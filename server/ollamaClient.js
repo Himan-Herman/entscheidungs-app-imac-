@@ -5,7 +5,7 @@ export async function frageOllama(prompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'llama3',
+        model: 'qwen:4b',
       prompt: prompt,
       stream: false
     })
