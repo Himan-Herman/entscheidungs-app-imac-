@@ -1,32 +1,63 @@
 import { useState } from 'react';
+import './App.css';
 
 function App() {
+  const [eingabe, setEingabe] = useState('');
   const [antwort, setAntwort] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [verlauf, setVerlauf] = useState([]);
 
-  const frageAbsenden = async () => {
-    setLoading(true);
+  const frageSenden = async () => {
+    if (!eingabe.trim()) return;
+
+    const neuerVerlauf = [...verlauf, { role: 'user', content: eingabe }];
+    setVerlauf(neuerVerlauf);
+    setAntwort('Antwort wird geladen...');
+
     try {
       const res = await fetch('/api/ki', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frage: 'Was ist Migräne?' })
+        body: JSON.stringify({ verlauf: neuerVerlauf })
       });
+
       const data = await res.json();
       setAntwort(data.antwort);
-    } catch (err) {
-      setAntwort('Fehler bei der KI-Anfrage.');
+      setVerlauf([...neuerVerlauf, { role: 'assistant', content: data.antwort }]);
+    } catch (error) {
+      setAntwort('Fehler beim Abrufen der Antwort.');
     }
-    setLoading(false);
+
+    setEingabe('');
   };
 
   return (
-    <div>
-      <h1>Entscheidungs-App</h1>
-      <button onClick={frageAbsenden}>Frage an KI senden</button>
-      {loading ? <p>Antwort wird geladen...</p> : <p>{antwort}</p>}
+  <div className="app">
+    <h1>Entscheidungs-App</h1>
+
+    <div className="eingabe-box">
+      <input
+        type="text"
+        value={eingabe}
+        onChange={(e) => setEingabe(e.target.value)}
+        placeholder="Beschreibe dein Symptom..."
+      />
+      <button onClick={frageSenden}>Frage an KI senden</button>
     </div>
-  );
+
+    <div className="chat-verlauf">
+      {verlauf.map((eintrag, index) => (
+        <div
+          key={index}
+          className={eintrag.role === 'user' ? 'frage' : 'antwort'}
+        >
+          <strong>{eintrag.role === 'user' ? 'Du:' : 'KI:'}</strong>
+          <p>{eintrag.content}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 }
 
 export default App;

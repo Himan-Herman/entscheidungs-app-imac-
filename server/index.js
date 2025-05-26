@@ -12,13 +12,18 @@ app.get('/api/test', (req, res) => {
 app.use(express.json());
 
 app.post('/api/ki', async (req, res) => {
-  const { frage } = req.body;
+  const { verlauf } = req.body;
+
+  if (!verlauf || !Array.isArray(verlauf)) {
+    return res.status(400).json({ error: 'Verlauf fehlt oder ist ungültig' });
+  }
 
   try {
-    const antwort = await frageOllama(frage);
+    const antwort = await frageOllama(verlauf);
     res.json({ antwort });
-  } catch (err) {
-    res.status(500).json({ fehler: 'KI nicht erreichbar', details: err.message });
+  } catch (error) {
+    console.error('KI-Fehler:', error);
+    res.status(500).json({ error: 'KI-Antwort fehlgeschlagen' });
   }
 });
 
