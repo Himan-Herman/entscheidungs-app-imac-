@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import './App.css';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const [eingabe, setEingabe] = useState('');
   const [antwort, setAntwort] = useState('');
   const [verlauf, setVerlauf] = useState([]);
+  const navigate = useNavigate();
 
   const frageSenden = async () => {
     if (!eingabe.trim()) return;
@@ -24,39 +26,51 @@ function App() {
       setAntwort(data.antwort);
       setVerlauf([...neuerVerlauf, { role: 'assistant', content: data.antwort }]);
     } catch (error) {
+      console.error(error);
       setAntwort('Fehler beim Abrufen der Antwort.');
     }
-
+  
     setEingabe('');
   };
 
   return (
-  <div className="app">
-    <h1>Entscheidungs-App</h1>
-
-    <div className="eingabe-box">
-      <input
-        type="text"
-        value={eingabe}
-        onChange={(e) => setEingabe(e.target.value)}
-        placeholder="Beschreibe dein Symptom..."
-      />
-      <button onClick={frageSenden}>Frage an KI senden</button>
-    </div>
-
-    <div className="chat-verlauf">
-      {verlauf.map((eintrag, index) => (
-        <div
-          key={index}
-          className={eintrag.role === 'user' ? 'frage' : 'antwort'}
+    <div className="app">
+      <h1>Entscheidungs-App</h1>
+  
+      <div className="eingabe-box">
+        <input
+          type="text"
+          value={eingabe}
+          onChange={(e) => setEingabe(e.target.value)}
+          placeholder="Beschreibe dein Symptom..."
+        />
+        <button onClick={frageSenden}>Frage an KI senden</button>
+      </div>
+  
+      {/* ✅ Button sauber platziert */}
+      <div style={{ marginTop: '20px' }}>
+        <button
+          onClick={() => navigate('/koerperregionen')}
+          style={{ padding: '10px 20px' }}
         >
-          <strong>{eintrag.role === 'user' ? 'Du:' : 'KI:'}</strong>
-          <p>{eintrag.content}</p>
-        </div>
-      ))}
+          Körperregionen-Auswahl
+        </button>
+      </div>
+  
+      <div className="chat-verlauf">
+        {verlauf.map((eintrag, index) => (
+          <div
+            key={index}
+            className={eintrag.role === 'user' ? 'frage' : 'antwort'}
+          >
+            <strong>{eintrag.role === 'user' ? 'Du:' : 'KI:'}</strong>
+            <p>{eintrag.content}</p>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+  
 
 }
 
