@@ -6,13 +6,20 @@
   
   .koerperregionen-page h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: #50b51d;
   }
   
   .koerperregionen-page img {
     max-width: 90%;
     height: auto;
-    border: 2px solid #ccc;
+    border: 2px solid #9d1717;
     border-radius: 10px;
+  }
+  
+  .koerperbild {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
   }
   
