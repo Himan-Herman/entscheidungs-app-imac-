@@ -64,7 +64,8 @@ function App() {
             className={eintrag.role === 'user' ? 'frage' : 'antwort'}
           >
             <strong>{eintrag.role === 'user' ? 'Du:' : 'KI:'}</strong>
-            <p>{eintrag.content}</p>
+            <p dangerouslySetInnerHTML={{ __html: nachricht.inhalt }} />
+
           </div>
         ))}
       </div>
