@@ -1,21 +1,22 @@
 import express from 'express';
-import { frageOpenAI } from '../openaiClient.js'; // ✅
+import { frageOpenAI } from '../openaiClient.js';
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
-  const { verlauf } = req.body;
-
-  if (!verlauf || !Array.isArray(verlauf)) {
-    return res.status(400).json({ error: 'Verlauf fehlt oder ist ungültig' });
-  }
-
   try {
-    const antwort = await frageOpenAI(verlauf); // ✅
+    const { verlauf, base64Bild } = req.body;
+
+    console.log('📩 Verlauf:', verlauf);
+    if (base64Bild) {
+      console.log('🖼️ Bild (Base64) empfangen:', base64Bild.substring(0, 30) + '...');
+    }
+
+    const antwort = await frageOpenAI(verlauf);
     res.json({ antwort });
   } catch (error) {
-    console.error('KI-Fehler:', error);
-    res.status(500).json({ error: 'KI-Antwort fehlgeschlagen' });
+    console.error('❌ Fehler in /api/ki:', error);
+    res.status(500).json({ fehler: 'Serverfehler beim Verarbeiten der Anfrage.' });
   }
 });
 
