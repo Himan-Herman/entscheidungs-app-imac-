@@ -26,11 +26,11 @@ export default function Koerperkarte() {
   />
 
 
-  {/* Herz */}
+  {/* Herz erledigt */}
   <circle
-    cx="150"
-    cy="200"
-    r="30"
+    cx="161"
+    cy="179"
+    r="16"
     fill="red"
     stroke="black"
     strokeWidth="2"
@@ -38,15 +38,39 @@ export default function Koerperkarte() {
     style={{ cursor: 'pointer' }}
   />
 
-  {/* Lunge */}
-  <circle
-    cx="110"
-    cy="160"
-    r="25"
+  {/* Lunge rechts erledigt */}
+  <ellipse
+    cx="135"
+    cy="150"
+    rx="10"
+    ry="22"
     fill="lightblue"
     stroke="black"
     strokeWidth="2"
-    onClick={() => navigate('/?organ=lunge')}
+    onClick={() => navigate('/?organ=rechte Lunge')}
+    style={{ cursor: 'pointer' }}
+  />
+  <ellipse
+    cx="132"
+    cy="206"
+    rx="13"
+    ry="19"
+    fill="lightblue"
+    stroke="black"
+    strokeWidth="2"
+    onClick={() => navigate('/?organ=rechte Lunge')}
+    style={{ cursor: 'pointer' }}
+  />
+  {/* Lunge links erledigt */}
+  <ellipse
+    cx="182"
+    cy="152"
+    rx="11"
+    ry="25"
+    fill="lightblue"
+    stroke="black"
+    strokeWidth="2"
+    onClick={() => navigate('/?organ=linke Lunge')}
     style={{ cursor: 'pointer' }}
   />
 
@@ -62,11 +86,11 @@ export default function Koerperkarte() {
     onClick={() => navigate('/?organ=leber')}
     style={{ cursor: 'pointer' }}
   />
-  {/* Kopf */}
+  {/* Kopf erledigt */}
 <circle
-  cx="150"
-  cy="100"
-  r="25"
+  cx="160"
+  cy="34"
+  r="32"
   fill="peachpuff"
   stroke="black"
   strokeWidth="2"
@@ -74,12 +98,12 @@ export default function Koerperkarte() {
   style={{ cursor: 'pointer' }}
 />
 
-{/* Hals */}
+{/* Hals erledigt*/} 
 <ellipse
-  cx="150"
-  cy="135"
-  rx="12"
-  ry="18"
+  cx="160"
+  cy="92"
+  rx="5"
+  ry="25"
   fill="orange"
   stroke="black"
   strokeWidth="2"
@@ -115,18 +139,7 @@ export default function Koerperkarte() {
   style={{ cursor: 'pointer' }}
 />
 
-{/* Leber */}
-<ellipse
-  cx="180" 
-  cy="260"
-  rx="35"
-  ry="20" 
-  fill="brown"
-  stroke="black" 
-  strokeWidth="2" 
-  onClick={() => navigate('/?organ=leber')} 
-  style={{ cursor: 'pointer' }}
-/>
+
 
 {/* Gallenblase */}
 <ellipse
@@ -168,7 +181,7 @@ export default function Koerperkarte() {
 
 {/* Niere links */}
 <ellipse
-  cx="110"
+  cx="120"
   cy="340"
   rx="12"
   ry="18"
@@ -217,25 +230,12 @@ export default function Koerperkarte() {
   style={{ cursor: 'pointer' }}
 />
 
-{/* Brustdrüse links */}
+{/* Brustdrüse rechts erledigt */}
 <ellipse
-  cx="130"
-  cy="220"
-  rx="10"
-  ry="14"
-  fill="pink"
-  stroke="black"
-  strokeWidth="1"
-  onClick={() => navigate('/?organ=brust_links')}
-  style={{ cursor: 'pointer' }}
-/>
-
-{/* Brustdrüse rechts */}
-<ellipse
-  cx="170"
-  cy="220"
-  rx="10"
-  ry="14"
+  cx="128"
+  cy="187"
+  rx="16"
+  ry="16"
   fill="pink"
   stroke="black"
   strokeWidth="1"
@@ -243,27 +243,64 @@ export default function Koerperkarte() {
   style={{ cursor: 'pointer' }}
 />
 
-{/* Schulter links */}
-<circle
-  cx="90"
-  cy="130"
-  r="12"
+{/* Brustdrüse links erledigt */}
+<ellipse
+  cx="192"
+  cy="187"
+  rx="16"
+  ry="16"
+  fill="pink"
+  stroke="black"
+  strokeWidth="1"
+  onClick={() => navigate('/?organ=brust_links')}
+  style={{ cursor: 'pointer' }}
+/>
+
+{/* Schulter recht erledigt*/}
+<ellipse
+  cx="89"
+  cy="160"
+  rx="12"
+  ry="25"
+  fill="orange"
+  stroke="black"
+  strokeWidth="1"
+  onClick={() => navigate('/?organ=schulter_rechts')}
+  style={{ cursor: 'pointer' }}
+/>
+<ellipse
+  cx="109"
+  cy="132"
+  rx="18"
+  ry="9"
+  fill="orange"
+  stroke="black"
+  strokeWidth="1"
+  onClick={() => navigate('/?organ=schulter_rechts')}
+  style={{ cursor: 'pointer' }}
+/>
+
+{/* Schulter links erledigt*/}
+<ellipse
+  cx="229"
+  cy="160"
+  rx="12"
+  ry="25"
   fill="orange"
   stroke="black"
   strokeWidth="1"
   onClick={() => navigate('/?organ=schulter_links')}
   style={{ cursor: 'pointer' }}
 />
-
-{/* Schulter rechts */}
-<circle
-  cx="210"
-  cy="130"
-  r="12"
+<ellipse
+  cx="209"
+  cy="132"
+  rx="18"
+  ry="9"
   fill="orange"
   stroke="black"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=schulter_rechts')}
+  onClick={() => navigate('/?organ=schulter_links')}
   style={{ cursor: 'pointer' }}
 />
 
