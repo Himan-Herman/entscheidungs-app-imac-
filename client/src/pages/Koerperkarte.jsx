@@ -1,21 +1,31 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import koerperBild from '../assets/img/Koerper_Vorderseite.png';
+
 
 export default function Koerperkarte() {
   const navigate = useNavigate();
 
   return (
     <div>
-      <h2>Körperkarte</h2>
+      <h2 style={{ textAlign: "center" }}>Körperkarte – Vorderseite</h2>
 
       <svg
-  version="1.1"
-  xmlns="http://www.w3.org/2000/svg"
   viewBox="0 0 300 700"
-  width="300"
+  width="100%"
   height="700"
-  style={{ maxWidth: "100%" }}
+  preserveAspectRatio="xMidYMid meet"
 >
+  <image
+    href={koerperBild}
+    x="0"
+    y="0"
+    width="300"
+    height="700"
+    preserveAspectRatio="xMidYMid meet"
+  />
+
+
   {/* Herz */}
   <circle
     cx="150"
