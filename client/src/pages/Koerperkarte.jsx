@@ -50,15 +50,16 @@ export default function Koerperkarte() {
     onClick={() => navigate('/?organ=rechte Lunge')}
     style={{ cursor: 'pointer' }}
   />
+  {/* leber erledigt */}
   <ellipse
-    cx="132"
-    cy="206"
-    rx="13"
-    ry="19"
-    fill="lightblue"
+    cx="134"
+    cy="220"
+    rx="14"
+    ry="20"
+    fill="darkred"
     stroke="black"
     strokeWidth="2"
-    onClick={() => navigate('/?organ=rechte Lunge')}
+    onClick={() => navigate('/?organ=Leber')}
     style={{ cursor: 'pointer' }}
   />
   {/* Lunge links erledigt */}
