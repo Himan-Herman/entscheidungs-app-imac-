@@ -6,7 +6,7 @@ export default function Koerperkarte() {
 
   return (
     <div>
-      <h2>Körperkarte – Vorderseite</h2>
+      <h2>Körperkarte</h2>
 
       <svg
   version="1.1"

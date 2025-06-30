@@ -60,7 +60,7 @@ useEffect(() => {
       console.error(error);
       setVerlauf([
         ...neuerVerlauf,
-        { role: 'assistant', content: '❌ Fehler beim Abrufen der Antwort.' }
+        { role: 'assistant', content: ' Fehler beim Abrufen der Antwort.' }
       ]);
     }
   
@@ -84,7 +84,7 @@ useEffect(() => {
           accept="image/*"
           onChange={(e) => setBild(e.target.files[0])}
         />
-        <button onClick={frageSenden}>Frage an KI senden</button>
+        <button onClick={frageSenden}>Frage senden</button>
       </div>
 
       <div style={{ marginTop: '20px' }}>
@@ -102,7 +102,7 @@ useEffect(() => {
             key={index}
             className={eintrag.role === 'user' ? 'frage' : 'antwort'}
           >
-            <strong>{eintrag.role === 'user' ? 'Du:' : 'KI:'}</strong>
+            <strong>{eintrag.role === 'user' ? 'Ich:' : 'KI:'}</strong>
             <p dangerouslySetInnerHTML={{ __html: eintrag.content }} />
           </div>
         ))}
