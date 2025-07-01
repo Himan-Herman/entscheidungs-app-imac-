@@ -25,14 +25,13 @@ export default function Koerperkarte() {
     preserveAspectRatio="xMidYMid meet"
   />
 
-
-  {/* Herz erledigt */}
-  <circle
+{/* Herz erledigt */}
+<circle
     cx="161"
     cy="179"
     r="16"
     fill="transparent"
-    stroke="black"
+    stroke="transparent"
     strokeWidth="2"
     onClick={() => navigate('/?organ=herz')}
     style={{ cursor: 'pointer' }}
@@ -44,8 +43,8 @@ export default function Koerperkarte() {
     cy="150"
     rx="10"
     ry="22"
-    fill="lightblue"
-    stroke="black"
+    fill="transparent"
+    stroke="transparent"
     strokeWidth="2"
     onClick={() => navigate('/?organ=rechte Lunge')}
     style={{ cursor: 'pointer' }}
@@ -56,8 +55,8 @@ export default function Koerperkarte() {
     cy="210"
     rx="28"
     ry="16"
-    fill="darkred"
-    stroke="black"
+    fill="transparent"
+    stroke="transparent"
     strokeWidth="2"
     onClick={() => navigate('/?organ=Leber')}
     style={{ cursor: 'pointer' }}
@@ -67,8 +66,8 @@ export default function Koerperkarte() {
     cy="225"
     rx="10"
     ry="16"
-    fill="darkred"
-    stroke="black"
+    fill="transparent"
+    stroke="transparent"
     strokeWidth="2"
     onClick={() => navigate('/?organ=Leber')}
     style={{ cursor: 'pointer' }}
@@ -79,8 +78,8 @@ export default function Koerperkarte() {
     cy="152"
     rx="11"
     ry="25"
-    fill="lightblue"
-    stroke="black"
+    fill="transparent"
+    stroke="transparent"
     strokeWidth="2"
     onClick={() => navigate('/?organ=linke Lunge')}
     style={{ cursor: 'pointer' }}
@@ -92,8 +91,8 @@ export default function Koerperkarte() {
   cx="160"
   cy="34"
   r="32"
-  fill="peachpuff"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=kopf')}
   style={{ cursor: 'pointer' }}
@@ -105,8 +104,8 @@ export default function Koerperkarte() {
   cy="92"
   rx="5"
   ry="25"
-  fill="orange"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=hals')}
   style={{ cursor: 'pointer' }}
@@ -118,8 +117,8 @@ export default function Koerperkarte() {
   cy="243"
   rx="10"
   ry="8"
-  fill="gold"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=magen')}
   style={{ cursor: 'pointer' }}
@@ -129,8 +128,8 @@ export default function Koerperkarte() {
   cy="234"
   rx="8"
   ry="6"
-  fill="gold"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=magen')}
   style={{ cursor: 'pointer' }}
@@ -140,8 +139,8 @@ export default function Koerperkarte() {
   cy="224"
   rx="6"
   ry="5"
-  fill="gold"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=magen')}
   style={{ cursor: 'pointer' }}
@@ -151,8 +150,8 @@ export default function Koerperkarte() {
   cy="215"
   rx="5"
   ry="4"
-  fill="gold"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=magen')}
   style={{ cursor: 'pointer' }}
@@ -162,8 +161,8 @@ export default function Koerperkarte() {
   cy="210"
   rx="5"
   ry="4"
-  fill="gold"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=magen')}
   style={{ cursor: 'pointer' }}
@@ -176,8 +175,8 @@ export default function Koerperkarte() {
   height="52"
   rx="15"
   ry="15"
-  fill="#8B4513"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=darm')}
   style={{ cursor: 'pointer' }}
@@ -191,8 +190,8 @@ export default function Koerperkarte() {
   cy="234"
   rx="6"
   ry="6"
-  fill="green"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=gallenblase')}
   style={{ cursor: 'pointer' }}
@@ -204,8 +203,8 @@ export default function Koerperkarte() {
   y="226"
   width="16"
   height="9"
-  fill="violet"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
@@ -215,8 +214,8 @@ export default function Koerperkarte() {
   y="224"
   width="10"
   height="9"
-  fill="violet"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
@@ -226,8 +225,8 @@ export default function Koerperkarte() {
   y="218"
   width="8"
   height="9"
-  fill="violet"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
@@ -237,8 +236,8 @@ export default function Koerperkarte() {
   y="221"
   width="6"
   height="7"
-  fill="violet"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
@@ -248,8 +247,8 @@ export default function Koerperkarte() {
   y="235"
   width="13"
   height="10"
-  fill="violet"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
@@ -263,8 +262,8 @@ export default function Koerperkarte() {
   cy="250"
   rx="8"
   ry="10"
-  fill="crimson"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=niere_links')}
   style={{ cursor: 'pointer' }}
@@ -276,8 +275,8 @@ export default function Koerperkarte() {
   cy="250"
   rx="8"
   ry="10"
-  fill="crimson"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=niere_rechts')}
   style={{ cursor: 'pointer' }}
@@ -287,8 +286,8 @@ export default function Koerperkarte() {
   cy="237"
   rx="3"
   ry="6"
-  fill="crimson"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=niere_rechts')}
   style={{ cursor: 'pointer' }}
@@ -298,8 +297,8 @@ export default function Koerperkarte() {
   cx="160"
   cy="325"
   r="13"
-  fill="gold"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate('/?organ=blase')}
   style={{ cursor: 'pointer' }}
@@ -311,8 +310,8 @@ export default function Koerperkarte() {
   y="338.9"
   width="10"
   height="20"
-  fill="black"
-  stroke="white"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="1"
   onClick={() => navigate('/?organ=uterus_prostata')}
   style={{ cursor: 'pointer' }}
@@ -324,8 +323,8 @@ export default function Koerperkarte() {
   cy="187"
   rx="16"
   ry="16"
-  fill="pink"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="1"
   onClick={() => navigate('/?organ=brust_rechts')}
   style={{ cursor: 'pointer' }}
@@ -337,21 +336,21 @@ export default function Koerperkarte() {
   cy="187"
   rx="16"
   ry="16"
-  fill="pink"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="1"
   onClick={() => navigate('/?organ=brust_links')}
   style={{ cursor: 'pointer' }}
 />
 
-{/* Schulter recht erledigt*/}
+{/* Schulter rechts erledigt */}
 <ellipse
   cx="89"
   cy="160"
   rx="12"
   ry="25"
-  fill="orange"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="1"
   onClick={() => navigate('/?organ=schulter_rechts')}
   style={{ cursor: 'pointer' }}
@@ -361,21 +360,21 @@ export default function Koerperkarte() {
   cy="132"
   rx="18"
   ry="9"
-  fill="orange"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="1"
   onClick={() => navigate('/?organ=schulter_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
-{/* Schulter links erledigt*/}
+{/* Schulter links erledigt */}
 <ellipse
   cx="229"
   cy="160"
   rx="12"
   ry="25"
-  fill="orange"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="1"
   onClick={() => navigate('/?organ=schulter_links')}
   style={{ cursor: 'pointer' }}
@@ -385,8 +384,8 @@ export default function Koerperkarte() {
   cy="132"
   rx="18"
   ry="9"
-  fill="orange"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   strokeWidth="1"
   onClick={() => navigate('/?organ=schulter_links')}
   style={{ cursor: 'pointer' }}
@@ -397,56 +396,55 @@ export default function Koerperkarte() {
   cx="88"
   cy="240"
   r="15"
-  fill="lightgray"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=ellenbogen_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
-{/* Ellbogen links erledigt*/}
+{/* Ellbogen links erledigt */}
 <circle
   cx="228"
   cy="240"
   r="15"
-  fill="lightgray"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=ellenbogen_links')}
   style={{ cursor: 'pointer' }}
 />
-
 
 {/* Hand rechts erledigt */}
 <ellipse
   cx="75"
   cy="363"
   rx="11"
-  ry= "33"
-  fill="lightgray"
-  stroke="black"
+  ry="33"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=hand_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
-{/* Unterarm links  */}
+{/* Unterarm links */}
 <ellipse
-  cx="240"
-  cy="292"
-  rx="16"
-  ry="38"
-  fill="red"
-  stroke="black"
+  cx="245"
+  cy="353"
+  rx="1"
+  ry="33"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Unterarm_links')}
   style={{ cursor: 'pointer' }}
 />
 
-{/* Unterarm rechts  */}
+{/* Unterarm rechts */}
 <ellipse
   cx="79"
   cy="292"
   rx="16"
-  ry= "38"
-  fill="red"
-  stroke="black"
+  ry="38"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Unterarm_rechts')}
   style={{ cursor: 'pointer' }}
 />
@@ -457,52 +455,56 @@ export default function Koerperkarte() {
   cy="363"
   rx="11"
   ry="33"
-  fill="lightgray"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=hand_links')}
   style={{ cursor: 'pointer' }}
 />
-{/* oberarm links erledigt */}
+
+{/* Oberarm links erledigt */}
 <ellipse
   cx="225"
   cy="205"
   rx="16"
   ry="20"
-  fill="blue"
-  stroke="green"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Oberarm_links')}
   style={{ cursor: 'pointer' }}
-  />
+/>
+
 {/* Oberarm rechts erledigt */}
 <ellipse
   cx="90"
   cy="205"
   rx="16"
-  ry= "20"
-  fill="blue"
-  stroke="green"
+  ry="20"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Oberarm_rechts')}
   style={{ cursor: 'pointer' }}
 />
-{/* Oberschenkel rechts erledigt  */}
+
+{/* Oberschenkel rechts erledigt */}
 <ellipse
   cx="127"
   cy="400"
   rx="29"
   ry="78"
-  fill="green"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Oberschenkel_rechts')}
   style={{ cursor: 'pointer' }}
 />
-{/* Oberschenkel links erledigt  */}
-  <ellipse
+
+{/* Oberschenkel links erledigt */}
+<ellipse
   cx="194"
   cy="400"
   rx="29"
   ry="78"
-  fill="green"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Oberschenkel_rechts')}
   style={{ cursor: 'pointer' }}
 />
@@ -512,8 +514,8 @@ export default function Koerperkarte() {
   cx="130"
   cy="499"
   r="22"
-  fill="#808080"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=knie_rechts')}
   style={{ cursor: 'pointer' }}
 />
@@ -523,41 +525,44 @@ export default function Koerperkarte() {
   cx="190"
   cy="499"
   r="22"
-  fill="#808080"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=knie_links')}
   style={{ cursor: 'pointer' }}
 />
-{/* Unterschenkel rechts erledigt  */}
+
+{/* Unterschenkel rechts erledigt */}
 <ellipse
   cx="130"
   cy="592"
   rx="22"
   ry="71"
-  fill="green"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Unteschenkel_rechts')}
   style={{ cursor: 'pointer' }}
 />
+
 {/* Unterschenkel links erledigt */}
-  <ellipse
+<ellipse
   cx="189"
   cy="592"
   rx="22"
   ry="71"
-  fill="green"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=Unterschenkel_links')}
   style={{ cursor: 'pointer' }}
 />
+
 {/* Fuß rechts erledigt */}
 <ellipse
   cx="130"
   cy="684"
   rx="19"
   ry="21"
-  fill="#d4af37"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=fuss_rechts')}
   style={{ cursor: 'pointer' }}
 />
@@ -568,8 +573,8 @@ export default function Koerperkarte() {
   cy="684"
   rx="19"
   ry="21"
-  fill="#d4af37"
-  stroke="black"
+  fill="transparent"
+  stroke="transparent"
   onClick={() => navigate('/?organ=fuss_links')}
   style={{ cursor: 'pointer' }}
 />
