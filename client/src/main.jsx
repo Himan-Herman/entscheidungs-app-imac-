@@ -5,12 +5,12 @@ import App from './App';
 import Koerperkarte from './pages/Koerperkarte';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <Router>
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/koerperregionen" element={<Koerperkarte />} />
       </Routes>
     </Router>
-  </React.StrictMode>
+  //</React.StrictMode>
 );
