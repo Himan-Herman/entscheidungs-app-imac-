@@ -56,7 +56,7 @@ export default function Chat() {
       console.error(error);
       setVerlauf([
         ...neuerVerlauf,
-        { role: 'assistant', content: '❌ Fehler beim Abrufen der Antwort.' }
+        { role: 'assistant', content: ' Fehler beim Abrufen der Antwort.' }
       ]);
     }
 
@@ -104,13 +104,13 @@ export default function Chat() {
               onClick={() => navigate('/koerperregionen')}
               style={{ marginRight: '10px', padding: '10px 20px' }}
             >
-              Körpervorderseite
+              Körper_Vorderseite
             </button>
             <button
               onClick={() => navigate('/rueckseite')}
               style={{ padding: '10px 20px' }}
             >
-              Körperrückseite
+              Körper_Rückseite
             </button>
           </div>
         )}
