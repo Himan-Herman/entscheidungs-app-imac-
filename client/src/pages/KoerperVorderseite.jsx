@@ -8,7 +8,7 @@ export default function Koerperkarte() {
 
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>Körper_Vorderseite</h2>
+      <h2 style={{ textAlign: "center" }}>Körperkarte_Vorderseite</h2>
 
       <svg
   viewBox="0 0 300 700"

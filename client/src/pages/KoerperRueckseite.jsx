@@ -1,4 +1,5 @@
-// src/pages/KoerperRueckseite.jsx
+// src/KoerperRueckseite.jsx
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import rueckenBild from "../assets/img/Koerper_Rueckseite.png";
@@ -7,16 +8,17 @@ export default function KoerperRueckseite() {
   const navigate = useNavigate();
 
   return (
-    <div>
-      <h2 style={{ textAlign: "center" }}>Körperkarte – Rückseite</h2>
+    <div style={{ textAlign: "center" }}>
+      <h2>Körperkarte – Rückseite</h2>
 
       <svg
         viewBox="0 0 300 700"
         width="100%"
         height="700"
-        style={{ backgroundColor: "lightgray" }}
         preserveAspectRatio="xMidYMid meet"
+        
       >
+        {/* Hintergrundbild */}
         <image
           href={rueckenBild}
           x="0"
@@ -26,58 +28,168 @@ export default function KoerperRueckseite() {
           preserveAspectRatio="xMidYMid meet"
         />
 
-        {/* Wirbelsäule */}
-        <rect
-  x="135"
-  y="120"
-  width="30"
-  height="250"
-  fill="rgba(255, 165, 0, 0.4)"
-  stroke="orange"
+        {/* Klickbare Regionen */}
+        
+       {/* 1 – Nacken (als Rechteck) */}
+<rect
+  x="134"
+  y="76"
+  width="42"
+  height="30"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=nacken")}
+  style={{ cursor: "pointer" }}
+/>
+
+
+
+        {/* 2 – Schultern */}
+        <circle
+          cx="95"
+          cy="145"
+          r="20"
+          fill="transparent" 
+  stroke="transparent"
+          strokeWidth="2"
+          onClick={() => navigate("/?organ=schulterblatt_links")}
+          style={{ cursor: "pointer" }}
+        />
+        <circle
+          cx="214"
+          cy="145"
+          r="20"
+          fill="transparent" 
+  stroke="transparent"
+          strokeWidth="2"
+          onClick={() => navigate("/?organ=schulterblatt_rechts")}
+          style={{ cursor: "pointer" }}
+        />
+
+        {/* 3 – Rückenmitte (Wirbelsäule) als vertikales Rechteck */}
+<rect
+  x="147"
+  y="107"
+  width="16"
+  height="172"
+  fill="transparent" 
+  stroke="transparent"
   strokeWidth="2"
   onClick={() => navigate("/?organ=wirbelsaeule")}
   style={{ cursor: "pointer" }}
 />
-{/* Orange halbtransparent */}
+        
+
+     {/* 4 – Nierenbereich (als Ellipse) */}
+<ellipse
+  cx="136"
+  cy="236"
+  rx="9"
+  ry="14"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=niere_links")}
+  style={{ cursor: "pointer" }}
+/>
+<ellipse
+  cx="172"
+  cy="237"
+  rx="8"
+  ry="14"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=niere_rechts")}
+  style={{ cursor: "pointer" }}
+/>
+       
+
+        {/* 5 – Lende/unterer Rücken */}
+        <ellipse
+  cx="125"
+  cy="315"
+  rx="24"
+  ry="40"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=becken_rechts")}
+  style={{ cursor: "pointer" }}
+/>
+<ellipse
+  cx="180"
+  cy="315"
+  rx="24"
+  ry="40"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=becken_links")}
+  style={{ cursor: "pointer" }}
+/>
+        
+        {/* 6 – Hinterkopf */}
+<circle
+  cx="155"
+  cy="46"
+  r="30"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=hinterkopf")}
+  style={{ cursor: "pointer" }}
+/>
+<ellipse
+  cx="127"
+  cy="70"
+  rx="4"
+  ry="10"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=ohr_links")}
+  style={{ cursor: "pointer" }}
+/>
+
+<ellipse
+  cx="183"
+  cy="70"
+  rx="4"
+  ry="10"
+  fill="transparent" 
+  stroke="transparent"
+  strokeWidth="2"
+  onClick={() => navigate("/?organ=ohr_rechts")}
+  style={{ cursor: "pointer" }}
+/>
+{/*Linkes Bein}*/}
+<ellipse
+  cx="115"
+  cy="510"
+  rx="25"
+  ry="150"
+  fill="transparent" 
+  stroke="transparent"
+  onClick={() => navigate("/?organ=bein_links")}
+  style={{ cursor: "pointer" }}
+/>
+
+{/*Rechtes Bein */}
+<ellipse
+  cx="185"
+  cy="510"
+  rx="25"
+  ry="150"
+  fill="transparent" 
+  stroke="transparent"
+  onClick={() => navigate("/?organ=bein_rechts")}
+  style={{ cursor: "pointer" }}
+/>
 
 
-  {/* Niere links */}
-  <circle
-    cx="115"
-    cy="280"
-    r="15"
-    fill="rgba(255, 0, 0, 0.4)"     // Rot halbtransparent
-    stroke="red"
-    strokeWidth="2"
-    onClick={() => navigate("/?organ=niere-links")}
-    style={{ cursor: "pointer" }}
-  />
-
-  {/* Niere rechts */}
-  <circle
-    cx="185"
-    cy="280"
-    r="15"
-    fill="rgba(255, 0, 0, 0.4)"
-    stroke="red"
-    strokeWidth="2"
-    onClick={() => navigate("/?organ=niere-rechts")}
-    style={{ cursor: "pointer" }}
-  />
-
-  {/* Beckenbereich */}
-  <rect
-    x="120"
-    y="380"
-    width="60"
-    height="50"
-    fill="rgba(0, 128, 255, 0.3)"  // Blau halbtransparent
-    stroke="blue"
-    strokeWidth="2"
-    onClick={() => navigate("/?organ=becken")}
-    style={{ cursor: "pointer" }}
-  />
-</svg>
+      </svg>
     </div>
   );
 }
