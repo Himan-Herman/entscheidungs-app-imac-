@@ -1,0 +1,24 @@
+/* src/styles/Intro.css */
+.intro-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: white; /* oder später gewünschte Farbe */
+    animation: fadeIn 2s ease-in-out;
+  }
+  
+  .intro-logo {
+    width: 300px;
+    height: auto;
+    opacity: 0;
+    animation: fadeInLogo 2s forwards;
+  }
+  
+  /* Animationen */
+  @keyframes fadeInLogo {
+    to {
+      opacity: 1;
+    }
+  }
+  
