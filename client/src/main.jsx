@@ -16,7 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   //<React.StrictMode>
     <Router>
       <Routes>
-        <Route path="/" element={<App />} />
+      <Route path="/" element={<Startseite />} /> 
         <Route path="/intro" element={<Intro />} />
         <Route path="/koerperregionen" element={<KoerperVorderseite />} />
         <Route path="/rueckseite" element={<KoerperRueckseite />} />
