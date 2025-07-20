@@ -1,24 +1,53 @@
-/* src/styles/Intro.css */
+/* Container für Intro */
 .intro-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background-color: white; /* oder später gewünschte Farbe */
-    animation: fadeIn 2s ease-in-out;
+    height: 88vh;
+    background-color: white;
   }
   
+  /* Logo mit Fade-In-Zoom-Animation */
   .intro-logo {
-    width: 300px;
-    height: auto;
+    width: 500px;
     opacity: 0;
-    animation: fadeInLogo 2s forwards;
+    transform: scale(0.8);
+    animation: fadeInZoom 1.5s forwards;
   }
   
-  /* Animationen */
-  @keyframes fadeInLogo {
+  /* Fade-In + Zoom */
+  @keyframes fadeInZoom {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* Fallback: nur Fade-In ohne Zoom (falls nötig für andere Zwecke) */
+  @keyframes fadeIn {
     to {
       opacity: 1;
+    }
+  }
+  
+  /* Klasse wird später aktiv → Fade-Out + Zoom kleiner */
+  .fade-out {
+    animation: fadeOutZoom 1s forwards;
+  }
+  
+  /* Fade-Out + Zoom verkleinern */
+  @keyframes fadeOutZoom {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0.7);
     }
   }
   

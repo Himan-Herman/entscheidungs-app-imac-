@@ -33,7 +33,8 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    onClick={() => navigate('/?organ=herz')}
+    onClick={() => navigate("/symptom?organ=herz")}
+
     style={{ cursor: 'pointer' }}
   />
 
@@ -46,7 +47,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    onClick={() => navigate('/?organ=rechte Lunge')}
+    onClick={() => navigate('/symptom?organ=rechte Lunge')}
     style={{ cursor: 'pointer' }}
   />
   {/* leber erledigt */}
@@ -58,7 +59,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    onClick={() => navigate('/?organ=Leber')}
+    onClick={() => navigate('/symptom?organ=Leber')}
     style={{ cursor: 'pointer' }}
   />
    <ellipse
@@ -69,7 +70,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    onClick={() => navigate('/?organ=Leber')}
+    onClick={() => navigate('/symptom?organ=Leber')}
     style={{ cursor: 'pointer' }}
   />
   {/* Lunge links erledigt */}
@@ -81,7 +82,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    onClick={() => navigate('/?organ=linke Lunge')}
+    onClick={() => navigate('/symptom?organ=linke Lunge')}
     style={{ cursor: 'pointer' }}
   />
 
@@ -94,7 +95,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=kopf')}
+  onClick={() => navigate('/symptom?organ=kopf')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -107,7 +108,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=hals')}
+  onClick={() => navigate('/symptom?organ=hals')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -120,7 +121,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=magen')}
+  onClick={() => navigate('/symptom?organ=magen')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse
@@ -131,7 +132,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=magen')}
+  onClick={() => navigate('/symptom?organ=magen')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse
@@ -142,7 +143,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=magen')}
+  onClick={() => navigate('/symptom?organ=magen')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse
@@ -153,7 +154,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=magen')}
+  onClick={() => navigate('/symptom?organ=magen')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse
@@ -164,7 +165,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=magen')}
+  onClick={() => navigate('/symptom?organ=magen')}
   style={{ cursor: 'pointer' }}
 />
 {/* Darm erledigt*/}
@@ -178,7 +179,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=darm')}
+  onClick={() => navigate('/symptom?organ=darm')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -193,7 +194,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=gallenblase')}
+  onClick={() => navigate('/symptom?organ=gallenblase')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -206,7 +207,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=bauchspeicheldrüse')}
+  onClick={() => navigate('/symptom?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
 />
 <rect
@@ -217,7 +218,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=bauchspeicheldrüse')}
+  onClick={() => navigate('/symptom?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
 />
 <rect
@@ -228,7 +229,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=bauchspeicheldrüse')}
+  onClick={() => navigate('/symptom?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
 />
 <rect
@@ -239,7 +240,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=bauchspeicheldrüse')}
+  onClick={() => navigate('/symptom?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
 />
 <rect
@@ -250,7 +251,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=bauchspeicheldrüse')}
+  onClick={() => navigate('/symptom?organ=bauchspeicheldrüse')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -265,7 +266,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=niere_links')}
+  onClick={() => navigate('/symptom?organ=niere_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -278,7 +279,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=niere_rechts')}
+  onClick={() => navigate('/symptom?organ=iere_rechts')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse
@@ -289,7 +290,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=niere_rechts')}
+  onClick={() => navigate('/symptom?organ=niere_rechts')}
   style={{ cursor: 'pointer' }}
 />
 {/* Blase erledigt */}
@@ -300,7 +301,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/?organ=blase')}
+  onClick={() => navigate('/symptom?organ=blase')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -313,7 +314,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=uterus_prostata')}
+  onClick={() => navigate('/symptom?organ=uterus_prostata')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -326,7 +327,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=brust_rechts')}
+  onClick={() => navigate('/symptom?organ=rust_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -339,7 +340,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=brust_links')}
+  onClick={() => navigate('/symptom?organ=brust_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -352,7 +353,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=schulter_rechts')}
+  onClick={() => navigate('/symptom?organ=schulter_rechts')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse
@@ -363,7 +364,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=schulter_rechts')}
+  onClick={() => navigate('/symptom?organ=schulter_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -376,7 +377,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=schulter_links')}
+  onClick={() => navigate('/symptom?organ=schulter_links')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse
@@ -387,7 +388,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  onClick={() => navigate('/?organ=schulter_links')}
+  onClick={() => navigate('/symptom?organ=schulter_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -398,7 +399,7 @@ export default function Koerperkarte() {
   r="15"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=ellenbogen_rechts')}
+  onClick={() => navigate('/symptom?organ=ellenbogen_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -409,7 +410,7 @@ export default function Koerperkarte() {
   r="15"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=ellenbogen_links')}
+  onClick={() => navigate('/symptom?organ=ellenbogen_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -421,7 +422,7 @@ export default function Koerperkarte() {
   ry="33"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=hand_rechts')}
+  onClick={() => navigate('/symptom?organ=nd_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -433,7 +434,7 @@ export default function Koerperkarte() {
   ry="33"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Unterarm_links')}
+  onClick={() => navigate('/symptom?organ=Unterarm_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -445,7 +446,7 @@ export default function Koerperkarte() {
   ry="38"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Unterarm_rechts')}
+  onClick={() => navigate('/symptom?organ=Unterarm_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -457,7 +458,7 @@ export default function Koerperkarte() {
   ry="33"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=hand_links')}
+  onClick={() => navigate('/symptom?organ=hand_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -469,7 +470,7 @@ export default function Koerperkarte() {
   ry="20"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Oberarm_links')}
+  onClick={() => navigate('/symptom?organ=Oberarm_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -481,7 +482,7 @@ export default function Koerperkarte() {
   ry="20"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Oberarm_rechts')}
+  onClick={() => navigate('/symptom?organ=Oberarm_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -493,7 +494,7 @@ export default function Koerperkarte() {
   ry="78"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Oberschenkel_rechts')}
+  onClick={() => navigate('/symptom?organ=Oberschenkel_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -505,7 +506,7 @@ export default function Koerperkarte() {
   ry="78"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Oberschenkel_rechts')}
+  onClick={() => navigate('/symptom?organ=Oberschenkel_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -516,7 +517,7 @@ export default function Koerperkarte() {
   r="22"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=knie_rechts')}
+  onClick={() => navigate('/symptom?organ=knie_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -527,7 +528,7 @@ export default function Koerperkarte() {
   r="22"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=knie_links')}
+  onClick={() => navigate('/symptom?organ=knie_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -539,7 +540,7 @@ export default function Koerperkarte() {
   ry="71"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Unteschenkel_rechts')}
+  onClick={() => navigate('/symptom?organ=Unteschenkel_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -551,7 +552,7 @@ export default function Koerperkarte() {
   ry="71"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=Unterschenkel_links')}
+  onClick={() => navigate('/symptom?organ=Unterschenkel_links')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -563,7 +564,7 @@ export default function Koerperkarte() {
   ry="21"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=fuss_rechts')}
+  onClick={() => navigate('/symptom?organ=fuss_rechts')}
   style={{ cursor: 'pointer' }}
 />
 
@@ -575,7 +576,7 @@ export default function Koerperkarte() {
   ry="21"
   fill="transparent"
   stroke="transparent"
-  onClick={() => navigate('/?organ=fuss_links')}
+  onClick={() => navigate('/symptom?organ=fuss_links')}
   style={{ cursor: 'pointer' }}
 />
 

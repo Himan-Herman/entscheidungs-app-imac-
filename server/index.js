@@ -1,13 +1,16 @@
 import dotenv from 'dotenv';
 dotenv.config();
+console.log("🔍 OPENAI_API_KEY:", process.env.OPENAI_API_KEY);
 import express from 'express';
-import kiRouter from './routes/ki.js';
+import cors from 'cors';
+import kiRouter from './routes/ki.js'; // ⚠️ Muss existieren!
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json());
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
 
 // API-Routen
 app.use('/api/ki', kiRouter);

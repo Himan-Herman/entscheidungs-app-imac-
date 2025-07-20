@@ -39,7 +39,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=nacken")}
+  onClick={() => navigate("/symptom?organ=nacken")}
   style={{ cursor: "pointer" }}
 />
 
@@ -53,7 +53,7 @@ export default function KoerperRueckseite() {
           fill="transparent" 
   stroke="transparent"
           strokeWidth="2"
-          onClick={() => navigate("/?organ=schulterblatt_links")}
+          onClick={() => navigate("/symptom?organ=schulterblatt_links")}
           style={{ cursor: "pointer" }}
         />
         <circle
@@ -63,7 +63,7 @@ export default function KoerperRueckseite() {
           fill="transparent" 
   stroke="transparent"
           strokeWidth="2"
-          onClick={() => navigate("/?organ=schulterblatt_rechts")}
+          onClick={() => navigate("/symptom?organ=schulterblatt_rechts")}
           style={{ cursor: "pointer" }}
         />
 
@@ -76,7 +76,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=wirbelsaeule")}
+  onClick={() => navigate("/symptom?organ=wirbelsaeule")}
   style={{ cursor: "pointer" }}
 />
         
@@ -90,7 +90,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=niere_links")}
+  onClick={() => navigate("/symptom?organ=niere_links")}
   style={{ cursor: "pointer" }}
 />
 <ellipse
@@ -101,7 +101,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=niere_rechts")}
+  onClick={() => navigate("/symptom?organ=niere_rechts")}
   style={{ cursor: "pointer" }}
 />
        
@@ -115,7 +115,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=becken_rechts")}
+  onClick={() => navigate("/symptom?organ=becken_rechts")}
   style={{ cursor: "pointer" }}
 />
 <ellipse
@@ -126,7 +126,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=becken_links")}
+  onClick={() => navigate("/symptom?organ=becken_links")}
   style={{ cursor: "pointer" }}
 />
         
@@ -138,7 +138,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=hinterkopf")}
+  onClick={() => navigate("/symptom?organ=hinterkopf")}
   style={{ cursor: "pointer" }}
 />
 <ellipse
@@ -149,7 +149,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=ohr_links")}
+  onClick={() => navigate("/symptom?organ=ohr_links")}
   style={{ cursor: "pointer" }}
 />
 
@@ -161,7 +161,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/?organ=ohr_rechts")}
+  onClick={() => navigate("/symptom?organ=ohr_rechts")}
   style={{ cursor: "pointer" }}
 />
 {/*Linkes Bein}*/}
@@ -172,7 +172,7 @@ export default function KoerperRueckseite() {
   ry="150"
   fill="transparent" 
   stroke="transparent"
-  onClick={() => navigate("/?organ=bein_links")}
+  onClick={() => navigate("/symptom?organ=bein_links")}
   style={{ cursor: "pointer" }}
 />
 
@@ -184,7 +184,7 @@ export default function KoerperRueckseite() {
   ry="150"
   fill="transparent" 
   stroke="transparent"
-  onClick={() => navigate("/?organ=bein_rechts")}
+  onClick={() => navigate("/symptom?organ=bein_rechts")}
   style={{ cursor: "pointer" }}
 />
 
