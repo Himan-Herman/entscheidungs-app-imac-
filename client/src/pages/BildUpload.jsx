@@ -30,21 +30,28 @@ export default function BildUpload() {
 
   const handleFrageSenden = async () => {
     if (!beschreibung.trim()) return;
-
+  
+    if (!base64Bild) {
+      setAntwort("❗ Bitte lade ein Bild hoch, bevor du analysierst.");
+      setLadezustand(false);
+      return;
+    }
+    
+  
     setLadezustand(true);
-
+  
     try {
-      const response = await fetch("/api/ki", {
+      const response = await fetch("/api/symptom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: beschreibung, base64Bild }),
       });
-
+  
       const data = await response.json();
-
+  
       setAntwort(data.antwort);
       setVerlauf((prev) => [...prev, { frage: beschreibung, antwort: data.antwort }]);
-      setBeschreibung(""); // nach Senden zurücksetzen
+      setBeschreibung(""); 
     } catch (error) {
       console.error("Fehler beim Bild-Upload:", error);
       setAntwort("❌ Fehler bei der Analyse. Bitte erneut versuchen.");
@@ -52,7 +59,7 @@ export default function BildUpload() {
       setLadezustand(false);
     }
   };
-
+  
   return (
     <div className="bildupload-container">
       <h2>Bild hochladen & analysieren</h2>
