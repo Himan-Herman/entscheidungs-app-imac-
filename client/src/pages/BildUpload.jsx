@@ -4,8 +4,8 @@ import "../styles/BildUpload.css";
 function convertToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.readAsDataURL(file); // GANZE Data-URL!
-      reader.onload = () => resolve(reader.result); // ✅ KEIN split!
+      reader.readAsDataURL(file); 
+      reader.onload = () => resolve(reader.result); 
       reader.onerror = (error) => reject(error);
     });
   }
@@ -17,7 +17,7 @@ export default function BildUpload() {
   const [base64Bild, setBase64Bild] = useState("");
   const [antwort, setAntwort] = useState("");
   const [ladezustand, setLadezustand] = useState(false);
-  const [verlauf, setVerlauf] = useState([]); // Verlauf von Fragen & Antworten
+  const [verlauf, setVerlauf] = useState([]); 
 
   const handleBildAuswahl = async (e) => {
     const file = e.target.files[0];
