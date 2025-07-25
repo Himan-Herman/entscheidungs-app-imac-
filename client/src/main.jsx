@@ -9,6 +9,8 @@ import Startseite from './pages/Startseite';
 import BildUpload from './pages/BildUpload';
 import SymptomChat from './pages/SymptomChat';
 import KoerperregionStart from './pages/KoerperregionStart';
+import SymptomEingabe from './pages/SymptomEingabe';
+
 
 
 
@@ -23,8 +25,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <Route path="/region-start" element={<KoerperregionStart />} />
   <Route path="/koerperregionen" element={<KoerperVorderseite />} />
   <Route path="/rueckseite" element={<KoerperRueckseite />} />
-  
-
+  <Route path="/textsymptom" element={<SymptomEingabe />} />
+  <Route path="/textsymptom" element={<SymptomEingabe />} />
 </Routes>
 
     </Router>

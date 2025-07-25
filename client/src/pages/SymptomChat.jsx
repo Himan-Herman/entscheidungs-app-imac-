@@ -30,11 +30,11 @@ export default function SymptomChat() {
     setLadeStatus(true);
   
     try {
-      const response = await fetch("/api/ki", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ frage: eingabe })
-      });
+      const response = await fetch("/api/textsymptom", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: aktuelleFrage }), 
+        });
   
       const data = await response.json();
   

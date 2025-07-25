@@ -8,6 +8,8 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/', async (req, res) => {
   const { prompt, base64Bild } = req.body;
+  console.log("✅ Prompt empfangen:", prompt);
+
 
   if (!base64Bild || typeof base64Bild !== 'string') {
     return res.status(400).json({ fehler: '❌ Kein gültiges Bild erhalten.' });

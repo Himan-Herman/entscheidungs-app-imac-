@@ -1,0 +1,62 @@
+/* styles/SymptomEingabe.css */
+
+.symptom-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: sans-serif;
+  }
+  
+  .symptom-container h2 {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    text-align: center;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 120px;
+    padding: 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+    margin-bottom: 1rem;
+  }
+  
+  button {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #1abc9c;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #16a085;
+  }
+  
+  .frage-block,
+  .antwort-block {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  .frage-block {
+    background-color: #ecf0f1;
+  }
+  
+  .antwort-block {
+    background-color: #e8f8f5;
+    color: #2d3436;
+  }
+  
