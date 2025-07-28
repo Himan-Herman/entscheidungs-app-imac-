@@ -4,6 +4,7 @@ dotenv.config();
 import express from 'express';
 import symptomRoute from './routes/symptom.js';
 import textSymptomRoute from './routes/textsymptom.js';
+import koerpersymptomRoute from './routes/koerpersymptom.js';
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 //  API-Routen registrieren
 app.use('/api/symptom', symptomRoute);
 app.use('/api/textsymptom', textSymptomRoute);
-
+app.use('/api/koerpersymptom', koerpersymptomRoute);
 // Server starten
 app.listen(3000, () => {
   console.log(' Server läuft unter http://localhost:3000');

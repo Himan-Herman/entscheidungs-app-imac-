@@ -1,0 +1,60 @@
+.koerpersymptom-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.eingabe-box {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eingabe-box input {
+  flex: 1;
+  padding: 0.6rem;
+  font-size: 1rem;
+}
+
+.chatverlauf {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.chat-bubble {
+  margin: 0.5rem 0;
+  padding: 0.6rem;
+  border-radius: 6px;
+}
+
+.chat-bubble.user {
+  background-color: #e0f7fa;
+  text-align: left;
+}
+
+.chat-bubble.assistant {
+  background-color: #f1f8e9;
+  text-align: left;
+}
+
+.lade-spinner {
+  text-align: center;
+  padding: 1rem;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ccc;
+  border-top-color: #2196f3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
