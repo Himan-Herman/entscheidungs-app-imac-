@@ -25,17 +25,19 @@ const systemMessage = {
   
   
 
-export async function frageOpenAI(verlauf) {
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    ...verlauf,
-  ];
+  export async function frageOpenAI(verlauf) {
+    const messages = [
+      systemMessage, // korrekt referenziert
+      ...verlauf,
+    ];
+  
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages,
+      temperature: 0.4,
+    });
+  
+    return response.choices[0].message.content;
+  }
+  
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
-    messages,
-    temperature: 0.4,
-  });
-
-  return response.choices[0].message.content;
-}
