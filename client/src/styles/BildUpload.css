@@ -55,3 +55,11 @@
     font-weight: 500;
   }
   
+
+  textarea {
+  margin-bottom: 0.5rem;
+}
+
+button {
+  margin-bottom: 1rem;
+}
