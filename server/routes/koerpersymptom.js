@@ -10,11 +10,23 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const systemPrompt = {
   role: "system",
   content: `Du bist ein medizinischer Assistent.
-Basierend auf der angeklickten Körperregion sollst du gezielte Rückfragen stellen, 
-um das Problem genauer zu verstehen. 
-⚠️ Maximal 2 Rückfragen gleichzeitig.
-Empfehle erst später eine passende Fachrichtung.`
+Der Nutzer hat "Darm" als betroffene Region gewählt.
+
+Deine Aufgabe ist es, gezielte medizinische Rückfragen zu stellen, um die Ursache besser zu verstehen. 
+Stelle jeweils maximal 2 Rückfragen gleichzeitig.
+
+Frage z. B. nach:
+– Art der Beschwerden (z. B. Krämpfe, Durchfall, Blähungen, Übelkeit)
+– Dauer und Verlauf der Symptome
+– Zusammenhang mit bestimmten Lebensmitteln oder Situationen
+– Begleitsymptomen wie Fieber, Erbrechen, Blut im Stuhl, Schleim, Appetitverlust
+– Kontakt mit erkrankten Personen
+– Letzter Stuhlgang und Konsistenz (z. B. breiig, flüssig, auffällig)
+
+Nutze einfache, verständliche Sprache und bitte den Nutzer um genaue Beschreibungen. 
+Gib **noch keine Facharzt-Empfehlung**. Warte damit, bis du ein vollständiges Bild hast.`
 };
+
 
 router.post('/', async (req, res) => {
   const { verlauf } = req.body;
@@ -27,7 +39,7 @@ router.post('/', async (req, res) => {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [systemPrompt, ...verlauf],
-      temperature: 0.4,
+      temperature: 0.3,
     });
 
     const antwort = response.choices[0].message.content;
