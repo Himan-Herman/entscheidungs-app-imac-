@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-
+import "../styles/KoerperSymptomChat.css";
 
 export default function KoerperSymptomChat() {
   const [eingabe, setEingabe] = useState('');
@@ -47,38 +47,34 @@ export default function KoerperSymptomChat() {
     setLadeStatus(false);
   };
 
-  return (
-    <div className="koerpersymptom-container">
-      <h2>Körpersymptom beschreiben</h2>
+ return (
+  <div className="symptomchat-container">
+    <h2>Körpersymptom beschreiben</h2>
 
-      <div className="eingabe-box">
-        <input
-          type="text"
-          value={eingabe}
-          onChange={(e) => setEingabe(e.target.value)}
-          placeholder="Beschreibe dein Symptom hier..."
-        />
-        <button onClick={frageSenden} disabled={ladeStatus}>Frage senden</button>
-      </div>
-
-      <div className="chatverlauf">
-        {verlauf.map((eintrag, index) => (
-          <div
-            key={index}
-            className={`chat-bubble ${eintrag.role === "user" ? "user" : "assistant"}`}
-          >
-            <strong>{eintrag.role === "user" ? "👤 Du:" : "🩺 Medo:"}</strong>
-            <div dangerouslySetInnerHTML={{ __html: eintrag.content }} />
-          </div>
-        ))}
-
-        {ladeStatus && (
-          <div className="lade-spinner">
-            <div className="spinner"></div>
-            <p>Moment …</p>
-          </div>
-        )}
-      </div>
+    {/* Verlauf oben */}
+    <div className="chatverlauf">
+      {verlauf.map((nachricht, index) => (
+        <div
+          key={index}
+          className={`chat-bubble ${nachricht.role === "user" ? "user" : "assistant"}`}
+        >
+          <strong>
+            {nachricht.role === "user" ? "👤 Du:" : "🩺 Medo:"}
+          </strong>
+          <p>{nachricht.content}</p>
+        </div>
+      ))}
     </div>
-  );
-}
+
+    {/* Eingabe unten */}
+    <div className="eingabe-bereich">
+      <input
+        type="text"
+        placeholder="Beschreibe dein Symptom hier..."
+        value={eingabe}
+        onChange={(e) => setEingabe(e.target.value)}
+      />
+      <button onClick={frageSenden}>Frage senden</button>
+    </div>
+  </div>
+)};
