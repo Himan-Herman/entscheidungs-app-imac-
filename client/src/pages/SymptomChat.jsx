@@ -49,41 +49,31 @@ export default function SymptomChat() {
   
   
   return (
-    <div className="symptomchat-container">
-      <h2>Symptom beschreiben</h2>
+  <div className="symptom-chat-container">
+    <h2>Symptom beschreiben</h2>
 
-      <div className="eingabe-box">
-      <input
-  type="text"
-  value={eingabe}
-  onChange={(e) => setEingabe(e.target.value)}
-  placeholder="Beschreibe dein Symptom..."
-/>
-
-
-        <button onClick={frageSenden} disabled={ladeStatus}>
-          Frage senden
-        </button>
-      </div>
-
-      <div className="chatverlauf">
-        {verlauf.map((eintrag, index) => (
-          <div
-            key={index}
-            className={`chat-bubble ${eintrag.role === "user" ? "user" : "assistant"}`}
-          >
-            <strong>{eintrag.role === "user" ? "👤 Du:" : "🩺 Medo:"}</strong>
-            <div dangerouslySetInnerHTML={{ __html: eintrag.content }} />
-          </div>
-        ))}
-
-        {ladeStatus && (
-          <div className="lade-spinner">
-            <div className="spinner"></div>
-            <p>Moment …</p>
-          </div>
-        )}
-      </div>
+    {/* Chatverlauf zuerst */}
+    <div className="chatverlauf">
+      {verlauf.map((nachricht, index) => (
+        <div
+          key={index}
+          className={nachricht.role === "user" ? "nachricht user" : "nachricht assistant"}
+        >
+          <strong>{nachricht.role === "user" ? "👤 Du:" : "🩺 Medo:"}</strong>
+          <p>{nachricht.content}</p>
+        </div>
+      ))}
     </div>
-  );
-}
+
+    {/* Eingabe + Button darunter */}
+    <div className="eingabe-bereich">
+      <input
+        type="text"
+        placeholder="Beschreibe dein Symptom..."
+        value={eingabe}
+        onChange={(e) => setEingabe(e.target.value)}
+      />
+      <button onClick={frageSenden}>Frage senden</button>
+    </div>
+  </div>
+)};
