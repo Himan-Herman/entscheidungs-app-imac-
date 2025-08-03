@@ -105,38 +105,41 @@ export default function BildUpload() {
   <div className="bildupload-container">
     <h2>Bild hochladen & analysieren</h2>
 
-    <input type="file" accept="image/*" onChange={handleBildAuswahl} />
+    {/* Bild-Upload & Vorschau schön gruppiert */}
+    <div className="bild-upload-bereich">
+      <input type="file" accept="image/*" onChange={handleBildAuswahl} />
+      {bild && (
+        <img src={bild} alt="Vorschau" className="bild-vorschau-klein" />
+      )}
+    </div>
 
-    {bild && (
-      <img src={bild} alt="Vorschau" className="bild-vorschau-klein" />
-    )}
-
-    {/* Verlauf zuerst */}
-    {verlauf.map((eintrag, index) => (
-      <div key={index}>
-        <div className="frage-block">
-          <strong>👤 Du:</strong> {eintrag.frage}
+    {/* Verlauf */}
+    <div className="chatverlauf">
+      {verlauf.map((eintrag, index) => (
+        <div key={index}>
+          <div className="frage-block">
+            <strong>👤 Du:</strong> {eintrag.frage}
+          </div>
+          <div className="antwort-block">
+            <strong>🩺 Medo:</strong>{" "}
+            <span dangerouslySetInnerHTML={{ __html: eintrag.antwort }} />
+          </div>
         </div>
-        <div className="antwort-block">
-          <strong>🩺 Medo:</strong>{" "}
-          <span dangerouslySetInnerHTML={{ __html: eintrag.antwort }} />
-        </div>
-      </div>
-    ))}
+      ))}
+    </div>
 
     {ladezustand && <p>⏳ Analyse läuft...</p>}
 
-    {/* Eingabefeld + Button ganz unten */}
+    {/* Eingabezeile */}
     {bild && (
-      <>
+      <div className="eingabe-bereich">
         <textarea
           placeholder="Beschreibe das Bild oder stelle eine Frage dazu..."
           value={beschreibung}
           onChange={(e) => setBeschreibung(e.target.value)}
         ></textarea>
-
         <button onClick={handleFrageSenden}>Senden</button>
-      </>
+      </div>
     )}
   </div>
 )};

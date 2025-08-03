@@ -5,24 +5,40 @@ const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 router.post('/', async (req, res) => {
-  const { prompt } = req.body;
+  const { verlauf } = req.body;
+
+  if (!Array.isArray(verlauf)) {
+    return res.status(400).json({ antwort: "❌ Gesprächsverlauf fehlt oder ist ungültig." });
+  }
+
+  const systemPrompt = {
+    role: "system",
+content: `🩺 Du bist ein medizinischer KI-Assistent.
+
+Deine Aufgabe ist es, Beschwerden empathisch einzugrenzen und dem Nutzer eine sinnvolle Einschätzung zu geben. Das Ziel ist es, mögliche Ursachen zu benennen, eine passende ärztliche Fachrichtung zu empfehlen und gegebenenfalls einfache therapeutische Maßnahmen vorzuschlagen.
+
+🔁 Stelle maximal zwei gezielte Rückfragen gleichzeitig. Versuche, innerhalb von 4 Rückfragen ein klares Bild zu erhalten. Bei Bedarf maximal 6 Rückfragen.
+
+🎯 Wenn du genug weißt, nenne:
+
+1. **🔍 Wahrscheinliche Ursache** (z. B. Lebensmittelinfektion, Blasenentzündung, Spannungskopfschmerz)  
+2. **👩‍⚕️ Fachrichtung:** Nenne differenziert eine geeignete Anlaufstelle, z. B.:  
+   – **Hausärzt:in zur Erstuntersuchung**,  
+   – oder eine spezialisierte Praxis wie **Gastroenterolog:in**, **Neurolog:in**, **Dermatolog:in**, je nach Symptomlage  
+3. **💡 Maßnahmen:**  
+   – Nenne 1–2 rezeptfreie, einfache Maßnahmen (z. B. Paracetamol, Flüssigkeit, Ruhe)  
+   – Gib immer den Hinweis: „Diese Maßnahmen ersetzen keinen Arztbesuch.“
+
+⛔ Vermeide medizinische Fachsprache. Gib keine verschreibungspflichtigen Medikamente an. Sprich ruhig, einfach und verständlich.`
+
+
+  };
 
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
-      messages: [
-        {
-           role: "system",
-    content: `🩺 Du bist ein professioneller medizinischer Assistent.
-Deine Aufgabe ist es, auf die Symptome des Nutzers empathisch einzugehen und das Problem einzugrenzen.
-
-🔁 Stelle maximal **zwei kurze Rückfragen auf einmal**.
-🔚 Gib eine **Facharzt-Empfehlung** (z. B. Dermatologie, Neurologie), **sobald du genug weißt**.
-⛔ **Stelle keine Rückfragen mehr**, wenn du bereits eine Empfehlung gibst.
-🎯 Ziel: Klare, schrittweise Unterhaltung – nie überfordern – hilfsbereit sein.` },
-        { role: "user", content: prompt },
-      ],
-      temperature: 0.5,
+      messages: [systemPrompt, ...verlauf],
+      temperature: 0.2,
     });
 
     const antwort = completion.choices[0].message.content;
@@ -33,5 +49,4 @@ Deine Aufgabe ist es, auf die Symptome des Nutzers empathisch einzugehen und das
   }
 });
 
-// ❗ WICHTIG:
 export default router;
