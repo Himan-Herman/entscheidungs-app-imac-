@@ -10,17 +10,17 @@ export default function SymptomChat() {
   const [searchParams] = useSearchParams();
   const organ = searchParams.get("organ");
 
-  // ✅ Ref für Scrollbereich
+
   const chatEndRef = useRef(null);
 
-  // ✅ Scroll-Funktion
+ 
   const scrollToBottom = () => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  // ✅ Immer scrollen, wenn Verlauf sich ändert
+ 
   useEffect(() => {
     scrollToBottom();
   }, [verlauf]);
@@ -41,7 +41,7 @@ export default function SymptomChat() {
     const neuerVerlauf = [...verlauf, neueFrage];
     setVerlauf([
   ...neuerVerlauf,
-  { role: "assistant", content: "🕒 Antwort wird geladen..." } // ⏳ Ladeanzeige
+  { role: "assistant", content: "🕒..." } 
 ]);
 
     setEingabe('');
@@ -51,12 +51,12 @@ export default function SymptomChat() {
       const response = await fetch("/api/textsymptom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verlauf: neuerVerlauf }), // ✅ Verlauf wird übergeben
+        body: JSON.stringify({ verlauf: neuerVerlauf }), 
       });
 
       const data = await response.json();
-      // Entferne die letzte (Lade-)Nachricht und ersetze durch echte Antwort
-const verlaufOhneLadeanzeige = [...neuerVerlauf]; // nur echte Nachrichten
+      
+const verlaufOhneLadeanzeige = [...neuerVerlauf]; 
 verlaufOhneLadeanzeige.push({ role: "assistant", content: data.antwort });
 setVerlauf(verlaufOhneLadeanzeige);
 
