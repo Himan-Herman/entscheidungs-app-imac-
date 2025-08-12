@@ -34,7 +34,7 @@ const systemMessage = {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages,
-      temperature: 0.4,
+      temperature: 0.2,
     });
   
     return response.choices[0].message.content;
