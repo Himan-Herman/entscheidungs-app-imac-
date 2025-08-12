@@ -5,6 +5,7 @@ import express from 'express';
 import symptomRoute from './routes/symptom.js';
 import textSymptomRoute from './routes/textsymptom.js';
 import koerpersymptomRoute from './routes/koerpersymptom.js';
+import symptomThreadRoute from './routes/symptomThread.js';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use('/api/symptom', symptomRoute);
 app.use('/api/textsymptom', textSymptomRoute);
 app.use('/api/koerpersymptom', koerpersymptomRoute);
+app.use('/api/symptom-thread', symptomThreadRoute);
 // Server starten
 app.listen(3000, () => {
   console.log(' Server läuft unter http://localhost:3000');
