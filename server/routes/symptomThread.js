@@ -11,33 +11,37 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const assistant_id = "asst_iYNQijvS2n779FVOvCteIT18";
 
 router.post("/", async (req, res) => {
-  const { verlauf } = req.body;
+  const { verlauf, threadId } = req.body;
 
   if (!Array.isArray(verlauf)) {
     return res.status(400).json({ antwort: "❌ Gesprächsverlauf fehlt oder ist ungültig." });
   }
 
   try {
-    // 1. Neuen Thread erstellen
-    const thread = await openai.beta.threads.create();
+    // 1. Vorhandenen Thread verwenden oder neuen erstellen
+    let currentThreadId = threadId;
+    if (!currentThreadId) {
+      const thread = await openai.beta.threads.create();
+      currentThreadId = thread.id;
+    }
 
     // 2. Verlauf in den Thread schreiben
     for (const msg of verlauf) {
-      await openai.beta.threads.messages.create(thread.id, {
+      await openai.beta.threads.messages.create(currentThreadId, {
         role: msg.role,
         content: msg.content
       });
     }
 
     // 3. Run starten
-    const run = await openai.beta.threads.runs.create(thread.id, {
+    const run = await openai.beta.threads.runs.create(currentThreadId, {
       assistant_id
     });
 
     // 4. Auf Abschluss warten
     let status = "queued";
     while (status !== "completed" && status !== "failed") {
-      const lauf = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      const lauf = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
       status = lauf.status;
       if (status !== "completed") {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -49,11 +53,12 @@ router.post("/", async (req, res) => {
     }
 
     // 5. Antwort holen
-    const messages = await openai.beta.threads.messages.list(thread.id);
+    const messages = await openai.beta.threads.messages.list(currentThreadId);
     const letzte = messages.data[0];
     const antwort = letzte.content[0].text.value;
 
-    res.json({ antwort });
+    // 6. Antwort + aktuelle Thread-ID zurückgeben
+    res.json({ antwort, threadId: currentThreadId });
 
   } catch (err) {
     console.error("❌ Fehler im Thread:", err);

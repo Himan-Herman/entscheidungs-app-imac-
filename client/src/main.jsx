@@ -11,6 +11,7 @@ import SymptomChat from './pages/SymptomChat';
 import KoerperregionStart from './pages/KoerperregionStart';
 import SymptomEingabe from './pages/SymptomEingabe';
 import KoerperSymptomChat from './pages/KoerperSymptomChat';
+import SymptomThread from "./pages/SymptomThread";
 
 
 
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <Route path="/textsymptom" element={<SymptomEingabe />} />
   <Route path="/textsymptom" element={<SymptomEingabe />} />
   <Route path="/koerpersymptom" element={<KoerperSymptomChat />} />
+  <Route path="/thread" element={<SymptomThread />} />
 
 </Routes>
 
