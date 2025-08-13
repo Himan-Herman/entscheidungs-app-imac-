@@ -29,7 +29,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <Route path="/textsymptom" element={<SymptomEingabe />} />
   <Route path="/textsymptom" element={<SymptomEingabe />} />
   <Route path="/koerpersymptom" element={<KoerperSymptomChat />} />
-  <Route path="/thread" element={<SymptomThread />} />
+  <Route path="/symptom" element={<SymptomChat />} />
+<Route path="/symptom-thread" element={<SymptomThread />} />
+
 
 </Routes>
 

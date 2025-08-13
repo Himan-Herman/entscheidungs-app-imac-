@@ -1,68 +1,82 @@
+// server/routes/symptomThread.js
 import express from 'express';
-import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import OpenAI from 'openai';
 
 dotenv.config();
-
 const router = express.Router();
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const ASSISTANT_ID = process.env.ASSISTANT_ID || 'asst_iYNQijvS2n779FVOvCteIT18'; // ggf. anpassen
 
-// Deine Assistant-ID
-const assistant_id = "asst_iYNQijvS2n779FVOvCteIT18";
-
-router.post("/", async (req, res) => {
-  const { verlauf, threadId } = req.body;
-
-  if (!Array.isArray(verlauf)) {
-    return res.status(400).json({ antwort: "❌ Gesprächsverlauf fehlt oder ist ungültig." });
+// kleines Helper: bis zu N Sekunden auf "completed" warten
+async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs = 750) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+    if (run.status === 'completed') return run;
+    if (['failed', 'cancelled', 'expired'].includes(run.status)) {
+      throw new Error(`Run status: ${run.status}`);
+    }
+    await new Promise(r => setTimeout(r, pollMs));
   }
+  throw new Error('Run timeout');
+}
 
+router.post('/', async (req, res) => {
   try {
-    // 1. Vorhandenen Thread verwenden oder neuen erstellen
+    const { verlauf, threadId } = req.body;
+
+    if (!Array.isArray(verlauf) || verlauf.length === 0) {
+      return res.status(400).json({ fehler: 'Ungültiger oder leerer Verlauf.' });
+    }
+
+    // 1) Thread holen/erstellen
     let currentThreadId = threadId;
     if (!currentThreadId) {
-      const thread = await openai.beta.threads.create();
-      currentThreadId = thread.id;
+      const t = await openai.beta.threads.create();
+      currentThreadId = t.id;
     }
 
-    // 2. Verlauf in den Thread schreiben
-    for (const msg of verlauf) {
-      await openai.beta.threads.messages.create(currentThreadId, {
-        role: msg.role,
-        content: msg.content
-      });
+    // 2) Nur die neue User-Nachricht anhängen (du sendest ja [userMsg])
+    const last = verlauf[verlauf.length - 1];
+    const content = typeof last?.content === 'string' ? last.content.trim() : '';
+    if (!last || last.role !== 'user' || !content) {
+      return res.status(400).json({ fehler: 'Letzte Nachricht muss vom Nutzer stammen.' });
     }
-
-    // 3. Run starten
-    const run = await openai.beta.threads.runs.create(currentThreadId, {
-      assistant_id
+    
+    await openai.beta.threads.messages.create(currentThreadId, {
+      role: 'user',
+      content
     });
 
-    // 4. Auf Abschluss warten
-    let status = "queued";
-    while (status !== "completed" && status !== "failed") {
-      const lauf = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
-      status = lauf.status;
-      if (status !== "completed") {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+    // 3) Run starten
+    const run = await openai.beta.threads.runs.create(currentThreadId, {
+      assistant_id: ASSISTANT_ID
+     
+    });
+
+    // 4) Warten bis fertig
+    await waitForRunCompletion(currentThreadId, run.id, 30000, 600);
+
+    // 5) Letzte Assistant-Antwort holen
+    const msgs = await openai.beta.threads.messages.list(currentThreadId, { limit: 5 });
+    // erste Assistant-Nachricht (messages sind absteigend sortiert)
+    const assistantMsg = msgs.data.find(m => m.role === 'assistant');
+
+    // Text extrahieren (Falls mehrere Blöcke vorhanden sind)
+    let antwort = '…';
+    if (assistantMsg && Array.isArray(assistantMsg.content)) {
+      const textParts = assistantMsg.content
+        .filter(p => p.type === 'text' && p.text?.value)
+        .map(p => p.text.value.trim());
+      if (textParts.length) antwort = textParts.join('\n\n');
     }
 
-    if (status === "failed") {
-      return res.status(500).json({ antwort: "❌ Assistant-Run fehlgeschlagen." });
-    }
-
-    // 5. Antwort holen
-    const messages = await openai.beta.threads.messages.list(currentThreadId);
-    const letzte = messages.data[0];
-    const antwort = letzte.content[0].text.value;
-
-    // 6. Antwort + aktuelle Thread-ID zurückgeben
-    res.json({ antwort, threadId: currentThreadId });
-
+    return res.json({ antwort, threadId: currentThreadId });
   } catch (err) {
-    console.error("❌ Fehler im Thread:", err);
-    res.status(500).json({ antwort: "❌ Fehler bei der KI-Verarbeitung (Thread)." });
+    console.error('symptom-thread error:', err);
+    return res.status(500).json({ fehler: 'Serverfehler in /api/symptom-thread.' });
   }
 });
 
