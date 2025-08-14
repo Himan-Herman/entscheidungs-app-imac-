@@ -132,12 +132,19 @@ export default function SymptomChat() {
       </div>
 
       <div className="eingabe-bereich">
-        <input
-          type="text"
-          placeholder="Beschreibe dein Symptom..."
-          value={eingabe}
-          onChange={(e) => setEingabe(e.target.value)}
-        />
+      <input
+  type="text"
+  placeholder="Beschreibe dein Symptom hier..."
+  value={eingabe}
+  onChange={(e) => setEingabe(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      frageSenden();
+    }
+  }}
+/>
+
         <button onClick={frageSenden} disabled={ladeStatus}>Senden</button>
       </div>
     </div>
