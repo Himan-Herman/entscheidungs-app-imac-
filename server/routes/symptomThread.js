@@ -7,13 +7,14 @@ dotenv.config();
 const router = express.Router();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const ASSISTANT_ID = process.env.ASSISTANT_ID || 'asst_iYNQijvS2n779FVOvCteIT18'; // ggf. anpassen
+const ASSISTANT_ID = process.env.ASSISTANT_ID || 'asst_iYNQijvS2n779FVOvCteIT18';
 
-// kleines Helper: bis zu N Sekunden auf "completed" warten
+// Helper: wartet bis ein Run fertig ist
 async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs = 750) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+    // NEUE SYNTAX: runId zuerst, Thread-ID als Option
+    const run = await openai.beta.threads.runs.retrieve(runId, { thread_id: threadId });
     if (run.status === 'completed') return run;
     if (['failed', 'cancelled', 'expired'].includes(run.status)) {
       throw new Error(`Run status: ${run.status}`);
@@ -23,6 +24,7 @@ async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs =
   throw new Error('Run timeout');
 }
 
+
 router.post('/', async (req, res) => {
   try {
     const { verlauf, threadId } = req.body;
@@ -31,20 +33,22 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ fehler: 'Ungültiger oder leerer Verlauf.' });
     }
 
-    // 1) Thread holen/erstellen
-    let currentThreadId = threadId;
-    if (!currentThreadId) {
+    // 1) Thread holen oder neu erstellen
+    let currentThreadId = null;
+    if (threadId && typeof threadId === "string" && threadId.trim() !== "" && threadId !== "undefined" && threadId !== "null") {
+      currentThreadId = threadId;
+    } else {
       const t = await openai.beta.threads.create();
       currentThreadId = t.id;
     }
 
-    // 2) Nur die neue User-Nachricht anhängen (du sendest ja [userMsg])
+    // 2) Letzte User-Nachricht holen
     const last = verlauf[verlauf.length - 1];
     const content = typeof last?.content === 'string' ? last.content.trim() : '';
     if (!last || last.role !== 'user' || !content) {
       return res.status(400).json({ fehler: 'Letzte Nachricht muss vom Nutzer stammen.' });
     }
-    
+
     await openai.beta.threads.messages.create(currentThreadId, {
       role: 'user',
       content
@@ -53,18 +57,17 @@ router.post('/', async (req, res) => {
     // 3) Run starten
     const run = await openai.beta.threads.runs.create(currentThreadId, {
       assistant_id: ASSISTANT_ID
-     
     });
 
-    // 4) Warten bis fertig
-    await waitForRunCompletion(currentThreadId, run.id, 30000, 600);
+    // 4) Auf Fertigstellung warten (jetzt mit richtiger Parameter-Reihenfolge!)
+    
+await waitForRunCompletion(run.thread_id, run.id, 30000, 600);
+
 
     // 5) Letzte Assistant-Antwort holen
     const msgs = await openai.beta.threads.messages.list(currentThreadId, { limit: 5 });
-    // erste Assistant-Nachricht (messages sind absteigend sortiert)
     const assistantMsg = msgs.data.find(m => m.role === 'assistant');
 
-    // Text extrahieren (Falls mehrere Blöcke vorhanden sind)
     let antwort = '…';
     if (assistantMsg && Array.isArray(assistantMsg.content)) {
       const textParts = assistantMsg.content

@@ -78,7 +78,7 @@ export default function SymptomChat() {
     setLadeStatus(true);
 
     try {
-      const response = await fetch("/api/textsymptom", {
+      const response = await fetch("/api/symptom-thread", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ verlauf: neuerVerlauf, threadId }),

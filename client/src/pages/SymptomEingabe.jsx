@@ -35,12 +35,12 @@ export default function SymptomEingabe() {
 
   const chatEndRef = useRef(null);
 
-  // Auto-Scroll immer ans Ende
+ 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [verlauf, ladezustand]);
 
-  // Persistiere Verlauf bei Änderungen (Backup zu den Sofort-Saves unten)
+  
   useEffect(() => {
     safeSetLS(LS_CHAT_KEY, JSON.stringify(verlauf));
   }, [verlauf]);
@@ -54,9 +54,9 @@ export default function SymptomEingabe() {
 
     setLadezustand(true);
 
-    // 1) Nutzerfrage sofort anzeigen & speichern
+    
     setVerlauf((prev) => {
-      const nv = [...prev, { frage: text, antwort: "…" }]; // Platzhalter bis Antwort da ist
+      const nv = [...prev, { frage: text, antwort: "…" }]; 
       safeSetLS(LS_CHAT_KEY, JSON.stringify(nv));
       return nv;
     });
@@ -71,7 +71,7 @@ export default function SymptomEingabe() {
 
       const data = await response.json();
 
-      // 2) Letzten Eintrag (Platzhalter) durch echte Antwort ersetzen
+      
       setVerlauf((prev) => {
         const nv = [...prev];
         const idx = nv.findLastIndex((e) => e.frage === text);
