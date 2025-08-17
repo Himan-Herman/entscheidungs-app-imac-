@@ -7,7 +7,7 @@ dotenv.config();
 const router = express.Router();
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const ASSISTANT_ID = process.env.ASSISTANT_ID || 'asst_iYNQijvS2n779FVOvCteIT18';
+const ASSISTANT_ID = process.env.ASSISTANT_ID;
 
 // Helper: wartet bis ein Run fertig ist
 async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs = 750) {
