@@ -1,59 +1,85 @@
-import express from "express";
-import OpenAI from "openai";
-import dotenv from "dotenv";
+
+import express from 'express';
+import dotenv from 'dotenv';
+import OpenAI from 'openai';
 
 dotenv.config();
-
 const router = express.Router();
+
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const ASSISTANT_ID = process.env.ASSISTANT_ID_KOERPERSYMPTOM;
 
-// 🔹 Neue Assistant-ID für KörperSymptom
-const assistant_id = "asst_xqwfaqoLEV5k6uVE8krrQUM7";
-
-router.post("/", async (req, res) => {
-  const { verlauf, threadId } = req.body;
-
-  if (!Array.isArray(verlauf)) {
-    return res.status(400).json({ antwort: "❌ Ungültiger Gesprächsverlauf." });
+// Helper: wartet bis ein Run fertig ist
+async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs = 750) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    // NEUE SYNTAX: runId zuerst, Thread-ID als Option
+    const run = await openai.beta.threads.runs.retrieve(runId, { thread_id: threadId });
+    if (run.status === 'completed') return run;
+    if (['failed', 'cancelled', 'expired'].includes(run.status)) {
+      throw new Error(`Run status: ${run.status}`);
+    }
+    await new Promise(r => setTimeout(r, pollMs));
   }
+  throw new Error('Run timeout');
+}
 
+
+router.post('/', async (req, res) => {
   try {
-    let currentThreadId = threadId;
+    const { verlauf, threadId } = req.body;
 
-    // Falls noch kein Thread existiert → neuen erstellen
-    if (!currentThreadId) {
-      const thread = await openai.beta.threads.create();
-      currentThreadId = thread.id;
+    if (!Array.isArray(verlauf) || verlauf.length === 0) {
+      return res.status(400).json({ fehler: 'Ungültiger oder leerer Verlauf.' });
     }
 
-    // Verlauf ins Thread schreiben
-    for (const msg of verlauf) {
-      await openai.beta.threads.messages.create(currentThreadId, {
-        role: msg.role,
-        content: msg.content
-      });
+    // 1) Thread holen oder neu erstellen
+    let currentThreadId = null;
+    if (threadId && typeof threadId === "string" && threadId.trim() !== "" && threadId !== "undefined" && threadId !== "null") {
+      currentThreadId = threadId;
+    } else {
+      const t = await openai.beta.threads.create();
+      currentThreadId = t.id;
     }
 
-    // KI-Antwort generieren
-    const run = await openai.beta.threads.runs.create(currentThreadId, {
-      assistant_id
+    // 2) Letzte User-Nachricht holen
+    const last = verlauf[verlauf.length - 1];
+    const content = typeof last?.content === 'string' ? last.content.trim() : '';
+    if (!last || last.role !== 'user' || !content) {
+      return res.status(400).json({ fehler: 'Letzte Nachricht muss vom Nutzer stammen.' });
+    }
+
+    await openai.beta.threads.messages.create(currentThreadId, {
+      role: 'user',
+      content
     });
 
-    // Auf Antwort warten
-    let runStatus;
-    do {
-      await new Promise((r) => setTimeout(r, 1000));
-      runStatus = await openai.beta.threads.runs.retrieve(currentThreadId, run.id);
-    } while (runStatus.status !== "completed");
+    // 3) Run starten
+    const run = await openai.beta.threads.runs.create(currentThreadId, {
+      assistant_id: ASSISTANT_ID
+    });
 
-    // Letzte Nachricht abrufen
-    const messages = await openai.beta.threads.messages.list(currentThreadId);
-    const lastMsg = messages.data[0]?.content[0]?.text?.value || "⚠️ Keine Antwort erhalten.";
+    // 4) Auf Fertigstellung warten (jetzt mit richtiger Parameter-Reihenfolge!)
+    
+await waitForRunCompletion(run.thread_id, run.id, 30000, 600);
 
-    res.json({ antwort: lastMsg, threadId: currentThreadId });
-  } catch (error) {
-    console.error("❌ Fehler im KörperSymptom-Thread:", error);
-    res.status(500).json({ antwort: "❌ Serverfehler im KörperSymptom-Thread." });
+
+    // 5) Letzte Assistant-Antwort holen
+    const msgs = await openai.beta.threads.messages.list(currentThreadId, { limit: 5 });
+    const assistantMsg = msgs.data.find(m => m.role === 'assistant');
+
+    let antwort = '…';
+    if (assistantMsg && Array.isArray(assistantMsg.content)) {
+      const textParts = assistantMsg.content
+        .filter(p => p.type === 'text' && p.text?.value)
+        .map(p => p.text.value.trim());
+      if (textParts.length) antwort = textParts.join('\n\n');
+    }
+
+    return res.json({ antwort, threadId: currentThreadId });
+  } catch (err) {
+    console.error('symptom-thread error:', err);
+    return res.status(500).json({ fehler: 'Serverfehler in /api/symptom-thread.' });
   }
 });
 

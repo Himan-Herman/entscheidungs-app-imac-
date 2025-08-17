@@ -1,43 +1,31 @@
-// src/pages/KoerperSymptomThread.jsx
+
 import { useEffect, useRef, useState } from "react";
-import "../styles/SymptomThread.css"; // Styles wiederverwenden
+import "../styles/SymptomThread.css";
 import { useSearchParams } from "react-router-dom";
-import { getOrganPrompt } from "./prompt/organPrompts"; // optional
+import { getOrganPrompt } from "./prompt/organPrompts";
 
 const THREAD_API = "/api/koerpersymptomthread";
 const LS_THREAD_KEY = "koerperThreadId";
 const LS_CHAT_KEY   = "koerperThreadVerlauf";
 
-// kleine Helper statt leerer catch-Blöcke
-const safeSetLS = (k, v) => {
-  try { localStorage.setItem(k, v); }
-  catch (e) { console.warn("[LS set] failed:", k, e); }
-};
-const safeRemoveLS = (k) => {
-  try { localStorage.removeItem(k); }
-  catch (e) { console.warn("[LS remove] failed:", k, e); }
-};
+const safeSetLS = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { console.warn("[LS set] failed:", k, e); } };
+const safeRemoveLS = (k) => { try { localStorage.removeItem(k); } catch (e) { console.warn("[LS remove] failed:", k, e); } };
 
 export default function KoerperSymptomThread() {
   const [searchParams] = useSearchParams();
-  const organ = searchParams.get("organ"); // optional
+  const organ = searchParams.get("organ");
 
-  const [eingabe, setEingabe]   = useState("");
-  const [verlauf, setVerlauf]   = useState(() => {
+  const [eingabe, setEingabe] = useState("");
+  const [verlauf, setVerlauf] = useState(() => {
     const raw = localStorage.getItem(LS_CHAT_KEY);
     try { return raw ? JSON.parse(raw) : []; }
-    catch (e) {
-      console.warn("[JSON parse] invalid chat, clearing:", e);
-      safeRemoveLS(LS_CHAT_KEY);
-      return [];
-    }
+    catch (e) { console.warn("[JSON parse] invalid chat, clearing:", e); safeRemoveLS(LS_CHAT_KEY); return []; }
   });
   const [threadId, setThreadId] = useState(() => localStorage.getItem(LS_THREAD_KEY) || "");
-  const [laden, setLaden]       = useState(false);
+  const [laden, setLaden] = useState(false);
   const [fehlermeldung, setFehlermeldung] = useState("");
   const chatEndeRef = useRef(null);
 
-  // Start-Message (oder Organ-Prompt), wenn noch leer
   useEffect(() => {
     if (verlauf.length === 0) {
       const startText = organ
@@ -50,12 +38,10 @@ export default function KoerperSymptomThread() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organ]);
 
-  // Auto-Scroll
   useEffect(() => {
     chatEndeRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [verlauf, laden]);
 
-  // Senden
   async function senden() {
     if (!eingabe.trim() || laden) return;
     setFehlermeldung("");
@@ -65,17 +51,27 @@ export default function KoerperSymptomThread() {
       const userMsg = { role: "user", content: eingabe.trim() };
       setEingabe("");
 
-      // sofort in UI + LS
       setVerlauf((alt) => {
         const nv = [...alt, userMsg];
         safeSetLS(LS_CHAT_KEY, JSON.stringify(nv));
         return nv;
       });
 
+      // ✅ payload wird JEZT auch im fetch verwendet
+      const payload = {
+        threadId: threadId || null,
+        verlauf: (!threadId && organ)
+          ? [
+              { role: "user", content: `Kontext: Die betroffene Körperregion ist "${organ}".` },
+              userMsg
+            ]
+          : [userMsg]
+      };
+
       const res = await fetch(THREAD_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verlauf: [userMsg], threadId: threadId || null })
+        body: JSON.stringify(payload) // <-- hier lag der Fehler
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -111,7 +107,7 @@ export default function KoerperSymptomThread() {
     safeRemoveLS(LS_THREAD_KEY);
     safeRemoveLS(LS_CHAT_KEY);
     setThreadId("");
-    setVerlauf([]); // Begrüßung kommt wieder aus useEffect
+    setVerlauf([]);
     setFehlermeldung("");
   }
 

@@ -1,10 +1,11 @@
+// src/pages/KoerpersymptomChat.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import "../styles/KoerperSymptomChat.css";
-import { useNavigate } from "react-router-dom";
 
-
+const THREAD_API = "/api/koerpersymptomthread";
 const LS_CHAT_KEY = "koerperChatVerlauf";
+const LS_THREAD_KEY = "koerperThreadId";
 
 export default function KoerperSymptomChat() {
   const [eingabe, setEingabe] = useState("");
@@ -13,36 +14,41 @@ export default function KoerperSymptomChat() {
       const raw = localStorage.getItem(LS_CHAT_KEY);
       return raw ? JSON.parse(raw) : [];
     } catch (e) {
-      console.warn("Fehler beim Lesen von LocalStorage:", e);
+      console.warn("[LS read] koerperChatVerlauf fehlgeschlagen:", e);
       return [];
     }
   });
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  // 🔹 Thread-ID für echte Threads
+  const [threadId, setThreadId] = useState(() => {
+    try {
+      return localStorage.getItem(LS_THREAD_KEY) || "";
+    } catch (e) {
+      console.warn("[LS read] koerperThreadId fehlgeschlagen:", e);
+      return "";
+    }
+  });
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const organ = searchParams.get("organ");
 
   const chatRef = useRef(null);
   const inputRef = useRef(null);
   const lastIntroOrganRef = useRef(null);
   const navigate = useNavigate();
-  
+
+  // Intro-Text bei Organwechsel (nur UI, nicht an KI senden)
   useEffect(() => {
     if (!organ) return;
-  
-    // Falls für dieses Organ bereits eine Intro im Verlauf existiert, nichts tun
+
     const introExistiert = verlauf.some(
-      (m) =>
-        m.role === "assistant" &&
-        m.content.includes(`"${organ}" als betroffene Region`)
+      (m) => m.role === "assistant" && m.content.includes(`"${organ}" als betroffene Region`)
     );
-  
     if (introExistiert) {
-      lastIntroOrganRef.current = organ; // merken
+      lastIntroOrganRef.current = organ;
       return;
     }
-  
-    // Wenn die letzte Intro nicht zu diesem Organ gehört -> neue Intro anhängen
+
     if (lastIntroOrganRef.current !== organ) {
       const neueStartFrage = {
         role: "assistant",
@@ -53,99 +59,127 @@ export default function KoerperSymptomChat() {
         try {
           localStorage.setItem(LS_CHAT_KEY, JSON.stringify(neu));
         } catch (e) {
-          console.warn("Fehler beim Schreiben in LocalStorage:", e);
+          console.warn("[LS write] koerperChatVerlauf fehlgeschlagen:", e);
         }
         return neu;
       });
-      lastIntroOrganRef.current = organ; // merken, damit nicht erneut angehängt wird
+      lastIntroOrganRef.current = organ;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organ]);
-  
 
-  // Verlauf immer speichern
+  // Verlauf speichern
   useEffect(() => {
     try {
       localStorage.setItem(LS_CHAT_KEY, JSON.stringify(verlauf));
     } catch (e) {
-      console.warn("Fehler beim Speichern in LocalStorage:", e);
+      console.warn("[LS write] koerperChatVerlauf fehlgeschlagen:", e);
     }
   }, [verlauf]);
 
   // Auto-Scroll
   useEffect(() => {
     if (chatRef.current) {
-      chatRef.current.scrollTo({
-        top: chatRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+      chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
     }
   }, [verlauf]);
 
-  // Nachricht senden
+  // Nachricht senden -> Threads
   const frageSenden = async () => {
     if (!eingabe.trim()) return;
 
-    const neueFrage = { role: "user", content: eingabe };
-    const basisVerlauf = [...verlauf, neueFrage];
+    const userMsg = { role: "user", content: eingabe.trim() };
+    const basisVerlauf = [...verlauf, userMsg];
 
+    // ⏳ UI-Spinner
     const mitUhr = [...basisVerlauf, { role: "assistant", content: "🕒" }];
     setVerlauf(mitUhr);
     setEingabe("");
 
     try {
-      const response = await fetch("/api/koerpersymptom", {
+      // Beim allerersten Senden ohne Thread-ID einmal den Organ-Kontext mitgeben
+      const payload = {
+        threadId: threadId || null,
+        verlauf:
+          !threadId && organ
+            ? [
+                { role: "user", content: `Kontext: Die betroffene Körperregion ist "${organ}".` },
+                userMsg,
+              ]
+            : [userMsg],
+      };
+
+      const response = await fetch(THREAD_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verlauf: basisVerlauf, organ }),
+        body: JSON.stringify(payload),
       });
 
+      // Falls der Server Fehler schickt, zeige ihn an
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("[Thread API] HTTP", response.status, text);
+        const fertigFehler = [...basisVerlauf, { role: "assistant", content: "⚠️ Serverfehler (Thread)." }];
+        setVerlauf(fertigFehler);
+        return;
+      }
+
       const data = await response.json();
-      const fertig = [
-        ...basisVerlauf,
-        { role: "assistant", content: data.antwort },
-      ];
+
+      // 🧠 Thread-ID merken (vom Server zurückgegeben)
+      if (data.threadId && data.threadId !== threadId) {
+        setThreadId(data.threadId);
+        try {
+          localStorage.setItem(LS_THREAD_KEY, data.threadId);
+        } catch (e) {
+          console.warn("[LS write] koerperThreadId fehlgeschlagen:", e);
+        }
+      }
+
+      // ⏹️ Spinner entfernen, Antwort einsetzen
+      const fertig = [...basisVerlauf, { role: "assistant", content: data.antwort || "…" }];
       setVerlauf(fertig);
     } catch (error) {
       console.error("Fehler bei der KI-Antwort:", error);
-      const mitFehler = [
-        ...basisVerlauf,
-        { role: "assistant", content: "⚠️ Fehler bei der Antwort." },
-      ];
+      const mitFehler = [...basisVerlauf, { role: "assistant", content: "⚠️ Fehler bei der Antwort." }];
       setVerlauf(mitFehler);
     }
   };
 
+  // Enter = senden
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      frageSenden();
+    }
+  };
+
+  // Neustart: Chat + Thread zurücksetzen
   const neustart = () => {
-    // Chat & Storage leeren
     setVerlauf([]);
     setEingabe("");
-    try { localStorage.removeItem(LS_CHAT_KEY); } catch (e) { console.warn(e); }
-    setSearchParams({});                 // organ aus der URL entfernen
+    setThreadId("");
+    try {
+      localStorage.removeItem(LS_CHAT_KEY);
+      localStorage.removeItem(LS_THREAD_KEY);
+    } catch (e) {
+      console.warn("[LS remove] fehlgeschlagen:", e);
+    }
+    setSearchParams({});
     if (lastIntroOrganRef?.current !== undefined) lastIntroOrganRef.current = null;
-  
-    // 🔧 History so umbauen, dass "Zurück" direkt zur Körperkarte führt:
-    // 1) Aktuellen History-Eintrag durch die Körperkarte ersetzen
-    navigate("/koerperregionen", { replace: true });  // <— Pfad ggf. anpassen
-  
-    // 2) Sofort wieder die Chat-Seite ohne organ pushen (damit man im Chat bleibt)
-    navigate("/koerpersymptom", { replace: false });   // <— Pfad ggf. anpassen
-  
-    // Fokus
+
+    // Zur Körperkarte und zurück (History sauber)
+    navigate("/koerperregionen", { replace: true });
+    navigate("/koerpersymptom", { replace: false });
+
     inputRef.current?.focus();
   };
-  
-  
 
   return (
     <div className="symptomchat-container">
       <div className="chat-header">
         <h2>Körpersymptom beschreiben</h2>
-        <button
-          className="reset-btn"
-          onClick={neustart}
-          title="Chat löschen und neu starten"
-        >
+        <button className="reset-btn" onClick={neustart} title="Chat & Thread löschen und neu starten">
           🔄 Neustart
         </button>
       </div>
@@ -160,13 +194,9 @@ export default function KoerperSymptomChat() {
         {verlauf.map((nachricht, index) => (
           <div
             key={index}
-            className={`chat-bubble ${
-              nachricht.role === "user" ? "user" : "assistant"
-            }`}
+            className={`chat-bubble ${nachricht.role === "user" ? "user" : "assistant"}`}
           >
-            <strong>
-              {nachricht.role === "user" ? "👤 Du:" : "🩺 Medo:"}
-            </strong>
+            <strong>{nachricht.role === "user" ? "👤 Du:" : "🩺 Medo:"}</strong>
             <p>{nachricht.content}</p>
           </div>
         ))}
@@ -179,15 +209,21 @@ export default function KoerperSymptomChat() {
           placeholder="Beschreibe dein Symptom hier..."
           value={eingabe}
           onChange={(e) => setEingabe(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              frageSenden();
-            }
-          }}
+          onKeyDown={handleKeyDown}
         />
         <button onClick={frageSenden}>Frage senden</button>
       </div>
+
+      {/* Optional: Thread-ID anzeigen */}
+      {threadId ? (
+        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.7 }}>
+          Thread-ID: <code>{threadId}</code>
+        </div>
+      ) : (
+        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.6 }}>
+          Noch kein Thread erstellt
+        </div>
+      )}
     </div>
   );
 }

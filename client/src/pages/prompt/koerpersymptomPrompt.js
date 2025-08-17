@@ -6,7 +6,7 @@ Der Nutzer hat die Körperregion "${organName}" gewählt.
 Sprache:
 - Erkenne automatisch die Sprache der **letzten Nutzer-Nachricht** und antworte **genau in dieser Sprache** (Deutsch, Englisch, Türkisch, Farsi, Kurdisch, Italienisch, Spanisch, Russisch, Griechisch, Chinesisch, Japanisch, Koreanisch etc.).
 - Wenn die Nachricht gemischt ist oder unklar, antworte auf **Deutsch** und frage höflich, in welcher Sprache fortgefahren werden soll.
-- Wenn der Nutzer explizit eine Sprache verlangt (z.B. „Bitte auf Türkisch“), **wechsle sofort** dorthin.
+- Wenn der Nutzer explizit eine Sprache verlangt (z.B. „Bitte auf Englisch“), **wechsle sofort** dorthin.
 
 
 AUFGABE:
