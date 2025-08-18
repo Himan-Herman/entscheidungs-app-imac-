@@ -2,6 +2,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
+import { buildKoerpersymptomPrompt } from '../../client/src/pages/prompt/koerpersymptomPrompt.js';
 
 dotenv.config();
 const router = express.Router();
@@ -25,62 +26,53 @@ async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs =
 }
 
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
+  const { verlauf, organName } = req.body;
+
+  if (!Array.isArray(verlauf)) {
+    return res.status(400).json({ antwort: "❌ Gesprächsverlauf fehlt oder ist ungültig." });
+  }
+
   try {
-    const { verlauf, threadId } = req.body;
+    const currentThreadId = req.body.threadId || (await openai.beta.threads.create()).id;
 
-    if (!Array.isArray(verlauf) || verlauf.length === 0) {
-      return res.status(400).json({ fehler: 'Ungültiger oder leerer Verlauf.' });
+    // Verlauf in den Thread schreiben
+    for (const msg of verlauf) {
+      await openai.beta.threads.messages.create(currentThreadId, {
+        role: msg.role,
+        content: msg.content
+      });
     }
 
-    // 1) Thread holen oder neu erstellen
-    let currentThreadId = null;
-    if (threadId && typeof threadId === "string" && threadId.trim() !== "" && threadId !== "undefined" && threadId !== "null") {
-      currentThreadId = threadId;
-    } else {
-      const t = await openai.beta.threads.create();
-      currentThreadId = t.id;
-    }
+    // User-Turns zählen
+    const userTurns = verlauf.filter(v => v.role === "user").length;
 
-    // 2) Letzte User-Nachricht holen
-    const last = verlauf[verlauf.length - 1];
-    const content = typeof last?.content === 'string' ? last.content.trim() : '';
-    if (!last || last.role !== 'user' || !content) {
-      return res.status(400).json({ fehler: 'Letzte Nachricht muss vom Nutzer stammen.' });
-    }
+    // Prompt für diese Region bauen
+    const systemPrompt = buildKoerpersymptomPrompt({ organName, userTurns });
 
-    await openai.beta.threads.messages.create(currentThreadId, {
-      role: 'user',
-      content
-    });
-
-    // 3) Run starten
+    // 🟢 Run starten mit Prompt als Instructions
     const run = await openai.beta.threads.runs.create(currentThreadId, {
-      assistant_id: ASSISTANT_ID
+      assistant_id: ASSISTANT_ID,
+      instructions: systemPrompt
     });
 
-    // 4) Auf Fertigstellung warten (jetzt mit richtiger Parameter-Reihenfolge!)
-    
-await waitForRunCompletion(run.thread_id, run.id, 30000, 600);
+    // Warten bis fertig
+    await waitForRunCompletion(run.thread_id, run.id, 30000, 600);
 
+    // Antwort holen
+    const msgs = await openai.beta.threads.messages.list(currentThreadId, { limit: 10 });
+    const assistantMsg = msgs.data.find(m => m.role === "assistant");
 
-    // 5) Letzte Assistant-Antwort holen
-    const msgs = await openai.beta.threads.messages.list(currentThreadId, { limit: 5 });
-    const assistantMsg = msgs.data.find(m => m.role === 'assistant');
+    res.json({
+      threadId: currentThreadId,
+      antwort: assistantMsg ? assistantMsg.content[0].text.value : "⚠️ Keine Antwort erhalten."
+    });
 
-    let antwort = '…';
-    if (assistantMsg && Array.isArray(assistantMsg.content)) {
-      const textParts = assistantMsg.content
-        .filter(p => p.type === 'text' && p.text?.value)
-        .map(p => p.text.value.trim());
-      if (textParts.length) antwort = textParts.join('\n\n');
-    }
-
-    return res.json({ antwort, threadId: currentThreadId });
-  } catch (err) {
-    console.error('symptom-thread error:', err);
-    return res.status(500).json({ fehler: 'Serverfehler in /api/symptom-thread.' });
+  } catch (e) {
+    console.error("❌ Fehler:", e);
+    res.status(500).json({ fehler: e.message });
   }
 });
+
 
 export default router;
