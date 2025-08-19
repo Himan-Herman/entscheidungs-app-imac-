@@ -4,6 +4,8 @@ import "../styles/BildUpload.css";
 // LocalStorage Keys
 const LS_VERLAUF_KEY = "bildChatVerlauf";
 const LS_BILD_KEY = "letztesBild";
+const LS_THREAD_KEY = "bildThreadId"; 
+
 
 // ✅ Bild verkleinern (max 512x512 px) und in Base64 umwandeln
 async function resizeImageToBase64(file, maxSize = 512) {
@@ -134,10 +136,13 @@ export default function BildUpload() {
         body: JSON.stringify({
           prompt: beschreibung,
           base64Bild: base64Bild,
+          threadId: localStorage.getItem(LS_THREAD_KEY) || null,
         }),
       });
 
       const data = await response.json();
+      if (data.threadId) localStorage.setItem(LS_THREAD_KEY, data.threadId);
+
 
       const antwortText = data.antwort || data.fehler || "Keine Antwort erhalten.";
       setAntwort(antwortText);
