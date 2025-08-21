@@ -12,12 +12,17 @@ import KoerperregionStart from './pages/KoerperregionStart';
 import SymptomEingabe from './pages/SymptomEingabe';
 import KoerperSymptomChat from './pages/KoerperSymptomChat';
 import SymptomThread from "./pages/SymptomThread";
-
+import Impressum from "./pages/Impressum";
+import Datenschutz from "./pages/Datenschutz";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   //<React.StrictMode>
     <Router>
+      <Header />
+
      <Routes>
   <Route path="/" element={<Intro />} />  // Logo NUR auf dieser Route
   <Route path="/startseite" element={<Startseite />} />
@@ -27,14 +32,15 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <Route path="/koerperregionen" element={<KoerperVorderseite />} />
   <Route path="/rueckseite" element={<KoerperRueckseite />} />
   <Route path="/textsymptom" element={<SymptomEingabe />} />
-  <Route path="/textsymptom" element={<SymptomEingabe />} />
   <Route path="/koerpersymptom" element={<KoerperSymptomChat />} />
-  <Route path="/symptom" element={<SymptomChat />} />
 <Route path="/symptom-thread" element={<SymptomThread />} />
+<Route path="/impressum" element={<Impressum />} />
+<Route path="/datenschutz" element={<Datenschutz />} />
+
 
 
 </Routes>
-
+<Footer />
     </Router>
-  //</React.StrictMode>
+  
 );

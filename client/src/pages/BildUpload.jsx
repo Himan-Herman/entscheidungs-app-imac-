@@ -174,19 +174,21 @@ export default function BildUpload() {
 
   return (
     <div className="bildupload-container">
-      <h2>Bild hochladen & analysieren</h2>
-
-      {/* Neu starten Button */}
-      <button onClick={handleNeuStart} className="neu-start-btn">
-        🔄 Neu starten
-        
-      </button>
-<button onClick={clearVerlauf} className="secondary-btn"> Verlauf löschen</button>
-      {/* Bild-Upload & Vorschau */}
-      <div className="bild-upload-bereich">
-        <input type="file" accept="image/*" onChange={handleBildAuswahl} />
-        {bild && <img src={bild} alt="Vorschau" className="bild-vorschau-klein" />}
-      </div>
+    <h2>Bild hochladen & analysieren</h2>
+  
+    {/* Neu starten Button */}
+    <button onClick={handleNeuStart} className="neu-start-btn">
+      🔄 Neu starten
+    </button>
+    <button onClick={clearVerlauf} className="secondary-btn">
+    🧹Verlauf löschen
+    </button>
+  
+    <div className="bild-upload-bereich">
+      <input type="file" accept="image/*" onChange={handleBildAuswahl} />
+      {bild && <img src={bild} alt="Vorschau" className="bild-vorschau-klein" />}
+    </div>
+  
 
       {/* Verlauf */}
       <div className="chatverlauf" style={{ maxHeight: 300, overflowY: "auto" }}>

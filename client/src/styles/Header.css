@@ -1,0 +1,180 @@
+
+:root{
+    --ms-bg: #ffffff;         /* Header-Hintergrund (nicht transparent) */
+    --ms-fg: #111;            /* Textfarbe */
+    --ms-accent: #2b6cb0;     /* Akzent (Links aktiv/Hover) */
+    --ms-border: #e5e7eb;     /* Linie unten */
+    --focus: #0ea5e9;         /* Fokus-Ring */
+  }
+  
+  /* Skip-Link */
+  .skip-link{
+    position:absolute;
+    left:-999px;
+    top:auto;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+  }
+  .skip-link:focus{
+    left:8px;
+    top:8px;
+    width:auto;
+    height:auto;
+    background:#fff;
+    color:#000;
+    padding:8px 12px;
+    border:2px solid var(--focus);
+    border-radius:8px;
+    z-index:10000;
+  }
+  
+  /* Header-Container */
+  .ms-header{
+    background: var(--ms-bg);
+    color: var(--ms-fg);
+    border-bottom: 1px solid var(--ms-border);
+    position: sticky;
+    top: 0;
+    box-shadow: 0 1px 0 rgba(0,0,0,.06);
+     border-bottom: none;
+    z-index: 1000;
+  }
+  .ms-header__inner{
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0px 0px;
+  }
+  
+  /* Logo links – drehbar bei Hover/Focus */
+  .ms-logo{
+    display: flex;
+    align-items: center;
+   
+    background: none;
+    border: none;
+    padding: 8px 0px;
+    cursor: pointer;
+  }
+  .ms-logo img{
+    width: 60px;
+    height: 60px;
+    display: block;
+    border-radius: 20px;
+    will-change: transform;
+  }
+  .ms-logo__text{
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    font-size: 1.05rem;
+    color: var(--ms-fg);
+  }
+  
+  /* Dreh-Animation – respektiert prefers-reduced-motion */
+  @media (prefers-reduced-motion: no-preference){
+    .ms-logo:hover img,
+    .ms-logo:focus img{
+      transform: rotate(360deg);
+      transition: transform 2s ease;
+    }
+  }
+  
+  /* Hamburger-Button (nur mobil sichtbar) */
+  .ms-nav-toggle{
+    margin-left: auto;
+    background: none;
+    border: 2px solid transparent;
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .ms-nav-toggle:focus{
+    outline: none;
+    border-color: var(--focus);
+    border-radius: 10px;
+  }
+  
+  /* Navigation */
+  .ms-nav{
+    margin-left: auto;
+  }
+  .ms-nav ul{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .ms-divider{
+    width: 1px;
+    height: 20px;
+    background: var(--ms-border);
+  }
+  
+  /* Link */
+  
+
+  .ms-link-home {
+    display: flex;
+    align-items: center;   /* zentriert Text vertikal */
+    padding: 0px 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--ms-fg);
+    margin-top: 40px;
+    
+  }
+  
+  .ms-link-home:hover,
+  .ms-link-home:focus{
+    background: #f5f7fb;
+    outline: none;
+  }
+  .ms-link-home.active{  
+    background:#e5f0ff;         
+    color: var(--ms-accent);
+    font-weight: 600;
+  }
+  
+  /* Responsiv: unter 860px wird Menü einklappbar */
+  @media (max-width: 860px){
+    .ms-nav-toggle{ display: inline-block; }
+    .ms-nav{
+      position: absolute;
+      right: 16px;
+      top: 58px;
+      background: var(--ms-bg);
+      border: 1px solid var(--ms-border);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      padding: 8px;
+      display: none;
+    }
+    .ms-nav.is-open{ display: block; }
+    .ms-nav ul{
+      flex-direction: column;
+      align-items: stretch;
+      gap: 2px;
+      min-width: 220px;
+    }
+    .ms-divider{ display: none; }
+  }
+  
+  /* Desktop: Hamburger ausblenden */
+  @media (min-width: 861px){
+    .ms-nav-toggle{ display: none; }
+  }
+  
+  /* Visually hidden utility */
+  .visually-hidden{
+    position:absolute !important;
+    height:1px; width:1px;
+    overflow:hidden; clip:rect(1px,1px,1px,1px);
+    white-space:nowrap;
+  }
+  

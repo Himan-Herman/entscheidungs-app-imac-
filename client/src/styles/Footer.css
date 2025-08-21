@@ -1,0 +1,13 @@
+/* Footer.css */
+.ms-footer-link {
+    margin: 0 10px;
+    text-decoration: none;   /* kein Unterstrich */
+    color: #0b64d7;             /* Standardfarbe */
+    transition: color 0.3s ease;
+  }
+  
+  .ms-footer-link:hover,
+  .ms-footer-link:focus {
+    color: #af05d1;          /* Farbe ändern bei Hover/Focus */
+  }
+  

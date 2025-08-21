@@ -82,3 +82,8 @@
   border-color: #3498db;
 }
 
+.neu-start-btn {
+  margin-right: 50px; /* Abstand nach rechts für den ersten Button */
+  /* Weitere Stile für den Button */
+}
+
