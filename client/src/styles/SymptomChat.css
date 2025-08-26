@@ -208,12 +208,30 @@
  
   border-radius: 100px;      
 
-
-
-  font-size: 1px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
  
 }
+
+
+
+.reset-btn {
+  padding: 6px 12px;
+  margin: 30px;
+  margin-right: 1px;
+  border: 2px solid #ccc;
+  border-radius: 50px;
+  background: #f3f3f3;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.reset-btn:hover {
+  background: #ee8e3f;   /* rot = Warnung */
+  color: white;
+  border-color: #0028c69a;
+}
+

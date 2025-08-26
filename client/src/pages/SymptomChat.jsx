@@ -128,9 +128,11 @@ export default function SymptomChat() {
 
 
   return (
-    <div className="symptom-chat-container">
-      <h2>Symptom beschreiben</h2>
-      <button className="reset-btn" onClick={resetChat}>🔄 Neustart</button>
+    <div className="chat-header">
+    <h2>Symptom beschreiben</h2>
+    <button className="reset-btn" onClick={resetChat}>↻ Neues Gespräch</button>
+
+  
   
       <div className="chatverlauf">
         {verlauf.map((nachricht, index) => (
