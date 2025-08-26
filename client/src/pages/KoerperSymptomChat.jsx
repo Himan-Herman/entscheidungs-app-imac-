@@ -180,7 +180,7 @@ export default function KoerperSymptomChat() {
       <div className="chat-header">
         <h2>Körpersymptom beschreiben</h2>
         <button className="reset-btn" onClick={neustart} title="Chat & Thread löschen und neu starten">
-          🔄 Neustart
+          🔄 Neues Gespräch
         </button>
       </div>
 
@@ -217,11 +217,11 @@ export default function KoerperSymptomChat() {
       {/* Optional: Thread-ID anzeigen */}
       {threadId ? (
         <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.7 }}>
-          Thread-ID: <code>{threadId}</code>
+         
         </div>
       ) : (
         <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.6 }}>
-          Noch kein Thread erstellt
+          
         </div>
       )}
     </div>
