@@ -159,7 +159,7 @@ export default function BildUpload() {
   };
 
   // 🔁 Neu starten – Verlauf & Bild löschen
-  const handleNeuStart = () => {
+  const resetChat = () => {
     setVerlauf([]);
     setBild(null);
     setBase64Bild("");
@@ -177,9 +177,7 @@ export default function BildUpload() {
     <h2>Bild hochladen & analysieren</h2>
   
     {/* Neu starten Button */}
-    <button onClick={handleNeuStart} className="neu-start-btn">
-      🔄 Neu starten
-    </button>
+    <button className="reset-btn" onClick={resetChat}>↻ Neues Gespräch</button>
     <button onClick={clearVerlauf} className="secondary-btn">
     🧹Verlauf löschen
     </button>
