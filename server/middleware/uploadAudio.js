@@ -10,8 +10,8 @@ const allowedTypes = [
   "audio/x-wav",
   "audio/m4a",
   "audio/mp4",
-  "audio/mpeg",   // mp3
-  "audio/ogg",    // ogg/opus
+  "audio/mpeg", 
+  "audio/ogg",   
 ];
 
 function fileFilter(req, file, cb) {

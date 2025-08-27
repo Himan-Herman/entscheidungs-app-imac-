@@ -26,7 +26,7 @@ export default function Startseite() {
   style={{ cursor: "pointer" }}
 >
   <h2>Symptom beschreiben</h2>
-  <p>Klicke hier, um dein Symptom einzugeben und von der KI analysieren zu lassen.</p>
+  <p>Klicke hier, um dein Symptom einzugeben und  analysieren zu lassen.</p>
 </div>
 
 

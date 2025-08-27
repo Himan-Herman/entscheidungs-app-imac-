@@ -9,9 +9,9 @@ import Startseite from './pages/Startseite';
 import BildUpload from './pages/BildUpload';
 import SymptomChat from './pages/SymptomChat';
 import KoerperregionStart from './pages/KoerperregionStart';
-import SymptomEingabe from './pages/SymptomEingabe';
+//import SymptomEingabe from './pages/SymptomEingabe';
 import KoerperSymptomChat from './pages/KoerperSymptomChat';
-import SymptomThread from "./pages/SymptomThread";
+//import SymptomThread from "./pages/SymptomThread";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import Footer from "./components/Footer";
@@ -31,9 +31,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <Route path="/region-start" element={<KoerperregionStart />} />
   <Route path="/koerperregionen" element={<KoerperVorderseite />} />
   <Route path="/rueckseite" element={<KoerperRueckseite />} />
-  <Route path="/textsymptom" element={<SymptomEingabe />} />
+  
   <Route path="/koerpersymptom" element={<KoerperSymptomChat />} />
-<Route path="/symptom-thread" element={<SymptomThread />} />
+
 <Route path="/impressum" element={<Impressum />} />
 <Route path="/datenschutz" element={<Datenschutz />} />
 

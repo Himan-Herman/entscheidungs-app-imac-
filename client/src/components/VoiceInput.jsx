@@ -4,7 +4,7 @@ import StopIcon from "@mui/icons-material/Stop";
 
 export default function VoiceInput({ onTranscribed }) {
   const [isRecording, setIsRecording] = useState(false);
-  const [status, setStatus] = useState("");
+  const [, setStatus] = useState("");
   const [, setAudioURL] = useState(null);
 
   const mediaRecorderRef = useRef(null);

@@ -1,13 +1,13 @@
 // src/KoerperRueckseite.jsx
 
 import React from "react";
-import { useNavigate, useLocation} from "react-router-dom";
+import { useNavigate} from "react-router-dom";
 import rueckenBild from "../assets/img/Koerper_Rueckseite.png";
 
 
 export default function KoerperRueckseite() {
   const navigate = useNavigate();
-  const location = useLocation();
+  
   const openChat = (organId) => {
     navigate(`/koerpersymptom?organ=${organId}&seite=rueckseite`, {
       state: { from: "/koerperkarte/rueckseite" },

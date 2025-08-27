@@ -272,6 +272,7 @@ const handleVoice = (text) => {
     letztesBild.current = base64;
     try {
       localStorage.setItem(LS_BILD_KEY, base64);
+      localStorage.removeItem(LS_THREAD_KEY);
     } catch (err) {
       console.warn("[BildUpload] Konnte Bild nicht speichern:", err);
     }
@@ -289,14 +290,17 @@ const handleVoice = (text) => {
 
     setLadezustand(true);
     try {
+      const existingThreadId = localStorage.getItem(LS_THREAD_KEY) || null;
+   const body = {
+     prompt: beschreibung,
+     base64Bild: base64Bild
+   };
+   if (existingThreadId) body.threadId = existingThreadId;
+
       const response = await fetch("/api/symptom", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: beschreibung,
-          base64Bild: base64Bild,
-          threadId: localStorage.getItem(LS_THREAD_KEY) || null,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
@@ -325,6 +329,7 @@ const handleVoice = (text) => {
     try {
       localStorage.removeItem(LS_VERLAUF_KEY);
       localStorage.removeItem(LS_BILD_KEY);
+      localStorage.removeItem(LS_THREAD_KEY);
     } catch (e) {
       console.warn("[BildUpload] Konnte LocalStorage nicht lesen:", e);
     }
