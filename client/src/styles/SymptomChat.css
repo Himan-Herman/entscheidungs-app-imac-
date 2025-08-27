@@ -221,9 +221,10 @@
   padding: 6px 12px;
   margin: 30px;
   margin-right: 1px;
-  border: 2px solid #ccc;
+  border: 2px solid #f20202;
   border-radius: 50px;
-  background: #f3f3f3;
+  background: #ee8e3f;
+  color: white;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;

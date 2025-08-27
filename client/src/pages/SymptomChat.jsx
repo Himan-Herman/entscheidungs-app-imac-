@@ -17,7 +17,7 @@ export default function SymptomChat() {
   const organ = searchParams.get("organ");
 
   const chatEndRef = useRef(null);
-  const MAX_CHARS = 200;
+  const MAX_CHARS = 150;
   const autoResize = (el) => {
     el.style.height = "auto";
     el.style.height = Math.min(el.scrollHeight, 160) + "px"; // bis ~6 Zeilen

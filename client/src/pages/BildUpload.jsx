@@ -1,12 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/BildUpload.css";
 
-// LocalStorage Keys
+import VoiceInput from "../components/VoiceInput.jsx";
+import { FaPaperPlane } from "react-icons/fa";
+
+
+
 const LS_VERLAUF_KEY = "bildChatVerlauf";
 const LS_BILD_KEY = "letztesBild";
 const LS_THREAD_KEY = "bildThreadId";
 
-// ✅ Bild verkleinern (max 512px) und in Base64 umwandeln
+
 async function resizeImageToBase64(file, maxSize = 512) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -47,25 +51,54 @@ async function resizeImageToBase64(file, maxSize = 512) {
 }
 
 export default function BildUpload() {
-  const [bild, setBild] = useState(null);          // Vorschau (ObjectURL oder Data-URL)
+  const [bild, setBild] = useState(null);         
   const [beschreibung, setBeschreibung] = useState("");
-  const [base64Bild, setBase64Bild] = useState(""); // fürs Backend
+  const [base64Bild, setBase64Bild] = useState("");
   const [, setAntwort] = useState("");
   const [ladezustand, setLadezustand] = useState(false);
   const [verlauf, setVerlauf] = useState([]);
 
-  // Datei-Inputs (Galerie/Kamera mobil)
+  
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  // Chat/Scroll
+  
   const letztesBild = useRef("");
   const chatEndRef = useRef(null);
 
-  // Webcam (Desktop)
+  
   const [showCam, setShowCam] = useState(false);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+  const MIN_TXTAREA_H = 44
+  const textareaRef = useRef(null);
+
+
+  const autoResize = (el) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.max(el.scrollHeight, MIN_TXTAREA_H) + "px";
+  };
+
+
+  const MAX_CHARS = 150;
+  
+  
+  
+
+
+const [isRec, setIsRec] = useState(false);
+const recognitionRef = useRef(null);
+
+const handleVoice = (text) => {
+  
+  setBeschreibung(prev =>
+    (text ?? "").slice(0, MAX_CHARS)
+  );
+  
+  handleFrageSenden();
+};
+
 
   const clearVerlauf = () => {
     setVerlauf([]);
@@ -76,7 +109,7 @@ export default function BildUpload() {
     }
   };
 
-  // 🔄 LocalStorage beim Start laden
+  
   useEffect(() => {
     try {
       const gespeicherterVerlauf = localStorage.getItem(LS_VERLAUF_KEY);
@@ -84,7 +117,7 @@ export default function BildUpload() {
 
       if (gespeicherterVerlauf) setVerlauf(JSON.parse(gespeicherterVerlauf));
       if (gespeichertesBild) {
-        setBild(gespeichertesBild); // Data-URL direkt als Vorschau
+        setBild(gespeichertesBild); 
         setBase64Bild(gespeichertesBild);
         letztesBild.current = gespeichertesBild;
       }
@@ -93,7 +126,7 @@ export default function BildUpload() {
     }
   }, []);
 
-  // 📌 Verlauf in LocalStorage spiegeln
+  
   useEffect(() => {
     try {
       localStorage.setItem(LS_VERLAUF_KEY, JSON.stringify(verlauf));
@@ -102,30 +135,53 @@ export default function BildUpload() {
     }
   }, [verlauf]);
 
-  // ⬇️ Auto-Scroll ans Ende bei neuer Nachricht
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [verlauf]);
 
-  // ❌ Webcam-Stream bei Unmount stoppen
+
   useEffect(() => {
     return () => {
-      try {
-        streamRef.current?.getTracks()?.forEach((t) => t.stop());
-      } catch {}
+      streamRef.current?.getTracks()?.forEach(t => t.stop());
     };
   }, []);
+  
+  useEffect(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      recognitionRef.current = null;
+      return;
+    }
+    const rec = new SR();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = "de-DE"; 
+    rec.onresult = (e) => {
+      let finalText = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalText += e.results[i][0].transcript + " ";
+      }
+      if (finalText) {
+        
+        setBeschreibung(prev =>
+          (prev + (prev && !prev.endsWith(" ") ? " " : "") + finalText).slice(0, MAX_CHARS)
+        );
+      }
+    };
+    rec.onend = () => setIsRec(false);
+    recognitionRef.current = rec;
+  
+   
+  }, []);
+  
 
-  // ----- Webcam-Funktionen (Desktop) -----
+
   const startWebcam = async () => {
     try {
-      // ggf. alten Stream stoppen
-      try { streamRef.current?.getTracks()?.forEach(t => t.stop()); } catch {}
-  
-      // 1) Erstmal einfache Constraints (Desktop/Safari mögen das lieber)
+ 
       let constraints = { video: true };
   
-      // 2) Wenn Mobilgerät: Rückkamera wünschen (ohne "exact", sonst kann es fehlschlagen)
+     
       if (/Mobi|Android/i.test(navigator.userAgent)) {
         constraints = { video: { facingMode: "environment" } };
       }
@@ -133,22 +189,22 @@ export default function BildUpload() {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
   
-      // Overlay öffnen, damit das <video> sicher im DOM ist
+    
       setShowCam(true);
   
-      // Warten bis <video> im DOM ist
+ 
       requestAnimationFrame(async () => {
         const video = videoRef.current;
         if (!video) return;
   
         video.srcObject = stream;
-        // Safari/iOS brauchen das für Autoplay
+        
         video.muted = true;
         video.setAttribute("muted", "");
         video.playsInline = true;
         video.setAttribute("playsinline", "");
   
-        // Auf Metadaten warten, dann play()
+        
         video.onloadedmetadata = async () => {
           try {
             await video.play();
@@ -165,12 +221,11 @@ export default function BildUpload() {
   
 
   const stopWebcam = () => {
-    try {
-      streamRef.current?.getTracks()?.forEach((t) => t.stop());
-    } catch {}
+    streamRef.current?.getTracks()?.forEach((t) => t.stop());
     streamRef.current = null;
     setShowCam(false);
   };
+  
 
   const capturePhoto = () => {
     const video = videoRef.current;
@@ -190,18 +245,42 @@ export default function BildUpload() {
       0.9
     );
   };
-  // ---------------------------------------
+ 
+  const toggleRecording = () => {
+    const rec = recognitionRef.current;
+    if (!rec) {
+      alert("Spracherkennung wird von diesem Browser nicht unterstützt.");
+      return;
+    }
+  
+    try {
+      if (isRec) { 
+        rec.stop(); 
+        setIsRec(false); 
+      } else { 
+        rec.start(); 
+        setIsRec(true); 
+      }
+    } catch (err) {
+      console.error("Speech start/stop:", err);
+    }
+  }; 
 
-  // Datei gewählt (Galerie / Kamera / Webcam-Snapshot)
+  // ---------------------------------------
+  const handleBeschreibungChange = (e) => {
+    const value = e.target.value.slice(0, MAX_CHARS);
+    setBeschreibung(value);
+  };
+  
   const handleBildAuswahl = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Vorschau per ObjectURL
+    
     const objectURL = URL.createObjectURL(file);
     setBild(objectURL);
 
-    // In Base64 verkleinern + persistieren
+    
     const base64 = await resizeImageToBase64(file);
     setBase64Bild(base64);
     letztesBild.current = base64;
@@ -211,7 +290,7 @@ export default function BildUpload() {
       console.warn("[BildUpload] Konnte Bild nicht speichern:", err);
     }
 
-    // ObjectURL später freigeben
+    
     return () => URL.revokeObjectURL(objectURL);
   };
 
@@ -251,7 +330,7 @@ export default function BildUpload() {
     }
   };
 
-  // 🔁 Neu starten – Verlauf & Bild löschen
+
   const resetChat = () => {
     setVerlauf([]);
     setBild(null);
@@ -264,22 +343,29 @@ export default function BildUpload() {
       console.warn("[BildUpload] Konnte LocalStorage nicht lesen:", e);
     }
   };
+useEffect(() => {
+  
+  autoResize(textareaRef.current);
 
+  
+  if (document.activeElement === textareaRef.current) {
+    textareaRef.current.blur();
+  }
+}, []);
   return (
     <div className="bildupload-container">
       <h2>Bild hochladen & analysieren</h2>
 
-      {/* Aktionen */}
+     
       <button className="btn btn--sm" onClick={resetChat}>
   <span className="icon">↻</span> Neues Gespräch
 </button>
       <button className="btn btn--sm btn--danger" onClick={clearVerlauf}>
   <span className="icon">🧹</span> Verlauf löschen
 </button>
-      {/* Upload-Bereich */}
-      {/* Sidebar rechts mit Upload-Buttons */}
+ 
 <div className="upload-sidebar">
-  {/* Versteckte Inputs */}
+  
   <input
     ref={galleryInputRef}
     type="file"
@@ -296,7 +382,7 @@ export default function BildUpload() {
     style={{ display: "none" }}
   />
 
-  {/* Buttons */}
+ 
   <button
     type="button"
     className="btn btn--primary-2"
@@ -325,11 +411,11 @@ export default function BildUpload() {
 
 
 
-        {/* Vorschau */}
+    
         {bild && <img src={bild} alt="Vorschau" className="bild-vorschau-klein" />}
       </div>
 
-      {/* Verlauf */}
+   
       <div className="chatverlauf" style={{ maxHeight: 300, overflowY: "auto" }}>
         {verlauf.map((eintrag, index) => (
           <div key={index}>
@@ -347,25 +433,50 @@ export default function BildUpload() {
 
       {ladezustand && <p>⏳ Analyse läuft...</p>}
 
-      {/* Eingabezeile */}
-      {base64Bild && (
-        <div className="eingabe-bereich">
-          <textarea
-            placeholder="Beschreibe das Bild oder stelle eine Frage dazu..."
-            value={beschreibung}
-            onChange={(e) => setBeschreibung(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleFrageSenden();
-              }
-            }}
-          />
-          <button onClick={handleFrageSenden}>Senden</button>
-        </div>
-      )}
+      
+{base64Bild && (
+  <div className="eingabe-bereich">
+    {/* Textfeld */}
+    <textarea
+  ref={textareaRef}
+  placeholder="Beschreibe das Bild oder stelle eine Frage dazu ..."
+  value={beschreibung}
+  maxLength={MAX_CHARS}      
+  rows={1}
+  onChange={(e) => { handleBeschreibungChange(e); autoResize(e.target); }}
+  onInput={(e) => autoResize(e.target)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleFrageSenden();
+    }
+  }}
+  className="chat-textarea"
+/>
 
-      {/* Webcam-Overlay */}
+
+
+
+    
+    <div className="eingabe-actions">
+      <span className={`char-count ${beschreibung.length >= MAX_CHARS ? "limit" : ""}`}>
+        {beschreibung.length}/{MAX_CHARS}
+      </span>
+
+      
+      <div className="voice-wrap">
+        <VoiceInput onTranscribed={handleVoice} />
+      </div>
+
+      <button className="send-btn" onClick={handleFrageSenden} disabled={ladezustand}>
+        <FaPaperPlane />
+      </button>
+    </div>
+  </div>
+)}
+
+
+     
       {showCam && (
         <div
           style={{

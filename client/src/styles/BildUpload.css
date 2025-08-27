@@ -95,7 +95,7 @@
   gap: .5rem;
   padding: .6rem 1rem;
   border-radius: 9999px;            /* full pill */
-  border: 1.5px solid #ff00ae;      /* neutral border */
+  border: 2px solid #ff0000;      /* neutral border */
   background: #fd8657;              /* soft bg */
   color: #faf9f9;
   
@@ -105,6 +105,7 @@
   transition: background .15s ease, border-color .15s ease, transform .05s ease;
   cursor: pointer;
   user-select: none;
+  margin: 10px;
 }
 /*.btn:hover { background: #ee8e3f;  border-color: #c009c6;  color: #f7f5f5; } */
 .btn:active { transform: translateY(1px); }
@@ -149,3 +150,123 @@ margin-left: 10px;
   color: #040404;
 }
 .btn--primary-2:hover { background: #d1d9f1; }
+/* Eingabezeile */
+.eingabe-bereich {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+}
+
+.eingabe-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.eingabe-wrapper textarea {
+  width: 100%;
+  min-height: 56px;
+  padding: .75rem 6.2rem .75rem 1rem; /* rechts Platz für Counter + Mic */
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+/* Zeichenzähler rechts unten im Feld */
+.char-counter {
+  position: absolute;
+  right: 3.4rem;
+  bottom: .5rem;
+  font-size: .85rem;
+  color: #6b7280;
+  user-select: none;
+}
+
+/* Mikro-Button im Feld */
+.mic-btn {
+  position: absolute;
+  right: .6rem;
+  bottom: .4rem;
+  height: 2.2rem;
+  min-width: 2.2rem;
+  padding: 0 .6rem;
+  border-radius: 9999px;
+  border: 1.5px solid #d1d5db;
+  background: #f7f7f8;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.mic-btn:hover { background: #eeeef1; }
+.mic-btn.recording {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* Senden-Button optisch passend */
+.btn-send {
+  padding: .75rem 1rem;
+  border-radius: 12px;
+  border: 1.5px solid #d1d5db;
+  background: #f7f7f8;
+  font-weight: 600;
+}
+.btn-send:hover { background: #eeeef1; }
+
+
+.chat-textarea {
+  min-height: 44px;           /* kompakte Startgröße wie im 2. Bild */
+  overflow: hidden;           /* keine Scrollbar */
+  resize: none;               /* kein manuelles Ziehen */
+  padding: .75rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  outline: none;              /* WebKit-Ring entfernen */
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  background: #fff;
+}
+
+/* dezenter Fokus, aber nicht so „knallig“ blau */
+.chat-textarea:focus-visible {
+  border-color: #93c5fd;                          /* soft blue */
+  box-shadow: 0 0 0 3px rgba(147,197,253,.35);    /* sanfter Ring */
+  outline: none;
+}
+
+
+
+.char-count {
+  font-size: 0.9rem;
+  color: #6b7280; /* grau normal */
+}
+
+.char-count.limit {
+  color: #dc2626; /* rot, sobald Limit erreicht */
+  font-weight: 600;
+}
+.frage-block,
+.antwort-block {
+  margin-bottom: 12px;   /* Abstand zwischen Frage & Antwort */
+  padding: 10px 14px;
+  border-radius: 10px;
+  max-width: 100%;
+}
+
+.frage-block {
+  background: #dbeafe;   /* hellblau */
+}
+
+.antwort-block {
+  background: #f3f4f6;   /* hellgrau */
+}
+
+.chat-textarea::placeholder {
+  color: #9ca3af;        /* Grau */
+  font-style: italic;    /* Kursiv */
+  font-size: 0.9rem;     /* Kleiner als Text */
+  opacity: 1;            /* Standard ist 0.6 → damit es klar lesbar ist */
+}
