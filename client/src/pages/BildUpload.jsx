@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect,useLayoutEffect } from "react";
 import "../styles/BildUpload.css";
 
 import VoiceInput from "../components/VoiceInput.jsx";
@@ -79,6 +79,9 @@ export default function BildUpload() {
     el.style.height = "auto";
     el.style.height = Math.max(el.scrollHeight, MIN_TXTAREA_H) + "px";
   };
+  useLayoutEffect(() => {
+    autoResize(textareaRef.current);
+  }, [beschreibung]);
 
 
   const MAX_CHARS = 150;
@@ -172,7 +175,7 @@ const handleVoice = (text) => {
     rec.onend = () => setIsRec(false);
     recognitionRef.current = rec;
   
-   
+    requestAnimationFrame(() => autoResize(textareaRef.current));
   }, []);
   
 
