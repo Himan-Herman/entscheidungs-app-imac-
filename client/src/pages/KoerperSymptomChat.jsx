@@ -59,7 +59,7 @@ useEffect(() => {
     sessionStorage.setItem("koerperSeite", seite);
   }
 
-}, []);
+}, [seite, location]);
 
 // Immer wenn Chat geladen wird: History-Eintrag auf /region-start setzen
 useEffect(() => {
@@ -217,7 +217,9 @@ useEffect(() => {
     try {
       localStorage.removeItem(LS_CHAT_KEY);
       localStorage.removeItem(LS_THREAD_KEY);
-    } catch {}
+    } catch (e) {
+      console.warn("[LS remove] failed:", e);
+    }
     if (lastIntroOrganRef?.current !== undefined) lastIntroOrganRef.current = null;
   
     // sauber halten
