@@ -33,24 +33,24 @@ Ziel ist eine KI-gestützte, barrierefreie Anwendung zur Symptomerfassung und ä
 
 # Geplante Erweiterungen
 
--  *Registrierungsseite**  
+-  *Registrierungsseite*  
   - Name, Vorname, Geburtsdatum (+ Hinweis bei <18 Jahre)  
   - Adresse, Hausarzt + weitere Ärzte, Kontaktdaten  
   - Profilbild & Abmelde-Button  
 
-- *Einstellungen/Profil**  
+- *Einstellungen/Profil*  
   - Arzt hinzufügen  
   - Kontaktinformationen ändern  
 
-- *Arzt-Benachrichtigung**  
+- *Arzt-Benachrichtigung*  
   - automatische Mitteilung bei kritischen Symptomen  
 
-- *UX/UI Verbesserungen**  
+- *UX/UI Verbesserungen*  
   - Emojis & Avatar-Feedback im Chat  
   - Placeholder & Barrierefreiheits-Optimierung  
   - Kamera-Direktzugriff beim Bildupload  
 
--  *Dokumentation**  
+-  *Dokumentation*  
   - Pflege README  
   - Praxissemester-Bericht (laufend)
 
