@@ -87,14 +87,15 @@ export default function BildUpload() {
   
 
 
-const [isRec, setIsRec] = useState(false);
+const [, setIsRec] = useState(false);
 const recognitionRef = useRef(null);
 
 const handleVoice = (text) => {
   
   setBeschreibung(prev =>
-    (text ?? "").slice(0, MAX_CHARS)
+    (prev + " " + (text ?? "")).slice(0, MAX_CHARS)
   );
+  
   
   handleFrageSenden();
 };
@@ -246,25 +247,7 @@ const handleVoice = (text) => {
     );
   };
  
-  const toggleRecording = () => {
-    const rec = recognitionRef.current;
-    if (!rec) {
-      alert("Spracherkennung wird von diesem Browser nicht unterstützt.");
-      return;
-    }
-  
-    try {
-      if (isRec) { 
-        rec.stop(); 
-        setIsRec(false); 
-      } else { 
-        rec.start(); 
-        setIsRec(true); 
-      }
-    } catch (err) {
-      console.error("Speech start/stop:", err);
-    }
-  }; 
+   
 
   // ---------------------------------------
   const handleBeschreibungChange = (e) => {
