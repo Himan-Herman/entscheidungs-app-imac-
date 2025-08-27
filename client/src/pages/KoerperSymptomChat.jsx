@@ -1,11 +1,19 @@
 // src/pages/KoerpersymptomChat.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import "../styles/KoerperSymptomChat.css";
+
+// neu: identisch zur Symptom-UI
+import VoiceInput from "../components/VoiceInput.jsx";
+import { FaPaperPlane } from "react-icons/fa";
 
 const THREAD_API = "/api/koerpersymptomthread";
 const LS_CHAT_KEY = "koerperChatVerlauf";
 const LS_THREAD_KEY = "koerperThreadId";
+
+// wie im Symptom-Bereich
+const MAX_CHARS = 150;
 
 export default function KoerperSymptomChat() {
   const [eingabe, setEingabe] = useState("");
@@ -19,7 +27,7 @@ export default function KoerperSymptomChat() {
     }
   });
 
-  // 🔹 Thread-ID für echte Threads
+  // Thread-ID
   const [threadId, setThreadId] = useState(() => {
     try {
       return localStorage.getItem(LS_THREAD_KEY) || "";
@@ -36,8 +44,52 @@ export default function KoerperSymptomChat() {
   const inputRef = useRef(null);
   const lastIntroOrganRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromReset = location.state?.fromReset === true;
+const seite = searchParams.get("seite") || sessionStorage.getItem("koerperSeite") || "vorderseite";
 
-  // Intro-Text bei Organwechsel (nur UI, nicht an KI senden)
+// Seite & letzte Karten-Route merken (falls vorhanden)
+useEffect(() => {
+  // if (seite) sessionStorage.setItem("koerperSeite", seite);
+  if (location.state?.from) {
+    sessionStorage.setItem("lastMapRoute", location.state.from);
+    
+  }
+  if (seite) {
+    sessionStorage.setItem("koerperSeite", seite);
+  }
+
+}, []);
+
+// Immer wenn Chat geladen wird: History-Eintrag auf /region-start setzen
+useEffect(() => {
+  window.history.replaceState({}, "", "/startseite");
+}, []);
+
+
+// Browser-Zurück abfangen und IMMER zu /startseite leiten
+useEffect(() => {
+  const handlePop = (e) => {
+    e.preventDefault();
+    navigate("/startseite", { replace: true });
+  };
+  window.addEventListener("popstate", handlePop);
+  return () => window.removeEventListener("popstate", handlePop);
+}, [navigate]);
+
+
+
+useEffect(() => {
+  if (fromReset) {
+    // Aufräumen – alte Merker löschen, damit nichts mehr „zieht“
+    sessionStorage.removeItem("koerperSeite");
+    sessionStorage.removeItem("lastMapRoute");
+    // den Reset-Status beim Verlassen automatisch vergessen:
+    history.replaceState({}, "");
+  }
+}, [fromReset]);
+
+  // Intro-Text bei Organwechsel (nur UI)
   useEffect(() => {
     if (!organ) return;
 
@@ -84,11 +136,12 @@ export default function KoerperSymptomChat() {
     }
   }, [verlauf]);
 
-  // Nachricht senden -> Threads
-  const frageSenden = async () => {
-    if (!eingabe.trim()) return;
+  // Frage senden -> Threads (optional Text von Voice)
+  const frageSenden = async (textOverride) => {
+    const aktuelleFrage = (textOverride ?? eingabe).trim();
+    if (!aktuelleFrage) return;
 
-    const userMsg = { role: "user", content: eingabe.trim() };
+    const userMsg = { role: "user", content: aktuelleFrage };
     const basisVerlauf = [...verlauf, userMsg];
 
     // ⏳ UI-Spinner
@@ -97,7 +150,6 @@ export default function KoerperSymptomChat() {
     setEingabe("");
 
     try {
-      // Beim allerersten Senden ohne Thread-ID einmal den Organ-Kontext mitgeben
       const payload = {
         threadId: threadId || null,
         verlauf:
@@ -115,7 +167,6 @@ export default function KoerperSymptomChat() {
         body: JSON.stringify(payload),
       });
 
-      // Falls der Server Fehler schickt, zeige ihn an
       if (!response.ok) {
         const text = await response.text();
         console.error("[Thread API] HTTP", response.status, text);
@@ -126,7 +177,6 @@ export default function KoerperSymptomChat() {
 
       const data = await response.json();
 
-      // 🧠 Thread-ID merken (vom Server zurückgegeben)
       if (data.threadId && data.threadId !== threadId) {
         setThreadId(data.threadId);
         try {
@@ -136,7 +186,6 @@ export default function KoerperSymptomChat() {
         }
       }
 
-      // ⏹️ Spinner entfernen, Antwort einsetzen
       const fertig = [...basisVerlauf, { role: "assistant", content: data.antwort || "…" }];
       setVerlauf(fertig);
     } catch (error) {
@@ -154,7 +203,13 @@ export default function KoerperSymptomChat() {
     }
   };
 
-  // Neustart: Chat + Thread zurücksetzen
+  // Voice-Callback (wie im Symptom-Bereich)
+  const handleVoice = (text) => {
+    setEingabe(text);
+    frageSenden(text);
+  };
+
+  // Neustart
   const neustart = () => {
     setVerlauf([]);
     setEingabe("");
@@ -162,19 +217,22 @@ export default function KoerperSymptomChat() {
     try {
       localStorage.removeItem(LS_CHAT_KEY);
       localStorage.removeItem(LS_THREAD_KEY);
-    } catch (e) {
-      console.warn("[LS remove] fehlgeschlagen:", e);
-    }
-    setSearchParams({});
+    } catch {}
     if (lastIntroOrganRef?.current !== undefined) lastIntroOrganRef.current = null;
+  
+    // sauber halten
+    setSearchParams({});
+    sessionStorage.removeItem("koerperSeite");
+    sessionStorage.removeItem("lastMapRoute");
+  
+    // immer zur Startseite der Regionen
+    navigate("/region-start", { replace: true, state: { fromReset: true } });
 
-    // Zur Körperkarte und zurück (History sauber)
-    navigate("/koerperregionen", { replace: true });
-    navigate("/koerpersymptom", { replace: false });
-
-    inputRef.current?.focus();
   };
+  
 
+  
+  
   return (
     <div className="symptomchat-container">
       <div className="chat-header">
@@ -202,27 +260,50 @@ export default function KoerperSymptomChat() {
         ))}
       </div>
 
+      {/* Eingabe wie im Symptom-Chat: Textarea + Counter + Voice + Send */}
       <div className="eingabe-bereich">
-        <input
+        <textarea
           ref={inputRef}
-          type="text"
           placeholder="Beschreibe dein Symptom hier..."
           value={eingabe}
+          maxLength={MAX_CHARS}
+          rows={1}
           onChange={(e) => setEingabe(e.target.value)}
           onKeyDown={handleKeyDown}
+          onInput={(e) => {
+            e.target.style.height = "auto";
+            e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
+          }}
+          className="chat-textarea"
+          aria-label="Symptomeingabe"
         />
-        <button onClick={frageSenden}>Frage senden</button>
+
+        <div className="eingabe-actions">
+          <span className={`char-count ${eingabe.length >= MAX_CHARS ? "limit" : ""}`}>
+            {eingabe.length}/{MAX_CHARS}
+          </span>
+
+          <div className="voice-wrap">
+            <VoiceInput onTranscribed={handleVoice} />
+          </div>
+
+          <button
+            type="button"
+            className="send-btn"
+            onClick={() => frageSenden()}
+            disabled={!eingabe.trim()}
+            title="Frage senden"
+          >
+            <FaPaperPlane />
+          </button>
+        </div>
       </div>
 
-      {/* Optional: Thread-ID anzeigen */}
+      {/* Thread-ID Anzeige optional leer */}
       {threadId ? (
-        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.7 }}>
-         
-        </div>
+        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.7 }} />
       ) : (
-        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.6 }}>
-          
-        </div>
+        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.6 }} />
       )}
     </div>
   );

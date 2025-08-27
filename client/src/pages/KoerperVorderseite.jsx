@@ -1,10 +1,17 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import koerperBild from '../assets/img/Koerper_Vorderseite.png';
 
 
 export default function Koerperkarte() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+const openChat = (organId) => {
+  navigate(`/koerpersymptom?organ=${organId}&seite=vorderseite`, {
+    state: { from: location.pathname },   // <- Merker für "von wo"
+  });
+};
 
   return (
     <div>
@@ -59,7 +66,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    onClick={() => navigate('/koerpersymptom?organ=Leber')}
+    onClick={() => openChat("Leber")}
     style={{ cursor: 'pointer' }}
   />
    <ellipse

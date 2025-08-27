@@ -1,11 +1,18 @@
 // src/KoerperRueckseite.jsx
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation} from "react-router-dom";
 import rueckenBild from "../assets/img/Koerper_Rueckseite.png";
+
 
 export default function KoerperRueckseite() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const openChat = (organId) => {
+    navigate(`/koerpersymptom?organ=${organId}&seite=rueckseite`, {
+      state: { from: "/koerperkarte/rueckseite" },
+    });
+  };
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -39,7 +46,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=nacken")}
+  onClick={() => openChat("nacken")}
   style={{ cursor: "pointer" }}
 />
 
