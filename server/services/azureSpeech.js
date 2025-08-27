@@ -2,13 +2,12 @@ import fetch from "node-fetch";
 import { bufferToWav } from "../utils/toWav.js";
 
 const KEY = process.env.AZURE_SPEECH_KEY;
-const REGION = process.env.AZURE_SPEECH_REGION; // z. B. germanywestcentral
-
+const REGION = process.env.AZURE_SPEECH_REGION; 
 export async function transcribeWithAzure(audioBuffer, mimeType, hintLang) {
   if (!KEY || !REGION) throw new Error("Azure Speech ENV Variablen fehlen");
   if (!audioBuffer?.length) throw new Error("Keine Audiodaten");
 
-  // ⚠️ Immer in WAV konvertieren → beseitigt Codec-Probleme
+
   const wavBuffer = await bufferToWav(
     audioBuffer,
     mimeType?.includes("ogg") ? ".ogg" : (mimeType?.includes("webm") ? ".webm" : ".bin")

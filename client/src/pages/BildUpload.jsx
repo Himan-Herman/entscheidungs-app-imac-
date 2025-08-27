@@ -507,7 +507,7 @@ useEffect(() => {
                 📸 Foto aufnehmen
               </button>
               <button className="secondary-btn" onClick={stopWebcam}>
-                ❌ Abbrechen
+                 Abbrechen
               </button>
             </div>
           </div>

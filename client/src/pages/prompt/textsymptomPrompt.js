@@ -1,4 +1,4 @@
-// server/prompts/symptomPrompt.js
+
 export const symptomPromptText = ` Du bist ein medizinischer KI-Assistent.
 
 Sprache:

@@ -1,4 +1,4 @@
-// src/pages/Startseite.jsx
+
 import React from "react";
 import "../styles/Startseite.css";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,7 @@ export default function Startseite() {
       <h1>Willkommen bei MedScout</h1>
 
       <div className="startseite-grid">
-        {/* 1 – Bild-Upload + Bild-Chat */}
+        
         
 <div className="bereich bild-chat" onClick={() => navigate("/bild")} style={{ cursor: "pointer" }}>
   <h2>Bild hochladen</h2>
@@ -19,7 +19,7 @@ export default function Startseite() {
 </div>
 
 
-        {/* 2 – Symptomeingabe + KI-Chat */}
+        
         <div
   className="bereich symptom-chat"
   onClick={() => navigate("/symptom")}
@@ -30,7 +30,7 @@ export default function Startseite() {
 </div>
 
 
-        {/* 3 – Körperregionen-Auswahl */}
+        
         <div
   className="bereich koerperregionen"
   onClick={() => navigate("/region-start")}

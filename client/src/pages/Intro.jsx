@@ -15,12 +15,12 @@ export default function Intro() {
     } else {
       sessionStorage.setItem("introShown", "true");
 
-      // Nach 4s beginnen wir zu verstecken (Start der Animation)
+      
       const fadeOutTimer = setTimeout(() => {
         setVerschwinden(true);
       }, 4000);
 
-      // Nach 5s navigieren wir zur Startseite (1s für fade-out)
+      
       const navigateTimer = setTimeout(() => {
         navigate("/startseite");
       }, 5000);

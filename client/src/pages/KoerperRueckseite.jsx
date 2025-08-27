@@ -1,5 +1,3 @@
-// src/KoerperRueckseite.jsx
-
 import React from "react";
 import { useNavigate} from "react-router-dom";
 import rueckenBild from "../assets/img/Koerper_Rueckseite.png";
@@ -25,7 +23,7 @@ export default function KoerperRueckseite() {
         preserveAspectRatio="xMidYMid meet"
         
       >
-        {/* Hintergrundbild */}
+        
         <image
           href={rueckenBild}
           x="0"
@@ -35,7 +33,7 @@ export default function KoerperRueckseite() {
           preserveAspectRatio="xMidYMid meet"
         />
 
-        {/* Klickbare Regionen */}
+        
         
        {/* 1 – Nacken (als Rechteck) */}
 <rect

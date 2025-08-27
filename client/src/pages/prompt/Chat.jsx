@@ -6,7 +6,7 @@ export default function Chat() {
   const [eingabe, setEingabe] = useState('');
   const [verlauf, setVerlauf] = useState([]);
   const [bild, setBild] = useState(null);
-  const [zeigeOptionen, setZeigeOptionen] = useState(false); // NEU für die Auswahl
+  const [zeigeOptionen, setZeigeOptionen] = useState(false); 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const gewaehltesOrgan = searchParams.get('organ');
@@ -84,7 +84,7 @@ export default function Chat() {
         <button onClick={frageSenden}>Frage senden</button>
       </div>
 
-      {/* Körperregionen-Auswahl */}
+    
       <div style={{ marginTop: '20px' }}>
         <button
           onClick={() => setZeigeOptionen(!zeigeOptionen)}
@@ -116,7 +116,7 @@ export default function Chat() {
         )}
       </div>
 
-      {/* Verlauf anzeigen */}
+      
       <div className="chat-verlauf" style={{ marginTop: '30px', textAlign: 'left', maxWidth: '600px', margin: '30px auto' }}>
         {verlauf.map((eintrag, index) => (
           <div

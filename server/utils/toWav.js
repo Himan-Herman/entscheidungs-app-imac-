@@ -15,9 +15,9 @@ export async function bufferToWav(buffer, inExt = ".webm") {
   await new Promise((resolve, reject) => {
     ffmpeg(inPath)
       .outputOptions([
-        "-acodec pcm_s16le", // PCM 16-bit
-        "-ac 1",             // 1 Kanal
-        "-ar 16000",         // 16 kHz (Azure ok)
+        "-acodec pcm_s16le", 
+        "-ac 1",            
+        "-ar 16000",        
       ])
       .on("end", resolve)
       .on("error", reject)
@@ -25,7 +25,7 @@ export async function bufferToWav(buffer, inExt = ".webm") {
   });
 
   const wav = fs.readFileSync(outPath);
-  // aufräumen (nicht kritisch, aber sauber)
+  
   try { fs.unlinkSync(inPath); fs.unlinkSync(outPath); fs.rmdirSync(tmpDir); } catch {}
   return wav;
 }

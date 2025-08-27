@@ -19,10 +19,10 @@ export async function frageOpenAI(verlauf) {
   });
   let text = response.choices[0].message.content;
 
-  // 🔽 Formatierung: Absätze
+  
   text = text.replace(/\n/g, '<br/>');
 
-  // 🔽 Fett-Markierung typischer medizinischer Empfehlungen
+  
   text = text.replace(/(Wasser trinken|viel trinken|Arzt aufsuchen|ärztlicher Rat|schonen Sie sich|Ruhe halten|Hausarzt|Kühlen|Wärme|entzündungshemmend|Beobachtung|Notaufnahme)/gi, '<strong>$1</strong>');
 
   return text;

@@ -1,4 +1,4 @@
-// NICHTS aus React importieren – reine JS-Funktion!
+
 export function buildKoerpersymptomPrompt({ organName, userTurns }) {
     return `Du bist ein vorsichtiger medizinischer Assistent.
 Der Nutzer hat die Körperregion "${organName}" gewählt.

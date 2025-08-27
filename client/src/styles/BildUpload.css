@@ -6,7 +6,7 @@
   font-family: sans-serif;
 }
 
-/* Vorschau-Bild */
+
 .bild-vorschau {
   margin-top: 1rem;
   max-width: 100%;
@@ -47,7 +47,7 @@
   margin-bottom: 6px;
 }
 
-/* Eingabezeile + Button */
+
 .eingabe-bereich {
   display: flex;
   gap: 1rem;
@@ -83,20 +83,19 @@
 }
 
 .neu-start-btn {
-  margin-right: 50px; /* Abstand nach rechts für den ersten Button */
-  /* Weitere Stile für den Button */
+  margin-right: 50px; 
+  
 }
 
 
-/* ==== Buttons – Pill-Style ==== */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: .5rem;
   padding: .6rem 1rem;
-  border-radius: 9999px;            /* full pill */
-  border: 2px solid #ff0000;      /* neutral border */
-  background: #fd8657;              /* soft bg */
+  border-radius: 9999px;           
+  border: 2px solid #ff0000;     
+  background: #fd8657;              
   color: #faf9f9;
   
   font-weight: 600;
@@ -111,7 +110,7 @@
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: .5; pointer-events: none; }
 
-/* Variante für „Delete/Warning“ (Verlauf löschen) */
+
 .btn--danger {
   border-color: #005e1b;
   background: #cdf6a4;
@@ -120,25 +119,25 @@ margin-left: 10px;
 }
 /*.btn--danger:hover { background: #99f3c0; border-color: #6506c5;  color: #080808; }*/
 
-/* kompaktere Größe (optional) */
+
 .btn--sm { padding: .5rem .9rem; font-weight: 600; }
 
-/* Icon-Feinschliff */
+
 .btn .icon { display: inline-block; font-size: 1.05em; transform: translateY(1px); }
 
-/* Fokus sichtbar & barrierefrei */
+
 .btn:focus-visible {
-  outline: 2px solid #6366f1;      /* violet focus ring */
+  outline: 2px solid #6366f1;      
   outline-offset: 2px;
   border-color: #a5b4fc;
 }
 
 
-/* Sidebar rechts */
+
 .upload-sidebar {
-  position: absolute;       /* fixiere am Container */
+  position: absolute;       
   right: 1rem;
-  top: 13.5rem;                /* etwas unter der Überschrift */
+  top: 13.5rem;                
   display: flex;
   flex-direction: column;
   gap: .6rem;
@@ -150,7 +149,7 @@ margin-left: 10px;
   color: #040404;
 }
 .btn--primary-2:hover { background: #d1d9f1; }
-/* Eingabezeile */
+
 .eingabe-bereich {
   display: flex;
   gap: .6rem;
@@ -165,14 +164,14 @@ margin-left: 10px;
 .eingabe-wrapper textarea {
   width: 100%;
   min-height: 56px;
-  padding: .75rem 6.2rem .75rem 1rem; /* rechts Platz für Counter + Mic */
+  padding: .75rem 6.2rem .75rem 1rem; 
   border: 1.5px solid #d1d5db;
   border-radius: 12px;
   font-size: 1rem;
   resize: vertical;
 }
 
-/* Zeichenzähler rechts unten im Feld */
+
 .char-counter {
   position: absolute;
   right: 3.4rem;
@@ -182,7 +181,7 @@ margin-left: 10px;
   user-select: none;
 }
 
-/* Mikro-Button im Feld */
+
 .mic-btn {
   position: absolute;
   right: .6rem;
@@ -205,7 +204,7 @@ margin-left: 10px;
   border-color: #fca5a5;
 }
 
-/* Senden-Button optisch passend */
+
 .btn-send {
   padding: .75rem 1rem;
   border-radius: 12px;
@@ -217,23 +216,23 @@ margin-left: 10px;
 
 
 .chat-textarea {
-  min-height: 44px;           /* kompakte Startgröße wie im 2. Bild */
-  overflow: hidden;           /* keine Scrollbar */
-  resize: none;               /* kein manuelles Ziehen */
+  min-height: 44px;        
+  overflow: hidden;           
+  resize: none;              
   padding: .75rem 1rem;
   font-size: 0.95rem;
   line-height: 1.4;
   border: 1.5px solid #d1d5db;
   border-radius: 12px;
-  outline: none;              /* WebKit-Ring entfernen */
+  outline: none;              
   transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
   background: #fff;
 }
 
-/* dezenter Fokus, aber nicht so „knallig“ blau */
+
 .chat-textarea:focus-visible {
-  border-color: #93c5fd;                          /* soft blue */
-  box-shadow: 0 0 0 3px rgba(147,197,253,.35);    /* sanfter Ring */
+  border-color: #93c5fd;                          
+  box-shadow: 0 0 0 3px rgba(147,197,253,.35);    
   outline: none;
 }
 
@@ -241,32 +240,32 @@ margin-left: 10px;
 
 .char-count {
   font-size: 0.9rem;
-  color: #6b7280; /* grau normal */
+  color: #6b7280;
 }
 
 .char-count.limit {
-  color: #dc2626; /* rot, sobald Limit erreicht */
+  color: #dc2626; 
   font-weight: 600;
 }
 .frage-block,
 .antwort-block {
-  margin-bottom: 12px;   /* Abstand zwischen Frage & Antwort */
+  margin-bottom: 12px;  
   padding: 10px 14px;
   border-radius: 10px;
   max-width: 100%;
 }
 
 .frage-block {
-  background: #dbeafe;   /* hellblau */
+  background: #dbeafe;   
 }
 
 .antwort-block {
-  background: #f3f4f6;   /* hellgrau */
+  background: #f3f4f6; 
 }
 
 .chat-textarea::placeholder {
-  color: #9ca3af;        /* Grau */
-  font-style: italic;    /* Kursiv */
-  font-size: 0.9rem;     /* Kleiner als Text */
-  opacity: 1;            /* Standard ist 0.6 → damit es klar lesbar ist */
+  color: #9ca3af;      
+  font-style: italic;    
+  font-size: 0.9rem;     
+  opacity: 1;           
 }

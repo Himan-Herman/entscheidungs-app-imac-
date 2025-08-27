@@ -1,4 +1,4 @@
-// server/utils/frageOpenAI.js
+
 
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
@@ -27,7 +27,7 @@ const systemMessage = {
 
   export async function frageOpenAI(verlauf) {
     const messages = [
-      systemMessage, // korrekt referenziert
+      systemMessage, 
       ...verlauf,
     ];
   

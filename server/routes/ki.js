@@ -29,8 +29,7 @@ router.post('/', async (req, res) => {
     };
 
     const messages = [systemPrompt, ...verlauf];
-
-    // ⚠️ Wenn base64Bild übergeben wird → als NEUE Nachricht im Format GPT-4o mit image_url
+ image_url
     if (base64Bild) {
       messages.push({
         role: "user",

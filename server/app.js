@@ -21,11 +21,11 @@ app.use(cors({
   origin: true,      
   credentials: true,
 }));
-// Body-Parser-Konfiguration (für große Base64-Dateien)
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-//  API-Routen registrierung
+
 app.use('/api/symptom', symptomRoute);
 //app.use('/api/textsymptom', textSymptomRoute);
 //app.use('/api/koerpersymptom', koerpersymptomRoute);

@@ -1,13 +1,13 @@
 
 :root{
-    --ms-bg: #ffffff;         /* Header-Hintergrund (nicht transparent) */
-    --ms-fg: #111;            /* Textfarbe */
-    --ms-accent: #2b6cb0;     /* Akzent (Links aktiv/Hover) */
-    --ms-border: #e5e7eb;     /* Linie unten */
-    --focus: #0ea5e9;         /* Fokus-Ring */
+    --ms-bg: #ffffff;         
+    --ms-fg: #111;            
+    --ms-accent: #2b6cb0;     
+    --ms-border: #e5e7eb;     
+    --focus: #0ea5e9;         
   }
   
-  /* Skip-Link */
+  
   .skip-link{
     position:absolute;
     left:-999px;
@@ -29,7 +29,7 @@
     z-index:10000;
   }
   
-  /* Header-Container */
+  
   .ms-header{
     background: var(--ms-bg);
     color: var(--ms-fg);
@@ -49,7 +49,7 @@
     padding: 0px 0px;
   }
   
-  /* Logo links – drehbar bei Hover/Focus */
+  
   .ms-logo{
     display: flex;
     align-items: center;
@@ -73,7 +73,7 @@
     color: var(--ms-fg);
   }
   
-  /* Dreh-Animation – respektiert prefers-reduced-motion */
+  
   @media (prefers-reduced-motion: no-preference){
     .ms-logo:hover img,
     .ms-logo:focus img{
@@ -82,7 +82,7 @@
     }
   }
   
-  /* Hamburger-Button (nur mobil sichtbar) */
+  
   .ms-nav-toggle{
     margin-left: auto;
     background: none;
@@ -98,7 +98,7 @@
     border-radius: 10px;
   }
   
-  /* Navigation */
+ 
   .ms-nav{
     margin-left: auto;
   }
@@ -116,12 +116,12 @@
     background: var(--ms-border);
   }
   
-  /* Link */
+  
   
 
   .ms-link-home {
     display: flex;
-    align-items: center;   /* zentriert Text vertikal */
+    align-items: center;  
     padding: 0px 10px;
     border-radius: 10px;
     text-decoration: none;
@@ -141,7 +141,7 @@
     font-weight: 600;
   }
   
-  /* Responsiv: unter 860px wird Menü einklappbar */
+  
   @media (max-width: 860px){
     .ms-nav-toggle{ display: inline-block; }
     .ms-nav{
@@ -165,12 +165,12 @@
     .ms-divider{ display: none; }
   }
   
-  /* Desktop: Hamburger ausblenden */
+  
   @media (min-width: 861px){
     .ms-nav-toggle{ display: none; }
   }
   
-  /* Visually hidden utility */
+ 
   .visually-hidden{
     position:absolute !important;
     height:1px; width:1px;

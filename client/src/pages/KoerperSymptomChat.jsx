@@ -1,10 +1,12 @@
-// src/pages/KoerpersymptomChat.jsx
+
+
 import React, { useState, useEffect, useRef } from "react";
 
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import "../styles/KoerperSymptomChat.css";
 
-// neu: identisch zur Symptom-UI
+
+
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
 
@@ -12,7 +14,8 @@ const THREAD_API = "/api/koerpersymptomthread";
 const LS_CHAT_KEY = "koerperChatVerlauf";
 const LS_THREAD_KEY = "koerperThreadId";
 
-// wie im Symptom-Bereich
+
+
 const MAX_CHARS = 150;
 
 export default function KoerperSymptomChat() {
@@ -27,7 +30,8 @@ export default function KoerperSymptomChat() {
     }
   });
 
-  // Thread-ID
+
+  
   const [threadId, setThreadId] = useState(() => {
     try {
       return localStorage.getItem(LS_THREAD_KEY) || "";
@@ -48,9 +52,10 @@ export default function KoerperSymptomChat() {
   const fromReset = location.state?.fromReset === true;
 const seite = searchParams.get("seite") || sessionStorage.getItem("koerperSeite") || "vorderseite";
 
-// Seite & letzte Karten-Route merken (falls vorhanden)
+
 useEffect(() => {
-  // if (seite) sessionStorage.setItem("koerperSeite", seite);
+  
+  
   if (location.state?.from) {
     sessionStorage.setItem("lastMapRoute", location.state.from);
     
@@ -61,13 +66,15 @@ useEffect(() => {
 
 }, [seite, location]);
 
-// Immer wenn Chat geladen wird: History-Eintrag auf /region-start setzen
+
+
 useEffect(() => {
   window.history.replaceState({}, "", "/startseite");
 }, []);
 
 
-// Browser-Zurück abfangen und IMMER zu /startseite leiten
+
+
 useEffect(() => {
   const handlePop = (e) => {
     e.preventDefault();
@@ -81,15 +88,18 @@ useEffect(() => {
 
 useEffect(() => {
   if (fromReset) {
-    // Aufräumen – alte Merker löschen, damit nichts mehr „zieht“
+    
+    
     sessionStorage.removeItem("koerperSeite");
     sessionStorage.removeItem("lastMapRoute");
-    // den Reset-Status beim Verlassen automatisch vergessen:
+    
+    
     history.replaceState({}, "");
   }
 }, [fromReset]);
 
-  // Intro-Text bei Organwechsel (nur UI)
+  
+
   useEffect(() => {
     if (!organ) return;
 
@@ -120,7 +130,7 @@ useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organ]);
 
-  // Verlauf speichern
+  
   useEffect(() => {
     try {
       localStorage.setItem(LS_CHAT_KEY, JSON.stringify(verlauf));
@@ -129,14 +139,14 @@ useEffect(() => {
     }
   }, [verlauf]);
 
-  // Auto-Scroll
+  
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
     }
   }, [verlauf]);
 
-  // Frage senden -> Threads (optional Text von Voice)
+  
   const frageSenden = async (textOverride) => {
     const aktuelleFrage = (textOverride ?? eingabe).trim();
     if (!aktuelleFrage) return;
@@ -144,7 +154,7 @@ useEffect(() => {
     const userMsg = { role: "user", content: aktuelleFrage };
     const basisVerlauf = [...verlauf, userMsg];
 
-    // ⏳ UI-Spinner
+    
     const mitUhr = [...basisVerlauf, { role: "assistant", content: "🕒" }];
     setVerlauf(mitUhr);
     setEingabe("");
@@ -195,7 +205,7 @@ useEffect(() => {
     }
   };
 
-  // Enter = senden
+  
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -203,13 +213,13 @@ useEffect(() => {
     }
   };
 
-  // Voice-Callback (wie im Symptom-Bereich)
+  
   const handleVoice = (text) => {
     setEingabe(text);
     frageSenden(text);
   };
 
-  // Neustart
+  
   const neustart = () => {
     setVerlauf([]);
     setEingabe("");
@@ -222,12 +232,12 @@ useEffect(() => {
     }
     if (lastIntroOrganRef?.current !== undefined) lastIntroOrganRef.current = null;
   
-    // sauber halten
+   
     setSearchParams({});
     sessionStorage.removeItem("koerperSeite");
     sessionStorage.removeItem("lastMapRoute");
   
-    // immer zur Startseite der Regionen
+   
     navigate("/region-start", { replace: true, state: { fromReset: true } });
 
   };
@@ -262,7 +272,7 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* Eingabe wie im Symptom-Chat: Textarea + Counter + Voice + Send */}
+      
       <div className="eingabe-bereich">
         <textarea
           ref={inputRef}
@@ -301,7 +311,7 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Thread-ID Anzeige optional leer */}
+      
       {threadId ? (
         <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.7 }} />
       ) : (

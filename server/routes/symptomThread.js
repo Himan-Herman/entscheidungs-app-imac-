@@ -1,4 +1,4 @@
-// server/routes/symptomThread.js
+
 import express from 'express';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
@@ -9,11 +9,11 @@ const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const ASSISTANT_ID = process.env.ASSISTANT_ID;
 
-// Helper: wartet bis ein Run fertig ist
+
 async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs = 750) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    // NEUE SYNTAX: runId zuerst, Thread-ID als Option
+    
     const run = await openai.beta.threads.runs.retrieve(runId, { thread_id: threadId });
     if (run.status === 'completed') return run;
     if (['failed', 'cancelled', 'expired'].includes(run.status)) {
@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ fehler: 'Ungültiger oder leerer Verlauf.' });
     }
 
-    // 1) Thread holen oder neu erstellen
+   
     let currentThreadId = null;
     if (threadId && typeof threadId === "string" && threadId.trim() !== "" && threadId !== "undefined" && threadId !== "null") {
       currentThreadId = threadId;
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
       currentThreadId = t.id;
     }
 
-    // 2) Letzte User-Nachricht holen
+    
     const last = verlauf[verlauf.length - 1];
     const content = typeof last?.content === 'string' ? last.content.trim() : '';
     if (!last || last.role !== 'user' || !content) {
@@ -54,17 +54,17 @@ router.post('/', async (req, res) => {
       content
     });
 
-    // 3) Run starten
+   
     const run = await openai.beta.threads.runs.create(currentThreadId, {
       assistant_id: ASSISTANT_ID
     });
 
-    // 4) Auf Fertigstellung warten (jetzt mit richtiger Parameter-Reihenfolge!)
+    
     
 await waitForRunCompletion(run.thread_id, run.id, 30000, 600);
 
 
-    // 5) Letzte Assistant-Antwort holen
+  
     const msgs = await openai.beta.threads.messages.list(currentThreadId, { limit: 5 });
     const assistantMsg = msgs.data.find(m => m.role === 'assistant');
 

@@ -32,7 +32,7 @@ const openChat = (organId) => {
     preserveAspectRatio="xMidYMid meet"
   />
 
-{/* Herz erledigt */}
+{/* Herz erledit */}
 <circle
     cx="161"
     cy="179"

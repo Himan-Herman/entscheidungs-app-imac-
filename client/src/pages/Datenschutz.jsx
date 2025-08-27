@@ -71,7 +71,7 @@ export default function Datenschutz() {
       <ul>
         <li>
           <strong>Chat-/Symptom-Verläufe (Server):</strong> 
-          {/* Frist setzen */}
+         
           werden standardmäßig nach <strong>30 Tagen</strong> gelöscht oder anonymisiert, sofern keine längere Aufbewahrung zur IT‑Sicherheit oder Fehleranalyse notwendig ist.
         </li>
         <li>

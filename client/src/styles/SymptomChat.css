@@ -5,7 +5,7 @@
   text-align: center;
 }
 
-/* Verlauf zuerst */
+
 .chatverlauf {
   display: flex;
   flex-direction: column;
@@ -16,7 +16,7 @@
   padding-right: 10px;
 }
 
-/* Eingabefeld unten */
+
 .eingabe-box {
   display: flex;
   justify-content: center;
@@ -58,7 +58,7 @@
   margin-bottom: 10px;
 }
 
-/* Ladeanimation */
+
 .lade-spinner {
   display: flex;
   flex-direction: column;
@@ -132,14 +132,14 @@
   margin-bottom: 0.5rem;
   border-radius: 10px;
 }
-/* Gesamte Leiste: Textarea links, Actions rechts */
+
 .eingabe-bereich{
   display:flex;
   align-items:center;
-  gap:12px;                 /* Abstand Textfeld ↔ Actions; gern kleiner machen */
+  gap:12px;                 
 }
 
-/* Textfeld */
+
 .chat-textarea{
   flex:1;
   min-height:44px;
@@ -148,15 +148,15 @@
   resize:none;
 }
 
-/* Actions: Counter | Mic | Senden */
+
 .eingabe-actions{
   display:flex;
   align-items:center;
-  gap:8px;                  /* Abstand zwischen Counter – Mic – Senden */
+  gap:8px;                  
 }
-.eingabe-actions > *{ flex:0 0 auto; }   /* nichts darf umbrechen/strecken */
+.eingabe-actions > *{ flex:0 0 auto; }   
 
-/* Counter */
+
 .char-count{
   min-width: 1px;
   text-align:right;
@@ -164,16 +164,16 @@
   color:#666;
 }
 
-/* Mic-Größe = Senden; VoiceInput neutralisieren */
+
 .voice-wrap{
-  width:60px;               /* Breite des Mic-Buttons */
-  height:144px;              /* gleiche Höhe wie Senden */
+  width:60px;               
+  height:144px;              
   display:flex;
   align-items:center;
   justify-content:center;
 }
 
-/* Falls VoiceInput intern .mic-button/absolute nutzt → hart überschreiben */
+
 .voice-wrap :is(button, .mic-button){
   width:100%;
   height:100%;
@@ -185,10 +185,10 @@
   background:#f3f3f3;
    margin-bottom: 15px;
   cursor:pointer;
-  position:static !important;    /* absolut/fixed ausschalten */
+  position:static !important;    
 }
 
-/* Senden */
+
 .eingabe-actions > button{
   height:44px;
   padding:10px 16px;
@@ -231,7 +231,7 @@
 }
 
 .reset-btn:hover {
-  background: #ee8e3f;   /* rot = Warnung */
+  background: #ee8e3f;   
   color: white;
   border-color: #0028c69a;
 }

@@ -46,12 +46,12 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ fehler: 'Kein gültiges Bild erhalten.' });
     }
 
-    // 1) Thread neu erstellen
+    
     const threadId = (clientThreadId && String(clientThreadId).trim() && clientThreadId !== 'undefined' && clientThreadId !== 'null')
       ? clientThreadId
       : (await openai.beta.threads.create()).id;
 
-    // 2) Data-URL 
+    
     const { mime, b64 } = splitDataUrl(base64Bild);
     if (!mime || !b64) {
       return res.status(400).json({ fehler: 'Ungültiges Bildformat (Data-URL erwartet).' });
@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
       purpose: 'vision',
     });
 
-    // 3) Zusatz-Instruktionen 
+    
     const fp = fingerprint(base64Bild);
     const last = imageHashByThread.get(threadId) || null;
     const istGleichesBild = last === fp;
@@ -72,29 +72,28 @@ router.post('/', async (req, res) => {
       ? 'Beschreibe das Bild nicht erneut. Stelle nur gezielte Rückfragen oder beziehe dich auf den bisherigen Verlauf.'
       : getBildanalysePrompt();
 
-    // 4) Nachricht in den Thread: Text + Bild (
+     
     await openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: [
-        // ⛔ war: { type: 'input_text', text: ... }
+      
         { type: 'text', text: (prompt || 'Bitte analysiere dieses Bild.').trim() },
     
-        // ⛔ war: { type: 'input_image', image_file: { file_id: uploaded.id } }
-        // ✅ korrekt:
+      
         { type: 'image_file', image_file: { file_id: uploaded.id } },
       ],
     });
     
-    // 5) mit Assistant-ID + Instruktionen
+    
     const run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: ASSISTANT_ID,
       additional_instructions: instr,
     });
 
-    // 6) Warten 
+    
     await waitForRunCompletion(run.thread_id, run.id, 30000, 700);
 
-    // 7) Antwort holen
+    
     const msgs = await openai.beta.threads.messages.list(threadId, { limit: 8, order: 'desc' });
     const assistantMsg = msgs.data.find(m => m.role === 'assistant');
 
