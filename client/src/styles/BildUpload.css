@@ -87,3 +87,65 @@
   /* Weitere Stile für den Button */
 }
 
+
+/* ==== Buttons – Pill-Style ==== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .6rem 1rem;
+  border-radius: 9999px;            /* full pill */
+  border: 1.5px solid #ff00ae;      /* neutral border */
+  background: #fd8657;              /* soft bg */
+  color: #faf9f9;
+  
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 1px 0 rgba(0,0,0,.03), inset 0 1px 0 #fff;
+  transition: background .15s ease, border-color .15s ease, transform .05s ease;
+  cursor: pointer;
+  user-select: none;
+}
+/*.btn:hover { background: #ee8e3f;  border-color: #c009c6;  color: #f7f5f5; } */
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .5; pointer-events: none; }
+
+/* Variante für „Delete/Warning“ (Verlauf löschen) */
+.btn--danger {
+  border-color: #005e1b;
+  background: #cdf6a4;
+  color: #6a1e1e;
+margin-left: 10px;
+}
+/*.btn--danger:hover { background: #99f3c0; border-color: #6506c5;  color: #080808; }*/
+
+/* kompaktere Größe (optional) */
+.btn--sm { padding: .5rem .9rem; font-weight: 600; }
+
+/* Icon-Feinschliff */
+.btn .icon { display: inline-block; font-size: 1.05em; transform: translateY(1px); }
+
+/* Fokus sichtbar & barrierefrei */
+.btn:focus-visible {
+  outline: 2px solid #6366f1;      /* violet focus ring */
+  outline-offset: 2px;
+  border-color: #a5b4fc;
+}
+
+
+/* Sidebar rechts */
+.upload-sidebar {
+  position: absolute;       /* fixiere am Container */
+  right: 1rem;
+  top: 13.5rem;                /* etwas unter der Überschrift */
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  z-index: 200;
+}
+.btn--primary-2 {
+  background: #eef2ff;
+  border-color: #2e55ee;
+  color: #040404;
+}
+.btn--primary-2:hover { background: #d1d9f1; }
