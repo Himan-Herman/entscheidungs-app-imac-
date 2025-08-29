@@ -24,7 +24,10 @@ async function waitForRunCompletion(threadId, runId, timeoutMs = 30000, pollMs =
   }
   throw new Error('Run timeout');
 }
-const imageHashByThread = new Map();
+
+const imageHashByThread = new Map(); // threadId -> fingerprint
+const threadNeedsMedicalImage = new Map(); // threadId|NEW -> boolean (nach Off-Topic nur noch medizinische Bilder zulassen)
+
 const fingerprint = (dataUrl = '') => dataUrl.slice(0, 160);
 function splitDataUrl(dataUrl) {
   const m = /^data:(.+);base64,(.*)$/.exec(dataUrl || '');
@@ -37,21 +40,44 @@ function extFromMime(mime = '') {
   return 'jpg';
 }
 
-
 router.post('/', async (req, res) => {
   try {
-    const { prompt, base64Bild, threadId: clientThreadId } = req.body || {};
+    // ⬇️ NEU: bildTyp & letzteSprache mit reinnehmen
+    const { prompt, base64Bild, threadId: clientThreadId, bildTyp, letzteSprache } = req.body || {};
 
+    // 1) Technische Validierung – ohne Bild -> 400
     if (!base64Bild || typeof base64Bild !== 'string') {
       return res.status(400).json({ fehler: 'Kein gültiges Bild erhalten.' });
     }
 
-    
+    // 2) ThreadId bestimmen (neu oder weiterverwenden)
     const threadId = (clientThreadId && String(clientThreadId).trim() && clientThreadId !== 'undefined' && clientThreadId !== 'null')
       ? clientThreadId
       : (await openai.beta.threads.create()).id;
 
     
+      if (bildTyp && bildTyp !== 'medizinisch') {
+        return res.json({
+          threadId: clientThreadId || null,
+          antwort: 'Hier kann ich nur medizinische Bilder analysieren. Für Beschwerden ohne Bild wechsle bitte in den **Symptombereich** (Startseite → Home → Symptombereich). 🙂'
+        });
+      }
+      
+      
+
+    // 4) Fachliche Sperre B: Wenn Thread zuletzt Off-Topic war, nur fortfahren wenn jetzt wirklich medizinisch
+    const needMed = threadNeedsMedicalImage.get(threadId || 'NEW');
+    if (needMed && (!bildTyp || bildTyp !== 'medizinisch')) {
+      return res.json({
+        threadId,
+        antwort: 'Hier kann ich nur medizinisch relevante Bilder analysieren. Bitte lade ein geeignetes Foto hoch. 🙂'
+      });
+    }
+
+    // → Ab hier ist das Bild als medizinisch freigegeben
+    threadNeedsMedicalImage.set(threadId || 'NEW', false);
+
+    // 5) Data-URL prüfen & Datei vorbereiten
     const { mime, b64 } = splitDataUrl(base64Bild);
     if (!mime || !b64) {
       return res.status(400).json({ fehler: 'Ungültiges Bildformat (Data-URL erwartet).' });
@@ -62,38 +88,36 @@ router.post('/', async (req, res) => {
       purpose: 'vision',
     });
 
-    
+    // 6) Duplikat-Erkennung pro Thread
     const fp = fingerprint(base64Bild);
     const last = imageHashByThread.get(threadId) || null;
     const istGleichesBild = last === fp;
     if (!istGleichesBild) imageHashByThread.set(threadId, fp);
 
+    // 7) Anweisungen/Prompt korrekt setzen (mit Parametern)
     const instr = istGleichesBild
-      ? 'Beschreibe das Bild nicht erneut. Stelle nur gezielte Rückfragen oder beziehe dich auf den bisherigen Verlauf.'
-      : getBildanalysePrompt();
+      ? getBildanalysePrompt({ bildTyp: 'medizinisch', istNeuesBild: false, letzteSprache })
+      : getBildanalysePrompt({ bildTyp: 'medizinisch', istNeuesBild: true,  letzteSprache });
 
-     
+    // 8) Message mit Text + Bild an den Thread hängen
     await openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: [
-      
         { type: 'text', text: (prompt || 'Bitte analysiere dieses Bild.').trim() },
-    
-      
         { type: 'image_file', image_file: { file_id: uploaded.id } },
       ],
     });
-    
-    
+
+    // 9) Run starten – zusätzliche Instruktionen mitschicken
     const run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: ASSISTANT_ID,
       additional_instructions: instr,
     });
 
-    
+    // 10) Auf Completion warten
     await waitForRunCompletion(run.thread_id, run.id, 30000, 700);
 
-    
+    // 11) Letzte Assistant-Antwort holen
     const msgs = await openai.beta.threads.messages.list(threadId, { limit: 8, order: 'desc' });
     const assistantMsg = msgs.data.find(m => m.role === 'assistant');
 
