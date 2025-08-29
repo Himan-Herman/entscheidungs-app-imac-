@@ -1,5 +1,5 @@
 export function getBildanalysePrompt({ bildTyp, istNeuesBild, letzteSprache } = {}) {
-  // Fall 1: Bild ist nicht medizinisch relevant
+  
   if (bildTyp && bildTyp !== "medizinisch") {
     return `
 Ich bin ein medizinischer KI-Assistent und analysiere **ausschließlich Bilder von Haut, Nägeln oder sichtbaren medizinischen Veränderungen**.  
@@ -9,7 +9,7 @@ Dieses Bild wirkt **nicht medizinisch relevant** (z. B. Landschaft, Objekt, Text
 `;
   }
 
-  // Fall 2: Bild ist identisch mit einem zuvor hochgeladenen
+  
   if (istNeuesBild === false) {
     return `
 Das Bild ist identisch mit dem zuvor hochgeladenen. Ich kann es nicht erneut analysieren.  
@@ -18,7 +18,7 @@ Das Bild ist identisch mit dem zuvor hochgeladenen. Ich kann es nicht erneut ana
 `;
   }
 
-  // Fall 3: Kein Bild vorhanden oder textbasierte Symptome
+  
   if (!bildTyp) {
     return `
 Ich bin ein medizinischer KI-Assistent und kann **nur Bilder von Haut, Nägeln oder sichtbaren medizinischen Veränderungen** analysieren.  
@@ -27,7 +27,7 @@ Ich bin ein medizinischer KI-Assistent und kann **nur Bilder von Haut, Nägeln o
 `;
   }
 
-  // Fall 4: Medizinisches Bild mit Sprachanpassung
+  
   const sprachHinweis = letzteSprache
     ? `⚠ Hinweis: Nutzer*in schreibt auf **${letzteSprache}** – bitte genau in dieser Sprache antworten.`
     : "";

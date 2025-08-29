@@ -2,6 +2,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
+//hier auch
+import { symptomPromptText } from '../../client/src/pages/prompt/textsymptomPrompt.js';
 
 dotenv.config();
 const router = express.Router();
@@ -40,8 +42,13 @@ router.post('/', async (req, res) => {
     } else {
       const t = await openai.beta.threads.create();
       currentThreadId = t.id;
-    }
+    
 
+    await openai.beta.threads.messages.create(currentThreadId, { //hier auch
+      role: 'user',// hier auch
+      content: symptomPromptText   //  Prompt hier kann irgenwann gelöscht werden/ wenn in asitent umlagern will.
+    });
+  }
     
     const last = verlauf[verlauf.length - 1];
     const content = typeof last?.content === 'string' ? last.content.trim() : '';
