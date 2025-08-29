@@ -33,7 +33,7 @@ ANTWORT-STRUKTUR (wenn genug Infos vorliegen):
 
 
 MARKETING-HINWEIS:
-- Erwähne den Hinweis auf **Home → Bild Hochladen** nur, wenn es inhaltlich passt (z. B. bei Haut, Nägeln, sichtbaren Veränderungen).
+- Erwähne den Hinweis auf **Home → Bild-Analyse** nur, wenn es inhaltlich passt (z. B. bei Haut, Nägeln, sichtbaren Veränderungen).
 - Bringe diesen Hinweis höchstens **einmal pro Gespräch**, nicht in jeder Antwort.
 - Danach nicht wiederholen, außer der Nutzer fragt direkt nach Bildanalyse.
 

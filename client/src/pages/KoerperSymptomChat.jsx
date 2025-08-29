@@ -30,7 +30,10 @@ export default function KoerperSymptomChat() {
     }
   });
 
-
+  const autoResize = (el) => {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 160) + "px";
+  };
   
   const [threadId, setThreadId] = useState(() => {
     try {
@@ -42,6 +45,8 @@ export default function KoerperSymptomChat() {
   });
 
   const [searchParams, setSearchParams] = useSearchParams();
+   const [isSending, setIsSending] = useState(false);
+
   const organ = searchParams.get("organ");
 
   const chatRef = useRef(null);
@@ -127,7 +132,7 @@ useEffect(() => {
       });
       lastIntroOrganRef.current = organ;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line 
   }, [organ]);
 
   
@@ -148,7 +153,11 @@ useEffect(() => {
 
   
   const frageSenden = async (textOverride) => {
-    const aktuelleFrage = (textOverride ?? eingabe).trim();
+    const raw =
+     typeof textOverride === "string"
+       ? textOverride
+       : eingabe; // Fallback auf State
+   const aktuelleFrage = (raw || "").trim();
     if (!aktuelleFrage) return;
 
     const userMsg = { role: "user", content: aktuelleFrage };
@@ -215,9 +224,9 @@ useEffect(() => {
 
   
   const handleVoice = (text) => {
-    setEingabe(text);
-    frageSenden(text);
-  };
+    setEingabe(text || "");
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };;
 
   
   const neustart = () => {
@@ -274,21 +283,18 @@ useEffect(() => {
 
       
       <div className="eingabe-bereich">
-        <textarea
-          ref={inputRef}
-          placeholder="Beschreibe dein Symptom hier..."
-          value={eingabe}
-          maxLength={MAX_CHARS}
-          rows={1}
-          onChange={(e) => setEingabe(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onInput={(e) => {
-            e.target.style.height = "auto";
-            e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
-          }}
-          className="chat-textarea"
-          aria-label="Symptomeingabe"
-        />
+       <textarea
+  ref={inputRef}
+  placeholder="Beschreibe dein Symptom hier..."
+  value={eingabe}
+  maxLength={MAX_CHARS}
+  rows={1}
+  onChange={(e) => setEingabe(e.target.value)}
+  onInput={(e) => autoResize(e.target)}
+  onKeyDown={handleKeyDown}   // 👈 hier statt Inline-Logik
+  className="chat-textarea"
+/>
+
 
         <div className="eingabe-actions">
           <span className={`char-count ${eingabe.length >= MAX_CHARS ? "limit" : ""}`}>
@@ -299,15 +305,9 @@ useEffect(() => {
             <VoiceInput onTranscribed={handleVoice} />
           </div>
 
-          <button
-            type="button"
-            className="send-btn"
-            onClick={() => frageSenden()}
-            disabled={!eingabe.trim()}
-            title="Frage senden"
-          >
-            <FaPaperPlane />
-          </button>
+          <button className="send-btn" onClick={() => frageSenden()} disabled={isSending}>
+    <FaPaperPlane />
+  </button>
         </div>
       </div>
 

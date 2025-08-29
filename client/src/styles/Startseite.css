@@ -12,12 +12,101 @@
     margin-top: 2rem;
   }
   
-  .bereich {
-    border: 2px solid #ccc;
-    padding: 1.5rem;
-    width: 300px;
-    border-radius: 12px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+ 
+  .bereich p {
+    margin-bottom: 0.6rem; /* sorgt für mehr Luft */
+    line-height: 1.5;      /* bessere Lesbarkeit */
   }
   
+
+
+  
+
+
+  /* Grid bleibt wie gehabt */
+
+/* Buttons statt divs (barriereärmer + klickbar) */
+/* Basis-Stil für alle */
+.startseite-grid .bereich {
+  appearance: none;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 300px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .35s ease, box-shadow .35s ease, background-color .35s ease, border-color .35s ease;
+  outline-offset: 4px;
+}
+
+/* Bild-Analyse → Hellblau */
+.startseite-grid .bereich.bild-chat {
+  background-color: #eaffebc9;   /* zartes Blau */
+  border: 2px solid #4A90E2;   /* Akzentblau */
+  box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
+}
+
+/* Symptom-Check → Mint/Petrol */
+.startseite-grid .bereich.symptom-chat {
+  background-color: #defffc;   /* Mint */
+  border: 2px solid #2D9C8C;   /* Petrol */
+  box-shadow: 0 2px 8px rgba(45, 156, 140, 0.25);
+}
+
+/* Body-Map → Indigo/Neutral */
+.startseite-grid .bereich.koerperregionen {
+  background-color: #fffde3;   /* sehr helles Indigo */
+  border: 2px solid #5A6ACF;   /* Indigo */
+  box-shadow: 0 2px 8px rgba(90, 106, 207, 0.25);
+}
+
+/* Aktiver Puls-Effekt bleibt gleich */
+.startseite-grid .bereich.is-active {
+  animation: pulseHighlight 2s ease-in-out infinite;
+  background-color: #f6f1f1;
+}
+
+
+.startseite-grid .bereich:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  background-color: #fff;
+}
+
+/* Sanfte Puls-Animation */
+@keyframes pulseHighlight {
+  0% {
+    transform: scale(1);
+    box-shadow: -12px -12px 12px rgba(151, 252, 255, 0.998);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: -9px 9px 16px rgba(215, 255, 192, 0.919);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 6px 6px 20px rgba(207, 209, 255, 0.838);
+  }
+}
+
+.startseite-grid .bereich.is-active {
+  animation: pulseHighlight 2s ease-in-out infinite;
+  background-color: #fff0f8;
+  border-color: #b7c7ff; /* dezenter Akzent */
+}
+
+
+.startseite-grid .bereich p {
+  margin: .5rem 0;
+  line-height: 1.5;
+}
+
+/* Weniger Bewegung respektieren */
+@media (prefers-reduced-motion: reduce) {
+  .startseite-grid .bereich,
+  .startseite-grid .bereich.is-active,
+  .startseite-grid .bereich:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
