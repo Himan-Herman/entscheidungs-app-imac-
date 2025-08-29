@@ -75,7 +75,11 @@ export default function SymptomChat() {
 
   
   const frageSenden = async (textOverride) => {
-    const aktuelleFrage = (textOverride ?? eingabe).trim();
+    const raw =
+     typeof textOverride === "string"
+       ? textOverride
+       : eingabe; // Fallback auf State
+   const aktuelleFrage = (raw || "").trim();
     if (!aktuelleFrage) return;
 
     const neueFrage = { role: "user", content: aktuelleFrage };
@@ -119,12 +123,17 @@ export default function SymptomChat() {
   };
 
  
-  const handleVoice = (text) => {
-   
-    setEingabe(text);
-    
-    frageSenden(text);
-  };
+ // oben einen Ref fürs Textfeld anlegen:
+const inputRef = useRef(null);
+
+// ...
+
+const handleVoice = (text) => {
+  setEingabe(text || "");
+  // nach dem Setzen kurz fokussieren, damit man direkt editiert:
+  requestAnimationFrame(() => inputRef.current?.focus());
+};
+
 
 
   return (
@@ -150,6 +159,7 @@ export default function SymptomChat() {
       <div className="eingabe-bereich">
   {/* nur das Textfeld */}
   <textarea
+  ref={inputRef}
     placeholder="Beschreibe dein Symptom hier..."
     value={eingabe}
     maxLength={MAX_CHARS}
