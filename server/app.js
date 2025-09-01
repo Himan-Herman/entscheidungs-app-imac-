@@ -13,6 +13,7 @@ import symptomThreadRoute from './routes/symptomThread.js';
 import koerpersymptomThread from "./routes/koerpersymptomThread.js";
 //import bildanalyseThread from "./routes/bildanalyseThread.js";
 import transcribeRouter from "./routes/transcribe.js";
+import { authRouter } from "./routes/auth.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/symptom-thread', symptomThreadRoute);
 app.use("/api/koerpersymptomthread", koerpersymptomThread);
 //app.use("/api/bildanalyse-thread", bildanalyseThread);
 app.use("/api/transcribe", transcribeRouter);
+app.use("/api/auth", authRouter);
 
 
 app.get('/health', (_req, res) => {

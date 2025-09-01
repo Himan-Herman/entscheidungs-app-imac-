@@ -1,46 +1,44 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import App from './App';
-import Intro from './pages/Intro';
-import KoerperVorderseite from './pages/KoerperVorderseite';
-import KoerperRueckseite from './pages/KoerperRueckseite';
-import Startseite from './pages/Startseite';
-import BildUpload from './pages/BildUpload';
-import SymptomChat from './pages/SymptomChat';
-import KoerperregionStart from './pages/KoerperregionStart';
-//import SymptomEingabe from './pages/SymptomEingabe';
-import KoerperSymptomChat from './pages/KoerperSymptomChat';
-//import SymptomThread from "./pages/SymptomThread";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Intro from "./pages/Intro";
+import Register from "./pages/Register.jsx";
+import Startseite from "./pages/Startseite";
+import KoerperVorderseite from "./pages/KoerperVorderseite";
+import KoerperRueckseite from "./pages/KoerperRueckseite";
+import BildUpload from "./pages/BildUpload";
+import SymptomChat from "./pages/SymptomChat";
+import KoerperregionStart from "./pages/KoerperregionStart";
+import KoerperSymptomChat from "./pages/KoerperSymptomChat";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 
+function Gate() {
+  const hasUser = !!localStorage.getItem("medscout_user_id");
+  return hasUser ? <Navigate to="/intro" replace /> : <Navigate to="/register" replace />;
+}
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  //<React.StrictMode>
-    <Router>
-      <Header />
-
-     <Routes>
-  <Route path="/" element={<Intro />} />  // Logo NUR auf dieser Route
-  <Route path="/startseite" element={<Startseite />} />
-  <Route path="/symptom" element={<SymptomChat />} />
-  <Route path="/bild" element={<BildUpload />} />
-  <Route path="/region-start" element={<KoerperregionStart />} />
-  <Route path="/koerperregionen" element={<KoerperVorderseite />} />
-  <Route path="/rueckseite" element={<KoerperRueckseite />} />
-  
-  <Route path="/koerpersymptom" element={<KoerperSymptomChat />} />
-
-<Route path="/impressum" element={<Impressum />} />
-<Route path="/datenschutz" element={<Datenschutz />} />
-
-
-
-</Routes>
-<Footer />
-    </Router>
-  
+ReactDOM.createRoot(document.getElementById("root")).render(
+  // <React.StrictMode>
+  <Router>
+    <Header />
+    <Routes>
+      <Route path="/" element={<Gate />} />
+      <Route path="/intro" element={<Intro />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/startseite" element={<Startseite />} />
+      <Route path="/symptom" element={<SymptomChat />} />
+      <Route path="/bild" element={<BildUpload />} />
+      <Route path="/region-start" element={<KoerperregionStart />} />
+      <Route path="/koerperregionen" element={<KoerperVorderseite />} />
+      <Route path="/rueckseite" element={<KoerperRueckseite />} />
+      <Route path="/koerpersymptom" element={<KoerperSymptomChat />} />
+      <Route path="/impressum" element={<Impressum />} />
+      <Route path="/datenschutz" element={<Datenschutz />} />
+    </Routes>
+    <Footer />
+  </Router>
+  // </React.StrictMode>
 );

@@ -8,22 +8,22 @@ export default function Intro() {
   const [verschwinden, setVerschwinden] = useState(false);
 
   useEffect(() => {
-    const alreadyShown = sessionStorage.getItem("introShown");
+    // NEU: nur registrierte Nutzer dürfen Intro sehen
+   const hasUser = !!localStorage.getItem("medscout_user_id");
+   if (!hasUser) {
+     navigate("/startseite", { replace: true });
+     return;
+   }
 
+   const alreadyShown = sessionStorage.getItem("introShown");
     if (alreadyShown) {
       navigate("/startseite");
     } else {
       sessionStorage.setItem("introShown", "true");
 
       
-      const fadeOutTimer = setTimeout(() => {
-        setVerschwinden(true);
-      }, 4000);
-
-      
-      const navigateTimer = setTimeout(() => {
-        navigate("/startseite");
-      }, 5000);
+      const fadeOutTimer = setTimeout(() => setVerschwinden(true), 4000);
+     const navigateTimer = setTimeout(() => navigate("/startseite", { replace: true }), 5000);
 
       return () => {
         clearTimeout(fadeOutTimer);
