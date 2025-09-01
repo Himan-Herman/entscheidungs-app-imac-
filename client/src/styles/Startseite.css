@@ -76,15 +76,15 @@
 @keyframes pulseHighlight {
   0% {
     transform: scale(1);
-    box-shadow: -12px -12px 12px rgba(151, 252, 255, 0.998);
+    box-shadow: -12px -12px 12px rgba(255, 255, 255, 0.998);
   }
   50% {
     transform: scale(1.03);
-    box-shadow: -9px 9px 16px rgba(215, 255, 192, 0.919);
+    box-shadow: -9px 9px 16px rgba(255, 255, 255, 0.919);
   }
   100% {
     transform: scale(1);
-    box-shadow: 6px 6px 20px rgba(207, 209, 255, 0.838);
+    box-shadow: 6px 6px 20px rgba(255, 255, 255, 0.838);
   }
 }
 
