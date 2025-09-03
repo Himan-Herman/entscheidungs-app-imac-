@@ -1,26 +1,25 @@
-/* Grundlayout */
+
 :root { --container: 1100px; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; }
 
-/* Zentrale Breite für alle Seiteninhalte */
+
 .container {
   max-width: var(--container);
-  margin: 0 auto;          /* zentriert horizontal */
-  padding: 0 16px;         /* Rand innen für kleine Screens */
+  margin: 0 auto;         
+  padding: 0 16px;        
 }
 
-/* Seitenkopf mit Titel + Actions (z. B. „Neues Gespräch“) */
+
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;  /* Titel links, Button rechts */
+  justify-content: space-between;  
   gap: 1rem;
   margin: 1.25rem 0;
 }
 
-/* Footer konsistent links/rechts ausrichten */
 .footer {
   border-top: 1px solid #eee;
   padding: 14px 0;
@@ -30,7 +29,7 @@ html, body { margin: 0; }
 .footer .inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;  /* links ©, rechts Links */
+  justify-content: space-between;  
   gap: 1rem;
   flex-wrap: wrap;
 }
@@ -39,4 +38,4 @@ html, body { margin: 0; }
   gap: 1rem;
 }
 .footer a { color: inherit; text-decoration: none; }
-.footer a:hover { text-decoration: underline; }
+.footer a:hover { text-decoration: none; }

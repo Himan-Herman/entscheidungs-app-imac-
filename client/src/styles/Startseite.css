@@ -14,8 +14,8 @@
   
  
   .bereich p {
-    margin-bottom: 0.6rem; /* sorgt für mehr Luft */
-    line-height: 1.5;      /* bessere Lesbarkeit */
+    margin-bottom: 0.6rem; 
+    line-height: 1.5;      
   }
   
 
@@ -23,10 +23,7 @@
   
 
 
-  /* Grid bleibt wie gehabt */
-
-/* Buttons statt divs (barriereärmer + klickbar) */
-/* Basis-Stil für alle */
+  
 .startseite-grid .bereich {
   appearance: none;
   border-radius: 12px;
@@ -38,28 +35,28 @@
   outline-offset: 4px;
 }
 
-/* Bild-Analyse → Hellblau */
+
 .startseite-grid .bereich.bild-chat {
-  background-color: #eaffebc9;   /* zartes Blau */
-  border: 2px solid #4A90E2;   /* Akzentblau */
+  background-color: #eaffebc9;   
+  border: 2px solid #4A90E2;   
   box-shadow: 0 2px 8px rgba(74, 144, 226, 0.25);
 }
 
-/* Symptom-Check → Mint/Petrol */
+
 .startseite-grid .bereich.symptom-chat {
-  background-color: #defffc;   /* Mint */
-  border: 2px solid #2D9C8C;   /* Petrol */
+  background-color: #defffc;    
+  border: 2px solid #2D9C8C;   
   box-shadow: 0 2px 8px rgba(45, 156, 140, 0.25);
 }
 
-/* Body-Map → Indigo/Neutral */
+
 .startseite-grid .bereich.koerperregionen {
-  background-color: #fffde3;   /* sehr helles Indigo */
-  border: 2px solid #5A6ACF;   /* Indigo */
+  background-color: #fffde3;  
+  border: 2px solid #5A6ACF;   
   box-shadow: 0 2px 8px rgba(90, 106, 207, 0.25);
 }
 
-/* Aktiver Puls-Effekt bleibt gleich */
+
 .startseite-grid .bereich.is-active {
   animation: pulseHighlight 2s ease-in-out infinite;
   background-color: #f6f1f1;
@@ -72,7 +69,7 @@
   background-color: #fff;
 }
 
-/* Sanfte Puls-Animation */
+
 @keyframes pulseHighlight {
   0% {
     transform: scale(1);
@@ -91,7 +88,7 @@
 .startseite-grid .bereich.is-active {
   animation: pulseHighlight 2s ease-in-out infinite;
   background-color: #fff0f8;
-  border-color: #b7c7ff; /* dezenter Akzent */
+  border-color: #b7c7ff;
 }
 
 
@@ -100,7 +97,7 @@
   line-height: 1.5;
 }
 
-/* Weniger Bewegung respektieren */
+
 @media (prefers-reduced-motion: reduce) {
   .startseite-grid .bereich,
   .startseite-grid .bereich.is-active,
@@ -110,3 +107,18 @@
   }
 }
 
+
+
+
+.doctor-title{
+  font-weight: 700;
+  margin-bottom: .5rem;
+}
+.doctor-limit{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: .35rem;
+  font-size: .9rem;
+  color: var(--muted);
+}
