@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Register.css";
+import { Link } from "react-router-dom";
+
 
 const pwdRule =
   /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_\-+=[{\]}:;,.?~]{8,}$/; 
@@ -38,7 +40,7 @@ export default function Register() {
     }
     setDoctorMsg("");
     setDoctors(d => [...d, { name: "", specialty: "", clinic_name: "", email_secure: "", phone: "", address: "", allow_alerts: false }]);
-    // optional: Fokus auf neues Feld
+    
     setTimeout(() => {
       const el = document.getElementById(`doc-name-${doctors.length}`);
       el?.focus();
@@ -76,50 +78,81 @@ export default function Register() {
   async function submit(e) {
     e.preventDefault();
     setErr("");
-    if (!valid) { setErr("Bitte Pflichtfelder prüfen und Richtlinien akzeptieren."); return; }
+    if (!valid) {
+      setErr("Bitte Pflichtfelder prüfen und Richtlinien akzeptieren.");
+      return;
+    }
     setBusy(true);
     try {
       const doctorsClean = doctors
-      .filter(d => d.name || d.specialty || d.clinic_name || d.email_secure || d.phone || d.address)
-      .slice(0, MAX_DOCTORS);
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user: {
-            email: form.email,
-            password: form.password,
-            first_name: form.first_name,
-            last_name: form.last_name,
-            date_of_birth: form.date_of_birth,
-          },
-          profile: {
-            phone: form.phone || null,
-            postal_code: form.postal_code || null,
-            country: form.country || null,
-            insurance_type: form.insurance_type || null,
-            address_line: form.address_line || null,
-            city: form.city || null,
-            gender: form.gender || null,
-          },
-          consent: {
-            terms_accepted: form.accept_terms,
-            privacy_accepted: form.accept_privacy,
-            medical_disclaimer_accepted: form.accept_med_disclaimer,
-            doctor_alert_consent: form.doctor_alert_consent
-          },
-          doctors: doctorsClean
-        })
-      });
-      if (!res.ok) throw new Error("Registrierung fehlgeschlagen.");
-      const data = await res.json();
-      localStorage.setItem("medscout_registered", "true");
-      localStorage.setItem("medscout_user_id", data.user_id);
-      navigate("/intro", { replace: true }); // <— BUGFIX: navigate statt nav
-    } catch (e2) {
-      setErr(e2.message ?? "Fehler.");
-    } finally { setBusy(false); }
+        .filter(
+          (d) =>
+            d.name ||
+            d.specialty ||
+            d.clinic_name ||
+            d.email_secure ||
+            d.phone ||
+            d.address
+        )
+        .slice(0, MAX_DOCTORS);
+    // 👉 payload definieren
+    const payload = {
+      user: {
+        email: form.email,
+        password: form.password,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        date_of_birth: form.date_of_birth,
+      },
+      profile: {
+        phone: form.phone || null,
+        postal_code: form.postal_code || null,
+        country: form.country || null,
+        insurance_type: form.insurance_type || null,
+        address_line: form.address_line || null,
+        city: form.city || null,
+        gender: form.gender || null,
+      },
+      consent: {
+        terms_accepted: form.accept_terms,
+        privacy_accepted: form.accept_privacy,
+        medical_disclaimer_accepted: form.accept_med_disclaimer,
+        doctor_alert_consent: form.doctor_alert_consent,
+      },
+      doctors: doctorsClean,
+    };
+
+    
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (data.error === "EMAIL_EXISTS") {
+        setErr("Diese E-Mail ist bereits registriert.");
+      } else {
+        setErr(data.error || "Registrierung fehlgeschlagen.");
+      }
+      setBusy(false);
+      return; 
+    }
+    
+    const data = await res.json();
+    
+   
+    localStorage.setItem("pending_verification_email", payload.user.email);
+    localStorage.setItem("pending_verification_user_id", data.user_id);
+    navigate("/check-email", { replace: true });
+  } catch (e2) {
+    setErr(e2.message ?? "Fehler.");
+  } finally {
+    setBusy(false);
   }
+}
+  
 
   function setField(k, v) { setForm(prev => ({ ...prev, [k]: v })); }
 
@@ -239,7 +272,7 @@ export default function Register() {
     <option value="divers">Divers</option>
     <option value="keine_angabe">Keine Angabe</option>
   </select>
-  <small className="hint">Optional. Hilft bei passenderen Hinweisen.</small>
+  
 </div>
 
 
@@ -283,48 +316,53 @@ export default function Register() {
 </div>
 
         
-        <fieldset className="consents">
-          <legend className="legend">Einwilligungen</legend>
+<fieldset className="consents">
+  <legend className="legend">Einwilligungen</legend>
 
-          <label className="check">
-            <input
-              type="checkbox"
-              required
-              checked={form.accept_terms}
-              onChange={e => setField("accept_terms", e.target.checked)}
-            />
-            <span>AGB akzeptieren <span className="req" aria-hidden="true">*</span></span>
-          </label>
+  {/* AGB */}
+  <label className="check">
+    <input
+      type="checkbox"
+      required
+      checked={form.accept_terms}
+      onChange={e => setField("accept_terms", e.target.checked)}
+    />
+    <span>AGB akzeptieren <span className="req" aria-hidden="true">*</span></span>
+  </label>
 
-          <label className="check">
-            <input
-              type="checkbox"
-              required
-              checked={form.accept_privacy}
-              onChange={e => setField("accept_privacy", e.target.checked)}
-            />
-            <span>Datenschutzerklärung akzeptieren <span className="req" aria-hidden="true">*</span></span>
-          </label>
+  {/* Datenschutz */}
+  <label className="check">
+    <input
+      type="checkbox"
+      required
+      checked={form.accept_privacy}
+      onChange={e => setField("accept_privacy", e.target.checked)}
+    />
+    <span>Datenschutzerklärung akzeptieren <span className="req" aria-hidden="true">*</span></span>
+  </label>
 
-          <label className="check">
-            <input
-              type="checkbox"
-              required
-              checked={form.accept_med_disclaimer}
-              onChange={e => setField("accept_med_disclaimer", e.target.checked)}
-            />
-            <span>Medizinischer Disclaimer gelesen <span className="req" aria-hidden="true">*</span></span>
-          </label>
+  {/* Disclaimer */}
+  <label className="check">
+    <input
+      type="checkbox"
+      required
+      checked={form.accept_med_disclaimer}
+      onChange={e => setField("accept_med_disclaimer", e.target.checked)}
+    />
+    <span>Medizinischer Disclaimer gelesen <span className="req" aria-hidden="true">*</span></span>
+  </label>
 
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={form.doctor_alert_consent}
-              onChange={e => setField("doctor_alert_consent", e.target.checked)}
-            />
-            <span>„Arzt-Benachrichtigung im Ernstfall“ erlauben (optional)</span>
-          </label>
-        </fieldset>
+  {/* optional */}
+  <label className="check">
+    <input
+      type="checkbox"
+      checked={form.doctor_alert_consent}
+      onChange={e => setField("doctor_alert_consent", e.target.checked)}
+    />
+    <span>„Arzt-Benachrichtigung im Ernstfall“ erlauben (optional)</span>
+  </label>
+</fieldset>
+
 
         
         <details className="opt-details">
@@ -469,7 +507,7 @@ export default function Register() {
      <option value="privat">Privat</option>
      <option value="sonstiges">Sonstiges</option>
    </select>
-   <small className="hint">Keine Nummern im MVP – nur der Status.</small>
+   
  </div>
         </details>
 
@@ -493,8 +531,18 @@ export default function Register() {
 </button>
 
 
+
       </form>
+      <div className="legal-links" aria-label="Rechtliche Informationen">
+  <Link to="/impressum?public=1">Impressum</Link>
+  <span className="sep">·</span>
+  <Link to="/datenschutz?public=1">Datenschutz</Link>
+</div>
+
+
       </section>
     </main>
   );
 }
+
+

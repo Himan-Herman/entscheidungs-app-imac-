@@ -229,3 +229,14 @@
   color: #9ca3af;
   opacity: 1;            
 }
+.legal-links {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+.legal-links a {
+  color: inherit;
+  text-decoration: none;
+}
+.sep { margin: 0 .5rem; }

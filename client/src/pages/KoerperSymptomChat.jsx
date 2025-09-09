@@ -167,6 +167,7 @@ useEffect(() => {
     const mitUhr = [...basisVerlauf, { role: "assistant", content: "🕒" }];
     setVerlauf(mitUhr);
     setEingabe("");
+    setIsSending(true);
 
     try {
       const payload = {

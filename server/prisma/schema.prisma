@@ -1,0 +1,41 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  // … deine Felder …
+  profile      UserProfile?
+  consent      Consent?
+  doctors      Doctor[]
+}
+
+model UserProfile {
+  id      String @id @default(cuid())
+  userId  String @unique
+  // HIER anpassen:
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // … restliche Felder …
+}
+
+model Consent {
+  id      String @id @default(cuid())
+  userId  String @unique
+  // HIER anpassen:
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // … restliche Felder …
+}
+
+model Doctor {
+  id      String @id @default(cuid())
+  userId  String
+  // HIER anpassen:
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // … restliche Felder …
+}
+
