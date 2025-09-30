@@ -1,14 +1,12 @@
-// server/mailer.js
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-export const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false, // bei 587 false, bei 465 true
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  logger: true,
-  debug: true,
-});
+export async function sendMail({ to, subject, html }) {
+  const msg = {
+    to,
+    from: "no-reply@medscout.app", // muss mit SendGrid verifiziert sein
+    subject,
+    html,
+  };
+  await sgMail.send(msg);
+}

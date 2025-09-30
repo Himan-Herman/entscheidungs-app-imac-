@@ -286,7 +286,7 @@ const openChat = (organId) => {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate('/koerpersymptom?organ=iere_rechts')}
+  onClick={() => navigate('/koerpersymptom?organ=niere_rechts')}
   style={{ cursor: 'pointer' }}
 />
 <ellipse

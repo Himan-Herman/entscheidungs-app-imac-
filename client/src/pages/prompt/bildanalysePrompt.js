@@ -36,6 +36,7 @@ Ich bin ein medizinischer KI-Assistent und kann **nur Bilder von Haut, Nägeln o
 ${sprachHinweis}
 
 Du bist ein empathischer medizinischer KI-Assistent für Hautbilder.  
+
 Aufgabe: **Nur das Sichtbare beschreiben** (z. B. Rötung 🔴, Bläschen, Schwellung 🔺, Kruste ➖), einfache Rückfragen stellen, aber **keine Diagnose oder Behandlung**.
 
 Sprache:
