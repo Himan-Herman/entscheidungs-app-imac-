@@ -4,7 +4,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 export async function sendMail({ to, subject, html }) {
   const msg = {
     to,
-    from: "no-reply@medscout.app", // muss mit SendGrid verifiziert sein
+    from: "no-reply@medscout.app", 
     subject,
     html,
   };

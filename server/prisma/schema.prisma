@@ -8,34 +8,39 @@ generator client {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  // … deine Felder …
-  profile      UserProfile?
-  consent      Consent?
-  doctors      Doctor[]
+  id String @id @default(cuid())
+
+  // Auth + E-Mail-Verifizierung
+  email              String    @unique
+  passwordHash       String
+  verified           Boolean   @default(false)
+  verifyToken        String?   @unique
+  verifyTokenExpires DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationen
+  profile UserProfile?
+  consent Consent?
+  doctors Doctor[]
 }
 
 model UserProfile {
-  id      String @id @default(cuid())
-  userId  String @unique
-  // HIER anpassen:
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // … restliche Felder …
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Consent {
-  id      String @id @default(cuid())
-  userId  String @unique
-  // HIER anpassen:
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // … restliche Felder …
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Doctor {
-  id      String @id @default(cuid())
-  userId  String
-  // HIER anpassen:
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // … restliche Felder …
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-

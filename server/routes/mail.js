@@ -1,22 +1,18 @@
-import express from 'express';
-import { ServerClient } from 'postmark';
+// routes/mail.js
+import express from "express";
+import { sendMail } from "../emailService.js";
 
 const router = express.Router();
-const client = new ServerClient(process.env.POSTMARK_API_TOKEN);
 
-router.post('/send-test', async (req, res) => {
+router.post("/send", async (req, res) => {
+  const { to, subject, text, html } = req.body || {};
+  if (!to || !subject) return res.status(400).json({ error: "Felder 'to' und 'subject' sind erforderlich." });
   try {
-    const r = await client.sendEmail({
-      From: 'no-reply@medscout.app',
-      To: 'DEINE_TESTMAIL@…',        // z.B. deine Gmail
-      Subject: 'MedScout Test',
-      TextBody: 'Hallo vom Postmark API-Client!',
-      MessageStream: 'outbound'      // Standard-Transactional
-    });
-    res.json(r);
+    await sendMail(to, subject, text, html);
+    res.status(200).json({ ok: true });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
+    console.error("Mail-Fehler:", e?.response?.body ?? e);
+    res.status(500).json({ ok: false, error: "Senden fehlgeschlagen." });
   }
 });
 

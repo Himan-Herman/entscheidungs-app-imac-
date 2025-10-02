@@ -6,7 +6,8 @@ import symptomRoute from './routes/symptom.js';
 import symptomThreadRoute from './routes/symptomThread.js';
 import koerpersymptomThread from './routes/koerpersymptomThread.js';
 import transcribeRouter from './routes/transcribe.js';
-import { authRouter } from './routes/auth.js';
+import authRouter from './routes/auth.js';
+
 
 import mailRoutes from './routes/mail.js';           // optional: Test-Route
 import { sendVerificationEmail } from './emailService.js';
