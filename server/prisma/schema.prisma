@@ -1,6 +1,7 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  // optional bei CI/CD: shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 generator client {
@@ -8,23 +9,18 @@ generator client {
 }
 
 model User {
-  id String @id @default(cuid())
-
-  // Auth + E-Mail-Verifizierung
-  email              String    @unique
-  passwordHash       String
-  verified           Boolean   @default(false)
-  verifyToken        String?   @unique
+  id                String   @id @default(cuid())
+  email             String   @unique
+  passwordHash      String
+  verified          Boolean  @default(false)
+  verifyToken       String?  @unique
   verifyTokenExpires DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relationen
-  profile UserProfile?
-  consent Consent?
-  doctors Doctor[]
+  profile  UserProfile?
+  consent  Consent?
+  doctors  Doctor[]
 }
 
 model UserProfile {
