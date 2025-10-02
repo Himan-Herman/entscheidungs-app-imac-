@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy",
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
@@ -28,3 +30,4 @@
     "react-icons": "^5.5.0"
   }
 }
+
