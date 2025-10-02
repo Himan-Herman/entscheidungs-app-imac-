@@ -2,10 +2,10 @@
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
-    "build": "prisma generate",
-    "migrate:deploy": "prisma migrate deploy",
-    "start": "node app.js"
-  },
+  "dev": "nodemon app.js",
+  "build": "prisma generate && prisma migrate deploy",
+  "start": "node app.js"
+},
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
