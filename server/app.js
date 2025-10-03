@@ -9,7 +9,7 @@ import transcribeRouter from './routes/transcribe.js';
 import authRouter from './routes/auth.js';
 
 
-import mailRoutes from './routes/mail.js';           // optional: Test-Route
+import mailRoutes from './routes/mail.js';           
 import { sendVerificationEmail } from './emailService.js';
 
 const app = express();
@@ -23,13 +23,13 @@ app.use('/api/symptom-thread', symptomThreadRoute);
 app.use('/api/koerpersymptomthread', koerpersymptomThread);
 app.use('/api/transcribe', transcribeRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/mail', mailRoutes);                    // optional: Test-Route
+app.use('/api/mail', mailRoutes);                    
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'medscout-server', time: new Date().toISOString() });
 });
 
-// einfacher Test-Endpunkt für die Verifikationsmail
+
 app.post('/test-email', async (req, res) => {
   try {
     const { email } = req.body;
@@ -42,7 +42,7 @@ app.post('/test-email', async (req, res) => {
   }
 });
 
-// 🔴 WICHTIG: der Server muss hier starten
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server läuft unter http://localhost:${PORT}`);
