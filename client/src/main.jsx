@@ -10,7 +10,7 @@ import {
 import Layout from "./Layout.jsx";
 
 import Intro from "./pages/Intro";
-import Register from "./pages/Register.jsx";
+//import Register from "./pages/Register.jsx";
 import Startseite from "./pages/Startseite";
 import KoerperVorderseite from "./pages/KoerperVorderseite";
 import KoerperRueckseite from "./pages/KoerperRueckseite";
@@ -39,7 +39,7 @@ createRoot(document.getElementById("root")).render(
         <Route element={<Layout />}>
           <Route path="/" element={<Gate />} />
           <Route path="/intro" element={<Intro />} />
-          <Route path="/register" element={<Register />} />
+          
           <Route path="/startseite" element={<Startseite />} />
           <Route path="/symptom" element={<SymptomChat />} />
           <Route path="/bild" element={<BildUpload />} />
