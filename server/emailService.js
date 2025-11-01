@@ -39,16 +39,12 @@ export async function sendMail(to, subject, text, html) {
  * Übergib am besten direkt den komplette Link (link).
  * Alternativ kann (uid, token) übergeben werden.
  */
-export async function sendVerificationEmail({ to, link, token, uid, userName }) {
-  let verifyLink = link;
-  if (!verifyLink && token && uid) {
-    const apiBase = (process.env.API_BASE_URL ?? "http://localhost:3000").replace(/\/+$/,"");
-    verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
-  }
+export async function sendVerificationEmail({ to, token, userName }) {
+  if (!token) throw new Error("sendVerificationEmail: missing token");
 
-  if (!verifyLink) {
-    throw new Error("sendVerificationEmail: missing link (or token+uid)");
-  }
+  const apiBase = (process.env.API_BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+  // ✔️ passt zur Backend-Route unten (Query-Param ?token=)
+  const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
 
   const subject = "Bitte E-Mail-Adresse bestätigen";
   const text = `Hallo${userName ? " " + userName : ""},

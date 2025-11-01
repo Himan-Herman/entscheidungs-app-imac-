@@ -156,8 +156,8 @@ authRouter.get("/verify-email", async (req, res) => {
     });
 
     if (!user) {
-      const appBase = (process.env.APP_BASE_URL || "http://localhost:5173").replace(/\/+$/,"");
-      return res.redirect(`${appBase}/verify-email?status=invalid`);
+      const appBase = (process.env.APP_BASE_URL || "https://medscout.app").replace(/\/+$/,"");
+      return res.redirect(`${appBase}/verified`);
     }
 
     // verifizieren + Token leeren
@@ -170,11 +170,11 @@ authRouter.get("/verify-email", async (req, res) => {
       },
     });
 
-    const appBase = (process.env.APP_BASE_URL || "http://localhost:5173").replace(/\/+$/,"");
+    const appBase = (process.env.APP_BASE_URL || "https://medscout.app").replace(/\/+$/,"");
     return res.redirect(`${appBase}/intro`);
   } catch (err) {
     console.error("[verify-email]", err);
-    const appBase = (process.env.APP_BASE_URL || "http://localhost:5173").replace(/\/+$/,"");
+    const appBase = (process.env.APP_BASE_URL || "https://medscout.app").replace(/\/+$/,"");
     return res.redirect(`${appBase}/verify-email?status=error`);
   }
 });
