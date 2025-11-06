@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://api.medscout.app/api/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
