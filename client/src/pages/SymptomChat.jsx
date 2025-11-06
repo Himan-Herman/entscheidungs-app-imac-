@@ -5,7 +5,7 @@ import { getOrganPrompt } from "./prompt/organPrompts";
 
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
-
+import { apiFetch } from "../lib/api";
 
 export default function SymptomChat() {
   const [eingabe, setEingabe] = useState("");
@@ -91,10 +91,12 @@ export default function SymptomChat() {
     setLadeStatus(true);
 
     try {
-      const response = await fetch("/api/symptom-thread", {
+      const response = await apiFetch("/api/symptom-thread", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ verlauf: neuerVerlauf, threadId }),
+        body: JSON.stringify({
+          verlauf: neuerVerlauf,
+          threadId,
+        }),
       });
 
       const data = await response.json();

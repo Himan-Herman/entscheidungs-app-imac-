@@ -1,3 +1,4 @@
+// server/app.js
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -12,18 +13,26 @@ import { sendVerificationEmail } from './emailService.js';
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: [
-    'http://localhost:5173',      // lokal (Vite)
-    'https://DEIN-CLIENT-DOMAIN'  // später  echte Frontend-URL (z. B. Vercel)
-  ],
-  credentials: true
-}));
+
+const allowedOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: allowedOrigins.length
+      ? allowedOrigins
+      : ['http://localhost:5173'], // Fallback für lokale Entwicklung
+    credentials: false, // kein Cookie-Handling nötig
+  })
+);
+
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-// API-Routen
+
 app.use('/api/symptom', symptomRoute);
 app.use('/api/symptom-thread', symptomThreadRoute);
 app.use('/api/koerpersymptomthread', koerpersymptomThread);
@@ -31,9 +40,16 @@ app.use('/api/transcribe', transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/mail', mailRoutes);
 
-// Health + Root
-app.get('/health', (_req, res) =>
-  res.json({ ok: true, service: 'medscout-server', time: new Date().toISOString() })
+
+
+// funktioniert mit /health UND /api/health
+app.get(['/health', '/api/health'], (_req, res) =>
+  res.json({
+    ok: true,
+    service: 'medscout-server',
+    time: new Date().toISOString(),
+    uptime: process.uptime(),
+  })
 );
 
 app.get('/', (_req, res) => {
@@ -42,17 +58,23 @@ app.get('/', (_req, res) => {
     <p>Der Server läuft erfolgreich.</p>
     <ul>
       <li><a href="/health">/health</a></li>
+      <li><a href="/api/health">/api/health</a></li>
       <li><a href="/api/symptom">/api/symptom</a></li>
       <li><a href="/api/auth">/api/auth</a></li>
     </ul>
   `);
 });
 
-// Test-Email (optional – in Prod lieber schützen/entfernen)
+
 app.post('/test-email', async (req, res) => {
   try {
     const { email } = req.body;
-    const verifyLink = `${process.env.APP_BASE_URL}/verify-email?token=TEST123`;
+    const APP_BASE_URL =
+      process.env.APP_BASE_URL ||
+      process.env.VITE_APP_BASE_URL ||
+      'https://medscout.app';
+    const verifyLink = `${APP_BASE_URL}/verify-email?token=TEST123`;
+
     const info = await sendVerificationEmail(email, verifyLink);
     res.json({ ok: true, info });
   } catch (err) {
@@ -61,7 +83,7 @@ app.post('/test-email', async (req, res) => {
   }
 });
 
-// Start
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server läuft unter http://localhost:${PORT}`);
