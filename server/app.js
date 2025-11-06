@@ -35,6 +35,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use('/api/symptom', symptomRoute);
 app.use('/api/symptom-thread', symptomThreadRoute);
+app.use("/api/textsymptom",  symptomThreadRoute);
 app.use('/api/koerpersymptomthread', koerpersymptomThread);
 app.use('/api/transcribe', transcribeRouter);
 app.use('/api/auth', authRouter);

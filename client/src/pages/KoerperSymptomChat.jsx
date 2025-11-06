@@ -9,7 +9,7 @@ import "../styles/KoerperSymptomChat.css";
 
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
-import { apiFetch } from "../lib/api.js";
+
 const THREAD_API = "/api/koerpersymptomthread";
 const LS_CHAT_KEY = "koerperChatVerlauf";
 const LS_THREAD_KEY = "koerperThreadId";
@@ -181,8 +181,9 @@ useEffect(() => {
             : [userMsg],
       };
 
-      const response = await apiFetch("/api/koerpersymptomthread", {
+      const response = await fetch(THREAD_API, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
