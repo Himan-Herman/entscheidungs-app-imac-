@@ -7,7 +7,13 @@ import { buildKoerpersymptomPrompt } from '../../client/src/pages/prompt/koerper
 dotenv.config();
 const router = express.Router();
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  
+});
+if (!process.env.OPENAI_API_KEY) console.warn('[koerpersymptom] OPENAI_API_KEY fehlt');
+if (!process.env.OPENAI_PROJECT_ID) console.warn('[koerpersymptom] OPENAI_PROJECT_ID fehlt');
+
 const ASSISTANT_ID = process.env.ASSISTANT_ID_KOERPERSYMPTOM;
 
 
