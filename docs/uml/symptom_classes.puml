@@ -1,0 +1,53 @@
+@startuml symptom_classes
+skinparam classAttributeIconSize 0
+
+title Domain-Klassen für den Symptom-Chat
+
+class SymptomSession {
+  - id: string
+  - userId: string
+  - threadId: string
+  - messages: List<Message>
+  - createdAt: DateTime
+  - updatedAt: DateTime
+  + addUserMessage(text: string)
+  + addAssistantMessage(text: string)
+}
+
+class Message {
+  - id: string
+  - role: MessageRole
+  - content: string
+  - timestamp: DateTime
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+class SymptomController {
+  + handlePostSymptom(request, response)
+  - getOrCreateSession(userId: string): SymptomSession
+}
+
+class KIClient {
+  + createThread(): string
+  + sendMessage(threadId: string, text: string): void
+  + getResponse(threadId: string): string
+}
+
+class User {
+  - id: string
+  - name: string
+  - email: string
+}
+
+SymptomSession "1" o-- "many" Message : enthält >
+SymptomSession "1" --> "1" User : gehört zu >
+
+SymptomController ..> SymptomSession : verwendet >
+SymptomController ..> KIClient : ruft auf >
+
+@enduml

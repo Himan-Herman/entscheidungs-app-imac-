@@ -1,0 +1,30 @@
+@startuml symptom_usecase
+left to right direction
+skinparam packageStyle rect
+skinparam actorStyle awesome
+
+actor User as "Nutzer/Patient"
+
+rectangle MedScout <<System>> {
+  usecase "Symptom eingeben" as UC_SymptomInput
+  usecase "KI-Rückfragen beantworten" as UC_AnswerQuestions
+  usecase "Facharzt-\nEmpfehlung anzeigen" as UC_ShowRecommendation
+  usecase "Verlauf der\nKonversation ansehen" as UC_ViewHistory
+}
+
+User --> UC_SymptomInput
+User --> UC_AnswerQuestions
+User --> UC_ShowRecommendation
+User --> UC_ViewHistory
+
+UC_SymptomInput --> UC_AnswerQuestions : <<includes>>
+UC_AnswerQuestions --> UC_ShowRecommendation : <<results in>>
+
+note right of UC_ViewHistory
+  Der Symptom-Chat nutzt eine
+  eigene threadId (symptomThreadId),
+  damit der Verlauf getrennt von
+  Body Map und Bildanalyse bleibt.
+end note
+
+@enduml
