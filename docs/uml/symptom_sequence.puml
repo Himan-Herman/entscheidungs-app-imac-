@@ -32,17 +32,23 @@ end
 
 == Nachricht an KI schicken ==
 
+== Nachricht an KI schicken ==
+
+FE -> BE : POST /api/symptom\n{text, threadId}
+
 BE -> KIC : sendMessage(threadId, text)
 KIC -> OA : POST /threads/{threadId}/messages
 OA --> KIC : 202 Accepted
 
 BE -> KIC : getResponse(threadId)
 KIC -> OA : POST /threads/{threadId}/runs
-OA --> KIC : Antwort\n(Rückfrage oder Empfehlung)
+OA --> KIC : assistantMessage
+
 KIC --> BE : assistantMessage
 BE --> FE : { replyText, threadId }
 
-FE --> User : Antwort im Chat anzeigen
+FE --> User : Antwort anzeigen
+
 
 == Folgefragen (gleicher Thread) ==
 
