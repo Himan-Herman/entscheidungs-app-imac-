@@ -1,0 +1,36 @@
+@startuml image_usecase
+left to right direction
+skinparam packageStyle rect
+skinparam actorStyle awesome
+
+actor User as "Nutzer/Patient"
+
+rectangle MedScout <<System>> {
+
+  usecase "Bild hochladen" as UC_UploadImage
+  usecase "Bildbeschreibung  eingeben" as UC_DescribeImage
+  usecase "KI-Analyse ausführen\n(Bildanalyse)" as UC_AnalyzeImage
+  usecase "Facharzt-\nEmpfehlung anzeigen\n(Bildanalyse)" as UC_ImageRecommendation
+  usecase "Bildanalyse-Verlauf\nansehen" as UC_ViewImageHistory
+}
+
+' --- User Actions ---
+User --> UC_UploadImage
+User --> UC_DescribeImage
+User --> UC_AnalyzeImage
+User --> UC_ImageRecommendation
+User --> UC_ViewImageHistory
+
+' --- Relations ---
+UC_UploadImage --> UC_DescribeImage : <<includes>>
+UC_DescribeImage --> UC_AnalyzeImage : <<includes>>
+UC_AnalyzeImage --> UC_ImageRecommendation : <<results in>>
+
+note right of UC_ViewImageHistory
+Der Bild-Upload nutzt eine eigene
+threadId (imageThreadId),
+damit der Verlauf getrennt
+von Symptom- und Body-Map-Chat bleibt.
+end note
+
+@enduml

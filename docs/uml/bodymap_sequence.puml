@@ -1,0 +1,62 @@
+@startuml bodymap_sequence
+autonumber
+skinparam participantStyle rectangle
+
+actor User
+participant "React-Frontend\n(BodyMapView)" as FE
+participant "Backend\n(/api/bodymap)" as BE
+participant "KIClient\n(openaiClient)" as KIC
+participant "OpenAI\nThreads API" as OA
+
+title Body-Map-Chat mit eigener bodyMapThreadId
+
+== Erste Körperregion wählen (Thread anlegen) ==
+
+User -> FE : Körperregion auswählen\n(z.B. Kopf)
+FE -> FE : getOrCreateBodyMapThreadId()
+
+alt bodyMapThreadId existiert NICHT
+  FE -> BE : POST /api/bodymap\n{region, text, threadId: null}
+  BE -> KIC : createThread()
+  KIC -> OA : POST /threads
+  OA --> KIC : bodyMapThreadId
+  KIC --> BE : bodyMapThreadId
+  BE --> FE : { replyText: "Thread erstellt", bodyMapThreadId }
+  note right of FE
+    Frontend speichert bodyMapThreadId,
+    z.B. im State oder LocalStorage.
+  end note
+else bodyMapThreadId existiert bereits
+  FE -> BE : POST /api/bodymap\n{region, text, threadId}
+end
+
+== Details / Nachricht an KI schicken ==
+
+FE -> BE : POST /api/bodymap\n{region, text, threadId}
+BE -> KIC : sendMessage(threadId, text)
+KIC -> OA : POST /threads/{threadId}/messages
+OA --> KIC : 202 Accepted
+
+BE -> KIC : getResponse(threadId)
+KIC -> OA : POST /threads/{threadId}/runs
+OA --> KIC : assistantMessage\n(Rückfrage oder Empfehlung)
+KIC --> BE : assistantMessage
+BE --> FE : { replyText, threadId }
+FE --> User : Antwort im Body-Map-Chat anzeigen
+
+== Folgefragen (gleicher Thread) ==
+
+User -> FE : Rückfrage beantworten
+FE -> BE : POST /api/bodymap\n{text, threadId}
+BE -> KIC : sendMessage(threadId, text)
+... gleiche Schritte wie oben ...
+
+note over BE, KIC
+  Alle Nachrichten dieses Bereichs
+  verwenden bodyMapThreadId.
+  Symptom-Chat und Bildanalyse
+  haben jeweils eigene threadIds
+  (getrennte Kontexte).
+end note
+
+@enduml

@@ -1,0 +1,69 @@
+@startuml bodymap_classes
+skinparam classAttributeIconSize 0
+
+title Domain-Klassen für die Body-Map
+
+class BodyMapSession {
+  - id: string
+  - userId: string
+  - bodyMapThreadId: string
+  - selectedRegion: BodyRegion
+  - messages: List<Message>
+  - createdAt: DateTime
+  - updatedAt: DateTime
+  + selectRegion(region: BodyRegion)
+  + addUserMessage(text: string)
+  + addAssistantMessage(text: string)
+}
+
+class Message {
+  - id: string
+  - role: MessageRole
+  - content: string
+  - timestamp: DateTime
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+enum BodyRegion {
+  head
+  neck
+  chest
+  abdomen
+  back
+  arm
+  leg
+}
+
+class BodyMapController {
+  + handlePostBodyMap(request, response)
+  - getOrCreateBodyMapSession(userId: string): BodyMapSession
+}
+
+class KIClient {
+  + createThread(): string
+  + sendMessage(threadId: string, text: string): void
+  + getResponse(threadId: string): string
+}
+
+class User {
+  - id: string
+  - name: string
+  - email: string
+}
+
+' Beziehungen im HRW-Stil
+BodyMapSession "1   " *-- "many" Message : enthält 
+BodyMapSession "1  " -- "1  " User : gehört zu 
+BodyMapSession ..> BodyRegion : nutzt Region 
+
+Message ..> MessageRole : verwendet Rolle 
+
+BodyMapController ..> BodyMapSession : verwendet 
+BodyMapController ..> KIClient : ruft auf 
+
+@enduml

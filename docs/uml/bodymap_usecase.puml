@@ -1,0 +1,37 @@
+@startuml bodymap_usecase
+left to right direction
+skinparam packageStyle rect
+skinparam actorStyle awesome
+
+actor User as "Nutzer/Patient"
+
+rectangle MedScout <<System>> {
+
+  usecase "Körperregion auswählen" as UC_SelectRegion
+  usecase "Details zur Region angeben" as UC_ProvideDetails
+  usecase "KI-Rückfragen beantworten\n(Body Map)" as UC_AnswerQuestions
+  usecase "Facharzt-\nEmpfehlung anzeigen\n(Body Map)" as UC_ShowRecommendation
+  usecase "Body-Map-Verlauf\nansehen" as UC_ViewHistory
+}
+
+' --- User-Pfeile ---
+User --> UC_SelectRegion
+User --> UC_ProvideDetails
+User --> UC_AnswerQuestions
+User --> UC_ShowRecommendation
+User --> UC_ViewHistory
+
+
+
+' --- Beziehungen zwischen Use-Cases ---
+UC_SelectRegion --> UC_ProvideDetails : <<includes>>
+UC_ProvideDetails --> UC_AnswerQuestions : <<includes>>
+UC_AnswerQuestions --> UC_ShowRecommendation : <<results in>>
+
+note right of UC_ViewHistory
+Der Body-Map-Chat nutzt eine eigene
+threadId (bodyMapThreadId),
+damit der Verlauf getrennt bleibt.
+end note
+
+@enduml

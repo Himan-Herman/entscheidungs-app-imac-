@@ -1,0 +1,69 @@
+@startuml image_sequence
+autonumber
+skinparam participantStyle rectangle
+
+actor User
+participant "React-Frontend\n(ImageUploadView)" as FE
+participant "Backend\n(/api/image)" as BE
+participant "KIClient\n(openaiClient)" as KIC
+participant "OpenAI\nThreads API" as OA
+
+title Bildanalyse mit eigener imageThreadId
+
+== Bild auswählen & hochladen ==
+
+User -> FE : Bild auswählen\n(z.B. Hautausschlag)
+FE -> BE : POST /api/image\n{ image, description, threadId: null }
+
+== Thread anlegen (nur beim ersten Bild) ==
+
+alt imageThreadId existiert NICHT
+  BE -> KIC : createThread()
+  KIC -> OA : POST /threads
+  OA --> KIC : imageThreadId
+  KIC --> BE : imageThreadId
+  BE --> FE : { message: "Thread erstellt", imageThreadId }
+  note right of FE
+    Frontend speichert imageThreadId
+    (z.B. State oder LocalStorage).
+  end note
+else imageThreadId existiert bereits
+  FE -> BE : POST /api/image\n{ image, description, threadId }
+end
+
+== Bild & Beschreibung an KI senden ==
+
+BE -> KIC : sendMessage(threadId, "Beschreibung")
+KIC -> OA : POST /threads/{threadId}/messages
+OA --> KIC : 202 Accepted
+
+BE -> KIC : sendMessage(threadId, "Image: Base64…")
+KIC -> OA : POST /threads/{threadId}/messages
+OA --> KIC : 202 Accepted
+
+== KI-Analyse ausführen ==
+
+BE -> KIC : getResponse(threadId)
+KIC -> OA : POST /threads/{threadId}/runs
+OA --> KIC : assistantMessage\n(Bildanalyse + Rückfrage/Empfehlung)
+KIC --> BE : assistantMessage
+BE --> FE : { replyText, threadId }
+
+FE --> User : KI-Antwort anzeigen\n(z.B. „Verdacht auf Ekzem…“)
+
+== Folgefragen (gleicher Thread) ==
+
+User -> FE : Rückfrage beantworten
+FE -> BE : POST /api/image\n{text, threadId}
+BE -> KIC : sendMessage(threadId, text)
+... gleiche Schritte wie oben ...
+
+note over BE, KIC
+  Die Bildanalyse nutzt eine eigene
+  imageThreadId.
+  Dadurch bleibt der Kontext
+  von Symptom- und Body-Map-Chat
+  vollständig getrennt.
+end note
+
+@enduml

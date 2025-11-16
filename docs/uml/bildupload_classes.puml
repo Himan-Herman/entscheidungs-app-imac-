@@ -1,0 +1,68 @@
+@startuml image_classes
+skinparam classAttributeIconSize 0
+
+title Domain-Klassen für die Bildanalyse
+
+class ImageSession {
+  - id: string
+  - userId: string
+  - imageThreadId: string
+  - image: ImageData
+  - description: string
+  - messages: List<Message>
+  - createdAt: DateTime
+  - updatedAt: DateTime
+  + attachImage(image: ImageData)
+  + addUserMessage(text: string)
+  + addAssistantMessage(text: string)
+}
+
+class ImageData {
+  - id: string
+  - filePath: string
+  - mimeType: string
+  - sizeInBytes: int
+}
+
+class Message {
+  - id: string
+  - role: MessageRole
+  - content: string
+  - timestamp: DateTime
+}
+
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+class ImageController {
+  + handlePostImage(request, response)
+  - getOrCreateImageSession(userId: string): ImageSession
+}
+
+class KIClient {
+  + createThread(): string
+  + sendMessage(threadId: string, text: string): void
+  + getResponse(threadId: string): string
+}
+
+class User {
+  - id: string
+  - name: string
+  - email: string
+}
+
+' --- Beziehungen im HRW-Stil ---
+
+ImageSession "1" *-- "1" ImageData : enthält Bild >
+ImageSession "1" *-- "many" Message : enthält >
+ImageSession "1" -- "1" User : gehört zu >
+
+Message ..> MessageRole : verwendet Rolle >
+
+ImageController ..> ImageSession : verwendet >
+ImageController ..> KIClient : ruft auf >
+
+@enduml
