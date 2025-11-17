@@ -17,14 +17,23 @@ authRouter.post("/register", async (req, res) => {
   try {
     const { user, profile = {}, consent = {}, doctors = [] } = req.body ?? {};
 
-    if (!user?.email || !user?.password || !user?.first_name || !user?.last_name || !user?.date_of_birth) {
+    if (
+      !user?.email ||
+      !user?.password ||
+      !user?.first_name ||
+      !user?.last_name ||
+      !user?.date_of_birth
+    ) {
       return res.status(400).json({ error: "Pflichtfelder fehlen." });
     }
 
     const emailNorm = user.email.trim().toLowerCase();
 
     // existiert?
-    const existing = await prisma.user.findUnique({ where: { email: emailNorm } });
+    const existing = await prisma.user.findUnique({
+      where: { email: emailNorm },
+    });
+
     if (existing) {
       if (!existing.verified) {
         // neuen Token generieren
@@ -39,10 +48,20 @@ authRouter.post("/register", async (req, res) => {
           },
         });
 
-        const apiBase = (process.env.API_BASE_URL ?? "http://localhost:3000").replace(/\/+$/,"");
-        const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(tokenPlain)}`;
+        const apiBase = (
+          process.env.API_BASE_URL ?? "http://localhost:3000"
+        ).replace(/\/+$/, "");
+        const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(
+          tokenPlain
+        )}`;
 
-        await sendVerificationEmail({ to: emailNorm, link: verifyLink, userName: existing.firstName ?? undefined });
+        // WICHTIG: token mitgeben
+        await sendVerificationEmail({
+          to: emailNorm,
+          token: tokenPlain,
+          link: verifyLink,
+          userName: existing.firstName ?? undefined,
+        });
 
         return res.json({ ok: true, resent: true });
       }
@@ -77,7 +96,9 @@ authRouter.post("/register", async (req, res) => {
           create: {
             termsAcceptedAt: consent.terms_accepted ? new Date() : null,
             privacyAcceptedAt: consent.privacy_accepted ? new Date() : null,
-            medicalDisclaimerAcceptedAt: consent.medical_disclaimer_accepted ? new Date() : null,
+            medicalDisclaimerAcceptedAt: consent.medical_disclaimer_accepted
+              ? new Date()
+              : null,
             doctorAlertConsent: !!consent.doctor_alert_consent,
           },
         },
@@ -110,15 +131,29 @@ authRouter.post("/register", async (req, res) => {
       },
     });
 
-    const apiBase = (process.env.API_BASE_URL ?? "http://localhost:3000").replace(/\/+$/,"");
-    const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(tokenPlain)}`;
+    const apiBase = (
+      process.env.API_BASE_URL ?? "http://localhost:3000"
+    ).replace(/\/+$/, "");
+    const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(
+      tokenPlain
+    )}`;
 
     try {
       if (process.env.EMAIL_ENABLED !== "false") {
-        await sendVerificationEmail({ to: created.email, link: verifyLink, userName: created.firstName });
+        // WICHTIG: token mitgeben
+        await sendVerificationEmail({
+          to: created.email,
+          token: tokenPlain,
+          link: verifyLink,
+          userName: created.firstName,
+        });
       }
     } catch (err) {
-      console.error("MAIL SEND FAILED:", err?.code, err?.response?.body ?? err?.message ?? err);
+      console.error(
+        "MAIL SEND FAILED:",
+        err?.code,
+        err?.response?.body ?? err?.message ?? err
+      );
       return res.status(202).json({
         ok: false,
         error: "MAIL_FAILED_CAN_RESEND",
@@ -155,8 +190,11 @@ authRouter.get("/verify-email", async (req, res) => {
       select: { id: true },
     });
 
+    const appBase = (
+      process.env.APP_BASE_URL || "https://medscout.app"
+    ).replace(/\/+$/, "");
+
     if (!user) {
-      const appBase = (process.env.APP_BASE_URL || "https://medscout.app").replace(/\/+$/,"");
       return res.redirect(`${appBase}/verified`);
     }
 
@@ -170,11 +208,12 @@ authRouter.get("/verify-email", async (req, res) => {
       },
     });
 
-    const appBase = (process.env.APP_BASE_URL || "https://medscout.app").replace(/\/+$/,"");
     return res.redirect(`${appBase}/intro`);
   } catch (err) {
     console.error("[verify-email]", err);
-    const appBase = (process.env.APP_BASE_URL || "https://medscout.app").replace(/\/+$/,"");
+    const appBase = (
+      process.env.APP_BASE_URL || "https://medscout.app"
+    ).replace(/\/+$/, "");
     return res.redirect(`${appBase}/verify-email?status=error`);
   }
 });
@@ -197,10 +236,20 @@ authRouter.post("/resend-verification", async (req, res) => {
       data: { verifyToken: tokenPlain, verifyTokenExpires: expires },
     });
 
-    const apiBase = (process.env.API_BASE_URL ?? "http://localhost:3000").replace(/\/+$/,"");
-    const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(tokenPlain)}`;
+    const apiBase = (
+      process.env.API_BASE_URL ?? "http://localhost:3000"
+    ).replace(/\/+$/, "");
+    const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(
+      tokenPlain
+    )}`;
 
-    await sendVerificationEmail({ to: emailNorm, link: verifyLink, userName: u.firstName ?? undefined });
+    // WICHTIG: token mitgeben
+    await sendVerificationEmail({
+      to: emailNorm,
+      token: tokenPlain,
+      link: verifyLink,
+      userName: u.firstName ?? undefined,
+    });
 
     return res.json({ ok: true });
   } catch (err) {
@@ -221,7 +270,9 @@ authRouter.post("/login", async (req, res) => {
   if (!ok) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
 
   if (!u.verified) {
-    return res.status(403).json({ error: "EMAIL_NOT_VERIFIED", needVerification: true });
+    return res
+      .status(403)
+      .json({ error: "EMAIL_NOT_VERIFIED", needVerification: true });
   }
 
   return res.json({ ok: true, userId: u.id });
