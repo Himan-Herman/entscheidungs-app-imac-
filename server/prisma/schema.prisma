@@ -31,10 +31,16 @@ model UserProfile {
 }
 
 model Consent {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                         String   @id @default(cuid())
+  userId                     String   @unique
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  termsAcceptedAt            DateTime
+  privacyAcceptedAt          DateTime
+  medicalDisclaimerAcceptedAt DateTime
+  doctorAlertConsent         Boolean  @default(false)
 }
+
 
 model Doctor {
   id     String @id @default(cuid())
