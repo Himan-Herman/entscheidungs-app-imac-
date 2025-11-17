@@ -1,22 +1,15 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // optional bei CI/CD: shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 model User {
-  id                String   @id @default(cuid())
-  email             String   @unique
-  passwordHash      String
-  verified          Boolean  @default(false)
-  verifyToken       String?  @unique
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  passwordHash       String
+  firstName          String
+  lastName           String
+  dateOfBirth        DateTime
+  verified           Boolean  @default(false)
+  verifyToken        String?  @unique
   verifyTokenExpires DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   profile  UserProfile?
   consent  Consent?
@@ -24,8 +17,16 @@ model User {
 }
 
 model UserProfile {
-  id     String @id @default(cuid())
-  userId String @unique
+  id         String  @id @default(cuid())
+  userId     String  @unique
+  phone      String?
+  addressLine String?
+  postalCode  String?
+  city        String?
+  country     String?
+  insuranceType String?
+  gender      String?
+
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -39,4 +40,13 @@ model Doctor {
   id     String @id @default(cuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
 }
