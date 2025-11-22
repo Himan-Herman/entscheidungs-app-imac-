@@ -2,48 +2,53 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import sgMail from "@sendgrid/mail";
+import { Resend } from "resend";
 
-const apiKey = process.env.SENDGRID_API_KEY;
-const from = process.env.SENDGRID_FROM;
+const resendApiKey = process.env.RESEND_API_KEY;
+const from = process.env.EMAIL_FROM; // z.B. "MedScoutX <noreply@medscoutx.app>"
 
-if (!apiKey) console.error("FEHLER: SENDGRID_API_KEY fehlt in .env");
-if (!from) console.error("FEHLER: SENDGRID_FROM fehlt in .env");
+if (!resendApiKey) console.error("FEHLER: RESEND_API_KEY fehlt in .env");
+if (!from) console.error("FEHLER: EMAIL_FROM fehlt in .env");
 
-if (apiKey) sgMail.setApiKey(apiKey);
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 /**
- * Generische Mail senden
+ * Generische Mail senden (Resend)
  */
 export async function sendMail(to, subject, text, html) {
-  const msg = {
+  if (!resend) {
+    throw new Error("Resend ist nicht initialisiert (RESEND_API_KEY fehlt).");
+  }
+
+  const message = {
+    from,
     to,
-    from, // MUSS bei SendGrid verifiziert sein (Single Sender oder Domain)
     subject,
     text: text ?? "",
     html: html ?? `<p>${text ?? ""}</p>`,
   };
 
   try {
-    const [res] = await sgMail.send(msg);
-    console.log(`📧 Mail an ${Array.isArray(to) ? to.join(", ") : to} gesendet. Status:`, res.statusCode);
+    const res = await resend.emails.send(message);
+    console.log(
+      `📧 Mail an ${Array.isArray(to) ? to.join(", ") : to} gesendet.`,
+      "Resend-ID:",
+      res?.data?.id ?? "keine ID"
+    );
     return true;
   } catch (err) {
-    console.error("SendGrid Fehler:", err?.response?.body ?? err);
+    console.error("Resend Fehler:", err?.response?.data ?? err);
     throw err;
   }
 }
 
 /**
  * Verifizierungs-Mail senden
- * Übergib am besten direkt den komplette Link (link).
- * Alternativ kann (uid, token) übergeben werden.
  */
 export async function sendVerificationEmail({ to, token, userName }) {
   if (!token) throw new Error("sendVerificationEmail: missing token");
 
   const apiBase = (process.env.API_BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
-  // ✔️ passt zur Backend-Route unten (Query-Param ?token=)
   const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
 
   const subject = "Bitte E-Mail-Adresse bestätigen";
