@@ -56,13 +56,13 @@ class User {
 
 ' --- Beziehungen im HRW-Stil ---
 
-ImageSession "1" *-- "1" ImageData : enthält Bild >
-ImageSession "1" *-- "many" Message : enthält >
-ImageSession "1" -- "1" User : gehört zu >
+ImageSession "1  " *-- "1..*  " ImageData : enthält Bild 
+ImageSession "1  " *-- "0..*" Message : enthält 
+ImageSession "0..*  " -- "1  " User : gehört zu 
 
-Message ..> MessageRole : verwendet Rolle >
+Message ..> MessageRole : verwendet Rolle 
 
-ImageController ..> ImageSession : verwendet >
-ImageController ..> KIClient : ruft auf >
+ImageController ..> ImageSession : verwendet 
+ImageController ..> KIClient : ruft auf 
 
 @enduml

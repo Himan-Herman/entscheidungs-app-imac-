@@ -44,10 +44,15 @@ class User {
   - email: string
 }
 
-SymptomSession "1" o-- "many" Message : enthält >
-SymptomSession "1" --> "1" User : gehört zu >
+' HRW-konforme Beziehungen:
+SymptomSession " 1 " *-- "0..*" Message : enthält 
+SymptomSession "0..*"  -- " 1 " User : gehört zu 
 
-SymptomController ..> SymptomSession : verwendet >
-SymptomController ..> KIClient : ruft auf >
+
+SymptomController ..> SymptomSession : verwendet 
+SymptomController ..> KIClient : ruft auf 
+
+' Optional, wenn du die Rolle-Beziehung explizit zeigen willst:
+Message ..> MessageRole : verwendet Rolle 
 
 @enduml

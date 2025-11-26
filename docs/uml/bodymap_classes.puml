@@ -57,8 +57,8 @@ class User {
 }
 
 ' Beziehungen im HRW-Stil
-BodyMapSession "1   " *-- "many" Message : enthält 
-BodyMapSession "1  " -- "1  " User : gehört zu 
+BodyMapSession "1   " *-- "0.." Message : enthält 
+BodyMapSession "0..  " -- "1  " User : gehört zu 
 BodyMapSession ..> BodyRegion : nutzt Region 
 
 Message ..> MessageRole : verwendet Rolle 
