@@ -10,6 +10,7 @@ import transcribeRouter from './routes/transcribe.js';
 import authRouter from './routes/auth.js';
 import mailRoutes from './routes/mail.js';
 import { sendVerificationEmail } from './emailService.js';
+import { requireAuth } from './middleware/requireAuth.js';
 
 const app = express();
 
@@ -33,11 +34,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 
-app.use('/api/symptom', symptomRoute);
-app.use('/api/symptom-thread', symptomThreadRoute);
-app.use("/api/textsymptom",  symptomThreadRoute);
-app.use('/api/koerpersymptomthread', koerpersymptomThread);
-app.use('/api/transcribe', transcribeRouter);
+app.use('/api/symptom', requireAuth, symptomRoute);
+app.use('/api/symptom-thread', requireAuth, symptomThreadRoute);
+app.use('/api/textsymptom', requireAuth, symptomThreadRoute);
+app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
+app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/mail', mailRoutes);
 

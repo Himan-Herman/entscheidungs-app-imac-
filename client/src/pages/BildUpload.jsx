@@ -3,6 +3,7 @@ import "../styles/BildUpload.css";
 
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
+import { getAuthHeaders } from "../api/authHeaders";
 
 
 
@@ -299,7 +300,10 @@ const handleVoice = (text) => {
 
       const response = await fetch("/api/symptom", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),      // 🔐 Token dazu
+        },
         body: JSON.stringify(body),
       });
 

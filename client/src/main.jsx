@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import ProtectedRoute from "./components/ProtectedRoute";
 import {
   BrowserRouter,
   Routes,
@@ -40,13 +41,62 @@ createRoot(document.getElementById("root")).render(
           <Route path="/" element={<Gate />} />
           <Route path="/intro" element={<Intro />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/startseite" element={<Startseite />} />
-          <Route path="/symptom" element={<SymptomChat />} />
-          <Route path="/bild" element={<BildUpload />} />
-          <Route path="/region-start" element={<KoerperregionStart />} />
-          <Route path="/koerperregionen" element={<KoerperVorderseite />} />
-          <Route path="/rueckseite" element={<KoerperRueckseite />} />
-          <Route path="/koerpersymptom" element={<KoerperSymptomChat />} />
+          <Route
+  path="/startseite"
+  element={
+    <ProtectedRoute>
+      <Startseite />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/symptom"
+  element={
+    <ProtectedRoute>
+      <SymptomChat />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/bild"
+  element={
+    <ProtectedRoute>
+      <BildUpload />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/region-start"
+  element={
+    <ProtectedRoute>
+      <KoerperregionStart />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/koerperregionen"
+  element={
+    <ProtectedRoute>
+      <KoerperVorderseite />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/rueckseite"
+  element={
+    <ProtectedRoute>
+      <KoerperRueckseite />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/koerpersymptom"
+  element={
+    <ProtectedRoute>
+      <KoerperSymptomChat />
+    </ProtectedRoute>
+  }
+/>
           <Route path="/impressum" element={<Impressum />} />
           <Route path="/datenschutz" element={<Datenschutz />} />
           <Route path="/check-email" element={<CheckEmail />} />

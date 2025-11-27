@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import "../styles/SymptomChat.css";
 import { getOrganPrompt } from "./prompt/organPrompts";
+import { getAuthHeaders } from "../api/authHeaders";
+
 
 export default function SymptomChat() {
   const [eingabe, setEingabe] = useState('');
@@ -80,9 +82,13 @@ export default function SymptomChat() {
     try {
       const response = await fetch("/api/textsymptom", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),          // 🔐 Token kommt hier rein
+        },
         body: JSON.stringify({ verlauf: neuerVerlauf, threadId }),
       });
+      
 
       const data = await response.json();
 

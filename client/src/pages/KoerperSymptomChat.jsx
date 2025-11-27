@@ -9,6 +9,8 @@ import "../styles/KoerperSymptomChat.css";
 
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
+import { getAuthHeaders } from "../api/authHeaders";
+
 
 const THREAD_API = "/api/koerpersymptomthread";
 const LS_CHAT_KEY = "koerperChatVerlauf";
@@ -183,10 +185,13 @@ useEffect(() => {
 
       const response = await fetch(THREAD_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),      // 🔐 Token wird hier ergänzt
+        },
         body: JSON.stringify(payload),
       });
-
+      
       if (!response.ok) {
         const text = await response.text();
         console.error("[Thread API] HTTP", response.status, text);

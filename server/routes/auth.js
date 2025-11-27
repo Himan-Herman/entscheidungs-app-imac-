@@ -4,6 +4,8 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail } from "../emailService.js";
+import jwt from "jsonwebtoken";
+
 
 const prisma = new PrismaClient();
 const authRouter = express.Router();
@@ -275,7 +277,15 @@ authRouter.post("/login", async (req, res) => {
       .json({ error: "EMAIL_NOT_VERIFIED", needVerification: true });
   }
 
-  return res.json({ ok: true, userId: u.id });
+  // 🔐 NEU: JWT erzeugen
+  const token = jwt.sign(
+    { userId: u.id },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  // Nutzer-ID + Token zurückgeben
+  return res.json({ ok: true, userId: u.id, token });
 });
 
 export default authRouter;

@@ -30,7 +30,17 @@ export default function Login() {
 
       if (!res.ok) throw new Error(data.error || "Login fehlgeschlagen.");
 
+      // 🔐 1) Deine bisherige Logik: Nutzer-ID speichern
       localStorage.setItem("medscout_user_id", data.userId);
+
+      // 🔐 2) NEU: Token speichern (für requireAuth)
+      if (data.token) {
+        localStorage.setItem("medscout_token", data.token);
+      } else {
+        console.warn("Login: Kein Token im Backend-Response gefunden.");
+      }
+
+      // Weiterleitung
       navigate("/intro", { replace: true });
     } catch (err) {
       setError(err.message || "Fehler beim Login.");
@@ -63,4 +73,3 @@ export default function Login() {
     </form>
   );
 }
-
