@@ -28,10 +28,14 @@ export default function Login() {
       const data = await res.json();
 
       if (data.error === "EMAIL_NOT_VERIFIED") {
+        // E-Mail für CheckEmail merken
+        localStorage.setItem("pending_verification_email", email.trim().toLowerCase());
+      
         setError("Bitte bestätige zuerst deine E-Mail.");
         navigate("/check-email");
         return;
       }
+      
 
       if (!res.ok) throw new Error(data.error || "Login fehlgeschlagen.");
 
