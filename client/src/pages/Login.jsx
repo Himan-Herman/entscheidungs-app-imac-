@@ -10,13 +10,18 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [verifyStatus, setVerifyStatus] = useState(null);
 
-  // Prüft ?verify=ok / invalid / missing / error aus der URL
+  // Status aus der URL (E-Mail-Verify + Passwort-Reset)
+  const [verifyStatus, setVerifyStatus] = useState(null);
+  const [resetStatus, setResetStatus] = useState(null);
+
+  // Prüft ?verify=... und ?reset=... aus der URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const v = params.get("verify");
+    const r = params.get("reset");
     if (v) setVerifyStatus(v);
+    if (r) setResetStatus(r);
   }, [location.search]);
 
   async function handleLogin(e) {
@@ -62,7 +67,7 @@ export default function Login() {
     }
   }
 
-  // Hilfsfunktion für Verify-Meldungen
+  // Meldungen für E-Mail-Verifizierung
   function renderVerifyMessage() {
     if (!verifyStatus) return null;
 
@@ -121,6 +126,27 @@ export default function Login() {
     }
 
     return null;
+  }
+
+  // Meldung für erfolgreiches Passwort-Reset
+  function renderResetMessage() {
+    if (resetStatus !== "ok") return null;
+
+    return (
+      <p
+        style={{
+          margin: "0 0 10px 0",
+          fontSize: 13,
+          padding: "8px 10px",
+          borderRadius: 10,
+          backgroundColor: "rgba(22,163,74,0.08)",
+          color: "#166534",
+        }}
+      >
+        ✅ Dein Passwort wurde erfolgreich zurückgesetzt. Bitte melde dich mit
+        deinem neuen Passwort an.
+      </p>
+    );
   }
 
   return (
@@ -199,6 +225,9 @@ export default function Login() {
 
         {/* Verify-Meldungen */}
         {renderVerifyMessage()}
+
+        {/* Reset-Meldung */}
+        {renderResetMessage()}
 
         {/* Fehlermeldung */}
         {error && (
@@ -296,6 +325,24 @@ export default function Login() {
             }}
           >
             {busy ? "Wird eingeloggt …" : "Einloggen"}
+          </button>
+
+          {/* Passwort vergessen */}
+          <button
+            type="button"
+            onClick={() => navigate("/forgot-password")}
+            style={{
+              marginTop: 10,
+              background: "none",
+              border: "none",
+              padding: 0,
+              color: "#0f766e",
+              textDecoration: "underline",
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            Passwort vergessen?
           </button>
         </form>
 

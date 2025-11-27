@@ -3,7 +3,7 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { sendVerificationEmail } from "../emailService.js";
+import { sendVerificationEmail, sendMail } from "../emailService.js";
 import jwt from "jsonwebtoken";
 
 
@@ -269,6 +269,64 @@ authRouter.post("/resend-verification", async (req, res) => {
     return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
   }
 });
+// POST /api/auth/request-password-reset
+authRouter.post("/request-password-reset", async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email) {
+      return res.status(400).json({ ok: false, error: "email_required" });
+    }
+
+    const emailNorm = email.trim().toLowerCase();
+
+    const user = await prisma.user.findUnique({
+      where: { email: emailNorm },
+    });
+
+    // Immer ok → nicht verraten, ob Mail existiert
+    if (!user || !user.verified) {
+      return res.json({ ok: true });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1h
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetToken: token,
+        passwordResetExpires: expires,
+      },
+    });
+
+    const appBase = (
+      process.env.APP_BASE_URL || "https://medscoutx.app"
+    ).replace(/\/+$/, "");
+
+    const resetLink = `${appBase}/reset-password?token=${encodeURIComponent(
+      token
+    )}`;
+
+    await sendMail(
+      emailNorm,
+      "MedScoutX – Passwort zurücksetzen",
+      `Hallo ${user.firstName ?? ""},
+
+du hast eine Zurücksetzung deines Passworts angefordert.
+Klicke auf den folgenden Link, um ein neues Passwort zu setzen:
+
+${resetLink}
+
+Wenn du das nicht warst, kannst du diese E-Mail ignorieren.`
+    );
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[request-password-reset]", err);
+    return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
+  }
+});
+
 
 // POST /api/auth/login
 authRouter.post("/login", async (req, res) => {

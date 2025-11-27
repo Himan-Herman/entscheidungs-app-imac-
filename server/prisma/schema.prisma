@@ -1,20 +1,23 @@
 model User {
-  id                 String   @id @default(cuid())
-  email              String   @unique
-  passwordHash       String
-  firstName          String
-  lastName           String
-  dateOfBirth        DateTime
-  verified           Boolean  @default(false)
-  verifyToken        String?  @unique
-  verifyTokenExpires DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  email                String   @unique
+  passwordHash         String
+  firstName            String
+  lastName             String
+  dateOfBirth          DateTime
+  verified             Boolean  @default(false)
+  verifyToken          String?  @unique
+  verifyTokenExpires   DateTime?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
 
   profile  UserProfile?
   consent  Consent?
   doctors  Doctor[]
 }
+
 
 model UserProfile {
   id         String  @id @default(cuid())

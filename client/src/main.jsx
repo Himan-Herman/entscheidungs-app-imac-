@@ -24,6 +24,8 @@ import Datenschutz from "./pages/Datenschutz";
 import CheckEmail from "./pages/CheckEmail";
 import Verified from "./pages/Verified";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 //import VerifyEmail from "./pages/VerifyEmail";
 
 function Gate() {
@@ -107,6 +109,8 @@ createRoot(document.getElementById("root")).render(
           {/* Fallback: alles Unbekannte auf Startseite */}
           <Route path="*" element={<Navigate to="/startseite" replace />} />
         </Route>
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
