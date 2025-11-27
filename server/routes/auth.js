@@ -179,41 +179,57 @@ authRouter.post("/register", async (req, res) => {
 
 // GET /api/auth/verify-email?token=...
 // GET /api/auth/verify-email
+// GET /api/auth/verify-email?token=...
 authRouter.get("/verify-email", async (req, res) => {
   try {
     const { token } = req.query;
-    if (!token) {
-      return res.status(400).json({ ok: false, error: "MISSING_TOKEN" });
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).send("Fehlender oder ungültiger Token.");
     }
 
-    // Token aus DB holen
-    const entry = await prisma.emailVerificationToken.findUnique({
-      where: { token },
+    // User anhand des Tokens (und Ablaufdatum) finden
+    const user = await prisma.user.findFirst({
+      where: {
+        verifyToken: token,
+        verifyTokenExpires: {
+          gt: new Date(), // noch gültig
+        },
+      },
     });
 
-    if (!entry) {
+    if (!user) {
       return res
         .status(400)
-        .json({ ok: false, error: "INVALID_OR_EXPIRED_TOKEN" });
+        .send("Dieser Bestätigungslink ist ungültig oder abgelaufen.");
     }
 
-    // User auf verified setzen
+    // User verifizieren und Token entfernen
     await prisma.user.update({
-      where: { id: entry.userId },
-      data: { verified: true },
+      where: { id: user.id },
+      data: {
+        verified: true,
+        verifyToken: null,
+        verifyTokenExpires: null,
+      },
     });
 
-    // Token löschen (nur einmal nutzbar)
-    await prisma.emailVerificationToken.delete({
-      where: { token },
-    });
+    // Ziel-URL (Startseite im Frontend)
+    const frontendBase =
+      process.env.FRONTEND_URL ||
+      process.env.APP_BASE_URL ||
+      "https://medscoutx.app";
 
-    return res.json({ ok: true });
+    // Redirect auf Startseite
+    return res.redirect(`${frontendBase.replace(/\/+$/, "")}/startseite`);
   } catch (err) {
     console.error("verify-email error:", err);
-    return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
+    return res
+      .status(500)
+      .send("Serverfehler bei der E-Mail-Bestätigung. Bitte später erneut versuchen.");
   }
 });
+
 
 
 // POST /api/auth/resend-verification
