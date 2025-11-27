@@ -11,7 +11,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  // Status aus der URL (E-Mail-Verify + Passwort-Reset)
+  // ✅ Status aus der URL für E-Mail-Verify & Passwort-Reset
   const [verifyStatus, setVerifyStatus] = useState(null);
   const [resetStatus, setResetStatus] = useState(null);
 
@@ -20,6 +20,7 @@ export default function Login() {
     const params = new URLSearchParams(location.search);
     const v = params.get("verify");
     const r = params.get("reset");
+
     if (v) setVerifyStatus(v);
     if (r) setResetStatus(r);
   }, [location.search]);
@@ -67,7 +68,7 @@ export default function Login() {
     }
   }
 
-  // Meldungen für E-Mail-Verifizierung
+  // Hilfsfunktion für Verify-Meldungen
   function renderVerifyMessage() {
     if (!verifyStatus) return null;
 
@@ -101,8 +102,8 @@ export default function Login() {
             color: "#b91c1c",
           }}
         >
-          ❌ Der Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere
-          dich erneut.
+          ❌ Der Bestätigungslink ist ungültig oder abgelaufen. Bitte
+          registriere dich erneut.
         </p>
       );
     }
@@ -128,25 +129,26 @@ export default function Login() {
     return null;
   }
 
-  // Meldung für erfolgreiches Passwort-Reset
+  // ✅ Meldung nach erfolgreichem Passwort-Reset
   function renderResetMessage() {
-    if (resetStatus !== "ok") return null;
-
-    return (
-      <p
-        style={{
-          margin: "0 0 10px 0",
-          fontSize: 13,
-          padding: "8px 10px",
-          borderRadius: 10,
-          backgroundColor: "rgba(22,163,74,0.08)",
-          color: "#166534",
-        }}
-      >
-        ✅ Dein Passwort wurde erfolgreich zurückgesetzt. Bitte melde dich mit
-        deinem neuen Passwort an.
-      </p>
-    );
+    if (resetStatus === "ok") {
+      return (
+        <p
+          style={{
+            margin: "0 0 10px 0",
+            fontSize: 13,
+            padding: "8px 10px",
+            borderRadius: 10,
+            backgroundColor: "rgba(22,163,74,0.08)",
+            color: "#166534",
+          }}
+        >
+          🔑 Dein Passwort wurde erfolgreich zurückgesetzt. Bitte melde dich mit
+          deinem neuen Passwort an.
+        </p>
+      );
+    }
+    return null;
   }
 
   return (
@@ -223,10 +225,8 @@ export default function Login() {
           MedScoutX-Funktionen zu nutzen.
         </p>
 
-        {/* Verify-Meldungen */}
+        {/* Status-Meldungen */}
         {renderVerifyMessage()}
-
-        {/* Reset-Meldung */}
         {renderResetMessage()}
 
         {/* Fehlermeldung */}
@@ -304,6 +304,7 @@ export default function Login() {
             }}
           />
 
+          {/* 🔐 Einloggen */}
           <button
             type="submit"
             disabled={busy}
@@ -327,7 +328,7 @@ export default function Login() {
             {busy ? "Wird eingeloggt …" : "Einloggen"}
           </button>
 
-          {/* Passwort vergessen */}
+          {/* 🔑 Passwort vergessen */}
           <button
             type="button"
             onClick={() => navigate("/forgot-password")}
@@ -335,11 +336,12 @@ export default function Login() {
               marginTop: 10,
               background: "none",
               border: "none",
-              padding: 0,
               color: "#0f766e",
               textDecoration: "underline",
-              fontSize: 13,
               cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 500,
+              padding: 0,
             }}
           >
             Passwort vergessen?
@@ -372,14 +374,22 @@ export default function Login() {
           <span>
             <Link
               to="/impressum"
-              style={{ color: "#6b7280", textDecoration: "none", marginRight: 8 }}
+              style={{
+                color: "#6b7280",
+                textDecoration: "none",
+                marginRight: 8,
+              }}
             >
               Impressum
             </Link>
             |
             <Link
               to="/datenschutz"
-              style={{ color: "#6b7280", textDecoration: "none", marginLeft: 8 }}
+              style={{
+                color: "#6b7280",
+                textDecoration: "none",
+                marginLeft: 8,
+              }}
             >
               Datenschutz
             </Link>
