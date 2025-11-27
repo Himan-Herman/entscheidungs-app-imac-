@@ -178,47 +178,43 @@ authRouter.post("/register", async (req, res) => {
 });
 
 // GET /api/auth/verify-email?token=...
+// GET /api/auth/verify-email
 authRouter.get("/verify-email", async (req, res) => {
   try {
     const { token } = req.query;
-    if (!token) return res.status(400).send("TOKEN_MISSING");
-
-    // user mit gültigem Token finden
-    const user = await prisma.user.findFirst({
-      where: {
-        verifyToken: String(token),
-        verifyTokenExpires: { gt: new Date() },
-      },
-      select: { id: true },
-    });
-
-    const appBase = (
-      process.env.APP_BASE_URL || "https://medscout.app"
-    ).replace(/\/+$/, "");
-
-    if (!user) {
-      return res.redirect(`${appBase}/verified`);
+    if (!token) {
+      return res.status(400).json({ ok: false, error: "MISSING_TOKEN" });
     }
 
-    // verifizieren + Token leeren
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        verified: true,
-        verifyToken: null,
-        verifyTokenExpires: null,
-      },
+    // Token aus DB holen
+    const entry = await prisma.emailVerificationToken.findUnique({
+      where: { token },
     });
 
-    return res.redirect(`${appBase}/intro`);
+    if (!entry) {
+      return res
+        .status(400)
+        .json({ ok: false, error: "INVALID_OR_EXPIRED_TOKEN" });
+    }
+
+    // User auf verified setzen
+    await prisma.user.update({
+      where: { id: entry.userId },
+      data: { verified: true },
+    });
+
+    // Token löschen (nur einmal nutzbar)
+    await prisma.emailVerificationToken.delete({
+      where: { token },
+    });
+
+    return res.json({ ok: true });
   } catch (err) {
-    console.error("[verify-email]", err);
-    const appBase = (
-      process.env.APP_BASE_URL || "https://medscout.app"
-    ).replace(/\/+$/, "");
-    return res.redirect(`${appBase}/verify-email?status=error`);
+    console.error("verify-email error:", err);
+    return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
   }
 });
+
 
 // POST /api/auth/resend-verification
 authRouter.post("/resend-verification", async (req, res) => {

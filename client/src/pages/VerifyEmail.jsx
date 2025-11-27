@@ -1,37 +1,55 @@
+// client/src/pages/VerifyEmail.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function VerifyEmail() {
-  const [msg, setMsg] = useState("Bitte warten…");
+  const [msg, setMsg] = useState("Bitte warte, deine E-Mail wird geprüft …");
   const navigate = useNavigate();
 
   useEffect(() => {
+    const qs = new URLSearchParams(window.location.search);
+    const token = qs.get("token");
+
+    if (!token) {
+      setMsg("❌ Kein Bestätigungs-Token gefunden. Bitte registriere dich neu.");
+      return;
+    }
+
     async function verify() {
-      const qs = new URLSearchParams(window.location.search);
-      const token = qs.get("token");
-
-      if (!token) {
-        setMsg("❌ Ungültiger Link.");
-        return;
-      }
-
       try {
-        const resp = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/api/auth/verify-email?token=${token}`
-        );
-        const data = await resp.json();
+        const base = import.meta.env.VITE_API_BASE_URL; // z.B. https://api.medscoutx.app
+        const url = `${base}/api/auth/verify-email?token=${encodeURIComponent(
+          token
+        )}`;
 
-        if (resp.ok && data.ok) {
-          setMsg("✅ Deine E-Mail wurde erfolgreich bestätigt! 🎉");
+        const res = await fetch(url);
 
-          // Weiterleitung nach Login-Seite
-          setTimeout(() => navigate("/login"), 2000);
-        } else {
-          setMsg("❌ Link ungültig oder abgelaufen.");
+        if (!res.ok) {
+          console.error("verify-email status:", res.status);
+          if (res.status === 400) {
+            setMsg(
+              "❌ Der Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere dich erneut."
+            );
+          } else {
+            setMsg("❌ Unerwarteter Fehler. Bitte versuche es später erneut.");
+          }
+          return;
         }
+
+        // Erfolgreich
+        setMsg(
+          "✅ E-Mail erfolgreich bestätigt. Du wirst jetzt zur Startseite weitergeleitet …"
+        );
+
+        // nach 1,5 s zur Startseite
+        setTimeout(() => {
+          navigate("/startseite");
+        }, 1500);
       } catch (err) {
-        console.error(err);
-        setMsg("❌ Unerwarteter Fehler. Bitte versuche es später erneut.");
+        console.error("verify-email fetch error:", err);
+        setMsg(
+          "❌ Netzwerkfehler bei der Bestätigung. Bitte versuche es später erneut."
+        );
       }
     }
 
