@@ -45,12 +45,17 @@ export async function sendMail(to, subject, text, html) {
 /**
  * Verifizierungs-Mail senden
  */
-export async function sendVerificationEmail({ to, token, userName }) {
+export async function sendVerificationEmail({ to, token, userName, link }) {
   if (!token) throw new Error("sendVerificationEmail: missing token");
 
-  // Frontend-Basis-URL (für den Button & Link in der Mail)
-  const appBase = (process.env.APP_BASE_URL ?? "http://localhost:5173").replace(/\/+$/, "");
-  const verifyLink = `${appBase}/verify-email?token=${encodeURIComponent(token)}`;
+  // Wenn ein Link übergeben wurde (auth.js), diesen verwenden.
+  // Sonst Fallback: API_BASE_URL selbst bauen.
+  const verifyLink =
+    (link && link.trim()) ||
+    `${(process.env.API_BASE_URL ?? "http://localhost:3000")
+      .replace(/\/+$/, "")}/api/auth/verify-email?token=${encodeURIComponent(
+      token
+    )}`;
 
   const subject = "MedScoutX – bitte bestätige deine E-Mail-Adresse";
 
@@ -73,15 +78,12 @@ Wenn du dich nicht bei MedScoutX registriert hast, kannst du diese Nachricht ign
       <tr>
         <td align="center">
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background-color:#ffffff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.06);overflow:hidden;">
-            <!-- Header / Brand -->
             <tr>
               <td style="padding:20px 28px 12px 28px;border-bottom:1px solid #f0f0f0;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#ffffff;">
                 <div style="font-size:18px;font-weight:600;letter-spacing:0.03em;">MedScoutX</div>
                 <div style="font-size:12px;opacity:0.9;margin-top:4px;">KI-gestützte medizinische Entscheidungsunterstützung</div>
               </td>
             </tr>
-
-            <!-- Inhalt -->
             <tr>
               <td style="padding:24px 28px 8px 28px;color:#111827;font-size:15px;line-height:1.6;">
                 <p style="margin:0 0 8px 0;">Hallo${userName ? " " + userName : ""} 👋</p>
@@ -91,8 +93,6 @@ Wenn du dich nicht bei MedScoutX registriert hast, kannst du diese Nachricht ign
                 </p>
               </td>
             </tr>
-
-            <!-- Button -->
             <tr>
               <td style="padding:0 28px 16px 28px;" align="center">
                 <a href="${verifyLink}"
@@ -111,8 +111,6 @@ Wenn du dich nicht bei MedScoutX registriert hast, kannst du diese Nachricht ign
                 </a>
               </td>
             </tr>
-
-            <!-- Fallback-Link -->
             <tr>
               <td style="padding:0 28px 24px 28px;color:#4b5563;font-size:13px;line-height:1.6;">
                 <p style="margin:16px 0 8px 0;">
@@ -126,8 +124,6 @@ Wenn du dich nicht bei MedScoutX registriert hast, kannst du diese Nachricht ign
                 </p>
               </td>
             </tr>
-
-            <!-- Footer -->
             <tr>
               <td style="padding:16px 28px 20px 28px;border-top:1px solid #f0f0f0;color:#9ca3af;font-size:11px;line-height:1.5;">
                 <p style="margin:0 0 4px 0;">
@@ -149,3 +145,4 @@ Wenn du dich nicht bei MedScoutX registriert hast, kannst du diese Nachricht ign
 
   return sendMail(to, subject, text, html);
 }
+
