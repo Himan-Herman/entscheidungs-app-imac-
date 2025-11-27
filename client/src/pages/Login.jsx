@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const verifyStatus = params.get("verify"); // ok, invalid, missing, error …
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,17 +35,9 @@ export default function Login() {
 
       if (!res.ok) throw new Error(data.error || "Login fehlgeschlagen.");
 
-      // 🔐 1) Deine bisherige Logik: Nutzer-ID speichern
       localStorage.setItem("medscout_user_id", data.userId);
+      if (data.token) localStorage.setItem("medscout_token", data.token);
 
-      // 🔐 2) NEU: Token speichern (für requireAuth)
-      if (data.token) {
-        localStorage.setItem("medscout_token", data.token);
-      } else {
-        console.warn("Login: Kein Token im Backend-Response gefunden.");
-      }
-
-      // Weiterleitung
       navigate("/intro", { replace: true });
     } catch (err) {
       setError(err.message || "Fehler beim Login.");
@@ -52,7 +49,22 @@ export default function Login() {
   return (
     <form onSubmit={handleLogin}>
       <h1>Login</h1>
+
+      {/* Verify-Meldungen */}
+      {verifyStatus === "ok" && (
+        <p style={{ color: "green" }}>
+          Deine E-Mail wurde erfolgreich bestätigt! Du kannst dich jetzt einloggen.
+        </p>
+      )}
+
+      {verifyStatus === "invalid" && (
+        <p style={{ color: "red" }}>
+          Der Bestätigungslink ist ungültig oder abgelaufen.
+        </p>
+      )}
+
       {error && <p style={{ color: "red" }}>{error}</p>}
+
       <input
         type="email"
         placeholder="E-Mail"
@@ -60,6 +72,7 @@ export default function Login() {
         onChange={(e) => setEmail(e.target.value)}
         required
       />
+
       <input
         type="password"
         placeholder="Passwort"
@@ -67,6 +80,7 @@ export default function Login() {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
+
       <button type="submit" disabled={busy}>
         {busy ? "..." : "Einloggen"}
       </button>

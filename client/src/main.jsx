@@ -24,7 +24,7 @@ import Datenschutz from "./pages/Datenschutz";
 import CheckEmail from "./pages/CheckEmail";
 import Verified from "./pages/Verified";
 import Login from "./pages/Login";
-import VerifyEmail from "./pages/VerifyEmail";
+//import VerifyEmail from "./pages/VerifyEmail";
 
 function Gate() {
   const hasUser = !!localStorage.getItem("medscout_user_id");
@@ -102,7 +102,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="/check-email" element={<CheckEmail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/verified" element={<Verified />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+          
 
           {/* Fallback: alles Unbekannte auf Startseite */}
           <Route path="*" element={<Navigate to="/startseite" replace />} />
@@ -111,3 +111,6 @@ createRoot(document.getElementById("root")).render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+
+//<Route path="/verify-email" element={<VerifyEmail />} />

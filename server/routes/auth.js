@@ -179,16 +179,23 @@ authRouter.post("/register", async (req, res) => {
 
 // GET /api/auth/verify-email?token=...
 // GET /api/auth/verify-email
-// GET /api/auth/verify-email?token=...
 authRouter.get("/verify-email", async (req, res) => {
+  const frontendBase =
+    process.env.FRONTEND_URL ||
+    process.env.APP_BASE_URL ||
+    "https://medscoutx.app";
+
+  const loginUrl = `${frontendBase.replace(/\/+$/, "")}/login`;
+
   try {
     const { token } = req.query;
 
     if (!token || typeof token !== "string") {
-      return res.status(400).send("Fehlender oder ungültiger Token.");
+      // Kein / kaputter Token → direkt Login mit Info
+      return res.redirect(`${loginUrl}?verify=missing`);
     }
 
-    // User anhand des Tokens (und Ablaufdatum) finden
+    // User mit gültigem Token suchen
     const user = await prisma.user.findFirst({
       where: {
         verifyToken: token,
@@ -199,12 +206,11 @@ authRouter.get("/verify-email", async (req, res) => {
     });
 
     if (!user) {
-      return res
-        .status(400)
-        .send("Dieser Bestätigungslink ist ungültig oder abgelaufen.");
+      // Token ungültig / abgelaufen → Login mit info
+      return res.redirect(`${loginUrl}?verify=invalid`);
     }
 
-    // User verifizieren und Token entfernen
+    // User verifizieren & Token löschen
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -214,22 +220,14 @@ authRouter.get("/verify-email", async (req, res) => {
       },
     });
 
-    // Ziel-URL (Startseite im Frontend)
-    const frontendBase =
-      process.env.FRONTEND_URL ||
-      process.env.APP_BASE_URL ||
-      "https://medscoutx.app";
-
-    // Redirect auf Startseite
-    return res.redirect(`${frontendBase.replace(/\/+$/, "")}/startseite`);
+    // Erfolg → Login mit Erfolg-Flag
+    return res.redirect(`${loginUrl}?verify=ok`);
   } catch (err) {
     console.error("verify-email error:", err);
-    return res
-      .status(500)
-      .send("Serverfehler bei der E-Mail-Bestätigung. Bitte später erneut versuchen.");
+    // Fallback: Login mit Fehlerhinweis
+    return res.redirect(`${loginUrl}?verify=error`);
   }
 });
-
 
 
 // POST /api/auth/resend-verification
