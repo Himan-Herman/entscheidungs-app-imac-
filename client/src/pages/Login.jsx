@@ -1,19 +1,23 @@
-// src/pages/Login.jsx (oder wo du sie liegen hast)
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+// client/src/pages/Login.jsx
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Query-Parameter aus der URL lesen, z. B. /login?verify=ok
-  const params = new URLSearchParams(location.search);
-  const verifyStatus = params.get("verify"); // "ok" | "invalid" | "missing" | "error" | null
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [verifyStatus, setVerifyStatus] = useState(null);
+
+  // Prüft ?verify=ok / invalid / missing / error aus der URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const v = params.get("verify");
+    if (v) setVerifyStatus(v);
+  }, [location.search]);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -29,33 +33,27 @@ export default function Login() {
 
       const data = await res.json();
 
-      // 1) E-Mail ist noch nicht verifiziert
+      // → E-Mail noch nicht bestätigt
       if (data.error === "EMAIL_NOT_VERIFIED") {
-        // E-Mail merken, damit CheckEmail.jsx weiß, wohin resend gehen soll
         localStorage.setItem(
           "pending_verification_email",
           email.trim().toLowerCase()
         );
-
         setError("Bitte bestätige zuerst deine E-Mail.");
         navigate("/check-email");
         return;
       }
 
-      // 2) Andere Login-Fehler
       if (!res.ok) {
         throw new Error(data.error || "Login fehlgeschlagen.");
       }
 
-      // 3) Erfolg → User-ID & Token speichern
-      if (data.userId) {
-        localStorage.setItem("medscout_user_id", data.userId);
-      }
+      // User + Token speichern
+      localStorage.setItem("medscout_user_id", data.userId);
       if (data.token) {
         localStorage.setItem("medscout_token", data.token);
       }
 
-      // 4) Weiterleitung in die App (Intro → dann Startseite)
       navigate("/intro", { replace: true });
     } catch (err) {
       setError(err.message || "Fehler beim Login.");
@@ -64,59 +62,283 @@ export default function Login() {
     }
   }
 
+  // Hilfsfunktion für Verify-Meldungen
+  function renderVerifyMessage() {
+    if (!verifyStatus) return null;
+
+    if (verifyStatus === "ok") {
+      return (
+        <p
+          style={{
+            margin: "0 0 10px 0",
+            fontSize: 13,
+            padding: "8px 10px",
+            borderRadius: 10,
+            backgroundColor: "rgba(22,163,74,0.08)",
+            color: "#166534",
+          }}
+        >
+          ✅ Deine E-Mail wurde erfolgreich bestätigt. Du kannst dich jetzt
+          einloggen.
+        </p>
+      );
+    }
+
+    if (verifyStatus === "invalid" || verifyStatus === "missing") {
+      return (
+        <p
+          style={{
+            margin: "0 0 10px 0",
+            fontSize: 13,
+            padding: "8px 10px",
+            borderRadius: 10,
+            backgroundColor: "rgba(220,38,38,0.06)",
+            color: "#b91c1c",
+          }}
+        >
+          ❌ Der Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere
+          dich erneut.
+        </p>
+      );
+    }
+
+    if (verifyStatus === "error") {
+      return (
+        <p
+          style={{
+            margin: "0 0 10px 0",
+            fontSize: 13,
+            padding: "8px 10px",
+            borderRadius: 10,
+            backgroundColor: "rgba(248,250,252,0.8)",
+            color: "#b45309",
+          }}
+        >
+          ⚠️ Beim Bestätigen deiner E-Mail ist ein Fehler aufgetreten. Bitte
+          versuche es später erneut.
+        </p>
+      );
+    }
+
+    return null;
+  }
+
   return (
-    <form onSubmit={handleLogin}>
-      <h1>Login</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background:
+          "linear-gradient(135deg, #0f172a 0%, #0f766e 45%, #22c55e 100%)",
+        padding: 16,
+        boxSizing: "border-box",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          backgroundColor: "#ffffff",
+          borderRadius: 24,
+          boxShadow: "0 18px 45px rgba(15,23,42,0.35)",
+          padding: "28px 26px 22px",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Badge oben */}
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "4px 10px",
+            borderRadius: 999,
+            backgroundColor: "rgba(37,99,235,0.08)",
+            color: "#1d4ed8",
+            fontSize: 12,
+            fontWeight: 600,
+            marginBottom: 10,
+          }}
+        >
+          <span
+            style={{
+              display: "inline-flex",
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              backgroundColor: "#22c55e",
+            }}
+          />
+          MedScoutX – Sicherer Zugang
+        </div>
 
-      {/* Hinweis nach E-Mail-Bestätigung */}
-      {verifyStatus === "ok" && (
-        <p style={{ color: "green" }}>
-          Deine E-Mail wurde erfolgreich bestätigt! Du kannst dich jetzt einloggen.
+        {/* Titel */}
+        <h1
+          style={{
+            margin: "0 0 6px 0",
+            fontSize: 26,
+            lineHeight: 1.2,
+            color: "#020617",
+          }}
+        >
+          Login
+        </h1>
+
+        <p
+          style={{
+            margin: "0 0 18px 0",
+            fontSize: 14,
+            color: "#4b5563",
+          }}
+        >
+          Melde dich mit deiner registrierten E-Mail an, um deine
+          MedScoutX-Funktionen zu nutzen.
         </p>
-      )}
 
-      {/* Hinweis bei ungültigem/abgelaufenem Link */}
-      {verifyStatus === "invalid" && (
-        <p style={{ color: "red" }}>
-          Der Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere dich erneut
-          oder fordere eine neue Bestätigungs-E-Mail an.
-        </p>
-      )}
+        {/* Verify-Meldungen */}
+        {renderVerifyMessage()}
 
-      {/* Optional: weitere Fälle */}
-      {verifyStatus === "missing" && (
-        <p style={{ color: "red" }}>
-          Es wurde kein gültiger Bestätigungslink gefunden.
-        </p>
-      )}
-      {verifyStatus === "error" && (
-        <p style={{ color: "red" }}>
-          Es ist ein Fehler bei der E-Mail-Bestätigung aufgetreten. Bitte versuche es erneut.
-        </p>
-      )}
+        {/* Fehlermeldung */}
+        {error && (
+          <p
+            style={{
+              margin: "0 0 10px 0",
+              fontSize: 13,
+              padding: "8px 10px",
+              borderRadius: 10,
+              backgroundColor: "rgba(248,113,113,0.08)",
+              color: "#b91c1c",
+            }}
+          >
+            {error}
+          </p>
+        )}
 
-      {/* Laufende Fehler (z. B. falsches Passwort) */}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        <form onSubmit={handleLogin} style={{ marginTop: 8 }}>
+          <label
+            style={{
+              display: "block",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#111827",
+              marginBottom: 4,
+            }}
+          >
+            E-Mail
+          </label>
+          <input
+            type="email"
+            placeholder="z.B. deinname@mail.de"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              marginBottom: 12,
+              borderRadius: 12,
+              border: "1px solid #e5e7eb",
+              fontSize: 14,
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
 
-      <input
-        type="email"
-        placeholder="E-Mail"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
+          <label
+            style={{
+              display: "block",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#111827",
+              marginBottom: 4,
+            }}
+          >
+            Passwort
+          </label>
+          <input
+            type="password"
+            placeholder="Passwort"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              marginBottom: 16,
+              borderRadius: 12,
+              border: "1px solid #e5e7eb",
+              fontSize: 14,
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
 
-      <input
-        type="password"
-        placeholder="Passwort"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+          <button
+            type="submit"
+            disabled={busy}
+            style={{
+              width: "100%",
+              padding: "11px 14px",
+              borderRadius: 999,
+              border: "none",
+              outline: "none",
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: busy ? "default" : "pointer",
+              backgroundColor: busy ? "#9ca3af" : "#0f766e",
+              color: "#ffffff",
+              boxShadow: busy
+                ? "none"
+                : "0 10px 22px rgba(15,118,110,0.45)",
+              transition: "transform 0.12s ease, box-shadow 0.12s ease",
+            }}
+          >
+            {busy ? "Wird eingeloggt …" : "Einloggen"}
+          </button>
+        </form>
 
-      <button type="submit" disabled={busy}>
-        {busy ? "..." : "Einloggen"}
-      </button>
-    </form>
+        {/* Untere Links */}
+        <div
+          style={{
+            marginTop: 18,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: 12,
+            color: "#6b7280",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
+        >
+          <span>
+            Noch kein Konto?{" "}
+            <Link
+              to="/register"
+              style={{ color: "#0f766e", textDecoration: "none" }}
+            >
+              Jetzt registrieren
+            </Link>
+          </span>
+
+          <span>
+            <Link
+              to="/impressum"
+              style={{ color: "#6b7280", textDecoration: "none", marginRight: 8 }}
+            >
+              Impressum
+            </Link>
+            |
+            <Link
+              to="/datenschutz"
+              style={{ color: "#6b7280", textDecoration: "none", marginLeft: 8 }}
+            >
+              Datenschutz
+            </Link>
+          </span>
+        </div>
+      </div>
+    </main>
   );
 }
