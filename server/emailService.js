@@ -48,105 +48,45 @@ export async function sendMail(to, subject, text, html) {
 export async function sendVerificationEmail({ to, token, userName }) {
   if (!token) throw new Error("sendVerificationEmail: missing token");
 
-  // Frontend-Basis-URL (für den Button & Link in der Mail)
   const appBase = (process.env.APP_BASE_URL ?? "http://localhost:5173").replace(/\/+$/, "");
   const verifyLink = `${appBase}/verify-email?token=${encodeURIComponent(token)}`;
 
-  const subject = "MedScoutX – bitte bestätige deine E-Mail-Adresse";
+  const subject = "MedScoutX – Bitte E-Mail-Adresse bestätigen";
 
   const text = `Hallo${userName ? " " + userName : ""},
 
-willkommen bei MedScoutX! Bitte bestätige deine E-Mail-Adresse, indem du auf folgenden Link klickst:
+vielen Dank für deine Registrierung bei MedScoutX!
 
+Bitte bestätige deine E-Mail-Adresse über folgenden Link:
 ${verifyLink}
 
-Wenn du dich nicht bei MedScoutX registriert hast, kannst du diese Nachricht ignorieren.`;
+Falls du dich nicht registriert hast, kannst du diese E-Mail einfach ignorieren.`;
 
-  const html = `<!DOCTYPE html>
-<html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <title>MedScoutX – E-Mail-Adresse bestätigen</title>
-  </head>
-  <body style="margin:0;padding:0;background-color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#f5f5f7;padding:32px 0;">
-      <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:520px;background-color:#ffffff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.06);overflow:hidden;">
-            <!-- Header / Brand -->
-            <tr>
-              <td style="padding:20px 28px 12px 28px;border-bottom:1px solid #f0f0f0;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#ffffff;">
-                <div style="font-size:18px;font-weight:600;letter-spacing:0.03em;">MedScoutX</div>
-                <div style="font-size:12px;opacity:0.9;margin-top:4px;">KI-gestützte medizinische Entscheidungsunterstützung</div>
-              </td>
-            </tr>
+  const html = `
+    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;line-height:1.5">
+      <h2>Willkommen bei MedScoutX${userName ? ", " + userName : ""} 👋</h2>
+      <p>Bitte bestätige deine E-Mail-Adresse, um deinen Account zu aktivieren:</p>
 
-            <!-- Inhalt -->
-            <tr>
-              <td style="padding:24px 28px 8px 28px;color:#111827;font-size:15px;line-height:1.6;">
-                <p style="margin:0 0 8px 0;">Hallo${userName ? " " + userName : ""} 👋</p>
-                <p style="margin:0 0 16px 0;">
-                  willkommen bei <strong>MedScoutX</strong>. Damit wir dein Konto aktivieren können,
-                  bestätige bitte kurz deine E-Mail-Adresse.
-                </p>
-              </td>
-            </tr>
+      <p>
+        <a href="${verifyLink}" 
+           style="display:inline-block;
+                  padding:12px 18px;
+                  text-decoration:none;
+                  border-radius:8px;
+                  background:#0057ff;
+                  color:white;
+                  font-weight:600;">
+          E-Mail jetzt bestätigen
+        </a>
+      </p>
 
-            <!-- Button -->
-            <tr>
-              <td style="padding:0 28px 16px 28px;" align="center">
-                <a href="${verifyLink}"
-                   style="
-                     display:inline-block;
-                     padding:12px 24px;
-                     margin:8px 0 4px 0;
-                     background-color:#0f766e;
-                     color:#ffffff;
-                     text-decoration:none;
-                     border-radius:999px;
-                     font-size:15px;
-                     font-weight:600;
-                   ">
-                  E-Mail jetzt bestätigen
-                </a>
-              </td>
-            </tr>
+      <p>Direkter Link (falls der Button nicht funktioniert):<br>
+      <a href="${verifyLink}">${verifyLink}</a></p>
 
-            <!-- Fallback-Link -->
-            <tr>
-              <td style="padding:0 28px 24px 28px;color:#4b5563;font-size:13px;line-height:1.6;">
-                <p style="margin:16px 0 8px 0;">
-                  Falls der Button nicht funktioniert, kopiere bitte diesen Link in die
-                  Adresszeile deines Browsers:
-                </p>
-                <p style="margin:0;word-break:break-all;">
-                  <a href="${verifyLink}" style="color:#0f766e;text-decoration:none;">
-                    ${verifyLink}
-                  </a>
-                </p>
-              </td>
-            </tr>
-
-            <!-- Footer -->
-            <tr>
-              <td style="padding:16px 28px 20px 28px;border-top:1px solid #f0f0f0;color:#9ca3af;font-size:11px;line-height:1.5;">
-                <p style="margin:0 0 4px 0;">
-                  Du hast dich nicht bei MedScoutX registriert?
-                  Dann kannst du diese E-Mail einfach ignorieren.
-                </p>
-                <p style="margin:0;">
-                  © ${new Date().getFullYear()} MedScoutX – keine medizinische Notfallversorgung.
-                  Im Notfall wähle bitte den Notruf (112).
-                </p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>`;
+      <hr />
+      <small>Diese Nachricht wurde automatisch von MedScoutX versendet. Falls du dich nicht registriert hast, kannst du sie ignorieren.</small>
+    </div>
+  `;
 
   return sendMail(to, subject, text, html);
 }
-
