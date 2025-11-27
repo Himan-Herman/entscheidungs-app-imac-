@@ -355,5 +355,54 @@ authRouter.post("/login", async (req, res) => {
   // Nutzer-ID + Token zurückgeben
   return res.json({ ok: true, userId: u.id, token });
 });
+// POST /api/auth/reset-password
+authRouter.post("/reset-password", async (req, res) => {
+  try {
+    const { token, password } = req.body || {};
+
+    if (!token || !password) {
+      return res
+        .status(400)
+        .json({ ok: false, error: "missing_fields" });
+    }
+
+    // passenden User zum Token finden (Token noch gültig?)
+    const user = await prisma.user.findFirst({
+      where: {
+        passwordResetToken: token,
+        passwordResetExpires: {
+          gt: new Date(), // Ablaufzeit > jetzt
+        },
+      },
+    });
+
+    if (!user) {
+      // Token ungültig oder abgelaufen
+      return res
+        .status(400)
+        .json({ ok: false, error: "invalid_or_expired" });
+    }
+
+    // neues Passwort hashen
+    const newHash = await bcrypt.hash(password, 10);
+
+    // Passwort aktualisieren + Reset-Token löschen
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: newHash,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+      },
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[reset-password]", err);
+    return res
+      .status(500)
+      .json({ ok: false, error: "SERVER_ERROR" });
+  }
+});
 
 export default authRouter;
