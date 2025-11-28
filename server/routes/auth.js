@@ -3,7 +3,9 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { sendVerificationEmail, sendMail } from "../emailService.js";
+import { sendVerificationEmail, sendMail, sendPasswordResetEmail } from "../emailService.js";
+
+
 import jwt from "jsonwebtoken";
 
 
@@ -302,23 +304,20 @@ authRouter.post("/request-password-reset", async (req, res) => {
     const appBase = (
       process.env.APP_BASE_URL || "https://medscoutx.app"
     ).replace(/\/+$/, "");
-
+    
     const resetLink = `${appBase}/reset-password?token=${encodeURIComponent(
       token
     )}`;
-
-    await sendMail(
-      emailNorm,
-      "MedScoutX – Passwort zurücksetzen",
-      `Hallo ${user.firstName ?? ""},
-
-du hast eine Zurücksetzung deines Passworts angefordert.
-Klicke auf den folgenden Link, um ein neues Passwort zu setzen:
-
-${resetLink}
-
-Wenn du das nicht warst, kannst du diese E-Mail ignorieren.`
-    );
+    
+    // ✨ Neue professionelle HTML-Mail
+    await sendPasswordResetEmail({
+      to: emailNorm,
+      userName: user.firstName ?? undefined,
+      resetLink,
+    });
+    
+    return res.json({ ok: true });
+    
 
     return res.json({ ok: true });
   } catch (err) {
