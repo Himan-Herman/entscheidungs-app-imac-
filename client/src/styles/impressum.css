@@ -1,43 +1,50 @@
-/* === Allgemeines Layout für Rechtsseiten (Datenschutz, Impressum, AGB) === */
+/* === Grundlayout für die Impressum-Seite === */
 
-.legal {
-  /* zentrierter „Karten“-Look */
+.impressum-main,
+.legal { /* falls du className="legal" beibehältst */
+  position: relative;
   max-width: 900px;
-  margin: 2.5rem auto;
-  padding: 2.5rem 2rem 3rem;
-  background: #fff8e6;
-  border-radius: 16px;
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
-  color: #0f172a; /* sehr dunkles Blau = guter Kontrast */
-  line-height: 1.6;
+  margin: 3rem auto;
+  padding: 2.4rem 2.6rem 3rem;
+  background: #f3f4f6; /* leichtes Grau, nicht hartes Weiß */
+  border-radius: 18px;
+  box-shadow: 0 20px 55px rgba(15, 23, 42, 0.35);
+  color: #020617;
+  line-height: 1.7;
   font-size: 0.98rem;
+  overflow: hidden;
 }
 
-/* Hintergrund der Seite leicht absetzen, falls body greifbar ist */
+/* Hintergrund für den ganzen View */
 body {
-  background: radial-gradient(circle at top left, #28481e 0%, #5c7c50 45%, #a4bca7 80%);
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: radial-gradient(circle at top, #d3d8e6 0, #1b3dd6 55%, #3950b6 100%);
 }
 
-/* --- Header --- */
+/* Linker Akzent-Balken – beim Impressum etwas „blauer“ als beim Datenschutz */
 
-.legal__header {
-  margin-bottom: 1.75rem;
-  text-align: left;
-}
 .legal::before {
   content: "";
   position: absolute;
   inset: 0;
   width: 6px;
   left: 0;
-  background: linear-gradient(180deg, #e9710e, #6366f1);
+  background: linear-gradient(180deg, #e90e20, #6366f1);
+}
+
+/* Header */
+
+.legal__header {
+  margin-bottom: 1.9rem;
 }
 
 .legal__header h1 {
+  margin: 0 0 0.4rem;
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  margin: 0 0 0.4rem;
   color: #020617;
 }
 
@@ -47,39 +54,37 @@ body {
   color: #6b7280;
 }
 
-/* --- Überschriften & Absätze --- */
+/* Sektionen & Typografie */
 
 .legal__section {
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.9rem;
 }
 
 .legal__section h2 {
-  font-size: 1.1rem;
+  font-size: 1.12rem;
   font-weight: 700;
   margin: 0 0 0.7rem;
   color: #0f172a;
 }
 
 .legal__section p {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.8rem;
 }
 
-/* Listen sauber einrücken */
-
 .legal__section ul {
-  padding-left: 1.25rem;
-  margin: 0.25rem 0 0.75rem;
+  margin: 0.25rem 0 0.8rem;
+  padding-left: 1.3rem;
 }
 
 .legal__section li {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
 }
 
-/* --- Address & Definition Lists --- */
+/* Address / Definition-Liste */
 
 .legal__address {
   font-style: normal;
-  margin: 0.5rem 0 1rem;
+  margin: 0.6rem 0 1.1rem;
 }
 
 .legal__list {
@@ -92,21 +97,21 @@ body {
 }
 
 .legal__list dd {
-  margin: 0 0 0.1rem 0;
+  margin: 0 0 0.1rem;
 }
 
-/* --- Divider --- */
+/* Divider */
 
 .legal__divider {
   border: 0;
   border-top: 1px solid #e5e7eb;
-  margin: 1.8rem 0 1.5rem;
+  margin: 2rem 0 1.7rem;
 }
 
-/* --- Links --- */
+/* Links */
 
 .legal a {
-  color: #0019f8; /* dunkles Teal */
+  color: #1d4ed8; /* gedecktes Blau */
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
@@ -116,52 +121,48 @@ body {
   text-decoration-thickness: 2px;
 }
 
-/* Tastaturfokus deutlich sichtbar (WCAG) */
-
 .legal a:focus-visible,
 .legal .btn:focus-visible {
   outline: 3px solid #f97316;
   outline-offset: 3px;
 }
 
-/* --- Button-Bereich (Zurück zur Registrierung) --- */
+/* Button unten */
 
 .legal__actions {
-  margin-top: 2.2rem;
+  margin-top: 2.3rem;
   display: flex;
   justify-content: flex-start;
 }
 
-/* Falls du schon global .btn nutzt, überschreibt dies nur innerhalb .legal */
-
 .legal .btn {
   border: none;
   border-radius: 999px;
-  padding: 0.7rem 1.4rem;
+  padding: 0.7rem 1.6rem;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(135deg, #0f766e, #22c55e);
+  background: linear-gradient(135deg, #1d4ed8, #22c55e);
   color: #f9fafb;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 10px 26px rgba(37, 99, 235, 0.4);
   transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
 }
 
 .legal .btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.45);
+  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.5);
   filter: brightness(1.03);
 }
 
 .legal .btn:active {
   transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 7px 18px rgba(37, 99, 235, 0.45);
 }
 
-/* --- Typografie-Feintuning --- */
+/* Bold / Italic */
 
 .legal strong {
   font-weight: 700;
@@ -171,23 +172,23 @@ body {
   font-style: italic;
 }
 
-/* --- Responsives Design (Handy / kleine Tablets) --- */
+/* Responsiv (Mobile) */
 
 @media (max-width: 768px) {
   .legal {
-    margin: 1.25rem 0.75rem 2rem;
-    padding: 1.75rem 1.25rem 2rem;
-    border-radius: 14px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
+    margin: 1.5rem 0.9rem 2.4rem;
+    padding: 2rem 1.5rem 2.3rem;
+    border-radius: 16px;
+    box-shadow: 0 16px 45px rgba(15, 23, 42, 0.5);
     font-size: 0.95rem;
   }
 
   .legal__header h1 {
-    font-size: 1.6rem;
+    font-size: 1.7rem;
   }
 
   .legal__section h2 {
-    font-size: 1.02rem;
+    font-size: 1.05rem;
   }
 
   .legal__actions {
@@ -200,23 +201,23 @@ body {
   }
 }
 
-/* --- Druckversion: sauber & ohne Schatten --- */
+/* Druckansicht */
 
 @media print {
-  .legal {
-    box-shadow: none;
-    background: #ffffff;
-    margin: 0;
-    padding: 0;
-    max-width: 100%;
-    border-radius: 0;
-  }
-
   body {
     background: #ffffff;
   }
 
-  .legal .btn,
+  .legal {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: #ffffff;
+  }
+
+  .legal::before,
   .legal__actions {
     display: none;
   }

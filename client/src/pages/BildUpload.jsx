@@ -4,7 +4,7 @@ import "../styles/BildUpload.css";
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
 import { getAuthHeaders } from "../api/authHeaders";
-
+import DisclaimerShort from "../components/DisclaimerShort";
 
 
 const LS_VERLAUF_KEY = "bildChatVerlauf";
@@ -349,6 +349,7 @@ useEffect(() => {
 }, []);
   return (
     <div className="bildupload-container">
+      <DisclaimerShort />
       <h2>Bild hochladen & analysieren</h2>
 
      

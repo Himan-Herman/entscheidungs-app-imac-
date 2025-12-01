@@ -535,8 +535,10 @@ export default function Register() {
       </form>
       <div className="legal-links" aria-label="Rechtliche Informationen">
   <Link to="/impressum?public=1">Impressum</Link>
-  <span className="sep">·</span>
+  <span className="sep">.</span>
   <Link to="/datenschutz?public=1">Datenschutz</Link>
+  <span className="sep">.</span>
+  <Link to="/disclaimer?public=1">Disclaimer</Link>
 </div>
 
 

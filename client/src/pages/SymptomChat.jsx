@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import "../styles/SymptomChat.css";
 import { getOrganPrompt } from "./prompt/organPrompts";
 import { getAuthHeaders } from "../api/authHeaders";
-
+import DisclaimerShort from "../components/DisclaimerShort";
 
 export default function SymptomChat() {
   const [eingabe, setEingabe] = useState('');
@@ -121,6 +121,7 @@ export default function SymptomChat() {
 
   return (
     <div className="symptom-container">
+      <DisclaimerShort />
       <h2>Symptom beschreiben</h2>
       <button className="reset-btn" onClick={resetChat}> 🔄 Neues Gespräch</button>
 

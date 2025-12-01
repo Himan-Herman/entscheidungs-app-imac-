@@ -11,7 +11,7 @@ import {
 import Layout from "./Layout.jsx";
 
 import Intro from "./pages/Intro";
-import Register from "./pages/Register.jsx";
+import Register from "./pages/Register";
 import Startseite from "./pages/Startseite";
 import KoerperVorderseite from "./pages/KoerperVorderseite";
 import KoerperRueckseite from "./pages/KoerperRueckseite";
@@ -26,6 +26,7 @@ import Verified from "./pages/Verified";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Disclaimer from "./pages/Disclaimer";
 //import VerifyEmail from "./pages/VerifyEmail";
 
 function Gate() {
@@ -111,6 +112,7 @@ createRoot(document.getElementById("root")).render(
         </Route>
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

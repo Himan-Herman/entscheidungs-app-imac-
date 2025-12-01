@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import "../styles/KoerperSymptomChat.css";
+import DisclaimerShort from "../components/DisclaimerShort";
 
 
 
@@ -263,6 +264,7 @@ useEffect(() => {
   return (
     <div className="symptomchat-container">
       <div className="chat-header">
+      <DisclaimerShort />
         <h2>Körpersymptom beschreiben</h2>
         <button className="reset-btn" onClick={neustart} title="Chat & Thread löschen und neu starten">
           🔄 Neues Gespräch
