@@ -81,7 +81,9 @@
   /* Buttons */
   
   .disclaimer__actions {
-    margin-top: 2.4rem;
+    margin-top: 2.75rem;
+    display: flex;
+    justify-content: center;
   }
   
   .disclaimer .btn {
@@ -98,6 +100,10 @@
     gap: 0.35rem;
     box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
     transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+    max-width: 260px;       /* Button-Länge begrenzen */
+  width: 100%; 
+  justify-content: center; 
+   
   }
   
   .disclaimer .btn:hover {

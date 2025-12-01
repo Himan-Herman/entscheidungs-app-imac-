@@ -186,6 +186,30 @@ export default function Disclaimer() {
           jederzeit in der App verfügbar.
         </p>
       </section>
+{/* 10. Kontakt bei Fragen */}
+<section
+  className="disclaimer__section"
+  aria-labelledby="disc-10-kontakt"
+>
+  <h2 id="disc-10-kontakt">10. Kontakt für Rückfragen</h2>
+  <p>
+    Bei technischen Problemen, Fragen zur Nutzung oder Unsicherheiten bezüglich
+    der KI-Ausgaben kannst du dich jederzeit an unseren Support wenden:
+  </p>
+
+  <p>
+    <strong>E-Mail:</strong>{" "}
+    <a href="mailto:support@medscout.app">support@medscout.app</a><br />
+
+    <strong>Telefon:</strong>{" "}
+    <a href="tel:+4921115895272">+49 211 15895272</a>
+  </p>
+
+  <p>
+    Bitte beachte, dass über diesen Kontakt <strong>keine medizinische Beratung</strong>
+    geleistet werden darf.
+  </p>
+</section>
 
       {/* Button */}
       <div className="disclaimer__actions">

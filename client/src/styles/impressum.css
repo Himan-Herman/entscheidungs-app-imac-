@@ -149,6 +149,9 @@ body {
   gap: 0.35rem;
   box-shadow: 0 10px 26px rgba(37, 99, 235, 0.4);
   transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+  max-width: 260px;       /* Button-Länge begrenzen */
+  width: 100%; 
+  justify-content: center; 
 }
 
 .legal .btn:hover {
