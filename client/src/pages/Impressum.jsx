@@ -40,14 +40,14 @@ export default function Impressum() {
         <dl className="legal__list">
           <dt>E-Mail</dt>
           <dd>
-            <a href="mailto:himankhorshidy@gmail.com">
+            <a href="mailto:contact@medscout.app">
               himankhorshidy@gmail.com
             </a>
           </dd>
 
           <dt>Telefon</dt>
           <dd>
-            <a href="tel:+491722956919">+49&nbsp;172&nbsp;2956919</a>
+            <a href="tel:+4921115895272">+49&nbsp;211&nbsp;15895272</a>
           </dd>
 
           <dt>Rechtsform</dt>

@@ -240,3 +240,26 @@
   text-decoration: none;
 }
 .sep { margin: 0 .5rem; }
+
+.legal-links .sep {
+  margin: 0 0.35rem;
+}
+
+.legal-links a:hover {
+  text-decoration: underline;
+}
+.field--legal {
+  margin-top: 1rem;
+}
+
+.checkbox-legal {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.checkbox-legal input[type="checkbox"] {
+  margin-top: 0.15rem;
+}

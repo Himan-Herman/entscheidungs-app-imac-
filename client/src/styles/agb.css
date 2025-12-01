@@ -1,0 +1,52 @@
+.agb {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+    color: #0f172a;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+  }
+  
+  .agb__header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .agb__header h1 {
+    font-size: 1.9rem;
+    margin: 0 0 0.3rem;
+  }
+  
+  .agb__subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+  
+  .agb__section {
+    margin-top: 1.8rem;
+  }
+  
+  .agb__section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .agb__section p {
+    margin: 0.35rem 0;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+  
+  .agb a {
+    color: #0369a1;
+    text-decoration: none;
+  }
+  
+  .agb a:hover {
+    text-decoration: underline;
+  }
+  
+  .agb__actions {
+    margin-top: 2.5rem;
+  }
+  

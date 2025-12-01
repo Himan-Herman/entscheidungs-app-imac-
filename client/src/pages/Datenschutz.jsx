@@ -38,13 +38,13 @@ export default function Datenschutz() {
         <dl className="legal__list">
           <dt>E-Mail</dt>
           <dd>
-            <a href="mailto:himankhorshidy@gmail.com">
+            <a href="mailto:privacy@medscout.app">
               himankhorshidy@gmail.com
             </a>
           </dd>
           <dt>Telefon</dt>
           <dd>
-            <a href="tel:+491722956919">+49 172 2956919</a>
+            <a href="tel:+4921115895272">+49 211 15895272</a>
           </dd>
         </dl>
       </section>
@@ -499,3 +499,4 @@ export default function Datenschutz() {
     </main>
   );
 }
+

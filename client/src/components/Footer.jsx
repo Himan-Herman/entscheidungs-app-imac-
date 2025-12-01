@@ -13,7 +13,9 @@ export default function Footer() {
           <span>|</span>
           <a href="/datenschutz">Datenschutz</a>
           <span>|</span>
-          <a href="/datenschutz">Disclaimer</a>
+          <a href="/disclaimer">Disclaimer</a>
+          <span>|</span>
+          <a href="/agb">AGB</a>
         </nav>
       </div>
     </footer>

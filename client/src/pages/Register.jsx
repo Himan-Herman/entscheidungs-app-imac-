@@ -510,7 +510,32 @@ export default function Register() {
    
  </div>
         </details>
-
+ {/* AGB + Datenschutz Zustimmungs-Checkbox */}
+ <div className="field field--legal">
+        <label className="checkbox-legal">
+          <input
+            type="checkbox"
+            id="accept_terms"
+            name="accept_terms"
+            required
+            aria-required="true"
+            aria-label="Ich akzeptiere die AGB und die Datenschutzerklärung"
+          />
+          <span>
+            Ich akzeptiere die{" "}
+            <Link to="/agb" aria-label="Allgemeine Geschäftsbedingungen öffnen">
+              AGB
+            </Link>{" "}
+            und die{" "}
+            <Link
+              to="/datenschutz?public=1"
+              aria-label="Datenschutzerklärung öffnen"
+            >
+              Datenschutzerklärung
+            </Link>.
+          </span>
+        </label>
+      </div>
         {err && <p className="error" role="alert">{err}</p>}
 
         <button
@@ -534,12 +559,15 @@ export default function Register() {
 
       </form>
       <div className="legal-links" aria-label="Rechtliche Informationen">
-  <Link to="/impressum?public=1">Impressum</Link>
-  <span className="sep">.</span>
-  <Link to="/datenschutz?public=1">Datenschutz</Link>
-  <span className="sep">.</span>
-  <Link to="/disclaimer?public=1">Disclaimer</Link>
-</div>
+        <Link to="/impressum?public=1">Impressum</Link>
+        <span className="sep">·</span>
+        <Link to="/datenschutz?public=1">Datenschutz</Link>
+        <span className="sep">·</span>
+        <Link to="/disclaimer?public=1">Disclaimer</Link>
+        <span className="sep">·</span>
+        <Link to="/agb">AGB</Link>
+      </div>
+
 
 
       </section>
