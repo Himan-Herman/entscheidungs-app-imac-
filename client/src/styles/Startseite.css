@@ -1,6 +1,22 @@
 /* ----------------------------------------------------------
    Basis & Theme-Variablen
 ---------------------------------------------------------- */
+/* Global: verhindert horizontales Scrollen und macht Padding sicher */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Wichtig: Padding zählt zur Breite dazu → keine +2x Padding-Überbreite mehr */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
 :root {
   /* Farben – Light Mode */
@@ -116,6 +132,8 @@
 ---------------------------------------------------------- */
 
 .startseite {
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -125,6 +143,7 @@
     radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.14), transparent 55%),
     var(--color-bg);
   color: var(--color-text);
+  overflow-x: hidden; /* zusätzliche Sicherheit */
 }
 
 /* Innerer Container für max. Breite */
@@ -410,12 +429,6 @@
   margin-top: 0.4rem;
 }
 
-.startseite__feature-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-  margin-top: 0.4rem;
-}
 
 .startseite__feature-card {
   width: 100%;
@@ -668,9 +681,7 @@
     padding-bottom: 3rem;
   }
 
-  .startseite__feature-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  
 
   .startseite__trust {
     padding: 1.1rem 1.2rem;
@@ -737,20 +748,32 @@
   min-height: 100svh;
   display: flex;
   justify-content: center;
-  padding: 1.25rem 1rem 2.5rem;
+  padding: 1.25rem 0 2.5rem;   /* KEIN horizontales Padding mehr */
+  overflow-x: hidden;
 }
 
 .startseite-inner {
   width: 100%;
   max-width: 1040px;
   margin: 0 auto;
+  padding: 0 1rem;             /* Innenabstand, aber durch box-sizing sicher */
 }
 
 /* Feature-Grid Desktop */
 .startseite__feature-grid {
+  width: 100%;
+  max-width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.4rem;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+  margin-top: 0.6rem;
+}
+
+/* Ab Tablet: 2 Spalten */
+@media (min-width: 768px) {
+  .startseite__feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 /* Mobile-Anpassungen */
@@ -764,10 +787,7 @@
     border-radius: 20px;
   }
 
-  .startseite__feature-grid {
-    grid-template-columns: 1fr;  /* 1 Spalte */
-    gap: 1.1rem;
-  }
+  
 
   .startseite__feature-card {
     padding: 1.1rem 1rem 1.3rem;
@@ -801,6 +821,9 @@
     box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.6s ease,
     background 0.4s ease;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .startseite__feature-title {

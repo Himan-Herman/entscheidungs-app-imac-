@@ -131,7 +131,7 @@ export default function SymptomChat() {
             key={index}
             className={nachricht.role === "user" ? "nachricht user" : "nachricht assistant"}
           >
-            <strong>{nachricht.role === "user" ? "👤 Du:" : "🩺 Medo:"}</strong>
+            <strong>{nachricht.role === "user" ? "👤 Du:" : "🩺 Meda:"}</strong>
             <p>{nachricht.content}</p>
           </div>
         ))}

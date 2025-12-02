@@ -283,7 +283,7 @@ useEffect(() => {
             key={index}
             className={`chat-bubble ${nachricht.role === "user" ? "user" : "assistant"}`}
           >
-            <strong>{nachricht.role === "user" ? "👤 Du:" : "🩺 Medo:"}</strong>
+            <strong>{nachricht.role === "user" ? "👤 Du:" : "🩺 Meda:"}</strong>
             <p>{nachricht.content}</p>
           </div>
         ))}

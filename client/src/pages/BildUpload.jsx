@@ -419,7 +419,7 @@ useEffect(() => {
               <strong>👤 Du:</strong> {eintrag.frage}
             </div>
             <div className="antwort-block">
-              <strong>🩺 Medo:</strong>{" "}
+              <strong>🩺 Meda:</strong>{" "}
               <span dangerouslySetInnerHTML={{ __html: eintrag.antwort }} />
             </div>
           </div>
