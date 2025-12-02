@@ -1,7 +1,7 @@
 /* ----------------------------------------------------------
-   GLOBAL RESET (wichtig für iPhone Overflow / Zoom-Probleme)
+   Basis & Theme-Variablen
 ---------------------------------------------------------- */
-
+/* Global: verhindert horizontales Scrollen und macht Padding sicher */
 html,
 body {
   margin: 0;
@@ -11,73 +11,93 @@ body {
   overflow-x: hidden;
 }
 
+/* Wichtig: Padding zählt zur Breite dazu → keine +2x Padding-Überbreite mehr */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* ----------------------------------------------------------
-   ROOT VARIABLEN
----------------------------------------------------------- */
-
 :root {
-  --max-width: 1040px;
-
-  --radius-lg: 20px;
-  --radius-xl: 24px;
-
-  --transition-fast: 160ms ease-out;
-  --transition-med: 220ms ease-out;
-
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", Roboto, sans-serif;
-
-  /* Light */
+  /* Farben – Light Mode */
   --color-bg: #f3f4f6;
   --color-bg-elevated: #ffffff;
   --color-bg-soft: #e5e7eb;
-
   --color-text: #0f172a;
   --color-text-soft: #4b5563;
   --color-text-muted: #6b7280;
 
-  --color-primary: #2563eb;
+  --color-primary: #2563eb;      /* Blau – Hauptfarbe */
   --color-primary-soft: #dbeafe;
-  --color-secondary: #16a34a;
-  --color-accent: #f97316;
+  --color-secondary: #16a34a;    /* Grün für positive Akzente */
+  --color-accent: #f97316;       /* Orange für Highlights */
 
   --color-border-subtle: rgba(15, 23, 42, 0.06);
   --color-border-strong: rgba(15, 23, 42, 0.18);
 
+  --color-focus: #fbbf24;        /* gut sichtbare Fokusfarbe */
+
   --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12);
   --shadow-light: 0 10px 25px rgba(15, 23, 42, 0.08);
 
-  --color-focus: #fbbf24;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", Roboto, sans-serif;
+
+  --transition-fast: 160ms ease-out;
+  --transition-med: 220ms ease-out;
+
+  --max-width: 960px;
 }
 
-/* DARK MODE */
+/* Dark Mode via data-theme="dark" auf <html> */
 :root[data-theme="dark"] {
   --color-bg: #020617;
   --color-bg-elevated: rgba(15, 23, 42, 0.9);
-  --color-bg-soft: rgba(15, 23, 42, 0.7);
-
+  --color-bg-soft: rgba(15, 23, 42, 0.8);
   --color-text: #e5e7eb;
   --color-text-soft: #cbd5f5;
   --color-text-muted: #9ca3af;
 
   --color-primary: #60a5fa;
   --color-primary-soft: rgba(37, 99, 235, 0.18);
+  --color-secondary: #22c55e;
+  --color-accent: #fbbf24;
 
-  --color-border-subtle: rgba(148, 163, 184, 0.2);
+  --color-border-subtle: rgba(148, 163, 184, 0.24);
   --color-border-strong: rgba(148, 163, 184, 0.45);
 
-  --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.6);
-  --shadow-light: 0 18px 45px rgba(15, 23, 42, 0.5);
+  --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.9);
+  --shadow-light: 0 18px 40px rgba(15, 23, 42, 0.75);
+}
+
+/* System-Dark-Mode als Fallback, wenn kein data-theme gesetzt ist */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #020617;
+    --color-bg-elevated: rgba(15, 23, 42, 0.9);
+    --color-bg-soft: rgba(15, 23, 42, 0.8);
+    --color-text: #e5e7eb;
+    --color-text-soft: #cbd5f5;
+    --color-text-muted: #9ca3af;
+
+    --color-primary: #60a5fa;
+    --color-primary-soft: rgba(37, 99, 235, 0.18);
+    --color-secondary: #22c55e;
+    --color-accent: #fbbf24;
+
+    --color-border-subtle: rgba(148, 163, 184, 0.24);
+    --color-border-strong: rgba(148, 163, 184, 0.45);
+
+    --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.9);
+    --shadow-light: 0 18px 40px rgba(15, 23, 42, 0.75);
+  }
 }
 
 /* ----------------------------------------------------------
-   SCREENREADER UTILITIES
+   Screenreader-Utilities
 ---------------------------------------------------------- */
 
 .sr-only {
@@ -92,62 +112,78 @@ body {
   border: 0;
 }
 
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  clip: auto;
+  white-space: normal;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
 /* ----------------------------------------------------------
-   PAGE LAYOUT – Startseite
+   Page Layout
 ---------------------------------------------------------- */
 
 .startseite {
   width: 100%;
   max-width: 100%;
-  min-height: 100svh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: var(--font-sans);
   background:
     radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.16), transparent 55%),
     radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.14), transparent 55%),
     var(--color-bg);
   color: var(--color-text);
-
-  padding-left: env(safe-area-inset-left, 0);
-  padding-right: env(safe-area-inset-right, 0);
+  overflow-x: hidden; /* zusätzliche Sicherheit */
 }
 
-/* Zentrierter Inhalt */
+/* Innerer Container für max. Breite */
+.startseite__main,
 .startseite__header,
-.startseite__footer,
-.startseite__main {
+.startseite__footer {
   width: 100%;
   max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 1.25rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 /* ----------------------------------------------------------
-   HEADER
+   Header
 ---------------------------------------------------------- */
 
 .startseite__header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   padding-top: 1.25rem;
   padding-bottom: 0.75rem;
 }
 
 .startseite__header-left {
   display: flex;
+  align-items: center;
   gap: 0.75rem;
 }
 
-/* Logo */
 .startseite__logo-mark {
   width: 40px;
   height: 40px;
   border-radius: 14px;
   background: radial-gradient(circle at 30% 0%, #fef3c7, transparent 60%),
     linear-gradient(135deg, #1d4ed8, #22c55e);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.4);
-  display: flex;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.42);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
@@ -165,180 +201,312 @@ body {
 .startseite__app-name {
   font-size: 1.1rem;
   font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .startseite__app-tagline {
   font-size: 0.8rem;
   color: var(--color-text-muted);
+  max-width: 16rem;
 }
 
-/* DARK/LIGHT Toggle */
+/* Header Right: Theme Toggle */
+.startseite__header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .startseite__theme-toggle {
   border: none;
-  background: rgba(15, 23, 42, 0.05);
-  padding: 0.35rem 0.55rem;
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--color-text-soft);
   border-radius: 999px;
+  padding: 0.35rem 0.55rem;
   font-size: 1.1rem;
   cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-:root[data-theme="dark"] .startseite__theme-toggle {
-  background: rgba(255, 255, 255, 0.18);
+:root[data-theme="dark"] .startseite__theme-toggle,
+:root:not([data-theme]):is(:root[data-theme="dark"]) .startseite__theme-toggle {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.startseite__theme-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.2);
 }
 
 /* ----------------------------------------------------------
-   MAIN AREA
+   Hauptbereich
 ---------------------------------------------------------- */
 
 .startseite__main {
   flex: 1;
-  padding-top: 1rem;
-  padding-bottom: 2rem;
+  padding-top: 0.2rem;
+  padding-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
 }
 
 /* ----------------------------------------------------------
-   HERO / INTRO
+   Hero Section
 ---------------------------------------------------------- */
 
 .startseite__hero {
-  padding: 1.4rem 1.2rem;
+  margin-top: 0.5rem;
+  padding: 1.35rem 1.2rem 1.3rem;
   border-radius: var(--radius-xl);
-  background:
-    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.18), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.18), transparent 55%),
-    linear-gradient(135deg, #0f172a, #020617);
+  background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.86),
+      rgba(15, 23, 42, 0.9)
+    ),
+    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.6), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.5), transparent 55%);
   color: #e5e7eb;
   box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Light Mode Hero etwas heller */
+:root:not([data-theme="dark"]) .startseite__hero {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.18), transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.18), transparent 50%),
+    linear-gradient(135deg, #0f172a, #020617);
+}
+
+.startseite__hero::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  opacity: 0.3;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(248, 250, 252, 0.08), transparent 55%),
+    radial-gradient(circle at 80% 100%, rgba(248, 250, 252, 0.03), transparent 65%);
+  pointer-events: none;
 }
 
 .startseite__hero-heading {
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.4rem;
+  position: relative;
+  z-index: 1;
 }
 
 .startseite__hero-text {
-  font-size: 0.92rem;
+  font-size: 0.93rem;
+  line-height: 1.5;
   color: #cbd5f5;
   margin-bottom: 0.9rem;
+  position: relative;
+  z-index: 1;
 }
 
-/* Hero Button */
+/* Hero Actions */
+
+.startseite__hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  position: relative;
+  z-index: 1;
+}
+
+.startseite__hero-helper {
+  font-size: 0.8rem;
+  color: #c7d2fe;
+}
+
+/* ----------------------------------------------------------
+   Buttons
+---------------------------------------------------------- */
+
 .startseite__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.2rem;
+  padding: 0.7rem 1.1rem;
   border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 180ms ease;
-  border: none;
+  transition:
+    background var(--transition-med),
+    color var(--transition-med),
+    box-shadow var(--transition-med),
+    transform var(--transition-fast),
+    border-color var(--transition-med);
+  text-align: center;
+  gap: 0.45rem;
 }
 
 .startseite__btn--primary {
   background: linear-gradient(135deg, #2563eb, #22c55e);
-  color: white;
-  box-shadow: 0 18px 35px rgba(37, 99, 235, 0.5);
+  color: #f9fafb;
+  box-shadow: 0 18px 35px rgba(37, 99, 235, 0.45);
+}
+
+.startseite__btn--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 45px rgba(37, 99, 235, 0.6);
+}
+
+.startseite__btn--secondary {
+  background: var(--color-bg-elevated);
+  color: var(--color-primary);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-light);
+}
+
+.startseite__btn--secondary:hover {
+  background: var(--color-primary-soft);
+}
+
+.startseite__btn--ghost {
+  background: transparent;
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+:root:not([data-theme="dark"]) .startseite__btn--ghost {
+  color: var(--color-text-soft);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+.startseite__btn--ghost:hover {
+  background: rgba(15, 23, 42, 0.25);
+}
+
+/* Fokus-Stile für Buttons & interaktive Elemente */
+
+.startseite__btn:focus-visible,
+.startseite__theme-toggle:focus-visible,
+.startseite__feature-card:focus-visible,
+.startseite__footer-link:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }
 
 /* ----------------------------------------------------------
-   FEATURE GRID – Quick Actions
+   Sektion Header
+---------------------------------------------------------- */
+
+.startseite__section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.startseite__section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.startseite__section-title--center {
+  text-align: center;
+}
+
+.startseite__section-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* ----------------------------------------------------------
+   Feature Grid (Quick Actions)
 ---------------------------------------------------------- */
 
 .startseite__features {
-  margin-top: 1rem;
+  margin-top: 0.4rem;
 }
 
-/* Basis: Handy */
-.startseite__feature-grid {
-  display: grid;
-  width: 100%;
-  max-width: 100%;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
 
-/* Tablet/Desktop */
-@media (min-width: 768px) {
-  .startseite__feature-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Feature Card */
 .startseite__feature-card {
   width: 100%;
-  max-width: 100%;
-  padding: 1.4rem 1.4rem 1.6rem;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: linear-gradient(
-    135deg,
-    rgba(219, 234, 254, 0.96),
-    rgba(191, 219, 254, 0.98)
-  );
-  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  background: linear-gradient(145deg, #8bdeff, #fdf8ff);
+  backdrop-filter: blur(18px);
+  padding: 0.85rem 0.95rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  text-align: left;
   cursor: pointer;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
   transition:
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.22);
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+:root[data-theme="dark"] .startseite__feature-card,
+:root:not([data-theme]):is(:root[data-theme="dark"])
+  .startseite__feature-card {
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: var(--shadow-light);
 }
 
 .startseite__feature-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-1px);
+  border-color: var(--color-border-strong);
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.18);
 }
 
-/* Dark */
-:root[data-theme="dark"] .startseite__feature-card {
-  background:
-    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.12), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgba(74, 222, 128, 0.1), transparent 55%),
-    #020617;
-  border-color: rgba(148, 163, 184, 0.36);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+.startseite__feature-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background: var(--color-primary-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: radial-gradient(circle at 30% 0%, #ffffff, #dbeafe);
+  color: #2563eb; /* deine Primärfarbe */
 }
 
-/* Titel + Beschreibungen */
-.startseite__feature-title {
+.startseite__feature-icon span {
+  font-size: 1.3rem;
+}
+
+.startseite__feature-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.startseite__section-title {
   font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.35rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
 }
+
 
 .startseite__feature-description {
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   color: var(--color-text-soft);
 }
 
-/* ICON */
-.startseite__feature-icon {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: radial-gradient(circle at 30% 0%, #ffffff, #dbeafe);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.6rem;
-}
-
-/* Fokus / automatische Animation */
-.focus-card {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.45);
-}
-
 /* ----------------------------------------------------------
-   TRUST SECTION
+   Vertrauen & Sicherheit
 ---------------------------------------------------------- */
 
 .startseite__trust {
-  margin-top: 1.4rem;
-  padding: 1rem 1rem 1.1rem;
+  margin-top: 0.5rem;
+  padding: 1rem 0.95rem;
   border-radius: var(--radius-lg);
-  background: var(--color-bg-soft);
+  background: rgba(15, 23, 42, 0.03);
   border: 1px solid var(--color-border-subtle);
 }
 
@@ -346,40 +514,103 @@ body {
   background: rgba(15, 23, 42, 0.85);
 }
 
+.startseite__trust-text {
+  font-size: 0.9rem;
+  color: var(--color-text-soft);
+  margin-top: 0.2rem;
+  margin-bottom: 0.6rem;
+}
+
 .startseite__trust-list {
   list-style: none;
   padding: 0;
-  margin: 0.6rem 0 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.4rem;
+}
+
+.startseite__trust-list li {
+  font-size: 0.86rem;
+  color: var(--color-text-soft);
+}
+
+.startseite__trust-list strong {
+  color: var(--color-text);
+}
+
+.startseite__highlight {
+  font-weight: 700;
+  color: var(--color-accent);
 }
 
 /* ----------------------------------------------------------
-   ABO CARD
+   Abo / Pro-Teaser
 ---------------------------------------------------------- */
 
 .startseite__abo {
-  margin-top: 1rem;
+  margin-top: 0.4rem;
 }
 
 .startseite__abo-card {
-  padding: 1.2rem 1rem 1.3rem;
+  padding: 1rem 1rem 1.05rem;
   border-radius: var(--radius-xl);
+  border: 1px solid rgba(251, 191, 36, 0.4);
   background:
-    radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.12), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.18), transparent 55%),
+    radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.1), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.18), transparent 60%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.96));
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
+  color: #f9fafb;
+  text-align: left;
+}
+
+:root:not([data-theme="dark"]) .startseite__abo-card {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.16), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.22), transparent 60%),
     linear-gradient(135deg, #0f172a, #020617);
-  color: white;
+}
+
+.startseite__abo-text {
+  font-size: 0.9rem;
+  margin-top: 0.35rem;
+  margin-bottom: 0.5rem;
+  color: #e5e7eb;
+}
+
+.startseite__abo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.7rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #e5e7eb;
+}
+
+.startseite__abo-list li::before {
+  content: "•";
+  margin-right: 0.35rem;
+  color: var(--color-accent);
 }
 
 /* ----------------------------------------------------------
-   FOOTER
+   Status-Region (Screenreader)
+---------------------------------------------------------- */
+
+
+  /* Wird nur für Screenreader genutzt, visueller Stil via .sr-only */
+
+
+/* ----------------------------------------------------------
+   Footer
 ---------------------------------------------------------- */
 
 .startseite__footer {
-  padding-top: 0.8rem;
-  padding-bottom: 1.2rem;
+  padding-top: 0.7rem;
+  padding-bottom: 1.1rem;
   border-top: 1px solid rgba(148, 163, 184, 0.25);
   margin-top: auto;
 }
@@ -387,31 +618,255 @@ body {
 .startseite__footer-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem 1rem;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .startseite__footer-link {
-  border: none;
   background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
   color: var(--color-text-muted);
-  text-decoration: underline;
   cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(148, 163, 184, 0.6);
+  text-underline-offset: 2px;
+  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+}
+
+.startseite__footer-link:hover {
+  color: var(--color-primary);
+  text-decoration-color: var(--color-primary);
+}
+
+.startseite__footer-note {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  line-height: 1.4;
 }
 
 /* ----------------------------------------------------------
-   MEDIA QUERIES
+   Responsivität
 ---------------------------------------------------------- */
 
 @media (min-width: 640px) {
+  .startseite__hero {
+    padding: 1.6rem 1.6rem 1.5rem;
+  }
+
   .startseite__hero-heading {
     font-size: 1.6rem;
+  }
+
+  .startseite__hero-text {
+    font-size: 0.96rem;
+    max-width: 32rem;
+  }
+
+  .startseite__hero-actions {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .startseite__hero-helper {
+    max-width: 20rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .startseite__main {
+    padding-top: 1rem;
+    padding-bottom: 3rem;
+  }
+
+  
+
+  .startseite__trust {
+    padding: 1.1rem 1.2rem;
+  }
+
+  .startseite__abo-card {
+    padding: 1.2rem 1.3rem 1.2rem;
   }
 }
 
 @media (min-width: 1024px) {
+  .startseite__main {
+    padding-top: 1.4rem;
+  }
+
   .startseite__hero {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2.1fr 1.4fr;
     column-gap: 1.4rem;
+    align-items: center;
   }
+
+  .startseite__hero-text {
+    margin-bottom: 1.1rem;
+  }
+
+  .startseite__hero-actions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .startseite__features {
+    margin-top: 0.8rem;
+  }
+}
+
+
+/* Normalzustand */
+.startseite__feature-card {
+  transition: transform 1.6s ease, box-shadow 1.55s ease;
+}
+
+/* Animation: Card schwebt langsam hoch */
+.focus-card {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  border-color: rgba(37, 99, 235, 0.35);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.6s ease;
+}
+
+/* Dark Mode */
+:root[data-theme="dark"] .focus-card {
+  box-shadow: 100 25px 50px rgba(66, 232, 165, 0.55);
+  border-color: rgba(231, 12, 12, 0.12);
+}
+
+/* testen für Farbe */ 
+/* Layout-Container */
+.startseite-root {
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+  padding: 1.25rem 0 2.5rem;   /* KEIN horizontales Padding mehr */
+  overflow-x: hidden;
+}
+
+.startseite-inner {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 1rem;             /* Innenabstand, aber durch box-sizing sicher */
+}
+
+/* Feature-Grid Desktop */
+.startseite__feature-grid {
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
+  margin-top: 0.6rem;
+}
+
+/* Ab Tablet: 2 Spalten */
+@media (min-width: 768px) {
+  .startseite__feature-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile-Anpassungen */
+@media (max-width: 768px) {
+  .startseite-root {
+    padding: 1rem 0.9rem 2rem;
+  }
+
+  .startseite__hero-card {
+    padding: 1.5rem 1.2rem;
+    border-radius: 20px;
+  }
+
+  
+
+  .startseite__feature-card {
+    padding: 1.1rem 1rem 1.3rem;
+    border-radius: 18px;
+  }
+
+  .startseite__section-title {
+    font-size: 1.1rem;
+  }
+
+  .startseite__section-subtitle {
+    font-size: 0.9rem;
+  }
+}
+/* BASIS: Light-Theme Karten */
+.startseite__feature-card {
+  position: relative;
+  border-radius: 24px;
+  padding: 1.4rem 1.4rem 1.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: linear-gradient(
+    135deg,
+    rgba(219, 234, 254, 0.96),
+    rgba(191, 219, 254, 0.98)
+  );
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.22);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.6s ease,
+    background 0.4s ease;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.startseite__feature-title {
+  margin: 0 0 0.4rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a; /* dunkel, gute Lesbarkeit */
+}
+
+.startseite__feature-description {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #1f2933;
+}
+
+/* DARK THEME VARIANTE */
+:root[data-theme="dark"] .startseite__feature-card {
+  background: radial-gradient(
+      circle at 0% 0%,
+      rgba(56, 189, 248, 0.12),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 100% 100%,
+      rgba(74, 222, 128, 0.1),
+      transparent 55%
+    ),
+    #020617;
+  border-color: rgba(148, 163, 184, 0.36);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.55);
+}
+
+:root[data-theme="dark"] .startseite__feature-title {
+  color: #e5e7eb;
+}
+
+:root[data-theme="dark"] .startseite__feature-description {
+  color: #cbd5f5;
+}
+
+/* Fokus-Animation (heb die Karte leicht an, aber sauber innerhalb des Rahmens) */
+.focus-card {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.45);
 }
