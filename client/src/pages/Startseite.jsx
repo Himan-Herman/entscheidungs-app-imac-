@@ -11,11 +11,17 @@ import {
 export default function Startseite() {
   const navigate = useNavigate();
 
-  // Dark-Mode (system / light / dark) – kannst du später noch nutzen
-  const [theme, setTheme] = useState("system");
+  // THEME (nur light/dark, kein "system" mehr)
+  const [theme, setTheme] = useState("dark");
 
-  // Fokus-Index für die „Spotlight“-Animation der Boxen
-  const [focusIndex, setFocusIndex] = useState(0);
+  const handleThemeToggle = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", theme);
+  }, [theme]);
 
   // 🔹 Karten-Konfiguration (wird unten gerendert)
   const featureCards = [
@@ -53,10 +59,8 @@ export default function Startseite() {
     },
   ];
 
-  // Seitentitel setzen
-  useEffect(() => {
-    document.title = "MedScoutX – Dein smarter Gesundheits-Navigator";
-  }, []);
+  // Fokus-Index für die „Spotlight“-Animation der Boxen
+  const [focusIndex, setFocusIndex] = useState(0);
 
   // 🔹 Auto-Fokus alle 3 Sekunden auf nächste Box
   useEffect(() => {
@@ -67,28 +71,13 @@ export default function Startseite() {
     return () => clearInterval(interval);
   }, [featureCards.length]);
 
-  // Dark-Mode-Handling (optional)
+  // Seitentitel setzen
   useEffect(() => {
-    const root = document.documentElement;
-
-    if (theme === "system") {
-      root.removeAttribute("data-theme");
-    } else {
-      root.setAttribute("data-theme", theme);
-    }
-  }, [theme]);
+    document.title = "MedScoutX – Dein smarter Gesundheits-Navigator";
+  }, []);
 
   const handleNavigate = (path) => {
     navigate(path);
-  };
-  
-
-  const handleThemeToggle = () => {
-    setTheme((prev) => {
-      if (prev === "system") return "dark";
-      if (prev === "dark") return "light";
-      return "system";
-    });
   };
 
   return (
@@ -103,7 +92,6 @@ export default function Startseite() {
         <header className="startseite__header" role="banner">
           <div className="startseite__header-left">
             <div className="startseite__logo-mark" aria-hidden="true">
-              {/* Hier kannst du dein Logo/Icon per CSS-Hintergrund oder <img> einfügen */}
               <span className="startseite__logo-symbol">✚</span>
             </div>
             <div className="startseite__branding">
@@ -120,22 +108,20 @@ export default function Startseite() {
               className="startseite__theme-toggle"
               onClick={handleThemeToggle}
               aria-label={
-                theme === "system"
-                  ? "Darstellungsmodus: Systemstandard. Umschalten auf Dunkelmodus."
-                  : theme === "dark"
-                  ? "Darstellungsmodus: Dunkel. Umschalten auf Hellmodus."
-                  : "Darstellungsmodus: Hell. Umschalten auf Systemstandard."
+                theme === "dark"
+                  ? "Aktuell Dunkelmodus. Umschalten auf Hellmodus."
+                  : "Aktuell Hellmodus. Umschalten auf Dunkelmodus."
               }
             >
               <span aria-hidden="true">
-                {theme === "system" ? "🌓" : theme === "dark" ? "🌙" : "☀️"}
+                {theme === "dark" ? "🌙" : "☀️"}
               </span>
             </button>
           </div>
         </header>
 
-                {/* HAUPTBEREICH */}
-                <div className="startseite-root">
+        {/* HAUPTBEREICH */}
+        <div className="startseite-root">
           <main
             id="main-content"
             className="startseite-inner"
@@ -160,7 +146,6 @@ export default function Startseite() {
                     Facharzt-Vorschläge, ohne eine Diagnose zu ersetzen.
                   </p>
 
-                  {/* ⭐ EINZIGER BUTTON */}
                   <button
                     type="button"
                     className="startseite__btn startseite__btn--primary"
@@ -311,8 +296,7 @@ export default function Startseite() {
           </main>
         </div>
 
-
-        {/* STATUS (für Screenreader, falls du später dynamische Meldungen einbauen willst) */}
+        {/* STATUS (für Screenreader) */}
         <div
           className="startseite__status-region sr-only"
           aria-live="polite"
@@ -358,8 +342,8 @@ export default function Startseite() {
           </nav>
 
           <p className="startseite__footer-note">
-            MedScoutX ist eine KI-gestützte Orientierungs-Hilfe und ersetzt keine ärztliche
-            Diagnose oder Behandlung.
+            MedScoutX ist eine KI-gestützte Orientierungs-Hilfe und ersetzt
+            keine ärztliche Diagnose oder Behandlung.
           </p>
         </footer>
       </div>
