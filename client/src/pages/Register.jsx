@@ -565,7 +565,7 @@ export default function Register() {
         <span className="sep">·</span>
         <Link to="/disclaimer?public=1">Disclaimer</Link>
         <span className="sep">·</span>
-        <Link to="/agb">AGB</Link>
+        <Link to="/agb?from=register">AGB</Link>
       </div>
 
 
