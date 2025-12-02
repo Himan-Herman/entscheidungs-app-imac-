@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Startseite.css";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../ThemeMode";
+
 import {
   IconSymptomChat,
   IconBodyMap,
@@ -10,18 +12,11 @@ import {
 
 export default function Startseite() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   // THEME (nur light/dark, kein "system" mehr)
-  const [theme, setTheme] = useState("light");
+  
 
-  const handleThemeToggle = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.setAttribute("data-theme", theme);
-  }, [theme]);
 
   // 🔹 Karten-Konfiguration (wird unten gerendert)
   const featureCards = [
@@ -103,20 +98,21 @@ export default function Startseite() {
           </div>
 
           <div className="startseite__header-right">
-            <button
-              type="button"
-              className="startseite__theme-toggle"
-              onClick={handleThemeToggle}
-              aria-label={
-                theme === "dark"
-                  ? "Aktuell Dunkelmodus. Umschalten auf Hellmodus."
-                  : "Aktuell Hellmodus. Umschalten auf Dunkelmodus."
-              }
-            >
-              <span aria-hidden="true">
-                {theme === "dark" ? "🌙" : "☀️"}
-              </span>
-            </button>
+          <button
+  type="button"
+  className="startseite__theme-toggle"
+  onClick={toggleTheme}
+  aria-label={
+    theme === "dark"
+      ? "Aktuell Dunkelmodus. Umschalten auf Hellmodus."
+      : "Aktuell Hellmodus. Umschalten auf Dunkelmodus."
+  }
+>
+  <span aria-hidden="true">
+    {theme === "dark" ? "🌙" : "☀️"}
+  </span>
+</button>
+
           </div>
         </header>
 
