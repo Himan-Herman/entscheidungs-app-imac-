@@ -12,7 +12,7 @@ export default function Startseite() {
   const navigate = useNavigate();
 
   // THEME (nur light/dark, kein "system" mehr)
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
 
   const handleThemeToggle = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
