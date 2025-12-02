@@ -10,30 +10,19 @@ export default function Intro() {
   useEffect(() => {
     document.title = "MedScoutX – wird geladen …";
 
-    // Nur registrierte Nutzer dürfen Intro sehen
+    // Nur eingeloggte Nutzer sollen Intro sehen
     const hasUser = !!localStorage.getItem("medscout_user_id");
     if (!hasUser) {
-      navigate("/startseite", { replace: true });
+      navigate("/login", { replace: true });
       return;
     }
 
-    const alreadyShown = sessionStorage.getItem("introShown");
-
-    // Für Screenreader / A11y: wenn schon gezeigt → direkt weiter
-    if (alreadyShown) {
-      navigate("/startseite", { replace: true });
-      return;
-    }
-
-    sessionStorage.setItem("introShown", "true");
-
-    // Motion-Einstellungen des Systems beachten (A11y)
     const prefersReducedMotion = window.matchMedia?.(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    const fadeOutDelay = prefersReducedMotion ? 1000 : 4000;
-    const navigateDelay = prefersReducedMotion ? 1200 : 5000;
+    const fadeOutDelay = prefersReducedMotion ? 800 : 4000;
+    const navigateDelay = prefersReducedMotion ? 1000 : 5000;
 
     const fadeOutTimer = setTimeout(() => setFadeOut(true), fadeOutDelay);
     const navigateTimer = setTimeout(
@@ -55,7 +44,6 @@ export default function Intro() {
       </a>
 
       <div className="intro-container" aria-labelledby="intro-heading">
-        {/* Rolle status + aria-live → Screenreader wissen: „App lädt“ */}
         <main
           id="intro-main"
           className="intro-content"
@@ -75,9 +63,9 @@ export default function Intro() {
             />
           </div>
 
-          {/* Für Screenreader klar machen, was passiert */}
           <p className="intro-status-text">
-            MedScoutX wird geladen. Du wirst gleich zur Startseite weitergeleitet.
+            MedScoutX wird geladen. Du wirst gleich zur Startseite
+            weitergeleitet.
           </p>
         </main>
       </div>

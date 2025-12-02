@@ -134,147 +134,183 @@ export default function Startseite() {
           </div>
         </header>
 
-        {/* HAUPTBEREICH */}
-        <main id="main-content" className="startseite__main" aria-label="Startseite von MedScoutX">
-          {/* HERO / EINFÜHRUNG */}
-<section
-  className="startseite__hero"
-  aria-labelledby="hero-heading"
->
-  <h1 id="hero-heading" className="startseite__hero-heading">
-    Dein smarter Gesundheits-Navigator
-  </h1>
-
-  <div className="startseite__hero-layout">
-    {/* Linke Seite – Text */}
-    <div className="startseite__hero-left">
-      <p className="startseite__hero-text">
-        MedScoutX unterstützt dich dabei, Beschwerden besser einzuordnen – mit Symptom-Chat,
-        Körperkarte und Bildanalyse. Du erhältst Orientierung und Facharzt-Vorschläge, ohne eine
-        Diagnose zu ersetzen.
-      </p>
-
-      {/* ⭐ NEUER EINZIGER BUTTON */}
-      <button
-        type="button"
-        className="startseite__btn startseite__btn--primary"
-        onClick={() => navigate("/info")}
-        aria-describedby="hero-primary-desc"
-      >
-        Wie funktioniert MedScoutX?
-      </button>
-
-      <p id="hero-primary-desc" className="startseite__hero-helper">
-        Erfahre, wie MedScoutX funktioniert, welche Vorteile es bietet und wie es dir hilft,
-        Beschwerden strukturiert und sicher einzuordnen.
-      </p>
-    </div>
-  </div>
-</section>
-
-
-          {/* FUNKTIONSBEREICH / QUICK ACTIONS */}
-          <section
-  className="startseite__features"
-  aria-labelledby="features-heading"
->
-  <div className="startseite__section-header">
-    <h2 id="features-heading" className="startseite__section-title">
-      Direkt loslegen
-    </h2>
-    <p className="startseite__section-subtitle">
-      Wähle den Bereich, der am besten zu deiner aktuellen Situation passt.
-    </p>
-  </div>
-
-  <div
-    className="startseite__feature-grid"
-    role="list"
-    aria-label="Hauptfunktionen von MedScoutX"
-  >
-    {featureCards.map((card, index) => (
-      <button
-        key={card.key}
-        type="button"
-        className={`startseite__feature-card ${
-          focusIndex === index ? "focus-card" : ""
-        }`}
-        role="listitem"
-        onClick={() => handleNavigate(card.to)}
-        aria-label={`${card.title}: ${card.description}`}
-      >
-        <div className="startseite__feature-icon" aria-hidden="true">
-          <card.Icon />
-        </div>
-
-        <div className="startseite__feature-content">
-          <h3 className="startseite__feature-title">{card.title}</h3>
-          <p className="startseite__feature-description">
-            {card.description}
-          </p>
-        </div>
-      </button>
-    ))}
-  </div>
-</section>
-
-
-          {/* VERTRAUEN & SICHERHEIT */}
-          <section
-            className="startseite__trust"
-            aria-labelledby="trust-heading"
+                {/* HAUPTBEREICH */}
+                <div className="startseite-root">
+          <main
+            id="main-content"
+            className="startseite-inner"
+            aria-label="Startseite von MedScoutX"
           >
-            <h2 id="trust-heading" className="startseite__section-title">
-              Datenschutz & Sicherheit
-            </h2>
-            <p className="startseite__trust-text">
-              Deine Gesundheit ist sensibel – und genau so behandeln wir deine Daten.
-            </p>
-            <ul className="startseite__trust-list">
-              <li>
-                <strong>Keine Notfallversorgung:</strong> Bei akuten Beschwerden wähle bitte den{" "}
-                <span className="startseite__highlight">Notruf 112</span> oder wende dich direkt an
-                Ärzt:innen.
-              </li>
-              <li>
-                <strong>Orientierung statt Diagnose:</strong> MedScoutX liefert Vorschläge und Hinweise,
-                ersetzt aber keine medizinische Untersuchung.
-              </li>
-              <li>
-                <strong>Datenschutz:</strong> DSGVO-orientiertes Konzept und Hosting in der EU (je nach
-                Tarif & Infrastrukturkonfiguration).
-              </li>
-            </ul>
-          </section>
+            {/* HERO / EINFÜHRUNG */}
+            <section
+              className="startseite__hero"
+              aria-labelledby="hero-heading"
+            >
+              <h1 id="hero-heading" className="startseite__hero-heading">
+                Dein smarter Gesundheits-Navigator
+              </h1>
 
-          {/* ABO / PREMIUM-TEASER */}
-          <section
-            className="startseite__abo"
-            aria-labelledby="abo-heading"
-          >
-            <div className="startseite__abo-card" role="group" aria-describedby="abo-benefits">
-              <h2 id="abo-heading" className="startseite__section-title startseite__section-title--center">
-                Mehr Antworten mit MedScoutX Pro
-              </h2>
-              <p id="abo-benefits" className="startseite__abo-text">
-                Für Vielnutzer:innen & Power-User: höhere Limits, erweiterte Analysefunktionen und
-                priorisierte Antworten.
-              </p>
-              <ul className="startseite__abo-list">
-                <li>Mehr Anfragen pro Monat</li>
-                <li>Detailliertere KI-Antworten & Verlaufsanalyse</li>
-                <li>Bevorzugte Verarbeitung in der MedScoutX-Cloud</li>
-              </ul>
-              <button
-                type="button"
-                className="startseite__btn startseite__btn--secondary"
-                onClick={() => handleNavigate("/abo")}
+              <div className="startseite__hero-layout">
+                {/* Linke Seite – Text */}
+                <div className="startseite__hero-left">
+                  <p className="startseite__hero-text">
+                    MedScoutX unterstützt dich dabei, Beschwerden besser
+                    einzuordnen – mit Symptom-Chat, Körperkarte und
+                    Bildanalyse. Du erhältst Orientierung und
+                    Facharzt-Vorschläge, ohne eine Diagnose zu ersetzen.
+                  </p>
+
+                  {/* ⭐ EINZIGER BUTTON */}
+                  <button
+                    type="button"
+                    className="startseite__btn startseite__btn--primary"
+                    onClick={() => navigate("/info")}
+                    aria-describedby="hero-primary-desc"
+                  >
+                    Wie funktioniert MedScoutX?
+                  </button>
+
+                  <p
+                    id="hero-primary-desc"
+                    className="startseite__hero-helper"
+                  >
+                    Erfahre, wie MedScoutX funktioniert, welche Vorteile es
+                    bietet und wie es dir hilft, Beschwerden strukturiert
+                    und sicher einzuordnen.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* FUNKTIONSBEREICH / QUICK ACTIONS */}
+            <section
+              className="startseite__features"
+              aria-labelledby="features-heading"
+            >
+              <div className="startseite__section-header">
+                <h2
+                  id="features-heading"
+                  className="startseite__section-title"
+                >
+                  Direkt loslegen
+                </h2>
+                <p className="startseite__section-subtitle">
+                  Wähle den Bereich, der am besten zu deiner aktuellen
+                  Situation passt.
+                </p>
+              </div>
+
+              <div
+                className="startseite__feature-grid"
+                role="list"
+                aria-label="Hauptfunktionen von MedScoutX"
               >
-                Tarife ansehen
-              </button>
-            </div>
-          </section>
-        </main>
+                {featureCards.map((card, index) => (
+                  <button
+                    key={card.key}
+                    type="button"
+                    className={`startseite__feature-card ${
+                      focusIndex === index ? "focus-card" : ""
+                    }`}
+                    role="listitem"
+                    onClick={() => handleNavigate(card.to)}
+                    aria-label={`${card.title}: ${card.description}`}
+                  >
+                    <div
+                      className="startseite__feature-icon"
+                      aria-hidden="true"
+                    >
+                      <card.Icon />
+                    </div>
+
+                    <div className="startseite__feature-content">
+                      <h3 className="startseite__feature-title">
+                        {card.title}
+                      </h3>
+                      <p className="startseite__feature-description">
+                        {card.description}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* VERTRAUEN & SICHERHEIT */}
+            <section
+              className="startseite__trust"
+              aria-labelledby="trust-heading"
+            >
+              <h2
+                id="trust-heading"
+                className="startseite__section-title"
+              >
+                Datenschutz &amp; Sicherheit
+              </h2>
+              <p className="startseite__trust-text">
+                Deine Gesundheit ist sensibel – und genau so behandeln wir
+                deine Daten.
+              </p>
+              <ul className="startseite__trust-list">
+                <li>
+                  <strong>Keine Notfallversorgung:</strong> Bei akuten
+                  Beschwerden wähle bitte den{" "}
+                  <span className="startseite__highlight">Notruf 112</span>{" "}
+                  oder wende dich direkt an Ärzt:innen.
+                </li>
+                <li>
+                  <strong>Orientierung statt Diagnose:</strong> MedScoutX
+                  liefert Vorschläge und Hinweise, ersetzt aber keine
+                  medizinische Untersuchung.
+                </li>
+                <li>
+                  <strong>Datenschutz:</strong> DSGVO-orientiertes Konzept
+                  und Hosting in der EU (je nach Tarif &amp;
+                  Infrastrukturkonfiguration).
+                </li>
+              </ul>
+            </section>
+
+            {/* ABO / PREMIUM-TEASER */}
+            <section
+              className="startseite__abo"
+              aria-labelledby="abo-heading"
+            >
+              <div
+                className="startseite__abo-card"
+                role="group"
+                aria-describedby="abo-benefits"
+              >
+                <h2
+                  id="abo-heading"
+                  className="startseite__section-title startseite__section-title--center"
+                >
+                  Mehr Antworten mit MedScoutX Pro
+                </h2>
+                <p
+                  id="abo-benefits"
+                  className="startseite__abo-text"
+                >
+                  Für Vielnutzer:innen &amp; Power-User: höhere Limits,
+                  erweiterte Analysefunktionen und priorisierte Antworten.
+                </p>
+                <ul className="startseite__abo-list">
+                  <li>Mehr Anfragen pro Monat</li>
+                  <li>Detailliertere KI-Antworten &amp; Verlaufsanalyse</li>
+                  <li>Bevorzugte Verarbeitung in der MedScoutX-Cloud</li>
+                </ul>
+                <button
+                  type="button"
+                  className="startseite__btn startseite__btn--secondary"
+                  onClick={() => handleNavigate("/abo")}
+                >
+                  Tarife ansehen
+                </button>
+              </div>
+            </section>
+          </main>
+        </div>
+
 
         {/* STATUS (für Screenreader, falls du später dynamische Meldungen einbauen willst) */}
         <div
