@@ -28,6 +28,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Disclaimer from "./pages/Disclaimer";
 import AGB from "./pages/AGB.jsx";
+import Info from "./pages/Info"; 
+
 //import VerifyEmail from "./pages/VerifyEmail";
 
 function Gate() {
@@ -115,6 +117,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/disclaimer" element={<Disclaimer />} />
         <Route path="/agb" element={<AGB />} />
+        <Route path="/info" element={<Info />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
