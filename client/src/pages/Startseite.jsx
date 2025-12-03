@@ -303,14 +303,16 @@ export default function Startseite() {
   className="startseite__demo"
   aria-labelledby="demo-heading"
 >
-  <div className="startseite__section-header startseite__section-header--center">
-    <h2 id="demo-heading" className="startseite__section-title">
-      Ein kurzer Blick in MedScoutX
-    </h2>
-    <p className="startseite__section-subtitle">
-      In wenigen Sekunden siehst du, wie Symptom-Chat, Körperkarte und Bildanalyse zusammenspielen.
-    </p>
-  </div>
+<div className="startseite__section-header startseite__section-header--center">
+  <h2 id="demo-heading" className="startseite__section-title">
+    Meda – deine KI, visualisiert
+  </h2>
+  <p className="startseite__section-subtitle">
+    Das Video zeigt symbolisch, wie Meda medizinische Muster erkennt und 
+    dir bei Beschwerden Orientierung bietet.
+  </p>
+</div>
+
 
   <div className="startseite__demo-media">
     <video
