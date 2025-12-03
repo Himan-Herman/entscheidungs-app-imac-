@@ -870,3 +870,40 @@ body {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 22px 55px rgba(15, 23, 42, 0.45);
 }
+/* Root-Container der Startseite */
+.startseite {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.16), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.14), transparent 55%),
+    var(--color-bg);
+  color: var(--color-text);
+
+  /* iPhone Notch / Safe Area */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Unser zentrierter Inhalt */
+.startseite-root {
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+
+  /* leicht vom Rand weg: hier „2–4 px“ Effekt */
+  padding: 1rem 0.75rem 2.25rem;
+}
+
+/* Inhalt auf max. Breite beschränken */
+.startseite-inner,
+.startseite__main,
+.startseite__header,
+.startseite__footer {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+}

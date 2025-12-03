@@ -45,17 +45,23 @@
       radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.16), transparent 55%),
       var(--color-bg, #f3f4f6);
     color: var(--color-text, #0f172a);
+  
+    /* ✔ verhindert iPhone-Zoom auf 105% */
+    width: 100%;
+    overflow-x: hidden;
   }
   
+  
+  /* 📌 Zentraler Wrapper – So logisch wie auf Startseite */
   .info-header,
   .info-main {
     width: 100%;
-    max-width: var(--max-width, 960px);
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+    max-width: 900px;    /* besser als 960px, perfekter Fit für deine Boxen */
+    margin-inline: auto; /* links & rechts zentriert */
+    padding-inline: 1rem; /* etwas kleiner, damit NICHTS overflowen kann */
+    box-sizing: border-box; /* 💯 verhindert Überlauf */
   }
+  
   
   /* ----------------------------------------------------------
      Header

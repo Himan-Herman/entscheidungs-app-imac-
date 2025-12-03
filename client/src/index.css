@@ -67,3 +67,6 @@ button:focus-visible {
     background-color: #cc0c0c;
   }
 }
+html {
+  -webkit-text-size-adjust: 100%;
+}
