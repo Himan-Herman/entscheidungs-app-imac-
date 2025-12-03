@@ -7,8 +7,6 @@ const pwdRule =
 
 export default function Register() {
   const navigate = useNavigate();
-  const [fieldErrors, setFieldErrors] = useState({});
-
 
   const [form, setForm] = useState({
     email: "",
@@ -16,17 +14,12 @@ export default function Register() {
     first_name: "",
     last_name: "",
     date_of_birth: "",
+    gender: "",
+    // Einwilligungen
     accept_terms: false,
     accept_privacy: false,
     accept_med_disclaimer: false,
-    doctor_alert_consent: false,
-    phone: "",
-    postal_code: "",
-    country: "",
-    address_line: "",
-    city: "",
-    gender: "",
-    // neue Bestätigung: über 18
+    // 18+ Bestätigung
     over18_confirmed: false,
   });
 
@@ -37,7 +30,7 @@ export default function Register() {
     setForm(prev => ({ ...prev, [key]: value }));
   }
 
-  // Altersberechnung aus Geburtsdatum
+  // Altersberechnung
   const isMinor = useMemo(() => {
     if (!form.date_of_birth) return false;
     const dob = new Date(form.date_of_birth);
@@ -51,92 +44,46 @@ export default function Register() {
     return age < 18;
   }, [form.date_of_birth]);
 
+  // Gesamte Gültigkeit – KEEP IT SIMPLE
   const valid = useMemo(() => {
     const emailOk = /\S+@\S+\.\S+/.test(form.email);
     const pwdOk = pwdRule.test(form.password);
-    const nameOk = form.first_name.trim() && form.last_name.trim();
-    const dobOk = !!form.date_of_birth;
-    const ageOk = dobOk && !isMinor && form.over18_confirmed;
+    const nameOk =
+      form.first_name.trim().length > 0 &&
+      form.last_name.trim().length > 0;
+    const dobOk = !!form.date_of_birth && !isMinor;
     const consentOk =
-      form.accept_terms && form.accept_privacy && form.accept_med_disclaimer;
+      form.accept_terms &&
+      form.accept_privacy &&
+      form.accept_med_disclaimer;
+    const ageConfirmOk = form.over18_confirmed;
 
-    return emailOk && pwdOk && nameOk && dobOk && ageOk && consentOk;
+    return emailOk && pwdOk && nameOk && dobOk && consentOk && ageConfirmOk;
   }, [form, isMinor]);
 
   async function submit(e) {
     e.preventDefault();
     setErr("");
 
-    // Spezifische Checks für Alter
+    // Minimale Checks, NICHT übertreiben
     if (!form.date_of_birth) {
       setErr("Bitte gib dein Geburtsdatum an.");
       return;
     }
-
     if (isMinor) {
       setErr(
         "Du bist noch nicht volljährig. MedScoutX darf nur von Personen ab 18 Jahren genutzt werden."
       );
       return;
     }
-
     if (!form.over18_confirmed) {
       setErr("Bitte bestätige, dass du mindestens 18 Jahre alt bist.");
       return;
     }
-
-    // Validierung aller Pflichtfelder
-const newErrors = {};
-
-if (!form.email.trim()) newErrors.email = "E-Mail ist erforderlich.";
-if (!/\S+@\S+\.\S+/.test(form.email)) newErrors.email = "Ungültige E-Mail-Adresse.";
-
-if (!pwdRule.test(form.password))
-  newErrors.password = "Passwort erfüllt die Anforderungen nicht.";
-
-if (!form.first_name.trim())
-  newErrors.first_name = "Vorname ist erforderlich.";
-
-if (!form.last_name.trim())
-  newErrors.last_name = "Nachname ist erforderlich.";
-
-if (!form.date_of_birth)
-  newErrors.date_of_birth = "Bitte Geburtsdatum angeben.";
-
-if (isMinor)
-  newErrors.date_of_birth = "Du musst mindestens 18 Jahre alt sein.";
-
-if (!form.over18_confirmed)
-  newErrors.over18_confirmed = "Bitte bestätigen.";
-
-// Adresse
-if (!form.address_line.trim()) newErrors.address_line = "Pflichtfeld.";
-if (!form.postal_code.trim()) newErrors.postal_code = "Pflichtfeld.";
-if (!form.city.trim()) newErrors.city = "Pflichtfeld.";
-if (!form.country.trim()) newErrors.country = "Pflichtfeld.";
-
-// AGB / Datenschutz / Disclaimer
-if (!form.accept_terms || !form.accept_privacy || !form.accept_med_disclaimer) {
-  newErrors.accept_terms = "Bitte zustimmen.";
-}
-
-if (Object.keys(newErrors).length > 0) {
-  setFieldErrors(newErrors);
-
-  // Scroll to first invalid field
-  const firstKey = Object.keys(newErrors)[0];
-  const el = document.getElementById(firstKey);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    el.focus();
-  }
-
-  setErr("Bitte Pflichtfelder prüfen.");
-  return;
-}
-
-setFieldErrors({});
-
+    if (!valid) {
+      setErr("Bitte prüfe alle Pflichtfelder und Zustimmungen.");
+      return;
+    }
 
     setBusy(true);
     try {
@@ -148,20 +95,20 @@ setFieldErrors({});
           last_name: form.last_name,
           date_of_birth: form.date_of_birth,
         },
+        // Profil-Daten – aktuell minimal, Rest auf null
         profile: {
-          phone: form.phone || null,
-          postal_code: form.postal_code || null,
-          country: form.country || null,
-          address_line: form.address_line || null,
-          city: form.city || null,
+          phone: null,
+          postal_code: null,
+          country: null,
+          insurance_type: null,
+          address_line: null,
+          city: null,
           gender: form.gender || null,
         },
         consent: {
           terms_accepted: form.accept_terms,
           privacy_accepted: form.accept_privacy,
           medical_disclaimer_accepted: form.accept_med_disclaimer,
-          doctor_alert_consent: form.doctor_alert_consent,
-          // über 18 wird aktuell nur im Frontend geprüft
         },
       };
 
@@ -186,9 +133,12 @@ setFieldErrors({});
 
       localStorage.setItem("pending_verification_email", payload.user.email);
       localStorage.setItem("pending_verification_user_id", data.user_id);
+
+      // NACH REGISTRIERUNG → später Abo-Seite,
+      // vorerst wie gehabt:
       navigate("/check-email", { replace: true });
     } catch (e2) {
-      setErr(e2.message ?? "Fehler.");
+      setErr(e2.message ?? "Fehler bei der Registrierung.");
     } finally {
       setBusy(false);
     }
@@ -208,178 +158,135 @@ setFieldErrors({});
         <h1 id="register-heading" className="h1">
           Registrieren
         </h1>
+
         <p className="required-hint">
-  <span className="req">*</span> Pflichtfeld
-</p>
+          <span className="req">*</span> Pflichtfeld
+        </p>
 
-
-<form className="form" onSubmit={submit} noValidate>
-  {/* E-Mail */}
-  <div className="field">
-    <label htmlFor="email" className="label">
-      E-Mail{" "}
-      <span className="req" aria-hidden="true">
-        *
-      </span>
-      <span className="sr-only"> (Pflichtfeld)</span>
-    </label>
-
-    <input
-      id="email"
-      type="email"
-      required
-      placeholder="z. B. name@example.com"
-      autoComplete="email"
-      value={form.email}
-      onChange={e => setField("email", e.target.value)}
-      aria-invalid={!!fieldErrors.email}
-      aria-describedby="email-hint"
-      className={`input ${fieldErrors.email ? "input-error" : ""}`}
-    />
-
-    <small id="email-hint" className="hint">
-      Wir verwenden deine E-Mail für dein Konto und wichtige Hinweise.
-    </small>
-
-    {fieldErrors.email && (
-      <p className="field-error" role="alert">
-        {fieldErrors.email}
-      </p>
-    )}
-  </div>
-
-
+        <form className="form" onSubmit={submit} noValidate>
+          {/* E-Mail */}
+          <div className="field">
+            <label htmlFor="email" className="label">
+              E-Mail{" "}
+              <span className="req" aria-hidden="true">
+                *
+              </span>
+              <span className="sr-only"> (Pflichtfeld)</span>
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              className="input"
+              placeholder="z. B. name@example.com"
+              autoComplete="email"
+              value={form.email}
+              onChange={e => setField("email", e.target.value)}
+              aria-describedby="email-hint"
+            />
+            <small id="email-hint" className="hint">
+              Wir verwenden deine E-Mail für dein Konto und wichtige Hinweise.
+            </small>
+          </div>
 
           {/* Passwort */}
-<div className="field">
-  <label htmlFor="password" className="label">
-    Passwort{" "}
-    <span className="req" aria-hidden="true">
-      *
-    </span>
-    <span className="sr-only"> (Pflichtfeld)</span>
-  </label>
-  <input
-    id="password"
-    type="password"
-    required
-    placeholder="Mind. 8 Zeichen, Zahl &amp; Buchstabe"
-    autoComplete="new-password"
-    value={form.password}
-    onChange={e => setField("password", e.target.value)}
-    aria-describedby="pwd-hint"
-    aria-invalid={!!fieldErrors.password}
-    className={`input ${fieldErrors.password ? "input-error" : ""}`}
-    pattern={pwdRule.source}
-    title="Mindestens 8 Zeichen, mindestens 1 Buchstabe und 1 Zahl"
-  />
-  <small id="pwd-hint" className="hint">
-    Mindestens 8 Zeichen, inklusive Zahl &amp; Buchstabe.
-  </small>
-  {fieldErrors.password && (
-    <p className="field-error" role="alert">
-      {fieldErrors.password}
-    </p>
-  )}
-</div>
-
+          <div className="field">
+            <label htmlFor="password" className="label">
+              Passwort{" "}
+              <span className="req" aria-hidden="true">
+                *
+              </span>
+              <span className="sr-only"> (Pflichtfeld)</span>
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              className="input"
+              placeholder="Mind. 8 Zeichen, Zahl &amp; Buchstabe"
+              autoComplete="new-password"
+              value={form.password}
+              onChange={e => setField("password", e.target.value)}
+              aria-describedby="pwd-hint"
+              pattern={pwdRule.source}
+              title="Mindestens 8 Zeichen, mindestens 1 Buchstabe und 1 Zahl"
+            />
+            <small id="pwd-hint" className="hint">
+              Mindestens 8 Zeichen, inklusive Zahl &amp; Buchstabe.
+            </small>
+          </div>
 
           {/* Name */}
-<div className="grid-2">
-  <div className="field">
-    <label htmlFor="first_name" className="label">
-      Vorname{" "}
-      <span className="req" aria-hidden="true">
-        *
-      </span>
-      <span className="sr-only"> (Pflichtfeld)</span>
-    </label>
-    <input
-      id="first_name"
-      className={`input ${
-        fieldErrors.first_name ? "input-error" : ""
-      }`}
-      placeholder="z. B. Max"
-      autoComplete="given-name"
-      required
-      value={form.first_name}
-      onChange={e => setField("first_name", e.target.value)}
-      aria-invalid={!!fieldErrors.first_name}
-    />
-    {fieldErrors.first_name && (
-      <p className="field-error" role="alert">
-        {fieldErrors.first_name}
-      </p>
-    )}
-  </div>
-
-  <div className="field">
-    <label htmlFor="last_name" className="label">
-      Nachname{" "}
-      <span className="req" aria-hidden="true">
-        *
-      </span>
-      <span className="sr-only"> (Pflichtfeld)</span>
-    </label>
-    <input
-      id="last_name"
-      className={`input ${
-        fieldErrors.last_name ? "input-error" : ""
-      }`}
-      placeholder="z. B. Mustermann"
-      autoComplete="family-name"
-      required
-      value={form.last_name}
-      onChange={e => setField("last_name", e.target.value)}
-      aria-invalid={!!fieldErrors.last_name}
-    />
-    {fieldErrors.last_name && (
-      <p className="field-error" role="alert">
-        {fieldErrors.last_name}
-      </p>
-    )}
-  </div>
-</div>
-
+          <div className="grid-2">
+            <div className="field">
+              <label htmlFor="first_name" className="label">
+                Vorname{" "}
+                <span className="req" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only"> (Pflichtfeld)</span>
+              </label>
+              <input
+                id="first_name"
+                className="input"
+                placeholder="z. B. Max"
+                autoComplete="given-name"
+                required
+                value={form.first_name}
+                onChange={e => setField("first_name", e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="last_name" className="label">
+                Nachname{" "}
+                <span className="req" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only"> (Pflichtfeld)</span>
+              </label>
+              <input
+                id="last_name"
+                className="input"
+                placeholder="z. B. Mustermann"
+                autoComplete="family-name"
+                required
+                value={form.last_name}
+                onChange={e => setField("last_name", e.target.value)}
+              />
+            </div>
+          </div>
 
           {/* Geburtsdatum */}
-<div className="field">
-  <label htmlFor="dob" className="label">
-    Geburtsdatum{" "}
-    <span className="req" aria-hidden="true">
-      *
-    </span>
-    <span className="sr-only"> (Pflichtfeld)</span>
-  </label>
-  <input
-    id="date_of_birth"
-    type="date"
-    className={`input ${
-      fieldErrors.date_of_birth ? "input-error" : ""
-    }`}
-    placeholder="TT.MM.JJJJ"
-    autoComplete="bday"
-    required
-    value={form.date_of_birth}
-    onChange={e => setField("date_of_birth", e.target.value)}
-    aria-invalid={!!fieldErrors.date_of_birth}
-  />
-
-  {fieldErrors.date_of_birth && (
-    <p className="field-error" role="alert">
-      {fieldErrors.date_of_birth}
-    </p>
-  )}
-
-  {/* Zusatzhinweis bei Minderjährigen (falls du ihn behalten willst) */}
-  {isMinor && !fieldErrors.date_of_birth && (
-    <div className="minor-note" role="alert" aria-live="assertive">
-      <strong>Hinweis:</strong> Du bist noch nicht volljährig. MedScoutX darf
-      nur von Personen ab 18 Jahren genutzt werden.
-    </div>
-  )}
-</div>
-
+          <div className="field">
+            <label htmlFor="dob" className="label">
+              Geburtsdatum{" "}
+              <span className="req" aria-hidden="true">
+                *
+              </span>
+              <span className="sr-only"> (Pflichtfeld)</span>
+            </label>
+            <input
+              id="dob"
+              type="date"
+              className="input"
+              placeholder="TT.MM.JJJJ"
+              autoComplete="bday"
+              required
+              value={form.date_of_birth}
+              onChange={e => setField("date_of_birth", e.target.value)}
+              aria-invalid={isMinor ? "true" : "false"}
+            />
+            {isMinor && (
+              <div
+                className="minor-note"
+                role="alert"
+                aria-live="assertive"
+              >
+                <strong>Hinweis:</strong> Du bist noch nicht volljährig.
+                MedScoutX darf nur von Personen ab 18 Jahren genutzt werden.
+              </div>
+            )}
+          </div>
 
           {/* Geschlecht (optional) */}
           <div className="field">
@@ -400,70 +307,73 @@ setFieldErrors({});
             </select>
           </div>
 
-          
-
           {/* Einwilligungen */}
-<fieldset className="consents">
-  <legend className="legend">Einwilligungen</legend>
+          <fieldset className="consents">
+            <legend className="legend">Einwilligungen</legend>
 
-  {/* 18+ Bestätigung */}
-  <label className="check">
-    <input
-      type="checkbox"
-      required
-      checked={form.over18_confirmed}
-      onChange={e => setField("over18_confirmed", e.target.checked)}
-      aria-required="true"
-    />
-    <span>
-      Ich bestätige, dass ich mindestens 18 Jahre alt bin
-      <span className="req" aria-hidden="true"> *</span>
-    </span>
-  </label>
+            {/* 18+ Bestätigung */}
+            <label className="check">
+              <input
+                type="checkbox"
+                required
+                checked={form.over18_confirmed}
+                onChange={e =>
+                  setField("over18_confirmed", e.target.checked)
+                }
+                aria-required="true"
+              />
+              <span>
+                Ich bestätige, dass ich mindestens 18 Jahre alt bin{" "}
+                <span className="req" aria-hidden="true">
+                  *
+                </span>
+              </span>
+            </label>
 
-  {/* EINZIGE GESAMT-RECHTSKLAUSEL */}
-  <label className="check">
-    <input
-      type="checkbox"
-      required
-      checked={form.accept_terms}
-      onChange={e => {
-        // Diese Checkbox setzt ALLE drei früheren Zustimmungen gemeinsam
-        setField("accept_terms", e.target.checked);
-        setField("accept_privacy", e.target.checked);
-        setField("accept_med_disclaimer", e.target.checked);
-      }}
-      aria-required="true"
-    />
-    <span>
-      Ich habe die{" "}
-      <Link to="/agb" aria-label="Allgemeine Geschäftsbedingungen öffnen">
-        AGB
-      </Link>
-      {", "}
-      <Link
-        to="/datenschutz?public=1"
-        aria-label="Datenschutzerklärung öffnen"
-      >
-         Datenschut &
-      </Link>
-      {" "}und den{" "}
-      <Link
-        to="/disclaimer?public=1"
-        aria-label="Medizinischen Disclaimer öffnen"
-      >
-         Disclaimer
-      </Link>{" "}
-      gelesen und stimme diesen hiermit zu.
-      <span className="req" aria-hidden="true"> *</span>
-      <span className="sr-only"> (Pflichtfeld)</span>
-    </span>
-  </label>
-
-  {/* Arzt-Benachrichtigung (optional) */}
-  
-</fieldset>
-
+            {/* EINE gesammelte Rechtsklausel */}
+            <label className="check">
+              <input
+                type="checkbox"
+                required
+                checked={form.accept_terms}
+                onChange={e => {
+                  const checked = e.target.checked;
+                  setField("accept_terms", checked);
+                  setField("accept_privacy", checked);
+                  setField("accept_med_disclaimer", checked);
+                }}
+                aria-required="true"
+              />
+              <span>
+                Ich habe die{" "}
+                <Link
+                  to="/agb"
+                  aria-label="Allgemeine Geschäftsbedingungen öffnen"
+                >
+                  Allgemeinen Geschäftsbedingungen
+                </Link>
+                {", "}
+                <Link
+                  to="/datenschutz?public=1"
+                  aria-label="Datenschutzerklärung öffnen"
+                >
+                  die Datenschutzerklärung
+                </Link>{" "}
+                und den{" "}
+                <Link
+                  to="/disclaimer?public=1"
+                  aria-label="Medizinischen Disclaimer öffnen"
+                >
+                  medizinischen Disclaimer
+                </Link>{" "}
+                gelesen und stimme diesen hiermit zu.
+                <span className="req" aria-hidden="true">
+                  *
+                </span>
+                <span className="sr-only"> (Pflichtfeld)</span>
+              </span>
+            </label>
+          </fieldset>
 
           {/* Fehlermeldung */}
           {err && (

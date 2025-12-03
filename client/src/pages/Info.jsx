@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import "../styles/Info.css";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { useTheme } from "../ThemeMode";
+
 
 
 import {
@@ -15,7 +15,7 @@ import {
 
 export default function Info() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  
 
   useEffect(() => {
     document.title = "Wie funktioniert MedScoutX?";
