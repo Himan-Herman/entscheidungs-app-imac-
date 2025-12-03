@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import "../styles/Startseite.css";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../ThemeMode";
+import heroImage from "../assets/media/hero-medscoutx.png";
+import demoVideo from "../assets/media/medscoutx-demo.mp4";
+
 
 import {
   IconSymptomChat,
@@ -125,43 +128,49 @@ export default function Startseite() {
           >
             {/* HERO / EINFÜHRUNG */}
             <section
-              className="startseite__hero"
-              aria-labelledby="hero-heading"
-            >
-              <h1 id="hero-heading" className="startseite__hero-heading">
-                Dein smarter Gesundheits-Navigator
-              </h1>
+  className="startseite__hero"
+  aria-labelledby="hero-heading"
+>
+  <div className="startseite__hero-layout">
+    {/* Linke Seite – Text */}
+    <div className="startseite__hero-left">
+      <h1 id="hero-heading" className="startseite__hero-heading">
+        Dein smarter Gesundheits-Navigator
+      </h1>
 
-              <div className="startseite__hero-layout">
-                {/* Linke Seite – Text */}
-                <div className="startseite__hero-left">
-                  <p className="startseite__hero-text">
-                    MedScoutX unterstützt dich dabei, Beschwerden besser
-                    einzuordnen – mit Symptom-Chat, Körperkarte und
-                    Bildanalyse. Du erhältst Orientierung und
-                    Facharzt-Vorschläge, ohne eine Diagnose zu ersetzen.
-                  </p>
+      <p className="startseite__hero-text">
+        MedScoutX unterstützt dich dabei, Beschwerden besser einzuordnen – mit Symptom-Chat,
+        Körperkarte und Bildanalyse. Du erhältst Orientierung und Facharzt-Vorschläge, ohne
+        eine Diagnose zu ersetzen.
+      </p>
 
-                  <button
-                    type="button"
-                    className="startseite__btn startseite__btn--primary"
-                    onClick={() => navigate("/info")}
-                    aria-describedby="hero-primary-desc"
-                  >
-                    Wie funktioniert MedScoutX?
-                  </button>
+      <button
+        type="button"
+        className="startseite__btn startseite__btn--primary"
+        onClick={() => navigate("/info")}
+        aria-describedby="hero-primary-desc"
+      >
+        Wie funktioniert MedScoutX?
+      </button>
 
-                  <p
-                    id="hero-primary-desc"
-                    className="startseite__hero-helper"
-                  >
-                    Erfahre, wie MedScoutX funktioniert, welche Vorteile es
-                    bietet und wie es dir hilft, Beschwerden strukturiert
-                    und sicher einzuordnen.
-                  </p>
-                </div>
-              </div>
-            </section>
+      <p id="hero-primary-desc" className="startseite__hero-helper">
+        Erfahre, wie MedScoutX funktioniert, welche Vorteile es bietet und wie es dir hilft,
+        Beschwerden strukturiert und sicher einzuordnen.
+      </p>
+    </div>
+
+    {/* Rechte Seite – Hero-Bild (auch auf Handy sichtbar, darunter) */}
+    <div className="startseite__hero-visual" aria-hidden="true">
+      <img
+        src={heroImage}
+        alt=""
+        className="startseite__hero-image"
+        loading="lazy"
+      />
+    </div>
+  </div>
+</section>
+
 
             {/* FUNKTIONSBEREICH / QUICK ACTIONS */}
             <section
@@ -289,6 +298,35 @@ export default function Startseite() {
                 </button>
               </div>
             </section>
+            {/* KURZES DEMO-VIDEO */}
+<section
+  className="startseite__demo"
+  aria-labelledby="demo-heading"
+>
+  <div className="startseite__section-header startseite__section-header--center">
+    <h2 id="demo-heading" className="startseite__section-title">
+      Ein kurzer Blick in MedScoutX
+    </h2>
+    <p className="startseite__section-subtitle">
+      In wenigen Sekunden siehst du, wie Symptom-Chat, Körperkarte und Bildanalyse zusammenspielen.
+    </p>
+  </div>
+
+  <div className="startseite__demo-media">
+    <video
+      className="startseite__demo-video"
+      src={demoVideo}
+      autoPlay
+      muted
+      loop
+      playsInline
+      aria-label="Kurzer Einblick in die MedScoutX-App"
+    >
+      Dein Browser unterstützt das Abspielen von Videos nicht.
+    </video>
+  </div>
+</section>
+
           </main>
         </div>
 

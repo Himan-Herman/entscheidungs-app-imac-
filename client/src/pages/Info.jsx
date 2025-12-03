@@ -2,6 +2,10 @@ import React, { useEffect } from "react";
 import "../styles/Info.css";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import symptomDemoImg from "../assets/media/symptom-demo.jpg";
+import bodymapDemoImg from "../assets/media/bodymap-demo.jpg";
+import imageDemoImg from "../assets/media/image-demo.jpg";
+
 
 
 
@@ -147,63 +151,95 @@ export default function Info() {
 
           {/* Funktionen-Bereich */}
           <section
-            className="info-section"
-            aria-labelledby="info-features-heading"
-          >
-            <h2 id="info-features-heading" className="info-heading-section">
-              Drei Perspektiven auf deine Beschwerden
-            </h2>
+  className="info-section"
+  aria-labelledby="info-features-heading"
+>
+  <h2 id="info-features-heading" className="info-heading-section">
+    Drei Perspektiven auf deine Beschwerden
+  </h2>
 
-            <div className="info-feature-grid" role="list">
-              <article
-                className="info-feature-card"
-                role="listitem"
-                aria-label="Symptom-Chat"
-              >
-                <div className="info-feature-card__icon" aria-hidden="true">
-    <IconSymptomChat />
-  </div>
-                <h3 className="info-feature-card__title">Symptom-Chat</h3>
-                <p className="info-feature-card__text">
-                  Ideal, wenn du dir unsicher bist: Du schreibst frei, was los ist.
-                  MedScoutX fragt nach, sortiert deine Angaben und erstellt eine
-                  kurze, strukturierte Übersicht.
-                </p>
-              </article>
+  <div className="info-feature-grid" role="list">
+    {/* Symptom-Chat */}
+    <article
+      className="info-feature-card"
+      role="listitem"
+      aria-label="Symptom-Chat"
+    >
+      <div className="info-feature-card__icon" aria-hidden="true">
+        <IconSymptomChat />
+      </div>
+      <h3 className="info-feature-card__title">Symptom-Chat</h3>
+      <p className="info-feature-card__text">
+        Ideal, wenn du dir unsicher bist: Du schreibst frei, was los ist.
+        MedScoutX fragt nach, sortiert deine Angaben und erstellt eine
+        kurze, strukturierte Übersicht.
+      </p>
 
-              <article
-                className="info-feature-card"
-                role="listitem"
-                aria-label="Körperkarte"
-              >
-                <div className="info-feature-card__icon" aria-hidden="true">
-    <IconBodyMap />
-  </div>
-                <h3 className="info-feature-card__title">Körperkarte</h3>
-                <p className="info-feature-card__text">
-                  Du wählst die betroffene Region am Körper aus. Danach folgen
-                  gezielte Fragen zur Lokalisation, Art des Schmerzes und
-                  eventuellen Begleitsymptomen.
-                </p>
-              </article>
+      {/* Bild unter der Box */}
+      <figure className="info-feature-media">
+        <img
+          src={symptomDemoImg}
+          alt="Beispielansicht des Symptom-Chats mit Meda"
+          className="info-feature-image"
+          loading="lazy"
+        />
+      </figure>
+    </article>
 
-              <article
-                className="info-feature-card"
-                role="listitem"
-                aria-label="Bildanalyse"
-              >
-                 <div className="info-feature-card__icon" aria-hidden="true">
-    <IconImageAnalysis />
+    {/* Körperkarte */}
+    <article
+      className="info-feature-card"
+      role="listitem"
+      aria-label="Körperkarte"
+    >
+      <div className="info-feature-card__icon" aria-hidden="true">
+        <IconBodyMap />
+      </div>
+      <h3 className="info-feature-card__title">Körperkarte</h3>
+      <p className="info-feature-card__text">
+        Du wählst die betroffene Region am Körper aus. Danach folgen
+        gezielte Fragen zur Lokalisation, Art des Schmerzes und
+        eventuellen Begleitsymptomen.
+      </p>
+
+      <figure className="info-feature-media">
+        <img
+          src={bodymapDemoImg}
+          alt="Beispielansicht der MedScoutX-Körperkarte"
+          className="info-feature-image"
+          loading="lazy"
+        />
+      </figure>
+    </article>
+
+    {/* Bildanalyse */}
+    <article
+      className="info-feature-card"
+      role="listitem"
+      aria-label="Bildanalyse"
+    >
+      <div className="info-feature-card__icon" aria-hidden="true">
+        <IconImageAnalysis />
+      </div>
+      <h3 className="info-feature-card__title">Bildanalyse</h3>
+      <p className="info-feature-card__text">
+        Du lädst ein Foto hoch (z.&nbsp;B. Hautveränderung). MedScoutX
+        beschreibt, was auf dem Bild zu sehen ist, und stellt Rückfragen –
+        z.&nbsp;B. Dauer, Juckreiz oder Veränderungen.
+      </p>
+
+      <figure className="info-feature-media">
+        <img
+          src={imageDemoImg}
+          alt="Beispielansicht der MedScoutX-Bildanalyse"
+          className="info-feature-image"
+          loading="lazy"
+        />
+      </figure>
+    </article>
   </div>
-                <h3 className="info-feature-card__title">Bildanalyse</h3>
-                <p className="info-feature-card__text">
-                  Du lädst ein Foto hoch (z.&nbsp;B. Hautveränderung). MedScoutX beschreibt,
-                  was auf dem Bild zu sehen ist, und stellt Rückfragen – z.&nbsp;B. Dauer,
-                  Juckreiz oder Veränderungen.
-                </p>
-              </article>
-            </div>
-          </section>
+</section>
+
 
           {/* Sicherheit & Verantwortung */}
           <section
