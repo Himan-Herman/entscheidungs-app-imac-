@@ -1,271 +1,1177 @@
-.bildupload-container {
-  padding: 2rem;
-  text-align: center;
-  max-width: 750px;
-  margin: 0 auto;
-  font-family: sans-serif;
-}
+/* ===========================
+   Basis-Layout Bildanalyse
+   =========================== */
 
-
-.bild-vorschau {
-  margin-top: 1rem;
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-}
-
-.bild-vorschau-klein {
-  max-width: 200px;
-  margin-top: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-
-/* Nachrichten-Stil */
-.frage-block {
-  background-color: #d6f0ff;
-  padding: 1rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  text-align: left;
-  word-wrap: break-word;
-}
-
-.antwort-block {
-  background-color: #f0f0f0;
-  padding: 1rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  text-align: left;
-  word-wrap: break-word;
-}
-
-.frage-block strong,
-.antwort-block strong {
-  display: block;
-  margin-bottom: 6px;
-}
-
-
-.eingabe-bereich {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  align-items: center;
-  margin-top: 1rem;
-}
-
-.eingabe-bereich textarea {
-  flex: 1;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  resize: none;
-  height: 40px;
-}
-
-.eingabe-bereich button {
-  padding: 0.75rem 1.2rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.eingabe-bereich button:hover {
-  background-color: #3498db;
-  color: white;
-  border-color: #3498db;
-}
-
-.neu-start-btn {
-  margin-right: 50px; 
+   .bildupload-page {
+    min-height: 100vh;
+    width: 100%;
+    padding: 1.5rem 1rem 2rem;
+    box-sizing: border-box;
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.16), transparent 55%),
+      linear-gradient(135deg, #020617 0%, #020617 35%, #020617 100%);
+    color: #e5e7eb;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "Segoe UI", sans-serif;
+    display: flex;
+    justify-content: center;
+  }
   
-}
-
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .6rem 1rem;
-  border-radius: 9999px;           
-  border: 2px solid #ff0000;     
-  background: #fd8657;              
-  color: #faf9f9;
+  .bildupload-shell {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
   
-  font-weight: 600;
-  line-height: 1;
-  box-shadow: 0 1px 0 rgba(0,0,0,.03), inset 0 1px 0 #fff;
-  transition: background .15s ease, border-color .15s ease, transform .05s ease;
-  cursor: pointer;
-  user-select: none;
-  margin: 10px;
+  /* ===========================
+     Header
+     =========================== */
+  
+  .bildupload-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .bildupload-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #f9fafb;
+    margin: 0;
+  }
+  
+  .bildupload-subtitle {
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+    color: #9ca3af;
+    max-width: 40rem;
+  }
+  
+  .bildupload-header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+  }
+  
+  .chip--accent {
+    background: linear-gradient(
+      135deg,
+      rgba(56, 189, 248, 0.2),
+      rgba(59, 130, 246, 0.24)
+    );
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #e0f2fe;
+  }
+  
+  .chip--soft {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(148, 163, 184, 0.5);
+    color: #cbd5f5;
+  }
+  
+  /* ===========================
+     Disclaimer-Section
+     =========================== */
+  
+  .bildupload-disclaimer-section {
+    margin-bottom: 1rem;
+  }
+  
+  /* ===========================
+     Layout: Panels
+     =========================== */
+  
+  .bildupload-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .bildupload-panel {
+    background: radial-gradient(
+        circle at top left,
+        rgba(15, 118, 110, 0.18),
+        rgba(15, 23, 42, 0.9)
+      ),
+      radial-gradient(
+        circle at bottom right,
+        rgba(30, 64, 175, 0.25),
+        rgba(15, 23, 42, 1)
+      );
+    border-radius: 1.25rem;
+    padding: 1rem 0.9rem 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow:
+      0 18px 40px rgba(15, 23, 42, 0.7),
+      inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(14px);
+    box-sizing: border-box;
+  }
+  
+  .bildupload-panel--left {
+    order: 1;
+  }
+  
+  .bildupload-panel--right {
+    order: 2;
+  }
+  
+  /* Panel-Titel & Beschreibung */
+  
+  .panel-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #f3f4f6;
+    margin: 0 0 0.25rem;
+  }
+  
+  .panel-description {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    color: #9ca3af;
+  }
+  
+  /* ===========================
+     Upload-Actions / Buttons
+     =========================== */
+  
+  .upload-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+  }
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color 0.16s ease,
+      border-color 0.16s ease,
+      transform 0.08s ease,
+      box-shadow 0.16s ease;
+    background: none;
+    color: inherit;
+  }
+  
+  .btn span:first-child {
+    font-size: 1rem;
+  }
+  
+  .btn:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 2px;
+  }
+  
+  /* Primäre Variante für Upload */
+  
+  .btn--primary-2 {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-color: rgba(148, 163, 184, 0.6);
+    color: #e5e7eb;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.7);
+  }
+  
+  .btn--primary-2:hover {
+    background: linear-gradient(135deg, #111827, #020617);
+    border-color: rgba(129, 140, 248, 0.9);
+    transform: translateY(-1px);
+  }
+  
+  .btn--primary-2:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.8);
+  }
+  
+  /* Ghost-Buttons */
+  
+  .btn--ghost {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(148, 163, 184, 0.5);
+    color: #e5e7eb;
+  }
+  
+  .btn--ghost:hover {
+    background: rgba(15, 23, 42, 0.9);
+  }
+  
+  .btn--ghost-danger {
+    background: rgba(127, 29, 29, 0.18);
+    border-color: rgba(248, 113, 113, 0.6);
+    color: #fecaca;
+  }
+  
+  .btn--ghost-danger:hover {
+    background: rgba(127, 29, 29, 0.35);
+  }
+  
+  /* Control Row (Reset / Verlauf löschen) */
+  
+  .control-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  /* ===========================
+     Bild-Vorschau
+     =========================== */
+  
+  .bild-preview-wrapper {
+    margin-top: 0.4rem;
+  }
+  
+  .bild-preview-card {
+    margin: 0;
+    padding: 0.5rem;
+    border-radius: 0.9rem;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  
+  .bild-vorschau-klein {
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 0.7rem;
+  }
+  
+  .bild-preview-caption {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+  
+  .bild-placeholder {
+    border-radius: 0.9rem;
+    border: 1px dashed rgba(148, 163, 184, 0.6);
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    color: #6b7280;
+    font-size: 0.8rem;
+  }
+  
+  .bild-placeholder-outline {
+    width: 100%;
+    max-width: 240px;
+    height: 130px;
+    border-radius: 0.8rem;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: repeating-linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.9),
+      rgba(15, 23, 42, 0.9) 6px,
+      rgba(31, 41, 55, 0.9) 6px,
+      rgba(31, 41, 55, 0.9) 12px
+    );
+  }
+  
+  /* ===========================
+     Chat-Bereich
+     =========================== */
+  
+  .chat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    min-height: 0;
+  }
+  
+  .chat-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  
+  .chat-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(22, 163, 74, 0.18);
+    border: 1px solid rgba(34, 197, 94, 0.6);
+    font-size: 0.75rem;
+    color: #bbf7d0;
+  }
+  
+  .status-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.9);
+  }
+  
+  .status-label {
+    white-space: nowrap;
+  }
+  
+  /* Chatverlauf */
+  
+  .chatverlauf {
+    background: rgba(15, 23, 42, 0.85);
+    border-radius: 0.9rem;
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    padding: 0.65rem 0.7rem;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  
+  .chat-placeholder {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+  
+  .chat-placeholder-example {
+    display: inline-block;
+    margin-top: 0.15rem;
+    font-style: italic;
+    color: #e5e7eb;
+  }
+  
+  /* Nachrichten-Bubbles */
+  
+  .chat-message-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  
+  .message-bubble {
+    border-radius: 0.9rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .message-bubble--user {
+    align-self: flex-end;
+    background: linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.9),
+      rgba(56, 189, 248, 0.95)
+    );
+    color: #f9fafb;
+  }
+  
+  .message-bubble--meda {
+    align-self: flex-start;
+    background: rgba(15, 23, 42, 0.96);
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    color: #e5e7eb;
+  }
+  
+  .message-label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 0.15rem;
+  }
+  
+  .message-text {
+    margin: 0;
+  }
+  
+  /* Ladezustand */
+  
+  .loading-row {
+    min-height: 1.2rem;
+  }
+  
+  .loading-text {
+    font-size: 0.8rem;
+    color: #e5e7eb;
+  }
+  
+  /* Eingabe-Bereich */
+  
+  .eingabe-bereich {
+    margin-top: 0.4rem;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(55, 65, 81, 0.9);
+    background: radial-gradient(
+        circle at top left,
+        rgba(37, 99, 235, 0.2),
+        rgba(15, 23, 42, 0.96)
+      ),
+      rgba(15, 23, 42, 0.96);
+    padding: 0.55rem 0.6rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  
+  .eingabe-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .eingabe-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #e5e7eb;
+  }
+  
+  .eingabe-hint {
+    font-size: 0.7rem;
+    color: #9ca3af;
+  }
+  
+  /* Textarea */
+  
+  .chat-textarea {
+    width: 100%;
+    resize: none;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    padding: 0.4rem 0.55rem;
+    font-size: 0.85rem;
+    background: rgba(15, 23, 42, 0.95);
+    color: #e5e7eb;
+    line-height: 1.4;
+  }
+  
+  .chat-textarea::placeholder {
+    color: #6b7280;
+  }
+  
+  .chat-textarea:focus-visible {
+    outline: 2px solid #38bdf8;
+    outline-offset: 1px;
+  }
+  
+  /* Actions unter Textarea */
+  
+  .eingabe-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .char-count {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+  
+  .char-count.limit {
+    color: #f97373;
+  }
+  
+  .voice-wrap {
+    margin-left: auto;
+  }
+  
+  .send-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.96),
+      rgba(56, 189, 248, 0.98)
+    );
+    color: #f9fafb;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.9);
+    transition:
+      transform 0.08s ease,
+      box-shadow 0.12s ease,
+      filter 0.12s ease;
+  }
+  
+  .send-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+    box-shadow: none;
+  }
+  
+  .send-btn:not(:disabled):hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  
+  .send-btn:focus-visible {
+    outline: 2px solid #22c55e;
+    outline-offset: 2px;
+  }
+  
+  /* Hinweis, wenn kein Bild gewählt */
+  
+  .eingabe-disabled-hint {
+    margin: 0.4rem 0 0;
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+  
+  /* ===========================
+     Webcam-Overlay
+     =========================== */
+  
+  .webcam-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  
+  .webcam-dialog {
+    width: 100%;
+    max-width: 520px;
+    background: rgba(15, 23, 42, 0.98);
+    border-radius: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  }
+  
+  .webcam-title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f3f4f6;
+  }
+  
+  .webcam-subtitle {
+    margin: 0.3rem 0 0.6rem;
+    font-size: 0.85rem;
+    color: #9ca3af;
+  }
+  
+  .webcam-video-wrapper {
+    border-radius: 0.8rem;
+    overflow: hidden;
+    background: #020617;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+  }
+  
+  .webcam-video {
+    display: block;
+    width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+  }
+  
+  .webcam-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+  
+  /* Primary / Secondary Buttons im Dialog */
+  
+  .primary-btn,
+  .secondary-btn {
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .primary-btn {
+    background: linear-gradient(
+      135deg,
+      rgba(37, 99, 235, 0.98),
+      rgba(56, 189, 248, 0.98)
+    );
+    color: #f9fafb;
+    border-color: rgba(59, 130, 246, 0.9);
+  }
+  
+  .primary-btn:hover {
+    filter: brightness(1.05);
+  }
+  
+  .secondary-btn {
+    background: rgba(15, 23, 42, 0.9);
+    color: #e5e7eb;
+    border-color: rgba(148, 163, 184, 0.7);
+  }
+  
+  .secondary-btn:hover {
+    background: rgba(15, 23, 42, 1);
+  }
+  
+  /* ===========================
+     Hilfsklassen / A11y
+     =========================== */
+  
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* ===========================
+     Responsive Design
+     =========================== */
+  
+  @media (min-width: 768px) {
+    .bildupload-page {
+      padding: 2rem 1.5rem 2.5rem;
+    }
+  
+    .bildupload-header {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  
+    .bildupload-title {
+      font-size: 1.9rem;
+    }
+  
+    .bildupload-layout {
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.3fr);
+      align-items: flex-start;
+    }
+  
+    .bildupload-panel {
+      padding: 1.1rem 1.1rem 1.1rem;
+    }
+  
+    .bildupload-panel--left {
+      order: 1;
+    }
+  
+    .bildupload-panel--right {
+      order: 2;
+    }
+  
+    .chatverlauf {
+      max-height: 340px !important;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .bildupload-page {
+      padding: 2.25rem 1.75rem 2.75rem;
+    }
+  
+    .bildupload-layout {
+      gap: 1.5rem;
+    }
+  
+    .bildupload-panel {
+      border-radius: 1.3rem;
+    }
+  }
+  
+  .bildupload-page--light {
+    background:
+      radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.08), transparent 55%),
+      #f3f4f6;
+    color: #0f172a;
+  }
+  
+  .bildupload-page--light .bildupload-panel {
+    background: #ffffff;
+    border-color: rgba(148, 163, 184, 0.5);
+  }
+  
+  .bildupload-page--light .chatverlauf,
+  .bildupload-page--light .eingabe-bereich {
+    background: #f9fafb;
+    border-color: rgba(148, 163, 184, 0.7);
+  }
+  
+  .bildupload-page--light .chat-textarea {
+    background: #ffffff;
+    color: #0f172a;
+  }
+  
+  /* =======================================
+   LIGHT MODE – gezielte Overrides
+   ======================================= */
+
+.bildupload-page--light {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.10), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.10), transparent 55%),
+    #f3f4f6;
+  color: #020617;
 }
-/*.btn:hover { background: #ee8e3f;  border-color: #c009c6;  color: #f7f5f5; } */
-.btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: .5; pointer-events: none; }
 
+/* Panels & Header */
 
-.btn--danger {
-  border-color: #005e1b;
-  background: #cdf6a4;
-  color: #6a1e1e;
-margin-left: 10px;
-}
-/*.btn--danger:hover { background: #99f3c0; border-color: #6506c5;  color: #080808; }*/
-
-
-.btn--sm { padding: .5rem .9rem; font-weight: 600; }
-
-
-.btn .icon { display: inline-block; font-size: 1.05em; transform: translateY(1px); }
-
-
-.btn:focus-visible {
-  outline: 2px solid #6366f1;      
-  outline-offset: 2px;
-  border-color: #a5b4fc;
+.bildupload-page--light .bildupload-title {
+  color: #0f172a;
 }
 
-
-
-.upload-sidebar {
-  position: absolute;       
-  right: 1rem;
-  top: 13.5rem;                
-  display: flex;
-  flex-direction: column;
-  gap: .6rem;
-  z-index: 200;
-}
-.btn--primary-2 {
-  background: #eef2ff;
-  border-color: #2e55ee;
-  color: #040404;
-}
-.btn--primary-2:hover { background: #d1d9f1; }
-
-.eingabe-bereich {
-  display: flex;
-  gap: .6rem;
-  align-items: center;
+.bildupload-page--light .bildupload-subtitle {
+  color: #4b5563;
 }
 
-.eingabe-wrapper {
-  position: relative;
-  flex: 1;
+.bildupload-page--light .bildupload-panel {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.12);
 }
 
-.eingabe-wrapper textarea {
-  width: 100%;
-  min-height: 56px;
-  padding: .75rem 6.2rem .75rem 1rem; 
-  border: 1.5px solid #d1d5db;
-  border-radius: 12px;
-  font-size: 1rem;
-  resize: vertical;
+.bildupload-page--light .panel-title {
+  color: #0f172a;
 }
 
+.bildupload-page--light .panel-description {
+  color: #4b5563;
+}
 
-.char-counter {
-  position: absolute;
-  right: 3.4rem;
-  bottom: .5rem;
-  font-size: .85rem;
+/* Chips */
+
+.bildupload-page--light .chip--accent {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #60a5fa;
+  color: #1d4ed8;
+}
+
+.bildupload-page--light .chip--soft {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+/* Bild-Vorschau */
+
+.bildupload-page--light .bild-preview-card {
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.bildupload-page--light .bild-preview-caption {
   color: #6b7280;
-  user-select: none;
 }
 
-
-.mic-btn {
-  position: absolute;
-  right: .6rem;
-  bottom: .4rem;
-  height: 2.2rem;
-  min-width: 2.2rem;
-  padding: 0 .6rem;
-  border-radius: 9999px;
-  border: 1.5px solid #d1d5db;
-  background: #f7f7f8;
-  font-size: 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.bildupload-page--light .bild-placeholder {
+  border-color: #d1d5db;
+  color: #9ca3af;
 }
-.mic-btn:hover { background: #eeeef1; }
-.mic-btn.recording {
+
+.bildupload-page--light .bild-placeholder-outline {
+  background: repeating-linear-gradient(
+    135deg,
+    #f9fafb,
+    #f9fafb 6px,
+    #e5e7eb 6px,
+    #e5e7eb 12px
+  );
+}
+
+/* Buttons */
+
+.bildupload-page--light .btn--primary-2 {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  border-color: #60a5fa;
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+}
+
+.bildupload-page--light .btn--primary-2:hover {
+  filter: brightness(1.03);
+}
+
+.bildupload-page--light .btn--ghost {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.bildupload-page--light .btn--ghost:hover {
+  background: #d1d5db;
+}
+
+.bildupload-page--light .btn--ghost-danger {
   background: #fee2e2;
   border-color: #fca5a5;
+  color: #b91c1c;
 }
 
-
-.btn-send {
-  padding: .75rem 1rem;
-  border-radius: 12px;
-  border: 1.5px solid #d1d5db;
-  background: #f7f7f8;
-  font-weight: 600;
-}
-.btn-send:hover { background: #eeeef1; }
-
-
-.chat-textarea {
-  min-height: 44px;        
-  overflow: hidden;           
-  resize: none;              
-  padding: .75rem 1rem;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  border: 1.5px solid #d1d5db;
-  border-radius: 12px;
-  outline: none;              
-  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
-  background: #fff;
+.bildupload-page--light .btn--ghost-danger:hover {
+  background: #fecaca;
 }
 
+/* Chat-Bereich */
 
-.chat-textarea:focus-visible {
-  border-color: #93c5fd;                          
-  box-shadow: 0 0 0 3px rgba(147,197,253,.35);    
-  outline: none;
+.bildupload-page--light .chatverlauf {
+  background: #ffffff;
+  border-color: #d1d5db;
 }
 
-
-
-.char-count {
-  font-size: 0.9rem;
+.bildupload-page--light .chat-placeholder {
   color: #6b7280;
 }
 
-.char-count.limit {
-  color: #dc2626; 
-  font-weight: 600;
-}
-.frage-block,
-.antwort-block {
-  margin-bottom: 12px;  
-  padding: 10px 14px;
-  border-radius: 10px;
-  max-width: 100%;
+.bildupload-page--light .chat-placeholder-example {
+  color: #111827;
 }
 
-.frage-block {
-  background: #dbeafe;   
+/* Bubbles */
+
+.bildupload-page--light .message-bubble--meda {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #111827;
 }
 
-.antwort-block {
-  background: #f3f4f6; 
+.bildupload-page--light .message-bubble--user {
+  /* Gradient darf bleiben, nur etwas heller wirken */
+  background: linear-gradient(135deg, #2563eb, #38bdf8);
+  color: #f9fafb;
 }
 
-.chat-textarea::placeholder {
-  color: #9ca3af;      
-  font-style: italic;    
-  font-size: 0.9rem;     
-  opacity: 1;           
+/* Eingabe-Bereich & Textarea */
+
+.bildupload-page--light .eingabe-bereich {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.bildupload-page--light .eingabe-label {
+  color: #111827;
+}
+
+.bildupload-page--light .eingabe-hint {
+  color: #6b7280;
+}
+
+.bildupload-page--light .chat-textarea {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #111827;
+}
+
+.bildupload-page--light .chat-textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* Zähler & Hinweis */
+
+.bildupload-page--light .char-count {
+  color: #6b7280;
+}
+
+.bildupload-page--light .char-count.limit {
+  color: #dc2626;
+}
+
+.bildupload-page--light .eingabe-disabled-hint {
+  color: #6b7280;
+}
+
+/* Light Mode: Webcam-Dialog */
+
+.bildupload-page--light .webcam-dialog {
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.bildupload-page--light .webcam-title {
+  color: #0f172a;
+}
+
+.bildupload-page--light .webcam-subtitle {
+  color: #4b5563;
+}
+
+.bildupload-page--light .webcam-video-wrapper {
+  background: #020617;
+  border-color: #d1d5db;
+}
+/* =======================================
+   LIGHT MODE – Status Badge
+   ======================================= */
+
+   .bildupload-page--light .chat-header-badge {
+    background: #dcfce7;          /* helles, sauberes Grün */
+    border-color: #86efac;        /* weicher Rand */
+    color: #166534;               /* dunkler, gut lesbarer Text */
+    box-shadow: none;             /* Glow entfernen */
+  }
+  
+  .bildupload-page--light .chat-header-badge .status-dot {
+    background: #16a34a;          /* kräftigeres Grün */
+    box-shadow: none;
+  }
+  /* =======================================
+   LIGHT MODE – Voice Button & Send Button
+   ======================================= */
+/* =======================================
+   LIGHT MODE – Voice & Send Buttons
+   ======================================= */
+
+/* Voice Button Basis */
+.bildupload-page--light .voice-wrap button,
+.bildupload-page--light .voice-wrap .voice-btn {
+  background: #0b5fe7 !important;
+  color: #ffffff !important;
+  border: none;
+  box-shadow: 5px 10px 20px rgba(1, 7, 17, 0.35);
+  transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+/* Send Button Basis */
+.bildupload-page--light .send-btn {
+  background: #0b5fe7 !important;
+  border: none;
+  color: #ffffff !important;
+  box-shadow: 5px 10px 20px rgba(1, 7, 17, 0.35);
+  transition: filter 0.18s ease, transform 0.18s ease;
+}
+
+/* Hover (für beide Buttons identisch!) */
+.bildupload-page--light .voice-wrap button:hover,
+.bildupload-page--light .voice-wrap .voice-btn:hover,
+.bildupload-page--light .send-btn:hover {
+  filter: brightness(1.5);
+  transform: translateY(-1px);
+}
+
+/* Optional: Active (Klick-Effekt) */
+.bildupload-page--light .voice-wrap button:active,
+.bildupload-page--light .voice-wrap .voice-btn:active,
+.bildupload-page--light .send-btn:active {
+  transform: translateY(0px);
+  filter: brightness(0.95);
+}
+
+/* Icon-Farbe sicherstellen */
+.bildupload-page--light .send-btn svg {
+  color: #ffffff !important;
+}
+/* Light + Dark Mode */
+.chat-textarea {
+  padding: 5px 16px !important;   /* NEU: mehr vertical padding */
+  line-height: 1.45;               /* bessere Text-Lesbarkeit */
+  min-height: 80px;                /* mehr Platz im Feld */
+}
+
+.eingabe-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 0 5px;
+}
+
+.eingabe-label {
+  font-weight: 800;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.eingabe-hint {
+  font-size: 13px;
+  color: #6b7280;
+}
+.bildupload-page--light .eingabe-hint {
+  color: #6b7280;
+}
+
+/* =======================================
+   DARK MODE – Voice & Send Buttons
+   ======================================= */
+
+   .bildupload-page--dark .voice-wrap button,
+   .bildupload-page--dark .voice-wrap .voice-btn {
+     background: #0b5fe7;
+     color: #ffffff;
+     border: none;
+     box-shadow: 5px 10px 20px rgba(0, 0, 0, 0.55);
+   }
+   
+   .bildupload-page--dark .voice-wrap button:hover,
+   .bildupload-page--dark .voice-wrap .voice-btn:hover {
+     filter: brightness(1.15);
+     transform: translateY(-2px);
+   }
+   
+   .bildupload-page--dark .voice-wrap button:active,
+   .bildupload-page--dark .voice-wrap .voice-btn:active {
+     transform: translateY(0);
+     filter: brightness(0.98);
+   }
+   
+   .bildupload-page--dark .send-btn {
+     background: #0b5fe7;
+     color: #ffffff;
+     border: none;
+     box-shadow: 5px 10px 20px rgba(0, 0, 0, 0.55);
+   }
+   
+   .bildupload-page--dark .send-btn:hover {
+     filter: brightness(1.15);
+     transform: translateY(-2px);
+   }
+   
+   .bildupload-page--dark .send-btn:active {
+     transform: translateY(0);
+     filter: brightness(0.98);
+   }
+   
+   .bildupload-page--dark .send-btn svg {
+     color: #ffffff;
+   }
+   /* =======================================
+   DARK MODE – Label & Hint
+   ======================================= */
+
+.bildupload-page--dark .eingabe-label {
+  color: #e5e7eb;    /* fast weiß */
+}
+
+.bildupload-page--dark .eingabe-hint {
+  color: #9ca3af;    /* dezentes Grau */
+}
+
+/* Speech to voice */
+
+/* =======================================
+   TTS-Button in der Meda-Antwort
+   ======================================= */
+
+   .message-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+    margin-bottom: 0.2rem;
+  }
+  
+  .tts-btn {
+    border: none;
+    background: transparent;
+    padding: 0.15rem 0.35rem;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background-color 0.16s ease,
+      transform 0.14s ease,
+      opacity 0.14s ease;
+  }
+  
+  .tts-btn svg {
+    display: block;
+  }
+  
+  /* Hover-Effekt */
+  .tts-btn:hover {
+    background-color: rgba(148, 163, 184, 0.22);
+    transform: translateY(-1px);
+  }
+  
+  .tts-btn:active {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  
+  /* Light / Dark Mode Farben */
+  
+  .bildupload-page--light .tts-btn svg {
+    color: #4b5563; /* dunkles Grau, gut lesbar */
+  }
+  
+  .bildupload-page--dark .tts-btn svg {
+    color: #e5e7eb; /* hell im Dark-Mode */
+  }
+  /* =========================================
+   TTS Button – sichtbar auf Light & Dark
+   ========================================= */
+
+.tts-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+
+  /* Wichtig für Sichtbarkeit */
+  color: var(--text-color, #ffffff);
+}
+
+/* Hover (Desktop) */
+.tts-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* DARK MODE */
+.bildupload-page--dark .tts-btn svg {
+  color: #ffffff !important;
+}
+
+/* LIGHT MODE */
+.bildupload-page--light .tts-btn svg {
+  color: #0b5fe7 !important;
+}
+
+/* Mobile sicher sichtbar machen */
+@media (max-width: 600px) {
+  .tts-btn {
+    padding: 6px;
+  }
+
+  .tts-btn svg {
+    width: 20px;
+    height: 20px;
+  }
 }

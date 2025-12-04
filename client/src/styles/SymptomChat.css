@@ -1,238 +1,952 @@
-.symptomchat-container {
-  max-width: 750px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
-}
+/* =========================================
+   Grundlayout – Symptom-Chat Seite
+   ========================================= */
 
-
-.chatverlauf {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 30px;
-  padding-right: 10px;
-}
-
-
-.eingabe-box {
-  display: flex;
-  justify-content: center;
+   .symptom-page {
+    min-height: 100vh;
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "Segoe UI", sans-serif;
+  }
+  
+  .symptom-page * {
+    box-sizing: border-box;
+  }
+  
+  .symptom-shell {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  
+  /* =========================================
+     Light / Dark Mode
+     ========================================= */
+  
+  .symptom-page--light {
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.12), transparent 55%),
+      #f1f5f9;
+    color: #0f172a;
+  }
+  
+  .symptom-page--dark {
+    background:
+      radial-gradient(circle at top left, rgba(56, 189, 248, 0.3), transparent 60%),
+      radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.9), transparent 55%),
+      #020617;
+    color: #e5e7eb;
+  }
+  
+  /* =========================================
+     Header
+     ========================================= */
+  
+  .symptom-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .symptom-header-text {
+    max-width: 640px;
+  }
+  
+  .symptom-title {
+    font-size: clamp(1.6rem, 2vw + 1rem, 2.1rem);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin: 0 0 0.4rem;
+  }
+  
+  .symptom-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
+  }
+  
+  .symptom-header-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+  }
+  
+  /* Chips */
+  
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+  }
+  
+  .chip--accent {
+    background: linear-gradient(135deg, #0ea5e9, #22c55e);
+    color: #f9fafb;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4);
+  }
+  
+  .chip--soft {
+    background: rgba(148, 163, 184, 0.08);
+    border-color: rgba(148, 163, 184, 0.4);
+  }
+  
+  /* =========================================
+     Disclaimer
+     ========================================= */
+  
+  .symptom-disclaimer-section {
+    margin-bottom: 1rem;
+  }
+  
+  /* =========================================
+     Layout: jetzt vertikal (Hinweise über Chat)
+     ========================================= */
+  
+  .symptom-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  
+  /* Panels */
+  
+  .symptom-panel {
+    border-radius: 1.25rem;
+    padding: 1.25rem 1.4rem;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+  }
+  
+  .symptom-page--light .symptom-panel {
+    background: rgba(255, 255, 255, 0.96);
+    color: #0f172a;
+  }
+  
+  .symptom-page--dark .symptom-panel {
+    background: rgba(15, 23, 42, 0.97);
+    color: #e5e7eb;
+  }
+  
+  /* Panel-Titel / Text */
+  
+  .panel-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  
+  .panel-description {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    opacity: 0.92;
+  }
+  
+  /* Tipps-Liste */
+  
+  .tip-list {
+    margin: 0 0 1rem 0;
+    padding-left: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .tip-list li {
+    margin-bottom: 0.3rem;
+  }
+  
+  /* Buttons – generisch */
+  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.16s ease,
+      background-color 0.16s ease,
+      border-color 0.16s ease;
+    white-space: nowrap;
+  }
+  
+  .btn .icon {
+    font-size: 1rem;
+  }
+  
+  .btn--ghost {
+    background: transparent;
+    border-color: rgba(148, 163, 184, 0.6);
+    color: inherit;
+  }
+  
+  .btn--ghost:hover {
+    background: rgba(148, 163, 184, 0.10);
+    transform: translateY(-1px);
+  }
+  
+  .btn--ghost-danger {
+    background: transparent;
+    border-color: rgba(248, 113, 113, 0.7);
+    color: #b91c1c;
+  }
+  
+  .symptom-page--dark .btn--ghost-danger {
+    color: #fecaca;
+  }
+  
+  .btn--ghost-danger:hover {
+    background: rgba(248, 113, 113, 0.12);
+    transform: translateY(-1px);
+  }
+  
+  .hint-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* =========================================
+     Chat-Card
+     ========================================= */
+  
+  .chat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .chat-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .chat-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    background: rgba(34, 197, 94, 0.12);
+  }
+  
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #22c55e;
+  }
+  
+  .status-label {
+    font-weight: 500;
+  }
+  
+  /* =========================================
+     Chat-Verlauf
+     ========================================= */
+  
+  .symptom-chatlog {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 0.6rem 0.4rem;
+    border-radius: 0.9rem;
+    background: rgba(15, 23, 42, 0.03);
+  }
+  
+  .symptom-page--dark .symptom-chatlog {
+    background: rgba(15, 23, 42, 0.78);
+  }
+  
+  .chat-placeholder {
+    font-size: 0.9rem;
+    opacity: 0.88;
+  }
+  
+  .chat-placeholder-example {
+    display: inline-block;
+    margin-top: 0.25rem;
+    font-weight: 500;
+  }
+  
+  /* Messages */
+  
+  .chat-message-block {
+    margin-bottom: 0.55rem;
+  }
+  
+  .message-bubble {
+    border-radius: 0.9rem;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    max-width: 100%;
+  }
+  
+  .message-bubble--user {
+    align-self: flex-end;
+    margin-left: auto;
+  }
+  
+  .message-bubble--meda {
+    align-self: flex-start;
+    margin-right: auto;
+  }
+  
+  .symptom-page--light .message-bubble--user {
+    background: #0b5fe7;
+    color: #f9fafb;
+  }
+  
+  .symptom-page--dark .message-bubble--user {
+    background: #1d4ed8;
+    color: #f9fafb;
+  }
+  
+  .symptom-page--light .message-bubble--meda {
+    background: #e5f2ff;
+    color: #0f172a;
+  }
+  
+  .symptom-page--dark .message-bubble--meda {
+    background: #020617;
+    color: #e5e7eb;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+  }
+  
+  .message-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+  
+  .message-text {
+    margin: 0;
+  }
+  
+  /* Kopfzeile in Meda-Bubble (Label + TTS-Button) */
+  
+  .message-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+    margin-bottom: 0.1rem;
+  }
+  
+  /* =========================================
+     TTS-Button
+     ========================================= */
+  
+  .tts-btn {
+    border: none;
+    background: transparent;
+    padding: 0.15rem 0.35rem;
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      background-color 0.16s ease,
+      transform 0.14s ease,
+      opacity 0.14s ease;
+  }
+  
+  .tts-btn svg {
+    display: block;
+  }
+  
+  /* Hover nur Desktop */
+  @media (hover: hover) and (pointer: fine) {
+    .tts-btn:hover {
+      background-color: rgba(148, 163, 184, 0.22);
+      transform: translateY(-1px);
+    }
+    .tts-btn:active {
+      transform: translateY(0);
+      opacity: 0.85;
+    }
+  }
+  
+  .symptom-page--light .tts-btn svg {
+    color: #4b5563;
+  }
+  
+  .symptom-page--dark .tts-btn svg {
+    color: #e5e7eb;
+  }
+  
+  /* =========================================
+     Loading-Zeile
+     ========================================= */
+  
+  .loading-row {
+    min-height: 1.2rem;
+    font-size: 0.85rem;
+  }
+  
+  .loading-text {
+    margin: 0;
+    opacity: 0.9;
+  }
+  
+  /* =========================================
+     Eingabe-Bereich
+     ========================================= */
+  
+  .symptom-input-area {
+    margin-top: 0.4rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.35);
+  }
+  
+  .eingabe-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .eingabe-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .eingabe-hint {
+    font-size: 0.8rem;
+    opacity: 0.85;
+  }
+  
+  .symptom-page--dark .eingabe-label {
+    color: #e5e7eb;
+  }
+  
+  .symptom-page--dark .eingabe-hint {
+    color: #9ca3af;
+  }
+  
+  /* Textarea */
+  
+  .chat-textarea {
+    width: 100%;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+    resize: vertical;
+    min-height: 70px;
+    max-height: 200px;
+    outline: none;
+    line-height: 1.45;
+  }
+  
+  .symptom-page--light .chat-textarea {
+    background: #ffffff;
+    color: #0f172a;
+  }
+  
+  .symptom-page--dark .chat-textarea {
+    background: #020617;
+    color: #e5e7eb;
+  }
+  
+  .chat-textarea::placeholder {
+    color: rgba(148, 163, 184, 0.9);
+  }
+  
+  .chat-textarea:focus {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.45);
+  }
+  
+  /* Eingabe-Actions */
+  
+  .eingabe-actions {
+    display: flex;
+  align-items: center;     /* WICHTIG: sorgt für perfekte Höhe */
   gap: 10px;
-  position: sticky;
-  bottom: 0;
-  background: #fff;
-  padding-top: 10px;
-}
-
-.eingabe-box input {
-  width: 70%;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.eingabe-box button {
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 8px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
-
-
-.chat-bubble.user {
-  background-color: #d6f0ff;
-}
-
-.chat-bubble.assistant {
-  background-color: #f0f0f0;
-}
-
-.chat-bubble strong {
-  display: block;
-  margin-bottom: 10px;
-}
-
-
-.lade-spinner {
+  margin-top: 10px;
+  }
+  
+  .char-count {
+    font-size: 0.8rem;
+    opacity: 0.85;
+  }
+  
+  .char-count.limit {
+    color: #e11d48;
+  }
+  
+  /* Voice-Button-Wrapper */
+  
+  .voice-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Voice Button – STT (Klasse aus VoiceInput: .voice-btn oder .mic-button) */
+  
+  .voice-wrap button,
+  .voice-wrap .voice-btn,
+  .voice-wrap .mic-button {
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  
+  .symptom-page--light .voice-wrap button,
+  .symptom-page--light .voice-wrap .voice-btn,
+  .symptom-page--light .voice-wrap .mic-button {
+    background: #0b5fe7;
+    color: #ffffff;
+    box-shadow: 5px 10px 20px rgba(1, 7, 17, 0.35);
+  }
+  
+  .symptom-page--dark .voice-wrap button,
+  .symptom-page--dark .voice-wrap .voice-btn,
+  .symptom-page--dark .voice-wrap .mic-button {
+    background: #0b5fe7;
+    color: #ffffff;
+    box-shadow: 5px 10px 20px rgba(0, 0, 0, 0.65);
+  }
+  
+  /* Aufnahme aktiv – VoiceInput darf .voice-btn--recording setzen */
+  
+  .voice-btn--recording {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    animation: pulseMicSymptom 1.2s ease-in-out infinite;
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  
+  @keyframes pulseMicSymptom {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    }
+    50% {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 12px rgba(220, 38, 38, 0);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .voice-btn--recording {
+      animation: none;
+    }
+  }
+  
+  /* Senden-Button – wie bei Bildanalyse */
+  
+  .send-btn {
+    border-radius: 999px;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.16s ease,
+      filter 0.16s ease;
+  }
+  
+  .symptom-page--light .send-btn {
+    background: #0b5fe7;
+    color: #ffffff;
+    box-shadow: 5px 10px 20px rgba(1, 7, 17, 0.35);
+  }
+  
+  .symptom-page--dark .send-btn {
+    background: #2563eb;
+    color: #f9fafb;
+    box-shadow: 5px 10px 20px rgba(0, 0, 0, 0.65);
+  }
+  
+  .send-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+  }
+  
+  .send-btn:active {
+    transform: translateY(0);
+    filter: brightness(0.97);
+  }
+  
+  /* =========================================
+     Responsive
+     ========================================= */
+  
+  @media (max-width: 900px) {
+    .symptom-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .symptom-header-meta {
+      align-items: flex-start;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .symptom-page {
+      padding: 1.5rem 1rem;
+    }
+  
+    .symptom-panel {
+      padding: 1rem 1rem;
+    }
+  
+    .symptom-chatlog {
+      max-height: 260px;
+    }
+  
+    .eingabe-actions {
+      gap: 0.45rem;
+    }
+  
+    .send-btn {
+      padding-inline: 0.9rem;
+    }
+  }
+  /* Buttons in der Eingabezeile */
+.eingabe-actions {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin: 20px;
-  color: #888;
+  gap: 0.75rem;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 5px solid #ddd;
-  border-top: 5px solid #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 10px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-.symptom-chat-container {
-  max-width: 800px;
-  margin: auto;
-  padding: 2rem;
-}
-
-/*.chatverlauf {
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 1.5rem;
-  border: 1px solid #ccc;
-  padding: 1rem;
-  border-radius: 8px;
-  background: #f9f9f9;
-} */
-
-.nachricht.user {
-  background: #dff0ff;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 10px;
-}
-
-.nachricht.assistant {
-  background: #eeeeee;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 10px;
-}
-
-.symptom-chat-container {
-  max-width: 800px;
-  margin: auto;
-  padding: 2rem;
-}
-
-
-
-.nachricht.user {
-  background: #dff0ff;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 10px;
-}
-
-.nachricht.assistant {
-  background: #eeeeee;
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 10px;
-}
-
-.eingabe-bereich{
-  display:flex;
-  align-items:center;
-  gap:12px;                 
-}
-
-
-.chat-textarea{
-  flex:1;
-  min-height:44px;
-  padding:10px 12px;
-  border-radius:12px;
-  resize:none;
-}
-
-
-.eingabe-actions{
-  display:flex;
-  align-items:center;
-  gap:8px;                  
-}
-.eingabe-actions > *{ flex:0 0 auto; }   
-
-
-.char-count{
-  min-width: 1px;
-  text-align:right;
-  font-size:.9rem;
-  color:#666;
-}
-
-
-.voice-wrap{
-  width:60px;               
-  height:144px;              
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-
-.voice-wrap :is(button, .mic-button){
-  width:100%;
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid #ccc;
-  border-radius:80px;
-  background:#f3f3f3;
-   margin-bottom: 15px;
-  cursor:pointer;
-  position:static !important;    
-}
-
-
-.eingabe-actions > button{
-  height:44px;
-  padding:10px 16px;
-  border-radius:8px;
-  background:#eee;
-  border:1px solid #ccc;
-  cursor:pointer;
-}
-.eingabe-actions > button:hover,
-.voice-wrap :is(button, .mic-button):hover{
-  background:#3498db; color:#fff; border-color:#3498db;
-}
-
-
+/* Gemeinsame Größe */
+.voice-btn,
 .send-btn {
-  width: 60px;
- 
-  border-radius: 100px;      
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+/* Voice = rund */
+.voice-btn {
+  border-radius: 50%;
+}
+
+/* Send = eckig */
+.send-btn {
+  border-radius: 14px;
+}
+
+.voice-btn svg,
+.send-btn svg {
+  width: 22px;
+  height: 22px;
+  color: #ffffff;
+}
+
+/* Light-Mode */
+.symptom-page--light .voice-btn,
+.symptom-page--light .send-btn {
+  background: #0b5fe7;
+  box-shadow: 0 10px 20px rgba(11, 95, 231, 0.32);
+}
+
+/* Dark-Mode */
+.symptom-page--dark .voice-btn,
+.symptom-page--dark .send-btn {
+  background: #2f7dde;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+/* Hover / Active / Disabled */
+.voice-btn:hover,
+.send-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.voice-btn:active,
+.send-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.voice-btn:disabled,
+.send-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+/* Buttons gleich groß */
+.voice-btn,
+.send-btn {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #0b5fe7;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  box-shadow: 0 10px 20px rgba(11, 95, 231, 0.3);
+  transition: 0.2s ease;
+}
+
+/* Senden eckig */
+.send-btn {
+  border-radius: 14px;
+}
+
+/* Icons */
+.voice-btn svg,
+.send-btn svg {
+  width: 22px;
+  height: 22px;
+  color: #fff;
+}
+
+.voice-btn,
+.send-btn {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+
+  display: flex;           
+  align-items: center;
+  justify-content: center;
+
+  background: #0b5fe7;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(11, 95, 231, 0.25);
+  transition: 0.2s ease;
+}
+
+/* SEND-Button eckig */
+.send-btn {
+  border-radius: 14px;
+}
+
+/* Icon-Größen für beide */
+.voice-btn svg,
+.send-btn svg {
+  width: 22px;
+  height: 22px;
+  color: #fff;
+}
+/* ======== GLOBAL VARIABLES FÜR LIGHT & DARK MODE ======== */
+
+/* LIGHT MODE */
+:root[data-theme="light"] {
+  --text-primary: #0f172a;        /* sehr dunkles Navy → perfekt lesbar */
+  --text-secondary: #475569;      /* gedämpft, wie iOS "secondary label" */
+  --text-placeholder: #94a3b8;
+  --panel-bg: #ffffff;
+  --panel-border: #e2e8f0;
+}
+
+/* DARK MODE */
+:root[data-theme="dark"] {
+  --text-primary: #f1f5f9;        /* fast weiß */
+  --text-secondary: #cbd5e1;
+  --text-placeholder: #64748b;
+  --panel-bg: #0f172a;
+  --panel-border: #1e293b;
+}
+
+.symptom-container,
+.symptom-panel,
+.chat-message-block,
+.panel-description,
+.panel-title {
+  color: var(--text-primary);
+}
+
+.chat-placeholder,
+.chat-placeholder-example,
+.eingabe-hint,
+.char-count {
+  color: var(--text-secondary);
+}
+
+.chat-textarea::placeholder,
+input::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
+}
+
+.symptom-panel,
+.chat-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+}
+
+.send-btn svg,
+.voice-btn svg {
+  color: #fff;
+}
+
+/* Header-Balken über dem Eingabefeld */
+.symptom-input-area .eingabe-label-row {
+  color: #f9fafb;                 /* Standard-Text hell */
+}
+
+/* Titel links */
+.symptom-input-area .eingabe-label {
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+/* "Max. 150 Zeichen" rechts */
+.symptom-input-area .eingabe-hint {
+  color: #e5e7eb;                 /* etwas dunkleres Weiß/Grau */
+}
+/* Einheitliche Button-Größen */
+.symptom-input-area .voice-wrap button,
+.symptom-input-area .send-btn {
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
- 
+  box-sizing: border-box;
+}
+.symptom-input-area .voice-wrap button svg,
+.symptom-input-area .send-btn svg {
+  width: 22px;
+  height: 22px;
+}
+/* Buttons & Counter exakt mittig in einer Reihe */
+.eingabe-actions {
+  display: flex;
+  align-items: center; /* ← sorgt für perfekte Vertikal-Zentrierung */
+  gap: 12px;
+}
+.char-count {
+  display: flex;
+  align-items: center;
+  height: 52px; /* gleiche Höhe wie Buttons */
+}
+/* Aktiver Pill – sicherstellen, dass Text wirklich weiß ist */
+.chip--accent {
+  color: #ffffff;
+  font-weight: 600;
 }
 
-
-
-.reset-btn {
-  padding: 6px 12px;
-  margin: 30px;
-  margin-right: 1px;
-  border: 2px solid #f20202;
-  border-radius: 50px;
-  background: #ee8e3f;
-  color: white;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+/* Inaktiver Pill – bessere Lesbarkeit in Light Mode */
+.symptom-page--light .chip--soft {
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #64748b;          /* dunkleres Grau, gut lesbar */
+  font-weight: 500;
 }
 
-.reset-btn:hover {
-  background: #ee8e3f;   
-  color: white;
-  border-color: #0028c69a;
+/* Dark Mode: nur Umriss + hellere Schrift */
+.symptom-page--dark .chip--soft {
+  background-color: transparent;
+  border: 1px solid #475569;
+  color: #e2e8f0;
+}
+.chat-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
+/* Light Mode */
+.symptom-page--light .chat-header-badge {
+  background: #dcfce7;          /* hellgrün */
+  border: 1px solid #22c55e;
+}
+
+.symptom-page--light .status-label {
+  color: #166534;               /* deutliches Dunkelgrün */
+}
+
+/* Dark Mode */
+.symptom-page--dark .chat-header-badge {
+  background: rgba(22, 163, 74, 0.25);
+  border: 1px solid rgba(74, 222, 128, 0.9);
+}
+
+.symptom-page--dark .status-label {
+  color: #bbf7d0;
+}
+
+/* Char-Counter im Eingabebereich */
+.symptom-input-area .char-count {
+  color: #e5e7eb;          /* sehr helles Grau → hoher Kontrast auf Navy */
+  font-weight: 500;
+}
+.voice-wrap .mic-button {
+  position: relative;
+  top: -2px;     /* 2px höher */
+}
+
+.voice-wrap button {
+  position: relative;
+  top: -7px;
+}

@@ -96,7 +96,7 @@ export default function VoiceInput({ onTranscribed }) {
     <div style={{ marginTop: "1rem" }}>
      <button
   type="button"
-  className="mic-button"
+  className="voice-btn"
   onClick={isRecording ? stopRecording : startRecording}
 >
   {isRecording ? <StopIcon fontSize="small" /> : <MicIcon fontSize="small" />}
