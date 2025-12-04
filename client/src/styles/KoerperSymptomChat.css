@@ -673,3 +673,51 @@
 .koerper-page--dark .btn--ghost-danger:hover {
   background-color: rgba(255, 90, 90, 0.35);
 }
+
+/* -------------------------------------------------
+   Bessere Lesbarkeit des Platzhalters im Textfeld
+   (speziell auf iOS / Handy)
+-------------------------------------------------- */
+
+/* LIGHT MODE */
+.koerper-page--light .chat-textarea::placeholder {
+  color: #6b7280;           /* gut lesbares Grau */
+  opacity: 0.95;
+  font-size: 0.95rem;
+}
+
+.koerper-page--light .chat-textarea::-webkit-input-placeholder {
+  color: #6b7280;
+  opacity: 0.95;
+}
+
+.koerper-page--light .chat-textarea::-moz-placeholder {
+  color: #6b7280;
+  opacity: 0.95;
+}
+
+.koerper-page--light .chat-textarea:-ms-input-placeholder {
+  color: #6b7280;
+  opacity: 0.95;
+}
+
+/* DARK MODE */
+.koerper-page--dark .chat-textarea::placeholder {
+  color: rgba(226, 232, 240, 0.9); /* fast weiß, aber weich */
+  font-size: 0.95rem;
+}
+
+.koerper-page--dark .chat-textarea::-webkit-input-placeholder {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.koerper-page--dark .chat-textarea::-moz-placeholder {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.koerper-page--dark .chat-textarea:-ms-input-placeholder {
+  color: rgba(226, 232, 240, 0.9);
+}
+.chat-textarea {
+  min-height: 120px;
+}

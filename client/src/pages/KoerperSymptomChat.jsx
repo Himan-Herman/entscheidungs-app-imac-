@@ -350,7 +350,7 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
                 onClick={neustart}
                 title="Chat & Thread löschen und neu starten"
               >
-                🔄 Neues Gespräch
+                ↻ Neues Gespräch
               </button>
 
               <button

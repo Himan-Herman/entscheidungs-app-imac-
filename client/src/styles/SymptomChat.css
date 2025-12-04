@@ -1066,3 +1066,54 @@ input::placeholder {
   font-size: clamp(0.8rem, 1.2vw, 0.95rem);
   opacity: 0.8;
 }
+
+.btn-header--soft-danger {
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background 0.25s, border-color 0.25s;
+  cursor: pointer;
+}
+[data-theme="light"] .btn-header--soft-danger {
+  background: rgba(255, 99, 99, 0.15);
+  border: 1px solid rgba(255, 99, 99, 0.35);
+  color: rgb(170, 20, 20);
+}
+
+
+
+/* ========================= */
+/* Verlauf löschen – SymptomChat */
+/* ========================= */
+
+/* Light Mode */
+.btn--ghost-danger {
+  padding: 0.55rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+  background: #ffe5e8;      /* zartes Rosa */
+  color: #8a1020;           /* gut lesbares Rot */
+  border: 1px solid #f8c9cf;
+}
+
+.btn--ghost-danger:hover {
+  background: #ffd6db;
+  border-color: #f1b4bc;
+}
+
+/* Dark Mode – deutlich stärkerer Kontrast */
+[data-theme="dark"] .btn--ghost-danger {
+  background: #4a1922;      /* dunkles Rot/Violett */
+  color: #ffe5ea;           /* sehr helles Rosa-Weiß */
+  border: 1px solid #ff708a;
+}
+
+[data-theme="dark"] .btn--ghost-danger:hover {
+  background: #5a1f2a;
+  border-color: #ff879b;
+}

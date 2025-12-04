@@ -177,4 +177,15 @@
     overflow:hidden; clip:rect(1px,1px,1px,1px);
     white-space:nowrap;
   }
+  .header__logo {
+    margin-right: 4px;
+  }
+  
+  .header__logo {
+    transform: translateX(-4px);
+  }
+  /*logo schieben*/
+  .ms-logo img {
+    margin-left: 6px;
+  }
   

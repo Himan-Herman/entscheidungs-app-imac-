@@ -238,7 +238,7 @@ export default function SymptomChat() {
                 aria-label="Neues Gespräch starten, Verlauf und Kontext zurücksetzen"
               >
                 <span className="icon" aria-hidden="true">
-                  🔄
+                ↻
                 </span>
                 <span>Neues Gespräch</span>
               </button>
