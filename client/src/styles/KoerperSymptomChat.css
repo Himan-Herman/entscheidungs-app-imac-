@@ -1,140 +1,675 @@
-.koerpersymptom-container {
-  max-width: 750px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  background: #fff;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+/* Grundlayout der Seite */
+.koerper-page {
+  min-height: 100vh;
+  padding: 2.5rem 1.5rem 3rem;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
 }
 
+/* Light / Dark Hintergrund wie bei den anderen Seiten */
+.koerper-page--light {
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.2), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.18), transparent 55%),
+    linear-gradient(135deg, #f4f7fb 0%, #eef3f8 40%, #e5ecf5 100%);
+  color: #0f172a;
+}
 
+.koerper-page--dark {
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.25), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.18), transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.25), transparent 55%),
+    linear-gradient(135deg, #020617 0%, #020617 40%, #020617 100%);
+  color: #e5e7eb;
+}
+
+.koerper-shell {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+/* Header oben */
+.koerper-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.75rem;
+}
+
+.koerper-header-text {
+  flex: 1 1 auto;
+}
+
+.koerper-title {
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.4rem;
+}
+
+.koerper-subtitle {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+  line-height: 1.5;
+  color: rgba(15, 23, 42, 0.75);
+}
+
+.koerper-page--dark .koerper-subtitle {
+  color: rgba(226, 232, 240, 0.8);
+}
+
+/* Chips rechts oben */
+.koerper-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Aktiver Bereich */
+.chip--accent {
+  background: linear-gradient(90deg, #22c1c3, #16a34a);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(34, 197, 94, 0.35);
+}
+
+/* Zweiter Bereich – in Light-Mode gut lesbar */
+.koerper-page[data-theme="light"] .chip--soft {
+  color: #4b5563;
+  background-color: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.9);
+  font-weight: 500;
+}
+
+.koerper-page[data-theme="dark"] .chip--soft {
+  color: rgba(226, 232, 240, 0.96);
+  background-color: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.7);
+}
+
+/* Disclaimer */
+.koerper-disclaimer-section {
+  margin-bottom: 1.75rem;
+}
+
+/* Chat-Card */
+.symptomchat-container {
+  background-color: rgba(248, 250, 252, 0.95);
+  border-radius: 22px;
+  box-shadow:
+    0 22px 45px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(148, 163, 184, 0.15);
+  padding: 1.4rem 1.6rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.koerper-page--dark .symptomchat-container {
+  background: radial-gradient(circle at top left, #0f172a, #020617 55%);
+  box-shadow:
+    0 22px 45px rgba(15, 23, 42, 0.8),
+    0 0 0 1px rgba(30, 64, 175, 0.7);
+}
+
+/* Kopfzeile im Chat */
+.chat-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chat-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Reset-Button */
+.reset-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  background-color: transparent;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.koerper-page--dark .reset-btn {
+  border-color: rgba(148, 163, 184, 0.9);
+  color: #e5e7eb;
+}
+
+.reset-btn:hover {
+  background-color: rgba(148, 163, 184, 0.12);
+}
+
+/* Chatverlauf */
+.chatverlauf {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  padding: 0.9rem 1rem;
+  max-height: 330px;
+  overflow-y: auto;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.koerper-page--dark .chatverlauf {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(51, 65, 85, 0.9);
+}
+
+/* Platzhalter, wenn noch kein Verlauf */
+.chat-placeholder {
+  font-size: 0.93rem;
+  color: rgba(100, 116, 139, 0.95);
+}
+
+.koerper-page--dark .chat-placeholder {
+  color: rgba(203, 213, 225, 0.9);
+}
+
+.chat-placeholder-example {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-style: italic;
+}
+
+/* Nachrichtenblasen */
 .chat-bubble {
-  padding: 1rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  word-wrap: break-word;
-  text-align: left;
+  margin-bottom: 0.65rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  max-width: 100%;
 }
 
 .chat-bubble.user {
-  background-color: #d6f0ff;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  align-self: flex-end;
+}
+
+.koerper-page--dark .chat-bubble.user {
+  background: rgba(37, 99, 235, 0.22);
+  border-color: rgba(59, 130, 246, 0.65);
 }
 
 .chat-bubble.assistant {
-  background-color: #f0f0f0;
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
-.chat-bubble strong {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: bold;
+.koerper-page--dark .chat-bubble.assistant {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(51, 65, 85, 0.95);
 }
 
-.eingabe-bereich {
+.bubble-header-row {
   display: flex;
-  gap: 1rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.eingabe-bereich input {
-  flex: 1;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-.eingabe-bereich button {
-  padding: 0.75rem 1.2rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.eingabe-bereich button:hover {
-  background-color: #3498db;
-  color: white;
-  border-color: #3498db;
-}
-
-.lade-spinner {
-  text-align: center;
-  padding: 1rem;
-  color: #888;
-}
-
-.spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid #ccc;
-  border-top-color: #3498db;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
-
-.eingabe-bereich {
-  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.25rem 0;
+  margin-bottom: 0.2rem;
 }
 
-.eingabe-bereich input {
-  flex: 1;
-  min-width: 0;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  font-size: 1rem;
-  line-height: 1.2;
+.bubble-label {
+  font-weight: 600;
+  margin-right: 0.2rem;
 }
 
-.eingabe-controls {
+.bubble-text {
+  margin: 0.1rem 0 0;
+}
+
+/* TTS-Button */
+.tts-btn {
+  border: none;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.koerper-page--dark .tts-btn {
+  background: rgba(37, 99, 235, 0.22);
+}
+
+.tts-btn:hover {
+  filter: brightness(1.05);
+}
+
+/* Eingabebereich */
+.eingabe-bereich {
+  margin-top: 0.4rem;
+  padding: 0.75rem 0.6rem 0.1rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0b1530 0%, #020617 100%);
+  color: #e5e7eb;
+}
+
+.koerper-page--light .eingabe-bereich {
+  background: linear-gradient(135deg, #0b1530 0%, #020617 100%);
+}
+
+/* Label + Max-150-Zeichen – responsive wie bei SymptomChat */
+.eingabe-label-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: clamp(8px, 2vw, 18px);
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.eingabe-label {
+  font-size: clamp(1rem, 1.4vw, 1.1rem);
+  font-weight: 600;
+}
+
+.eingabe-hint {
+  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+  opacity: 0.8;
+}
+
+/* Textarea */
+.chat-textarea {
+  width: 100%;
+  resize: none;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  padding: 0.6rem 0.7rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  margin-bottom: 0.55rem;
+  background-color: #f9fafb;
+  color: #0f172a;
+}
+
+.koerper-page--dark .chat-textarea {
+  background-color: #020617;
+  color: #e5e7eb;
+  border-color: rgba(51, 65, 85, 0.9);
+}
+
+.chat-textarea::placeholder {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* Zeile mit Zeichenanzahl + Voice + Senden */
+.eingabe-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .char-count {
   font-size: 0.85rem;
-  opacity: 0.7;
-  min-width: 4.5rem; 
-  text-align: right;
+  color: rgba(148, 163, 184, 0.95);
+  margin-right: auto;
 }
 
-.voice-btn,
-.send-btn {
+.char-count.limit {
+  color: #f97316;
+}
+
+/* Voice-Button + Wrapper */
+.voice-wrap {
+  display: flex;
+  align-items: center;
+}
+
+/* Voice-Button kommt aus VoiceInput, wir geben nur allgemeines Styling */
+.voice-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
   border: none;
-  border-radius: 10px;
-  padding: 0.6rem 0.9rem;
-  font-size: 1rem;
   cursor: pointer;
-  background: #f2f2f2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.45);
+  background-color: #2563eb;
+  color: #ffffff;
 }
 
-.voice-btn.active {
-  outline: 2px solid #999;
+.voice-btn:hover {
+  filter: brightness(1.05);
 }
 
+/* Senden-Button – rechteckig mit soften Ecken */
 .send-btn {
-  background: #1e90ff;
-  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.45);
+  background-color: #2563eb;
+  color: #ffffff;
 }
 
 .send-btn:disabled {
   opacity: 0.6;
-  cursor: not-allowed;
+  cursor: default;
+  box-shadow: none;
+}
+
+.send-btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .koerper-page {
+    padding: 1.6rem 1rem 2.2rem;
+  }
+
+  .koerper-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .koerper-header-meta {
+    align-items: flex-start;
+  }
+
+  .symptomchat-container {
+    padding: 1.1rem 1.1rem 1.2rem;
+  }
+
+  .chatverlauf {
+    max-height: 260px;
+  }
+}
+
+/* Kopfzeile im Chat */
+.chat-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.chat-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Container für die beiden Buttons oben rechts */
+.chat-top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+/* Generische Button-Styles (wie auf anderen Seiten) */
+.btn {
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+/* Neutraler Ghost-Button */
+.btn--ghost {
+  border-color: rgba(148, 163, 184, 0.7);
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #0f172a;
+}
+
+.koerper-page--dark .btn--ghost {
+  border-color: rgba(148, 163, 184, 0.9);
+  background-color: rgba(15, 23, 42, 0.95);
+  color: #e5e7eb;
+}
+
+.btn--ghost:hover {
+  background-color: rgba(148, 163, 184, 0.12);
+}
+
+/* Gefährlicher Ghost-Button (Verlauf löschen) */
+.btn--ghost-danger {
+  border-color: rgba(248, 113, 113, 0.9);
+  background-color: rgba(254, 242, 242, 0.95);
+  color: #b91c1c;
+}
+
+.koerper-page--dark .btn--ghost-danger {
+  border-color: rgba(248, 113, 113, 0.9);
+  background-color: rgba(210, 173, 173, 0.95);
+  color: #fdfbfb;
+}
+
+.btn--ghost-danger:hover {
+  filter: brightness(1.03);
+}
+
+/* … der Rest (eingabe-label-row, chatverlauf, voice-btn, send-btn, usw.)
+   kann so bleiben wie in der vorherigen Version, die wir schon gebaut haben. */
+
+/* Für Handy: Header und Disclaimer stapeln, ohne Chaos */
+@media (max-width: 768px) {
+  .koerper-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .koerper-header-meta {
+    align-items: flex-start;
+  }
+
+  .chat-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chat-top-actions {
+    align-self: stretch;
+    justify-content: flex-start;
+  }
+}
+.koerper-organ-hint {
+  font-size: 0.85rem;
+  margin: 0 0 0.4rem;
+  color: #4b5563;           /* grau auf Light Mode */
+  line-height: 1.4;
+}
+
+.koerper-organ-example {
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* Dark Mode Variante */
+.koerper-page--dark .koerper-organ-hint {
+  color: #e5e7eb;
+}
+/* Header-Layout */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.chat-header-left .chat-title {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 700;
+}
+
+/* Button-Grundstil im Header */
+.btn-header {
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background-color 0.18s ease, border-color 0.18s ease,
+    color 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* neutrales „Neues Gespräch“ */
+.btn-header--ghost {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.5);
+  color: #e5e7eb;
+}
+
+.btn-header--ghost:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+/* weicher Rosa-Danger-Button */
+.btn-header--soft-danger {
+  background: #fee2e2;         /* hellrosa */
+  border-color: #fecaca;
+  color: #f5b9b9;              /* dunkles Rot für Text/Icon */
+}
+
+.btn-header--soft-danger:hover {
+  background: #fecaca;
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.25);
+}
+
+/* Dark-Mode-Varianten */
+.koerper-page--dark .btn-header--ghost {
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
+}
+
+.koerper-page--dark .btn-header--soft-danger {
+  background: rgba(248, 113, 113, 0.16);
+  border-color: rgba(241, 198, 198, 0.7);
+  color: #fecaca;
+}
+
+.koerper-page--dark .btn-header--soft-danger:hover {
+  background: rgba(248, 113, 113, 0.26);
+}
+/* --- Hinweistext unter der Überschrift --- */
+.region-hint {
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  line-height: 1.45;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  font-weight: 400;
+  transition: color 0.2s ease;
+}
+
+/* Light Mode → gut lesbar */
+.koerper-page--light .region-hint {
+  color: rgba(235, 236, 239, 0.72);   /* #0f172a dunkelblau-grau */
+}
+
+/* Dark Mode → etwas heller, aber sichtbar */
+.koerper-page--dark .region-hint {
+  color: rgba(255, 255, 255, 0.987); /* #f1f5f9 */
+}
+/* ---------- Hellerer Hinweistext im Light-Mode ---------- */
+.koerper-page--light .koerper-organ-hint {
+  color: #fefefe; /* sehr gut lesbar, modernes Slate-Dunkelblau */
+  opacity: 0.95;  /* fast volle Deckkraft */
+}
+
+/* Beispieltext "In meiner Region…" ebenfalls heller */
+.koerper-page--light .koerper-organ-example {
+  color: #eff0f3; /* etwas stärker, sehr gut lesbar */
+  font-weight: 500;
+}
+.btn {
+  font-weight: 500;
+  border-radius: 22px;
+  padding: 0.55rem 1.1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+/* ---------- LIGHT MODE BUTTONS ---------- */
+
+.koerper-page--light .btn--ghost {
+  background-color: #f0f4f8;
+  border: 1px solid #d0d7df;
+  color: #1e293b; /* dunkelblau / sehr lesbar */
+}
+
+.koerper-page--light .btn--ghost-danger {
+  background-color: #f8d2d2;
+  border: 1px solid #e8b3b3;
+  color: #7a1f1f; /* edles dunkles Rot — lesbar, professionell */
+}
+
+/* Hover-Effekte */
+.koerper-page--light .btn--ghost:hover {
+  background-color: #e2e8f0;
+}
+
+.koerper-page--light .btn--ghost-danger:hover {
+  background-color: #f4c5c5;
+}
+/* ---------- DARK MODE BUTTONS ---------- */
+
+.koerper-page--dark .btn--ghost {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #f0f4f8; /* weißlich – perfekte Lesbarkeit */
+}
+
+.koerper-page--dark .btn--ghost-danger {
+  background-color: rgba(255, 80, 80, 0.25);
+  border: 1px solid rgba(255, 120, 120, 0.35);
+  color: #fff; /* immer weiß im Dark Mode */
+}
+
+/* Hover */
+.koerper-page--dark .btn--ghost:hover {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.koerper-page--dark .btn--ghost-danger:hover {
+  background-color: rgba(255, 90, 90, 0.35);
 }

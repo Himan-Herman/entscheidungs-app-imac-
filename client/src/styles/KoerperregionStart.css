@@ -1,0 +1,258 @@
+/* ===== Grundlayout für die Körperkarten-Startseite ===== */
+
+.koerper-start-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: clamp(1.5rem, 3vw, 2.5rem) clamp(1.25rem, 3vw, 3rem);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: var(
+    --page-bg-gradient,
+    radial-gradient(circle at top left, #dbeafe 0, #f9fafb 40%, #e5e7eb 100%)
+  );
+  color: var(--text-primary, #0f172a);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+}
+
+.koerper-start-page[data-theme="dark"] {
+  background: var(
+    --page-bg-gradient-dark,
+    radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 100%)
+  );
+  color: #e5e7eb;
+}
+
+.koerper-start-shell {
+  width: 100%;
+  max-width: 1120px;
+}
+
+/* ===== Header ===== */
+
+.koerper-start-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.koerper-start-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.koerper-start-subtitle {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+  color: var(--text-secondary, #6b7280);
+  max-width: 40rem;
+}
+
+.koerper-start-page[data-theme="dark"] .koerper-start-subtitle {
+  color: rgba(148, 163, 184, 0.95);
+}
+
+.koerper-start-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+/* Chips (nutzt deine bestehenden chip-Styles; hier nur falls nötig) */
+/*
+.chip { … }
+.chip--accent { … }
+.chip--soft { … }
+*/
+
+@media (max-width: 768px) {
+  .koerper-start-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .koerper-start-header-meta {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* ===== Panel für Auswahl ===== */
+
+.koerper-start-panel {
+  background: var(--panel-bg, rgba(248, 250, 252, 0.9));
+  border-radius: 28px;
+  padding: clamp(1.5rem, 3vw, 2rem);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.koerper-start-page[data-theme="dark"] .koerper-start-panel {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(55, 65, 81, 0.9);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+}
+
+.koerper-start-hint {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.koerper-start-page[data-theme="dark"] .koerper-start-hint {
+  color: rgba(148, 163, 184, 0.95);
+}
+
+/* ===== Toggle-Button (Auswahl öffnen/schließen) ===== */
+
+.koerper-toggle-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.4rem;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #0ea5e9, #22c55e);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(15, 118, 110, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.koerper-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(15, 118, 110, 0.45);
+  filter: brightness(1.03);
+}
+
+.koerper-toggle-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 3px;
+}
+
+/* ===== Options-Grid (Vorder-/Rückseite) ===== */
+
+.koerper-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: max-height 0.22s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.koerper-options--open {
+  max-height: 500px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ===== Option-Chips ===== */
+
+.option-chip {
+  border: none;
+  text-align: left;
+  padding: 1rem 1.1rem;
+  border-radius: 24px;
+  background: radial-gradient(
+      circle at top left,
+      rgba(59, 130, 246, 0.12),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(34, 197, 94, 0.14),
+      transparent 55%
+    ),
+    var(--panel-option-bg, #ffffff);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  color: inherit;
+}
+
+.koerper-start-page[data-theme="dark"] .option-chip {
+  background: radial-gradient(
+      circle at top left,
+      rgba(59, 130, 246, 0.2),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(34, 197, 94, 0.18),
+      transparent 55%
+    ),
+    rgba(15, 23, 42, 0.96);
+  border-color: rgba(75, 85, 99, 0.9);
+}
+
+.option-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 40px rgba(15, 23, 42, 0.28);
+}
+
+.option-chip:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 3px;
+}
+
+.option-chip-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.option-chip-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.koerper-start-page[data-theme="dark"] .option-chip-subtitle {
+  color: rgba(148, 163, 184, 0.96);
+}
+
+/* ===== Footer-Hinweis ===== */
+
+.koerper-start-footer-text {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #6b7280);
+}
+
+.koerper-start-page[data-theme="dark"] .koerper-start-footer-text {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+/* In KoerperregionStart.css ergänzen */
+
+/* Lesbarer Chip im LIGHT-Mode */
+.koerper-start-page[data-theme="light"] .chip--soft {
+    color: #4b5563;                    /* deutlich dunklerer Text */
+    border-color: rgba(148, 163, 184, 0.9);
+    background-color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+  }
+  
+  /* Optional: im DARK-Mode leicht aufhellen, aber soft lassen */
+  .koerper-start-page[data-theme="dark"] .chip--soft {
+    color: rgba(226, 232, 240, 0.96);
+    border-color: rgba(148, 163, 184, 0.8);
+    background-color: rgba(15, 23, 42, 0.9);
+  }
+  

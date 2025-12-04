@@ -5,22 +5,17 @@ import React, {
   useLayoutEffect,
 } from "react";
 import "../styles/BildUpload.css";
-import { Image, Camera, Video } from "lucide-react";
-import { Volume2 } from "lucide-react";
-
-
 import { useTheme } from "../ThemeMode";
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
 import { getAuthHeaders } from "../api/authHeaders";
 import DisclaimerShort from "../components/DisclaimerShort";
-// Beispiel – so ähnlich wie auf deiner Infoseite
-
+import { Image as ImageIcon, Camera, Video } from "lucide-react";
+import SpeakButton from "../components/SpeakButton.jsx";
 
 const LS_VERLAUF_KEY = "bildChatVerlauf";
 const LS_BILD_KEY = "letztesBild";
 const LS_THREAD_KEY = "bildThreadId";
-
 
 async function resizeImageToBase64(file, maxSize = 512) {
   return new Promise((resolve, reject) => {
@@ -61,6 +56,14 @@ async function resizeImageToBase64(file, maxSize = 512) {
   });
 }
 
+// kleiner Helper, um HTML-Antworten in reinen Text für TTS zu verwandeln
+function stripHtml(html) {
+  if (!html) return "";
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
+}
+
 export default function BildUpload() {
   const [bild, setBild] = useState(null);
   const [beschreibung, setBeschreibung] = useState("");
@@ -81,7 +84,6 @@ export default function BildUpload() {
   const streamRef = useRef(null);
   const MIN_TXTAREA_H = 44;
   const textareaRef = useRef(null);
-  
 
   const autoResize = (el) => {
     if (!el) return;
@@ -106,26 +108,32 @@ export default function BildUpload() {
     handleFrageSenden();
   };
 
-  const clearVerlauf = () => {
-    setVerlauf([]);
-    try {
-      localStorage.setItem(LS_VERLAUF_KEY, JSON.stringify([]));
-    } catch (e) {
-      console.warn("[BildUpload] Konnte Verlauf nicht leeren:", e);
-    }
-  };
-
+  // 1) Initialisierung – Verlauf, Bild & ThreadId aus LocalStorage laden
   useEffect(() => {
     try {
+      // Verlauf
       const gespeicherterVerlauf = localStorage.getItem(LS_VERLAUF_KEY);
-      const gespeichertesBild = localStorage.getItem(LS_BILD_KEY);
+      if (gespeicherterVerlauf) {
+        try {
+          const parsed = JSON.parse(gespeicherterVerlauf);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setVerlauf(parsed);
+          }
+        } catch (e) {
+          console.warn("[BildUpload] Verlauf defekt, wird gelöscht:", e);
+          localStorage.removeItem(LS_VERLAUF_KEY);
+        }
+      }
 
-      if (gespeicherterVerlauf) setVerlauf(JSON.parse(gespeicherterVerlauf));
+      // Bild (Base64 oder Data-URL)
+      const gespeichertesBild = localStorage.getItem(LS_BILD_KEY);
       if (gespeichertesBild) {
-        setBild(gespeichertesBild);
-        setBase64Bild(gespeichertesBild);
+        setBild(gespeichertesBild); // für <img src=...>
+        setBase64Bild(gespeichertesBild); // für Backend
         letztesBild.current = gespeichertesBild;
       }
+
+      // ThreadId bleibt im LocalStorage, wird in handleFrageSenden gelesen
     } catch (e) {
       console.warn("[BildUpload] Konnte LocalStorage nicht lesen:", e);
     }
@@ -180,34 +188,6 @@ export default function BildUpload() {
 
     requestAnimationFrame(() => autoResize(textareaRef.current));
   }, []);
-    // ---- Text-to-Speech (Antwort von Meda vorlesen) ----
-    const stripHtml = (html) => {
-      if (!html) return "";
-      const tmp = document.createElement("div");
-      tmp.innerHTML = html;
-      return tmp.textContent || tmp.innerText || "";
-    };
-  
-    const handleSpeak = (htmlText) => {
-      if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-        alert("Vorlesen wird von diesem Browser nicht unterstützt.");
-        return;
-      }
-  
-      const text = stripHtml(htmlText);
-      if (!text.trim()) return;
-  
-      const synth = window.speechSynthesis;
-      synth.cancel(); // alte Ausgabe abbrechen
-  
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = "de-DE";
-      utter.rate = 1.0;
-      utter.pitch = 1.0;
-  
-      synth.speak(utter);
-    };
-  
 
   const startWebcam = async () => {
     try {
@@ -364,6 +344,15 @@ export default function BildUpload() {
     }
   };
 
+  const clearVerlauf = () => {
+    setVerlauf([]);
+    try {
+      localStorage.setItem(LS_VERLAUF_KEY, JSON.stringify([]));
+    } catch (e) {
+      console.warn("[BildUpload] Konnte Verlauf nicht leeren:", e);
+    }
+  };
+
   useEffect(() => {
     autoResize(textareaRef.current);
 
@@ -435,37 +424,34 @@ export default function BildUpload() {
               tabIndex={-1}
             />
 
-<div className="upload-actions" role="group" aria-label="Bildquellen">
-  <button
-    type="button"
-    className="btn btn--primary-2"
-    onClick={() => galleryInputRef.current?.click()}
-  >
-    <Image size={18} strokeWidth={2} aria-hidden="true" />
-    <span>Bild aus Galerie wählen</span>
-  </button>
+            <div className="upload-actions" role="group" aria-label="Bildquellen">
+              <button
+                type="button"
+                className="upload-btn"
+                onClick={() => galleryInputRef.current?.click()}
+              >
+                <ImageIcon size={18} strokeWidth={2} aria-hidden="true" />
+                <span>Bild aus Galerie wählen</span>
+              </button>
 
-  <button
-    type="button"
-    className="btn btn--primary-2"
-    onClick={() => cameraInputRef.current?.click()}
-    title="Öffnet auf Mobilgeräten direkt die Kamera"
-  >
-    <Camera size={18} strokeWidth={2} aria-hidden="true" />
-    <span>Smartphone-Kamera</span>
-  </button>
+              <button
+                type="button"
+                className="upload-btn"
+                onClick={() => cameraInputRef.current?.click()}
+              >
+                <Camera size={18} strokeWidth={2} aria-hidden="true" />
+                <span>Smartphone-Kamera</span>
+              </button>
 
-  <button
-    type="button"
-    className="btn btn--primary-2"
-    onClick={startWebcam}
-    title="Webcam im Browser (Desktop)"
-  >
-    <Video size={18} strokeWidth={2} aria-hidden="true" />
-    <span>Webcam starten</span>
-  </button>
-</div>
-
+              <button
+                type="button"
+                className="upload-btn"
+                onClick={startWebcam}
+              >
+                <Video size={18} strokeWidth={2} aria-hidden="true" />
+                <span>Webcam starten</span>
+              </button>
+            </div>
 
             <div className="bild-preview-wrapper" aria-live="polite">
               {bild ? (
@@ -550,37 +536,32 @@ export default function BildUpload() {
                   </p>
                 )}
 
-{verlauf.map((eintrag, index) => (
-  <article
-    key={index}
-    className="chat-message-block"
-    aria-label={`Nachricht ${index + 1}`}
-  >
-    <div className="frage-block message-bubble message-bubble--user">
-      <strong className="message-label">👤 Du:</strong>
-      <p className="message-text">{eintrag.frage}</p>
-    </div>
-
-    <div className="antwort-block message-bubble message-bubble--meda">
-      <div className="message-header-row">
-        <strong className="message-label">🩺 Meda:</strong>
-        <button
-          type="button"
-          className="tts-btn"
-          onClick={() => handleSpeak(eintrag.antwort)}
-          aria-label="Antwort von Meda vorlesen"
-        >
-          <Volume2 size={16} aria-hidden="true" />
-        </button>
-      </div>
-      <span
-        className="message-text"
-        dangerouslySetInnerHTML={{ __html: eintrag.antwort }}
-      />
-    </div>
-  </article>
-))}
-
+                {verlauf.map((eintrag, index) => (
+                  <article
+                    key={index}
+                    className="chat-message-block"
+                    aria-label={`Nachricht ${index + 1}`}
+                  >
+                    <div className="frage-block message-bubble message-bubble--user">
+                      <strong className="message-label">👤 Du:</strong>
+                      <p className="message-text">{eintrag.frage}</p>
+                    </div>
+                    <div className="antwort-block message-bubble message-bubble--meda">
+                      <div className="message-header-row">
+                        <strong className="message-label">🩺 Meda:</strong>
+                        <SpeakButton
+                          text={stripHtml(eintrag.antwort || "")}
+                          className="tts-btn"
+                          ariaLabel="Antwort von Meda vorlesen"
+                        />
+                      </div>
+                      <span
+                        className="message-text"
+                        dangerouslySetInnerHTML={{ __html: eintrag.antwort }}
+                      />
+                    </div>
+                  </article>
+                ))}
                 <div ref={chatEndRef} />
               </section>
 
@@ -598,14 +579,15 @@ export default function BildUpload() {
 
               {base64Bild && (
                 <div className="eingabe-bereich">
-                  <div className="eingabe-label-row">
+                  <div className="bild-eingabe-label-row">
                     <label
                       htmlFor="bildbeschreibung"
-                      className="eingabe-label"
+                      className="bild-eingabe-label"
                     >
                       Frage zu diesem Bild
                     </label>
-                    <span className="eingabe-hint">
+
+                    <span className="bild-eingabe-hint">
                       Max. {MAX_CHARS} Zeichen
                     </span>
                   </div>

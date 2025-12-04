@@ -11,6 +11,7 @@ import authRouter from './routes/auth.js';
 import mailRoutes from './routes/mail.js';
 import { sendVerificationEmail } from './emailService.js';
 import { requireAuth } from './middleware/requireAuth.js';
+import ttsRouter from "./routes/tts.js";
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/mail', mailRoutes);
+app.use("/api/tts", ttsRouter);
 
 
 

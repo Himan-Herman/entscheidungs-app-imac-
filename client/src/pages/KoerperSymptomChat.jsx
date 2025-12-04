@@ -1,27 +1,28 @@
-
-
+// src/pages/KoerperSymptomChat.jsx
 import React, { useState, useEffect, useRef } from "react";
+import {
+  useSearchParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import "../styles/KoerperSymptomChat.css";
+
+import { useTheme } from "../ThemeMode";
 import DisclaimerShort from "../components/DisclaimerShort";
-
-
-
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
 import { getAuthHeaders } from "../api/authHeaders";
-
+import SpeakButton from "../components/SpeakButton";
 
 const THREAD_API = "/api/koerpersymptomthread";
 const LS_CHAT_KEY = "koerperChatVerlauf";
 const LS_THREAD_KEY = "koerperThreadId";
-
-
-
 const MAX_CHARS = 150;
 
 export default function KoerperSymptomChat() {
+  const { theme } = useTheme(); // "light" | "dark"
+
   const [eingabe, setEingabe] = useState("");
   const [verlauf, setVerlauf] = useState(() => {
     try {
@@ -32,12 +33,6 @@ export default function KoerperSymptomChat() {
       return [];
     }
   });
-
-  const autoResize = (el) => {
-    el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 160) + "px";
-  };
-  
   const [threadId, setThreadId] = useState(() => {
     try {
       return localStorage.getItem(LS_THREAD_KEY) || "";
@@ -46,73 +41,60 @@ export default function KoerperSymptomChat() {
       return "";
     }
   });
+  const [isSending, setIsSending] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
-   const [isSending, setIsSending] = useState(false);
-
   const organ = searchParams.get("organ");
+  
+const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
+
+  const seite =
+    searchParams.get("seite") ||
+    sessionStorage.getItem("koerperSeite") ||
+    "vorderseite";
 
   const chatRef = useRef(null);
   const inputRef = useRef(null);
   const lastIntroOrganRef = useRef(null);
+
   const navigate = useNavigate();
   const location = useLocation();
   const fromReset = location.state?.fromReset === true;
-const seite = searchParams.get("seite") || sessionStorage.getItem("koerperSeite") || "vorderseite";
 
-
-useEffect(() => {
-  
-  
-  if (location.state?.from) {
-    sessionStorage.setItem("lastMapRoute", location.state.from);
-    
-  }
-  if (seite) {
-    sessionStorage.setItem("koerperSeite", seite);
-  }
-
-}, [seite, location]);
-
-
-
-useEffect(() => {
-  window.history.replaceState({}, "", "/startseite");
-}, []);
-
-
-
-
-useEffect(() => {
-  const handlePop = (e) => {
-    e.preventDefault();
-    navigate("/startseite", { replace: true });
+  // Textarea-Autoresize
+  const autoResize = (el) => {
+    if (!el) return;
+    el.style.height = "auto";
+    const maxH = 160;
+    el.style.height = Math.min(el.scrollHeight, maxH) + "px";
   };
-  window.addEventListener("popstate", handlePop);
-  return () => window.removeEventListener("popstate", handlePop);
-}, [navigate]);
 
+  // Route-Infos für „zurück zur Karte“ merken
+  useEffect(() => {
+    if (location.state?.from) {
+      sessionStorage.setItem("lastMapRoute", location.state.from);
+    }
+    if (seite) {
+      sessionStorage.setItem("koerperSeite", seite);
+    }
+  }, [seite, location]);
 
+  // nach „Neues Gespräch“: nur Session-Caches löschen, KEINE URL-Manipulation
+  useEffect(() => {
+    if (fromReset) {
+      sessionStorage.removeItem("koerperSeite");
+      sessionStorage.removeItem("lastMapRoute");
+    }
+  }, [fromReset]);
 
-useEffect(() => {
-  if (fromReset) {
-    
-    
-    sessionStorage.removeItem("koerperSeite");
-    sessionStorage.removeItem("lastMapRoute");
-    
-    
-    history.replaceState({}, "");
-  }
-}, [fromReset]);
-
-  
-
+  // Einstiegs-Nachricht, wenn Organ gewählt wurde
   useEffect(() => {
     if (!organ) return;
 
     const introExistiert = verlauf.some(
-      (m) => m.role === "assistant" && m.content.includes(`"${organ}" als betroffene Region`)
+      (m) =>
+        m.role === "assistant" &&
+        m.content.includes(`"${organ}" als betroffene Region`)
     );
     if (introExistiert) {
       lastIntroOrganRef.current = organ;
@@ -135,10 +117,10 @@ useEffect(() => {
       });
       lastIntroOrganRef.current = organ;
     }
-    // eslint-disable-next-line 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organ]);
 
-  
+  // Verlauf im LocalStorage speichern
   useEffect(() => {
     try {
       localStorage.setItem(LS_CHAT_KEY, JSON.stringify(verlauf));
@@ -147,27 +129,34 @@ useEffect(() => {
     }
   }, [verlauf]);
 
-  
+  // Immer nach unten scrollen bei neuen Nachrichten
   useEffect(() => {
     if (chatRef.current) {
-      chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
+      chatRef.current.scrollTo({
+        top: chatRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [verlauf]);
 
-  
+  // KI-Anfrage
   const frageSenden = async (textOverride) => {
     const raw =
-     typeof textOverride === "string"
-       ? textOverride
-       : eingabe; // Fallback auf State
-   const aktuelleFrage = (raw || "").trim();
-    if (!aktuelleFrage) return;
+      typeof textOverride === "string" ? textOverride : eingabe;
+    const aktuelleFrage = (raw || "").trim();
+    if (!aktuelleFrage || isSending) return;
 
     const userMsg = { role: "user", content: aktuelleFrage };
     const basisVerlauf = [...verlauf, userMsg];
 
-    
-    const mitUhr = [...basisVerlauf, { role: "assistant", content: "🕒" }];
+    // Zwischenstatus mit Sanduhr
+    const mitUhr = [
+      ...basisVerlauf,
+      {
+        role: "assistant",
+        content: "⏳ Meda analysiert deine Angaben …",
+      },
+    ];
     setVerlauf(mitUhr);
     setEingabe("");
     setIsSending(true);
@@ -178,7 +167,10 @@ useEffect(() => {
         verlauf:
           !threadId && organ
             ? [
-                { role: "user", content: `Kontext: Die betroffene Körperregion ist "${organ}".` },
+                {
+                  role: "user",
+                  content: `Kontext: Die betroffene Körperregion ist "${organ}".`,
+                },
                 userMsg,
               ]
             : [userMsg],
@@ -188,15 +180,21 @@ useEffect(() => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...getAuthHeaders(),      // 🔐 Token wird hier ergänzt
+          ...getAuthHeaders(),
         },
         body: JSON.stringify(payload),
       });
-      
+
       if (!response.ok) {
         const text = await response.text();
         console.error("[Thread API] HTTP", response.status, text);
-        const fertigFehler = [...basisVerlauf, { role: "assistant", content: "⚠️ Serverfehler (Thread)." }];
+        const fertigFehler = [
+          ...basisVerlauf,
+          {
+            role: "assistant",
+            content: "⚠️ Serverfehler. Bitte später erneut versuchen.",
+          },
+        ];
         setVerlauf(fertigFehler);
         return;
       }
@@ -212,16 +210,30 @@ useEffect(() => {
         }
       }
 
-      const fertig = [...basisVerlauf, { role: "assistant", content: data.antwort || "…" }];
+      const fertig = [
+        ...basisVerlauf,
+        {
+          role: "assistant",
+          content: data.antwort || "…",
+        },
+      ];
       setVerlauf(fertig);
     } catch (error) {
       console.error("Fehler bei der KI-Antwort:", error);
-      const mitFehler = [...basisVerlauf, { role: "assistant", content: "⚠️ Fehler bei der Antwort." }];
+      const mitFehler = [
+        ...basisVerlauf,
+        {
+          role: "assistant",
+          content:
+            "⚠️ Es ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
+        },
+      ];
       setVerlauf(mitFehler);
+    } finally {
+      setIsSending(false);
     }
   };
 
-  
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -229,13 +241,16 @@ useEffect(() => {
     }
   };
 
-  
+  // Ergebnis aus VoiceInput
   const handleVoice = (text) => {
-    setEingabe(text || "");
+    setEingabe((text || "").slice(0, MAX_CHARS));
     requestAnimationFrame(() => inputRef.current?.focus());
-  };;
+  };
 
-  
+  // Nur Verlauf löschen (Thread bleibt)
+ 
+
+  // Alles zurücksetzen und wieder zur Region-Startseite
   const neustart = () => {
     setVerlauf([]);
     setEingabe("");
@@ -246,85 +261,234 @@ useEffect(() => {
     } catch (e) {
       console.warn("[LS remove] failed:", e);
     }
-    if (lastIntroOrganRef?.current !== undefined) lastIntroOrganRef.current = null;
-  
-   
+    if (lastIntroOrganRef?.current !== undefined)
+      lastIntroOrganRef.current = null;
+
     setSearchParams({});
     sessionStorage.removeItem("koerperSeite");
     sessionStorage.removeItem("lastMapRoute");
-  
-   
-    navigate("/region-start", { replace: true, state: { fromReset: true } });
 
+    navigate("/region-start", { replace: true, state: { fromReset: true } });
+  };
+  const clearVerlauf = () => {
+    try {
+      // bisherigen Verlauf aus LocalStorage entfernen
+      localStorage.removeItem(LS_CHAT_KEY);
+    } catch (e) {
+      console.warn("[LS remove] koerperChatVerlauf löschen fehlgeschlagen:", e);
+    }
+  
+    if (organ) {
+      // Wenn eine Region gewählt ist: neue Einstiegsnachricht für genau dieses Organ
+      const neueStartFrage = {
+        role: "assistant",
+        content: `Du hast "${organ}" als betroffene Region gewählt. Kannst du bitte beschreiben, was genau du dort spürst?`,
+      };
+  
+      const neu = [neueStartFrage];
+      setVerlauf(neu);
+  
+      // Merken, dass für dieses Organ bereits ein Intro gesetzt wurde
+      lastIntroOrganRef.current = organ;
+  
+      try {
+        localStorage.setItem(LS_CHAT_KEY, JSON.stringify(neu));
+      } catch (e) {
+        console.warn("[LS write] koerperChatVerlauf nach Reset fehlgeschlagen:", e);
+      }
+    } else {
+      // Falls aus irgendeinem Grund kein Organ gesetzt ist: einfach komplett leeren
+      setVerlauf([]);
+    }
   };
   
 
-  
-  
+  const zeichenAnzahl = eingabe.length;
+
   return (
-    <div className="symptomchat-container">
-      <div className="chat-header">
-      <DisclaimerShort />
-        <h2>Körpersymptom beschreiben</h2>
-        <button className="reset-btn" onClick={neustart} title="Chat & Thread löschen und neu starten">
-          🔄 Neues Gespräch
-        </button>
-      </div>
+    <main
+      className={`koerper-page koerper-page--${theme}`}
+      data-theme={theme}
+      aria-labelledby="koerper-heading"
+      role="main"
+    >
+      <div className="koerper-shell">
+        <header className="koerper-header">
+          <div className="koerper-header-text">
+            <h1 id="koerper-heading" className="koerper-title">
+              Körpersymptom in der gewählten Region
+            </h1>
+            <p className="koerper-subtitle">
+              Beschreibe, was du in dieser Körperregion spürst. Meda stellt
+              Rückfragen und hilft dir, die nächsten Schritte besser zu
+              verstehen.
+            </p>
+          </div>
+          <div className="koerper-header-meta" aria-hidden="true">
+            <span className="chip chip--accent">Body&nbsp;Map</span>
+            <span className="chip chip--soft">Region auswählen</span>
+          </div>
+        </header>
 
-      <div
-        className="chatverlauf"
-        ref={chatRef}
-        role="log"
-        aria-live="polite"
-        aria-relevant="additions"
-      >
-        {verlauf.map((nachricht, index) => (
+        <section
+          className="koerper-disclaimer-section"
+          aria-label="Wichtige Hinweise"
+        >
+          <DisclaimerShort />
+        </section>
+
+        <section
+          className="symptomchat-container"
+          aria-label="Körpersymptom-Chat mit Meda"
+        >
+          <header className="chat-top-row">
+            <h2 className="chat-title">Körpersymptom beschreiben</h2>
+            <div className="chat-top-actions">
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={neustart}
+                title="Chat & Thread löschen und neu starten"
+              >
+                🔄 Neues Gespräch
+              </button>
+
+              <button
+                type="button"
+                className="btn btn--ghost-danger"
+                onClick={clearVerlauf}
+                title="Nur bisherigen Verlauf löschen"
+              >
+                🧹 Verlauf löschen
+              </button>
+            </div>
+          </header>
+
+          {/* Chatverlauf */}
           <div
-            key={index}
-            className={`chat-bubble ${nachricht.role === "user" ? "user" : "assistant"}`}
+            className="chatverlauf"
+            ref={chatRef}
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions"
           >
-            <strong>{nachricht.role === "user" ? "👤 Du:" : "🩺 Meda:"}</strong>
-            <p>{nachricht.content}</p>
+            {verlauf.length === 0 && (
+              <p className="chat-placeholder">
+                Wähle zuerst eine Körperregion aus. Danach kannst du hier dein
+                Symptom beschreiben, z.&nbsp;B.:
+                <br />
+                <span className="chat-placeholder-example">
+                  „Seit einigen Tagen habe ich ein Ziehen in der rechten
+                  Schulter, wenn ich den Arm hebe.“
+                </span>
+              </p>
+            )}
+
+            {verlauf.map((nachricht, index) => {
+              const isUser = nachricht.role === "user";
+              return (
+                <article
+                  key={index}
+                  className={`chat-bubble ${
+                    isUser ? "user" : "assistant"
+                  }`}
+                  aria-label={`Nachricht ${index + 1} von ${
+                    isUser ? "dir" : "Meda"
+                  }`}
+                >
+                  {isUser ? (
+                    <>
+                      <strong className="bubble-label">👤 Du:</strong>
+                      <p className="bubble-text">{nachricht.content}</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bubble-header-row">
+                        <strong className="bubble-label">🩺 Meda:</strong>
+                        {/* OpenAI-TTS über Backend (gleiche Logik wie im Symptom-Chat) */}
+                        <SpeakButton
+                          text={nachricht.content || ""}
+                          className="tts-btn"
+                          ariaLabel="Antwort von Meda vorlesen"
+                        />
+                      </div>
+                      <p className="bubble-text">{nachricht.content}</p>
+                    </>
+                  )}
+                </article>
+              );
+            })}
           </div>
-        ))}
-      </div>
 
-      
-      <div className="eingabe-bereich">
-       <textarea
-  ref={inputRef}
-  placeholder="Beschreibe dein Symptom hier..."
-  value={eingabe}
-  maxLength={MAX_CHARS}
-  rows={1}
-  onChange={(e) => setEingabe(e.target.value)}
-  onInput={(e) => autoResize(e.target)}
-  onKeyDown={handleKeyDown}   // 👈 hier statt Inline-Logik
-  className="chat-textarea"
-/>
+          {/* Eingabe */}
+          <div className="eingabe-bereich">
+  <div className="eingabe-label-row">
+    <label
+      htmlFor="koerper-eingabe"
+      className="eingabe-label"
+    >
+      Dein Symptom in dieser Region
+    </label>
+    <span className="eingabe-hint">
+      Max. {MAX_CHARS} Zeichen
+    </span>
+  </div>
 
+  {organ && (
+    <p className="koerper-organ-hint">
+      <strong>Hinweis:</strong> Bitte beginne deine Beschreibung mit der
+      gewählten Region, z.&nbsp;B.&nbsp;
+      <span className="koerper-organ-example">
+        „In meiner {organLabel} …“
+      </span>
+      . Für allgemeine, nicht region-bezogene Fragen nutze bitte den
+      Symptom-Chat.
+    </p>
+  )}
 
-        <div className="eingabe-actions">
-          <span className={`char-count ${eingabe.length >= MAX_CHARS ? "limit" : ""}`}>
-            {eingabe.length}/{MAX_CHARS}
-          </span>
+  <textarea
+    id="koerper-eingabe"
+    ref={inputRef}
+    className="chat-textarea"
+    placeholder={`Beschreibe hier dein Symptom in der gewählten Region, z. B. Art, Dauer, Stärke, Auslöser …`}
+    value={eingabe}
+    maxLength={MAX_CHARS}
+    rows={1}
+    onChange={(e) =>
+      setEingabe(e.target.value.slice(0, MAX_CHARS))
+    }
+    onInput={(e) => autoResize(e.target)}
+    onKeyDown={handleKeyDown}
+    aria-label="Symptom in dieser Körperregion eingeben"
+  />
 
-          <div className="voice-wrap">
-            <VoiceInput onTranscribed={handleVoice} />
+            <div className="eingabe-actions">
+              <span
+                className={`char-count ${
+                  zeichenAnzahl >= MAX_CHARS ? "limit" : ""
+                }`}
+                aria-live="polite"
+              >
+                {zeichenAnzahl}/{MAX_CHARS}
+              </span>
+
+              <div className="voice-wrap">
+                <VoiceInput onTranscribed={handleVoice} />
+              </div>
+
+              <button
+                type="button"
+                className="send-btn"
+                onClick={() => frageSenden()}
+                disabled={isSending}
+                aria-label="Symptombeschreibung senden"
+              >
+                <FaPaperPlane aria-hidden="true" />
+              </button>
+            </div>
           </div>
-
-          <button className="send-btn" onClick={() => frageSenden()} disabled={isSending}>
-    <FaPaperPlane />
-  </button>
-        </div>
+        </section>
       </div>
-
-      
-      {threadId ? (
-        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.7 }} />
-      ) : (
-        <div style={{ marginTop: 8, fontSize: "0.85rem", opacity: 0.6 }} />
-      )}
-    </div>
+    </main>
   );
 }

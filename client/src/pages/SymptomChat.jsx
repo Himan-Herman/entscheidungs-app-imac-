@@ -8,8 +8,7 @@ import { getAuthHeaders } from "../api/authHeaders";
 import DisclaimerShort from "../components/DisclaimerShort";
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
-
-import { Volume2 } from "lucide-react";
+import SpeakButton from "../components/SpeakButton.jsx";
 
 const LS_VERLAUF_KEY = "symptomVerlauf";
 const LS_THREAD_KEY = "symptomThreadId";
@@ -27,9 +26,6 @@ export default function SymptomChat() {
   const chatEndRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Browser-TTS Stimmen
-  const [ttsVoices, setTtsVoices] = useState([]);
-
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -39,19 +35,37 @@ export default function SymptomChat() {
   }, [verlauf]);
 
   // Verlauf & Thread-ID aus LocalStorage laden
+  // 1) Initialisierung: erst LocalStorage, sonst Organ-Prompt
   useEffect(() => {
-    const gespeicherterVerlauf = localStorage.getItem(LS_VERLAUF_KEY);
-    const gespeicherteThreadId = localStorage.getItem(LS_THREAD_KEY);
+    let initialVerlauf = [];
 
-    if (gespeicherterVerlauf) {
-      try {
+    try {
+      const gespeicherterVerlauf = localStorage.getItem(LS_VERLAUF_KEY);
+      if (gespeicherterVerlauf) {
         const parsed = JSON.parse(gespeicherterVerlauf);
-        if (Array.isArray(parsed)) setVerlauf(parsed);
-      } catch {
-        localStorage.removeItem(LS_VERLAUF_KEY);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          initialVerlauf = parsed;
+        }
+      }
+    } catch (e) {
+      console.warn("[SymptomChat] Konnte Verlauf nicht lesen:", e);
+      localStorage.removeItem(LS_VERLAUF_KEY);
+    }
+
+    // Nur wenn WIRKLICH kein gespeicherter Verlauf da ist → Organ-Prompt setzen
+    if (initialVerlauf.length === 0 && organ) {
+      const prompt = getOrganPrompt(organ);
+      if (prompt) {
+        initialVerlauf = [{ role: "assistant", content: prompt }];
       }
     }
 
+    if (initialVerlauf.length > 0) {
+      setVerlauf(initialVerlauf);
+    }
+
+    // Thread-ID laden
+    const gespeicherteThreadId = localStorage.getItem(LS_THREAD_KEY);
     if (
       gespeicherteThreadId &&
       gespeicherteThreadId !== "null" &&
@@ -62,86 +76,16 @@ export default function SymptomChat() {
     } else {
       localStorage.removeItem(LS_THREAD_KEY);
     }
-  }, []);
+  }, [organ]);
 
-  // Verlauf speichern
+  // 2) Verlauf immer speichern, wenn er sich ändert
   useEffect(() => {
-    localStorage.setItem(LS_VERLAUF_KEY, JSON.stringify(verlauf));
+    try {
+      localStorage.setItem(LS_VERLAUF_KEY, JSON.stringify(verlauf));
+    } catch (e) {
+      console.warn("[SymptomChat] Konnte Verlauf nicht speichern:", e);
+    }
   }, [verlauf]);
-
-  // Organ-Prompt nur setzen, wenn kein Verlauf vorhanden
-  useEffect(() => {
-    if (organ && verlauf.length === 0) {
-      const prompt = getOrganPrompt(organ);
-      if (prompt) {
-        const ersteAntwort = { role: "assistant", content: prompt };
-        setVerlauf([ersteAntwort]);
-      }
-    }
-  }, [organ, verlauf.length]);
-
-  // Browser-TTS: Stimmen laden
-  useEffect(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-
-    const synth = window.speechSynthesis;
-
-    const updateVoices = () => {
-      const voices = synth.getVoices();
-      setTtsVoices(voices);
-    };
-
-    updateVoices();
-    synth.onvoiceschanged = updateVoices;
-
-    return () => {
-      synth.onvoiceschanged = null;
-    };
-  }, []);
-
-  const stripHtml = (html) => {
-    if (!html) return "";
-    const tmp = document.createElement("div");
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || "";
-  };
-
-  const handleSpeak = (textOrHtml) => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      alert("Vorlesen wird von diesem Browser nicht unterstützt.");
-      return;
-    }
-
-    const clean = stripHtml(textOrHtml);
-    if (!clean.trim()) return;
-
-    const synth = window.speechSynthesis;
-    synth.cancel();
-
-    const utter = new SpeechSynthesisUtterance(clean);
-
-    const langCode = "de-DE";
-    utter.lang = langCode;
-
-    if (ttsVoices && ttsVoices.length > 0) {
-      const preferredVoice =
-        ttsVoices.find(
-          (v) =>
-            v.lang === langCode &&
-            v.name.toLowerCase().includes("google")
-        ) ||
-        ttsVoices.find((v) => v.lang === langCode) ||
-        null;
-
-      if (preferredVoice) {
-        utter.voice = preferredVoice;
-      }
-    }
-
-    utter.rate = 1.0;
-    utter.pitch = 1.0;
-    synth.speak(utter);
-  };
 
   // Speech-to-Text Ergebnis aus VoiceInput
   const handleVoice = (text /* , language */) => {
@@ -357,6 +301,7 @@ export default function SymptomChat() {
 
                 {verlauf.map((nachricht, index) => {
                   const isUser = nachricht.role === "user";
+
                   return (
                     <article
                       key={index}
@@ -377,24 +322,25 @@ export default function SymptomChat() {
                       ) : (
                         <div className="message-bubble message-bubble--meda">
                           <div className="message-header-row">
-                            <strong className="message-label">🩺 Meda:</strong>
-                            <button
-                              type="button"
+                            <strong className="message-label">
+                              🩺 Meda:
+                            </strong>
+
+                            {/* 🔊 OpenAI-TTS über Backend */}
+                            <SpeakButton
+                              text={nachricht.content || ""}
                               className="tts-btn"
-                              onClick={() =>
-                                handleSpeak(nachricht.content || "")
-                              }
-                              aria-label="Antwort von Meda vorlesen"
-                            >
-                              <Volume2 size={16} aria-hidden="true" />
-                            </button>
+                              ariaLabel="Antwort von Meda vorlesen"
+                            />
                           </div>
+
                           <p className="message-text">{nachricht.content}</p>
                         </div>
                       )}
                     </article>
                   );
                 })}
+
                 <div ref={chatEndRef} />
               </section>
 
@@ -449,21 +395,20 @@ export default function SymptomChat() {
                   </span>
 
                   <div className="voice-wrap">
-                  <VoiceInput 
-  onTranscribed={handleVoice}
-  className="voice-btn"
-/>
-
+                    <VoiceInput
+                      onTranscribed={handleVoice}
+                      className="voice-btn"
+                    />
                   </div>
 
                   <button
-    type="button"
-    className="send-btn"
-    onClick={frageSenden}
-    aria-label="Symptombeschreibung senden"
-  >
-    <FaPaperPlane />
-  </button>
+                    type="button"
+                    className="send-btn"
+                    onClick={frageSenden}
+                    aria-label="Symptombeschreibung senden"
+                  >
+                    <FaPaperPlane />
+                  </button>
                 </div>
               </div>
             </div>
