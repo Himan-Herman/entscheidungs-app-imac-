@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-//import "../styles/Startseite.css";
-//import { useNavigate } from "react-router-dom";
-//import { useTheme } from "../ThemeMode";
+import "../styles/Startseite.css";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../ThemeMode";
 import heroImage from "../assets/media/hero-medscoutx.png";
 import demoVideo from "../assets/media/medscoutx-demo.mp4";
 
