@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/img/medscout-logo.png";
+import logo from "../assets/img/medscout-logo6.png";
 import "../styles/Intro.css";
 
 export default function Intro() {
