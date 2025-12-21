@@ -17,45 +17,6 @@ const LS_VERLAUF_KEY = "bildChatVerlauf";
 const LS_BILD_KEY = "letztesBild";
 const LS_THREAD_KEY = "bildThreadId";
 
-async function resizeImageToBase64(file, maxSize = 512) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > maxSize) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
-          }
-        } else {
-          if (height > maxSize) {
-            width = Math.round((width * maxSize) / height);
-            height = maxSize;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const base64 = canvas.toDataURL("image/jpeg", 0.8);
-        resolve(base64);
-      };
-      img.onerror = reject;
-      img.src = e.target.result;
-    };
-
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 // kleiner Helper, um HTML-Antworten in reinen Text für TTS zu verwandeln
 function stripHtml(html) {
   if (!html) return "";
@@ -67,7 +28,6 @@ function stripHtml(html) {
 export default function BildUpload() {
   const [bild, setBild] = useState(null);
   const [beschreibung, setBeschreibung] = useState("");
-  const [base64Bild, setBase64Bild] = useState("");
   const [, setAntwort] = useState("");
   const [ladezustand, setLadezustand] = useState(false);
   const [verlauf, setVerlauf] = useState([]);
@@ -76,7 +36,7 @@ export default function BildUpload() {
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
-  const letztesBild = useRef("");
+  const letztesBild = useRef(null); // File für FormData
   const chatEndRef = useRef(null);
 
   const [showCam, setShowCam] = useState(false);
@@ -104,36 +64,25 @@ export default function BildUpload() {
     setBeschreibung((prev) =>
       (prev + " " + (text ?? "")).slice(0, MAX_CHARS)
     );
-
     handleFrageSenden();
   };
 
-  // 1) Initialisierung – Verlauf, Bild & ThreadId aus LocalStorage laden
+  // Initialisierung – Verlauf, Bild & ThreadId aus LocalStorage laden
   useEffect(() => {
     try {
-      // Verlauf
       const gespeicherterVerlauf = localStorage.getItem(LS_VERLAUF_KEY);
       if (gespeicherterVerlauf) {
-        try {
-          const parsed = JSON.parse(gespeicherterVerlauf);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setVerlauf(parsed);
-          }
-        } catch (e) {
-          console.warn("[BildUpload] Verlauf defekt, wird gelöscht:", e);
-          localStorage.removeItem(LS_VERLAUF_KEY);
+        const parsed = JSON.parse(gespeicherterVerlauf);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setVerlauf(parsed);
         }
       }
 
-      // Bild (Base64 oder Data-URL)
       const gespeichertesBild = localStorage.getItem(LS_BILD_KEY);
       if (gespeichertesBild) {
-        setBild(gespeichertesBild); // für <img src=...>
-        setBase64Bild(gespeichertesBild); // für Backend
-        letztesBild.current = gespeichertesBild;
+        setBild(gespeichertesBild);
+        letztesBild.current = null;
       }
-
-      // ThreadId bleibt im LocalStorage, wird in handleFrageSenden gelesen
     } catch (e) {
       console.warn("[BildUpload] Konnte LocalStorage nicht lesen:", e);
     }
@@ -175,11 +124,10 @@ export default function BildUpload() {
       }
       if (finalText) {
         setBeschreibung((prev) =>
-          (
-            prev +
-            (prev && !prev.endsWith(" ") ? " " : "") +
-            finalText
-          ).slice(0, MAX_CHARS)
+          (prev + (prev && !prev.endsWith(" ") ? " " : "") + finalText).slice(
+            0,
+            MAX_CHARS
+          )
         );
       }
     };
@@ -192,35 +140,28 @@ export default function BildUpload() {
   const startWebcam = async () => {
     try {
       let constraints = { video: true };
-
       if (/Mobi|Android/i.test(navigator.userAgent)) {
         constraints = { video: { facingMode: "environment" } };
       }
-
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
-
       setShowCam(true);
 
-      requestAnimationFrame(async () => {
-        const video = videoRef.current;
-        if (!video) return;
+      const video = videoRef.current;
+      if (!video) return;
+      video.srcObject = stream;
+      video.muted = true;
+      video.setAttribute("muted", "");
+      video.playsInline = true;
+      video.setAttribute("playsinline", "");
 
-        video.srcObject = stream;
-
-        video.muted = true;
-        video.setAttribute("muted", "");
-        video.playsInline = true;
-        video.setAttribute("playsinline", "");
-
-        video.onloadedmetadata = async () => {
-          try {
-            await video.play();
-          } catch (err) {
-            console.warn("video.play() blockiert:", err);
-          }
-        };
-      });
+      video.onloadedmetadata = async () => {
+        try {
+          await video.play();
+        } catch (err) {
+          console.warn("video.play() blockiert:", err);
+        }
+      };
     } catch (e) {
       alert("Kamera-Zugriff verweigert oder nicht verfügbar.");
       console.error(e);
@@ -240,23 +181,16 @@ export default function BildUpload() {
     canvas.width = video.videoWidth || 640;
     canvas.height = video.videoHeight || 480;
     canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(
-      async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], "snapshot.jpg", {
-          type: "image/jpeg",
-        });
-        await handleBildAuswahl({ target: { files: [file] } });
-        stopWebcam();
-      },
-      "image/jpeg",
-      0.9
-    );
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const file = new File([blob], "snapshot.jpg", { type: "image/jpeg" });
+      await handleBildAuswahl({ target: { files: [file] } });
+      stopWebcam();
+    }, "image/jpeg", 0.9);
   };
 
   const handleBeschreibungChange = (e) => {
-    const value = e.target.value.slice(0, MAX_CHARS);
-    setBeschreibung(value);
+    setBeschreibung(e.target.value.slice(0, MAX_CHARS));
   };
 
   const handleBildAuswahl = async (e) => {
@@ -265,12 +199,10 @@ export default function BildUpload() {
 
     const objectURL = URL.createObjectURL(file);
     setBild(objectURL);
+    letztesBild.current = file;
 
-    const base64 = await resizeImageToBase64(file);
-    setBase64Bild(base64);
-    letztesBild.current = base64;
     try {
-      localStorage.setItem(LS_BILD_KEY, base64);
+      localStorage.setItem(LS_BILD_KEY, objectURL);
       localStorage.removeItem(LS_THREAD_KEY);
     } catch (err) {
       console.warn("[BildUpload] Konnte Bild nicht speichern:", err);
@@ -281,33 +213,26 @@ export default function BildUpload() {
 
   const handleFrageSenden = async () => {
     if (!beschreibung.trim()) return;
-    if (!base64Bild) {
+    if (!bild) {
       const warnung = "❗ Bitte lade ein Bild hoch, bevor du analysierst.";
       setAntwort(warnung);
-      setVerlauf((prev) => [
-        ...prev,
-        { frage: beschreibung, antwort: warnung },
-      ]);
+      setVerlauf((prev) => [...prev, { frage: beschreibung, antwort: warnung }]);
       setBeschreibung("");
       return;
     }
 
     setLadezustand(true);
     try {
-      const existingThreadId = localStorage.getItem(LS_THREAD_KEY) || null;
-      const body = {
-        prompt: beschreibung,
-        base64Bild: base64Bild,
-      };
-      if (existingThreadId) body.threadId = existingThreadId;
+      const formData = new FormData();
+      formData.append("prompt", beschreibung);
+      formData.append("bild", letztesBild.current);
+      const existingThreadId = localStorage.getItem(LS_THREAD_KEY);
+      if (existingThreadId) formData.append("threadId", existingThreadId);
 
       const response = await fetch("/api/symptom", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...getAuthHeaders(),
-        },
-        body: JSON.stringify(body),
+        headers: getAuthHeaders(), // Content-Type wird automatisch gesetzt
+        body: formData,
       });
 
       const data = await response.json();
@@ -315,10 +240,7 @@ export default function BildUpload() {
 
       const antwortText = data.antwort || data.fehler || "Keine Antwort erhalten.";
       setAntwort(antwortText);
-      setVerlauf((prev) => [
-        ...prev,
-        { frage: beschreibung, antwort: antwortText },
-      ]);
+      setVerlauf((prev) => [...prev, { frage: beschreibung, antwort: antwortText }]);
       setBeschreibung("");
     } catch (error) {
       console.error("Fehler beim Bild-Upload:", error);
@@ -333,7 +255,6 @@ export default function BildUpload() {
   const resetChat = () => {
     setVerlauf([]);
     setBild(null);
-    setBase64Bild("");
     setBeschreibung("");
     try {
       localStorage.removeItem(LS_VERLAUF_KEY);
@@ -355,28 +276,19 @@ export default function BildUpload() {
 
   useEffect(() => {
     autoResize(textareaRef.current);
-
     if (document.activeElement === textareaRef.current) {
       textareaRef.current.blur();
     }
   }, []);
 
   return (
-    <main
-      className={`bildupload-page bildupload-page--${theme}`}
-      data-theme={theme}
-      aria-labelledby="bildanalyse-heading"
-      role="main"
-    >
+    <main className={`bildupload-page bildupload-page--${theme}`} data-theme={theme} aria-labelledby="bildanalyse-heading" role="main">
       <div className="bildupload-shell">
         <header className="bildupload-header">
           <div className="bildupload-header-text">
-            <h1 id="bildanalyse-heading" className="bildupload-title">
-              Bildanalyse mit MedScoutX
-            </h1>
+            <h1 id="bildanalyse-heading" className="bildupload-title">Bildanalyse mit MedScoutX</h1>
             <p className="bildupload-subtitle">
-              Lade ein medizinisches Foto hoch (z. B. Haut, Schwellung oder
-              Verletzung) und stelle Meda gezielte Fragen zur Einschätzung.
+              Lade ein medizinisches Foto hoch (z. B. Haut, Schwellung oder Verletzung) und stelle Meda gezielte Fragen zur Einschätzung.
             </p>
           </div>
           <div className="bildupload-header-meta" aria-hidden="true">
@@ -385,69 +297,31 @@ export default function BildUpload() {
           </div>
         </header>
 
-        <section
-          className="bildupload-disclaimer-section"
-          aria-label="Wichtige Hinweise"
-        >
+        <section className="bildupload-disclaimer-section" aria-label="Wichtige Hinweise">
           <DisclaimerShort />
         </section>
 
         <div className="bildupload-layout">
           {/* Linke Seite: Bild & Upload-Optionen */}
-          <section
-            className="bildupload-panel bildupload-panel--left"
-            aria-label="Bildauswahl und Vorschau"
-          >
+          <section className="bildupload-panel bildupload-panel--left" aria-label="Bildauswahl und Vorschau">
             <h2 className="panel-title">Bild auswählen</h2>
             <p className="panel-description">
               Wähle ein vorhandenes Foto, nutze die Kamera oder die Webcam.
             </p>
 
-            {/* Versteckte Inputs für Galerie/Kamera */}
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleBildAuswahl}
-              className="visually-hidden"
-              aria-hidden="true"
-              tabIndex={-1}
-            />
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleBildAuswahl}
-              className="visually-hidden"
-              aria-hidden="true"
-              tabIndex={-1}
-            />
+            <input ref={galleryInputRef} type="file" accept="image/*" onChange={handleBildAuswahl} className="visually-hidden" aria-hidden="true" tabIndex={-1} />
+            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleBildAuswahl} className="visually-hidden" aria-hidden="true" tabIndex={-1} />
 
             <div className="upload-actions" role="group" aria-label="Bildquellen">
-              <button
-                type="button"
-                className="upload-btn"
-                onClick={() => galleryInputRef.current?.click()}
-              >
+              <button type="button" className="upload-btn" onClick={() => galleryInputRef.current?.click()}>
                 <ImageIcon size={18} strokeWidth={2} aria-hidden="true" />
                 <span>Bild aus Galerie wählen</span>
               </button>
-
-              <button
-                type="button"
-                className="upload-btn"
-                onClick={() => cameraInputRef.current?.click()}
-              >
+              <button type="button" className="upload-btn" onClick={() => cameraInputRef.current?.click()}>
                 <Camera size={18} strokeWidth={2} aria-hidden="true" />
                 <span>Smartphone-Kamera</span>
               </button>
-
-              <button
-                type="button"
-                className="upload-btn"
-                onClick={startWebcam}
-              >
+              <button type="button" className="upload-btn" onClick={startWebcam}>
                 <Video size={18} strokeWidth={2} aria-hidden="true" />
                 <span>Webcam starten</span>
               </button>
@@ -456,14 +330,8 @@ export default function BildUpload() {
             <div className="bild-preview-wrapper" aria-live="polite">
               {bild ? (
                 <figure className="bild-preview-card">
-                  <img
-                    src={bild}
-                    alt="Ausgewähltes Bild zur Analyse"
-                    className="bild-vorschau-klein"
-                  />
-                  <figcaption className="bild-preview-caption">
-                    Aktives Bild für die Analyse
-                  </figcaption>
+                  <img src={bild} alt="Ausgewähltes Bild zur Analyse" className="bild-vorschau-klein" />
+                  <figcaption className="bild-preview-caption">Aktives Bild für die Analyse</figcaption>
                 </figure>
               ) : (
                 <div className="bild-placeholder" aria-hidden="true">
@@ -474,49 +342,31 @@ export default function BildUpload() {
             </div>
 
             <div className="control-row">
-              <button
-                type="button"
-                className="btn btn--ghost"
-                onClick={resetChat}
-                aria-label="Neues Gespräch starten, Bild und Verlauf zurücksetzen"
-              >
-                <span className="icon" aria-hidden="true">
-                  ↻
-                </span>
+              <button type="button" className="btn btn--ghost" onClick={resetChat} aria-label="Neues Gespräch starten, Bild und Verlauf zurücksetzen">
+                <span className="icon" aria-hidden="true">↻</span>
                 <span>Neues Gespräch</span>
               </button>
-              <button
-                type="button"
-                className="btn btn--ghost-danger"
-                onClick={clearVerlauf}
-                aria-label="Nur den Gesprächsverlauf löschen"
-              >
-                <span className="icon" aria-hidden="true">
-                  🧹
-                </span>
+              <button type="button" className="btn btn--ghost-danger" onClick={clearVerlauf} aria-label="Nur den Gesprächsverlauf löschen">
+                <span className="icon" aria-hidden="true">🧹</span>
                 <span>Verlauf löschen</span>
               </button>
             </div>
           </section>
 
           {/* Rechte Seite: Chat & Eingabe */}
-          <section
-            className="bildupload-panel bildupload-panel--right"
-            aria-label="Chatverlauf und Frageeingabe"
-          >
+          <section className="bildupload-panel bildupload-panel--right" aria-label="Chatverlauf und Frageeingabe">
             <div className="chat-card" role="group" aria-label="Analyse-Chat mit Meda">
               <header className="chat-header">
                 <div>
                   <h2 className="panel-title">Analyse-Chat</h2>
-                  <p className="panel-description">
-                    Stelle der KI-Assistentin Meda konkrete Fragen zu deinem Bild.
-                  </p>
+                  <p className="panel-description">Stelle der KI-Assistentin Meda konkrete Fragen zu deinem Bild.</p>
                 </div>
                 <div className="chat-header-badge">
                   <span className="status-dot" aria-hidden="true" />
                   <span className="status-label">Meda ist bereit</span>
                 </div>
               </header>
+
 
               <section
                 className="chatverlauf"
@@ -577,7 +427,7 @@ export default function BildUpload() {
                 )}
               </div>
 
-              {base64Bild && (
+              {bild && (
                 <div className="eingabe-bereich">
                   <div className="bild-eingabe-label-row">
                     <label
@@ -641,7 +491,7 @@ export default function BildUpload() {
                 </div>
               )}
 
-              {!base64Bild && (
+              {!bild && (
                 <p className="eingabe-disabled-hint">
                   Lade zuerst ein Bild hoch, um eine Frage zu stellen.
                 </p>

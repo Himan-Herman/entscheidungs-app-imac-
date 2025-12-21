@@ -420,7 +420,7 @@
 .eingabe-bereich {
   margin-top: 0.4rem;
   border-radius: 0.9rem;
-  border: 1px solid rgba(55, 65, 81, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.9);
   background: radial-gradient(
       circle at top left,
       rgba(37, 99, 235, 0.2),
@@ -988,6 +988,7 @@
 /* Max-Zeichen */
 .bild-eingabe-hint {
   font-size: clamp(0.7rem, 1.2vw, 0.95rem);
+  
   opacity: 0.8;
   color: inherit; /* Dark/Light Mode kompatibel */
 }
@@ -1060,4 +1061,87 @@
 /* falls irgendwo .tts-btn selbst eine Farbe bekommt → neutral halten */
 .tts-btn {
   color: inherit;
+}
+
+
+.chat-textarea {
+  color: #111 !important;
+  background-color: #fff !important;
+  opacity: 1 !important;
+  z-index: 1;
+}
+
+
+
+.bildupload-page--light .bild-eingabe-label-row {
+  background-color: #ffffff !important; /* weißer Hintergrund */
+  opacity: 1 !important;                /* volle Deckkraft */
+  z-index: 1;                            /* über Parent-Container */
+}
+
+/* Label und Hinweis */
+.bildupload-page--light .bild-eingabe-label-row .eingabe-label {
+  color: #000000 !important;  /* schwarz */
+}
+
+.bildupload-page--light .bild-eingabe-label-row .eingabe-hint {
+  color: #000000 !important;  /* schwarz */
+}
+
+/* Parent-Container */
+.bildupload-page--light .eingabe-bereich {
+  background-color: #0f172a !important; /* dunkel */
+  border: 1px solid #374151 !important;
+  border-radius: 0.9rem;
+  padding: 0.55rem 0.6rem 0.5rem;
+  z-index: 1;
+}
+
+/* Label + Hinweis */
+.bildupload-page--light .bild-eingabe-label-row .eingabe-label,
+.bildupload-page--light .bild-eingabe-label-row .eingabe-hint {
+  color: #f9fafb !important; /* weiß / hell */
+}
+
+/* Textarea */
+.bildupload-page--light .chat-textarea {
+  background-color: #ffffff !important; /* weiß für Textarea */
+  color: #111827 !important;            /* Text dunkel */
+  border: 1px solid #d1d5db !important;
+  border-radius: 6px;
+  padding: 12px 16px;
+  min-height: 52px;
+  line-height: 1.45;
+  z-index: 2; /* über Parent */
+}
+
+/* Placeholder */
+.bildupload-page--light .chat-textarea::placeholder {
+  color: #9ca3af !important; /* hellgrau, sichtbar */
+}
+/* Label + Hinweis direkt über Textarea, Hintergrund dunkel */
+.bildupload-page--light .bild-eingabe-label-row {
+  background-color: #0f172a !important; /* dunkel */
+  padding: 4px 8px;                     /* Abstand innen */
+  border-radius: 0 0 0 0;               /* keine extra Box-Rundung */
+}
+
+/* Label + Hinweis Text weiß */
+.bildupload-page--light .bild-eingabe-label-row .eingabe-label,
+.bildupload-page--light .bild-eingabe-label-row .eingabe-hint {
+  color: #ffffff !important;
+}
+/* Meda-Antworten im Bildanalyse-Chat anpassen */
+.bildupload-page--light .message-bubble--meda {
+  background-color: #e0f2fe !important; /* hellblau wie Symptom-Check */
+  border: 1px solid #bae6fd !important;  /* heller Rand passend */
+  color: #0f172a !important;            /* Text dunkel für Kontrast */
+  box-shadow: none !important;          /* optional: kein extra Schatten */
+}
+
+/* Optional: kleine Rundungen + Padding */
+.bildupload-page--light .message-bubble--meda {
+  border-radius: 12px;
+  padding: 12px 16px;
+  line-height: 1.45;
 }
