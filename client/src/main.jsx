@@ -13,6 +13,7 @@ import Layout from "./Layout.jsx";
 import Intro from "./pages/Intro";
 import Register from "./pages/Register";
 import Startseite from "./pages/Startseite";
+import LandingPage from "./pages/LandingPage";
 import KoerperVorderseite from "./pages/KoerperVorderseite";
 import KoerperRueckseite from "./pages/KoerperRueckseite";
 import BildUpload from "./pages/BildUpload";
@@ -30,6 +31,7 @@ import Disclaimer from "./pages/Disclaimer";
 import AGB from "./pages/AGB.jsx";
 import Info from "./pages/Info"; 
 import { ThemeProvider } from "./ThemeMode";
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 //import VerifyEmail from "./pages/VerifyEmail";
 
@@ -45,6 +47,7 @@ createRoot(document.getElementById("root")).render(
 
     {/* ⭐ GLOBAL THEME PROVIDER – bleibt immer aktiv */}
     <ThemeProvider>
+      <LanguageProvider>
 
       <BrowserRouter>
         <Routes>
@@ -52,7 +55,8 @@ createRoot(document.getElementById("root")).render(
           {/* Layout mit verschachtelten Routes */}
           <Route element={<Layout />}>
 
-            <Route path="/" element={<Gate />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/gate" element={<Gate />} />
             <Route path="/intro" element={<Intro />} />
             <Route path="/register" element={<Register />} />
 
@@ -128,7 +132,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/verified" element={<Verified />} />
 
             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/startseite" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
 
           </Route>
 
@@ -141,6 +145,7 @@ createRoot(document.getElementById("root")).render(
 
         </Routes>
       </BrowserRouter>
+      </LanguageProvider>
 
     </ThemeProvider>
   </React.StrictMode>
