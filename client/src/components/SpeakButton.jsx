@@ -1,9 +1,14 @@
 import React, { useState, useRef } from "react";
 import { Volume2 } from "lucide-react";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function SpeakButton({ text, className = "", ariaLabel = "" }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
+  const { language } = useLanguage();
+  const fallbackAriaLabel = language === "en" ? "Read answer aloud" : "Antwort vorlesen";
+  const idleTitle = language === "en" ? "Listen to answer" : "Antwort anhören";
+  const busyTitle = language === "en" ? "Audio is playing..." : "Audio läuft...";
 
   const handleClick = async () => {
     // Wenn bereits am Abspielen → blockieren
@@ -52,8 +57,8 @@ export default function SpeakButton({ text, className = "", ariaLabel = "" }) {
       onClick={handleClick}
       disabled={isPlaying}     // ← verhindert erneuten Klick
       className={`${className} ${isPlaying ? "tts-disabled" : ""}`}
-      aria-label={ariaLabel}
-      title={isPlaying ? "Audio läuft …" : "Antwort anhören"}
+      aria-label={ariaLabel || fallbackAriaLabel}
+      title={isPlaying ? busyTitle : idleTitle}
     >
       <Volume2 size={16} aria-hidden="true" />
     </button>

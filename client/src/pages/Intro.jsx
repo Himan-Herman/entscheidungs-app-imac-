@@ -1,16 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/img/medscout-logo6.png";
+import { useLanguage } from "../i18n/LanguageContext";
 import "../styles/Intro.css";
 
 export default function Intro() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [fadeOut, setFadeOut] = useState(false);
 
-  useEffect(() => {
-    document.title = "MedScoutX – wird geladen …";
+  const copy = language === "en"
+    ? {
+        title: "MedScoutX - loading",
+        skip: "Skip intro",
+        heading: "MedScoutX is starting",
+        status: "MedScoutX is loading. You will be redirected to the home screen shortly.",
+      }
+    : {
+        title: "MedScoutX - wird geladen",
+        skip: "Intro überspringen",
+        heading: "MedScoutX wird gestartet",
+        status: "MedScoutX wird geladen. Du wirst gleich zur Startseite weitergeleitet.",
+      };
 
-    // Nur eingeloggte Nutzer sollen Intro sehen
+  useEffect(() => {
+    document.title = copy.title;
+
     const hasUser = !!localStorage.getItem("medscout_user_id");
     if (!hasUser) {
       navigate("/login", { replace: true });
@@ -34,13 +49,12 @@ export default function Intro() {
       clearTimeout(fadeOutTimer);
       clearTimeout(navigateTimer);
     };
-  }, [navigate]);
+  }, [copy.title, navigate]);
 
   return (
     <>
-      {/* Skip-Link für Screenreader & Tastatur */}
       <a href="#intro-main" className="sr-only sr-only-focusable">
-        Intro überspringen
+        {copy.skip}
       </a>
 
       <div className="intro-container" aria-labelledby="intro-heading">
@@ -52,7 +66,7 @@ export default function Intro() {
           aria-atomic="true"
         >
           <h1 id="intro-heading" className="sr-only">
-            MedScoutX wird gestartet
+            {copy.heading}
           </h1>
 
           <div className="intro-logo-wrapper">
@@ -63,10 +77,7 @@ export default function Intro() {
             />
           </div>
 
-          <p className="intro-status-text">
-            MedScoutX wird geladen. Du wirst gleich zur Startseite
-            weitergeleitet.
-          </p>
+          <p className="intro-status-text">{copy.status}</p>
         </main>
       </div>
     </>

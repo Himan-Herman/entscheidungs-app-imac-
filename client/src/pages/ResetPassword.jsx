@@ -1,6 +1,7 @@
-// client/src/pages/ResetPassword.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -8,8 +9,42 @@ export default function ResetPassword() {
   const [busy, setBusy] = useState(false);
   const [token, setToken] = useState(null);
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
-  // Token aus URL lesen
+  const copy = language === "en"
+    ? {
+        title: "Create a new password",
+        text: "Please enter a new secure password.",
+        label: "New password",
+        placeholder: "At least 8 characters",
+        hint: "Password must be at least 8 characters. A number and symbol are recommended.",
+        save: "Save password",
+        saving: "Saving...",
+        invalidLink: "Invalid or missing link.",
+        shortPassword: "The password must be at least 8 characters long.",
+        unknownError: "Unknown error.",
+        requestError: "Error: ",
+        success: "Your password was reset successfully. Redirecting...",
+        network: "Network error. Please try again later.",
+        language: "Language",
+      }
+    : {
+        title: "Neues Passwort setzen",
+        text: "Bitte gib ein neues, sicheres Passwort ein.",
+        label: "Neues Passwort",
+        placeholder: "Mindestens 8 Zeichen",
+        hint: "Passwort mindestens 8 Zeichen - idealerweise mit Zahl und Sonderzeichen.",
+        save: "Passwort speichern",
+        saving: "Speichere...",
+        invalidLink: "Ungültiger oder fehlender Link.",
+        shortPassword: "Das Passwort muss mindestens 8 Zeichen lang sein.",
+        unknownError: "Unbekannter Fehler.",
+        requestError: "Fehler: ",
+        success: "Dein Passwort wurde erfolgreich zurückgesetzt. Weiterleitung...",
+        network: "Netzwerkfehler. Bitte später erneut versuchen.",
+        language: "Sprache",
+      };
+
   useEffect(() => {
     const qs = new URLSearchParams(window.location.search);
     const t = qs.get("token");
@@ -22,14 +57,13 @@ export default function ResetPassword() {
     setMsg("");
 
     if (!token) {
-      setMsg("❌ Ungültiger oder fehlender Link.");
+      setMsg(copy.invalidLink);
       setBusy(false);
       return;
     }
 
-    // 🔐 Passwortrichtlinien überprüfen
     if (password.length < 8) {
-      setMsg("❌ Das Passwort muss mindestens 8 Zeichen lang sein.");
+      setMsg(copy.shortPassword);
       setBusy(false);
       return;
     }
@@ -44,23 +78,24 @@ export default function ResetPassword() {
       const data = await res.json();
 
       if (!res.ok) {
-        setMsg("❌ Fehler: " + (data.error || "Unbekannter Fehler."));
+        setMsg(copy.requestError + (data.error || copy.unknownError));
         setBusy(false);
         return;
       }
 
-      // Erfolgreich
-      setMsg("✅ Dein Passwort wurde erfolgreich zurückgesetzt! Weiterleitung…");
+      setMsg(copy.success);
 
       setTimeout(() => {
         navigate("/login?reset=ok");
       }, 1500);
     } catch {
-      setMsg("❌ Netzwerkfehler. Bitte später erneut versuchen.");
+      setMsg(copy.network);
     } finally {
       setBusy(false);
     }
   }
+
+  const isSuccess = msg === copy.success;
 
   return (
     <main
@@ -86,6 +121,16 @@ export default function ResetPassword() {
           boxSizing: "border-box",
         }}
       >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 18,
+          }}
+        >
+          <LanguageSwitcher label={copy.language} compact />
+        </div>
+
         <h1
           style={{
             margin: "0 0 10px 0",
@@ -94,7 +139,7 @@ export default function ResetPassword() {
             color: "#020617",
           }}
         >
-          Neues Passwort setzen
+          {copy.title}
         </h1>
 
         <p
@@ -104,10 +149,9 @@ export default function ResetPassword() {
             color: "#4b5563",
           }}
         >
-          Bitte gib ein neues, sicheres Passwort ein.
+          {copy.text}
         </p>
 
-        {/* Meldungen */}
         {msg && (
           <p
             style={{
@@ -115,10 +159,10 @@ export default function ResetPassword() {
               fontSize: 13,
               padding: "8px 10px",
               borderRadius: 10,
-              backgroundColor: msg.startsWith("✅")
+              backgroundColor: isSuccess
                 ? "rgba(22,163,74,0.08)"
                 : "rgba(220,38,38,0.06)",
-              color: msg.startsWith("✅") ? "#166534" : "#b91c1c",
+              color: isSuccess ? "#166534" : "#b91c1c",
             }}
           >
             {msg}
@@ -135,7 +179,7 @@ export default function ResetPassword() {
               marginBottom: 4,
             }}
           >
-            Neues Passwort
+            {copy.label}
           </label>
 
           <input
@@ -144,7 +188,7 @@ export default function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
             minLength={8}
             required
-            placeholder="Mindestens 8 Zeichen"
+            placeholder={copy.placeholder}
             style={{
               width: "100%",
               padding: "10px 12px",
@@ -157,7 +201,6 @@ export default function ResetPassword() {
             }}
           />
 
-          {/* Passwortrichtlinien */}
           <p
             style={{
               fontSize: 12,
@@ -166,7 +209,7 @@ export default function ResetPassword() {
               marginBottom: 16,
             }}
           >
-            Passwort mindestens 8 Zeichen – idealerweise mit Zahl & Sonderzeichen.
+            {copy.hint}
           </p>
 
           <button
@@ -189,7 +232,7 @@ export default function ResetPassword() {
               transition: "transform 0.12s ease, box-shadow 0.12s ease",
             }}
           >
-            {busy ? "Speichere …" : "Passwort speichern"}
+            {busy ? copy.saving : copy.save}
           </button>
         </form>
       </div>

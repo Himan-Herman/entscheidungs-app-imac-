@@ -2,11 +2,26 @@ import React, { useState, useRef } from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import StopIcon from "@mui/icons-material/Stop";
 import { getAuthHeaders } from "../api/authHeaders";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function VoiceInput({ onTranscribed }) {
   const [isRecording, setIsRecording] = useState(false);
   const [, setStatus] = useState("");
   const [, setAudioURL] = useState(null);
+  const { language } = useLanguage();
+  const copy = language === "en"
+    ? {
+        micError: "Microphone unavailable.",
+        transcriptionError: "Transcription failed.",
+        start: "Start voice input",
+        stop: "Stop voice input",
+      }
+    : {
+        micError: "Mikrofon nicht verfügbar.",
+        transcriptionError: "Transkription fehlgeschlagen.",
+        start: "Spracheingabe starten",
+        stop: "Spracheingabe stoppen",
+      };
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -49,7 +64,7 @@ export default function VoiceInput({ onTranscribed }) {
       }, 60000);
     } catch (err) {
       console.error("Mic-Fehler:", err);
-      setStatus("❌ Mikrofon nicht verfügbar.");
+      setStatus(`❌ ${copy.micError}`);
     }
   };
 
@@ -86,7 +101,7 @@ export default function VoiceInput({ onTranscribed }) {
       onTranscribed?.(data.text || "", data.language || "");
     } catch (err) {
       console.error("Transkriptionsfehler:", err);
-      setStatus("❌ Transkription fehlgeschlagen");
+      setStatus(`❌ ${copy.transcriptionError}`);
     }
   };
 
@@ -96,6 +111,8 @@ export default function VoiceInput({ onTranscribed }) {
         type="button"
         className="voice-btn"
         onClick={isRecording ? stopRecording : startRecording}
+        aria-label={isRecording ? copy.stop : copy.start}
+        title={isRecording ? copy.stop : copy.start}
       >
         {isRecording ? <StopIcon fontSize="small" /> : <MicIcon fontSize="small" />}
       </button>

@@ -2,14 +2,36 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/img/medscout-logo.png";
+import { useLanguage } from "../i18n/LanguageContext";
+import LanguageSwitcher from "./LanguageSwitcher";
 import "../styles/Header.css";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const { language } = useLanguage();
 
   // 🔐 ist der Nutzer eingeloggt?
   const isLoggedIn = !!localStorage.getItem("medscout_token");
+  const copy = language === "en"
+    ? {
+        skip: "Skip to content",
+        homeAria: "Go to home page",
+        navToggle: "Toggle navigation",
+        nav: "Main navigation",
+        home: "Home",
+        logout: "Log out",
+        language: "Language",
+      }
+    : {
+        skip: "Zum Inhalt springen",
+        homeAria: "Zur Startseite",
+        navToggle: "Navigation umschalten",
+        nav: "Hauptnavigation",
+        home: "Home",
+        logout: "Ausloggen",
+        language: "Sprache",
+      };
 
   function handleLogout() {
     // Token & User löschen
@@ -30,16 +52,20 @@ export default function Header() {
 
   return (
     <>
-      <a className="skip-link" href="#main">Zum Inhalt springen</a>
+      <a className="skip-link" href="#main">{copy.skip}</a>
       <header className="ms-header" role="banner">
         <div className="ms-header__inner">
           <button
             className="ms-logo"
             onClick={() => navigate("/startseite")}
-            aria-label="Zur Startseite"
+            aria-label={copy.homeAria}
           >
             <img src={logo} alt="MedScout Logo" />
           </button>
+
+          <div className="ms-header__language">
+            <LanguageSwitcher label={copy.language} compact />
+          </div>
 
           <button
             className="ms-nav-toggle"
@@ -47,13 +73,13 @@ export default function Header() {
             aria-expanded={open ? "true" : "false"}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="visually-hidden">Navigation umschalten</span>☰
+            <span className="visually-hidden">{copy.navToggle}</span>☰
           </button>
 
           <nav
             id="hauptnavigation"
             className={`ms-nav ${open ? "is-open" : ""}`}
-            aria-label="Hauptnavigation"
+            aria-label={copy.nav}
           >
             <ul>
               <li>
@@ -62,7 +88,7 @@ export default function Header() {
                   className="ms-link-home"
                   onClick={() => setOpen(false)}
                 >
-                  Home
+                  {copy.home}
                 </NavLink>
               </li>
 
@@ -82,7 +108,7 @@ export default function Header() {
                       font: "inherit",
                     }}
                   >
-                    Ausloggen
+                    {copy.logout}
                   </button>
                 </li>
               )}

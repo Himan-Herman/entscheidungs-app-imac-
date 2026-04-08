@@ -8,37 +8,41 @@ import "../styles/LandingPage.css";
 const copy = {
   de: {
     languageLabel: "Sprache",
+    skip: "Zum Inhalt springen",
     login: "Login",
     register: "Registrieren",
     continue: "Zur App",
-    badge: "KI-gestuetzte medizinische Orientierung",
+    badge: "KI-gestützte medizinische Orientierung",
     headline: "MedScoutX bringt Struktur in gesundheitliche Unsicherheit.",
     description:
-      "Erhalte eine moderne, vertrauenswuerdige Ersteinschaetzung mit Symptom-Dialog, Koerperkarte und Bildanalyse. MedScoutX hilft dir, Beschwerden besser einzuordnen und den naechsten sinnvollen Schritt vorzubereiten.",
+      "Erhalte eine moderne, vertrauenswürdige Ersteinschätzung mit Symptom-Dialog, Körperkarte und Bildanalyse. MedScoutX hilft dir, Beschwerden besser einzuordnen und den nächsten sinnvollen Schritt vorzubereiten.",
     primaryCta: "Jetzt kostenlos starten",
     secondaryCta: "Zum Login",
-    supportText: "Fuer Patientinnen und Patienten, die schneller Orientierung wollen.",
+    supportText: "Für Patientinnen und Patienten, die schneller Orientierung wollen.",
     highlightsTitle: "Warum MedScoutX",
     highlights: [
-      "Gefuehrte Symptom-Erfassung mit klaren, verstaendlichen Nachfragen.",
-      "Koerperkarte fuer eine schnelle Navigation zur betroffenen Region.",
-      "Visuelle Analyse fuer medizinische Bilder mit sicherem, ruhigem UX.",
+      "Geführte Symptom-Erfassung mit klaren, verständlichen Nachfragen.",
+      "Körperkarte für eine schnelle Navigation zur betroffenen Region.",
+      "Visuelle Analyse für medizinische Bilder mit sicherem, ruhigem UX.",
     ],
     metricA: "Schneller Einstieg",
     metricB: "DE / EN bereit",
     metricC: "Fokus auf Vertrauen",
     mediaEyebrow: "Produktvorschau",
-    mediaTitle: "So praesentiert sich MedScoutX auf Desktop und mobil.",
+    mediaTitle: "So präsentiert sich MedScoutX auf Desktop und mobil.",
     mediaText:
-      "Die Landingpage fuehrt Besucher direkt zu Registrierung oder Login und schafft gleichzeitig einen starken ersten Eindruck fuer das Produkt.",
-    sectionTitle: "Ein professioneller Einstieg fuer neue Nutzer",
+      "Die Landingpage führt Besucher direkt zu Registrierung oder Login und schafft gleichzeitig einen starken ersten Eindruck für das Produkt.",
+    sectionTitle: "Ein professioneller Einstieg für neue Nutzer",
     sectionText:
-      "Die Seite ist bewusst oeffentlich gehalten: Besucher koennen sich zuerst informieren, die Sprache wechseln und dann selbst entscheiden, ob sie sich registrieren oder einloggen moechten.",
+      "Die Seite ist bewusst öffentlich gehalten: Besucher können sich zuerst informieren, die Sprache wechseln und dann selbst entscheiden, ob sie sich registrieren oder einloggen möchten.",
     disclaimer:
-      "MedScoutX ersetzt keine aerztliche Diagnose und ist nicht fuer Notfaelle gedacht.",
+      "MedScoutX ersetzt keine ärztliche Diagnose und ist nicht für Notfälle gedacht.",
+    imprint: "Impressum",
+    privacy: "Datenschutz",
   },
   en: {
     languageLabel: "Language",
+    skip: "Skip to content",
     login: "Login",
     register: "Register",
     continue: "Open App",
@@ -67,6 +71,8 @@ const copy = {
       "This page is intentionally public: visitors can learn what MedScoutX does, switch languages, and then decide whether they want to register or sign in.",
     disclaimer:
       "MedScoutX does not replace a medical diagnosis and is not intended for emergencies.",
+    imprint: "Imprint",
+    privacy: "Privacy",
   },
 };
 
@@ -79,13 +85,13 @@ export default function LandingPage() {
   useEffect(() => {
     document.title = language === "en"
       ? "MedScoutX - Medical guidance for your next step"
-      : "MedScoutX - Medizinische Orientierung fuer den naechsten Schritt";
+      : "MedScoutX - Medizinische Orientierung für den nächsten Schritt";
   }, [language]);
 
   return (
     <div className="landing-page">
       <a href="#landing-main" className="landing-page__skip-link">
-        Skip to content
+        {currentCopy.skip}
       </a>
 
       <header className="landing-page__header">
@@ -205,8 +211,8 @@ export default function LandingPage() {
       <footer className="landing-page__footer">
         <p>{currentCopy.disclaimer}</p>
         <div className="landing-page__footer-links">
-          <Link to="/impressum?public=1">Impressum</Link>
-          <Link to="/datenschutz?public=1">Datenschutz</Link>
+          <Link to="/impressum?public=1">{currentCopy.imprint}</Link>
+          <Link to="/datenschutz?public=1">{currentCopy.privacy}</Link>
         </div>
       </footer>
     </div>

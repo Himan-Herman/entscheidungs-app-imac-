@@ -1,21 +1,70 @@
-// client/src/pages/Login.jsx
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { language } = useLanguage();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  // ✅ Status aus der URL für E-Mail-Verify & Passwort-Reset
   const [verifyStatus, setVerifyStatus] = useState(null);
   const [resetStatus, setResetStatus] = useState(null);
 
-  // Prüft ?verify=... und ?reset=... aus der URL
+  const copy = language === "en"
+    ? {
+        badge: "MedScoutX - Secure access",
+        title: "Login",
+        subtitle: "Sign in with your registered email address to use your MedScoutX features.",
+        email: "Email",
+        emailPlaceholder: "e.g. yourname@mail.com",
+        password: "Password",
+        passwordPlaceholder: "Password",
+        submitting: "Signing in...",
+        submit: "Sign in",
+        forgot: "Forgot password?",
+        noAccount: "No account yet?",
+        register: "Register now",
+        imprint: "Imprint",
+        privacy: "Privacy",
+        emailFirst: "Please confirm your email first.",
+        loginFailed: "Login failed.",
+        loginError: "Login error.",
+        verifyOk: "Your email has been verified successfully. You can sign in now.",
+        verifyInvalid: "The verification link is invalid or expired. Please register again.",
+        verifyError: "An error occurred while verifying your email. Please try again later.",
+        resetOk: "Your password was reset successfully. Please sign in with your new password.",
+        language: "Language",
+      }
+    : {
+        badge: "MedScoutX - Sicherer Zugang",
+        title: "Login",
+        subtitle: "Melde dich mit deiner registrierten E-Mail an, um deine MedScoutX-Funktionen zu nutzen.",
+        email: "E-Mail",
+        emailPlaceholder: "z.B. deinname@mail.de",
+        password: "Passwort",
+        passwordPlaceholder: "Passwort",
+        submitting: "Wird eingeloggt...",
+        submit: "Einloggen",
+        forgot: "Passwort vergessen?",
+        noAccount: "Noch kein Konto?",
+        register: "Jetzt registrieren",
+        imprint: "Impressum",
+        privacy: "Datenschutz",
+        emailFirst: "Bitte bestätige zuerst deine E-Mail.",
+        loginFailed: "Login fehlgeschlagen.",
+        loginError: "Fehler beim Login.",
+        verifyOk: "Deine E-Mail wurde erfolgreich bestätigt. Du kannst dich jetzt einloggen.",
+        verifyInvalid: "Der Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere dich erneut.",
+        verifyError: "Beim Bestätigen deiner E-Mail ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
+        resetOk: "Dein Passwort wurde erfolgreich zurückgesetzt. Bitte melde dich mit deinem neuen Passwort an.",
+        language: "Sprache",
+      };
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const v = params.get("verify");
@@ -39,22 +88,20 @@ export default function Login() {
 
       const data = await res.json();
 
-      // → E-Mail noch nicht bestätigt
       if (data.error === "EMAIL_NOT_VERIFIED") {
         localStorage.setItem(
           "pending_verification_email",
           email.trim().toLowerCase()
         );
-        setError("Bitte bestätige zuerst deine E-Mail.");
+        setError(copy.emailFirst);
         navigate("/check-email");
         return;
       }
 
       if (!res.ok) {
-        throw new Error(data.error || "Login fehlgeschlagen.");
+        throw new Error(data.error || copy.loginFailed);
       }
 
-      // User + Token speichern
       localStorage.setItem("medscout_user_id", data.userId);
       if (data.token) {
         localStorage.setItem("medscout_token", data.token);
@@ -62,30 +109,32 @@ export default function Login() {
 
       navigate("/intro", { replace: true });
     } catch (err) {
-      setError(err.message || "Fehler beim Login.");
+      setError(err.message || copy.loginError);
     } finally {
       setBusy(false);
     }
   }
 
-  // Hilfsfunktion für Verify-Meldungen
   function renderVerifyMessage() {
     if (!verifyStatus) return null;
+
+    const styles = {
+      margin: "0 0 10px 0",
+      fontSize: 13,
+      padding: "8px 10px",
+      borderRadius: 10,
+    };
 
     if (verifyStatus === "ok") {
       return (
         <p
           style={{
-            margin: "0 0 10px 0",
-            fontSize: 13,
-            padding: "8px 10px",
-            borderRadius: 10,
+            ...styles,
             backgroundColor: "rgba(22,163,74,0.08)",
             color: "#166534",
           }}
         >
-          ✅ Deine E-Mail wurde erfolgreich bestätigt. Du kannst dich jetzt
-          einloggen.
+          {copy.verifyOk}
         </p>
       );
     }
@@ -94,16 +143,12 @@ export default function Login() {
       return (
         <p
           style={{
-            margin: "0 0 10px 0",
-            fontSize: 13,
-            padding: "8px 10px",
-            borderRadius: 10,
+            ...styles,
             backgroundColor: "rgba(220,38,38,0.06)",
             color: "#b91c1c",
           }}
         >
-          ❌ Der Bestätigungslink ist ungültig oder abgelaufen. Bitte
-          registriere dich erneut.
+          {copy.verifyInvalid}
         </p>
       );
     }
@@ -112,16 +157,12 @@ export default function Login() {
       return (
         <p
           style={{
-            margin: "0 0 10px 0",
-            fontSize: 13,
-            padding: "8px 10px",
-            borderRadius: 10,
+            ...styles,
             backgroundColor: "rgba(248,250,252,0.8)",
             color: "#b45309",
           }}
         >
-          ⚠️ Beim Bestätigen deiner E-Mail ist ein Fehler aufgetreten. Bitte
-          versuche es später erneut.
+          {copy.verifyError}
         </p>
       );
     }
@@ -129,26 +170,23 @@ export default function Login() {
     return null;
   }
 
-  // ✅ Meldung nach erfolgreichem Passwort-Reset
   function renderResetMessage() {
-    if (resetStatus === "ok") {
-      return (
-        <p
-          style={{
-            margin: "0 0 10px 0",
-            fontSize: 13,
-            padding: "8px 10px",
-            borderRadius: 10,
-            backgroundColor: "rgba(22,163,74,0.08)",
-            color: "#166534",
-          }}
-        >
-          🔑 Dein Passwort wurde erfolgreich zurückgesetzt. Bitte melde dich mit
-          deinem neuen Passwort an.
-        </p>
-      );
-    }
-    return null;
+    if (resetStatus !== "ok") return null;
+
+    return (
+      <p
+        style={{
+          margin: "0 0 10px 0",
+          fontSize: 13,
+          padding: "8px 10px",
+          borderRadius: 10,
+          backgroundColor: "rgba(22,163,74,0.08)",
+          color: "#166534",
+        }}
+      >
+        {copy.resetOk}
+      </p>
+    );
   }
 
   return (
@@ -175,34 +213,44 @@ export default function Login() {
           boxSizing: "border-box",
         }}
       >
-        {/* Badge oben */}
         <div
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "4px 10px",
-            borderRadius: 999,
-            backgroundColor: "rgba(37,99,235,0.08)",
-            color: "#1d4ed8",
-            fontSize: 12,
-            fontWeight: 600,
-            marginBottom: 10,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 12,
+            flexWrap: "wrap",
+            marginBottom: 12,
           }}
         >
-          <span
+          <div
             style={{
               display: "inline-flex",
-              width: 8,
-              height: 8,
+              alignItems: "center",
+              gap: 8,
+              padding: "4px 10px",
               borderRadius: 999,
-              backgroundColor: "#22c55e",
+              backgroundColor: "rgba(37,99,235,0.08)",
+              color: "#1d4ed8",
+              fontSize: 12,
+              fontWeight: 600,
             }}
-          />
-          MedScoutX – Sicherer Zugang
+          >
+            <span
+              style={{
+                display: "inline-flex",
+                width: 8,
+                height: 8,
+                borderRadius: 999,
+                backgroundColor: "#22c55e",
+              }}
+            />
+            {copy.badge}
+          </div>
+
+          <LanguageSwitcher label={copy.language} compact />
         </div>
 
-        {/* Titel */}
         <h1
           style={{
             margin: "0 0 6px 0",
@@ -211,7 +259,7 @@ export default function Login() {
             color: "#020617",
           }}
         >
-          Login
+          {copy.title}
         </h1>
 
         <p
@@ -221,15 +269,12 @@ export default function Login() {
             color: "#4b5563",
           }}
         >
-          Melde dich mit deiner registrierten E-Mail an, um deine
-          MedScoutX-Funktionen zu nutzen.
+          {copy.subtitle}
         </p>
 
-        {/* Status-Meldungen */}
         {renderVerifyMessage()}
         {renderResetMessage()}
 
-        {/* Fehlermeldung */}
         {error && (
           <p
             style={{
@@ -255,11 +300,11 @@ export default function Login() {
               marginBottom: 4,
             }}
           >
-            E-Mail
+            {copy.email}
           </label>
           <input
             type="email"
-            placeholder="z.B. deinname@mail.de"
+            placeholder={copy.emailPlaceholder}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -284,11 +329,11 @@ export default function Login() {
               marginBottom: 4,
             }}
           >
-            Passwort
+            {copy.password}
           </label>
           <input
             type="password"
-            placeholder="Passwort"
+            placeholder={copy.passwordPlaceholder}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -304,7 +349,6 @@ export default function Login() {
             }}
           />
 
-          {/* 🔐 Einloggen */}
           <button
             type="submit"
             disabled={busy}
@@ -325,10 +369,9 @@ export default function Login() {
               transition: "transform 0.12s ease, box-shadow 0.12s ease",
             }}
           >
-            {busy ? "Wird eingeloggt …" : "Einloggen"}
+            {busy ? copy.submitting : copy.submit}
           </button>
 
-          {/* 🔑 Passwort vergessen */}
           <button
             type="button"
             onClick={() => navigate("/forgot-password")}
@@ -344,11 +387,10 @@ export default function Login() {
               padding: 0,
             }}
           >
-            Passwort vergessen?
+            {copy.forgot}
           </button>
         </form>
 
-        {/* Untere Links */}
         <div
           style={{
             marginTop: 18,
@@ -362,12 +404,12 @@ export default function Login() {
           }}
         >
           <span>
-            Noch kein Konto?{" "}
+            {copy.noAccount}{" "}
             <Link
               to="/register"
               style={{ color: "#0f766e", textDecoration: "none" }}
             >
-              Jetzt registrieren
+              {copy.register}
             </Link>
           </span>
 
@@ -380,7 +422,7 @@ export default function Login() {
                 marginRight: 8,
               }}
             >
-              Impressum
+              {copy.imprint}
             </Link>
             |
             <Link
@@ -391,7 +433,7 @@ export default function Login() {
                 marginLeft: 8,
               }}
             >
-              Datenschutz
+              {copy.privacy}
             </Link>
           </span>
         </div>

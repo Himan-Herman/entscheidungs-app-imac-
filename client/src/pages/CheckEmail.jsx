@@ -1,15 +1,49 @@
-// client/src/pages/CheckEmail.jsx
 import { useState } from "react";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function CheckEmail() {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const { language } = useLanguage();
+
+  const copy = language === "en"
+    ? {
+        badge: "Secure MedScoutX login",
+        title: "Please confirm your email",
+        text: "We just sent you a verification email. Open your inbox and click the confirmation button to activate your account.",
+        tip: "Tip:",
+        tipText: "Check your spam or promotions folder if the email is not visible right away.",
+        resend: "Send email again",
+        resending: "Sending email...",
+        success: "We sent the email again.",
+        error: "Something went wrong. Please try again later.",
+        network: "Network error. Please check your connection and try again.",
+        missing: "No email for verification was found. Please register again.",
+        footer: "If you did not use MedScoutX yourself, you can ignore this message. Your account will only be activated after you confirm the link.",
+        language: "Language",
+      }
+    : {
+        badge: "Sicherer MedScoutX-Login",
+        title: "Bitte E-Mail bestätigen",
+        text: "Wir haben dir gerade eine Bestätigungsmail geschickt. Öffne dein Postfach und klicke auf den Button \"E-Mail jetzt bestätigen\", damit dein Konto aktiviert wird.",
+        tip: "Tipp:",
+        tipText: "Schau auch im Spam- oder Werbungsordner nach, falls die Mail nicht sofort sichtbar ist.",
+        resend: "E-Mail erneut senden",
+        resending: "Sende E-Mail...",
+        success: "Wir haben dir die E-Mail erneut gesendet.",
+        error: "Leider ist ein Fehler aufgetreten. Bitte versuche es später noch einmal.",
+        network: "Netzwerkfehler. Bitte prüfe deine Verbindung und versuche es erneut.",
+        missing: "Keine E-Mail für die Bestätigung gefunden. Bitte registriere dich neu.",
+        footer: "Wenn du MedScoutX nicht selbst benutzt hast, kannst du diese Nachricht ignorieren. Dein Konto wird nur aktiviert, wenn du den Link bestätigst.",
+        language: "Sprache",
+      };
 
   async function resend() {
     const email = localStorage.getItem("pending_verification_email");
 
     if (!email) {
-      setMsg("❌ Keine E-Mail für die Bestätigung gefunden. Bitte registriere dich neu.");
+      setMsg(copy.missing);
       return;
     }
 
@@ -24,18 +58,16 @@ export default function CheckEmail() {
       });
       const d = await r.json();
 
-      if (d.ok) {
-        setMsg("✅ Wir haben dir die E-Mail erneut gesendet.");
-      } else {
-        setMsg("❌ Leider ist ein Fehler aufgetreten. Bitte versuche es später noch einmal.");
-      }
+      setMsg(d.ok ? copy.success : copy.error);
     } catch (err) {
       console.error(err);
-      setMsg("❌ Netzwerkfehler. Bitte prüfe deine Verbindung und versuche es erneut.");
+      setMsg(copy.network);
     } finally {
       setBusy(false);
     }
   }
+
+  const isSuccess = msg === copy.success;
 
   return (
     <main
@@ -61,34 +93,44 @@ export default function CheckEmail() {
           boxSizing: "border-box",
         }}
       >
-        {/* Badge */}
         <div
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "4px 10px",
-            borderRadius: "999px",
-            backgroundColor: "rgba(34,197,94,0.08)",
-            color: "#0f766e",
-            fontSize: "12px",
-            fontWeight: 600,
-            marginBottom: "10px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 12,
+            marginBottom: 10,
+            flexWrap: "wrap",
           }}
         >
-          <span
+          <div
             style={{
               display: "inline-flex",
-              width: 8,
-              height: 8,
+              alignItems: "center",
+              gap: "8px",
+              padding: "4px 10px",
               borderRadius: "999px",
-              backgroundColor: "#22c55e",
+              backgroundColor: "rgba(34,197,94,0.08)",
+              color: "#0f766e",
+              fontSize: "12px",
+              fontWeight: 600,
             }}
-          />
-          Sicherer MedScoutX-Login
+          >
+            <span
+              style={{
+                display: "inline-flex",
+                width: 8,
+                height: 8,
+                borderRadius: "999px",
+                backgroundColor: "#22c55e",
+              }}
+            />
+            {copy.badge}
+          </div>
+
+          <LanguageSwitcher label={copy.language} compact />
         </div>
 
-        {/* Titel */}
         <h1
           style={{
             margin: "0 0 8px 0",
@@ -97,10 +139,9 @@ export default function CheckEmail() {
             color: "#020617",
           }}
         >
-          Bitte E-Mail bestätigen ✉️
+          {copy.title}
         </h1>
 
-        {/* Untertitel */}
         <p
           style={{
             margin: "0 0 16px 0",
@@ -109,13 +150,9 @@ export default function CheckEmail() {
             color: "#4b5563",
           }}
         >
-          Wir haben dir gerade eine Bestätigungs­mail geschickt. 
-          <br />
-          <strong>Öffne dein Postfach</strong> und klicke auf den Button{" "}
-          <em>„E-Mail jetzt bestätigen“</em>, damit dein Konto aktiviert wird.
+          {copy.text}
         </p>
 
-        {/* Info-Box */}
         <div
           style={{
             marginBottom: 18,
@@ -126,11 +163,9 @@ export default function CheckEmail() {
             color: "#475569",
           }}
         >
-          💡 <strong>Tipp:</strong> Schau auch im Spam- oder Werbungsordner nach, 
-          falls die Mail nicht sofort sichtbar ist.
+          <strong>{copy.tip}</strong> {copy.tipText}
         </div>
 
-        {/* Button + Status */}
         <button
           type="button"
           onClick={resend}
@@ -152,7 +187,7 @@ export default function CheckEmail() {
               : "0 10px 22px rgba(15,118,110,0.4)",
           }}
         >
-          {busy ? "Sende E-Mail …" : "E-Mail erneut senden"}
+          {busy ? copy.resending : copy.resend}
         </button>
 
         {msg && (
@@ -161,18 +196,13 @@ export default function CheckEmail() {
               marginTop: 12,
               fontSize: "13px",
               lineHeight: 1.5,
-              color: msg.startsWith("✅")
-                ? "#16a34a"
-                : msg.startsWith("❌")
-                ? "#b91c1c"
-                : "#334155",
+              color: isSuccess ? "#16a34a" : "#b91c1c",
             }}
           >
             {msg}
           </p>
         )}
 
-        {/* Footer klein */}
         <p
           style={{
             marginTop: 20,
@@ -181,9 +211,7 @@ export default function CheckEmail() {
             lineHeight: 1.6,
           }}
         >
-          Wenn du MedScoutX nicht selbst benutzt hast, kannst du diese Nachricht
-          ignorieren. Dein Konto wird nur aktiviert, wenn du den Link
-          bestätigst.
+          {copy.footer}
         </p>
       </div>
     </main>

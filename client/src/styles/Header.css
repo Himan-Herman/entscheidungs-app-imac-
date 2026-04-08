@@ -84,7 +84,6 @@
   
   
   .ms-nav-toggle{
-    margin-left: auto;
     background: none;
     border: 2px solid transparent;
     font-size: 1.25rem;
@@ -100,6 +99,10 @@
   
  
   .ms-nav{
+    margin-left: auto;
+  }
+
+  .ms-header__language {
     margin-left: auto;
   }
   .ms-nav ul{
@@ -143,6 +146,16 @@
   
   
   @media (max-width: 860px){
+    .ms-header__inner {
+      padding: 0 12px;
+      gap: 10px;
+    }
+    .ms-header__language .language-switcher__label {
+      display: none;
+    }
+    .ms-header__language .language-switcher__button {
+      padding: 7px 10px;
+    }
     .ms-nav-toggle{ display: inline-block; }
     .ms-nav{
       position: absolute;
