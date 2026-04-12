@@ -115,7 +115,7 @@ export default function Startseite() {
         trust2: "Orientierung statt Diagnose:",
         trust2Text: "MedScoutX liefert Vorschläge und Hinweise, ersetzt aber keine medizinische Untersuchung.",
         trust3: "Datenschutz:",
-        trust3Text: "DSGVO-orientiertes Konzept und Hosting in der EU, je nach Tarif und Infrastrukturkonfiguration.",
+        trust3Text: "Keine dauerhafte Speicherung deiner Gesundheitsdaten, DSGVO-konformes Konzept und Verarbeitung innerhalb der EU.",
         proTitle: "Mehr Antworten mit MedScoutX Pro",
         proText: "Für Vielnutzerinnen, Vielnutzer und Power-User: höhere Limits, erweiterte Analysefunktionen und priorisierte Antworten.",
         pro1: "Mehr Anfragen pro Monat",
