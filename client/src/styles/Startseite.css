@@ -169,7 +169,7 @@ body {
   position: sticky;
   top: calc(var(--page-header-top, 0px) - 16px);
   z-index: 900;
-  margin-top: -1.35rem;
+  margin-top: -2.7rem;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   margin-bottom: 2.4rem;
