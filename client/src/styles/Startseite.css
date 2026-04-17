@@ -167,11 +167,11 @@ body {
   align-items: center;
   justify-content: space-between;
   position: sticky;
-  top: var(--page-header-top, 0px);
+  top: calc(var(--page-header-top, 0px) - 8px);
   z-index: 900;
-  padding-top: 1.25rem;
+  padding-top: 0.9rem;
   padding-bottom: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.75rem;
   background: rgba(243, 244, 246, 0.84);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
