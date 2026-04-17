@@ -165,14 +165,14 @@ body {
 .startseite__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   position: sticky;
   top: calc(var(--page-header-top, 0px) - 16px);
   z-index: 900;
-  margin-top: -2.7rem;
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
-  margin-bottom: 2.4rem;
+  margin-top: -3.35rem;
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+  margin-bottom: 2rem;
   background: rgba(243, 244, 246, 0.84);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);

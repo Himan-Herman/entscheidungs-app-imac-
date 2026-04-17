@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Startseite.css";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
 import heroImage from "../assets/media/hero-medscoutx.png";
 import demoVideo from "../assets/media/medscoutx-demo.mp4";
@@ -15,7 +14,6 @@ import {
 
 export default function Startseite() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
   const { language } = useLanguage();
 
   const copy = language === "en"
@@ -23,8 +21,6 @@ export default function Startseite() {
         title: "MedScoutX - Your smart health navigator",
         skip: "Skip to main content",
         tagline: "AI assistance for your health - not a replacement for clinicians.",
-        themeAriaDark: "Dark mode active. Switch to light mode.",
-        themeAriaLight: "Light mode active. Switch to dark mode.",
         heroTitle: "Your smart health navigator",
         heroText:
           "MedScoutX helps you understand symptoms better with symptom chat, body map and image analysis. You receive orientation and specialist suggestions without replacing a diagnosis.",
@@ -97,8 +93,6 @@ export default function Startseite() {
         title: "MedScoutX - Dein smarter Gesundheits-Navigator",
         skip: "Zum Hauptinhalt springen",
         tagline: "KI-Assistenz für deine Gesundheit - kein Ersatz für Ärztinnen und Ärzte.",
-        themeAriaDark: "Aktuell Dunkelmodus. Umschalten auf Hellmodus.",
-        themeAriaLight: "Aktuell Hellmodus. Umschalten auf Dunkelmodus.",
         heroTitle: "Dein smarter Gesundheits-Navigator",
         heroText:
           "MedScoutX unterstützt dich dabei, Beschwerden besser einzuordnen - mit Symptom-Chat, Körperkarte und Bildanalyse. Du erhältst Orientierung und Facharzt-Vorschläge, ohne eine Diagnose zu ersetzen.",
@@ -203,17 +197,6 @@ export default function Startseite() {
               <span className="startseite__app-name">MedScoutX</span>
               <span className="startseite__app-tagline">{copy.tagline}</span>
             </div>
-          </div>
-
-          <div className="startseite__header-right">
-            <button
-              type="button"
-              className="startseite__theme-toggle"
-              onClick={toggleTheme}
-              aria-label={theme === "dark" ? copy.themeAriaDark : copy.themeAriaLight}
-            >
-              <span aria-hidden="true">{theme === "dark" ? "🌙" : "☀️"}</span>
-            </button>
           </div>
         </header>
 
