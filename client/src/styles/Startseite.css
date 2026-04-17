@@ -171,6 +171,7 @@ body {
   z-index: 900;
   padding-top: 1.25rem;
   padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
   background: rgba(243, 244, 246, 0.84);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -268,7 +269,7 @@ body {
 ---------------------------------------------------------- */
 
 .startseite__hero {
-  margin-top: 0.5rem;
+  margin-top: 1.25rem;
   padding: 1.35rem 1.2rem 1.3rem;
   border-radius: var(--radius-xl);
   background: linear-gradient(
