@@ -167,9 +167,9 @@ body {
   align-items: center;
   justify-content: flex-start;
   position: sticky;
-  top: calc(var(--page-header-top, 0px) - 16px);
+  top: calc(var(--page-header-top, 0px) - 6px);
   z-index: 900;
-  margin-top: -3.35rem;
+  margin-top: calc(-1 * var(--global-header-height, 80px) - 2.25rem);
   padding-top: 0.65rem;
   padding-bottom: 0.65rem;
   margin-bottom: 2rem;

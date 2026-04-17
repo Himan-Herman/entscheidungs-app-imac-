@@ -1,10 +1,20 @@
 import React from "react";
 import { useNavigate} from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 import rueckenBild from "../assets/img/Koerper_Rueckseite.png";
 
 
 export default function KoerperRueckseite() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+
+  const copy = language === "en"
+    ? {
+        title: "Body Map - Back View",
+      }
+    : {
+        title: "Körperkarte - Rückseite",
+      };
   
   const openChat = (organId) => {
     navigate(`/koerpersymptom?organ=${organId}&seite=rueckseite`, {
@@ -14,7 +24,7 @@ export default function KoerperRueckseite() {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h2>Körperkarte – Rückseite</h2>
+      <h2>{copy.title}</h2>
 
       <svg
         viewBox="0 0 300 700"

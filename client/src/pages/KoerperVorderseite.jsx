@@ -1,11 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 import koerperBild from '../assets/img/Koerper_Vorderseite.png';
-
 
 export default function Koerperkarte() {
   const navigate = useNavigate();
- 
+  const { language } = useLanguage();
+
+  const copy = language === "en"
+    ? {
+        title: "Body Map - Front View",
+      }
+    : {
+        title: "Körperkarte - Vorderseite",
+      };
 
 const openChat = (organId) => {
   navigate(`/koerpersymptom?organ=${organId}&seite=vorderseite`, {
@@ -15,7 +23,7 @@ const openChat = (organId) => {
 
   return (
     <div>
-      <h2 style={{ textAlign: "center" }}>Körperkarte_Vorderseite</h2>
+      <h2 style={{ textAlign: "center" }}>{copy.title}</h2>
 
       <svg
   viewBox="0 0 300 700"
