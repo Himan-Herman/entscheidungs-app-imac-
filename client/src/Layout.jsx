@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import "./styles/layout.css";
 
 export default function Layout() {
   const { pathname, search } = useLocation();
@@ -25,7 +26,11 @@ export default function Layout() {
   return (
     <>
       {!hideNav && !hideHeaderFooter && <Header />}
-      <main>
+      <main
+        className={`layout-main ${
+          !hideNav && !hideHeaderFooter ? "layout-main--with-header" : ""
+        }`.trim()}
+      >
         <Outlet />
       </main>
       {!hideNav && !hideHeaderFooter && <Footer />}

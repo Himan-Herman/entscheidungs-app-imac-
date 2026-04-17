@@ -46,8 +46,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 900;
   gap: 24px;
   margin-bottom: 32px;
+  padding: 12px 0;
+  background: rgba(247, 251, 250, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .landing-page__brand-block {

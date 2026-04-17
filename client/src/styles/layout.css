@@ -4,6 +4,14 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; }
 
+.layout-main {
+  --page-header-top: 0px;
+}
+
+.layout-main--with-header {
+  --page-header-top: 78px;
+}
+
 
 .container {
   max-width: var(--container);

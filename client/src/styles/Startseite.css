@@ -166,8 +166,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: sticky;
+  top: var(--page-header-top, 0px);
+  z-index: 900;
   padding-top: 1.25rem;
   padding-bottom: 0.75rem;
+  background: rgba(243, 244, 246, 0.84);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+:root[data-theme="dark"] .startseite__header {
+  background: rgba(2, 6, 23, 0.84);
 }
 
 .startseite__header-left {
