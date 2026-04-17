@@ -8,8 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
 
-      // 👇 DAS ist der Offline-Teil
       workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         navigateFallback: '/index.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,mp4}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
@@ -28,7 +30,6 @@ export default defineConfig({
         ],
       },
 
-      // 👇 dein Manifest bleibt wie es ist
       manifest: {
         name: 'MedScoutX',
         short_name: 'MedScoutX',

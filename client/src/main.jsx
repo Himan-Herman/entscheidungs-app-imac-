@@ -1,5 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { registerSW } from "virtual:pwa-register";
 import ProtectedRoute from "./components/ProtectedRoute";
 import {
   BrowserRouter,
@@ -41,6 +42,13 @@ function Gate() {
     ? <Navigate to="/intro" replace />
     : <Navigate to="/register" replace />;
 }
+
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    updateSW(true);
+  },
+});
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
