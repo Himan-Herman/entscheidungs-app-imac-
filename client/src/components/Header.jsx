@@ -1,6 +1,7 @@
 // client/src/components/Header.jsx
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { Home, LogOut, Menu } from "lucide-react";
 import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -14,11 +15,12 @@ export default function Header() {
   // 🔐 ist der Nutzer eingeloggt?
   const isLoggedIn = !!localStorage.getItem("medscout_token");
   const copy = language === "en"
-    ? {
+      ? {
         skip: "Skip to content",
         homeAria: "Go to home page",
         navToggle: "Toggle navigation",
         nav: "Main navigation",
+        appLabel: "Professional workspace",
         home: "Home",
         logout: "Log out",
         language: "Language",
@@ -28,6 +30,7 @@ export default function Header() {
         homeAria: "Zur Startseite",
         navToggle: "Navigation umschalten",
         nav: "Hauptnavigation",
+        appLabel: "Professioneller Bereich",
         home: "Home",
         logout: "Ausloggen",
         language: "Sprache",
@@ -61,6 +64,10 @@ export default function Header() {
             aria-label={copy.homeAria}
           >
             <img src={logo} alt="MedScout Logo" />
+            <span className="ms-logo__copy">
+              <span className="ms-logo__title">MedScoutX</span>
+              <span className="ms-logo__subtitle">{copy.appLabel}</span>
+            </span>
           </button>
 
           <div className="ms-header__language">
@@ -73,7 +80,8 @@ export default function Header() {
             aria-expanded={open ? "true" : "false"}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="visually-hidden">{copy.navToggle}</span>☰
+            <span className="visually-hidden">{copy.navToggle}</span>
+            <Menu size={18} aria-hidden="true" />
           </button>
 
           <nav
@@ -85,10 +93,13 @@ export default function Header() {
               <li>
                 <NavLink
                   to="/startseite"
-                  className="ms-link-home"
+                  className={({ isActive }) =>
+                    `ms-nav-item ${isActive ? "is-active" : ""}`.trim()
+                  }
                   onClick={() => setOpen(false)}
                 >
-                  {copy.home}
+                  <Home size={16} aria-hidden="true" />
+                  <span>{copy.home}</span>
                 </NavLink>
               </li>
 
@@ -96,19 +107,11 @@ export default function Header() {
                 <li>
                   <button
                     type="button"
-                    className="ms-link-logout"
+                    className="ms-nav-item ms-nav-item--button"
                     onClick={handleLogout}
-                    // optional: damit es wie ein Link aussieht
-                    style={{
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      margin: 0,
-                      cursor: "pointer",
-                      font: "inherit",
-                    }}
                   >
-                    {copy.logout}
+                    <LogOut size={16} aria-hidden="true" />
+                    <span>{copy.logout}</span>
                   </button>
                 </li>
               )}
