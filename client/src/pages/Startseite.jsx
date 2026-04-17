@@ -188,18 +188,6 @@ export default function Startseite() {
       </a>
 
       <div className="startseite" data-page="startseite">
-        <header className="startseite__header" role="banner">
-          <div className="startseite__header-left">
-            <div className="startseite__logo-mark" aria-hidden="true">
-              <span className="startseite__logo-symbol">✚</span>
-            </div>
-            <div className="startseite__branding">
-              <span className="startseite__app-name">MedScoutX</span>
-              <span className="startseite__app-tagline">{copy.tagline}</span>
-            </div>
-          </div>
-        </header>
-
         <div className="startseite-root">
           <main
             id="main-content"
