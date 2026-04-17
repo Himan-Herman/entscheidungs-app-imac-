@@ -5,6 +5,7 @@
   --ms-accent: #0f766e;
   --ms-accent-strong: #0b4f6c;
   --ms-border: rgba(15, 23, 42, 0.1);
+  --ms-edge-fade: linear-gradient(180deg, rgba(243, 247, 250, 0.98), rgba(243, 247, 250, 0));
   --ms-focus: #0ea5e9;
   --ms-panel: rgba(255, 255, 255, 0.82);
   --ms-shadow: 0 18px 38px rgba(15, 23, 42, 0.1);
@@ -16,6 +17,7 @@
   --ms-fg: #e5eef8;
   --ms-muted: #9db0c7;
   --ms-border: rgba(148, 163, 184, 0.18);
+  --ms-edge-fade: linear-gradient(180deg, rgba(10, 18, 31, 0.98), rgba(10, 18, 31, 0));
   --ms-focus: #38bdf8;
   --ms-panel: rgba(15, 23, 42, 0.78);
   --ms-shadow: 0 20px 42px rgba(2, 6, 23, 0.5);
@@ -53,11 +55,19 @@
   background: var(--ms-bg);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid var(--ms-border);
-  box-shadow:
-    0 16px 36px rgba(15, 23, 42, 0.08),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
   isolation: isolate;
+}
+
+.ms-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 12px;
+  background: var(--ms-edge-fade);
+  pointer-events: none;
 }
 
 .ms-header__inner {
@@ -253,6 +263,14 @@
   .ms-header__inner {
     padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
     gap: 12px;
+  }
+
+  .ms-logo__copy {
+    display: none;
+  }
+
+  .ms-logo {
+    gap: 0;
   }
 
   .ms-logo__subtitle {

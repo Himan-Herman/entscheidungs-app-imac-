@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Login() {
@@ -38,7 +37,6 @@ export default function Login() {
         verifyInvalid: "The verification link is invalid or expired. Please register again.",
         verifyError: "An error occurred while verifying your email. Please try again later.",
         resetOk: "Your password was reset successfully. Please sign in with your new password.",
-        language: "Language",
       }
     : {
         badge: "MedScoutX - Sicherer Zugang",
@@ -62,7 +60,6 @@ export default function Login() {
         verifyInvalid: "Der Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere dich erneut.",
         verifyError: "Beim Bestätigen deiner E-Mail ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
         resetOk: "Dein Passwort wurde erfolgreich zurückgesetzt. Bitte melde dich mit deinem neuen Passwort an.",
-        language: "Sprache",
       };
 
   useEffect(() => {
@@ -247,8 +244,6 @@ export default function Login() {
             />
             {copy.badge}
           </div>
-
-          <LanguageSwitcher label={copy.language} compact />
         </div>
 
         <h1
