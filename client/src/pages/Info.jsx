@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import "../styles/Info.css";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
 import { useLanguage } from "../i18n/LanguageContext";
 import symptomDemoImg from "../assets/media/symptom-demo.jpg";
 import bodymapDemoImg from "../assets/media/bodymap-demo.jpg";
@@ -130,7 +129,6 @@ export default function Info() {
       <a href="#info-main" className="sr-only sr-only-focusable">
         {copy.skip}
       </a>
-      <Header />
       <div className="info-page" data-page="info">
         <header className="startseite__header info-header-merged" role="banner">
           <div className="startseite__header-left">

@@ -11,29 +11,25 @@ export default function Layout() {
   const isLoggedIn = !!localStorage.getItem("medscout_user_id");
   const isLegal = pathname === "/impressum" || pathname === "/datenschutz";
   const forcePublic = params.get("public") === "1";
-  const isLandingPage = pathname === "/";
 
-  // bestimmte Seiten ohne Navigation
-  const hideNav =
+  const hideHeader =
     pathname.startsWith("/check-email") || pathname.startsWith("/verified");
 
-  // Legal-Seiten ohne Header/Footer, wenn öffentlich oder ?public=1
-  const hideHeaderFooter =
+  const hideFooter =
     pathname === "/register" ||
-    isLandingPage ||
     (isLegal && (!isLoggedIn || forcePublic));
 
   return (
     <>
-      {!hideNav && !hideHeaderFooter && <Header />}
+      {!hideHeader && <Header />}
       <main
         className={`layout-main ${
-          !hideNav && !hideHeaderFooter ? "layout-main--with-header" : ""
+          !hideHeader ? "layout-main--with-header" : ""
         }`.trim()}
       >
         <Outlet />
       </main>
-      {!hideNav && !hideHeaderFooter && <Footer />}
+      {!hideHeader && !hideFooter && <Footer />}
     </>
   );
 }

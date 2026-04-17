@@ -77,7 +77,7 @@ const copy = {
 };
 
 export default function LandingPage() {
-  const { language, setLanguage, supportedLanguages } = useLanguage();
+  const { language } = useLanguage();
 
   const isLoggedIn = !!localStorage.getItem("medscout_user_id");
   const currentCopy = useMemo(() => copy[language] ?? copy.de, [language]);
@@ -93,46 +93,6 @@ export default function LandingPage() {
       <a href="#landing-main" className="landing-page__skip-link">
         {currentCopy.skip}
       </a>
-
-      <header className="landing-page__header">
-        <div className="landing-page__brand-block">
-          <div className="landing-page__logo-mark" aria-hidden="true">
-            <span>+</span>
-          </div>
-          <div>
-            <p className="landing-page__brand-name">MedScoutX</p>
-            <p className="landing-page__brand-tagline">{currentCopy.badge}</p>
-          </div>
-        </div>
-
-        <div className="landing-page__header-actions">
-          <div className="landing-page__language-switch" aria-label={currentCopy.languageLabel}>
-            <span className="landing-page__language-label">{currentCopy.languageLabel}</span>
-            <div className="landing-page__language-options" role="group" aria-label={currentCopy.languageLabel}>
-              {supportedLanguages.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  className={`landing-page__language-button ${language === option ? "is-active" : ""}`}
-                  onClick={() => setLanguage(option)}
-                  aria-pressed={language === option}
-                >
-                  {option.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="landing-page__auth-links">
-            <Link className="landing-page__ghost-link" to="/login">
-              {currentCopy.login}
-            </Link>
-            <Link className="landing-page__solid-link" to={isLoggedIn ? "/startseite" : "/register"}>
-              {isLoggedIn ? currentCopy.continue : currentCopy.register}
-            </Link>
-          </div>
-        </div>
-      </header>
 
       <main id="landing-main" className="landing-page__main">
         <section className="landing-page__hero">

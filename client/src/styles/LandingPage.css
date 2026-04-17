@@ -396,6 +396,7 @@
 
 .landing-page__footer-links a {
   color: var(--landing-accent-strong);
+  text-decoration: none;
 }
 
 @media (max-width: 1080px) {

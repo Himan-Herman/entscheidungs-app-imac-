@@ -138,18 +138,16 @@ createRoot(document.getElementById("root")).render(
             <Route path="/check-email" element={<CheckEmail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/verified" element={<Verified />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/agb" element={<AGB />} />
+            <Route path="/info" element={<Info />} />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
 
           </Route>
-
-          {/* Seiten außerhalb des Layouts */}
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/disclaimer" element={<Disclaimer />} />
-          <Route path="/agb" element={<AGB />} />
-          <Route path="/info" element={<Info />} />
 
         </Routes>
       </BrowserRouter>

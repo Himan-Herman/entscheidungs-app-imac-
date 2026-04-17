@@ -112,13 +112,11 @@ body {
 
 .legal a {
   color: #1d4ed8; /* gedecktes Blau */
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
 }
 
 .legal a:hover {
-  text-decoration-thickness: 2px;
+  text-decoration: none;
 }
 
 .legal a:focus-visible,
