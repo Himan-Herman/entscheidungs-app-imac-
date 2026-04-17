@@ -5,7 +5,6 @@
   --ms-accent: #0f766e;
   --ms-accent-strong: #0b4f6c;
   --ms-border: rgba(15, 23, 42, 0.1);
-  --ms-edge-fade: linear-gradient(180deg, rgba(243, 247, 250, 0.98), rgba(243, 247, 250, 0));
   --ms-focus: #0ea5e9;
   --ms-panel: rgba(255, 255, 255, 0.82);
   --ms-shadow: 0 18px 38px rgba(15, 23, 42, 0.1);
@@ -17,7 +16,6 @@
   --ms-fg: #e5eef8;
   --ms-muted: #9db0c7;
   --ms-border: rgba(148, 163, 184, 0.18);
-  --ms-edge-fade: linear-gradient(180deg, rgba(10, 18, 31, 0.98), rgba(10, 18, 31, 0));
   --ms-focus: #38bdf8;
   --ms-panel: rgba(15, 23, 42, 0.78);
   --ms-shadow: 0 20px 42px rgba(2, 6, 23, 0.5);
@@ -64,9 +62,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -10px;
-  height: 12px;
-  background: var(--ms-edge-fade);
+  bottom: -2px;
+  height: 4px;
+  background: var(--ms-bg);
   pointer-events: none;
 }
 
