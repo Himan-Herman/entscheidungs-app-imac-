@@ -1,7 +1,7 @@
 
 :root {
   --container: 1100px;
-  --global-header-height: 92px;
+  --global-header-height: 80px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -54,6 +54,6 @@ html, body { margin: 0; }
 
 @media (max-width: 860px) {
   :root {
-    --global-header-height: 86px;
+    --global-header-height: 76px;
   }
 }
