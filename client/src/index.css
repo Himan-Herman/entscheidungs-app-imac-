@@ -8,6 +8,7 @@
   -moz-osx-font-smoothing: grayscale;
   color: #0f172a;
   background: #ffffff;
+  color-scheme: light;
 }
 
 html {
@@ -29,4 +30,26 @@ body {
 
 a {
   color: inherit;
+}
+
+:root[data-theme="dark"] {
+  color: #e5e7eb;
+  background: #020617;
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] html,
+html[data-theme="dark"] {
+  background: #020617;
+}
+
+:root[data-theme="dark"] body,
+html[data-theme="dark"] body {
+  background: #020617;
+  color: #e5e7eb;
+}
+
+:root[data-theme="dark"] #root,
+html[data-theme="dark"] #root {
+  background: #020617;
 }
