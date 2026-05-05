@@ -12,7 +12,7 @@ import { useTheme } from "../ThemeMode";
 import DisclaimerShort from "../components/DisclaimerShort";
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
-import { getAuthHeaders } from "../api/authHeaders";
+import { authFetch } from "../api/authFetch";
 import SpeakButton from "../components/SpeakButton";
 
 const THREAD_API = "/api/koerpersymptomthread";
@@ -176,11 +176,10 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
             : [userMsg],
       };
 
-      const response = await fetch(THREAD_API, {
+      const response = await authFetch(THREAD_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...getAuthHeaders(),
         },
         body: JSON.stringify(payload),
       });

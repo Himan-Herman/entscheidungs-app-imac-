@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import StopIcon from "@mui/icons-material/Stop";
-import { getAuthHeaders } from "../api/authHeaders";
+import { authFetch } from "../api/authFetch";
 import { useLanguage } from "../i18n/LanguageContext";
 
 export default function VoiceInput({ onTranscribed }) {
@@ -87,11 +87,8 @@ export default function VoiceInput({ onTranscribed }) {
       const filename = mimeRef.current === "audio/ogg" ? "aufnahme.ogg" : "aufnahme.webm";
       formData.append("audio", blob, filename);
 
-      const res = await fetch("/api/transcribe", {
+      const res = await authFetch("/api/transcribe", {
         method: "POST",
-        headers: {
-          ...getAuthHeaders(),        //   ←  🔥 WICHTIG FÜR 401-FIX
-        },
         body: formData,
       });
 

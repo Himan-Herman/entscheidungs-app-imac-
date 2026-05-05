@@ -219,6 +219,12 @@ export default function Register() {
 
       const data = await res.json();
 
+      // Preview/Dev: Backend kann skip_verification liefern — dann keine „Check E-Mail“-Seite.
+      if (data.skip_verification) {
+        navigate("/login", { replace: true });
+        return;
+      }
+
       localStorage.setItem("pending_verification_email", payload.user.email);
       localStorage.setItem("pending_verification_user_id", data.user_id);
       navigate("/check-email", { replace: true });

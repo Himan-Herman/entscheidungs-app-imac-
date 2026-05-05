@@ -66,4 +66,17 @@ export default defineConfig({
       },
     },
   },
+
+  // `npm run preview` — gleicher API-Proxy wie im Dev-Server (Backend auf :3000 starten).
+  preview: {
+    host: true,
+    port: 4173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

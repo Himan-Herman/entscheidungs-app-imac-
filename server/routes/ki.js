@@ -29,7 +29,7 @@ router.post('/', async (req, res) => {
     };
 
     const messages = [systemPrompt, ...verlauf];
- image_url
+
     if (base64Bild) {
       messages.push({
         role: "user",

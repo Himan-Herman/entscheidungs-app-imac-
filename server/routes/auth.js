@@ -14,6 +14,11 @@ const authRouter = express.Router();
 
 const INSURANCE_WHITELIST = new Set(["gesetzlich", "privat", "sonstiges"]);
 
+// Preview / lokale Entwicklung: SKIP_EMAIL_VERIFICATION=true setzen → keine E-Mail-Bestätigung nötig,
+// Login funktioniert sofort (auch für ältere Test-Accounts mit verified=false).
+// Produktion: Variable weglassen oder "false" — dann gilt wieder die normale Verifikation per Mail.
+const skipEmailVerification = process.env.SKIP_EMAIL_VERIFICATION === "true";
+
 authRouter.get("/health", (_req, res) => res.json({ ok: true, route: "auth" }));
 
 // POST /api/auth/register
@@ -40,6 +45,23 @@ authRouter.post("/register", async (req, res) => {
 
     if (existing) {
       if (!existing.verified) {
+        if (skipEmailVerification) {
+          await prisma.user.update({
+            where: { id: existing.id },
+            data: {
+              verified: true,
+              verifyToken: null,
+              verifyTokenExpires: null,
+            },
+          });
+          return res.json({
+            ok: true,
+            user_id: existing.id,
+            email_verified: true,
+            skip_verification: true,
+          });
+        }
+
         // neuen Token generieren
         const tokenPlain = crypto.randomBytes(32).toString("hex");
         const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -82,7 +104,7 @@ authRouter.post("/register", async (req, res) => {
         firstName: user.first_name,
         lastName: user.last_name,
         dateOfBirth: new Date(user.date_of_birth),
-        verified: false,
+        verified: skipEmailVerification ? true : false,
         profile: {
           create: {
             phone: profile.phone ?? null,
@@ -123,52 +145,55 @@ authRouter.post("/register", async (req, res) => {
       select: { id: true, firstName: true, email: true },
     });
 
-    // Verifikations-Token setzen (Plain in verifyToken)
-    const tokenPlain = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    if (!skipEmailVerification) {
+      // Verifikations-Token setzen (Plain in verifyToken)
+      const tokenPlain = crypto.randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    await prisma.user.update({
-      where: { id: created.id },
-      data: {
-        verifyToken: tokenPlain,
-        verifyTokenExpires: expires,
-      },
-    });
+      await prisma.user.update({
+        where: { id: created.id },
+        data: {
+          verifyToken: tokenPlain,
+          verifyTokenExpires: expires,
+        },
+      });
 
-    const apiBase = (
-      process.env.API_BASE_URL ?? "http://localhost:3000"
-    ).replace(/\/+$/, "");
-    const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(
-      tokenPlain
-    )}`;
+      const apiBase = (
+        process.env.API_BASE_URL ?? "http://localhost:3000"
+      ).replace(/\/+$/, "");
+      const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(
+        tokenPlain
+      )}`;
 
-    try {
-      if (process.env.EMAIL_ENABLED !== "false") {
-        // WICHTIG: token mitgeben
-        await sendVerificationEmail({
-          to: created.email,
-          token: tokenPlain,
-          link: verifyLink,
-          userName: created.firstName,
+      try {
+        if (process.env.EMAIL_ENABLED !== "false") {
+          // WICHTIG: token mitgeben
+          await sendVerificationEmail({
+            to: created.email,
+            token: tokenPlain,
+            link: verifyLink,
+            userName: created.firstName,
+          });
+        }
+      } catch (err) {
+        console.error(
+          "MAIL SEND FAILED:",
+          err?.code,
+          err?.response?.body ?? err?.message ?? err
+        );
+        return res.status(202).json({
+          ok: false,
+          error: "MAIL_FAILED_CAN_RESEND",
+          message: "Mailversand fehlgeschlagen. Bitte später erneut versuchen.",
         });
       }
-    } catch (err) {
-      console.error(
-        "MAIL SEND FAILED:",
-        err?.code,
-        err?.response?.body ?? err?.message ?? err
-      );
-      return res.status(202).json({
-        ok: false,
-        error: "MAIL_FAILED_CAN_RESEND",
-        message: "Mailversand fehlgeschlagen. Bitte später erneut versuchen.",
-      });
     }
 
     return res.json({
       ok: true,
       user_id: created.id,
-      email_verified: false,
+      email_verified: skipEmailVerification ? true : false,
+      ...(skipEmailVerification ? { skip_verification: true } : {}),
     });
   } catch (e) {
     if (e.code === "P2002" && e.meta?.target?.includes("email")) {
@@ -241,6 +266,18 @@ authRouter.post("/resend-verification", async (req, res) => {
     const emailNorm = email.trim().toLowerCase();
     const u = await prisma.user.findUnique({ where: { email: emailNorm } });
     if (!u || u.verified) return res.json({ ok: true }); // keine Infos leaken
+
+    if (skipEmailVerification) {
+      await prisma.user.update({
+        where: { id: u.id },
+        data: {
+          verified: true,
+          verifyToken: null,
+          verifyTokenExpires: null,
+        },
+      });
+      return res.json({ ok: true, skip_verification: true });
+    }
 
     const tokenPlain = crypto.randomBytes(32).toString("hex");
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -338,18 +375,20 @@ authRouter.post("/login", async (req, res) => {
   const ok = await bcrypt.compare(password, u.passwordHash);
   if (!ok) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
 
-  if (!u.verified) {
+  if (!skipEmailVerification && !u.verified) {
     return res
       .status(403)
       .json({ error: "EMAIL_NOT_VERIFIED", needVerification: true });
   }
 
-  // 🔐 NEU: JWT erzeugen
-  const token = jwt.sign(
-    { userId: u.id },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+  // JWT: optional JWT_EXPIRES_IN (z. B. "30d"); in development längere Lebensdauer als Fallback.
+  const jwtExpires =
+    process.env.JWT_EXPIRES_IN ||
+    (process.env.NODE_ENV === "development" ? "90d" : "7d");
+
+  const token = jwt.sign({ userId: u.id }, process.env.JWT_SECRET, {
+    expiresIn: jwtExpires,
+  });
 
   // Nutzer-ID + Token zurückgeben
   return res.json({ ok: true, userId: u.id, token });

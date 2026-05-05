@@ -4,7 +4,7 @@ import "../styles/SymptomChat.css";
 
 import { useTheme } from "../ThemeMode";
 import { getOrganPrompt } from "./prompt/organPrompts";
-import { getAuthHeaders } from "../api/authHeaders";
+import { authFetch } from "../api/authFetch";
 import DisclaimerShort from "../components/DisclaimerShort";
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
@@ -118,11 +118,10 @@ export default function SymptomChat() {
     setLadeStatus(true);
 
     try {
-      const response = await fetch("/api/textsymptom", {
+      const response = await authFetch("/api/textsymptom", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...getAuthHeaders(),
         },
         body: JSON.stringify({ verlauf: neuerVerlauf, threadId }),
       });

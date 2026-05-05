@@ -8,7 +8,7 @@ import "../styles/BildUpload.css";
 import { useTheme } from "../ThemeMode";
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
-import { getAuthHeaders } from "../api/authHeaders";
+import { authFetch } from "../api/authFetch";
 import DisclaimerShort from "../components/DisclaimerShort";
 import { Image as ImageIcon, Camera, Video } from "lucide-react";
 import SpeakButton from "../components/SpeakButton.jsx";
@@ -229,9 +229,8 @@ export default function BildUpload() {
       const existingThreadId = localStorage.getItem(LS_THREAD_KEY);
       if (existingThreadId) formData.append("threadId", existingThreadId);
 
-      const response = await fetch("/api/symptom", {
+      const response = await authFetch("/api/symptom", {
         method: "POST",
-        headers: getAuthHeaders(), // Content-Type wird automatisch gesetzt
         body: formData,
       });
 

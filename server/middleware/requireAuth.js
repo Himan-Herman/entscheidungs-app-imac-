@@ -34,11 +34,27 @@ export function requireAuth(req, res, next) {
     // 4) weiter zur Route
     next();
   } catch (err) {
-    console.error('Auth-Fehler:', err.message);
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        code: "TOKEN_EXPIRED",
+        message: "Nicht autorisiert: Anmeldesitzung abgelaufen.",
+      });
+    }
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        code: "TOKEN_INVALID",
+        message: "Nicht autorisiert: Ungültiger Token.",
+      });
+    }
+
+    console.error("Auth-Fehler:", err.message);
 
     return res.status(401).json({
       success: false,
-      message: 'Nicht autorisiert: Ungültiger oder abgelaufener Token.',
+      code: "AUTH_ERROR",
+      message: "Nicht autorisiert: Ungültiger oder abgelaufener Token.",
     });
   }
 }

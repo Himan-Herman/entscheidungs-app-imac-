@@ -37,6 +37,8 @@ export default function Login() {
         verifyInvalid: "The verification link is invalid or expired. Please register again.",
         verifyError: "An error occurred while verifying your email. Please try again later.",
         resetOk: "Your password was reset successfully. Please sign in with your new password.",
+        sessionExpired:
+          "Your session has expired. Please sign in again to continue using MedScoutX.",
       }
     : {
         badge: "MedScoutX - Sicherer Zugang",
@@ -60,13 +62,18 @@ export default function Login() {
         verifyInvalid: "Der Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere dich erneut.",
         verifyError: "Beim Bestätigen deiner E-Mail ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
         resetOk: "Dein Passwort wurde erfolgreich zurückgesetzt. Bitte melde dich mit deinem neuen Passwort an.",
+        sessionExpired:
+          "Deine Anmeldesitzung ist abgelaufen. Bitte melde dich erneut an, um MedScoutX weiter zu nutzen.",
       };
+
+  const [sessionExpiredBanner, setSessionExpiredBanner] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const v = params.get("verify");
     const r = params.get("reset");
 
+    setSessionExpiredBanner(params.get("reason") === "session_expired");
     if (v) setVerifyStatus(v);
     if (r) setResetStatus(r);
   }, [location.search]);
@@ -186,6 +193,25 @@ export default function Login() {
     );
   }
 
+  function renderSessionExpiredMessage() {
+    if (!sessionExpiredBanner) return null;
+
+    return (
+      <p
+        style={{
+          margin: "0 0 10px 0",
+          fontSize: 13,
+          padding: "8px 10px",
+          borderRadius: 10,
+          backgroundColor: "rgba(217,119,6,0.12)",
+          color: "#9a3412",
+        }}
+      >
+        {copy.sessionExpired}
+      </p>
+    );
+  }
+
   return (
     <main
       style={{
@@ -269,6 +295,7 @@ export default function Login() {
 
         {renderVerifyMessage()}
         {renderResetMessage()}
+        {renderSessionExpiredMessage()}
 
         {error && (
           <p
