@@ -139,6 +139,33 @@ export function resetSessionKeepLanguage() {
 }
 
 /**
+ * Restores an archived snapshot into the active session (sessionStorage).
+ * Aligns patient locale storage so chat/document strings stay consistent.
+ * @param {{ patientLanguage?: string, doctorLanguage?: string, answers: object }} item
+ * @returns {boolean}
+ */
+export function hydrateSessionFromArchiveItem(item) {
+  if (!item?.answers || typeof item.answers !== "object") return false;
+  const completedStep = PRE_VISIT_QUESTION_STEPS.length - 1;
+  savePreVisitSession({
+    patientLanguage: item.patientLanguage || "de",
+    doctorLanguage:
+      item.doctorLanguage || item.patientLanguage || "de",
+    answers: JSON.parse(JSON.stringify(item.answers)),
+    stepIndex: completedStep,
+  });
+  try {
+    sessionStorage.setItem(
+      PREVISIT_LOCALE_STORAGE_KEY,
+      item.patientLanguage || "de",
+    );
+  } catch {
+    /* ignore */
+  }
+  return true;
+}
+
+/**
  * Removes intake session and selected patient language.
  */
 export function clearFullSession() {

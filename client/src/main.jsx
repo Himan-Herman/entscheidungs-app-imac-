@@ -36,6 +36,7 @@ import PreVisitLanguagePage from "./features/preVisit/pages/PreVisitLanguagePage
 import PreVisitChatPage from "./features/preVisit/pages/PreVisitChatPage.jsx";
 import PreVisitReviewPage from "./features/preVisit/pages/PreVisitReviewPage.jsx";
 import PreVisitDocumentPage from "./features/preVisit/pages/PreVisitDocumentPage.jsx";
+import PreVisitHistoryPage from "./features/preVisit/pages/PreVisitHistoryPage.jsx";
 import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider } from "./i18n/LanguageContext";
 
@@ -151,6 +152,7 @@ createRoot(document.getElementById("root")).render(
 
             {/* Pre-Visit Medical Communication (fourth module — UI only, no auth) */}
             <Route path="/pre-visit/document" element={<PreVisitDocumentPage />} />
+            <Route path="/pre-visit/history" element={<PreVisitHistoryPage />} />
             <Route path="/pre-visit/chat" element={<PreVisitChatPage />} />
             <Route path="/pre-visit/review" element={<PreVisitReviewPage />} />
             <Route path="/pre-visit" element={<PreVisitLanguagePage />} />

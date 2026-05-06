@@ -15,6 +15,7 @@ import {
   setDoctorLanguage,
 } from "../constants/preVisitSession.js";
 import { generatePreVisitPdf } from "../pdf/generatePreVisitPdf.js";
+import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import "../styles/PreVisitDocumentPage.css";
 
 const ui = {
@@ -32,6 +33,16 @@ const ui = {
     pdfDisabled: "PDF erstellen",
     pdfLocalNote:
       "Die PDF-Datei wird lokal in Ihrem Browser erstellt. Es werden keine Daten übertragen.",
+    consentCheckbox:
+      "Ich möchte diese Sitzung lokal im Browser speichern, um sie später erneut ansehen zu können.",
+    consentExpl:
+      "Die Speicherung erfolgt nur lokal in diesem Browser. Es werden keine Daten an MedScoutX übertragen.",
+    saveLocal: "Sitzung lokal speichern",
+    saveSuccess: "Die Sitzung wurde lokal gespeichert.",
+    archiveNote:
+      "Sie können gespeicherte Sitzungen später löschen. Diese Funktion ersetzt keine Patientenakte.",
+    historyLink: "Gespeicherte Sitzungen anzeigen",
+    consentSectionTitle: "Optionale lokale Kopie",
   },
   en: {
     title: "Prepare document for the doctor",
@@ -47,6 +58,15 @@ const ui = {
     pdfDisabled: "Create PDF",
     pdfLocalNote:
       "The PDF file is created locally in your browser. No data is transmitted.",
+    consentCheckbox:
+      "I want to save this session locally in this browser so I can view it again later.",
+    consentExpl:
+      "The session is stored only locally in this browser. No data is transmitted to MedScoutX.",
+    saveLocal: "Save session locally",
+    saveSuccess: "The session was saved locally.",
+    archiveNote:
+      "You can delete saved sessions later. This feature does not replace a medical record.",
+    consentSectionTitle: "Optional local copy",
   },
 };
 
@@ -57,6 +77,8 @@ export default function PreVisitDocumentPage() {
   const t = ui[language] ?? ui.de;
 
   const [session, setSession] = useState(() => loadPreVisitSession());
+  const [consentLocalSave, setConsentLocalSave] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     const s = loadPreVisitSession();
@@ -116,6 +138,19 @@ export default function PreVisitDocumentPage() {
       uiLanguage: language,
       labels: {},
     });
+  }
+
+  function handleSaveArchive() {
+    if (!consentLocalSave) return;
+    const latest = loadPreVisitSession();
+    if (!latest?.answers) return;
+    try {
+      savePreVisitArchiveItem(latest);
+      setSaveSuccess(true);
+      setConsentLocalSave(false);
+    } catch {
+      setSaveSuccess(false);
+    }
   }
 
   if (!session?.answers) {
@@ -233,6 +268,50 @@ export default function PreVisitDocumentPage() {
             </p>
           </div>
         </div>
+
+        <section
+          className="pre-visit-doc__consent"
+          aria-labelledby="previsit-consent-heading"
+        >
+          <h2 id="previsit-consent-heading" className="pre-visit-doc__consent-title">
+            {t.consentSectionTitle}
+          </h2>
+
+          <label className="pre-visit-doc__checkbox-label">
+            <input
+              type="checkbox"
+              className="pre-visit-doc__checkbox"
+              checked={consentLocalSave}
+              onChange={(e) => {
+                setConsentLocalSave(e.target.checked);
+                setSaveSuccess(false);
+              }}
+            />
+            <span className="pre-visit-doc__checkbox-text">{t.consentCheckbox}</span>
+          </label>
+
+          <p className="pre-visit-doc__consent-expl">{t.consentExpl}</p>
+
+          <button
+            type="button"
+            className="pre-visit-doc__btn pre-visit-doc__btn--archive"
+            disabled={!consentLocalSave}
+            onClick={handleSaveArchive}
+          >
+            {t.saveLocal}
+          </button>
+
+          {saveSuccess ? (
+            <p className="pre-visit-doc__save-success" role="status" aria-live="polite">
+              {t.saveSuccess}
+            </p>
+          ) : null}
+
+          <p className="pre-visit-doc__archive-note">{t.archiveNote}</p>
+          <Link className="pre-visit-doc__history-link" to="/pre-visit/history">
+            {t.historyLink}
+          </Link>
+        </section>
       </div>
     </div>
   );

@@ -1,0 +1,204 @@
+.pre-visit-history {
+  --pvh-bg: #f4f5f7;
+  --pvh-card: #ffffff;
+  --pvh-border: rgba(15, 23, 42, 0.1);
+  --pvh-text: #0f172a;
+  --pvh-muted: #475569;
+  --pvh-subtle: #64748b;
+  --pvh-accent: #0e7490;
+  --pvh-danger: #b91c1c;
+  --pvh-shadow: 0 2px 12px rgba(15, 23, 42, 0.06),
+    0 16px 40px rgba(15, 23, 42, 0.05);
+
+  min-height: calc(100vh - 120px);
+  padding: clamp(20px, 4vw, 40px) clamp(14px, 3vw, 24px);
+  box-sizing: border-box;
+  background: var(--pvh-bg);
+  color: var(--pvh-text);
+}
+
+.pre-visit-history__inner {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.pre-visit-history__header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pre-visit-history__title {
+  margin: 0;
+  font-size: clamp(1.35rem, 3.5vw, 1.6rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.pre-visit-history__lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--pvh-muted);
+}
+
+.pre-visit-history__empty {
+  margin: 0;
+  padding: 28px 20px;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--pvh-muted);
+  background: var(--pvh-card);
+  border: 1px solid var(--pvh-border);
+  border-radius: 14px;
+  box-shadow: var(--pvh-shadow);
+}
+
+.pre-visit-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pre-visit-history__card-wrap {
+  margin: 0;
+}
+
+.pre-visit-history__card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 18px 16px;
+  background: var(--pvh-card);
+  border: 1px solid var(--pvh-border);
+  border-radius: 14px;
+  box-shadow: var(--pvh-shadow);
+}
+
+.pre-visit-history__card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 520px) {
+  .pre-visit-history__card-meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px 20px;
+  }
+}
+
+.pre-visit-history__date {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--pvh-text);
+  line-height: 1.4;
+}
+
+.pre-visit-history__date-label {
+  font-weight: 500;
+  color: var(--pvh-subtle);
+}
+
+.pre-visit-history__langs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.88rem;
+}
+
+.pre-visit-history__lang-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.pre-visit-history__lang-key {
+  color: var(--pvh-subtle);
+  min-width: 7.5rem;
+}
+
+.pre-visit-history__lang-val {
+  font-weight: 600;
+  color: var(--pvh-text);
+}
+
+.pre-visit-history__preview {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--pvh-muted);
+  padding-top: 2px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.pre-visit-history__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pre-visit-history__btn {
+  appearance: none;
+  font-family: inherit;
+  font-size: 0.94rem;
+  font-weight: 600;
+  padding: 11px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.pre-visit-history__btn:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.45);
+  outline-offset: 2px;
+}
+
+.pre-visit-history__btn--primary {
+  background: var(--pvh-accent);
+  color: #f8fafc;
+  border-color: rgba(14, 116, 144, 0.25);
+}
+
+.pre-visit-history__btn--primary:hover {
+  filter: brightness(1.05);
+}
+
+.pre-visit-history__btn--danger {
+  background: #fff;
+  color: var(--pvh-danger);
+  border-color: rgba(185, 28, 28, 0.25);
+}
+
+.pre-visit-history__btn--danger:hover {
+  background: rgba(185, 28, 28, 0.05);
+}
+
+.pre-visit-history__footer {
+  padding-top: 4px;
+}
+
+.pre-visit-history__btn--clear {
+  width: 100%;
+  background: transparent;
+  color: var(--pvh-muted);
+  border-color: var(--pvh-border);
+}
+
+.pre-visit-history__btn--clear:hover {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.12);
+}
