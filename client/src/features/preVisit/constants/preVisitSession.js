@@ -49,6 +49,9 @@ export function buildInitialSession(patientLanguage) {
               PRE_VISIT_QUESTION_STEPS.length - 1
             )
           : 0,
+      ...(stored.doctorLanguage
+        ? { doctorLanguage: stored.doctorLanguage }
+        : {}),
     };
   }
 
@@ -57,6 +60,17 @@ export function buildInitialSession(patientLanguage) {
     answers: empty,
     stepIndex: 0,
   };
+}
+
+/**
+ * @param {string} code Language id (e.g. de, en)
+ */
+export function setDoctorLanguage(code) {
+  const s = loadPreVisitSession();
+  if (!s) return null;
+  const next = { ...s, doctorLanguage: code };
+  savePreVisitSession(next);
+  return next;
 }
 
 const answerKeys = () => Object.keys(createEmptyAnswers());

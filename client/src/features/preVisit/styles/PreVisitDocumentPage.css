@@ -1,0 +1,241 @@
+.pre-visit-doc {
+  --pvd-bg: #f4f5f7;
+  --pvd-card: #ffffff;
+  --pvd-border: rgba(15, 23, 42, 0.1);
+  --pvd-text: #0f172a;
+  --pvd-muted: #475569;
+  --pvd-subtle: #64748b;
+  --pvd-accent: #0e7490;
+  --pvd-shadow: 0 2px 12px rgba(15, 23, 42, 0.06),
+    0 16px 40px rgba(15, 23, 42, 0.05);
+
+  min-height: calc(100vh - 120px);
+  padding: clamp(20px, 4vw, 40px) clamp(14px, 3vw, 24px);
+  box-sizing: border-box;
+  background: var(--pvd-bg);
+  color: var(--pvd-text);
+}
+
+.pre-visit-doc__inner {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pre-visit-doc__header {
+  margin: 0;
+}
+
+.pre-visit-doc__title {
+  margin: 0 0 10px;
+  font-size: clamp(1.35rem, 3.5vw, 1.6rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.pre-visit-doc__lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--pvd-muted);
+}
+
+.pre-visit-doc__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pre-visit-doc__label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--pvd-text);
+}
+
+.pre-visit-doc__select {
+  appearance: none;
+  width: 100%;
+  max-width: 420px;
+  padding: 14px 44px 14px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--pvd-text);
+  background-color: #fafbfc;
+  border: 1px solid var(--pvd-border);
+  border-radius: 12px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23475569' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pre-visit-doc__select:hover {
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.pre-visit-doc__select:focus {
+  outline: none;
+  border-color: var(--pvd-accent);
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.2);
+}
+
+.pre-visit-doc__preview {
+  background: var(--pvd-card);
+  border: 1px solid var(--pvd-border);
+  border-radius: 18px;
+  padding: clamp(20px, 4vw, 28px);
+  box-shadow: var(--pvd-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.pre-visit-doc__section-block {
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.pre-visit-doc__section-block:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.pre-visit-doc__section-heading {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--pvd-text);
+}
+
+.pre-visit-doc__block-note {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--pvd-subtle);
+  background: rgba(14, 116, 144, 0.06);
+  border: 1px solid rgba(14, 116, 144, 0.12);
+  border-radius: 10px;
+}
+
+.pre-visit-doc__rows {
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.pre-visit-doc__row {
+  margin: 0;
+}
+
+.pre-visit-doc__row-label {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--pvd-accent);
+}
+
+.pre-visit-doc__row-value {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pre-visit-doc__row-value--empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.pre-visit-doc__footer-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.pre-visit-doc__pdf-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 28rem;
+}
+
+@media (min-width: 520px) {
+  .pre-visit-doc__footer-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+.pre-visit-doc__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid var(--pvd-border);
+  background: #ffffff;
+  color: var(--pvd-text);
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pre-visit-doc__btn:hover {
+  border-color: rgba(14, 116, 144, 0.28);
+  background: #fafbfc;
+}
+
+.pre-visit-doc__btn:focus-visible {
+  outline: 2px solid var(--pvd-accent);
+  outline-offset: 2px;
+}
+
+.pre-visit-doc__btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--pvd-accent);
+  padding-left: 4px;
+  padding-right: 4px;
+  min-height: 44px;
+}
+
+.pre-visit-doc__btn--ghost:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+
+.pre-visit-doc__btn--pdf-active {
+  background: var(--pvd-accent);
+  color: #ffffff;
+  border-color: rgba(14, 116, 144, 0.25);
+  box-shadow: 0 8px 22px rgba(14, 116, 144, 0.2);
+}
+
+.pre-visit-doc__btn--pdf-active:hover {
+  background: #0c6278;
+}
+
+.pre-visit-doc__pdf-hint {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--pvd-muted);
+  max-width: 28rem;
+}

@@ -27,6 +27,7 @@ const ui = {
     newSession: "Neue Sitzung starten",
     wipeSession: "Sitzung vollständig löschen",
     home: "Zur Startseite",
+    prepareDocument: "Dokument vorbereiten",
   },
   en: {
     title: "Summary of your entries",
@@ -40,6 +41,7 @@ const ui = {
     newSession: "Start new session",
     wipeSession: "Delete session completely",
     home: "Back to home",
+    prepareDocument: "Prepare document",
   },
 };
 
@@ -98,6 +100,15 @@ export default function PreVisitReviewPage() {
         <article className="pre-visit-review__card">
           <h1 className="pre-visit-review__title">{t.title}</h1>
           <p className="pre-visit-review__intro">{t.intro}</p>
+
+          <div className="pre-visit-review__prepare-wrap">
+            <Link
+              className="pre-visit-review__prepare-btn"
+              to="/pre-visit/document"
+            >
+              {t.prepareDocument}
+            </Link>
+          </div>
 
           <dl className="pre-visit-review__list">
             {PRE_VISIT_QUESTION_STEPS.map((step, stepIndex) => {
