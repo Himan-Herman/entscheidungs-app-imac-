@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
+import { PREVISIT_LOCALE_STORAGE_KEY } from "../constants/preVisitSession.js";
 import "../styles/PreVisitLanguagePage.css";
 
 const copy = {
@@ -13,7 +14,6 @@ const copy = {
     trust: "Alle Angaben beruhen ausschließlich auf Ihren eigenen Aussagen.",
     languageLabel: "Sprache für Ihre Angaben",
     continue: "Weiter",
-    saved: "Die Sprachauswahl wurde gespeichert.",
     backHome: "Zurück zur Startseite",
   },
   en: {
@@ -24,19 +24,16 @@ const copy = {
     trust: "All information is based solely on your own statements.",
     languageLabel: "Language for your entries",
     continue: "Continue",
-    saved: "Your language selection has been saved.",
     backHome: "Back to home",
   },
 };
 
-const STORAGE_KEY = "medscoutx_previsit_locale";
-
 export default function PreVisitLanguagePage() {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const t = copy[language] ?? copy.de;
 
   const [selectedLocale, setSelectedLocale] = useState("de");
-  const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
     document.title =
@@ -56,11 +53,11 @@ export default function PreVisitLanguagePage() {
 
   function handleContinue() {
     try {
-      sessionStorage.setItem(STORAGE_KEY, selectedLocale);
+      sessionStorage.setItem(PREVISIT_LOCALE_STORAGE_KEY, selectedLocale);
     } catch {
       /* ignore quota / private mode */
     }
-    setConfirmed(true);
+    navigate("/pre-visit/chat");
   }
 
   return (
@@ -88,7 +85,6 @@ export default function PreVisitLanguagePage() {
               id="previsit-language"
               className="pre-visit-card__select"
               value={selectedLocale}
-              disabled={confirmed}
               onChange={(e) => setSelectedLocale(e.target.value)}
             >
               {options.map((o) => (
@@ -103,16 +99,10 @@ export default function PreVisitLanguagePage() {
             <button
               type="button"
               className="pre-visit-card__submit"
-              disabled={confirmed}
               onClick={handleContinue}
             >
               {t.continue}
             </button>
-            {confirmed ? (
-              <p className="pre-visit-card__status" role="status">
-                {t.saved}
-              </p>
-            ) : null}
           </div>
         </article>
 

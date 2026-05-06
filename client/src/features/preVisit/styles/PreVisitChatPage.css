@@ -1,0 +1,198 @@
+.pre-visit-chat {
+  --pvc-bg: #f4f5f7;
+  --pvc-card: #ffffff;
+  --pvc-border: rgba(15, 23, 42, 0.1);
+  --pvc-text: #0f172a;
+  --pvc-muted: #475569;
+  --pvc-subtle: #64748b;
+  --pvc-accent: #0e7490;
+  --pvc-accent-soft: rgba(14, 116, 144, 0.08);
+  --pvc-shadow: 0 2px 12px rgba(15, 23, 42, 0.06),
+    0 16px 40px rgba(15, 23, 42, 0.05);
+
+  min-height: calc(100vh - 120px);
+  padding: clamp(20px, 4vw, 40px) clamp(14px, 3vw, 24px);
+  box-sizing: border-box;
+  background: var(--pvc-bg);
+  color: var(--pvc-text);
+}
+
+.pre-visit-chat__inner {
+  width: min(640px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pre-visit-chat__safety {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--pvc-subtle);
+  background: #ffffff;
+  border: 1px solid var(--pvc-border);
+}
+
+.pre-visit-chat__progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pre-visit-chat__progress-label {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--pvc-muted);
+}
+
+.pre-visit-chat__progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.pre-visit-chat__progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--pvc-accent);
+  transition: width 0.25s ease;
+}
+
+.pre-visit-chat__card {
+  background: var(--pvc-card);
+  border: 1px solid var(--pvc-border);
+  border-radius: 18px;
+  padding: clamp(22px, 4vw, 32px);
+  box-shadow: var(--pvc-shadow);
+}
+
+.pre-visit-chat__section-label {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--pvc-accent);
+}
+
+.pre-visit-chat__title {
+  margin: 0 0 12px;
+  font-size: clamp(1.25rem, 3.5vw, 1.45rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.pre-visit-chat__explanation {
+  margin: 0 0 18px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--pvc-muted);
+}
+
+.pre-visit-chat__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pre-visit-chat__textarea-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--pvc-text);
+}
+
+.pre-visit-chat__textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 14px 16px;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  font-family: inherit;
+  color: var(--pvc-text);
+  background: #fafbfc;
+  border: 1px solid var(--pvc-border);
+  border-radius: 12px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.pre-visit-chat__textarea:focus {
+  outline: none;
+  border-color: var(--pvc-accent);
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.2);
+}
+
+.pre-visit-chat__textarea::placeholder {
+  color: #94a3b8;
+}
+
+.pre-visit-chat__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 22px;
+}
+
+.pre-visit-chat__btn {
+  min-height: 48px;
+  padding: 0 22px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.pre-visit-chat__btn--secondary {
+  color: var(--pvc-muted);
+  background: #ffffff;
+  border-color: var(--pvc-border);
+}
+
+.pre-visit-chat__btn--secondary:hover:not(:disabled) {
+  border-color: rgba(14, 116, 144, 0.35);
+  color: var(--pvc-text);
+}
+
+.pre-visit-chat__btn--primary {
+  color: #ffffff;
+  background: var(--pvc-accent);
+}
+
+.pre-visit-chat__btn--primary:hover:not(:disabled) {
+  background: #0c6278;
+}
+
+.pre-visit-chat__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pre-visit-chat__link {
+  align-self: center;
+  margin-top: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--pvc-accent);
+  text-decoration: none;
+}
+
+.pre-visit-chat__link:hover {
+  text-decoration: underline;
+}
+
+.pre-visit-chat__link:focus-visible {
+  outline: 2px solid var(--pvc-accent);
+  outline-offset: 2px;
+}
