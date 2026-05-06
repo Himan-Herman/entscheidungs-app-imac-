@@ -58,3 +58,13 @@ export function IconAbo() {
     </svg>
   );
 }
+
+/** Pre-Visit / Arztgespräch — Clipboard, ruhig klinisch */
+export function IconPreVisit() {
+  return (
+    <svg {...baseProps} aria-hidden="true">
+      <path d="M9 3.5h6l.5 1.5H18a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h2.5L9 3.5z" />
+      <path d="M9 9h6M9 12.5h6M9 16h4" />
+    </svg>
+  );
+}

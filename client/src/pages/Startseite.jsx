@@ -9,7 +9,7 @@ import {
   IconSymptomChat,
   IconBodyMap,
   IconImageAnalysis,
-  IconAbo,
+  IconPreVisit,
 } from "../components/MedScoutIcons";
 
 export default function Startseite() {
@@ -80,12 +80,12 @@ export default function Startseite() {
             Icon: IconImageAnalysis,
           },
           {
-            key: "abo",
-            title: "Plans and limits",
+            key: "previsit",
+            title: "Prepare for your visit",
             description:
-              "Track your usage and switch to MedScoutX Pro whenever you need more capacity.",
-            to: "/abo",
-            Icon: IconAbo,
+              "Structure your concerns and questions for an appointment — multilingual preparation; no diagnoses or treatment recommendations.",
+            to: "/pre-visit",
+            Icon: IconPreVisit,
           },
         ],
       }
@@ -152,12 +152,12 @@ export default function Startseite() {
             Icon: IconImageAnalysis,
           },
           {
-            key: "abo",
-            title: "Abo und Limits",
+            key: "previsit",
+            title: "Arztgespräch vorbereiten",
             description:
-              "Behalte deine Nutzung im Blick und wechsle bei Bedarf zu MedScoutX Pro.",
-            to: "/abo",
-            Icon: IconAbo,
+              "Strukturiere Beschwerden und Fragen für deinen Termin — mehrsprachig. Keine Diagnosen und keine Behandlungsempfehlungen.",
+            to: "/pre-visit",
+            Icon: IconPreVisit,
           },
         ],
       };

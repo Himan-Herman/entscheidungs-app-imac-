@@ -31,7 +31,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Disclaimer from "./pages/Disclaimer";
 import AGB from "./pages/AGB.jsx";
-import Info from "./pages/Info"; 
+import Info from "./pages/Info";
+import PreVisitLanguagePage from "./features/preVisit/pages/PreVisitLanguagePage.jsx";
 import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider } from "./i18n/LanguageContext";
 
@@ -144,6 +145,13 @@ createRoot(document.getElementById("root")).render(
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/agb" element={<AGB />} />
             <Route path="/info" element={<Info />} />
+
+            {/* Pre-Visit Medical Communication (fourth module — UI only, no auth) */}
+            <Route path="/pre-visit" element={<PreVisitLanguagePage />} />
+            <Route
+              path="/arztgespraech"
+              element={<Navigate to="/pre-visit" replace />}
+            />
 
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

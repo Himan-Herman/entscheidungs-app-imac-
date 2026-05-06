@@ -1,0 +1,177 @@
+/* Pre-Visit module: calm clinical surface (light, independent of global dark theme) */
+.pre-visit-page {
+  --pv-bg: #f6f7f9;
+  --pv-card: #ffffff;
+  --pv-border: rgba(15, 23, 42, 0.1);
+  --pv-text: #0f172a;
+  --pv-muted: #475569;
+  --pv-subtle: #64748b;
+  --pv-accent: #0e7490;
+  --pv-accent-hover: #0c6278;
+  --pv-shadow: 0 4px 24px rgba(15, 23, 42, 0.06),
+    0 24px 48px rgba(15, 23, 42, 0.04);
+  min-height: calc(100vh - 120px);
+  padding: clamp(24px, 5vw, 48px) clamp(16px, 4vw, 32px);
+  box-sizing: border-box;
+  background: var(--pv-bg);
+  color: var(--pv-text);
+}
+
+.pre-visit-page__shell {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+}
+
+.pre-visit-card {
+  background: var(--pv-card);
+  border: 1px solid var(--pv-border);
+  border-radius: 20px;
+  padding: clamp(28px, 5vw, 40px);
+  box-shadow: var(--pv-shadow);
+}
+
+.pre-visit-card__eyebrow {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pv-accent);
+}
+
+.pre-visit-card__title {
+  margin: 0 0 16px;
+  font-size: clamp(1.45rem, 4vw, 1.75rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--pv-text);
+}
+
+.pre-visit-card__lead {
+  margin: 0 0 20px;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--pv-muted);
+}
+
+.pre-visit-card__trust {
+  margin: 0 0 28px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(14, 116, 144, 0.06);
+  border: 1px solid rgba(14, 116, 144, 0.12);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--pv-subtle);
+}
+
+.pre-visit-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.pre-visit-card__label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--pv-text);
+}
+
+.pre-visit-card__select {
+  appearance: none;
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--pv-text);
+  background-color: #fafbfc;
+  border: 1px solid var(--pv-border);
+  border-radius: 12px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23475569' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pre-visit-card__select:hover {
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.pre-visit-card__select:focus {
+  outline: none;
+  border-color: var(--pv-accent);
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.2);
+}
+
+.pre-visit-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pre-visit-card__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  background: var(--pv-accent);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.pre-visit-card__submit:hover:not(:disabled) {
+  background: var(--pv-accent-hover);
+}
+
+.pre-visit-card__submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.pre-visit-card__submit:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.pre-visit-card__status {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #14532d;
+  background: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.15);
+}
+
+.pre-visit-page__back {
+  align-self: center;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--pv-accent);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.pre-visit-page__back:hover {
+  text-decoration: underline;
+}
+
+.pre-visit-page__back:focus-visible {
+  outline: 2px solid var(--pv-accent);
+  outline-offset: 2px;
+}
