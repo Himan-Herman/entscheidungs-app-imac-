@@ -1,5 +1,8 @@
+import legalIt from "../legal/it/index.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalIt,
   header: {
     skip: "Vai al contenuto",
     homeAria: "Vai alla home",

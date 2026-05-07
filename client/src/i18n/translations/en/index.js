@@ -10,6 +10,7 @@ import resetPassword from "./resetPassword.js";
 import landing from "./landing.js";
 import info from "./info.js";
 import preVisit from "./preVisit.js";
+import legal from "../legal/en/index.js";
 
 export default {
   header,
@@ -24,4 +25,5 @@ export default {
   landing,
   info,
   preVisit,
+  legal,
 };

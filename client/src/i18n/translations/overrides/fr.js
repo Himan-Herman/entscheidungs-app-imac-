@@ -1,5 +1,8 @@
+import legalFr from "../legal/fr/index.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalFr,
   header: {
     skip: "Aller au contenu",
     homeAria: "Aller à l’accueil",

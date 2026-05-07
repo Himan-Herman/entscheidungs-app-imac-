@@ -1,5 +1,8 @@
+import legalTr from "../legal/tr/index.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalTr,
   header: {
     skip: "İçeriğe geç",
     homeAria: "Ana sayfaya git",
