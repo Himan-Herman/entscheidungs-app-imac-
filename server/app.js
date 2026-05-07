@@ -14,6 +14,7 @@ import { requireAuth } from './middleware/requireAuth.js';
 import ttsRouter from "./routes/tts.js";
 import kiRouter from "./routes/ki.js";
 import previsitRouter from "./routes/previsit.js";
+import previsitSessionsRouter from "./routes/previsitSessions.js";
 
 const app = express();
 
@@ -46,6 +47,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/mail', mailRoutes);
 app.use("/api/tts", ttsRouter);
 app.use("/api/ki", kiRouter);
+/** Saved Pre-Visit sessions (DB): JWT required; mount before /api/previsit so paths are not swallowed. */
+app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
 app.use("/api/previsit", previsitRouter);
 
 

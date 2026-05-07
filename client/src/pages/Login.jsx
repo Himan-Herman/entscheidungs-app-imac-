@@ -16,9 +16,10 @@ export default function Login() {
 
   const copy = language === "en"
     ? {
-        badge: "MedScoutX - Secure access",
+        badge: "MedScoutX — appointment preparation",
         title: "Login",
-        subtitle: "Sign in with your registered email address to use your MedScoutX features.",
+        subtitle:
+          "Structured preparation for medical conversations — not a substitute for clinical diagnosis.",
         email: "Email",
         emailPlaceholder: "e.g. yourname@mail.com",
         password: "Password",
@@ -41,9 +42,10 @@ export default function Login() {
           "Your session has expired. Please sign in again to continue using MedScoutX.",
       }
     : {
-        badge: "MedScoutX - Sicherer Zugang",
+        badge: "MedScoutX — Vorbereitung fürs Arztgespräch",
         title: "Login",
-        subtitle: "Melde dich mit deiner registrierten E-Mail an, um deine MedScoutX-Funktionen zu nutzen.",
+        subtitle:
+          "Strukturierte Vorbereitung Ihrer Angaben vor dem Termin — ersetzt keine ärztliche Beratung.",
         email: "E-Mail",
         emailPlaceholder: "z.B. deinname@mail.de",
         password: "Passwort",

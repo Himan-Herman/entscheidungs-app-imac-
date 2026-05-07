@@ -333,6 +333,14 @@ body {
   z-index: 1;
 }
 
+@media (min-width: 520px) {
+  .startseite__hero-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}
+
 .startseite__hero-helper {
   font-size: 0.8rem;
   color: #c7d2fe;
@@ -1048,4 +1056,69 @@ body {
     object-fit: cover;   /* Handy: füllt schöner */
     height: 260px;       /* Standard für iPhone-Hero-Videos */
   }
+}
+
+/* Compact “for whom / how it works / safety” strip (logged-in home) */
+.startseite__prep-strip {
+  margin: 1.75rem auto 0;
+  max-width: var(--max-width);
+  padding: 1.25rem 1.35rem 1.4rem;
+  border-radius: var(--radius-xl);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-light);
+}
+
+.startseite__prep-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .startseite__prep-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.startseite__prep-list,
+.startseite__prep-steps {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--color-text-soft);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.startseite__prep-steps {
+  list-style-position: outside;
+}
+
+.startseite__prep-eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.startseite__safety-strip {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.startseite__safety-strip h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--color-text);
+}
+
+.startseite__safety-strip p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--color-text-soft);
 }

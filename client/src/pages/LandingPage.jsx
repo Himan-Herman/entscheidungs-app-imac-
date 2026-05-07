@@ -7,85 +7,94 @@ import "../styles/LandingPage.css";
 
 const copy = {
   de: {
-    languageLabel: "Sprache",
     skip: "Zum Inhalt springen",
-    login: "Login",
-    register: "Registrieren",
-    continue: "Zur App",
-    badge: "KI-gestützte medizinische Orientierung",
-    headline: "MedScoutX bringt Struktur in gesundheitliche Unsicherheit.",
+    badge: "Arztgespräch strukturiert vorbereiten",
+    headline: "Arztgespräche besser vorbereiten – in jeder Sprache.",
     description:
-      "Erhalte eine moderne, vertrauenswürdige Ersteinschätzung mit Symptom-Dialog, Körperkarte und Bildanalyse. MedScoutX hilft dir, Beschwerden besser einzuordnen und den nächsten sinnvollen Schritt vorzubereiten.",
-    primaryCta: "Jetzt kostenlos starten",
-    secondaryCta: "Zum Login",
-    supportText: "Für Patientinnen und Patienten, die schneller Orientierung wollen.",
-    highlightsTitle: "Warum MedScoutX",
-    highlights: [
-      "Geführte Symptom-Erfassung mit klaren, verständlichen Nachfragen.",
-      "Körperkarte für eine schnelle Navigation zur betroffenen Region.",
-      "Visuelle Analyse für medizinische Bilder mit sicherem, ruhigem UX.",
+      "MedScoutX hilft Patientinnen und Patienten, Beschwerden, Medikamente, Dokumente und Fragen strukturiert für den Arzttermin vorzubereiten. Die Angaben können als übersichtliches PDF in der Sprache der Praxis erstellt werden.",
+    primaryCta: "Arztgespräch vorbereiten",
+    secondaryCta: "Mehr erfahren",
+    trustLine:
+      "Keine Diagnose. Keine Therapieempfehlung. Keine Dringlichkeitseinschätzung. Nur strukturierte Vorbereitung Ihrer Angaben.",
+    metricA: "Mehrsprachige Kommunikation",
+    metricB: "PDF für den Arzttermin",
+    metricC: "Sie behalten die Kontrolle",
+    forWhomTitle: "Für wen",
+    forWhom: [
+      "Für Patientinnen und Patienten mit Sprachbarrieren",
+      "Für Praxen mit internationalem Patientenaufkommen",
+      "Für Kliniken und Ambulanzen zur besseren Vorbereitung von Gesprächen",
     ],
-    metricA: "Schneller Einstieg",
-    metricB: "DE / EN bereit",
-    metricC: "Fokus auf Vertrauen",
-    mediaEyebrow: "Produktvorschau",
-    mediaTitle: "So präsentiert sich MedScoutX auf Desktop und mobil.",
+    howTitle: "So funktioniert's",
+    howSteps: [
+      "Sprache wählen",
+      "Angaben strukturiert erfassen",
+      "Arzt-Sprache auswählen",
+      "PDF für den Termin erstellen",
+    ],
+    safetyTitle: "Sicherheitsgrenze",
+    safetyBody:
+      "MedScoutX erstellt keine Diagnose, keine Behandlungsempfehlung und keine Notfallbewertung. Die Anwendung unterstützt ausschließlich bei der strukturierten Vorbereitung und Dokumentation von Patientenaussagen.",
+    mediaEyebrow: "Einblick",
+    mediaTitle: "Klare Oberfläche — auch auf dem Smartphone",
     mediaText:
-      "Die Landingpage führt Besucher direkt zu Registrierung oder Login und schafft gleichzeitig einen starken ersten Eindruck für das Produkt.",
-    sectionTitle: "Ein professioneller Einstieg für neue Nutzer",
-    sectionText:
-      "Die Seite ist bewusst öffentlich gehalten: Besucher können sich zuerst informieren, die Sprache wechseln und dann selbst entscheiden, ob sie sich registrieren oder einloggen möchten.",
-    disclaimer:
-      "MedScoutX ersetzt keine ärztliche Diagnose und ist nicht für Notfälle gedacht.",
+      "Die Darstellung ist bewusst ruhig gehalten: Fokus auf Ihre eigenen Angaben und eine übersichtliche Zusammenstellung für das Gespräch in der Praxis.",
+    footerDisclaimer:
+      "MedScoutX ist keine Diagnose-App und kein Notfalldienst. Bei akuten Beschwerden wenden Sie sich an den ärztlichen Notdienst oder die Notaufnahme.",
     imprint: "Impressum",
     privacy: "Datenschutz",
+    login: "Login",
   },
   en: {
-    languageLabel: "Language",
     skip: "Skip to content",
-    login: "Login",
-    register: "Register",
-    continue: "Open App",
-    badge: "AI-assisted medical guidance",
-    headline: "MedScoutX brings clarity to health uncertainty.",
+    badge: "Structured preparation for your appointment",
+    headline: "Prepare medical appointments better — in any language.",
     description:
-      "Get a modern, trustworthy first orientation with guided symptom dialogue, body mapping, and image analysis. MedScoutX helps people understand symptoms better and prepare the next sensible step.",
-    primaryCta: "Start for free",
-    secondaryCta: "Go to login",
-    supportText: "Built for people who want faster orientation with a calm professional experience.",
-    highlightsTitle: "Why MedScoutX",
-    highlights: [
-      "Guided symptom intake with focused follow-up questions.",
-      "A body map that helps users navigate directly to the affected area.",
-      "Visual analysis for medical images with a composed, trustworthy experience.",
+      "MedScoutX helps patients structure symptoms, medication, documents and questions before a doctor’s appointment. The information can be prepared as a clear PDF in the language of the medical practice.",
+    primaryCta: "Prepare doctor visit",
+    secondaryCta: "Learn more",
+    trustLine:
+      "No diagnosis. No treatment recommendation. No urgency assessment. Only structured preparation of your own statements.",
+    metricA: "Multilingual communication",
+    metricB: "PDF for your visit",
+    metricC: "You stay in control",
+    forWhomTitle: "Who it is for",
+    forWhom: [
+      "For patients facing language barriers",
+      "For practices with an international patient mix",
+      "For hospitals and clinics to support better conversation preparation",
     ],
-    metricA: "Fast onboarding",
-    metricB: "DE / EN ready",
-    metricC: "Trust-first UX",
-    mediaEyebrow: "Product preview",
-    mediaTitle: "A polished MedScoutX introduction on desktop and mobile.",
+    howTitle: "How it works",
+    howSteps: [
+      "Choose language",
+      "Capture details in a structured way",
+      "Select the doctor-facing language",
+      "Create a PDF for the appointment",
+    ],
+    safetyTitle: "Safety boundary",
+    safetyBody:
+      "MedScoutX does not provide a diagnosis, treatment recommendation, or emergency assessment. It only supports structured preparation and documentation of patient statements.",
+    mediaEyebrow: "Preview",
+    mediaTitle: "A calm interface — mobile-first",
     mediaText:
-      "The landing page guides visitors straight to registration or login while creating a strong first impression of the product.",
-    sectionTitle: "A professional public entry point",
-    sectionText:
-      "This page is intentionally public: visitors can learn what MedScoutX does, switch languages, and then decide whether they want to register or sign in.",
-    disclaimer:
-      "MedScoutX does not replace a medical diagnosis and is not intended for emergencies.",
+      "The experience stays professional and readable: your own wording, structured for the clinical team that will see you.",
+    footerDisclaimer:
+      "MedScoutX is not for diagnosis or emergencies. For acute symptoms, contact emergency services or a clinician immediately.",
     imprint: "Imprint",
     privacy: "Privacy",
+    login: "Login",
   },
 };
 
 export default function LandingPage() {
   const { language } = useLanguage();
-
-  const isLoggedIn = !!localStorage.getItem("medscout_user_id");
   const currentCopy = useMemo(() => copy[language] ?? copy.de, [language]);
 
   useEffect(() => {
-    document.title = language === "en"
-      ? "MedScoutX - Medical guidance for your next step"
-      : "MedScoutX - Medizinische Orientierung für den nächsten Schritt";
+    document.title =
+      language === "en"
+        ? "MedScoutX — Prepare for your doctor visit"
+        : "MedScoutX — Arztgespräch vorbereiten";
   }, [language]);
 
   return (
@@ -102,17 +111,26 @@ export default function LandingPage() {
             <p className="landing-page__description">{currentCopy.description}</p>
 
             <div className="landing-page__cta-row">
-              <Link className="landing-page__cta landing-page__cta--primary" to={isLoggedIn ? "/startseite" : "/register"}>
-                {isLoggedIn ? currentCopy.continue : currentCopy.primaryCta}
+              <Link
+                className="landing-page__cta landing-page__cta--primary"
+                to="/pre-visit"
+              >
+                {currentCopy.primaryCta}
               </Link>
-              <Link className="landing-page__cta landing-page__cta--secondary" to="/login">
+              <Link
+                className="landing-page__cta landing-page__cta--secondary"
+                to="/info"
+              >
                 {currentCopy.secondaryCta}
               </Link>
             </div>
 
-            <p className="landing-page__support-text">{currentCopy.supportText}</p>
+            <p className="landing-page__trust-line">{currentCopy.trustLine}</p>
 
-            <div className="landing-page__metrics" aria-label={currentCopy.highlightsTitle}>
+            <div
+              className="landing-page__metrics"
+              aria-label={currentCopy.howTitle}
+            >
               <div className="landing-page__metric-card">
                 <span>01</span>
                 <strong>{currentCopy.metricA}</strong>
@@ -131,7 +149,9 @@ export default function LandingPage() {
           <div className="landing-page__hero-media">
             <div className="landing-page__media-shell">
               <div className="landing-page__media-copy">
-                <p className="landing-page__media-eyebrow">{currentCopy.mediaEyebrow}</p>
+                <p className="landing-page__media-eyebrow">
+                  {currentCopy.mediaEyebrow}
+                </p>
                 <h2>{currentCopy.mediaTitle}</h2>
                 <p>{currentCopy.mediaText}</p>
               </div>
@@ -151,26 +171,49 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="landing-page__details" aria-labelledby="landing-details-title">
-          <div className="landing-page__details-card">
-            <h2 id="landing-details-title">{currentCopy.sectionTitle}</h2>
-            <p>{currentCopy.sectionText}</p>
-          </div>
-
-          <div className="landing-page__details-card">
-            <h2>{currentCopy.highlightsTitle}</h2>
-            <ul className="landing-page__highlights">
-              {currentCopy.highlights.map((item) => (
+        <section
+          className="landing-page__value-grid"
+          aria-labelledby="landing-for-whom"
+        >
+          <div className="landing-page__value-card">
+            <h2 id="landing-for-whom" className="landing-page__value-title">
+              {currentCopy.forWhomTitle}
+            </h2>
+            <ul className="landing-page__value-list">
+              {currentCopy.forWhom.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
+          </div>
+
+          <div className="landing-page__value-card">
+            <h2 className="landing-page__value-title">{currentCopy.howTitle}</h2>
+            <ol className="landing-page__value-steps">
+              {currentCopy.howSteps.map((step, i) => (
+                <li key={step}>
+                  <span className="landing-page__step-num">{i + 1}</span>
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="landing-page__value-card landing-page__value-card--wide">
+            <h2 className="landing-page__value-title">
+              {currentCopy.safetyTitle}
+            </h2>
+            <p className="landing-page__safety-body">{currentCopy.safetyBody}</p>
           </div>
         </section>
       </main>
 
       <footer className="landing-page__footer">
-        <p>{currentCopy.disclaimer}</p>
+        <p>{currentCopy.footerDisclaimer}</p>
         <div className="landing-page__footer-links">
+          <Link to="/login">{currentCopy.login}</Link>
+          <span className="landing-page__footer-sep" aria-hidden="true">
+            ·
+          </span>
           <Link to="/impressum?public=1">{currentCopy.imprint}</Link>
           <Link to="/datenschutz?public=1">{currentCopy.privacy}</Link>
         </div>

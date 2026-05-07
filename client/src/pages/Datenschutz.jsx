@@ -60,17 +60,21 @@ export default function Datenschutz() {
         </p>
         <ul>
           <li>die App installierst und ein Konto anlegst,</li>
+          <li>
+            Informationen für ein Arztgespräch strukturiert erfasst und optional
+            als PDF vorbereitest,
+          </li>
           <li>Symptome über den Text-Chat eingibst,</li>
           <li>Körperregionen über die Body-Map auswählst,</li>
-          <li>Bilder (z. B. Hautfotos oder medizinische Aufnahmen) hochlädst,</li>
-          <li>unser KI-basiertes System zur Einschätzung nutzt.</li>
+          <li>Bilder (z. B. Hautfotos oder medizinische Aufnahmen) hochlädst.</li>
         </ul>
         <p>
-          MedScoutX ist <strong>kein medizinisches Diagnosewerkzeug</strong> und
-          ersetzt keine ärztliche Untersuchung oder Beratung. Die App dient
-          ausschließlich der <strong>orientierenden Einschätzung</strong> und
-          kann dir Hinweise auf mögliche Fachrichtungen geben, an die du dich
-          wenden kannst.
+          MedScoutX ist <strong>kein Diagnose- oder Behandlungswerkzeug</strong> und
+          ersetzt keine ärztliche Untersuchung oder Beratung. Die Anwendung
+          unterstützt bei der <strong>strukturierten Vorbereitung und Dokumentation</strong>{" "}
+          deiner eigenen Angaben vor medizinischen Terminen. Wenn du eine PDF rein lokal
+          erzeugst und dabei keine Übertragung erfolgt, gelten die dort beschriebenen
+          besonderen Hinweise.
         </p>
       </section>
 

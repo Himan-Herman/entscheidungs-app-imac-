@@ -16,6 +16,29 @@ model User {
   profile  UserProfile?
   consent  Consent?
   doctors  Doctor[]
+  preVisitSessions PreVisitSession[]
+}
+
+model PreVisitSession {
+  id              String   @id @default(cuid())
+  userId          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  patientLanguage String
+  doctorLanguage  String?
+
+  title           String?
+  status          String   @default("draft")
+
+  answers         Json
+  aiDoctorVersion Json?
+  aiSafetyNotice  String?
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 

@@ -32,6 +32,8 @@ export default function Register() {
         alert: "Notice:",
         alertText: "MedScoutX is not an emergency service (112 / 911).",
         title: "Create account",
+        subtitle:
+          "Account for structured preparation before appointments — not for diagnosis.",
         required: "Required field",
         email: "Email",
         emailHint: "We use your email for your account and important updates.",
@@ -78,6 +80,8 @@ export default function Register() {
         alert: "Hinweis:",
         alertText: "MedScoutX ist kein Notfalldienst (112 / 116117)!",
         title: "Registrieren",
+        subtitle:
+          "Konto für strukturierte Vorbereitung von Arztgesprächen — keine Diagnose.",
         required: "Pflichtfeld",
         email: "E-Mail",
         emailHint: "Wir verwenden deine E-Mail für dein Konto und wichtige Hinweise.",
@@ -259,6 +263,8 @@ export default function Register() {
         <h1 id="register-heading" className="h1">
           {copy.title}
         </h1>
+
+        <p className="register-page__subtitle">{copy.subtitle}</p>
 
         <p className="required-hint">
           <span className="req">*</span> {copy.required}

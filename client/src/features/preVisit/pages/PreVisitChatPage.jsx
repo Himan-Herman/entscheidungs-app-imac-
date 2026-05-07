@@ -7,6 +7,7 @@ import {
 } from "../constants/questionFlow.js";
 import {
   buildInitialSession,
+  loadPreVisitSession,
   PREVISIT_LOCALE_STORAGE_KEY,
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
@@ -20,6 +21,32 @@ function readLocaleKey() {
     return null;
   }
 }
+
+/** Neutral demo copy for local development only (non-diagnostic). */
+const PREVISIT_DEMO_ANSWERS = {
+  appointmentReason:
+    "Vorbereitung auf einen Arzttermin wegen wiederkehrender Beschwerden.",
+  symptomsOwnWords:
+    "Ich habe seit einiger Zeit wiederkehrende Beschwerden und möchte diese beim Arzt strukturiert besprechen.",
+  onsetAndCourse:
+    "Die Beschwerden bestehen seit etwa zwei Wochen. Der Verlauf ist wechselnd.",
+  medications: "Keine regelmäßigen Medikamente angegeben.",
+  preExistingConditions: "Keine bekannten Vorerkrankungen angegeben.",
+  relevantDocuments: "Keine Dokumente angegeben.",
+  patientQuestions:
+    "Welche Untersuchungen sind sinnvoll? Welche Informationen sollte ich weiter beobachten?",
+};
+
+const devUi = {
+  de: {
+    insertDemo: "Demo-Angaben einfügen",
+    devOnlyNote: "Nur für lokale Entwicklung sichtbar.",
+  },
+  en: {
+    insertDemo: "Insert demo information",
+    devOnlyNote: "Visible only during local development.",
+  },
+};
 
 const ui = {
   de: {
@@ -114,6 +141,25 @@ export default function PreVisitChatPage() {
     }));
   }
 
+  function insertDemoAndGoToReview() {
+    const loc = readLocaleKey() || "de";
+    const prev = loadPreVisitSession();
+    const patientLanguage = prev?.patientLanguage || loc;
+    const completedStep = PRE_VISIT_QUESTION_STEPS.length - 1;
+    const next = {
+      ...(prev || {
+        patientLanguage: loc,
+        answers: {},
+        stepIndex: 0,
+      }),
+      patientLanguage,
+      answers: { ...PREVISIT_DEMO_ANSWERS },
+      stepIndex: completedStep,
+    };
+    savePreVisitSession(next);
+    navigate("/pre-visit/review");
+  }
+
   const title = pickLocalized(step.title, session.patientLanguage);
   const explanation = pickLocalized(
     step.explanation,
@@ -191,6 +237,21 @@ export default function PreVisitChatPage() {
             </button>
           </div>
         </article>
+
+        {import.meta.env.DEV ? (
+          <div className="pre-visit-chat__dev-demo">
+            <button
+              type="button"
+              className="pre-visit-chat__btn pre-visit-chat__btn--demo"
+              onClick={insertDemoAndGoToReview}
+            >
+              {devUi[language]?.insertDemo ?? devUi.de.insertDemo}
+            </button>
+            <p className="pre-visit-chat__dev-note">
+              {devUi[language]?.devOnlyNote ?? devUi.de.devOnlyNote}
+            </p>
+          </div>
+        ) : null}
 
         <Link className="pre-visit-chat__link" to="/pre-visit">
           {tUi.changeLanguage}

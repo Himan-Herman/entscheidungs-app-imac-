@@ -196,3 +196,43 @@
   outline: 2px solid var(--pvc-accent);
   outline-offset: 2px;
 }
+
+.pre-visit-chat__dev-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(15, 23, 42, 0.12);
+}
+
+.pre-visit-chat__btn--demo {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--pvc-muted);
+  background: transparent;
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  border-radius: 10px;
+}
+
+.pre-visit-chat__btn--demo:hover {
+  border-color: rgba(14, 116, 144, 0.35);
+  color: var(--pvc-text);
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.pre-visit-chat__btn--demo:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.35);
+  outline-offset: 2px;
+}
+
+.pre-visit-chat__dev-note {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--pvc-subtle);
+  max-width: 22rem;
+}
