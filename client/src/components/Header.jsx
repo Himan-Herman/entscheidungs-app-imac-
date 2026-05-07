@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Home, LogOut, Menu, Moon, SunMedium } from "lucide-react";
 import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
-import LanguageSwitcher from "./LanguageSwitcher";
+import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
+import { getMessages } from "../i18n/translations";
 import "../styles/Header.css";
 
 export default function Header() {
@@ -14,31 +15,11 @@ export default function Header() {
   const { language } = useLanguage();
   const { theme, toggleTheme } = useTheme();
 
+  const copy = useMemo(() => getMessages(language).header, [language]);
+
   const isLoggedIn = !!localStorage.getItem("medscout_token");
   const homePath = isLoggedIn ? "/startseite" : "/";
-  const copy = language === "en"
-      ? {
-        skip: "Skip to content",
-        homeAria: "Go to home page",
-        navToggle: "Toggle navigation",
-        nav: "Main navigation",
-        appLabel: "Professional workspace",
-        home: "Home",
-        logout: "Log out",
-        language: "Language",
-        theme: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
-      }
-    : {
-        skip: "Zum Inhalt springen",
-        homeAria: "Zur Startseite",
-        navToggle: "Navigation umschalten",
-        nav: "Hauptnavigation",
-        appLabel: "Professioneller Bereich",
-        home: "Home",
-        logout: "Ausloggen",
-        language: "Sprache",
-        theme: theme === "dark" ? "Auf Hellmodus umschalten" : "Auf Dunkelmodus umschalten",
-      };
+  const themeLabel = theme === "dark" ? copy.themeLight : copy.themeDark;
 
   useEffect(() => {
     setOpen(false);
@@ -78,14 +59,14 @@ export default function Header() {
               type="button"
               className="ms-theme-toggle"
               onClick={toggleTheme}
-              aria-label={copy.theme}
-              title={copy.theme}
+              aria-label={themeLabel}
+              title={themeLabel}
             >
               {theme === "dark" ? <SunMedium size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
             </button>
 
             <div className="ms-header__language">
-              <LanguageSwitcher label={copy.language} compact />
+              <GlobalLanguageSelector label={copy.languageLabel} compact />
             </div>
           </div>
 

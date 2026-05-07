@@ -30,6 +30,7 @@ model PreVisitSession {
 
   title           String?
   status          String   @default("draft")
+  pdfDownloaded   Boolean  @default(false)
 
   answers         Json
   aiDoctorVersion Json?

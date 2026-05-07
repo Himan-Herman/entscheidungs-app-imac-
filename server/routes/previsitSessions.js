@@ -73,6 +73,7 @@ function sessionJson(row) {
     doctorLanguage: row.doctorLanguage,
     title: row.title,
     status: row.status,
+    pdfDownloaded: row.pdfDownloaded,
     answers: row.answers,
     aiDoctorVersion: row.aiDoctorVersion ?? null,
     aiSafetyNotice: row.aiSafetyNotice ?? null,
@@ -122,7 +123,16 @@ router.post("/", async (req, res) => {
     aiSafetyNotice,
     title,
     status,
+    pdfDownloaded: pdfDownloadedBody,
   } = body;
+
+  if (
+    pdfDownloadedBody !== undefined &&
+    pdfDownloadedBody !== null &&
+    typeof pdfDownloadedBody !== "boolean"
+  ) {
+    return res.status(400).json({ ok: false, error: "pdfDownloaded_invalid" });
+  }
 
   if (!patientLanguage || typeof patientLanguage !== "string" || !patientLanguage.trim()) {
     return res.status(400).json({ ok: false, error: "patientLanguage_required" });
@@ -152,6 +162,11 @@ router.post("/", async (req, res) => {
     aiNotice = aiSafetyNotice;
   }
 
+  let pdfDownloaded = pdfDownloadedBody === true;
+  if (st.value === "pdf_created") {
+    pdfDownloaded = true;
+  }
+
   try {
     const created = await prisma.preVisitSession.create({
       data: {
@@ -160,6 +175,7 @@ router.post("/", async (req, res) => {
         doctorLanguage: docLang,
         title: ti.value,
         status: st.value,
+        pdfDownloaded,
         answers,
         aiDoctorVersion:
           aiDoctorVersion === undefined || aiDoctorVersion === null ? null : aiDoctorVersion,
@@ -262,6 +278,20 @@ router.put("/:id", async (req, res) => {
       const st = normalizeStatus(body.status, null);
       if (!st.ok) return res.status(400).json({ ok: false, error: st.error });
       data.status = st.value;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(body, "pdfDownloaded")) {
+      const p = body.pdfDownloaded;
+      if (p !== true && p !== false) {
+        return res.status(400).json({ ok: false, error: "pdfDownloaded_invalid" });
+      }
+      data.pdfDownloaded = p;
+    }
+
+    const nextStatus =
+      data.status !== undefined ? data.status : existing.status;
+    if (nextStatus === "pdf_created") {
+      data.pdfDownloaded = true;
     }
 
     if (Object.keys(data).length === 0) {

@@ -1,13 +1,42 @@
+.ms-footer {
+  margin-top: auto;
+  padding: 14px 16px 20px;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
 
-.ms-footer-link {
-    margin: 0 10px;
-    text-decoration: none;  
-    color: #0b64d7;            
-    transition: color 0.3s ease;
-  }
-  
-  .ms-footer-link:hover,
-  .ms-footer-link:focus {
-    color: #af05d1;          
-  }
-  
+.ms-footer__inner {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.ms-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 4px;
+  font-size: 13px;
+}
+
+.ms-footer__link {
+  margin: 0 8px;
+  text-decoration: none;
+  color: #0f766e;
+  font-weight: 500;
+  transition:
+    color 0.15s ease,
+    text-decoration 0.15s ease;
+}
+
+.ms-footer__link:hover,
+.ms-footer__link:focus-visible {
+  color: #0d9488;
+  text-decoration: underline;
+  outline: none;
+}
+
+.ms-footer__sep {
+  color: #cbd5e1;
+  user-select: none;
+}

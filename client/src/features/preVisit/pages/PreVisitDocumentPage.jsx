@@ -251,14 +251,19 @@ export default function PreVisitDocumentPage() {
   function handleDownloadPdf() {
     const latest = loadPreVisitSession();
     if (!latest?.answers) return;
-    const next = { ...latest, pdfDownloaded: true };
-    savePreVisitSession(next);
-    setSession(next);
-    generatePreVisitPdf({
-      session: next,
-      uiLanguage: language,
-      labels: {},
-    });
+    try {
+      const ok = generatePreVisitPdf({
+        session: latest,
+        uiLanguage: language,
+        labels: {},
+      });
+      if (!ok) return;
+      const next = { ...latest, pdfDownloaded: true };
+      savePreVisitSession(next);
+      setSession(next);
+    } catch {
+      /* PDF generation failed — do not set pdfDownloaded */
+    }
   }
 
   async function handleSaveToAccount() {
@@ -289,7 +294,8 @@ export default function PreVisitDocumentPage() {
             ? latest.aiSafetyNotice.trim()
             : null,
         title: language === "en" ? t.sessionTitleEn : t.sessionTitleDe,
-        status: "pdf_created",
+        status: latest.pdfDownloaded ? "pdf_created" : "draft",
+        pdfDownloaded: !!latest.pdfDownloaded,
       };
 
       const res = await authFetch("/api/previsit/sessions", {

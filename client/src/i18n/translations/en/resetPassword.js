@@ -1,0 +1,15 @@
+export default {
+  title: "Create a new password",
+  text: "Please enter a new secure password.",
+  label: "New password",
+  placeholder: "At least 8 characters",
+  hint: "Password must be at least 8 characters. A number and symbol are recommended.",
+  save: "Save password",
+  saving: "Saving...",
+  invalidLink: "Invalid or missing link.",
+  shortPassword: "The password must be at least 8 characters long.",
+  unknownError: "Unknown error.",
+  requestError: "Error: ",
+  success: "Your password was reset successfully. Redirecting...",
+  network: "Network error. Please try again later.",
+};

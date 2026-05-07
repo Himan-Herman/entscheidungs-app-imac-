@@ -1,0 +1,15 @@
+export default {
+  title: "Neues Passwort setzen",
+  text: "Bitte gib ein neues, sicheres Passwort ein.",
+  label: "Neues Passwort",
+  placeholder: "Mindestens 8 Zeichen",
+  hint: "Passwort mindestens 8 Zeichen - idealerweise mit Zahl und Sonderzeichen.",
+  save: "Passwort speichern",
+  saving: "Speichere...",
+  invalidLink: "Ungültiger oder fehlender Link.",
+  shortPassword: "Das Passwort muss mindestens 8 Zeichen lang sein.",
+  unknownError: "Unbekannter Fehler.",
+  requestError: "Fehler: ",
+  success: "Dein Passwort wurde erfolgreich zurückgesetzt. Weiterleitung...",
+  network: "Netzwerkfehler. Bitte später erneut versuchen.",
+};

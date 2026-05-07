@@ -146,6 +146,12 @@ function hydrateServerSessionToLocal(record) {
     );
   }
 
+  if (record.pdfDownloaded === true) {
+    payload.pdfDownloaded = true;
+  } else if (record.status === "pdf_created") {
+    payload.pdfDownloaded = true;
+  }
+
   savePreVisitSession(payload);
   try {
     sessionStorage.setItem(PREVISIT_LOCALE_STORAGE_KEY, patientLang);

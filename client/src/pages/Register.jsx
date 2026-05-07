@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
 import "../styles/Register.css";
 
 const pwdRule =
@@ -27,103 +27,7 @@ export default function Register() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
-  const copy = language === "en"
-    ? {
-        alert: "Notice:",
-        alertText: "MedScoutX is not an emergency service (112 / 911).",
-        title: "Create account",
-        subtitle:
-          "Account for structured preparation before appointments — not for diagnosis.",
-        required: "Required field",
-        email: "Email",
-        emailHint: "We use your email for your account and important updates.",
-        password: "Password",
-        passwordPlaceholder: "At least 8 characters, number and letter",
-        passwordHint: "At least 8 characters, including a number and a letter.",
-        firstName: "First name",
-        lastName: "Last name",
-        birthDate: "Date of birth",
-        minorTitle: "Notice:",
-        minorText: "You are not yet of legal age. MedScoutX may only be used by people aged 18 and over.",
-        gender: "Gender",
-        genderPlaceholder: "Please choose...",
-        genderFemale: "Female",
-        genderMale: "Male",
-        genderDiverse: "Diverse",
-        genderNone: "Prefer not to say",
-        consents: "Consents",
-        ageConfirm: "I confirm that I am at least 18 years old",
-        termsOpen: "Open terms and conditions",
-        privacyOpen: "Open privacy policy",
-        disclaimerOpen: "Open medical disclaimer",
-        legalTextStart: "I have read the",
-        legalTextMiddle: "privacy policy",
-        legalTextEnd: "and agree to them.",
-        submit: "Continue",
-        saving: "Saving...",
-        cancel: "Cancel",
-        imprint: "Imprint",
-        privacy: "Privacy",
-        disclaimer: "Disclaimer",
-        terms: "Terms",
-        language: "Language",
-        enterBirth: "Please enter your date of birth.",
-        underage: "You are not yet of legal age. MedScoutX may only be used by people aged 18 and over.",
-        confirmAge: "Please confirm that you are at least 18 years old.",
-        checkFields: "Please check all required fields and consents.",
-        emailExists: "This email is already registered.",
-        failed: "Registration failed.",
-        requestError: "Registration error.",
-        srRequired: "(required field)",
-      }
-    : {
-        alert: "Hinweis:",
-        alertText: "MedScoutX ist kein Notfalldienst (112 / 116117)!",
-        title: "Registrieren",
-        subtitle:
-          "Konto für strukturierte Vorbereitung von Arztgesprächen — keine Diagnose.",
-        required: "Pflichtfeld",
-        email: "E-Mail",
-        emailHint: "Wir verwenden deine E-Mail für dein Konto und wichtige Hinweise.",
-        password: "Passwort",
-        passwordPlaceholder: "Mind. 8 Zeichen, Zahl und Buchstabe",
-        passwordHint: "Mindestens 8 Zeichen, inklusive Zahl und Buchstabe.",
-        firstName: "Vorname",
-        lastName: "Nachname",
-        birthDate: "Geburtsdatum",
-        minorTitle: "Hinweis:",
-        minorText: "Du bist noch nicht volljährig. MedScoutX darf nur von Personen ab 18 Jahren genutzt werden.",
-        gender: "Geschlecht",
-        genderPlaceholder: "Bitte wählen...",
-        genderFemale: "Weiblich",
-        genderMale: "Männlich",
-        genderDiverse: "Divers",
-        genderNone: "Keine Angabe",
-        consents: "Einwilligungen",
-        ageConfirm: "Ich bestätige, dass ich mindestens 18 Jahre alt bin",
-        termsOpen: "Allgemeine Geschäftsbedingungen öffnen",
-        privacyOpen: "Datenschutzerklärung öffnen",
-        disclaimerOpen: "Medizinischen Disclaimer öffnen",
-        legalTextStart: "Ich habe die",
-        legalTextMiddle: "die Datenschutzerklärung",
-        legalTextEnd: "und den medizinischen Disclaimer gelesen und stimme diesen hiermit zu.",
-        submit: "Weiter",
-        saving: "Speichere...",
-        cancel: "Abbrechen",
-        imprint: "Impressum",
-        privacy: "Datenschutz",
-        disclaimer: "Disclaimer",
-        terms: "AGB",
-        language: "Sprache",
-        enterBirth: "Bitte gib dein Geburtsdatum an.",
-        underage: "Du bist noch nicht volljährig. MedScoutX darf nur von Personen ab 18 Jahren genutzt werden.",
-        confirmAge: "Bitte bestätige, dass du mindestens 18 Jahre alt bist.",
-        checkFields: "Bitte prüfe alle Pflichtfelder und Zustimmungen.",
-        emailExists: "Diese E-Mail ist bereits registriert.",
-        failed: "Registrierung fehlgeschlagen.",
-        requestError: "Fehler bei der Registrierung.",
-        srRequired: "(Pflichtfeld)",
-      };
+  const copy = useMemo(() => getMessages(language).register, [language]);
 
   function setField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -245,19 +149,8 @@ export default function Register() {
         className="register-container"
         aria-labelledby="register-heading"
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-            flexWrap: "wrap",
-          }}
-        >
-          <div className="alert-bar" role="note" style={{ margin: 0, flex: 1 }}>
-            <strong>{copy.alert}</strong> {copy.alertText}
-          </div>
-          <LanguageSwitcher label={copy.language} compact />
+        <div className="alert-bar" role="note">
+          <strong>{copy.alert}</strong> {copy.alertText}
         </div>
 
         <h1 id="register-heading" className="h1">

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -11,39 +12,8 @@ export default function ResetPassword() {
   const navigate = useNavigate();
   const { language } = useLanguage();
 
-  const copy = language === "en"
-    ? {
-        title: "Create a new password",
-        text: "Please enter a new secure password.",
-        label: "New password",
-        placeholder: "At least 8 characters",
-        hint: "Password must be at least 8 characters. A number and symbol are recommended.",
-        save: "Save password",
-        saving: "Saving...",
-        invalidLink: "Invalid or missing link.",
-        shortPassword: "The password must be at least 8 characters long.",
-        unknownError: "Unknown error.",
-        requestError: "Error: ",
-        success: "Your password was reset successfully. Redirecting...",
-        network: "Network error. Please try again later.",
-        language: "Language",
-      }
-    : {
-        title: "Neues Passwort setzen",
-        text: "Bitte gib ein neues, sicheres Passwort ein.",
-        label: "Neues Passwort",
-        placeholder: "Mindestens 8 Zeichen",
-        hint: "Passwort mindestens 8 Zeichen - idealerweise mit Zahl und Sonderzeichen.",
-        save: "Passwort speichern",
-        saving: "Speichere...",
-        invalidLink: "Ungültiger oder fehlender Link.",
-        shortPassword: "Das Passwort muss mindestens 8 Zeichen lang sein.",
-        unknownError: "Unbekannter Fehler.",
-        requestError: "Fehler: ",
-        success: "Dein Passwort wurde erfolgreich zurückgesetzt. Weiterleitung...",
-        network: "Netzwerkfehler. Bitte später erneut versuchen.",
-        language: "Sprache",
-      };
+  const copy = useMemo(() => getMessages(language).resetPassword, [language]);
+  const navCopy = useMemo(() => getMessages(language).header, [language]);
 
   useEffect(() => {
     const qs = new URLSearchParams(window.location.search);
@@ -128,7 +98,7 @@ export default function ResetPassword() {
             marginBottom: 18,
           }}
         >
-          <LanguageSwitcher label={copy.language} compact />
+          <GlobalLanguageSelector label={navCopy.languageLabel} compact />
         </div>
 
         <h1

@@ -1,43 +1,55 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-
-const SUPPORTED_LANGUAGES = ["de", "en"];
-const STORAGE_KEY = "medscout_language";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import {
+  isSupportedLanguage,
+  LANGUAGE_STORAGE_KEY,
+  resolveInitialLanguage,
+  SUPPORTED_LANGUAGE_CODES,
+} from "./localeConfig";
 
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState(() => {
+  const [language, setLanguageState] = useState(() => {
     if (typeof window === "undefined") {
       return "de";
     }
-
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (SUPPORTED_LANGUAGES.includes(stored)) {
-      return stored;
-    }
-
-    const browserLanguage = window.navigator.language?.toLowerCase().startsWith("en")
-      ? "en"
-      : "de";
-
-    return browserLanguage;
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return resolveInitialLanguage(stored, window.navigator.language);
   });
+
+  const setLanguage = useCallback((next) => {
+    const code = typeof next === "string" ? next.toLowerCase() : "";
+    setLanguageState(isSupportedLanguage(code) ? code : "en");
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
-    localStorage.setItem(STORAGE_KEY, language);
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    } catch {
+      /* ignore quota / private mode */
+    }
   }, [language]);
 
   const value = useMemo(
     () => ({
       language,
       setLanguage,
-      supportedLanguages: SUPPORTED_LANGUAGES,
+      supportedLanguages: SUPPORTED_LANGUAGE_CODES,
     }),
-    [language]
+    [language, setLanguage]
   );
 
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  return (
+    <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+  );
 }
 
 export function useLanguage() {

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -10,35 +11,8 @@ export default function ForgotPassword() {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const copy = language === "en"
-    ? {
-        title: "Reset password",
-        text: "Enter your email address and we will send you a reset link.",
-        email: "Email",
-        placeholder: "yourname@mail.com",
-        submit: "Request link",
-        submitting: "Sending...",
-        back: "Back to login",
-        badge: "Secure account recovery",
-        success: "If the email exists, a reset link has been sent.",
-        error: "Something went wrong. Please try again later.",
-        network: "Network error. Please try again later.",
-        language: "Language",
-      }
-    : {
-        title: "Passwort zurücksetzen",
-        text: "Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen.",
-        email: "E-Mail",
-        placeholder: "deinname@mail.de",
-        submit: "Link anfordern",
-        submitting: "Senden...",
-        back: "Zurück zum Login",
-        badge: "Sichere Kontowiederherstellung",
-        success: "Wenn die E-Mail existiert, wurde ein Link zum Zurücksetzen versendet.",
-        error: "Fehler - bitte später erneut versuchen.",
-        network: "Netzwerkfehler - bitte später erneut versuchen.",
-        language: "Sprache",
-      };
+  const copy = useMemo(() => getMessages(language).forgotPassword, [language]);
+  const navCopy = useMemo(() => getMessages(language).header, [language]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -118,7 +92,7 @@ export default function ForgotPassword() {
             {copy.badge}
           </div>
 
-          <LanguageSwitcher label={copy.language} compact />
+          <GlobalLanguageSelector label={navCopy.languageLabel} compact />
         </div>
 
         <h1 style={{ marginBottom: 12 }}>{copy.title}</h1>

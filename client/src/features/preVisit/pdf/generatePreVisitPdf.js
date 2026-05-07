@@ -63,12 +63,14 @@ function structuredFieldTitle(key, uiLanguage) {
  * @param {object} params.session — medscoutx_previsit_session shape
  * @param {'de'|'en'} params.uiLanguage — app UI language for labels
  * @param {object} [params.labels] — optional overrides (merged with defaults)
+ * @returns {boolean} true if the PDF was built and download triggered
  */
 export function generatePreVisitPdf({ session, uiLanguage, labels: labelOverrides = {} }) {
   if (!session?.answers) {
-    return;
+    return false;
   }
 
+  try {
   const L = { ...defaultLabels(uiLanguage), ...labelOverrides };
   const answers = session.answers;
   const patientLang = session.patientLanguage || "de";
@@ -191,4 +193,9 @@ export function generatePreVisitPdf({ session, uiLanguage, labels: labelOverride
   }
 
   doc.save(L.pdfFilename);
+  return true;
+  } catch (err) {
+    console.error("[generatePreVisitPdf]", err);
+    return false;
+  }
 }
