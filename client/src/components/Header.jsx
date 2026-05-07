@@ -64,7 +64,9 @@ export default function Header() {
             onClick={() => navigate(homePath)}
             aria-label={copy.homeAria}
           >
-            <img src={logo} alt="MedScout Logo" />
+            <span className="ms-logo__mark">
+              <img src={logo} alt="" />
+            </span>
             <span className="ms-logo__copy">
               <span className="ms-logo__title">MedScoutX</span>
               <span className="ms-logo__subtitle">{copy.appLabel}</span>
