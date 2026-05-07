@@ -1,5 +1,14 @@
+import legalFa from "../legal/fa/index.js";
+import landing from "./fa.landing.js";
+import info from "./fa.info.js";
+import preVisit from "./fa.preVisit.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalFa,
+  landing,
+  info,
+  preVisit,
   header: {
     skip: "رفتن به محتوا",
     homeAria: "رفتن به صفحهٔ اصلی",

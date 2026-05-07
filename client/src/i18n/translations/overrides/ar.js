@@ -1,5 +1,14 @@
+import legalAr from "../legal/ar/index.js";
+import landing from "./ar.landing.js";
+import info from "./ar.info.js";
+import preVisit from "./ar.preVisit.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalAr,
+  landing,
+  info,
+  preVisit,
   header: {
     skip: "تخطّي إلى المحتوى",
     homeAria: "الانتقال إلى الصفحة الرئيسية",

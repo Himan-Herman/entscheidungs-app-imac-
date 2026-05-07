@@ -1,5 +1,8 @@
+import legalPt from "../legal/pt/index.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalPt,
   header: {
     skip: "Ir para o conteúdo",
     homeAria: "Ir para a página inicial",

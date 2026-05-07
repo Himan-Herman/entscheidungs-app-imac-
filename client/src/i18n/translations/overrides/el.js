@@ -1,5 +1,8 @@
+import legalEl from "../legal/el/index.js";
+
 /** Ελληνικά — partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalEl,
   header: {
     skip: "Μετάβαση στο περιεχόμενο",
     homeAria: "Μετάβαση στην αρχική σελίδα",
