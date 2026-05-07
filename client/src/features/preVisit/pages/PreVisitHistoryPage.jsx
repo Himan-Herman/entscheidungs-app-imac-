@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
+import { getMessages } from "../../../i18n/translations/index.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import { hydrateSessionFromArchiveItem } from "../constants/preVisitSession.js";
 import {
@@ -11,45 +12,10 @@ import {
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitHistoryPage.css";
 
-const copy = {
-  de: {
-    title: "Lokal gespeicherte Sitzungen",
-    expl:
-      "Diese Sitzungen sind nur in diesem Browser gespeichert. Sie wurden nicht an MedScoutX übertragen.",
-    privacyNote:
-      "Lokal gespeicherte Sitzungen bleiben nur auf diesem Gerät und in diesem Browser.",
-    empty: "Es sind keine lokal gespeicherten Sitzungen vorhanden.",
-    patientLang: "Patientensprache",
-    doctorLang: "Arztsprache",
-    savedAt: "Gespeichert",
-    view: "Ansehen",
-    delete: "Löschen",
-    clearAll: "Alle gespeicherten Sitzungen löschen",
-    clearConfirm:
-      "Alle lokal gespeicherten Sitzungen unwiderruflich löschen?",
-  },
-  en: {
-    title: "Locally saved sessions",
-    expl:
-      "These sessions are stored only in this browser. They were not transmitted to MedScoutX.",
-    privacyNote:
-      "Locally saved sessions remain only on this device and in this browser.",
-    empty: "There are no locally saved sessions.",
-    patientLang: "Patient language",
-    doctorLang: "Doctor language",
-    savedAt: "Saved",
-    view: "View",
-    delete: "Delete",
-    clearAll: "Delete all saved sessions",
-    clearConfirm:
-      "Permanently delete all locally saved sessions? This cannot be undone.",
-  },
-};
-
 function langLabel(code, uiLang) {
   const opt = PRE_VISIT_LANGUAGE_OPTIONS.find((o) => o.id === code);
   if (!opt) return code || "—";
-  return uiLang === "en" ? opt.labelEn : opt.labelDe;
+  return uiLang === "de" ? opt.labelDe : opt.labelEn;
 }
 
 function previewFromAnswers(answers, maxLen = 140) {
@@ -66,10 +32,11 @@ function formatSaved(iso, uiLang) {
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "—";
-    return new Intl.DateTimeFormat(
-      uiLang === "en" ? "en-GB" : "de-DE",
-      { dateStyle: "medium", timeStyle: "short" },
-    ).format(d);
+    const localeTag = uiLang === "de" ? "de-DE" : "en-GB";
+    return new Intl.DateTimeFormat(localeTag, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(d);
   } catch {
     return "—";
   }
@@ -78,7 +45,7 @@ function formatSaved(iso, uiLang) {
 export default function PreVisitHistoryPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
-  const t = copy[language] ?? copy.de;
+  const t = useMemo(() => getMessages(language).preVisit.localHistory, [language]);
 
   const [items, setItems] = useState(() => listPreVisitArchiveItems());
 
@@ -87,11 +54,8 @@ export default function PreVisitHistoryPage() {
   }, []);
 
   useEffect(() => {
-    document.title =
-      language === "en"
-        ? "Saved sessions — Pre-Visit — MedScoutX"
-        : "Gespeicherte Sitzungen — Pre-Visit — MedScoutX";
-  }, [language]);
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   const sorted = useMemo(() => {
     return [...items].sort((a, b) => {
@@ -136,7 +100,7 @@ export default function PreVisitHistoryPage() {
         ) : (
           <ul
             className="pre-visit-history__list"
-            aria-label={language === "en" ? "Saved sessions" : "Gespeicherte Sitzungen"}
+            aria-label={t.listAriaLabel}
           >
             {sorted.map((item) => (
               <li key={item.id} className="pre-visit-history__card-wrap">

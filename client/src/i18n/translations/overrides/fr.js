@@ -99,6 +99,47 @@ export default {
     disclaimer: "Avertissement",
     ariaLabel: "Liens juridiques",
   },
+  landing: {
+    pageTitle: "MedScoutX — Préparer votre consultation médicale",
+    skip: "Aller au contenu",
+    badge: "Préparation structurée avant la consultation",
+    headline:
+      "Mieux préparer vos consultations médicales — dans toutes les langues.",
+    description:
+      "MedScoutX aide les patientes et patients à structurer symptômes, médicaments, documents et questions avant un rendez-vous médical. Les informations peuvent être rassemblées dans un PDF clair, dans la langue du cabinet ou de l’équipe soignante.",
+    primaryCta: "Préparer la consultation",
+    secondaryCta: "En savoir plus",
+    trustLine:
+      "Pas de diagnostic. Pas de recommandation thérapeutique. Pas d’évaluation de l’urgence. Uniquement une préparation structurée de vos propres éléments.",
+    metricA: "Communication multilingue",
+    metricB: "PDF pour la consultation",
+    metricC: "Vous gardez le contrôle",
+    forWhomTitle: "À qui s’adresse-t-il",
+    forWhom: [
+      "Aux personnes confrontées à une barrière linguistique",
+      "Aux cabinets avec une patientèle internationale",
+      "Aux hôpitaux et cliniques pour mieux préparer les échanges",
+    ],
+    howTitle: "Comment ça marche",
+    howSteps: [
+      "Choisir la langue",
+      "Saisir les informations de façon structurée",
+      "Choisir la langue à destination du professionnel de santé",
+      "Créer un PDF pour le rendez-vous",
+    ],
+    safetyTitle: "Limite de sécurité",
+    safetyBody:
+      "MedScoutX ne fournit pas de diagnostic, ne recommande pas de traitement et n’évalue pas les situations d’urgence. Il soutient uniquement la préparation structurée et la documentation des éléments que vous choisissez de partager.",
+    mediaEyebrow: "Aperçu",
+    mediaTitle: "Une interface sobre — pensée pour le mobile",
+    mediaText:
+      "L’expérience reste lisible et professionnelle : vos formulations, structurées pour l’équipe soignante qui vous recevra.",
+    footerDisclaimer:
+      "MedScoutX ne remplace pas un diagnostic ni un service d’urgence. En cas de symptômes aigus, contactez les services d’urgence ou un professionnel de santé sans attendre.",
+    imprint: "Mentions légales",
+    privacy: "Confidentialité",
+    login: "Connexion",
+  },
   common: {
     continue: "Continuer",
     cancel: "Annuler",

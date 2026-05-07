@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
+import { getMessages } from "../../../i18n/translations/index.js";
 import { authFetch } from "../../../api/authFetch.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import {
@@ -14,73 +15,10 @@ import {
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitAccountHistoryPage.css";
 
-const copy = {
-  de: {
-    title: "Meine Vorbereitungen",
-    subtitle:
-      "Hier sehen Sie die Vorbereitungen, die Sie ausdrücklich in Ihrem MedScoutX-Konto gespeichert haben.",
-    loginHint:
-      "Melden Sie sich an, um gespeicherte Vorbereitungen zu sehen.",
-    loginCta: "Zum Login",
-    loading: "Wird geladen …",
-    loadError:
-      "Die Liste konnte gerade nicht geladen werden. Bitte versuchen Sie es später erneut.",
-    empty:
-      "Es sind noch keine Vorbereitungen in Ihrem Konto gespeichert.",
-    patientLang: "Patientensprache",
-    doctorLang: "Arztsprache",
-    created: "Erstellt",
-    statusLabel: "Status",
-    open: "Öffnen",
-    deleteOne: "Löschen",
-    deleteAll: "Alle Vorbereitungen löschen",
-    confirmDeleteAll:
-      "Möchten Sie wirklich alle in Ihrem Konto gespeicherten Vorbereitungen löschen? Dies kann nicht rückgängig gemacht werden.",
-    privacyNote:
-      "Gespeicherte Vorbereitungen können jederzeit gelöscht werden. Diese Funktion ersetzt keine Patientenakte.",
-    defaultTitle: "Arztgespräch-Vorbereitung",
-    deleteError:
-      "Die Vorbereitung konnte gerade nicht gelöscht werden.",
-    deleteAllError:
-      "Die Vorbereitungen konnten gerade nicht gelöscht werden.",
-    statusDraft: "Entwurf",
-    statusPdfCreated: "PDF erstellt",
-    statusCompleted: "Abgeschlossen",
-  },
-  en: {
-    title: "My preparations",
-    subtitle:
-      "Here you can see the preparations you explicitly saved to your MedScoutX account.",
-    loginHint: "Sign in to view saved preparations.",
-    loginCta: "Sign in",
-    loading: "Loading…",
-    loadError:
-      "The list could not be loaded right now. Please try again later.",
-    empty: "No preparations have been saved to your account yet.",
-    patientLang: "Patient language",
-    doctorLang: "Doctor language",
-    created: "Created",
-    statusLabel: "Status",
-    open: "Open",
-    deleteOne: "Delete",
-    deleteAll: "Delete all preparations",
-    confirmDeleteAll:
-      "Delete all preparations saved to your account? This cannot be undone.",
-    privacyNote:
-      "Saved preparations can be deleted at any time. This feature does not replace a medical record.",
-    defaultTitle: "Doctor visit preparation",
-    deleteError: "The preparation could not be deleted right now.",
-    deleteAllError: "Preparations could not be deleted right now.",
-    statusDraft: "Draft",
-    statusPdfCreated: "PDF created",
-    statusCompleted: "Completed",
-  },
-};
-
 function langLabel(code, uiLang) {
   const opt = PRE_VISIT_LANGUAGE_OPTIONS.find((o) => o.id === code);
   if (!opt) return code || "—";
-  return uiLang === "en" ? opt.labelEn : opt.labelDe;
+  return uiLang === "de" ? opt.labelDe : opt.labelEn;
 }
 
 function previewFromAnswers(answers, maxLen = 140) {
@@ -97,7 +35,8 @@ function formatCreated(iso, uiLang) {
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "—";
-    return new Intl.DateTimeFormat(uiLang === "en" ? "en-GB" : "de-DE", {
+    const localeTag = uiLang === "de" ? "de-DE" : "en-GB";
+    return new Intl.DateTimeFormat(localeTag, {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(d);
@@ -164,7 +103,7 @@ export default function PreVisitAccountHistoryPage() {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
-  const t = copy[language] ?? copy.de;
+  const t = useMemo(() => getMessages(language).preVisit.accountHistory, [language]);
 
   const [hasAuthToken, setHasAuthToken] = useState(() =>
     typeof window !== "undefined"
@@ -182,7 +121,7 @@ export default function PreVisitAccountHistoryPage() {
   }, [location.pathname, location.key]);
 
   const fetchSessions = useCallback(async () => {
-    const messages = copy[language] ?? copy.de;
+    const messages = getMessages(language).preVisit.accountHistory;
     setLoading(true);
     setError(null);
     try {
@@ -219,11 +158,8 @@ export default function PreVisitAccountHistoryPage() {
   }, [hasAuthToken, fetchSessions]);
 
   useEffect(() => {
-    document.title =
-      language === "en"
-        ? "MedScoutX — My preparations"
-        : "MedScoutX — Meine Vorbereitungen";
-  }, [language]);
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   function cardTitle(row) {
     return (typeof row.title === "string" && row.title.trim()) || t.defaultTitle;

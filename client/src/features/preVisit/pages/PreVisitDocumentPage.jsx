@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
+import { getMessages } from "../../../i18n/translations/index.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
   pickLocalized,
 } from "../constants/questionFlow.js";
-import {
-  STRUCTURED_DOCTOR_LABELS,
-  STRUCTURED_SECTION_ORDER,
-} from "../constants/structuredDoctorLabels.js";
+import { STRUCTURED_SECTION_ORDER } from "../constants/structuredDoctorLabels.js";
 import {
   computePreVisitAiFingerprint,
   isAiDoctorVersionFresh,
@@ -24,112 +22,11 @@ import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitDocumentPage.css";
 
-const ui = {
-  de: {
-    title: "Dokument für den Arzt vorbereiten",
-    explanation:
-      "Wählen Sie die Sprache, in der die strukturierte Arztversion erstellt werden soll.",
-    doctorLangLabel: "Sprache für die Arztversion",
-    doctorLangHint:
-      "Wählen Sie die Sprache, in der der Arzt oder die Praxis das Dokument lesen soll.",
-    sectionStructured: "Strukturierte Arztversion",
-    sectionOriginal: "Originalangaben des Patienten",
-    disclaimer:
-      "Die Arztversion basiert ausschließlich auf den Angaben des Patienten. Es werden keine Diagnosen, Empfehlungen oder Dringlichkeitseinschätzungen erstellt.",
-    empty: "nicht angegeben",
-    backReview: "Zurück zur Prüfung",
-    pdfDisabled: "PDF erstellen",
-    pdfLocalNote:
-      "Die PDF-Datei wird lokal in Ihrem Browser erstellt. Es werden keine Daten übertragen.",
-    consentCheckbox:
-      "Ich möchte diese Sitzung lokal im Browser speichern, um sie später erneut ansehen zu können.",
-    consentExpl:
-      "Die Speicherung erfolgt nur lokal in diesem Browser. Es werden keine Daten an MedScoutX übertragen.",
-    saveLocal: "Sitzung lokal speichern",
-    saveSuccess: "Die Sitzung wurde lokal gespeichert.",
-    archiveNote:
-      "Sie können gespeicherte Sitzungen später löschen. Diese Funktion ersetzt keine Patientenakte.",
-    historyLink: "Gespeicherte Sitzungen anzeigen",
-    consentSectionTitle: "Optionale lokale Kopie",
-    createDoctorVersion: "Arztversion erstellen",
-    creatingDoctorVersion: "Arztversion wird erstellt …",
-    aiError:
-      "Die Arztversion konnte gerade nicht erstellt werden. Sie können weiterhin die lokale PDF-Vorschau verwenden.",
-    aiSuccessStatus:
-      "Die Arztversion wurde auf Basis Ihrer Angaben erstellt.",
-    accountSectionTitle: "In meinem Konto speichern",
-    accountConsentCheckbox:
-      "Ich möchte diese Vorbereitung in meinem MedScoutX-Konto speichern.",
-    accountConsentExpl:
-      "Diese Speicherung ist optional. Sie können gespeicherte Vorbereitungen später ansehen oder löschen.",
-    saveToAccount: "Im Konto speichern",
-    accountLoginHint:
-      "Melden Sie sich an, um Vorbereitungen in Ihrem Konto zu speichern.",
-    accountLoginLink: "Zum Login",
-    accountSaveSuccess:
-      "Die Vorbereitung wurde in Ihrem Konto gespeichert.",
-    accountSaveError:
-      "Die Vorbereitung konnte gerade nicht gespeichert werden.",
-    sessionTitleDe: "Arztgespräch-Vorbereitung",
-    sessionTitleEn: "Doctor visit preparation",
-    viewMyPreparations: "Meine Vorbereitungen anzeigen",
-  },
-  en: {
-    title: "Prepare document for the doctor",
-    explanation:
-      "Choose the language in which the structured doctor version should be created.",
-    doctorLangLabel: "Language for the doctor version",
-    doctorLangHint:
-      "Choose the language in which the doctor or practice should read the document.",
-    sectionStructured: "Structured doctor version",
-    sectionOriginal: "Original patient statements",
-    disclaimer:
-      "The doctor version is based only on the patient’s statements. No diagnoses, recommendations or urgency assessments are created.",
-    empty: "not specified",
-    backReview: "Back to review",
-    pdfDisabled: "Create PDF",
-    pdfLocalNote:
-      "The PDF file is created locally in your browser. No data is transmitted.",
-    consentCheckbox:
-      "I want to save this session locally in this browser so I can view it again later.",
-    consentExpl:
-      "The session is stored only locally in this browser. No data is transmitted to MedScoutX.",
-    saveLocal: "Save session locally",
-    saveSuccess: "The session was saved locally.",
-    archiveNote:
-      "You can delete saved sessions later. This feature does not replace a medical record.",
-    historyLink: "View saved sessions",
-    consentSectionTitle: "Optional local copy",
-    createDoctorVersion: "Create doctor version",
-    creatingDoctorVersion: "Creating doctor version …",
-    aiError:
-      "The doctor version could not be created right now. You can still use the local PDF preview.",
-    aiSuccessStatus:
-      "The doctor version was created based on your statements.",
-    accountSectionTitle: "Save to my account",
-    accountConsentCheckbox:
-      "I want to save this preparation in my MedScoutX account.",
-    accountConsentExpl:
-      "This storage is optional. You can view or delete saved preparations later.",
-    saveToAccount: "Save to account",
-    accountLoginHint:
-      "Sign in to save preparations to your account.",
-    accountLoginLink: "Sign in",
-    accountSaveSuccess:
-      "The preparation was saved to your account.",
-    accountSaveError:
-      "The preparation could not be saved right now.",
-    sessionTitleDe: "Arztgespräch-Vorbereitung",
-    sessionTitleEn: "Doctor visit preparation",
-    viewMyPreparations: "View my preparations",
-  },
-};
-
 export default function PreVisitDocumentPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
-  const t = ui[language] ?? ui.de;
+  const t = useMemo(() => getMessages(language).preVisit.document, [language]);
 
   const [session, setSession] = useState(() => loadPreVisitSession());
   const [consentLocalSave, setConsentLocalSave] = useState(false);
@@ -166,11 +63,8 @@ export default function PreVisitDocumentPage() {
   }, [location.pathname, location.key]);
 
   useEffect(() => {
-    document.title =
-      language === "en"
-        ? "MedScoutX — Document preview"
-        : "MedScoutX — Dokument";
-  }, [language]);
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   const patientLang = session?.patientLanguage || "de";
 
@@ -184,7 +78,7 @@ export default function PreVisitDocumentPage() {
     () =>
       PRE_VISIT_LANGUAGE_OPTIONS.map((row) => ({
         value: row.id,
-        label: language === "en" ? row.labelEn : row.labelDe,
+        label: language === "de" ? row.labelDe : row.labelEn,
       })),
     [language]
   );
@@ -243,9 +137,8 @@ export default function PreVisitDocumentPage() {
   }
 
   function structuredHeading(key) {
-    const rec = STRUCTURED_DOCTOR_LABELS[key];
-    if (!rec) return "";
-    return language === "en" ? rec.en : rec.de;
+    const labels = t.structuredRowLabels;
+    return labels[key] || "";
   }
 
   function handleDownloadPdf() {
@@ -293,7 +186,7 @@ export default function PreVisitDocumentPage() {
           latest.aiSafetyNotice.trim()
             ? latest.aiSafetyNotice.trim()
             : null,
-        title: language === "en" ? t.sessionTitleEn : t.sessionTitleDe,
+        title: language === "de" ? t.sessionTitleDe : t.sessionTitleEn,
         status: latest.pdfDownloaded ? "pdf_created" : "draft",
         pdfDownloaded: !!latest.pdfDownloaded,
       };
@@ -447,11 +340,7 @@ export default function PreVisitDocumentPage() {
 
         <nav
           className="pre-visit-doc__main-actions"
-          aria-label={
-            language === "en"
-              ? "Doctor version, PDF export, return to review"
-              : "Arztversion, PDF-Export, Rückkehr zur Prüfung"
-          }
+          aria-label={t.mainNavAria}
         >
           <div className="pre-visit-doc__ai-block">
             <button

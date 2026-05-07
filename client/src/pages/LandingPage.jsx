@@ -1,101 +1,18 @@
 import React, { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { resolveLanding } from "../i18n/translations/resolveLanding.js";
 import heroPoster from "../assets/media/hero-medscoutx.png";
 import demoVideo from "../assets/media/medscoutx-demo.mp4";
 import "../styles/LandingPage.css";
 
-const copy = {
-  de: {
-    skip: "Zum Inhalt springen",
-    badge: "Arztgespräch strukturiert vorbereiten",
-    headline: "Arztgespräche besser vorbereiten – in jeder Sprache.",
-    description:
-      "MedScoutX hilft Patientinnen und Patienten, Beschwerden, Medikamente, Dokumente und Fragen strukturiert für den Arzttermin vorzubereiten. Die Angaben können als übersichtliches PDF in der Sprache der Praxis erstellt werden.",
-    primaryCta: "Arztgespräch vorbereiten",
-    secondaryCta: "Mehr erfahren",
-    trustLine:
-      "Keine Diagnose. Keine Therapieempfehlung. Keine Dringlichkeitseinschätzung. Nur strukturierte Vorbereitung Ihrer Angaben.",
-    metricA: "Mehrsprachige Kommunikation",
-    metricB: "PDF für den Arzttermin",
-    metricC: "Sie behalten die Kontrolle",
-    forWhomTitle: "Für wen",
-    forWhom: [
-      "Für Patientinnen und Patienten mit Sprachbarrieren",
-      "Für Praxen mit internationalem Patientenaufkommen",
-      "Für Kliniken und Ambulanzen zur besseren Vorbereitung von Gesprächen",
-    ],
-    howTitle: "So funktioniert's",
-    howSteps: [
-      "Sprache wählen",
-      "Angaben strukturiert erfassen",
-      "Arzt-Sprache auswählen",
-      "PDF für den Termin erstellen",
-    ],
-    safetyTitle: "Sicherheitsgrenze",
-    safetyBody:
-      "MedScoutX erstellt keine Diagnose, keine Behandlungsempfehlung und keine Notfallbewertung. Die Anwendung unterstützt ausschließlich bei der strukturierten Vorbereitung und Dokumentation von Patientenaussagen.",
-    mediaEyebrow: "Einblick",
-    mediaTitle: "Klare Oberfläche — auch auf dem Smartphone",
-    mediaText:
-      "Die Darstellung ist bewusst ruhig gehalten: Fokus auf Ihre eigenen Angaben und eine übersichtliche Zusammenstellung für das Gespräch in der Praxis.",
-    footerDisclaimer:
-      "MedScoutX ist keine Diagnose-App und kein Notfalldienst. Bei akuten Beschwerden wenden Sie sich an den ärztlichen Notdienst oder die Notaufnahme.",
-    imprint: "Impressum",
-    privacy: "Datenschutz",
-    login: "Login",
-  },
-  en: {
-    skip: "Skip to content",
-    badge: "Structured preparation for your appointment",
-    headline: "Prepare medical appointments better — in any language.",
-    description:
-      "MedScoutX helps patients structure symptoms, medication, documents and questions before a doctor’s appointment. The information can be prepared as a clear PDF in the language of the medical practice.",
-    primaryCta: "Prepare doctor visit",
-    secondaryCta: "Learn more",
-    trustLine:
-      "No diagnosis. No treatment recommendation. No urgency assessment. Only structured preparation of your own statements.",
-    metricA: "Multilingual communication",
-    metricB: "PDF for your visit",
-    metricC: "You stay in control",
-    forWhomTitle: "Who it is for",
-    forWhom: [
-      "For patients facing language barriers",
-      "For practices with an international patient mix",
-      "For hospitals and clinics to support better conversation preparation",
-    ],
-    howTitle: "How it works",
-    howSteps: [
-      "Choose language",
-      "Capture details in a structured way",
-      "Select the doctor-facing language",
-      "Create a PDF for the appointment",
-    ],
-    safetyTitle: "Safety boundary",
-    safetyBody:
-      "MedScoutX does not provide a diagnosis, treatment recommendation, or emergency assessment. It only supports structured preparation and documentation of patient statements.",
-    mediaEyebrow: "Preview",
-    mediaTitle: "A calm interface — mobile-first",
-    mediaText:
-      "The experience stays professional and readable: your own wording, structured for the clinical team that will see you.",
-    footerDisclaimer:
-      "MedScoutX is not for diagnosis or emergencies. For acute symptoms, contact emergency services or a clinician immediately.",
-    imprint: "Imprint",
-    privacy: "Privacy",
-    login: "Login",
-  },
-};
-
 export default function LandingPage() {
   const { language } = useLanguage();
-  const currentCopy = useMemo(() => copy[language] ?? copy.de, [language]);
+  const currentCopy = useMemo(() => resolveLanding(language), [language]);
 
   useEffect(() => {
-    document.title =
-      language === "en"
-        ? "MedScoutX — Prepare for your doctor visit"
-        : "MedScoutX — Arztgespräch vorbereiten";
-  }, [language]);
+    document.title = currentCopy.pageTitle;
+  }, [currentCopy.pageTitle]);
 
   return (
     <div className="landing-page">

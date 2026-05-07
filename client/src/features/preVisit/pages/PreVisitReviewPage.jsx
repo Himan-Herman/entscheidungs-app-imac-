@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
+import { getMessages } from "../../../i18n/translations/index.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
   pickLocalized,
@@ -15,40 +16,11 @@ import {
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitReviewPage.css";
 
-const ui = {
-  de: {
-    title: "Übersicht Ihrer Angaben",
-    intro:
-      "So werden Ihre Einträge später für die ärztliche Vorbereitung verwendet. Sie können noch Anpassungen vornehmen.",
-    empty: "nicht angegeben",
-    edit: "Bearbeiten",
-    clearField: "Angabe löschen",
-    trustBeforeActions:
-      "Sie können Ihre Angaben vor dem Erstellen des Dokuments jederzeit prüfen, bearbeiten oder löschen.",
-    newSession: "Neue Sitzung starten",
-    wipeSession: "Sitzung vollständig löschen",
-    prepareDocument: "Dokument vorbereiten",
-  },
-  en: {
-    title: "Summary of your entries",
-    intro:
-      "This is how your entries will be used to prepare for your visit. You can still make changes.",
-    empty: "not specified",
-    edit: "Edit",
-    clearField: "Remove entry",
-    trustBeforeActions:
-      "You can review, edit or delete your information at any time before creating the document.",
-    newSession: "Start new session",
-    wipeSession: "Delete session completely",
-    prepareDocument: "Prepare document",
-  },
-};
-
 export default function PreVisitReviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
-  const t = ui[language] ?? ui.de;
+  const t = useMemo(() => getMessages(language).preVisit.review, [language]);
 
   const [session, setSession] = useState(() => loadPreVisitSession());
 
@@ -61,11 +33,8 @@ export default function PreVisitReviewPage() {
   }, [location.pathname, location.key, navigate]);
 
   useEffect(() => {
-    document.title =
-      language === "en"
-        ? "MedScoutX — Pre-visit summary"
-        : "MedScoutX — Übersicht";
-  }, [language]);
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   if (!session?.answers) {
     return null;

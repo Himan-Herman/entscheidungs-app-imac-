@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
+import { getMessages } from "../../../i18n/translations/index.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
   pickLocalized,
@@ -37,38 +38,16 @@ const PREVISIT_DEMO_ANSWERS = {
     "Welche Untersuchungen sind sinnvoll? Welche Informationen sollte ich weiter beobachten?",
 };
 
-const devUi = {
-  de: {
-    insertDemo: "Demo-Angaben einfügen",
-    devOnlyNote: "Nur für lokale Entwicklung sichtbar.",
-  },
-  en: {
-    insertDemo: "Insert demo information",
-    devOnlyNote: "Visible only during local development.",
-  },
-};
-
-const ui = {
-  de: {
-    progress: (n, total) => `Schritt ${n} von ${total}`,
-    answerPlaceholder: "Ihre Angaben …",
-    next: "Weiter",
-    back: "Zurück",
-    changeLanguage: "Sprache der Angaben ändern",
-  },
-  en: {
-    progress: (n, total) => `Step ${n} of ${total}`,
-    answerPlaceholder: "Your entry…",
-    next: "Continue",
-    back: "Back",
-    changeLanguage: "Change entry language",
-  },
-};
+function progressFromTemplate(template, current, total) {
+  return template
+    .replace("{{current}}", String(current))
+    .replace("{{total}}", String(total));
+}
 
 export default function PreVisitChatPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const tUi = ui[language] ?? ui.de;
+  const tUi = useMemo(() => getMessages(language).preVisit.chat, [language]);
 
   const [session, setSession] = useState(() =>
     buildInitialSession(readLocaleKey() || "de")
@@ -94,11 +73,8 @@ export default function PreVisitChatPage() {
   }, [session]);
 
   useEffect(() => {
-    document.title =
-      language === "en"
-        ? "MedScoutX — Pre-visit intake"
-        : "MedScoutX — Arztgespräch vorbereiten";
-  }, [language]);
+    document.title = tUi.pageTitle;
+  }, [tUi.pageTitle]);
 
   const total = PRE_VISIT_QUESTION_STEPS.length;
   const stepIndex = Math.min(
@@ -178,7 +154,11 @@ export default function PreVisitChatPage() {
             className="pre-visit-chat__progress-label"
             id="previsit-progress-label"
           >
-            {tUi.progress(progressNum, total)}
+            {progressFromTemplate(
+              tUi.progressTemplate,
+              progressNum,
+              total
+            )}
           </p>
           <div
             className="pre-visit-chat__progress-track"
@@ -197,7 +177,7 @@ export default function PreVisitChatPage() {
 
         <article className="pre-visit-chat__card">
           <p className="pre-visit-chat__section-label">
-            {language === "en" ? "Question" : "Frage"}
+            {tUi.sectionLabelQuestion}
           </p>
           <h1 className="pre-visit-chat__title">{title}</h1>
           <p className="pre-visit-chat__explanation">{explanation}</p>
@@ -207,7 +187,7 @@ export default function PreVisitChatPage() {
               className="pre-visit-chat__textarea-label"
               htmlFor={`previsit-field-${step.key}`}
             >
-              {language === "en" ? "Your answer" : "Ihre Antwort"}
+              {tUi.sectionLabelAnswer}
             </label>
             <textarea
               id={`previsit-field-${step.key}`}
@@ -245,10 +225,10 @@ export default function PreVisitChatPage() {
               className="pre-visit-chat__btn pre-visit-chat__btn--demo"
               onClick={insertDemoAndGoToReview}
             >
-              {devUi[language]?.insertDemo ?? devUi.de.insertDemo}
+              {tUi.devInsertDemo}
             </button>
             <p className="pre-visit-chat__dev-note">
-              {devUi[language]?.devOnlyNote ?? devUi.de.devOnlyNote}
+              {tUi.devOnlyNote}
             </p>
           </div>
         ) : null}
