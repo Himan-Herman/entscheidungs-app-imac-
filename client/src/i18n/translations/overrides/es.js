@@ -98,6 +98,47 @@ export default {
     disclaimer: "Descargo",
     ariaLabel: "Enlaces legales",
   },
+  landing: {
+    pageTitle: "MedScoutX — Preparación para la consulta médica",
+    skip: "Ir al contenido",
+    badge: "Preparación estructurada antes de la consulta",
+    headline:
+      "Prepare mejor sus consultas médicas — en cualquier idioma.",
+    description:
+      "MedScoutX le ayuda a ordenar de forma estructurada síntomas, medicación, documentos y preguntas antes de una consulta médica. La información puede reunirse en un PDF claro, en el idioma del centro o del equipo clínico.",
+    primaryCta: "Preparar la consulta médica",
+    secondaryCta: "Más información",
+    trustLine:
+      "Sin diagnóstico. Sin recomendaciones de tratamiento. Sin valoración de urgencia. Solo preparación estructurada de lo que usted mismo indica.",
+    metricA: "Comunicación multilingüe",
+    metricB: "PDF para la consulta",
+    metricC: "Usted mantiene el control",
+    forWhomTitle: "Para quién es",
+    forWhom: [
+      "Para personas con barreras idiomáticas",
+      "Para centros con pacientes de distintos países",
+      "Para hospitales y clínicas que desean apoyar una mejor preparación del encuentro",
+    ],
+    howTitle: "Cómo funciona",
+    howSteps: [
+      "Elija el idioma",
+      "Recoja la información de forma ordenada",
+      "Seleccione el idioma orientado al profesional sanitario",
+      "Genere un PDF para la cita",
+    ],
+    safetyTitle: "Límite de seguridad",
+    safetyBody:
+      "MedScoutX no ofrece diagnóstico, no recomienda tratamientos ni evalúa situaciones de emergencia. Solo apoya la preparación estructurada y la documentación de lo que usted elija exponer.",
+    mediaEyebrow: "Vista previa",
+    mediaTitle: "Una interfaz sobria — pensada para el móvil",
+    mediaText:
+      "La experiencia se mantiene clara y profesional: sus propias palabras, ordenadas para el equipo clínico que le atenderá.",
+    footerDisclaimer:
+      "MedScoutX no sustituye el diagnóstico ni los servicios de urgencia. Ante síntomas agudos, contacte de inmediato con los servicios de emergencia o con un profesional sanitario.",
+    imprint: "Aviso legal",
+    privacy: "Privacidad",
+    login: "Iniciar sesión",
+  },
   common: {
     continue: "Continuar",
     cancel: "Cancelar",
