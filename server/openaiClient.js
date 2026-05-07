@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
+/** Shared client — reuse across modules (do not instantiate duplicate OpenAI clients). */
+export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 

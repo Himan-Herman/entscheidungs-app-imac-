@@ -92,6 +92,13 @@
   color: var(--pv-text);
 }
 
+.pre-visit-card__field-hint {
+  margin: 8px 0 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--pv-subtle);
+}
+
 .pre-visit-card__select {
   appearance: none;
   width: 100%;

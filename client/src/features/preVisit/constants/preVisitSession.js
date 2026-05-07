@@ -30,6 +30,42 @@ export function savePreVisitSession(payload) {
   }
 }
 
+/**
+ * Stable fingerprint for patient answers + doctor language (AI doctor-version cache).
+ * @param {object} answers
+ * @param {string} doctorLanguage
+ */
+export function computePreVisitAiFingerprint(answers, doctorLanguage) {
+  const empty = createEmptyAnswers();
+  const merged = {
+    ...empty,
+    ...(answers && typeof answers === "object" ? answers : {}),
+  };
+  const norm = {};
+  for (const k of Object.keys(empty)) {
+    norm[k] = merged[k] != null ? String(merged[k]) : "";
+  }
+  return JSON.stringify({
+    doctorLanguage: String(doctorLanguage || "de"),
+    answers: norm,
+  });
+}
+
+/**
+ * @param {object} session
+ * @returns {boolean}
+ */
+export function isAiDoctorVersionFresh(session) {
+  if (!session?.aiDoctorVersion || !session?.aiDoctorVersionFingerprint) {
+    return false;
+  }
+  const dl = session.doctorLanguage || session.patientLanguage || "de";
+  return (
+    computePreVisitAiFingerprint(session.answers, dl) ===
+    session.aiDoctorVersionFingerprint
+  );
+}
+
 export function buildInitialSession(patientLanguage) {
   const empty = createEmptyAnswers();
   const stored = loadPreVisitSession();

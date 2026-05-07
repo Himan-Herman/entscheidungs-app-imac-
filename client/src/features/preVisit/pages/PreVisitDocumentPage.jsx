@@ -11,9 +11,13 @@ import {
   STRUCTURED_SECTION_ORDER,
 } from "../constants/structuredDoctorLabels.js";
 import {
+  computePreVisitAiFingerprint,
+  isAiDoctorVersionFresh,
   loadPreVisitSession,
+  savePreVisitSession,
   setDoctorLanguage,
 } from "../constants/preVisitSession.js";
+import { apiFetch } from "../../../lib/api.js";
 import { generatePreVisitPdf } from "../pdf/generatePreVisitPdf.js";
 import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
@@ -25,6 +29,8 @@ const ui = {
     explanation:
       "Wählen Sie die Sprache, in der die strukturierte Arztversion erstellt werden soll.",
     doctorLangLabel: "Sprache für die Arztversion",
+    doctorLangHint:
+      "Wählen Sie die Sprache, in der der Arzt oder die Praxis das Dokument lesen soll.",
     sectionStructured: "Strukturierte Arztversion",
     sectionOriginal: "Originalangaben des Patienten",
     disclaimer:
@@ -44,12 +50,20 @@ const ui = {
       "Sie können gespeicherte Sitzungen später löschen. Diese Funktion ersetzt keine Patientenakte.",
     historyLink: "Gespeicherte Sitzungen anzeigen",
     consentSectionTitle: "Optionale lokale Kopie",
+    createDoctorVersion: "Arztversion erstellen",
+    creatingDoctorVersion: "Arztversion wird erstellt …",
+    aiError:
+      "Die Arztversion konnte gerade nicht erstellt werden. Sie können weiterhin die lokale PDF-Vorschau verwenden.",
+    aiSuccessStatus:
+      "Die Arztversion wurde auf Basis Ihrer Angaben erstellt.",
   },
   en: {
     title: "Prepare document for the doctor",
     explanation:
       "Choose the language in which the structured doctor version should be created.",
-    doctorLangLabel: "Language for the doctor-facing summary",
+    doctorLangLabel: "Language for the doctor version",
+    doctorLangHint:
+      "Choose the language in which the doctor or practice should read the document.",
     sectionStructured: "Structured doctor version",
     sectionOriginal: "Original patient statements",
     disclaimer:
@@ -69,6 +83,12 @@ const ui = {
       "You can delete saved sessions later. This feature does not replace a medical record.",
     historyLink: "View saved sessions",
     consentSectionTitle: "Optional local copy",
+    createDoctorVersion: "Create doctor version",
+    creatingDoctorVersion: "Creating doctor version …",
+    aiError:
+      "The doctor version could not be created right now. You can still use the local PDF preview.",
+    aiSuccessStatus:
+      "The doctor version was created based on your statements.",
   },
 };
 
@@ -81,6 +101,9 @@ export default function PreVisitDocumentPage() {
   const [session, setSession] = useState(() => loadPreVisitSession());
   const [consentLocalSave, setConsentLocalSave] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState(null);
+  const [aiSuccessNote, setAiSuccessNote] = useState(null);
 
   useEffect(() => {
     const s = loadPreVisitSession();
@@ -122,8 +145,55 @@ export default function PreVisitDocumentPage() {
 
   function handleDoctorLangChange(e) {
     const code = e.target.value;
+    setAiError(null);
+    setAiSuccessNote(null);
     const next = setDoctorLanguage(code);
     setSession(next ?? loadPreVisitSession());
+  }
+
+  async function handleCreateDoctorVersion() {
+    if (!session?.answers) return;
+
+    const dl = doctorLang;
+    if (isAiDoctorVersionFresh(session)) {
+      setAiError(null);
+      setAiSuccessNote(t.aiSuccessStatus);
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError(null);
+    setAiSuccessNote(null);
+
+    try {
+      const data = await apiFetch("/api/previsit/doctor-version", {
+        method: "POST",
+        body: JSON.stringify({
+          patientLanguage: session.patientLanguage,
+          doctorLanguage: dl,
+          answers: session.answers,
+        }),
+      });
+
+      const fpSession = loadPreVisitSession() || session;
+      const next = {
+        ...fpSession,
+        aiDoctorVersion: data.doctorVersion,
+        aiSafetyNotice:
+          typeof data.safetyNotice === "string" ? data.safetyNotice : "",
+        aiDoctorVersionFingerprint: computePreVisitAiFingerprint(
+          fpSession.answers,
+          dl
+        ),
+      };
+      savePreVisitSession(next);
+      setSession(next);
+      setAiSuccessNote(t.aiSuccessStatus);
+    } catch {
+      setAiError(t.aiError);
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   function structuredHeading(key) {
@@ -159,6 +229,12 @@ export default function PreVisitDocumentPage() {
     return null;
   }
 
+  const aiFresh = isAiDoctorVersionFresh(session);
+  const structuredSource =
+    aiFresh && session.aiDoctorVersion
+      ? session.aiDoctorVersion
+      : session.answers;
+
   return (
     <div className="pre-visit-doc">
       <div className="pre-visit-doc__inner">
@@ -177,6 +253,7 @@ export default function PreVisitDocumentPage() {
             className="pre-visit-doc__select"
             value={doctorLang}
             onChange={handleDoctorLangChange}
+            aria-describedby="previsit-doctor-lang-hint"
           >
             {langOptions.map((o) => (
               <option key={o.value} value={o.value}>
@@ -184,6 +261,9 @@ export default function PreVisitDocumentPage() {
               </option>
             ))}
           </select>
+          <p id="previsit-doctor-lang-hint" className="pre-visit-doc__field-hint">
+            {t.doctorLangHint}
+          </p>
         </div>
 
         <div className="pre-visit-doc__preview">
@@ -199,7 +279,7 @@ export default function PreVisitDocumentPage() {
             </h2>
             <div className="pre-visit-doc__rows">
               {STRUCTURED_SECTION_ORDER.map((key) => {
-                const text = session.answers[key] ?? "";
+                const text = structuredSource[key] ?? "";
                 const empty = !String(text).trim();
                 return (
                   <div key={key} className="pre-visit-doc__row">
@@ -217,6 +297,11 @@ export default function PreVisitDocumentPage() {
                 );
               })}
             </div>
+            {aiFresh && session.aiSafetyNotice?.trim() ? (
+              <p className="pre-visit-doc__ai-safety-inline" role="note">
+                {session.aiSafetyNotice.trim()}
+              </p>
+            ) : null}
           </section>
 
           <section
@@ -257,10 +342,44 @@ export default function PreVisitDocumentPage() {
           className="pre-visit-doc__main-actions"
           aria-label={
             language === "en"
-              ? "PDF export and return to review"
-              : "PDF-Export und Rückkehr zur Prüfung"
+              ? "Doctor version, PDF export, return to review"
+              : "Arztversion, PDF-Export, Rückkehr zur Prüfung"
           }
         >
+          <div className="pre-visit-doc__ai-block">
+            <button
+              type="button"
+              className="pre-visit-doc__btn pre-visit-doc__btn--create-ai"
+              onClick={handleCreateDoctorVersion}
+              disabled={aiLoading}
+              aria-busy={aiLoading}
+            >
+              {t.createDoctorVersion}
+            </button>
+            {aiLoading ? (
+              <p
+                className="pre-visit-doc__ai-loading"
+                aria-live="polite"
+                role="status"
+              >
+                {t.creatingDoctorVersion}
+              </p>
+            ) : null}
+            {aiError ? (
+              <p className="pre-visit-doc__ai-error" role="alert">
+                {aiError}
+              </p>
+            ) : null}
+            {aiSuccessNote ? (
+              <p
+                className="pre-visit-doc__ai-success-note"
+                role="status"
+                aria-live="polite"
+              >
+                {aiSuccessNote}
+              </p>
+            ) : null}
+          </div>
           <div className="pre-visit-doc__pdf-lead">
             <button
               type="button"

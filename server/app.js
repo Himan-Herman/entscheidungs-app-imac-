@@ -13,6 +13,7 @@ import { sendVerificationEmail } from './emailService.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import ttsRouter from "./routes/tts.js";
 import kiRouter from "./routes/ki.js";
+import previsitRouter from "./routes/previsit.js";
 
 const app = express();
 
@@ -45,7 +46,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/mail', mailRoutes);
 app.use("/api/tts", ttsRouter);
 app.use("/api/ki", kiRouter);
-
+app.use("/api/previsit", previsitRouter);
 
 
 // funktioniert mit /health UND /api/health

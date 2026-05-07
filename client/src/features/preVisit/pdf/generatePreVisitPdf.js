@@ -8,6 +8,7 @@ import {
   STRUCTURED_DOCTOR_LABELS,
   STRUCTURED_SECTION_ORDER,
 } from "../constants/structuredDoctorLabels.js";
+import { isAiDoctorVersionFresh } from "../constants/preVisitSession.js";
 
 function defaultLabels(uiLanguage) {
   const en = uiLanguage === "en";
@@ -22,11 +23,11 @@ function defaultLabels(uiLanguage) {
       ? "Original patient statements"
       : "Originalangaben des Patienten",
     patientLanguageLabel: en
-      ? "Patient language (entries)"
-      : "Patientensprache (Angaben)",
+      ? "Language of patient statements"
+      : "Sprache der Patientenantworten",
     doctorLanguageLabel: en
-      ? "Doctor-facing language (PDF)"
-      : "Sprache der Arztversion (PDF)",
+      ? "Language of doctor version"
+      : "Sprache der Arztversion",
     documentCreatedLabel: en ? "Created" : "Erstellt",
     empty: en ? "not specified" : "nicht angegeben",
     pdfFilename: en
@@ -72,6 +73,8 @@ export function generatePreVisitPdf({ session, uiLanguage, labels: labelOverride
   const answers = session.answers;
   const patientLang = session.patientLanguage || "de";
   const doctorLang = session.doctorLanguage || patientLang;
+  const useAiStructured =
+    isAiDoctorVersionFresh(session) && session.aiDoctorVersion;
 
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -145,7 +148,12 @@ export function generatePreVisitPdf({ session, uiLanguage, labels: labelOverride
   doc.setFont("helvetica", "normal");
 
   for (const key of STRUCTURED_SECTION_ORDER) {
-    const raw = answers[key] ?? "";
+    let raw;
+    if (useAiStructured) {
+      raw = session.aiDoctorVersion[key] ?? "";
+    } else {
+      raw = answers[key] ?? "";
+    }
     const empty = !String(raw).trim();
     const value = empty ? L.empty : raw;
     const title = structuredFieldTitle(key, uiLanguage);
@@ -153,6 +161,12 @@ export function generatePreVisitPdf({ session, uiLanguage, labels: labelOverride
     gap(1);
     writeWrapped(value, bodySize, "normal");
     gap(5);
+  }
+
+  if (useAiStructured && session.aiSafetyNotice?.trim()) {
+    gap(3);
+    writeWrapped(session.aiSafetyNotice.trim(), bodySize, "italic");
+    gap(4);
   }
 
   gap(4);

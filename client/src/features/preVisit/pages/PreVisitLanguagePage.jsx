@@ -15,7 +15,10 @@ const copy = {
     trust: "Alle Angaben beruhen ausschließlich auf Ihren eigenen Aussagen.",
     valueProp:
       "Bereiten Sie Beschwerden, Medikamente, Dokumente und Fragen strukturiert vor – in Ihrer Sprache.",
-    languageLabel: "Sprache für Ihre Angaben",
+    languageLabel:
+      "Sprache, in der Sie mit MedScoutX antworten möchten",
+    languageHint:
+      "Sie können Ihre Angaben in der Sprache machen, in der Sie sich am sichersten ausdrücken können.",
     continue: "Weiter",
   },
   en: {
@@ -26,7 +29,9 @@ const copy = {
     trust: "All information is based solely on your own statements.",
     valueProp:
       "Prepare symptoms, medications, documents and questions in a structured way — in your language.",
-    languageLabel: "Language for your entries",
+    languageLabel: "Language you want to use with MedScoutX",
+    languageHint:
+      "You can provide your information in the language in which you feel most confident.",
     continue: "Continue",
   },
 };
@@ -91,6 +96,7 @@ export default function PreVisitLanguagePage() {
               className="pre-visit-card__select"
               value={selectedLocale}
               onChange={(e) => setSelectedLocale(e.target.value)}
+              aria-describedby="previsit-language-hint"
             >
               {options.map((o) => (
                 <option key={o.value} value={o.value}>
@@ -98,6 +104,9 @@ export default function PreVisitLanguagePage() {
                 </option>
               ))}
             </select>
+            <p id="previsit-language-hint" className="pre-visit-card__field-hint">
+              {t.languageHint}
+            </p>
           </div>
 
           <div className="pre-visit-card__actions">
