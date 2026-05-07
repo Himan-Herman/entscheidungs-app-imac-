@@ -12,6 +12,7 @@ import {
   resetSessionKeepLanguage,
   setSessionStepIndex,
 } from "../constants/preVisitSession.js";
+import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitReviewPage.css";
 
 const ui = {
@@ -26,7 +27,6 @@ const ui = {
       "Sie können Ihre Angaben vor dem Erstellen des Dokuments jederzeit prüfen, bearbeiten oder löschen.",
     newSession: "Neue Sitzung starten",
     wipeSession: "Sitzung vollständig löschen",
-    home: "Zur Startseite",
     prepareDocument: "Dokument vorbereiten",
   },
   en: {
@@ -40,7 +40,6 @@ const ui = {
       "You can review, edit or delete your information at any time before creating the document.",
     newSession: "Start new session",
     wipeSession: "Delete session completely",
-    home: "Back to home",
     prepareDocument: "Prepare document",
   },
 };
@@ -97,18 +96,23 @@ export default function PreVisitReviewPage() {
   return (
     <div className="pre-visit-review">
       <div className="pre-visit-review__inner">
+        <PreVisitModuleChrome />
         <article className="pre-visit-review__card">
           <h1 className="pre-visit-review__title">{t.title}</h1>
-          <p className="pre-visit-review__intro">{t.intro}</p>
 
           <div className="pre-visit-review__prepare-wrap">
             <Link
               className="pre-visit-review__prepare-btn"
               to="/pre-visit/document"
+              aria-describedby="previsit-review-intro"
             >
               {t.prepareDocument}
             </Link>
           </div>
+
+          <p id="previsit-review-intro" className="pre-visit-review__intro">
+            {t.intro}
+          </p>
 
           <dl className="pre-visit-review__list">
             {PRE_VISIT_QUESTION_STEPS.map((step, stepIndex) => {
@@ -166,12 +170,6 @@ export default function PreVisitReviewPage() {
             >
               {t.wipeSession}
             </button>
-          </div>
-
-          <div className="pre-visit-review__footer-link-wrap">
-            <Link className="pre-visit-review__footer-link" to="/startseite">
-              {t.home}
-            </Link>
           </div>
         </article>
       </div>

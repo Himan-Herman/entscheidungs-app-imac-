@@ -15,6 +15,7 @@
   box-sizing: border-box;
   background: var(--pvc-bg);
   color: var(--pvc-text);
+  overflow-x: clip;
 }
 
 .pre-visit-chat__inner {
@@ -23,17 +24,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.pre-visit-chat__safety {
-  margin: 0;
-  padding: 14px 16px;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  line-height: 1.55;
-  color: var(--pvc-subtle);
-  background: #ffffff;
-  border: 1px solid var(--pvc-border);
 }
 
 .pre-visit-chat__progress-wrap {
@@ -128,6 +118,11 @@
   box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.2);
 }
 
+.pre-visit-chat__textarea:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.45);
+  outline-offset: 2px;
+}
+
 .pre-visit-chat__textarea::placeholder {
   color: #94a3b8;
 }
@@ -177,6 +172,11 @@
 .pre-visit-chat__btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.pre-visit-chat__btn:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.45);
+  outline-offset: 3px;
 }
 
 .pre-visit-chat__link {

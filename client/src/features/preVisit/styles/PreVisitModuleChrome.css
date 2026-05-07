@@ -1,0 +1,55 @@
+.pre-visit-chrome {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.pre-visit-chrome__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.pre-visit-chrome__back {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0e7490;
+  text-decoration: none;
+  border-radius: 6px;
+}
+
+.pre-visit-chrome__back:hover {
+  text-decoration: underline;
+}
+
+.pre-visit-chrome__back:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.45);
+  outline-offset: 3px;
+}
+
+.pre-visit-chrome__module {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  text-align: right;
+  max-width: min(100%, 18rem);
+  line-height: 1.35;
+}
+
+.pre-visit-chrome__safety {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}

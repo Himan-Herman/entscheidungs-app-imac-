@@ -16,6 +16,7 @@ import {
 } from "../constants/preVisitSession.js";
 import { generatePreVisitPdf } from "../pdf/generatePreVisitPdf.js";
 import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
+import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitDocumentPage.css";
 
 const ui = {
@@ -66,6 +67,7 @@ const ui = {
     saveSuccess: "The session was saved locally.",
     archiveNote:
       "You can delete saved sessions later. This feature does not replace a medical record.",
+    historyLink: "View saved sessions",
     consentSectionTitle: "Optional local copy",
   },
 };
@@ -160,6 +162,7 @@ export default function PreVisitDocumentPage() {
   return (
     <div className="pre-visit-doc">
       <div className="pre-visit-doc__inner">
+        <PreVisitModuleChrome />
         <header className="pre-visit-doc__header">
           <h1 className="pre-visit-doc__title">{t.title}</h1>
           <p className="pre-visit-doc__lead">{t.explanation}</p>
@@ -250,14 +253,18 @@ export default function PreVisitDocumentPage() {
           <p className="pre-visit-doc__block-note">{t.disclaimer}</p>
         </div>
 
-        <div className="pre-visit-doc__footer-actions">
-          <Link className="pre-visit-doc__btn" to="/pre-visit/review">
-            {t.backReview}
-          </Link>
-          <div className="pre-visit-doc__pdf-block">
+        <nav
+          className="pre-visit-doc__main-actions"
+          aria-label={
+            language === "en"
+              ? "PDF export and return to review"
+              : "PDF-Export und Rückkehr zur Prüfung"
+          }
+        >
+          <div className="pre-visit-doc__pdf-lead">
             <button
               type="button"
-              className="pre-visit-doc__btn pre-visit-doc__btn--pdf-active"
+              className="pre-visit-doc__btn pre-visit-doc__btn--pdf-primary"
               onClick={handleDownloadPdf}
               aria-describedby="previsit-pdf-local-note"
             >
@@ -267,10 +274,13 @@ export default function PreVisitDocumentPage() {
               {t.pdfLocalNote}
             </p>
           </div>
-        </div>
+          <Link className="pre-visit-doc__back-review" to="/pre-visit/review">
+            {t.backReview}
+          </Link>
+        </nav>
 
         <section
-          className="pre-visit-doc__consent"
+          className="pre-visit-doc__consent pre-visit-doc__consent--secondary"
           aria-labelledby="previsit-consent-heading"
         >
           <h2 id="previsit-consent-heading" className="pre-visit-doc__consent-title">

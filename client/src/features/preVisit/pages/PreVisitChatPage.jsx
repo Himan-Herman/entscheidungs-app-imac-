@@ -10,6 +10,7 @@ import {
   PREVISIT_LOCALE_STORAGE_KEY,
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
+import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitChatPage.css";
 
 function readLocaleKey() {
@@ -27,8 +28,6 @@ const ui = {
     next: "Weiter",
     back: "Zurück",
     changeLanguage: "Sprache der Angaben ändern",
-    safety:
-      "Dieses System erstellt keine Diagnose, keine Therapieempfehlung und keine Dringlichkeitseinschätzung. Es dokumentiert nur Ihre eigenen Angaben.",
   },
   en: {
     progress: (n, total) => `Step ${n} of ${total}`,
@@ -36,8 +35,6 @@ const ui = {
     next: "Continue",
     back: "Back",
     changeLanguage: "Change entry language",
-    safety:
-      "This tool does not provide a diagnosis, treatment advice, or urgency assessment. It only records your own statements.",
   },
 };
 
@@ -128,9 +125,7 @@ export default function PreVisitChatPage() {
   return (
     <div className="pre-visit-chat">
       <div className="pre-visit-chat__inner">
-        <p className="pre-visit-chat__safety" role="note">
-          {tUi.safety}
-        </p>
+        <PreVisitModuleChrome />
 
         <div className="pre-visit-chat__progress-wrap">
           <p

@@ -11,6 +11,7 @@
   box-sizing: border-box;
   background: var(--pvr-bg);
   color: var(--pvr-text);
+  overflow-x: clip;
 }
 
 .pre-visit-review__inner {
@@ -38,14 +39,14 @@
 }
 
 .pre-visit-review__intro {
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   font-size: 0.98rem;
   line-height: 1.6;
   color: var(--pvr-muted);
 }
 
 .pre-visit-review__prepare-wrap {
-  margin: 0 0 24px;
+  margin: 0 0 18px;
 }
 
 .pre-visit-review__prepare-btn {
@@ -53,18 +54,18 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 52px;
-  padding: 0 24px;
-  font-size: 1rem;
+  min-height: 56px;
+  padding: 0 28px;
+  font-size: 1.06rem;
   font-weight: 650;
   font-family: inherit;
-  border-radius: 12px;
+  border-radius: 14px;
   text-decoration: none;
   box-sizing: border-box;
   color: #ffffff;
   background: var(--pvr-accent);
   border: 1px solid rgba(14, 116, 144, 0.25);
-  box-shadow: 0 10px 28px rgba(14, 116, 144, 0.22);
+  box-shadow: 0 12px 32px rgba(14, 116, 144, 0.26);
   transition: background 0.15s ease, transform 0.12s ease;
 }
 
@@ -84,7 +85,7 @@
 @media (min-width: 480px) {
   .pre-visit-review__prepare-btn {
     width: auto;
-    min-width: min(100%, 320px);
+    min-width: min(100%, 360px);
   }
 }
 
@@ -216,12 +217,13 @@
 }
 
 .pre-visit-review__session-btn--secondary {
-  background: var(--pvr-accent);
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--pvr-accent);
+  border: 1px solid rgba(14, 116, 144, 0.35);
 }
 
 .pre-visit-review__session-btn--secondary:hover {
-  background: #0c6278;
+  background: rgba(14, 116, 144, 0.06);
 }
 
 .pre-visit-review__session-btn--outline {
@@ -236,29 +238,6 @@
 }
 
 .pre-visit-review__session-btn:focus-visible {
-  outline: 2px solid var(--pvr-accent);
-  outline-offset: 2px;
-}
-
-.pre-visit-review__footer-link-wrap {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
-  text-align: center;
-}
-
-.pre-visit-review__footer-link {
-  font-size: 0.94rem;
-  font-weight: 600;
-  color: var(--pvr-accent);
-  text-decoration: none;
-}
-
-.pre-visit-review__footer-link:hover {
-  text-decoration: underline;
-}
-
-.pre-visit-review__footer-link:focus-visible {
   outline: 2px solid var(--pvr-accent);
   outline-offset: 2px;
 }

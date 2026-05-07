@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
 import { PREVISIT_LOCALE_STORAGE_KEY } from "../constants/preVisitSession.js";
+import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitLanguagePage.css";
 
 const copy = {
@@ -12,9 +13,10 @@ const copy = {
     explanation:
       "Dieses System hilft Ihnen dabei, Ihre Beschwerden und Fragen strukturiert für einen Arzttermin vorzubereiten. Es werden keine Diagnosen oder medizinischen Empfehlungen erstellt.",
     trust: "Alle Angaben beruhen ausschließlich auf Ihren eigenen Aussagen.",
+    valueProp:
+      "Bereiten Sie Beschwerden, Medikamente, Dokumente und Fragen strukturiert vor – in Ihrer Sprache.",
     languageLabel: "Sprache für Ihre Angaben",
     continue: "Weiter",
-    backHome: "Zurück zur Startseite",
   },
   en: {
     eyebrow: "Pre-visit",
@@ -22,9 +24,10 @@ const copy = {
     explanation:
       "This tool helps you structure your concerns and questions for a medical appointment. It does not provide diagnoses or medical recommendations.",
     trust: "All information is based solely on your own statements.",
+    valueProp:
+      "Prepare symptoms, medications, documents and questions in a structured way — in your language.",
     languageLabel: "Language for your entries",
     continue: "Continue",
-    backHome: "Back to home",
   },
 };
 
@@ -63,6 +66,7 @@ export default function PreVisitLanguagePage() {
   return (
     <div className="pre-visit-page">
       <div className="pre-visit-page__shell">
+        <PreVisitModuleChrome />
         <article
           className="pre-visit-card"
           aria-labelledby="previsit-title"
@@ -72,6 +76,7 @@ export default function PreVisitLanguagePage() {
             {t.title}
           </h1>
           <p className="pre-visit-card__lead">{t.explanation}</p>
+          <p className="pre-visit-card__value-prop">{t.valueProp}</p>
           <p className="pre-visit-card__trust">{t.trust}</p>
 
           <div className="pre-visit-card__field">
@@ -105,10 +110,6 @@ export default function PreVisitLanguagePage() {
             </button>
           </div>
         </article>
-
-        <Link className="pre-visit-page__back" to="/">
-          {t.backHome}
-        </Link>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   deletePreVisitArchiveItem,
   listPreVisitArchiveItems,
 } from "../session/localPreVisitArchive.js";
+import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitHistoryPage.css";
 
 const copy = {
@@ -15,6 +16,8 @@ const copy = {
     title: "Lokal gespeicherte Sitzungen",
     expl:
       "Diese Sitzungen sind nur in diesem Browser gespeichert. Sie wurden nicht an MedScoutX übertragen.",
+    privacyNote:
+      "Lokal gespeicherte Sitzungen bleiben nur auf diesem Gerät und in diesem Browser.",
     empty: "Es sind keine lokal gespeicherten Sitzungen vorhanden.",
     patientLang: "Patientensprache",
     doctorLang: "Arztsprache",
@@ -29,6 +32,8 @@ const copy = {
     title: "Locally saved sessions",
     expl:
       "These sessions are stored only in this browser. They were not transmitted to MedScoutX.",
+    privacyNote:
+      "Locally saved sessions remain only on this device and in this browser.",
     empty: "There are no locally saved sessions.",
     patientLang: "Patient language",
     doctorLang: "Doctor language",
@@ -115,9 +120,13 @@ export default function PreVisitHistoryPage() {
   return (
     <div className="pre-visit-history">
       <div className="pre-visit-history__inner">
+        <PreVisitModuleChrome />
         <header className="pre-visit-history__header">
           <h1 className="pre-visit-history__title">{t.title}</h1>
           <p className="pre-visit-history__lead">{t.expl}</p>
+          <p className="pre-visit-history__privacy" role="note">
+            {t.privacyNote}
+          </p>
         </header>
 
         {sorted.length === 0 ? (
