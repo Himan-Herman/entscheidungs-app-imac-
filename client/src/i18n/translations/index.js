@@ -15,6 +15,11 @@ import roOverrides from "./overrides/ro.js";
 import nlOverrides from "./overrides/nl.js";
 import ckbOverrides from "./overrides/ckb.js";
 import kuOverrides from "./overrides/ku.js";
+import elOverrides from "./overrides/el.js";
+import sqOverrides from "./overrides/sq.js";
+import hrOverrides from "./overrides/hr.js";
+import bsOverrides from "./overrides/bs.js";
+import srOverrides from "./overrides/sr.js";
 
 const bundles = {
   en,
@@ -33,6 +38,11 @@ const bundles = {
   nl: deepMerge(en, nlOverrides),
   ckb: deepMerge(en, ckbOverrides),
   ku: deepMerge(en, kuOverrides),
+  el: deepMerge(en, elOverrides),
+  sq: deepMerge(en, sqOverrides),
+  hr: deepMerge(en, hrOverrides),
+  bs: deepMerge(en, bsOverrides),
+  sr: deepMerge(en, srOverrides),
 };
 
 /**

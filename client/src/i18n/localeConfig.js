@@ -29,6 +29,11 @@ export const LOCALE_OPTIONS = [
   { code: "nl", nativeName: "Nederlands" },
   { code: "ckb", nativeName: "کوردی (سۆرانی)" },
   { code: "ku", nativeName: "Kurdî (Kurmancî)" },
+  { code: "el", nativeName: "Ελληνικά" },
+  { code: "sq", nativeName: "Shqip" },
+  { code: "hr", nativeName: "Hrvatski" },
+  { code: "bs", nativeName: "Bosanski" },
+  { code: "sr", nativeName: "Српски" },
 ];
 
 export const SUPPORTED_LANGUAGE_CODES = LOCALE_OPTIONS.map((o) => o.code);
