@@ -348,6 +348,106 @@
   max-width: 32rem;
 }
 
+.pre-visit-doc__consent--account {
+  margin-top: 28px;
+  padding: 20px 20px 22px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid rgba(14, 116, 144, 0.22);
+  box-shadow: 0 8px 28px rgba(14, 116, 144, 0.08);
+  border-top: none;
+  padding-top: 20px;
+}
+
+.pre-visit-doc__consent-title--account {
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--pvd-text);
+}
+
+.pre-visit-doc__account-login {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.pre-visit-doc__account-login-hint {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--pvd-muted);
+  max-width: 36rem;
+}
+
+.pre-visit-doc__btn--account-login {
+  min-height: 48px;
+  padding: 0 22px;
+  font-weight: 600;
+  border-color: rgba(14, 116, 144, 0.35);
+  color: var(--pvd-accent);
+  background: rgba(14, 116, 144, 0.06);
+}
+
+.pre-visit-doc__btn--account-login:hover {
+  background: rgba(14, 116, 144, 0.1);
+  border-color: rgba(14, 116, 144, 0.45);
+}
+
+.pre-visit-doc__btn--account {
+  align-self: stretch;
+  max-width: 100%;
+  min-height: 48px;
+  font-weight: 650;
+  background: var(--pvd-accent);
+  color: #ffffff;
+  border-color: rgba(14, 116, 144, 0.3);
+  box-shadow: 0 10px 26px rgba(14, 116, 144, 0.22);
+}
+
+.pre-visit-doc__btn--account:hover:not(:disabled) {
+  background: #0c6278;
+}
+
+.pre-visit-doc__btn--account:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pre-visit-doc__account-error {
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #7f1d1d;
+  background: rgba(185, 28, 28, 0.06);
+  border: 1px solid rgba(185, 28, 28, 0.15);
+  border-radius: 10px;
+}
+
+.pre-visit-doc__account-history-link {
+  align-self: flex-start;
+  margin-top: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--pvd-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.pre-visit-doc__account-history-link:hover {
+  border-bottom-color: rgba(14, 116, 144, 0.35);
+}
+
+.pre-visit-doc__account-history-link:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.45);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 .pre-visit-doc__consent--secondary {
   margin-top: 32px;
   padding: 18px 18px 20px;

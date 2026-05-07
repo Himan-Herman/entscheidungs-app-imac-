@@ -18,6 +18,7 @@ import {
   setDoctorLanguage,
 } from "../constants/preVisitSession.js";
 import { apiFetch } from "../../../lib/api.js";
+import { authFetch } from "../../../api/authFetch.js";
 import { generatePreVisitPdf } from "../pdf/generatePreVisitPdf.js";
 import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
@@ -56,6 +57,22 @@ const ui = {
       "Die Arztversion konnte gerade nicht erstellt werden. Sie können weiterhin die lokale PDF-Vorschau verwenden.",
     aiSuccessStatus:
       "Die Arztversion wurde auf Basis Ihrer Angaben erstellt.",
+    accountSectionTitle: "In meinem Konto speichern",
+    accountConsentCheckbox:
+      "Ich möchte diese Vorbereitung in meinem MedScoutX-Konto speichern.",
+    accountConsentExpl:
+      "Diese Speicherung ist optional. Sie können gespeicherte Vorbereitungen später ansehen oder löschen.",
+    saveToAccount: "Im Konto speichern",
+    accountLoginHint:
+      "Melden Sie sich an, um Vorbereitungen in Ihrem Konto zu speichern.",
+    accountLoginLink: "Zum Login",
+    accountSaveSuccess:
+      "Die Vorbereitung wurde in Ihrem Konto gespeichert.",
+    accountSaveError:
+      "Die Vorbereitung konnte gerade nicht gespeichert werden.",
+    sessionTitleDe: "Arztgespräch-Vorbereitung",
+    sessionTitleEn: "Doctor visit preparation",
+    viewMyPreparations: "Meine Vorbereitungen anzeigen",
   },
   en: {
     title: "Prepare document for the doctor",
@@ -89,6 +106,22 @@ const ui = {
       "The doctor version could not be created right now. You can still use the local PDF preview.",
     aiSuccessStatus:
       "The doctor version was created based on your statements.",
+    accountSectionTitle: "Save to my account",
+    accountConsentCheckbox:
+      "I want to save this preparation in my MedScoutX account.",
+    accountConsentExpl:
+      "This storage is optional. You can view or delete saved preparations later.",
+    saveToAccount: "Save to account",
+    accountLoginHint:
+      "Sign in to save preparations to your account.",
+    accountLoginLink: "Sign in",
+    accountSaveSuccess:
+      "The preparation was saved to your account.",
+    accountSaveError:
+      "The preparation could not be saved right now.",
+    sessionTitleDe: "Arztgespräch-Vorbereitung",
+    sessionTitleEn: "Doctor visit preparation",
+    viewMyPreparations: "View my preparations",
   },
 };
 
@@ -101,6 +134,15 @@ export default function PreVisitDocumentPage() {
   const [session, setSession] = useState(() => loadPreVisitSession());
   const [consentLocalSave, setConsentLocalSave] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [consentAccountSave, setConsentAccountSave] = useState(false);
+  const [accountSaveSuccess, setAccountSaveSuccess] = useState(false);
+  const [accountSaveError, setAccountSaveError] = useState(null);
+  const [accountSaving, setAccountSaving] = useState(false);
+  const [hasAuthToken, setHasAuthToken] = useState(() =>
+    typeof window !== "undefined"
+      ? !!window.localStorage.getItem("medscout_token")
+      : false
+  );
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   const [aiSuccessNote, setAiSuccessNote] = useState(null);
@@ -118,6 +160,10 @@ export default function PreVisitDocumentPage() {
     }
     setSession(s);
   }, [location.pathname, location.key, navigate]);
+
+  useEffect(() => {
+    setHasAuthToken(!!localStorage.getItem("medscout_token"));
+  }, [location.pathname, location.key]);
 
   useEffect(() => {
     document.title =
@@ -205,11 +251,66 @@ export default function PreVisitDocumentPage() {
   function handleDownloadPdf() {
     const latest = loadPreVisitSession();
     if (!latest?.answers) return;
+    const next = { ...latest, pdfDownloaded: true };
+    savePreVisitSession(next);
+    setSession(next);
     generatePreVisitPdf({
-      session: latest,
+      session: next,
       uiLanguage: language,
       labels: {},
     });
+  }
+
+  async function handleSaveToAccount() {
+    if (!consentAccountSave || !hasAuthToken) return;
+
+    setAccountSaving(true);
+    setAccountSaveError(null);
+    setAccountSaveSuccess(false);
+
+    try {
+      const latest = loadPreVisitSession();
+      if (!latest?.answers || typeof latest.answers !== "object") {
+        setAccountSaveError(t.accountSaveError);
+        return;
+      }
+
+      const dl =
+        latest.doctorLanguage || latest.patientLanguage || doctorLang;
+
+      const payload = {
+        patientLanguage: latest.patientLanguage || "de",
+        doctorLanguage: dl || null,
+        answers: latest.answers,
+        aiDoctorVersion: latest.aiDoctorVersion ?? null,
+        aiSafetyNotice:
+          typeof latest.aiSafetyNotice === "string" &&
+          latest.aiSafetyNotice.trim()
+            ? latest.aiSafetyNotice.trim()
+            : null,
+        title: language === "en" ? t.sessionTitleEn : t.sessionTitleDe,
+        status: "pdf_created",
+      };
+
+      const res = await authFetch("/api/previsit/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        setAccountSaveError(t.accountSaveError);
+        return;
+      }
+
+      setAccountSaveSuccess(true);
+      setConsentAccountSave(false);
+    } catch (err) {
+      if (err?.message === "SESSION_EXPIRED") return;
+      setAccountSaveError(t.accountSaveError);
+    } finally {
+      setAccountSaving(false);
+    }
   }
 
   function handleSaveArchive() {
@@ -397,6 +498,83 @@ export default function PreVisitDocumentPage() {
             {t.backReview}
           </Link>
         </nav>
+
+        <section
+          className="pre-visit-doc__consent pre-visit-doc__consent--account"
+          aria-labelledby="previsit-account-heading"
+        >
+          <h2
+            id="previsit-account-heading"
+            className="pre-visit-doc__consent-title pre-visit-doc__consent-title--account"
+          >
+            {t.accountSectionTitle}
+          </h2>
+
+          {!hasAuthToken ? (
+            <div className="pre-visit-doc__account-login">
+              <p className="pre-visit-doc__account-login-hint">{t.accountLoginHint}</p>
+              <Link
+                className="pre-visit-doc__btn pre-visit-doc__btn--account-login"
+                to="/login"
+              >
+                {t.accountLoginLink}
+              </Link>
+            </div>
+          ) : (
+            <>
+              <label className="pre-visit-doc__checkbox-label">
+                <input
+                  type="checkbox"
+                  className="pre-visit-doc__checkbox"
+                  checked={consentAccountSave}
+                  onChange={(e) => {
+                    setConsentAccountSave(e.target.checked);
+                    setAccountSaveSuccess(false);
+                    setAccountSaveError(null);
+                  }}
+                />
+                <span className="pre-visit-doc__checkbox-text">
+                  {t.accountConsentCheckbox}
+                </span>
+              </label>
+
+              <p className="pre-visit-doc__consent-expl">{t.accountConsentExpl}</p>
+
+              <button
+                type="button"
+                className="pre-visit-doc__btn pre-visit-doc__btn--account"
+                disabled={!consentAccountSave || accountSaving}
+                aria-busy={accountSaving}
+                onClick={handleSaveToAccount}
+              >
+                {t.saveToAccount}
+              </button>
+
+              {accountSaveSuccess ? (
+                <p
+                  className="pre-visit-doc__save-success"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {t.accountSaveSuccess}
+                </p>
+              ) : null}
+
+              {accountSaveError ? (
+                <p className="pre-visit-doc__account-error" role="alert">
+                  {accountSaveError}
+                </p>
+              ) : null}
+
+              <Link
+                className="pre-visit-doc__account-history-link"
+                to="/pre-visit/my-preparations"
+              >
+                {t.viewMyPreparations}
+              </Link>
+            </>
+          )}
+        </section>
 
         <section
           className="pre-visit-doc__consent pre-visit-doc__consent--secondary"
