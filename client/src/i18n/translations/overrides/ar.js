@@ -2,6 +2,7 @@ import legalAr from "../legal/ar/index.js";
 import landing from "./ar.landing.js";
 import info from "./ar.info.js";
 import preVisit from "./ar.preVisit.js";
+import startseite from "./ar.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
@@ -9,6 +10,7 @@ export default {
   landing,
   info,
   preVisit,
+  startseite,
   header: {
     skip: "تخطّي إلى المحتوى",
     homeAria: "الانتقال إلى الصفحة الرئيسية",
@@ -108,38 +110,6 @@ export default {
     continue: "متابعة",
     cancel: "إلغاء",
     close: "إغلاق",
-  },
-  startseite: {
-    title: "MedScoutX — التحضير للموعد",
-    skip: "إلى المحتوى الرئيسي",
-    tagline:
-      "تحضير منظّم للحديث الطبي — وليس تشخيصًا أو نصيحة علاج.",
-    heroTitle: "حضّر مواعيدك الطبية بشكل أفضل — بأي لغة.",
-    heroText:
-      "يساعدك MedScoutX على تنظيم الأعراض والأدوية والمستندات والأسئلة قبل الموعد. صدّر ملف PDF واضحًا بلغة العيادة.",
-    heroPrimary: "التحضير للموعد",
-    heroSecondary: "معرفة المزيد",
-    heroHelp:
-      "وحدات اختيارية للأعراض أو خريطة الجسم أو الصور — دائمًا تحت سيطرتك.",
-    audienceTitle: "لمن MedScoutX",
-    stepsEyebrow: "كيف يعمل",
-    safetyStripTitle: "حدّ الأمان",
-    safetyStripBody:
-      "لا يشخّص MedScoutX ولا يقترح علاجًا ولا يقيّم الإسعافية. يدعم تنظيم ما تختار مشاركته فقط.",
-    featuresTitle: "استكشاف الوظائف",
-    featuresSubtitle:
-      "ابدأ بالتحضير للموعد أو استخدم الأدوات الإضافية عند الحاجة.",
-    trustTitle: "الخصوصية والشفافية",
-    trustText:
-      "مصمّم لاستخدام بيانات قليلة؛ أنت تقرر ما تُدخله وما يُحفظ محليًا.",
-    legal: "معلومات قانونية",
-    imprint: "بيانات النشر",
-    privacy: "الخصوصية",
-    terms: "الشروط",
-    disclaimer: "إخلاء المسؤولية",
-    footerNote:
-      "يدعم MedScoutX تنظيم معلوماتك — وليس تشخيصًا أو نصيحة علاج أو تقييم إسعافية.",
-    videoUnsupported: "المتصفح لا يدعم تشغيل الفيديو.",
   },
   forgotPassword: {
     title: "إعادة تعيين كلمة المرور",

@@ -1,8 +1,19 @@
+import legalKu from "../legal/ku/index.js";
+import landing from "./ku.landing.js";
+import info from "./ku.info.js";
+import preVisit from "./ku.preVisit.js";
+import startseite from "./ku.startseite.js";
+
 /**
  * Kurdish Kurmanji (Kurmancî) — Latin script, LTR.
  * Partial overrides merged onto English — missing keys fall back to EN.
  */
 export default {
+  legal: legalKu,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Derbasî naverokê bibe",
     homeAria: "Biçe ser malperê",
@@ -102,38 +113,6 @@ export default {
     continue: "Berdewam bike",
     cancel: "Betal bike",
     close: "Bigre",
-  },
-  startseite: {
-    title: "MedScoutX — Amadekirina serdanê",
-    skip: "Biçe naveroka sereke",
-    tagline:
-      "Amadekirina rêzdar ji bo axaftina tenduristiyê — ne dermanîkirin ne jî şîretên çareseriyê.",
-    heroTitle: "Serdanên xwe baştir amade bike — bi her zimanî.",
-    heroText:
-      "MedScoutX alîkarî te dike ku berî serdanê belîşan, derman, belge û pirsan bi rêzî bibî. PDF-eke zelal bi zimanê koça tenduristiyê derxe.",
-    heroPrimary: "Serdanê amade bike",
-    heroSecondary: "Zêdetir bizane",
-    heroHelp:
-      "Modûlên bijarte ji bo belîşan, nexşeya laş an wêneyan — her dem bin kontrola te.",
-    audienceTitle: "MedScoutX ji bo kê ye",
-    stepsEyebrow: "Çawa dixebite",
-    safetyStripTitle: "Sînorê ewlehiyê",
-    safetyStripBody:
-      "MedScoutX dermanî nake, çareserî pêşniyar nake û acîlî nagire; tenê alîkarî dike ku tiştên ku tu dixwazî parve bikî bi rêzî bibin.",
-    featuresTitle: "Taybetmendiyan binase",
-    featuresSubtitle:
-      "Bi amadekirina serdanê dest pê bike an amûrên din bikar bîne.",
-    trustTitle: "Nepenîtî û şeffafî",
-    trustText:
-      "Ji bo karanîna daneyên kêm hatiye sêwîrandin; tu biryar didî çi binivisî û çi li herêmî tomar dibe.",
-    legal: "Agahî ya qanûnî",
-    imprint: "Agahî ya qanûnî",
-    privacy: "Nepenîtî",
-    terms: "Merc",
-    disclaimer: "Redkirin",
-    footerNote:
-      "MedScoutX alîkarî dike ku agahiyên te bi rêzî bibin — ne dermanîkirin, ne şîretên çareseriyê, ne jî nirxandina acîlî.",
-    videoUnsupported: "Geroka te vîdyoyê napeşîne.",
   },
   forgotPassword: {
     title: "Şîfreyê reset bike",

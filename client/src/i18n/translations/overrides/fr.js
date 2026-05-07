@@ -1,8 +1,13 @@
 import legalFr from "../legal/fr/index.js";
+import info from "./fr.info.js";
+import preVisit from "./fr.preVisit.js";
+import startseite from "./fr.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
   legal: legalFr,
+  info,
+  preVisit,
   header: {
     skip: "Aller au contenu",
     homeAria: "Aller à l’accueil",
@@ -148,38 +153,7 @@ export default {
     cancel: "Annuler",
     close: "Fermer",
   },
-  startseite: {
-    title: "MedScoutX — Préparer la consultation",
-    skip: "Aller au contenu principal",
-    tagline:
-      "Préparation structurée pour l’échange médical — pas de diagnostic ni de conseil thérapeutique.",
-    heroTitle: "Mieux préparer vos rendez-vous — dans toutes les langues.",
-    heroText:
-      "MedScoutX aide à structurer symptômes, médicaments, documents et questions avant un rendez-vous. Export PDF clair dans la langue du cabinet.",
-    heroPrimary: "Préparer la consultation",
-    heroSecondary: "En savoir plus",
-    heroHelp:
-      "Des modules optionnels pour symptômes, schéma corporel ou images — toujours sous votre contrôle.",
-    audienceTitle: "À qui s’adresse MedScoutX",
-    stepsEyebrow: "Fonctionnement",
-    safetyStripTitle: "Limite de sécurité",
-    safetyStripBody:
-      "MedScoutX ne pose pas de diagnostic, ne recommande pas de traitement et n’évalue pas l’urgence. Il aide à structurer ce que vous choisissez de partager.",
-    featuresTitle: "Découvrir les fonctions",
-    featuresSubtitle:
-      "Commencez par la préparation ou utilisez les outils complémentaires.",
-    trustTitle: "Confidentialité et transparence",
-    trustText:
-      "Conçu pour limiter les données : vous décidez quoi saisir et quoi garder localement.",
-    legal: "Informations légales",
-    imprint: "Mentions légales",
-    privacy: "Confidentialité",
-    terms: "CGU",
-    disclaimer: "Avertissement",
-    footerNote:
-      "MedScoutX aide à préparer vos propos — pas de diagnostic, ni conseil thérapeutique, ni évaluation d’urgence.",
-    videoUnsupported: "Votre navigateur ne prend pas en charge la vidéo.",
-  },
+  startseite,
   forgotPassword: {
     title: "Réinitialiser le mot de passe",
     text: "Saisissez votre e-mail. Nous enverrons un lien de réinitialisation.",

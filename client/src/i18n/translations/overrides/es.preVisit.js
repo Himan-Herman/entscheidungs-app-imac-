@@ -1,0 +1,157 @@
+export default {
+  language: {
+    pageTitle: "MedScoutX — Preparación para la consulta",
+    eyebrow: "Pre-consulta",
+    title: "Preparación para la consulta médica",
+    explanation:
+      "Esta herramienta le ayuda a estructurar sus inquietudes y preguntas para una consulta médica. No ofrece diagnósticos ni recomendaciones médicas.",
+    trust: "Toda la información se basa únicamente en lo que usted indica.",
+    valueProp:
+      "Prepare síntomas, medicación, documentos y preguntas de forma estructurada — en su idioma.",
+    languageLabel: "Idioma que desea usar con MedScoutX",
+    languageHint:
+      "Puede introducir la información en el idioma en el que se sienta más seguro.",
+    continue: "Continuar",
+  },
+  chrome: {
+    backHome: "Volver al inicio de MedScoutX",
+    moduleLabel: "Preparar la consulta médica",
+    safety:
+      "Este módulo solo sirve para preparar y documentar su información. No sustituye el consejo médico.",
+    navAria: "Navegación de pre-consulta",
+  },
+  chat: {
+    pageTitle: "MedScoutX — Cuestionario previo",
+    progressTemplate: "Paso {{current}} de {{total}}",
+    answerPlaceholder: "Su respuesta…",
+    next: "Continuar",
+    back: "Volver",
+    changeLanguage: "Cambiar idioma de entrada",
+    sectionLabelQuestion: "Pregunta",
+    sectionLabelAnswer: "Su respuesta",
+    devInsertDemo: "Insertar datos de demostración",
+    devOnlyNote: "Visible solo en desarrollo local.",
+  },
+  review: {
+    pageTitle: "MedScoutX — Resumen previo",
+    title: "Resumen de sus respuestas",
+    intro:
+      "Así se utilizarán sus respuestas para preparar la consulta. Aún puede hacer cambios.",
+    empty: "no indicado",
+    edit: "Editar",
+    clearField: "Eliminar entrada",
+    trustBeforeActions:
+      "Puede revisar, editar o borrar su información en cualquier momento antes de crear el documento.",
+    newSession: "Iniciar nueva sesión",
+    wipeSession: "Eliminar sesión por completo",
+    prepareDocument: "Preparar documento",
+  },
+  document: {
+    pageTitle: "MedScoutX — Vista previa del documento",
+    title: "Preparar documento para el médico",
+    explanation:
+      "Elija el idioma en el que debe crearse la versión estructurada para el médico.",
+    doctorLangLabel: "Idioma de la versión para el médico",
+    doctorLangHint:
+      "Elija el idioma en el que el médico o el centro deben leer el documento.",
+    sectionStructured: "Versión estructurada para el médico",
+    sectionOriginal: "Declaraciones originales del paciente",
+    disclaimer:
+      "La versión para el médico se basa solo en las declaraciones del paciente. No se crean diagnósticos, recomendaciones ni valoraciones de urgencia.",
+    empty: "no indicado",
+    backReview: "Volver al resumen",
+    pdfDisabled: "Crear PDF",
+    pdfLocalNote:
+      "El archivo PDF se crea localmente en su navegador. No se transmiten datos.",
+    consentCheckbox:
+      "Quiero guardar esta sesión localmente en este navegador para poder consultarla después.",
+    consentExpl:
+      "La sesión se guarda solo localmente en este navegador. No se envían datos a MedScoutX.",
+    saveLocal: "Guardar sesión localmente",
+    saveSuccess: "La sesión se guardó localmente.",
+    archiveNote:
+      "Puede eliminar las sesiones guardadas más adelante. Esta función no sustituye el historial clínico.",
+    historyLink: "Ver sesiones guardadas",
+    consentSectionTitle: "Copia local opcional",
+    createDoctorVersion: "Crear versión para el médico",
+    creatingDoctorVersion: "Creando versión para el médico…",
+    aiError:
+      "No se pudo crear la versión para el médico ahora. Aún puede usar la vista previa PDF local.",
+    aiSuccessStatus:
+      "La versión para el médico se creó a partir de sus declaraciones.",
+    accountSectionTitle: "Guardar en mi cuenta",
+    accountConsentCheckbox:
+      "Quiero guardar esta preparación en mi cuenta MedScoutX.",
+    accountConsentExpl:
+      "Este almacenamiento es opcional. Podrá ver o eliminar preparaciones guardadas después.",
+    saveToAccount: "Guardar en la cuenta",
+    accountLoginHint:
+      "Inicie sesión para guardar preparaciones en su cuenta.",
+    accountLoginLink: "Iniciar sesión",
+    accountSaveSuccess:
+      "La preparación se guardó en su cuenta.",
+    accountSaveError:
+      "No se pudo guardar la preparación ahora.",
+    sessionTitleDe: "Vorbereitung Arztgespräch",
+    sessionTitleEn: "Doctor visit preparation",
+    viewMyPreparations: "Ver mis preparaciones",
+    mainNavAria:
+      "Versión para el médico, exportar PDF, volver al resumen",
+    structuredRowLabels: {
+      appointmentReason: "Motivo actual de la consulta",
+      symptomsOwnWords: "Síntomas con palabras del paciente",
+      onsetAndCourse: "Inicio y evolución en el tiempo",
+      medications: "Medicación actual",
+      preExistingConditions: "Enfermedades previas conocidas",
+      relevantDocuments: "Documentos relevantes",
+      patientQuestions: "Preguntas para el médico",
+    },
+  },
+  localHistory: {
+    pageTitle: "Sesiones guardadas — Pre-consulta — MedScoutX",
+    title: "Sesiones guardadas localmente",
+    expl:
+      "Estas sesiones solo están en este navegador. No se han enviado a MedScoutX.",
+    privacyNote:
+      "Las sesiones locales permanecen solo en este dispositivo y navegador.",
+    empty: "No hay sesiones guardadas localmente.",
+    patientLang: "Idioma del paciente",
+    doctorLang: "Idioma del médico",
+    savedAt: "Guardado",
+    view: "Ver",
+    delete: "Eliminar",
+    clearAll: "Eliminar todas las sesiones guardadas",
+    clearConfirm:
+      "¿Eliminar permanentemente todas las sesiones locales? No se puede deshacer.",
+    listAriaLabel: "Sesiones guardadas",
+  },
+  accountHistory: {
+    pageTitle: "MedScoutX — Mis preparaciones",
+    title: "Mis preparaciones",
+    subtitle:
+      "Aquí ve las preparaciones que guardó explícitamente en su cuenta MedScoutX.",
+    loginHint: "Inicie sesión para ver preparaciones guardadas.",
+    loginCta: "Iniciar sesión",
+    loading: "Cargando…",
+    loadError:
+      "No se pudo cargar la lista ahora. Inténtelo más tarde.",
+    empty: "Aún no hay preparaciones guardadas en su cuenta.",
+    patientLang: "Idioma del paciente",
+    doctorLang: "Idioma del médico",
+    created: "Creado",
+    statusLabel: "Estado",
+    open: "Abrir",
+    deleteOne: "Eliminar",
+    deleteAll: "Eliminar todas las preparaciones",
+    confirmDeleteAll:
+      "¿Eliminar todas las preparaciones guardadas en su cuenta? No se puede deshacer.",
+    privacyNote:
+      "Puede eliminar preparaciones guardadas en cualquier momento. Esta función no sustituye el historial clínico.",
+    defaultTitle: "Preparación para la visita médica",
+    deleteError: "No se pudo eliminar la preparación ahora.",
+    deleteAllError: "No se pudieron eliminar las preparaciones ahora.",
+    statusDraft: "Borrador",
+    statusPdfCreated: "PDF creado",
+    statusCompleted: "Completado",
+  },
+};

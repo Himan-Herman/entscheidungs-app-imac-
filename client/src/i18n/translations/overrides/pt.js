@@ -1,8 +1,16 @@
 import legalPt from "../legal/pt/index.js";
+import landing from "./pt.landing.js";
+import info from "./pt.info.js";
+import preVisit from "./pt.preVisit.js";
+import startseite from "./pt.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
   legal: legalPt,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Ir para o conteúdo",
     homeAria: "Ir para a página inicial",
@@ -103,38 +111,6 @@ export default {
     continue: "Continuar",
     cancel: "Cancelar",
     close: "Fechar",
-  },
-  startseite: {
-    title: "MedScoutX — Preparar a consulta",
-    skip: "Ir para o conteúdo principal",
-    tagline:
-      "Preparação estruturada para a conversa clínica — não é diagnóstico nem aconselhamento terapêutico.",
-    heroTitle: "Prepare melhor as suas consultas — em qualquer idioma.",
-    heroText:
-      "MedScoutX ajuda a estruturar sintomas, medicamentos, documentos e perguntas antes da consulta. Exporte um PDF claro no idioma do centro.",
-    heroPrimary: "Preparar a consulta",
-    heroSecondary: "Saiba mais",
-    heroHelp:
-      "Módulos opcionais para sintomas, mapa corporal ou imagens — sempre sob o seu controlo.",
-    audienceTitle: "Para quem é o MedScoutX",
-    stepsEyebrow: "Como funciona",
-    safetyStripTitle: "Limite de segurança",
-    safetyStripBody:
-      "MedScoutX não diagnostica, não recomenda tratamento nem avalia urgências. Apenas ajuda a estruturar o que escolher partilhar.",
-    featuresTitle: "Explorar funções",
-    featuresSubtitle:
-      "Comece pela preparação da consulta ou use ferramentas complementares.",
-    trustTitle: "Privacidade e transparência",
-    trustText:
-      "Concebido para poucos dados: decide o que introduz e o que guarda localmente.",
-    legal: "Informação legal",
-    imprint: "Impressão legal",
-    privacy: "Privacidade",
-    terms: "Termos",
-    disclaimer: "Aviso legal",
-    footerNote:
-      "MedScoutX apoia a preparação das suas informações — não diagnóstico, nem aconselhamento terapêutico, nem avaliação de urgência.",
-    videoUnsupported: "O seu navegador não reproduz vídeo.",
   },
   forgotPassword: {
     title: "Redefinir palavra-passe",

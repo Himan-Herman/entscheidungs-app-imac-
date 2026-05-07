@@ -1,5 +1,17 @@
+import legalPl from "../legal/pl/index.js";
+import landing from "./pl.landing.js";
+import info from "./pl.info.js";
+import preVisit from "./pl.preVisit.js";
+import startseite from "./pl.startseite.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
+
 export default {
+  legal: legalPl,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Przejdź do treści",
     homeAria: "Przejdź do strony głównej",
@@ -99,38 +111,6 @@ export default {
     continue: "Dalej",
     cancel: "Anuluj",
     close: "Zamknij",
-  },
-  startseite: {
-    title: "MedScoutX — Przygotowanie do wizyty",
-    skip: "Przejdź do treści głównej",
-    tagline:
-      "Uporządkowane przygotowanie do rozmowy medycznej — nie diagnoza ani porada lecznicza.",
-    heroTitle: "Lepiej przygotuj wizyty — w dowolnym języku.",
-    heroText:
-      "MedScoutX pomaga uporządkować objawy, leki, dokumenty i pytania przed wizytą. Eksportuj czytelny PDF w języku placówki.",
-    heroPrimary: "Przygotuj wizytę",
-    heroSecondary: "Dowiedz się więcej",
-    heroHelp:
-      "Opcjonalne moduły: objawy, mapa ciała lub zdjęcia — zawsze pod Twoją kontrolą.",
-    audienceTitle: "Dla kogo jest MedScoutX",
-    stepsEyebrow: "Jak to działa",
-    safetyStripTitle: "Granica bezpieczeństwa",
-    safetyStripBody:
-      "MedScoutX nie stawia diagnozy, nie zaleca leczenia ani nie ocenia pilności. Wspiera tylko uporządkowanie tego, co zdecydujesz się udostępnić.",
-    featuresTitle: "Poznaj funkcje",
-    featuresSubtitle:
-      "Zacznij od przygotowania do wizyty lub użyj narzędzi dodatkowych.",
-    trustTitle: "Prywatność i przejrzystość",
-    trustText:
-      "Zaprojektowane oszczędnie danych: Ty decydujesz, co wpisujesz i co zapisujesz lokalnie.",
-    legal: "Informacje prawne",
-    imprint: "Stopka redakcyjna",
-    privacy: "Prywatność",
-    terms: "Regulamin",
-    disclaimer: "Zastrzeżenie",
-    footerNote:
-      "MedScoutX wspiera uporządkowanie Twoich informacji — nie diagnoza, nie porada lecznicza, nie ocena pilności.",
-    videoUnsupported: "Twoja przeglądarka nie odtwarza wideo.",
   },
   forgotPassword: {
     title: "Reset hasła",

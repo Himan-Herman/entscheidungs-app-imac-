@@ -1,8 +1,19 @@
+import legalCkb from "../legal/ckb/index.js";
+import landing from "./ckb.landing.js";
+import info from "./ckb.info.js";
+import preVisit from "./ckb.preVisit.js";
+import startseite from "./ckb.startseite.js";
+
 /**
  * Kurdish Sorani (کوردی سۆرانی) — Arabic script, RTL.
  * Partial overrides merged onto English — missing keys fall back to EN.
  */
 export default {
+  legal: legalCkb,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "بڕۆ بۆ ناوەرۆک",
     homeAria: "بڕۆ بۆ پەڕەی سەرەکی",
@@ -102,38 +113,6 @@ export default {
     continue: "بەردەوامبوون",
     cancel: "پاشگەزبوونەوە",
     close: "داخستن",
-  },
-  startseite: {
-    title: "MedScoutX — ئامادەکاری بۆ چاوپێکەوتن",
-    skip: "بڕۆ بۆ ناوەرۆکی سەرەکی",
-    tagline:
-      "ئامادەکاری ڕێکخراو بۆ گفتوگۆی پزیشکی — نەک دۆزینەوە یان ڕێنمایی چارەسەر.",
-    heroTitle: "چاوپێکەوتنەکانت باشتر ئامادە بکە — بە ھەر زمانێک.",
-    heroText:
-      "MedScoutX یارمەتیت دەدات نیشانەکان، دەرمانەکان، بەڵگەنامەکان و پرسیارەکان لەپێش چاوپێکەوتن ڕێکبخەیت. PDFی ڕوون بە زمانەی نەخۆشخانەکە دەربهێنە.",
-    heroPrimary: "ئامادەکاری چاوپێکەوتن",
-    heroSecondary: "زیاتر بزانە",
-    heroHelp:
-      "بەشە ھەڵبژاردەکان بۆ نیشانەکان، نەخشەی جەستە یان وێنە — ھەمیشە لەژێر کۆنتڕۆڵی تۆدا.",
-    audienceTitle: "MedScoutX بۆ کێیە",
-    stepsEyebrow: "چۆنیەتی کارکردن",
-    safetyStripTitle: "سنووری ئاسایش",
-    safetyStripBody:
-      "MedScoutX دۆزینەوە ناکات، چارەسەر پێشنیار ناکات و فریاگوزاری نارێژێت؛ تەنیا یارمەتی ڕێکخستنی ئەوەی دەتەوێت بڵێیت دەدات.",
-    featuresTitle: "تواناکان بخوێنەرەوە",
-    featuresSubtitle:
-      "بە ئامادەکاری چاوپێکەوتن دەستپێبکە یان ئامرازەکانی تر بەکاربهێنە.",
-    trustTitle: "تایبەتمەندی و ڕوونی",
-    trustText:
-      "بۆ کەمترین داتا دیزاینکراوە؛ تۆ بڕیاری دەدەیت چ بنووسیت و چ لە ناوخۆدا پاشەکەوت بکەیت.",
-    legal: "زانیاریی یاسایی",
-    imprint: "زانیاریی یاسایی",
-    privacy: "تایبەتمەندی",
-    terms: "مەرجەکان",
-    disclaimer: "ڕەتکردنەوە",
-    footerNote:
-      "MedScoutX یارمەتی ڕێکخستنی زانیارییەکانت دەدات — نەک دۆزینەوە، نەک ڕێنمایی چارەسەر، نەک نارێژینی فریاگوزاری.",
-    videoUnsupported: "وێبگەڕەکەت ڤیدیۆ پشتگیری ناکات.",
   },
   forgotPassword: {
     title: "ڕێکخستنەوەی تێپەڕەوشە",

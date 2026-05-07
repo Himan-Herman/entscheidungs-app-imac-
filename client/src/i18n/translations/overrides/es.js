@@ -1,8 +1,13 @@
 import legalEs from "../legal/es/index.js";
+import info from "./es.info.js";
+import preVisit from "./es.preVisit.js";
+import startseite from "./es.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
   legal: legalEs,
+  info,
+  preVisit,
   header: {
     skip: "Ir al contenido",
     homeAria: "Ir a la página de inicio",
@@ -147,38 +152,7 @@ export default {
     cancel: "Cancelar",
     close: "Cerrar",
   },
-  startseite: {
-    title: "MedScoutX — Preparar la consulta",
-    skip: "Ir al contenido principal",
-    tagline:
-      "Preparación estructurada para la conversación médica — no es diagnóstico ni consejo terapéutico.",
-    heroTitle: "Prepare mejor sus citas médicas — en cualquier idioma.",
-    heroText:
-      "MedScoutX le ayuda a estructurar síntomas, medicación, documentos y preguntas antes de la cita. Exporte un PDF claro en el idioma del centro.",
-    heroPrimary: "Preparar la consulta",
-    heroSecondary: "Más información",
-    heroHelp:
-      "Módulos opcionales para síntomas, mapa corporal o imágenes — siempre bajo su control.",
-    audienceTitle: "Para quién es MedScoutX",
-    stepsEyebrow: "Cómo funciona",
-    safetyStripTitle: "Límite de seguridad",
-    safetyStripBody:
-      "MedScoutX no diagnostica, no recomienda tratamiento ni evalúa urgencias. Solo ayuda a estructurar lo que elija compartir.",
-    featuresTitle: "Explorar funciones",
-    featuresSubtitle:
-      "Empiece por la preparación de la cita o use herramientas complementarias.",
-    trustTitle: "Privacidad y transparencia",
-    trustText:
-      "Diseñado para usar pocos datos: usted decide qué introduce y qué guarda localmente.",
-    legal: "Información legal",
-    imprint: "Aviso legal",
-    privacy: "Privacidad",
-    terms: "Términos",
-    disclaimer: "Descargo",
-    footerNote:
-      "MedScoutX apoya la preparación de sus datos — no diagnóstico, ni consejo terapéutico, ni valoración de urgencia.",
-    videoUnsupported: "Su navegador no reproduce vídeo.",
-  },
+  startseite,
   forgotPassword: {
     title: "Restablecer contraseña",
     text: "Introduzca su correo. Le enviaremos un enlace.",

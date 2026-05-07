@@ -1,5 +1,16 @@
+import legalSq from "../legal/sq/index.js";
+import landing from "./sq.landing.js";
+import info from "./sq.info.js";
+import preVisit from "./sq.preVisit.js";
+import startseite from "./sq.startseite.js";
+
 /** Shqip — partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalSq,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Kalo te përmbajtja",
     homeAria: "Shko te faqja kryesore",
@@ -99,38 +110,6 @@ export default {
     continue: "Vazhdo",
     cancel: "Anulo",
     close: "Mbyll",
-  },
-  startseite: {
-    title: "MedScoutX — Përgatitja për vizitën",
-    skip: "Kalo te përmbajtja kryesore",
-    tagline:
-      "Përgatitje e strukturuar për bisedën mjekësore — jo diagnozë as këshillë terapeutike.",
-    heroTitle: "Përgatitni më mirë vizitat tuaja — në çdo gjuhë.",
-    heroText:
-      "MedScoutX ju ndihmon të strukturoni simptomat, ilaçet, dokumentet dhe pyetjet para vizitës. Eksportoni një PDF të qartë në gjuhën e njësise shëndetësore.",
-    heroPrimary: "Përgatit vizitën",
-    heroSecondary: "Mësoni më shumë",
-    heroHelp:
-      "Module opsionale për simptoma, hartën e trupit ose imazhe — gjithmonë nën kontrollin tuaj.",
-    audienceTitle: "Për kë është MedScoutX",
-    stepsEyebrow: "Si funksionon",
-    safetyStripTitle: "Kufiri i sigurisë",
-    safetyStripBody:
-      "MedScoutX nuk bën diagnozë, nuk rekomandon trajtim dhe nuk vlerëson urgjencën; mbështet vetëm strukturimin e asaj që zgjidhni të ndani.",
-    featuresTitle: "Eksploro funksionet",
-    featuresSubtitle:
-      "Filloni nga përgatitja e vizitës ose përdorni mjete shtesë.",
-    trustTitle: "Privatësia dhe transparenca",
-    trustText:
-      "I konceptuar për pak të dhëna: ju vendosni çfarë futni dhe çfarë ruani lokalisht.",
-    legal: "Informacion ligjor",
-    imprint: "Informacion ligjor",
-    privacy: "Privatësia",
-    terms: "Kushtet",
-    disclaimer: "Mohim përgjegjësie",
-    footerNote:
-      "MedScoutX mbështet strukturimin e informacionit tuaj — jo diagnozë, jo këshillë terapeutike, jo vlerësim urgjence.",
-    videoUnsupported: "Shfletuesi juaj nuk mbështet video.",
   },
   forgotPassword: {
     title: "Rivendos fjalëkalimin",

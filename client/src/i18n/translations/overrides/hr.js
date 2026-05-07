@@ -1,5 +1,17 @@
+import legalHr from "../legal/hr/index.js";
+import landing from "./hr.landing.js";
+import info from "./hr.info.js";
+import preVisit from "./hr.preVisit.js";
+import startseite from "./hr.startseite.js";
+
 /** Hrvatski — partial overrides merged onto English — missing keys fall back to EN. */
+
 export default {
+  legal: legalHr,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Prijeđi na sadržaj",
     homeAria: "Idi na početnu stranicu",
@@ -99,38 +111,6 @@ export default {
     continue: "Nastavi",
     cancel: "Odustani",
     close: "Zatvori",
-  },
-  startseite: {
-    title: "MedScoutX — Priprema za posjet liječniku",
-    skip: "Prijeđi na glavni sadržaj",
-    tagline:
-      "Strukturirana priprema za razgovor u zdravstvu — usmjerena na jasnoću vaših informacija prije posjeta.",
-    heroTitle: "Bolje se pripremite za preglede — na bilo kojem jeziku.",
-    heroText:
-      "MedScoutX pomaže da prije posjeta složite simptome, lijekove, dokumente i pitanja. Izvezite jasan PDF jezikom ustanove.",
-    heroPrimary: "Pripremi posjet",
-    heroSecondary: "Saznajte više",
-    heroHelp:
-      "Izborni moduli za simptome, kartu tijela ili slike — uvijek pod vašom kontrolom.",
-    audienceTitle: "Za koga je MedScoutX",
-    stepsEyebrow: "Kako funkcionira",
-    safetyStripTitle: "Granica odgovornosti",
-    safetyStripBody:
-      "MedScoutX ne zamjenjuje pregled u zdravstvu i ne donosi stručne zaključke; podržava strukturiranje onoga što odlučite podijeliti prije razgovora s liječnikom.",
-    featuresTitle: "Istražite mogućnosti",
-    featuresSubtitle:
-      "Počnite od priprema za posjet ili koristite dodatne alate.",
-    trustTitle: "Privatnost i transparentnost",
-    trustText:
-      "Razvijeno uz načelo malo podataka: vi birate što unosite i što pohranjujete lokalno.",
-    legal: "Pravne informacije",
-    imprint: "Impresum",
-    privacy: "Privatnost",
-    terms: "Uvjeti",
-    disclaimer: "Odricanje od odgovornosti",
-    footerNote:
-      "MedScoutX pomaže strukturirati vaše napomene za razgovor — ne nadomješta zdravstveno procjenjivanje u ustanovi.",
-    videoUnsupported: "Vaš preglednik ne reproducira video.",
   },
   forgotPassword: {
     title: "Resetiranje lozinke",

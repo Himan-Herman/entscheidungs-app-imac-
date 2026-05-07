@@ -1,5 +1,17 @@
+import legalRo from "../legal/ro/index.js";
+import landing from "./ro.landing.js";
+import info from "./ro.info.js";
+import preVisit from "./ro.preVisit.js";
+import startseite from "./ro.startseite.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
+
 export default {
+  legal: legalRo,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Treci la conținut",
     homeAria: "Mergi la pagina principală",
@@ -99,38 +111,6 @@ export default {
     continue: "Continuă",
     cancel: "Anulează",
     close: "Închide",
-  },
-  startseite: {
-    title: "MedScoutX — Pregătire pentru consultație",
-    skip: "La conținutul principal",
-    tagline:
-      "Pregătire structurată pentru dialogul medical — nu diagnostic sau recomandare terapeutică.",
-    heroTitle: "Pregătiți mai bine consultațiile — în orice limbă.",
-    heroText:
-      "MedScoutX vă ajută să structurați simptomele, medicamentele, documentele și întrebările înainte de vizită. Exportați un PDF clar în limba centrului medical.",
-    heroPrimary: "Pregătiți consultația",
-    heroSecondary: "Aflați mai mult",
-    heroHelp:
-      "Module opționale pentru simptome, harta corpului sau imagini — mereu sub controlul dumneavoastră.",
-    audienceTitle: "Pentru cine este MedScoutX",
-    stepsEyebrow: "Cum funcționează",
-    safetyStripTitle: "Limită de siguranță",
-    safetyStripBody:
-      "MedScoutX nu pune diagnostic, nu recomandă tratament și nu evaluează urgența. Sprijină doar structurarea a ceea ce alegeți să partajați.",
-    featuresTitle: "Explorați funcțiile",
-    featuresSubtitle:
-      "Începeți cu pregătirea consultației sau folosiți instrumente complementare.",
-    trustTitle: "Confidențialitate și transparență",
-    trustText:
-      "Conceput pentru puține date: dumneavoastră decideți ce introduceți și ce salvați local.",
-    legal: "Informații legale",
-    imprint: "Date legale",
-    privacy: "Confidențialitate",
-    terms: "Termeni",
-    disclaimer: "Declinare",
-    footerNote:
-      "MedScoutX sprijină pregătirea informațiilor dumneavoastră — nu diagnostic, nu recomandare terapeutică, nu evaluare de urgență.",
-    videoUnsupported: "Browserul nu redă video.",
   },
   forgotPassword: {
     title: "Resetare parolă",

@@ -1,8 +1,16 @@
 import legalEl from "../legal/el/index.js";
+import landing from "./el.landing.js";
+import info from "./el.info.js";
+import preVisit from "./el.preVisit.js";
+import startseite from "./el.startseite.js";
 
 /** Ελληνικά — partial overrides merged onto English — missing keys fall back to EN. */
 export default {
   legal: legalEl,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Μετάβαση στο περιεχόμενο",
     homeAria: "Μετάβαση στην αρχική σελίδα",
@@ -102,38 +110,6 @@ export default {
     continue: "Συνέχεια",
     cancel: "Ακύρωση",
     close: "Κλείσιμο",
-  },
-  startseite: {
-    title: "MedScoutX — Προετοιμασία για την επίσκεψη",
-    skip: "Μετάβαση στο κύριο περιεχόμενο",
-    tagline:
-      "Οργανωμένη προετοιμασία για τη συνομιλία με τον γιατρό — όχι διάγνωση ή θεραπευτική συμβουλή.",
-    heroTitle: "Οργανώστε καλύτερα τις επισκέψεις σας — σε οποιαδήποτε γλώσσα.",
-    heroText:
-      "Το MedScoutX σάς βοηθά να δομήσετε συμπτώματα, φάρμακα, έγγραφα και ερωτήσεις πριν από την επίσκεψη. Εξαγάγετε ένα σαφές PDF στη γλώσσα της μονάδας υγείας.",
-    heroPrimary: "Προετοιμασία επίσκεψης",
-    heroSecondary: "Μάθετε περισσότερα",
-    heroHelp:
-      "Προαιρετικές ενότητες για συμπτώματα, χάρτη σώματος ή εικόνες — πάντα υπό τον έλεγχό σας.",
-    audienceTitle: "Για ποιους είναι το MedScoutX",
-    stepsEyebrow: "Πώς λειτουργεί",
-    safetyStripTitle: "Όριο ασφαλείας",
-    safetyStripBody:
-      "Το MedScoutX δεν διαγιγνώσκει, δεν προτείνει θεραπεία και δεν αξιολογεί επείγουσα περίθαλψη· υποστηρίζει μόνο τη δόμηση όσων επιλέγετε να μοιραστείτε.",
-    featuresTitle: "Εξερευνήστε τις λειτουργίες",
-    featuresSubtitle:
-      "Ξεκινήστε από την προετοιμασία της επίσκεψης ή χρησιμοποιήστε συμπληρωματικά εργαλεία.",
-    trustTitle: "Απόρρητο και διαφάνεια",
-    trustText:
-      "Σχεδιασμένο για ελάχιστα δεδομένα· εσείς αποφασίζετε τι εισάγετε και τι αποθηκεύετε τοπικά.",
-    legal: "Νομικές πληροφορίες",
-    imprint: "Νομικές πληροφορίες",
-    privacy: "Απόρρητο",
-    terms: "Όροι",
-    disclaimer: "Αποποίηση",
-    footerNote:
-      "Το MedScoutX υποστηρίζει τη δόμηση των πληροφοριών σας — όχι διάγνωση, θεραπευτική συμβουλή ή αξιολόγηση επείγοντος.",
-    videoUnsupported: "Ο φυλλομετρητής σας δεν υποστηρίζει βίντεο.",
   },
   forgotPassword: {
     title: "Επαναφορά κωδικού",

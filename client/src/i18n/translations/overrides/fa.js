@@ -2,6 +2,7 @@ import legalFa from "../legal/fa/index.js";
 import landing from "./fa.landing.js";
 import info from "./fa.info.js";
 import preVisit from "./fa.preVisit.js";
+import startseite from "./fa.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
@@ -9,6 +10,7 @@ export default {
   landing,
   info,
   preVisit,
+  startseite,
   header: {
     skip: "رفتن به محتوا",
     homeAria: "رفتن به صفحهٔ اصلی",
@@ -108,38 +110,6 @@ export default {
     continue: "ادامه",
     cancel: "لغو",
     close: "بستن",
-  },
-  startseite: {
-    title: "MedScoutX — آماده‌سازی ویزیت",
-    skip: "رفتن به محتوای اصلی",
-    tagline:
-      "آماده‌سازی ساخت‌یافته برای گفتگوی پزشکی — تشخیص یا توصیهٔ درمانی نیست.",
-    heroTitle: "ویزیت‌های پزشکی را بهتر آماده کنید — به هر زبانی.",
-    heroText:
-      "MedScoutX به شما کمک می‌کند علائم، داروها، مدارک و پرسش‌ها را پیش از ویزیت سازماندهی کنید. PDF شفاف به زبان مرکز درمانی صادر کنید.",
-    heroPrimary: "آماده‌سازی ویزیت",
-    heroSecondary: "بیشتر بدانید",
-    heroHelp:
-      "ماژول‌های اختیاری برای علائم، نقشهٔ بدن یا تصویر — همیشه تحت کنترل شما.",
-    audienceTitle: "MedScoutX برای چه کسانی است",
-    stepsEyebrow: "چگونه کار می‌کند",
-    safetyStripTitle: "مرز ایمنی",
-    safetyStripBody:
-      "MedScoutX تشخیص نمی‌دهد، درمان پیشنهاد نمی‌کند و اورژانس بودن را ارزیابی نمی‌کند؛ فقط به سازماندهی آنچه انتخاب می‌کنید به اشتراک بگذارید کمک می‌کند.",
-    featuresTitle: "کشف امکانات",
-    featuresSubtitle:
-      "با آماده‌سازی ویزیت شروع کنید یا در صورت نیاز از ابزارهای تکمیلی استفاده کنید.",
-    trustTitle: "حریم خصوصی و شفافیت",
-    trustText:
-      "با دادهٔ کم طراحی شده؛ شما تصمیم می‌گیرید چه وارد کنید و چه را محلی ذخیره کنید.",
-    legal: "اطلاعات حقوقی",
-    imprint: "پایگاه قانونی",
-    privacy: "حریم خصوصی",
-    terms: "شرایط",
-    disclaimer: "سلب مسئولیت",
-    footerNote:
-      "MedScoutX به سازماندهی گفته‌های شما کمک می‌کند — نه تشخیص، نه توصیهٔ درمانی، نه ارزیابی اورژانس.",
-    videoUnsupported: "مرورگر شما پخش ویدیو را پشتیبانی نمی‌کند.",
   },
   forgotPassword: {
     title: "بازنشانی رمز عبور",

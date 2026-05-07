@@ -1,8 +1,15 @@
 import legalIt from "../legal/it/index.js";
+import landing from "./it.landing.js";
+import info from "./it.info.js";
+import preVisit from "./it.preVisit.js";
+import startseite from "./it.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
   legal: legalIt,
+  landing,
+  info,
+  preVisit,
   header: {
     skip: "Vai al contenuto",
     homeAria: "Vai alla home",
@@ -106,38 +113,7 @@ export default {
     cancel: "Annulla",
     close: "Chiudi",
   },
-  startseite: {
-    title: "MedScoutX — Preparare la visita",
-    skip: "Vai al contenuto principale",
-    tagline:
-      "Preparazione strutturata per il colloquio — non è diagnosi né consiglio terapeutico.",
-    heroTitle: "Prepara meglio le visite mediche — in ogni lingua.",
-    heroText:
-      "MedScoutX aiuta a strutturare sintomi, farmaci, documenti e domande prima della visita. Esporta un PDF chiaro nella lingua dello studio.",
-    heroPrimary: "Prepara la visita",
-    heroSecondary: "Scopri di più",
-    heroHelp:
-      "Moduli opzionali per sintomi, mappa corporea o immagini — sempre sotto il tuo controllo.",
-    audienceTitle: "Per chi è MedScoutX",
-    stepsEyebrow: "Come funziona",
-    safetyStripTitle: "Limite di sicurezza",
-    safetyStripBody:
-      "MedScoutX non diagnostica, non raccomanda terapie e non valuta urgenze. Supporta solo ciò che scegli di condividere.",
-    featuresTitle: "Scopri le funzioni",
-    featuresSubtitle:
-      "Inizia dalla preparazione alla visita o usa gli strumenti complementari.",
-    trustTitle: "Privacy e trasparenza",
-    trustText:
-      "Progettato per pochi dati: decidi tu cosa inserire e cosa salvare in locale.",
-    legal: "Informazioni legali",
-    imprint: "Note legali",
-    privacy: "Privacy",
-    terms: "Termini",
-    disclaimer: "Disclaimer",
-    footerNote:
-      "MedScoutX supporta la preparazione delle tue informazioni — non diagnosi, né consiglio terapeutico, né valutazione dell’urgenza.",
-    videoUnsupported: "Il browser non supporta la riproduzione video.",
-  },
+  startseite,
   forgotPassword: {
     title: "Reimposta password",
     text: "Inserisci l’e-mail. Ti invieremo un link di reimpostazione.",

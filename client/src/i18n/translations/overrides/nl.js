@@ -1,5 +1,17 @@
+import legalNl from "../legal/nl/index.js";
+import landing from "./nl.landing.js";
+import info from "./nl.info.js";
+import preVisit from "./nl.preVisit.js";
+import startseite from "./nl.startseite.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
+
 export default {
+  legal: legalNl,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Naar inhoud",
     homeAria: "Naar startpagina",
@@ -99,38 +111,6 @@ export default {
     continue: "Verder",
     cancel: "Annuleren",
     close: "Sluiten",
-  },
-  startseite: {
-    title: "MedScoutX — Consult voorbereiden",
-    skip: "Naar hoofdinhoud",
-    tagline:
-      "Gestructureerde voorbereiding op het medisch gesprek — geen diagnose of therapieadvies.",
-    heroTitle: "Bereid uw consulten beter voor — in elke taal.",
-    heroText:
-      "MedScoutX helpt u symptomen, medicatie, documenten en vragen te structureren vóór het bezoek. Exporteer een duidelijke PDF in de taal van de praktijk.",
-    heroPrimary: "Consult voorbereiden",
-    heroSecondary: "Meer informatie",
-    heroHelp:
-      "Optionele modules voor symptomen, lichaamskaart of afbeeldingen — altijd onder uw controle.",
-    audienceTitle: "Voor wie is MedScoutX",
-    stepsEyebrow: "Hoe het werkt",
-    safetyStripTitle: "Veiligheidsgrens",
-    safetyStripBody:
-      "MedScoutX stelt geen diagnose, adviseert geen behandeling en beoordeelt geen urgentie. Het ondersteunt alleen het structureren van wat u wilt delen.",
-    featuresTitle: "Functies verkennen",
-    featuresSubtitle:
-      "Begin met consultvoorbereiding of gebruik aanvullende tools.",
-    trustTitle: "Privacy en transparantie",
-    trustText:
-      "Ontworpen voor weinig gegevens: u kiest wat u invoert en lokaal bewaart.",
-    legal: "Juridische informatie",
-    imprint: "Colofon",
-    privacy: "Privacy",
-    terms: "Voorwaarden",
-    disclaimer: "Disclaimer",
-    footerNote:
-      "MedScoutX ondersteunt het structureren van uw gegevens — geen diagnose, therapieadvies of urgentiebeoordeling.",
-    videoUnsupported: "Uw browser ondersteunt geen video.",
   },
   forgotPassword: {
     title: "Wachtwoord resetten",
