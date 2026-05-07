@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import {
+  isRtlLanguage,
   isSupportedLanguage,
   LANGUAGE_STORAGE_KEY,
   resolveInitialLanguage,
@@ -30,7 +31,10 @@ export function LanguageProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    document.documentElement.lang = language;
+    const root = document.documentElement;
+    root.lang = language;
+    root.dir = isRtlLanguage(language) ? "rtl" : "ltr";
+    root.dataset.msTextDir = isRtlLanguage(language) ? "rtl" : "ltr";
     try {
       localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     } catch {

@@ -74,7 +74,7 @@
 
 .gls__menu {
   position: absolute;
-  right: 0;
+  inset-inline-end: 0;
   top: calc(100% + 6px);
   z-index: 50;
   min-width: 220px;
@@ -95,7 +95,7 @@
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  text-align: left;
+  text-align: start;
   padding: 10px 12px;
   border: none;
   border-radius: 10px;
@@ -137,8 +137,8 @@
 
 @media (max-width: 480px) {
   .gls__menu {
-    right: auto;
-    left: 0;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
     min-width: min(100vw - 32px, 260px);
   }
 }

@@ -1,6 +1,16 @@
 /** Persisted preference — keep stable for existing users. */
 export const LANGUAGE_STORAGE_KEY = "medscout_language";
 
+/** Right-to-left UI scripts — used for `dir` on `<html>` (full RTL layout comes later). */
+export const RTL_LANGUAGE_CODES = ["ar", "fa", "ckb"];
+
+export function isRtlLanguage(code) {
+  return (
+    typeof code === "string" &&
+    RTL_LANGUAGE_CODES.includes(code.toLowerCase())
+  );
+}
+
 /** Scalable locale registry — add entries here when introducing a new language. */
 export const LOCALE_OPTIONS = [
   { code: "de", nativeName: "Deutsch" },
@@ -8,6 +18,17 @@ export const LOCALE_OPTIONS = [
   { code: "fr", nativeName: "Français" },
   { code: "es", nativeName: "Español" },
   { code: "it", nativeName: "Italiano" },
+  { code: "ru", nativeName: "Русский" },
+  { code: "uk", nativeName: "Українська" },
+  { code: "tr", nativeName: "Türkçe" },
+  { code: "pt", nativeName: "Português" },
+  { code: "ar", nativeName: "العربية" },
+  { code: "fa", nativeName: "فارسی" },
+  { code: "pl", nativeName: "Polski" },
+  { code: "ro", nativeName: "Română" },
+  { code: "nl", nativeName: "Nederlands" },
+  { code: "ckb", nativeName: "کوردی (سۆرانی)" },
+  { code: "ku", nativeName: "Kurdî (Kurmancî)" },
 ];
 
 export const SUPPORTED_LANGUAGE_CODES = LOCALE_OPTIONS.map((o) => o.code);
