@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Home, LogOut, Menu, Moon, SunMedium } from "lucide-react";
+import { BookUser, Home, LogOut, Menu, Moon, SunMedium } from "lucide-react";
 import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
@@ -98,6 +98,22 @@ export default function Header() {
                   <span>{copy.home}</span>
                 </NavLink>
               </li>
+
+              {isLoggedIn && (
+                <li>
+                  <NavLink
+                    to="/settings/doctor-contacts"
+                    className={({ isActive }) =>
+                      `ms-nav-item ${isActive ? "is-active" : ""}`.trim()
+                    }
+                    onClick={() => setOpen(false)}
+                    aria-label={copy.settingsDoctorContactsAria}
+                  >
+                    <BookUser size={16} aria-hidden="true" />
+                    <span>{copy.settingsDoctorContacts}</span>
+                  </NavLink>
+                </li>
+              )}
 
               {isLoggedIn && (
                 <li>

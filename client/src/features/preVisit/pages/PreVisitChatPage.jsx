@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
@@ -13,6 +13,7 @@ import {
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
+import PreVisitAudioToolbar from "../components/PreVisitAudioToolbar.jsx";
 import SymptomsAdaptivePanel from "../components/SymptomsAdaptivePanel.jsx";
 import {
   createEmptySymptomsIntakeSlice,
@@ -111,6 +112,17 @@ export default function PreVisitChatPage() {
     session.answers?.symptomsOwnWords,
   ]);
 
+  const [symptomsPanelBusy, setSymptomsPanelBusy] = useState(false);
+  const adaptivePanelRef = useRef(null);
+
+  const handleSymptomsBusy = useCallback((busy) => {
+    setSymptomsPanelBusy(Boolean(busy));
+  }, []);
+
+  useEffect(() => {
+    if (!useAdaptiveSymptoms) setSymptomsPanelBusy(false);
+  }, [useAdaptiveSymptoms]);
+
   const handleSymptomsAdaptiveFinished = useCallback(
     (compiled) => {
       setSession((prev) => {
@@ -201,6 +213,50 @@ export default function PreVisitChatPage() {
   const progressNum = stepIndex + 1;
   const progressPct = (progressNum / total) * 100;
 
+  const speakText = useMemo(() => {
+    const parts = [title, explanation];
+    if (useAdaptiveSymptoms) {
+      const q = String(
+        session.intakeV1?.symptomsOwnWords?.currentQuestion || ""
+      ).trim();
+      if (q) parts.push(q);
+    }
+    return parts.filter(Boolean).join("\n\n").slice(0, 1200);
+  }, [
+    title,
+    explanation,
+    useAdaptiveSymptoms,
+    session.intakeV1?.symptomsOwnWords?.currentQuestion,
+  ]);
+
+  const appendTranscript = useCallback(
+    (snippet) => {
+      const add = String(snippet || "").trim();
+      if (!add) return;
+      if (useAdaptiveSymptoms) {
+        adaptivePanelRef.current?.appendDictatedText?.(add);
+        return;
+      }
+      setSession((prev) => {
+        const idx = Math.min(
+          Math.max(0, prev.stepIndex),
+          PRE_VISIT_QUESTION_STEPS.length - 1
+        );
+        const key = PRE_VISIT_QUESTION_STEPS[idx].key;
+        const cur = String(prev.answers[key] ?? "").trim();
+        return {
+          ...prev,
+          patientLanguage: prev.patientLanguage || readLocaleKey() || "de",
+          answers: {
+            ...prev.answers,
+            [key]: cur ? `${cur} ${add}` : add,
+          },
+        };
+      });
+    },
+    [useAdaptiveSymptoms]
+  );
+
   return (
     <div className="pre-visit-chat">
       <div className="pre-visit-chat__inner">
@@ -239,14 +295,24 @@ export default function PreVisitChatPage() {
           <h1 className="pre-visit-chat__title">{title}</h1>
           <p className="pre-visit-chat__explanation">{explanation}</p>
 
+          <PreVisitAudioToolbar
+            speakText={speakText}
+            patientLanguage={session.patientLanguage || readLocaleKey() || "de"}
+            labels={tUi}
+            onAppendTranscript={appendTranscript}
+            disabled={useAdaptiveSymptoms && symptomsPanelBusy}
+          />
+
           {useAdaptiveSymptoms ? (
             <SymptomsAdaptivePanel
+              ref={adaptivePanelRef}
               session={session}
               setSession={setSession}
               labels={tUi}
               patientLanguage={session.patientLanguage}
               onExitStep={goBack}
               onFinished={handleSymptomsAdaptiveFinished}
+              onBusyChange={handleSymptomsBusy}
             />
           ) : (
             <>

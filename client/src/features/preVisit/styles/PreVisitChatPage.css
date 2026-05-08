@@ -335,3 +335,121 @@
 :root[data-theme="dark"] .pre-visit-adaptive__error {
   color: #fca5a5;
 }
+
+/* OpenAI-backed listen / dictate (Pre-Visit chat only) */
+.pre-visit-audio {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(14, 116, 144, 0.04);
+  border: 1px solid rgba(14, 116, 144, 0.12);
+}
+
+.pre-visit-audio__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pre-visit-audio__hint {
+  margin: 0;
+  flex: 1 1 200px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--pvc-muted);
+}
+
+.pre-visit-audio__btns {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.pre-visit-audio__icon-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--pvc-border);
+  background: #ffffff;
+  color: var(--pvc-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.pre-visit-audio__icon-btn:hover:not(:disabled) {
+  border-color: rgba(14, 116, 144, 0.35);
+  color: var(--pvc-accent);
+}
+
+.pre-visit-audio__icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pre-visit-audio__icon-btn:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.45);
+  outline-offset: 2px;
+}
+
+.pre-visit-audio__icon-btn--teal {
+  border-color: rgba(14, 116, 144, 0.45);
+  color: var(--pvc-accent);
+  background: var(--pvc-accent-soft);
+}
+
+.pre-visit-audio__icon-btn--rec {
+  border-color: rgba(185, 28, 28, 0.35);
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.06);
+}
+
+.pre-visit-audio__privacy {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--pvc-subtle);
+}
+
+.pre-visit-audio__unsupported {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--pvc-muted);
+}
+
+.pre-visit-audio__error {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+:root[data-theme="dark"] .pre-visit-audio {
+  background: rgba(45, 212, 191, 0.06);
+  border-color: rgba(45, 212, 191, 0.18);
+}
+
+:root[data-theme="dark"] .pre-visit-audio__icon-btn {
+  background: rgba(30, 41, 59, 0.65);
+  color: var(--pvc-muted);
+  border-color: var(--pvc-border);
+}
+
+:root[data-theme="dark"] .pre-visit-audio__icon-btn--rec {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #fca5a5;
+  background: rgba(185, 28, 28, 0.12);
+}
+
+:root[data-theme="dark"] .pre-visit-audio__error {
+  color: #fca5a5;
+}

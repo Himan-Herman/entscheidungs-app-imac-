@@ -24,7 +24,7 @@ authRouter.get("/health", (_req, res) => res.json({ ok: true, route: "auth" }));
 // POST /api/auth/register
 authRouter.post("/register", async (req, res) => {
   try {
-    const { user, profile = {}, consent = {}, doctors = [] } = req.body ?? {};
+    const { user, profile = {}, consent = {} } = req.body ?? {};
 
     if (
       !user?.email ||
@@ -129,17 +129,7 @@ authRouter.post("/register", async (req, res) => {
           },
         },
         doctors: {
-          create: (Array.isArray(doctors) ? doctors : [])
-            .slice(0, 5)
-            .map((d) => ({
-              name: d.name || null,
-              specialty: d.specialty || null,
-              clinicName: d.clinic_name || null,
-              emailSecure: d.email_secure || null,
-              phone: d.phone || null,
-              address: d.address || null,
-              allowAlerts: !!d.allow_alerts,
-            })),
+          create: [],
         },
       },
       select: { id: true, firstName: true, email: true },

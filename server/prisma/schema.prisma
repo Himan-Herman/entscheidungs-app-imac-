@@ -15,7 +15,8 @@ model User {
 
   profile  UserProfile?
   consent  Consent?
-  doctors  Doctor[]
+  doctors          Doctor[]
+  doctorContacts   DoctorContact[]
   preVisitSessions PreVisitSession[]
 }
 
@@ -73,6 +74,25 @@ model Doctor {
   id     String @id @default(cuid())
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/** Address book for Pre-Visit — per authenticated user (managed in Settings). */
+model DoctorContact {
+  id           String   @id @default(cuid())
+  userId       String
+  doctorName   String
+  practiceName String?
+  specialty    String?
+  email        String
+  phone        String?
+  address      String?
+  note         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 datasource db {

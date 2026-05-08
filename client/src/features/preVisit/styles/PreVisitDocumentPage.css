@@ -634,3 +634,109 @@
   background: rgba(248, 113, 113, 0.1);
   border-color: rgba(248, 113, 113, 0.22);
 }
+
+/* Doctor contacts + PDF email (account) */
+.pre-visit-doc__field--recipient {
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.pre-visit-doc__recipient-heading {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--pvd-text);
+}
+
+.pre-visit-doc__recipient-meta {
+  margin: 6px 0 0;
+  font-size: 0.84rem;
+  color: var(--pvd-subtle);
+}
+
+.pre-visit-doc__manage-book-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--pvd-accent);
+  text-decoration: none;
+}
+
+.pre-visit-doc__manage-book-link:hover {
+  text-decoration: underline;
+}
+
+.pre-visit-doc__email-block {
+  width: 100%;
+  max-width: 100%;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(14, 116, 144, 0.18);
+  background: rgba(14, 116, 144, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.pre-visit-doc__email-heading {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 650;
+  color: var(--pvd-text);
+}
+
+.pre-visit-doc__email-privacy {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--pvd-muted);
+}
+
+.pre-visit-doc__btn--email-send {
+  margin-top: 4px;
+  background: var(--pvd-accent);
+  color: #fff;
+  border: none;
+}
+
+.pre-visit-doc__btn--email-send:hover:not(:disabled) {
+  filter: brightness(0.96);
+}
+
+.pre-visit-doc__btn--email-send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pre-visit-doc__email-success {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f766e;
+}
+
+.pre-visit-doc__email-error {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+:root[data-theme="dark"] .pre-visit-doc__email-block {
+  border-color: rgba(45, 212, 191, 0.22);
+  background: rgba(45, 212, 191, 0.06);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__email-success {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .pre-visit-doc__email-error {
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .pre-visit-doc__field--recipient {
+  border-bottom-color: rgba(148, 163, 184, 0.12);
+}

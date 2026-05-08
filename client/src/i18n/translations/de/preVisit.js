@@ -40,6 +40,21 @@ export default {
     adaptiveBusy: "Einen Moment …",
     adaptiveProgressMeta:
       "Nachfragen für diese Angabe: {{n}} von maximal {{max}}",
+    audioHint:
+      "Sie können die Frage vorlesen lassen oder Ihre Antwort diktieren.",
+    audioPrivacy:
+      "Für Vorlesen und Spracheingabe werden Text bzw. Audio zur Verarbeitung an den KI-Dienst übertragen. Es wird hierbei nichts dauerhaft gespeichert.",
+    audioMicUnsupported:
+      "Audioaufnahme wird von diesem Browser nicht unterstützt.",
+    audioListenAria: "Frage vorlesen lassen",
+    audioListenTitle: "Frage und Kurzhinweis vorlesen lassen",
+    audioDictateAria: "Antwort diktieren",
+    audioDictateTitle: "Aufnahme starten und erneut tippen zum Beenden",
+    audioErrorGeneric:
+      "Die Sprachfunktion ist gerade nicht verfügbar. Bitte versuchen Sie es später erneut.",
+    audioErrorPlayback: "Die Wiedergabe konnte nicht gestartet werden.",
+    audioMicPermission:
+      "Mikrofonzugriff wurde verweigert oder ist nicht verfügbar.",
   },
   review: {
     pageTitle: "MedScoutX — Übersicht",
@@ -106,6 +121,32 @@ export default {
     viewMyPreparations: "Meine Vorbereitungen anzeigen",
     mainNavAria:
       "Arztversion, PDF-Export, Rückkehr zur Prüfung",
+    doctorRecipientSection: "Empfänger (Ärztebuch)",
+    doctorRecipientFieldLabel: "Kontakt auswählen",
+    doctorRecipientHint:
+      "Optional: Wählen Sie einen Kontakt aus Ihrem Ärztebuch für die geplante Übergabe.",
+    doctorRecipientNone: "Kein Arzt ausgewählt",
+    doctorRecipientManage: "Ärztebuch verwalten",
+    doctorRecipientLoading: "Kontakte werden geladen …",
+    doctorRecipientEmailMissing:
+      "Für diesen Kontakt ist keine E-Mail-Adresse hinterlegt.",
+    emailPdfSection: "PDF per E-Mail senden",
+    emailPdfPrivacy:
+      "Wenn Sie das PDF senden, wird die Datei über MedScoutX an die im Ärztebuch gespeicherte E-Mail-Adresse übermittelt. Es erfolgt kein automatischer Versand; Sie lösen den Versand selbst aus. Der Inhalt entspricht nur Ihren eigenen Angaben und stellt keine Diagnose oder Therapieempfehlung dar.",
+    emailPdfConsent:
+      "Ich möchte das PDF ausdrücklich an die gewählte Praxis-E-Mail senden und habe den Hinweis gelesen.",
+    emailPdfSend: "PDF jetzt senden",
+    emailPdfSending: "Wird gesendet …",
+    emailPdfSuccess:
+      "Das PDF wurde zur Zustellung eingereiht. Bitte prüfen Sie bei Bedarf Ihr Postfach auf eine Sendebestätigung.",
+    emailPdfError:
+      "Der Versand ist gerade nicht möglich. Bitte versuchen Sie es später erneut oder nutzen Sie „PDF erstellen“.",
+    emailPdfRequiresDoctor:
+      "Bitte wählen Sie einen Kontakt mit gültiger E-Mail-Adresse oder belassen Sie „Kein Arzt ausgewählt“.",
+    emailPdfRequiresConsent:
+      "Bitte bestätigen Sie zuerst den Hinweis und die Einwilligung zum Versand.",
+    emailPdfNoPdf:
+      "Das PDF konnte nicht erstellt werden. Versuchen Sie es erneut.",
     structuredRowLabels: {
       appointmentReason: "Aktueller Anlass",
       symptomsOwnWords: "Beschwerden in eigenen Worten",

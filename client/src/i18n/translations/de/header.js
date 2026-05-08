@@ -6,6 +6,8 @@ export default {
   appLabel: "Professioneller Bereich",
   home: "Home",
   logout: "Ausloggen",
+  settingsDoctorContacts: "Ärztebuch",
+  settingsDoctorContactsAria: "Ärztebuch öffnen",
   languageLabel: "Sprache",
   themeLight: "Auf Hellmodus umschalten",
   themeDark: "Auf Dunkelmodus umschalten",

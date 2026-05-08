@@ -11,6 +11,7 @@ import landing from "./landing.js";
 import info from "./info.js";
 import preVisit from "./preVisit.js";
 import legal from "../legal/de/index.js";
+import settingsDoctorContacts from "./settingsDoctorContacts.js";
 
 export default {
   header,
@@ -26,4 +27,5 @@ export default {
   info,
   preVisit,
   legal,
+  settingsDoctorContacts,
 };

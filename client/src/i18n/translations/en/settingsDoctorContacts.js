@@ -1,0 +1,28 @@
+export default {
+  pageTitle: "MedScoutX — Doctor contacts",
+  heading: "Doctor contacts",
+  intro:
+    "Manage contacts for sharing your pre-visit preparation. Only you can see these entries.",
+  backHome: "Back to home",
+  addContact: "Add contact",
+  save: "Save",
+  cancel: "Cancel",
+  edit: "Edit",
+  delete: "Delete",
+  deleteConfirm:
+    "Remove this contact permanently? Any local selection in an open preparation stays until you change it.",
+  empty: "No contacts yet. Add e.g. your practice or clinician.",
+  loadingContacts: "Loading…",
+  loadError: "Contacts could not be loaded.",
+  saveError: "The contact could not be saved.",
+  deleteError: "The contact could not be deleted.",
+  fieldDoctorName: "Doctor name",
+  fieldPracticeName: "Practice / clinic",
+  fieldSpecialty: "Specialty",
+  fieldEmail: "Email",
+  fieldPhone: "Phone (optional)",
+  fieldAddress: "Address (optional)",
+  fieldNote: "Note (optional)",
+  requiredHint: "Required fields are indicated.",
+  cardAria: "Doctor contact",
+};

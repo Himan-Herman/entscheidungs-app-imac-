@@ -39,6 +39,20 @@ export default {
     adaptiveBusy: "One moment …",
     adaptiveProgressMeta:
       "Follow-ups for this entry: {{n}} of up to {{max}}",
+    audioHint:
+      "You can listen to the question or dictate your answer.",
+    audioPrivacy:
+      "For reading aloud and speech input, text or audio is sent to the AI service for processing. Nothing is permanently stored by this function.",
+    audioMicUnsupported:
+      "Audio recording is not supported by this browser.",
+    audioListenAria: "Read question aloud",
+    audioListenTitle: "Read question and short guidance aloud",
+    audioDictateAria: "Dictate answer",
+    audioDictateTitle: "Tap to start recording; tap again to stop",
+    audioErrorGeneric:
+      "The audio feature is unavailable right now. Please try again later.",
+    audioErrorPlayback: "Playback could not be started.",
+    audioMicPermission: "Microphone access was denied or is unavailable.",
   },
   review: {
     pageTitle: "MedScoutX — Pre-visit summary",
@@ -105,6 +119,32 @@ export default {
     viewMyPreparations: "View my preparations",
     mainNavAria:
       "Doctor version, PDF export, return to review",
+    doctorRecipientSection: "Recipient (doctor contacts)",
+    doctorRecipientFieldLabel: "Select contact",
+    doctorRecipientHint:
+      "Optional: pick a contact from your doctor contact list for planned sharing.",
+    doctorRecipientNone: "No doctor selected",
+    doctorRecipientManage: "Manage doctor contacts",
+    doctorRecipientLoading: "Loading contacts…",
+    doctorRecipientEmailMissing:
+      "This contact has no email address on file.",
+    emailPdfSection: "Send PDF by email",
+    emailPdfPrivacy:
+      "If you send the PDF, MedScoutX will transmit the file to the email address stored for that contact in your doctor contacts. Nothing is sent automatically; you trigger sending yourself. The content reflects only your own statements and is not a diagnosis or treatment recommendation.",
+    emailPdfConsent:
+      "I explicitly want to send the PDF to the selected practice email and have read the notice above.",
+    emailPdfSend: "Send PDF now",
+    emailPdfSending: "Sending…",
+    emailPdfSuccess:
+      "The PDF has been submitted for delivery. You may check your mail client for confirmation if needed.",
+    emailPdfError:
+      "Sending is not possible right now. Please try again later or use “Create PDF”.",
+    emailPdfRequiresDoctor:
+      "Please choose a contact with a valid email address, or leave “No doctor selected”.",
+    emailPdfRequiresConsent:
+      "Please confirm the notice and consent before sending.",
+    emailPdfNoPdf:
+      "The PDF could not be generated. Please try again.",
     structuredRowLabels: {
       appointmentReason: "Current reason for appointment",
       symptomsOwnWords: "Symptoms in patient’s own words",

@@ -38,6 +38,7 @@ import PreVisitReviewPage from "./features/preVisit/pages/PreVisitReviewPage.jsx
 import PreVisitDocumentPage from "./features/preVisit/pages/PreVisitDocumentPage.jsx";
 import PreVisitHistoryPage from "./features/preVisit/pages/PreVisitHistoryPage.jsx";
 import PreVisitAccountHistoryPage from "./features/preVisit/pages/PreVisitAccountHistoryPage.jsx";
+import SettingsDoctorContactsPage from "./pages/SettingsDoctorContactsPage.jsx";
 import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider } from "./i18n/LanguageContext";
 
@@ -135,6 +136,15 @@ createRoot(document.getElementById("root")).render(
               element={
                 <ProtectedRoute>
                   <KoerperSymptomChat />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/settings/doctor-contacts"
+              element={
+                <ProtectedRoute>
+                  <SettingsDoctorContactsPage />
                 </ProtectedRoute>
               }
             />

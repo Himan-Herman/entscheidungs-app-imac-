@@ -1,4 +1,12 @@
-import { useCallback, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   PREVISIT_SYMPTOMS_MAX_FOLLOWUPS,
   compileSymptomsDocumentation,
@@ -9,23 +17,34 @@ import {
 /**
  * Adaptive symptoms intake (bounded). Persists slice on `session.intakeV1.symptomsOwnWords`.
  */
-export default function SymptomsAdaptivePanel({
-  session,
-  setSession,
-  patientLanguage,
-  labels,
-  onFinished,
-  onExitStep,
-}) {
+const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
+  {
+    session,
+    setSession,
+    patientLanguage,
+    labels,
+    onFinished,
+    onExitStep,
+    onBusyChange,
+  },
+  ref
+) {
   const [replyDraft, setReplyDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    onBusyChange?.(busy);
+  }, [busy, onBusyChange]);
 
   const slice = useMemo(() => {
     const existing = session?.intakeV1?.symptomsOwnWords;
     if (existing && typeof existing === "object") return existing;
     return createEmptySymptomsIntakeSlice();
   }, [session?.intakeV1?.symptomsOwnWords]);
+
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
 
   const persistSlice = useCallback(
     (nextSlice) => {
@@ -39,6 +58,45 @@ export default function SymptomsAdaptivePanel({
         },
       }));
     },
+    [patientLanguage, setSession]
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      appendDictatedText(snippet) {
+        const s = String(snippet || "").trim();
+        if (!s) return;
+        const prev = sessionRef.current;
+        const sw =
+          prev.intakeV1?.symptomsOwnWords || createEmptySymptomsIntakeSlice();
+        const currentQ = sw.currentQuestion
+          ? String(sw.currentQuestion).trim()
+          : "";
+        if (currentQ) {
+          setReplyDraft((d) =>
+            String(d || "").trim() ? `${String(d).trim()} ${s}` : s
+          );
+          return;
+        }
+        const seed = String(sw.seedStatement || "").trim();
+        const nextSeed = seed ? `${seed} ${s}` : s;
+        setSession((p) => ({
+          ...p,
+          patientLanguage: p.patientLanguage || patientLanguage,
+          intakeV1: {
+            schemaVersion: 1,
+            ...p.intakeV1,
+            symptomsOwnWords: {
+              ...(p.intakeV1?.symptomsOwnWords ||
+                createEmptySymptomsIntakeSlice()),
+              seedStatement: nextSeed,
+              status: "active",
+            },
+          },
+        }));
+      },
+    }),
     [patientLanguage, setSession]
   );
 
@@ -289,4 +347,8 @@ export default function SymptomsAdaptivePanel({
       </div>
     </>
   );
-}
+});
+
+SymptomsAdaptivePanel.displayName = "SymptomsAdaptivePanel";
+
+export default SymptomsAdaptivePanel;

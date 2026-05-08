@@ -6,6 +6,8 @@ export default {
   appLabel: "Professional workspace",
   home: "Home",
   logout: "Log out",
+  settingsDoctorContacts: "Doctor contacts",
+  settingsDoctorContactsAria: "Open doctor contacts",
   languageLabel: "Language",
   themeLight: "Switch to light mode",
   themeDark: "Switch to dark mode",

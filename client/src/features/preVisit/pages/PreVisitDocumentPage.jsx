@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
@@ -14,10 +14,15 @@ import {
   loadPreVisitSession,
   savePreVisitSession,
   setDoctorLanguage,
+  setSelectedDoctorContact,
 } from "../constants/preVisitSession.js";
 import { apiFetch } from "../../../lib/api.js";
 import { authFetch } from "../../../api/authFetch.js";
-import { generatePreVisitPdf } from "../pdf/generatePreVisitPdf.js";
+import {
+  buildPreVisitPdfBlob,
+  generatePreVisitPdf,
+  getPreVisitPdfFilename,
+} from "../pdf/generatePreVisitPdf.js";
 import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitDocumentPage.css";
@@ -43,6 +48,13 @@ export default function PreVisitDocumentPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
   const [aiSuccessNote, setAiSuccessNote] = useState(null);
+
+  const [doctorContacts, setDoctorContacts] = useState([]);
+  const [doctorContactsLoading, setDoctorContactsLoading] = useState(false);
+  const [consentEmailPdf, setConsentEmailPdf] = useState(false);
+  const [emailPdfSending, setEmailPdfSending] = useState(false);
+  const [emailPdfSuccess, setEmailPdfSuccess] = useState(false);
+  const [emailPdfError, setEmailPdfError] = useState(null);
 
   useEffect(() => {
     const s = loadPreVisitSession();
@@ -82,6 +94,111 @@ export default function PreVisitDocumentPage() {
       })),
     [language]
   );
+
+  const pdfLang = language === "en" ? "en" : "de";
+
+  const loadDoctorContacts = useCallback(async () => {
+    if (!hasAuthToken) {
+      setDoctorContacts([]);
+      return;
+    }
+    setDoctorContactsLoading(true);
+    try {
+      const res = await authFetch("/api/user/doctor-contacts");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error("load_failed");
+      setDoctorContacts(Array.isArray(data.contacts) ? data.contacts : []);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setDoctorContacts([]);
+    } finally {
+      setDoctorContactsLoading(false);
+    }
+  }, [hasAuthToken]);
+
+  useEffect(() => {
+    void loadDoctorContacts();
+  }, [loadDoctorContacts]);
+
+  useEffect(() => {
+    if (!hasAuthToken || doctorContactsLoading) return;
+    const sel = session?.selectedDoctorContactId;
+    if (!sel) return;
+    if (!doctorContacts.some((c) => c.id === sel)) {
+      const next = setSelectedDoctorContact(null);
+      setSession(next ?? loadPreVisitSession());
+    }
+  }, [
+    hasAuthToken,
+    doctorContactsLoading,
+    doctorContacts,
+    session?.selectedDoctorContactId,
+  ]);
+
+  function handleDoctorRecipientChange(e) {
+    const v = e.target.value;
+    const next = setSelectedDoctorContact(v === "" ? null : v);
+    setSession(next ?? loadPreVisitSession());
+    setEmailPdfError(null);
+    setEmailPdfSuccess(false);
+  }
+
+  async function handleSendPdfEmail() {
+    setEmailPdfError(null);
+    setEmailPdfSuccess(false);
+    const contactId = session?.selectedDoctorContactId;
+    if (!contactId) {
+      setEmailPdfError(t.emailPdfRequiresDoctor);
+      return;
+    }
+    if (!consentEmailPdf) {
+      setEmailPdfError(t.emailPdfRequiresConsent);
+      return;
+    }
+    const contact = doctorContacts.find((c) => c.id === contactId);
+    if (!contact?.email?.trim()) {
+      setEmailPdfError(t.doctorRecipientEmailMissing);
+      return;
+    }
+    const latest = loadPreVisitSession();
+    if (!latest?.answers) return;
+    const blob = buildPreVisitPdfBlob({
+      session: latest,
+      uiLanguage: pdfLang,
+      labels: {},
+    });
+    if (!blob) {
+      setEmailPdfError(t.emailPdfNoPdf);
+      return;
+    }
+    setEmailPdfSending(true);
+    try {
+      const fd = new FormData();
+      fd.append("pdf", blob, getPreVisitPdfFilename(pdfLang));
+      fd.append("emailSendConsent", "true");
+      fd.append("locale", pdfLang);
+      const res = await authFetch(
+        `/api/user/doctor-contacts/${encodeURIComponent(contactId)}/send-previsit-pdf`,
+        { method: "POST", body: fd }
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg =
+          typeof data?.message === "string" && data.message.trim()
+            ? data.message
+            : t.emailPdfError;
+        setEmailPdfError(msg);
+        return;
+      }
+      setEmailPdfSuccess(true);
+      setConsentEmailPdf(false);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setEmailPdfError(t.emailPdfError);
+    } finally {
+      setEmailPdfSending(false);
+    }
+  }
 
   function handleDoctorLangChange(e) {
     const code = e.target.value;
@@ -235,6 +352,13 @@ export default function PreVisitDocumentPage() {
       ? session.aiDoctorVersion
       : session.answers;
 
+  const selectedDoctorRecipientValue = session.selectedDoctorContactId
+    ? String(session.selectedDoctorContactId)
+    : "";
+  const selectedContactForRecipient = doctorContacts.find(
+    (c) => c.id === selectedDoctorRecipientValue
+  );
+
   return (
     <div className="pre-visit-doc">
       <div className="pre-visit-doc__inner">
@@ -265,6 +389,51 @@ export default function PreVisitDocumentPage() {
             {t.doctorLangHint}
           </p>
         </div>
+
+        {hasAuthToken ? (
+          <div className="pre-visit-doc__field pre-visit-doc__field--recipient">
+            <h2 className="pre-visit-doc__recipient-heading">
+              {t.doctorRecipientSection}
+            </h2>
+            <p className="pre-visit-doc__field-hint">{t.doctorRecipientHint}</p>
+            <label className="pre-visit-doc__label" htmlFor="previsit-doctor-recipient">
+              {t.doctorRecipientFieldLabel}
+            </label>
+            <select
+              id="previsit-doctor-recipient"
+              className="pre-visit-doc__select"
+              value={selectedDoctorRecipientValue}
+              onChange={handleDoctorRecipientChange}
+              disabled={doctorContactsLoading}
+              aria-busy={doctorContactsLoading}
+            >
+              <option value="">{t.doctorRecipientNone}</option>
+              {doctorContacts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {[c.doctorName, c.practiceName].filter(Boolean).join(" — ") ||
+                    c.email}
+                </option>
+              ))}
+            </select>
+            {doctorContactsLoading ? (
+              <p className="pre-visit-doc__recipient-meta" role="status">
+                {t.doctorRecipientLoading}
+              </p>
+            ) : null}
+            {selectedContactForRecipient &&
+            !String(selectedContactForRecipient.email || "").trim() ? (
+              <p className="pre-visit-doc__ai-error" role="alert">
+                {t.doctorRecipientEmailMissing}
+              </p>
+            ) : null}
+            <Link
+              className="pre-visit-doc__manage-book-link"
+              to="/settings/doctor-contacts"
+            >
+              {t.doctorRecipientManage}
+            </Link>
+          </div>
+        ) : null}
 
         <div className="pre-visit-doc__preview">
           <section
@@ -389,6 +558,54 @@ export default function PreVisitDocumentPage() {
               {t.pdfLocalNote}
             </p>
           </div>
+
+          {hasAuthToken ? (
+            <div className="pre-visit-doc__email-block">
+              <h2 className="pre-visit-doc__email-heading">{t.emailPdfSection}</h2>
+              <p className="pre-visit-doc__email-privacy">{t.emailPdfPrivacy}</p>
+              <label className="pre-visit-doc__checkbox-label">
+                <input
+                  type="checkbox"
+                  className="pre-visit-doc__checkbox"
+                  checked={consentEmailPdf}
+                  onChange={(e) => {
+                    setConsentEmailPdf(e.target.checked);
+                    setEmailPdfError(null);
+                    setEmailPdfSuccess(false);
+                  }}
+                  disabled={emailPdfSending}
+                />
+                <span className="pre-visit-doc__checkbox-text">
+                  {t.emailPdfConsent}
+                </span>
+              </label>
+              <button
+                type="button"
+                className="pre-visit-doc__btn pre-visit-doc__btn--email-send"
+                onClick={() => void handleSendPdfEmail()}
+                disabled={
+                  emailPdfSending ||
+                  !consentEmailPdf ||
+                  !selectedDoctorRecipientValue ||
+                  !String(selectedContactForRecipient?.email || "").trim()
+                }
+                aria-busy={emailPdfSending}
+              >
+                {emailPdfSending ? t.emailPdfSending : t.emailPdfSend}
+              </button>
+              {emailPdfSuccess ? (
+                <p className="pre-visit-doc__email-success" role="status">
+                  {t.emailPdfSuccess}
+                </p>
+              ) : null}
+              {emailPdfError ? (
+                <p className="pre-visit-doc__email-error" role="alert">
+                  {emailPdfError}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           <Link className="pre-visit-doc__back-review" to="/pre-visit/review">
             {t.backReview}
           </Link>

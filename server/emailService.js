@@ -43,6 +43,47 @@ export async function sendMail(to, subject, text, html) {
 }
 
 /**
+ * Send transactional email with PDF attachment (e.g. Pre-Visit document).
+ * Does not log attachment content or recipient details beyond provider IDs.
+ */
+export async function sendEmailWithPdfAttachment({
+  to,
+  subject,
+  text,
+  pdfFilename,
+  pdfBuffer,
+}) {
+  if (!resend || !from) {
+    throw new Error("RESEND_NOT_CONFIGURED");
+  }
+
+  const message = {
+    from,
+    to,
+    subject,
+    text: text ?? "",
+    attachments: [
+      {
+        filename: pdfFilename || "document.pdf",
+        content: pdfBuffer,
+      },
+    ],
+  };
+
+  try {
+    const res = await resend.emails.send(message);
+    console.info("[email] attachment send ok", res?.data?.id ?? "");
+    return true;
+  } catch (err) {
+    console.error(
+      "Resend attachment error:",
+      err?.response?.data ?? err?.message ?? err
+    );
+    throw err;
+  }
+}
+
+/**
  * Verifizierungs-Mail senden
  */
 export async function sendVerificationEmail({ to, token, userName, link }) {

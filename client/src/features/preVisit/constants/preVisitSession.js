@@ -90,6 +90,18 @@ export function buildInitialSession(patientLanguage) {
       ...(stored.doctorLanguage
         ? { doctorLanguage: stored.doctorLanguage }
         : {}),
+      ...(Object.prototype.hasOwnProperty.call(
+        stored,
+        "selectedDoctorContactId"
+      )
+        ? {
+            selectedDoctorContactId:
+              stored.selectedDoctorContactId == null ||
+              stored.selectedDoctorContactId === ""
+                ? null
+                : String(stored.selectedDoctorContactId),
+          }
+        : {}),
       ...(intakeV1 ? { intakeV1 } : {}),
     };
   }
@@ -108,6 +120,24 @@ export function setDoctorLanguage(code) {
   const s = loadPreVisitSession();
   if (!s) return null;
   const next = { ...s, doctorLanguage: code };
+  savePreVisitSession(next);
+  return next;
+}
+
+/**
+ * Persist selected doctor contact id for Pre-Visit document flow (local session only).
+ * @param {string | null} contactId server doctor contact id or null to clear
+ */
+export function setSelectedDoctorContact(contactId) {
+  const s = loadPreVisitSession();
+  if (!s) return null;
+  const next = {
+    ...s,
+    selectedDoctorContactId:
+      contactId === null || contactId === undefined || contactId === ""
+        ? null
+        : String(contactId),
+  };
   savePreVisitSession(next);
   return next;
 }
