@@ -52,125 +52,25 @@
   }
   
   
-  /* 📌 Zentraler Wrapper – So logisch wie auf Startseite */
-  .info-header,
+  /* 📌 Zentraler Wrapper */
   .info-main {
     width: 100%;
-    max-width: 900px;    /* besser als 960px, perfekter Fit für deine Boxen */
-    margin-inline: auto; /* links & rechts zentriert */
-    padding-inline: 1rem; /* etwas kleiner, damit NICHTS overflowen kann */
-    box-sizing: border-box; /* 💯 verhindert Überlauf */
-  }
-  
-  
-  /* ----------------------------------------------------------
-     Header
-  ---------------------------------------------------------- */
-  
-  .info-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 1.1rem;
-    padding-bottom: 0.9rem;
-  }
-  
-  .info-header__left {
-    display: flex;
-    align-items: center;
-    gap: 0.9rem;
-  }
-  
-  .info-header__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.35rem 0.7rem;
-    border-radius: 999px;
-    border: 1px solid rgba(148, 163, 184, 0.5);
-    background: rgba(227, 139, 6, 0.9);
-    color: var(--color-text-soft, #4b5563);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: background 160ms ease-out, box-shadow 160ms ease-out,
-      transform 160ms ease-out, border-color 160ms ease-out;
-  }
-  
-  :root[data-theme="dark"] .info-header__back {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(20, 21, 22, 0.5);
-
-    color: var(--color-text-soft, #cbd5f5);
-  }
-  
-  .info-header__back:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
-  }
-  
-  .info-header__back-text {
-    white-space: nowrap;
-    
-  }
-  
-  .info-header__branding {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-  }
-  
-  .info-header__app-name {
-    font-size: 1rem;
-    font-weight: 700;
-  }
-  
-  .info-header__app-sub {
-    font-size: 0.78rem;
-    color: var(--color-text-muted, #6b7280);
-    max-width: 15rem;
-  }
-  
-  /* CTA im Header (Symptom-Check) */
-  
-  .info-header__cta {
-    border: none;
-    border-radius: 999px;
-    padding: 0.5rem 0.95rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, #2563eb, #22c55e);
-    color: #f9fafb;
-    cursor: pointer;
-    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.45);
-    transition: transform 160ms ease-out, box-shadow 180ms ease-out;
-  }
-  
-  .info-header__cta:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 14px 36px rgba(37, 99, 235, 0.6);
-  }
-  
-  /* Fokus-Stile für interaktive Elemente */
-  
-  .info-header__back:focus-visible,
-  .info-header__cta:focus-visible,
-  .info-cta-button:focus-visible {
-    outline: 3px solid var(--color-focus, #fbbf24);
-    outline-offset: 3px;
-  }
-  
-  /* ----------------------------------------------------------
-     Main
-  ---------------------------------------------------------- */
-  
-  .info-main {
+    max-width: 900px;
+    margin-inline: auto;
+    padding-inline: 1rem;
     padding-bottom: 2.4rem;
-    padding-top: 0.5rem;
+    padding-top: 1rem;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 1.6rem;
   }
-  
+
+  .info-cta-button:focus-visible {
+    outline: 3px solid var(--color-focus, #fbbf24);
+    outline-offset: 3px;
+  }
+
   /* ----------------------------------------------------------
      Typografie & Sektionen
   ---------------------------------------------------------- */
@@ -524,39 +424,7 @@
     }
   }
 
-  /* ── Info („Mehr erfahren“): innerer Kopfbalken darf nicht über den Intro-Block rutschen ──
-     Startseite.css setzt auf .startseite__header ein negatives margin-top, damit die Startseite
-     unter dem festen App-Header anschlägt. Auf /info zieht das die erste Sektion unter den
-     weißen Seitenkopf — hier zurücksetzen und Abstand erzwingen. */
-  .info-page .startseite__header.info-header-merged {
-    margin-top: 0;
-    margin-bottom: 1.25rem;
-    justify-content: space-between;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    row-gap: 0.65rem;
-  }
-
-  .info-page .startseite__header-right {
-    margin-left: auto;
-  }
-
-  .info-page .info-main {
-    padding-top: 0.35rem;
-  }
-
   .info-page .info-section--intro {
     position: relative;
     z-index: 0;
   }
-
-  @media (min-width: 640px) {
-    .info-page .startseite__header.info-header-merged {
-      margin-bottom: 1.5rem;
-    }
-
-    .info-page .info-main {
-      padding-top: 0.5rem;
-    }
-  }
-  

@@ -30,35 +30,6 @@ export default function Info() {
         {copy.skip}
       </a>
       <div className="info-page" data-page="info">
-        <header className="startseite__header info-header-merged" role="banner">
-          <div className="startseite__header-left">
-            <button
-              type="button"
-              className="back-btn"
-              onClick={() => navigate(-1)}
-              aria-label={copy.backAria}
-            >
-              <span aria-hidden="true">←</span>
-              {copy.back}
-            </button>
-
-            <div className="startseite__branding">
-              <span className="startseite__app-name">MedScoutX</span>
-              <span className="startseite__app-tagline">{copy.tagline}</span>
-            </div>
-          </div>
-
-          <div className="startseite__header-right">
-            <button
-              type="button"
-              className="info-header__cta"
-              onClick={() => navigate("/pre-visit")}
-            >
-              {copy.ctaTop}
-            </button>
-          </div>
-        </header>
-
         <main id="info-main" className="info-main" aria-label={copy.mainAria}>
           <section
             className="info-section info-section--intro"
