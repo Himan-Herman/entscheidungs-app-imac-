@@ -13,6 +13,13 @@ export default {
       "You can provide your information in the language in which you feel most confident.",
     continue: "Continue",
   },
+  qrLanding: {
+    title: "Confirm practice context",
+    loading: "Loading QR context…",
+    invalid: "This QR link is invalid or unavailable.",
+    inactive: "This QR target is currently inactive.",
+    cta: "Prepare doctor visit for this practice",
+  },
   chrome: {
     backHome: "Back to MedScoutX home",
     moduleLabel: "Prepare doctor visit",
@@ -32,13 +39,16 @@ export default {
     devInsertDemo: "Insert demo information",
     devOnlyNote: "Visible only during local development.",
     adaptiveSeedHint:
-      "Describe in your own words what you notice or feel — without trying to diagnose.",
+      "Please describe this item in your own words, as concretely and neutrally as possible.",
     adaptiveFollowupLabel: "Follow-up for preparation",
     adaptiveSeedRequired: "Please briefly describe what is going on, in your own words.",
     adaptiveAnswerRequired: "Please answer the follow-up briefly.",
     adaptiveBusy: "One moment …",
     adaptiveProgressMeta:
       "Follow-ups for this entry: {{n}} of up to {{max}}",
+    adaptiveSkip: "Skip",
+    adaptiveServiceError:
+      "The adaptive follow-up could not be created right now. You can continue or edit later.",
     audioHint:
       "You can listen to the question or dictate your answer.",
     audioPrivacy:
@@ -53,6 +63,8 @@ export default {
       "The audio feature is unavailable right now. Please try again later.",
     audioErrorPlayback: "Playback could not be started.",
     audioMicPermission: "Microphone access was denied or is unavailable.",
+    longitudinalCaseBanner:
+      "Optional: A longitudinal case is linked. Intake uses only your own earlier statements — no medical interpretation.",
   },
   review: {
     pageTitle: "MedScoutX — Pre-visit summary",
@@ -76,6 +88,45 @@ export default {
     doctorLangLabel: "Language for the doctor version",
     doctorLangHint:
       "Choose the language in which the doctor or practice should read the document.",
+    practiceContextTitle: "Selected practice context",
+    practiceContextPractice: "Practice",
+    practiceContextTarget: "Target",
+    practiceContextDoctor: "Doctor",
+    practiceContextSpecialty: "Specialty",
+    patientMetaSection: "Optional patient details",
+    patientMetaNote:
+      "This information is optional and helps the practice identify the document.",
+    patientNameLabel: "Name",
+    patientEmailLabel: "Email",
+    patientDateOfBirthLabel: "Date of birth",
+    patientGenderOrSalutationLabel: "Gender / salutation",
+    patientPhoneLabel: "Phone (optional)",
+    timelineSection: "Timeline / case link",
+    timelineHint:
+      "Optional: link this preparation to a previous similar case to compare changes based only on your own statements.",
+    timelineTopicLabel: "Topic / case label (optional)",
+    timelineTopicPlaceholder: "e.g. recurring symptoms since spring",
+    timelineSelectLabel: "Select previous preparation",
+    timelineSelectNone: "No previous preparation selected",
+    timelineUntitled: "Untitled",
+    timelineCompare: "Compare timeline",
+    timelineComparing: "Comparing…",
+    timelineResultTitle: "Factual timeline (no medical interpretation)",
+    timelineNewlyMentioned: "Newly mentioned",
+    timelineStillMentioned: "Still mentioned",
+    timelineNoLongerMentioned: "No longer mentioned",
+    timelineUnclear: "Unclear",
+    timelinePatientAddedNewInformation: "New information added by the patient",
+    timelinePatientDidNotMentionPrior:
+      "Previously reported information not mentioned in this session",
+    timelineIncludePdf:
+      "I want to include this timeline summary in the doctor PDF.",
+    timelineLoadError:
+      "Previous preparations could not be loaded.",
+    timelineSummaryError:
+      "The timeline summary could not be created right now.",
+    timelineSelectCaseFirst:
+      "Please select a previous preparation first.",
     sectionStructured: "Structured doctor version",
     sectionOriginal: "Original patient statements",
     disclaimer:
@@ -125,6 +176,20 @@ export default {
       "Optional: pick a contact from your doctor contact list for planned sharing.",
     doctorRecipientNone: "No doctor selected",
     doctorRecipientManage: "Manage doctor contacts",
+    longitudinalPdfSection: "Case / timeline in PDF (optional)",
+    longitudinalPdfNote:
+      "Only if you explicitly enable it. No diagnosis or medical evaluation. You can delete timelines and entries at any time.",
+    longitudinalPdfCaseTitle: "Include case title",
+    longitudinalPdfContinuity: "Case continuity summary (patient statements only)",
+    longitudinalPdfSessionsOverview: "Overview of earlier preparations (date & reason)",
+    longitudinalPdfRelatedReports:
+      "Related previous reports (from session comparison, if available)",
+    longitudinalLoadOverview: "Load overview from linked case",
+    longitudinalLoadOverviewBusy: "Loading…",
+    longitudinalLoadOverviewError: "Could not load the overview.",
+    longitudinalPdfCompareHint:
+      "To include the factual comparison in the PDF, generate a comparison above under Timeline first.",
+    linkMyCases: "My cases",
     doctorRecipientLoading: "Loading contacts…",
     doctorRecipientEmailMissing:
       "This contact has no email address on file.",
@@ -132,7 +197,7 @@ export default {
     emailPdfPrivacy:
       "If you send the PDF, MedScoutX will transmit the file to the email address stored for that contact in your doctor contacts. Nothing is sent automatically; you trigger sending yourself. The content reflects only your own statements and is not a diagnosis or treatment recommendation.",
     emailPdfConsent:
-      "I explicitly want to send the PDF to the selected practice email and have read the notice above.",
+      "I confirm that this document may contain personal health information and may be sent to the selected practice/doctor.",
     emailPdfSend: "Send PDF now",
     emailPdfSending: "Sending…",
     emailPdfSuccess:
@@ -154,6 +219,99 @@ export default {
       relevantDocuments: "Relevant documents",
       patientQuestions: "Questions for the doctor",
     },
+  },
+  cases: {
+    pageTitle: "MedScoutX — My cases",
+    title: "My cases",
+    intro:
+      "Group multiple preparations around a topic over time. You control content and deletion.",
+    safetyNote:
+      "No diagnosis, no urgency, no treatment advice. Only your own entries are compared and organised.",
+    searchPlaceholder: "Search…",
+    showArchived: "Show archived",
+    createCase: "Create case",
+    fieldTitle: "Title",
+    fieldCategory: "Category (optional)",
+    fieldDescription: "Description (optional)",
+    save: "Save",
+    cancel: "Cancel",
+    loading: "Loading…",
+    loadError: "Cases could not be loaded.",
+    saveError: "The case could not be saved.",
+    empty: "No cases yet.",
+    sessionCount: "Preparations",
+    loginHint: "Sign in to manage cases.",
+    loginCta: "Sign in",
+    linkPreparations: "My preparations",
+    backHome: "Back to home",
+  },
+  caseDetail: {
+    pageTitle: "MedScoutX — Case",
+    backToList: "All cases",
+    loading: "Loading…",
+    loadError: "The case could not be loaded.",
+    saveError: "Changes could not be saved.",
+    deleteError: "The case could not be deleted.",
+    loginHint: "Please sign in.",
+    loginCta: "Sign in",
+    safetyNote:
+      "You stay in control: timelines are optional and deletable anytime. No medical evaluation.",
+    archived: "Archived",
+    fieldTitle: "Title",
+    fieldCategory: "Category",
+    fieldDescription: "Description",
+    saveMeta: "Save details",
+    archive: "Archive case",
+    unarchive: "Unarchive case",
+    deleteCase: "Delete entire case",
+    confirmDeleteCase:
+      "Delete this case? Linked preparations stay in your account but are unassigned from the case.",
+    followUp: "Create follow-up preparation",
+    followUpError: "Follow-up could not be started.",
+    attachSession: "Attach preparation",
+    selectSession: "Choose preparation…",
+    attachConfirm: "Attach",
+    attachError: "Attach failed.",
+    unlinkError: "Could not remove link.",
+    timeline: "Timeline",
+    emptyTimeline: "No preparations in this case yet.",
+    reopen: "Open / continue editing",
+    clearPdf: "Clear PDF status",
+    pdfClearError: "PDF status could not be updated.",
+    unlink: "Remove from case",
+    deleteSession: "Delete preparation",
+    confirmDeleteSession:
+      "Permanently delete this saved preparation from your account?",
+    deleteSessionError: "Delete failed.",
+    pdfReady: "PDF marked",
+    reopenError: "Could not open.",
+    compareTitle: "Compare two preparations",
+    compareHint:
+      "Factual wording differences only — no medical judgement.",
+    sessionA: "First preparation",
+    sessionB: "Second preparation",
+    compareRun: "Generate comparison",
+    comparing: "Comparing…",
+    compareError: "Comparison failed.",
+    pickTwoSessions: "Please pick two different preparations.",
+    diffNew: "Newly mentioned",
+    diffStill: "Still mentioned",
+    diffGone: "No longer mentioned",
+    diffUnclear: "Unclear",
+    diffAddedInfo: "Patient added new information",
+    diffOmittedPrior:
+      "Previously reported information not mentioned in this session",
+    continuityTitle: "Continuity summary",
+    continuityHint:
+      "Recurring themes from your text only — no inference, no judgement.",
+    continuityGenerate: "Generate summary",
+    continuityBusy: "Generating…",
+    continuityError: "Could not generate summary.",
+    continuitySymptoms: "Repeatedly mentioned symptoms/concerns",
+    continuityMeds: "Repeatedly mentioned medications",
+    continuityQuestions: "Repeated patient questions",
+    continuityConcerns: "Repeated concerns",
+    continuityToPrep: "Use in new preparation",
   },
   localHistory: {
     pageTitle: "Saved sessions — Pre-Visit — MedScoutX",
@@ -201,5 +359,6 @@ export default {
     statusDraft: "Draft",
     statusPdfCreated: "PDF created",
     statusCompleted: "Completed",
+    linkCases: "Open my cases",
   },
 };

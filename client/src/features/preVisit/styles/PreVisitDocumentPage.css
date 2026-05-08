@@ -97,6 +97,31 @@
   outline-offset: 2px;
 }
 
+.pre-visit-doc__input {
+  width: 100%;
+  max-width: 420px;
+  min-height: 46px;
+  padding: 10px 12px;
+  font-size: 0.98rem;
+  font-family: inherit;
+  color: var(--pvd-text);
+  background-color: #fafbfc;
+  border: 1px solid var(--pvd-border);
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.pre-visit-doc__input:focus {
+  outline: none;
+  border-color: var(--pvd-accent);
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.2);
+}
+
+.pre-visit-doc__input:focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.45);
+  outline-offset: 2px;
+}
+
 .pre-visit-doc__preview {
   background: var(--pvd-card);
   border: 1px solid var(--pvd-border);
@@ -579,6 +604,10 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
 }
 
+:root[data-theme="dark"] .pre-visit-doc__input {
+  background: rgba(2, 6, 23, 0.55);
+}
+
 :root[data-theme="dark"] .pre-visit-doc__section-block {
   border-bottom-color: rgba(148, 163, 184, 0.14);
 }
@@ -639,6 +668,48 @@
 .pre-visit-doc__field--recipient {
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.pre-visit-doc__field--identity {
+  padding-bottom: 6px;
+}
+
+.pre-visit-doc__field--timeline {
+  padding: 12px 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.7);
+}
+
+.pre-visit-doc__timeline-actions {
+  margin-top: 6px;
+}
+
+.pre-visit-doc__btn--timeline {
+  min-height: 42px;
+  font-size: 0.94rem;
+}
+
+.pre-visit-doc__timeline-summary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(14, 116, 144, 0.16);
+  border-radius: 10px;
+  background: rgba(14, 116, 144, 0.04);
+}
+
+.pre-visit-doc__timeline-title {
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--pvd-text);
+}
+
+.pre-visit-doc__timeline-line {
+  margin: 0 0 6px;
+  font-size: 0.84rem;
+  color: var(--pvd-muted);
 }
 
 .pre-visit-doc__recipient-heading {
@@ -739,4 +810,14 @@
 
 :root[data-theme="dark"] .pre-visit-doc__field--recipient {
   border-bottom-color: rgba(148, 163, 184, 0.12);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__field--timeline {
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(30, 41, 59, 0.45);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__timeline-summary {
+  border-color: rgba(45, 212, 191, 0.25);
+  background: rgba(45, 212, 191, 0.08);
 }

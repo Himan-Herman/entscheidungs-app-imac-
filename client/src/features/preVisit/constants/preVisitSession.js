@@ -3,7 +3,7 @@ import {
   PRE_VISIT_SESSION_KEY,
   createEmptyAnswers,
 } from "./questionFlow.js";
-import { normalizeIntakeV1FromStorage } from "../engine/symptomsAdaptiveEngine.js";
+import { normalizeAdaptiveIntakeV1 } from "../adaptive/adaptiveSessionUtils.js";
 
 /** Same key as language selection screen — single source of truth */
 export const PREVISIT_LOCALE_STORAGE_KEY = "medscoutx_previsit_locale";
@@ -76,7 +76,81 @@ export function buildInitialSession(patientLanguage) {
     stored.answers &&
     typeof stored.answers === "object"
   ) {
-    const intakeV1 = normalizeIntakeV1FromStorage(stored.intakeV1);
+    const intakeV1 = normalizeAdaptiveIntakeV1(stored.intakeV1);
+    const caseTimeline =
+      stored.caseTimeline && typeof stored.caseTimeline === "object"
+        ? {
+            relatedSessionId: String(stored.caseTimeline.relatedSessionId || ""),
+            caseTopic: String(stored.caseTimeline.caseTopic || ""),
+            includeInPdf: Boolean(stored.caseTimeline.includeInPdf),
+            summary:
+              stored.caseTimeline.summary &&
+              typeof stored.caseTimeline.summary === "object"
+                ? {
+                    newlyMentioned: Array.isArray(
+                      stored.caseTimeline.summary.newlyMentioned
+                    )
+                      ? stored.caseTimeline.summary.newlyMentioned
+                      : [],
+                    stillMentioned: Array.isArray(
+                      stored.caseTimeline.summary.stillMentioned
+                    )
+                      ? stored.caseTimeline.summary.stillMentioned
+                      : [],
+                    noLongerMentioned: Array.isArray(
+                      stored.caseTimeline.summary.noLongerMentioned
+                    )
+                      ? stored.caseTimeline.summary.noLongerMentioned
+                      : [],
+                    unclear: Array.isArray(stored.caseTimeline.summary.unclear)
+                      ? stored.caseTimeline.summary.unclear
+                      : [],
+                    patientAddedNewInformation: Array.isArray(
+                      stored.caseTimeline.summary.patientAddedNewInformation
+                    )
+                      ? stored.caseTimeline.summary.patientAddedNewInformation
+                      : [],
+                    patientDidNotMentionPreviouslyReportedInformation:
+                      Array.isArray(
+                        stored.caseTimeline.summary
+                          .patientDidNotMentionPreviouslyReportedInformation
+                      )
+                        ? stored.caseTimeline.summary
+                            .patientDidNotMentionPreviouslyReportedInformation
+                        : [],
+                  }
+                : null,
+          }
+        : null;
+    const patientIdentity =
+      stored.patientIdentity && typeof stored.patientIdentity === "object"
+        ? {
+            patientName: String(stored.patientIdentity.patientName || ""),
+            patientEmail: String(stored.patientIdentity.patientEmail || ""),
+            patientDateOfBirth: String(
+              stored.patientIdentity.patientDateOfBirth || ""
+            ),
+            patientGenderOrSalutation: String(
+              stored.patientIdentity.patientGenderOrSalutation || ""
+            ),
+            patientPhone: String(stored.patientIdentity.patientPhone || ""),
+          }
+        : null;
+    const practiceContext =
+      stored.practiceContext && typeof stored.practiceContext === "object"
+        ? {
+            qrToken: String(stored.practiceContext.qrToken || ""),
+            practiceName: String(stored.practiceContext.practiceName || ""),
+            targetName: String(stored.practiceContext.targetName || ""),
+            targetType: String(stored.practiceContext.targetType || ""),
+            doctorName: String(stored.practiceContext.doctorName || ""),
+            specialty: String(stored.practiceContext.specialty || ""),
+            preferredDoctorLanguage: String(
+              stored.practiceContext.preferredDoctorLanguage || ""
+            ),
+          }
+        : null;
+    const longitudinalCase = normalizeLongitudinalCase(stored.longitudinalCase);
     return {
       patientLanguage: stored.patientLanguage || patientLanguage,
       answers: { ...empty, ...stored.answers },
@@ -103,14 +177,272 @@ export function buildInitialSession(patientLanguage) {
           }
         : {}),
       ...(intakeV1 ? { intakeV1 } : {}),
+      ...(caseTimeline ? { caseTimeline } : {}),
+      ...(patientIdentity ? { patientIdentity } : {}),
+      ...(practiceContext ? { practiceContext } : {}),
+      ...(longitudinalCase ? { longitudinalCase } : {}),
     };
   }
 
+  const longitudinalCaseFresh = normalizeLongitudinalCase(stored?.longitudinalCase);
   return {
     patientLanguage,
     answers: empty,
     stepIndex: 0,
+    ...(longitudinalCaseFresh ? { longitudinalCase: longitudinalCaseFresh } : {}),
   };
+}
+
+function defaultLongitudinalPdfInclude() {
+  return {
+    caseTitle: false,
+    continuitySummary: false,
+    sessionsOverview: false,
+    relatedReportsSummary: false,
+  };
+}
+
+/** @param {unknown} raw */
+export function normalizeLongitudinalCase(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const pdfIn = { ...defaultLongitudinalPdfInclude() };
+  if (raw.pdfInclude && typeof raw.pdfInclude === "object") {
+    for (const k of Object.keys(pdfIn)) {
+      if (Object.prototype.hasOwnProperty.call(raw.pdfInclude, k)) {
+        pdfIn[k] = Boolean(raw.pdfInclude[k]);
+      }
+    }
+  }
+  let continuitySummary = null;
+  const cs = raw.continuitySummary;
+  if (cs && typeof cs === "object") {
+    continuitySummary = {
+      recurringSymptoms: Array.isArray(cs.recurringSymptoms)
+        ? cs.recurringSymptoms
+        : [],
+      recurringMedications: Array.isArray(cs.recurringMedications)
+        ? cs.recurringMedications
+        : [],
+      recurringPatientQuestions: Array.isArray(cs.recurringPatientQuestions)
+        ? cs.recurringPatientQuestions
+        : [],
+      recurringConcerns: Array.isArray(cs.recurringConcerns)
+        ? cs.recurringConcerns
+        : [],
+    };
+    const emptyCont =
+      !continuitySummary.recurringSymptoms.length &&
+      !continuitySummary.recurringMedications.length &&
+      !continuitySummary.recurringPatientQuestions.length &&
+      !continuitySummary.recurringConcerns.length;
+    if (emptyCont) continuitySummary = null;
+  }
+  const out = {
+    caseId: String(raw.caseId || ""),
+    caseTitle: String(raw.caseTitle || ""),
+    compactTimelineSnippet: String(raw.compactTimelineSnippet || ""),
+    sessionsOverviewLines: Array.isArray(raw.sessionsOverviewLines)
+      ? raw.sessionsOverviewLines.map((x) => String(x || "").trim()).filter(Boolean).slice(0, 40)
+      : [],
+    continuitySummary,
+    pdfInclude: pdfIn,
+  };
+  if (
+    !out.caseId &&
+    !out.caseTitle &&
+    !out.compactTimelineSnippet &&
+    !out.sessionsOverviewLines.length &&
+    !out.continuitySummary
+  ) {
+    return null;
+  }
+  return out;
+}
+
+/**
+ * @param {object} patch partial longitudinal case state
+ */
+export function setLongitudinalCaseData(patch) {
+  const s = loadPreVisitSession();
+  if (!s) return null;
+  const prev = normalizeLongitudinalCase(s.longitudinalCase) || {
+    caseId: "",
+    caseTitle: "",
+    compactTimelineSnippet: "",
+    sessionsOverviewLines: [],
+    continuitySummary: null,
+    pdfInclude: defaultLongitudinalPdfInclude(),
+  };
+  const pdfMerge = {
+    ...prev.pdfInclude,
+    ...(patch.pdfInclude && typeof patch.pdfInclude === "object"
+      ? patch.pdfInclude
+      : {}),
+  };
+  const nextLc = {
+    caseId:
+      patch.caseId !== undefined ? String(patch.caseId || "") : prev.caseId,
+    caseTitle:
+      patch.caseTitle !== undefined
+        ? String(patch.caseTitle || "")
+        : prev.caseTitle,
+    compactTimelineSnippet:
+      patch.compactTimelineSnippet !== undefined
+        ? String(patch.compactTimelineSnippet || "")
+        : prev.compactTimelineSnippet,
+    sessionsOverviewLines:
+      patch.sessionsOverviewLines !== undefined
+        ? Array.isArray(patch.sessionsOverviewLines)
+          ? patch.sessionsOverviewLines
+              .map((x) => String(x || "").trim())
+              .filter(Boolean)
+              .slice(0, 40)
+          : prev.sessionsOverviewLines
+        : prev.sessionsOverviewLines,
+    continuitySummary:
+      patch.continuitySummary !== undefined
+        ? patch.continuitySummary
+        : prev.continuitySummary,
+    pdfInclude: pdfMerge,
+  };
+  const normalized = normalizeLongitudinalCase(nextLc);
+  const next = { ...s, ...(normalized ? { longitudinalCase: normalized } : {}) };
+  if (!normalized) delete next.longitudinalCase;
+  savePreVisitSession(next);
+  return next;
+}
+
+/**
+ * Start a blank follow-up preparation while preserving case linkage & optional compact snippet.
+ */
+export function resetSessionForCaseFollowUp({
+  patientLanguage: plIn,
+  caseId,
+  caseTitle,
+  compactTimelineSnippet = "",
+  continuitySummary = null,
+}) {
+  let locale = "de";
+  try {
+    const fromStorage = sessionStorage.getItem(PREVISIT_LOCALE_STORAGE_KEY);
+    const fromSession = loadPreVisitSession()?.patientLanguage;
+    locale = plIn || fromStorage || fromSession || "de";
+  } catch {
+    locale = plIn || loadPreVisitSession()?.patientLanguage || "de";
+  }
+  const fresh = {
+    patientLanguage: locale,
+    doctorLanguage: locale,
+    answers: createEmptyAnswers(),
+    stepIndex: 0,
+    longitudinalCase: normalizeLongitudinalCase({
+      caseId: String(caseId || ""),
+      caseTitle: String(caseTitle || ""),
+      compactTimelineSnippet: String(compactTimelineSnippet || ""),
+      continuitySummary,
+      pdfInclude: defaultLongitudinalPdfInclude(),
+      sessionsOverviewLines: [],
+    }),
+  };
+  savePreVisitSession(fresh);
+  try {
+    sessionStorage.setItem(PREVISIT_LOCALE_STORAGE_KEY, locale);
+  } catch {
+    /* ignore */
+  }
+  return fresh;
+}
+
+/**
+ * Optional patient identity block used only for document assignment in Pre-Visit.
+ * Values are stored in session only after explicit user input.
+ * @param {{
+ *  patientName: string,
+ *  patientEmail: string,
+ *  patientDateOfBirth: string,
+ *  patientGenderOrSalutation: string,
+ *  patientPhone: string
+ * }} patch
+ */
+export function setOptionalPatientIdentity(patch) {
+  const s = loadPreVisitSession();
+  if (!s) return null;
+  const current =
+    s.patientIdentity && typeof s.patientIdentity === "object"
+      ? s.patientIdentity
+      : {};
+  const next = {
+    ...s,
+    patientIdentity: {
+      patientName: String(patch.patientName ?? current.patientName ?? ""),
+      patientEmail: String(patch.patientEmail ?? current.patientEmail ?? ""),
+      patientDateOfBirth: String(
+        patch.patientDateOfBirth ?? current.patientDateOfBirth ?? ""
+      ),
+      patientGenderOrSalutation: String(
+        patch.patientGenderOrSalutation ??
+          current.patientGenderOrSalutation ??
+          ""
+      ),
+      patientPhone: String(patch.patientPhone ?? current.patientPhone ?? ""),
+    },
+  };
+  savePreVisitSession(next);
+  return next;
+}
+
+export function setCaseTimelineData(patch) {
+  const s = loadPreVisitSession();
+  if (!s) return null;
+  const current =
+    s.caseTimeline && typeof s.caseTimeline === "object" ? s.caseTimeline : {};
+  const next = {
+    ...s,
+    caseTimeline: {
+      relatedSessionId: String(
+        patch.relatedSessionId ?? current.relatedSessionId ?? ""
+      ),
+      caseTopic: String(patch.caseTopic ?? current.caseTopic ?? ""),
+      includeInPdf: Boolean(
+        patch.includeInPdf ?? current.includeInPdf ?? false
+      ),
+      summary:
+        patch.summary === undefined
+          ? current.summary ?? null
+          : patch.summary,
+    },
+  };
+  savePreVisitSession(next);
+  return next;
+}
+
+export function setPracticeContext(patch) {
+  const s = loadPreVisitSession();
+  const base = s && typeof s === "object" ? s : buildInitialSession("de");
+  const current =
+    base.practiceContext && typeof base.practiceContext === "object"
+      ? base.practiceContext
+      : {};
+  const preferredDoctorLanguage = String(
+    patch?.preferredDoctorLanguage ?? current.preferredDoctorLanguage ?? ""
+  ).trim();
+  const next = {
+    ...base,
+    practiceContext: {
+      qrToken: String(patch?.qrToken ?? current.qrToken ?? ""),
+      practiceName: String(patch?.practiceName ?? current.practiceName ?? ""),
+      targetName: String(patch?.targetName ?? current.targetName ?? ""),
+      targetType: String(patch?.targetType ?? current.targetType ?? ""),
+      doctorName: String(patch?.doctorName ?? current.doctorName ?? ""),
+      specialty: String(patch?.specialty ?? current.specialty ?? ""),
+      preferredDoctorLanguage,
+    },
+  };
+  if (preferredDoctorLanguage) {
+    next.doctorLanguage = preferredDoctorLanguage;
+  }
+  savePreVisitSession(next);
+  return next;
 }
 
 /**
@@ -173,9 +505,9 @@ export function clearAnswerField(fieldKey) {
     ...s,
     answers: { ...s.answers, [fieldKey]: "" },
   };
-  if (fieldKey === "symptomsOwnWords" && next.intakeV1) {
+  if (next.intakeV1 && Object.prototype.hasOwnProperty.call(next.intakeV1, fieldKey)) {
     const v1 = { ...next.intakeV1 };
-    delete v1.symptomsOwnWords;
+    delete v1[fieldKey];
     next.intakeV1 = Object.keys(v1).length > 0 ? v1 : undefined;
   }
   savePreVisitSession(next);

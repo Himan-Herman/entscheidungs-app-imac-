@@ -54,6 +54,14 @@ export default {
     doctorLangLabel: "Langue de la version médecin",
     doctorLangHint:
       "Choisissez la langue dans laquelle le médecin ou le cabinet doit lire le document.",
+    patientMetaSection: "Informations patient facultatives",
+    patientMetaNote:
+      "Ces informations sont facultatives et aident le cabinet à identifier le document.",
+    patientNameLabel: "Nom",
+    patientDateOfBirthLabel: "Date de naissance",
+    patientEmailLabel: "E-mail",
+    patientPhoneLabel: "Téléphone (facultatif)",
+    patientGenderOrSalutationLabel: "Genre / civilité",
     sectionStructured: "Version structurée pour le médecin",
     sectionOriginal: "Déclarations originales du patient",
     disclaimer:
@@ -92,6 +100,8 @@ export default {
       "La préparation a été enregistrée dans votre compte.",
     accountSaveError:
       "La préparation n’a pas pu être enregistrée pour le moment.",
+    emailPdfConsent:
+      "Je confirme que ce document peut contenir des informations de santé personnelles et peut être envoyé au cabinet/médecin sélectionné.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Doctor visit preparation",
     viewMyPreparations: "Voir mes préparations",

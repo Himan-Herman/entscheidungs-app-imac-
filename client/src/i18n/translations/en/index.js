@@ -12,6 +12,7 @@ import info from "./info.js";
 import preVisit from "./preVisit.js";
 import legal from "../legal/en/index.js";
 import settingsDoctorContacts from "./settingsDoctorContacts.js";
+import settingsPractices from "./settingsPractices.js";
 
 export default {
   header,
@@ -28,4 +29,5 @@ export default {
   preVisit,
   legal,
   settingsDoctorContacts,
+  settingsPractices,
 };

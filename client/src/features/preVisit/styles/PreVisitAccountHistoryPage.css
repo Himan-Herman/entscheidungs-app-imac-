@@ -49,6 +49,24 @@
   max-width: 40rem;
 }
 
+.pre-visit-account__cases-link {
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--pva-accent);
+  text-decoration: none;
+  width: fit-content;
+}
+
+.pre-visit-account__cases-link:hover {
+  text-decoration: underline;
+}
+
+.pre-visit-account__cases-link:focus-visible {
+  outline: 2px solid var(--pva-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 .pre-visit-account__gate {
   display: flex;
   flex-direction: column;

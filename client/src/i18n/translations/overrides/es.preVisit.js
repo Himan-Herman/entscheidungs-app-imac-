@@ -54,6 +54,14 @@ export default {
     doctorLangLabel: "Idioma de la versión para el médico",
     doctorLangHint:
       "Elija el idioma en el que el médico o el centro deben leer el documento.",
+    patientMetaSection: "Información opcional del paciente",
+    patientMetaNote:
+      "Esta información es opcional y ayuda al centro a identificar el documento.",
+    patientNameLabel: "Nombre",
+    patientDateOfBirthLabel: "Fecha de nacimiento",
+    patientEmailLabel: "Correo electrónico",
+    patientPhoneLabel: "Teléfono (opcional)",
+    patientGenderOrSalutationLabel: "Género / tratamiento",
     sectionStructured: "Versión estructurada para el médico",
     sectionOriginal: "Declaraciones originales del paciente",
     disclaimer:
@@ -92,6 +100,8 @@ export default {
       "La preparación se guardó en su cuenta.",
     accountSaveError:
       "No se pudo guardar la preparación ahora.",
+    emailPdfConsent:
+      "Confirmo que este documento puede contener información de salud personal y que puede enviarse al centro/médico seleccionado.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Doctor visit preparation",
     viewMyPreparations: "Ver mis preparaciones",

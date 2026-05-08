@@ -1,6 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { BookUser, Home, LogOut, Menu, Moon, SunMedium } from "lucide-react";
+import {
+  BookUser,
+  Building2,
+  History,
+  Home,
+  LogOut,
+  Menu,
+  Moon,
+  SunMedium,
+} from "lucide-react";
 import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
@@ -98,6 +107,38 @@ export default function Header() {
                   <span>{copy.home}</span>
                 </NavLink>
               </li>
+
+              {isLoggedIn && (
+                <li>
+                  <NavLink
+                    to="/pre-visit/cases"
+                    className={({ isActive }) =>
+                      `ms-nav-item ${isActive ? "is-active" : ""}`.trim()
+                    }
+                    onClick={() => setOpen(false)}
+                    aria-label={copy.preVisitCasesAria}
+                  >
+                    <History size={16} aria-hidden="true" />
+                    <span>{copy.preVisitCases}</span>
+                  </NavLink>
+                </li>
+              )}
+
+              {isLoggedIn && (
+                <li>
+                  <NavLink
+                    to="/settings/practices"
+                    className={({ isActive }) =>
+                      `ms-nav-item ${isActive ? "is-active" : ""}`.trim()
+                    }
+                    onClick={() => setOpen(false)}
+                    aria-label={copy.settingsPracticesAria}
+                  >
+                    <Building2 size={16} aria-hidden="true" />
+                    <span>{copy.settingsPractices}</span>
+                  </NavLink>
+                </li>
+              )}
 
               {isLoggedIn && (
                 <li>

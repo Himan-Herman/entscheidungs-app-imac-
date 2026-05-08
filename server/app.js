@@ -15,9 +15,19 @@ import ttsRouter from "./routes/tts.js";
 import kiRouter from "./routes/ki.js";
 import previsitRouter from "./routes/previsit.js";
 import previsitSessionsRouter from "./routes/previsitSessions.js";
+import previsitCasesRouter from "./routes/previsitCases.js";
 import doctorContactsRouter from "./routes/doctorContacts.js";
+import practicesRouter from "./routes/practices.js";
+import publicPrevisitQrRouter from "./routes/publicPrevisitQr.js";
+import { validateStartupEnv } from './utils/startupEnvValidation.js';
 
 const app = express();
+
+// Startup checks prevent silent misconfiguration that can break auth/email/API links in production.
+validateStartupEnv();
+
+// Render/Proxy setup for correct client IP handling (rate limits, audit logs).
+app.set('trust proxy', 1);
 
 
 const allowedOrigins = (process.env.CORS_ORIGIN || '')
@@ -50,9 +60,13 @@ app.use("/api/tts", ttsRouter);
 app.use("/api/ki", kiRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
 app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
+app.use("/api/practices", requireAuth, practicesRouter);
+/** Pre-Visit cases / timelines — JWT required; mount before generic /api/previsit. */
+app.use("/api/previsit/cases", requireAuth, previsitCasesRouter);
 /** Saved Pre-Visit sessions (DB): JWT required; mount before /api/previsit so paths are not swallowed. */
 app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
 app.use("/api/previsit", previsitRouter);
+app.use("/api/public/previsit", publicPrevisitQrRouter);
 
 
 // funktioniert mit /health UND /api/health

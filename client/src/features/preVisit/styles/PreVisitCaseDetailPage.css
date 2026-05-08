@@ -1,0 +1,237 @@
+.pre-visit-case-detail {
+  min-height: calc(100vh - 120px);
+  padding: clamp(20px, 4vw, 40px) clamp(14px, 3vw, 24px);
+  background: #f4f5f7;
+  color: #0f172a;
+  box-sizing: border-box;
+}
+
+.pre-visit-case-detail__inner {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pre-visit-case-detail__crumb a {
+  color: #0e7490;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pre-visit-case-detail__header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pre-visit-case-detail__title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.pre-visit-case-detail__badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.pre-visit-case-detail__safety {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #475569;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(14, 116, 144, 0.08);
+  border: 1px solid rgba(14, 116, 144, 0.15);
+}
+
+.pre-visit-case-detail__form {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pre-visit-case-detail__label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.pre-visit-case-detail__input,
+.pre-visit-case-detail__textarea,
+.pre-visit-case-detail__select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.pre-visit-case-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pre-visit-case-detail__section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.pre-visit-case-detail__section-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.pre-visit-case-detail__hint {
+  margin: 0 0 10px;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.pre-visit-case-detail__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pre-visit-case-detail__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pre-visit-case-detail__timeline-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  position: relative;
+}
+
+.pre-visit-case-detail__timeline-date {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.pre-visit-case-detail__timeline-reason {
+  margin: 6px 0 0;
+  font-size: 0.95rem;
+}
+
+.pre-visit-case-detail__timeline-meta {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.pre-visit-case-detail__timeline-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pre-visit-case-detail__pill {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.pre-visit-case-detail__btn {
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  padding: 7px 12px;
+  font: inherit;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.pre-visit-case-detail__btn--primary {
+  background: #0e7490;
+  border-color: #0e7490;
+  color: #fff;
+}
+
+.pre-visit-case-detail__btn--danger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #9f1239;
+}
+
+.pre-visit-case-detail__diff,
+.pre-visit-case-detail__continuity {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.pre-visit-case-detail__diff-block strong,
+.pre-visit-case-detail__continuity strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.pre-visit-case-detail__error {
+  color: #b91c1c;
+  margin: 0;
+}
+
+.pre-visit-case-detail__muted {
+  color: #64748b;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pre-visit-case-detail {
+    background: #0f172a;
+    color: #e2e8f0;
+  }
+  .pre-visit-case-detail__form,
+  .pre-visit-case-detail__section,
+  .pre-visit-case-detail__timeline-card,
+  .pre-visit-case-detail__btn {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+  }
+  .pre-visit-case-detail__btn--primary {
+    background: #0e7490;
+    border-color: #0e7490;
+    color: #ecfeff;
+  }
+  .pre-visit-case-detail__btn--danger {
+    background: #3f1d2e;
+    border-color: #6b213f;
+    color: #fecdd3;
+  }
+  .pre-visit-case-detail__hint,
+  .pre-visit-case-detail__muted,
+  .pre-visit-case-detail__timeline-date {
+    color: #94a3b8;
+  }
+}

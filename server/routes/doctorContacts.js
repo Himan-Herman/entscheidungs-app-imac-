@@ -10,6 +10,7 @@ import express from 'express';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import { sendEmailWithPdfAttachment } from '../emailService.js';
+import { sendPrevisitPdfLimiter } from '../middleware/ipRateLimit.js';
 
 const prisma = new PrismaClient();
 
@@ -219,9 +220,12 @@ router.post('/', async (req, res) => {
 
 /**
  * POST /:id/send-previsit-pdf — explicit-consent email with PDF attachment (must be registered BEFORE GET /:id)
+ *
+ * Rate limit before multer: curbs email abuse and large-upload spam; protects SMTP/API cost.
  */
 router.post(
   '/:id/send-previsit-pdf',
+  sendPrevisitPdfLimiter,
   (req, res, next) => {
     uploadPdf.single('pdf')(req, res, (err) => {
       if (!err) return next();

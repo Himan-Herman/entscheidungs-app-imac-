@@ -1,23 +1,39 @@
 /**
- * Pre-Visit adaptive intake (symptoms prototype): bounded follow-up questions only.
- * No diagnosis, urgency, treatment, specialist recommendation, or invented symptoms.
+ * Pre-Visit adaptive intake by category: bounded follow-up questions only.
+ * No diagnosis, urgency, treatment, specialist recommendation, or inferred medical facts.
  */
 import { openai } from '../openaiClient.js';
 
 const MODEL = 'gpt-4o-mini';
 const SERVER_MAX_FOLLOWUPS = 6;
 const DEFAULT_MAX_FOLLOWUPS = 4;
+const ALLOWED_CATEGORIES = new Set([
+  'symptomsOwnWords',
+  'onsetAndCourse',
+  'medications',
+  'patientQuestions',
+]);
+const CATEGORY_HINTS = {
+  symptomsOwnWords:
+    'Clarify symptom description in the patient’s own wording only.',
+  onsetAndCourse:
+    'Clarify timing and course only (start, progression, pattern) without interpretation.',
+  medications:
+    'Clarify medication documentation only (name, dose, frequency, as-needed) without advice.',
+  patientQuestions:
+    'Clarify what the patient wants to ask in the appointment; documentation only.',
+};
 
 const SYSTEM = `You help patients DOCUMENT what they already said before a doctor visit.
 You are NOT a doctor. You do NOT diagnose, triage, assess urgency, recommend treatment or specialists, infer causes, or add symptoms the patient did not mention.
 
-Your job: produce at most ONE short neutral follow-up question to improve completeness of the patient's OWN wording — OR mark the category done.
+Your job: produce at most ONE short neutral follow-up question to improve completeness of the patient's OWN wording for the selected category — OR mark the category done.
 
 Output rules:
 - Reply as a single JSON object ONLY with keys: "done" (boolean), "followUpQuestion" (string or null), "completeness" (number 0-1).
 - If done is true: followUpQuestion MUST be null.
 - If done is false: followUpQuestion MUST be one concise question (max ~120 characters) in the patient's language (see patientLanguage).
-- Questions must be generic documentation prompts (timing, pattern, triggers/relievers, context the patient thinks matters). Never name a condition. Never warn about emergencies. Never suggest what the doctor should do.
+- Questions must be generic documentation prompts for the category only. Never name a condition. Never warn about emergencies. Never suggest what the doctor should do.
 - completeness is your conservative estimate of how well the combined text covers what the patient might want recorded (0-1). It does NOT measure medical severity.
 - If the latest patient text is empty or unusable, set done false and ask one neutral clarification, unless follow-up limit is reached (then done true).
 - If you already have enough plain-language detail for this category, set done true.`;
@@ -56,9 +72,11 @@ function normalizeQaHistory(raw) {
  *   qaHistory?: { question: string, answer: string }[],
  *   maxFollowUps?: number,
  * }} params
+ *   category?: 'symptomsOwnWords'|'onsetAndCourse'|'medications'|'patientQuestions',
+ * }} params
  * @returns {Promise<{ done: boolean, followUpQuestion: string | null, completeness: number }>}
  */
-export async function runSymptomsAdaptiveTurn(params) {
+export async function runAdaptiveIntakeTurn(params) {
   if (!process.env.OPENAI_API_KEY?.trim()) {
     const err = new Error('OPENAI_API_KEY missing');
     err.statusCode = 500;
@@ -70,6 +88,16 @@ export async function runSymptomsAdaptiveTurn(params) {
   const patientLanguage = params?.patientLanguage != null
     ? String(params.patientLanguage).slice(0, 12)
     : 'de';
+
+  const category = params?.category != null
+    ? String(params.category).trim()
+    : 'symptomsOwnWords';
+  if (!ALLOWED_CATEGORIES.has(category)) {
+    const err = new Error('invalid category');
+    err.statusCode = 400;
+    err.safeMessage = 'Invalid request.';
+    throw err;
+  }
 
   const seedStatement =
     params?.seedStatement != null ? String(params.seedStatement).trim() : '';
@@ -100,7 +128,8 @@ export async function runSymptomsAdaptiveTurn(params) {
 
   const payload = {
     patientLanguage,
-    category: 'symptomsOwnWords',
+    category,
+    categoryHint: CATEGORY_HINTS[category],
     maxFollowUps,
     followUpsSoFar: qaHistory.length,
     seedStatement: seedStatement.slice(0, 6000),
@@ -122,7 +151,7 @@ export async function runSymptomsAdaptiveTurn(params) {
         {
           role: 'user',
           content: JSON.stringify({
-            task: 'Return next JSON action for symptomsOwnWords intake',
+            task: 'Return next JSON action for adaptive intake',
             payload,
           }),
         },
@@ -185,3 +214,6 @@ export async function runSymptomsAdaptiveTurn(params) {
 
   return { done, followUpQuestion, completeness };
 }
+
+// Backward-compatible export name used by existing route import.
+export const runSymptomsAdaptiveTurn = runAdaptiveIntakeTurn;

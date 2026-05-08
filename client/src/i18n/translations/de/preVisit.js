@@ -14,6 +14,13 @@ export default {
       "Sie können Ihre Angaben in der Sprache machen, in der Sie sich am sichersten ausdrücken können.",
     continue: "Weiter",
   },
+  qrLanding: {
+    title: "Praxis-Kontext bestätigen",
+    loading: "QR-Kontext wird geladen …",
+    invalid: "Dieser QR-Link ist ungültig oder nicht mehr verfügbar.",
+    inactive: "Dieses QR-Ziel ist derzeit nicht aktiv.",
+    cta: "Arztgespräch für diese Praxis vorbereiten",
+  },
   chrome: {
     backHome: "Zurück zur MedScoutX-Startseite",
     moduleLabel: "Arztgespräch vorbereiten",
@@ -33,13 +40,16 @@ export default {
     devInsertDemo: "Demo-Angaben einfügen",
     devOnlyNote: "Nur für lokale Entwicklung sichtbar.",
     adaptiveSeedHint:
-      "Beschreiben Sie in eigenen Worten, was Sie spüren oder bemerken — ohne Diagnose zu stellen.",
+      "Beschreiben Sie diesen Punkt bitte in eigenen Worten, möglichst konkret und neutral.",
     adaptiveFollowupLabel: "Nachfrage zur Vorbereitung",
     adaptiveSeedRequired: "Bitte geben Sie kurz in eigenen Worten an, worum es geht.",
     adaptiveAnswerRequired: "Bitte beantworten Sie die Nachfrage kurz.",
     adaptiveBusy: "Einen Moment …",
     adaptiveProgressMeta:
       "Nachfragen für diese Angabe: {{n}} von maximal {{max}}",
+    adaptiveSkip: "Überspringen",
+    adaptiveServiceError:
+      "Die adaptive Frage konnte gerade nicht erstellt werden. Sie können fortfahren oder später bearbeiten.",
     audioHint:
       "Sie können die Frage vorlesen lassen oder Ihre Antwort diktieren.",
     audioPrivacy:
@@ -55,6 +65,8 @@ export default {
     audioErrorPlayback: "Die Wiedergabe konnte nicht gestartet werden.",
     audioMicPermission:
       "Mikrofonzugriff wurde verweigert oder ist nicht verfügbar.",
+    longitudinalCaseBanner:
+      "Optional: Es ist ein Verlauf (Fall) verknüpft. Die Aufnahme nutzt nur Ihre eigenen früheren Angaben — ohne medizinische Bewertung.",
   },
   review: {
     pageTitle: "MedScoutX — Übersicht",
@@ -78,6 +90,45 @@ export default {
     doctorLangLabel: "Sprache für die Arztversion",
     doctorLangHint:
       "Wählen Sie die Sprache, in der der Arzt oder die Praxis das Dokument lesen soll.",
+    practiceContextTitle: "Ausgewählter Praxis-Kontext",
+    practiceContextPractice: "Praxis",
+    practiceContextTarget: "Ziel",
+    practiceContextDoctor: "Ärztin/Arzt",
+    practiceContextSpecialty: "Fachrichtung",
+    patientMetaSection: "Optionale Patientendaten",
+    patientMetaNote:
+      "Diese Angaben sind freiwillig und helfen der Praxis, das Dokument zuzuordnen.",
+    patientNameLabel: "Name",
+    patientEmailLabel: "E-Mail",
+    patientDateOfBirthLabel: "Geburtsdatum",
+    patientGenderOrSalutationLabel: "Geschlecht / Anrede",
+    patientPhoneLabel: "Telefon (optional)",
+    timelineSection: "Verlauf / Fallbezug",
+    timelineHint:
+      "Optional: Verknüpfen Sie diese Vorbereitung mit einem früheren ähnlichen Fall, um Änderungen nur auf Basis Ihrer Angaben zu vergleichen.",
+    timelineTopicLabel: "Thema / Fallbezeichnung (optional)",
+    timelineTopicPlaceholder: "z. B. wiederkehrende Beschwerden seit Frühjahr",
+    timelineSelectLabel: "Frühere Vorbereitung auswählen",
+    timelineSelectNone: "Keine frühere Vorbereitung ausgewählt",
+    timelineUntitled: "Ohne Titel",
+    timelineCompare: "Verlauf vergleichen",
+    timelineComparing: "Vergleich läuft …",
+    timelineResultTitle: "Faktischer Verlauf (ohne medizinische Bewertung)",
+    timelineNewlyMentioned: "Neu erwähnt",
+    timelineStillMentioned: "Weiterhin erwähnt",
+    timelineNoLongerMentioned: "Nicht mehr erwähnt",
+    timelineUnclear: "Unklar",
+    timelinePatientAddedNewInformation: "Neue Angaben / ergänzte Information",
+    timelinePatientDidNotMentionPrior:
+      "Zuvor genannte Informationen in dieser Sitzung nicht erwähnt",
+    timelineIncludePdf:
+      "Ich möchte diese Verlaufszusammenfassung im Arzt-PDF aufnehmen.",
+    timelineLoadError:
+      "Frühere Vorbereitungen konnten nicht geladen werden.",
+    timelineSummaryError:
+      "Die Verlaufszusammenfassung konnte gerade nicht erstellt werden.",
+    timelineSelectCaseFirst:
+      "Bitte wählen Sie zuerst eine frühere Vorbereitung aus.",
     sectionStructured: "Strukturierte Arztversion",
     sectionOriginal: "Originalangaben des Patienten",
     disclaimer:
@@ -127,6 +178,20 @@ export default {
       "Optional: Wählen Sie einen Kontakt aus Ihrem Ärztebuch für die geplante Übergabe.",
     doctorRecipientNone: "Kein Arzt ausgewählt",
     doctorRecipientManage: "Ärztebuch verwalten",
+    longitudinalPdfSection: "Fall / Verlauf im PDF (optional)",
+    longitudinalPdfNote:
+      "Nur mit Ihrer ausdrücklichen Auswahl. Keine Diagnose, keine medizinische Bewertung. Sie können Verläufe und Einträge jederzeit löschen.",
+    longitudinalPdfCaseTitle: "Falltitel im PDF",
+    longitudinalPdfContinuity: "Kontinuitätszusammenfassung (nur Patientenangaben)",
+    longitudinalPdfSessionsOverview: "Überblick früherer Vorbereitungen (Datum & Anlass)",
+    longitudinalPdfRelatedReports:
+      "Frühere zugeordnete Berichte (aus Verlaufsvergleich, falls vorhanden)",
+    longitudinalLoadOverview: "Überblick aus dem Fall laden",
+    longitudinalLoadOverviewBusy: "Lädt …",
+    longitudinalLoadOverviewError: "Der Überblick konnte nicht geladen werden.",
+    longitudinalPdfCompareHint:
+      "Um den Vergleich im PDF verwenden zu können, erzeugen Sie oben unter „Zeitlicher Verlauf“ zuerst eine faktuelle Gegenüberstellung.",
+    linkMyCases: "Meine Verläufe",
     doctorRecipientLoading: "Kontakte werden geladen …",
     doctorRecipientEmailMissing:
       "Für diesen Kontakt ist keine E-Mail-Adresse hinterlegt.",
@@ -134,7 +199,7 @@ export default {
     emailPdfPrivacy:
       "Wenn Sie das PDF senden, wird die Datei über MedScoutX an die im Ärztebuch gespeicherte E-Mail-Adresse übermittelt. Es erfolgt kein automatischer Versand; Sie lösen den Versand selbst aus. Der Inhalt entspricht nur Ihren eigenen Angaben und stellt keine Diagnose oder Therapieempfehlung dar.",
     emailPdfConsent:
-      "Ich möchte das PDF ausdrücklich an die gewählte Praxis-E-Mail senden und habe den Hinweis gelesen.",
+      "Ich bestätige, dass dieses Dokument persönliche Gesundheitsangaben enthalten kann und an die ausgewählte Praxis/den ausgewählten Arzt gesendet werden darf.",
     emailPdfSend: "PDF jetzt senden",
     emailPdfSending: "Wird gesendet …",
     emailPdfSuccess:
@@ -156,6 +221,97 @@ export default {
       relevantDocuments: "Relevante Dokumente",
       patientQuestions: "Fragen an den Arzt",
     },
+  },
+  cases: {
+    pageTitle: "MedScoutX — Meine Verläufe",
+    title: "Meine Verläufe",
+    intro:
+      "Gruppieren Sie mehrere Vorbereitungen zu einem Thema über die Zeit. Nur Sie steuern Inhalt und Löschung.",
+    safetyNote:
+      "Keine Diagnose, keine Dringlichkeit, keine Therapieempfehlung. Es werden nur Ihre eigenen Texte verglichen und geordnet.",
+    searchPlaceholder: "Suchen …",
+    showArchived: "Archivierte anzeigen",
+    createCase: "Neuen Fall anlegen",
+    fieldTitle: "Titel",
+    fieldCategory: "Kategorie (optional)",
+    fieldDescription: "Beschreibung (optional)",
+    save: "Speichern",
+    cancel: "Abbrechen",
+    loading: "Wird geladen …",
+    loadError: "Die Verläufe konnten nicht geladen werden.",
+    saveError: "Der Fall konnte nicht gespeichert werden.",
+    empty: "Noch keine Fälle angelegt.",
+    sessionCount: "Vorbereitungen",
+    loginHint: "Bitte melden Sie sich an, um Verläufe zu verwalten.",
+    loginCta: "Zum Login",
+    linkPreparations: "Zu meinen Vorbereitungen",
+    backHome: "Zur Startseite",
+  },
+  caseDetail: {
+    pageTitle: "MedScoutX — Fall",
+    backToList: "Alle Verläufe",
+    loading: "Wird geladen …",
+    loadError: "Der Fall konnte nicht geladen werden.",
+    saveError: "Die Änderungen konnten nicht gespeichert werden.",
+    deleteError: "Der Fall konnte nicht gelöscht werden.",
+    loginHint: "Bitte anmelden.",
+    loginCta: "Zum Login",
+    safetyNote:
+      "Sie behalten die Kontrolle: Verlauf und Einträge sind freiwillig und jederzeit löschbar. Keine medizinische Bewertung.",
+    archived: "Archiviert",
+    fieldTitle: "Titel",
+    fieldCategory: "Kategorie",
+    fieldDescription: "Beschreibung",
+    saveMeta: "Metadaten speichern",
+    archive: "Fall archivieren",
+    unarchive: "Archivierung aufheben",
+    deleteCase: "Gesamten Fall löschen",
+    confirmDeleteCase:
+      "Diesen Fall löschen? Zugeordnete Vorbereitungen bleiben im Konto, werden aber von diesem Fall getrennt.",
+    followUp: "Folge-Vorbereitung starten",
+    followUpError: "Die Folge-Vorbereitung konnte nicht gestartet werden.",
+    attachSession: "Vorbereitung zuordnen",
+    selectSession: "Vorbereitung wählen …",
+    attachConfirm: "Zuordnen",
+    attachError: "Zuordnung fehlgeschlagen.",
+    unlinkError: "Entfernen der Zuordnung fehlgeschlagen.",
+    timeline: "Zeitleiste",
+    emptyTimeline: "Noch keine Vorbereitungen in diesem Fall.",
+    reopen: "Öffnen / bearbeiten",
+    clearPdf: "PDF-Status zurücksetzen",
+    pdfClearError: "PDF-Status konnte nicht aktualisiert werden.",
+    unlink: "Aus Fall entfernen",
+    deleteSession: "Vorbereitung löschen",
+    confirmDeleteSession: "Diese gespeicherte Vorbereitung unwiderruflich löschen?",
+    deleteSessionError: "Löschen fehlgeschlagen.",
+    pdfReady: "PDF markiert",
+    reopenError: "Öffnen fehlgeschlagen.",
+    compareTitle: "Zwei Vorbereitungen vergleichen",
+    compareHint:
+      "Nur sachliche Unterschiede in Ihren Angaben — ohne medizinische Bewertung.",
+    sessionA: "Erste Vorbereitung",
+    sessionB: "Zweite Vorbereitung",
+    compareRun: "Vergleich erstellen",
+    comparing: "Vergleich läuft …",
+    compareError: "Vergleich war nicht möglich.",
+    pickTwoSessions: "Bitte zwei verschiedene Vorbereitungen wählen.",
+    diffNew: "Neu erwähnt",
+    diffStill: "Weiterhin erwähnt",
+    diffGone: "Nicht mehr erwähnt",
+    diffUnclear: "Unklar",
+    diffAddedInfo: "Neue / ergänzte Patienteninformation",
+    diffOmittedPrior: "Zuvor berichtete Information in dieser Sitzung nicht erwähnt",
+    continuityTitle: "Kontinuitätszusammenfassung",
+    continuityHint:
+      "Wiederkehrende Themen nur aus Ihren Texten — keine Deutung, keine Bewertung.",
+    continuityGenerate: "Zusammenfassung erstellen",
+    continuityBusy: "Wird erstellt …",
+    continuityError: "Die Zusammenfassung war nicht möglich.",
+    continuitySymptoms: "Wiederkehrend genannte Beschwerden / Symptome",
+    continuityMeds: "Wiederkehrend genannte Medikamente",
+    continuityQuestions: "Wiederkehrende Patientenfragen",
+    continuityConcerns: "Wiederkehrende Sorgen / Anliegen",
+    continuityToPrep: "In neue Vorbereitung übernehmen",
   },
   localHistory: {
     pageTitle: "Gespeicherte Sitzungen — Pre-Visit — MedScoutX",
@@ -207,5 +363,6 @@ export default {
     statusDraft: "Entwurf",
     statusPdfCreated: "PDF erstellt",
     statusCompleted: "Abgeschlossen",
+    linkCases: "Meine Verläufe öffnen",
   },
 };

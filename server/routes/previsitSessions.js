@@ -69,6 +69,7 @@ function sessionJson(row) {
     id: row.id,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    preVisitCaseId: row.preVisitCaseId ?? null,
     patientLanguage: row.patientLanguage,
     doctorLanguage: row.doctorLanguage,
     title: row.title,
@@ -78,6 +79,19 @@ function sessionJson(row) {
     aiDoctorVersion: row.aiDoctorVersion ?? null,
     aiSafetyNotice: row.aiSafetyNotice ?? null,
   };
+}
+
+async function resolvePreVisitCaseId(userId, raw) {
+  if (raw === undefined) return { omit: true };
+  if (raw === null || raw === "") return { ok: true, value: null };
+  if (typeof raw !== "string") return { ok: false, error: "preVisitCaseId_invalid" };
+  const cid = raw.trim();
+  if (!cid) return { ok: true, value: null };
+  const row = await prisma.preVisitCase.findFirst({
+    where: { id: cid, userId },
+  });
+  if (!row) return { ok: false, error: "preVisitCase_not_found" };
+  return { ok: true, value: cid };
 }
 
 function safeServerError(res, err, context) {
@@ -167,6 +181,19 @@ router.post("/", async (req, res) => {
     pdfDownloaded = true;
   }
 
+  let preVisitCaseIdValue;
+  let includePreVisitCaseId = false;
+  if (Object.prototype.hasOwnProperty.call(body, "preVisitCaseId")) {
+    const cr = await resolvePreVisitCaseId(userId, body.preVisitCaseId);
+    if (!cr.omit && !cr.ok) {
+      return res.status(400).json({ ok: false, error: cr.error });
+    }
+    if (!cr.omit) {
+      includePreVisitCaseId = true;
+      preVisitCaseIdValue = cr.value;
+    }
+  }
+
   try {
     const created = await prisma.preVisitSession.create({
       data: {
@@ -180,6 +207,7 @@ router.post("/", async (req, res) => {
         aiDoctorVersion:
           aiDoctorVersion === undefined || aiDoctorVersion === null ? null : aiDoctorVersion,
         aiSafetyNotice: aiNotice,
+        ...(includePreVisitCaseId ? { preVisitCaseId: preVisitCaseIdValue } : {}),
       },
     });
     return res.status(201).json({ ok: true, session: sessionJson(created) });
@@ -286,6 +314,14 @@ router.put("/:id", async (req, res) => {
         return res.status(400).json({ ok: false, error: "pdfDownloaded_invalid" });
       }
       data.pdfDownloaded = p;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(body, "preVisitCaseId")) {
+      const cr = await resolvePreVisitCaseId(userId, body.preVisitCaseId);
+      if (!cr.omit && !cr.ok) {
+        return res.status(400).json({ ok: false, error: cr.error });
+      }
+      if (!cr.omit) data.preVisitCaseId = cr.value;
     }
 
     const nextStatus =

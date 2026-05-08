@@ -12,7 +12,11 @@ import {
   computePreVisitAiFingerprint,
   isAiDoctorVersionFresh,
   loadPreVisitSession,
+  normalizeLongitudinalCase,
   savePreVisitSession,
+  setCaseTimelineData,
+  setLongitudinalCaseData,
+  setOptionalPatientIdentity,
   setDoctorLanguage,
   setSelectedDoctorContact,
 } from "../constants/preVisitSession.js";
@@ -32,6 +36,27 @@ export default function PreVisitDocumentPage() {
   const location = useLocation();
   const { language } = useLanguage();
   const t = useMemo(() => getMessages(language).preVisit.document, [language]);
+  const tCaseDetail = useMemo(
+    () => getMessages(language).preVisit.caseDetail,
+    [language],
+  );
+  const pdfLabelOverrides = useMemo(
+    () => ({
+      patientAddedNewInformationLabel: t.timelinePatientAddedNewInformation,
+      patientDidNotMentionPreviouslyLabel: t.timelinePatientDidNotMentionPrior,
+      longitudinalSectionHeading: t.longitudinalPdfSection,
+      longitudinalSectionNote: t.longitudinalPdfNote,
+      longitudinalCaseTitlePdfLabel: t.longitudinalPdfCaseTitle,
+      longitudinalContinuitySubheading: t.longitudinalPdfContinuity,
+      continuityRecurringSymptomsLabel: tCaseDetail.continuitySymptoms,
+      continuityRecurringMedicationsLabel: tCaseDetail.continuityMeds,
+      continuityRecurringQuestionsLabel: tCaseDetail.continuityQuestions,
+      continuityRecurringConcernsLabel: tCaseDetail.continuityConcerns,
+      longitudinalSessionsOverviewHeading: t.longitudinalPdfSessionsOverview,
+      longitudinalRelatedReportsHeading: t.longitudinalPdfRelatedReports,
+    }),
+    [t, tCaseDetail],
+  );
 
   const [session, setSession] = useState(() => loadPreVisitSession());
   const [consentLocalSave, setConsentLocalSave] = useState(false);
@@ -55,6 +80,36 @@ export default function PreVisitDocumentPage() {
   const [emailPdfSending, setEmailPdfSending] = useState(false);
   const [emailPdfSuccess, setEmailPdfSuccess] = useState(false);
   const [emailPdfError, setEmailPdfError] = useState(null);
+  const [patientIdentity, setPatientIdentity] = useState(() => {
+    const s = loadPreVisitSession();
+    const p = s?.patientIdentity || {};
+    return {
+      patientName: String(p.patientName || ""),
+      patientEmail: String(p.patientEmail || ""),
+      patientDateOfBirth: String(p.patientDateOfBirth || ""),
+      patientGenderOrSalutation: String(p.patientGenderOrSalutation || ""),
+      patientPhone: String(p.patientPhone || ""),
+    };
+  });
+  const [timelineLoading, setTimelineLoading] = useState(false);
+  const [timelineError, setTimelineError] = useState(null);
+  const [timelineSessions, setTimelineSessions] = useState([]);
+  const [timelineBusy, setTimelineBusy] = useState(false);
+  const [longitudinalOverviewBusy, setLongitudinalOverviewBusy] = useState(false);
+  const [longitudinalPdfErr, setLongitudinalPdfErr] = useState(null);
+  const [caseTimeline, setCaseTimeline] = useState(() => {
+    const s = loadPreVisitSession();
+    const c = s?.caseTimeline || {};
+    return {
+      relatedSessionId: String(c.relatedSessionId || ""),
+      caseTopic: String(c.caseTopic || ""),
+      includeInPdf: Boolean(c.includeInPdf),
+      summary:
+        c.summary && typeof c.summary === "object"
+          ? c.summary
+          : null,
+    };
+  });
 
   useEffect(() => {
     const s = loadPreVisitSession();
@@ -62,12 +117,33 @@ export default function PreVisitDocumentPage() {
       navigate("/pre-visit", { replace: true });
       return;
     }
+    const preferredFromPractice = String(
+      s?.practiceContext?.preferredDoctorLanguage || ""
+    ).trim();
     if (!s.doctorLanguage) {
-      setDoctorLanguage(s.patientLanguage || "de");
+      setDoctorLanguage(preferredFromPractice || s.patientLanguage || "de");
       setSession(loadPreVisitSession());
       return;
     }
     setSession(s);
+    const p = s?.patientIdentity || {};
+    setPatientIdentity({
+      patientName: String(p.patientName || ""),
+      patientEmail: String(p.patientEmail || ""),
+      patientDateOfBirth: String(p.patientDateOfBirth || ""),
+      patientGenderOrSalutation: String(p.patientGenderOrSalutation || ""),
+      patientPhone: String(p.patientPhone || ""),
+    });
+    const c = s?.caseTimeline || {};
+    setCaseTimeline({
+      relatedSessionId: String(c.relatedSessionId || ""),
+      caseTopic: String(c.caseTopic || ""),
+      includeInPdf: Boolean(c.includeInPdf),
+      summary:
+        c.summary && typeof c.summary === "object"
+          ? c.summary
+          : null,
+    });
   }, [location.pathname, location.key, navigate]);
 
   useEffect(() => {
@@ -96,6 +172,11 @@ export default function PreVisitDocumentPage() {
   );
 
   const pdfLang = language === "en" ? "en" : "de";
+
+  const longitudinalUi = useMemo(
+    () => normalizeLongitudinalCase(session?.longitudinalCase),
+    [session?.longitudinalCase],
+  );
 
   const loadDoctorContacts = useCallback(async () => {
     if (!hasAuthToken) {
@@ -143,6 +224,148 @@ export default function PreVisitDocumentPage() {
     setEmailPdfSuccess(false);
   }
 
+  function handlePatientIdentityFieldChange(field, value) {
+    const nextIdentity = { ...patientIdentity, [field]: value };
+    setPatientIdentity(nextIdentity);
+    const next = setOptionalPatientIdentity(nextIdentity);
+    if (next) setSession(next);
+  }
+
+  const loadTimelineSessions = useCallback(async () => {
+    if (!hasAuthToken) {
+      setTimelineSessions([]);
+      return;
+    }
+    setTimelineLoading(true);
+    setTimelineError(null);
+    try {
+      const res = await authFetch("/api/previsit/sessions");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !Array.isArray(data.sessions)) {
+        setTimelineError(t.timelineLoadError);
+        setTimelineSessions([]);
+        return;
+      }
+      setTimelineSessions(data.sessions);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setTimelineError(t.timelineLoadError);
+      setTimelineSessions([]);
+    } finally {
+      setTimelineLoading(false);
+    }
+  }, [hasAuthToken, t.timelineLoadError]);
+
+  useEffect(() => {
+    void loadTimelineSessions();
+  }, [loadTimelineSessions]);
+
+  function updateCaseTimeline(patch) {
+    const nextRaw = { ...caseTimeline, ...patch };
+    setCaseTimeline(nextRaw);
+    const next = setCaseTimelineData(nextRaw);
+    if (next) setSession(next);
+  }
+
+  function patchLongitudinalPdfInclude(partial) {
+    setLongitudinalPdfErr(null);
+    const next = setLongitudinalCaseData({ pdfInclude: partial });
+    if (next) setSession(next);
+  }
+
+  async function handleLoadSessionsOverview() {
+    const cid = longitudinalUi?.caseId;
+    if (!cid || !hasAuthToken) return;
+    setLongitudinalOverviewBusy(true);
+    setLongitudinalPdfErr(null);
+    try {
+      const res = await authFetch(
+        `/api/previsit/cases/${encodeURIComponent(cid)}`,
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok || !data.case?.sessions) {
+        setLongitudinalPdfErr(t.longitudinalLoadOverviewError);
+        return;
+      }
+      const localeTag = language === "de" ? "de-DE" : "en-GB";
+      const lines = data.case.sessions.map((s) => {
+        const d = new Date(s.createdAt);
+        const ds = Number.isNaN(d.getTime())
+          ? "—"
+          : new Intl.DateTimeFormat(localeTag, {
+              dateStyle: "medium",
+            }).format(d);
+        const reason = String(s.appointmentReasonPreview || "").trim();
+        return `${ds} — ${reason || "—"}`;
+      });
+      const next = setLongitudinalCaseData({
+        sessionsOverviewLines: lines,
+        caseTitle: String(data.case.title || longitudinalUi.caseTitle || ""),
+      });
+      if (next) setSession(next);
+    } catch (e) {
+      if (e?.message !== "SESSION_EXPIRED") {
+        setLongitudinalPdfErr(t.longitudinalLoadOverviewError);
+      }
+    } finally {
+      setLongitudinalOverviewBusy(false);
+    }
+  }
+
+  async function handleGenerateTimelineSummary() {
+    if (!caseTimeline.relatedSessionId) {
+      setTimelineError(t.timelineSelectCaseFirst);
+      return;
+    }
+    const previous = timelineSessions.find(
+      (row) => row.id === caseTimeline.relatedSessionId
+    );
+    if (!previous?.answers || !session?.answers) {
+      setTimelineError(t.timelineLoadError);
+      return;
+    }
+    setTimelineBusy(true);
+    setTimelineError(null);
+    try {
+      const data = await apiFetch("/api/previsit/history-diff", {
+        method: "POST",
+        body: JSON.stringify({
+          previousAnswers: previous.answers,
+          currentAnswers: session.answers,
+          patientLanguage: session.patientLanguage,
+          doctorLanguage: doctorLang,
+        }),
+      });
+      const summary = {
+        newlyMentioned: Array.isArray(data?.newlyMentioned)
+          ? data.newlyMentioned
+          : [],
+        stillMentioned: Array.isArray(data?.stillMentioned)
+          ? data.stillMentioned
+          : [],
+        noLongerMentioned: Array.isArray(data?.noLongerMentioned)
+          ? data.noLongerMentioned
+          : [],
+        unclear: Array.isArray(data?.unclear) ? data.unclear : [],
+        patientAddedNewInformation: Array.isArray(
+          data?.patientAddedNewInformation,
+        )
+          ? data.patientAddedNewInformation
+          : [],
+        patientDidNotMentionPreviouslyReportedInformation: Array.isArray(
+          data?.patientDidNotMentionPreviouslyReportedInformation,
+        )
+          ? data.patientDidNotMentionPreviouslyReportedInformation
+          : [],
+      };
+      updateCaseTimeline({ summary });
+    } catch {
+      setTimelineError(t.timelineSummaryError);
+    } finally {
+      setTimelineBusy(false);
+    }
+  }
+
   async function handleSendPdfEmail() {
     setEmailPdfError(null);
     setEmailPdfSuccess(false);
@@ -165,7 +388,7 @@ export default function PreVisitDocumentPage() {
     const blob = buildPreVisitPdfBlob({
       session: latest,
       uiLanguage: pdfLang,
-      labels: {},
+      labels: pdfLabelOverrides,
     });
     if (!blob) {
       setEmailPdfError(t.emailPdfNoPdf);
@@ -265,7 +488,7 @@ export default function PreVisitDocumentPage() {
       const ok = generatePreVisitPdf({
         session: latest,
         uiLanguage: language,
-        labels: {},
+        labels: pdfLabelOverrides,
       });
       if (!ok) return;
       const next = { ...latest, pdfDownloaded: true };
@@ -292,11 +515,79 @@ export default function PreVisitDocumentPage() {
 
       const dl =
         latest.doctorLanguage || latest.patientLanguage || doctorLang;
+      const normalizedPatientIdentity = {
+        patientName: String(latest?.patientIdentity?.patientName || "").trim(),
+        patientDateOfBirth: String(
+          latest?.patientIdentity?.patientDateOfBirth || ""
+        ).trim(),
+        patientEmail: String(latest?.patientIdentity?.patientEmail || "").trim(),
+        patientPhone: String(latest?.patientIdentity?.patientPhone || "").trim(),
+        patientGenderOrSalutation: String(
+          latest?.patientIdentity?.patientGenderOrSalutation || ""
+        ).trim(),
+      };
+      const hasPatientIdentity = Object.values(normalizedPatientIdentity).some(
+        (v) => v.length > 0
+      );
+      const answersForAccount = hasPatientIdentity
+        ? { ...latest.answers, patientIdentity: normalizedPatientIdentity }
+        : { ...latest.answers };
+      const timelineSummary = latest?.caseTimeline?.summary;
+      const timelinePayload =
+        latest?.caseTimeline?.relatedSessionId &&
+        timelineSummary &&
+        typeof timelineSummary === "object"
+          ? {
+              caseTimeline: {
+                relatedSessionId: String(
+                  latest.caseTimeline.relatedSessionId || ""
+                ),
+                caseTopic: String(latest.caseTimeline.caseTopic || ""),
+                includeInPdf: Boolean(latest.caseTimeline.includeInPdf),
+                summary: {
+                  newlyMentioned: Array.isArray(
+                    timelineSummary.newlyMentioned
+                  )
+                    ? timelineSummary.newlyMentioned
+                    : [],
+                  stillMentioned: Array.isArray(timelineSummary.stillMentioned)
+                    ? timelineSummary.stillMentioned
+                    : [],
+                  noLongerMentioned: Array.isArray(
+                    timelineSummary.noLongerMentioned
+                  )
+                    ? timelineSummary.noLongerMentioned
+                    : [],
+                  unclear: Array.isArray(timelineSummary.unclear)
+                    ? timelineSummary.unclear
+                    : [],
+                  patientAddedNewInformation: Array.isArray(
+                    timelineSummary.patientAddedNewInformation,
+                  )
+                    ? timelineSummary.patientAddedNewInformation
+                    : [],
+                  patientDidNotMentionPreviouslyReportedInformation:
+                    Array.isArray(
+                      timelineSummary.patientDidNotMentionPreviouslyReportedInformation,
+                    )
+                      ? timelineSummary.patientDidNotMentionPreviouslyReportedInformation
+                      : [],
+                },
+              },
+            }
+          : {};
+      const answersForAccountWithTimeline = {
+        ...answersForAccount,
+        ...timelinePayload,
+      };
+
+      const caseLinkId =
+        normalizeLongitudinalCase(latest.longitudinalCase)?.caseId || "";
 
       const payload = {
         patientLanguage: latest.patientLanguage || "de",
         doctorLanguage: dl || null,
-        answers: latest.answers,
+        answers: answersForAccountWithTimeline,
         aiDoctorVersion: latest.aiDoctorVersion ?? null,
         aiSafetyNotice:
           typeof latest.aiSafetyNotice === "string" &&
@@ -306,6 +597,7 @@ export default function PreVisitDocumentPage() {
         title: language === "de" ? t.sessionTitleDe : t.sessionTitleEn,
         status: latest.pdfDownloaded ? "pdf_created" : "draft",
         pdfDownloaded: !!latest.pdfDownloaded,
+        ...(caseLinkId ? { preVisitCaseId: caseLinkId } : {}),
       };
 
       const res = await authFetch("/api/previsit/sessions", {
@@ -369,6 +661,33 @@ export default function PreVisitDocumentPage() {
         </header>
 
         <div className="pre-visit-doc__field">
+          {session?.practiceContext?.practiceName ? (
+            <div className="pre-visit-doc__timeline-summary">
+              <p className="pre-visit-doc__timeline-title">{t.practiceContextTitle}</p>
+              <p className="pre-visit-doc__timeline-line">
+                <strong>{t.practiceContextPractice}: </strong>
+                {session.practiceContext.practiceName}
+              </p>
+              {session.practiceContext.targetName ? (
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.practiceContextTarget}: </strong>
+                  {session.practiceContext.targetName}
+                </p>
+              ) : null}
+              {session.practiceContext.doctorName ? (
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.practiceContextDoctor}: </strong>
+                  {session.practiceContext.doctorName}
+                </p>
+              ) : null}
+              {session.practiceContext.specialty ? (
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.practiceContextSpecialty}: </strong>
+                  {session.practiceContext.specialty}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <label className="pre-visit-doc__label" htmlFor="previsit-doctor-lang">
             {t.doctorLangLabel}
           </label>
@@ -389,6 +708,287 @@ export default function PreVisitDocumentPage() {
             {t.doctorLangHint}
           </p>
         </div>
+
+        <div className="pre-visit-doc__field pre-visit-doc__field--identity">
+          <h2 className="pre-visit-doc__recipient-heading">{t.patientMetaSection}</h2>
+          <p className="pre-visit-doc__field-hint">{t.patientMetaNote}</p>
+          <label className="pre-visit-doc__label" htmlFor="previsit-patient-name">
+            {t.patientNameLabel}
+          </label>
+          <input
+            id="previsit-patient-name"
+            className="pre-visit-doc__input"
+            type="text"
+            value={patientIdentity.patientName}
+            onChange={(e) =>
+              handlePatientIdentityFieldChange("patientName", e.target.value)
+            }
+            autoComplete="name"
+          />
+          <label className="pre-visit-doc__label" htmlFor="previsit-patient-email">
+            {t.patientEmailLabel}
+          </label>
+          <input
+            id="previsit-patient-email"
+            className="pre-visit-doc__input"
+            type="email"
+            value={patientIdentity.patientEmail}
+            onChange={(e) =>
+              handlePatientIdentityFieldChange("patientEmail", e.target.value)
+            }
+            autoComplete="email"
+          />
+          <label className="pre-visit-doc__label" htmlFor="previsit-patient-dob">
+            {t.patientDateOfBirthLabel}
+          </label>
+          <input
+            id="previsit-patient-dob"
+            className="pre-visit-doc__input"
+            type="date"
+            value={patientIdentity.patientDateOfBirth}
+            onChange={(e) =>
+              handlePatientIdentityFieldChange(
+                "patientDateOfBirth",
+                e.target.value
+              )
+            }
+          />
+          <label className="pre-visit-doc__label" htmlFor="previsit-patient-salutation">
+            {t.patientGenderOrSalutationLabel}
+          </label>
+          <input
+            id="previsit-patient-salutation"
+            className="pre-visit-doc__input"
+            type="text"
+            value={patientIdentity.patientGenderOrSalutation}
+            onChange={(e) =>
+              handlePatientIdentityFieldChange(
+                "patientGenderOrSalutation",
+                e.target.value
+              )
+            }
+          />
+          <label className="pre-visit-doc__label" htmlFor="previsit-patient-phone">
+            {t.patientPhoneLabel}
+          </label>
+          <input
+            id="previsit-patient-phone"
+            className="pre-visit-doc__input"
+            type="tel"
+            value={patientIdentity.patientPhone}
+            onChange={(e) =>
+              handlePatientIdentityFieldChange("patientPhone", e.target.value)
+            }
+            autoComplete="tel"
+          />
+        </div>
+
+        {hasAuthToken ? (
+          <div className="pre-visit-doc__field pre-visit-doc__field--timeline">
+            <h2 className="pre-visit-doc__recipient-heading">{t.timelineSection}</h2>
+            <p className="pre-visit-doc__field-hint">{t.timelineHint}</p>
+            <label className="pre-visit-doc__label" htmlFor="previsit-case-topic">
+              {t.timelineTopicLabel}
+            </label>
+            <input
+              id="previsit-case-topic"
+              className="pre-visit-doc__input"
+              type="text"
+              value={caseTimeline.caseTopic}
+              onChange={(e) =>
+                updateCaseTimeline({ caseTopic: e.target.value })
+              }
+              placeholder={t.timelineTopicPlaceholder}
+            />
+            <label
+              className="pre-visit-doc__label"
+              htmlFor="previsit-related-session"
+            >
+              {t.timelineSelectLabel}
+            </label>
+            <select
+              id="previsit-related-session"
+              className="pre-visit-doc__select"
+              value={caseTimeline.relatedSessionId}
+              onChange={(e) =>
+                updateCaseTimeline({
+                  relatedSessionId: e.target.value,
+                  summary: null,
+                })
+              }
+              disabled={timelineLoading}
+            >
+              <option value="">{t.timelineSelectNone}</option>
+              {timelineSessions
+                .filter((row) => row.id !== session?.id)
+                .map((row) => (
+                  <option key={row.id} value={row.id}>
+                    {new Date(row.createdAt).toLocaleDateString()} —{" "}
+                    {String(row?.answers?.appointmentReason || "").trim() ||
+                      t.timelineUntitled}
+                  </option>
+                ))}
+            </select>
+            <div className="pre-visit-doc__timeline-actions">
+              <button
+                type="button"
+                className="pre-visit-doc__btn pre-visit-doc__btn--timeline"
+                onClick={() => void handleGenerateTimelineSummary()}
+                disabled={timelineBusy || !caseTimeline.relatedSessionId}
+              >
+                {timelineBusy ? t.timelineComparing : t.timelineCompare}
+              </button>
+            </div>
+            {timelineError ? (
+              <p className="pre-visit-doc__email-error" role="alert">
+                {timelineError}
+              </p>
+            ) : null}
+            {caseTimeline.summary ? (
+              <div className="pre-visit-doc__timeline-summary">
+                <p className="pre-visit-doc__timeline-title">{t.timelineResultTitle}</p>
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.timelineNewlyMentioned}: </strong>
+                  {(caseTimeline.summary.newlyMentioned || []).join(" | ") || t.empty}
+                </p>
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.timelineStillMentioned}: </strong>
+                  {(caseTimeline.summary.stillMentioned || []).join(" | ") || t.empty}
+                </p>
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.timelineNoLongerMentioned}: </strong>
+                  {(caseTimeline.summary.noLongerMentioned || []).join(" | ") ||
+                    t.empty}
+                </p>
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.timelineUnclear}: </strong>
+                  {(caseTimeline.summary.unclear || []).join(" | ") || t.empty}
+                </p>
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.timelinePatientAddedNewInformation}: </strong>
+                  {(caseTimeline.summary.patientAddedNewInformation || []).join(
+                    " | ",
+                  ) || t.empty}
+                </p>
+                <p className="pre-visit-doc__timeline-line">
+                  <strong>{t.timelinePatientDidNotMentionPrior}: </strong>
+                  {(
+                    caseTimeline.summary
+                      .patientDidNotMentionPreviouslyReportedInformation || []
+                  ).join(" | ") || t.empty}
+                </p>
+                <label className="pre-visit-doc__checkbox-label">
+                  <input
+                    type="checkbox"
+                    className="pre-visit-doc__checkbox"
+                    checked={caseTimeline.includeInPdf}
+                    onChange={(e) =>
+                      updateCaseTimeline({ includeInPdf: e.target.checked })
+                    }
+                  />
+                  <span className="pre-visit-doc__checkbox-text">
+                    {t.timelineIncludePdf}
+                  </span>
+                </label>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {hasAuthToken && longitudinalUi?.caseId ? (
+          <div className="pre-visit-doc__field pre-visit-doc__field--longitudinal-pdf">
+            <h2 className="pre-visit-doc__recipient-heading">
+              {t.longitudinalPdfSection}
+            </h2>
+            <p className="pre-visit-doc__field-hint">{t.longitudinalPdfNote}</p>
+            <Link
+              className="pre-visit-doc__manage-book-link"
+              to={`/pre-visit/cases/${encodeURIComponent(longitudinalUi.caseId)}`}
+            >
+              {t.linkMyCases}
+            </Link>
+            <div className="pre-visit-doc__timeline-actions">
+              <button
+                type="button"
+                className="pre-visit-doc__btn pre-visit-doc__btn--timeline"
+                disabled={longitudinalOverviewBusy}
+                onClick={() => void handleLoadSessionsOverview()}
+              >
+                {longitudinalOverviewBusy
+                  ? t.longitudinalLoadOverviewBusy
+                  : t.longitudinalLoadOverview}
+              </button>
+            </div>
+            {longitudinalPdfErr ? (
+              <p className="pre-visit-doc__email-error" role="alert">
+                {longitudinalPdfErr}
+              </p>
+            ) : null}
+            <label className="pre-visit-doc__checkbox-label">
+              <input
+                type="checkbox"
+                className="pre-visit-doc__checkbox"
+                checked={!!longitudinalUi.pdfInclude.caseTitle}
+                onChange={(e) =>
+                  patchLongitudinalPdfInclude({ caseTitle: e.target.checked })
+                }
+              />
+              <span className="pre-visit-doc__checkbox-text">
+                {t.longitudinalPdfCaseTitle}
+              </span>
+            </label>
+            <label className="pre-visit-doc__checkbox-label">
+              <input
+                type="checkbox"
+                className="pre-visit-doc__checkbox"
+                checked={!!longitudinalUi.pdfInclude.continuitySummary}
+                onChange={(e) =>
+                  patchLongitudinalPdfInclude({
+                    continuitySummary: e.target.checked,
+                  })
+                }
+              />
+              <span className="pre-visit-doc__checkbox-text">
+                {t.longitudinalPdfContinuity}
+              </span>
+            </label>
+            <label className="pre-visit-doc__checkbox-label">
+              <input
+                type="checkbox"
+                className="pre-visit-doc__checkbox"
+                checked={!!longitudinalUi.pdfInclude.sessionsOverview}
+                onChange={(e) =>
+                  patchLongitudinalPdfInclude({
+                    sessionsOverview: e.target.checked,
+                  })
+                }
+              />
+              <span className="pre-visit-doc__checkbox-text">
+                {t.longitudinalPdfSessionsOverview}
+              </span>
+            </label>
+            <label className="pre-visit-doc__checkbox-label">
+              <input
+                type="checkbox"
+                className="pre-visit-doc__checkbox"
+                checked={!!longitudinalUi.pdfInclude.relatedReportsSummary}
+                onChange={(e) =>
+                  patchLongitudinalPdfInclude({
+                    relatedReportsSummary: e.target.checked,
+                  })
+                }
+              />
+              <span className="pre-visit-doc__checkbox-text">
+                {t.longitudinalPdfRelatedReports}
+              </span>
+            </label>
+            {!caseTimeline.summary ? (
+              <p className="pre-visit-doc__field-hint" role="note">
+                {t.longitudinalPdfCompareHint}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {hasAuthToken ? (
           <div className="pre-visit-doc__field pre-visit-doc__field--recipient">
@@ -683,6 +1283,9 @@ export default function PreVisitDocumentPage() {
                 to="/pre-visit/my-preparations"
               >
                 {t.viewMyPreparations}
+              </Link>
+              <Link className="pre-visit-doc__manage-book-link" to="/pre-visit/cases">
+                {t.linkMyCases}
               </Link>
             </>
           )}

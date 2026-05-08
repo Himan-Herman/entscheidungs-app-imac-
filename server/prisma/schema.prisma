@@ -18,11 +18,31 @@ model User {
   doctors          Doctor[]
   doctorContacts   DoctorContact[]
   preVisitSessions PreVisitSession[]
+  preVisitCases    PreVisitCase[]
+  practiceProfiles PracticeProfile[]
+}
+
+/** Groups multiple saved Pre-Visit sessions into a longitudinal / chronic case timeline. */
+model PreVisitCase {
+  id          String   @id @default(cuid())
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  description String?
+  category    String?
+  isArchived  Boolean  @default(false)
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions PreVisitSession[]
+
+  @@index([userId])
 }
 
 model PreVisitSession {
-  id              String   @id @default(cuid())
-  userId          String
+  id             String         @id @default(cuid())
+  userId         String
+  preVisitCaseId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -37,9 +57,11 @@ model PreVisitSession {
   aiDoctorVersion Json?
   aiSafetyNotice  String?
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preVisitCase PreVisitCase? @relation(fields: [preVisitCaseId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([preVisitCaseId])
   @@index([createdAt])
 }
 
@@ -93,6 +115,48 @@ model DoctorContact {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model PracticeProfile {
+  id                      String   @id @default(cuid())
+  userId                  String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  practiceName            String
+  publicSlug              String   @unique
+  logoUrl                 String?
+  address                 String?
+  phone                   String?
+  email                   String?
+  website                 String?
+  specialty               String?
+  preferredDoctorLanguage String   @default("de")
+  patientIntroText        String?
+  isActive                Boolean  @default(true)
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qrTargets PracticeQrTarget[]
+
+  @@index([userId])
+}
+
+model PracticeQrTarget {
+  id                      String   @id @default(cuid())
+  practiceProfileId       String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  targetName              String
+  targetType              String   @default("practice")
+  doctorName              String?
+  specialty               String?
+  recipientEmail          String?
+  preferredDoctorLanguage String?
+  qrToken                 String   @unique
+  isActive                Boolean  @default(true)
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([practiceProfileId])
 }
 
 datasource db {

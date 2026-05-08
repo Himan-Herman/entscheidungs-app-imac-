@@ -38,7 +38,11 @@ import PreVisitReviewPage from "./features/preVisit/pages/PreVisitReviewPage.jsx
 import PreVisitDocumentPage from "./features/preVisit/pages/PreVisitDocumentPage.jsx";
 import PreVisitHistoryPage from "./features/preVisit/pages/PreVisitHistoryPage.jsx";
 import PreVisitAccountHistoryPage from "./features/preVisit/pages/PreVisitAccountHistoryPage.jsx";
+import PreVisitQrLandingPage from "./features/preVisit/pages/PreVisitQrLandingPage.jsx";
+import PreVisitCasesPage from "./features/preVisit/pages/PreVisitCasesPage.jsx";
+import PreVisitCaseDetailPage from "./features/preVisit/pages/PreVisitCaseDetailPage.jsx";
 import SettingsDoctorContactsPage from "./pages/SettingsDoctorContactsPage.jsx";
+import SettingsPracticesPage from "./pages/SettingsPracticesPage.jsx";
 import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider } from "./i18n/LanguageContext";
 
@@ -148,6 +152,14 @@ createRoot(document.getElementById("root")).render(
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/settings/practices"
+              element={
+                <ProtectedRoute>
+                  <SettingsPracticesPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Öffentliche statische Seiten */}
             <Route path="/impressum" element={<Impressum />} />
@@ -164,6 +176,22 @@ createRoot(document.getElementById("root")).render(
             {/* Pre-Visit Medical Communication (fourth module — UI only, no auth) */}
             <Route path="/pre-visit/document" element={<PreVisitDocumentPage />} />
             <Route
+              path="/pre-visit/cases"
+              element={
+                <ProtectedRoute>
+                  <PreVisitCasesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pre-visit/cases/:caseId"
+              element={
+                <ProtectedRoute>
+                  <PreVisitCaseDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/pre-visit/my-preparations"
               element={<PreVisitAccountHistoryPage />}
             />
@@ -171,6 +199,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/pre-visit/chat" element={<PreVisitChatPage />} />
             <Route path="/pre-visit/review" element={<PreVisitReviewPage />} />
             <Route path="/pre-visit" element={<PreVisitLanguagePage />} />
+            <Route path="/pre-visit/qr/:qrToken" element={<PreVisitQrLandingPage />} />
             <Route
               path="/arztgespraech"
               element={<Navigate to="/pre-visit" replace />}

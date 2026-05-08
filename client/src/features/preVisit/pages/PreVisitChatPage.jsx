@@ -9,17 +9,18 @@ import {
 import {
   buildInitialSession,
   loadPreVisitSession,
+  normalizeLongitudinalCase,
   PREVISIT_LOCALE_STORAGE_KEY,
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
+import { authFetch } from "../../../api/authFetch.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import PreVisitAudioToolbar from "../components/PreVisitAudioToolbar.jsx";
-import SymptomsAdaptivePanel from "../components/SymptomsAdaptivePanel.jsx";
+import AdaptiveIntakePanel from "../adaptive/AdaptiveIntakePanel.jsx";
 import {
-  createEmptySymptomsIntakeSlice,
-  isAdaptiveCategory,
-  shouldUseLegacySymptomsEditor,
-} from "../engine/symptomsAdaptiveEngine.js";
+  createEmptyAdaptiveSlice,
+} from "../adaptive/adaptiveSessionUtils.js";
+import { isAdaptiveCategoryKey } from "../adaptive/adaptiveCategories.js";
 import "../styles/PreVisitChatPage.css";
 
 function readLocaleKey() {
@@ -79,6 +80,46 @@ export default function PreVisitChatPage() {
     savePreVisitSession(session);
   }, [session]);
 
+  const fetchedCaseCompactRef = useRef("");
+  useEffect(() => {
+    const cid = session?.longitudinalCase?.caseId;
+    if (!cid) return;
+    if (String(session?.longitudinalCase?.compactTimelineSnippet || "").trim()) {
+      fetchedCaseCompactRef.current = cid;
+      return;
+    }
+    if (fetchedCaseCompactRef.current === cid) return;
+    fetchedCaseCompactRef.current = cid;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await authFetch(
+          `/api/previsit/cases/${encodeURIComponent(cid)}/compact-intake-context`,
+        );
+        const data = await res.json().catch(() => ({}));
+        if (cancelled || !data.ok) return;
+        setSession((prev) => {
+          const norm = normalizeLongitudinalCase({
+            ...(prev.longitudinalCase || {}),
+            caseId: cid,
+            caseTitle: String(data.caseTitle || prev.longitudinalCase?.caseTitle || ""),
+            compactTimelineSnippet: String(data.snippet || ""),
+          });
+          if (!norm) return prev;
+          return { ...prev, longitudinalCase: norm };
+        });
+      } catch {
+        if (!cancelled) fetchedCaseCompactRef.current = "";
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    session?.longitudinalCase?.caseId,
+    session?.longitudinalCase?.compactTimelineSnippet,
+  ]);
+
   useEffect(() => {
     document.title = tUi.pageTitle;
   }, [tUi.pageTitle]);
@@ -88,42 +129,36 @@ export default function PreVisitChatPage() {
   const step = PRE_VISIT_QUESTION_STEPS[stepIndex];
   const currentValue = session.answers[step.key] ?? "";
 
-  const useAdaptiveSymptoms =
-    isAdaptiveCategory(step.key) && !shouldUseLegacySymptomsEditor(session);
-
-  const legacySymptomsEditor = shouldUseLegacySymptomsEditor(session);
+  const useAdaptiveStep = isAdaptiveCategoryKey(step.key);
 
   useEffect(() => {
-    if (step.key !== "symptomsOwnWords") return;
-    if (legacySymptomsEditor) return;
-    if (session.intakeV1?.symptomsOwnWords) return;
+    if (!isAdaptiveCategoryKey(step.key)) return;
+    if (session.intakeV1?.[step.key]) return;
     setSession((prev) => ({
       ...prev,
       intakeV1: {
-        schemaVersion: 1,
+        schemaVersion: 2,
         ...prev.intakeV1,
-        symptomsOwnWords: createEmptySymptomsIntakeSlice(),
+        [step.key]: createEmptyAdaptiveSlice(step.key),
       },
     }));
   }, [
     step.key,
-    legacySymptomsEditor,
-    session.intakeV1?.symptomsOwnWords,
-    session.answers?.symptomsOwnWords,
+    session.intakeV1,
   ]);
 
-  const [symptomsPanelBusy, setSymptomsPanelBusy] = useState(false);
+  const [adaptivePanelBusy, setAdaptivePanelBusy] = useState(false);
   const adaptivePanelRef = useRef(null);
 
-  const handleSymptomsBusy = useCallback((busy) => {
-    setSymptomsPanelBusy(Boolean(busy));
+  const handleAdaptiveBusy = useCallback((busy) => {
+    setAdaptivePanelBusy(Boolean(busy));
   }, []);
 
   useEffect(() => {
-    if (!useAdaptiveSymptoms) setSymptomsPanelBusy(false);
-  }, [useAdaptiveSymptoms]);
+    if (!useAdaptiveStep) setAdaptivePanelBusy(false);
+  }, [useAdaptiveStep]);
 
-  const handleSymptomsAdaptiveFinished = useCallback(
+  const handleAdaptiveFinished = useCallback(
     (compiled) => {
       setSession((prev) => {
         const totalSteps = PRE_VISIT_QUESTION_STEPS.length;
@@ -135,22 +170,22 @@ export default function PreVisitChatPage() {
         }
         return {
           ...prev,
-          answers: { ...prev.answers, symptomsOwnWords: compiled },
+          answers: { ...prev.answers, [step.key]: compiled },
           intakeV1: {
-            schemaVersion: 1,
+            schemaVersion: 2,
             ...prev.intakeV1,
-            symptomsOwnWords: {
-              ...(prev.intakeV1?.symptomsOwnWords ||
-                createEmptySymptomsIntakeSlice()),
+            [step.key]: {
+              ...(prev.intakeV1?.[step.key] || createEmptyAdaptiveSlice(step.key)),
               status: "complete",
-              currentQuestion: null,
+              currentQuestion: "",
+              compiledAnswer: compiled,
             },
           },
           stepIndex: nextIdx,
         };
       });
     },
-    [navigate]
+    [navigate, step.key]
   );
 
   function setAnswer(value) {
@@ -201,6 +236,7 @@ export default function PreVisitChatPage() {
       answers: { ...PREVISIT_DEMO_ANSWERS },
       stepIndex: completedStep,
     };
+    if (prev?.longitudinalCase) next.longitudinalCase = prev.longitudinalCase;
     savePreVisitSession(next);
     navigate("/pre-visit/review");
   }
@@ -215,25 +251,24 @@ export default function PreVisitChatPage() {
 
   const speakText = useMemo(() => {
     const parts = [title, explanation];
-    if (useAdaptiveSymptoms) {
-      const q = String(
-        session.intakeV1?.symptomsOwnWords?.currentQuestion || ""
-      ).trim();
+    if (useAdaptiveStep) {
+      const q = String(session.intakeV1?.[step.key]?.currentQuestion || "").trim();
       if (q) parts.push(q);
     }
     return parts.filter(Boolean).join("\n\n").slice(0, 1200);
   }, [
     title,
     explanation,
-    useAdaptiveSymptoms,
-    session.intakeV1?.symptomsOwnWords?.currentQuestion,
+    useAdaptiveStep,
+    session.intakeV1,
+    step.key,
   ]);
 
   const appendTranscript = useCallback(
     (snippet) => {
       const add = String(snippet || "").trim();
       if (!add) return;
-      if (useAdaptiveSymptoms) {
+      if (useAdaptiveStep) {
         adaptivePanelRef.current?.appendDictatedText?.(add);
         return;
       }
@@ -254,7 +289,7 @@ export default function PreVisitChatPage() {
         };
       });
     },
-    [useAdaptiveSymptoms]
+    [useAdaptiveStep]
   );
 
   return (
@@ -289,6 +324,11 @@ export default function PreVisitChatPage() {
         </div>
 
         <article className="pre-visit-chat__card">
+          {session?.longitudinalCase?.caseId ? (
+            <p className="pre-visit-chat__longitudinal-note" role="note">
+              {tUi.longitudinalCaseBanner}
+            </p>
+          ) : null}
           <p className="pre-visit-chat__section-label">
             {tUi.sectionLabelQuestion}
           </p>
@@ -300,19 +340,22 @@ export default function PreVisitChatPage() {
             patientLanguage={session.patientLanguage || readLocaleKey() || "de"}
             labels={tUi}
             onAppendTranscript={appendTranscript}
-            disabled={useAdaptiveSymptoms && symptomsPanelBusy}
+            disabled={useAdaptiveStep && adaptivePanelBusy}
           />
 
-          {useAdaptiveSymptoms ? (
-            <SymptomsAdaptivePanel
+          {useAdaptiveStep ? (
+            <AdaptiveIntakePanel
               ref={adaptivePanelRef}
+              categoryKey={step.key}
+              categoryTitle={title}
               session={session}
               setSession={setSession}
               labels={tUi}
               patientLanguage={session.patientLanguage}
               onExitStep={goBack}
-              onFinished={handleSymptomsAdaptiveFinished}
-              onBusyChange={handleSymptomsBusy}
+              onSkipStep={goNext}
+              onFinished={handleAdaptiveFinished}
+              onBusyChange={handleAdaptiveBusy}
             />
           ) : (
             <>

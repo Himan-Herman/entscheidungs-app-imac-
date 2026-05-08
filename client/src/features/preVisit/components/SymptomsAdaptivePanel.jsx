@@ -8,17 +8,18 @@ import {
   useState,
 } from "react";
 import {
-  PREVISIT_SYMPTOMS_MAX_FOLLOWUPS,
-  compileSymptomsDocumentation,
-  createEmptySymptomsIntakeSlice,
+  PREVISIT_ADAPTIVE_MAX_FOLLOWUPS,
+  compileAdaptiveDocumentation,
+  createEmptyAdaptiveIntakeSlice,
   getOfflineFollowUpQuestion,
 } from "../engine/symptomsAdaptiveEngine.js";
 
 /**
- * Adaptive symptoms intake (bounded). Persists slice on `session.intakeV1.symptomsOwnWords`.
+ * Adaptive intake (bounded) for selected category.
  */
 const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
   {
+    categoryKey,
     session,
     setSession,
     patientLanguage,
@@ -38,10 +39,10 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
   }, [busy, onBusyChange]);
 
   const slice = useMemo(() => {
-    const existing = session?.intakeV1?.symptomsOwnWords;
+    const existing = session?.intakeV1?.[categoryKey];
     if (existing && typeof existing === "object") return existing;
-    return createEmptySymptomsIntakeSlice();
-  }, [session?.intakeV1?.symptomsOwnWords]);
+    return createEmptyAdaptiveIntakeSlice();
+  }, [categoryKey, session?.intakeV1?.[categoryKey]]);
 
   const sessionRef = useRef(session);
   sessionRef.current = session;
@@ -54,11 +55,11 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
         intakeV1: {
           schemaVersion: 1,
           ...prev.intakeV1,
-          symptomsOwnWords: nextSlice,
+          [categoryKey]: nextSlice,
         },
       }));
     },
-    [patientLanguage, setSession]
+    [categoryKey, patientLanguage, setSession]
   );
 
   useImperativeHandle(
@@ -69,7 +70,7 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
         if (!s) return;
         const prev = sessionRef.current;
         const sw =
-          prev.intakeV1?.symptomsOwnWords || createEmptySymptomsIntakeSlice();
+          prev.intakeV1?.[categoryKey] || createEmptyAdaptiveIntakeSlice();
         const currentQ = sw.currentQuestion
           ? String(sw.currentQuestion).trim()
           : "";
@@ -87,9 +88,8 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
           intakeV1: {
             schemaVersion: 1,
             ...p.intakeV1,
-            symptomsOwnWords: {
-              ...(p.intakeV1?.symptomsOwnWords ||
-                createEmptySymptomsIntakeSlice()),
+            [categoryKey]: {
+              ...(p.intakeV1?.[categoryKey] || createEmptyAdaptiveIntakeSlice()),
               seedStatement: nextSeed,
               status: "active",
             },
@@ -97,12 +97,12 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
         }));
       },
     }),
-    [patientLanguage, setSession]
+    [categoryKey, patientLanguage, setSession]
   );
 
   const applyServerOrFallback = useCallback(
     async (seed, qaHistory) => {
-      if (qaHistory.length >= PREVISIT_SYMPTOMS_MAX_FOLLOWUPS) {
+      if (qaHistory.length >= PREVISIT_ADAPTIVE_MAX_FOLLOWUPS) {
         return {
           done: true,
           followUpQuestion: null,
@@ -114,10 +114,11 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            category: categoryKey,
             patientLanguage,
             seedStatement: seed,
             qaHistory,
-            maxFollowUps: PREVISIT_SYMPTOMS_MAX_FOLLOWUPS,
+            maxFollowUps: PREVISIT_ADAPTIVE_MAX_FOLLOWUPS,
           }),
         });
         const data = await res.json().catch(() => ({}));
@@ -134,7 +135,7 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
         };
       } catch {
         const idx = qaHistory.length;
-        const q = getOfflineFollowUpQuestion(patientLanguage, idx);
+        const q = getOfflineFollowUpQuestion(patientLanguage, categoryKey, idx);
         if (!q) {
           return { done: true, followUpQuestion: null, completeness: 0.75 };
         }
@@ -145,7 +146,7 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
         };
       }
     },
-    [patientLanguage]
+    [categoryKey, patientLanguage]
   );
 
   const handleBack = useCallback(() => {
@@ -194,7 +195,12 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
         const qaHistory = Array.isArray(slice.qaHistory) ? slice.qaHistory : [];
         const out = await applyServerOrFallback(seed, qaHistory);
         if (out.done) {
-          const compiled = compileSymptomsDocumentation(seed, qaHistory);
+          const compiled = compileAdaptiveDocumentation(
+            categoryKey,
+            patientLanguage,
+            seed,
+            qaHistory
+          );
           persistSlice({
             ...slice,
             seedStatement: seed,
@@ -236,7 +242,12 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
     try {
       const out = await applyServerOrFallback(seed, nextHist);
       if (out.done) {
-        const compiled = compileSymptomsDocumentation(seed, nextHist);
+        const compiled = compileAdaptiveDocumentation(
+          categoryKey,
+          patientLanguage,
+          seed,
+          nextHist
+        );
         persistSlice({
           ...slice,
           seedStatement: seed,
@@ -324,7 +335,7 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
       <p className="pre-visit-adaptive__meta" aria-live="polite">
         {labels.adaptiveProgressMeta
           .replace("{{n}}", String(slice.qaHistory?.length || 0))
-          .replace("{{max}}", String(PREVISIT_SYMPTOMS_MAX_FOLLOWUPS))}
+          .replace("{{max}}", String(PREVISIT_ADAPTIVE_MAX_FOLLOWUPS))}
       </p>
 
       <div className="pre-visit-chat__actions">

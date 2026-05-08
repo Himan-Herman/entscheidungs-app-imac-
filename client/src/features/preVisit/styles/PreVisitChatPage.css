@@ -433,6 +433,17 @@
   color: #b91c1c;
 }
 
+.pre-visit-chat__longitudinal-note {
+  margin: 0 0 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  background: var(--pvc-accent-soft);
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  color: var(--pvc-muted);
+}
+
 :root[data-theme="dark"] .pre-visit-audio {
   background: rgba(45, 212, 191, 0.06);
   border-color: rgba(45, 212, 191, 0.18);

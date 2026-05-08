@@ -9,6 +9,7 @@ import {
 } from "../constants/questionFlow.js";
 import {
   computePreVisitAiFingerprint,
+  normalizeLongitudinalCase,
   PREVISIT_LOCALE_STORAGE_KEY,
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
@@ -85,10 +86,37 @@ function hydrateServerSessionToLocal(record) {
     );
   }
 
+  const caseTimeline =
+    answers?.caseTimeline &&
+    typeof answers.caseTimeline === "object" &&
+    !Array.isArray(answers.caseTimeline)
+      ? answers.caseTimeline
+      : null;
+  if (caseTimeline) {
+    payload.caseTimeline = {
+      relatedSessionId: String(caseTimeline.relatedSessionId || ""),
+      caseTopic: String(caseTimeline.caseTopic || ""),
+      includeInPdf: Boolean(caseTimeline.includeInPdf),
+      summary:
+        caseTimeline.summary && typeof caseTimeline.summary === "object"
+          ? caseTimeline.summary
+          : null,
+    };
+  }
+
   if (record.pdfDownloaded === true) {
     payload.pdfDownloaded = true;
   } else if (record.status === "pdf_created") {
     payload.pdfDownloaded = true;
+  }
+
+  const cid =
+    typeof record.preVisitCaseId === "string"
+      ? record.preVisitCaseId.trim()
+      : "";
+  if (cid) {
+    const nl = normalizeLongitudinalCase({ caseId: cid });
+    if (nl) payload.longitudinalCase = nl;
   }
 
   savePreVisitSession(payload);
@@ -222,6 +250,11 @@ export default function PreVisitAccountHistoryPage() {
         <header className="pre-visit-account__header">
           <h1 className="pre-visit-account__title">{t.title}</h1>
           <p className="pre-visit-account__subtitle">{t.subtitle}</p>
+          {hasAuthToken ? (
+            <Link className="pre-visit-account__cases-link" to="/pre-visit/cases">
+              {t.linkCases}
+            </Link>
+          ) : null}
         </header>
 
         {!hasAuthToken ? (

@@ -42,12 +42,66 @@ function defaultLabels(uiLanguage) {
     part2Heading: en
       ? "Original patient statements"
       : "Originalangaben des Patienten",
+    previousReportsHeading: en
+      ? "Previous related reports (summary)"
+      : "Frühere zugeordnete Berichte (Zusammenfassung)",
+    newlyMentionedLabel: en ? "Newly mentioned" : "Neu erwähnt",
+    stillMentionedLabel: en ? "Still mentioned" : "Weiterhin erwähnt",
+    noLongerMentionedLabel: en
+      ? "No longer mentioned"
+      : "Nicht mehr erwähnt",
+    unclearLabel: en ? "Unclear" : "Unklar",
+    patientAddedNewInformationLabel: en
+      ? "Patient added new information"
+      : "Neue Patienteninformation / Ergänzung",
+    patientDidNotMentionPreviouslyLabel: en
+      ? "Previously reported information not mentioned in this session"
+      : "Früher berichtete Angaben in dieser Session nicht erwähnt",
+    longitudinalSectionHeading: en ? "Case / timeline (optional)" : "Fall / Verlauf (optional)",
+    longitudinalSectionNote: en
+      ? "Included only because you opted in below. Patient statements only; no diagnosis or medical evaluation."
+      : "Wurde nur aufgrund Ihrer Auswahl eingefügt. Nur Patientenangaben; keine Diagnose oder medizinische Bewertung.",
+    longitudinalCaseTitlePdfLabel: en ? "Case title" : "Falltitel",
+    continuityRecurringSymptomsLabel: en
+      ? "Repeatedly mentioned symptoms or concerns"
+      : "Mehrfach genannte Symptome oder Beschwerden",
+    continuityRecurringMedicationsLabel: en
+      ? "Repeatedly mentioned medications"
+      : "Mehrfach genannte Medikamente",
+    continuityRecurringQuestionsLabel: en
+      ? "Repeated patient questions"
+      : "Mehrfach gestellte Patientenfragen",
+    continuityRecurringConcernsLabel: en
+      ? "Repeated concerns"
+      : "Mehrfach genannte Sorgen",
+    longitudinalSessionsOverviewHeading: en
+      ? "Earlier preparations (overview)"
+      : "Frühere Vorbereitungen (Überblick)",
+    longitudinalRelatedReportsHeading: en
+      ? "Session comparison (patient wording)"
+      : "Vergleich der Vorbereitungen (Patientenformulierung)",
+    longitudinalContinuitySubheading: en
+      ? "Continuity summary (patient statements only)"
+      : "Kontinuitätszusammenfassung (nur Patientenangaben)",
     patientLanguageLabel: en
       ? "Language of patient statements"
       : "Sprache der Patientenantworten",
     doctorLanguageLabel: en
       ? "Language of doctor version"
       : "Sprache der Arztversion",
+    patientLabel: en ? "Patient" : "Patient",
+    contactLabel: en ? "Contact" : "Kontakt",
+    patientNameLabel: en ? "Name" : "Name",
+    patientEmailLabel: en ? "Email" : "E-Mail",
+    patientDateOfBirthLabel: en ? "Date of birth" : "Geburtsdatum",
+    patientGenderOrSalutationLabel: en
+      ? "Gender / salutation"
+      : "Geschlecht / Anrede",
+    patientPhoneLabel: en ? "Phone" : "Telefon",
+    practiceLabel: en ? "Practice" : "Praxis",
+    targetLabel: en ? "Target" : "Ziel",
+    doctorLabel: en ? "Doctor" : "Ärztin/Arzt",
+    specialtyLabel: en ? "Specialty" : "Fachrichtung",
     documentCreatedLabel: en ? "Created" : "Erstellt",
     empty: en ? "not specified" : "nicht angegeben",
     pdfFilename: en
@@ -117,6 +171,10 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
   }
 
   const L = { ...defaultLabels(uiLanguage), ...labels };
+  const timeline = session?.caseTimeline;
+  const longitudinal = session?.longitudinalCase;
+  const relatedReportsInLongitudinal =
+    longitudinal?.pdfInclude?.relatedReportsSummary === true;
   const answers = session.answers;
   const patientLang = session.patientLanguage || "de";
   const doctorLang = session.doctorLanguage || patientLang;
@@ -236,11 +294,55 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     const innerW = contentW - pad * 2;
     const lh = lineHeightMm(metaSize);
 
-    const metaLines = [
-      `${L.patientLanguageLabel}: ${languageDisplay(patientLang, uiLanguage)}`,
-      `${L.doctorLanguageLabel}: ${languageDisplay(doctorLang, uiLanguage)}`,
-      `${L.documentCreatedLabel}: ${formatCreated(uiLanguage)}`,
-    ];
+    const patientMeta =
+      session?.patientIdentity && typeof session.patientIdentity === "object"
+        ? session.patientIdentity
+        : {};
+    const patientName = String(patientMeta.patientName || "").trim();
+    const patientSalutation = String(
+      patientMeta.patientGenderOrSalutation || ""
+    ).trim();
+    const patientDob = String(patientMeta.patientDateOfBirth || "").trim();
+    const patientEmail = String(patientMeta.patientEmail || "").trim();
+    const patientPhone = String(patientMeta.patientPhone || "").trim();
+    const contactParts = [patientEmail, patientPhone].filter(Boolean);
+    const practiceContext =
+      session?.practiceContext && typeof session.practiceContext === "object"
+        ? session.practiceContext
+        : null;
+
+    const metaLines = [];
+    if (patientName || patientSalutation) {
+      const patientValue = [patientName, patientSalutation]
+        .filter(Boolean)
+        .join(" — ");
+      metaLines.push(`${L.patientLabel}: ${patientValue}`);
+    }
+    if (patientDob) {
+      metaLines.push(`${L.patientDateOfBirthLabel}: ${patientDob}`);
+    }
+    if (contactParts.length > 0) {
+      metaLines.push(`${L.contactLabel}: ${contactParts.join(" · ")}`);
+    }
+    if (practiceContext?.practiceName) {
+      metaLines.push(`${L.practiceLabel}: ${practiceContext.practiceName}`);
+    }
+    if (practiceContext?.targetName) {
+      metaLines.push(`${L.targetLabel}: ${practiceContext.targetName}`);
+    }
+    if (practiceContext?.doctorName) {
+      metaLines.push(`${L.doctorLabel}: ${practiceContext.doctorName}`);
+    }
+    if (practiceContext?.specialty) {
+      metaLines.push(`${L.specialtyLabel}: ${practiceContext.specialty}`);
+    }
+    metaLines.push(
+      `${L.patientLanguageLabel}: ${languageDisplay(patientLang, uiLanguage)}`
+    );
+    metaLines.push(
+      `${L.doctorLanguageLabel}: ${languageDisplay(doctorLang, uiLanguage)}`
+    );
+    metaLines.push(`${L.documentCreatedLabel}: ${formatCreated(uiLanguage)}`);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(metaSize);
@@ -271,19 +373,6 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     y = boxTop + boxH + 8;
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.2);
-  }
-
-  function writeWrapped(text, sizePt, style = "normal") {
-    doc.setFont("helvetica", style);
-    doc.setFontSize(sizePt);
-    doc.setTextColor(...COL.slate);
-    const lh = lineHeightMm(sizePt);
-    const lines = doc.splitTextToSize(String(text), contentW);
-    for (let i = 0; i < lines.length; i++) {
-      needSpace(lh + 0.8);
-      doc.text(lines[i], margin, y);
-      y += lh;
-    }
   }
 
   function writeSectionHeading(text) {
@@ -392,6 +481,133 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     const raw = answers[step.key] ?? "";
     const title = pickLocalized(step.title, patientLang);
     writeFieldBlock(`${title}`, raw, L.empty);
+  }
+
+  if (
+    timeline?.includeInPdf &&
+    timeline?.summary &&
+    !relatedReportsInLongitudinal
+  ) {
+    gap(4);
+    writeSectionHeading(L.previousReportsHeading);
+    const summary = timeline.summary;
+    const lines = [
+      [L.newlyMentionedLabel, summary.newlyMentioned],
+      [L.stillMentionedLabel, summary.stillMentioned],
+      [L.noLongerMentionedLabel, summary.noLongerMentioned],
+      [L.unclearLabel, summary.unclear],
+      [L.patientAddedNewInformationLabel, summary.patientAddedNewInformation],
+      [
+        L.patientDidNotMentionPreviouslyLabel,
+        summary.patientDidNotMentionPreviouslyReportedInformation,
+      ],
+    ];
+    for (const [label, list] of lines) {
+      const items = Array.isArray(list)
+        ? list.map((x) => String(x || "").trim()).filter(Boolean)
+        : [];
+      if (!items.length) continue;
+      writeFieldBlock(label, items.map((x) => `- ${x}`).join("\n"), L.empty);
+    }
+  }
+
+  const pdfInc = longitudinal?.pdfInclude;
+  const wantsLongitudinalBlock =
+    longitudinal &&
+    pdfInc &&
+    (pdfInc.caseTitle ||
+      pdfInc.continuitySummary ||
+      pdfInc.sessionsOverview ||
+      pdfInc.relatedReportsSummary);
+  if (wantsLongitudinalBlock) {
+    gap(4);
+    writeSectionHeading(L.longitudinalSectionHeading);
+    gap(3);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(metaSize);
+    doc.setTextColor(...COL.slateMuted);
+    const hintLines = doc.splitTextToSize(L.longitudinalSectionNote, contentW);
+    const hintLh = lineHeightMm(metaSize);
+    for (const ln of hintLines) {
+      needSpace(hintLh + 1);
+      doc.text(ln, margin, y);
+      y += hintLh;
+    }
+    doc.setTextColor(...COL.slate);
+    doc.setFont("helvetica", "normal");
+    gap(4);
+
+    if (pdfInc.caseTitle && String(longitudinal.caseTitle || "").trim()) {
+      writeFieldBlock(
+        L.longitudinalCaseTitlePdfLabel,
+        String(longitudinal.caseTitle).trim(),
+        L.empty
+      );
+    }
+    if (pdfInc.continuitySummary && longitudinal.continuitySummary) {
+      gap(3);
+      writeSectionHeading(L.longitudinalContinuitySubheading);
+      const cs = longitudinal.continuitySummary;
+      const continuityBlocks = [
+        [L.continuityRecurringSymptomsLabel, cs.recurringSymptoms],
+        [L.continuityRecurringMedicationsLabel, cs.recurringMedications],
+        [L.continuityRecurringQuestionsLabel, cs.recurringPatientQuestions],
+        [L.continuityRecurringConcernsLabel, cs.recurringConcerns],
+      ];
+      for (const [label, list] of continuityBlocks) {
+        const items = Array.isArray(list)
+          ? list.map((x) => String(x || "").trim()).filter(Boolean)
+          : [];
+        if (!items.length) continue;
+        writeFieldBlock(
+          label,
+          items.map((x) => `- ${x}`).join("\n"),
+          L.empty
+        );
+      }
+    }
+    if (
+      pdfInc.sessionsOverview &&
+      Array.isArray(longitudinal.sessionsOverviewLines) &&
+      longitudinal.sessionsOverviewLines.length > 0
+    ) {
+      const bodyLines = longitudinal.sessionsOverviewLines
+        .map((x) => String(x || "").trim())
+        .filter(Boolean)
+        .map((line) => `- ${line}`)
+        .join("\n");
+      writeFieldBlock(
+        L.longitudinalSessionsOverviewHeading,
+        bodyLines,
+        L.empty
+      );
+    }
+    if (
+      pdfInc.relatedReportsSummary &&
+      timeline?.summary &&
+      typeof timeline.summary === "object"
+    ) {
+      writeSectionHeading(L.longitudinalRelatedReportsHeading);
+      const summary = timeline.summary;
+      const lines = [
+        [L.newlyMentionedLabel, summary.newlyMentioned],
+        [L.stillMentionedLabel, summary.stillMentioned],
+        [L.noLongerMentionedLabel, summary.noLongerMentioned],
+        [L.unclearLabel, summary.unclear],
+        [L.patientAddedNewInformationLabel, summary.patientAddedNewInformation],
+        [
+          L.patientDidNotMentionPreviouslyLabel,
+          summary.patientDidNotMentionPreviouslyReportedInformation,
+        ],
+      ];
+      for (const [label, list] of lines) {
+        const items = Array.isArray(list)
+          ? list.map((x) => String(x || "").trim()).filter(Boolean)
+          : [];
+        if (!items.length) continue;
+        writeFieldBlock(label, items.map((x) => `- ${x}`).join("\n"), L.empty);
+      }
+    }
   }
 
   applyFooters(doc, L, uiLanguage, pageWidth, pageHeight, margin);
