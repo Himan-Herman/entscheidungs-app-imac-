@@ -93,6 +93,27 @@ export default function SettingsPrivacyPage() {
           </Link>
         </header>
 
+        <section className="settings-privacy__card" aria-labelledby="privacy-legal-links-title">
+          <h2 id="privacy-legal-links-title" className="settings-privacy__section-title">
+            {t.legalLinksTitle}
+          </h2>
+          <p className="settings-privacy__muted">{t.legalLinksIntro}</p>
+          <nav className="settings-privacy__legal-nav" aria-label={t.legalLinksTitle}>
+            <Link className="settings-privacy__legal-link" to="/datenschutz">
+              {t.linkPrivacy}
+            </Link>
+            <Link className="settings-privacy__legal-link" to="/impressum">
+              {t.linkImprint}
+            </Link>
+            <Link className="settings-privacy__legal-link" to="/agb">
+              {t.linkTerms}
+            </Link>
+            <Link className="settings-privacy__legal-link" to="/account/data">
+              {t.linkAccountPrivacyHub}
+            </Link>
+          </nav>
+        </section>
+
         <section className="settings-privacy__card" aria-labelledby="privacy-export-title">
           <h2 id="privacy-export-title" className="settings-privacy__section-title">
             {t.exportTitle}

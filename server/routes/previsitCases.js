@@ -6,6 +6,7 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { summarizeCaseContinuity } from "../services/preVisitCaseContinuityClient.js";
 import { previsitCaseContinuityLimiter } from "../middleware/ipRateLimit.js";
+import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -237,6 +238,11 @@ router.post("/", async (req, res) => {
         category: cat.value ?? null,
         isArchived: body.isArchived === true,
       },
+    });
+    void trackAnalyticsEvent({
+      eventType: "case_created",
+      userId,
+      metadata: {},
     });
     return res.status(201).json({
       ok: true,

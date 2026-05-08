@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Volume2 } from "lucide-react";
 
+import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
+
 const MAX_SPEAK_CHARS = 1200;
 
 /**
@@ -12,6 +14,7 @@ export default function PreVisitAudioToolbar({
   labels,
   onAppendTranscript,
   disabled = false,
+  qrToken = "",
 }) {
   const [speakPhase, setSpeakPhase] = useState("idle");
   const [recordPhase, setRecordPhase] = useState("idle");
@@ -89,6 +92,15 @@ export default function PreVisitAudioToolbar({
       const blob = await res.blob();
       if (ac.signal.aborted) return;
 
+      void sendPracticeAnalyticsEvent({
+        eventType: "text_to_speech_used",
+        ...(qrToken ? { qrToken } : {}),
+        metadata: {
+          usedTextToSpeech: true,
+          deviceType: detectDeviceType(),
+        },
+      });
+
       const url = URL.createObjectURL(blob);
       objectUrlRef.current = url;
       const el = new Audio(url);
@@ -128,6 +140,7 @@ export default function PreVisitAudioToolbar({
     labels.audioErrorGeneric,
     labels.audioErrorPlayback,
     patientLanguage,
+    qrToken,
     speakPhase,
     speakText,
     stopPlayback,
@@ -180,14 +193,24 @@ export default function PreVisitAudioToolbar({
           );
         }
         const t = data?.text != null ? String(data.text).trim() : "";
-        if (t) onAppendTranscript(t);
+        if (t) {
+          void sendPracticeAnalyticsEvent({
+            eventType: "speech_input_used",
+            ...(qrToken ? { qrToken } : {}),
+            metadata: {
+              usedSpeechInput: true,
+              deviceType: detectDeviceType(),
+            },
+          });
+          onAppendTranscript(t);
+        }
       } catch (e) {
         setAudioError(e?.message || labels.audioErrorGeneric);
       } finally {
         setRecordPhase("idle");
       }
     },
-    [labels.audioErrorGeneric, onAppendTranscript, patientLanguage]
+    [labels.audioErrorGeneric, onAppendTranscript, patientLanguage, qrToken]
   );
 
   const handleMic = useCallback(async () => {

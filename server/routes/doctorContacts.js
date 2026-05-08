@@ -12,6 +12,7 @@ import { PrismaClient } from '@prisma/client';
 import { deliverPrevisitPdfEmail } from '../services/emailQueueService.js';
 import { sendPrevisitPdfLimiter } from '../middleware/ipRateLimit.js';
 import { writeAuditLog } from '../services/auditLogService.js';
+import { trackAnalyticsEvent } from '../services/analyticsService.js';
 
 const prisma = new PrismaClient();
 
@@ -53,6 +54,8 @@ function rowJson(row) {
     phone: row.phone,
     address: row.address,
     note: row.note,
+    isFavorite: Boolean(row.isFavorite),
+    lastUsedAt: row.lastUsedAt?.toISOString?.() ?? row.lastUsedAt ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -103,6 +106,7 @@ function normalizeCreateBody(body) {
       phone,
       address,
       note,
+      isFavorite: Boolean(body?.isFavorite),
     },
   };
 }
@@ -151,6 +155,9 @@ function normalizeUpdateBody(body) {
       body.note == null || body.note === ''
         ? null
         : String(body.note).trim().slice(0, MAX_NOTE) || null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'isFavorite')) {
+    data.isFavorite = Boolean(body.isFavorite);
   }
   if (Object.keys(data).length === 0) {
     return { ok: false, error: 'no_fields' };
@@ -323,6 +330,35 @@ Kontakt in der App hinterlegt: ${contact.doctorName}${practiceLine ? `\n${practi
         pdfBuffer: req.file.buffer,
       });
 
+      await prisma.doctorContact.update({
+        where: { id: contact.id },
+        data: { lastUsedAt: new Date() },
+      });
+
+      const rawSid =
+        typeof req.body?.preVisitSessionId === 'string'
+          ? req.body.preVisitSessionId.trim()
+          : '';
+      let practiceForPdf = null;
+      let sessionForPdf = null;
+      if (rawSid) {
+        const srow = await prisma.preVisitSession.findFirst({
+          where: { id: rawSid, userId },
+          select: { id: true, practiceProfileId: true },
+        });
+        if (srow) {
+          sessionForPdf = srow.id;
+          practiceForPdf = srow.practiceProfileId;
+        }
+      }
+      void trackAnalyticsEvent({
+        eventType: 'previsit_pdf_sent',
+        userId,
+        practiceId: practiceForPdf || undefined,
+        sessionId: sessionForPdf || undefined,
+        metadata: { emailSent: true },
+      });
+
       writeAuditLog({
         req,
         userId,
@@ -343,6 +379,30 @@ Kontakt in der App hinterlegt: ${contact.doctorName}${practiceLine ? `\n${practi
     }
   }
 );
+
+/**
+ * POST /:id/touch — mark contact as recently used (dashboard ordering)
+ */
+router.post('/:id/touch', async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return bad(res, 401, 'unauthorized', 'Unauthorized.');
+
+  const { id } = req.params;
+  try {
+    const existing = await prisma.doctorContact.findFirst({
+      where: { id, userId },
+    });
+    if (!existing) return bad(res, 404, 'not_found', 'Not found.');
+    await prisma.doctorContact.update({
+      where: { id },
+      data: { lastUsedAt: new Date() },
+    });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('[doctor-contacts] touch', err?.message);
+    return bad(res, 500, 'server_error', 'Server error.');
+  }
+});
 
 /**
  * GET /:id — single contact

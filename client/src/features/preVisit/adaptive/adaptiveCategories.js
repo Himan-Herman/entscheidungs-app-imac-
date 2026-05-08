@@ -3,9 +3,9 @@ export const ADAPTIVE_CATEGORIES = {
     key: "symptomsOwnWords",
     maxFollowups: 4,
     seedPromptDe:
-      "Beschreiben Sie Ihre Beschwerden in eigenen Worten, neutral und möglichst konkret.",
+      "Beschreiben Sie kurz Ihre Beschwerden mit eigenen Worten (neutral, ohne Fachbegriffe).",
     seedPromptEn:
-      "Describe your symptoms in your own words, neutrally and as concretely as possible.",
+      "Briefly describe how you feel in your own words (plain language, no jargon).",
     allowedFollowupTypes: ["clarification", "missing_information", "patient_confirmation"],
     completionRule:
       "Complete when description is understandable without adding medical interpretation.",
@@ -25,9 +25,9 @@ export const ADAPTIVE_CATEGORIES = {
     key: "medications",
     maxFollowups: 3,
     seedPromptDe:
-      "Nennen Sie Medikamente, soweit bekannt mit Name, Dosis und Häufigkeit.",
+      "Welche Medikamente nehmen Sie ein? (Name, wie oft — wenn Sie es wissen)",
     seedPromptEn:
-      "List medications, if known with name, dose, and frequency.",
+      "Which medicines do you take? (name and how often — if you know)",
     allowedFollowupTypes: ["missing_information", "clarification", "patient_confirmation"],
     completionRule:
       "Complete when medication info is clear enough for documentation.",

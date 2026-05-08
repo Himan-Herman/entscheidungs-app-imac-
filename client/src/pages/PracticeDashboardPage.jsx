@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
+import { detectDeviceType, sendPracticeAnalyticsEvent } from "../api/productAnalytics.js";
 import "../styles/PracticeDashboardPage.css";
 
 const STATUSES = ["new", "opened", "in_review", "completed", "archived"];
@@ -40,6 +41,8 @@ export default function PracticeDashboardPage() {
   const [doctor, setDoctor] = useState("");
   const [languageFilter, setLanguageFilter] = useState("");
   const [query, setQuery] = useState("");
+  const [analyticsSummary, setAnalyticsSummary] = useState(null);
+  const [analyticsLoadFailed, setAnalyticsLoadFailed] = useState(false);
 
   const loadPractices = useCallback(async () => {
     const res = await authFetch("/api/practices");
@@ -80,6 +83,48 @@ export default function PracticeDashboardPage() {
       setLoading(false);
     }
   }, [doctor, languageFilter, practiceId, query, status, t.loadError]);
+
+  const loadAnalytics = useCallback(async () => {
+    if (!practiceId) {
+      setAnalyticsSummary(null);
+      setAnalyticsLoadFailed(false);
+      return;
+    }
+    try {
+      const res = await authFetch(
+        `/api/practice/analytics/summary?practiceId=${encodeURIComponent(practiceId)}`,
+      );
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403) {
+        setAnalyticsSummary(null);
+        setAnalyticsLoadFailed(false);
+        return;
+      }
+      if (!res.ok || !data.ok || !data.summary) throw new Error("analytics_failed");
+      setAnalyticsSummary(data.summary);
+      setAnalyticsLoadFailed(false);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setAnalyticsSummary(null);
+      setAnalyticsLoadFailed(true);
+    }
+  }, [practiceId]);
+
+  useEffect(() => {
+    void loadAnalytics();
+  }, [loadAnalytics]);
+
+  useEffect(() => {
+    if (!practiceId) return;
+    void sendPracticeAnalyticsEvent({
+      eventType: "practice_dashboard_opened",
+      practiceId,
+      metadata: {
+        deviceType: detectDeviceType(),
+        uiLanguage: language,
+      },
+    });
+  }, [practiceId]); // eslint-disable-line react-hooks/exhaustive-deps -- beacon tied to practice selection; avoid duplicate on UI language change
 
   useEffect(() => {
     document.title = t.pageTitle;
@@ -132,6 +177,109 @@ export default function PracticeDashboardPage() {
             <Link to="/startseite">{tPractices.backHome}</Link>
           </div>
         </header>
+
+        {analyticsSummary ? (
+          <section className="practice-dashboard__analytics" aria-label={t.analyticsHeading}>
+            <h2 className="practice-dashboard__analytics-heading">{t.analyticsHeading}</h2>
+            <p className="practice-dashboard__analytics-privacy">{t.analyticsPrivacy}</p>
+            <div className="practice-dashboard__analytics-grid">
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsPrevisitStarts}</h3>
+                <p className="practice-dashboard__stat-value">{analyticsSummary.previsitStarts}</p>
+              </article>
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsPdfCreated}</h3>
+                <p className="practice-dashboard__stat-value">{analyticsSummary.pdfCreated}</p>
+              </article>
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsPdfSent}</h3>
+                <p className="practice-dashboard__stat-value">{analyticsSummary.pdfSent}</p>
+              </article>
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsQrStarts}</h3>
+                <p className="practice-dashboard__stat-value">{analyticsSummary.qrPrevisitStarts}</p>
+              </article>
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsQrLandings}</h3>
+                <p className="practice-dashboard__stat-value">{analyticsSummary.qrLandingOpens}</p>
+              </article>
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsSpeech}</h3>
+                <p className="practice-dashboard__stat-value">
+                  {t.analyticsSpeechBreakdown
+                    .replace("{{in}}", String(analyticsSummary.speechInputUses))
+                    .replace("{{out}}", String(analyticsSummary.textToSpeechUses))}
+                </p>
+              </article>
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsFollowUps}</h3>
+                <p className="practice-dashboard__stat-value">{analyticsSummary.followUpsCreated}</p>
+              </article>
+              <article className="practice-dashboard__stat-card">
+                <h3 className="practice-dashboard__stat-label">{t.analyticsActiveQrTargets}</h3>
+                <p className="practice-dashboard__stat-value">{analyticsSummary.activeQrTargets}</p>
+              </article>
+            </div>
+            {(analyticsSummary.patientLanguages?.length > 0 ||
+              analyticsSummary.doctorLanguages?.length > 0 ||
+              analyticsSummary.languagePairs?.length > 0) ? (
+              <div className="practice-dashboard__analytics-lists">
+                {analyticsSummary.patientLanguages?.length > 0 ? (
+                  <div className="practice-dashboard__analytics-list-block">
+                    <h3 className="practice-dashboard__analytics-list-title">{t.analyticsPatientLangs}</h3>
+                    <ul className="practice-dashboard__analytics-list">
+                      {analyticsSummary.patientLanguages.map((row) => (
+                        <li key={row.language}>
+                          <span>{row.language}</span>
+                          <span className="practice-dashboard__analytics-count">{row.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {analyticsSummary.doctorLanguages?.length > 0 ? (
+                  <div className="practice-dashboard__analytics-list-block">
+                    <h3 className="practice-dashboard__analytics-list-title">{t.analyticsDoctorLangs}</h3>
+                    <ul className="practice-dashboard__analytics-list">
+                      {analyticsSummary.doctorLanguages.map((row) => (
+                        <li key={row.language}>
+                          <span>{row.language}</span>
+                          <span className="practice-dashboard__analytics-count">{row.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {analyticsSummary.languagePairs?.length > 0 ? (
+                  <div className="practice-dashboard__analytics-list-block">
+                    <h3 className="practice-dashboard__analytics-list-title">{t.analyticsLangPairs}</h3>
+                    <ul className="practice-dashboard__analytics-list">
+                      {analyticsSummary.languagePairs.map((row) => (
+                        <li key={row.pair}>
+                          <span>{row.pair.replace("|", " → ")}</span>
+                          <span className="practice-dashboard__analytics-count">{row.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+            {analyticsSummary.avgCompletionBucketScore != null ? (
+              <p className="practice-dashboard__analytics-footnote">
+                {t.analyticsAvgCompletion.replace(
+                  "{{score}}",
+                  String(analyticsSummary.avgCompletionBucketScore),
+                )}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
+        {analyticsLoadFailed && practiceId ? (
+          <p className="practice-dashboard__analytics-warn" role="status">
+            {t.analyticsLoadError}
+          </p>
+        ) : null}
 
         <section className="practice-dashboard__filters" aria-label={t.filtersTitle}>
           <label className="practice-dashboard__field">

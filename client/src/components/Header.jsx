@@ -9,6 +9,7 @@ import {
   Menu,
   Moon,
   SunMedium,
+  UserRound,
 } from "lucide-react";
 import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -113,6 +114,22 @@ export default function Header() {
                   <span>{copy.home}</span>
                 </NavLink>
               </li>
+
+              {isLoggedIn && (
+                <li>
+                  <NavLink
+                    to="/account"
+                    className={({ isActive }) =>
+                      `ms-nav-item ${isActive ? "is-active" : ""}`.trim()
+                    }
+                    onClick={() => setOpen(false)}
+                    aria-label={copy.accountPortalAria}
+                  >
+                    <UserRound size={16} aria-hidden="true" />
+                    <span>{copy.accountPortal}</span>
+                  </NavLink>
+                </li>
+              )}
 
               {isLoggedIn && (
                 <li>

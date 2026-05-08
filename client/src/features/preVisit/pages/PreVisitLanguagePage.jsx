@@ -4,8 +4,9 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
-import { PREVISIT_LOCALE_STORAGE_KEY } from "../constants/preVisitSession.js";
+import { PREVISIT_LOCALE_STORAGE_KEY, loadPreVisitSession } from "../constants/preVisitSession.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
+import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
 import "../styles/PreVisitLanguagePage.css";
 
 export default function PreVisitLanguagePage() {
@@ -34,6 +35,30 @@ export default function PreVisitLanguagePage() {
     } catch {
       /* ignore quota / private mode */
     }
+    const pv = loadPreVisitSession();
+    const qr =
+      pv?.practiceContext?.qrToken != null
+        ? String(pv.practiceContext.qrToken).trim()
+        : "";
+    const deviceType = detectDeviceType();
+    void sendPracticeAnalyticsEvent({
+      eventType: "previsit_language_selected",
+      ...(qr ? { qrToken: qr } : {}),
+      metadata: {
+        patientLanguage: selectedLocale,
+        uiLanguage: language,
+        deviceType,
+        source: qr ? "qr" : "manual",
+      },
+    });
+    void sendPracticeAnalyticsEvent({
+      eventType: "language_pair_used",
+      ...(qr ? { qrToken: qr } : {}),
+      metadata: {
+        patientLanguage: selectedLocale,
+        deviceType,
+      },
+    });
     navigate("/pre-visit/chat");
   }
 

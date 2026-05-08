@@ -131,6 +131,12 @@ export const publicPrevisitQrLimiter = createIpRateLimiter({
   keyPrefix: 'public:previsit:qr',
 });
 
+/** GET /api/public/documents/:token — neutral PDF handout */
+export const publicSecureDocumentsLimiter = createIpRateLimiter({
+  max: 60,
+  keyPrefix: "public:secure-documents",
+});
+
 /** GET /api/account/export — GDPR JSON export */
 export const accountExportLimiter = createIpRateLimiter({
   max: 8,

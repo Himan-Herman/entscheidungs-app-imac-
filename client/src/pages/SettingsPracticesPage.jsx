@@ -4,6 +4,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations/index.js";
 import { authFetch } from "../api/authFetch.js";
 import PreVisitModuleChrome from "../features/preVisit/components/PreVisitModuleChrome.jsx";
+import PracticeIntegrationsPanel from "../components/PracticeIntegrationsPanel.jsx";
 import "../styles/SettingsPracticesPage.css";
 
 const EMPTY_PRACTICE = {
@@ -51,6 +52,7 @@ export default function SettingsPracticesPage() {
   const [editingTargetId, setEditingTargetId] = useState(null);
   const [targetSaving, setTargetSaving] = useState(false);
   const [targetError, setTargetError] = useState("");
+  const [integrationPracticeId, setIntegrationPracticeId] = useState("");
   const appBaseUrl =
     (typeof window !== "undefined" && window.location?.origin) || "";
 
@@ -299,6 +301,19 @@ export default function SettingsPracticesPage() {
           </button>
         </div>
 
+        <section
+          className="settings-practices__integrations"
+          aria-labelledby="settings-practices-integrations-heading"
+        >
+          <h2
+            id="settings-practices-integrations-heading"
+            className="settings-practices__integrations-title"
+          >
+            {t.integrationsHeading}
+          </h2>
+          <p className="settings-practices__integrations-text">{t.integrationsIntro}</p>
+        </section>
+
         {showForm ? (
           <form className="settings-practices__form" onSubmit={submitPractice}>
             <label className="settings-practices__label">{t.fieldPracticeName} *
@@ -352,6 +367,7 @@ export default function SettingsPracticesPage() {
             {practices.map((p) => {
               const baseLink = `/pre-visit/qr`;
               const isActiveCard = activePracticeId === p.id;
+              const isIntegrationOpen = integrationPracticeId === p.id;
               return (
                 <li className="settings-practices__card" key={p.id}>
                   <h3 className="settings-practices__card-title">{p.practiceName}</h3>
@@ -362,7 +378,22 @@ export default function SettingsPracticesPage() {
                     <button type="button" className="settings-practices__btn settings-practices__btn--ghost" onClick={() => openEditPractice(p)}>{t.edit}</button>
                     <button type="button" className="settings-practices__btn settings-practices__btn--danger" onClick={() => void deletePractice(p.id)}>{t.delete}</button>
                     <button type="button" className="settings-practices__btn settings-practices__btn--primary" onClick={() => openManageTargets(p.id)}>{t.manageTargets}</button>
+                    <button
+                      type="button"
+                      className="settings-practices__btn settings-practices__btn--ghost"
+                      onClick={() =>
+                        setIntegrationPracticeId((prev) => (prev === p.id ? "" : p.id))
+                      }
+                    >
+                      {t.manageIntegration}
+                    </button>
                   </div>
+
+                  {isIntegrationOpen ? (
+                    <div className="settings-practices__integration-panel">
+                      <PracticeIntegrationsPanel practiceId={p.id} labels={t} />
+                    </div>
+                  ) : null}
 
                   {isActiveCard ? (
                     <div className="settings-practices__targets">

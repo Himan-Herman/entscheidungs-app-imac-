@@ -25,10 +25,15 @@ import practiceDashboardRouter from "./routes/practiceDashboard.js";
 import practiceFollowUpsRouter from "./routes/practiceFollowUps.js";
 import previsitFollowUpsRouter from "./routes/previsitFollowUps.js";
 import accountRouter from "./routes/account.js";
+import accountPatientPortalRouter from "./routes/accountPatientPortal.js";
+import practicePortalRouter from "./routes/practicePortal.js";
+import practiceAnalyticsRouter from "./routes/practiceAnalytics.js";
+import publicDocumentsRouter from "./routes/publicDocuments.js";
+import practiceApiDataRouter from "./routes/practiceApiData.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
-import { publicPrevisitQrLimiter } from "./middleware/ipRateLimit.js";
+import { publicPrevisitQrLimiter, publicSecureDocumentsLimiter } from "./middleware/ipRateLimit.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -73,6 +78,7 @@ app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/account', requireAuth, accountRouter);
+app.use('/api/account', requireAuth, accountPatientPortalRouter);
 app.use('/api/mail', mailRoutes);
 app.use("/api/tts", ttsRouter);
 app.use("/api/ki", kiRouter);
@@ -88,6 +94,10 @@ app.use("/api/previsit/cases", requireAuth, previsitCasesRouter);
 app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
 app.use("/api/previsit", previsitRouter);
 app.use("/api/public/previsit", publicPrevisitQrLimiter, publicPrevisitQrRouter);
+app.use("/api/public/documents", publicSecureDocumentsLimiter, publicDocumentsRouter);
+app.use("/api/practice", requireAuth, practiceAnalyticsRouter);
+app.use("/api/practice", requireAuth, practicePortalRouter);
+app.use("/api/practice/api", requireAuth, practiceApiDataRouter);
 
 app.get(['/health', '/api/health'], (_req, res) =>
   res.json({

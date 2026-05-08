@@ -1,0 +1,323 @@
+.account-portal {
+  padding: 16px 14px 48px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.account-portal__shell {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.account-portal__nav-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 840px) {
+  .account-portal__shell {
+    grid-template-columns: 1fr;
+  }
+  .account-portal__nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--color-bg, #fafafa);
+    padding-bottom: 8px;
+  }
+}
+
+.account-portal__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-portal__nav-link {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.account-portal__nav-link:hover {
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.account-portal__nav-link--active {
+  border-color: rgba(15, 118, 110, 0.35);
+  background: rgba(15, 118, 110, 0.1);
+}
+
+.account-portal__main {
+  min-height: 40vh;
+}
+
+.account-portal-page__hero {
+  margin-bottom: 20px;
+}
+
+.account-portal-page__title {
+  margin: 0 0 8px;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.account-portal-page__subtitle,
+.account-portal-page__lead {
+  margin: 0;
+  max-width: 52ch;
+  line-height: 1.5;
+  opacity: 0.92;
+}
+
+.account-portal-page__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.account-portal-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.account-portal-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.account-portal-card--wide {
+  grid-column: 1 / -1;
+}
+
+.account-portal-card__title {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+
+.account-portal-card__meta {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  opacity: 0.88;
+}
+
+.account-portal-card__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.95rem;
+}
+
+.account-portal-card__empty {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.account-portal-card__more {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.account-portal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.account-portal__btn--primary {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
+}
+
+.account-portal__btn--small {
+  min-height: 38px;
+  padding: 0 12px;
+  font-size: 0.88rem;
+}
+
+.account-portal__error {
+  color: #b91c1c;
+  margin: 0 0 12px;
+}
+
+.account-portal__ok {
+  color: #0f766e;
+  margin: 8px 0 0;
+}
+
+.account-portal-doc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.account-portal-doc-list__item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+}
+
+.account-portal-doc-list__title {
+  display: block;
+  font-weight: 600;
+}
+
+.account-portal-doc-list__meta {
+  display: block;
+  font-size: 0.88rem;
+  opacity: 0.85;
+}
+
+.account-portal-doc-list__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.account-portal-form {
+  display: grid;
+  gap: 14px;
+  max-width: 520px;
+  margin-top: 16px;
+}
+
+.account-portal-form__field {
+  display: grid;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+
+.account-portal-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.account-portal-form__input,
+.account-portal-form__textarea {
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  font: inherit;
+}
+
+.account-portal-form__textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.account-portal-danger {
+  margin-top: 28px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px dashed rgba(15, 23, 42, 0.15);
+}
+
+.account-portal-danger--red {
+  border-color: rgba(185, 28, 28, 0.35);
+  background: rgba(254, 242, 242, 0.5);
+}
+
+.account-portal-danger__title {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+
+.account-portal-page__footer-note {
+  margin-top: 32px;
+  font-size: 0.95rem;
+}
+
+.account-portal__legal {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  font-size: 0.85rem;
+}
+
+.account-portal__legal-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.account-portal__legal-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-portal__legal-nav a {
+  color: #0f766e;
+  text-decoration: none;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.account-portal__legal-nav a:hover {
+  text-decoration: underline;
+}
+
+.account-portal__legal-note {
+  margin: 10px 0 0;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+:root[data-theme="dark"] .account-portal__legal {
+  border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .account-portal__legal-title {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .account-portal__legal-nav a {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .account-portal__legal-note {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .account-portal-card,
+[data-theme="dark"] .account-portal-card {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(148, 163, 184, 0.2);
+}

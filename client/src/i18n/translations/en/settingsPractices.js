@@ -45,5 +45,64 @@ export default {
   copyLink: "Copy link",
   linkCopied: "Link copied.",
   copyFallback: "Copy this link manually:",
+  integrationsHeading: "Integrations",
+  integrationsIntro:
+    "Connect neutral calendar exports, optional outbound notifications (metadata only), and controlled document delivery. Clinical details stay inside MedScoutX unless you explicitly export them elsewhere.",
+  integrationsPlaceholder:
+    "Calendar, practice software, and secure interfaces will be prepared in a later release.",
+  manageIntegration: "Integration settings",
+  loadingIntegration: "Loading integration settings…",
+  integrationLoadError: "Integration settings could not be loaded.",
+  integrationSaveError: "Integration settings could not be saved.",
+  tabDelivery: "Secure documents",
+  tabCalendar: "Calendar",
+  tabWebhooks: "Webhooks",
+  tabApi: "API / PMS",
+  deliveryIntro:
+    "Choose how document handoffs are oriented. Secure links expire automatically and contain no clinical narrative by default.",
+  fieldDeliveryMode: "Document delivery mode",
+  modeDownloadOnly: "Download only (in-product)",
+  modeEmail: "Email channel (no sensitive body content)",
+  modeSecurePortal: "Secure portal link",
+  modeWebhook: "Webhook plus controlled links",
+  fieldSecureDownload: "Allow secure time-limited download links",
+  noteNoClinicalWebhook:
+    "Webhooks include identifiers and status metadata only — no medical free text by default.",
+  noteLinksExpire: "Secure document links expire and can be revoked anytime.",
+  noteEmailNoSensitive:
+    "Operational emails must not include sensitive clinical details.",
+  noteConsent: "Patient consent is required before sharing outside MedScoutX.",
+  calendarIntro:
+    "Neutral calendar files (.ics) contain appointment timing hints only — no symptoms or diagnoses.",
+  fieldCalendarEnabled: "Enable calendar export features",
+  fieldCalendarProvider: "Calendar provider (roadmap)",
+  calendarProviderUnset: "Not selected",
+  calendarIcsHint:
+    'Export lives at GET /api/practice/previsit-sessions/:id/calendar.ics — requires appointment date on the preparation.',
+  webhooksIntro:
+    "Signed outbound HTTPS deliveries with retries (environment-controlled). Payloads stay metadata-first.",
+  fieldWebhookEnabled: "Enable outbound webhooks",
+  fieldWebhookUrl: "Webhook HTTPS URL",
+  fieldWebhookSecret: "Signing secret (stored encrypted)",
+  webhookSecretPlaceholder: "Paste once — never shown again",
+  webhookSecretConfiguredHint: "A signing secret is already stored.",
+  clearWebhookSecret: "Revoke stored signing secret",
+  webhookTest: "Send test webhook",
+  webhookTestQueued: "Test event queued.",
+  webhookTestFailed: "Could not queue test.",
+  webhookRecent: "Recent webhook deliveries",
+  webhookNoEvents: "No webhook rows yet.",
+  readOnlyHint:
+    "You can view integration settings. Ask an owner or admin to change them.",
+  encryptionWarning:
+    "Server encryption key missing — webhook secrets cannot be saved until PRACTICE_INTEGRATION_MASTER_KEY is configured.",
+  saveIntegration: "Save integration settings",
+  apiIntro:
+    "Authenticated JSON endpoints for listings owned by this practice — intake answers are omitted by default.",
+  apiPvsNote:
+    "Direct practice software connections are prepared through controlled, secure interfaces.",
+  apiEndpointsHint:
+    "GET /api/practice/api/previsit-sessions?practiceProfileId=… · …/follow-ups · …/cases · detail routes require the same query.",
+  apiRoleHint: "Your role",
 };
 

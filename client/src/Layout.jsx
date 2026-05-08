@@ -2,7 +2,11 @@ import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import OfflineBanner from "./components/OfflineBanner.jsx";
+import PwaInstallHint from "./components/PwaInstallHint.jsx";
+import AppBottomNav, { shouldShowMobileAppNav } from "./components/AppBottomNav.jsx";
 import "./styles/layout.css";
+import "./components/AppBottomNav.css";
 
 export default function Layout() {
   const { pathname, search } = useLocation();
@@ -19,17 +23,23 @@ export default function Layout() {
     pathname === "/register" ||
     (isLegal && (!isLoggedIn || forcePublic));
 
+  const showMobileShell = isLoggedIn && shouldShowMobileAppNav(pathname);
+
   return (
-    <>
+    <div className={showMobileShell ? "layout-app layout-app--mobile-shell" : undefined}>
       {!hideHeader && <Header />}
+      {!hideHeader && <OfflineBanner />}
+      {!hideHeader && <PwaInstallHint hasBottomNav={showMobileShell} />}
       <main
+        id="main"
         className={`layout-main ${
           !hideHeader ? "layout-main--with-header" : ""
-        }`.trim()}
+        } ${showMobileShell ? "layout-main--with-bottom-nav" : ""}`.trim()}
       >
         <Outlet />
       </main>
       {!hideHeader && !hideFooter && <Footer />}
-    </>
+      {showMobileShell ? <AppBottomNav /> : null}
+    </div>
   );
 }

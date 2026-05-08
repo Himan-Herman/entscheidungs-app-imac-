@@ -2,6 +2,21 @@ import express from "express";
 import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
+import {
+  canManageIntegrations,
+  canViewIntegrationSettings,
+} from "../utils/practiceAccess.js";
+import {
+  DOCUMENT_DELIVERY_MODES,
+  PracticeWebhookEventType,
+} from "../constants/practiceIntegrationWebhookEvents.js";
+import {
+  encryptWebhookSecretForStorage,
+  fingerprintWebhookSecret,
+  isIntegrationEncryptionConfigured,
+} from "../utils/integrationCrypto.js";
+import { enqueuePracticeWebhook } from "../services/practiceWebhookService.js";
+import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -11,6 +26,12 @@ const TARGET_TYPES = new Set([
   "doctor",
   "department",
   "appointment_type",
+]);
+const CALENDAR_PROVIDERS = new Set([
+  "manual",
+  "ics",
+  "google_later",
+  "microsoft_later",
 ]);
 const PRACTICE_MEMBER_ROLES = new Set([
   "owner",
@@ -95,6 +116,30 @@ function memberJson(row) {
   };
 }
 
+function integrationSettingsResponse(row) {
+  return {
+    calendarEnabled: row.calendarEnabled,
+    calendarProvider: row.calendarProvider,
+    webhookEnabled: row.webhookEnabled,
+    webhookUrl: row.webhookUrl,
+    webhookSecretConfigured: Boolean(row.webhookSecretEnc),
+    documentDeliveryMode: row.documentDeliveryMode,
+    secureDownloadEnabled: row.secureDownloadEnabled,
+  };
+}
+
+function defaultIntegrationSettingsShape() {
+  return {
+    calendarEnabled: false,
+    calendarProvider: null,
+    webhookEnabled: false,
+    webhookUrl: null,
+    webhookSecretConfigured: false,
+    documentDeliveryMode: "secure_portal",
+    secureDownloadEnabled: true,
+  };
+}
+
 async function resolvePracticeAccess(userId, practiceId) {
   const practice = await prisma.practiceProfile.findUnique({
     where: { id: practiceId },
@@ -172,6 +217,12 @@ router.post("/", async (req, res) => {
       action: "practice_profile_created",
       entityType: "PracticeProfile",
       entityId: created.id,
+      metadata: {},
+    });
+    void trackAnalyticsEvent({
+      eventType: "practice_profile_created",
+      userId,
+      practiceId: created.id,
       metadata: {},
     });
     return res.status(201).json({ ok: true, practice: profileJson(created) });
@@ -305,6 +356,12 @@ router.post("/:id/qr-targets", async (req, res) => {
     entityType: "PracticeQrTarget",
     entityId: row.id,
     metadata: { practiceProfileId: access.practice.id },
+  });
+  void trackAnalyticsEvent({
+    eventType: "qr_target_created",
+    userId,
+    practiceId: access.practice.id,
+    metadata: { targetType: row.targetType },
   });
   return res.status(201).json({ ok: true, target: targetJson(row) });
 });
@@ -455,6 +512,190 @@ router.delete("/:id/members/:memberId", async (req, res) => {
   }
   await prisma.practiceMember.delete({ where: { id: existing.id } });
   return res.json({ ok: true, deleted: true });
+});
+
+router.get("/:id/integration-settings", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access || !canViewIntegrationSettings(access.role)) {
+    return res.status(404).json({ ok: false, error: "not_found" });
+  }
+  const row = await prisma.practiceIntegrationSettings.findUnique({
+    where: { practiceProfileId: access.practice.id },
+  });
+  const recentWebhookEvents = await prisma.practiceWebhookEvent.findMany({
+    where: { practiceProfileId: access.practice.id },
+    orderBy: { createdAt: "desc" },
+    take: 15,
+    select: {
+      id: true,
+      eventType: true,
+      status: true,
+      attempts: true,
+      lastError: true,
+      createdAt: true,
+      deliveredAt: true,
+      updatedAt: true,
+    },
+  });
+  return res.json({
+    ok: true,
+    role: access.role,
+    canManage: canManageIntegrations(access.role),
+    encryptionReady: isIntegrationEncryptionConfigured(),
+    settings: row ? integrationSettingsResponse(row) : defaultIntegrationSettingsShape(),
+    recentWebhookEvents,
+  });
+});
+
+router.put("/:id/integration-settings", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access || !canManageIntegrations(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  const b = req.body || {};
+
+  const documentDeliveryMode = String(b.documentDeliveryMode || "").trim();
+  if (
+    documentDeliveryMode &&
+    !DOCUMENT_DELIVERY_MODES.includes(documentDeliveryMode)
+  ) {
+    return res.status(400).json({ ok: false, error: "documentDeliveryMode_invalid" });
+  }
+
+  let calendarProvider = null;
+  if (Object.prototype.hasOwnProperty.call(b, "calendarProvider")) {
+    const cp = b.calendarProvider === null || b.calendarProvider === ""
+      ? null
+      : String(b.calendarProvider).trim();
+    if (cp && !CALENDAR_PROVIDERS.has(cp)) {
+      return res.status(400).json({ ok: false, error: "calendarProvider_invalid" });
+    }
+    calendarProvider = cp;
+  }
+
+  const nextWebhookSecret = typeof b.webhookSecret === "string" ? b.webhookSecret.trim() : "";
+  const clearWebhookSecret = Boolean(b.webhookSecretClear);
+  if (nextWebhookSecret && clearWebhookSecret) {
+    return res.status(400).json({ ok: false, error: "webhookSecret_conflict" });
+  }
+  if (nextWebhookSecret && !isIntegrationEncryptionConfigured()) {
+    return res.status(503).json({
+      ok: false,
+      error: "integration_encryption_not_configured",
+    });
+  }
+
+  const integrationDefaults = {
+    calendarEnabled: false,
+    calendarProvider: null,
+    webhookEnabled: false,
+    webhookUrl: null,
+    webhookSecretEnc: null,
+    webhookSecretHash: null,
+    documentDeliveryMode: "secure_portal",
+    secureDownloadEnabled: true,
+  };
+
+  const data = {};
+  if (Object.prototype.hasOwnProperty.call(b, "calendarEnabled")) {
+    data.calendarEnabled = Boolean(b.calendarEnabled);
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "calendarProvider")) {
+    data.calendarProvider = calendarProvider;
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "webhookEnabled")) {
+    data.webhookEnabled = Boolean(b.webhookEnabled);
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "webhookUrl")) {
+    const url = normalizeOpt(b.webhookUrl, 2000);
+    data.webhookUrl = url;
+  }
+  if (documentDeliveryMode) {
+    data.documentDeliveryMode = documentDeliveryMode;
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "secureDownloadEnabled")) {
+    data.secureDownloadEnabled = Boolean(b.secureDownloadEnabled);
+  }
+
+  if (clearWebhookSecret) {
+    data.webhookSecretEnc = null;
+    data.webhookSecretHash = null;
+  } else   if (nextWebhookSecret) {
+    const enc = encryptWebhookSecretForStorage(nextWebhookSecret);
+    if (!enc) {
+      return res.status(503).json({
+        ok: false,
+        error: "integration_encryption_failed",
+      });
+    }
+    data.webhookSecretEnc = enc;
+    data.webhookSecretHash = fingerprintWebhookSecret(nextWebhookSecret);
+  }
+
+  if (Object.keys(data).length === 0) {
+    const existing = await prisma.practiceIntegrationSettings.findUnique({
+      where: { practiceProfileId: access.practice.id },
+    });
+    return res.json({
+      ok: true,
+      settings: existing
+        ? integrationSettingsResponse(existing)
+        : defaultIntegrationSettingsShape(),
+      encryptionReady: isIntegrationEncryptionConfigured(),
+    });
+  }
+
+  const saved = await prisma.practiceIntegrationSettings.upsert({
+    where: { practiceProfileId: access.practice.id },
+    create: {
+      practiceProfileId: access.practice.id,
+      ...integrationDefaults,
+      ...data,
+    },
+    update: data,
+  });
+
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_integration_settings_updated",
+    entityType: "PracticeIntegrationSettings",
+    entityId: saved.id,
+    metadata: { practiceProfileId: access.practice.id },
+  });
+
+  return res.json({
+    ok: true,
+    settings: integrationSettingsResponse(saved),
+    encryptionReady: isIntegrationEncryptionConfigured(),
+  });
+});
+
+router.post("/:id/integration-settings/webhook-test", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access || !canManageIntegrations(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  try {
+    const row = await enqueuePracticeWebhook({
+      practiceProfileId: access.practice.id,
+      eventType: PracticeWebhookEventType.WEBHOOK_TEST,
+      payload: { source: "settings_ui" },
+    });
+    return res.status(201).json({
+      ok: true,
+      webhookEventId: row.id,
+    });
+  } catch {
+    return res.status(500).json({ ok: false, error: "enqueue_failed" });
+  }
 });
 
 export default router;

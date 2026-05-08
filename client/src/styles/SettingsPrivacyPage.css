@@ -28,6 +28,21 @@
   font-size: 0.9rem;
 }
 
+.settings-privacy__legal-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.settings-privacy__legal-link {
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .settings-privacy__card {
   border: 1px solid var(--ms-border, rgba(0, 0, 0, 0.12));
   border-radius: 12px;

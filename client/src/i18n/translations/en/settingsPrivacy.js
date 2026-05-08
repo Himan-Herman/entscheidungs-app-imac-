@@ -22,4 +22,10 @@ export default {
     "Your MedScoutX Pre-Visit–related data has been deleted. Your account login remains.",
   deleteError: "Deletion could not be completed. Please try again later.",
   backStart: "Back to home",
+  legalLinksTitle: "Legal documents & account tools",
+  legalLinksIntro: "Privacy policy, terms, and links to export or delete data stored with MedScoutX.",
+  linkPrivacy: "Privacy policy",
+  linkImprint: "Imprint",
+  linkTerms: "Terms",
+  linkAccountPrivacyHub: "Account privacy & Pre-Visit deletion",
 };

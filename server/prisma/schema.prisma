@@ -24,6 +24,8 @@ model User {
   followUpPatientThreads PreVisitFollowUpThread[] @relation("FollowUpPatientUser")
   followUpCreatedThreads PreVisitFollowUpThread[] @relation("FollowUpCreatedByUser")
   auditLogs        AuditLog[]
+  secureDocumentsCreated SecureDocumentDelivery[] @relation("SecureDocCreatedBy")
+  patientProfiles      PatientProfile[]
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -42,6 +44,24 @@ model AuditLog {
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+/**
+ * Privacy-preserving product analytics — salted hashes only, sanitized metadata allowlist.
+ * TODO retention: periodically aggregate long-term metrics and prune raw rows older than N days (no medical content stored).
+ */
+model AnalyticsEvent {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  eventType    String
+  userHash     String?
+  practiceHash String?
+  sessionHash  String?
+  metadata     Json?
+
+  @@index([createdAt])
+  @@index([practiceHash, eventType])
+  @@index([practiceHash, createdAt])
 }
 
 /** Groups multiple saved Pre-Visit sessions into a longitudinal / chronic case timeline. */
@@ -67,6 +87,7 @@ model PreVisitSession {
   preVisitCaseId String?
   practiceProfileId String?
   practiceQrTargetId String?
+  patientProfileId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -91,11 +112,19 @@ model PreVisitSession {
   practiceProfile PracticeProfile? @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
   practiceQrTarget PracticeQrTarget? @relation(fields: [practiceQrTargetId], references: [id], onDelete: SetNull)
   followUpThreads PreVisitFollowUpThread[]
+  secureDocumentDeliveries SecureDocumentDelivery[]
+  patientProfile PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+
+  /// Optional opaque appointment reference (manual text or future external id).
+  appointmentReference String?
+  /// When set, enables neutral calendar export (.ics) without clinical content.
+  appointmentAt DateTime?
 
   @@index([userId])
   @@index([preVisitCaseId])
   @@index([practiceProfileId])
   @@index([practiceQrTargetId])
+  @@index([patientProfileId])
   @@index([practiceStatus])
   @@index([createdAt])
 }
@@ -111,8 +140,35 @@ model UserProfile {
   country     String?
   insuranceType String?
   gender      String?
+  /// Optional salutation / gender label for forms (non-clinical)
+  genderOrSalutation String?
+  displayName String?
+  preferredPatientLanguage String?
+  preferredDoctorLanguage String?
+  /// Free-text emergency contact note — operational only; not medical advice
+  emergencyNote String?
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Optional family / dependent profile (caregiver prepares for another person). User must explicitly select.
+model PatientProfile {
+  id                      String   @id @default(cuid())
+  userId                  String
+  displayName             String
+  relationLabel           String
+  dateOfBirth             DateTime?
+  genderOrSalutation      String?
+  preferredPatientLanguage String?
+  preferredDoctorLanguage String?
+  isArchived              Boolean  @default(false)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions PreVisitSession[]
+
+  @@index([userId])
 }
 
 model Consent {
@@ -174,8 +230,71 @@ model PracticeProfile {
   members   PracticeMember[]
   preVisitSessions PreVisitSession[]
   followUpThreads PreVisitFollowUpThread[]
+  integrationSettings PracticeIntegrationSettings?
+  secureDocumentDeliveries SecureDocumentDelivery[]
+  webhookEvents PracticeWebhookEvent[]
 
   @@index([userId])
+}
+
+/// Practice integration preferences — secrets never returned to clients; signing material encrypted at rest.
+model PracticeIntegrationSettings {
+  id                   String   @id @default(cuid())
+  practiceProfileId    String   @unique
+  calendarEnabled      Boolean  @default(false)
+  /// manual | ics | google_later | microsoft_later
+  calendarProvider     String?
+  webhookEnabled       Boolean  @default(false)
+  webhookUrl           String?
+  /// SHA-256 hex of secret (fingerprint only; not used for signing).
+  webhookSecretHash    String?
+  /// AES-256-GCM encrypted signing secret (see integrationCrypto). Plaintext never stored.
+  webhookSecretEnc     String?
+  /// download_only | email | secure_portal | webhook
+  documentDeliveryMode String   @default("secure_portal")
+  secureDownloadEnabled Boolean @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+}
+
+model SecureDocumentDelivery {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  preVisitSessionId String
+  createdByUserId   String
+  tokenHash         String    @unique
+  expiresAt         DateTime
+  downloadedAt      DateTime?
+  revokedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  deliveryType      String    @default("secure_link")
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  preVisitSession PreVisitSession @relation(fields: [preVisitSessionId], references: [id], onDelete: Cascade)
+  createdBy       User            @relation("SecureDocCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([practiceProfileId])
+  @@index([preVisitSessionId])
+}
+
+model PracticeWebhookEvent {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  eventType         String
+  payload           Json
+  status            String    @default("pending")
+  attempts          Int       @default(0)
+  lastError         String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deliveredAt       DateTime?
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([practiceProfileId, status])
+  @@index([createdAt])
 }
 
 model PracticeQrTarget {

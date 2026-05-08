@@ -13,6 +13,7 @@ import {
   resolveInitialLanguage,
   SUPPORTED_LANGUAGE_CODES,
 } from "./localeConfig";
+import { sendPracticeAnalyticsEvent } from "../api/productAnalytics.js";
 
 const LanguageContext = createContext(null);
 
@@ -27,7 +28,18 @@ export function LanguageProvider({ children }) {
 
   const setLanguage = useCallback((next) => {
     const code = typeof next === "string" ? next.toLowerCase() : "";
-    setLanguageState(isSupportedLanguage(code) ? code : "en");
+    const resolved = isSupportedLanguage(code) ? code : "en";
+    setLanguageState((prev) => {
+      if (prev !== resolved) {
+        queueMicrotask(() => {
+          void sendPracticeAnalyticsEvent({
+            eventType: "ui_language_changed",
+            metadata: { uiLanguage: resolved },
+          });
+        });
+      }
+      return resolved;
+    });
   }, []);
 
   useEffect(() => {

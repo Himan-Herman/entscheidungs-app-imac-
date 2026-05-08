@@ -11,6 +11,7 @@ export function createEmptyAdaptiveSlice(categoryKey) {
     currentQuestion: "",
     compiledAnswer: "",
     replies: [],
+    askedQuestions: [],
     safetyFlags: [],
   };
 }
@@ -21,14 +22,27 @@ export function getAdaptiveSlice(session, categoryKey) {
   return createEmptyAdaptiveSlice(categoryKey);
 }
 
-export function compactAdaptiveContext(answers = {}) {
-  return {
-    appointmentReason: String(answers.appointmentReason || "").slice(0, 500),
-    symptomsOwnWords: String(answers.symptomsOwnWords || "").slice(0, 500),
-    onsetAndCourse: String(answers.onsetAndCourse || "").slice(0, 500),
-    medications: String(answers.medications || "").slice(0, 500),
-    preExistingConditions: String(answers.preExistingConditions || "").slice(0, 500),
+/**
+ * Cross-category hints for the adaptive model — excludes active category to reduce duplication tokens.
+ */
+export function compactAdaptiveContext(answers = {}, excludeCategoryKey = "") {
+  const raw = {
+    appointmentReason: String(answers.appointmentReason || ""),
+    symptomsOwnWords: String(answers.symptomsOwnWords || ""),
+    onsetAndCourse: String(answers.onsetAndCourse || ""),
+    medications: String(answers.medications || ""),
+    preExistingConditions: String(answers.preExistingConditions || ""),
+    patientQuestions: String(answers.patientQuestions || ""),
   };
+  const out = {};
+  const maxLen = 280;
+  for (const [k, v] of Object.entries(raw)) {
+    if (excludeCategoryKey && k === excludeCategoryKey) continue;
+    const t = v.trim().replace(/\s+/g, " ");
+    if (!t) continue;
+    out[k] = t.length <= maxLen ? t : `${t.slice(0, maxLen - 1)}…`;
+  }
+  return out;
 }
 
 export function normalizeAdaptiveIntakeV1(raw) {
@@ -51,6 +65,12 @@ export function normalizeAdaptiveIntakeV1(raw) {
             .map((r) => String(r || "").trim())
             .filter(Boolean)
             .slice(0, 20)
+        : [],
+      askedQuestions: Array.isArray(v.askedQuestions)
+        ? v.askedQuestions
+            .map((q) => String(q || "").trim())
+            .filter(Boolean)
+            .slice(0, 12)
         : [],
       safetyFlags: Array.isArray(v.safetyFlags)
         ? v.safetyFlags.map((s) => String(s || "").trim()).filter(Boolean)

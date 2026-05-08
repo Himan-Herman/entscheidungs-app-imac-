@@ -84,6 +84,8 @@ function dashboardItemJson(row) {
     archivedAt: row.archivedAt,
     completedAt: row.completedAt,
     lastStatusChangeAt: row.lastStatusChangeAt,
+    appointmentAt: row.appointmentAt || null,
+    appointmentReference: row.appointmentReference || null,
   };
 }
 
@@ -201,6 +203,64 @@ router.get("/preparations/:id", async (req, res) => {
   }
 
   return res.json({ ok: true, role: access.role, preparation: preparationDetailJson(row) });
+});
+
+router.put("/preparations/:id/appointment", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.body?.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  const access = await resolvePracticeAccess(userId, practiceId);
+  if (!access || !canUpdateStatus(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  const existing = await prisma.preVisitSession.findFirst({
+    where: { id: req.params.id, practiceProfileId: access.practice.id },
+  });
+  if (!existing) return res.status(404).json({ ok: false, error: "not_found" });
+
+  const data = {};
+  if (Object.prototype.hasOwnProperty.call(req.body || {}, "appointmentAt")) {
+    const raw = req.body.appointmentAt;
+    if (raw === null || raw === "") {
+      data.appointmentAt = null;
+    } else {
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) {
+        return res.status(400).json({ ok: false, error: "appointmentAt_invalid" });
+      }
+      data.appointmentAt = d;
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(req.body || {}, "appointmentReference")) {
+    const ref = req.body.appointmentReference;
+    data.appointmentReference =
+      ref === null || ref === ""
+        ? null
+        : String(ref).trim().slice(0, 500) || null;
+  }
+
+  if (Object.keys(data).length === 0) {
+    const row = await prisma.preVisitSession.findFirst({
+      where: { id: existing.id },
+      include: {
+        preVisitCase: { select: { id: true, title: true } },
+        practiceQrTarget: { select: { id: true, targetName: true, doctorName: true, targetType: true } },
+      },
+    });
+    return res.json({ ok: true, preparation: preparationDetailJson(row) });
+  }
+
+  const updated = await prisma.preVisitSession.update({
+    where: { id: existing.id },
+    data,
+    include: {
+      preVisitCase: { select: { id: true, title: true } },
+      practiceQrTarget: { select: { id: true, targetName: true, doctorName: true, targetType: true } },
+    },
+  });
+  return res.json({ ok: true, preparation: preparationDetailJson(updated) });
 });
 
 router.put("/preparations/:id/status", async (req, res) => {

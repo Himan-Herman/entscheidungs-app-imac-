@@ -1,6 +1,7 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -132,6 +133,22 @@ router.post("/", async (req, res) => {
       messages: { orderBy: { createdAt: "asc" } },
     },
   });
+  void trackAnalyticsEvent({
+    eventType: "followup_created",
+    userId: session.userId,
+    practiceId: access.practice.id,
+    sessionId: session.id,
+    metadata: { followupCount: 1 },
+  });
+  if (session.preVisitCaseId) {
+    void trackAnalyticsEvent({
+      eventType: "case_followup_created",
+      userId: session.userId,
+      practiceId: access.practice.id,
+      sessionId: session.id,
+      metadata: { hasCaseContext: true },
+    });
+  }
   return res.status(201).json({ ok: true, thread: threadJson(created) });
 });
 

@@ -1,6 +1,7 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -117,6 +118,13 @@ router.post("/:threadId/messages", async (req, res) => {
     entityType: "PreVisitFollowUpMessage",
     entityId: message.id,
     metadata: { threadId: thread.id, senderType: "patient" },
+  });
+  void trackAnalyticsEvent({
+    eventType: "followup_answered",
+    userId,
+    practiceId: thread.practiceProfileId || undefined,
+    sessionId: thread.preVisitSessionId,
+    metadata: {},
   });
   return res.status(201).json({ ok: true, message });
 });

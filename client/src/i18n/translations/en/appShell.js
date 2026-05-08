@@ -1,0 +1,16 @@
+export default {
+  navPrepare: "Prepare visit",
+  navPreparations: "My preparations",
+  navTimelines: "Timelines",
+  navDoctors: "Doctors",
+  navSettings: "Settings",
+  bottomNavAria: "Primary app navigation",
+  offlineTitle: "You appear to be offline.",
+  offlineDetail:
+    "Sign-in, cloud save, QR codes, email sending, and server-backed speech need an internet connection. Local preparation drafts and PDF generation may still work if data is already on this device.",
+  installHint: "MedScoutX can be installed as an app on your device.",
+  installAction: "Install",
+  installDismiss: "Not now",
+  installAria: "Install MedScoutX",
+  routeLoadingAria: "Loading screen",
+};

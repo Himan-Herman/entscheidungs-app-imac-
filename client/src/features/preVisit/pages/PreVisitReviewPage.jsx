@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
@@ -14,6 +14,7 @@ import {
   setSessionStepIndex,
 } from "../constants/preVisitSession.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
+import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
 import "../styles/PreVisitReviewPage.css";
 
 export default function PreVisitReviewPage() {
@@ -23,6 +24,7 @@ export default function PreVisitReviewPage() {
   const t = useMemo(() => getMessages(language).preVisit.review, [language]);
 
   const [session, setSession] = useState(() => loadPreVisitSession());
+  const reviewOpenedRef = useRef(false);
 
   useEffect(() => {
     const s = loadPreVisitSession();
@@ -35,6 +37,25 @@ export default function PreVisitReviewPage() {
   useEffect(() => {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
+
+  useEffect(() => {
+    if (!session?.answers || reviewOpenedRef.current) return;
+    reviewOpenedRef.current = true;
+    const pv = loadPreVisitSession();
+    const qr =
+      pv?.practiceContext?.qrToken != null
+        ? String(pv.practiceContext.qrToken).trim()
+        : "";
+    void sendPracticeAnalyticsEvent({
+      eventType: "previsit_review_opened",
+      ...(qr ? { qrToken: qr } : {}),
+      metadata: {
+        flowStep: "review",
+        deviceType: detectDeviceType(),
+        uiLanguage: language,
+      },
+    });
+  }, [session?.answers, language]);
 
   if (!session?.answers) {
     return null;

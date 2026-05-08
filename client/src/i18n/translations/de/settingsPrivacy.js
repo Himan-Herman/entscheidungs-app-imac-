@@ -22,4 +22,11 @@ export default {
     "Ihre MedScoutX-Daten zu Pre-Visit wurden gelöscht. Ihr Zugang bleibt bestehen.",
   deleteError: "Löschung konnte nicht abgeschlossen werden. Bitte später erneut versuchen.",
   backStart: "Zurück zur Startseite",
+  legalLinksTitle: "Rechtstexte & Kontodaten",
+  legalLinksIntro:
+    "Datenschutz, AGB und Links zu Export oder Löschen von bei MedScoutX gespeicherten Daten.",
+  linkPrivacy: "Datenschutz",
+  linkImprint: "Impressum",
+  linkTerms: "AGB",
+  linkAccountPrivacyHub: "Konto-Datenschutz & Pre-Visit-Löschung",
 };

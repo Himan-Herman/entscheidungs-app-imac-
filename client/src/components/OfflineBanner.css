@@ -1,0 +1,27 @@
+.offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 100%);
+  color: #78350f;
+  border-bottom: 1px solid rgba(120, 53, 15, 0.2);
+}
+
+.offline-banner__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.offline-banner__detail {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+:root[data-theme="dark"] .offline-banner {
+  background: linear-gradient(180deg, #422006 0%, #78350f 100%);
+  color: #fef3c7;
+  border-bottom-color: rgba(254, 243, 199, 0.2);
+}

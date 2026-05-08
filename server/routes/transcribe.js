@@ -4,6 +4,7 @@ import { uploadAudio } from "../middleware/uploadAudio.js";
 import { transcribeRouteLimiter } from "../middleware/ipRateLimit.js";
 import { transcribeAutoWithWhisper } from "../services/whisperService.js";
 import { logServerError } from "../utils/safeApiError.js";
+import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
 const router = express.Router();
 
@@ -17,6 +18,15 @@ router.post("/", transcribeRouteLimiter, uploadAudio.single("audio"), async (req
 
     
     const result = await transcribeAutoWithWhisper(buffer, originalname || "audio.webm");
+
+    const uid = req.user?.userId;
+    if (typeof uid === "string" && uid.length > 0) {
+      void trackAnalyticsEvent({
+        eventType: "speech_input_used",
+        userId: uid,
+        metadata: { usedSpeechInput: true },
+      });
+    }
 
     return res.json({
       text: result.text,

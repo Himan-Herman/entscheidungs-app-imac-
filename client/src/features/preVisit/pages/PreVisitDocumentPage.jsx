@@ -23,6 +23,7 @@ import {
 } from "../constants/preVisitSession.js";
 import { apiFetch } from "../../../lib/api.js";
 import { authFetch } from "../../../api/authFetch.js";
+import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
 import {
   buildPreVisitPdfBlob,
   generatePreVisitPdf,
@@ -403,6 +404,8 @@ export default function PreVisitDocumentPage() {
       fd.append("pdf", blob, getPreVisitPdfFilename(language));
       fd.append("emailSendConsent", "true");
       fd.append("locale", language);
+      const storedId = String(loadPreVisitSession()?.cloudSessionId || "").trim();
+      if (storedId) fd.append("preVisitSessionId", storedId);
       const res = await authFetch(
         `/api/user/doctor-contacts/${encodeURIComponent(contactId)}/send-previsit-pdf`,
         { method: "POST", body: fd }
@@ -638,9 +641,28 @@ export default function PreVisitDocumentPage() {
         body: JSON.stringify(payload),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
         setAccountSaveError(t.accountSaveError);
         return;
+      }
+
+      const sid = data.session?.id;
+      if (typeof sid === "string" && sid.length > 0) {
+        const latest = loadPreVisitSession();
+        const merged = { ...latest, cloudSessionId: sid };
+        savePreVisitSession(merged);
+        setSession(merged);
+        void sendPracticeAnalyticsEvent({
+          eventType: "previsit_saved_to_account",
+          sessionId: sid,
+          metadata: {
+            source: "account",
+            deviceType: detectDeviceType(),
+            uiLanguage: language,
+          },
+        });
       }
 
       setAccountSaveSuccess(true);

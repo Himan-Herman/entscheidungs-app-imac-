@@ -13,6 +13,7 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
 const prisma = new PrismaClient();
 
@@ -73,6 +74,7 @@ function sessionJson(row) {
     preVisitCaseId: row.preVisitCaseId ?? null,
     practiceProfileId: row.practiceProfileId ?? null,
     practiceQrTargetId: row.practiceQrTargetId ?? null,
+    patientProfileId: row.patientProfileId ?? null,
     practiceStatus: row.practiceStatus ?? "new",
     openedAt: row.openedAt ?? null,
     archivedAt: row.archivedAt ?? null,
@@ -252,6 +254,53 @@ router.post("/", async (req, res) => {
       entityId: created.id,
       metadata: { status: created.status },
     });
+
+    const pid = created.practiceProfileId;
+    const sid = created.id;
+    const uid = created.userId;
+    const metaBase = {
+      patientLanguage: created.patientLanguage,
+      doctorLanguage: created.doctorLanguage || undefined,
+      source: created.practiceQrTargetId ? "qr" : "manual",
+      hasPracticeContext: Boolean(pid),
+    };
+    void trackAnalyticsEvent({
+      eventType: "previsit_started",
+      userId: uid,
+      practiceId: pid || undefined,
+      sessionId: sid,
+      metadata: metaBase,
+    });
+    void trackAnalyticsEvent({
+      eventType: "language_pair_used",
+      userId: uid,
+      practiceId: pid || undefined,
+      sessionId: sid,
+      metadata: metaBase,
+    });
+    if (created.practiceQrTargetId) {
+      let targetTypeMeta;
+      try {
+        const tgt = await prisma.practiceQrTarget.findUnique({
+          where: { id: created.practiceQrTargetId },
+          select: { targetType: true },
+        });
+        targetTypeMeta = tgt?.targetType || undefined;
+      } catch {
+        targetTypeMeta = undefined;
+      }
+      void trackAnalyticsEvent({
+        eventType: "qr_previsit_started",
+        userId: uid,
+        practiceId: pid || undefined,
+        sessionId: sid,
+        metadata: {
+          hasPracticeContext: true,
+          ...(targetTypeMeta ? { targetType: targetTypeMeta } : {}),
+        },
+      });
+    }
+
     return res.status(201).json({ ok: true, session: sessionJson(created) });
   } catch (err) {
     return safeServerError(res, err, "create");
@@ -425,6 +474,13 @@ router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
+    const existingRow = await prisma.preVisitSession.findFirst({
+      where: { id, userId },
+      select: { practiceProfileId: true },
+    });
+    if (!existingRow) {
+      return res.status(404).json({ ok: false, error: "not_found" });
+    }
     const result = await prisma.preVisitSession.deleteMany({
       where: { id, userId },
     });
@@ -437,6 +493,13 @@ router.delete("/:id", async (req, res) => {
       action: "previsit_session_deleted",
       entityType: "PreVisitSession",
       entityId: id,
+      metadata: {},
+    });
+    void trackAnalyticsEvent({
+      eventType: "previsit_deleted",
+      userId,
+      practiceId: existingRow.practiceProfileId || undefined,
+      sessionId: id,
       metadata: {},
     });
     return res.json({ ok: true, deleted: true });

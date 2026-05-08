@@ -1,5 +1,6 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
+import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -17,6 +18,14 @@ router.get("/qr/:qrToken", async (req, res) => {
   }
 
   const practice = target.practiceProfile;
+  void trackAnalyticsEvent({
+    eventType: "qr_landing_opened",
+    practiceId: practice.id,
+    metadata: {
+      targetType: target.targetType || undefined,
+      hasPracticeContext: true,
+    },
+  });
   return res.json({
     ok: true,
     data: {

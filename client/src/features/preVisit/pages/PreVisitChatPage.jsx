@@ -14,6 +14,7 @@ import {
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
 import { authFetch } from "../../../api/authFetch.js";
+import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import PreVisitAudioToolbar from "../components/PreVisitAudioToolbar.jsx";
 import AdaptiveIntakePanel from "../adaptive/AdaptiveIntakePanel.jsx";
@@ -158,8 +159,43 @@ export default function PreVisitChatPage() {
     if (!useAdaptiveStep) setAdaptivePanelBusy(false);
   }, [useAdaptiveStep]);
 
+  const adaptiveStartedRef = useRef(new Set());
+  useEffect(() => {
+    if (!useAdaptiveStep || !step?.key) return;
+    if (adaptiveStartedRef.current.has(step.key)) return;
+    adaptiveStartedRef.current.add(step.key);
+    const qr =
+      session?.practiceContext?.qrToken != null
+        ? String(session.practiceContext.qrToken).trim()
+        : "";
+    void sendPracticeAnalyticsEvent({
+      eventType: "previsit_adaptive_category_started",
+      ...(qr ? { qrToken: qr } : {}),
+      metadata: {
+        adaptiveCategoryKey: step.key,
+        flowStep: step.key,
+        deviceType: detectDeviceType(),
+        uiLanguage: language,
+      },
+    });
+  }, [useAdaptiveStep, step.key, session?.practiceContext?.qrToken, language]);
+
   const handleAdaptiveFinished = useCallback(
     (compiled) => {
+      const qr =
+        session?.practiceContext?.qrToken != null
+          ? String(session.practiceContext.qrToken).trim()
+          : "";
+      void sendPracticeAnalyticsEvent({
+        eventType: "previsit_adaptive_category_completed",
+        ...(qr ? { qrToken: qr } : {}),
+        metadata: {
+          adaptiveCategoryKey: step.key,
+          flowStep: step.key,
+          deviceType: detectDeviceType(),
+          uiLanguage: language,
+        },
+      });
       setSession((prev) => {
         const totalSteps = PRE_VISIT_QUESTION_STEPS.length;
         const idx = Math.min(Math.max(0, prev.stepIndex), totalSteps - 1);
@@ -185,7 +221,7 @@ export default function PreVisitChatPage() {
         };
       });
     },
-    [navigate, step.key]
+    [language, navigate, session?.practiceContext?.qrToken, step.key]
   );
 
   function setAnswer(value) {
@@ -341,6 +377,11 @@ export default function PreVisitChatPage() {
             labels={tUi}
             onAppendTranscript={appendTranscript}
             disabled={useAdaptiveStep && adaptivePanelBusy}
+            qrToken={
+              session?.practiceContext?.qrToken != null
+                ? String(session.practiceContext.qrToken).trim()
+                : ""
+            }
           />
 
           {useAdaptiveStep ? (

@@ -1,27 +1,15 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import ProtectedRoute from "./components/ProtectedRoute";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Layout from "./Layout.jsx";
 
 import Intro from "./pages/Intro";
 import Register from "./pages/Register";
-import Startseite from "./pages/Startseite";
 import LandingPage from "./pages/LandingPage";
-import KoerperVorderseite from "./pages/KoerperVorderseite";
-import KoerperRueckseite from "./pages/KoerperRueckseite";
-import BildUpload from "./pages/BildUpload";
-import SymptomChat from "./pages/SymptomChat";
-import KoerperregionStart from "./pages/KoerperregionStart";
-import KoerperSymptomChat from "./pages/KoerperSymptomChat";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import CheckEmail from "./pages/CheckEmail";
@@ -32,33 +20,73 @@ import ResetPassword from "./pages/ResetPassword";
 import Disclaimer from "./pages/Disclaimer";
 import AGB from "./pages/AGB.jsx";
 import Info from "./pages/Info";
-import PreVisitLanguagePage from "./features/preVisit/pages/PreVisitLanguagePage.jsx";
-import PreVisitChatPage from "./features/preVisit/pages/PreVisitChatPage.jsx";
-import PreVisitReviewPage from "./features/preVisit/pages/PreVisitReviewPage.jsx";
-import PreVisitDocumentPage from "./features/preVisit/pages/PreVisitDocumentPage.jsx";
-import PreVisitHistoryPage from "./features/preVisit/pages/PreVisitHistoryPage.jsx";
-import PreVisitAccountHistoryPage from "./features/preVisit/pages/PreVisitAccountHistoryPage.jsx";
-import PreVisitQrLandingPage from "./features/preVisit/pages/PreVisitQrLandingPage.jsx";
-import PreVisitCasesPage from "./features/preVisit/pages/PreVisitCasesPage.jsx";
-import PreVisitCaseDetailPage from "./features/preVisit/pages/PreVisitCaseDetailPage.jsx";
-import PreVisitFollowUpsPage from "./features/preVisit/pages/PreVisitFollowUpsPage.jsx";
-import PreVisitFollowUpThreadPage from "./features/preVisit/pages/PreVisitFollowUpThreadPage.jsx";
-import SettingsDoctorContactsPage from "./pages/SettingsDoctorContactsPage.jsx";
-import SettingsPracticesPage from "./pages/SettingsPracticesPage.jsx";
-import PracticeDashboardPage from "./pages/PracticeDashboardPage.jsx";
-import PracticePreparationDetailPage from "./pages/PracticePreparationDetailPage.jsx";
 import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider } from "./i18n/LanguageContext";
 
-//import VerifyEmail from "./pages/VerifyEmail";
+const Startseite = lazy(() => import("./pages/Startseite.jsx"));
+const KoerperVorderseite = lazy(() => import("./pages/KoerperVorderseite.jsx"));
+const KoerperRueckseite = lazy(() => import("./pages/KoerperRueckseite.jsx"));
+const BildUpload = lazy(() => import("./pages/BildUpload.jsx"));
+const SymptomChat = lazy(() => import("./pages/SymptomChat.jsx"));
+const KoerperregionStart = lazy(() => import("./pages/KoerperregionStart.jsx"));
+const KoerperSymptomChat = lazy(() => import("./pages/KoerperSymptomChat.jsx"));
+
+const PreVisitLanguagePage = lazy(() =>
+  import("./features/preVisit/pages/PreVisitLanguagePage.jsx"),
+);
+const PreVisitChatPage = lazy(() => import("./features/preVisit/pages/PreVisitChatPage.jsx"));
+const PreVisitReviewPage = lazy(() => import("./features/preVisit/pages/PreVisitReviewPage.jsx"));
+const PreVisitDocumentPage = lazy(() =>
+  import("./features/preVisit/pages/PreVisitDocumentPage.jsx"),
+);
+const PreVisitHistoryPage = lazy(() => import("./features/preVisit/pages/PreVisitHistoryPage.jsx"));
+const PreVisitAccountHistoryPage = lazy(() =>
+  import("./features/preVisit/pages/PreVisitAccountHistoryPage.jsx"),
+);
+const PreVisitQrLandingPage = lazy(() =>
+  import("./features/preVisit/pages/PreVisitQrLandingPage.jsx"),
+);
+const PreVisitCasesPage = lazy(() => import("./features/preVisit/pages/PreVisitCasesPage.jsx"));
+const PreVisitCaseDetailPage = lazy(() =>
+  import("./features/preVisit/pages/PreVisitCaseDetailPage.jsx"),
+);
+const PreVisitFollowUpsPage = lazy(() =>
+  import("./features/preVisit/pages/PreVisitFollowUpsPage.jsx"),
+);
+const PreVisitFollowUpThreadPage = lazy(() =>
+  import("./features/preVisit/pages/PreVisitFollowUpThreadPage.jsx"),
+);
+
+const SettingsDoctorContactsPage = lazy(() =>
+  import("./pages/SettingsDoctorContactsPage.jsx"),
+);
+const SettingsPracticesPage = lazy(() => import("./pages/SettingsPracticesPage.jsx"));
+const PracticeDashboardPage = lazy(() => import("./pages/PracticeDashboardPage.jsx"));
+const PracticePreparationDetailPage = lazy(() =>
+  import("./pages/PracticePreparationDetailPage.jsx"),
+);
+const SettingsPrivacyPage = lazy(() => import("./pages/SettingsPrivacyPage.jsx"));
+
+const AccountPortalLayout = lazy(() => import("./pages/account/AccountPortalLayout.jsx"));
+const AccountHomePage = lazy(() => import("./pages/account/AccountHomePage.jsx"));
+const AccountDocumentsPage = lazy(() => import("./pages/account/AccountDocumentsPage.jsx"));
+const AccountDoctorsPage = lazy(() => import("./pages/account/AccountDoctorsPage.jsx"));
+const AccountPersonalPage = lazy(() => import("./pages/account/AccountPersonalPage.jsx"));
+const AccountProfilesPage = lazy(() => import("./pages/account/AccountProfilesPage.jsx"));
+const AccountDataPage = lazy(() => import("./pages/account/AccountDataPage.jsx"));
+
+function RouteFallback() {
+  return (
+    <div className="app-route-fallback" aria-busy="true" role="status">
+      <span className="app-route-fallback__sr">Loading…</span>
+    </div>
+  );
+}
 
 function Gate() {
   const hasUser =
-    !!localStorage.getItem("medscout_token") &&
-    !!localStorage.getItem("medscout_user_id");
-  return hasUser
-    ? <Navigate to="/intro" replace />
-    : <Navigate to="/register" replace />;
+    !!localStorage.getItem("medscout_token") && !!localStorage.getItem("medscout_user_id");
+  return hasUser ? <Navigate to="/intro" replace /> : <Navigate to="/register" replace />;
 }
 
 const updateSW = registerSW({
@@ -70,196 +98,199 @@ const updateSW = registerSW({
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-
-    {/* ⭐ GLOBAL THEME PROVIDER – bleibt immer aktiv */}
     <ThemeProvider>
       <LanguageProvider>
+        <BrowserRouter>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/gate" element={<Gate />} />
+                <Route path="/intro" element={<Intro />} />
+                <Route path="/register" element={<Register />} />
 
-      <BrowserRouter>
-        <Routes>
+                <Route
+                  path="/startseite"
+                  element={
+                    <ProtectedRoute>
+                      <Startseite />
+                    </ProtectedRoute>
+                  }
+                />
 
-          {/* Layout mit verschachtelten Routes */}
-          <Route element={<Layout />}>
+                <Route
+                  path="/account"
+                  element={
+                    <ProtectedRoute>
+                      <AccountPortalLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<AccountHomePage />} />
+                  <Route path="documents" element={<AccountDocumentsPage />} />
+                  <Route path="doctors" element={<AccountDoctorsPage />} />
+                  <Route path="personal" element={<AccountPersonalPage />} />
+                  <Route path="profiles" element={<AccountProfilesPage />} />
+                  <Route path="data" element={<AccountDataPage />} />
+                  <Route
+                    path="follow-ups"
+                    element={<Navigate to="/pre-visit/follow-ups" replace />}
+                  />
+                </Route>
 
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/gate" element={<Gate />} />
-            <Route path="/intro" element={<Intro />} />
-            <Route path="/register" element={<Register />} />
+                <Route
+                  path="/symptom"
+                  element={
+                    <ProtectedRoute>
+                      <SymptomChat />
+                    </ProtectedRoute>
+                  }
+                />
 
-            {/* Geschützte Bereiche */}
-            <Route
-              path="/startseite"
-              element={
-                <ProtectedRoute>
-                  <Startseite />
-                </ProtectedRoute>
-              }
-            />
+                <Route
+                  path="/bild"
+                  element={
+                    <ProtectedRoute>
+                      <BildUpload />
+                    </ProtectedRoute>
+                  }
+                />
 
-            <Route
-              path="/symptom"
-              element={
-                <ProtectedRoute>
-                  <SymptomChat />
-                </ProtectedRoute>
-              }
-            />
+                <Route
+                  path="/region-start"
+                  element={
+                    <ProtectedRoute>
+                      <KoerperregionStart />
+                    </ProtectedRoute>
+                  }
+                />
 
-            <Route
-              path="/bild"
-              element={
-                <ProtectedRoute>
-                  <BildUpload />
-                </ProtectedRoute>
-              }
-            />
+                <Route
+                  path="/koerperregionen"
+                  element={
+                    <ProtectedRoute>
+                      <KoerperVorderseite />
+                    </ProtectedRoute>
+                  }
+                />
 
-            <Route
-              path="/region-start"
-              element={
-                <ProtectedRoute>
-                  <KoerperregionStart />
-                </ProtectedRoute>
-              }
-            />
+                <Route
+                  path="/rueckseite"
+                  element={
+                    <ProtectedRoute>
+                      <KoerperRueckseite />
+                    </ProtectedRoute>
+                  }
+                />
 
-            <Route
-              path="/koerperregionen"
-              element={
-                <ProtectedRoute>
-                  <KoerperVorderseite />
-                </ProtectedRoute>
-              }
-            />
+                <Route
+                  path="/koerpersymptom"
+                  element={
+                    <ProtectedRoute>
+                      <KoerperSymptomChat />
+                    </ProtectedRoute>
+                  }
+                />
 
-            <Route
-              path="/rueckseite"
-              element={
-                <ProtectedRoute>
-                  <KoerperRueckseite />
-                </ProtectedRoute>
-              }
-            />
+                <Route
+                  path="/settings/doctor-contacts"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsDoctorContactsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings/practices"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPracticesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings/privacy"
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPrivacyPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/dashboard/preparations/:id"
+                  element={
+                    <ProtectedRoute>
+                      <PracticePreparationDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
 
-            <Route
-              path="/koerpersymptom"
-              element={
-                <ProtectedRoute>
-                  <KoerperSymptomChat />
-                </ProtectedRoute>
-              }
-            />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/datenschutz" element={<Datenschutz />} />
+                <Route path="/check-email" element={<CheckEmail />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/verified" element={<Verified />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/disclaimer" element={<Disclaimer />} />
+                <Route path="/agb" element={<AGB />} />
+                <Route path="/info" element={<Info />} />
 
-            <Route
-              path="/settings/doctor-contacts"
-              element={
-                <ProtectedRoute>
-                  <SettingsDoctorContactsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings/practices"
-              element={
-                <ProtectedRoute>
-                  <SettingsPracticesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings/privacy"
-              element={
-                <ProtectedRoute>
-                  <SettingsPrivacyPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/practice/dashboard"
-              element={
-                <ProtectedRoute>
-                  <PracticeDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/practice/dashboard/preparations/:id"
-              element={
-                <ProtectedRoute>
-                  <PracticePreparationDetailPage />
-                </ProtectedRoute>
-              }
-            />
+                <Route path="/pre-visit/document" element={<PreVisitDocumentPage />} />
+                <Route
+                  path="/pre-visit/cases"
+                  element={
+                    <ProtectedRoute>
+                      <PreVisitCasesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/pre-visit/cases/:caseId"
+                  element={
+                    <ProtectedRoute>
+                      <PreVisitCaseDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/pre-visit/my-preparations" element={<PreVisitAccountHistoryPage />} />
+                <Route path="/pre-visit/history" element={<PreVisitHistoryPage />} />
+                <Route
+                  path="/pre-visit/follow-ups"
+                  element={
+                    <ProtectedRoute>
+                      <PreVisitFollowUpsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/pre-visit/follow-ups/:threadId"
+                  element={
+                    <ProtectedRoute>
+                      <PreVisitFollowUpThreadPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/pre-visit/chat" element={<PreVisitChatPage />} />
+                <Route path="/pre-visit/review" element={<PreVisitReviewPage />} />
+                <Route path="/pre-visit" element={<PreVisitLanguagePage />} />
+                <Route path="/pre-visit/qr/:qrToken" element={<PreVisitQrLandingPage />} />
+                <Route path="/arztgespraech" element={<Navigate to="/pre-visit" replace />} />
 
-            {/* Öffentliche statische Seiten */}
-            <Route path="/impressum" element={<Impressum />} />
-            <Route path="/datenschutz" element={<Datenschutz />} />
-            <Route path="/check-email" element={<CheckEmail />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/verified" element={<Verified />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/disclaimer" element={<Disclaimer />} />
-            <Route path="/agb" element={<AGB />} />
-            <Route path="/info" element={<Info />} />
-
-            {/* Pre-Visit Medical Communication (fourth module — UI only, no auth) */}
-            <Route path="/pre-visit/document" element={<PreVisitDocumentPage />} />
-            <Route
-              path="/pre-visit/cases"
-              element={
-                <ProtectedRoute>
-                  <PreVisitCasesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pre-visit/cases/:caseId"
-              element={
-                <ProtectedRoute>
-                  <PreVisitCaseDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pre-visit/my-preparations"
-              element={<PreVisitAccountHistoryPage />}
-            />
-            <Route path="/pre-visit/history" element={<PreVisitHistoryPage />} />
-            <Route
-              path="/pre-visit/follow-ups"
-              element={
-                <ProtectedRoute>
-                  <PreVisitFollowUpsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/pre-visit/follow-ups/:threadId"
-              element={
-                <ProtectedRoute>
-                  <PreVisitFollowUpThreadPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/pre-visit/chat" element={<PreVisitChatPage />} />
-            <Route path="/pre-visit/review" element={<PreVisitReviewPage />} />
-            <Route path="/pre-visit" element={<PreVisitLanguagePage />} />
-            <Route path="/pre-visit/qr/:qrToken" element={<PreVisitQrLandingPage />} />
-            <Route
-              path="/arztgespraech"
-              element={<Navigate to="/pre-visit" replace />}
-            />
-
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-
-          </Route>
-
-        </Routes>
-      </BrowserRouter>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
       </LanguageProvider>
-
     </ThemeProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

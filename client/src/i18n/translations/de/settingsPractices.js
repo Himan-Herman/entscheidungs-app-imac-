@@ -45,5 +45,65 @@ export default {
   copyLink: "Link kopieren",
   linkCopied: "Link wurde kopiert.",
   copyFallback: "Bitte Link manuell kopieren:",
+  integrationsHeading: "Integrationen",
+  integrationsIntro:
+    "Kalenderexporte (neutral), optionale Benachrichtigungen (nur Metadaten) und kontrollierte Dokumentenübergabe verbinden. Klinische Inhalte bleiben in MedScoutX, solange Sie nicht ausdrücklich exportieren.",
+  integrationsPlaceholder:
+    "Kalender, Praxissoftware und sichere Schnittstellen werden später vorbereitet.",
+  manageIntegration: "Integration",
+  loadingIntegration: "Integration wird geladen …",
+  integrationLoadError: "Integrationseinstellungen konnten nicht geladen werden.",
+  integrationSaveError: "Integrationseinstellungen konnten nicht gespeichert werden.",
+  tabDelivery: "Sichere Dokumentenzustellung",
+  tabCalendar: "Kalender",
+  tabWebhooks: "Webhooks",
+  tabApi: "API / Praxissoftware",
+  deliveryIntro:
+    "Legen Sie fest, wie Übergaben ausgerichtet sind. Sichere Links laufen ab und enthalten standardmäßig keine klinischen Freitexte.",
+  fieldDeliveryMode: "Modus Dokumentenzustellung",
+  modeDownloadOnly: "Nur Download (in der Anwendung)",
+  modeEmail: "E-Mail-Kanal (ohne sensible Inhalte im Text)",
+  modeSecurePortal: "Sicheres Portal / Link",
+  modeWebhook: "Webhook plus kontrollierte Links",
+  fieldSecureDownload: "Zeitlich begrenzte Download-Links erlauben",
+  noteNoClinicalWebhook:
+    "Webhooks enthalten nach Vorgabe nur Kennungen und Status — keine medizinischen Freitexte.",
+  noteLinksExpire: "Sichere Dokumentenlinks laufen ab und können widerrufen werden.",
+  noteEmailNoSensitive:
+    "Betriebliche E-Mails dürfen keine sensiblen klinischen Details enthalten.",
+  noteConsent:
+    "Einwilligung der Patientin/des Patienten bleibt erforderlich, bevor extern geteilt wird.",
+  calendarIntro:
+    "Neutrale Kalenderdateien (.ics) enthalten nur Terminzeitpunkte — keine Symptome oder Diagnosen.",
+  fieldCalendarEnabled: "Kalenderexport aktivieren",
+  fieldCalendarProvider: "Kalenderanbieter (Roadmap)",
+  calendarProviderUnset: "Keine Auswahl",
+  calendarIcsHint:
+    "Export unter GET /api/practice/previsit-sessions/:id/calendar.ics — erfordert ein gesetztes Termindatum an der Vorbereitung.",
+  webhooksIntro:
+    "Signierte HTTPS-Zustellungen mit Wiederholungen (umgebungsabhängig). Nutzdaten bleiben metadatenorientiert.",
+  fieldWebhookEnabled: "Ausgehende Webhooks aktivieren",
+  fieldWebhookUrl: "Webhook-HTTPS-URL",
+  fieldWebhookSecret: "Signaturgeheimnis (verschlüsselt gespeichert)",
+  webhookSecretPlaceholder: "Einmal einfügen — wird nie wieder angezeigt",
+  webhookSecretConfiguredHint: "Ein Signaturgeheimnis ist bereits hinterlegt.",
+  clearWebhookSecret: "Hinterlegtes Signaturgeheimnis widerrufen",
+  webhookTest: "Test-Webhook senden",
+  webhookTestQueued: "Test-Ereignis eingereiht.",
+  webhookTestFailed: "Test konnte nicht eingereiht werden.",
+  webhookRecent: "Letzte Webhook-Zustellungen",
+  webhookNoEvents: "Noch keine Webhook-Einträge.",
+  readOnlyHint:
+    "Sie können die Integration einsehen. Änderungen sind Besitzerin/Besitzer oder Administrator:in vorbehalten.",
+  encryptionWarning:
+    "Server-Verschlüsselung fehlt — Webhook-Geheimnisse können erst gespeichert werden, wenn PRACTICE_INTEGRATION_MASTER_KEY gesetzt ist.",
+  saveIntegration: "Integration speichern",
+  apiIntro:
+    "Authentifizierte JSON-Endpunkte für diese Praxis — Intake-Antworten sind standardmäßig nicht enthalten.",
+  apiPvsNote:
+    "Direkte Praxissoftware-Anbindungen werden kontrolliert über sichere Schnittstellen vorbereitet.",
+  apiEndpointsHint:
+    "GET /api/practice/api/previsit-sessions?practiceProfileId=… · …/follow-ups · …/cases — Detailrouten mit gleichem Query.",
+  apiRoleHint: "Ihre Rolle",
 };
 

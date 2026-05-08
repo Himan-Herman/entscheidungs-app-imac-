@@ -15,6 +15,7 @@
 }
 
 .practice-dashboard__header,
+.practice-dashboard__analytics,
 .practice-dashboard__filters,
 .practice-dashboard__card {
   background: #fff;
@@ -45,6 +46,90 @@
 .practice-dashboard__error {
   margin: 0;
   color: #b91c1c;
+}
+
+.practice-dashboard__analytics-heading {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.practice-dashboard__analytics-privacy {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.practice-dashboard__analytics-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.practice-dashboard__stat-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: #f8fafc;
+}
+
+.practice-dashboard__stat-label {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.practice-dashboard__stat-value {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.practice-dashboard__analytics-lists {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin-top: 16px;
+}
+
+.practice-dashboard__analytics-list-title {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+}
+
+.practice-dashboard__analytics-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.practice-dashboard__analytics-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.practice-dashboard__analytics-count {
+  font-variant-numeric: tabular-nums;
+  color: #475569;
+}
+
+.practice-dashboard__analytics-footnote {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.practice-dashboard__analytics-warn {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #92400e;
 }
 
 .practice-dashboard__filters {
@@ -186,6 +271,7 @@
     color: #e2e8f0;
   }
   .practice-dashboard__header,
+  .practice-dashboard__analytics,
   .practice-dashboard__filters,
   .practice-dashboard__card,
   .practice-dashboard__followup-thread {
@@ -199,6 +285,23 @@
   .practice-dashboard__role,
   .practice-dashboard__muted {
     color: #94a3b8;
+  }
+  .practice-dashboard__stat-card {
+    background: #0f172a;
+    border-color: #334155;
+  }
+  .practice-dashboard__stat-label {
+    color: #94a3b8;
+  }
+  .practice-dashboard__stat-value {
+    color: #f1f5f9;
+  }
+  .practice-dashboard__analytics-privacy,
+  .practice-dashboard__analytics-footnote {
+    color: #94a3b8;
+  }
+  .practice-dashboard__analytics-warn {
+    color: #fcd34d;
   }
   .practice-dashboard__field input,
   .practice-dashboard__field select,

@@ -82,7 +82,10 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
         existingCategoryAnswer: String(slice.compiledAnswer || "").slice(0, 2000),
         currentPatientReply: String(currentReply || "").slice(0, 2000),
         previousReplies: Array.isArray(previousReplies)
-          ? previousReplies.map((r) => String(r || "").slice(0, 1000)).slice(0, 20)
+          ? previousReplies.map((r) => String(r || "").slice(0, 640)).slice(0, 8)
+          : [],
+        recentQuestions: Array.isArray(slice.askedQuestions)
+          ? slice.askedQuestions.map((q) => String(q || "").slice(0, 160)).slice(-8)
           : [],
         maxFollowups: Number(cfg?.maxFollowups || 2),
         previousSessionContext:
@@ -90,10 +93,13 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
           sessionRef.current?.caseTimeline?.relatedSessionId
             ? sessionRef.current.caseTimeline.summary
             : undefined,
-        compactContext: compactAdaptiveContext(sessionRef.current?.answers || {}),
+        compactContext: compactAdaptiveContext(
+          sessionRef.current?.answers || {},
+          categoryKey,
+        ),
         longitudinalCaseCompact: String(
-          sessionRef.current?.longitudinalCase?.compactTimelineSnippet || ""
-        ).slice(0, 2400),
+          sessionRef.current?.longitudinalCase?.compactTimelineSnippet || "",
+        ).slice(0, 1200),
       };
       const res = await fetch("/api/previsit/adaptive-intake", {
         method: "POST",
@@ -111,7 +117,14 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
         safetyFlags: sanitizeSafetyFlags(data?.safetyFlags),
       };
     },
-    [categoryKey, categoryTitle, cfg?.maxFollowups, patientLanguage, slice.compiledAnswer]
+    [
+      categoryKey,
+      categoryTitle,
+      cfg?.maxFollowups,
+      patientLanguage,
+      slice.compiledAnswer,
+      slice.askedQuestions,
+    ]
   );
 
   async function submitReply() {
@@ -132,10 +145,18 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
       const previousReplies = [...(slice.replies || [])];
       const out = await callAdaptive(reply, previousReplies);
       const nextReplies = [...previousReplies, reply];
+      const priorAsked = Array.isArray(slice.askedQuestions)
+        ? slice.askedQuestions
+        : [];
+      const askedQuestions =
+        String(slice.currentQuestion || "").trim().length > 0
+          ? [...priorAsked, String(slice.currentQuestion).trim()].filter(Boolean).slice(-10)
+          : priorAsked;
       const nextSlice = {
         ...slice,
         followupsUsed: nextReplies.length,
         replies: nextReplies,
+        askedQuestions,
         currentQuestion: out.isComplete ? "" : out.nextQuestion,
         compiledAnswer: out.compiledAnswer || String(slice.compiledAnswer || ""),
         safetyFlags: out.safetyFlags,

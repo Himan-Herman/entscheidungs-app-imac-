@@ -13,6 +13,7 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
         navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,mp4}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         runtimeCaching: [
@@ -31,24 +32,34 @@ export default defineConfig({
       },
 
       manifest: {
+        id: '/',
         name: 'MedScoutX',
         short_name: 'MedScoutX',
-        description: 'Medical decision support app',
+        description:
+          'Multilingual doctor visit preparation and medical communication support.',
+        lang: 'en',
         start_url: '/',
+        scope: '/',
         display: 'standalone',
-        background_color: '#0b0b0b',
-        theme_color: '#0b0b0b',
+        display_override: ['standalone', 'browser'],
+        orientation: 'any',
+        background_color: '#f8fafc',
+        theme_color: '#0f766e',
+        categories: ['health', 'productivity'],
         icons: [
           {
             src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
           },
           {
             src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any',
           },
+          // TODO(maskable): Add a dedicated safe-zone maskable icon (512+) — current asset may clip on Android adaptive icons.
           {
             src: '/pwa-512x512.png',
             sizes: '512x512',
