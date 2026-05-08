@@ -1,5 +1,16 @@
+import legalSr from "../legal/sr/index.js";
+import landing from "./sr.landing.js";
+import info from "./sr.info.js";
+import preVisit from "./sr.preVisit.js";
+import startseite from "./sr.startseite.js";
+
 /** Српски (ћирилица) — partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalSr,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Пређи на садржај",
     homeAria: "Иди на почетну страницу",
@@ -99,38 +110,6 @@ export default {
     continue: "Даље",
     cancel: "Откажи",
     close: "Затвори",
-  },
-  startseite: {
-    title: "MedScoutX — Припрема за посету лекару",
-    skip: "Пређи на главни садржај",
-    tagline:
-      "Структурирана припрема за разговор у здравству — усмерена на јасноћу ваших информација пре посете.",
-    heroTitle: "Боље се припремите за прегледе — на било ком језику.",
-    heroText:
-      "MedScoutX помаже да пре посете сложите симптоме, лекове, документа и питања. Извезите јасан PDF језиком установе.",
-    heroPrimary: "Припреми посету",
-    heroSecondary: "Сазнајте више",
-    heroHelp:
-      "Изборни модули за симптоме, карту тела или слике — увек под вашом контролом.",
-    audienceTitle: "За кога је MedScoutX",
-    stepsEyebrow: "Како функционише",
-    safetyStripTitle: "Граница одговорности",
-    safetyStripBody:
-      "MedScoutX не замењује преглед у здравству и не доноси стручне закључке; подржава структурирање онога што одлучите да поделите пре разговора са лекаром.",
-    featuresTitle: "Истражите могућности",
-    featuresSubtitle:
-      "Почните од припреме за посету или користите додатне алате.",
-    trustTitle: "Приватност и транспарентност",
-    trustText:
-      "Пројектовано уз мало података: ви бирате шта уносите и шта чувате локално.",
-    legal: "Правне информације",
-    imprint: "Импресум",
-    privacy: "Приватност",
-    terms: "Услови",
-    disclaimer: "Одрицање одговорности",
-    footerNote:
-      "MedScoutX помаже да структурирате ваше напомене за разговор — не замењује стручну процену у установи.",
-    videoUnsupported: "Ваш прегледач не репродукује видео.",
   },
   forgotPassword: {
     title: "Ресетовање лозинке",

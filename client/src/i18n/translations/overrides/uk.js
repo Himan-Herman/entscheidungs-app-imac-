@@ -1,5 +1,16 @@
+import legalUk from "../legal/uk/index.js";
+import landing from "./uk.landing.js";
+import info from "./uk.info.js";
+import preVisit from "./uk.preVisit.js";
+import startseite from "./uk.startseite.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalUk,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Перейти до вмісту",
     homeAria: "На головну",
@@ -99,38 +110,6 @@ export default {
     continue: "Далі",
     cancel: "Скасувати",
     close: "Закрити",
-  },
-  startseite: {
-    title: "MedScoutX — Підготовка до прийому",
-    skip: "До основного вмісту",
-    tagline:
-      "Структурована підготовка до розмови — не діагноз і не рекомендації щодо лікування.",
-    heroTitle: "Краще готуйтеся до прийомів — будь-якою мовою.",
-    heroText:
-      "MedScoutX допомагає структурувати симптоми, ліки, документи й запитання перед візитом. Експортуйте зрозумілий PDF мовою клініки.",
-    heroPrimary: "Підготувати прийом",
-    heroSecondary: "Дізнатися більше",
-    heroHelp:
-      "Додаткові модулі для симптомів, схеми тіла або зображень — завжди під вашим контролем.",
-    audienceTitle: "Для кого MedScoutX",
-    stepsEyebrow: "Як це працює",
-    safetyStripTitle: "Межа безпеки",
-    safetyStripBody:
-      "MedScoutX не ставить діагноз, не призначає лікування й не оцінює терміновість. Він лише допомагає структурувати те, що ви вирішите повідомити.",
-    featuresTitle: "Можливості",
-    featuresSubtitle:
-      "Почніть із підготовки до прийому або скористайтеся додатковими інструментами.",
-    trustTitle: "Конфіденційність і прозорість",
-    trustText:
-      "Мінімум даних: ви вирішуєте, що вводити й що зберігати локально.",
-    legal: "Правова інформація",
-    imprint: "Вихідні дані",
-    privacy: "Конфіденційність",
-    terms: "Умови",
-    disclaimer: "Дисклеймер",
-    footerNote:
-      "MedScoutX підтримує підготовку ваших формулювань — не діагноз, не поради щодо лікування й не оцінка терміновості.",
-    videoUnsupported: "Ваш браузер не підтримує відтворення відео.",
   },
   forgotPassword: {
     title: "Скидання пароля",

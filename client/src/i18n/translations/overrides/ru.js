@@ -1,5 +1,16 @@
+import legalRu from "../legal/ru/index.js";
+import landing from "./ru.landing.js";
+import info from "./ru.info.js";
+import preVisit from "./ru.preVisit.js";
+import startseite from "./ru.startseite.js";
+
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
+  legal: legalRu,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "Перейти к содержимому",
     homeAria: "На главную",
@@ -99,38 +110,6 @@ export default {
     continue: "Продолжить",
     cancel: "Отмена",
     close: "Закрыть",
-  },
-  startseite: {
-    title: "MedScoutX — Подготовка к приёму",
-    skip: "К основному содержимому",
-    tagline:
-      "Структурированная подготовка к разговору — не диагноз и не рекомендации по лечению.",
-    heroTitle: "Лучше готовьтесь к приёмам — на любом языке.",
-    heroText:
-      "MedScoutX помогает структурировать симптомы, лекарства, документы и вопросы до визита. Экспортируйте понятный PDF на языке клиники.",
-    heroPrimary: "Подготовить приём",
-    heroSecondary: "Подробнее",
-    heroHelp:
-      "Дополнительные модули для симптомов, схемы тела или изображений — всегда под вашим контролем.",
-    audienceTitle: "Для кого MedScoutX",
-    stepsEyebrow: "Как это работает",
-    safetyStripTitle: "Граница безопасности",
-    safetyStripBody:
-      "MedScoutX не ставит диагноз, не назначает лечение и не оценивает срочность. Он помогает структурировать то, что вы решите сообщить.",
-    featuresTitle: "Возможности",
-    featuresSubtitle:
-      "Начните с подготовки к приёму или используйте дополнительные инструменты.",
-    trustTitle: "Конфиденциальность и прозрачность",
-    trustText:
-      "Минимум данных: вы решаете, что вводить и что хранить локально.",
-    legal: "Правовая информация",
-    imprint: "Выходные данные",
-    privacy: "Конфиденциальность",
-    terms: "Условия",
-    disclaimer: "Дисклеймер",
-    footerNote:
-      "MedScoutX поддерживает подготовку ваших формулировок — не диагноз, не совет по лечению и не оценка срочности.",
-    videoUnsupported: "Ваш браузер не поддерживает воспроизведение видео.",
   },
   forgotPassword: {
     title: "Сброс пароля",
