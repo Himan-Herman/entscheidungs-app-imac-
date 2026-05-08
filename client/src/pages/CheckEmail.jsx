@@ -2,11 +2,13 @@ import { useMemo, useState } from "react";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { useAuthFlowPalette } from "../ThemeMode";
 
 export default function CheckEmail() {
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const { language } = useLanguage();
+  const p = useAuthFlowPalette();
 
   const copy = useMemo(() => getMessages(language).checkEmail, [language]);
   const navCopy = useMemo(() => getMessages(language).header, [language]);
@@ -48,8 +50,7 @@ export default function CheckEmail() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background:
-          "linear-gradient(135deg, #0f172a 0%, #0f766e 45%, #22c55e 100%)",
+        background: p.pageBg,
         padding: "16px",
         boxSizing: "border-box",
       }}
@@ -58,9 +59,9 @@ export default function CheckEmail() {
         style={{
           width: "100%",
           maxWidth: "480px",
-          backgroundColor: "#ffffff",
+          backgroundColor: p.cardBg,
           borderRadius: "24px",
-          boxShadow: "0 18px 45px rgba(15,23,42,0.35)",
+          boxShadow: p.cardShadow,
           padding: "28px 26px 24px",
           boxSizing: "border-box",
         }}
@@ -82,8 +83,8 @@ export default function CheckEmail() {
               gap: "8px",
               padding: "4px 10px",
               borderRadius: "999px",
-              backgroundColor: "rgba(34,197,94,0.08)",
-              color: "#0f766e",
+              backgroundColor: p.badgeBg,
+              color: p.badgeColor,
               fontSize: "12px",
               fontWeight: 600,
             }}
@@ -108,7 +109,7 @@ export default function CheckEmail() {
             margin: "0 0 8px 0",
             fontSize: "26px",
             lineHeight: 1.2,
-            color: "#020617",
+            color: p.title,
           }}
         >
           {copy.title}
@@ -119,7 +120,7 @@ export default function CheckEmail() {
             margin: "0 0 16px 0",
             fontSize: "14px",
             lineHeight: 1.7,
-            color: "#4b5563",
+            color: p.subtitle,
           }}
         >
           {copy.text}
@@ -130,9 +131,9 @@ export default function CheckEmail() {
             marginBottom: 18,
             padding: "10px 12px",
             borderRadius: 12,
-            backgroundColor: "#f1f5f9",
+            backgroundColor: p.tipBoxBg,
             fontSize: "13px",
-            color: "#475569",
+            color: p.tipBoxColor,
           }}
         >
           <strong>{copy.tip}</strong> {copy.tipText}
@@ -168,7 +169,7 @@ export default function CheckEmail() {
               marginTop: 12,
               fontSize: "13px",
               lineHeight: 1.5,
-              color: isSuccess ? "#16a34a" : "#b91c1c",
+              color: isSuccess ? p.successBannerColor : p.errorBannerColor,
             }}
           >
             {msg}
@@ -179,7 +180,7 @@ export default function CheckEmail() {
           style={{
             marginTop: 20,
             fontSize: "11px",
-            color: "#9ca3af",
+            color: p.footerNote,
             lineHeight: 1.6,
           }}
         >

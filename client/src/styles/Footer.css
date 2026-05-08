@@ -40,3 +40,21 @@
   color: #cbd5e1;
   user-select: none;
 }
+
+:root[data-theme="dark"] .ms-footer {
+  border-top-color: rgba(148, 163, 184, 0.22);
+  background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+}
+
+:root[data-theme="dark"] .ms-footer__link {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .ms-footer__link:hover,
+:root[data-theme="dark"] .ms-footer__link:focus-visible {
+  color: #99f6e4;
+}
+
+:root[data-theme="dark"] .ms-footer__sep {
+  color: #64748b;
+}

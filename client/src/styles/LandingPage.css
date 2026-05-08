@@ -499,6 +499,81 @@
   }
 }
 
+/* ========= Dark mode (global theme toggle) ========= */
+:root[data-theme="dark"] .landing-page {
+  --landing-bg: #020617;
+  --landing-surface: rgba(15, 23, 42, 0.72);
+  --landing-surface-strong: rgba(30, 41, 59, 0.85);
+  --landing-border: rgba(148, 163, 184, 0.22);
+  --landing-text: #f1f5f9;
+  --landing-muted: #94a3b8;
+  --landing-accent: #2dd4bf;
+  --landing-accent-strong: #14b8a6;
+  --landing-accent-soft: rgba(45, 212, 191, 0.14);
+  --landing-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+  background:
+    radial-gradient(circle at top right, rgba(45, 212, 191, 0.06), transparent 42%),
+    linear-gradient(180deg, #0f172a 0%, var(--landing-bg) 55%, #020617 100%);
+}
+
+:root[data-theme="dark"] .landing-page__skip-link:focus {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f1f5f9;
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+:root[data-theme="dark"] .landing-page__header {
+  background: rgba(15, 23, 42, 0.82);
+  border-bottom: 1px solid var(--landing-border);
+}
+
+:root[data-theme="dark"] .landing-page__eyebrow {
+  border-color: rgba(45, 212, 191, 0.22);
+}
+
+:root[data-theme="dark"] .landing-page__trust-line {
+  border-top-color: var(--landing-border);
+}
+
+:root[data-theme="dark"] .landing-page__metric-card {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: var(--landing-border);
+}
+
+:root[data-theme="dark"] .landing-page__metric-card span {
+  color: var(--landing-muted);
+}
+
+:root[data-theme="dark"] .landing-page__metric-card strong {
+  color: var(--landing-text);
+}
+
+:root[data-theme="dark"] .landing-page__ghost-link,
+:root[data-theme="dark"] .landing-page__cta--secondary {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(94, 234, 212, 0.28);
+  color: #ccfbf1;
+}
+
+:root[data-theme="dark"] .landing-page__video-frame {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+}
+
+:root[data-theme="dark"] .landing-page__language-switch {
+  background: rgba(15, 23, 42, 0.65);
+}
+
+:root[data-theme="dark"] .landing-page__language-button.is-active {
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+:root[data-theme="dark"] .landing-page__solid-link,
+:root[data-theme="dark"] .landing-page__cta--primary {
+  box-shadow: 0 12px 32px rgba(20, 184, 166, 0.35);
+}
+
 @media (max-width: 760px) {
   .landing-page {
     padding: 16px;

@@ -203,6 +203,42 @@ body {
   }
 }
 
+/* --- Dark mode (global theme toggle) --- */
+
+:root[data-theme="dark"] body {
+  background: linear-gradient(180deg, #020617 0%, #0f172a 45%, #020617 100%);
+}
+
+:root[data-theme="dark"] .legal {
+  background: rgba(15, 23, 42, 0.94);
+  color: #e5e7eb;
+  box-shadow: 0 24px 55px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme="dark"] .legal__header h1 {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .legal__subtitle {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .legal__section h2 {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .legal__divider {
+  border-top-color: rgba(148, 163, 184, 0.28);
+}
+
+:root[data-theme="dark"] .legal a {
+  color: #7dd3fc;
+}
+
+:root[data-theme="dark"] .legal a:hover {
+  color: #bae6fd;
+}
+
 /* --- Druckversion: sauber & ohne Schatten --- */
 
 @media print {

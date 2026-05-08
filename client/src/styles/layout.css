@@ -16,6 +16,10 @@ html, body { margin: 0; }
   padding-top: var(--global-header-height);
 }
 
+:root[data-theme="dark"] .layout-main {
+  background-color: #020617;
+}
+
 
 .container {
   max-width: var(--container);

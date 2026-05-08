@@ -57,6 +57,10 @@
   isolation: isolate;
 }
 
+:root[data-theme="dark"] .ms-header {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+
 .ms-header::after {
   content: "";
   position: absolute;
@@ -273,6 +277,17 @@
   background: #ffffff;
   border-color: rgba(11, 79, 108, 0.2);
   outline: none;
+}
+
+:root[data-theme="dark"] .ms-nav-item:hover,
+:root[data-theme="dark"] .ms-nav-item:focus {
+  background: rgba(30, 41, 59, 0.92);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+:root[data-theme="dark"] .ms-theme-toggle:hover,
+:root[data-theme="dark"] .ms-theme-toggle:focus-visible {
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
 .ms-nav-item.is-active {

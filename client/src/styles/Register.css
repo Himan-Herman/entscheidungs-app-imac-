@@ -451,6 +451,120 @@
   font-weight: 500;
 }
 
+/* ========== Hellmodus (global data-theme="light") ========== */
+
+:root[data-theme="light"] .register-page {
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.1), transparent 55%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  color: #0f172a;
+}
+
+:root[data-theme="light"] .register-container {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 20px 50px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+
+:root[data-theme="light"] .register-page .h1 {
+  color: #020617;
+}
+
+:root[data-theme="light"] .register-page__subtitle {
+  color: #475569;
+}
+
+:root[data-theme="light"] .register-page .label {
+  color: #334155;
+}
+
+:root[data-theme="light"] .register-page .input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+:root[data-theme="light"] .register-page .input:focus-visible {
+  background: #ffffff;
+}
+
+:root[data-theme="light"] .register-page input[type="date"].input {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+}
+
+:root[data-theme="light"] .register-page input[type="date"].input::-webkit-calendar-picker-indicator {
+  filter: none;
+  opacity: 1;
+}
+
+:root[data-theme="light"] .register-page .hint {
+  color: #64748b;
+}
+
+:root[data-theme="light"] .register-page .minor-note {
+  color: #991b1b;
+  background: rgba(254, 226, 226, 0.65);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+:root[data-theme="light"] .register-page .consents {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme="light"] .register-page .legend,
+:root[data-theme="light"] .register-page .check {
+  color: #334155;
+}
+
+:root[data-theme="light"] .register-page .error {
+  color: #991b1b;
+  background: rgba(254, 226, 226, 0.75);
+  border-color: rgba(239, 68, 68, 0.55);
+}
+
+:root[data-theme="light"] .register-page .alert-bar {
+  color: #991b1b;
+  background: rgba(254, 226, 226, 0.55);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+:root[data-theme="light"] .register-page .btn-primary {
+  box-shadow:
+    0 12px 22px rgba(15, 118, 110, 0.25),
+    0 0 0 1px rgba(15, 118, 110, 0.15);
+}
+
+:root[data-theme="light"] .register-page .btn-ghost {
+  color: #0f766e;
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+:root[data-theme="light"] .register-page .btn-ghost:hover {
+  background: rgba(15, 118, 110, 0.08);
+}
+
+:root[data-theme="light"] .register-page .legal-links {
+  border-top-color: rgba(15, 23, 42, 0.1);
+  color: #64748b;
+}
+
+:root[data-theme="light"] .register-page .legal-links a {
+  color: #0f766e;
+}
+
+:root[data-theme="light"] .register-page .consents a {
+  color: #0f766e !important;
+}
+
+:root[data-theme="light"] .register-page .required-hint {
+  color: #64748b;
+}
+
 /* Icons*/
 .startseite__feature-icon {
   width: 40px;

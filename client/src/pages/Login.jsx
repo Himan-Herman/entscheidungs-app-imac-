@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { useAuthFlowPalette } from "../ThemeMode";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
+  const p = useAuthFlowPalette();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,8 +87,8 @@ export default function Login() {
         <p
           style={{
             ...styles,
-            backgroundColor: "rgba(22,163,74,0.08)",
-            color: "#166534",
+            backgroundColor: p.successBannerBg,
+            color: p.successBannerColor,
           }}
         >
           {copy.verifyOk}
@@ -99,8 +101,8 @@ export default function Login() {
         <p
           style={{
             ...styles,
-            backgroundColor: "rgba(220,38,38,0.06)",
-            color: "#b91c1c",
+            backgroundColor: p.verifyInvalidBg,
+            color: p.verifyInvalidColor,
           }}
         >
           {copy.verifyInvalid}
@@ -113,8 +115,8 @@ export default function Login() {
         <p
           style={{
             ...styles,
-            backgroundColor: "rgba(248,250,252,0.8)",
-            color: "#b45309",
+            backgroundColor: p.verifyErrorBg,
+            color: p.verifyErrorColor,
           }}
         >
           {copy.verifyError}
@@ -135,8 +137,8 @@ export default function Login() {
           fontSize: 13,
           padding: "8px 10px",
           borderRadius: 10,
-          backgroundColor: "rgba(22,163,74,0.08)",
-          color: "#166534",
+          backgroundColor: p.resetOkBg,
+          color: p.resetOkColor,
         }}
       >
         {copy.resetOk}
@@ -154,8 +156,8 @@ export default function Login() {
           fontSize: 13,
           padding: "8px 10px",
           borderRadius: 10,
-          backgroundColor: "rgba(217,119,6,0.12)",
-          color: "#9a3412",
+          backgroundColor: p.sessionBannerBg,
+          color: p.sessionBannerColor,
         }}
       >
         {copy.sessionExpired}
@@ -170,8 +172,7 @@ export default function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background:
-          "linear-gradient(135deg, #0f172a 0%, #0f766e 45%, #22c55e 100%)",
+        background: p.pageBg,
         padding: 16,
         boxSizing: "border-box",
       }}
@@ -180,9 +181,9 @@ export default function Login() {
         style={{
           width: "100%",
           maxWidth: 480,
-          backgroundColor: "#ffffff",
+          backgroundColor: p.cardBg,
           borderRadius: 24,
-          boxShadow: "0 18px 45px rgba(15,23,42,0.35)",
+          boxShadow: p.cardShadow,
           padding: "28px 26px 22px",
           boxSizing: "border-box",
         }}
@@ -204,8 +205,8 @@ export default function Login() {
               gap: 8,
               padding: "4px 10px",
               borderRadius: 999,
-              backgroundColor: "rgba(37,99,235,0.08)",
-              color: "#1d4ed8",
+              backgroundColor: p.badgeBg,
+              color: p.badgeColor,
               fontSize: 12,
               fontWeight: 600,
             }}
@@ -228,7 +229,7 @@ export default function Login() {
             margin: "0 0 6px 0",
             fontSize: 26,
             lineHeight: 1.2,
-            color: "#020617",
+            color: p.title,
           }}
         >
           {copy.title}
@@ -238,7 +239,7 @@ export default function Login() {
           style={{
             margin: "0 0 18px 0",
             fontSize: 14,
-            color: "#4b5563",
+            color: p.subtitle,
           }}
         >
           {copy.subtitle}
@@ -255,8 +256,8 @@ export default function Login() {
               fontSize: 13,
               padding: "8px 10px",
               borderRadius: 10,
-              backgroundColor: "rgba(248,113,113,0.08)",
-              color: "#b91c1c",
+              backgroundColor: p.errorBannerBg,
+              color: p.errorBannerColor,
             }}
           >
             {error}
@@ -269,7 +270,7 @@ export default function Login() {
               display: "block",
               fontSize: 13,
               fontWeight: 600,
-              color: "#111827",
+              color: p.label,
               marginBottom: 4,
             }}
           >
@@ -286,7 +287,9 @@ export default function Login() {
               padding: "10px 12px",
               marginBottom: 12,
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: `1px solid ${p.inputBorder}`,
+              backgroundColor: p.inputBg,
+              color: p.inputColor,
               fontSize: 14,
               outline: "none",
               boxSizing: "border-box",
@@ -298,7 +301,7 @@ export default function Login() {
               display: "block",
               fontSize: 13,
               fontWeight: 600,
-              color: "#111827",
+              color: p.label,
               marginBottom: 4,
             }}
           >
@@ -315,7 +318,9 @@ export default function Login() {
               padding: "10px 12px",
               marginBottom: 16,
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: `1px solid ${p.inputBorder}`,
+              backgroundColor: p.inputBg,
+              color: p.inputColor,
               fontSize: 14,
               outline: "none",
               boxSizing: "border-box",
@@ -352,7 +357,7 @@ export default function Login() {
               marginTop: 10,
               background: "none",
               border: "none",
-              color: "#0f766e",
+              color: p.linkAccent,
               textDecoration: "underline",
               cursor: "pointer",
               fontSize: 13,
@@ -371,7 +376,7 @@ export default function Login() {
             justifyContent: "space-between",
             alignItems: "center",
             fontSize: 12,
-            color: "#6b7280",
+            color: p.footerMuted,
             gap: 8,
             flexWrap: "wrap",
           }}
@@ -380,7 +385,7 @@ export default function Login() {
             {copy.noAccount}{" "}
             <Link
               to="/register"
-              style={{ color: "#0f766e", textDecoration: "none" }}
+              style={{ color: p.linkAccent, textDecoration: "none" }}
             >
               {copy.register}
             </Link>
@@ -390,7 +395,7 @@ export default function Login() {
             <Link
               to="/impressum"
               style={{
-                color: "#6b7280",
+                color: p.linkMuted,
                 textDecoration: "none",
                 marginRight: 8,
               }}
@@ -401,7 +406,7 @@ export default function Login() {
             <Link
               to="/datenschutz"
               style={{
-                color: "#6b7280",
+                color: p.linkMuted,
                 textDecoration: "none",
                 marginLeft: 8,
               }}

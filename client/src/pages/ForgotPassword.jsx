@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { useAuthFlowPalette } from "../ThemeMode";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const p = useAuthFlowPalette();
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
@@ -42,8 +44,7 @@ export default function ForgotPassword() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background:
-          "linear-gradient(135deg, #0f172a 0%, #0f766e 45%, #22c55e 100%)",
+        background: p.pageBg,
         padding: 16,
       }}
     >
@@ -51,10 +52,10 @@ export default function ForgotPassword() {
         style={{
           width: "100%",
           maxWidth: 420,
-          backgroundColor: "#ffffff",
+          backgroundColor: p.cardBg,
           padding: 28,
           borderRadius: 20,
-          boxShadow: "0 18px 40px rgba(0,0,0,0.25)",
+          boxShadow: p.cardShadow,
         }}
       >
         <div
@@ -74,8 +75,8 @@ export default function ForgotPassword() {
               gap: 8,
               padding: "4px 10px",
               borderRadius: 999,
-              backgroundColor: "rgba(37,99,235,0.08)",
-              color: "#1d4ed8",
+              backgroundColor: p.badgeBg,
+              color: p.badgeColor,
               fontSize: 12,
               fontWeight: 600,
             }}
@@ -95,8 +96,10 @@ export default function ForgotPassword() {
           <GlobalLanguageSelector label={navCopy.languageLabel} compact />
         </div>
 
-        <h1 style={{ marginBottom: 12 }}>{copy.title}</h1>
-        <p style={{ fontSize: 14, marginBottom: 20 }}>{copy.text}</p>
+        <h1 style={{ marginBottom: 12, color: p.title }}>{copy.title}</h1>
+        <p style={{ fontSize: 14, marginBottom: 20, color: p.body }}>
+          {copy.text}
+        </p>
 
         {msg && (
           <p
@@ -104,8 +107,10 @@ export default function ForgotPassword() {
               fontSize: 13,
               padding: "8px 10px",
               borderRadius: 10,
-              backgroundColor: "rgba(22,163,74,0.12)",
-              color: "#166534",
+              backgroundColor:
+                msg === copy.success ? p.successBannerBg : p.errorBannerBg,
+              color:
+                msg === copy.success ? p.successBannerColor : p.errorBannerColor,
               marginBottom: 16,
             }}
           >
@@ -115,7 +120,13 @@ export default function ForgotPassword() {
 
         <form onSubmit={handleSubmit}>
           <label
-            style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, display: "block" }}
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              marginBottom: 4,
+              display: "block",
+              color: p.label,
+            }}
           >
             {copy.email}
           </label>
@@ -129,7 +140,9 @@ export default function ForgotPassword() {
               width: "100%",
               padding: "10px 12px",
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: `1px solid ${p.inputBorder}`,
+              backgroundColor: p.inputBg,
+              color: p.inputColor,
               marginBottom: 16,
               boxSizing: "border-box",
             }}
@@ -160,7 +173,7 @@ export default function ForgotPassword() {
             marginTop: 16,
             background: "none",
             border: "none",
-            color: "#0f766e",
+            color: p.linkAccent,
             textDecoration: "underline",
             cursor: "pointer",
             fontSize: 13,

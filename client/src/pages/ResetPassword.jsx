@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { useAuthFlowPalette } from "../ThemeMode";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -11,6 +12,7 @@ export default function ResetPassword() {
   const [token, setToken] = useState(null);
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const p = useAuthFlowPalette();
 
   const copy = useMemo(() => getMessages(language).resetPassword, [language]);
   const navCopy = useMemo(() => getMessages(language).header, [language]);
@@ -74,8 +76,7 @@ export default function ResetPassword() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background:
-          "linear-gradient(135deg, #0f172a 0%, #0f766e 45%, #22c55e 100%)",
+        background: p.pageBg,
         padding: 16,
         boxSizing: "border-box",
       }}
@@ -84,9 +85,9 @@ export default function ResetPassword() {
         style={{
           width: "100%",
           maxWidth: 480,
-          backgroundColor: "#ffffff",
+          backgroundColor: p.cardBg,
           borderRadius: 24,
-          boxShadow: "0 18px 45px rgba(15,23,42,0.35)",
+          boxShadow: p.cardShadow,
           padding: "28px 26px 22px",
           boxSizing: "border-box",
         }}
@@ -106,7 +107,7 @@ export default function ResetPassword() {
             margin: "0 0 10px 0",
             fontSize: 26,
             lineHeight: 1.2,
-            color: "#020617",
+            color: p.title,
           }}
         >
           {copy.title}
@@ -116,7 +117,7 @@ export default function ResetPassword() {
           style={{
             margin: "0 0 18px 0",
             fontSize: 14,
-            color: "#4b5563",
+            color: p.subtitle,
           }}
         >
           {copy.text}
@@ -129,10 +130,8 @@ export default function ResetPassword() {
               fontSize: 13,
               padding: "8px 10px",
               borderRadius: 10,
-              backgroundColor: isSuccess
-                ? "rgba(22,163,74,0.08)"
-                : "rgba(220,38,38,0.06)",
-              color: isSuccess ? "#166534" : "#b91c1c",
+              backgroundColor: isSuccess ? p.successBannerBg : p.errorBannerBg,
+              color: isSuccess ? p.successBannerColor : p.errorBannerColor,
             }}
           >
             {msg}
@@ -145,7 +144,7 @@ export default function ResetPassword() {
               display: "block",
               fontSize: 13,
               fontWeight: 600,
-              color: "#111827",
+              color: p.label,
               marginBottom: 4,
             }}
           >
@@ -164,7 +163,9 @@ export default function ResetPassword() {
               padding: "10px 12px",
               marginBottom: 6,
               borderRadius: 12,
-              border: "1px solid #e5e7eb",
+              border: `1px solid ${p.inputBorder}`,
+              backgroundColor: p.inputBg,
+              color: p.inputColor,
               fontSize: 14,
               outline: "none",
               boxSizing: "border-box",
@@ -174,7 +175,7 @@ export default function ResetPassword() {
           <p
             style={{
               fontSize: 12,
-              color: "#6b7280",
+              color: p.hint,
               marginTop: 4,
               marginBottom: 16,
             }}
