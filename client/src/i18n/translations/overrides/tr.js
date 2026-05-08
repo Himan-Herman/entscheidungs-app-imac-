@@ -1,8 +1,16 @@
 import legalTr from "../legal/tr/index.js";
+import landing from "./tr.landing.js";
+import info from "./tr.info.js";
+import preVisit from "./tr.preVisit.js";
+import startseite from "./tr.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
   legal: legalTr,
+  landing,
+  info,
+  preVisit,
+  startseite,
   header: {
     skip: "İçeriğe geç",
     homeAria: "Ana sayfaya git",
@@ -102,38 +110,6 @@ export default {
     continue: "Devam",
     cancel: "İptal",
     close: "Kapat",
-  },
-  startseite: {
-    title: "MedScoutX — Muayeneye hazırlık",
-    skip: "Ana içeriğe geç",
-    tagline:
-      "Klinik görüşme için yapılandırılmış hazırlık — tanı veya tedavi önerisi değildir.",
-    heroTitle: "Muayenelerinizi daha iyi hazırlayın — her dilde.",
-    heroText:
-      "MedScoutX, ziyaret öncesi semptomları, ilaçları, belgeleri ve soruları yapılandırmanıza yardımcı olur. Kliniğin dilinde net bir PDF dışa aktarın.",
-    heroPrimary: "Muayeneye hazırlan",
-    heroSecondary: "Daha fazla bilgi",
-    heroHelp:
-      "Semptomlar, vücut haritası veya görüntüler için isteğe bağlı modüller — her zaman sizin kontrolünüzde.",
-    audienceTitle: "MedScoutX kimin için",
-    stepsEyebrow: "Nasıl çalışır",
-    safetyStripTitle: "Güvenlik sınırı",
-    safetyStripBody:
-      "MedScoutX tanı koymaz, tedavi önermez ve aciliyet değerlendirmez. Yalnızca paylaşmayı seçtiğiniz bilgileri yapılandırmanıza yardımcı olur.",
-    featuresTitle: "Özellikleri keşfedin",
-    featuresSubtitle:
-      "Önce muayene hazırlığıyla başlayın veya ek araçları kullanın.",
-    trustTitle: "Gizlilik ve şeffaflık",
-    trustText:
-      "Az veriyle tasarlandı: ne gireceğinize ve neyi yerelde saklayacağınıza siz karar verirsiniz.",
-    legal: "Yasal bilgiler",
-    imprint: "Künye",
-    privacy: "Gizlilik",
-    terms: "Şartlar",
-    disclaimer: "Feragatname",
-    footerNote:
-      "MedScoutX ifadelerinizi yapılandırmanıza yardımcı olur — tanı, tedavi önerisi veya aciliyet değerlendirmesi değildir.",
-    videoUnsupported: "Tarayıcınız video oynatmayı desteklemiyor.",
   },
   forgotPassword: {
     title: "Şifre sıfırlama",
