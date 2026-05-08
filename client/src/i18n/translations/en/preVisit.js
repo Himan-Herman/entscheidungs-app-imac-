@@ -31,6 +31,14 @@ export default {
     sectionLabelAnswer: "Your answer",
     devInsertDemo: "Insert demo information",
     devOnlyNote: "Visible only during local development.",
+    adaptiveSeedHint:
+      "Describe in your own words what you notice or feel — without trying to diagnose.",
+    adaptiveFollowupLabel: "Follow-up for preparation",
+    adaptiveSeedRequired: "Please briefly describe what is going on, in your own words.",
+    adaptiveAnswerRequired: "Please answer the follow-up briefly.",
+    adaptiveBusy: "One moment …",
+    adaptiveProgressMeta:
+      "Follow-ups for this entry: {{n}} of up to {{max}}",
   },
   review: {
     pageTitle: "MedScoutX — Pre-visit summary",

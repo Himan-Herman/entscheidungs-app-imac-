@@ -281,3 +281,57 @@
 :root[data-theme="dark"] .pre-visit-chat__btn--demo:hover {
   background: rgba(148, 163, 184, 0.08);
 }
+
+/* Bounded adaptive symptoms follow-up */
+.pre-visit-adaptive__hint {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--pvc-muted);
+}
+
+.pre-visit-adaptive__followup {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--pvc-accent-soft);
+  border: 1px solid rgba(14, 116, 144, 0.18);
+}
+
+.pre-visit-adaptive__label {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pvc-accent);
+}
+
+.pre-visit-adaptive__question {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--pvc-text);
+}
+
+.pre-visit-adaptive__meta {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  color: var(--pvc-subtle);
+}
+
+.pre-visit-adaptive__error {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+:root[data-theme="dark"] .pre-visit-adaptive__followup {
+  border-color: rgba(45, 212, 191, 0.25);
+}
+
+:root[data-theme="dark"] .pre-visit-adaptive__error {
+  color: #fca5a5;
+}

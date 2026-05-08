@@ -3,6 +3,7 @@ import {
   PRE_VISIT_SESSION_KEY,
   createEmptyAnswers,
 } from "./questionFlow.js";
+import { normalizeIntakeV1FromStorage } from "../engine/symptomsAdaptiveEngine.js";
 
 /** Same key as language selection screen — single source of truth */
 export const PREVISIT_LOCALE_STORAGE_KEY = "medscoutx_previsit_locale";
@@ -75,6 +76,7 @@ export function buildInitialSession(patientLanguage) {
     stored.answers &&
     typeof stored.answers === "object"
   ) {
+    const intakeV1 = normalizeIntakeV1FromStorage(stored.intakeV1);
     return {
       patientLanguage: stored.patientLanguage || patientLanguage,
       answers: { ...empty, ...stored.answers },
@@ -88,6 +90,7 @@ export function buildInitialSession(patientLanguage) {
       ...(stored.doctorLanguage
         ? { doctorLanguage: stored.doctorLanguage }
         : {}),
+      ...(intakeV1 ? { intakeV1 } : {}),
     };
   }
 
@@ -133,7 +136,20 @@ export function updateAnswerField(fieldKey, value) {
  * @returns {object | null}
  */
 export function clearAnswerField(fieldKey) {
-  return updateAnswerField(fieldKey, "");
+  const s = loadPreVisitSession();
+  if (!s?.answers) return null;
+  if (!answerKeys().includes(fieldKey)) return null;
+  const next = {
+    ...s,
+    answers: { ...s.answers, [fieldKey]: "" },
+  };
+  if (fieldKey === "symptomsOwnWords" && next.intakeV1) {
+    const v1 = { ...next.intakeV1 };
+    delete v1.symptomsOwnWords;
+    next.intakeV1 = Object.keys(v1).length > 0 ? v1 : undefined;
+  }
+  savePreVisitSession(next);
+  return next;
 }
 
 /**

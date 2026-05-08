@@ -32,6 +32,14 @@ export default {
     sectionLabelAnswer: "Ihre Antwort",
     devInsertDemo: "Demo-Angaben einfügen",
     devOnlyNote: "Nur für lokale Entwicklung sichtbar.",
+    adaptiveSeedHint:
+      "Beschreiben Sie in eigenen Worten, was Sie spüren oder bemerken — ohne Diagnose zu stellen.",
+    adaptiveFollowupLabel: "Nachfrage zur Vorbereitung",
+    adaptiveSeedRequired: "Bitte geben Sie kurz in eigenen Worten an, worum es geht.",
+    adaptiveAnswerRequired: "Bitte beantworten Sie die Nachfrage kurz.",
+    adaptiveBusy: "Einen Moment …",
+    adaptiveProgressMeta:
+      "Nachfragen für diese Angabe: {{n}} von maximal {{max}}",
   },
   review: {
     pageTitle: "MedScoutX — Übersicht",

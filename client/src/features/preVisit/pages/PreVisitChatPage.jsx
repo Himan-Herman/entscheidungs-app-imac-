@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
@@ -13,6 +13,12 @@ import {
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
+import SymptomsAdaptivePanel from "../components/SymptomsAdaptivePanel.jsx";
+import {
+  createEmptySymptomsIntakeSlice,
+  isAdaptiveCategory,
+  shouldUseLegacySymptomsEditor,
+} from "../engine/symptomsAdaptiveEngine.js";
 import "../styles/PreVisitChatPage.css";
 
 function readLocaleKey() {
@@ -77,12 +83,63 @@ export default function PreVisitChatPage() {
   }, [tUi.pageTitle]);
 
   const total = PRE_VISIT_QUESTION_STEPS.length;
-  const stepIndex = Math.min(
-    Math.max(0, session.stepIndex),
-    total - 1
-  );
+  const stepIndex = Math.min(Math.max(0, session.stepIndex), total - 1);
   const step = PRE_VISIT_QUESTION_STEPS[stepIndex];
   const currentValue = session.answers[step.key] ?? "";
+
+  const useAdaptiveSymptoms =
+    isAdaptiveCategory(step.key) && !shouldUseLegacySymptomsEditor(session);
+
+  const legacySymptomsEditor = shouldUseLegacySymptomsEditor(session);
+
+  useEffect(() => {
+    if (step.key !== "symptomsOwnWords") return;
+    if (legacySymptomsEditor) return;
+    if (session.intakeV1?.symptomsOwnWords) return;
+    setSession((prev) => ({
+      ...prev,
+      intakeV1: {
+        schemaVersion: 1,
+        ...prev.intakeV1,
+        symptomsOwnWords: createEmptySymptomsIntakeSlice(),
+      },
+    }));
+  }, [
+    step.key,
+    legacySymptomsEditor,
+    session.intakeV1?.symptomsOwnWords,
+    session.answers?.symptomsOwnWords,
+  ]);
+
+  const handleSymptomsAdaptiveFinished = useCallback(
+    (compiled) => {
+      setSession((prev) => {
+        const totalSteps = PRE_VISIT_QUESTION_STEPS.length;
+        const idx = Math.min(Math.max(0, prev.stepIndex), totalSteps - 1);
+        const atLast = idx >= totalSteps - 1;
+        const nextIdx = atLast ? idx : idx + 1;
+        if (atLast) {
+          queueMicrotask(() => navigate("/pre-visit/review"));
+        }
+        return {
+          ...prev,
+          answers: { ...prev.answers, symptomsOwnWords: compiled },
+          intakeV1: {
+            schemaVersion: 1,
+            ...prev.intakeV1,
+            symptomsOwnWords: {
+              ...(prev.intakeV1?.symptomsOwnWords ||
+                createEmptySymptomsIntakeSlice()),
+              status: "complete",
+              currentQuestion: null,
+            },
+          },
+          stepIndex: nextIdx,
+        };
+      });
+    },
+    [navigate]
+  );
 
   function setAnswer(value) {
     setSession((prev) => ({
@@ -182,40 +239,53 @@ export default function PreVisitChatPage() {
           <h1 className="pre-visit-chat__title">{title}</h1>
           <p className="pre-visit-chat__explanation">{explanation}</p>
 
-          <div className="pre-visit-chat__field">
-            <label
-              className="pre-visit-chat__textarea-label"
-              htmlFor={`previsit-field-${step.key}`}
-            >
-              {tUi.sectionLabelAnswer}
-            </label>
-            <textarea
-              id={`previsit-field-${step.key}`}
-              className="pre-visit-chat__textarea"
-              value={currentValue}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder={tUi.answerPlaceholder}
-              rows={6}
-              autoComplete="off"
+          {useAdaptiveSymptoms ? (
+            <SymptomsAdaptivePanel
+              session={session}
+              setSession={setSession}
+              labels={tUi}
+              patientLanguage={session.patientLanguage}
+              onExitStep={goBack}
+              onFinished={handleSymptomsAdaptiveFinished}
             />
-          </div>
+          ) : (
+            <>
+              <div className="pre-visit-chat__field">
+                <label
+                  className="pre-visit-chat__textarea-label"
+                  htmlFor={`previsit-field-${step.key}`}
+                >
+                  {tUi.sectionLabelAnswer}
+                </label>
+                <textarea
+                  id={`previsit-field-${step.key}`}
+                  className="pre-visit-chat__textarea"
+                  value={currentValue}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  placeholder={tUi.answerPlaceholder}
+                  rows={6}
+                  autoComplete="off"
+                />
+              </div>
 
-          <div className="pre-visit-chat__actions">
-            <button
-              type="button"
-              className="pre-visit-chat__btn pre-visit-chat__btn--secondary"
-              onClick={goBack}
-            >
-              {tUi.back}
-            </button>
-            <button
-              type="button"
-              className="pre-visit-chat__btn pre-visit-chat__btn--primary"
-              onClick={goNext}
-            >
-              {tUi.next}
-            </button>
-          </div>
+              <div className="pre-visit-chat__actions">
+                <button
+                  type="button"
+                  className="pre-visit-chat__btn pre-visit-chat__btn--secondary"
+                  onClick={goBack}
+                >
+                  {tUi.back}
+                </button>
+                <button
+                  type="button"
+                  className="pre-visit-chat__btn pre-visit-chat__btn--primary"
+                  onClick={goNext}
+                >
+                  {tUi.next}
+                </button>
+              </div>
+            </>
+          )}
         </article>
 
         {import.meta.env.DEV ? (
