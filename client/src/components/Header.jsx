@@ -15,6 +15,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
 import { getMessages } from "../i18n/translations";
+import { authFetch } from "../api/authFetch.js";
 import "../styles/Header.css";
 
 export default function Header() {
@@ -34,7 +35,12 @@ export default function Header() {
     setOpen(false);
   }, [location.pathname]);
 
-  function handleLogout() {
+  async function handleLogout() {
+    try {
+      await authFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      /* still clear local session */
+    }
     localStorage.removeItem("medscout_token");
     localStorage.removeItem("medscout_user_id");
     localStorage.removeItem("symptom_thread_id");
@@ -152,6 +158,21 @@ export default function Header() {
                   >
                     <BookUser size={16} aria-hidden="true" />
                     <span>{copy.settingsDoctorContacts}</span>
+                  </NavLink>
+                </li>
+              )}
+
+              {isLoggedIn && (
+                <li>
+                  <NavLink
+                    to="/settings/privacy"
+                    className={({ isActive }) =>
+                      `ms-nav-item ${isActive ? "is-active" : ""}`.trim()
+                    }
+                    onClick={() => setOpen(false)}
+                    aria-label={copy.settingsPrivacyAria}
+                  >
+                    <span>{copy.settingsPrivacy}</span>
                   </NavLink>
                 </li>
               )}

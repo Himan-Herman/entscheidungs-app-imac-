@@ -20,6 +20,28 @@ model User {
   preVisitSessions PreVisitSession[]
   preVisitCases    PreVisitCase[]
   practiceProfiles PracticeProfile[]
+  practiceMemberships PracticeMember[]
+  followUpPatientThreads PreVisitFollowUpThread[] @relation("FollowUpPatientUser")
+  followUpCreatedThreads PreVisitFollowUpThread[] @relation("FollowUpCreatedByUser")
+  auditLogs        AuditLog[]
+}
+
+/** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  actorRole   String?
+  action      String
+  entityType  String?
+  entityId    String?
+  createdAt   DateTime @default(now())
+  ipHash      String?
+  userAgent   String?
+  metadata    Json?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 /** Groups multiple saved Pre-Visit sessions into a longitudinal / chronic case timeline. */
@@ -43,6 +65,8 @@ model PreVisitSession {
   id             String         @id @default(cuid())
   userId         String
   preVisitCaseId String?
+  practiceProfileId String?
+  practiceQrTargetId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -51,7 +75,12 @@ model PreVisitSession {
 
   title           String?
   status          String   @default("draft")
+  practiceStatus  String   @default("new")
   pdfDownloaded   Boolean  @default(false)
+  openedAt        DateTime?
+  archivedAt      DateTime?
+  completedAt     DateTime?
+  lastStatusChangeAt DateTime?
 
   answers         Json
   aiDoctorVersion Json?
@@ -59,9 +88,15 @@ model PreVisitSession {
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   preVisitCase PreVisitCase? @relation(fields: [preVisitCaseId], references: [id], onDelete: SetNull)
+  practiceProfile PracticeProfile? @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
+  practiceQrTarget PracticeQrTarget? @relation(fields: [practiceQrTargetId], references: [id], onDelete: SetNull)
+  followUpThreads PreVisitFollowUpThread[]
 
   @@index([userId])
   @@index([preVisitCaseId])
+  @@index([practiceProfileId])
+  @@index([practiceQrTargetId])
+  @@index([practiceStatus])
   @@index([createdAt])
 }
 
@@ -136,6 +171,9 @@ model PracticeProfile {
 
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   qrTargets PracticeQrTarget[]
+  members   PracticeMember[]
+  preVisitSessions PreVisitSession[]
+  followUpThreads PreVisitFollowUpThread[]
 
   @@index([userId])
 }
@@ -155,8 +193,67 @@ model PracticeQrTarget {
   isActive                Boolean  @default(true)
 
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  preVisitSessions PreVisitSession[]
+  followUpThreads PreVisitFollowUpThread[]
 
   @@index([practiceProfileId])
+}
+
+model PracticeMember {
+  id              String   @id @default(cuid())
+  practiceProfileId String
+  userId          String
+  role            String
+  createdAt       DateTime @default(now())
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([practiceProfileId, userId])
+  @@index([userId])
+  @@index([practiceProfileId, role])
+}
+
+model PreVisitFollowUpThread {
+  id                     String   @id @default(cuid())
+  preVisitSessionId      String
+  practiceProfileId      String?
+  qrTargetId             String?
+  patientUserId          String?
+  createdByUserId        String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  status                 String   @default("open")
+  title                  String?
+  isArchived             Boolean  @default(false)
+  followUpAccessToken    String?  @unique
+  followUpTokenExpiresAt DateTime?
+
+  session        PreVisitSession          @relation(fields: [preVisitSessionId], references: [id], onDelete: Cascade)
+  practiceProfile PracticeProfile?        @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
+  qrTarget       PracticeQrTarget?        @relation(fields: [qrTargetId], references: [id], onDelete: SetNull)
+  patientUser    User?                    @relation("FollowUpPatientUser", fields: [patientUserId], references: [id], onDelete: SetNull)
+  createdByUser  User?                    @relation("FollowUpCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  messages       PreVisitFollowUpMessage[]
+
+  @@index([preVisitSessionId])
+  @@index([practiceProfileId, status])
+  @@index([patientUserId, status])
+  @@index([updatedAt])
+}
+
+model PreVisitFollowUpMessage {
+  id           String   @id @default(cuid())
+  threadId     String
+  senderType   String
+  senderUserId String?
+  body         String
+  createdAt    DateTime @default(now())
+  readAt       DateTime?
+
+  thread      PreVisitFollowUpThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
 }
 
 datasource db {

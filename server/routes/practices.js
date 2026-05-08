@@ -1,6 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
+import { writeAuditLog } from "../services/auditLogService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -10,6 +11,13 @@ const TARGET_TYPES = new Set([
   "doctor",
   "department",
   "appointment_type",
+]);
+const PRACTICE_MEMBER_ROLES = new Set([
+  "owner",
+  "admin",
+  "doctor",
+  "assistant",
+  "viewer",
 ]);
 
 function userIdFromReq(req) {
@@ -77,11 +85,43 @@ function targetJson(row) {
   };
 }
 
+function memberJson(row) {
+  return {
+    id: row.id,
+    practiceProfileId: row.practiceProfileId,
+    userId: row.userId,
+    role: row.role,
+    createdAt: row.createdAt,
+  };
+}
+
+async function resolvePracticeAccess(userId, practiceId) {
+  const practice = await prisma.practiceProfile.findUnique({
+    where: { id: practiceId },
+  });
+  if (!practice) return null;
+  if (practice.userId === userId) return { practice, role: "owner" };
+  const member = await prisma.practiceMember.findUnique({
+    where: { practiceProfileId_userId: { practiceProfileId: practiceId, userId } },
+  });
+  if (!member) return null;
+  return { practice, role: member.role };
+}
+
+function roleAllows(role, allowed) {
+  return allowed.includes(role);
+}
+
 router.get("/", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
   const rows = await prisma.practiceProfile.findMany({
-    where: { userId },
+    where: {
+      OR: [
+        { userId },
+        { members: { some: { userId } } },
+      ],
+    },
     orderBy: { updatedAt: "desc" },
   });
   return res.json({ ok: true, practices: rows.map(profileJson) });
@@ -118,7 +158,21 @@ router.post("/", async (req, res) => {
         preferredDoctorLanguage,
         patientIntroText: normalizeOpt(b.patientIntroText, 1200),
         isActive: b.isActive !== false,
+        members: {
+          create: {
+            userId,
+            role: "owner",
+          },
+        },
       },
+    });
+    writeAuditLog({
+      req,
+      userId,
+      action: "practice_profile_created",
+      entityType: "PracticeProfile",
+      entityId: created.id,
+      metadata: {},
     });
     return res.status(201).json({ ok: true, practice: profileJson(created) });
   } catch (err) {
@@ -132,20 +186,20 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const row = await prisma.practiceProfile.findFirst({
-    where: { id: req.params.id, userId },
-  });
-  if (!row) return res.status(404).json({ ok: false, error: "not_found" });
-  return res.json({ ok: true, practice: profileJson(row) });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  return res.json({ ok: true, practice: profileJson(access.practice), role: access.role });
 });
 
 router.put("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const existing = await prisma.practiceProfile.findFirst({
-    where: { id: req.params.id, userId },
-  });
-  if (!existing) return res.status(404).json({ ok: false, error: "not_found" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!roleAllows(access.role, ["owner", "admin"])) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  const existing = access.practice;
   const b = req.body || {};
   const data = {};
   if (Object.prototype.hasOwnProperty.call(b, "practiceName")) {
@@ -189,8 +243,13 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (access.role !== "owner") {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
   const result = await prisma.practiceProfile.deleteMany({
-    where: { id: req.params.id, userId },
+    where: { id: req.params.id },
   });
   if (result.count === 0) return res.status(404).json({ ok: false, error: "not_found" });
   return res.json({ ok: true, deleted: true });
@@ -199,10 +258,10 @@ router.delete("/:id", async (req, res) => {
 router.get("/:id/qr-targets", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const owner = await prisma.practiceProfile.findFirst({ where: { id: req.params.id, userId } });
-  if (!owner) return res.status(404).json({ ok: false, error: "not_found" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
   const rows = await prisma.practiceQrTarget.findMany({
-    where: { practiceProfileId: owner.id },
+    where: { practiceProfileId: access.practice.id },
     orderBy: { updatedAt: "desc" },
   });
   return res.json({ ok: true, targets: rows.map(targetJson) });
@@ -211,8 +270,11 @@ router.get("/:id/qr-targets", async (req, res) => {
 router.post("/:id/qr-targets", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const owner = await prisma.practiceProfile.findFirst({ where: { id: req.params.id, userId } });
-  if (!owner) return res.status(404).json({ ok: false, error: "not_found" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!roleAllows(access.role, ["owner", "admin"])) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
   const b = req.body || {};
   const targetName = normalizeOpt(b.targetName, 180);
   if (!targetName) return res.status(400).json({ ok: false, error: "targetName_required" });
@@ -224,7 +286,7 @@ router.post("/:id/qr-targets", async (req, res) => {
   }
   const row = await prisma.practiceQrTarget.create({
     data: {
-      practiceProfileId: owner.id,
+      practiceProfileId: access.practice.id,
       targetName,
       targetType,
       doctorName: normalizeOpt(b.doctorName, 180),
@@ -235,16 +297,28 @@ router.post("/:id/qr-targets", async (req, res) => {
       isActive: b.isActive !== false,
     },
   });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "qr_target_created",
+    entityType: "PracticeQrTarget",
+    entityId: row.id,
+    metadata: { practiceProfileId: access.practice.id },
+  });
   return res.status(201).json({ ok: true, target: targetJson(row) });
 });
 
 router.put("/:id/qr-targets/:targetId", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const owner = await prisma.practiceProfile.findFirst({ where: { id: req.params.id, userId } });
-  if (!owner) return res.status(404).json({ ok: false, error: "not_found" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!roleAllows(access.role, ["owner", "admin"])) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
   const target = await prisma.practiceQrTarget.findFirst({
-    where: { id: req.params.targetId, practiceProfileId: owner.id },
+    where: { id: req.params.targetId, practiceProfileId: access.practice.id },
   });
   if (!target) return res.status(404).json({ ok: false, error: "target_not_found" });
   const b = req.body || {};
@@ -275,12 +349,111 @@ router.put("/:id/qr-targets/:targetId", async (req, res) => {
 router.delete("/:id/qr-targets/:targetId", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const owner = await prisma.practiceProfile.findFirst({ where: { id: req.params.id, userId } });
-  if (!owner) return res.status(404).json({ ok: false, error: "not_found" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!roleAllows(access.role, ["owner", "admin"])) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
   const result = await prisma.practiceQrTarget.deleteMany({
-    where: { id: req.params.targetId, practiceProfileId: owner.id },
+    where: { id: req.params.targetId, practiceProfileId: access.practice.id },
   });
   if (result.count === 0) return res.status(404).json({ ok: false, error: "target_not_found" });
+  return res.json({ ok: true, deleted: true });
+});
+
+router.get("/:id/members", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  const rows = await prisma.practiceMember.findMany({
+    where: { practiceProfileId: access.practice.id },
+    orderBy: { createdAt: "asc" },
+  });
+  return res.json({ ok: true, members: rows.map(memberJson), role: access.role });
+});
+
+router.post("/:id/members", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!roleAllows(access.role, ["owner", "admin"])) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  const role = String(req.body?.role || "").trim();
+  const memberUserId = String(req.body?.userId || "").trim();
+  if (!memberUserId) return res.status(400).json({ ok: false, error: "userId_required" });
+  if (!PRACTICE_MEMBER_ROLES.has(role)) {
+    return res.status(400).json({ ok: false, error: "role_invalid" });
+  }
+  if (access.role !== "owner" && role === "owner") {
+    return res.status(403).json({ ok: false, error: "forbidden_role_escalation" });
+  }
+  const userExists = await prisma.user.findUnique({ where: { id: memberUserId }, select: { id: true } });
+  if (!userExists) return res.status(404).json({ ok: false, error: "user_not_found" });
+  const row = await prisma.practiceMember.upsert({
+    where: {
+      practiceProfileId_userId: {
+        practiceProfileId: access.practice.id,
+        userId: memberUserId,
+      },
+    },
+    update: { role },
+    create: {
+      practiceProfileId: access.practice.id,
+      userId: memberUserId,
+      role,
+    },
+  });
+  return res.status(201).json({ ok: true, member: memberJson(row) });
+});
+
+router.put("/:id/members/:memberId", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!roleAllows(access.role, ["owner", "admin"])) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  const role = String(req.body?.role || "").trim();
+  if (!PRACTICE_MEMBER_ROLES.has(role)) {
+    return res.status(400).json({ ok: false, error: "role_invalid" });
+  }
+  const existing = await prisma.practiceMember.findFirst({
+    where: { id: req.params.memberId, practiceProfileId: access.practice.id },
+  });
+  if (!existing) return res.status(404).json({ ok: false, error: "member_not_found" });
+  if (existing.role === "owner" && access.role !== "owner") {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  if (access.role !== "owner" && role === "owner") {
+    return res.status(403).json({ ok: false, error: "forbidden_role_escalation" });
+  }
+  const row = await prisma.practiceMember.update({
+    where: { id: existing.id },
+    data: { role },
+  });
+  return res.json({ ok: true, member: memberJson(row) });
+});
+
+router.delete("/:id/members/:memberId", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const access = await resolvePracticeAccess(userId, req.params.id);
+  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!roleAllows(access.role, ["owner", "admin"])) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  const existing = await prisma.practiceMember.findFirst({
+    where: { id: req.params.memberId, practiceProfileId: access.practice.id },
+  });
+  if (!existing) return res.status(404).json({ ok: false, error: "member_not_found" });
+  if (existing.role === "owner") {
+    return res.status(400).json({ ok: false, error: "owner_member_cannot_be_deleted" });
+  }
+  await prisma.practiceMember.delete({ where: { id: existing.id } });
   return res.json({ ok: true, deleted: true });
 });
 

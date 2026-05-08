@@ -10,6 +10,8 @@ export default {
   settingsPracticesAria: "Open practice profiles",
   settingsDoctorContacts: "Doctor contacts",
   settingsDoctorContactsAria: "Open doctor contacts",
+  settingsPrivacy: "Privacy & data",
+  settingsPrivacyAria: "Open privacy and data export",
   preVisitCases: "My cases",
   preVisitCasesAria: "Open Pre-Visit cases and timeline",
   languageLabel: "Language",

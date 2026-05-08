@@ -21,37 +21,43 @@ import hrOverrides from "./overrides/hr.js";
 import bsOverrides from "./overrides/bs.js";
 import srOverrides from "./overrides/sr.js";
 
+/**
+ * Message fallback: keys prefer English, then German for keys missing from English
+ * (selected UI language still wins via per-locale overrides).
+ */
+const messagesFallbackBase = deepMerge(de, en);
+
 const bundles = {
   en,
   de,
-  fr: deepMerge(en, frOverrides),
-  es: deepMerge(en, esOverrides),
-  it: deepMerge(en, itOverrides),
-  pt: deepMerge(en, ptOverrides),
-  ru: deepMerge(en, ruOverrides),
-  tr: deepMerge(en, trOverrides),
-  uk: deepMerge(en, ukOverrides),
-  ar: deepMerge(en, arOverrides),
-  fa: deepMerge(en, faOverrides),
-  pl: deepMerge(en, plOverrides),
-  ro: deepMerge(en, roOverrides),
-  nl: deepMerge(en, nlOverrides),
-  ckb: deepMerge(en, ckbOverrides),
-  ku: deepMerge(en, kuOverrides),
-  el: deepMerge(en, elOverrides),
-  sq: deepMerge(en, sqOverrides),
-  hr: deepMerge(en, hrOverrides),
-  bs: deepMerge(en, bsOverrides),
-  sr: deepMerge(en, srOverrides),
+  fr: deepMerge(messagesFallbackBase, frOverrides),
+  es: deepMerge(messagesFallbackBase, esOverrides),
+  it: deepMerge(messagesFallbackBase, itOverrides),
+  pt: deepMerge(messagesFallbackBase, ptOverrides),
+  ru: deepMerge(messagesFallbackBase, ruOverrides),
+  tr: deepMerge(messagesFallbackBase, trOverrides),
+  uk: deepMerge(messagesFallbackBase, ukOverrides),
+  ar: deepMerge(messagesFallbackBase, arOverrides),
+  fa: deepMerge(messagesFallbackBase, faOverrides),
+  pl: deepMerge(messagesFallbackBase, plOverrides),
+  ro: deepMerge(messagesFallbackBase, roOverrides),
+  nl: deepMerge(messagesFallbackBase, nlOverrides),
+  ckb: deepMerge(messagesFallbackBase, ckbOverrides),
+  ku: deepMerge(messagesFallbackBase, kuOverrides),
+  el: deepMerge(messagesFallbackBase, elOverrides),
+  sq: deepMerge(messagesFallbackBase, sqOverrides),
+  hr: deepMerge(messagesFallbackBase, hrOverrides),
+  bs: deepMerge(messagesFallbackBase, bsOverrides),
+  sr: deepMerge(messagesFallbackBase, srOverrides),
 };
 
 /**
- * Full message tree for a locale. Unknown codes fall back to English.
+ * Full message tree for a locale. Unknown codes fall back to English → German merge.
  */
 export function getMessages(lang) {
   const code =
     typeof lang === "string" ? lang.toLowerCase() : "en";
-  return bundles[code] ?? en;
+  return bundles[code] ?? messagesFallbackBase;
 }
 
 export { bundles };

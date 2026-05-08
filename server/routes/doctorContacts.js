@@ -9,8 +9,9 @@
 import express from 'express';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
-import { sendEmailWithPdfAttachment } from '../emailService.js';
+import { deliverPrevisitPdfEmail } from '../services/emailQueueService.js';
 import { sendPrevisitPdfLimiter } from '../middleware/ipRateLimit.js';
+import { writeAuditLog } from '../services/auditLogService.js';
 
 const prisma = new PrismaClient();
 
@@ -211,6 +212,14 @@ router.post('/', async (req, res) => {
     const row = await prisma.doctorContact.create({
       data: { userId, ...norm.data },
     });
+    writeAuditLog({
+      req,
+      userId,
+      action: 'doctor_contact_created',
+      entityType: 'DoctorContact',
+      entityId: row.id,
+      metadata: {},
+    });
     return res.status(201).json({ ok: true, contact: rowJson(row) });
   } catch (err) {
     console.error('[doctor-contacts] create', err?.message);
@@ -256,10 +265,9 @@ router.post(
     }
 
     const { id } = req.params;
-    const locale =
-      typeof req.body?.locale === 'string' && req.body.locale.startsWith('en')
-        ? 'en'
-        : 'de';
+    const rawLocale =
+      typeof req.body?.locale === 'string' ? req.body.locale : '';
+    const locale = rawLocale.toLowerCase().startsWith('de') ? 'de' : 'en';
 
     try {
       const contact = await prisma.doctorContact.findFirst({
@@ -307,12 +315,21 @@ Kontakt in der App hinterlegt: ${contact.doctorName}${practiceLine ? `\n${practi
 
 — MedScoutX`;
 
-      await sendEmailWithPdfAttachment({
+      await deliverPrevisitPdfEmail({
         to: contact.email,
         subject,
         text,
         pdfFilename: pdfName,
         pdfBuffer: req.file.buffer,
+      });
+
+      writeAuditLog({
+        req,
+        userId,
+        action: 'pdf_sent',
+        entityType: 'DoctorContact',
+        entityId: id,
+        metadata: { locale },
       });
 
       return res.json({ ok: true });

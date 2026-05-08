@@ -41,15 +41,21 @@ import PreVisitAccountHistoryPage from "./features/preVisit/pages/PreVisitAccoun
 import PreVisitQrLandingPage from "./features/preVisit/pages/PreVisitQrLandingPage.jsx";
 import PreVisitCasesPage from "./features/preVisit/pages/PreVisitCasesPage.jsx";
 import PreVisitCaseDetailPage from "./features/preVisit/pages/PreVisitCaseDetailPage.jsx";
+import PreVisitFollowUpsPage from "./features/preVisit/pages/PreVisitFollowUpsPage.jsx";
+import PreVisitFollowUpThreadPage from "./features/preVisit/pages/PreVisitFollowUpThreadPage.jsx";
 import SettingsDoctorContactsPage from "./pages/SettingsDoctorContactsPage.jsx";
 import SettingsPracticesPage from "./pages/SettingsPracticesPage.jsx";
+import PracticeDashboardPage from "./pages/PracticeDashboardPage.jsx";
+import PracticePreparationDetailPage from "./pages/PracticePreparationDetailPage.jsx";
 import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider } from "./i18n/LanguageContext";
 
 //import VerifyEmail from "./pages/VerifyEmail";
 
 function Gate() {
-  const hasUser = !!localStorage.getItem("medscout_user_id");
+  const hasUser =
+    !!localStorage.getItem("medscout_token") &&
+    !!localStorage.getItem("medscout_user_id");
   return hasUser
     ? <Navigate to="/intro" replace />
     : <Navigate to="/register" replace />;
@@ -160,6 +166,30 @@ createRoot(document.getElementById("root")).render(
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/settings/privacy"
+              element={
+                <ProtectedRoute>
+                  <SettingsPrivacyPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/practice/dashboard"
+              element={
+                <ProtectedRoute>
+                  <PracticeDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/practice/dashboard/preparations/:id"
+              element={
+                <ProtectedRoute>
+                  <PracticePreparationDetailPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Öffentliche statische Seiten */}
             <Route path="/impressum" element={<Impressum />} />
@@ -196,6 +226,22 @@ createRoot(document.getElementById("root")).render(
               element={<PreVisitAccountHistoryPage />}
             />
             <Route path="/pre-visit/history" element={<PreVisitHistoryPage />} />
+            <Route
+              path="/pre-visit/follow-ups"
+              element={
+                <ProtectedRoute>
+                  <PreVisitFollowUpsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pre-visit/follow-ups/:threadId"
+              element={
+                <ProtectedRoute>
+                  <PreVisitFollowUpThreadPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/pre-visit/chat" element={<PreVisitChatPage />} />
             <Route path="/pre-visit/review" element={<PreVisitReviewPage />} />
             <Route path="/pre-visit" element={<PreVisitLanguagePage />} />

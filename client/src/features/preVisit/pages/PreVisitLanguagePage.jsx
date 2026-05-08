@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
+import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
 import { PREVISIT_LOCALE_STORAGE_KEY } from "../constants/preVisitSession.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
@@ -22,7 +23,7 @@ export default function PreVisitLanguagePage() {
     () =>
       PRE_VISIT_LANGUAGE_OPTIONS.map((row) => ({
         value: row.id,
-        label: language === "de" ? row.labelDe : row.labelEn,
+        label: formatLanguageDisplayName(language, row.id),
       })),
     [language]
   );

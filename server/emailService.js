@@ -12,6 +12,42 @@ if (!from) console.error("FEHLER: EMAIL_FROM fehlt in .env");
 
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+/** Backoff after transient failures — avoids duplicate successful sends (retry only on throw). */
+const RESEND_RETRY_BACKOFF_MS = [400, 1200, 2800];
+
+async function sendResendWithRetry(sendFn, eventName) {
+  let lastErr;
+  for (let attempt = 0; attempt <= RESEND_RETRY_BACKOFF_MS.length; attempt++) {
+    try {
+      const res = await sendFn();
+      const messageId = res?.data?.id ?? null;
+      console.info(
+        JSON.stringify({
+          level: "info",
+          event: eventName,
+          messageId,
+          attempt: attempt + 1,
+        }),
+      );
+      return res;
+    } catch (err) {
+      lastErr = err;
+      if (attempt === RESEND_RETRY_BACKOFF_MS.length) break;
+      await new Promise((r) =>
+        setTimeout(r, RESEND_RETRY_BACKOFF_MS[attempt]),
+      );
+    }
+  }
+  console.error(
+    JSON.stringify({
+      level: "error",
+      event: `${eventName}_failed`,
+      attempts: RESEND_RETRY_BACKOFF_MS.length + 1,
+    }),
+  );
+  throw lastErr;
+}
+
 /**
  * Generische Mail senden (Resend)
  */
@@ -28,18 +64,8 @@ export async function sendMail(to, subject, text, html) {
     html: html ?? `<p>${text ?? ""}</p>`,
   };
 
-  try {
-    const res = await resend.emails.send(message);
-    console.log(
-      `📧 Mail an ${Array.isArray(to) ? to.join(", ") : to} gesendet.`,
-      "Resend-ID:",
-      res?.data?.id ?? "keine ID"
-    );
-    return true;
-  } catch (err) {
-    console.error("Resend Fehler:", err?.response?.data ?? err);
-    throw err;
-  }
+  await sendResendWithRetry(() => resend.emails.send(message), "transactional_email");
+  return true;
 }
 
 /**
@@ -70,17 +96,8 @@ export async function sendEmailWithPdfAttachment({
     ],
   };
 
-  try {
-    const res = await resend.emails.send(message);
-    console.info("[email] attachment send ok", res?.data?.id ?? "");
-    return true;
-  } catch (err) {
-    console.error(
-      "Resend attachment error:",
-      err?.response?.data ?? err?.message ?? err
-    );
-    throw err;
-  }
+  await sendResendWithRetry(() => resend.emails.send(message), "pdf_attachment_email");
+  return true;
 }
 
 /**

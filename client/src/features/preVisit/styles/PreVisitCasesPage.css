@@ -4,10 +4,11 @@
   background: #f4f5f7;
   color: #0f172a;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .pre-visit-cases__inner {
-  max-width: 720px;
+  max-width: 920px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -127,11 +128,12 @@
   padding: 14px 16px;
   text-decoration: none;
   color: inherit;
-  transition: box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .pre-visit-cases__card:hover {
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08);
+  border-color: rgba(14, 116, 144, 0.25);
 }
 
 .pre-visit-cases__card-title {
@@ -171,6 +173,32 @@
 .pre-visit-cases__link {
   color: #0e7490;
   font-weight: 600;
+}
+
+.pre-visit-cases :focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.5);
+  outline-offset: 2px;
+}
+
+:dir(rtl) .pre-visit-cases,
+:dir(rtl) .pre-visit-cases * {
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .pre-visit-cases__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pre-visit-cases__btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pre-visit-cases * {
+    transition: none !important;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

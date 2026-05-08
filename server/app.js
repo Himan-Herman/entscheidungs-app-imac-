@@ -2,6 +2,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import { PrismaClient } from '@prisma/client';
 
 import symptomRoute from './routes/symptom.js';
 import symptomThreadRoute from './routes/symptomThread.js';
@@ -19,9 +21,17 @@ import previsitCasesRouter from "./routes/previsitCases.js";
 import doctorContactsRouter from "./routes/doctorContacts.js";
 import practicesRouter from "./routes/practices.js";
 import publicPrevisitQrRouter from "./routes/publicPrevisitQr.js";
+import practiceDashboardRouter from "./routes/practiceDashboard.js";
+import practiceFollowUpsRouter from "./routes/practiceFollowUps.js";
+import previsitFollowUpsRouter from "./routes/previsitFollowUps.js";
+import accountRouter from "./routes/account.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
+import { requestContextMiddleware } from "./middleware/requestContext.js";
+import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
+import { publicPrevisitQrLimiter } from "./middleware/ipRateLimit.js";
 
 const app = express();
+const prismaHealth = new PrismaClient();
 
 // Startup checks prevent silent misconfiguration that can break auth/email/API links in production.
 validateStartupEnv();
@@ -29,6 +39,7 @@ validateStartupEnv();
 // Render/Proxy setup for correct client IP handling (rate limits, audit logs).
 app.set('trust proxy', 1);
 
+app.use(requestContextMiddleware);
 
 const allowedOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
@@ -44,6 +55,12 @@ app.use(
   })
 );
 
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: false,
+  })
+);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -55,28 +72,71 @@ app.use('/api/textsymptom', requireAuth, symptomThreadRoute);
 app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/account', requireAuth, accountRouter);
 app.use('/api/mail', mailRoutes);
 app.use("/api/tts", ttsRouter);
 app.use("/api/ki", kiRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
 app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
 app.use("/api/practices", requireAuth, practicesRouter);
+app.use("/api/practice-dashboard", requireAuth, practiceDashboardRouter);
+app.use("/api/practice/follow-ups", requireAuth, practiceFollowUpsRouter);
+app.use("/api/previsit/follow-ups", requireAuth, previsitFollowUpsRouter);
 /** Pre-Visit cases / timelines — JWT required; mount before generic /api/previsit. */
 app.use("/api/previsit/cases", requireAuth, previsitCasesRouter);
 /** Saved Pre-Visit sessions (DB): JWT required; mount before /api/previsit so paths are not swallowed. */
 app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
 app.use("/api/previsit", previsitRouter);
-app.use("/api/public/previsit", publicPrevisitQrRouter);
+app.use("/api/public/previsit", publicPrevisitQrLimiter, publicPrevisitQrRouter);
 
-
-// funktioniert mit /health UND /api/health
 app.get(['/health', '/api/health'], (_req, res) =>
   res.json({
     ok: true,
-    service: 'medscout-server',
-    time: new Date().toISOString(),
-    uptime: process.uptime(),
+    service: 'medscoutx-api',
+    timestamp: new Date().toISOString(),
   })
+);
+
+app.get('/api/health/db', async (_req, res) => {
+  try {
+    await prismaHealth.$queryRaw`SELECT 1`;
+    return res.json({ ok: true, db: true });
+  } catch {
+    return res.status(503).json({ ok: false, db: false });
+  }
+});
+
+app.get('/api/health/openai', (_req, res) => {
+  const key = process.env.OPENAI_API_KEY;
+  const configured = typeof key === 'string' && key.length > 12;
+  return res.json({ ok: true, openai: { configured } });
+});
+
+/**
+ * Safe configuration snapshot — booleans only, no secrets or origins list.
+ */
+app.get('/api/health/config', (_req, res) =>
+  res.json({
+    ok: true,
+    service: 'medscoutx-api',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development',
+    trustProxy: Boolean(app.get('trust proxy')),
+    cors: {
+      configured: allowedOrigins.length > 0,
+      originCount: allowedOrigins.length,
+    },
+    features: {
+      databaseUrl: Boolean(process.env.DATABASE_URL),
+      jwt: Boolean(process.env.JWT_SECRET),
+      openai: Boolean(process.env.OPENAI_API_KEY),
+      resend: Boolean(process.env.RESEND_API_KEY),
+      emailFrom: Boolean(process.env.EMAIL_FROM),
+      apiBaseUrl: Boolean(process.env.API_BASE_URL),
+      frontendUrl:
+        Boolean(process.env.FRONTEND_URL) || Boolean(process.env.APP_BASE_URL),
+    },
+  }),
 );
 
 app.get('/', (_req, res) => {
@@ -106,10 +166,19 @@ app.post('/test-email', async (req, res) => {
     res.json({ ok: true, info });
   } catch (err) {
     console.error('[test-email]', err);
-    res.status(500).json({ ok: false, error: err.message });
+    res.status(500).json({ ok: false, error: 'Request failed.' });
   }
 });
 
+app.use((req, res, next) => {
+  if (res.headersSent) return;
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ ok: false, error: 'not_found' });
+  }
+  next();
+});
+
+app.use(httpErrorHandler);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

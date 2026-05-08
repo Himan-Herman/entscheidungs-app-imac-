@@ -260,6 +260,17 @@ export default function PreVisitAudioToolbar({
   const micBusy = recordPhase === "transcribing";
   const isRecording = recordPhase === "recording";
 
+  const audioLiveStatus =
+    speakPhase === "loading"
+      ? labels.audioStatusLoading
+      : speakPhase === "playing"
+        ? labels.audioStatusPlaying
+        : recordPhase === "recording"
+          ? labels.audioStatusRecording
+          : recordPhase === "transcribing"
+            ? labels.audioStatusTranscribing
+            : "";
+
   return (
     <div className="pre-visit-audio">
       <div className="pre-visit-audio__row">
@@ -275,7 +286,7 @@ export default function PreVisitAudioToolbar({
             aria-busy={speakPhase === "loading"}
             aria-pressed={speakPhase === "playing"}
           >
-            <Volume2 size={22} strokeWidth={2} aria-hidden />
+            <Volume2 size={26} strokeWidth={2} aria-hidden />
           </button>
           <button
             type="button"
@@ -287,10 +298,15 @@ export default function PreVisitAudioToolbar({
             aria-pressed={isRecording}
             aria-busy={micBusy}
           >
-            <Mic size={22} strokeWidth={2} aria-hidden />
+            <Mic size={26} strokeWidth={2} aria-hidden />
           </button>
         </div>
       </div>
+      {audioLiveStatus ? (
+        <p className="pre-visit-audio__live" aria-live="polite" aria-atomic="true">
+          {audioLiveStatus}
+        </p>
+      ) : null}
       {!micSupported ? (
         <p className="pre-visit-audio__unsupported" role="status">
           {labels.audioMicUnsupported}

@@ -1,6 +1,6 @@
 /**
- * Lightweight in-memory rate limiting by client IP (fixed 15-minute windows).
- * Reduces OpenAI/API cost, limits abusive email traffic, and helps protect availability.
+ * Lightweight in-memory rate limiting by client IP (fixed windows).
+ * Covers OpenAI-backed `/api/previsit/*`, `/api/ki`, outbound mail, auth, account GDPR routes.
  * No request bodies or sensitive fields are logged — only per-IP counters.
  */
 
@@ -79,4 +79,68 @@ export const previsitHistoryDiffLimiter = createIpRateLimiter({
 export const previsitCaseContinuityLimiter = createIpRateLimiter({
   max: 10,
   keyPrefix: 'previsit:case-continuity',
+});
+
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+/** POST /api/auth/login — brute-force mitigation */
+export const authLoginLimiter = createIpRateLimiter({
+  max: 40,
+  keyPrefix: 'auth:login',
+});
+
+/** POST /api/auth/register */
+export const authRegisterLimiter = createIpRateLimiter({
+  max: 15,
+  keyPrefix: 'auth:register',
+});
+
+/** POST /api/auth/request-password-reset */
+export const authPasswordResetLimiter = createIpRateLimiter({
+  max: 10,
+  keyPrefix: 'auth:password-reset',
+});
+
+/** POST /api/auth/reset-password */
+export const authResetPasswordLimiter = createIpRateLimiter({
+  max: 15,
+  keyPrefix: 'auth:reset-password',
+});
+
+/** POST /api/ki — OpenAI-backed image/chat */
+export const kiOpenAiRouteLimiter = createIpRateLimiter({
+  max: 45,
+  keyPrefix: 'ki:openai',
+});
+
+/** POST /api/mail/send — generic outbound mail */
+export const mailSendRouteLimiter = createIpRateLimiter({
+  max: 25,
+  keyPrefix: 'mail:send',
+});
+
+/** POST /api/transcribe — Whisper audio (symptom modules); not Pre-Visit chat audio */
+export const transcribeRouteLimiter = createIpRateLimiter({
+  max: 30,
+  keyPrefix: 'transcribe:whisper',
+});
+
+/** GET /api/public/previsit/qr/:token — unauthenticated QR resolver */
+export const publicPrevisitQrLimiter = createIpRateLimiter({
+  max: 150,
+  keyPrefix: 'public:previsit:qr',
+});
+
+/** GET /api/account/export — GDPR JSON export */
+export const accountExportLimiter = createIpRateLimiter({
+  max: 8,
+  keyPrefix: 'account:export',
+  windowMs: ONE_HOUR_MS,
+});
+
+/** DELETE /api/account/delete — destructive GDPR wipe */
+export const accountDeleteLimiter = createIpRateLimiter({
+  max: 4,
+  keyPrefix: 'account:delete',
+  windowMs: ONE_HOUR_MS,
 });

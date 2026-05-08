@@ -59,6 +59,10 @@ export default {
     audioListenTitle: "Read question and short guidance aloud",
     audioDictateAria: "Dictate answer",
     audioDictateTitle: "Tap to start recording; tap again to stop",
+    audioStatusLoading: "Preparing audio…",
+    audioStatusPlaying: "Playing…",
+    audioStatusRecording: "Recording… tap again when finished.",
+    audioStatusTranscribing: "Turning your speech into text…",
     audioErrorGeneric:
       "The audio feature is unavailable right now. Please try again later.",
     audioErrorPlayback: "Playback could not be started.",
@@ -136,6 +140,15 @@ export default {
     pdfDisabled: "Create PDF",
     pdfLocalNote:
       "The PDF file is created locally in your browser. No data is transmitted.",
+    qrShareButton: "QR code (share without email)",
+    qrShareTitle: "Share without email",
+    qrShareIntro:
+      "This QR code contains only a short note and a link to MedScoutX. It does not include your entries or medical details. Someone nearby can scan it from your screen.",
+    qrSharePayloadNote:
+      "Prepared with MedScoutX — PDF file was saved on this device.",
+    qrShareClose: "Close",
+    qrShareGenerateError:
+      "The QR code could not be created. Please try again.",
     consentCheckbox:
       "I want to save this session locally in this browser so I can view it again later.",
     consentExpl:
@@ -219,6 +232,58 @@ export default {
       relevantDocuments: "Relevant documents",
       patientQuestions: "Questions for the doctor",
     },
+  },
+  pdf: {
+    legalNotice:
+      "This document is based solely on the patient’s statements. It does not contain a diagnosis, treatment recommendation or urgency assessment.",
+    pdfDocumentTitle: "Pre-visit preparation document",
+    footerGeneratedNote: "Generated locally by MedScoutX Pre-Visit",
+    footerPageLabel: "Page",
+    part1Heading: "Structured doctor version",
+    part2Heading: "Original patient statements",
+    previousReportsHeading: "Previous related reports (summary)",
+    newlyMentionedLabel: "Newly mentioned",
+    stillMentionedLabel: "Still mentioned",
+    noLongerMentionedLabel: "No longer mentioned",
+    unclearLabel: "Unclear",
+    patientAddedNewInformationLabel: "Patient added new information",
+    patientDidNotMentionPreviouslyLabel:
+      "Previously reported information not mentioned in this session",
+    longitudinalSectionHeading: "Case / timeline (optional)",
+    longitudinalSectionNote:
+      "Included only because you opted in below. Patient statements only; no diagnosis or medical evaluation.",
+    longitudinalCaseTitlePdfLabel: "Case title",
+    continuityRecurringSymptomsLabel:
+      "Repeatedly mentioned symptoms or concerns",
+    continuityRecurringMedicationsLabel: "Repeatedly mentioned medications",
+    continuityRecurringQuestionsLabel: "Repeated patient questions",
+    continuityRecurringConcernsLabel: "Repeated concerns",
+    longitudinalSessionsOverviewHeading: "Earlier preparations (overview)",
+    longitudinalRelatedReportsHeading:
+      "Session comparison (patient wording)",
+    longitudinalContinuitySubheading:
+      "Continuity summary (patient statements only)",
+    followUpHeading: "Documented follow-up questions",
+    followUpSenderPractice: "Practice",
+    followUpSenderPatient: "Patient",
+    followUpSenderSystem: "System",
+    patientLanguageLabel: "Language of patient statements",
+    doctorLanguageLabel: "Language of doctor version",
+    patientLabel: "Patient",
+    contactLabel: "Contact",
+    patientNameLabel: "Name",
+    patientEmailLabel: "Email",
+    patientDateOfBirthLabel: "Date of birth",
+    patientGenderOrSalutationLabel: "Gender / salutation",
+    patientPhoneLabel: "Phone",
+    practiceLabel: "Practice",
+    targetLabel: "Target",
+    doctorLabel: "Doctor",
+    specialtyLabel: "Specialty",
+    documentCreatedLabel: "Created",
+    empty: "not specified",
+    pdfFilename: "medscoutx-pre-visit.pdf",
+    pdfBrandPracticeLine: "Practice document",
   },
   cases: {
     pageTitle: "MedScoutX — My cases",
@@ -330,6 +395,37 @@ export default {
     clearConfirm:
       "Permanently delete all locally saved sessions? This cannot be undone.",
     listAriaLabel: "Saved sessions",
+  },
+  followUps: {
+    pageTitle: "MedScoutX — Follow-up questions",
+    loading: "Loading…",
+    title: "Follow-up questions",
+    intro:
+      "Clarification messages from your practice about your saved preparation.",
+    safetyNote:
+      "These follow-up questions are only for clarifying your information before the medical appointment. For acute symptoms, please contact medical staff or emergency services directly.",
+    empty: "No follow-up questions yet.",
+    loadError: "Follow-up threads could not be loaded.",
+    open: "Open thread",
+    statusLabel: "Status",
+    practiceLabel: "Practice",
+    targetLabel: "Doctor/target",
+    relatedPreparation: "Related preparation",
+    createdAt: "Created",
+    waitingForPatient: "Waiting for patient",
+    answered: "Answered",
+    closed: "Closed",
+    archived: "Archived",
+    openStatus: "Open",
+    threadBack: "Back to follow-up list",
+    threadSend: "Send answer",
+    threadPlaceholder: "Write your answer",
+    threadLoadError: "Thread could not be loaded.",
+    threadSendError: "Your answer could not be sent.",
+    threadEmpty: "No messages yet.",
+    senderPractice: "Practice",
+    senderPatient: "You",
+    senderSystem: "System",
   },
   accountHistory: {
     pageTitle: "MedScoutX — My preparations",

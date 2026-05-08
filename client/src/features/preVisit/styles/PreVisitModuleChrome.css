@@ -14,11 +14,17 @@
 }
 
 .pre-visit-chrome__back {
-  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 8px 12px;
+  margin-left: -8px;
+  font-size: clamp(0.95rem, 2.8vw, 1rem);
   font-weight: 600;
   color: #0e7490;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 10px;
+  box-sizing: border-box;
 }
 
 .pre-visit-chrome__back:hover {
@@ -45,7 +51,7 @@
 .pre-visit-chrome__safety {
   margin: 12px 0 0;
   padding: 12px 14px;
-  font-size: 0.82rem;
+  font-size: clamp(0.9375rem, 2.8vw, 0.95rem);
   line-height: 1.55;
   color: #475569;
   background: rgba(255, 255, 255, 0.72);

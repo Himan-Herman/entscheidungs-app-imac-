@@ -3,6 +3,9 @@ import { getAuthHeaders } from "./authHeaders";
 /**
  * Wie fetch, setzt Authorization aus dem gespeicherten JWT und leitet bei abgelaufenem
  * Token zur Login-Seite weiter (gleicher Origin wie die App).
+ *
+ * TODO(medscoutx-auth): Move session to HttpOnly cookies via a same-site BFF; then remove
+ * medscout_token from localStorage and rely on cookie credentials.
  */
 export async function authFetch(input, init = {}) {
   const headers = new Headers(init.headers ?? undefined);

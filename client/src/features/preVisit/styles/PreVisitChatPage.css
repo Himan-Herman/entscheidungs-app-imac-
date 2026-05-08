@@ -1,3 +1,5 @@
+@import "./preVisitPatientUx.css";
+
 .pre-visit-chat {
   --pvc-bg: #f4f5f7;
   --pvc-card: #ffffff;
@@ -19,7 +21,7 @@
 }
 
 .pre-visit-chat__inner {
-  width: min(640px, 100%);
+  width: min(760px, 100%);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -34,7 +36,7 @@
 
 .pre-visit-chat__progress-label {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: clamp(0.9rem, 2.8vw, 0.95rem);
   font-weight: 600;
   color: var(--pvc-muted);
 }
@@ -80,8 +82,8 @@
 
 .pre-visit-chat__explanation {
   margin: 0 0 18px;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: clamp(1rem, 3.5vw, 1.0625rem);
+  line-height: 1.65;
   color: var(--pvc-muted);
 }
 
@@ -99,9 +101,10 @@
 
 .pre-visit-chat__textarea {
   width: 100%;
-  min-height: 140px;
+  min-height: 148px;
+  max-height: 42vh;
   padding: 14px 16px;
-  font-size: 1.05rem;
+  font-size: 1.0625rem;
   line-height: 1.55;
   font-family: inherit;
   color: var(--pvc-text);
@@ -109,6 +112,7 @@
   border: 1px solid var(--pvc-border);
   border-radius: 12px;
   resize: vertical;
+  scrollbar-gutter: stable;
   box-sizing: border-box;
 }
 
@@ -137,9 +141,9 @@
 }
 
 .pre-visit-chat__btn {
-  min-height: 48px;
+  min-height: 52px;
   padding: 0 22px;
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   font-family: inherit;
   border-radius: 12px;
@@ -163,6 +167,7 @@
 .pre-visit-chat__btn--primary {
   color: #ffffff;
   background: var(--pvc-accent);
+  box-shadow: 0 6px 20px rgba(14, 116, 144, 0.22);
 }
 
 .pre-visit-chat__btn--primary:hover:not(:disabled) {
@@ -180,12 +185,22 @@
 }
 
 .pre-visit-chat__link {
-  align-self: center;
-  margin-top: 4px;
-  font-size: 0.9rem;
+  align-self: stretch;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 10px 16px;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--pvc-accent);
   text-decoration: none;
+  border-radius: 12px;
+  border: 1px solid rgba(14, 116, 144, 0.28);
+  background: rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .pre-visit-chat__link:hover {
@@ -208,9 +223,9 @@
 }
 
 .pre-visit-chat__btn--demo {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 0.86rem;
+  min-height: 48px;
+  padding: 0 16px;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--pvc-muted);
   background: transparent;
@@ -266,6 +281,12 @@
   border-color: var(--pvc-border);
 }
 
+:root[data-theme="dark"] .pre-visit-chat__link {
+  background: rgba(30, 41, 59, 0.65);
+  border-color: rgba(45, 212, 191, 0.28);
+  color: #5eead4;
+}
+
 :root[data-theme="dark"] .pre-visit-chat__btn--secondary:hover:not(:disabled) {
   color: #f1f5f9;
 }
@@ -285,8 +306,8 @@
 /* Bounded adaptive symptoms follow-up */
 .pre-visit-adaptive__hint {
   margin: 0 0 14px;
-  font-size: 0.95rem;
-  line-height: 1.55;
+  font-size: clamp(1rem, 3.2vw, 1.02rem);
+  line-height: 1.6;
   color: var(--pvc-muted);
 }
 
@@ -309,8 +330,8 @@
 
 .pre-visit-adaptive__question {
   margin: 0;
-  font-size: 1.02rem;
-  line-height: 1.5;
+  font-size: clamp(1.02rem, 3.3vw, 1.08rem);
+  line-height: 1.55;
   font-weight: 600;
   color: var(--pvc-text);
 }
@@ -356,9 +377,20 @@
 .pre-visit-audio__hint {
   margin: 0;
   flex: 1 1 200px;
-  font-size: 0.88rem;
-  line-height: 1.45;
+  font-size: clamp(0.9375rem, 3vw, 1rem);
+  line-height: 1.55;
   color: var(--pvc-muted);
+}
+
+@media (max-width: 480px) {
+  .pre-visit-audio__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pre-visit-audio__btns {
+    justify-content: flex-start;
+    gap: 14px;
+  }
 }
 
 .pre-visit-audio__btns {
@@ -368,8 +400,9 @@
 }
 
 .pre-visit-audio__icon-btn {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -413,9 +446,23 @@
   background: rgba(185, 28, 28, 0.06);
 }
 
+.pre-visit-audio__live {
+  margin: 10px 0 0;
+  min-height: 1.35em;
+  font-size: clamp(0.9375rem, 3.2vw, 1rem);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--pvc-text);
+}
+
+.pre-visit-audio__live:empty {
+  min-height: 0;
+  margin-top: 0;
+}
+
 .pre-visit-audio__privacy {
   margin: 10px 0 0;
-  font-size: 0.75rem;
+  font-size: clamp(0.8125rem, 2.8vw, 0.875rem);
   line-height: 1.45;
   color: var(--pvc-subtle);
 }
@@ -442,6 +489,54 @@
   background: var(--pvc-accent-soft);
   border: 1px solid rgba(14, 116, 144, 0.2);
   color: var(--pvc-muted);
+}
+
+.pre-visit-chat :focus-visible,
+.pre-visit-adaptive__followup :focus-visible,
+.pre-visit-audio :focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.55);
+  outline-offset: 2px;
+}
+
+:dir(rtl) .pre-visit-chat__section-label,
+:dir(rtl) .pre-visit-chat__textarea-label,
+:dir(rtl) .pre-visit-chat__title,
+:dir(rtl) .pre-visit-chat__explanation,
+:dir(rtl) .pre-visit-audio__hint,
+:dir(rtl) .pre-visit-chat__longitudinal-note {
+  text-align: right;
+}
+
+@media (min-width: 1024px) {
+  .pre-visit-chat__inner {
+    width: min(840px, 100%);
+  }
+  .pre-visit-chat__card {
+    padding: 28px 32px;
+  }
+}
+
+@media (max-width: 520px) {
+  .pre-visit-chat__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .pre-visit-chat__btn {
+    width: 100%;
+  }
+  .pre-visit-chat__btn--primary {
+    font-size: 1.08rem;
+    min-height: 54px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pre-visit-chat *,
+  .pre-visit-audio__icon-btn,
+  .pre-visit-chat__btn {
+    transition: none !important;
+  }
 }
 
 :root[data-theme="dark"] .pre-visit-audio {

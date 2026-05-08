@@ -4,6 +4,7 @@ export default {
   intro:
     "Verwalten Sie Praxisprofile und QR-Ziele für den Pre-Visit-Start mit passendem Kontext.",
   backHome: "Zur Startseite",
+  openDashboard: "Praxis-Dashboard öffnen",
   addPractice: "Praxisprofil hinzufügen",
   save: "Speichern",
   cancel: "Abbrechen",

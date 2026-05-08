@@ -1,0 +1,68 @@
+/**
+ * Shared patient Pre-Visit journey: touch targets, readable type, safe areas.
+ * Loaded via @import from module stylesheets. No API or medical logic.
+ */
+
+/* Safe horizontal padding on very narrow phones */
+@media (max-width: 480px) {
+  .pre-visit-page,
+  .pre-visit-chat,
+  .pre-visit-doc,
+  .pre-visit-review,
+  .pre-visit-history,
+  .pre-visit-account,
+  .previsit-followups {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+}
+
+@media (max-width: 360px) {
+  .pre-visit-page,
+  .pre-visit-chat,
+  .pre-visit-doc,
+  .pre-visit-review,
+  .pre-visit-history,
+  .pre-visit-account,
+  .previsit-followups {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+}
+
+/* Mobile body copy — minimum ~16px readable size */
+@media (max-width: 640px) {
+  .pre-visit-page .pre-visit-card__lead,
+  .pre-visit-page .pre-visit-card__trust,
+  .pre-visit-page .pre-visit-card__value-prop,
+  .pre-visit-chat__explanation,
+  .pre-visit-review__intro,
+  .pre-visit-doc__lead,
+  .pre-visit-history__lead,
+  .pre-visit-account__subtitle,
+  .pre-visit-history__privacy,
+  .pre-visit-account__privacy,
+  .pre-visit-account__gate-text {
+    font-size: clamp(1rem, 3.8vw, 1.0625rem);
+    line-height: 1.65;
+  }
+
+  .pre-visit-card__field-hint,
+  .pre-visit-doc__field-hint,
+  .pre-visit-doc__consent-expl {
+    font-size: clamp(0.9375rem, 3.4vw, 1rem);
+    line-height: 1.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pre-visit-page *,
+  .pre-visit-chat *,
+  .pre-visit-doc *,
+  .pre-visit-review *,
+  .pre-visit-history *,
+  .pre-visit-account *,
+  .previsit-followups * {
+    scroll-behavior: auto !important;
+  }
+}

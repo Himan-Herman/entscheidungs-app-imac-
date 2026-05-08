@@ -1,0 +1,126 @@
+.settings-privacy {
+  padding: 1.25rem 1rem 2.5rem;
+}
+
+.settings-privacy__inner {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.settings-privacy__header {
+  margin-bottom: 1.5rem;
+}
+
+.settings-privacy__title {
+  font-size: 1.35rem;
+  font-weight: 650;
+  margin: 0 0 0.5rem;
+}
+
+.settings-privacy__intro {
+  margin: 0 0 0.75rem;
+  color: var(--ms-muted, #5c6570);
+  line-height: 1.45;
+}
+
+.settings-privacy__back {
+  display: inline-block;
+  font-size: 0.9rem;
+}
+
+.settings-privacy__card {
+  border: 1px solid var(--ms-border, rgba(0, 0, 0, 0.12));
+  border-radius: 12px;
+  padding: 1rem 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+  background: var(--ms-surface, #fff);
+}
+
+.settings-privacy__card--danger {
+  border-color: rgba(180, 40, 40, 0.35);
+}
+
+.settings-privacy__section-title {
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.settings-privacy__muted {
+  margin: 0 0 0.85rem;
+  font-size: 0.92rem;
+  color: var(--ms-muted, #5c6570);
+  line-height: 1.45;
+}
+
+.settings-privacy__phrase-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+}
+
+.settings-privacy__phrase-hint code {
+  font-size: 0.85rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.settings-privacy__danger-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.settings-privacy__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.settings-privacy__input {
+  font: inherit;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--ms-border, rgba(0, 0, 0, 0.18));
+  min-height: 2.5rem;
+}
+
+.settings-privacy__btn {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 0.55rem 1rem;
+  border: 1px solid transparent;
+  align-self: flex-start;
+}
+
+.settings-privacy__btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.settings-privacy__btn--primary {
+  background: var(--ms-accent, #1a6fb5);
+  color: #fff;
+}
+
+.settings-privacy__btn--danger {
+  background: #b42c2c;
+  color: #fff;
+}
+
+.settings-privacy__ok {
+  margin: 0.65rem 0 0;
+  font-size: 0.9rem;
+  color: #1d6b3a;
+}
+
+.settings-privacy__err {
+  margin: 0.65rem 0 0;
+  font-size: 0.9rem;
+  color: #b42c2c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .settings-privacy__phrase-hint code {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}

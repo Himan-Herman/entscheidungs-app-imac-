@@ -60,6 +60,10 @@ export default {
     audioListenTitle: "Frage und Kurzhinweis vorlesen lassen",
     audioDictateAria: "Antwort diktieren",
     audioDictateTitle: "Aufnahme starten und erneut tippen zum Beenden",
+    audioStatusLoading: "Audio wird vorbereitet …",
+    audioStatusPlaying: "Wiedergabe …",
+    audioStatusRecording: "Aufnahme … zum Beenden erneut tippen.",
+    audioStatusTranscribing: "Sprache wird in Text umgewandelt …",
     audioErrorGeneric:
       "Die Sprachfunktion ist gerade nicht verfügbar. Bitte versuchen Sie es später erneut.",
     audioErrorPlayback: "Die Wiedergabe konnte nicht gestartet werden.",
@@ -138,6 +142,15 @@ export default {
     pdfDisabled: "PDF erstellen",
     pdfLocalNote:
       "Die PDF-Datei wird lokal in Ihrem Browser erstellt. Es werden keine Daten übertragen.",
+    qrShareButton: "QR-Code (Teilen ohne E-Mail)",
+    qrShareTitle: "Teilen ohne E-Mail",
+    qrShareIntro:
+      "Dieser QR-Code enthält nur einen kurzen Hinweis und einen Link zu MedScoutX. Ihre Einträge und medizinischen Angaben sind nicht enthalten. Eine Person in der Nähe kann den Code von Ihrem Bildschirm scannen.",
+    qrSharePayloadNote:
+      "Mit MedScoutX vorbereitet — die PDF-Datei wurde auf diesem Gerät gespeichert.",
+    qrShareClose: "Schließen",
+    qrShareGenerateError:
+      "Der QR-Code konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
     consentCheckbox:
       "Ich möchte diese Sitzung lokal im Browser speichern, um sie später erneut ansehen zu können.",
     consentExpl:
@@ -221,6 +234,59 @@ export default {
       relevantDocuments: "Relevante Dokumente",
       patientQuestions: "Fragen an den Arzt",
     },
+  },
+  pdf: {
+    legalNotice:
+      "Dieses Dokument basiert ausschließlich auf Angaben des Patienten. Es enthält keine Diagnose, keine Therapieempfehlung und keine Dringlichkeitseinschätzung.",
+    pdfDocumentTitle: "Dokument zur Arztgespräch-Vorbereitung",
+    footerGeneratedNote: "Lokal erstellt mit MedScoutX Pre-Visit",
+    footerPageLabel: "Seite",
+    part1Heading: "Strukturierte Arztversion",
+    part2Heading: "Originalangaben des Patienten",
+    previousReportsHeading: "Frühere zugeordnete Berichte (Zusammenfassung)",
+    newlyMentionedLabel: "Neu erwähnt",
+    stillMentionedLabel: "Weiterhin erwähnt",
+    noLongerMentionedLabel: "Nicht mehr erwähnt",
+    unclearLabel: "Unklar",
+    patientAddedNewInformationLabel: "Neue Patienteninformation / Ergänzung",
+    patientDidNotMentionPreviouslyLabel:
+      "Früher berichtete Angaben in dieser Session nicht erwähnt",
+    longitudinalSectionHeading: "Fall / Verlauf (optional)",
+    longitudinalSectionNote:
+      "Wurde nur aufgrund Ihrer Auswahl eingefügt. Nur Patientenangaben; keine Diagnose oder medizinische Bewertung.",
+    longitudinalCaseTitlePdfLabel: "Falltitel",
+    continuityRecurringSymptomsLabel:
+      "Mehrfach genannte Symptome oder Beschwerden",
+    continuityRecurringMedicationsLabel: "Mehrfach genannte Medikamente",
+    continuityRecurringQuestionsLabel: "Mehrfach gestellte Patientenfragen",
+    continuityRecurringConcernsLabel: "Mehrfach genannte Sorgen",
+    longitudinalSessionsOverviewHeading:
+      "Frühere Vorbereitungen (Überblick)",
+    longitudinalRelatedReportsHeading:
+      "Vergleich der Vorbereitungen (Patientenformulierung)",
+    longitudinalContinuitySubheading:
+      "Kontinuitätszusammenfassung (nur Patientenangaben)",
+    followUpHeading: "Dokumentierte Rückfragen",
+    followUpSenderPractice: "Praxis",
+    followUpSenderPatient: "Patient",
+    followUpSenderSystem: "System",
+    patientLanguageLabel: "Sprache der Patientenantworten",
+    doctorLanguageLabel: "Sprache der Arztversion",
+    patientLabel: "Patient",
+    contactLabel: "Kontakt",
+    patientNameLabel: "Name",
+    patientEmailLabel: "E-Mail",
+    patientDateOfBirthLabel: "Geburtsdatum",
+    patientGenderOrSalutationLabel: "Geschlecht / Anrede",
+    patientPhoneLabel: "Telefon",
+    practiceLabel: "Praxis",
+    targetLabel: "Ziel",
+    doctorLabel: "Ärztin/Arzt",
+    specialtyLabel: "Fachrichtung",
+    documentCreatedLabel: "Erstellt",
+    empty: "nicht angegeben",
+    pdfFilename: "medscoutx-arztgespraech.pdf",
+    pdfBrandPracticeLine: "Praxisdokument",
   },
   cases: {
     pageTitle: "MedScoutX — Meine Verläufe",
@@ -330,6 +396,37 @@ export default {
     clearConfirm:
       "Alle lokal gespeicherten Sitzungen unwiderruflich löschen?",
     listAriaLabel: "Gespeicherte Sitzungen",
+  },
+  followUps: {
+    pageTitle: "MedScoutX — Rückfragen",
+    loading: "Wird geladen …",
+    title: "Rückfragen",
+    intro:
+      "Klärungsnachrichten Ihrer Praxis zu Ihrer gespeicherten Vorbereitung.",
+    safetyNote:
+      "Diese Rückfragen dienen nur der Klärung Ihrer Angaben vor dem Arztgespräch. Bei akuten Beschwerden wenden Sie sich bitte direkt an medizinisches Personal oder den Notruf.",
+    empty: "Noch keine Rückfragen vorhanden.",
+    loadError: "Rückfragen konnten nicht geladen werden.",
+    open: "Thread öffnen",
+    statusLabel: "Status",
+    practiceLabel: "Praxis",
+    targetLabel: "Ärztin/Arzt / Ziel",
+    relatedPreparation: "Zugehörige Vorbereitung",
+    createdAt: "Erstellt",
+    waitingForPatient: "Warten auf Patient",
+    answered: "Beantwortet",
+    closed: "Abgeschlossen",
+    archived: "Archiviert",
+    openStatus: "Offen",
+    threadBack: "Zurück zur Rückfragen-Liste",
+    threadSend: "Antwort senden",
+    threadPlaceholder: "Antwort schreiben",
+    threadLoadError: "Thread konnte nicht geladen werden.",
+    threadSendError: "Antwort konnte nicht gesendet werden.",
+    threadEmpty: "Noch keine Nachrichten.",
+    senderPractice: "Praxis",
+    senderPatient: "Sie",
+    senderSystem: "System",
   },
   accountHistory: {
     pageTitle: "MedScoutX — Meine Vorbereitungen",

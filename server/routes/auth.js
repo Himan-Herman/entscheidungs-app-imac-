@@ -8,6 +8,15 @@ import { sendVerificationEmail, sendMail, sendPasswordResetEmail } from "../emai
 
 import jwt from "jsonwebtoken";
 
+import { requireAuth } from "../middleware/requireAuth.js";
+import { writeAuditLog } from "../services/auditLogService.js";
+import {
+  authLoginLimiter,
+  authPasswordResetLimiter,
+  authRegisterLimiter,
+  authResetPasswordLimiter,
+} from "../middleware/ipRateLimit.js";
+
 
 const prisma = new PrismaClient();
 const authRouter = express.Router();
@@ -22,7 +31,7 @@ const skipEmailVerification = process.env.SKIP_EMAIL_VERIFICATION === "true";
 authRouter.get("/health", (_req, res) => res.json({ ok: true, route: "auth" }));
 
 // POST /api/auth/register
-authRouter.post("/register", async (req, res) => {
+authRouter.post("/register", authRegisterLimiter, async (req, res) => {
   try {
     const { user, profile = {}, consent = {} } = req.body ?? {};
 
@@ -299,7 +308,7 @@ authRouter.post("/resend-verification", async (req, res) => {
   }
 });
 // POST /api/auth/request-password-reset
-authRouter.post("/request-password-reset", async (req, res) => {
+authRouter.post("/request-password-reset", authPasswordResetLimiter, async (req, res) => {
   try {
     const { email } = req.body || {};
     if (!email) {
@@ -344,9 +353,6 @@ authRouter.post("/request-password-reset", async (req, res) => {
     });
     
     return res.json({ ok: true });
-    
-
-    return res.json({ ok: true });
   } catch (err) {
     console.error("[request-password-reset]", err);
     return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
@@ -355,7 +361,7 @@ authRouter.post("/request-password-reset", async (req, res) => {
 
 
 // POST /api/auth/login
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", authLoginLimiter, async (req, res) => {
   const { email, password } = req.body || {};
   const emailNorm = email?.trim().toLowerCase();
 
@@ -372,6 +378,7 @@ authRouter.post("/login", async (req, res) => {
   }
 
   // JWT: optional JWT_EXPIRES_IN (z. B. "30d"); in development längere Lebensdauer als Fallback.
+  // TODO(auth-hardening): Prefer HttpOnly cookies via same-site BFF to avoid long-lived tokens in localStorage.
   const jwtExpires =
     process.env.JWT_EXPIRES_IN ||
     (process.env.NODE_ENV === "development" ? "90d" : "7d");
@@ -380,11 +387,35 @@ authRouter.post("/login", async (req, res) => {
     expiresIn: jwtExpires,
   });
 
+  writeAuditLog({
+    req,
+    userId: u.id,
+    action: "login_success",
+    metadata: {},
+  });
+
   // Nutzer-ID + Token zurückgeben
   return res.json({ ok: true, userId: u.id, token });
 });
+
+/**
+ * POST /api/auth/logout — invalidates client-held JWT client-side; logs audit row server-side.
+ * TODO(medscoutx-auth): When moving JWT to HttpOnly cookies via a BFF or same-site API,
+ * call cookie-clear + rotation here instead of relying on localStorage removal alone.
+ */
+authRouter.post("/logout", requireAuth, (req, res) => {
+  const uid = typeof req.user?.userId === "string" ? req.user.userId : null;
+  writeAuditLog({
+    req,
+    userId: uid,
+    action: "logout",
+    metadata: {},
+  });
+  return res.json({ ok: true });
+});
+
 // POST /api/auth/reset-password
-authRouter.post("/reset-password", async (req, res) => {
+authRouter.post("/reset-password", authResetPasswordLimiter, async (req, res) => {
   try {
     const { token, password } = req.body || {};
 

@@ -281,9 +281,14 @@ export default function SettingsPracticesPage() {
         <header className="settings-practices__header">
           <h1 className="settings-practices__title">{t.heading}</h1>
           <p className="settings-practices__intro">{t.intro}</p>
-          <Link className="settings-practices__back" to="/startseite">
-            {t.backHome}
-          </Link>
+          <div className="settings-practices__top-links">
+            <Link className="settings-practices__back" to="/startseite">
+              {t.backHome}
+            </Link>
+            <Link className="settings-practices__back" to="/practice/dashboard">
+              {t.openDashboard}
+            </Link>
+          </div>
         </header>
 
         {loadError ? <p className="settings-practices__error">{loadError}</p> : null}

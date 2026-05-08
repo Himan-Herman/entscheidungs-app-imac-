@@ -4,10 +4,11 @@
   background: #f4f5f7;
   color: #0f172a;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .pre-visit-case-detail__inner {
-  max-width: 800px;
+  max-width: 980px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -123,6 +124,7 @@
   border-radius: 12px;
   padding: 12px;
   position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), #fff);
 }
 
 .pre-visit-case-detail__timeline-date {
@@ -168,6 +170,7 @@
   font: inherit;
   cursor: pointer;
   font-size: 0.88rem;
+  line-height: 1.35;
 }
 
 .pre-visit-case-detail__btn--primary {
@@ -206,6 +209,27 @@
   margin: 0;
 }
 
+.pre-visit-case-detail :focus-visible {
+  outline: 2px solid rgba(14, 116, 144, 0.55);
+  outline-offset: 2px;
+}
+
+:dir(rtl) .pre-visit-case-detail,
+:dir(rtl) .pre-visit-case-detail * {
+  text-align: right;
+}
+
+@media (max-width: 580px) {
+  .pre-visit-case-detail__actions,
+  .pre-visit-case-detail__timeline-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pre-visit-case-detail__btn {
+    width: 100%;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .pre-visit-case-detail {
     background: #0f172a;
@@ -218,6 +242,9 @@
     background: #1e293b;
     border-color: #334155;
     color: #e2e8f0;
+  }
+  .pre-visit-case-detail__timeline-card {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), #1e293b);
   }
   .pre-visit-case-detail__btn--primary {
     background: #0e7490;

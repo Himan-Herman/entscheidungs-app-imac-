@@ -3,11 +3,13 @@ dotenv.config();
 
 import express from 'express';
 import OpenAI from 'openai';
+import { kiOpenAiRouteLimiter } from '../middleware/ipRateLimit.js';
+import { logServerError } from '../utils/safeApiError.js';
 
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-router.post('/', async (req, res) => {
+router.post('/', kiOpenAiRouteLimiter, async (req, res) => {
   const { base64Bild, verlauf } = req.body;
 
   if (!verlauf || !Array.isArray(verlauf)) {
@@ -48,8 +50,8 @@ router.post('/', async (req, res) => {
     res.json({ antwort: completion.choices[0].message.content });
 
   } catch (error) {
-    console.error("KI-Fehler:", error);
-    res.status(500).json({ fehler: 'Fehler bei der KI-Verarbeitung: ' + error.message });
+    logServerError('ki/openai', error);
+    res.status(500).json({ fehler: 'Die Verarbeitung konnte nicht abgeschlossen werden.' });
   }
 });
 

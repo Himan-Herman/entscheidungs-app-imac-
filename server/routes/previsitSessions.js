@@ -12,6 +12,7 @@
 
 import express from "express";
 import { PrismaClient } from "@prisma/client";
+import { writeAuditLog } from "../services/auditLogService.js";
 
 const prisma = new PrismaClient();
 
@@ -70,6 +71,13 @@ function sessionJson(row) {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     preVisitCaseId: row.preVisitCaseId ?? null,
+    practiceProfileId: row.practiceProfileId ?? null,
+    practiceQrTargetId: row.practiceQrTargetId ?? null,
+    practiceStatus: row.practiceStatus ?? "new",
+    openedAt: row.openedAt ?? null,
+    archivedAt: row.archivedAt ?? null,
+    completedAt: row.completedAt ?? null,
+    lastStatusChangeAt: row.lastStatusChangeAt ?? null,
     patientLanguage: row.patientLanguage,
     doctorLanguage: row.doctorLanguage,
     title: row.title,
@@ -78,6 +86,29 @@ function sessionJson(row) {
     answers: row.answers,
     aiDoctorVersion: row.aiDoctorVersion ?? null,
     aiSafetyNotice: row.aiSafetyNotice ?? null,
+  };
+}
+
+async function resolvePracticeContextFromAnswers(answers) {
+  if (!answers || typeof answers !== "object" || Array.isArray(answers)) return null;
+  const pc =
+    answers.practiceContext &&
+    typeof answers.practiceContext === "object" &&
+    !Array.isArray(answers.practiceContext)
+      ? answers.practiceContext
+      : null;
+  if (!pc) return null;
+  const qrToken = String(pc.qrToken || "").trim();
+  if (!qrToken) return null;
+  const target = await prisma.practiceQrTarget.findUnique({
+    where: { qrToken },
+    include: { practiceProfile: true },
+  });
+  if (!target || !target.practiceProfile) return null;
+  if (!target.isActive || !target.practiceProfile.isActive) return null;
+  return {
+    practiceProfileId: target.practiceProfileId,
+    practiceQrTargetId: target.id,
   };
 }
 
@@ -180,6 +211,7 @@ router.post("/", async (req, res) => {
   if (st.value === "pdf_created") {
     pdfDownloaded = true;
   }
+  const practiceContext = await resolvePracticeContextFromAnswers(answers);
 
   let preVisitCaseIdValue;
   let includePreVisitCaseId = false;
@@ -207,8 +239,18 @@ router.post("/", async (req, res) => {
         aiDoctorVersion:
           aiDoctorVersion === undefined || aiDoctorVersion === null ? null : aiDoctorVersion,
         aiSafetyNotice: aiNotice,
+        ...(practiceContext || {}),
+        ...(practiceContext ? { practiceStatus: "new", lastStatusChangeAt: new Date() } : {}),
         ...(includePreVisitCaseId ? { preVisitCaseId: preVisitCaseIdValue } : {}),
       },
+    });
+    writeAuditLog({
+      req,
+      userId,
+      action: "previsit_session_created",
+      entityType: "PreVisitSession",
+      entityId: created.id,
+      metadata: { status: created.status },
     });
     return res.status(201).json({ ok: true, session: sessionJson(created) });
   } catch (err) {
@@ -280,6 +322,12 @@ router.put("/:id", async (req, res) => {
       const ans = validateAnswers(body.answers, true);
       if (!ans.ok) return res.status(400).json({ ok: false, error: ans.error });
       data.answers = body.answers;
+      const practiceContext = await resolvePracticeContextFromAnswers(body.answers);
+      if (practiceContext) {
+        data.practiceProfileId = practiceContext.practiceProfileId;
+        data.practiceQrTargetId = practiceContext.practiceQrTargetId;
+        if (!existing.practiceStatus) data.practiceStatus = "new";
+      }
     }
 
     if (Object.prototype.hasOwnProperty.call(body, "aiDoctorVersion")) {
@@ -383,6 +431,14 @@ router.delete("/:id", async (req, res) => {
     if (result.count === 0) {
       return res.status(404).json({ ok: false, error: "not_found" });
     }
+    writeAuditLog({
+      req,
+      userId,
+      action: "previsit_session_deleted",
+      entityType: "PreVisitSession",
+      entityId: id,
+      metadata: {},
+    });
     return res.json({ ok: true, deleted: true });
   } catch (err) {
     return safeServerError(res, err, "deleteOne");

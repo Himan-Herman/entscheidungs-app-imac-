@@ -1,6 +1,11 @@
 // src/middleware/requireAuth.js
 import jwt from 'jsonwebtoken';
 
+/**
+ * Bearer JWT from Authorization header (primary).
+ * Optional cookie branch reserved for a future HttpOnly cookie + BFF same-site setup —
+ * do not enable cookie-parser until migration is ready (see TODO in client authFetch / auth routes).
+ */
 export function requireAuth(req, res, next) {
   try {
     // 1) Token aus Header holen: "Authorization: Bearer <token>"
@@ -49,7 +54,9 @@ export function requireAuth(req, res, next) {
       });
     }
 
-    console.error("Auth-Fehler:", err.message);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Auth-Fehler:", err.message);
+    }
 
     return res.status(401).json({
       success: false,

@@ -13,6 +13,8 @@ import preVisit from "./preVisit.js";
 import legal from "../legal/de/index.js";
 import settingsDoctorContacts from "./settingsDoctorContacts.js";
 import settingsPractices from "./settingsPractices.js";
+import practiceDashboard from "./practiceDashboard.js";
+import settingsPrivacy from "./settingsPrivacy.js";
 
 export default {
   header,
@@ -30,4 +32,6 @@ export default {
   legal,
   settingsDoctorContacts,
   settingsPractices,
+  practiceDashboard,
+  settingsPrivacy,
 };

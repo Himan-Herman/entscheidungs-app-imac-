@@ -4,6 +4,7 @@ export default {
   intro:
     "Manage practice profiles and QR targets to start pre-visit with the right context.",
   backHome: "Back to home",
+  openDashboard: "Open practice dashboard",
   addPractice: "Add practice profile",
   save: "Save",
   cancel: "Cancel",

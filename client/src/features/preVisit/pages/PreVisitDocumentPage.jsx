@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
+import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
@@ -80,6 +81,10 @@ export default function PreVisitDocumentPage() {
   const [emailPdfSending, setEmailPdfSending] = useState(false);
   const [emailPdfSuccess, setEmailPdfSuccess] = useState(false);
   const [emailPdfError, setEmailPdfError] = useState(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [qrBusy, setQrBusy] = useState(false);
+  const [qrError, setQrError] = useState(null);
   const [patientIdentity, setPatientIdentity] = useState(() => {
     const s = loadPreVisitSession();
     const p = s?.patientIdentity || {};
@@ -166,12 +171,10 @@ export default function PreVisitDocumentPage() {
     () =>
       PRE_VISIT_LANGUAGE_OPTIONS.map((row) => ({
         value: row.id,
-        label: language === "de" ? row.labelDe : row.labelEn,
+        label: formatLanguageDisplayName(language, row.id),
       })),
     [language]
   );
-
-  const pdfLang = language === "en" ? "en" : "de";
 
   const longitudinalUi = useMemo(
     () => normalizeLongitudinalCase(session?.longitudinalCase),
@@ -387,7 +390,7 @@ export default function PreVisitDocumentPage() {
     if (!latest?.answers) return;
     const blob = buildPreVisitPdfBlob({
       session: latest,
-      uiLanguage: pdfLang,
+      uiLanguage: language,
       labels: pdfLabelOverrides,
     });
     if (!blob) {
@@ -397,9 +400,9 @@ export default function PreVisitDocumentPage() {
     setEmailPdfSending(true);
     try {
       const fd = new FormData();
-      fd.append("pdf", blob, getPreVisitPdfFilename(pdfLang));
+      fd.append("pdf", blob, getPreVisitPdfFilename(language));
       fd.append("emailSendConsent", "true");
-      fd.append("locale", pdfLang);
+      fd.append("locale", language);
       const res = await authFetch(
         `/api/user/doctor-contacts/${encodeURIComponent(contactId)}/send-previsit-pdf`,
         { method: "POST", body: fd }
@@ -498,6 +501,35 @@ export default function PreVisitDocumentPage() {
       /* PDF generation failed — do not set pdfDownloaded */
     }
   }
+
+  async function handleOpenQrShare() {
+    setQrBusy(true);
+    setQrError(null);
+    try {
+      const QRCode = (await import("qrcode")).default;
+      const site =
+        (typeof import.meta.env.VITE_SITE_URL === "string" &&
+          import.meta.env.VITE_SITE_URL.trim()) ||
+        (typeof window !== "undefined" ? window.location.origin : "");
+      const payload = `${site}\n\n${t.qrSharePayloadNote}`;
+      const url = await QRCode.toDataURL(payload, { margin: 2, width: 280 });
+      setQrDataUrl(url);
+      setQrModalOpen(true);
+    } catch {
+      setQrError(t.qrShareGenerateError);
+    } finally {
+      setQrBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!qrModalOpen) return undefined;
+    function onKey(e) {
+      if (e.key === "Escape") setQrModalOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [qrModalOpen]);
 
   async function handleSaveToAccount() {
     if (!consentAccountSave || !hasAuthToken) return;
@@ -1146,18 +1178,74 @@ export default function PreVisitDocumentPage() {
             ) : null}
           </div>
           <div className="pre-visit-doc__pdf-lead">
-            <button
-              type="button"
-              className="pre-visit-doc__btn pre-visit-doc__btn--pdf-primary"
-              onClick={handleDownloadPdf}
-              aria-describedby="previsit-pdf-local-note"
-            >
-              {t.pdfDisabled}
-            </button>
+            <div className="pre-visit-doc__pdf-actions">
+              <button
+                type="button"
+                className="pre-visit-doc__btn pre-visit-doc__btn--pdf-primary"
+                onClick={handleDownloadPdf}
+                aria-describedby="previsit-pdf-local-note"
+              >
+                {t.pdfDisabled}
+              </button>
+              <button
+                type="button"
+                className="pre-visit-doc__btn pre-visit-doc__btn--qr-secondary"
+                onClick={() => void handleOpenQrShare()}
+                disabled={qrBusy}
+                aria-busy={qrBusy}
+              >
+                {t.qrShareButton}
+              </button>
+            </div>
             <p id="previsit-pdf-local-note" className="pre-visit-doc__pdf-hint">
               {t.pdfLocalNote}
             </p>
+            {qrError ? (
+              <p className="pre-visit-doc__qr-inline-error" role="alert">
+                {qrError}
+              </p>
+            ) : null}
           </div>
+
+          {qrModalOpen ? (
+            <div
+              className="pre-visit-doc__qr-backdrop"
+              role="presentation"
+              onClick={() => setQrModalOpen(false)}
+            >
+              <div
+                className="pre-visit-doc__qr-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="previsit-qr-title"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2
+                  id="previsit-qr-title"
+                  className="pre-visit-doc__qr-title"
+                >
+                  {t.qrShareTitle}
+                </h2>
+                <p className="pre-visit-doc__qr-intro">{t.qrShareIntro}</p>
+                {qrDataUrl ? (
+                  <img
+                    src={qrDataUrl}
+                    alt=""
+                    className="pre-visit-doc__qr-img"
+                    width={280}
+                    height={280}
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  className="pre-visit-doc__btn pre-visit-doc__btn--pdf-primary"
+                  onClick={() => setQrModalOpen(false)}
+                >
+                  {t.qrShareClose}
+                </button>
+              </div>
+            </div>
+          ) : null}
 
           {hasAuthToken ? (
             <div className="pre-visit-doc__email-block">

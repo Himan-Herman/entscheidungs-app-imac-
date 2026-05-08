@@ -3,6 +3,7 @@
 .settings-practices__title { margin: 0; font-size: 1.5rem; }
 .settings-practices__intro { margin: 6px 0 0; opacity: .9; }
 .settings-practices__back { font-size: .95rem; }
+.settings-practices__top-links { display: flex; gap: 10px; flex-wrap: wrap; }
 .settings-practices__toolbar, .settings-practices__actions, .settings-practices__card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .settings-practices__btn { border-radius: 10px; border: 1px solid #d1d5db; background: #fff; padding: 8px 12px; cursor: pointer; }
 .settings-practices__btn--primary { background: #0f766e; border-color: #0f766e; color: #fff; }

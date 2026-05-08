@@ -43,8 +43,8 @@ export function isSupportedLanguage(code) {
 }
 
 /**
- * Restore saved locale, else browser language if supported, else legacy rule:
- * English → en, otherwise default de (matches previous DE/EN behaviour).
+ * Restore saved locale, else browser language if supported, else English
+ * (neutral default for international visitors; message fallback is en → de).
  */
 export function resolveInitialLanguage(stored, navigatorLang) {
   if (isSupportedLanguage(stored)) return stored;
@@ -52,7 +52,5 @@ export function resolveInitialLanguage(stored, navigatorLang) {
     .split("-")[0]
     .toLowerCase();
   if (isSupportedLanguage(prefix)) return prefix;
-  const nav = String(navigatorLang || "").toLowerCase();
-  if (nav.startsWith("en")) return "en";
-  return "de";
+  return "en";
 }

@@ -10,6 +10,8 @@ export default {
   settingsPracticesAria: "Praxisprofile öffnen",
   settingsDoctorContacts: "Ärztebuch",
   settingsDoctorContactsAria: "Ärztebuch öffnen",
+  settingsPrivacy: "Daten & Privatsphäre",
+  settingsPrivacyAria: "Datenschutz und Datenexport öffnen",
   preVisitCases: "Meine Verläufe",
   preVisitCasesAria: "Pre-Visit-Fälle und Zeitstrahl öffnen",
   languageLabel: "Sprache",

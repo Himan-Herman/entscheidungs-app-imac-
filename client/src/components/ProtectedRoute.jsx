@@ -2,7 +2,9 @@
 import { Navigate, useLocation } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
-  const hasUser = !!localStorage.getItem("medscout_user_id"); // aktuell dein Key
+  const hasUser =
+    !!localStorage.getItem("medscout_token") &&
+    !!localStorage.getItem("medscout_user_id");
   const location = useLocation();
 
   if (!hasUser) {

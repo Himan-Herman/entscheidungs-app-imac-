@@ -1,3 +1,5 @@
+@import "./preVisitPatientUx.css";
+
 .pre-visit-review {
   --pvr-bg: #f4f5f7;
   --pvr-card: #ffffff;
@@ -40,8 +42,8 @@
 
 .pre-visit-review__intro {
   margin: 0 0 22px;
-  font-size: 0.98rem;
-  line-height: 1.6;
+  font-size: clamp(1rem, 3.5vw, 1.05rem);
+  line-height: 1.65;
   color: var(--pvr-muted);
 }
 
@@ -124,8 +126,21 @@
 .pre-visit-review__item-tools {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   justify-content: flex-end;
+}
+
+@media (max-width: 520px) {
+  .pre-visit-review__item-tools {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .pre-visit-review__tool {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .pre-visit-review__tool {
@@ -200,13 +215,34 @@
   }
 }
 
+@media (max-width: 519px) {
+  .pre-visit-review__session-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .pre-visit-review__session-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .pre-visit-review__session-btn--outline {
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(15, 23, 42, 0.12);
+  }
+  .pre-visit-review__prepare-wrap .pre-visit-review__prepare-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 .pre-visit-review__session-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
+  min-height: 52px;
   padding: 0 20px;
-  font-size: 0.98rem;
+  font-size: 1.02rem;
   font-weight: 600;
   font-family: inherit;
   border-radius: 12px;
@@ -282,6 +318,10 @@
 :root[data-theme="dark"] .pre-visit-review__session-btn--secondary,
 :root[data-theme="dark"] .pre-visit-review__session-btn--outline {
   background: rgba(30, 41, 59, 0.65);
+}
+
+:root[data-theme="dark"] .pre-visit-review__session-btn--outline {
+  border-top-color: rgba(148, 163, 184, 0.18);
 }
 
 :root[data-theme="dark"] .pre-visit-review__session-btn--outline:hover {

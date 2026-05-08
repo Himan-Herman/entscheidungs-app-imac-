@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { formatUiDateTime } from "../../../i18n/intlLocale.js";
 import { authFetch } from "../../../api/authFetch.js";
 import { apiFetch } from "../../../lib/api.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
@@ -14,19 +15,6 @@ import {
 } from "../constants/preVisitSession.js";
 import { PRE_VISIT_QUESTION_STEPS } from "../constants/questionFlow.js";
 import "../styles/PreVisitCaseDetailPage.css";
-
-function formatDate(iso, lang) {
-  try {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
-    return new Intl.DateTimeFormat(lang === "de" ? "de-DE" : "en-GB", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(d);
-  } catch {
-    return "—";
-  }
-}
 
 export default function PreVisitCaseDetailPage() {
   const { caseId } = useParams();
@@ -505,7 +493,7 @@ export default function PreVisitCaseDetailPage() {
                   <option value="">{t.selectSession}</option>
                   {attachable.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {formatDate(s.createdAt, language)} — {(s.title || "").trim() || s.id.slice(0, 8)}
+                      {formatUiDateTime(s.createdAt, language)} — {(s.title || "").trim() || s.id.slice(0, 8)}
                     </option>
                   ))}
                 </select>
@@ -531,7 +519,7 @@ export default function PreVisitCaseDetailPage() {
                   {timeline.map((row) => (
                     <li key={row.id} className="pre-visit-case-detail__timeline-card">
                       <p className="pre-visit-case-detail__timeline-date">
-                        {formatDate(row.createdAt, language)}
+                        {formatUiDateTime(row.createdAt, language)}
                       </p>
                       <p className="pre-visit-case-detail__timeline-reason">
                         {row.appointmentReasonPreview || tDoc.empty}
@@ -588,7 +576,7 @@ export default function PreVisitCaseDetailPage() {
                   <option value="">{t.sessionA}</option>
                   {timeline.map((row) => (
                     <option key={row.id} value={row.id}>
-                      {formatDate(row.createdAt, language)}
+                      {formatUiDateTime(row.createdAt, language)}
                     </option>
                   ))}
                 </select>
@@ -600,7 +588,7 @@ export default function PreVisitCaseDetailPage() {
                   <option value="">{t.sessionB}</option>
                   {timeline.map((row) => (
                     <option key={row.id} value={row.id}>
-                      {formatDate(row.createdAt, language)}
+                      {formatUiDateTime(row.createdAt, language)}
                     </option>
                   ))}
                 </select>
