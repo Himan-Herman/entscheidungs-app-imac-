@@ -1,4 +1,4 @@
-/* Pre-Visit module: calm clinical surface (light, independent of global dark theme) */
+/* Pre-Visit module: calm clinical surface; dark follows global data-theme */
 .pre-visit-page {
   --pv-bg: #f6f7f9;
   --pv-card: #ffffff;
@@ -181,4 +181,36 @@
   color: #14532d;
   background: rgba(22, 163, 74, 0.08);
   border: 1px solid rgba(22, 163, 74, 0.15);
+}
+
+/* ── Dark mode (global theme toggle) ── */
+:root[data-theme="dark"] .pre-visit-page {
+  --pv-bg: #020617;
+  --pv-card: rgba(15, 23, 42, 0.9);
+  --pv-border: rgba(148, 163, 184, 0.22);
+  --pv-text: #f1f5f9;
+  --pv-muted: #94a3b8;
+  --pv-subtle: #94a3b8;
+  --pv-accent: #14b8a6;
+  --pv-accent-hover: #0d9488;
+  --pv-shadow:
+    0 4px 28px rgba(0, 0, 0, 0.35),
+    0 24px 56px rgba(0, 0, 0, 0.22);
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .pre-visit-card__select {
+  background-color: rgba(2, 6, 23, 0.55);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="dark"] .pre-visit-card__trust {
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(45, 212, 191, 0.18);
+}
+
+:root[data-theme="dark"] .pre-visit-card__status {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.22);
 }

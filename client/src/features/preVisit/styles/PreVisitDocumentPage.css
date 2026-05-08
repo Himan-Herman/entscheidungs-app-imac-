@@ -559,3 +559,78 @@
   outline-offset: 3px;
   border-radius: 4px;
 }
+
+:root[data-theme="dark"] .pre-visit-doc {
+  --pvd-bg: #020617;
+  --pvd-card: rgba(15, 23, 42, 0.9);
+  --pvd-border: rgba(148, 163, 184, 0.22);
+  --pvd-text: #f1f5f9;
+  --pvd-muted: #94a3b8;
+  --pvd-subtle: #94a3b8;
+  --pvd-accent: #14b8a6;
+  --pvd-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.35),
+    0 16px 48px rgba(0, 0, 0, 0.2);
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .pre-visit-doc__select {
+  background-color: rgba(2, 6, 23, 0.55);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="dark"] .pre-visit-doc__section-block {
+  border-bottom-color: rgba(148, 163, 184, 0.14);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__block-note {
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(45, 212, 191, 0.18);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__btn {
+  background: rgba(30, 41, 59, 0.65);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__btn:hover {
+  background: rgba(51, 65, 85, 0.85);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__consent {
+  border-top-color: rgba(148, 163, 184, 0.14);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__consent--account {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(45, 212, 191, 0.22);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__consent--secondary {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__btn--archive {
+  background: rgba(30, 41, 59, 0.65);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__btn--create-ai:hover:not(:disabled),
+:root[data-theme="dark"] .pre-visit-doc__btn--pdf-primary:hover,
+:root[data-theme="dark"] .pre-visit-doc__btn--account:hover:not(:disabled) {
+  background: #0d9488;
+}
+
+:root[data-theme="dark"] .pre-visit-doc__ai-success-note,
+:root[data-theme="dark"] .pre-visit-doc__save-success {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+:root[data-theme="dark"] .pre-visit-doc__ai-error,
+:root[data-theme="dark"] .pre-visit-doc__account-error {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.22);
+}

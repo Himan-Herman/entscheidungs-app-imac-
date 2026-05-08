@@ -236,3 +236,48 @@
   color: var(--pvc-subtle);
   max-width: 22rem;
 }
+
+:root[data-theme="dark"] .pre-visit-chat {
+  --pvc-bg: #020617;
+  --pvc-card: rgba(15, 23, 42, 0.9);
+  --pvc-border: rgba(148, 163, 184, 0.22);
+  --pvc-text: #f1f5f9;
+  --pvc-muted: #94a3b8;
+  --pvc-subtle: #94a3b8;
+  --pvc-accent: #14b8a6;
+  --pvc-accent-soft: rgba(45, 212, 191, 0.12);
+  --pvc-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.35),
+    0 16px 48px rgba(0, 0, 0, 0.2);
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .pre-visit-chat__progress-track {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+:root[data-theme="dark"] .pre-visit-chat__textarea {
+  background: rgba(2, 6, 23, 0.55);
+}
+
+:root[data-theme="dark"] .pre-visit-chat__btn--secondary {
+  background: rgba(30, 41, 59, 0.65);
+  color: var(--pvc-text);
+  border-color: var(--pvc-border);
+}
+
+:root[data-theme="dark"] .pre-visit-chat__btn--secondary:hover:not(:disabled) {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .pre-visit-chat__btn--primary:hover:not(:disabled) {
+  background: #0d9488;
+}
+
+:root[data-theme="dark"] .pre-visit-chat__dev-demo {
+  border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .pre-visit-chat__btn--demo:hover {
+  background: rgba(148, 163, 184, 0.08);
+}

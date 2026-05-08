@@ -215,3 +215,35 @@
   background: rgba(15, 23, 42, 0.04);
   border-color: rgba(15, 23, 42, 0.12);
 }
+
+:root[data-theme="dark"] .pre-visit-history {
+  --pvh-bg: #020617;
+  --pvh-card: rgba(15, 23, 42, 0.9);
+  --pvh-border: rgba(148, 163, 184, 0.22);
+  --pvh-text: #f1f5f9;
+  --pvh-muted: #94a3b8;
+  --pvh-subtle: #94a3b8;
+  --pvh-accent: #14b8a6;
+  --pvh-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.35),
+    0 16px 48px rgba(0, 0, 0, 0.2);
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .pre-visit-history__privacy {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+:root[data-theme="dark"] .pre-visit-history__preview {
+  border-top-color: rgba(148, 163, 184, 0.12);
+}
+
+:root[data-theme="dark"] .pre-visit-history__btn--danger {
+  background: rgba(30, 41, 59, 0.65);
+}
+
+:root[data-theme="dark"] .pre-visit-history__btn--clear:hover {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.2);
+}
