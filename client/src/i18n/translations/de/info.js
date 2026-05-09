@@ -30,18 +30,18 @@ export default {
   previsitText:
     "Der Kernablauf für mehrsprachige Kommunikation: strukturiert vorbereiten und ein PDF in der Sprache der Praxis erstellen.",
   previsitAlt: "MedScoutX Überblick zur Vorbereitung eines Arztgesprächs",
-  symptomTitle: "Symptom-Chat",
+  symptomTitle: "Symptom-Check",
   symptomText:
-    "Symptome strukturiert beschreiben und allgemeine Orientierung erhalten. Die Ausgabe ersetzt keine ärztliche Beratung und dient nicht der Diagnose.",
-  symptomAlt: "Beispielansicht des MedScoutX-Symptom-Chats",
+    "Symptome strukturiert beschreiben, allgemeine Orientierung erhalten und ein Arztgespräch vorbereiten. Keine Diagnose und keine Therapieempfehlung.",
+  symptomAlt: "Beispielansicht des MedScoutX Symptom-Checks",
   bodyTitle: "Körperkarte",
   bodyText:
-    "Betroffene Regionen markieren, damit Rückfragen zu Ort, Empfindungen und Kontext gezielt werden können — als Orientierung vor dem Termin.",
+    "Körperbereiche markieren, Beschwerden visuell beschreiben und ein Arztgespräch vorbereiten. Keine Diagnose oder medizinische Bewertung.",
   bodyAlt: "Beispielansicht der MedScoutX-Körperkarte",
-  imageTitle: "Bildanalyse",
+  imageTitle: "Bildbeschreibung",
   imageText:
-    "Ein Foto strukturiert beschreiben lassen und gezielte Rückfragen erhalten — ohne ärztliche Untersuchung zu ersetzen.",
-  imageAlt: "Beispielansicht der MedScoutX-Bildanalyse",
+    "Bild strukturiert beschreiben lassen, Beobachtungen für das Arztgespräch vorbereiten und patientenseitig bereitgestellte Fotos ordnen. Keine Diagnose und keine medizinische Bewertung.",
+  imageAlt: "Beispielansicht der MedScoutX-Bildbeschreibung",
   safetyTitle: "Was MedScoutX nicht macht — und was dir wichtig sein sollte",
   safety1Title: "Kein Notfall-Dienst",
   safety1Text:

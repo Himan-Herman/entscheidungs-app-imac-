@@ -1,4 +1,6 @@
 import { openai } from '../openaiClient.js';
+import { AI_MODULES } from '../config/aiSafetyPolicy.js';
+import { sanitizeStructuredPlainText } from './aiSafetySanitizer.js';
 
 const MODEL = 'gpt-4o-mini';
 const TITLE_MAX = 140;
@@ -72,6 +74,13 @@ function scrubList(arr) {
   return cleanItems(arr).filter((s) => !lineHasBannedWording(s));
 }
 
+function polishLine(line, doctorLanguage) {
+  return sanitizeStructuredPlainText(line, {
+    module: AI_MODULES.PREVISIT_CASE_CONTINUITY,
+    locale: doctorLanguage,
+  });
+}
+
 export async function summarizeCaseContinuity(params) {
   if (!process.env.OPENAI_API_KEY?.trim()) {
     const err = new Error('OPENAI_API_KEY missing');
@@ -136,9 +145,15 @@ export async function summarizeCaseContinuity(params) {
   }
 
   return {
-    recurringSymptoms: scrubList(parsed.recurringSymptoms),
-    recurringMedications: scrubList(parsed.recurringMedications),
-    recurringPatientQuestions: scrubList(parsed.recurringPatientQuestions),
-    recurringConcerns: scrubList(parsed.recurringConcerns),
+    recurringSymptoms: scrubList(parsed.recurringSymptoms).map((l) => polishLine(l, doctorLanguage)),
+    recurringMedications: scrubList(parsed.recurringMedications).map((l) =>
+      polishLine(l, doctorLanguage),
+    ),
+    recurringPatientQuestions: scrubList(parsed.recurringPatientQuestions).map((l) =>
+      polishLine(l, doctorLanguage),
+    ),
+    recurringConcerns: scrubList(parsed.recurringConcerns).map((l) =>
+      polishLine(l, doctorLanguage),
+    ),
   };
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/img/medscout-logo6.png";
 import { useLanguage } from "../i18n/LanguageContext";
+import { readUserMode, USER_MODES } from "../utils/userMode.js";
 import "../styles/Intro.css";
 
 export default function Intro() {
@@ -14,13 +15,15 @@ export default function Intro() {
         title: "MedScoutX - loading",
         skip: "Skip intro",
         heading: "MedScoutX is starting",
-        status: "MedScoutX is loading. You will be redirected to the home screen shortly.",
+        status:
+          "MedScoutX is loading. You will be redirected to your workspace shortly.",
       }
     : {
         title: "MedScoutX - wird geladen",
         skip: "Intro überspringen",
         heading: "MedScoutX wird gestartet",
-        status: "MedScoutX wird geladen. Du wirst gleich zur Startseite weitergeleitet.",
+        status:
+          "MedScoutX wird geladen. Du wirst gleich in den gewählten Bereich weitergeleitet.",
       };
 
   useEffect(() => {
@@ -40,16 +43,18 @@ export default function Intro() {
     const navigateDelay = prefersReducedMotion ? 1000 : 5000;
 
     const fadeOutTimer = setTimeout(() => setFadeOut(true), fadeOutDelay);
+    const home =
+      readUserMode() === USER_MODES.PRACTICE ? "/practice" : "/patient";
     const navigateTimer = setTimeout(
-      () => navigate("/startseite", { replace: true }),
-      navigateDelay
+      () => navigate(home, { replace: true }),
+      navigateDelay,
     );
 
     return () => {
       clearTimeout(fadeOutTimer);
       clearTimeout(navigateTimer);
     };
-  }, [copy.title, navigate]);
+  }, [copy.title, copy.status, navigate]);
 
   return (
     <>

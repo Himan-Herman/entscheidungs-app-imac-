@@ -72,23 +72,23 @@ export default {
     },
     {
       key: "symptom",
-      title: "Symptom dialogue",
+      title: "Symptom Check",
       description:
-        "Describe symptoms in a structured way and receive general orientation. The output does not replace medical advice and is not intended for diagnosis.",
+        "Describe symptoms in a structured way, receive general orientation, and prepare for a doctor visit. No diagnosis or treatment recommendation.",
       to: "/symptom",
     },
     {
       key: "bodymap",
       title: "Body map",
       description:
-        "Select the affected region and answer guided questions to describe what you feel — for orientation, not diagnosis.",
+        "Mark body regions, describe symptoms visually, and prepare for a doctor visit. No diagnosis or medical assessment.",
       to: "/region-start",
     },
     {
       key: "image",
-      title: "Image review",
+      title: "Image description",
       description:
-        "Upload a photo if needed; the tool describes what is visible and asks follow-up questions — not a stand-alone diagnosis.",
+        "Describe an image in a structured way, prepare observations for a doctor visit, and organize patient-provided photos. No diagnosis or medical assessment.",
       to: "/bild",
     },
   ],

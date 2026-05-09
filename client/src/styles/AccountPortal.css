@@ -4,6 +4,44 @@
   margin: 0 auto;
 }
 
+.account-portal__mode-strip {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  background: rgba(15, 118, 110, 0.06);
+}
+
+.account-portal__mode-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.account-portal__mode-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.88;
+}
+
+.account-portal__mode-select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font: inherit;
+  background: var(--color-bg, #fff);
+  color: inherit;
+}
+
+.account-portal__mode-hint {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+  line-height: 1.4;
+}
+
 .account-portal__shell {
   display: grid;
   grid-template-columns: minmax(180px, 240px) 1fr;

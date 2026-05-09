@@ -19,4 +19,9 @@ export default {
   languageLabel: "Sprache",
   themeLight: "Auf Hellmodus umschalten",
   themeDark: "Auf Dunkelmodus umschalten",
+  practiceDashboard: "Praxis-Dashboard",
+  practiceProfiles: "Praxisprofile",
+  switchArea: "Bereich wechseln",
+  switchPatient: "Patientenbereich",
+  switchPractice: "Praxisbereich",
 };

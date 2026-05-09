@@ -3,6 +3,8 @@
  * Does not diagnose or give medical advice — transform-only per system prompt.
  */
 import { openai } from '../openaiClient.js';
+import { ALLOWED_COMMUNICATION_STYLE, AI_MODULES } from '../config/aiSafetyPolicy.js';
+import { sanitizeStructuredPlainText } from './aiSafetySanitizer.js';
 
 const MODEL = 'gpt-4o-mini';
 
@@ -32,7 +34,9 @@ Rules:
 - Preserve the patient's meaning. Light clarification of wording is allowed only when it does not add medical content.
 - Output MUST be a single JSON object with exactly two keys: "doctorVersion" and "safetyNotice", matching the schema described in the user message.
 - "doctorVersion" must contain exactly these string keys: appointmentReason, symptomsOwnWords, onsetAndCourse, medications, preExistingConditions, relevantDocuments, patientQuestions — all values must be strings written in doctorLanguage only.
-- "safetyNotice" must be one short sentence written in doctorLanguage reminding that the content is patient-reported only and not a substitute for clinical evaluation (no diagnosis/treatment/urgency implied).`;
+- "safetyNotice" must be one short sentence written in doctorLanguage reminding that the content is patient-reported only and not a substitute for clinical evaluation (no diagnosis/treatment/urgency implied).
+
+${ALLOWED_COMMUNICATION_STYLE}`;
 
 function normalizeAnswers(input) {
   const src =
@@ -181,6 +185,20 @@ export async function generatePreVisitDoctorVersion(params) {
       'The AI service returned an invalid response. Please try again later.';
     throw err;
   }
+
+  for (const key of PREVISIT_ANSWER_KEYS) {
+    normalized.doctorVersion[key] = sanitizeStructuredPlainText(
+      normalized.doctorVersion[key],
+      {
+        module: AI_MODULES.PREVISIT_DOCTOR_TRANSFORM,
+        locale: doctorLanguage,
+      },
+    );
+  }
+  normalized.safetyNotice = sanitizeStructuredPlainText(normalized.safetyNotice, {
+    module: AI_MODULES.PREVISIT_DOCTOR_TRANSFORM,
+    locale: doctorLanguage,
+  });
 
   return normalized;
 }

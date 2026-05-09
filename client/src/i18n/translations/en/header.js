@@ -19,4 +19,9 @@ export default {
   languageLabel: "Language",
   themeLight: "Switch to light mode",
   themeDark: "Switch to dark mode",
+  practiceDashboard: "Practice dashboard",
+  practiceProfiles: "Practice profiles",
+  switchArea: "Switch area",
+  switchPatient: "Patient workspace",
+  switchPractice: "Practice workspace",
 };

@@ -1,56 +1,46 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/KoerperregionStart.css";
+import "../styles/BodyMapPages.css";
 import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
+import DisclaimerShort from "../components/DisclaimerShort";
+import {
+  BODY_MAP_CONSENT_KEY,
+  readBodyMapConsent,
+} from "../features/bodyMap/bodyMapSession";
 
 export default function KoerperregionStart() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const [optionsOpen, setOptionsOpen] = useState(false);
   const navigate = useNavigate();
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [hubUnlocked, setHubUnlocked] = useState(() => readBodyMapConsent());
 
-  const copy = language === "en"
-    ? {
-        title: "Body map with MedScoutX",
-        subtitle:
-          "Choose the body region where your symptoms occur. Meda uses this information later in the symptom chat to ask more precise follow-up questions.",
-        chip1: "Body Map",
-        chip2: "Choose region",
-        panel: "Body view selection",
-        hint:
-          "You can switch between the front and back of the body. Both views remain fully usable with keyboard and screen reader.",
-        open: "Open selection",
-        close: "Close selection",
-        frontAria: "Select front body view",
-        frontTitle: "Front",
-        frontText: "Abdomen, chest, face, front of arms, front of legs.",
-        backAria: "Select back body view",
-        backTitle: "Back",
-        backText: "Back, neck, shoulders, back of arms, back of legs.",
-        footer:
-          "You can switch the view again later without losing symptoms you already entered.",
-      }
-    : {
-        title: "Körperkarte mit MedScoutX",
-        subtitle:
-          "Wähle die Körperregion, in der deine Beschwerden auftreten. Meda nutzt diese Information später im Symptom-Chat, um gezieltere Rückfragen stellen zu können.",
-        chip1: "Body Map",
-        chip2: "Region auswählen",
-        panel: "Auswahl der Körperansicht",
-        hint:
-          "Du kannst zwischen Vorder- und Rückseite des Körpers wechseln. Beide Ansichten sind mit Tastatur und Screenreader vollständig nutzbar.",
-        open: "Auswahl öffnen",
-        close: "Auswahl schließen",
-        frontAria: "Körpervorderseite auswählen",
-        frontTitle: "Vorderseite",
-        frontText: "Bauch, Brust, Gesicht, Arme vorne, Beine vorne.",
-        backAria: "Körperrückseite auswählen",
-        backTitle: "Rückseite",
-        backText: "Rücken, Nacken, Schultern, Arme hinten, Beine hinten.",
-        footer:
-          "Hinweis: Du kannst die Ansicht später jederzeit wechseln, ohne dass bereits eingegebene Symptome verloren gehen.",
-      };
+  const t = useMemo(() => {
+    const b = getMessages(language);
+    return b.bodyMap?.start ?? getMessages("en").bodyMap.start;
+  }, [language]);
+
+  useEffect(() => {
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
+
+  useEffect(() => {
+    if (readBodyMapConsent()) setHubUnlocked(true);
+  }, []);
+
+  const persistConsent = () => {
+    if (!consentChecked) return;
+    try {
+      localStorage.setItem(BODY_MAP_CONSENT_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setHubUnlocked(true);
+  };
 
   return (
     <main
@@ -58,24 +48,72 @@ export default function KoerperregionStart() {
       data-theme={theme}
       aria-labelledby="bodymap-heading"
       role="main"
+      dir="ltr"
     >
       <div className="koerper-start-shell">
         <header className="koerper-start-header">
           <div>
             <h1 id="bodymap-heading" className="koerper-start-title">
-              {copy.title}
+              {t.title}
             </h1>
-            <p className="koerper-start-subtitle">{copy.subtitle}</p>
+            <p className="koerper-start-subtitle">{t.subtitle}</p>
           </div>
 
           <div className="koerper-start-header-meta" aria-hidden="true">
-            <span className="chip chip--accent">{copy.chip1}</span>
-            <span className="chip chip--soft">{copy.chip2}</span>
+            <span className="chip chip--accent">{t.chip1}</span>
+            <span className="chip chip--soft">{t.chip2}</span>
           </div>
         </header>
 
-        <section className="koerper-start-panel" aria-label={copy.panel}>
-          <p className="koerper-start-hint">{copy.hint}</p>
+        <section className="body-map-hub-safety" aria-label={t.title}>
+          <p className="body-map-hub-safety__text">{t.storeDisclaimer}</p>
+          <p className="body-map-hub-safety__emergency">{t.emergencyNote}</p>
+        </section>
+
+        <section className="koerper-disclaimer-short-wrap" aria-label={t.title}>
+          <DisclaimerShort />
+        </section>
+
+        {!hubUnlocked ? (
+          <section
+            className="body-map-hub-consent"
+            aria-labelledby="body-map-consent-title"
+          >
+            <h2
+              id="body-map-consent-title"
+              className="body-map-hub-consent__title"
+            >
+              {t.consentTitle}
+            </h2>
+            <label className="body-map-hub-consent__check">
+              <input
+                type="checkbox"
+                checked={consentChecked}
+                onChange={(e) => setConsentChecked(e.target.checked)}
+              />
+              <span>{t.consentCheckbox}</span>
+            </label>
+            <p className="body-map-hub-consent__links">
+              <Link to="/datenschutz">{t.consentPrivacyLink}</Link>
+            </p>
+            <button
+              type="button"
+              className="body-map-hub-consent__cta"
+              disabled={!consentChecked}
+              onClick={persistConsent}
+            >
+              {t.consentContinue}
+            </button>
+          </section>
+        ) : null}
+
+        <section
+          aria-label={t.panelTitle}
+          className={`koerper-start-panel ${
+            !hubUnlocked ? "koerper-start-panel--locked" : ""
+          }`}
+        >
+          <p className="koerper-start-hint">{t.hint}</p>
 
           <button
             type="button"
@@ -85,7 +123,7 @@ export default function KoerperregionStart() {
             aria-controls="bodymap-view-options"
           >
             <span className="koerper-toggle-label">
-              {optionsOpen ? copy.close : copy.open}
+              {optionsOpen ? t.close : t.open}
             </span>
           </button>
 
@@ -99,24 +137,24 @@ export default function KoerperregionStart() {
               type="button"
               className="option-chip"
               onClick={() => navigate("/koerperregionen")}
-              aria-label={copy.frontAria}
+              aria-label={t.frontAria}
             >
-              <span className="option-chip-title">{copy.frontTitle}</span>
-              <span className="option-chip-subtitle">{copy.frontText}</span>
+              <span className="option-chip-title">{t.frontTitle}</span>
+              <span className="option-chip-subtitle">{t.frontText}</span>
             </button>
 
             <button
               type="button"
               className="option-chip"
               onClick={() => navigate("/rueckseite")}
-              aria-label={copy.backAria}
+              aria-label={t.backAria}
             >
-              <span className="option-chip-title">{copy.backTitle}</span>
-              <span className="option-chip-subtitle">{copy.backText}</span>
+              <span className="option-chip-title">{t.backTitle}</span>
+              <span className="option-chip-subtitle">{t.backText}</span>
             </button>
           </div>
 
-          <p className="koerper-start-footer-text">{copy.footer}</p>
+          <p className="koerper-start-footer-text">{t.footer}</p>
         </section>
       </div>
     </main>

@@ -1,0 +1,126 @@
+.workspace-hub {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2.5rem;
+}
+
+.workspace-hub__hero {
+  margin-bottom: 1.75rem;
+}
+
+.workspace-hub__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+:root[data-theme="dark"] .workspace-hub__title {
+  color: #f1f5f9;
+}
+
+.workspace-hub__sub {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #475569;
+  max-width: 42rem;
+}
+
+:root[data-theme="dark"] .workspace-hub__sub {
+  color: #94a3b8;
+}
+
+.workspace-hub__classic {
+  display: inline-block;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #0e7490;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(14, 116, 144, 0.35);
+  padding-bottom: 2px;
+}
+
+.workspace-hub__classic:hover {
+  color: #0f766e;
+}
+
+.workspace-hub__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .workspace-hub__grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+.workspace-hub__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-height: 108px;
+  padding: 1.1rem 1.1rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.workspace-hub--practice .workspace-hub__tile {
+  border-top: 2px solid rgba(13, 148, 136, 0.5);
+}
+
+:root[data-theme="dark"] .workspace-hub__tile {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(148, 163, 184, 0.16);
+  color: #e2e8f0;
+}
+
+.workspace-hub__tile:hover {
+  border-color: rgba(14, 165, 233, 0.45);
+  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.12);
+  transform: translateY(-2px);
+}
+
+.workspace-hub__tile:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 3px;
+}
+
+.workspace-hub__tile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(
+    140deg,
+    rgba(14, 165, 233, 0.14),
+    rgba(13, 148, 136, 0.1)
+  );
+  color: #0e7490;
+}
+
+.workspace-hub__tile-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-hub__tile:hover {
+    transform: none;
+  }
+}

@@ -3,11 +3,20 @@
  * No diagnosis / triage / treatment — documentation + neutral clarification only.
  */
 
+import {
+  AI_MODULES,
+  ALLOWED_COMMUNICATION_STYLE,
+  getOutputSafetyPatterns,
+} from "../../config/aiSafetyPolicy.js";
+
 /** Compact system prompt — detailed rules live in user payload `instr` to save repetition tokens. */
 export const ADAPTIVE_SYSTEM_PROMPT = `You are a pre-visit documentation assistant.
 Hard bans: diagnosis, disease naming as fact, urgency/triage, treatment or medication advice, specialist referral suggestions, alarmist tone, inferred medical conclusions.
 Style: one short question OR completion; calm; everyday words; no robotic phrasing; do not echo the patient's wording verbatim unless needed for clarity.
-Output: JSON only as instructed in the user message.`;
+Output: JSON only as instructed in the user message.
+
+Shared safety baseline:
+${ALLOWED_COMMUNICATION_STYLE}`;
 
 export const ADAPTIVE_INSTR_BLOCK = `Return JSON:
 {"nextQuestion":"","isComplete":false,"compiledAnswer":"","safetyFlags":[]}
@@ -25,22 +34,8 @@ Rules:
 export const MULTILINGUAL_STYLE_NOTE = `If patientLanguage is ar, fa, ckb, tr, ru, fr, es (or regional variants): use simple everyday vocabulary; avoid stiff formal "machine translation" tone; stay neutral and calm.`;
 
 /** Patterns applied to model OUTPUT (nextQuestion + compiledAnswer). Flags retry / fallback — no PHI logged. */
-export const OUTPUT_VIOLATION_PATTERNS = [
-  /\bDIAGNOSE\b/i,
-  /\bdiagnosis\b/i,
-  /\burgent(ly)?\b/i,
-  /\bimmediately\b/i,
-  /\bsofort (?:zu )?(?:einem )?(?:Arzt|Ärztin)/i,
-  /\bNotfall\b/i,
-  /\byou should see (a )?(?:doctor|specialist|cardiologist|neurologist)/i,
-  /\bsee (a )?(cardiologist|neurologist|specialist)\b/i,
-  /\bbei (einem )?(Kardiologen|Neurologen|Facharzt)/i,
-  /\bmay indicate\b/i,
-  /\bcould indicate\b/i,
-  /\bthis sounds like\b/i,
-  /\bDas (klingt|deutet) (nach|auf)\b/i,
-  /\bpossibly (a |an )?\w+ (disorder|disease|syndrome)\b/i,
-];
+export const OUTPUT_VIOLATION_PATTERNS =
+  getOutputSafetyPatterns(AI_MODULES.PREVISIT_ADAPTIVE);
 
 export function listViolationPatternsSummary() {
   return [

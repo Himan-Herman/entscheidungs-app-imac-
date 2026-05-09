@@ -3,6 +3,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
 import { buildKoerpersymptomPrompt } from '../../client/src/pages/prompt/koerpersymptomPrompt.js';
+import { sanitizeAiOutput } from '../services/aiSafetySanitizer.js';
+import { AI_MODULES } from '../config/aiSafetyPolicy.js';
 
 
 dotenv.config();
@@ -34,7 +36,16 @@ async function waitForRunCompletion(threadId, runId, timeoutMs = 20000, pollMs =
 
 
 router.post("/", async (req, res) => {
-  const { verlauf, organName } = req.body;
+  const { verlauf } = req.body;
+  const locale =
+    typeof req.body?.patientLanguage === 'string' && req.body.patientLanguage.trim()
+      ? req.body.patientLanguage
+      : 'de';
+  const organNameRaw = req.body.organName;
+  const organName =
+    typeof organNameRaw === "string" && organNameRaw.trim()
+      ? organNameRaw.trim()
+      : "marked body region";
 
   if (!Array.isArray(verlauf)) {
     return res.status(400).json({ antwort: "❌ Gesprächsverlauf fehlt oder ist ungültig." });
@@ -70,9 +81,18 @@ router.post("/", async (req, res) => {
     const msgs = await openai.beta.threads.messages.list(currentThreadId, { limit: 10 });
     const assistantMsg = msgs.data.find(m => m.role === "assistant");
 
+    let raw = " Keine Antwort erhalten.";
+    if (assistantMsg && Array.isArray(assistantMsg.content)) {
+      const textParts = assistantMsg.content
+        .filter((p) => p.type === "text" && p.text?.value)
+        .map((p) => p.text.value.trim());
+      if (textParts.length) raw = textParts.join("\n\n");
+    }
+    const safe = sanitizeAiOutput(raw, { module: AI_MODULES.BODY_MAP, locale });
+
     res.json({
       threadId: currentThreadId,
-      antwort: assistantMsg ? assistantMsg.content[0].text.value : " Keine Antwort erhalten."
+      antwort: safe.text,
     });
 
   } catch (e) {

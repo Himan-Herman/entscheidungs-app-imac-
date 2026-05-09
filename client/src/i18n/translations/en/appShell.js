@@ -4,6 +4,11 @@ export default {
   navTimelines: "Timelines",
   navDoctors: "Doctors",
   navSettings: "Settings",
+  navPracticeDashboard: "Dashboard",
+  navPracticeProfiles: "Practices",
+  navPracticeFollowUps: "Follow-ups",
+  navAccountHome: "Account",
+  navPracticePrivacy: "Privacy",
   bottomNavAria: "Primary app navigation",
   offlineTitle: "You appear to be offline.",
   offlineDetail:

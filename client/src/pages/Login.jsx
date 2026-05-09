@@ -3,6 +3,11 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { useAuthFlowPalette } from "../ThemeMode";
+import {
+  writeUserMode,
+  PENDING_MODE_KEY,
+  USER_MODES,
+} from "../utils/userMode.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -62,6 +67,16 @@ export default function Login() {
       localStorage.setItem("medscout_user_id", data.userId);
       if (data.token) {
         localStorage.setItem("medscout_token", data.token);
+      }
+
+      try {
+        const pending = sessionStorage.getItem(PENDING_MODE_KEY);
+        if (pending === USER_MODES.PRACTICE || pending === USER_MODES.PATIENT) {
+          writeUserMode(pending);
+        }
+        sessionStorage.removeItem(PENDING_MODE_KEY);
+      } catch {
+        /* ignore */
       }
 
       navigate("/intro", { replace: true });

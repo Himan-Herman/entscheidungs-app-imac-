@@ -1,38 +1,85 @@
-import React from "react";
-import { useNavigate} from "react-router-dom";
+import React, { useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
+import {
+  readBodyMapConsent,
+  rememberBodyMapSelection,
+} from "../features/bodyMap/bodyMapSession";
+import "../styles/BodyMapPages.css";
 import rueckenBild from "../assets/img/Koerper_Rueckseite.png";
 
+function regionHitProps(goRegion, organId, ariaLabel) {
+  const label = ariaLabel || String(organId).replace(/_/g, " ");
+  return {
+    tabIndex: 0,
+    role: "button",
+    "aria-label": label,
+    style: { cursor: "pointer" },
+    onClick: () => goRegion(organId),
+    onKeyDown: (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goRegion(organId);
+      }
+    },
+  };
+}
 
 export default function KoerperRueckseite() {
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const t = useMemo(() => {
+    const b = getMessages(language);
+    return b.bodyMap ?? getMessages("en").bodyMap;
+  }, [language]);
+  const mb = t.mapBack;
 
-  const copy = language === "en"
-    ? {
-        title: "Body Map - Back View",
-      }
-    : {
-        title: "Körperkarte - Rückseite",
-      };
-  
-  const openChat = (organId) => {
-    navigate(`/koerpersymptom?organ=${organId}&seite=rueckseite`, {
-      state: { from: "/koerperkarte/rueckseite" },
-    });
+  useEffect(() => {
+    if (!readBodyMapConsent()) {
+      navigate("/region-start", { replace: true });
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    document.title = mb.pageTitle;
+  }, [mb.pageTitle]);
+
+  const goRegion = (organId) => {
+    rememberBodyMapSelection(organId, "rueckseite");
+    navigate(
+      `/koerpersymptom?organ=${encodeURIComponent(organId)}&seite=rueckseite`,
+      { state: { from: "/rueckseite" } },
+    );
   };
 
   return (
-    <div style={{ textAlign: "center" }}>
-      <h2>{copy.title}</h2>
-
-      <svg
-        viewBox="0 0 300 700"
-        width="100%"
-        height="700"
-        preserveAspectRatio="xMidYMid meet"
-        
-      >
+    <main
+      className="body-map-view-page"
+      aria-labelledby="body-map-back-heading"
+    >
+      <div className="body-map-view-page__toolbar">
+        <button
+          type="button"
+          className="body-map-view-page__back"
+          onClick={() => navigate("/region-start")}
+          aria-label={mb.backToHubAria}
+        >
+          ← {mb.backToHub}
+        </button>
+        <h1 id="body-map-back-heading" className="body-map-view-page__title">
+          {mb.heading}
+        </h1>
+        <p className="body-map-view-page__disclaimer">{mb.inlineDisclaimer}</p>
+      </div>
+      <div className="body-map-svg-wrap">
+        <svg
+          viewBox="0 0 300 700"
+          width="100%"
+          preserveAspectRatio="xMidYMid meet"
+          role="img"
+          aria-label={mb.diagramAria}
+        >
         
         <image
           href={rueckenBild}
@@ -54,8 +101,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => openChat("nacken")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'nacken')}
 />
 
 
@@ -68,8 +114,7 @@ export default function KoerperRueckseite() {
           fill="transparent" 
   stroke="transparent"
           strokeWidth="2"
-          onClick={() => navigate("/koerpersymptom?organ=schulterblatt_links")}
-          style={{ cursor: "pointer" }}
+          {...regionHitProps(goRegion, 'schulterblatt_links')}
         />
         <circle
           cx="214"
@@ -78,8 +123,7 @@ export default function KoerperRueckseite() {
           fill="transparent" 
   stroke="transparent"
           strokeWidth="2"
-          onClick={() => navigate("/koerpersymptom?organ=schulterblatt_rechts")}
-          style={{ cursor: "pointer" }}
+          {...regionHitProps(goRegion, 'schulterblatt_rechts')}
         />
 
         {/* 3 – Rückenmitte (Wirbelsäule) als vertikales Rechteck */}
@@ -91,8 +135,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=wirbelsaeule")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'wirbelsaeule')}
 />
         
 
@@ -105,8 +148,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=niere_links")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'niere_links')}
 />
 <ellipse
   cx="172"
@@ -116,8 +158,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=niere_rechts")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'niere_rechts')}
 />
        
 
@@ -130,8 +171,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=becken_rechts")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'becken_rechts')}
 />
 <ellipse
   cx="180"
@@ -141,8 +181,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=becken_links")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'becken_links')}
 />
         
         {/* 6 – Hinterkopf */}
@@ -153,8 +192,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=hinterkopf")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'hinterkopf')}
 />
 <ellipse
   cx="127"
@@ -164,8 +202,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=ohr_links")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'ohr_links')}
 />
 
 <ellipse
@@ -176,8 +213,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  onClick={() => navigate("/koerpersymptom?organ=ohr_rechts")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'ohr_rechts')}
 />
 {/*Linkes Bein}*/}
 <ellipse
@@ -187,8 +223,7 @@ export default function KoerperRueckseite() {
   ry="150"
   fill="transparent" 
   stroke="transparent"
-  onClick={() => navigate("/koerpersymptom?organ=bein_links")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'bein_links')}
 />
 
 {/*Rechtes Bein */}
@@ -199,12 +234,12 @@ export default function KoerperRueckseite() {
   ry="150"
   fill="transparent" 
   stroke="transparent"
-  onClick={() => navigate("/koerpersymptom?organ=bein_rechts")}
-  style={{ cursor: "pointer" }}
+  {...regionHitProps(goRegion, 'bein_rechts')}
 />
 
 
-      </svg>
-    </div>
+        </svg>
+      </div>
+    </main>
   );
 }

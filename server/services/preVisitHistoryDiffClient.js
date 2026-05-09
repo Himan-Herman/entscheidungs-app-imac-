@@ -1,4 +1,6 @@
 import { openai } from '../openaiClient.js';
+import { AI_MODULES } from '../config/aiSafetyPolicy.js';
+import { sanitizeStructuredPlainText } from './aiSafetySanitizer.js';
 
 const MODEL = 'gpt-4o-mini';
 
@@ -64,6 +66,13 @@ function scrubBullets(arr) {
   });
 }
 
+function polishLine(line, doctorLanguage) {
+  return sanitizeStructuredPlainText(line, {
+    module: AI_MODULES.PREVISIT_HISTORY_DIFF,
+    locale: doctorLanguage,
+  });
+}
+
 export async function summarizePreVisitHistoryDiff(params) {
   if (!process.env.OPENAI_API_KEY?.trim()) {
     const err = new Error('OPENAI_API_KEY missing');
@@ -123,13 +132,15 @@ export async function summarizePreVisitHistoryDiff(params) {
   }
 
   return {
-    newlyMentioned: scrubBullets(parsed.newlyMentioned),
-    stillMentioned: scrubBullets(parsed.stillMentioned),
-    noLongerMentioned: scrubBullets(parsed.noLongerMentioned),
-    unclear: scrubBullets(parsed.unclear),
-    patientAddedNewInformation: scrubBullets(parsed.patientAddedNewInformation),
+    newlyMentioned: scrubBullets(parsed.newlyMentioned).map((l) => polishLine(l, doctorLanguage)),
+    stillMentioned: scrubBullets(parsed.stillMentioned).map((l) => polishLine(l, doctorLanguage)),
+    noLongerMentioned: scrubBullets(parsed.noLongerMentioned).map((l) => polishLine(l, doctorLanguage)),
+    unclear: scrubBullets(parsed.unclear).map((l) => polishLine(l, doctorLanguage)),
+    patientAddedNewInformation: scrubBullets(parsed.patientAddedNewInformation).map((l) =>
+      polishLine(l, doctorLanguage),
+    ),
     patientDidNotMentionPreviouslyReportedInformation: scrubBullets(
       parsed.patientDidNotMentionPreviouslyReportedInformation,
-    ),
+    ).map((l) => polishLine(l, doctorLanguage)),
   };
 }

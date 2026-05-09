@@ -5,6 +5,7 @@ import {
   Building2,
   History,
   Home,
+  LayoutDashboard,
   LogOut,
   Menu,
   Moon,
@@ -17,10 +18,12 @@ import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
+import { readUserMode, writeUserMode, USER_MODES } from "../utils/userMode.js";
 import "../styles/Header.css";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const [userMode, setUserMode] = useState(() => readUserMode());
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
@@ -29,11 +32,23 @@ export default function Header() {
   const copy = useMemo(() => getMessages(language).header, [language]);
 
   const isLoggedIn = !!localStorage.getItem("medscout_token");
-  const homePath = isLoggedIn ? "/startseite" : "/";
+  const isPractice = isLoggedIn && userMode === USER_MODES.PRACTICE;
+  const homePath = !isLoggedIn
+    ? "/"
+    : isPractice
+      ? "/practice"
+      : "/patient";
   const themeLabel = theme === "dark" ? copy.themeLight : copy.themeDark;
 
   useEffect(() => {
     setOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    setUserMode(readUserMode());
+    const onMode = () => setUserMode(readUserMode());
+    window.addEventListener("medscoutx_user_mode_changed", onMode);
+    return () => window.removeEventListener("medscoutx_user_mode_changed", onMode);
   }, [location.pathname]);
 
   async function handleLogout() {
@@ -53,7 +68,9 @@ export default function Header() {
 
   return (
     <>
-      <a className="skip-link" href="#main">{copy.skip}</a>
+      <a className="skip-link" href="#main">
+        {copy.skip}
+      </a>
       <header className="ms-header" role="banner">
         <div className="ms-header__inner">
           <button
@@ -71,6 +88,29 @@ export default function Header() {
           </button>
 
           <div className="ms-header__controls">
+            {isLoggedIn && (
+              <label className="ms-header__mode">
+                <span className="visually-hidden">{copy.switchArea}</span>
+                <select
+                  className="ms-header__mode-select"
+                  value={userMode}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    writeUserMode(v);
+                    setUserMode(readUserMode());
+                    navigate(
+                      v === USER_MODES.PRACTICE ? "/practice" : "/patient",
+                      { replace: false },
+                    );
+                  }}
+                  aria-label={copy.switchArea}
+                >
+                  <option value={USER_MODES.PATIENT}>{copy.switchPatient}</option>
+                  <option value={USER_MODES.PRACTICE}>{copy.switchPractice}</option>
+                </select>
+              </label>
+            )}
+
             <button
               type="button"
               className="ms-theme-toggle"
@@ -78,7 +118,11 @@ export default function Header() {
               aria-label={themeLabel}
               title={themeLabel}
             >
-              {theme === "dark" ? <SunMedium size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+              {theme === "dark" ? (
+                <SunMedium size={18} aria-hidden="true" />
+              ) : (
+                <Moon size={18} aria-hidden="true" />
+              )}
             </button>
 
             <div className="ms-header__language">
@@ -131,7 +175,7 @@ export default function Header() {
                 </li>
               )}
 
-              {isLoggedIn && (
+              {isLoggedIn && !isPractice && (
                 <li>
                   <NavLink
                     to="/pre-visit/cases"
@@ -147,7 +191,23 @@ export default function Header() {
                 </li>
               )}
 
-              {isLoggedIn && (
+              {isLoggedIn && isPractice && (
+                <li>
+                  <NavLink
+                    to="/practice/dashboard"
+                    className={({ isActive }) =>
+                      `ms-nav-item ${isActive ? "is-active" : ""}`.trim()
+                    }
+                    onClick={() => setOpen(false)}
+                    aria-label={copy.practiceDashboard}
+                  >
+                    <LayoutDashboard size={16} aria-hidden="true" />
+                    <span>{copy.practiceDashboard}</span>
+                  </NavLink>
+                </li>
+              )}
+
+              {isLoggedIn && isPractice && (
                 <li>
                   <NavLink
                     to="/settings/practices"
@@ -163,7 +223,7 @@ export default function Header() {
                 </li>
               )}
 
-              {isLoggedIn && (
+              {isLoggedIn && !isPractice && (
                 <li>
                   <NavLink
                     to="/settings/doctor-contacts"

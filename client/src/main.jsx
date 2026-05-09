@@ -10,6 +10,7 @@ import Layout from "./Layout.jsx";
 import Intro from "./pages/Intro";
 import Register from "./pages/Register";
 import LandingPage from "./pages/LandingPage";
+import RoleEntryPage from "./pages/RoleEntryPage.jsx";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import CheckEmail from "./pages/CheckEmail";
@@ -74,6 +75,8 @@ const AccountDoctorsPage = lazy(() => import("./pages/account/AccountDoctorsPage
 const AccountPersonalPage = lazy(() => import("./pages/account/AccountPersonalPage.jsx"));
 const AccountProfilesPage = lazy(() => import("./pages/account/AccountProfilesPage.jsx"));
 const AccountDataPage = lazy(() => import("./pages/account/AccountDataPage.jsx"));
+const PatientHubPage = lazy(() => import("./pages/PatientHubPage.jsx"));
+const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
 
 function RouteFallback() {
   return (
@@ -104,7 +107,8 @@ createRoot(document.getElementById("root")).render(
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route element={<Layout />}>
-                <Route path="/" element={<LandingPage />} />
+                <Route path="/" element={<RoleEntryPage />} />
+                <Route path="/landing" element={<LandingPage />} />
                 <Route path="/gate" element={<Gate />} />
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/register" element={<Register />} />
@@ -114,6 +118,23 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <Startseite />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route
+                  path="/patient"
+                  element={
+                    <ProtectedRoute>
+                      <PatientHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeHubPage />
                     </ProtectedRoute>
                   }
                 />

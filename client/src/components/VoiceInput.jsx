@@ -1,32 +1,35 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useId } from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import StopIcon from "@mui/icons-material/Stop";
 import { authFetch } from "../api/authFetch";
 import { useLanguage } from "../i18n/LanguageContext";
 
-export default function VoiceInput({ onTranscribed }) {
+export default function VoiceInput({ onTranscribed, notice, labels, className }) {
   const [isRecording, setIsRecording] = useState(false);
   const [, setStatus] = useState("");
   const [, setAudioURL] = useState(null);
   const { language } = useLanguage();
-  const copy = language === "en"
-    ? {
-        micError: "Microphone unavailable.",
-        transcriptionError: "Transcription failed.",
-        start: "Start voice input",
-        stop: "Stop voice input",
-      }
-    : {
-        micError: "Mikrofon nicht verfügbar.",
-        transcriptionError: "Transkription fehlgeschlagen.",
-        start: "Spracheingabe starten",
-        stop: "Spracheingabe stoppen",
-      };
+  const defaults =
+    language === "en"
+      ? {
+          micError: "Microphone unavailable.",
+          transcriptionError: "Transcription failed.",
+          start: "Start voice input",
+          stop: "Stop voice input",
+        }
+      : {
+          micError: "Mikrofon nicht verfügbar.",
+          transcriptionError: "Transkription fehlgeschlagen.",
+          start: "Spracheingabe starten",
+          stop: "Spracheingabe stoppen",
+        };
+  const copy = { ...defaults, ...labels };
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const stopTimerRef = useRef(null);
   const mimeRef = useRef("audio/webm");
+  const noticeId = useId();
 
   const startRecording = async () => {
     try {
@@ -103,13 +106,19 @@ export default function VoiceInput({ onTranscribed }) {
   };
 
   return (
-    <div style={{ marginTop: "1rem" }}>
+    <div className={className || undefined} style={className ? undefined : { marginTop: "1rem" }}>
+      {notice ? (
+        <p className="voice-input__notice" id={noticeId}>
+          {notice}
+        </p>
+      ) : null}
       <button
         type="button"
         className="voice-btn"
         onClick={isRecording ? stopRecording : startRecording}
         aria-label={isRecording ? copy.stop : copy.start}
         title={isRecording ? copy.stop : copy.start}
+        aria-describedby={notice ? noticeId : undefined}
       >
         {isRecording ? <StopIcon fontSize="small" /> : <MicIcon fontSize="small" />}
       </button>

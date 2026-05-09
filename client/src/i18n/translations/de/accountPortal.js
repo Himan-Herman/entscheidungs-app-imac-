@@ -7,6 +7,10 @@ export default {
   navProfiles: "Profile",
   navData: "Datenschutz & Daten",
   navFollowUps: "Rückfragen",
+  switchArea: "Bereich wechseln",
+  switchPatient: "Patientenbereich",
+  switchPractice: "Praxisbereich",
+  switchHint: "Sie können dies jederzeit ändern.",
   title: "Mein MedScoutX",
   subtitle:
     "Vorbereitungen, Verläufe, Dokumente und Kontakte übersichtlich verwalten.",
@@ -85,4 +89,7 @@ export default {
   legalSectionTitle: "Rechtliches & Hinweise",
   legalSupportNote:
     "Support-E-Mail: vor Store-Release konfigurieren (Platzhalter — keine Rechtszusage).",
+  navPracticeProfiles: "Praxisprofile",
+  navPracticeDashboard: "Praxis-Dashboard",
+  navPrivacyShort: "Datenschutz & Bestätigungen",
 };

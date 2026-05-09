@@ -4,6 +4,11 @@ export default {
   navTimelines: "Verläufe",
   navDoctors: "Ärzte",
   navSettings: "Einstellungen",
+  navPracticeDashboard: "Dashboard",
+  navPracticeProfiles: "Praxen",
+  navPracticeFollowUps: "Rückfragen",
+  navAccountHome: "Konto",
+  navPracticePrivacy: "Datenschutz",
   bottomNavAria: "Hauptnavigation der App",
   offlineTitle: "Sie sind offline oder die Verbindung ist unterbrochen.",
   offlineDetail:

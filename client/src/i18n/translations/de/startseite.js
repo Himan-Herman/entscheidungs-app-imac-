@@ -72,23 +72,23 @@ export default {
     },
     {
       key: "symptom",
-      title: "Symptome einordnen",
+      title: "Symptom-Check",
       description:
-        "Symptome strukturiert beschreiben und allgemeine Orientierung erhalten. Die Ausgabe ersetzt keine ärztliche Beratung und dient nicht der Diagnose.",
+        "Symptome strukturiert beschreiben, allgemeine Orientierung erhalten und ein Arztgespräch vorbereiten. Keine Diagnose und keine Therapieempfehlung.",
       to: "/symptom",
     },
     {
       key: "bodymap",
       title: "Körperkarte",
       description:
-        "Betroffene Region wählen und per geführten Fragen beschreiben, was du spürst — zur Orientierung, nicht zur Diagnose.",
+        "Körperbereiche markieren, Beschwerden visuell beschreiben und ein Arztgespräch vorbereiten. Keine Diagnose oder medizinische Bewertung.",
       to: "/region-start",
     },
     {
       key: "image",
-      title: "Bildhinweis",
+      title: "Bildbeschreibung",
       description:
-        "Optional ein Bild hochladen; sichtbare Details werden beschrieben und nachgefragt — keine eigenständige Diagnose.",
+        "Bild strukturiert beschreiben lassen, Beobachtungen für das Arztgespräch vorbereiten und patientenseitig bereitgestellte Fotos ordnen. Keine Diagnose und keine medizinische Bewertung.",
       to: "/bild",
     },
   ],

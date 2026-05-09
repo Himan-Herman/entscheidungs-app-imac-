@@ -30,18 +30,18 @@ export default {
   previsitText:
     "The core flow for multilingual communication: structure what you want to say and export a PDF tailored to the practice language.",
   previsitAlt: "MedScoutX overview for preparing a doctor visit",
-  symptomTitle: "Symptom chat",
+  symptomTitle: "Symptom Check",
   symptomText:
-    "Describe symptoms in a structured way and receive general orientation. The output does not replace medical advice and is not intended for diagnosis.",
-  symptomAlt: "Example view of the MedScoutX symptom chat",
+    "Describe symptoms in a structured way, receive general orientation, and prepare for a doctor visit. No diagnosis or treatment recommendation.",
+  symptomAlt: "Example view of MedScoutX Symptom Check",
   bodyTitle: "Body map",
   bodyText:
-    "Select affected regions on the body so follow-up questions can focus on location, sensations and context — as orientation before your appointment.",
+    "Mark body regions, describe symptoms visually, and prepare for a doctor visit. No diagnosis or medical assessment.",
   bodyAlt: "Example view of the MedScoutX body map",
-  imageTitle: "Image analysis",
+  imageTitle: "Image description",
   imageText:
-    "Upload a photo for a structured description of what is visible and focused follow-up questions — without replacing examination by a clinician.",
-  imageAlt: "Example view of MedScoutX image analysis",
+    "Describe an image in a structured way, prepare observations for a doctor visit, and organize patient-provided photos. No diagnosis or medical assessment.",
+  imageAlt: "Example view of MedScoutX image description",
   safetyTitle: "What MedScoutX does not do — and what matters for you",
   safety1Title: "Not an emergency service",
   safety1Text:

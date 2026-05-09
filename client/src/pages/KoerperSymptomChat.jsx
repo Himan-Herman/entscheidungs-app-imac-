@@ -1,14 +1,18 @@
 // src/pages/KoerperSymptomChat.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   useSearchParams,
   useNavigate,
   useLocation,
+  Link,
 } from "react-router-dom";
 
 import "../styles/KoerperSymptomChat.css";
 
 import { useTheme } from "../ThemeMode";
+import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
+import { readBodyMapConsent } from "../features/bodyMap/bodyMapSession";
 import DisclaimerShort from "../components/DisclaimerShort";
 import VoiceInput from "../components/VoiceInput.jsx";
 import { FaPaperPlane } from "react-icons/fa";
@@ -18,10 +22,42 @@ import SpeakButton from "../components/SpeakButton";
 const THREAD_API = "/api/koerpersymptomthread";
 const LS_CHAT_KEY = "koerperChatVerlauf";
 const LS_THREAD_KEY = "koerperThreadId";
-const MAX_CHARS = 150;
+const MAX_CHARS = 1200;
+
+function interpolateRegion(template, region) {
+  return template.replace(/\{\{region\}\}/g, region);
+}
+
+function interpolateMax(template, max) {
+  return template.replace(/\{\{max\}\}/g, String(max));
+}
+
+function introExistsForOrgan(messages, organKey) {
+  return messages.some(
+    (m) =>
+      m.role === "assistant" &&
+      (m.bodyMapIntro === true && m.introOrgan === organKey),
+  );
+}
 
 export default function KoerperSymptomChat() {
-  const { theme } = useTheme(); // "light" | "dark"
+  const { theme } = useTheme();
+  const { language } = useLanguage();
+
+  const tc = useMemo(() => {
+    const b = getMessages(language);
+    return b.bodyMap?.chat ?? getMessages("en").bodyMap.chat;
+  }, [language]);
+
+  const voiceLabels = useMemo(
+    () => ({
+      micError: tc.voiceMicError,
+      transcriptionError: tc.voiceTxError,
+      start: tc.voiceStart,
+      stop: tc.voiceStop,
+    }),
+    [tc],
+  );
 
   const [eingabe, setEingabe] = useState("");
   const [verlauf, setVerlauf] = useState(() => {
@@ -45,8 +81,8 @@ export default function KoerperSymptomChat() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const organ = searchParams.get("organ");
-  
-const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
+
+  const organLabel = organ ? organ.replace(/_/g, " ") : "";
 
   const seite =
     searchParams.get("seite") ||
@@ -61,7 +97,16 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
   const location = useLocation();
   const fromReset = location.state?.fromReset === true;
 
-  // Textarea-Autoresize
+  useEffect(() => {
+    document.title = tc.pageTitle;
+  }, [tc.pageTitle]);
+
+  useEffect(() => {
+    if (!readBodyMapConsent()) {
+      navigate("/region-start", { replace: true });
+    }
+  }, [navigate]);
+
   const autoResize = (el) => {
     if (!el) return;
     el.style.height = "auto";
@@ -69,7 +114,6 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     el.style.height = Math.min(el.scrollHeight, maxH) + "px";
   };
 
-  // Route-Infos für „zurück zur Karte“ merken
   useEffect(() => {
     if (location.state?.from) {
       sessionStorage.setItem("lastMapRoute", location.state.from);
@@ -79,7 +123,6 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     }
   }, [seite, location]);
 
-  // nach „Neues Gespräch“: nur Session-Caches löschen, KEINE URL-Manipulation
   useEffect(() => {
     if (fromReset) {
       sessionStorage.removeItem("koerperSeite");
@@ -87,16 +130,10 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     }
   }, [fromReset]);
 
-  // Einstiegs-Nachricht, wenn Organ gewählt wurde
   useEffect(() => {
     if (!organ) return;
 
-    const introExistiert = verlauf.some(
-      (m) =>
-        m.role === "assistant" &&
-        m.content.includes(`"${organ}" als betroffene Region`)
-    );
-    if (introExistiert) {
+    if (introExistsForOrgan(verlauf, organ)) {
       lastIntroOrganRef.current = organ;
       return;
     }
@@ -104,7 +141,9 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     if (lastIntroOrganRef.current !== organ) {
       const neueStartFrage = {
         role: "assistant",
-        content: `Du hast "${organ}" als betroffene Region gewählt. Kannst du bitte beschreiben, was genau du dort spürst?`,
+        content: interpolateRegion(tc.introAssistant, organLabel),
+        bodyMapIntro: true,
+        introOrgan: organ,
       };
       setVerlauf((prev) => {
         const neu = [...prev, neueStartFrage];
@@ -120,7 +159,6 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organ]);
 
-  // Verlauf im LocalStorage speichern
   useEffect(() => {
     try {
       localStorage.setItem(LS_CHAT_KEY, JSON.stringify(verlauf));
@@ -129,7 +167,6 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     }
   }, [verlauf]);
 
-  // Immer nach unten scrollen bei neuen Nachrichten
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTo({
@@ -139,22 +176,27 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     }
   }, [verlauf]);
 
-  // KI-Anfrage
   const frageSenden = async (textOverride) => {
-    const raw =
-      typeof textOverride === "string" ? textOverride : eingabe;
+    const raw = typeof textOverride === "string" ? textOverride : eingabe;
     const aktuelleFrage = (raw || "").trim();
     if (!aktuelleFrage || isSending) return;
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setVerlauf((prev) => [
+        ...prev,
+        { role: "assistant", content: tc.offlineError },
+      ]);
+      return;
+    }
 
     const userMsg = { role: "user", content: aktuelleFrage };
     const basisVerlauf = [...verlauf, userMsg];
 
-    // Zwischenstatus mit Sanduhr
     const mitUhr = [
       ...basisVerlauf,
       {
         role: "assistant",
-        content: "⏳ Meda analysiert deine Angaben …",
+        content: tc.loadingLine,
       },
     ];
     setVerlauf(mitUhr);
@@ -164,12 +206,13 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     try {
       const payload = {
         threadId: threadId || null,
+        organName: organ || organLabel,
         verlauf:
           !threadId && organ
             ? [
                 {
                   role: "user",
-                  content: `Kontext: Die betroffene Körperregion ist "${organ}".`,
+                  content: `[Body map — visit preparation] Marked region: "${organ}". Neutral notes only; no diagnosis.`,
                 },
                 userMsg,
               ]
@@ -185,13 +228,12 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
       });
 
       if (!response.ok) {
-        const text = await response.text();
-        console.error("[Thread API] HTTP", response.status, text);
+        console.error("[Thread API] HTTP", response.status);
         const fertigFehler = [
           ...basisVerlauf,
           {
             role: "assistant",
-            content: "⚠️ Serverfehler. Bitte später erneut versuchen.",
+            content: tc.httpError,
           },
         ];
         setVerlauf(fertigFehler);
@@ -223,8 +265,7 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
         ...basisVerlauf,
         {
           role: "assistant",
-          content:
-            "⚠️ Es ist ein Fehler aufgetreten. Bitte versuche es später erneut.",
+          content: tc.serverError,
         },
       ];
       setVerlauf(mitFehler);
@@ -240,16 +281,11 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
     }
   };
 
-  // Ergebnis aus VoiceInput
   const handleVoice = (text) => {
     setEingabe((text || "").slice(0, MAX_CHARS));
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
-  // Nur Verlauf löschen (Thread bleibt)
- 
-
-  // Alles zurücksetzen und wieder zur Region-Startseite
   const neustart = () => {
     setVerlauf([]);
     setEingabe("");
@@ -269,40 +305,39 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
 
     navigate("/region-start", { replace: true, state: { fromReset: true } });
   };
+
   const clearVerlauf = () => {
     try {
-      // bisherigen Verlauf aus LocalStorage entfernen
       localStorage.removeItem(LS_CHAT_KEY);
     } catch (e) {
       console.warn("[LS remove] koerperChatVerlauf löschen fehlgeschlagen:", e);
     }
-  
+
     if (organ) {
-      // Wenn eine Region gewählt ist: neue Einstiegsnachricht für genau dieses Organ
       const neueStartFrage = {
         role: "assistant",
-        content: `Du hast "${organ}" als betroffene Region gewählt. Kannst du bitte beschreiben, was genau du dort spürst?`,
+        content: interpolateRegion(tc.introAssistant, organLabel),
+        bodyMapIntro: true,
+        introOrgan: organ,
       };
-  
+
       const neu = [neueStartFrage];
       setVerlauf(neu);
-  
-      // Merken, dass für dieses Organ bereits ein Intro gesetzt wurde
+
       lastIntroOrganRef.current = organ;
-  
+
       try {
         localStorage.setItem(LS_CHAT_KEY, JSON.stringify(neu));
       } catch (e) {
         console.warn("[LS write] koerperChatVerlauf nach Reset fehlgeschlagen:", e);
       }
     } else {
-      // Falls aus irgendeinem Grund kein Organ gesetzt ist: einfach komplett leeren
       setVerlauf([]);
     }
   };
-  
 
   const zeichenAnzahl = eingabe.length;
+  const maxLabel = interpolateMax(tc.maxCharsLabel, MAX_CHARS);
 
   return (
     <main
@@ -310,60 +345,62 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
       data-theme={theme}
       aria-labelledby="koerper-heading"
       role="main"
+      dir="ltr"
     >
       <div className="koerper-shell">
         <header className="koerper-header">
           <div className="koerper-header-text">
             <h1 id="koerper-heading" className="koerper-title">
-              Körpersymptom in der gewählten Region
+              {tc.title}
             </h1>
-            <p className="koerper-subtitle">
-              Beschreibe, was du in dieser Körperregion spürst. Meda stellt
-              Rückfragen und hilft dir, die nächsten Schritte besser zu
-              verstehen.
+            <p className="koerper-subtitle">{tc.subtitle}</p>
+            <p className="koerper-organ-hint">
+              {tc.accountDataHint}{" "}
+              <Link to="/settings/privacy">{tc.accountDataLink}</Link>
             </p>
           </div>
           <div className="koerper-header-meta" aria-hidden="true">
-            <span className="chip chip--accent">Body&nbsp;Map</span>
-            <span className="chip chip--soft">Region auswählen</span>
+            <span className="chip chip--accent">{tc.chip1}</span>
+            <span className="chip chip--soft">{tc.chip2}</span>
           </div>
         </header>
 
         <section
           className="koerper-disclaimer-section"
-          aria-label="Wichtige Hinweise"
+          aria-label={tc.sectionChat}
         >
           <DisclaimerShort />
         </section>
 
         <section
           className="symptomchat-container"
-          aria-label="Körpersymptom-Chat mit Meda"
+          aria-label={tc.sectionChat}
         >
           <header className="chat-top-row">
-            <h2 className="chat-title">Körpersymptom beschreiben</h2>
+            <h2 className="chat-title">{tc.chatHeading}</h2>
             <div className="chat-top-actions">
               <button
                 type="button"
                 className="btn btn--ghost"
                 onClick={neustart}
-                title="Chat & Thread löschen und neu starten"
+                title={tc.btnNewChatTitle}
               >
-                ↻ Neues Gespräch
+                ↻ {tc.btnNewChat}
               </button>
 
               <button
                 type="button"
                 className="btn btn--ghost-danger"
                 onClick={clearVerlauf}
-                title="Nur bisherigen Verlauf löschen"
+                title={tc.btnClearHistoryTitle}
               >
-                🧹 Verlauf löschen
+                🧹 {tc.btnClearHistory}
               </button>
             </div>
           </header>
 
-          {/* Chatverlauf */}
+          <p className="koerper-chat-intro">{tc.chatIntro}</p>
+
           <div
             className="chatverlauf"
             ref={chatRef}
@@ -373,12 +410,10 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
           >
             {verlauf.length === 0 && (
               <p className="chat-placeholder">
-                Wähle zuerst eine Körperregion aus. Danach kannst du hier dein
-                Symptom beschreiben, z.&nbsp;B.:
+                {tc.placeholderEmpty}
                 <br />
                 <span className="chat-placeholder-example">
-                  „Seit einigen Tagen habe ich ein Ziehen in der rechten
-                  Schulter, wenn ich den Arm hebe.“
+                  {tc.placeholderExample}
                 </span>
               </p>
             )}
@@ -388,27 +423,26 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
               return (
                 <article
                   key={index}
-                  className={`chat-bubble ${
-                    isUser ? "user" : "assistant"
-                  }`}
-                  aria-label={`Nachricht ${index + 1} von ${
-                    isUser ? "dir" : "Meda"
-                  }`}
+                  className={`chat-bubble ${isUser ? "user" : "assistant"}`}
+                  aria-label={`${index + 1}: ${isUser ? tc.userLabel : tc.assistantLabel}`}
                 >
                   {isUser ? (
                     <>
-                      <strong className="bubble-label">👤 Du:</strong>
+                      <strong className="bubble-label">
+                        {tc.userLabel}:
+                      </strong>
                       <p className="bubble-text">{nachricht.content}</p>
                     </>
                   ) : (
                     <>
                       <div className="bubble-header-row">
-                        <strong className="bubble-label">🩺 Meda:</strong>
-                        {/* OpenAI-TTS über Backend (gleiche Logik wie im Symptom-Chat) */}
+                        <strong className="bubble-label">
+                          {tc.assistantLabel}:
+                        </strong>
                         <SpeakButton
                           text={nachricht.content || ""}
                           className="tts-btn"
-                          ariaLabel="Antwort von Meda vorlesen"
+                          ariaLabel={tc.speakAria}
                         />
                       </div>
                       <p className="bubble-text">{nachricht.content}</p>
@@ -419,47 +453,39 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
             })}
           </div>
 
-          {/* Eingabe */}
           <div className="eingabe-bereich">
-  <div className="eingabe-label-row">
-    <label
-      htmlFor="koerper-eingabe"
-      className="eingabe-label"
-    >
-      Dein Symptom in dieser Region
-    </label>
-    <span className="eingabe-hint">
-      Max. {MAX_CHARS} Zeichen
-    </span>
-  </div>
+            <div className="eingabe-label-row">
+              <label htmlFor="koerper-eingabe" className="eingabe-label">
+                {tc.inputLabel}
+              </label>
+              <span className="eingabe-hint">{maxLabel}</span>
+            </div>
 
-  {organ && (
-    <p className="koerper-organ-hint">
-      <strong>Hinweis:</strong> Bitte beginne deine Beschreibung mit der
-      gewählten Region, z.&nbsp;B.&nbsp;
-      <span className="koerper-organ-example">
-        „In meiner {organLabel} …“
-      </span>
-      . Für allgemeine, nicht region-bezogene Fragen nutze bitte den
-      Symptom-Chat.
-    </p>
-  )}
+            {organ ? (
+              <p className="koerper-organ-hint">
+                <strong>{tc.organHintIntro}</strong>{" "}
+                <span className="koerper-organ-example">
+                  {interpolateRegion(tc.organHintExample, organLabel)}
+                </span>{" "}
+                {tc.organHintOutro}
+              </p>
+            ) : null}
 
-  <textarea
-    id="koerper-eingabe"
-    ref={inputRef}
-    className="chat-textarea"
-    placeholder={`Beschreibe hier dein Symptom in der gewählten Region, z. B. Art, Dauer, Stärke, Auslöser …`}
-    value={eingabe}
-    maxLength={MAX_CHARS}
-    rows={1}
-    onChange={(e) =>
-      setEingabe(e.target.value.slice(0, MAX_CHARS))
-    }
-    onInput={(e) => autoResize(e.target)}
-    onKeyDown={handleKeyDown}
-    aria-label="Symptom in dieser Körperregion eingeben"
-  />
+            <textarea
+              id="koerper-eingabe"
+              ref={inputRef}
+              className="chat-textarea"
+              placeholder={tc.inputPlaceholder}
+              value={eingabe}
+              maxLength={MAX_CHARS}
+              rows={1}
+              onChange={(e) =>
+                setEingabe(e.target.value.slice(0, MAX_CHARS))
+              }
+              onInput={(e) => autoResize(e.target)}
+              onKeyDown={handleKeyDown}
+              aria-label={tc.inputLabel}
+            />
 
             <div className="eingabe-actions">
               <span
@@ -472,7 +498,11 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
               </span>
 
               <div className="voice-wrap">
-                <VoiceInput onTranscribed={handleVoice} />
+                <VoiceInput
+                  onTranscribed={handleVoice}
+                  notice={tc.micNotice}
+                  labels={voiceLabels}
+                />
               </div>
 
               <button
@@ -480,7 +510,7 @@ const organLabel = organ ? organ.replace(/_/g, " ") : "Region";
                 className="send-btn"
                 onClick={() => frageSenden()}
                 disabled={isSending}
-                aria-label="Symptombeschreibung senden"
+                aria-label={tc.sendAria}
               >
                 <FaPaperPlane aria-hidden="true" />
               </button>

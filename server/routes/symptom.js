@@ -4,6 +4,8 @@ import OpenAI from 'openai';
 import { toFile } from 'openai/uploads';
 import multer from 'multer';
 import { getBildanalysePrompt } from '../../client/src/pages/prompt/bildanalysePrompt.js';
+import { sanitizeAiOutput } from '../services/aiSafetySanitizer.js';
+import { AI_MODULES } from '../config/aiSafetyPolicy.js';
 
 dotenv.config();
 const router = express.Router();
@@ -91,7 +93,7 @@ router.post('/', upload.single('bild'), async (req, res) => {
     await openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: [
-        { type: 'text', text: (prompt || 'Bitte analysiere dieses Bild.').trim() },
+        { type: 'text', text: (prompt || 'Please give a neutral structured description suitable for a doctor visit.').trim() },
         { type: 'image_file', image_file: { file_id: uploaded.id } },
       ],
     });
@@ -117,9 +119,14 @@ router.post('/', upload.single('bild'), async (req, res) => {
       if (parts.length) antwort = parts.join('\n\n');
     }
 
+    const safe = sanitizeAiOutput(antwort, {
+      module: AI_MODULES.IMAGE_ANALYSIS,
+      locale: letzteSprache || 'de',
+    });
+
     return res.json({
       threadId,
-      antwort: antwort.replace(/\n/g, '<br/>'),
+      antwort: safe.text,
     });
 
   } catch (e) {

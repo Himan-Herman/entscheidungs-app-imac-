@@ -177,6 +177,31 @@
   gap: 10px;
 }
 
+.ms-header__mode {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ms-header__mode-select {
+  min-height: 44px;
+  padding: 0.35rem 1.5rem 0.35rem 0.75rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ms-fg);
+  background: var(--ms-panel);
+  border: 1px solid var(--ms-border);
+  border-radius: 12px;
+  box-shadow: var(--ms-shadow);
+  cursor: pointer;
+  max-width: min(200px, 45vw);
+}
+
+.ms-header__mode-select:focus-visible {
+  outline: 2px solid var(--ms-focus);
+  outline-offset: 2px;
+}
+
 .ms-header__language {
   display: inline-flex;
   align-items: center;

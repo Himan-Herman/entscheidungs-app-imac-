@@ -3,6 +3,12 @@
  * No diagnosis, urgency, treatment, specialist recommendation, or inferred medical facts.
  */
 import { openai } from '../openaiClient.js';
+import {
+  AI_MODULES,
+  ALLOWED_COMMUNICATION_STYLE,
+  STRICT_RETRY_SUFFIX_COMPLETION,
+} from '../config/aiSafetyPolicy.js';
+import { sanitizeAiOutput, shouldRegenerateUnsafeOutput } from './aiSafetySanitizer.js';
 
 const MODEL = 'gpt-4o-mini';
 const SERVER_MAX_FOLLOWUPS = 6;
@@ -36,7 +42,10 @@ Output rules:
 - Questions must be generic documentation prompts for the category only. Never name a condition. Never warn about emergencies. Never suggest what the doctor should do.
 - completeness is your conservative estimate of how well the combined text covers what the patient might want recorded (0-1). It does NOT measure medical severity.
 - If the latest patient text is empty or unusable, set done false and ask one neutral clarification, unless follow-up limit is reached (then done true).
-- If you already have enough plain-language detail for this category, set done true.`;
+- If you already have enough plain-language detail for this category, set done true.
+
+Shared output safety:
+${ALLOWED_COMMUNICATION_STYLE}`;
 
 function clamp(n, lo, hi) {
   return Math.min(hi, Math.max(lo, n));
@@ -189,19 +198,64 @@ export async function runAdaptiveIntakeTurn(params) {
     throw err;
   }
 
-  const done = Boolean(parsed.done);
+  let done = Boolean(parsed.done);
   let followUpQuestion =
     parsed.followUpQuestion == null ? null : String(parsed.followUpQuestion).trim();
   let completeness = Number(parsed.completeness);
   if (!Number.isFinite(completeness)) completeness = 0.5;
   completeness = clamp(completeness, 0, 1);
 
+  if (
+    !done &&
+    followUpQuestion &&
+    shouldRegenerateUnsafeOutput(followUpQuestion, AI_MODULES.PREVISIT_INTAKE)
+  ) {
+    try {
+      const completion2 = await openai.chat.completions.create({
+        model: MODEL,
+        temperature: 0.1,
+        max_tokens: 320,
+        response_format: { type: 'json_object' },
+        messages: [
+          {
+            role: 'system',
+            content: `${SYSTEM}\n\n${STRICT_RETRY_SUFFIX_COMPLETION}`,
+          },
+          {
+            role: 'user',
+            content: JSON.stringify({
+              task: 'Return next JSON action for adaptive intake',
+              payload,
+            }),
+          },
+        ],
+      });
+      const raw2 = completion2?.choices?.[0]?.message?.content;
+      if (isNonEmptyString(raw2)) {
+        const parsed2 = JSON.parse(extractJsonObject(raw2));
+        done = Boolean(parsed2.done);
+        followUpQuestion =
+          parsed2.followUpQuestion == null
+            ? null
+            : String(parsed2.followUpQuestion).trim();
+        const c2 = Number(parsed2.completeness);
+        if (Number.isFinite(c2)) completeness = clamp(c2, 0, 1);
+      }
+    } catch {
+      /* keep first parse */
+    }
+  }
+
   if (done) {
     followUpQuestion = null;
   } else if (!followUpQuestion) {
     followUpQuestion = null;
   } else {
-    followUpQuestion = followUpQuestion.slice(0, 400);
+    const s = sanitizeAiOutput(followUpQuestion, {
+      module: AI_MODULES.PREVISIT_INTAKE,
+      locale: patientLanguage,
+    });
+    followUpQuestion = s.text.slice(0, 400);
   }
 
   if (!done && followUpQuestion && qaHistory.length + 1 > maxFollowUps) {

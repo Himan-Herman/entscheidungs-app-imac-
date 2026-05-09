@@ -17,9 +17,12 @@ export default function Layout() {
   const forcePublic = params.get("public") === "1";
 
   const hideHeader =
-    pathname.startsWith("/check-email") || pathname.startsWith("/verified");
+    pathname === "/" ||
+    pathname.startsWith("/check-email") ||
+    pathname.startsWith("/verified");
 
   const hideFooter =
+    pathname === "/" ||
     pathname === "/register" ||
     (isLegal && (!isLoggedIn || forcePublic));
 
