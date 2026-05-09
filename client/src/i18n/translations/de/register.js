@@ -49,4 +49,8 @@ export default {
   failed: "Registrierung fehlgeschlagen.",
   requestError: "Fehler bei der Registrierung.",
   srRequired: "(Pflichtfeld)",
+  firstNamePlaceholder: "z. B. Max",
+  lastNamePlaceholder: "z. B. Mustermann",
+  conjunctionAnd: "und",
+  legalLinksAria: "Rechtliche Informationen",
 };

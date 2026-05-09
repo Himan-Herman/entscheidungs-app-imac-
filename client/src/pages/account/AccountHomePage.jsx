@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { getMessages } from "../../i18n/translations/index.js";
 import { authFetch } from "../../api/authFetch.js";
+import { formatUiDate } from "../../i18n/intlLocale.js";
 
 export default function AccountHomePage() {
   const { language } = useLanguage();
@@ -10,6 +11,7 @@ export default function AccountHomePage() {
     const m = getMessages(language);
     return m.accountPortal ?? getMessages("en").accountPortal;
   }, [language]);
+  const tc = useMemo(() => getMessages(language).common, [language]);
 
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -49,7 +51,7 @@ export default function AccountHomePage() {
         <p className="account-portal-page__subtitle">{t.subtitle}</p>
       </header>
 
-      <section className="account-portal-page__quick" aria-label="Quick actions">
+      <section className="account-portal-page__quick" aria-label={t.quickActionsAria}>
         <Link className="account-portal__btn account-portal__btn--primary" to="/pre-visit">
           {t.quickNewPrep}
         </Link>
@@ -79,8 +81,7 @@ export default function AccountHomePage() {
               {prep.map((s) => (
                 <li key={s.id}>
                   <Link to={`/pre-visit/my-preparations`} state={{ focusSessionId: s.id }}>
-                    {s.title || "Pre-Visit"} ·{" "}
-                    {new Date(s.updatedAt).toLocaleDateString(language === "de" ? "de-DE" : "en-GB")}
+                    {s.title || t.defaultPrepTitle} · {formatUiDate(s.updatedAt, language)}
                   </Link>
                 </li>
               ))}
@@ -120,7 +121,7 @@ export default function AccountHomePage() {
             <ul className="account-portal-card__list">
               {docs.slice(0, 4).map((d) => (
                 <li key={d.id}>
-                  {d.title || "—"} · {d.pdfDownloaded ? t.statusCreated : t.statusDraft}
+                  {d.title || tc.emptyPlaceholder} · {d.pdfDownloaded ? t.statusCreated : t.statusDraft}
                 </li>
               ))}
             </ul>
@@ -158,7 +159,7 @@ export default function AccountHomePage() {
               {follow.map((f) => (
                 <li key={f.id}>
                   <Link to={`/pre-visit/follow-ups/${f.id}`}>
-                    {f.title || f.sessionTitle || "Follow-up"} · {f.status}
+                    {f.title || f.sessionTitle || t.defaultFollowUpLabel} · {f.status}
                   </Link>
                 </li>
               ))}

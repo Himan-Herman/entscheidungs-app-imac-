@@ -1,4 +1,5 @@
 import { deepMerge } from "../deepMerge.js";
+import { mergeFallbackMessages } from "../mergeFallbackMessages.js";
 import en from "./en/index.js";
 import de from "./de/index.js";
 import frOverrides from "./overrides/fr.js";
@@ -52,12 +53,14 @@ const bundles = {
 };
 
 /**
- * Full message tree for a locale. Unknown codes fall back to English → German merge.
+ * Full message tree for a locale.
+ * Fallback per key: selected language → English → German.
  */
 export function getMessages(lang) {
   const code =
     typeof lang === "string" ? lang.toLowerCase() : "en";
-  return bundles[code] ?? messagesFallbackBase;
+  const primary = bundles[code] ?? messagesFallbackBase;
+  return mergeFallbackMessages(primary, bundles.en, bundles.de);
 }
 
 export { bundles };

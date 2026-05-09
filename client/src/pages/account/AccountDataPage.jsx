@@ -37,7 +37,7 @@ export default function AccountDataPage() {
 
   async function deletePrevisit() {
     if (phrase.trim() !== DELETE_PREVISIT) return;
-    if (!window.confirm(language === "de" ? "Wirklich alle Pre-Visit-Daten löschen?" : "Delete all Pre-Visit data?")) return;
+    if (!window.confirm(t.confirmDeletePrevisit)) return;
     setBusy(true);
     setMsg("");
     try {
@@ -47,7 +47,7 @@ export default function AccountDataPage() {
         body: JSON.stringify({ confirmation: DELETE_PREVISIT }),
       });
       if (!res.ok) throw new Error();
-      setMsg(language === "de" ? "Pre-Visit-Daten wurden gelöscht." : "Pre-Visit data deleted.");
+      setMsg(t.deletePrevisitDone);
       setPhrase("");
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;

@@ -67,7 +67,7 @@ export default function Intro() {
           <div className="intro-logo-wrapper">
             <img
               src={logo}
-              alt="MedScoutX Logo"
+              alt={copy.logoAlt}
               className={`intro-logo ${fadeOut ? "fade-out" : "fade-in"}`}
             />
           </div>

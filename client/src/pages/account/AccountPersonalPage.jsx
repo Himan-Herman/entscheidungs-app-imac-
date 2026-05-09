@@ -112,7 +112,7 @@ export default function AccountPersonalPage() {
     setForm((prev) => ({ ...prev, [k]: v }));
   }
 
-  if (loading) return <p className="account-portal-card__empty">{t.saving}</p>;
+  if (loading) return <p className="account-portal-card__empty">{t.loading}</p>;
 
   return (
     <div className="account-portal-page">
@@ -123,61 +123,61 @@ export default function AccountPersonalPage() {
 
       <form className="account-portal-form" onSubmit={onSubmit}>
         <label className="account-portal-form__field">
-          E-mail
+          {t.fieldEmail}
           <input value={form.email} disabled className="account-portal-form__input" />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Vorname" : "First name"}
+          {t.fieldFirstName}
           <input className="account-portal-form__input" value={form.firstName} onChange={(e) => upd("firstName", e.target.value)} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Nachname" : "Last name"}
+          {t.fieldLastName}
           <input className="account-portal-form__input" value={form.lastName} onChange={(e) => upd("lastName", e.target.value)} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Geburtsdatum" : "Date of birth"}
+          {t.fieldDateOfBirth}
           <input type="date" className="account-portal-form__input" value={form.dateOfBirth} onChange={(e) => upd("dateOfBirth", e.target.value)} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Anzeigename (optional)" : "Display name (optional)"}
+          {t.fieldDisplayNameOptional}
           <input className="account-portal-form__input" value={form.displayName} onChange={(e) => upd("displayName", e.target.value)} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Telefon" : "Phone"}
+          {t.fieldPhone}
           <input className="account-portal-form__input" value={form.phone} onChange={(e) => upd("phone", e.target.value)} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Anrede / Geschlecht (frei)" : "Salutation / gender (optional)"}
+          {t.fieldGenderSalutationOptional}
           <input className="account-portal-form__input" value={form.genderOrSalutation} onChange={(e) => upd("genderOrSalutation", e.target.value)} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Bevorzugte Patientensprache" : "Preferred patient language"}
-          <input className="account-portal-form__input" value={form.preferredPatientLanguage} onChange={(e) => upd("preferredPatientLanguage", e.target.value)} placeholder="de / en" />
+          {t.fieldPreferredPatientLanguage}
+          <input className="account-portal-form__input" value={form.preferredPatientLanguage} onChange={(e) => upd("preferredPatientLanguage", e.target.value)} placeholder={t.placeholderLangCodesExample} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Bevorzugte Arztsprache" : "Preferred doctor language"}
-          <input className="account-portal-form__input" value={form.preferredDoctorLanguage} onChange={(e) => upd("preferredDoctorLanguage", e.target.value)} placeholder="de / en" />
+          {t.fieldPreferredDoctorLanguage}
+          <input className="account-portal-form__input" value={form.preferredDoctorLanguage} onChange={(e) => upd("preferredDoctorLanguage", e.target.value)} placeholder={t.placeholderLangCodesExample} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Notiz Kontakt / Notfall (optional, nicht medizinisch)" : "Emergency / contact note (optional, non-medical)"}
+          {t.fieldEmergencyContactNoteOptional}
           <textarea className="account-portal-form__textarea" rows={3} value={form.emergencyNote} onChange={(e) => upd("emergencyNote", e.target.value)} />
         </label>
         <label className="account-portal-form__field">
-          {language === "de" ? "Adresse" : "Address"}
+          {t.fieldAddress}
           <textarea className="account-portal-form__textarea" rows={2} value={form.addressLine} onChange={(e) => upd("addressLine", e.target.value)} />
         </label>
         <div className="account-portal-form__row">
           <label className="account-portal-form__field">
-            PLZ / ZIP
+            {t.fieldPostalZip}
             <input className="account-portal-form__input" value={form.postalCode} onChange={(e) => upd("postalCode", e.target.value)} />
           </label>
           <label className="account-portal-form__field">
-            {language === "de" ? "Ort" : "City"}
+            {t.fieldCity}
             <input className="account-portal-form__input" value={form.city} onChange={(e) => upd("city", e.target.value)} />
           </label>
         </div>
         <label className="account-portal-form__field">
-          {language === "de" ? "Land" : "Country"}
+          {t.fieldCountry}
           <input className="account-portal-form__input" value={form.country} onChange={(e) => upd("country", e.target.value)} />
         </label>
 

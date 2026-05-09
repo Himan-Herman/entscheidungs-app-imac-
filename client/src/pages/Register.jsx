@@ -217,7 +217,7 @@ export default function Register() {
               <input
                 id="first_name"
                 className="input"
-                placeholder={language === "en" ? "e.g. Alex" : "z. B. Max"}
+                placeholder={copy.firstNamePlaceholder}
                 autoComplete="given-name"
                 required
                 value={form.first_name}
@@ -232,7 +232,7 @@ export default function Register() {
               <input
                 id="last_name"
                 className="input"
-                placeholder={language === "en" ? "e.g. Smith" : "z. B. Mustermann"}
+                placeholder={copy.lastNamePlaceholder}
                 autoComplete="family-name"
                 required
                 value={form.last_name}
@@ -319,7 +319,7 @@ export default function Register() {
                 <Link to="/datenschutz?public=1" aria-label={copy.privacyOpen}>
                   {copy.legalTextMiddle}
                 </Link>{" "}
-                {language === "en" ? "and" : "und"}{" "}
+                {copy.conjunctionAnd}{" "}
                 <Link to="/disclaimer?public=1" aria-label={copy.disclaimerOpen}>
                   {copy.disclaimer}
                 </Link>{" "}
@@ -356,7 +356,7 @@ export default function Register() {
           </div>
         </form>
 
-        <div className="legal-links" aria-label={language === "en" ? "Legal information" : "Rechtliche Informationen"}>
+        <div className="legal-links" aria-label={copy.legalLinksAria}>
           <Link to="/impressum?public=1">{copy.imprint}</Link>
           <span className="sep">·</span>
           <Link to="/datenschutz?public=1">{copy.privacy}</Link>

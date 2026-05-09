@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/impressum.css";
 import { useLanguage } from "../i18n/LanguageContext";
 import { resolveLegalPage } from "../i18n/translations/resolveLegalPage";
+import LegalTranslationBanner from "../components/legal/LegalTranslationBanner";
 
 export default function Impressum() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function Impressum() {
       aria-labelledby="impressum-title"
     >
       <header className="legal__header">
+        <LegalTranslationBanner />
         <h1 id="impressum-title">{t.title}</h1>
         <p className="legal__subtitle">{t.subtitle}</p>
       </header>

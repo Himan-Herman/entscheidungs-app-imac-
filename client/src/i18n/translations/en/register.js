@@ -47,4 +47,8 @@ export default {
   failed: "Registration failed.",
   requestError: "Registration error.",
   srRequired: "(required field)",
+  firstNamePlaceholder: "e.g. Alex",
+  lastNamePlaceholder: "e.g. Smith",
+  conjunctionAnd: "and",
+  legalLinksAria: "Legal information",
 };

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { getMessages } from "../../i18n/translations/index.js";
 import { authFetch } from "../../api/authFetch.js";
+import { formatUiDate } from "../../i18n/intlLocale.js";
 
 export default function AccountDoctorsPage() {
   const { language } = useLanguage();
@@ -88,7 +89,7 @@ export default function AccountDoctorsPage() {
                 <span className="account-portal-doc-list__meta">
                   {c.practiceName || c.email}
                   {c.lastUsedAt
-                    ? ` · ${t.lastUsed}: ${new Date(c.lastUsedAt).toLocaleDateString(language === "de" ? "de-DE" : "en-GB")}`
+                    ? ` · ${t.lastUsed}: ${formatUiDate(c.lastUsedAt, language)}`
                     : ""}
                 </span>
               </div>

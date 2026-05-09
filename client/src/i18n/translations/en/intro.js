@@ -1,4 +1,5 @@
 export default {
+  logoAlt: "MedScoutX logo",
   title: "MedScoutX — loading",
   skip: "Skip intro",
   heading: "MedScoutX is starting",

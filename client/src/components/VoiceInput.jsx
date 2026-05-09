@@ -1,28 +1,19 @@
-import React, { useState, useRef, useId } from "react";
+import React, { useState, useRef, useId, useMemo } from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import StopIcon from "@mui/icons-material/Stop";
 import { authFetch } from "../api/authFetch";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
 
 export default function VoiceInput({ onTranscribed, notice, labels, className }) {
   const [isRecording, setIsRecording] = useState(false);
   const [, setStatus] = useState("");
   const [, setAudioURL] = useState(null);
   const { language } = useLanguage();
-  const defaults =
-    language === "en"
-      ? {
-          micError: "Microphone unavailable.",
-          transcriptionError: "Transcription failed.",
-          start: "Start voice input",
-          stop: "Stop voice input",
-        }
-      : {
-          micError: "Mikrofon nicht verfügbar.",
-          transcriptionError: "Transkription fehlgeschlagen.",
-          start: "Spracheingabe starten",
-          stop: "Spracheingabe stoppen",
-        };
+  const defaults = useMemo(() => {
+    const m = getMessages(language);
+    return m.voiceInput ?? getMessages("en").voiceInput;
+  }, [language]);
   const copy = { ...defaults, ...labels };
 
   const mediaRecorderRef = useRef(null);
@@ -66,7 +57,7 @@ export default function VoiceInput({ onTranscribed, notice, labels, className })
         }
       }, 60000);
     } catch (err) {
-      console.error("Mic-Fehler:", err);
+      console.error(err);
       setStatus(`❌ ${copy.micError}`);
     }
   };
@@ -95,12 +86,12 @@ export default function VoiceInput({ onTranscribed, notice, labels, className })
         body: formData,
       });
 
-      if (!res.ok) throw new Error(`Fehler: ${res.status}`);
+      if (!res.ok) throw new Error(String(res.status));
 
       const data = await res.json();
       onTranscribed?.(data.text || "", data.language || "");
     } catch (err) {
-      console.error("Transkriptionsfehler:", err);
+      console.error(err);
       setStatus(`❌ ${copy.transcriptionError}`);
     }
   };

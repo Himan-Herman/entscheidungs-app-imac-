@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { resolveLegalPage } from "../i18n/translations/resolveLegalPage";
 import LegalBlocks from "../components/legal/LegalBlocks";
+import LegalTranslationBanner from "../components/legal/LegalTranslationBanner";
 
 export default function AGB() {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ export default function AGB() {
   return (
     <main className="agb" role="main" aria-labelledby="agb-title">
       <header className="agb__header">
+        <LegalTranslationBanner />
         <h1 id="agb-title">{t.title}</h1>
         <p className="agb__subtitle">{t.subtitle}</p>
       </header>

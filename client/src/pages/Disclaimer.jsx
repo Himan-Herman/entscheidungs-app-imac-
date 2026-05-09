@@ -4,6 +4,7 @@ import "../styles/disclaimer.css";
 import { useLanguage } from "../i18n/LanguageContext";
 import { resolveLegalPage } from "../i18n/translations/resolveLegalPage";
 import LegalBlocks from "../components/legal/LegalBlocks";
+import LegalTranslationBanner from "../components/legal/LegalTranslationBanner";
 
 export default function Disclaimer() {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ export default function Disclaimer() {
       aria-labelledby="disclaimer-title"
     >
       <header className="disclaimer__header">
+        <LegalTranslationBanner />
         <h1 id="disclaimer-title">{t.title}</h1>
         <p className="disclaimer__subtitle">{t.subtitle}</p>
       </header>

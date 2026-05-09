@@ -1,4 +1,7 @@
 export default {
+  emptyPlaceholder: "—",
+  legalTranslationNotice:
+    "Diese englische Version dient der Verständlichkeit. Maßgeblich ist, soweit erforderlich, die deutsche Fassung.",
   continue: "Weiter",
   cancel: "Abbrechen",
   close: "Schließen",

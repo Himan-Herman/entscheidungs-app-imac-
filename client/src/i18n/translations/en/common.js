@@ -1,4 +1,7 @@
 export default {
+  emptyPlaceholder: "—",
+  legalTranslationNotice:
+    "This English version is provided for convenience. The German version remains legally authoritative where applicable.",
   continue: "Continue",
   cancel: "Cancel",
   close: "Close",

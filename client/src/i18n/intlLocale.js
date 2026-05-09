@@ -22,6 +22,20 @@ export function formatLanguageDisplayName(uiLanguageCode, languageId) {
   return row?.labelEn ?? code;
 }
 
+export function formatUiDate(isoOrDate, uiLanguageCode) {
+  try {
+    const d =
+      isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
+    if (Number.isNaN(d.getTime())) return "—";
+    return new Intl.DateTimeFormat(
+      [String(uiLanguageCode || "en").toLowerCase(), "en", "de"],
+      { dateStyle: "medium" },
+    ).format(d);
+  } catch {
+    return "—";
+  }
+}
+
 export function formatUiDateTime(isoOrDate, uiLanguageCode) {
   try {
     const d =

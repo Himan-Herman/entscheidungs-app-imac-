@@ -75,7 +75,7 @@ export default function AccountProfilesPage() {
   }
 
   async function archiveProfile(id) {
-    if (!window.confirm(language === "de" ? "Profil archivieren?" : "Archive profile?")) return;
+    if (!window.confirm(t.confirmArchiveProfile)) return;
     try {
       const res = await authFetch(`/api/account/family-profiles/${encodeURIComponent(id)}`, {
         method: "PUT",
@@ -94,7 +94,7 @@ export default function AccountProfilesPage() {
       <h1 className="account-portal-page__title">{t.profilesTitle}</h1>
       <p className="account-portal-page__lead">{t.profilesIntro}</p>
       <p className="account-portal-page__note">
-        <strong>{t.ownProfile}</strong> — {language === "de" ? "unter Persönliche Angaben." : "see Personal details."}
+        <strong>{t.ownProfile}</strong> — {t.ownProfileHintSeePersonal}
       </p>
       {error ? <p className="account-portal__error">{error}</p> : null}
 
@@ -105,15 +105,15 @@ export default function AccountProfilesPage() {
       {adding ? (
         <form className="account-portal-form account-portal-form--inline" onSubmit={addProfile}>
           <label className="account-portal-form__field">
-            Name
+            {t.profilesFieldName}
             <input required className="account-portal-form__input" value={form.displayName} onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))} />
           </label>
           <label className="account-portal-form__field">
             {t.relationLabel}
-            <input required className="account-portal-form__input" value={form.relationLabel} onChange={(e) => setForm((f) => ({ ...f, relationLabel: e.target.value }))} placeholder={language === "de" ? "z. B. Kind" : "e.g. child"} />
+            <input required className="account-portal-form__input" value={form.relationLabel} onChange={(e) => setForm((f) => ({ ...f, relationLabel: e.target.value }))} placeholder={t.profilesRelationPlaceholder} />
           </label>
           <label className="account-portal-form__field">
-            DOB
+            {t.profilesFieldDob}
             <input type="date" className="account-portal-form__input" value={form.dateOfBirth} onChange={(e) => setForm((f) => ({ ...f, dateOfBirth: e.target.value }))} />
           </label>
           <button type="submit" className="account-portal__btn">

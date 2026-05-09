@@ -4,6 +4,7 @@ import "../styles/legal.css";
 import { useLanguage } from "../i18n/LanguageContext";
 import { resolveLegalPage } from "../i18n/translations/resolveLegalPage";
 import LegalBlocks from "../components/legal/LegalBlocks";
+import LegalTranslationBanner from "../components/legal/LegalTranslationBanner";
 
 export default function Datenschutz() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ export default function Datenschutz() {
       aria-labelledby="datenschutz-title"
     >
       <header className="legal__header">
+        <LegalTranslationBanner />
         <h1 id="datenschutz-title">{t.title}</h1>
         <p className="legal__subtitle">
           <em>{t.subtitle}</em>
