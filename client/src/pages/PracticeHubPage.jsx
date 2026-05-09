@@ -4,10 +4,9 @@ import {
   BarChart3,
   Building2,
   ClipboardList,
-  Database,
   LayoutDashboard,
   Plug,
-  Shield,
+  QrCode,
   UsersRound,
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -16,14 +15,12 @@ import "../styles/WorkspaceHubPages.css";
 
 const TILES = [
   { to: "/settings/practices", key: "hubLinkProfiles", Icon: Building2 },
-  { to: "/settings/practices", key: "hubLinkQr", Icon: Building2 },
+  { to: "/settings/practices", key: "hubLinkQr", Icon: QrCode },
   { to: "/practice/dashboard", key: "hubLinkDashboard", Icon: LayoutDashboard },
   { to: "/pre-visit/follow-ups", key: "hubLinkFollowUps", Icon: ClipboardList },
   { to: "/practice/dashboard", key: "hubLinkIntegrations", Icon: Plug },
   { to: "/practice/dashboard", key: "hubLinkAnalytics", Icon: BarChart3 },
   { to: "/account/profiles", key: "hubLinkProfilesTeam", Icon: UsersRound },
-  { to: "/settings/privacy", key: "hubLinkPrivacySettings", Icon: Shield },
-  { to: "/account/data", key: "hubLinkAccountData", Icon: Database },
 ];
 
 export default function PracticeHubPage() {
