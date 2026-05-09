@@ -73,22 +73,22 @@ export default function Header() {
       </a>
       <header className="ms-header" role="banner">
         <div className="ms-header__inner">
-          <div className="ms-header__brand-row">
-            <button
-              className="ms-logo"
-              onClick={() => navigate(homePath)}
-              aria-label={copy.homeAria}
-            >
-              <span className="ms-logo__mark">
-                <img src={logo} alt="" />
-              </span>
-              <span className="ms-logo__copy">
-                <span className="ms-logo__title">MedScoutX</span>
-                <span className="ms-logo__subtitle">{copy.appLabel}</span>
-              </span>
-            </button>
+          <button
+            className="ms-logo"
+            onClick={() => navigate(homePath)}
+            aria-label={copy.homeAria}
+          >
+            <span className="ms-logo__mark">
+              <img src={logo} alt="" />
+            </span>
+            <span className="ms-logo__copy">
+              <span className="ms-logo__title">MedScoutX</span>
+              <span className="ms-logo__subtitle">{copy.appLabel}</span>
+            </span>
+          </button>
 
-            {isLoggedIn ? (
+          <div className="ms-header__controls">
+            {isLoggedIn && (
               <label className="ms-header__mode">
                 <span className="visually-hidden">{copy.switchArea}</span>
                 <select
@@ -109,39 +109,36 @@ export default function Header() {
                   <option value={USER_MODES.PRACTICE}>{copy.switchPractice}</option>
                 </select>
               </label>
-            ) : null}
+            )}
 
-            <div className="ms-header__toolbar">
-              <button
-                type="button"
-                className="ms-theme-toggle"
-                onClick={toggleTheme}
-                aria-label={themeLabel}
-                title={themeLabel}
-              >
-                {theme === "dark" ? (
-                  <SunMedium size={18} aria-hidden="true" />
-                ) : (
-                  <Moon size={18} aria-hidden="true" />
-                )}
-              </button>
+            <button
+              type="button"
+              className="ms-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={themeLabel}
+              title={themeLabel}
+            >
+              {theme === "dark" ? (
+                <SunMedium size={18} aria-hidden="true" />
+              ) : (
+                <Moon size={18} aria-hidden="true" />
+              )}
+            </button>
 
-              <div className="ms-header__language">
-                <GlobalLanguageSelector label={copy.languageLabel} compact />
-              </div>
-
-              <button
-                type="button"
-                className="ms-nav-toggle"
-                aria-controls="hauptnavigation"
-                aria-expanded={open ? "true" : "false"}
-                onClick={() => setOpen((v) => !v)}
-              >
-                <span className="visually-hidden">{copy.navToggle}</span>
-                <Menu size={18} aria-hidden="true" />
-              </button>
+            <div className="ms-header__language">
+              <GlobalLanguageSelector label={copy.languageLabel} compact />
             </div>
           </div>
+
+          <button
+            className="ms-nav-toggle"
+            aria-controls="hauptnavigation"
+            aria-expanded={open ? "true" : "false"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className="visually-hidden">{copy.navToggle}</span>
+            <Menu size={18} aria-hidden="true" />
+          </button>
 
           <nav
             id="hauptnavigation"
