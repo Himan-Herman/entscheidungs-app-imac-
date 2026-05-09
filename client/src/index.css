@@ -1,57 +1,37 @@
+@import "./styles/design-system.css";
+
 :root {
-  font-family: "Avenir Next", "SF Pro Text", "Segoe UI", Arial, sans-serif;
-  line-height: 1.5;
+  font-family: var(--ms-font-sans);
+  line-height: var(--ms-leading-normal);
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #0f172a;
-  background: #ffffff;
+  color: var(--ms-color-text);
+  background: var(--ms-color-bg);
   color-scheme: light;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
-  background: #ffffff;
+  background: var(--ms-color-bg);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #ffffff;
+  background: var(--ms-color-bg);
 }
 
 #root {
   min-height: 100vh;
-  background: #ffffff;
-}
-
-a {
-  color: inherit;
+  background: var(--ms-color-bg);
 }
 
 :root[data-theme="dark"] {
-  color: #e5e7eb;
-  background: #020617;
   color-scheme: dark;
-}
-
-:root[data-theme="dark"] html,
-html[data-theme="dark"] {
-  background: #020617;
-}
-
-:root[data-theme="dark"] body,
-html[data-theme="dark"] body {
-  background: #020617;
-  color: #e5e7eb;
-}
-
-:root[data-theme="dark"] #root,
-html[data-theme="dark"] #root {
-  background: #020617;
 }
 
 /* Capacitor / iOS safe-area baseline — shell components add extra bottom inset above fixed nav */
@@ -87,7 +67,7 @@ html[data-theme="dark"] #root {
   width: 36px;
   height: 36px;
   border: 3px solid rgba(15, 118, 110, 0.2);
-  border-top-color: #0f766e;
+  border-top-color: var(--ms-color-accent, #0f766e);
   border-radius: 50%;
   animation: app-route-spin 0.75s linear infinite;
 }

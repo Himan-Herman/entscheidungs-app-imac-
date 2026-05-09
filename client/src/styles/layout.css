@@ -37,10 +37,15 @@ html, body { margin: 0; }
 }
 
 .footer {
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--ms-color-border, #eee);
   padding: 14px 0;
   font-size: 0.95rem;
-  color: #111827;
+  color: var(--ms-color-text, #111827);
+}
+
+:root[data-theme="dark"] .footer {
+  border-top-color: rgba(148, 163, 184, 0.22);
+  color: var(--ms-color-text-secondary, #e2e8f0);
 }
 .footer .inner {
   display: flex;

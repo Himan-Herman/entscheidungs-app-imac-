@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/img/medscout-logo6.png";
 import { useLanguage } from "../i18n/LanguageContext";
+import { getMessages } from "../i18n/translations";
 import { readUserMode, USER_MODES } from "../utils/userMode.js";
 import "../styles/Intro.css";
 
@@ -10,21 +11,10 @@ export default function Intro() {
   const { language } = useLanguage();
   const [fadeOut, setFadeOut] = useState(false);
 
-  const copy = language === "en"
-    ? {
-        title: "MedScoutX - loading",
-        skip: "Skip intro",
-        heading: "MedScoutX is starting",
-        status:
-          "MedScoutX is loading. You will be redirected to your workspace shortly.",
-      }
-    : {
-        title: "MedScoutX - wird geladen",
-        skip: "Intro überspringen",
-        heading: "MedScoutX wird gestartet",
-        status:
-          "MedScoutX wird geladen. Du wirst gleich in den gewählten Bereich weitergeleitet.",
-      };
+  const copy = useMemo(() => {
+    const m = getMessages(language);
+    return m.intro ?? getMessages("en").intro;
+  }, [language]);
 
   useEffect(() => {
     document.title = copy.title;
@@ -54,7 +44,7 @@ export default function Intro() {
       clearTimeout(fadeOutTimer);
       clearTimeout(navigateTimer);
     };
-  }, [copy.title, copy.status, navigate]);
+  }, [copy.title, copy.status, copy.skip, navigate]);
 
   return (
     <>

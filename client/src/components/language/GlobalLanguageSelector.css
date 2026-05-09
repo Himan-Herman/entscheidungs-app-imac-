@@ -4,8 +4,8 @@
 }
 
 .gls--compact .gls__trigger {
-  padding: 6px 10px;
-  min-height: 36px;
+  padding: 8px 12px;
+  min-height: 44px;
 }
 
 .gls__trigger {
@@ -95,7 +95,8 @@
 }
 
 .gls__search::placeholder {
-  color: #94a3b8;
+  color: #64748b;
+  opacity: 1;
 }
 
 .gls__search:focus {
@@ -103,6 +104,11 @@
   border-color: #0f766e;
   box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2);
   background: #ffffff;
+}
+
+.gls__search:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
 }
 
 .gls__empty {

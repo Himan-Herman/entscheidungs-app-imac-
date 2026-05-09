@@ -21,6 +21,7 @@ import symptomCheck from "./symptomCheck.js";
 import imageAnalysis from "./imageAnalysis.js";
 import bodyMap from "./bodyMap.js";
 import roleEntry from "./roleEntry.js";
+import intro from "./intro.js";
 
 export default {
   header,
@@ -46,4 +47,5 @@ export default {
   imageAnalysis,
   bodyMap,
   roleEntry,
+  intro,
 };
