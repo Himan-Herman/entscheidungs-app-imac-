@@ -6,6 +6,7 @@ export default {
     "Account for structured preparation before appointments — not for diagnosis.",
   required: "Required field",
   email: "Email",
+  emailPlaceholder: "e.g. yourname@mail.com",
   emailHint: "We use your email for your account and important updates.",
   password: "Password",
   passwordPlaceholder: "At least 8 characters, number and letter",

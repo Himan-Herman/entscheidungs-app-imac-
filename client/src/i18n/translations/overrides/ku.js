@@ -1,14 +1,16 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalKu from "../legal/ku/index.js";
 import landing from "./ku.landing.js";
 import info from "./ku.info.js";
 import preVisit from "./ku.preVisit.js";
 import startseite from "./ku.startseite.js";
+import kuCore from "./ku/ku.core.js";
+import kuAccount from "./ku/ku.account.js";
+import kuModules from "./ku/ku.modules.js";
+import kuPractice from "./ku/ku.practice.js";
 
-/**
- * Kurdish Kurmanji (Kurmancî) — Latin script, LTR.
- * Partial overrides merged onto English — missing keys fall back to EN.
- */
-export default {
+/** Base Kurmanji overrides — paşîn bi layên ku were zêdekirin */
+const kuBase = {
   legal: legalKu,
   landing,
   info,
@@ -27,10 +29,10 @@ export default {
     themeDark: "Moda tarî",
   },
   login: {
-    badge: "MedScoutX — amadekirina serdanê",
+    badge: "MedScoutX — amadekirina hevdîtina bijîşkî",
     title: "Têketin",
     subtitle:
-      "Amadekirina rêzdar û berfireh ji bo axaftina tenduristiyê — şûnda nirxandina kînikî namîne.",
+      "Amadekirina rêzdar ji bo axaftina tenduristiyê — teşhîs nake û pêşniyara dermankirinê nade.",
     email: "E-name",
     emailPlaceholder: "mînak name@mail.com",
     password: "Şîfre",
@@ -48,21 +50,25 @@ export default {
     verifyOk: "E-name hat piştrastkirin. Tu dikarî têkevî.",
     verifyInvalid:
       "Lînkek derbasdar tune an demê wê derbas bûye. Ji nû ve tomar bibe.",
-    verifyError: "Di piştrastkirina e-nameyê de çewti derket. Paşê dîsa biceribîne.",
+    verifyError:
+      "Di piştrastkirina e-nameyê de çewti derket. Paşê dîsa biceribîne.",
     resetOk: "Şîfre hate nûkirin. Bi şîfreya nû têkeve.",
     sessionExpired:
       "Rûniştin bi dawî bû. Ji bo berdewamkirina MedScoutX dîsa têkeve.",
   },
   register: {
     alert: "Hişyarî:",
-    alertText: "MedScoutX xizmeta acîl nîne (112 / 911).",
+    alertText: "MedScoutX xizmeta acîlî nîne (112 / 911).",
     title: "Hesab çêbike",
-    subtitle: "Ji bo amadekirina serdanan hesab — ne ji bo dermanîkirinê.",
-    required: "Zarûkek pêwîst",
+    subtitle:
+      "Hesab ji bo amadekirina serdanan — teşhîs nake û pêşniyara dermankirinê nade.",
+    required: "Zevî pêwîst",
     email: "E-name",
-    emailHint: "Em e-nameyê ji bo hesab û agahdariyên girîng bikar tînin.",
+    emailPlaceholder: "mînak name@mail.com",
+    emailHint:
+      "Em e-nameyê ji bo hesab û agahdariyên girîng bikar tînin.",
     password: "Şîfre",
-    passwordPlaceholder: "Kêm 8 tîp, tîp û hejmar",
+    passwordPlaceholder: "Kêmî 8 tîp, tîp û hejmar",
     passwordHint: "Kêmî 8 tîp, bi tîp û hejmar.",
     firstName: "Nav",
     lastName: "Paşnav",
@@ -80,27 +86,31 @@ export default {
     ageConfirm: "Ez piştrast dikim ku ez kêmî 18 salî me",
     termsOpen: "Merc û şertan veke",
     privacyOpen: "Polîtîkaya nepênîtiyê veke",
-    disclaimerOpen: "Redkirina tenduristiyê veke",
-    legalTextStart: "Ez xwendim",
+    disclaimerOpen: "Sînorkirina platformê veke",
+    legalTextStart: "Ez piştrast dikim ku min xwend",
     legalTextMiddle: "polîtîkaya nepênîtiyê",
-    legalTextEnd: "û qebûl dikim.",
+    legalTextEnd: "qebûl dikim.",
     submit: "Berdewam bike",
     saving: "Tomar dibe…",
     cancel: "Betal bike",
     imprint: "Agahî ya qanûnî",
     privacy: "Nepenîtî",
-    disclaimer: "Redkirin",
-    terms: "Merc",
+    disclaimer: "Redkirina agahdanê",
+    terms: "Merc û şert",
     language: "Ziman",
     enterBirth: "Ji kerema xwe roja jidayikbûnê binivîse.",
     underage:
       "Tu ciwanî. MedScoutX tenê ji bo kesên 18 salî û mezintir e.",
     confirmAge: "Piştrast bike ku tu kêmî 18 salî yî.",
-    checkFields: "Zarûkên pêwîst û pejirandinan kontrol bike.",
+    checkFields: "Zevîyên pêwîst û pejirandinan kontrol bike.",
     emailExists: "Ev e-name berê hatiye tomarkirin.",
     failed: "Tomarkirin bi ser neket.",
     requestError: "Çewtiya tomarkirinê.",
     srRequired: "(pêwîst)",
+    firstNamePlaceholder: "Mînak: Leyla",
+    lastNamePlaceholder: "Mînak: Şaho",
+    conjunctionAnd: " û ",
+    legalLinksAria: "Agahîyên qanûnî",
   },
   footer: {
     imprint: "Agahî ya qanûnî",
@@ -115,7 +125,7 @@ export default {
     close: "Bigre",
   },
   forgotPassword: {
-    title: "Şîfreyê reset bike",
+    title: "Şîfreyê nû bike",
     text: "E-nameyê binivîse — em lînkek ji bo şîfreyê dişînin.",
     email: "E-name",
     placeholder: "name@mail.com",
@@ -139,7 +149,8 @@ export default {
     error: "Çewti derket. Paşê dîsa biceribîne.",
     network: "Çewtiya torê. Girêdanê kontrol bike.",
     missing: "E-name ji bo piştrastkirinê tune. Ji nû ve tomar bibe.",
-    footer: "Heke tu MedScoutX nexwestî, vê peyamê piştguh bike.",
+    footer:
+      "Heke tu MedScoutX nexwestî, vê peyamê piştguh bike.",
   },
   resetPassword: {
     title: "Şîfreya nû",
@@ -157,3 +168,8 @@ export default {
     network: "Çewtiya torê. Paşê dîsa biceribîne.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(kuBase, kuCore), kuAccount), kuModules),
+  kuPractice,
+);

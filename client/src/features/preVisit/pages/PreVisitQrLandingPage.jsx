@@ -17,6 +17,10 @@ export default function PreVisitQrLandingPage() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
+    document.title = t.pageTitle || t.title;
+  }, [t.pageTitle, t.title]);
+
+  useEffect(() => {
     let mounted = true;
     async function run() {
       setLoading(true);

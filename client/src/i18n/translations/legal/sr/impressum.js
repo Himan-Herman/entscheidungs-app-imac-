@@ -1,53 +1,53 @@
 export default {
-  pageTitle: "MedScoutX — Импресум",
-  title: "Импресум",
+  pageTitle: "MedScoutX — Impresum",
+  title: "Impresum",
   subtitle:
-    "Информације према § 5 ТМГ и § 18 ст. (2) МСтВ (Њемачка)",
-  s1Heading: "1. Одговорно лице",
+    "Informacije prema § 5 TMG i § 18 st. (2) MStV (Njemačka)",
+  s1Heading: "1. Odgovorno lice",
   addressStrong: "Himan Khorshidi",
-  addressLines: ["Еисенстраßе 64", "40227 Дüсселдорф", "Њемачка"],
-  ddLegalForm: "Самостални предузетник",
+  addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Njemačka"],
+  ddLegalForm: "Samostalni preduzetnik",
   emailDisplay: "himankhorshidy@gmail.com",
   emailHref: "mailto:contact@medscout.app",
   phoneDisplay: "+49 211 15895272",
   phoneHref: "tel:+4921115895272",
   privacyHref: "/datenschutz",
-  backRegister: "Натраг на регистрацију",
-  backRegisterAria: "Натраг на страницу регистрације",
-  labelEmail: "Е-пошта",
-  labelPhone: "Телефон",
-  labelLegalForm: "Правни облик",
+  backRegister: "Natrag na registraciju",
+  backRegisterAria: "Natrag na stranicu registracije",
+  labelEmail: "E-pošta",
+  labelPhone: "Telefon",
+  labelLegalForm: "Pravni oblik",
   labelResponsible:
-    "Одговорно за садржај према § 18 ст. (2) МСтВ",
-  ddResponsibleValue: "Химан Кхорсхиди, адреса као горе",
+    "Odgovorno za sadržaj prema § 18 st. (2) MStV",
+  ddResponsibleValue: "Himan Khorshidi, adresa kao gore",
   s1Footnote:
-    "Овај импресум примјењује се на апликацију MedScoutX и све повезане wеб презентације кроз које се апликација пружа или промовише (нпр. у Аппле Апп Сторе и Гоогле Плаy Сторе).",
-  s2Heading: "2. Одговорност за садржај",
+    "Ovaj impresum primjenjuje se na aplikaciju MedScoutX i sve povezane web prezentacije kroz koje se aplikacija pruža ili promoviše (npr. u Apple App Store i Google Play Store).",
+  s2Heading: "2. Odgovornost za sadržaj",
   s2p1:
-    "Као пружалац услуга, одговоран сам за властити садржај на овим страницама према опћем праву у складу са § 7 ст. (1) ТМГ. Међутим, према §§ 8–10 ТМГ нисам дужан надзирати пренесене или похрањене информације трећих страна ни истраживати околности које указују на незакониту активност.",
+    "Kao pružalac usluga, odgovoran sam za vlastiti sadržaj na ovim stranicama prema općem pravu u skladu sa § 7 st. (1) TMG. Međutim, prema §§ 8–10 TMG nisam dužan nadzirati prenesene ili pohranjene informacije trećih strana ni istraživati okolnosti koje ukazuju na nezakonitu aktivnost.",
   s2p2:
-    "Обавезе уклањања или блокирања кориштења информација према опћем праву остају на снази. Одговорност у том погледу могућа је тек од тренутка сазнања о конкретном кршењу. По обавјештењу о одговарајућим кршењима такав садржај ће се без одгађања уклонити.",
-  s3Heading: "3. Одговорност за линкове",
+    "Obaveze uklanjanja ili blokiranja korištenja informacija prema općem pravu ostaju na snazi. Odgovornost u tom pogledu moguća je tek od trenutka saznanja o konkretnom kršenju. Po obavještenju o odgovarajućim kršenjima takav sadržaj će se bez odgađanja ukloniti.",
+  s3Heading: "3. Odgovornost za linkove",
   s3p1:
-    "Апликација MedScoutX може садржавати линкове на вањске wеб странице трећих страна над чијим садржајем немам утицаја. Стога не могу преузети одговорност за такав вањски садржај. За садржај повезаних страница увијек је одговоран њихов пружалац или оператор.",
+    "Aplikacija MedScoutX može sadržavati linkove na vanjske web stranice trećih strana nad čijim sadržajem nemam uticaja. Stoga ne mogu preuzeti odgovornost za takav vanjski sadržaj. Za sadržaj povezanih stranica uvijek je odgovoran njihov pružalac ili operator.",
   s3p2:
-    "Трајни надзор повезаних страница без конкретних доказа о кршењу није разуман. Ако се кршења сазнају, такви линкови ће се без одгађања уклонити.",
-  s4Heading: "4. Рјешавање спорова",
+    "Trajni nadzor povezanih stranica bez konkretnih dokaza o kršenju nije razuman. Ako se kršenja saznaju, takvi linkovi će se bez odgađanja ukloniti.",
+  s4Heading: "4. Rješavanje sporova",
   s4p1Before:
-    "Европска комисија пружа платформу за онлине рјешавање спорова (ОС): ",
+    "Evropska komisija pruža platformu za online rješavanje sporova (OS): ",
   s4p1After: ".",
   s4p2:
-    "Нисам дужан нити вољан учествовати у поступцима рјешавања спорова пред тијелом за алтернативно рјешавање спорова за потрошаче.",
-  s5Heading: "5. Ауторска права",
+    "Nisam dužan niti voljan učestvovati u postupcima rješavanja sporova pred tijelom za alternativno rješavanje sporova za potrošače.",
+  s5Heading: "5. Autorska prava",
   s5p1:
-    "Садржај и дјела којима је оператор створио у овој апликације подлијежу њемачком ауторском праву. Умножавање, обрада, дистрибуција или било каква експлоатација изван граница ауторског права захтијева претходну писану сагласност носиоца права.",
+    "Sadržaj i djela kojima je operator stvorio u ovoj aplikacije podliježu njemačkom autorskom pravu. Umnožavanje, obrada, distribucija ili bilo kakva eksploatacija izvan granica autorskog prava zahtijeva prethodnu pisanu saglasnost nosioca prava.",
   s5p2:
-    "Гдје садржај у апликацији није креирао оператор, поштују се ауторска права трећих страна. Ако ипак сазнате за кршење ауторског права, молимо да ме обавијестите. По обавјештењу о кршењима такав садржај ће се без одгађања уклонити.",
+    "Gdje sadržaj u aplikaciji nije kreirao operator, poštuju se autorska prava trećih strana. Ako ipak saznate za kršenje autorskog prava, molimo da me obavijestite. Po obavještenju o kršenjima takav sadržaj će se bez odgađanja ukloniti.",
   s5p3:
-    "Заслуге за слике и иконе: React Icons, Google Fonts (Roboto Slab, уграђено локално), прилагођена графика и елементи логотипа за MedScoutX.",
-  s6Heading: "6. Напомена о заштити података",
+    "Zasluge za slike i ikone: React Icons, Google Fonts (Roboto Slab, ugrađeno lokalno), prilagođena grafika i elementi logotipa za MedScoutX.",
+  s6Heading: "6. Napomena o zaštiti podataka",
   s6p1Before:
-    "Додатно лице за заштиту података није потребно за MedScoutX према § 38 БДСГ. Упити о приватности могу се слати директно одговорном лицу наведеном горе. Детаљи о обради личних података налазе се у ",
-  s6privacyLink: "правилима приватности",
+    "Dodatno lice za zaštitu podataka nije potrebno za MedScoutX prema § 38 BDSG. Upiti o privatnosti mogu se slati direktno odgovornom licu navedenom gore. Detalji o obradi ličnih podataka nalaze se u ",
+  s6privacyLink: "pravilima privatnosti",
   s6p1After: ".",
 };

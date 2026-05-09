@@ -12,8 +12,8 @@
   .pre-visit-history,
   .pre-visit-account,
   .previsit-followups {
-    padding-left: max(14px, env(safe-area-inset-left));
-    padding-right: max(14px, env(safe-area-inset-right));
+    padding-inline: max(14px, env(safe-area-inset-left))
+      max(14px, env(safe-area-inset-right));
   }
 }
 
@@ -25,8 +25,8 @@
   .pre-visit-history,
   .pre-visit-account,
   .previsit-followups {
-    padding-left: max(12px, env(safe-area-inset-left));
-    padding-right: max(12px, env(safe-area-inset-right));
+    padding-inline: max(12px, env(safe-area-inset-left))
+      max(12px, env(safe-area-inset-right));
   }
 }
 

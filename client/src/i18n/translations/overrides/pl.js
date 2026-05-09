@@ -1,16 +1,21 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalPl from "../legal/pl/index.js";
 import landing from "./pl.landing.js";
 import info from "./pl.info.js";
-import preVisit from "./pl.preVisit.js";
+import preVisitPl from "./pl.preVisit.js";
+import preVisitOverlay from "./pl.preVisit.overlay.js";
 import startseite from "./pl.startseite.js";
+import plCore from "./pl/pl.core.js";
+import plAccount from "./pl/pl.account.js";
+import plModules from "./pl/pl.modules.js";
+import plPractice from "./pl/pl.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-
-export default {
+/** Polish — warstwy scalane (pl → en → de wg klucza). */
+const plBase = {
   legal: legalPl,
   landing,
   info,
-  preVisit,
+  preVisit: deepMerge(preVisitPl, preVisitOverlay),
   startseite,
   header: {
     skip: "Przejdź do treści",
@@ -55,9 +60,10 @@ export default {
     alert: "Uwaga:",
     alertText: "MedScoutX nie jest pogotowiem ratunkowym (112 / 911).",
     title: "Utwórz konto",
-    subtitle: "Konto do przygotowania wizyt — nie do diagnozowania.",
+    subtitle: "Konto do przygotowania wizyt — nie do oceny klinicznej.",
     required: "Pole wymagane",
     email: "E-mail",
+    emailPlaceholder: "np. imie@mail.pl",
     emailHint: "Używamy e-maila do konta i ważnych powiadomień.",
     password: "Hasło",
     passwordPlaceholder: "Min. 8 znaków, litera i cyfra",
@@ -99,6 +105,10 @@ export default {
     failed: "Rejestracja nie powiodła się.",
     requestError: "Błąd rejestracji.",
     srRequired: "(wymagane)",
+    firstNamePlaceholder: "np. Anna",
+    lastNamePlaceholder: "np. Kowalska",
+    conjunctionAnd: "oraz",
+    legalLinksAria: "Informacje prawne",
   },
   footer: {
     imprint: "Stopka redakcyjna",
@@ -156,3 +166,8 @@ export default {
     network: "Błąd sieci. Spróbuj później.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(plBase, plCore), plAccount), plModules),
+  plPractice,
+);

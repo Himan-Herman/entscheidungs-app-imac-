@@ -20,7 +20,8 @@
 }
 
 .ms-footer__link {
-  margin: 0 6px;
+  margin-block: 0;
+  margin-inline: 6px;
   padding: 10px 8px;
   min-height: 44px;
   display: inline-flex;

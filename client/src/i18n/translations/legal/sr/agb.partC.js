@@ -2,57 +2,57 @@
 export default [
   {
     id: "agb-9-nutzereingaben",
-    heading: "§9 Уноси корисника и излази АИ",
+    heading: "§9 Unosi korisnika i izlazi AI",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Корисник остаје носилац свих права на своје уносе (нпр. текстови, слике), у мјери у којој су заштитиви ауторским правом.</p>
-<p>(2) Корисник пружаоцу даје једноставну, свјетску лиценцу за кориштење уноса ради пружања уговорних услуга, обраде путем АИ услуга и кориштења у анонимизованој или агрегираној форми ради побољшања и анализе услуге.</p>
-<p>(3) Излази које генерише АИ служе искључиво почетној оријентацији. Могу бити нетачни, непотпуни или чињенично погрешни и не смију се схватити као медицинска дијагноза или обавезна препорука.</p>
+<p>(1) Korisnik ostaje nosilac svih prava na svoje unose (npr. tekstovi, slike), u mjeri u kojoj su zaštitivi autorskim pravom.</p>
+<p>(2) Korisnik pružaocu daje jednostavnu, svjetsku licencu za korištenje unosa radi pružanja ugovornih usluga, obrade putem AI usluga i korištenja u anonimizovanoj ili agregiranoj formi radi poboljšanja i analize usluge.</p>
+<p>(3) Izlazi koje generiše AI služe isključivo početnoj orijentaciji. Mogu biti netačni, nepotpuni ili činjenično pogrešni i ne smiju se shvatiti kao medicinska dijagnoza ili obavezna preporuka.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-10-haftung",
-    heading: "§10 Одговорност",
+    heading: "§10 Odgovornost",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Пружалац има неограничену одговорност за штету насталу повредом живота, тијела или здравља засновану на намјерном или непажњивом кршењу дужности од стране пружаоца, његових законских заступника или помагача, као и према закону о одговорности за производе.</p>
-<p>(2) За осталу штету пружалац има неограничену одговорност у случајевима намјере и грубе непажње.</p>
-<p>(3) У случајевима обичне непажње пружалац одговара само за кршење битне уговорне обавезе. У том случају одговорност је ограничена на типично предвидљиву штету.</p>
-<p>(4) Даљња одговорност пружаоца искључена је. То се односи и на индиректну штету, изгубљени профит или губитак података гдје закон дозвољава.</p>
-<p>(5) Кориштење Апликације као основе за медицинске дијагнозе или терапије на властити је ризик и није сврха уговора.</p>
+<p>(1) Pružalac ima neograničenu odgovornost za štetu nastalu povredom života, tijela ili zdravlja zasnovanu na namjernom ili nepažnjivom kršenju dužnosti od strane pružaoca, njegovih zakonskih zastupnika ili pomagača, kao i prema zakonu o odgovornosti za proizvode.</p>
+<p>(2) Za ostalu štetu pružalac ima neograničenu odgovornost u slučajevima namjere i grube nepažnje.</p>
+<p>(3) U slučajevima obične nepažnje pružalac odgovara samo za kršenje bitne ugovorne obaveze. U tom slučaju odgovornost je ograničena na tipično predvidljivu štetu.</p>
+<p>(4) Daljnja odgovornost pružaoca isključena je. To se odnosi i na indirektnu štetu, izgubljeni profit ili gubitak podataka gdje zakon dozvoljava.</p>
+<p>(5) Korištenje Aplikacije kao osnove za medicinske dijagnoze ili terapije na vlastiti je rizik i nije svrha ugovora.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-11-laufzeit",
-    heading: "§11 Трајање, суспендирање и раскид",
+    heading: "§11 Trajanje, suspendiranje i raskid",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Уговор с корисником закључен је на неодређено вријеме.</p>
-<p>(2) Корисник може обрисати свој рачун у Апликацији у било којем тренутку или престати користити услугу.</p>
-<p>(3) Пружалац може суспендирати приступ корисника у цјелини или дијелом или раскинути уговор из важних разлога ако корисник битно крши ове Увјете, злоупотребљава Апликацију или заобилази сигурносне механизме.</p>
-<p>(4) Брисање рачуна у Апликацији <strong>не</strong> раскида претплату закључену путем Апп Сторе или Плаy Сторе. Претплате треба посебно отказати у одговарајућој продавници.</p>
+<p>(1) Ugovor s korisnikom zaključen je na neodređeno vrijeme.</p>
+<p>(2) Korisnik može obrisati svoj račun u Aplikaciji u bilo kojem trenutku ili prestati koristiti uslugu.</p>
+<p>(3) Pružalac može suspendirati pristup korisnika u cjelini ili dijelom ili raskinuti ugovor iz važnih razloga ako korisnik bitno krši ove Uvjete, zloupotrebljava Aplikaciju ili zaobilazi sigurnosne mehanizme.</p>
+<p>(4) Brisanje računa u Aplikaciji <strong>ne</strong> raskida pretplatu zaključenu putem App Store ili Play Store. Pretplate treba posebno otkazati u odgovarajućoj prodavnici.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-12-datenschutz",
-    heading: "§12 Приватност",
+    heading: "§12 Privatnost",
     blocks: [
       {
         type: "html",
         html: `
-<p>Информације о обради личних података, посебно здравствених података у смислу чл.&нбсп;9 ГДПР-а, налазе се у <a href="/datenschutz">правилима приватности MedScoutX</a>. Због осјетљивости података Апликација је намијењена искључиво пунољетним корисницима (18+).</p>
+<p>Informacije o obradi ličnih podataka, posebno zdravstvenih podataka u smislu čl.&nbsp;9 GDPR-a, nalaze se u <a href="/datenschutz">pravilima privatnosti MedScoutX</a>. Zbog osjetljivosti podataka Aplikacija je namijenjena isključivo punoljetnim korisnicima (18+).</p>
 `.trim(),
       },
     ],

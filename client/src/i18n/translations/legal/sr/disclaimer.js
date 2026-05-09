@@ -1,141 +1,141 @@
 export default {
-  pageTitle: "MedScoutX — Одрицање одговорности",
-  title: "Одрицање одговорности / Напомена",
-  subtitle: "Посљедње ажурирање: 29. студенога 2025.",
-  backRegister: "Натраг на регистрацију",
-  backAria: "Натраг на страницу регистрације",
+  pageTitle: "MedScoutX — Odricanje odgovornosti",
+  title: "Odricanje odgovornosti / Napomena",
+  subtitle: "Posljednje ažuriranje: 29. studenoga 2025.",
+  backRegister: "Natrag na registraciju",
+  backAria: "Natrag na stranicu registracije",
   sections: [
     {
       id: "disc-1-zweck",
-      heading: "1. Сврха апликације",
+      heading: "1. Svrha aplikacije",
       blocks: [
         {
           type: "p",
           text:
-            "MedScoutX је информациони и оријентациони алат уз подршку вјештачке интелигенције у области здравства. Апликација је намијењена искључиво да корисницима пружи почетни структурисани преглед могућих узрока тегоба и потенцијално релевантних медицинских специјалности.",
+            "MedScoutX je informacioni i orijentacioni alat uz podršku vještačke inteligencije u oblasti zdravstva. Aplikacija je namenjena isključivo da korisnicima pruži početni strukturisani pregled mogućih uzroka tegoba i potencijalno relevantnih medicinskih specijalnosti.",
         },
         {
           type: "p",
           text:
-            "MedScoutX није медицински уређај у смислу ЕУ Уредбе о медицинским уређајима (МДР) и није намијењена постављању дијагноза, препоруци лечења или замјени клиничких одлука.",
+            "MedScoutX nije medicinski uređaj u smislu EU Uredbe o medicinskim uređajima (MDR) i nije namenjena postavljanju dijagnoza, preporuci lečenja ili zamjeni kliničkih odluka.",
         },
       ],
     },
     {
       id: "disc-2-keinediagnose",
-      heading: "2. Без медицинске дијагнозе или лечења",
+      heading: "2. Bez medicinske dijagnoze ili lečenja",
       blocks: [
         {
           type: "p",
           text:
-            "Излази и напомене које пружа MedScoutX заснивају се на алгоритмској обради и статистичким моделима. Не представљају дијагнозу и никада не замјењују лични преглед, вођење или лечење од стране квалификованих здравствених радника.",
+            "Izlazi i napomene koje pruža MedScoutX zasnivaju se na algoritmskoj obradi i statističkim modelima. Ne predstavljaju dijagnozu i nikada ne zamjenjuju lični pregled, vođenje ili lečenje od strane kvalifikovanih zdravstvenih radnika.",
         },
         {
           type: "p",
           text:
-            "Одлуке о дијагностици, лечењу или лековима не смију се доносити искључиво на основу излаза вјештачке интелигенције.",
+            "Odluke o dijagnostici, lečenju ili lekovima ne smiju se donositi isključivo na osnovu izlaza vještačke inteligencije.",
         },
       ],
     },
     {
       id: "disc-3-notfall",
-      heading: "3. Није за хитне случајеве",
+      heading: "3. Nije za hitne slučajeve",
       blocks: [
         {
           type: "p",
           text:
-            "MedScoutX није прикладан за хитне ситуације. Ако имате акутне симптоме који угрожавају живот, одмах контактирајте хитну медицинску помоћ или бирајте локални број за хитне случајеве (нпр. 112 у ЕУ или 911 у САД).",
+            "MedScoutX nije prikladan za hitne situacije. Ako imate akutne simptome koji ugrožavaju život, odmah kontaktirajte hitnu medicinsku pomoć ili birajte lokalni broj za hitne slučajeve (npr. 112 u EU ili 911 u SAD).",
         },
       ],
     },
     {
       id: "disc-4-grenzen",
-      heading: "4. Границе обраде вјештачке интелигенције",
+      heading: "4. Granice obrade vještačke inteligencije",
       blocks: [
         {
           type: "p",
           text:
-            "АИ модели могу садржавати погрешке, давати непотпуне информације или погрешно тумачити симптоме. Корисност излаза зависи од квалитета онога што унесете (нпр. описи, одабрана регија тијела, квалитет слике).",
+            "AI modeli mogu sadržavati pogreške, davati nepotpune informacije ili pogrešno tumačiti simptome. Korisnost izlaza zavisi od kvaliteta onoga što unesete (npr. opisi, odabrana regija tijela, kvalitet slike).",
         },
         {
           type: "p",
           text:
-            "Предане информације обрађују се аутоматски. Не постоји свеобухватна медицинска процјена ваше укупне ситуације.",
+            "Predane informacije obrađuju se automatski. Ne postoji sveobuhvatna medicinska procjena vaše ukupne situacije.",
         },
       ],
     },
     {
       id: "disc-5-keinverhaeltnis",
-      heading: "5. Без односа лекар–пацијент",
+      heading: "5. Bez odnosa lekar–pacijent",
       blocks: [
         {
           type: "p",
           text:
-            "Кориштење MedScoutX не успоставља однос лекар–пацијент. Излази АИ не представљају медицински савјет.",
+            "Korištenje MedScoutX ne uspostavlja odnos lekar–pacijent. Izlazi AI ne predstavljaju medicinski savjet.",
         },
       ],
     },
     {
       id: "disc-6-haftung",
-      heading: "6. Ограничење одговорности",
+      heading: "6. Ograničenje odgovornosti",
       blocks: [
         {
           type: "p",
           text:
-            "Пружалац одговара за штету насталу кориштењем или немогућношћу кориштења апликације само у случајевима намјере или грубе непажње. Одговорност за индиректну штету, посљедичну штету или изгубљену добит искључена је осим ако обавезно право другачије не одређује.",
+            "Pružalac odgovara za štetu nastalu korištenjem ili nemogućnošću korištenja aplikacije samo u slučajevima namjere ili grube nepažnje. Odgovornost za indirektnu štetu, posljedičnu štetu ili izgubljenu dobit isključena je osim ako obavezno pravo drugačije ne određuje.",
         },
       ],
     },
     {
       id: "disc-7-alter",
-      heading: "7. Међународна употреба и добни захтјеви",
+      heading: "7. Međunarodna upotreba i dobni zahtjevi",
       blocks: [
         {
           type: "p",
           text:
-            "MedScoutX је намијењен искључиво корисницима старијим од 16 година. У појединим земљама могу важити строжа правила; нпр. корисници у САД требају користити апликацију тек од 18 година и уз сагласност родитеља или старатеља.",
+            "MedScoutX je namenjen isključivo korisnicima starijim od 16 godina. U pojedinim zemljama mogu važiti stroža pravila; npr. korisnici u SAD trebaju koristiti aplikaciju tek od 18 godina i uz saglasnost roditelja ili staratelja.",
         },
         {
           type: "p",
           text:
-            "Корисници млађи од 18 година требају користити MedScoutX само уз сагласност родитеља или старатеља.",
+            "Korisnici mlađi od 18 godina trebaju koristiti MedScoutX samo uz saglasnost roditelja ili staratelja.",
         },
       ],
     },
     {
       id: "disc-8-automatisch",
-      heading: "8. Без аутоматизованог доношења одлука",
+      heading: "8. Bez automatizovanog donošenja odluka",
       blocks: [
         {
           type: "p",
           text:
-            "MedScoutX не доноси одлуке у смислу чл. 22 ГДПР-а које производе правне или слично значајне ефекте. Сви излази АИ служе искључиво оријентацији.",
+            "MedScoutX ne donosi odluke u smislu čl. 22 GDPR-a koje proizvode pravne ili slično značajne efekte. Svi izlazi AI služe isključivo orijentaciji.",
         },
       ],
     },
     {
       id: "disc-9-aenderungen",
-      heading: "9. Измјене овог одрицања",
+      heading: "9. Izmjene ovog odricanja",
       blocks: [
         {
           type: "p",
           text:
-            "Пружалац може ажурирати ово одрицање гдје то захтијева закон, технологија или измјене функционалности апликације. Актуелна верзија је увијек доступна у апликацији.",
+            "Pružalac može ažurirati ovo odricanje gdje to zahtijeva zakon, tehnologija ili izmjene funkcionalnosti aplikacije. Aktuelna verzija je uvijek dostupna u aplikaciji.",
         },
       ],
     },
     {
       id: "disc-10-kontakt",
-      heading: "10. Контакт за питања",
+      heading: "10. Kontakt za pitanja",
       blocks: [
         {
           type: "richContact",
           intro:
-            "За техничке проблеме, питања о кориштењу или несигурности у вези излаза АИ можете контактирати подршку:",
-          emailLabel: "Е-пошта:",
-          phoneLabel: "Телефон:",
-          noteBefore: "Напомињемо да кроз овај контакт канал не може бити пружен ",
-          noteStrong: "медицински савјет",
+            "Za tehničke probleme, pitanja o korištenju ili nesigurnosti u vezi izlaza AI možete kontaktirati podršku:",
+          emailLabel: "E-pošta:",
+          phoneLabel: "Telefon:",
+          noteBefore: "Napominjemo da kroz ovaj kontakt kanal ne može biti pružen ",
+          noteStrong: "medicinski savjet",
           noteAfter: ".",
         },
       ],

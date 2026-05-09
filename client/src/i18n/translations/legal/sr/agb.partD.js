@@ -2,40 +2,40 @@
 export default [
   {
     id: "agb-13-aenderungen",
-    heading: "§13 Измјене ових Увјета",
+    heading: "§13 Izmjene ovih Uslova",
     blocks: [
       {
         type: "html",
         html: `
-<p>Пружалац може измијенити ове Увјете гдје то захтијева закон или техничке или функцијске измјене Апликације, под увјетом да су измјене разумне за корисника.</p>
-<p>Битне измјене бит ће кориснику приопћене на одговарајући начин. Ако корисник не успротиви се у разумном року или настави користити Апликацију, измијењени Увјети сматрају се прихваћенима гдје је то изричито назначено.</p>
+<p>Pružalac može izmijeniti ove Uvjete gdje to zahtijeva zakon ili tehničke ili funkcijske izmjene Aplikacije, pod uvjetom da su izmjene razumne za korisnika.</p>
+<p>Bitne izmjene bit će korisniku priopćene na odgovarajući način. Ako korisnik ne usprotivi se u razumnom roku ili nastavi koristiti Aplikaciju, izmijenjeni Uvjeti smatraju se prihvaćenima gdje je to izričito naznačeno.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-14-recht",
-    heading: "§14 Примјењиво право и рјешавање спорова",
+    heading: "§14 Primjenjivo pravo i rješavanje sporova",
     blocks: [
       {
         type: "html",
         html: `
-<p>Примјењује се право Савезне Републике Њемачке. Обавезне одредбе заштите потрошача државе у којој корисник има уобичајено боравиште остају на снази.</p>
-<p>Платформа ЕУ за онлине рјешавање спорова доступна је на <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Пружалац није дужан нити вољан учествовати у поступцима рјешавања спорова пред тијелом за алтернативно рјешавање спорова за потрошаче.</p>
+<p>Primjenjuje se pravo Savezne Republike Njemačke. Obavezne odredbe zaštite potrošača države u kojoj korisnik ima uobičajeno boravište ostaju na snazi.</p>
+<p>Platforma EU za online rješavanje sporova dostupna je na <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Pružalac nije dužan niti voljan učestvovati u postupcima rješavanja sporova pred tijelom za alternativno rješavanje sporova za potrošače.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-15-kontakt",
-    heading: "§15 Контакт",
+    heading: "§15 Kontakt",
     blocks: [
       {
         type: "html",
         html: `
-<p>Опћа питања: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
-<p>Техничка подршка: <a href="mailto:support@medscout.app">support@medscout.app</a></p>
-<p>Наплата и фактуре: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
+<p>Opća pitanja: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Tehnička podrška: <a href="mailto:support@medscout.app">support@medscout.app</a></p>
+<p>Naplata i fakture: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
 `.trim(),
       },
     ],

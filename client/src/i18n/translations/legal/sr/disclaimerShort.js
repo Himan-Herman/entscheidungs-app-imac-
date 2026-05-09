@@ -1,8 +1,8 @@
 export default {
-  title: "Важна медицинска напомена",
-  textStart: "MedScoutX не поставља дијагнозе",
+  title: "Važna medicinska napomena",
+  textStart: "MedScoutX ne postavlja dijagnoze",
   textRest:
-    "и не замјењује преглед или савјет медицинских стручњака. Одговори АИ служе само почетној оријентацији. У хитним случајевима одмах назовите",
-  linkLabel: "Прикажи пуну медицинску напомену",
-  linkText: "Сазнајте више",
+    "i ne zamenjuje pregled ili savet medicinskih stručnjaka. Odgovori digitalnog asistenta služe samo početnoj orijentaciji. U hitnim slučajevima odmah pozovite",
+  linkLabel: "Prikaži punu medicinsku napomenu",
+  linkText: "Saznajte više",
 };

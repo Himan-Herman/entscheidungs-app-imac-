@@ -1,14 +1,16 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalCkb from "../legal/ckb/index.js";
 import landing from "./ckb.landing.js";
 import info from "./ckb.info.js";
 import preVisit from "./ckb.preVisit.js";
 import startseite from "./ckb.startseite.js";
+import ckbCore from "./ckb/ckb.core.js";
+import ckbAccount from "./ckb/ckb.account.js";
+import ckbModules from "./ckb/ckb.modules.js";
+import ckbPractice from "./ckb/ckb.practice.js";
 
-/**
- * Kurdish Sorani (کوردی سۆرانی) — Arabic script, RTL.
- * Partial overrides merged onto English — missing keys fall back to EN.
- */
-export default {
+/** بنچینەی وەرگێڕانی سۆرانی — لەگەڵ لایەکان دەگرێتەوە */
+const ckbBase = {
   legal: legalCkb,
   landing,
   info,
@@ -27,10 +29,10 @@ export default {
     themeDark: "دۆخی تاریک",
   },
   login: {
-    badge: "MedScoutX — ئامادەکاری بۆ چاوپێکەوتن",
+    badge: "MedScoutX — ئامادەکردنی چاوپێکەوتنی پزیشکی",
     title: "چوونەژوورەوە",
     subtitle:
-      "ئامادەکاری ڕێکخراو بۆ گفتوگۆی پزیشکی — جێگەی ڕاوێژکاری پزیشکی ناگرێتەوە.",
+      "ئامادەکاری ڕێکخراو بۆ گفتوگۆ لەگەڵ پێشکەشکاری تەندروستی — دەستنیشانکردن ناکات و پێشنیاری چارەسەری نادات.",
     email: "ئیمەیڵ",
     emailPlaceholder: "نموونە name@mail.com",
     password: "تێپەڕەوشە",
@@ -38,7 +40,7 @@ export default {
     submitting: "چوونەژوورەوە…",
     submit: "چوونەژوورەوە",
     forgot: "تێپەڕەوشەت لەبیر چووە؟",
-    noAccount: "هێشتا ھەژمارت نییە؟",
+    noAccount: "ھێشتا ھەژمارت نییە؟",
     register: "دروستکردنی ھەژمار",
     imprint: "زانیاریی یاسایی",
     privacy: "تایبەتمەندی",
@@ -48,7 +50,8 @@ export default {
     verifyOk: "ئیمەیڵ پشتڕاستکرایەوە. دەتوانیت بچیتە ژوورەوە.",
     verifyInvalid:
       "بەستەرەکە نادروستە یان بەسەرچووە. تکایە دووبارە تۆماربە.",
-    verifyError: "کێشەیەک ڕوویدا لە پشتڕاستکردنەوە. دواتر دووبارە هەوڵ بدەرەوە.",
+    verifyError:
+      "کێشەیەک ڕوویدا لە پشتڕاستکردنەوە. دواتر دووبارە هەوڵ بدەرەوە.",
     resetOk: "تێپەڕەوشە نوێکرایەوە. بە تێپەڕەوشەی نوێ بچۆرە ژوورەوە.",
     sessionExpired:
       "کاتی دانیشتن بەسەرچوو. بۆ بەردەوامبوون لە MedScoutX دووبارە بچۆرە ژوورەوە.",
@@ -57,10 +60,13 @@ export default {
     alert: "تێبینی:",
     alertText: "MedScoutX خزمەتگوزاری فریاگوزاری نییە (112 / 911).",
     title: "دروستکردنی ھەژمار",
-    subtitle: "ھەژمار بۆ ئامادەکردنی چاوپێکەوتن — نەک بۆ دۆزینەوە.",
+    subtitle:
+      "ھەژمار بۆ ئامادەکردنی چاوپێکەوتن — دەستنیشانکردن ناکات و پێشنیاری چارەسەری نادات.",
     required: "خانەی پێویست",
     email: "ئیمەیڵ",
-    emailHint: "ئیمەیڵەکەت بۆ ھەژمار و ئاگاداریی گرنگ بەکاردەھێنین.",
+    emailPlaceholder: "نموونە name@mail.com",
+    emailHint:
+      "ئیمەیڵەکەت بۆ ھەژمار و ئاگاداریی گرنگ بەکاردەھێنین.",
     password: "تێپەڕەوشە",
     passwordPlaceholder: "کەمترین ٨ پیت، ژمارە و نووسە",
     passwordHint: "کەمترین ٨ پیت، لەگەڵ ژمارە و نووسە.",
@@ -80,10 +86,10 @@ export default {
     ageConfirm: "دڵنیادەمەوە کە تەمەنم لە ١٨ ساڵ کەمتر نییە",
     termsOpen: "کردنەوەی مەرج و ڕێساکان",
     privacyOpen: "کردنەوەی سیاستی تایبەتمەندی",
-    disclaimerOpen: "کردنەوەی ڕەتکردنەوەی پزیشکی",
-    legalTextStart: "خوێندمەوە",
+    disclaimerOpen: "کردنەوەی ڕەتکردنەوەی زانیاریی سکاڵا",
+    legalTextStart: "دڵنیامەوە خوێندمەوەی",
     legalTextMiddle: "سیاستی تایبەتمەندی",
-    legalTextEnd: "و ڕازیم.",
+    legalTextEnd: "ڕازیم.",
     submit: "بەردەوامبوون",
     saving: "پاشەکەوتکردن…",
     cancel: "پاشگەزبوونەوە",
@@ -101,6 +107,10 @@ export default {
     failed: "تۆمارکردن سەرکەوتوو نەبوو.",
     requestError: "ھەڵە لە تۆمارکردن.",
     srRequired: "(پێویست)",
+    firstNamePlaceholder: "نموونە: ڕۆژین",
+    lastNamePlaceholder: "نموونە: کەریمی",
+    conjunctionAnd: "و",
+    legalLinksAria: "زانیاری یاسایی",
   },
   footer: {
     imprint: "زانیاریی یاسایی",
@@ -139,7 +149,8 @@ export default {
     error: "کێشەیەک ڕوویدا. دواتر دووبارە هەوڵ بدەرەوە.",
     network: "کێشەی تۆڕ. پەیوەندی بپشکنە.",
     missing: "ئیمەیڵ بۆ پشتڕاستکردنەوە نییە. دووبارە تۆماربە.",
-    footer: "ئەگەر MedScoutX نەتخوازێتە، ئەم پەیامە پشتگوێ خەنت.",
+    footer:
+      "ئەگەر MedScoutX نەتخوازێتە، ئەم پەیامە پشتگوێ خەنت.",
   },
   resetPassword: {
     title: "تێپەڕەوشەی نوێ",
@@ -157,3 +168,8 @@ export default {
     network: "کێشەی تۆڕ. دواتر دووبارە هەوڵ بدەرەوە.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(ckbBase, ckbCore), ckbAccount), ckbModules),
+  ckbPractice,
+);

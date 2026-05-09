@@ -1,11 +1,16 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalAr from "../legal/ar/index.js";
 import landing from "./ar.landing.js";
 import info from "./ar.info.js";
 import preVisit from "./ar.preVisit.js";
 import startseite from "./ar.startseite.js";
+import arCore from "./ar/ar.core.js";
+import arAccount from "./ar/ar.account.js";
+import arModules from "./ar/ar.modules.js";
+import arPractice from "./ar/ar.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+/** Base Arabic overrides — extended layers merged below */
+const arBase = {
   legal: legalAr,
   landing,
   info,
@@ -54,9 +59,11 @@ export default {
     alert: "تنبيه:",
     alertText: "MedScoutX ليس خدمة طوارئ (112 / 911).",
     title: "إنشاء حساب",
-    subtitle: "حساب للتحضير للمواعيد — وليس للتشخيص.",
+    subtitle:
+      "حساب للتحضير للمواعيد الطبّية — وليس لتقديم أحكام سريرية.",
     required: "حقل مطلوب",
     email: "البريد الإلكتروني",
+    emailPlaceholder: "مثل name@mail.com",
     emailHint: "نستخدم بريدك للحساب والإشعارات المهمة.",
     password: "كلمة المرور",
     passwordPlaceholder: "8 أحرف على الأقل، حرف ورقم",
@@ -77,17 +84,17 @@ export default {
     ageConfirm: "أؤكد أن عمري 18 عامًا على الأقل",
     termsOpen: "فتح الشروط والأحكام",
     privacyOpen: "فتح سياسة الخصوصية",
-    disclaimerOpen: "فتح إخلاء المسؤولية الطبي",
-    legalTextStart: "اطّلعت على",
+    disclaimerOpen: "فتح الإشعار بحدود المنصّة",
+    legalTextStart: "أقرّ بأنني اطلعتُ على",
     legalTextMiddle: "سياسة الخصوصية",
-    legalTextEnd: "وأوافق عليها.",
+    legalTextEnd: " وأوافق.",
     submit: "متابعة",
     saving: "جارٍ الحفظ…",
     cancel: "إلغاء",
     imprint: "بيانات النشر",
     privacy: "الخصوصية",
-    disclaimer: "إخلاء المسؤولية",
-    terms: "الشروط",
+    disclaimer: "إشعار بحدود المعلومات",
+    terms: "الشروط والأحكام",
     language: "اللغة",
     enterBirth: "يرجى إدخال تاريخ الميلاد.",
     underage:
@@ -98,6 +105,10 @@ export default {
     failed: "فشل التسجيل.",
     requestError: "خطأ في التسجيل.",
     srRequired: "(مطلوب)",
+    firstNamePlaceholder: "مثل: محمد",
+    lastNamePlaceholder: "مثل: أحمد",
+    conjunctionAnd: " و",
+    legalLinksAria: "معلومات قانونية",
   },
   footer: {
     imprint: "بيانات النشر",
@@ -129,7 +140,7 @@ export default {
     title: "أكّد بريدك الإلكتروني",
     text: "أرسلنا رسالة تحقق. افتحها لتفعيل الحساب.",
     tip: "نصيحة:",
-    tipText: "تحقّق من الرسائل غير المرغوب فيها أو العروض.",
+    tipText: "تحقّق أيضًا من مجلّد الرسائل غير المرغوب فيها أو العروض.",
     resend: "إعادة إرسال الرسالة",
     resending: "جارٍ الإرسال…",
     success: "أُعيد إرسال الرسالة.",
@@ -154,3 +165,8 @@ export default {
     network: "خطأ في الشبكة. حاول لاحقًا.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(arBase, arCore), arAccount), arModules),
+  arPractice,
+);

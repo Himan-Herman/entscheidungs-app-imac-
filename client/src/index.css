@@ -18,6 +18,208 @@ html {
   background: var(--ms-color-bg);
 }
 
+/* Persian (fa): readability for RTL script */
+html[lang="fa"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
+  line-height: 1.65;
+}
+
+html[lang="fa"] input,
+html[lang="fa"] textarea,
+html[lang="fa"] select,
+html[lang="fa"] button {
+  line-height: 1.55;
+}
+
+/* Kurmanji (ku): Latin script — readability for ê î û ş ç */
+html[lang="ku"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="ku"] input,
+html[lang="ku"] textarea,
+html[lang="ku"] select,
+html[lang="ku"] button {
+  line-height: 1.52;
+}
+
+/* Kurdish Sorani (ckb): Arabic-script RTL readability */
+html[lang="ckb"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    "Noto Naskh Arabic",
+    "Arabic UI Text",
+    Tahoma,
+    Arial,
+    sans-serif;
+  line-height: 1.68;
+}
+
+html[lang="ckb"] input,
+html[lang="ckb"] textarea,
+html[lang="ckb"] select,
+html[lang="ckb"] button {
+  line-height: 1.58;
+}
+
+/* Turkish (tr): Latin script — ğ ş ç ı İ ö ü readability */
+html[lang="tr"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="tr"] input,
+html[lang="tr"] textarea,
+html[lang="tr"] select,
+html[lang="tr"] button {
+  line-height: 1.52;
+}
+
+/* Russian (ru): Cyrillic readability (LTR) */
+html[lang="ru"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="ru"] input,
+html[lang="ru"] textarea,
+html[lang="ru"] select,
+html[lang="ru"] button {
+  line-height: 1.52;
+}
+
+/* Greek (el): polytonic readability (LTR) */
+html[lang="el"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="el"] input,
+html[lang="el"] textarea,
+html[lang="el"] select,
+html[lang="el"] button {
+  line-height: 1.52;
+}
+
+html[lang="pl"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="pl"] input,
+html[lang="pl"] textarea,
+html[lang="pl"] select,
+html[lang="pl"] button {
+  line-height: 1.52;
+}
+
+html[lang="hr"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="hr"] input,
+html[lang="hr"] textarea,
+html[lang="hr"] select,
+html[lang="hr"] button {
+  line-height: 1.52;
+}
+
+html[lang="bs"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="bs"] input,
+html[lang="bs"] textarea,
+html[lang="bs"] select,
+html[lang="bs"] button {
+  line-height: 1.52;
+}
+
+html[lang="sr"] {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  line-height: 1.58;
+}
+
+html[lang="sr"] input,
+html[lang="sr"] textarea,
+html[lang="sr"] select,
+html[lang="sr"] button {
+  line-height: 1.52;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -37,8 +239,7 @@ body {
 /* Capacitor / iOS safe-area baseline — shell components add extra bottom inset above fixed nav */
 @supports (padding: env(safe-area-inset-bottom)) {
   body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
   }
 }
 

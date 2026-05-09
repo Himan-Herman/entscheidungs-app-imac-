@@ -1,10 +1,15 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalEs from "../legal/es/index.js";
 import info from "./es.info.js";
 import preVisit from "./es.preVisit.js";
 import startseite from "./es.startseite.js";
+import esCore from "./es/es.core.js";
+import esAccount from "./es/es.account.js";
+import esModules from "./es/es.modules.js";
+import esPractice from "./es/es.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+/** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
+const esBase = {
   legal: legalEs,
   info,
   preVisit,
@@ -57,6 +62,7 @@ export default {
       "Cuenta para preparar citas médicas — no para diagnosticar.",
     required: "Campo obligatorio",
     email: "Correo electrónico",
+    emailPlaceholder: "ej. nombre@correo.com",
     emailHint: "Usamos su correo para la cuenta y avisos importantes.",
     password: "Contraseña",
     passwordPlaceholder: "Mín. 8 caracteres, letra y número",
@@ -77,17 +83,17 @@ export default {
     ageConfirm: "Confirmo que tengo al menos 18 años",
     termsOpen: "Abrir términos y condiciones",
     privacyOpen: "Abrir política de privacidad",
-    disclaimerOpen: "Abrir descargo médico",
-    legalTextStart: "He leído la",
-    legalTextMiddle: "política de privacidad",
-    legalTextEnd: "y acepto.",
+    disclaimerOpen: "Abrir información legal sobre límites médicos",
+    legalTextStart: "He leído los",
+    legalTextMiddle: "la política de privacidad",
+    legalTextEnd: " y acepto lo indicado en ellos.",
     submit: "Continuar",
     saving: "Guardando…",
     cancel: "Cancelar",
     imprint: "Aviso legal",
     privacy: "Privacidad",
-    disclaimer: "Descargo",
-    terms: "Términos",
+    disclaimer: "Descargo médico",
+    terms: "Términos y condiciones",
     language: "Idioma",
     enterBirth: "Indique la fecha de nacimiento.",
     underage:
@@ -98,6 +104,10 @@ export default {
     failed: "No se pudo completar el registro.",
     requestError: "Error de registro.",
     srRequired: "(obligatorio)",
+    firstNamePlaceholder: "p. ej., Ana",
+    lastNamePlaceholder: "p. ej., García",
+    conjunctionAnd: "y el",
+    legalLinksAria: "Información jurídica",
   },
   footer: {
     imprint: "Aviso legal",
@@ -197,3 +207,8 @@ export default {
     network: "Error de red. Inténtelo más tarde.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(esBase, esCore), esAccount), esModules),
+  esPractice,
+);

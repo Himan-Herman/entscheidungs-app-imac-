@@ -15,6 +15,7 @@ export default {
     continue: "Weiter",
   },
   qrLanding: {
+    pageTitle: "MedScoutX — QR-Praxis-Kontext",
     title: "Praxis-Kontext bestätigen",
     loading: "QR-Kontext wird geladen …",
     invalid: "Dieser QR-Link ist ungültig oder nicht mehr verfügbar.",

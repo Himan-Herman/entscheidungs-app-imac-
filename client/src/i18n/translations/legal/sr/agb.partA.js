@@ -2,71 +2,71 @@
 export default [
   {
     id: "agb-1-geltungsbereich",
-    heading: "§1 Обухват и пружалац",
+    heading: "§1 Obuhvat i pružalac",
     blocks: [
       {
         type: "html",
         html: `
-<p>Ови Увјети кориштења уређују кориштење мобилне и wеб апликације <strong>MedScoutX</strong> („Апликација”) од стране крајњих приватних корисника.</p>
-<p>Пружалац Апликације је:<br /><strong>MedScoutX Хеалтх Солутионс – Химан Кхорсхиди</strong><br />Еисенстраßе 64<br />40227 Дüсселдорф<br />Њемачка<br />Е-пошта: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
-<p>Кориштење Апликације дозвољено је искључиво пунољетним особама старијим од <strong>18 година</strong>. Малољетници не смију користити Апликацију.</p>
+<p>Ovi Uvjeti korištenja uređuju korištenje mobilne i web aplikacije <strong>MedScoutX</strong> („Aplikacija”) od strane krajnjih privatnih korisnika.</p>
+<p>Pružalac Aplikacije je:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Njemačka<br />E-pošta: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Korištenje Aplikacije dozvoljeno je isključivo punoljetnim osobama starijim od <strong>18 godina</strong>. Maloljetnici ne smiju koristiti Aplikaciju.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-2-zweck",
-    heading: "§2 Сврха Апликације и медицинска напомена",
+    heading: "§2 Svrha Aplikacije i medicinska napomena",
     blocks: [
       {
         type: "html",
         html: `
-<p>MedScoutX је информациони и оријентациони алат уз подршку вјештачке интелигенције у области здравства. Апликација је намијењена да корисницима пружи почетни структурисани преглед могућих узрока тегоба и потенцијално релевантних медицинских специјалности.</p>
-<p>MedScoutX <strong>није медицински уређај</strong> у смислу ЕУ Уредбе о медицинским уређајима (МДР). Посебно:</p>
+<p>MedScoutX je informacioni i orijentacioni alat uz podršku vještačke inteligencije u oblasti zdravstva. Aplikacija je namijenjena da korisnicima pruži početni strukturisani pregled mogućih uzroka tegoba i potencijalno relevantnih medicinskih specijalnosti.</p>
+<p>MedScoutX <strong>nije medicinski uređaj</strong> u smislu EU Uredbe o medicinskim uređajima (MDR). Posebno:</p>
 <ul>
-<li>Апликација <strong>не поставља дијагнозе</strong>,</li>
-<li><strong>не препоручује посебне терапије</strong> или лекове,</li>
-<li><strong>не замјењује клиничке одлуке</strong> или лечење.</li>
+<li>Aplikacija <strong>ne postavlja dijagnoze</strong>,</li>
+<li><strong>ne preporučuje posebne terapije</strong> ili lekove,</li>
+<li><strong>ne zamjenjuje kliničke odluke</strong> ili lečenje.</li>
 </ul>
-<p>Кориштење Апликације никада не замјењује лични преглед, вођење или лечење од стране лекара или других здравствених радника. Одлуке о дијагностици, терапијама или лековима не смију се доносити искључиво на основу излаза АИ.</p>
-<p>У акутним или животно угрожавајућим ситуацијама одмах назовите одговарајући хитни број (нпр. ЕУ: <strong>112</strong>, САД: <strong>911</strong>) или хитну медицинску службу.</p>
+<p>Korištenje Aplikacije nikada ne zamjenjuje lični pregled, vođenje ili lečenje od strane lekara ili drugih zdravstvenih radnika. Odluke o dijagnostici, terapijama ili lekovima ne smiju se donositi isključivo na osnovu izlaza AI.</p>
+<p>U akutnim ili životno ugrožavajućim situacijama odmah nazovite odgovarajući hitni broj (npr. EU: <strong>112</strong>, SAD: <strong>911</strong>) ili hitnu medicinsku službu.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-3-vertrag",
-    heading: "§3 Захтјеви за кориштење, регистрација и рачун",
+    heading: "§3 Zahtjevi za korištenje, registracija i račun",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Кориштење MedScoutX опћенито захтијева кориснички рачун. Регистрација је дозвољена само особама које су навршиле <strong>18 година</strong>.</p>
-<p>(2) При регистрацији корисник изричито потврђује да има најмање 18 година. Пружалац може затражити доказ о годинама или суспендирати рачуне ако постоји разумна сумња у доб.</p>
-<p>(3) Корисник мора дати тачне и потпуне информације при регистрацији и ажурирати их ако се промијене.</p>
-<p>(4) Приступни подаци (нпр. лозинка, токен за пријаву) морају се чувати повјерљиво и не смију се откривати трећим странама. Корисник је одговоран за све активности извршене његовим приступним подацима гдје је корисник крив.</p>
-<p>(5) Забрањено је кориштење Апликације у незаконите сврхе, анализа података трећих страна без сагласности, заобилажење сигурносних механизама или аутоматизовано масовно кориштење (сцрапинг, ботови).</p>
+<p>(1) Korištenje MedScoutX općenito zahtijeva korisnički račun. Registracija je dozvoljena samo osobama koje su navršile <strong>18 godina</strong>.</p>
+<p>(2) Pri registraciji korisnik izričito potvrđuje da ima najmanje 18 godina. Pružalac može zatražiti dokaz o godinama ili suspendirati račune ako postoji razumna sumnja u dob.</p>
+<p>(3) Korisnik mora dati tačne i potpune informacije pri registraciji i ažurirati ih ako se promijene.</p>
+<p>(4) Pristupni podaci (npr. lozinka, token za prijavu) moraju se čuvati povjerljivo i ne smiju se otkrivati trećim stranama. Korisnik je odgovoran za sve aktivnosti izvršene njegovim pristupnim podacima gdje je korisnik kriv.</p>
+<p>(5) Zabranjeno je korištenje Aplikacije u nezakonite svrhe, analiza podataka trećih strana bez saglasnosti, zaobilaženje sigurnosnih mehanizama ili automatizovano masovno korištenje (scraping, botovi).</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-4-leistungen",
-    heading: "§4 Услуге које пружа Апликација",
+    heading: "§4 Usluge koje pruža Aplikacija",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) MedScoutX пружа посебно сљедеће функције:</p>
+<p>(1) MedScoutX pruža posebno sljedeće funkcije:</p>
 <ul>
-<li>АИ подржана анализа симптома путем подручја цхата,</li>
-<li>АИ подржана анализа сликовних података,</li>
-<li>избор регија тијела путем карте тијела,</li>
-<li>управљање корисничким рачуном и функције историје,</li>
-<li>гдје је примјењиво, додатне функције унутар плаћених претплата.</li>
+<li>AI podržana analiza simptoma putem područja chata,</li>
+<li>AI podržana analiza slikovnih podataka,</li>
+<li>izbor regija tijela putem karte tijela,</li>
+<li>upravljanje korisničkim računom i funkcije istorije,</li>
+<li>gdje je primjenjivo, dodatne funkcije unutar plaćenih pretplata.</li>
 </ul>
-<p>(2) Тачан обим функција може варирати овисно о верзији апликације и одабраној претплати. Не постоји право на одређену функционалност осим ако је то изричито обећано.</p>
-<p>(3) Пружалац може прилагођавати, проширивати или ограничавати функције под увјетом да је то разумно за корисника и да не нарушава битне уговорне обавезе.</p>
+<p>(2) Tačan obim funkcija može varirati ovisno o verziji aplikacije i odabranoj pretplati. Ne postoji pravo na određenu funkcionalnost osim ako je to izričito obećano.</p>
+<p>(3) Pružalac može prilagođavati, proširivati ili ograničavati funkcije pod uvjetom da je to razumno za korisnika i da ne narušava bitne ugovorne obaveze.</p>
 `.trim(),
       },
     ],

@@ -2,148 +2,148 @@
 export default [
   {
     id: "ds-8-speicherfristen",
-    heading: "8. Рокови чувања",
+    heading: "8. Rokovi čuvanja",
     blocks: [
       {
         type: "p",
         text:
-          "Правило MedScoutX трајно не похрањује историју цхата, симптоме или слике на серверу. Садржај везан за здравље похрањује се само локално на вашем уређају (нпр. у ЛоцалСтораге) и може се у било којем тренутку обрисати.",
+          "Pravilo MedScoutX trajno ne pohranjuje istoriju chata, simptome ili slike na serveru. Sadržaj vezan za zdravlje pohranjuje se samo lokalno na vašem uređaju (npr. u LocalStorage) i može se u bilo kojem trenutku obrisati.",
       },
       {
         type: "ul",
         items: [
-          "Подаци рачуна: адреса е-поште, хасх лозинке и подешавање језика чувају се док постоји кориснички рачун. Након брисања рачуна ти подаци се бришу или анонимизују осим ако не важе законске обавезе чувања.",
-          "Подаци цхата и симптома: не похрањују се на серверу. Остају само на вашем уређају и у потпуности се бришу када користите „Нови разговор” или „Обриши историју”.",
-          "Отпреме слика: обрађују се само кратко ради прослијеђивања АИ услузи, затим се одбацују. Нема трајног складиштења.",
-          "Технички логови / сервер логови: за рад, сигурност и анализу грешака хостинг услуге аутоматски похрањују техничке логове (нпр. вријеме, скраћена ИП адреса, детаљи грешака), обично 14–30 дана. Ти подаци нису повезани с вашим профилом или садржајем и не користе се за оглашавање.",
-          "Локални подаци (ЛоцалСтораге, похрана апликације): историја цхата, подешавања (нпр. језик, приступачност) и уноси историје похрањују се само на уређају и могу се уклонити у било којем тренутку путем „Обриши историју” или подешавања уређаја.",
+          "Podaci računa: adresa e-pošte, hash lozinke i podešavanje jezika čuvaju se dok postoji korisnički račun. Nakon brisanja računa ti podaci se brišu ili anonimizuju osim ako ne važe zakonske obaveze čuvanja.",
+          "Podaci chata i simptoma: ne pohranjuju se na serveru. Ostaju samo na vašem uređaju i u potpunosti se brišu kada koristite „Novi razgovor” ili „Obriši istoriju”.",
+          "Otpreme slika: obrađuju se samo kratko radi proslijeđivanja AI usluzi, zatim se odbacuju. Nema trajnog skladištenja.",
+          "Tehnički logovi / server logovi: za rad, sigurnost i analizu grešaka hosting usluge automatski pohranjuju tehničke logove (npr. vrijeme, skraćena IP adresa, detalji grešaka), obično 14–30 dana. Ti podaci nisu povezani s vašim profilom ili sadržajem i ne koriste se za oglašavanje.",
+          "Lokalni podaci (LocalStorage, pohrana aplikacije): istorija chata, podešavanja (npr. jezik, pristupačnost) i unosi istorije pohranjuju se samo na uređaju i mogu se ukloniti u bilo kojem trenutku putem „Obriši istoriju” ili podešavanja uređaja.",
         ],
       },
     ],
   },
   {
     id: "ds-9-sicherheit",
-    heading: "9. Сигурност",
+    heading: "9. Sigurnost",
     blocks: [
       {
         type: "p",
         text:
-          "Примјењујемо одговарајуће техничке и организационе мјере ради заштите ваших података од губитка, измјене, неовлаштеног приступа или друге злоупотребе. То укључује посебно:",
+          "Primjenjujemo odgovarajuće tehničke i organizacione mjere radi zaštite vaših podataka od gubitka, izmjene, neovlaštenog pristupa ili druge zloupotrebe. To uključuje posebno:",
       },
       {
         type: "p",
         text:
-          "Обрада ваших здравствених података врши се тек након што дате изричиту сагласност при првом кориштењу одговарајућих функција (цхат симптоми, карта тијела, анализа слика) (потврдни оквир + потврда). Ту сагласност можете повући у било којем тренутку у поставкама апликације.",
+          "Obrada vaših zdravstvenih podataka vrši se tek nakon što date izričitu saglasnost pri prvom korištenju odgovarajućih funkcija (chat simptomi, karta tijela, analiza slika) (potvrdni okvir + potvrda). Tu saglasnost možete povući u bilo kojem trenutku u postavkama aplikacije.",
       },
       {
         type: "ul",
         items: [
-          "Шифровање у пријеносу (ТЛС/ХТТПС),",
-          "ограничења приступа и системи улога/дозвола,",
-          "минимизација података и псеудонимизација гдје је могуће,",
-          "редовна ажурирања система.",
+          "Šifrovanje u prijenosu (TLS/HTTPS),",
+          "ograničenja pristupa i sistemi uloga/dozvola,",
+          "minimizacija podataka i pseudonimizacija gdje je moguće,",
+          "redovna ažuriranja sistema.",
         ],
       },
     ],
   },
   {
     id: "ds-10-kinder",
-    heading: "10. Дјеца и млади",
+    heading: "10. Djeca i mladi",
     blocks: [
       {
         type: "p",
         text:
-          "MedScoutX није намијењен дјеци млађој од 16 година. Малољетници требају користити апликацију само уз сагласност законских старатеља. Ако сазнамо да су подаци дјетета млађег од 16 година обрађени без сагласности старатеља, те податке ћемо обрисати.",
+          "MedScoutX nije namenjen djeci mlađoj od 16 godina. Maloljetnici trebaju koristiti aplikaciju samo uz saglasnost zakonskih staratelja. Ako saznamo da su podaci djeteta mlađeg od 16 godina obrađeni bez saglasnosti staratelja, te podatke ćemo obrisati.",
       },
     ],
   },
   {
     id: "ds-11-rechte",
-    heading: "11. Ваша права (права испитаника)",
+    heading: "11. Vaša prava (prava ispitanika)",
     blocks: [
       {
         type: "p",
         text:
-          "Према ГДПР-у имате посебно сљедећа права:",
+          "Prema GDPR-u imate posebno sljedeća prava:",
       },
       {
         type: "ul",
         items: [
-          "Приступ (чл. 15 ГДПР): можете затражити информације о томе које личне податке обрађујемо о вама.",
-          "Исправка (чл. 16 ГДПР): можете затражити исправак нетачних података или допуну непотпуних података.",
-          "Брисање (чл. 17 ГДПР): можете затражити брисање ваших личних података осим ако законске обавезе чувања то спрјечавају.",
-          "Ограничење (чл. 18 ГДПР): можете затражити ограничење обраде.",
-          "Преносивост (чл. 20 ГДПР): можете затражити своје податке у структурисаном, уобичајеном и стројно читљивом формату.",
-          "Приговор (чл. 21 ГДПР): гдје се ослањамо на легитимне интересе, можете се успротивити из разлога који се односе на вашу посебну ситуацију.",
-          "Повлачење сагласности (чл. 7 ст. (3) ГДПР): дану сагласност, посебно за здравствене податке, можете повући у било којем тренутку с ефектом за будућност.",
-          "Жалба (чл. 77 ГДПР): имате право поднијети жалбу надзорном тијелу, нпр. на мјесту пребивалишта или на нашој локацији.",
+          "Pristup (čl. 15 GDPR): možete zatražiti informacije o tome koje lične podatke obrađujemo o vama.",
+          "Ispravka (čl. 16 GDPR): možete zatražiti ispravak netačnih podataka ili dopunu nepotpunih podataka.",
+          "Brisanje (čl. 17 GDPR): možete zatražiti brisanje vaših ličnih podataka osim ako zakonske obaveze čuvanja to sprječavaju.",
+          "Ograničenje (čl. 18 GDPR): možete zatražiti ograničenje obrade.",
+          "Prenosivost (čl. 20 GDPR): možete zatražiti svoje podatke u strukturisanom, uobičajenom i strojno čitljivom formatu.",
+          "Prigovor (čl. 21 GDPR): gdje se oslanjamo na legitimne interese, možete se usprotiviti iz razloga koji se odnose na vašu posebnu situaciju.",
+          "Povlačenje saglasnosti (čl. 7 st. (3) GDPR): danu saglasnost, posebno za zdravstvene podatke, možete povući u bilo kojem trenutku s efektom za budućnost.",
+          "Žalba (čl. 77 GDPR): imate pravo podnijeti žalbu nadzornom tijelu, npr. na mjestu prebivališta ili na našoj lokaciji.",
         ],
       },
       {
         type: "p",
         text:
-          "За остваривање права нас можете контактирати у било којем тренутку користећи горе наведене контакт податке.",
+          "Za ostvarivanje prava nas možete kontaktirati u bilo kojem trenutku koristeći gore navedene kontakt podatke.",
       },
     ],
   },
   {
     id: "ds-12-cookies",
-    heading: "12. Колачићи и ЛоцалСтораге",
+    heading: "12. Kolačići i LocalStorage",
     blocks: [
       {
         type: "p",
         text:
-          "MedScoutX не користи колачиће за праћење у сврху оглашавања. Ради практичности може се користити локална похрана на вашем уређају, нпр.:",
+          "MedScoutX ne koristi kolačiće za praćenje u svrhu oglašavanja. Radi praktičnosti može se koristiti lokalna pohrana na vašem uređaju, npr.:",
       },
       {
         type: "ul",
         items: [
-          "похрана вашег језичког избора,",
-          "опционална похрана историје цхата,",
-          "опције приступачности (нпр. величина фонта).",
+          "pohrana vašeg jezičkog izbora,",
+          "opcionalna pohrana istorije chata,",
+          "opcije pristupačnosti (npr. veličina fonta).",
         ],
       },
       {
         type: "p",
         text:
-          "Ове информације можете обрисати у било којем тренутку путем функција у апликацији или путем подешавања уређаја или прегледника.",
+          "Ove informacije možete obrisati u bilo kojem trenutku putem funkcija u aplikaciji ili putem podešavanja uređaja ili preglednika.",
       },
     ],
   },
   {
     id: "ds-13-berechtigungen",
-    heading: "13. Дозволе апликације",
+    heading: "13. Dozvole aplikacije",
     blocks: [
       {
         type: "p",
         text:
-          "Овисно о кориштењу MedScoutX може затражити сљедеће дозволе на вашем уређају:",
+          "Ovisno o korištenju MedScoutX može zatražiti sljedeće dozvole na vašem uređaju:",
       },
       {
         type: "ul",
         items: [
-          "Приступ камери/датотекама: за снимање или одабир слика за анализу слика. Ова дозвола је опциона и може се опозвати у поставкама уређаја.",
-          "Приступ похрани: за обраду сликовних датотека или привремених података.",
+          "Pristup kameri/datotekama: za snimanje ili odabir slika za analizu slika. Ova dozvola je opciona i može se opozvati u postavkama uređaja.",
+          "Pristup pohrani: za obradu slikovnih datoteka ili privremenih podataka.",
         ],
       },
       {
         type: "p",
         text:
-          "MedScoutX не приступа садржају без ваше радње и не шаље у позадини трећим странама податке који нису потребни за рад апликације.",
+          "MedScoutX ne pristupa sadržaju bez vaše radnje i ne šalje u pozadini trećim stranama podatke koji nisu potrebni za rad aplikacije.",
       },
     ],
   },
   {
     id: "ds-14-ki",
-    heading: "14. Напомене о обради АИ",
+    heading: "14. Napomene o obradi AI",
     blocks: [
       {
         type: "ul",
         items: [
-          "Ваши текстови и, гдје је примјењиво, слике обрађују се аутоматски ради генерирања приједлога и напомена.",
-          "АИ може гријешити или погрешно процијенити ситуације. Молимо критички прегледајте излазе и користите их само за оријентацију.",
-          "Не уносите имена трећих страна или идентификујуће детаље и избјегавајте непотребно опширне личне податке.",
-          "Кориштење апликације не замјењује лични медицински савјет, дијагнозу или лечење од стране лекара или других здравствених радника.",
+          "Vaši tekstovi i, gdje je primjenjivo, slike obrađuju se automatski radi generiranja prijedloga i napomena.",
+          "AI može griješiti ili pogrešno procijeniti situacije. Molimo kritički pregledajte izlaze i koristite ih samo za orijentaciju.",
+          "Ne unosite imena trećih strana ili identifikujuće detalje i izbjegavajte nepotrebno opširne lične podatke.",
+          "Korištenje aplikacije ne zamjenjuje lični medicinski savjet, dijagnozu ili lečenje od strane lekara ili drugih zdravstvenih radnika.",
         ],
       },
     ],
@@ -151,12 +151,12 @@ export default [
   {
     id: "ds-15-entscheid",
     heading:
-      "15. Без аутоматизованог доношења одлука у смислу чл. 22 ГДПР-а",
+      "15. Bez automatizovanog donošenja odluka u smislu čl. 22 GDPR-a",
     blocks: [
       {
         type: "p",
         text:
-          "MedScoutX не поставља дијагнозе нити доноси аутоматизоване одлуке које производе правне или слично значајне ефекте. Садржај који генерише АИ служи само оријентацији и не замјењује медицински савјет. У медицински релевантним ситуацијама бићете упозорени да контактирате лекара.",
+          "MedScoutX ne postavlja dijagnoze niti donosi automatizovane odluke koje proizvode pravne ili slično značajne efekte. Sadržaj koji generiše AI služi samo orijentaciji i ne zamjenjuje medicinski savjet. U medicinski relevantnim situacijama bićete upozoreni da kontaktirate lekara.",
       },
     ],
   },

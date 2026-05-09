@@ -174,7 +174,7 @@ export default function Register() {
               type="email"
               required
               className="input"
-              placeholder="name@example.com"
+              placeholder={copy.emailPlaceholder}
               autoComplete="email"
               value={form.email}
               onChange={(e) => setField("email", e.target.value)}

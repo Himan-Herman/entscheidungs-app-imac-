@@ -1,11 +1,16 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalTr from "../legal/tr/index.js";
 import landing from "./tr.landing.js";
 import info from "./tr.info.js";
 import preVisit from "./tr.preVisit.js";
 import startseite from "./tr.startseite.js";
+import trCore from "./tr/tr.core.js";
+import trAccount from "./tr/tr.account.js";
+import trModules from "./tr/tr.modules.js";
+import trPractice from "./tr/tr.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+/** Türkçe temel çeviriler — katmanlar aşağıda birleştirilir */
+const trBase = {
   legal: legalTr,
   landing,
   info,
@@ -24,12 +29,12 @@ export default {
     themeDark: "Koyu tema",
   },
   login: {
-    badge: "MedScoutX — muayene hazırlığı",
+    badge: "MedScoutX — doktor görüşmesine hazırlık",
     title: "Giriş",
     subtitle:
-      "Klinik görüşme için yapılandırılmış hazırlık — tıbbi tanının yerini tutmaz.",
+      "Sağlık sunucusuyla görüşme için yapılandırılmış hazırlık — teşhis sağlamaz; tedavi önerisi sunmaz.",
     email: "E-posta",
-    emailPlaceholder: "ör. adiniz@mail.com",
+    emailPlaceholder: "örn. adiniz@mail.com",
     password: "Şifre",
     passwordPlaceholder: "Şifre",
     submitting: "Giriş yapılıyor…",
@@ -54,9 +59,11 @@ export default {
     alert: "Uyarı:",
     alertText: "MedScoutX acil servis değildir (112 / 911).",
     title: "Hesap oluştur",
-    subtitle: "Muayene hazırlığı için hesap — tanı koymak için değil.",
+    subtitle:
+      "Muayene hazırlığı için hesap — teşhis sağlamaz; tedavi önerisi sunmaz.",
     required: "Zorunlu alan",
     email: "E-posta",
+    emailPlaceholder: "örn. adiniz@mail.com",
     emailHint: "Hesap ve önemli bildirimler için e-postanızı kullanıyoruz.",
     password: "Şifre",
     passwordPlaceholder: "En az 8 karakter, harf ve rakam",
@@ -77,17 +84,17 @@ export default {
     ageConfirm: "En az 18 yaşında olduğumu onaylıyorum",
     termsOpen: "Kullanım şartlarını aç",
     privacyOpen: "Gizlilik politikasını aç",
-    disclaimerOpen: "Tıbbi feragatnameyi aç",
-    legalTextStart: "Şunu okudum:",
-    legalTextMiddle: "gizlilik politikası",
-    legalTextEnd: "ve kabul ediyorum.",
+    disclaimerOpen: "Bilgilendirme metnini aç",
+    legalTextStart: "Şunları okudum:",
+    legalTextMiddle: "Gizlilik Politikası",
+    legalTextEnd: "metinlerini okuyup kabul ediyorum.",
     submit: "Devam",
     saving: "Kaydediliyor…",
     cancel: "İptal",
     imprint: "Künye",
     privacy: "Gizlilik",
     disclaimer: "Feragatname",
-    terms: "Şartlar",
+    terms: "Kullanım şartları",
     language: "Dil",
     enterBirth: "Doğum tarihinizi girin.",
     underage:
@@ -98,6 +105,10 @@ export default {
     failed: "Kayıt başarısız.",
     requestError: "Kayıt hatası.",
     srRequired: "(zorunlu)",
+    firstNamePlaceholder: "Örn. Ayşe",
+    lastNamePlaceholder: "Örn. Yılmaz",
+    conjunctionAnd: "ve",
+    legalLinksAria: "Yasal bilgiler",
   },
   footer: {
     imprint: "Künye",
@@ -155,3 +166,8 @@ export default {
     network: "Ağ hatası. Daha sonra deneyin.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(trBase, trCore), trAccount), trModules),
+  trPractice,
+);

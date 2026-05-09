@@ -57,7 +57,7 @@ export default {
     sectionStructured: "Strukturisana verzija za liječnika",
     sectionOriginal: "Izvorne izjave pacijenta",
     disclaimer:
-      "Verzija za liječnika zasniva se isključivo na izjavama pacijenta. Ne postavljaju se dijagnoze, preporuke niti procjena hitnosti.",
+      "Verzija za liječnika zasniva se isključivo na izjavama pacijenta. Ne predstavlja kliničku procjenu i ne sadrži preporuke za liječenje.",
     empty: "nije navedeno",
     backReview: "Nazad na sažetak",
     pdfDisabled: "Napravi PDF",

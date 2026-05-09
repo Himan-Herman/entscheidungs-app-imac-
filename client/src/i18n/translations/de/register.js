@@ -6,6 +6,7 @@ export default {
     "Konto für strukturierte Vorbereitung von Arztgesprächen — keine Diagnose.",
   required: "Pflichtfeld",
   email: "E-Mail",
+  emailPlaceholder: "z. B. deinname@mail.de",
   emailHint:
     "Wir verwenden deine E-Mail für dein Konto und wichtige Hinweise.",
   password: "Passwort",

@@ -4,10 +4,10 @@ import partC from "./agb.partC.js";
 import partD from "./agb.partD.js";
 
 export default {
-  pageTitle: "MedScoutX — Увјети кориштења",
-  title: "Увјети кориштења",
-  subtitle: "Верзија 1.0 — на снази од 1. просинца 2025.",
-  backLabel: "Натраг на регистрацију",
-  backAria: "Натраг на страницу регистрације",
+  pageTitle: "MedScoutX — Uslovi korištenja",
+  title: "Uslovi korištenja",
+  subtitle: "Verzija 1.0 — na snazi od 1. prosinca 2025.",
+  backLabel: "Natrag na registraciju",
+  backAria: "Natrag na stranicu registracije",
   sections: [...partA, ...partB, ...partC, ...partD],
 };

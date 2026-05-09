@@ -14,6 +14,7 @@ export default {
     continue: "Continue",
   },
   qrLanding: {
+    pageTitle: "MedScoutX — QR practice context",
     title: "Confirm practice context",
     loading: "Loading QR context…",
     invalid: "This QR link is invalid or unavailable.",

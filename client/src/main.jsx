@@ -22,7 +22,8 @@ import Disclaimer from "./pages/Disclaimer";
 import AGB from "./pages/AGB.jsx";
 import Info from "./pages/Info";
 import { ThemeProvider } from "./ThemeMode";
-import { LanguageProvider } from "./i18n/LanguageContext";
+import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
+import { getMessages } from "./i18n/translations";
 
 const Startseite = lazy(() => import("./pages/Startseite.jsx"));
 const KoerperVorderseite = lazy(() => import("./pages/KoerperVorderseite.jsx"));
@@ -79,9 +80,14 @@ const PatientHubPage = lazy(() => import("./pages/PatientHubPage.jsx"));
 const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
 
 function RouteFallback() {
+  const { language } = useLanguage();
+  const label =
+    getMessages(language).common?.loading ??
+    getMessages("en").common?.loading ??
+    "Loading…";
   return (
     <div className="app-route-fallback" aria-busy="true" role="status">
-      <span className="app-route-fallback__sr">Loading…</span>
+      <span className="app-route-fallback__sr">{label}</span>
     </div>
   );
 }

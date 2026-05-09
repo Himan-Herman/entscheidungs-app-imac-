@@ -93,7 +93,7 @@ export default {
     accountSaveError:
       "Niha tomarkirin bi ser neket.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
-    sessionTitleEn: "Doctor visit preparation",
+    sessionTitleEn: "Amadekirina hevdîtina bijîşkî",
     viewMyPreparations: "Amadekirinên min bibîne",
     mainNavAria:
       "Guhertoya ji bo doktor, PDF derxe, vegerê kurteyê",

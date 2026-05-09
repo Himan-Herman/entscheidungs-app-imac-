@@ -25,8 +25,18 @@
   text-align: center;
 }
 
+.body-map-view-page__svg-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+html[dir="rtl"] .body-map-view-page__back-chevron {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
 .body-map-view-page__back {
-  align-self: flex-start;
+  align-self: start;
   min-height: 44px;
   padding: 0.45rem 0.85rem;
   border-radius: 10px;

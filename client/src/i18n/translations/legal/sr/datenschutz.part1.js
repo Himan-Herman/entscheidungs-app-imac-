@@ -2,157 +2,157 @@
 export default [
   {
     id: "ds-1-verantwortlich",
-    heading: "1. Руковалац подацима",
+    heading: "1. Rukovalac podacima",
     blocks: [
       {
         type: "p",
         text:
-          "Ова политика приватности објашњава како апликација MedScoutX обрађује личне податке.",
+          "Ova politika privatnosti objašnjava kako aplikacija MedScoutX obrađuje lične podatke.",
       },
       {
         type: "address",
-        lineStrong: "Руковалац у смислу ГДПР-а",
+        lineStrong: "Rukovalac u smislu GDPR-a",
         lines: [
           "Himan Khorshidi",
-          "Еисенстраßе 64",
-          "40227 Дüсселдорф, Њемачка",
+          "Eisenstraße 64",
+          "40227 Düsseldorf, Njemačka",
         ],
       },
       {
         type: "dl",
         items: [
-          { dt: "Е-пошта", dd: "himankhorshidy@gmail.com", href: "mailto:privacy@medscout.app" },
-          { dt: "Телефон", dd: "+49 211 15895272", href: "tel:+4921115895272" },
+          { dt: "E-pošta", dd: "himankhorshidy@gmail.com", href: "mailto:privacy@medscout.app" },
+          { dt: "Telefon", dd: "+49 211 15895272", href: "tel:+4921115895272" },
         ],
       },
     ],
   },
   {
     id: "ds-2-worum",
-    heading: "2. О чему се ради?",
+    heading: "2. O čemu se radi?",
     blocks: [
       {
         type: "p",
         text:
-          "Ова обавјештавање описује како MedScoutX обрађује ваше личне податке када:",
+          "Ova obavještavanje opisuje kako MedScoutX obrađuje vaše lične podatke kada:",
       },
       {
         type: "ul",
         items: [
-          "инсталирате апликацију и креирате рачун,",
-          "прикупљате информације за медицински преглед на структурисан начин и их по жељи припремате као ПДФ,",
-          "уносите симптоме путем текстуалног цхата,",
-          "бирате регије тијела на карти тијела,",
-          "отпремате слике (нпр. фотографије коже или медицинске снимке).",
+          "instalirate aplikaciju i kreirate račun,",
+          "prikupljate informacije za medicinski pregled na strukturisan način i ih po želji pripremate kao PDF,",
+          "unosite simptome putem tekstualnog chata,",
+          "birate regije tijela na karti tijela,",
+          "otpremate slike (npr. fotografije kože ili medicinske snimke).",
         ],
       },
       {
         type: "p",
         text:
-          "MedScoutX није алат за дијагнозу или лечење и не замјењује медицински преглед или савјет. Апликација подржава структурисану припрему и документацију властитих информација прије медицинских посјета. Ако генеришете ПДФ искључиво локално без пријеноса, примјењују се посебне напомене тамо описане.",
+          "MedScoutX nije alat za dijagnozu ili lečenje i ne zamjenjuje medicinski pregled ili savjet. Aplikacija podržava strukturisanu pripremu i dokumentaciju vlastitih informacija pre medicinskih poseta. Ako generišete PDF isključivo lokalno bez prijenosa, primjenjuju se posebne napomene tamo opisane.",
       },
     ],
   },
   {
     id: "ds-3-kategorien",
-    heading: "3. Категорије личних података",
+    heading: "3. Kategorije ličnih podataka",
     blocks: [
       {
         type: "p",
         text:
-          "Овисно о начину кориштења апликације, могу се обрађивати сљедеће категорије личних података:",
+          "Ovisno o načinu korištenja aplikacije, mogu se obrađivati sljedeće kategorije ličnih podataka:",
       },
       {
         type: "ul",
         items: [
-          "Подаци рачуна: адреса е-поште, евентуално име или корисничко име, хасх лозинке (не лозинка у чистом тексту), подешавање језика.",
-          "Подаци везани за здравље: текстуални уноси о симптомима, одговори у цхату за симптоме, избор регија тијела на карти, информације везане за здравље у пољима слободног текста.",
-          "Подаци слика: слике које отпремате (нпр. промјене на кожи, фотографије регија тијела или других области везане за здравље). MedScoutX користи ове слике за опис уочљивих налаза, али не за самосталну медицинску дијагнозу.",
-          "Подаци кориштења и логови: временске ознаке захтјева, технички логови грешака, евентуално скраћена ИП адреса, информације о прегледнику/уређају, оперативни систем, кориштена верзија апликације.",
-          "Подаци претплате и уговора (ако користите плаћену претплату): резервисани план, трајање, статус претплате, техничке информације о куповини (преко Апп Сторе / Плаy Сторе). Потпуни подаци о плаћању (као што су бројеви картица) не похрањују се у MedScoutX већ их обрађује одговарајућа платна услуга платформе.",
-          "Локални подаци на вашем уређају: нпр. локално похрањена историја цхата или подешавања (језик, опције приступачности) у ЛоцалСтораге или сличним механизмима.",
+          "Podaci računa: adresa e-pošte, eventualno ime ili korisničko ime, hash lozinke (ne lozinka u čistom tekstu), podešavanje jezika.",
+          "Podaci vezani za zdravlje: tekstualni unosi o simptomima, odgovori u chatu za simptome, izbor regija tijela na karti, informacije vezane za zdravlje u poljima slobodnog teksta.",
+          "Podaci slika: slike koje otpremate (npr. promjene na koži, fotografije regija tijela ili drugih oblasti vezane za zdravlje). MedScoutX koristi ove slike za opis uočljivih nalaza, ali ne za samostalnu medicinsku dijagnozu.",
+          "Podaci korištenja i logovi: vremenske oznake zahtjeva, tehnički logovi grešaka, eventualno skraćena IP adresa, informacije o pregledniku/uređaju, operativni sistem, korištena verzija aplikacije.",
+          "Podaci pretplate i ugovora (ako koristite plaćenu pretplatu): rezervisani plan, trajanje, status pretplate, tehničke informacije o kupovini (preko App Store / Play Store). Potpuni podaci o plaćanju (kao što su brojevi kartica) ne pohranjuju se u MedScoutX već ih obrađuje odgovarajuća platna usluga platforme.",
+          "Lokalni podaci na vašem uređaju: npr. lokalno pohranjena istorija chata ili podešavanja (jezik, opcije pristupačnosti) u LocalStorage ili sličnim mehanizmima.",
         ],
       },
     ],
   },
   {
     id: "ds-4-zwecke",
-    heading: "4. Сврхе обраде",
+    heading: "4. Svrhe obrade",
     blocks: [
       {
         type: "ul",
         items: [
-          "Пружање функција апликације: пријава, регистрација, управљање рачуном и основне функције MedScoutX.",
-          "Цхат за симптоме и АИ подржана додатна питања: обрада вашег текстуалног уноса ради давања питања и напомена за даљу разјашњење.",
-          "Карта тијела: мапирање одабраних регија на одговарајућа АИ додатна питања и напомене.",
-          "Анализа слика: обрада отпремљених слика ради описа уочљивих налаза и приједлога могућих сљедећих корака (нпр. разјашњење од стране лекара). Не врши се аутоматска дијагноза у медицинско-правном смислу.",
-          "Стабилност и сигурност: анализа грешака, откривање злоупотребе, заштита система и података.",
-          "Правни захтјеви: испуњавање законских обавеза (нпр. документација ИТ сигурносних мјера, рокови чувања).",
+          "Pružanje funkcija aplikacije: prijava, registracija, upravljanje računom i osnovne funkcije MedScoutX.",
+          "Chat za simptome i AI podržana dodatna pitanja: obrada vašeg tekstualnog unosa radi davanja pitanja i napomena za dalju razjašnjenje.",
+          "Karta tijela: mapiranje odabranih regija na odgovarajuća AI dodatna pitanja i napomene.",
+          "Analiza slika: obrada otpremljenih slika radi opisa uočljivih nalaza i prijedloga mogućih sljedećih koraka (npr. razjašnjenje od strane lekara). Ne vrši se automatska dijagnoza u medicinsko-pravnom smislu.",
+          "Stabilnost i sigurnost: analiza grešaka, otkrivanje zloupotrebe, zaštita sistema i podataka.",
+          "Pravni zahtjevi: ispunjavanje zakonskih obaveza (npr. dokumentacija IT sigurnosnih mjera, rokovi čuvanja).",
         ],
       },
     ],
   },
   {
     id: "ds-5-rechtsgrundlagen",
-    heading: "5. Правне основе (ГДПР)",
+    heading: "5. Pravne osnove (GDPR)",
     blocks: [
       {
         type: "p",
         text:
-          "Овисно о ситуацији ослањамо се на сљедеће правне основе за обраду:",
+          "Ovisno o situaciji oslanjamo se na sljedeće pravne osnove za obradu:",
       },
       {
         type: "ul",
         items: [
-          "Чл. 6 ст. (1) тачка б) ГДПР – извршавање уговора: за пружање техничких функција апликације као што су регистрација, пријава и управљање корисничким рачуном.",
-          "Чл. 6 ст. (1) тачка ф) ГДПР – легитимни интереси: за осигурање ИТ сигурности, анализу грешака и откривање злоупотребе.",
-          "Чл. 6 ст. (1) тачка ц) ГДПР – законска обавеза: гдје постоје законске обавезе чувања (нпр. пореске обавезе у вези с претплатама).",
-          "Чл. 9 ст. (2) тачка а) ГДПР – изричита сагласност: ово је примарна правна основа за обраду ваших здравствених података. То укључује симптоме које добровољно уносите у текстуални цхат, изборе регија на карти тијела те отпремање и анализу слика. Прије првог кориштења ових функција изричито ћете бити замољени за сагласност (нпр. потврдни оквир и дугме за потврду). Сагласност можете повући у било којем тренутку с ефектом за будућност.",
+          "Čl. 6 st. (1) tačka b) GDPR – izvršavanje ugovora: za pružanje tehničkih funkcija aplikacije kao što su registracija, prijava i upravljanje korisničkim računom.",
+          "Čl. 6 st. (1) tačka f) GDPR – legitimni interesi: za osiguranje IT sigurnosti, analizu grešaka i otkrivanje zloupotrebe.",
+          "Čl. 6 st. (1) tačka c) GDPR – zakonska obaveza: gdje postoje zakonske obaveze čuvanja (npr. poreske obaveze u vezi s pretplatama).",
+          "Čl. 9 st. (2) tačka a) GDPR – izričita saglasnost: ovo je primarna pravna osnova za obradu vaših zdravstvenih podataka. To uključuje simptome koje dobrovoljno unosite u tekstualni chat, izbore regija na karti tijela te otpremanje i analizu slika. Pre prvog korištenja ovih funkcija izričito ćete biti zamoljeni za saglasnost (npr. potvrdni okvir i dugme za potvrdu). Saglasnost možete povući u bilo kojem trenutku s efektom za budućnost.",
         ],
       },
     ],
   },
   {
     id: "ds-6-auftragsverarbeiter",
-    heading: "6. Извршиоци обраде и откривање трећим странама",
+    heading: "6. Izvršioci obrade i otkrivanje trećim stranama",
     blocks: [
       {
         type: "p",
         text:
-          "За одређене функције MedScoutX користи пружаоце услуга као извршиоце обраде према чл. 28 ГДПР-а. Главне категорије су:",
+          "Za određene funkcije MedScoutX koristi pružaoce usluga kao izvršioce obrade prema čl. 28 GDPR-a. Glavne kategorije su:",
       },
       {
         type: "ul",
         items: [
-          "Пружаоци хостинга (ЕУ): европски цлоуд пружалац осигурава инфраструктуру за сервере и базе података (нпр. Рендер.цом с локацијом у ЕУ).",
-          "АИ пружалац – ОпенАИ (САД): за АИ обраду вашег текста, података слика и информација са карте тијела MedScoutX користи услуге ОпенАИ ЛЛЦ (Сан Францисцо, САД). Садржај се шифровано преноси ОпенАИ-у, обрађује тамо и брише након обраде.",
-          "Пружаоци е-поште: користи се технички пружалац за слање системских е-порука (нпр. порука за верификацију).",
+          "Pružaoci hostinga (EU): evropski cloud pružalac osigurava infrastrukturu za servere i baze podataka (npr. Render.com s lokacijom u EU).",
+          "AI pružalac – OpenAI (SAD): za AI obradu vašeg teksta, podataka slika i informacija sa karte tijela MedScoutX koristi usluge OpenAI LLC (San Francisco, SAD). Sadržaj se šifrovano prenosi OpenAI-u, obrađuje tamo i briše nakon obrade.",
+          "Pružaoci e-pošte: koristi se tehnički pružalac za slanje sistemskih e-poruka (npr. poruka za verifikaciju).",
         ],
       },
       {
         type: "p",
         text:
-          "Сви извршиоци везани су уговором према чл. 28 ГДПР-а и обрађују податке само по нашим упутама. Нема откривања ваших података у сврху оглашавања или маркетинга.",
+          "Svi izvršioci vezani su ugovorom prema čl. 28 GDPR-a i obrađuju podatke samo po našim uputama. Nema otkrivanja vaših podataka u svrhu oglašavanja ili marketinga.",
       },
     ],
   },
   {
     id: "ds-7-drittland",
-    heading: "7. Пријеноси у треће земље",
+    heading: "7. Prijenosi u treće zemlje",
     blocks: [
       {
         type: "p",
         text:
-          "При кориштењу АИ функција MedScoutX садржај (нпр. текст, симптоми, подаци слика) преноси се АИ пружаоцу ОпенАИ ЛЛЦ у САД-у. Такав пријенос представља пријенос у трећу земљу у смислу ГДПР-а.",
+          "Pri korištenju AI funkcija MedScoutX sadržaj (npr. tekst, simptomi, podaci slika) prenosi se AI pružaocu OpenAI LLC u SAD-u. Takav prijenos predstavlja prijenos u treću zemlju u smislu GDPR-a.",
       },
       {
         type: "p",
         text:
-          "Ради осигурања одговарајуће заштите података пријенос се заснива на стандардним уговорним клаузулама ЕУ (чл. 46 ГДПР) уз додатне техничке и организационе мјере (шифровање у пријеносу, кратко трајање обраде, брисање након одговора АИ услуге).",
+          "Radi osiguranja odgovarajuće zaštite podataka prijenos se zasniva na standardnim ugovornim klauzulama EU (čl. 46 GDPR) uz dodatne tehničke i organizacione mjere (šifrovanje u prijenosu, kratko trajanje obrade, brisanje nakon odgovora AI usluge).",
       },
       {
         type: "p_link",
-        before: "Даљње информације доступне су у документацији ОпенАИ о приватности: ",
+        before: "Daljnje informacije dostupne su u dokumentaciji OpenAI o privatnosti: ",
         href: "https://openai.com/policies/privacy-policy",
         linkText: "https://openai.com/policies/privacy-policy",
         after: "",

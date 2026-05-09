@@ -1,7 +1,7 @@
 /** Persisted preference — keep stable for existing users. */
 export const LANGUAGE_STORAGE_KEY = "medscout_language";
 
-/** Right-to-left UI scripts — used for `dir` on `<html>` (full RTL layout comes later). */
+/** Right-to-left UI scripts — `dir` on `<html>` set in LanguageProvider. */
 export const RTL_LANGUAGE_CODES = ["ar", "fa", "ckb"];
 
 export function isRtlLanguage(code) {
@@ -33,7 +33,7 @@ export const LOCALE_OPTIONS = [
   { code: "sq", nativeName: "Shqip" },
   { code: "hr", nativeName: "Hrvatski" },
   { code: "bs", nativeName: "Bosanski" },
-  { code: "sr", nativeName: "Српски" },
+  { code: "sr", nativeName: "Srpski" },
 ];
 
 export const SUPPORTED_LANGUAGE_CODES = LOCALE_OPTIONS.map((o) => o.code);

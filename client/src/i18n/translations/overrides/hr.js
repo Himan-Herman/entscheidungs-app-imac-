@@ -1,16 +1,21 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalHr from "../legal/hr/index.js";
 import landing from "./hr.landing.js";
 import info from "./hr.info.js";
-import preVisit from "./hr.preVisit.js";
+import preVisitHr from "./hr.preVisit.js";
+import preVisitOverlay from "./hr.preVisit.overlay.js";
 import startseite from "./hr.startseite.js";
+import hrCore from "./hr/hr.core.js";
+import hrAccount from "./hr/hr.account.js";
+import hrModules from "./hr/hr.modules.js";
+import hrPractice from "./hr/hr.practice.js";
 
-/** Hrvatski — partial overrides merged onto English — missing keys fall back to EN. */
-
-export default {
+/** Croatian — layered bundles merged (hr → en → de po ključu). */
+const hrBase = {
   legal: legalHr,
   landing,
   info,
-  preVisit,
+  preVisit: deepMerge(preVisitHr, preVisitOverlay),
   startseite,
   header: {
     skip: "Prijeđi na sadržaj",
@@ -28,7 +33,7 @@ export default {
     badge: "MedScoutX — priprema za posjet liječniku",
     title: "Prijava",
     subtitle:
-      "Strukturirana priprema za razgovor s liječnikom — ne nadomješta stručno mišljenje u klinici.",
+      "Strukturirana priprema za razgovor s liječnikom — ne zamjenjuje stručno mišljenje u klinici.",
     email: "E-pošta",
     emailPlaceholder: "npr. ime@mail.hr",
     password: "Lozinka",
@@ -55,9 +60,11 @@ export default {
     alert: "Napomena:",
     alertText: "MedScoutX nije hitna služba (112 / 911).",
     title: "Otvaranje računa",
-    subtitle: "Račun za pripremu posjeta — ne za procjenu stanja.",
+    subtitle:
+      "Račun za pripremu posjeta — ne za kliničku procjenu.",
     required: "Obavezno polje",
     email: "E-pošta",
+    emailPlaceholder: "npr. ime@mail.hr",
     emailHint: "E-poštu koristimo za račun i važna obavještenja.",
     password: "Lozinka",
     passwordPlaceholder: "Min. 8 znakova, slovo i broj",
@@ -99,6 +106,10 @@ export default {
     failed: "Registracija nije uspjela.",
     requestError: "Pogreška pri registraciji.",
     srRequired: "(obavezno)",
+    firstNamePlaceholder: "npr. Ana",
+    lastNamePlaceholder: "npr. Horvat",
+    conjunctionAnd: "i",
+    legalLinksAria: "Pravne informacije",
   },
   footer: {
     imprint: "Impresum",
@@ -156,3 +167,8 @@ export default {
     network: "Mrežna pogreška. Pokušajte kasnije.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(hrBase, hrCore), hrAccount), hrModules),
+  hrPractice,
+);

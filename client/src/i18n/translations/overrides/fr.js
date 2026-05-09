@@ -1,10 +1,14 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalFr from "../legal/fr/index.js";
 import info from "./fr.info.js";
 import preVisit from "./fr.preVisit.js";
 import startseite from "./fr.startseite.js";
+import frCore from "./fr/fr.core.js";
+import frAccount from "./fr/fr.account.js";
+import frModules from "./fr/fr.modules.js";
+import frPractice from "./fr/fr.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+const frBase = {
   legal: legalFr,
   info,
   preVisit,
@@ -79,9 +83,9 @@ export default {
     termsOpen: "Ouvrir les conditions générales",
     privacyOpen: "Ouvrir la politique de confidentialité",
     disclaimerOpen: "Ouvrir l’avertissement médical",
-    legalTextStart: "J’ai lu la",
-    legalTextMiddle: "politique de confidentialité",
-    legalTextEnd: "et j’accepte.",
+    legalTextStart: "J’ai lu les",
+    legalTextMiddle: "la politique de confidentialité",
+    legalTextEnd: " et je les accepte.",
     submit: "Continuer",
     saving: "Enregistrement…",
     cancel: "Annuler",
@@ -99,6 +103,10 @@ export default {
     failed: "Inscription impossible.",
     requestError: "Erreur d’inscription.",
     srRequired: "(obligatoire)",
+    firstNamePlaceholder: "ex. Marie",
+    lastNamePlaceholder: "ex. Dupont",
+    conjunctionAnd: "et",
+    legalLinksAria: "Informations juridiques",
   },
   footer: {
     imprint: "Mentions légales",
@@ -198,3 +206,9 @@ export default {
     network: "Erreur réseau. Réessayez plus tard.",
   },
 };
+
+/** fr → merging layers: extended FR modules override base; runtime getMessages merges fr → en → de per key */
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(frBase, frCore), frAccount), frModules),
+  frPractice,
+);

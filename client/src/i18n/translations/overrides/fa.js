@@ -1,11 +1,16 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalFa from "../legal/fa/index.js";
 import landing from "./fa.landing.js";
 import info from "./fa.info.js";
 import preVisit from "./fa.preVisit.js";
 import startseite from "./fa.startseite.js";
+import faCore from "./fa/fa.core.js";
+import faAccount from "./fa/fa.account.js";
+import faModules from "./fa/fa.modules.js";
+import faPractice from "./fa/fa.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+/** Base Persian overrides — extended layers merged below */
+const faBase = {
   legal: legalFa,
   landing,
   info,
@@ -27,7 +32,7 @@ export default {
     badge: "MedScoutX — آماده‌سازی ویزیت",
     title: "ورود",
     subtitle:
-      "آماده‌سازی ساخت‌یافته برای گفتگوی پزشکی — جایگزین تشخیص بالینی نیست.",
+      "آماده‌سازی ساخت‌یافته برای گفتگو با ارائه‌دهندهٔ خدمات سلامت — جایگزین مشورت پزشکی نیست.",
     email: "ایمیل",
     emailPlaceholder: "مثال name@mail.com",
     password: "رمز عبور",
@@ -54,10 +59,13 @@ export default {
     alert: "توجه:",
     alertText: "MedScoutX خدمات اورژانس نیست (112 / 911).",
     title: "ایجاد حساب",
-    subtitle: "حساب برای آماده‌سازی ویزیت — نه برای تشخیص.",
+    subtitle:
+      "حساب برای آماده‌سازی ویزیت‌ها — نه برای نتیجه‌گیری بالینی.",
     required: "فیلد الزامی",
     email: "ایمیل",
-    emailHint: "از ایمیل برای حساب و اطلاعیه‌های مهم استفاده می‌کنیم.",
+    emailPlaceholder: "مثال name@mail.com",
+    emailHint:
+      "از ایمیل برای حساب و اطلاعیه‌های مهم استفاده می‌کنیم.",
     password: "رمز عبور",
     passwordPlaceholder: "حداقل ۸ نویسه، حرف و عدد",
     passwordHint: "حداقل ۸ نویسه شامل حرف و عدد.",
@@ -75,19 +83,20 @@ export default {
     genderNone: "ترجیح می‌دهم نگویم",
     consents: "رضایت‌ها",
     ageConfirm: "تأیید می‌کنم حداقل ۱۸ سال دارم",
-    termsOpen: "باز کردن شرایط استفاده",
+    termsOpen: "باز کردن شرایط و ضوابط",
     privacyOpen: "باز کردن سیاست حریم خصوصی",
-    disclaimerOpen: "باز کردن سلب مسئولیت پزشکی",
-    legalTextStart: "خواندم",
+    disclaimerOpen: "باز کردن اطلاع محدودیت‌های پلتفرم",
+    legalTextStart: "تأیید می‌کنم مطالعه کرده‌ام",
     legalTextMiddle: "سیاست حریم خصوصی",
-    legalTextEnd: "را می‌پذیرم.",
+    legalTextEnd:
+      " و متن هر سه سند را خوانده و می‌پذیرم.",
     submit: "ادامه",
     saving: "در حال ذخیره…",
     cancel: "لغو",
     imprint: "پایگاه قانونی",
     privacy: "حریم خصوصی",
-    disclaimer: "سلب مسئولیت",
-    terms: "شرایط",
+    disclaimer: "اطلاع محدودیت‌های اطلاع‌رسانی",
+    terms: "شرایط و ضوابط",
     language: "زبان",
     enterBirth: "تاریخ تولد را وارد کنید.",
     underage:
@@ -98,6 +107,10 @@ export default {
     failed: "ثبت‌نام ناموفق بود.",
     requestError: "خطای ثبت‌نام.",
     srRequired: "(الزامی)",
+    firstNamePlaceholder: "مثال: مریم",
+    lastNamePlaceholder: "مثال: رضایی",
+    conjunctionAnd: " و ",
+    legalLinksAria: "اطلاعات حقوقی",
   },
   footer: {
     imprint: "پایگاه قانونی",
@@ -136,7 +149,8 @@ export default {
     error: "خطایی رخ داد. بعداً تلاش کنید.",
     network: "خطای شبکه. اتصال را بررسی کنید.",
     missing: "ایمیل در انتظار تأیید نیست. دوباره ثبت‌نام کنید.",
-    footer: "اگر MedScoutX را درخواست نکرده‌اید، این پیام را نادیده بگیرید.",
+    footer:
+      "اگر MedScoutX را درخواست نکرده‌اید، این پیام را نادیده بگیرید.",
   },
   resetPassword: {
     title: "رمز عبور جدید",
@@ -154,3 +168,8 @@ export default {
     network: "خطای شبکه. بعداً تلاش کنید.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(faBase, faCore), faAccount), faModules),
+  faPractice,
+);

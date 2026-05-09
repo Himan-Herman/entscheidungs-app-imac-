@@ -1,15 +1,21 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalEl from "../legal/el/index.js";
 import landing from "./el.landing.js";
 import info from "./el.info.js";
-import preVisit from "./el.preVisit.js";
+import preVisitEl from "./el.preVisit.js";
+import preVisitOverlay from "./el.preVisit.overlay.js";
 import startseite from "./el.startseite.js";
+import elCore from "./el/el.core.js";
+import elAccount from "./el/el.account.js";
+import elModules from "./el/el.modules.js";
+import elPractice from "./el/el.practice.js";
 
-/** Ελληνικά — partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+/** Greek — base merged with layered overrides (el → en → de per key). */
+const elBase = {
   legal: legalEl,
   landing,
   info,
-  preVisit,
+  preVisit: deepMerge(preVisitEl, preVisitOverlay),
   startseite,
   header: {
     skip: "Μετάβαση στο περιεχόμενο",
@@ -24,10 +30,10 @@ export default {
     themeDark: "Σκοτεινό θέμα",
   },
   login: {
-    badge: "MedScoutX — προετοιμασία για την επίσκεψη",
+    badge: "MedScoutX — προετοιμασία για την ιατρική επίσκεψη",
     title: "Σύνδεση",
     subtitle:
-      "Οργανωμένη προετοιμασία για τη συνομιλία με τον γιατρό — δεν υποκαθιστά την κλινική κρίση.",
+      "Δομημένη υποστήριξη πριν τη συνομιλία με τον γιατρό — δεν παρέχει διάγνωση ούτε θεραπευτικές συστάσεις.",
     email: "Email",
     emailPlaceholder: "π.χ. onoma@mail.gr",
     password: "Κωδικός",
@@ -54,9 +60,11 @@ export default {
     alert: "Σημείωση:",
     alertText: "Το MedScoutX δεν είναι υπηρεσία επείγουσας βοήθειας (112 / 911).",
     title: "Δημιουργία λογαριασμού",
-    subtitle: "Λογαριασμός για προετοιμασία επισκέψεων — όχι για διάγνωση.",
+    subtitle:
+      "Λογαριασμός για δομημένη προετοιμασία επισκέψεων — δεν παρέχει διάγνωση ούτε θεραπευτικές συστάσεις.",
     required: "Υποχρεωτικό πεδίο",
     email: "Email",
+    emailPlaceholder: "π.χ. onoma@mail.gr",
     emailHint: "Χρησιμοποιούμε το email για τον λογαριασμό και σημαντικές ειδοποιήσεις.",
     password: "Κωδικός",
     passwordPlaceholder: "Τουλάχιστον 8 χαρακτήρες, γράμμα και αριθμό",
@@ -78,16 +86,16 @@ export default {
     termsOpen: "Άνοιγμα όρων χρήσης",
     privacyOpen: "Άνοιγμα πολιτικής απορρήτου",
     disclaimerOpen: "Άνοιγμα ιατρικής αποποίησης",
-    legalTextStart: "Έχω διαβάσει την",
-    legalTextMiddle: "πολιτική απορρήτου",
-    legalTextEnd: "και συμφωνώ.",
+    legalTextStart: "Επιβεβαιώνω ότι έχω διαβάσει",
+    legalTextMiddle: "την πολιτική απορρήτου",
+    legalTextEnd: "και αποδέχομαι το περιεχόμενό τους.",
     submit: "Συνέχεια",
     saving: "Αποθήκευση…",
     cancel: "Ακύρωση",
     imprint: "Νομικές πληροφορίες",
     privacy: "Απόρρητο",
-    disclaimer: "Αποποίηση",
-    terms: "Όροι",
+    disclaimer: "την ιατρική αποποίηση",
+    terms: "Όρους χρήσης",
     language: "Γλώσσα",
     enterBirth: "Εισάγετε την ημερομηνία γέννησης.",
     underage:
@@ -98,6 +106,10 @@ export default {
     failed: "Η εγγραφή απέτυχε.",
     requestError: "Σφάλμα εγγραφής.",
     srRequired: "(υποχρεωτικό)",
+    firstNamePlaceholder: "π.χ. Μαρία",
+    lastNamePlaceholder: "π.χ. Παπαδοπούλου",
+    conjunctionAnd: "και",
+    legalLinksAria: "Νομικές πληροφορίες",
   },
   footer: {
     imprint: "Νομικές πληροφορίες",
@@ -155,3 +167,8 @@ export default {
     network: "Σφάλμα δικτύου. Δοκιμάστε αργότερα.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(elBase, elCore), elAccount), elModules),
+  elPractice,
+);

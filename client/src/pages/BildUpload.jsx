@@ -15,6 +15,7 @@ import DisclaimerShort from "../components/DisclaimerShort";
 import { Image as ImageIcon, Camera, Video } from "lucide-react";
 import SpeakButton from "../components/SpeakButton.jsx";
 import { useLanguage } from "../i18n/LanguageContext";
+import { LOCALE_OPTIONS } from "../i18n/localeConfig.js";
 import { getMessages } from "../i18n/translations/index.js";
 import { useOnlineStatus } from "../hooks/useOnlineStatus.js";
 
@@ -42,6 +43,13 @@ export default function BildUpload() {
   const t = useMemo(() => {
     const bundle = getMessages(language);
     return bundle.imageAnalysis ?? getMessages("en").imageAnalysis;
+  }, [language]);
+
+  const uiLanguageLabel = useMemo(() => {
+    const code =
+      typeof language === "string" ? language.toLowerCase() : "en";
+    const opt = LOCALE_OPTIONS.find((o) => o.code === code);
+    return opt?.nativeName ?? code;
   }, [language]);
 
   const [consentOk, setConsentOk] = useState(() => {
@@ -271,7 +279,7 @@ export default function BildUpload() {
       formData.append("bildTyp", "medizinisch");
       formData.append(
         "letzteSprache",
-        language === "de" ? "Deutsch" : language === "en" ? "English" : language,
+        uiLanguageLabel,
       );
 
       const existingThreadId = localStorage.getItem(LS_THREAD_KEY);

@@ -1,11 +1,16 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalIt from "../legal/it/index.js";
 import landing from "./it.landing.js";
 import info from "./it.info.js";
 import preVisit from "./it.preVisit.js";
 import startseite from "./it.startseite.js";
+import itCore from "./it/it.core.js";
+import itAccount from "./it/it.account.js";
+import itModules from "./it/it.modules.js";
+import itPractice from "./it/it.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+/** Base Italian overrides — extended layers merged below */
+const itBase = {
   legal: legalIt,
   landing,
   info,
@@ -56,10 +61,12 @@ export default {
     alertText: "MedScoutX non è un servizio di emergenza (112 / 911).",
     title: "Crea account",
     subtitle:
-      "Account per preparare le visite — non per diagnosticare.",
+      "Account per preparare le visite — non per formulare una diagnosi.",
     required: "Campo obbligatorio",
     email: "E-mail",
-    emailHint: "Usiamo l’e-mail per l’account e gli aggiornamenti importanti.",
+    emailPlaceholder: "es. nome@mail.com",
+    emailHint:
+      "Usiamo l’e-mail per l’account e gli aggiornamenti importanti.",
     password: "Password",
     passwordPlaceholder: "Min. 8 caratteri, lettera e numero",
     passwordHint: "Almeno 8 caratteri, con lettera e numero.",
@@ -79,27 +86,31 @@ export default {
     ageConfirm: "Confermo di avere almeno 18 anni",
     termsOpen: "Apri termini e condizioni",
     privacyOpen: "Apri informativa sulla privacy",
-    disclaimerOpen: "Apri disclaimer medico",
-    legalTextStart: "Ho letto l’",
-    legalTextMiddle: "informativa sulla privacy",
-    legalTextEnd: "e accetto.",
+    disclaimerOpen: "Apri avviso informativo sui limiti della piattaforma",
+    legalTextStart: "Ho letto i",
+    legalTextMiddle: "l’informativa sulla privacy",
+    legalTextEnd: " e accetto quanto indicato.",
     submit: "Continua",
     saving: "Salvataggio…",
     cancel: "Annulla",
     imprint: "Note legali",
     privacy: "Privacy",
-    disclaimer: "Disclaimer",
-    terms: "Termini",
+    disclaimer: "avviso informativo",
+    terms: "Termini e condizioni",
     language: "Lingua",
     enterBirth: "Inserisci la data di nascita.",
     underage:
-      "Non sei maggiorenne. MedScoutX è solo per utenti ≥ 18 anni.",
+      "Non sei maggiorenne. MedScoutX è solo per utenti di almeno 18 anni.",
     confirmAge: "Conferma di avere almeno 18 anni.",
     checkFields: "Controlla campi obbligatori e consensi.",
     emailExists: "Questa e-mail è già registrata.",
     failed: "Registrazione non riuscita.",
     requestError: "Errore di registrazione.",
     srRequired: "(obbligatorio)",
+    firstNamePlaceholder: "es. Maria",
+    lastNamePlaceholder: "es. Rossi",
+    conjunctionAnd: "e l’",
+    legalLinksAria: "Informazioni legali",
   },
   footer: {
     imprint: "Note legali",
@@ -158,3 +169,8 @@ export default {
     network: "Errore di rete. Riprova più tardi.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(itBase, itCore), itAccount), itModules),
+  itPractice,
+);

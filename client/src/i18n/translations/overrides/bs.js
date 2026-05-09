@@ -1,16 +1,21 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalBs from "../legal/bs/index.js";
 import landing from "./bs.landing.js";
 import info from "./bs.info.js";
-import preVisit from "./bs.preVisit.js";
+import preVisitBs from "./bs.preVisit.js";
+import preVisitOverlay from "./bs.preVisit.overlay.js";
 import startseite from "./bs.startseite.js";
+import bsCore from "./bs/bs.core.js";
+import bsAccount from "./bs/bs.account.js";
+import bsModules from "./bs/bs.modules.js";
+import bsPractice from "./bs/bs.practice.js";
 
-/** Bosanski — partial overrides merged onto English — missing keys fall back to EN. */
-
-export default {
+/** Bosanski — slojeviti paketi (bs → en → de po ključu). */
+const bsBase = {
   legal: legalBs,
   landing,
   info,
-  preVisit,
+  preVisit: deepMerge(preVisitBs, preVisitOverlay),
   startseite,
   header: {
     skip: "Pređi na sadržaj",
@@ -28,7 +33,7 @@ export default {
     badge: "MedScoutX — priprema za posjetu ljekaru",
     title: "Prijava",
     subtitle:
-      "Strukturirana priprema za razgovor u zdravstvu — ne zamjenjuje stručno mišljenje u ustanovi.",
+      "Strukturisana priprema za razgovor u zdravstvu — ne zamjenjuje stručno mišljenje u ustanovi.",
     email: "E-pošta",
     emailPlaceholder: "npr. ime@mail.ba",
     password: "Lozinka",
@@ -49,15 +54,16 @@ export default {
     verifyError: "Došlo je do greške pri potvrdi. Pokušajte kasnije.",
     resetOk: "Lozinka je resetovana. Prijavite se novom lozinkom.",
     sessionExpired:
-      "Sesija je istekla. Ponovo se prijavite za nastavak korištenja MedScoutX.",
+      "Sesija je istekla. Ponovo se prijavite za nastavak korišćenja MedScoutX.",
   },
   register: {
     alert: "Napomena:",
     alertText: "MedScoutX nije hitna služba (112 / 911).",
     title: "Otvaranje naloga",
-    subtitle: "Nalog za pripremu posjete — ne za procjenu stanja.",
+    subtitle: "Nalog za pripremu posjete — ne za kliničku procjenu.",
     required: "Obavezno polje",
     email: "E-pošta",
+    emailPlaceholder: "npr. ime@mail.ba",
     emailHint: "E-poštu koristimo za nalog i važna obavještenja.",
     password: "Lozinka",
     passwordPlaceholder: "Min. 8 znakova, slovo i broj",
@@ -99,6 +105,10 @@ export default {
     failed: "Registracija nije uspjela.",
     requestError: "Greška pri registraciji.",
     srRequired: "(obavezno)",
+    firstNamePlaceholder: "npr. Amra",
+    lastNamePlaceholder: "npr. Begović",
+    conjunctionAnd: "i",
+    legalLinksAria: "Pravne informacije",
   },
   footer: {
     imprint: "Impresum",
@@ -156,3 +166,8 @@ export default {
     network: "Mrežna greška. Pokušajte kasnije.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(bsBase, bsCore), bsAccount), bsModules),
+  bsPractice,
+);

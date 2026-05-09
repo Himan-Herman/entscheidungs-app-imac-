@@ -10,4 +10,5 @@ export default {
   speakReadAloud: "Read text aloud",
   speakListenTitle: "Listen to spoken text",
   speakPlayingTitle: "Audio is playing",
+  loading: "Loading…",
 };

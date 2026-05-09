@@ -4,7 +4,7 @@ export default {
     eyebrow: "Ziyaret öncesi",
     title: "Muayeneye hazırlık",
     explanation:
-      "Bu araç, muayene öncesi endişelerinizi ve sorularınızı yapılandırmanıza yardımcı olur. Tanı veya tıbbi öneri vermez.",
+      "Bu araç, muayene öncesi endişelerinizi ve sorularınızı yapılandırmanıza yardımcı olur. Teşhis sağlamaz; tedavi önerisi sunmaz.",
     trust: "Tüm bilgiler yalnızca sizin girdiklerinize dayanır.",
     valueProp:
       "Semptomları, ilaçları, belgeleri ve soruları yapılandırılmış şekilde — kendi dilinizde hazırlayın.",
@@ -17,7 +17,7 @@ export default {
     backHome: "MedScoutX ana sayfasına dön",
     moduleLabel: "Muayeneye hazırlık",
     safety:
-      "Bu modül yalnızca bilgilerinizin hazırlığı ve belgelenmesi içindir; hekim önerisinin yerini tutmaz.",
+      "Bu modül yalnızca bilgi hazırlığı ve dokümantasyon içindir; tedavi önerisi sunmaz.",
     navAria: "Ziyaret öncesi gezinme",
   },
   chat: {
@@ -57,7 +57,7 @@ export default {
     sectionStructured: "Hekim için yapılandırılmış sürüm",
     sectionOriginal: "Hastanın özgün ifadeleri",
     disclaimer:
-      "Hekim sürümü yalnızca hastanın ifadelerine dayanır. Tanı, öneri veya aciliyet değerlendirmesi oluşturulmaz.",
+      "Hekim sürümü yalnızca hastanın ifadelerine dayanır. Teşhis, tedavi önerisi veya aciliyet değerlendirmesi oluşturmaz.",
     empty: "belirtilmedi",
     backReview: "Özete dön",
     pdfDisabled: "PDF oluştur",
@@ -70,7 +70,7 @@ export default {
     saveLocal: "Oturumu yerelde kaydet",
     saveSuccess: "Oturum yerelde kaydedildi.",
     archiveNote:
-      "Kaydedilmiş oturumları daha sonra silebilirsiniz. Bu özellik tıbbi kayıtların yerini tutmaz.",
+      "Kaydedilmiş oturumları daha sonra silebilirsiniz. Bu özellik tıbbi kayıt oluşturmaz.",
     historyLink: "Kaydedilmiş oturumlara bak",
     consentSectionTitle: "İsteğe bağlı yerel kopya",
     createDoctorVersion: "Hekim sürümünü oluştur",
@@ -91,7 +91,7 @@ export default {
     accountSaveSuccess: "Hazırlık hesaba kaydedildi.",
     accountSaveError: "Hazırlık şu anda kaydedilemedi.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
-    sessionTitleEn: "Doctor visit preparation",
+    sessionTitleEn: "Doktor görüşmesine hazırlık",
     viewMyPreparations: "Hazırlıklarım",
     mainNavAria:
       "Hekim sürümü, PDF dışa aktarma, özete dönüş",

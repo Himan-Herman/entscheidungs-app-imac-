@@ -1,11 +1,16 @@
+import { deepMerge } from "../../deepMerge.js";
 import legalRu from "../legal/ru/index.js";
 import landing from "./ru.landing.js";
 import info from "./ru.info.js";
 import preVisit from "./ru.preVisit.js";
 import startseite from "./ru.startseite.js";
+import ruCore from "./ru/ru.core.js";
+import ruAccount from "./ru/ru.account.js";
+import ruModules from "./ru/ru.modules.js";
+import ruPractice from "./ru/ru.practice.js";
 
-/** Partial overrides merged onto English — missing keys fall back to EN. */
-export default {
+/** Russian — base bundle merged with layered overrides (ru → en → de per key). */
+const ruBase = {
   legal: legalRu,
   landing,
   info,
@@ -24,10 +29,10 @@ export default {
     themeDark: "Тёмная тема",
   },
   login: {
-    badge: "MedScoutX — подготовка к приёму",
+    badge: "MedScoutX — подготовка к приёму у врача",
     title: "Вход",
     subtitle:
-      "Структурированная подготовка к разговору с врачом — не замена клиническому заключению.",
+      "Структурированная поддержка перед разговором с врачом — не ставит диагноз и не даёт рекомендаций по лечению.",
     email: "Эл. почта",
     emailPlaceholder: "например, имя@mail.ru",
     password: "Пароль",
@@ -54,9 +59,11 @@ export default {
     alert: "Внимание:",
     alertText: "MedScoutX не служба экстренной помощи (112 / 911).",
     title: "Создать аккаунт",
-    subtitle: "Аккаунт для подготовки к приёмам — не для постановки диагноза.",
+    subtitle:
+      "Аккаунт для структурированной подготовки к приёмам — не ставит диагноз и не даёт рекомендаций по лечению.",
     required: "Обязательное поле",
     email: "Эл. почта",
+    emailPlaceholder: "например, имя@mail.ru",
     emailHint: "Мы используем почту для аккаунта и важных уведомлений.",
     password: "Пароль",
     passwordPlaceholder: "Не менее 8 символов, буква и цифра",
@@ -78,16 +85,16 @@ export default {
     termsOpen: "Открыть условия использования",
     privacyOpen: "Открыть политику конфиденциальности",
     disclaimerOpen: "Открыть медицинский дисклеймер",
-    legalTextStart: "Я ознакомился(лась) с",
-    legalTextMiddle: "политикой конфиденциальности",
-    legalTextEnd: "и согласен(на).",
+    legalTextStart: "Я подтверждаю, что прочитал(а)",
+    legalTextMiddle: "политику конфиденциальности",
+    legalTextEnd: "и принимаю изложенные в них условия.",
     submit: "Продолжить",
     saving: "Сохранение…",
     cancel: "Отмена",
     imprint: "Выходные данные",
     privacy: "Конфиденциальность",
-    disclaimer: "Дисклеймер",
-    terms: "Условия",
+    disclaimer: "медицинский дисклеймер",
+    terms: "Условия использования",
     language: "Язык",
     enterBirth: "Укажите дату рождения.",
     underage:
@@ -98,6 +105,10 @@ export default {
     failed: "Регистрация не удалась.",
     requestError: "Ошибка регистрации.",
     srRequired: "(обязательно)",
+    firstNamePlaceholder: "Например, Анна",
+    lastNamePlaceholder: "Например, Иванова",
+    conjunctionAnd: "и",
+    legalLinksAria: "Юридическая информация",
   },
   footer: {
     imprint: "Выходные данные",
@@ -155,3 +166,8 @@ export default {
     network: "Ошибка сети. Попробуйте позже.",
   },
 };
+
+export default deepMerge(
+  deepMerge(deepMerge(deepMerge(ruBase, ruCore), ruAccount), ruModules),
+  ruPractice,
+);

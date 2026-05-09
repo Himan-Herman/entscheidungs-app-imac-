@@ -2,57 +2,57 @@
 export default [
   {
     id: "agb-5-abo",
-    heading: "§5 Претплате и увјети плаћања",
+    heading: "§5 Pretplate i uslovi plaćanja",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Осим евентуалног бесплатног основног кориштења MedScoutX нуди плаћене претплате (нпр. „Про”, „Премиум”, „Унлимитед”). Актуелне цијене, рокови и обими услуга приказани су у Апликацији као и у Аппле Апп Сторе и Гоогле Плаy Сторе.</p>
-<p>(2) Претплате се закључују искључиво путем Аппле Апп Сторе или Гоогле Плаy Сторе. Примјењују се увјети и платни увјети одговарајућег оператора продавнице.</p>
-<p>(3) Претплате се обично аутоматски обнављају за наведени обрачунски период осим ако се не откажу у поставкама продавнице најмање 24 сата прије краја текућег периода.</p>
-<p>(4) Опозиви и поврати за куповине у апликацији морају се водити искључиво путем одговарајућег оператора продавнице. MedScoutX не може директно обрађивати опозиве или поврате за претплате из продавнице.</p>
+<p>(1) Osim eventualnog besplatnog osnovnog korištenja MedScoutX nudi plaćene pretplate (npr. „Pro”, „Premium”, „Unlimited”). Aktuelne cijene, rokovi i obimi usluga prikazani su u Aplikaciji kao i u Apple App Store i Google Play Store.</p>
+<p>(2) Pretplate se zaključuju isključivo putem Apple App Store ili Google Play Store. Primjenjuju se uvjeti i platni uvjeti odgovarajućeg operatora prodavnice.</p>
+<p>(3) Pretplate se obično automatski obnavljaju za navedeni obračunski period osim ako se ne otkažu u postavkama prodavnice najmanje 24 sata prije kraja tekućeg perioda.</p>
+<p>(4) Opozivi i povrati za kupovine u aplikaciji moraju se voditi isključivo putem odgovarajućeg operatora prodavnice. MedScoutX ne može direktno obrađivati opozive ili povrate za pretplate iz prodavnice.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-6-fairuse",
-    heading: "§6 Квоте кориштења и фер кориштење",
+    heading: "§6 Kvote korištenja i fer korištenje",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Овисно о одабраној претплати вриједе одређене квоте кориштења по обрачунском периоду (нпр. број АИ порука, анализа слика).</p>
-<p>(2) Када су ове квоте исцрпљене, релевантне функције се опћенито могу поново у потпуности користити тек у сљедећем обрачунском периоду осим ако корисник надогради претплату.</p>
-<p>(3) MedScoutX задржава право привремено ограничити функције према политици фер кориштења у случајевима неуобичајено високог или злоупотребљавајућег кориштења ради одржавања стабилности услуге за све кориснике.</p>
+<p>(1) Ovisno o odabranoj pretplati vrijede određene kvote korištenja po obračunskom periodu (npr. broj AI poruka, analiza slika).</p>
+<p>(2) Kada su ove kvote iscrpljene, relevantne funkcije se općenito mogu ponovo u potpunosti koristiti tek u sljedećem obračunskom periodu osim ako korisnik nadogradi pretplatu.</p>
+<p>(3) MedScoutX zadržava pravo privremeno ograničiti funkcije prema politici fer korištenja u slučajevima neuobičajeno visokog ili zloupotrebljavajućeg korištenja radi održavanja stabilnosti usluge za sve korisnike.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-7-widerruf",
-    heading: "§7 Право на одустанак",
+    heading: "§7 Pravo na odustanak",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Гдје корисник као потрошач закључи плаћену претплату, опћенито има законско право на одустанак.</p>
-<p>(2) Будући да се уговор о претплати закључује с одговарајућим оператором продавнице, остваривање права на одустанак уређује се искључиво увјетима Аппле Апп Сторе или Гоогле Плаy Сторе.</p>
-<p>(3) Одустанци се стога морају пријавити одговарајућем оператору продавнице. Одустанак директно према MedScoutX није могућ.</p>
+<p>(1) Gdje korisnik kao potrošač zaključi plaćenu pretplatu, općenito ima zakonsko pravo na odustanak.</p>
+<p>(2) Budući da se ugovor o pretplati zaključuje s odgovarajućim operatorom prodavnice, ostvarivanje prava na odustanak uređuje se isključivo uvjetima Apple App Store ili Google Play Store.</p>
+<p>(3) Odustanci se stoga moraju prijaviti odgovarajućem operatoru prodavnice. Odustanak direktno prema MedScoutX nije moguć.</p>
 `.trim(),
       },
     ],
   },
   {
     id: "agb-8-nutzungsrechte",
-    heading: "§8 Права кориштења у Апликацији",
+    heading: "§8 Prava korištenja u Aplikaciji",
     blocks: [
       {
         type: "html",
         html: `
-<p>(1) Сав садржај Апликације, посебно софтвер, дизајни, текстови, графика и базе података, заштићен је ауторским правом и у власништву је пружаоца или његових даватеља лиценце.</p>
-<p>(2) Корисник добија једноставно, непреносиво право кориштења Апликације на властитим уређајима у приватне сврхе.</p>
-<p>(3) Корисник не смије умножавати, дистрибуирати, јавно објављивати, декомпилирати или мијењати Апликацију или њене дијелове изван предвиђене употребе, осим гдје закон изричито дозвољава.</p>
+<p>(1) Sav sadržaj Aplikacije, posebno softver, dizajni, tekstovi, grafika i baze podataka, zaštićen je autorskim pravom i u vlasništvu je pružaoca ili njegovih davatelja licence.</p>
+<p>(2) Korisnik dobija jednostavno, neprenosivo pravo korištenja Aplikacije na vlastitim uređajima u privatne svrhe.</p>
+<p>(3) Korisnik ne smije umnožavati, distribuirati, javno objavljivati, dekompilirati ili mijenjati Aplikaciju ili njene dijelove izvan predviđene upotrebe, osim gdje zakon izričito dozvoljava.</p>
 `.trim(),
       },
     ],

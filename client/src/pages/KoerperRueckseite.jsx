@@ -65,14 +65,17 @@ export default function KoerperRueckseite() {
           onClick={() => navigate("/region-start")}
           aria-label={mb.backToHubAria}
         >
-          ← {mb.backToHub}
+          <span className="body-map-view-page__back-chevron" aria-hidden>
+            ←
+          </span>{" "}
+          {mb.backToHub}
         </button>
         <h1 id="body-map-back-heading" className="body-map-view-page__title">
           {mb.heading}
         </h1>
         <p className="body-map-view-page__disclaimer">{mb.inlineDisclaimer}</p>
       </div>
-      <div className="body-map-svg-wrap">
+      <div className="body-map-svg-wrap body-map-view-page__svg-ltr">
         <svg
           viewBox="0 0 300 700"
           width="100%"
