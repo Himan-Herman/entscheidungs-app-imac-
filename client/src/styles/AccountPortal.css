@@ -329,7 +329,7 @@
 }
 
 .account-portal__legal-nav a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .account-portal__legal-note {

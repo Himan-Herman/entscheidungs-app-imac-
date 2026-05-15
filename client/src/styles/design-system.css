@@ -120,14 +120,15 @@ body {
   background: var(--ms-color-bg);
 }
 
-/* Main content: prose links distinguishable from body text */
+/* Main content: prose links distinguishable from body text (no underline) */
 #main a:not(.workspace-hub__tile):not(.account-portal__nav-link) {
   color: var(--ms-color-link);
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 #main a:not(.workspace-hub__tile):not(.account-portal__nav-link):hover {
   color: var(--ms-color-link-hover);
+  text-decoration: none;
 }
 
 /* Nav / chrome links keep their own styling */

@@ -51,7 +51,7 @@
 }
 
 .settings-doctors__back:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .settings-doctors__toolbar {

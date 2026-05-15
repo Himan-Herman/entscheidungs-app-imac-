@@ -204,7 +204,7 @@
 }
 
 .pre-visit-chat__link:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .pre-visit-chat__link:focus-visible {

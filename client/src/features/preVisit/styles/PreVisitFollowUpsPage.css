@@ -145,7 +145,7 @@
 }
 
 .previsit-followups__back-link:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .previsit-followups__back-link:focus-visible {

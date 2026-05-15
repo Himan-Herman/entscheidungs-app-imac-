@@ -256,8 +256,7 @@
 
 .role-entry__inline-link {
   color: #0e7490;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 .role-entry[data-theme="dark"] .role-entry__inline-link {

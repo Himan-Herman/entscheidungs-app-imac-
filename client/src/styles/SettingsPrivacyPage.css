@@ -36,8 +36,7 @@
 
 .settings-privacy__legal-link {
   font-size: 0.95rem;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
   min-height: 44px;
   display: inline-flex;
   align-items: center;

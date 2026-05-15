@@ -60,7 +60,7 @@
 }
 
 .pre-visit-account__cases-link:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .pre-visit-account__cases-link:focus-visible {

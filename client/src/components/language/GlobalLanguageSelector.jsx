@@ -135,22 +135,26 @@ export default function GlobalLanguageSelector({
               onClick={(e) => e.stopPropagation()}
             />
           </li>
-          {filteredOptions.map((opt) => (
-            <li key={opt.code} role="presentation">
-              <button
-                id={`${listId}-opt-${opt.code}`}
-                type="button"
-                role="option"
-                aria-selected={language === opt.code}
-                className={`gls__option ${language === opt.code ? "is-active" : ""}`}
-                onClick={() => select(opt.code)}
-              >
-                <span className="gls__option-label">{opt.nativeName}</span>
-                <span className="gls__option-code" aria-hidden>
-                  {opt.code}
-                </span>
-              </button>
-            </li>
+          {filteredOptions.map((opt) => {
+            const enabled = isSelectable(opt.code);
+            return (
+              <li key={opt.code} role="presentation">
+                <button
+                  id={`${listId}-opt-${opt.code}`}
+                  type="button"
+                  role="option"
+                  aria-selected={language === opt.code}
+                  aria-disabled={!enabled}
+                  disabled={!enabled}
+                  className={`gls__option ${language === opt.code ? "is-active" : ""} ${!enabled ? "is-disabled" : ""}`.trim()}
+                  onClick={() => select(opt.code)}
+                >
+                  <span className="gls__option-label">{opt.nativeName}</span>
+                  <span className="gls__option-code" aria-hidden>
+                    {opt.code}
+                  </span>
+                </button>
+              </li>
             );
           })}
           {filteredOptions.length === 0 ? (

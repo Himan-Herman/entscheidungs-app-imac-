@@ -386,7 +386,7 @@
 }
 
 .pre-visit-doc__back-review:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .pre-visit-doc__back-review:focus-visible {
@@ -446,7 +446,7 @@
 
 .pre-visit-doc__btn--ghost:hover {
   background: transparent;
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .pre-visit-doc__btn--pdf-primary {
@@ -852,7 +852,7 @@
 }
 
 .pre-visit-doc__manage-book-link:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .pre-visit-doc__email-block {

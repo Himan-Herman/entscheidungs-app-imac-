@@ -192,8 +192,15 @@
 
 .gls__option:disabled,
 .gls__option.is-disabled {
-  opacity: 0.48;
+  opacity: 1;
+  color: #94a3b8;
   cursor: not-allowed;
+  pointer-events: none;
+}
+
+.gls__option:disabled .gls__option-code,
+.gls__option.is-disabled .gls__option-code {
+  color: #cbd5e1;
 }
 
 .gls__option:disabled:hover,
@@ -202,6 +209,12 @@
 .gls__option.is-disabled:focus-visible {
   background: transparent;
   box-shadow: none;
+  color: #94a3b8;
+}
+
+.gls__option.is-disabled.is-active {
+  background: rgba(148, 163, 184, 0.12);
+  color: #64748b;
 }
 
 @media (max-width: 480px) {
@@ -297,6 +310,10 @@
 
 :root[data-theme="dark"] .gls__option:disabled,
 :root[data-theme="dark"] .gls__option.is-disabled {
-  opacity: 0.4;
-  color: #94a3b8;
+  color: #64748b;
+}
+
+:root[data-theme="dark"] .gls__option:disabled .gls__option-code,
+:root[data-theme="dark"] .gls__option.is-disabled .gls__option-code {
+  color: #475569;
 }

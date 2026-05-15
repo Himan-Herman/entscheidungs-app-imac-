@@ -28,7 +28,7 @@
 }
 
 .pre-visit-chrome__back:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .pre-visit-chrome__back:focus-visible {
