@@ -7,6 +7,24 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; }
 
+/* Sticky footer: main grows, footer stays at bottom of viewport */
+.layout-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.layout-app > .layout-main {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.layout-app > .ms-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
 .layout-main {
   --page-header-top: 0px;
 }

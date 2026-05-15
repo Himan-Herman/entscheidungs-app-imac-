@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   BookUser,
@@ -24,6 +24,8 @@ import "../styles/Header.css";
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [userMode, setUserMode] = useState(() => readUserMode());
+  const menuPanelRef = useRef(null);
+  const menuToggleRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
@@ -43,6 +45,34 @@ export default function Header() {
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    function onPointerDown(e) {
+      const target = e.target;
+      if (
+        menuPanelRef.current?.contains(target) ||
+        menuToggleRef.current?.contains(target)
+      ) {
+        return;
+      }
+      setOpen(false);
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown, { passive: true });
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
 
   useEffect(() => {
     setUserMode(readUserMode());
@@ -118,6 +148,7 @@ export default function Header() {
           </div>
 
           <button
+            ref={menuToggleRef}
             type="button"
             className={`ms-nav-toggle${open ? " is-open" : ""}`}
             aria-controls="hauptnavigation"
@@ -133,6 +164,7 @@ export default function Header() {
           </button>
 
           <nav
+            ref={menuPanelRef}
             id="hauptnavigation"
             className={`ms-nav ${open ? "is-open" : ""}`}
             aria-label={copy.nav}

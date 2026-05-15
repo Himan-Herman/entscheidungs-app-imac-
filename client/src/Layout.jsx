@@ -29,7 +29,11 @@ export default function Layout() {
   const showMobileShell = isLoggedIn && shouldShowMobileAppNav(pathname);
 
   return (
-    <div className={showMobileShell ? "layout-app layout-app--mobile-shell" : undefined}>
+    <div
+      className={
+        showMobileShell ? "layout-app layout-app--mobile-shell" : "layout-app"
+      }
+    >
       {!hideHeader && <Header />}
       {!hideHeader && <OfflineBanner />}
       {!hideHeader && <PwaInstallHint hasBottomNav={showMobileShell} />}
