@@ -217,14 +217,25 @@
   color: #64748b;
 }
 
-@media (max-width: 480px) {
+/* Phones / narrow viewports: fallback when JS positioning is inactive */
+@media (max-width: 860px) {
   .gls__menu {
-    inset-inline-start: 0;
-    inset-inline-end: auto;
-    min-width: min(100vw - 32px, 260px);
-    /* More vertical room on phones; safe-area keeps clear of notches/home bar */
-    max-height: min(70vh, calc(100vh - env(safe-area-inset-top, 0px) - 96px));
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+    width: min(280px, calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+    max-width: calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    min-width: min(220px, 100%);
     max-height: min(70dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 96px));
+  }
+
+  .gls__menu--viewport {
+    min-width: 0;
+    max-width: calc(100vw - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    max-height: min(70dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 96px));
+  }
+
+  .gls--compact .gls__current {
+    max-width: 5.5rem;
   }
 }
 

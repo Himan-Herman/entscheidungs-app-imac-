@@ -4,6 +4,7 @@
 
 @media (max-width: 767px) {
   .layout-app--mobile-shell .app-bottom-nav {
+    direction: ltr;
     display: flex;
     position: fixed;
     left: 0;

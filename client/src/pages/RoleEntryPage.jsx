@@ -63,7 +63,7 @@ export default function RoleEntryPage() {
 
   return (
     <div className="role-entry" data-theme={theme}>
-      <header className="role-entry__top">
+      <header className="role-entry__top" dir="ltr">
         <span className="role-entry__brand">MedScoutX</span>
         <div className="role-entry__top-actions">
           <button

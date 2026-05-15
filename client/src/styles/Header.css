@@ -32,6 +32,7 @@
 
 .skip-link:focus {
   inset-inline-start: 8px;
+  inset-inline-end: auto;
   top: 8px;
   width: auto;
   height: auto;
@@ -43,7 +44,9 @@
   z-index: 10000;
 }
 
+/* App chrome: logo left / controls right — independent of ar|fa|ckb page direction */
 .ms-header {
+  direction: ltr;
   position: fixed;
   top: 0;
   inset-inline: 0;
@@ -333,9 +336,23 @@
 }
 
 @media (max-width: 860px) {
+  .ms-header {
+    overflow: visible;
+  }
+
   .ms-header__inner {
     padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
     gap: 12px;
+    overflow: visible;
+  }
+
+  .ms-header__controls {
+    overflow: visible;
+  }
+
+  .ms-header__language {
+    position: relative;
+    z-index: 2;
   }
 
   .ms-logo__copy {
@@ -405,4 +422,34 @@
   .ms-nav {
     margin-inline-start: 4px;
   }
+}
+
+/* Safety: never mirror header chrome when <html dir="rtl"> (ar / fa / ckb content) */
+:dir(rtl) .ms-header,
+:root[data-ms-text-dir="rtl"] .ms-header {
+  direction: ltr;
+}
+
+:dir(rtl) .ms-header__inner {
+  flex-direction: row;
+}
+
+:dir(rtl) .ms-header__controls {
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}
+
+:dir(rtl) .ms-nav {
+  inset-inline-end: 12px;
+  inset-inline-start: auto;
+}
+
+:dir(rtl) .skip-link {
+  inset-inline-start: -999px;
+  inset-inline-end: auto;
+}
+
+:dir(rtl) .skip-link:focus {
+  inset-inline-start: 8px;
+  inset-inline-end: auto;
 }

@@ -18,7 +18,6 @@ import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
-import { HEADER_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { readUserMode, writeUserMode, USER_MODES } from "../utils/userMode.js";
 import "../styles/Header.css";
 
@@ -72,7 +71,7 @@ export default function Header() {
       <a className="skip-link" href="#main">
         {copy.skip}
       </a>
-      <header className="ms-header" role="banner">
+      <header className="ms-header" role="banner" dir="ltr">
         <div className="ms-header__inner">
           <button
             className="ms-logo"
@@ -127,11 +126,7 @@ export default function Header() {
             </button>
 
             <div className="ms-header__language">
-              <GlobalLanguageSelector
-                label={copy.languageLabel}
-                compact
-                selectableLocaleCodes={HEADER_SELECTABLE_LOCALE_CODES}
-              />
+              <GlobalLanguageSelector label={copy.languageLabel} compact />
             </div>
           </div>
 

@@ -9,7 +9,12 @@ export default function Footer() {
   const f = useMemo(() => getMessages(language).footer, [language]);
 
   return (
-    <footer className="ms-footer" role="contentinfo" aria-label={f.ariaLabel}>
+    <footer
+      className="ms-footer"
+      role="contentinfo"
+      aria-label={f.ariaLabel}
+      dir="ltr"
+    >
       <div className="ms-footer__inner">
         <nav className="ms-footer__nav" aria-label={f.ariaLabel}>
           <Link className="ms-footer__link" to="/impressum">

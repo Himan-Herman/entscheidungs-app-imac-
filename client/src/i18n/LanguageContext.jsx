@@ -45,6 +45,7 @@ export function LanguageProvider({ children }) {
   useEffect(() => {
     const root = document.documentElement;
     root.lang = language;
+    /* RTL for page content (ar/fa/ckb); header/footer/nav keep dir="ltr" on their roots */
     root.dir = isRtlLanguage(language) ? "rtl" : "ltr";
     root.dataset.msTextDir = isRtlLanguage(language) ? "rtl" : "ltr";
     try {

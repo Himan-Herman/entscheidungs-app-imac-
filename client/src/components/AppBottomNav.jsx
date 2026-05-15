@@ -57,7 +57,7 @@ export default function AppBottomNav() {
 
   if (isPractice) {
     return (
-      <nav className="app-bottom-nav" aria-label={t.bottomNavAria}>
+      <nav className="app-bottom-nav" aria-label={t.bottomNavAria} dir="ltr">
         <NavLink to="/practice/dashboard" className="app-bottom-nav__link">
           <LayoutDashboard size={22} aria-hidden />
           <span>{t.navPracticeDashboard}</span>
@@ -83,7 +83,7 @@ export default function AppBottomNav() {
   }
 
   return (
-    <nav className="app-bottom-nav" aria-label={t.bottomNavAria}>
+    <nav className="app-bottom-nav" aria-label={t.bottomNavAria} dir="ltr">
       <NavLink end to="/pre-visit" className="app-bottom-nav__link">
         <HeartPulse size={22} aria-hidden />
         <span>{t.navPrepare}</span>

@@ -1,22 +1,35 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ChevronDown, Globe } from "lucide-react";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { getMessages } from "../../i18n/translations/index.js";
-import { LOCALE_OPTIONS } from "../../i18n/localeConfig";
+import {
+  HEADER_SELECTABLE_LOCALE_CODES,
+  LOCALE_OPTIONS,
+} from "../../i18n/localeConfig";
 import "./GlobalLanguageSelector.css";
 
 export default function GlobalLanguageSelector({
   label,
   compact = false,
   className = "",
-  /** If set, only these locale codes can be chosen; others remain listed but disabled. */
-  selectableLocaleCodes = null,
+  /** When true, every listed locale is clickable (otherwise only de + en). */
+  allowAllLocales = false,
+  /** Locales users may select; others stay visible but disabled. */
+  selectableLocaleCodes = HEADER_SELECTABLE_LOCALE_CODES,
 }) {
   const { language, setLanguage } = useLanguage();
   const copy = useMemo(() => getMessages(language).header, [language]);
   const common = useMemo(() => getMessages(language).common, [language]);
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("");
+  const [menuStyle, setMenuStyle] = useState(null);
   const rootRef = useRef(null);
   const triggerRef = useRef(null);
   const searchRef = useRef(null);
@@ -67,15 +80,75 @@ export default function GlobalLanguageSelector({
     return undefined;
   }, [open]);
 
+  useLayoutEffect(() => {
+    if (!open) {
+      setMenuStyle(null);
+      return undefined;
+    }
+
+    const mq = window.matchMedia("(max-width: 860px)");
+
+    function placeMenu() {
+      const trigger = triggerRef.current;
+      if (!mq.matches || !trigger) {
+        setMenuStyle(null);
+        return;
+      }
+
+      const rect = trigger.getBoundingClientRect();
+      const vw = document.documentElement.clientWidth;
+      const pad = 12;
+      const width = Math.min(280, vw - pad * 2);
+      const top = rect.bottom + 6;
+      const rightPx = Math.max(pad, vw - rect.right);
+      const leftEdge = vw - rightPx - width;
+
+      if (leftEdge >= pad) {
+        setMenuStyle({
+          position: "fixed",
+          top: `${top}px`,
+          right: `${rightPx}px`,
+          left: "auto",
+          width: `${width}px`,
+          zIndex: 1101,
+        });
+      } else {
+        setMenuStyle({
+          position: "fixed",
+          top: `${top}px`,
+          left: `${pad}px`,
+          right: "auto",
+          width: `${width}px`,
+          zIndex: 1101,
+        });
+      }
+    }
+
+    placeMenu();
+    window.addEventListener("resize", placeMenu);
+    window.addEventListener("scroll", placeMenu, true);
+    mq.addEventListener("change", placeMenu);
+
+    return () => {
+      window.removeEventListener("resize", placeMenu);
+      window.removeEventListener("scroll", placeMenu, true);
+      mq.removeEventListener("change", placeMenu);
+    };
+  }, [open]);
+
   const current =
     LOCALE_OPTIONS.find((o) => o.code === language) ??
     LOCALE_OPTIONS.find((o) => o.code === "en") ??
     LOCALE_OPTIONS[0];
 
   const selectableSet = useMemo(() => {
-    if (!selectableLocaleCodes?.length) return null;
-    return new Set(selectableLocaleCodes.map((c) => c.toLowerCase()));
-  }, [selectableLocaleCodes]);
+    if (allowAllLocales) return null;
+    const codes =
+      selectableLocaleCodes?.length > 0
+        ? selectableLocaleCodes
+        : HEADER_SELECTABLE_LOCALE_CODES;
+    return new Set(codes.map((c) => c.toLowerCase()));
+  }, [allowAllLocales, selectableLocaleCodes]);
 
   function isSelectable(code) {
     if (!selectableSet) return true;
@@ -117,9 +190,10 @@ export default function GlobalLanguageSelector({
       {open ? (
         <ul
           id={`${listId}-listbox`}
-          className="gls__menu"
+          className={`gls__menu${menuStyle ? " gls__menu--viewport" : ""}`}
           role="listbox"
           aria-labelledby={`${listId}-trigger`}
+          style={menuStyle ?? undefined}
         >
           <li role="presentation" className="gls__search-row">
             <input
