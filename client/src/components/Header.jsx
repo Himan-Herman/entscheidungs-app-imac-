@@ -7,8 +7,8 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
-  Menu,
   Moon,
+  Settings2,
   SunMedium,
   UserRound,
 } from "lucide-react";
@@ -51,6 +51,16 @@ export default function Header() {
     return () => window.removeEventListener("medscoutx_user_mode_changed", onMode);
   }, [location.pathname]);
 
+  function handleModeChange(e) {
+    const v = e.target.value;
+    writeUserMode(v);
+    setUserMode(readUserMode());
+    navigate(v === USER_MODES.PRACTICE ? "/practice" : "/patient", {
+      replace: false,
+    });
+    setOpen(false);
+  }
+
   async function handleLogout() {
     try {
       await authFetch("/api/auth/logout", { method: "POST" });
@@ -88,29 +98,6 @@ export default function Header() {
           </button>
 
           <div className="ms-header__controls">
-            {isLoggedIn && (
-              <label className="ms-header__mode">
-                <span className="visually-hidden">{copy.switchArea}</span>
-                <select
-                  className="ms-header__mode-select"
-                  value={userMode}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    writeUserMode(v);
-                    setUserMode(readUserMode());
-                    navigate(
-                      v === USER_MODES.PRACTICE ? "/practice" : "/patient",
-                      { replace: false },
-                    );
-                  }}
-                  aria-label={copy.switchArea}
-                >
-                  <option value={USER_MODES.PATIENT}>{copy.switchPatient}</option>
-                  <option value={USER_MODES.PRACTICE}>{copy.switchPractice}</option>
-                </select>
-              </label>
-            )}
-
             <button
               type="button"
               className="ms-theme-toggle"
@@ -131,13 +118,18 @@ export default function Header() {
           </div>
 
           <button
-            className="ms-nav-toggle"
+            type="button"
+            className={`ms-nav-toggle${open ? " is-open" : ""}`}
             aria-controls="hauptnavigation"
             aria-expanded={open ? "true" : "false"}
+            aria-label={copy.menuSettingsAria ?? copy.navToggle}
+            title={copy.menuSettingsLabel ?? copy.navToggle}
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="visually-hidden">{copy.navToggle}</span>
-            <Menu size={18} aria-hidden="true" />
+            <Settings2 size={22} strokeWidth={2.25} aria-hidden="true" />
+            <span className="ms-nav-toggle__label">
+              {copy.menuSettingsLabel ?? "Menu"}
+            </span>
           </button>
 
           <nav
@@ -146,6 +138,31 @@ export default function Header() {
             aria-label={copy.nav}
           >
             <ul>
+              {isLoggedIn && (
+                <li className="ms-nav__mode-row">
+                  <label className="ms-nav-mode">
+                    <span className="ms-nav-mode__label">{copy.switchArea}</span>
+                    <select
+                      className="ms-nav-mode__select"
+                      value={userMode}
+                      onChange={handleModeChange}
+                      aria-label={copy.switchArea}
+                    >
+                      <option value={USER_MODES.PATIENT}>
+                        {copy.switchPatient}
+                      </option>
+                      <option value={USER_MODES.PRACTICE}>
+                        {copy.switchPractice}
+                      </option>
+                    </select>
+                  </label>
+                </li>
+              )}
+
+              {isLoggedIn && (
+                <li className="ms-nav__divider" role="presentation" aria-hidden />
+              )}
+
               <li>
                 <NavLink
                   to={homePath}

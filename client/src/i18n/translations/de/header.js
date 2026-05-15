@@ -2,6 +2,8 @@ export default {
   skip: "Zum Inhalt springen",
   homeAria: "Zur Startseite",
   navToggle: "Navigation umschalten",
+  menuSettingsAria: "Einstellungen und Menü öffnen",
+  menuSettingsLabel: "Menü",
   nav: "Hauptnavigation",
   appLabel: "Professioneller Bereich",
   home: "Home",
