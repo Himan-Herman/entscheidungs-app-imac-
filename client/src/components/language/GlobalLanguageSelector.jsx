@@ -9,6 +9,8 @@ export default function GlobalLanguageSelector({
   label,
   compact = false,
   className = "",
+  /** If set, only these locale codes can be chosen; others remain listed but disabled. */
+  selectableLocaleCodes = null,
 }) {
   const { language, setLanguage } = useLanguage();
   const copy = useMemo(() => getMessages(language).header, [language]);
@@ -70,7 +72,18 @@ export default function GlobalLanguageSelector({
     LOCALE_OPTIONS.find((o) => o.code === "en") ??
     LOCALE_OPTIONS[0];
 
+  const selectableSet = useMemo(() => {
+    if (!selectableLocaleCodes?.length) return null;
+    return new Set(selectableLocaleCodes.map((c) => c.toLowerCase()));
+  }, [selectableLocaleCodes]);
+
+  function isSelectable(code) {
+    if (!selectableSet) return true;
+    return selectableSet.has(code.toLowerCase());
+  }
+
   function select(code) {
+    if (!isSelectable(code)) return;
     setLanguage(code);
     setOpen(false);
     triggerRef.current?.focus();
@@ -138,7 +151,8 @@ export default function GlobalLanguageSelector({
                 </span>
               </button>
             </li>
-          ))}
+            );
+          })}
           {filteredOptions.length === 0 ? (
             <li role="presentation" className="gls__empty">
               {common.languageSearchNoResults}

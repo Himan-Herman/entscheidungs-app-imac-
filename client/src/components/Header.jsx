@@ -18,6 +18,7 @@ import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
+import { HEADER_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { readUserMode, writeUserMode, USER_MODES } from "../utils/userMode.js";
 import "../styles/Header.css";
 
@@ -126,7 +127,11 @@ export default function Header() {
             </button>
 
             <div className="ms-header__language">
-              <GlobalLanguageSelector label={copy.languageLabel} compact />
+              <GlobalLanguageSelector
+                label={copy.languageLabel}
+                compact
+                selectableLocaleCodes={HEADER_SELECTABLE_LOCALE_CODES}
+              />
             </div>
           </div>
 

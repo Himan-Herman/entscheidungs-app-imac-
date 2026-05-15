@@ -190,6 +190,20 @@
   color: #0f766e;
 }
 
+.gls__option:disabled,
+.gls__option.is-disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.gls__option:disabled:hover,
+.gls__option.is-disabled:hover,
+.gls__option:disabled:focus-visible,
+.gls__option.is-disabled:focus-visible {
+  background: transparent;
+  box-shadow: none;
+}
+
 @media (max-width: 480px) {
   .gls__menu {
     inset-inline-start: 0;
@@ -279,4 +293,10 @@
 
 :root[data-theme="dark"] .gls__option.is-active .gls__option-code {
   color: #5eead4;
+}
+
+:root[data-theme="dark"] .gls__option:disabled,
+:root[data-theme="dark"] .gls__option.is-disabled {
+  opacity: 0.4;
+  color: #94a3b8;
 }
