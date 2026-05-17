@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "../styles/SymptomChat.css";
+import "../styles/PatientChatInputDesktop.css";
 
 import { useTheme } from "../ThemeMode";
 import { getOrganPrompt } from "./prompt/organPrompts";
@@ -451,7 +452,7 @@ export default function SymptomChat() {
                 <div ref={chatEndRef} />
               </section>
 
-              <div className="eingabe-bereich symptom-input-area">
+              <div className="eingabe-bereich symptom-input-area patient-chat-composer">
                 <div className="eingabe-label-row">
                   <label htmlFor="symptom-eingabe" className="eingabe-label">
                     {t.inputLabel}
@@ -481,24 +482,26 @@ export default function SymptomChat() {
                     {zeichenAnzahl}/{MAX_CHARS}
                   </span>
 
-                  <div className="voice-wrap">
-                    <VoiceInput
-                      onTranscribed={handleVoice}
-                      className="voice-input-wrap"
-                      labels={voiceLabels}
-                      notice={consentOk ? t.micNotice : undefined}
-                    />
-                  </div>
+                  <div className="patient-chat-action-group">
+                    <div className="voice-wrap">
+                      <VoiceInput
+                        onTranscribed={handleVoice}
+                        className="voice-input-wrap"
+                        labels={voiceLabels}
+                        notice={consentOk ? t.micNotice : undefined}
+                      />
+                    </div>
 
-                  <button
-                    type="button"
-                    className="send-btn"
-                    disabled={!consentOk || !online || !eingabe.trim()}
-                    onClick={() => void frageSenden()}
-                    aria-label={t.sendAria}
-                  >
-                    <FaPaperPlane />
-                  </button>
+                    <button
+                      type="button"
+                      className="send-btn"
+                      disabled={!consentOk || !online || !eingabe.trim()}
+                      onClick={() => void frageSenden()}
+                      aria-label={t.sendAria}
+                    >
+                      <FaPaperPlane />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

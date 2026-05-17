@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 
 import "../styles/KoerperSymptomChat.css";
+import "../styles/PatientChatInputDesktop.css";
 
 import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -453,7 +454,7 @@ export default function KoerperSymptomChat() {
             })}
           </div>
 
-          <div className="eingabe-bereich">
+          <div className="eingabe-bereich patient-chat-composer">
             <div className="eingabe-label-row">
               <label htmlFor="koerper-eingabe" className="eingabe-label">
                 {tc.inputLabel}
@@ -497,23 +498,25 @@ export default function KoerperSymptomChat() {
                 {zeichenAnzahl}/{MAX_CHARS}
               </span>
 
-              <div className="voice-wrap">
-                <VoiceInput
-                  onTranscribed={handleVoice}
-                  notice={tc.micNotice}
-                  labels={voiceLabels}
-                />
-              </div>
+              <div className="patient-chat-action-group">
+                <div className="voice-wrap">
+                  <VoiceInput
+                    onTranscribed={handleVoice}
+                    notice={tc.micNotice}
+                    labels={voiceLabels}
+                  />
+                </div>
 
-              <button
-                type="button"
-                className="send-btn"
-                onClick={() => frageSenden()}
-                disabled={isSending}
-                aria-label={tc.sendAria}
-              >
-                <FaPaperPlane aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  className="send-btn"
+                  onClick={() => frageSenden()}
+                  disabled={isSending}
+                  aria-label={tc.sendAria}
+                >
+                  <FaPaperPlane aria-hidden="true" />
+                </button>
+              </div>
             </div>
           </div>
         </section>

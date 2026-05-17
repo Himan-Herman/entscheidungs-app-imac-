@@ -1,0 +1,174 @@
+/**
+ * Desktop / laptop polish for patient chat composers
+ * (Symptom Check + Body Map region description).
+ * Mobile rules in SymptomChat.css / KoerperSymptomChat.css stay unchanged.
+ */
+
+@media (min-width: 901px) {
+  .symptom-page,
+  .koerper-page {
+    padding: clamp(2rem, 2.8vw, 2.75rem) clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .symptom-page .symptom-panel--chat,
+  .koerper-page .symptomchat-container {
+    width: 100%;
+    max-width: min(100%, 68rem);
+    margin-inline: auto;
+  }
+
+  .symptom-page .symptom-chatlog,
+  .koerper-page .chatverlauf {
+    max-height: clamp(280px, 40vh, 360px);
+  }
+
+  .symptom-page .patient-chat-composer,
+  .koerper-page .patient-chat-composer {
+    --patient-input-max: min(100%, 62.5rem);
+    width: 100%;
+    max-width: var(--patient-input-max);
+    margin-inline: auto;
+    margin-top: clamp(0.65rem, 1vw, 0.85rem);
+    padding: clamp(1rem, 1.5vw, 1.35rem) clamp(1rem, 2vw, 1.45rem);
+    border-radius: clamp(1rem, 1.1vw, 1.15rem);
+    box-sizing: border-box;
+  }
+
+  .symptom-page .patient-chat-composer.symptom-input-area {
+    border-top: none;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: linear-gradient(155deg, #0f172a 0%, #020617 100%);
+    box-shadow:
+      0 14px 36px rgba(15, 23, 42, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .koerper-page .patient-chat-composer.eingabe-bereich {
+    max-width: var(--patient-input-max);
+  }
+
+  .symptom-page .patient-chat-composer .eingabe-label-row,
+  .koerper-page .patient-chat-composer .eingabe-label-row {
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: clamp(0.4rem, 0.65vw, 0.55rem);
+    column-gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  }
+
+  .symptom-page .patient-chat-composer .eingabe-label,
+  .koerper-page .patient-chat-composer .eingabe-label {
+    font-size: clamp(0.92rem, 0.22vw + 0.86rem, 1rem);
+    font-weight: 600;
+  }
+
+  .symptom-page .patient-chat-composer .eingabe-hint,
+  .koerper-page .patient-chat-composer .eingabe-hint {
+    font-size: clamp(0.78rem, 0.14vw + 0.72rem, 0.86rem);
+  }
+
+  .symptom-page .patient-chat-composer .chat-textarea,
+  .koerper-page .patient-chat-composer .chat-textarea {
+    width: 100%;
+    min-height: 3.25rem;
+    max-height: 6.75rem;
+    margin-bottom: 0;
+    padding: clamp(0.6rem, 0.85vw, 0.75rem) clamp(0.8rem, 1.1vw, 1rem);
+    font-size: clamp(0.9rem, 0.18vw + 0.84rem, 0.95rem);
+    line-height: 1.5;
+    border-radius: clamp(0.75rem, 0.85vw, 0.9rem);
+    resize: vertical;
+  }
+
+  .koerper-page .patient-chat-composer .koerper-organ-hint {
+    max-width: 52ch;
+    margin-bottom: clamp(0.45rem, 0.7vw, 0.6rem);
+    font-size: clamp(0.86rem, 0.15vw + 0.8rem, 0.92rem);
+    line-height: 1.45;
+  }
+
+  .symptom-page .patient-chat-composer .eingabe-actions,
+  .koerper-page .patient-chat-composer .eingabe-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: clamp(0.5rem, 0.85vw, 0.75rem);
+    margin-top: clamp(0.55rem, 0.9vw, 0.7rem);
+  }
+
+  .symptom-page .patient-chat-composer .char-count,
+  .koerper-page .patient-chat-composer .char-count {
+    margin-right: auto;
+    height: auto;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    font-size: clamp(0.78rem, 0.14vw + 0.72rem, 0.85rem);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .patient-chat-action-group {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.45rem, 0.7vw, 0.6rem);
+    flex-shrink: 0;
+  }
+
+  .symptom-page .patient-chat-composer .voice-wrap,
+  .koerper-page .patient-chat-composer .voice-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .symptom-page .patient-chat-composer .voice-wrap button,
+  .symptom-page .patient-chat-composer .voice-wrap .mic-button,
+  .symptom-page .patient-chat-composer .voice-btn,
+  .symptom-page .patient-chat-composer .send-btn,
+  .koerper-page .patient-chat-composer .voice-wrap button,
+  .koerper-page .patient-chat-composer .voice-btn,
+  .koerper-page .patient-chat-composer .send-btn {
+    position: static;
+    top: auto;
+    width: clamp(2.75rem, 2.8vw, 3rem);
+    height: clamp(2.75rem, 2.8vw, 3rem);
+    min-width: clamp(2.75rem, 2.8vw, 3rem);
+    min-height: clamp(2.75rem, 2.8vw, 3rem);
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  .symptom-page .patient-chat-composer .send-btn,
+  .koerper-page .patient-chat-composer .send-btn {
+    border-radius: 12px;
+  }
+
+  .symptom-page .patient-chat-composer .voice-wrap button,
+  .symptom-page .patient-chat-composer .voice-wrap .mic-button,
+  .symptom-page .patient-chat-composer .voice-btn,
+  .koerper-page .patient-chat-composer .voice-wrap button,
+  .koerper-page .patient-chat-composer .voice-btn {
+    border-radius: 999px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .symptom-page .patient-chat-composer,
+  .koerper-page .patient-chat-composer {
+    --patient-input-max: min(100%, 58rem);
+  }
+}
+
+@media (min-width: 1440px) {
+  .symptom-page .symptom-shell,
+  .koerper-page .koerper-shell {
+    max-width: min(100%, 72rem);
+  }
+
+  .symptom-page .patient-chat-composer,
+  .koerper-page .patient-chat-composer {
+    --patient-input-max: min(100%, 56rem);
+    padding-inline: clamp(1.15rem, 2vw, 1.65rem);
+  }
+}
