@@ -5,8 +5,10 @@ import {
   ClipboardList,
   FileText,
   HeartPulse,
+  Heart,
   ImageIcon,
   Map as MapIcon,
+  MapPinned,
   Stethoscope,
   UserRound,
 } from "lucide-react";
@@ -15,6 +17,8 @@ import { getMessages } from "../i18n/translations";
 import "../styles/WorkspaceHubPages.css";
 
 const LINKS = [
+  { to: "/patient/find-practices", key: "hubLinkFindPractices", icon: MapPinned },
+  { to: "/account/health", key: "hubLinkHealthProfile", icon: Heart },
   { to: "/pre-visit", key: "hubLinkPreVisit", icon: HeartPulse },
   { to: "/symptom", key: "hubLinkSymptom", icon: Activity },
   { to: "/bild", key: "hubLinkImage", icon: ImageIcon },

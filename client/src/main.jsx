@@ -74,9 +74,15 @@ const AccountHomePage = lazy(() => import("./pages/account/AccountHomePage.jsx")
 const AccountDocumentsPage = lazy(() => import("./pages/account/AccountDocumentsPage.jsx"));
 const AccountDoctorsPage = lazy(() => import("./pages/account/AccountDoctorsPage.jsx"));
 const AccountPersonalPage = lazy(() => import("./pages/account/AccountPersonalPage.jsx"));
+const AccountHealthProfilePage = lazy(() =>
+  import("./pages/account/AccountHealthProfilePage.jsx"),
+);
 const AccountProfilesPage = lazy(() => import("./pages/account/AccountProfilesPage.jsx"));
 const AccountDataPage = lazy(() => import("./pages/account/AccountDataPage.jsx"));
 const PatientHubPage = lazy(() => import("./pages/PatientHubPage.jsx"));
+const PracticeFinderPage = lazy(() =>
+  import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
+);
 const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
 
 function RouteFallback() {
@@ -137,6 +143,14 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
+                  path="/patient/find-practices"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeFinderPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/practice"
                   element={
                     <ProtectedRoute>
@@ -157,6 +171,7 @@ createRoot(document.getElementById("root")).render(
                   <Route path="documents" element={<AccountDocumentsPage />} />
                   <Route path="doctors" element={<AccountDoctorsPage />} />
                   <Route path="personal" element={<AccountPersonalPage />} />
+                  <Route path="health" element={<AccountHealthProfilePage />} />
                   <Route path="profiles" element={<AccountProfilesPage />} />
                   <Route path="data" element={<AccountDataPage />} />
                   <Route

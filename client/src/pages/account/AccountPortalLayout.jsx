@@ -43,6 +43,7 @@ export default function AccountPortalLayout() {
       { to: "/pre-visit/cases", label: t.navTimelines },
       { to: "/account/doctors", label: t.navDoctors },
       { to: "/account/personal", label: t.navPersonal },
+      { to: "/account/health", label: t.navHealthProfile },
       { to: "/account/profiles", label: t.navProfiles },
       { to: "/account/data", label: t.navData },
       { to: "/pre-visit/follow-ups", label: t.navFollowUps },

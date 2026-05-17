@@ -43,6 +43,8 @@ export default {
     heading: "Praxisbereich",
     sub: "Werkzeuge für Vorbereitungsabläufe und sichere Dokumentation.",
   },
+  hubLinkFindPractices: "Arztpraxis weltweit finden",
+  hubLinkHealthProfile: "Gesundheitsprofil",
   hubLinkPreVisit: "Pre-Visit",
   hubLinkSymptom: "Symptom Check",
   hubLinkImage: "Bildanalyse",

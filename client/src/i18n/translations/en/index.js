@@ -21,6 +21,7 @@ import symptomCheck from "./symptomCheck.js";
 import imageAnalysis from "./imageAnalysis.js";
 import bodyMap from "./bodyMap.js";
 import roleEntry from "./roleEntry.js";
+import practiceFinder from "./practiceFinder.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
 
@@ -48,6 +49,7 @@ export default {
   imageAnalysis,
   bodyMap,
   roleEntry,
+  practiceFinder,
   intro,
   voiceInput,
 };

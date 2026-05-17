@@ -30,10 +30,15 @@ import practicePortalRouter from "./routes/practicePortal.js";
 import practiceAnalyticsRouter from "./routes/practiceAnalytics.js";
 import publicDocumentsRouter from "./routes/publicDocuments.js";
 import practiceApiDataRouter from "./routes/practiceApiData.js";
+import placesRouter from "./routes/places.js";
+import practiceFinderRouter from "./routes/practiceFinder.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
-import { publicPrevisitQrLimiter, publicSecureDocumentsLimiter } from "./middleware/ipRateLimit.js";
+import {
+  publicPrevisitQrLimiter,
+  publicSecureDocumentsLimiter,
+} from "./middleware/ipRateLimit.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -98,6 +103,9 @@ app.use("/api/public/documents", publicSecureDocumentsLimiter, publicDocumentsRo
 app.use("/api/practice", requireAuth, practiceAnalyticsRouter);
 app.use("/api/practice", requireAuth, practicePortalRouter);
 app.use("/api/practice/api", requireAuth, practiceApiDataRouter);
+app.use("/api/places", requireAuth, placesRouter);
+/** @deprecated — use /api/places; alias for older clients */
+app.use("/api/practice-finder", requireAuth, practiceFinderRouter);
 
 app.get(['/health', '/api/health'], (_req, res) =>
   res.json({
@@ -145,6 +153,7 @@ app.get('/api/health/config', (_req, res) =>
       apiBaseUrl: Boolean(process.env.API_BASE_URL),
       frontendUrl:
         Boolean(process.env.FRONTEND_URL) || Boolean(process.env.APP_BASE_URL),
+      googlePlaces: Boolean(process.env.GOOGLE_PLACES_API_KEY),
     },
   }),
 );

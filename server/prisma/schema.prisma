@@ -147,6 +147,16 @@ model UserProfile {
   preferredDoctorLanguage String?
   /// Free-text emergency contact note — operational only; not medical advice
   emergencyNote String?
+  /// Optional health context for Pre-Visit orientation — not a clinical record
+  heightCm             Int?
+  weightKg             Float?
+  allergies            String? @db.Text
+  chronicConditions    String? @db.Text
+  regularMedications   String? @db.Text
+  /// never | former | occasional | daily | prefer_not_say
+  smokingStatus        String?
+  /// never | occasional | regular | prefer_not_say
+  alcoholUse           String?
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

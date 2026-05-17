@@ -1,0 +1,73 @@
+export default {
+  pageTitle: "Arztpraxis weltweit finden",
+  pageHeading: "Arztpraxis weltweit finden",
+  pageSub:
+    "Neutrale standortbasierte Suche — MedScoutX bewertet keine Behandlungsqualität und gibt keine medizinische Beratung.",
+  mdrNotice:
+    "MedScoutX vermittelt keine medizinische Empfehlung. Die Ergebnisse basieren auf Standort, Fachrichtung, Entfernung und öffentlich verfügbaren Bewertungsdaten.",
+  resultsHeading: "Passende Arztpraxen in deiner Nähe",
+  serviceUnavailable:
+    "Die Arztsuche ist momentan nicht verfügbar.",
+  serviceUnavailableHint:
+    "Der Suchdienst ist noch nicht eingerichtet. Bitte versuchen Sie es später erneut.",
+  demoBanner:
+    "Entwicklungs-Demo — GOOGLE_PLACES_API_KEY auf dem Server für echte Ergebnisse setzen.",
+  fieldCountry: "Land",
+  fieldCountryRequired: "Land (Pflichtfeld)",
+  fieldSpecialty: "Fachrichtung / Kategorie",
+  fieldSpecialtyRequired: "Fachrichtung / Kategorie (Pflichtfeld)",
+  fieldPostal: "PLZ (optional)",
+  fieldCity: "Stadt / Region (optional)",
+  fieldAddress: "Vollständige Adresse (optional)",
+  placeholderCountry: "z. B. Deutschland oder DE",
+  placeholderSpecialty: "z. B. Hausarzt, Dermatologie, Kardiologie",
+  placeholderPostal: "z. B. 10115",
+  placeholderCity: "z. B. Berlin",
+  placeholderAddress: "Straße und Hausnummer für genauere Suche",
+  radiusLabel: "Suchradius",
+  radiusKm: "{value} km",
+  radiusMaxHint: "Bis {max} km in künftigen Updates vorgesehen",
+  useLocation: "Standort verwenden",
+  locationConsent:
+    "Ich stimme zu, dass mein Standort zur Suche passender Arztpraxen verwendet wird.",
+  locationConsentRequired:
+    "Bitte bestätigen Sie die Standortnutzung, bevor Sie fortfahren.",
+  locationDenied: "Standortzugriff wurde abgelehnt oder ist nicht verfügbar.",
+  locationSuccess:
+    "Standort nur für diese Suche verwendet (wird nicht gespeichert).",
+  searchButton: "Praxen suchen",
+  searching: "Suche läuft…",
+  loadMore: "Weitere Ergebnisse laden",
+  emptyTitle: "Keine Praxen in diesem Radius gefunden",
+  emptyHint:
+    "Versuchen Sie einen größeren Radius, eine andere Fachrichtung oder eine nahe Stadt.",
+  errorGeneric: "Suche konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
+  errorCountry: "Bitte ein Land eingeben.",
+  errorSpecialty: "Bitte eine Fachrichtung oder Kategorie eingeben.",
+  errorLocation:
+    "Bitte Stadt, PLZ oder Adresse eingeben — oder Standort verwenden.",
+  errorGeocode: "Adresse konnte nicht gefunden werden. Eingaben prüfen.",
+  errorGeocodeNotFound: "Für diese Angaben wurde kein Ort gefunden.",
+  errorRateLimit: "Zu viele Suchanfragen. Bitte kurz warten.",
+  backPatientHub: "Zurück zum Patientenbereich",
+  fieldDistance: "Entfernung",
+  cardDistance: "{value} km entfernt",
+  cardRating: "Bewertung",
+  cardReviews: "{count} Bewertungen",
+  cardNoRating: "Keine öffentliche Bewertung",
+  cardSpecialtyFallback: "Arztpraxis",
+  openWebsite: "Website öffnen",
+  openRoute: "Route öffnen",
+  openMaps: "In Google Maps ansehen",
+  phone: "Telefon",
+  hours: "Öffnungszeiten",
+  languages: "Sprachen",
+  booking: "Terminbuchung",
+  notAvailable: "Nicht verfügbar",
+  sortNotice:
+    "Reihenfolge kombiniert Entfernung und öffentliche Bewertungen (inkl. Anzahl) — nicht medizinische Qualität.",
+  navAria: "Praxis-Suche",
+  formAria: "Formular Praxissuche",
+  resultsAria: "Suchergebnisse",
+  skeletonAria: "Ergebnisse werden geladen",
+};

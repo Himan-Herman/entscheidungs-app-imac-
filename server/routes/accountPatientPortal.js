@@ -12,6 +12,52 @@ const router = express.Router();
 
 const DELETE_PREVISIT_CONFIRM = "DELETE_MY_PREVISIT_DATA";
 
+const SMOKING_VALUES = new Set([
+  "never",
+  "former",
+  "occasional",
+  "daily",
+  "prefer_not_say",
+]);
+const ALCOHOL_VALUES = new Set([
+  "never",
+  "occasional",
+  "regular",
+  "prefer_not_say",
+]);
+const INSURANCE_VALUES = new Set([
+  "statutory",
+  "private",
+  "self_pay",
+  "other",
+  "prefer_not_say",
+]);
+
+function userProfileJson(p) {
+  if (!p) return null;
+  return {
+    phone: p.phone,
+    addressLine: p.addressLine,
+    postalCode: p.postalCode,
+    city: p.city,
+    country: p.country,
+    insuranceType: p.insuranceType,
+    gender: p.gender,
+    genderOrSalutation: p.genderOrSalutation,
+    displayName: p.displayName,
+    preferredPatientLanguage: p.preferredPatientLanguage,
+    preferredDoctorLanguage: p.preferredDoctorLanguage,
+    emergencyNote: p.emergencyNote,
+    heightCm: p.heightCm,
+    weightKg: p.weightKg,
+    allergies: p.allergies,
+    chronicConditions: p.chronicConditions,
+    regularMedications: p.regularMedications,
+    smokingStatus: p.smokingStatus,
+    alcoholUse: p.alcoholUse,
+  };
+}
+
 function userIdFromReq(req) {
   const id = req.user?.userId;
   return typeof id === "string" && id.length > 0 ? id : null;
@@ -179,22 +225,7 @@ router.get("/patient-settings", async (req, res) => {
         lastName: user.lastName,
         dateOfBirth: user.dateOfBirth?.toISOString?.() ?? user.dateOfBirth,
       },
-      profile: p
-        ? {
-            phone: p.phone,
-            addressLine: p.addressLine,
-            postalCode: p.postalCode,
-            city: p.city,
-            country: p.country,
-            insuranceType: p.insuranceType,
-            gender: p.gender,
-            genderOrSalutation: p.genderOrSalutation,
-            displayName: p.displayName,
-            preferredPatientLanguage: p.preferredPatientLanguage,
-            preferredDoctorLanguage: p.preferredDoctorLanguage,
-            emergencyNote: p.emergencyNote,
-          }
-        : null,
+      profile: userProfileJson(p),
     });
   } catch (err) {
     console.error("[account/patient-settings GET]", err?.message ?? err);
@@ -235,13 +266,43 @@ router.put("/patient-settings", async (req, res) => {
     opt("postalCode", 20);
     opt("city", 120);
     opt("country", 80);
-    opt("insuranceType", 80);
     opt("gender", 40);
     opt("genderOrSalutation", 80);
     opt("displayName", 120);
     opt("preferredPatientLanguage", 12);
     opt("preferredDoctorLanguage", 12);
     opt("emergencyNote", 2000);
+    opt("allergies", 4000);
+    opt("chronicConditions", 4000);
+    opt("regularMedications", 4000);
+
+    const enumField = (key, allowed) => {
+      if (!Object.prototype.hasOwnProperty.call(b, key)) return;
+      const raw = b[key];
+      if (raw === null || raw === "") {
+        profileData[key] = null;
+        return;
+      }
+      if (typeof raw === "string" && allowed.has(raw)) profileData[key] = raw;
+    };
+    enumField("smokingStatus", SMOKING_VALUES);
+    enumField("alcoholUse", ALCOHOL_VALUES);
+    enumField("insuranceType", INSURANCE_VALUES);
+
+    const numField = (key, min, max, roundInt = false) => {
+      if (!Object.prototype.hasOwnProperty.call(b, key)) return;
+      const raw = b[key];
+      if (raw === null || raw === "") {
+        profileData[key] = null;
+        return;
+      }
+      const n = Number(raw);
+      if (!Number.isFinite(n)) return;
+      const clamped = Math.min(max, Math.max(min, n));
+      profileData[key] = roundInt ? Math.round(clamped) : clamped;
+    };
+    numField("heightCm", 50, 250, true);
+    numField("weightKg", 20, 500, false);
 
     if (Object.keys(userData).length) {
       await prisma.user.update({ where: { id: userId }, data: userData });
@@ -276,22 +337,7 @@ router.put("/patient-settings", async (req, res) => {
         lastName: next.lastName,
         dateOfBirth: next.dateOfBirth?.toISOString?.() ?? next.dateOfBirth,
       },
-      profile: next.profile
-        ? {
-            phone: next.profile.phone,
-            addressLine: next.profile.addressLine,
-            postalCode: next.profile.postalCode,
-            city: next.profile.city,
-            country: next.profile.country,
-            insuranceType: next.profile.insuranceType,
-            gender: next.profile.gender,
-            genderOrSalutation: next.profile.genderOrSalutation,
-            displayName: next.profile.displayName,
-            preferredPatientLanguage: next.profile.preferredPatientLanguage,
-            preferredDoctorLanguage: next.profile.preferredDoctorLanguage,
-            emergencyNote: next.profile.emergencyNote,
-          }
-        : null,
+      profile: userProfileJson(next.profile),
     });
   } catch (err) {
     console.error("[account/patient-settings PUT]", err?.message ?? err);

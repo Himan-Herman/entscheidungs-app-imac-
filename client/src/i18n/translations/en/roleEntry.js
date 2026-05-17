@@ -43,6 +43,8 @@ export default {
     heading: "Practice workspace",
     sub: "Operational tools for preparation workflows and documentation delivery.",
   },
+  hubLinkFindPractices: "Find medical practices worldwide",
+  hubLinkHealthProfile: "Health profile",
   hubLinkPreVisit: "Pre-Visit",
   hubLinkSymptom: "Symptom Check",
   hubLinkImage: "Image analysis",

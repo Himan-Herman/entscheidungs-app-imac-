@@ -252,6 +252,116 @@
   margin-top: 16px;
 }
 
+.account-portal-form--wide {
+  max-width: min(640px, 100%);
+}
+
+.account-portal-page__notice {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  background: rgba(15, 118, 110, 0.06);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  max-width: 62ch;
+}
+
+.account-portal-form__section {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.account-portal-form__section legend {
+  padding: 0 4px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.account-portal-form__radio-group {
+  display: grid;
+  gap: 8px;
+}
+
+.account-portal-form__radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  cursor: pointer;
+}
+
+.account-portal-form__radio:has(input:focus-visible) {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+.account-portal-form__radio input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.account-portal-form__bmi {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.account-portal-form__hint {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  opacity: 0.9;
+}
+
+.account-portal-form__inline-link {
+  color: #0f766e;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.account-portal-form__inline-link:hover,
+.account-portal-form__inline-link:focus-visible {
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .account-portal-form__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+:root[data-theme="dark"] .account-portal-page__notice {
+  border-color: rgba(94, 234, 212, 0.25);
+  background: rgba(45, 212, 191, 0.08);
+}
+
+:root[data-theme="dark"] .account-portal-form__section {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .account-portal-form__radio {
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+:root[data-theme="dark"] .account-portal-form__bmi {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .account-portal-form__inline-link {
+  color: #5eead4;
+}
+
 .account-portal-form__field {
   display: grid;
   gap: 6px;
