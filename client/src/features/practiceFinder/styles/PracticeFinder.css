@@ -207,10 +207,24 @@
   outline-offset: 2px;
 }
 
-.pf-btn--primary {
+.pf-btn--primary,
+a.pf-btn--primary,
+a.pf-btn--primary:visited {
   background: #0f766e;
   border-color: #0f766e;
-  color: #fff;
+  color: #ffffff;
+}
+
+a.pf-btn--primary:hover,
+a.pf-btn--primary:focus-visible {
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+}
+
+.pf-btn--primary svg,
+a.pf-btn--primary svg {
+  color: currentColor;
 }
 
 .pf-btn--secondary {
@@ -397,4 +411,17 @@
 :root[data-theme="dark"] .pf-form__error {
   background: rgba(127, 29, 29, 0.35);
   color: #fecaca;
+}
+
+:root[data-theme="dark"] .pf-btn--primary,
+:root[data-theme="dark"] a.pf-btn--primary,
+:root[data-theme="dark"] a.pf-btn--primary:hover {
+  background: #0d9488;
+  border-color: #0d9488;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .pf-btn--primary svg,
+:root[data-theme="dark"] a.pf-btn--primary svg {
+  color: currentColor;
 }
