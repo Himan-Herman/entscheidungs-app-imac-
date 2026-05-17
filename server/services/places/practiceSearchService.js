@@ -11,6 +11,8 @@ import { buildDemoResults } from "./demoResults.js";
 
 const MAX_RADIUS_KM = 50;
 const DEFAULT_RADIUS_KM = 5;
+/** Max practices returned per search request (initial + each "load more"). */
+export const PRACTICE_SEARCH_PAGE_SIZE = 10;
 
 function clampRadius(km) {
   const n = Number(km);
@@ -75,13 +77,14 @@ export async function runPracticeSearch(input) {
   const center = { lat, lng, radiusKm };
 
   if (isPlacesDemoModeEnabled() && !isPlacesApiConfigured()) {
+    const ranked = rankPracticeResults(
+      buildDemoResults(center, specialty, language),
+      center,
+    );
     return {
       center,
       radiusKm,
-      results: rankPracticeResults(
-        buildDemoResults(center, specialty, language),
-        center,
-      ),
+      results: ranked.slice(0, PRACTICE_SEARCH_PAGE_SIZE),
       nextPageToken: null,
       demoMode: true,
     };
@@ -95,13 +98,17 @@ export async function runPracticeSearch(input) {
     radiusKm,
     languageCode: language,
     pageToken: input.pageToken || null,
+    maxResultCount: PRACTICE_SEARCH_PAGE_SIZE,
   });
+
+  const ranked = rankPracticeResults(places, center);
 
   return {
     center,
     radiusKm,
-    results: rankPracticeResults(places, center),
-    nextPageToken,
+    results: ranked.slice(0, PRACTICE_SEARCH_PAGE_SIZE),
+    nextPageToken:
+      ranked.length > 0 && nextPageToken ? nextPageToken : null,
     demoMode: false,
   };
 }

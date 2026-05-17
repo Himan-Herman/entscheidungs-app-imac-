@@ -62,13 +62,13 @@ export async function googlePlacesTextSearch(opts) {
     radiusKm,
     languageCode = "en",
     pageToken = null,
-    maxResultCount = 20,
+    maxResultCount = 10,
   } = opts;
 
   const body = {
     textQuery,
     languageCode,
-    maxResultCount: Math.min(20, Math.max(1, maxResultCount)),
+    maxResultCount: Math.min(20, Math.max(1, Math.round(maxResultCount))),
     locationBias: {
       circle: {
         center: { latitude: lat, longitude: lng },

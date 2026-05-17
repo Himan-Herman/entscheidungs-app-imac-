@@ -1,6 +1,9 @@
 import { useCallback, useState } from "react";
 import { searchPlaces } from "../api/placesApi.js";
 
+/** Matches server PRACTICE_SEARCH_PAGE_SIZE — max results per search / load-more. */
+const RESULTS_PAGE_SIZE = 10;
+
 const INITIAL = {
   results: [],
   nextPageToken: null,
@@ -35,14 +38,14 @@ export function usePracticeFinderSearch(uiLanguage) {
           language: uiLanguage === "de" ? "de" : "en",
         });
 
+        const batch = (payload.results || []).slice(0, RESULTS_PAGE_SIZE);
+
         setState((prev) => ({
           center: payload.center,
           radiusKm: payload.radiusKm,
           demoMode: payload.demoMode === true,
           nextPageToken: payload.nextPageToken || null,
-          results: append
-            ? [...prev.results, ...(payload.results || [])]
-            : payload.results || [],
+          results: append ? [...prev.results, ...batch] : batch,
         }));
         return payload;
       } catch (e) {
