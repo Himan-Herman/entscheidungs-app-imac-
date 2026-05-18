@@ -17,6 +17,7 @@ export default {
   recentActivityHeading: "Recent activity",
   quickActionsHeading: "Quick actions",
   preVisitLink: "Open Pre-Visit preparations",
+  actionOpenSecurity: "Open security & privacy",
   roleLabel: "Your role",
   notProvided: "not provided",
 
@@ -27,6 +28,7 @@ export default {
   cardMedication: "Medication plans",
   cardDataRequests: "Data requests",
   cardTeam: "Team & permissions",
+  cardSecurity: "Security & privacy",
   cardActivity: "Activity",
 
   metricUnreadInbox: "Unread inbox items",

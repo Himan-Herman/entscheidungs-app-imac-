@@ -234,3 +234,20 @@
   font-family: inherit;
   margin: 0;
 }
+
+@media (max-width: 640px) {
+  .patient-inbox {
+    padding: 1rem 0.85rem 2rem;
+    overflow-x: hidden;
+  }
+
+  .patient-inbox__filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .patient-inbox__filter-btn {
+    min-height: var(--ms-control-min-height, 44px);
+    width: 100%;
+  }
+}

@@ -337,9 +337,15 @@ export default function PatientDataControlPage() {
         <p className="patient-data-control__privacy" role="note">
           {t.privacyNotice}
         </p>
-        <p style={{ marginTop: "0.75rem" }}>
+        <p style={{ marginTop: "0.75rem", display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
           <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/activity">
             {t.openActivity}
+          </Link>
+          <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/exports">
+            {(getMessages(language).exports || getMessages("en").exports).headingPatient}
+          </Link>
+          <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/consents">
+            {t.openConsents}
           </Link>
         </p>
       </header>

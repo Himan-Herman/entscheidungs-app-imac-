@@ -46,6 +46,7 @@ model User {
   secureDocumentAccessCreated SecureDocumentAccessToken[] @relation("SecureDocAccessCreatedBy")
   patientProfiles      PatientProfile[]
   exportJobs           ExportJob[]
+  consentRecords       ConsentRecord[]
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -177,6 +178,8 @@ model UserProfile {
   displayName String?
   preferredPatientLanguage String?
   preferredDoctorLanguage String?
+  /// App UI locale (de, en, …) — organizational preference only
+  preferredUiLanguage    String?
   /// Free-text emergency contact note — operational only; not medical advice
   emergencyNote String?
   /// Optional health context for Pre-Visit orientation — not a clinical record
@@ -266,6 +269,16 @@ model PracticeProfile {
   specialty               String?
   preferredDoctorLanguage String   @default("de")
   patientIntroText        String?
+  description             String?
+  city                    String?
+  postalCode              String?
+  country                 String?
+  supportedLanguages      String?
+  openingHours            String?
+  displayNameForPatients  String?
+  accentColor             String?
+  logoStorageKey          String?
+  logoMimeType            String?
   isActive                Boolean  @default(true)
 
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -850,6 +863,35 @@ model ExportJob {
   @@index([patientUserId, createdAt])
   @@index([practiceProfileId, createdAt])
   @@index([practicePatientLinkId])
+  @@index([status, expiresAt])
+}
+
+/**
+ * Granular patient consent per practice link — organizational purposes only.
+ */
+model ConsentRecord {
+  id                    String    @id @default(cuid())
+  patientUserId         String
+  practiceProfileId     String?
+  practicePatientLinkId String?
+  consentType           String
+  /// granted | revoked | expired
+  status                String    @default("granted")
+  grantedAt             DateTime  @default(now())
+  revokedAt             DateTime?
+  expiresAt             DateTime?
+  grantedByUserId       String?
+  revokedByUserId       String?
+  version               String?
+  metadataJson          Json?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  patientUser User @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([patientUserId, createdAt])
+  @@index([practiceProfileId, consentType])
+  @@index([practicePatientLinkId, consentType, status])
   @@index([status, expiresAt])
 }
 

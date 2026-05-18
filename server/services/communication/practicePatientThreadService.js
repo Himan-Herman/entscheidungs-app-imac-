@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import { linkHasConsentScope } from "../careRelationship/consentScopes.js";
+import { requireConsentScopeAsync } from "../careRelationship/requireConsentScope.js";
 import { notifyPatientInboxOfPracticeMessage } from "./inboxNotify.js";
 import { notifyPracticeInboxOfPatientMessage } from "../practiceInbox/practiceInboxNotify.js";
+import {
+  PRACTICE_BRANDING_SELECT,
+  practiceBrandingJson,
+} from "../../utils/practiceBranding.js";
 
 const prisma = new PrismaClient();
 
@@ -13,8 +17,13 @@ const MAX_BODY_LEN = 8000;
 const LINK_ACTIVE = new Set(["invited", "active"]);
 
 const includeLinkPractice = {
-  practiceProfile: { select: { id: true, practiceName: true } },
+  practiceProfile: { select: PRACTICE_BRANDING_SELECT },
 };
+
+function practiceFromProfile(profile) {
+  if (!profile) return null;
+  return practiceBrandingJson(profile);
+}
 
 /**
  * @param {import("@prisma/client").PracticePatientMessage} msg
@@ -140,7 +149,7 @@ async function getThreadForPatient(threadId, patientUserId) {
     where: { id: threadId, patientUserId },
     include: {
       messages: { orderBy: { createdAt: "asc" } },
-      practiceProfile: { select: { id: true, practiceName: true } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
       _count: { select: { messages: true } },
     },
   });
@@ -153,6 +162,10 @@ async function getThreadForPatient(threadId, patientUserId) {
  */
 export async function createThread(input) {
   const link = await assertLinkForPractice(input.linkId, input.practiceProfileId);
+  await requireConsentScopeAsync(link, "messages", {
+    actorUserId: input.senderUserId,
+    actorRole: "practice",
+  });
   const subject =
     input.subject != null ? trimText(input.subject, MAX_SUBJECT_LEN) : null;
   const body = trimText(input.body, MAX_BODY_LEN);
@@ -229,7 +242,7 @@ export async function listThreadsForPatient(patientUserId, opts = {}) {
     },
     include: {
       messages: { orderBy: { createdAt: "desc" }, take: 1 },
-      practiceProfile: { select: { id: true, practiceName: true } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
       _count: { select: { messages: true } },
     },
     orderBy: { updatedAt: "desc" },
@@ -248,7 +261,7 @@ export async function listThreadsForPatient(patientUserId, opts = {}) {
     out.push({
       ...base,
       practice: r.practiceProfile
-        ? { id: r.practiceProfile.id, practiceName: r.practiceProfile.practiceName }
+        ? practiceFromProfile(r.practiceProfile)
         : null,
     });
   }
@@ -274,7 +287,7 @@ export async function getThreadForPatientUser(threadId, patientUserId) {
   return {
     ...threadToJson(row, { includeMessages: true }),
     practice: row.practiceProfile
-      ? { id: row.practiceProfile.id, practiceName: row.practiceProfile.practiceName }
+      ? practiceFromProfile(row.practiceProfile)
       : null,
   };
 }
@@ -290,6 +303,12 @@ export async function addMessageFromPractice(input) {
   );
   if (thread.status === "archived") throw new Error("thread_archived");
   if (thread.status === "closed") throw new Error("thread_closed");
+
+  const link = await assertLinkForPractice(input.linkId, input.practiceProfileId);
+  await requireConsentScopeAsync(link, "messages", {
+    actorUserId: input.senderUserId,
+    actorRole: "practice",
+  });
 
   const body = trimText(input.body, MAX_BODY_LEN);
   if (!body) throw new Error("validation_required");
@@ -328,9 +347,11 @@ export async function addMessageFromPatient(input) {
   const link = await prisma.practicePatientLink.findUnique({
     where: { id: thread.practicePatientLinkId },
   });
-  if (!link || !linkHasConsentScope(link, "messages")) {
-    throw new Error("consent_required");
-  }
+  if (!link) throw new Error("consent_required");
+  await requireConsentScopeAsync(link, "messages", {
+    actorUserId: input.patientUserId,
+    actorRole: "patient",
+  });
 
   const body = trimText(input.body, MAX_BODY_LEN);
   if (!body) throw new Error("validation_required");
@@ -359,7 +380,7 @@ export async function addMessageFromPatient(input) {
   return {
     ...threadToJson(updated, { includeMessages: true }),
     practice: thread.practiceProfile
-      ? { id: thread.practiceProfile.id, practiceName: thread.practiceProfile.practiceName }
+      ? practiceFromProfile(thread.practiceProfile)
       : null,
   };
 }
@@ -480,14 +501,14 @@ export async function archiveThreadForPatient(threadId, patientUserId) {
     data: { status: "archived", archivedAt: now, updatedAt: now },
     include: {
       messages: { orderBy: { createdAt: "asc" } },
-      practiceProfile: { select: { id: true, practiceName: true } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
       _count: { select: { messages: true } },
     },
   });
   return {
     ...threadToJson(row, { includeMessages: true }),
     practice: row.practiceProfile
-      ? { id: row.practiceProfile.id, practiceName: row.practiceProfile.practiceName }
+      ? practiceFromProfile(row.practiceProfile)
       : null,
   };
 }
@@ -509,14 +530,14 @@ export async function restoreThreadForPatient(threadId, patientUserId) {
     },
     include: {
       messages: { orderBy: { createdAt: "asc" } },
-      practiceProfile: { select: { id: true, practiceName: true } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
       _count: { select: { messages: true } },
     },
   });
   return {
     ...threadToJson(row, { includeMessages: true }),
     practice: row.practiceProfile
-      ? { id: row.practiceProfile.id, practiceName: row.practiceProfile.practiceName }
+      ? practiceFromProfile(row.practiceProfile)
       : null,
   };
 }

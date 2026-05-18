@@ -18,8 +18,26 @@ export default function PracticePatientRecordTabs({ activeTab, onTabChange, t })
 
   return (
     <div className="practice-record__tabs-wrap">
+      <div className="practice-record__tab-select-wrap">
+        <label htmlFor={`${baseId}-tab-select`} className="practice-team__sr-only">
+          {t.recordTabSelect}
+        </label>
+        <select
+          id={`${baseId}-tab-select`}
+          className="practice-record__tab-select"
+          value={activeTab}
+          onChange={(e) => onTabChange(e.target.value)}
+          aria-label={t.recordTabSelect}
+        >
+          {TABS.map((tab) => (
+            <option key={tab.id} value={tab.id}>
+              {t[tab.labelKey]}
+            </option>
+          ))}
+        </select>
+      </div>
       <div
-        className="practice-record__tabs"
+        className="practice-record__tabs practice-record__tabs--desktop"
         role="tablist"
         aria-label={t.recordTabsLabel}
       >

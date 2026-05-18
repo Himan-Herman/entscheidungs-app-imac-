@@ -1,0 +1,87 @@
+.exports-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+.exports-page__list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.exports-page__item {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: var(--surface, #fff);
+}
+
+.exports-page__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin: 1rem 0;
+}
+
+.exports-page__form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.exports-page__form select {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"] .exports-page__item {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+@media (max-width: 640px) {
+  .exports-page {
+    padding: 1rem 0.85rem 2.5rem;
+  }
+
+  .exports-page__form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .exports-page__form label {
+    width: 100%;
+  }
+
+  .exports-page__actions .patient-threads__btn {
+    flex: 1 1 100%;
+    min-height: var(--ms-control-min-height, 44px);
+  }
+}
+
+.exports-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.exports-page__ai {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px dashed rgba(14, 116, 144, 0.35);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}

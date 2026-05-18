@@ -19,6 +19,12 @@
   --ms-radius-xl: 20px;
   --ms-radius-pill: 999px;
 
+  /* Breakpoints (CSS media queries use matching px literals) */
+  --ms-bp-mobile-max: 640px;
+  --ms-bp-tablet-min: 641px;
+  --ms-bp-tablet-max: 1024px;
+  --ms-bp-desktop-min: 1025px;
+
   /* Typography */
   --ms-font-sans: "Avenir Next", "SF Pro Text", "Segoe UI", Arial, sans-serif;
   --ms-text-base: 1rem;

@@ -19,17 +19,11 @@ import {
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import "../styles/PracticeOverviewPage.css";
+import LanguageSettingsBar from "../components/language/LanguageSettingsBar.jsx";
+import { formatUiDateTime } from "../i18n/intlLocale.js";
 
 function fmtDate(iso, lang) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  } catch {
-    return "—";
-  }
+  return formatUiDateTime(iso, lang);
 }
 
 function fmtMetric(value, notProvided) {
@@ -91,6 +85,13 @@ const CARD_DEFS = [
     visibilityKey: "team",
     labelKey: "cardTeam",
     to: (practiceId) => `/practice/team?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: Shield,
+  },
+  {
+    id: "security",
+    visibilityKey: "security",
+    labelKey: "cardSecurity",
+    to: (practiceId) => `/practice/security?practiceId=${encodeURIComponent(practiceId)}`,
     Icon: Shield,
   },
   {
@@ -297,6 +298,8 @@ export default function PracticeHubPage() {
         </p>
       </header>
 
+      <LanguageSettingsBar />
+
       <div className="practice-overview__toolbar">
         <label htmlFor="practice-overview-select">{t.selectPractice}</label>
         <select
@@ -471,6 +474,14 @@ export default function PracticeHubPage() {
                   to={`/practice/team?practiceId=${encodeURIComponent(practiceId)}`}
                 >
                   {t.actionManageTeam}
+                </Link>
+              ) : null}
+              {quickActions.openSecurity ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/security?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenSecurity}
                 </Link>
               ) : null}
             </div>

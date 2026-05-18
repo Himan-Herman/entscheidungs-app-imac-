@@ -68,6 +68,21 @@ export async function createAndRunExportJob(input) {
     if (needsLink && !input.practicePatientLinkId) {
       throw new Error("linkId_required");
     }
+    if (input.practicePatientLinkId && input.practiceProfileId) {
+      const link = await prisma.practicePatientLink.findFirst({
+        where: {
+          id: input.practicePatientLinkId,
+          practiceProfileId: input.practiceProfileId,
+        },
+      });
+      if (!link) throw new Error("link_not_found");
+      const { assertConsentForLink } = await import("../consent/consentRecordService.js");
+      await assertConsentForLink(link, "data_export", {
+        req: input.req,
+        actorUserId: input.requestedByUserId,
+        actorRole: input.practiceRole || "practice",
+      });
+    }
   }
 
   const expiresAt = new Date(Date.now() + EXPORT_TTL_MS);

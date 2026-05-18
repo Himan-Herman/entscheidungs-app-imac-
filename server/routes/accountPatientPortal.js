@@ -47,6 +47,7 @@ function userProfileJson(p) {
     displayName: p.displayName,
     preferredPatientLanguage: p.preferredPatientLanguage,
     preferredDoctorLanguage: p.preferredDoctorLanguage,
+    preferredUiLanguage: p.preferredUiLanguage,
     emergencyNote: p.emergencyNote,
     heightCm: p.heightCm,
     weightKg: p.weightKg,
@@ -271,6 +272,7 @@ router.put("/patient-settings", async (req, res) => {
     opt("displayName", 120);
     opt("preferredPatientLanguage", 12);
     opt("preferredDoctorLanguage", 12);
+    opt("preferredUiLanguage", 12);
     opt("emergencyNote", 2000);
     opt("allergies", 4000);
     opt("chronicConditions", 4000);

@@ -42,6 +42,12 @@ import practiceAudit from "./practiceAudit.js";
 import practiceTeam from "./practiceTeam.js";
 import archiveLifecycle from "./archiveLifecycle.js";
 import exports from "./exports.js";
+import patientConsents from "./patientConsents.js";
+import practiceSecurity from "./practiceSecurity.js";
+import apiErrors from "./apiErrors.js";
+import languageSettings from "./languageSettings.js";
+import responsive from "./responsive.js";
+import practiceSettings from "./practiceSettings.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
 
@@ -89,6 +95,13 @@ export default {
   practiceAudit,
   practiceTeam,
   archiveLifecycle,
+  exports,
+  patientConsents,
+  practiceSecurity,
+  apiErrors,
+  languageSettings,
+  responsive,
+  practiceSettings,
   intro,
   voiceInput,
 };

@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { notifyPatientInboxOfMedicationPlan } from "./inboxNotify.js";
+import {
+  PRACTICE_BRANDING_SELECT,
+  practiceBrandingJson,
+} from "../../utils/practiceBranding.js";
 
 const prisma = new PrismaClient();
 
@@ -17,7 +21,7 @@ const MAX_ITEMS = 30;
 
 const planInclude = {
   items: { orderBy: { sortOrder: "asc" } },
-  practiceProfile: { select: { id: true, practiceName: true } },
+  practiceProfile: { select: PRACTICE_BRANDING_SELECT },
 };
 
 function trimText(text, max) {
@@ -101,12 +105,14 @@ function planToJson(row) {
  * @param {string} linkId
  * @param {string} practiceProfileId
  */
-export async function assertLinkForPractice(linkId, practiceProfileId) {
+export async function assertLinkForPractice(linkId, practiceProfileId, ctx = {}) {
   const link = await prisma.practicePatientLink.findFirst({
     where: { id: linkId, practiceProfileId },
   });
   if (!link) throw new Error("link_not_found");
   if (!LINK_ACTIVE.has(link.status)) throw new Error("link_not_active");
+  const { assertConsentForLink } = await import("../consent/consentRecordService.js");
+  await assertConsentForLink(link, "medication_plan_access", ctx);
   return link;
 }
 
@@ -200,7 +206,7 @@ export async function listMedicationPlansForPracticePatient(
     where: { practicePatientLinkId: linkId, practiceProfileId },
     include: {
       items: { orderBy: { sortOrder: "asc" } },
-      practiceProfile: { select: { id: true, practiceName: true } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
     },
     orderBy: [{ version: "desc" }, { createdAt: "desc" }],
   });
@@ -215,7 +221,7 @@ export async function listMedicationPlansForPatient(patientUserId) {
     where: { patientUserId, status: "published" },
     include: {
       items: { orderBy: { sortOrder: "asc" } },
-      practiceProfile: { select: { id: true, practiceName: true } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
     },
     orderBy: [{ publishedAt: "desc" }, { version: "desc" }],
   });

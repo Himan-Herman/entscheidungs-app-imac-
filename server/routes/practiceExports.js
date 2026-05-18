@@ -9,9 +9,12 @@ import {
 } from "../services/export/exportJobService.js";
 import { generateExportAiOrganize } from "../services/export/exportAiOrganizeService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { practiceExportLimiter } from "../middleware/ipRateLimit.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
+
+router.use(practiceExportLimiter);
 
 function userIdFromReq(req) {
   const id = req.user?.userId;

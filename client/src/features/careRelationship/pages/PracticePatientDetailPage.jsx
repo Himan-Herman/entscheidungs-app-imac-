@@ -6,6 +6,7 @@ import { fetchPracticePatientLink } from "../api/practicePatientsApi.js";
 import { patientDisplayName } from "../utils/patientDisplayName.js";
 import PracticePatientRecordTabs from "../components/PracticePatientRecordTabs.jsx";
 import PracticePatientRecordSearch from "../components/PracticePatientRecordSearch.jsx";
+import ExportsPanel from "../../exports/components/ExportsPanel.jsx";
 import PracticePatientOverviewTab from "../components/PracticePatientOverviewTab.jsx";
 import PracticePatientActivityTab from "../components/PracticePatientActivityTab.jsx";
 import PracticePatientPreVisitsTab from "../components/PracticePatientPreVisitsTab.jsx";
@@ -162,6 +163,15 @@ export default function PracticePatientDetailPage() {
             practiceId={practiceId}
             t={t}
             onNavigateTab={setTab}
+          />
+        ) : null}
+
+        {practiceId && linkId ? (
+          <ExportsPanel
+            audience="practice"
+            practiceId={practiceId}
+            linkId={linkId}
+            compact
           />
         ) : null}
 

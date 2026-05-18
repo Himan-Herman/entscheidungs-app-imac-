@@ -13,6 +13,7 @@ import {
   revokePracticeTeamMember,
 } from "../api/practiceTeamApi.js";
 import "../../../styles/PracticeDashboardPage.css";
+import "../../../styles/PracticePatientsPage.css";
 import "../styles/PracticeTeamPage.css";
 
 const ASSIGNABLE_ROLES = ["admin", "doctor", "assistant", "viewer"];
@@ -386,7 +387,8 @@ export default function PracticeTeamPage() {
       {loading ? (
         <p className="practice-dashboard__muted">{t.loading}</p>
       ) : (
-        <div className="practice-team__table-wrap">
+        <>
+        <div className="practice-team__table-wrap practice-patients__table-wrap">
           <table className="practice-team__table">
             <caption className="practice-team__sr-only">{t.heading}</caption>
             <thead>
@@ -466,6 +468,67 @@ export default function PracticeTeamPage() {
             </tbody>
           </table>
         </div>
+        <div className="practice-patients__cards" aria-label={t.heading}>
+          {filteredMembers.length === 0 ? (
+            <p className="practice-dashboard__muted">{t.membersEmpty}</p>
+          ) : (
+            filteredMembers.map((m) => {
+              const isOwner = m.isPracticeOwner;
+              const displayName = m.user?.displayName || t.notProvided;
+              return (
+                <article key={m.id} className="practice-patients__card-item">
+                  <div className="practice-dashboard__card-top">
+                    <h2 className="practice-dashboard__muted" style={{ margin: 0, fontSize: "1rem" }}>
+                      {displayName}
+                      {isOwner ? (
+                        <span className="practice-team__badge">{t.ownerBadge}</span>
+                      ) : null}
+                    </h2>
+                    <span
+                      className={`practice-team__status-pill practice-team__status-pill--${m.status}`}
+                    >
+                      {statusLabel(m.status)}
+                    </span>
+                  </div>
+                  <p className="practice-patients__card-meta">{m.user?.email || "—"}</p>
+                  <dl className="ms-responsive-list__card-row">
+                    <dt>{t.colRole}</dt>
+                    <dd>
+                      {canManage && !isOwner && m.status !== "revoked" ? (
+                        <select
+                          value={m.role}
+                          aria-label={`${t.actionChangeRole} ${displayName}`}
+                          onChange={(e) => void onRoleChange(m.id, e.target.value)}
+                        >
+                          {ASSIGNABLE_ROLES.map((r) => (
+                            <option key={r} value={r}>
+                              {roleLabel(r)}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        roleLabel(m.role)
+                      )}
+                    </dd>
+                  </dl>
+                  {canManage && !isOwner && m.status !== "revoked" ? (
+                    <div className="ms-responsive-list__card-actions">
+                      <button
+                        type="button"
+                        className="practice-team__danger"
+                        onClick={() => void onRevoke(m.id)}
+                        aria-label={`${t.actionRevoke} ${displayName}`}
+                      >
+                        {t.actionRevoke}
+                      </button>
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })
+          )}
+        </div>
+        </>
       )}
 
       {canManage ? (

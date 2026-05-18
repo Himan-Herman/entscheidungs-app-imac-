@@ -452,5 +452,18 @@ export async function acceptPracticePatientLinkConsent(input) {
     include: includePatientPortal,
   });
 
+  const { grantConsentRecord } = await import("../consent/consentRecordService.js");
+  const { LEGACY_SCOPE_TO_CONSENT_TYPE } = await import("../consent/consentTypes.js");
+  for (const scope of scopes) {
+    const consentType = LEGACY_SCOPE_TO_CONSENT_TYPE[scope];
+    if (consentType) {
+      await grantConsentRecord({
+        patientUserId,
+        practicePatientLinkId: linkId,
+        consentType,
+      });
+    }
+  }
+
   return linkToPatientJson(row);
 }

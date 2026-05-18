@@ -1,0 +1,265 @@
+/**
+ * MedScoutX responsive utilities
+ * Mobile: max 640px | Tablet: 641–1024px | Desktop: 1025px+
+ * Aligns with design-system tokens; extends existing page patterns.
+ */
+
+:root {
+  --ms-bp-mobile-max: 640px;
+  --ms-bp-tablet-min: 641px;
+  --ms-bp-tablet-max: 1024px;
+  --ms-bp-desktop-min: 1025px;
+}
+
+/* Shared table ↔ card list (practice-patients pattern + aliases) */
+.ms-responsive-list__table-wrap,
+.practice-patients__table-wrap,
+.practice-team__table-wrap.practice-patients__table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ms-responsive-list__cards,
+.practice-patients__cards {
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+.ms-responsive-list__card,
+.practice-patients__card-item {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--ms-color-border, rgba(15, 23, 42, 0.08));
+  background: var(--ms-color-surface, rgba(255, 255, 255, 0.95));
+}
+
+:root[data-theme="dark"] .ms-responsive-list__card,
+:root[data-theme="dark"] .practice-patients__card-item {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.ms-responsive-list__card:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.ms-responsive-list__card-row {
+  display: grid;
+  grid-template-columns: minmax(6rem, 38%) 1fr;
+  gap: 0.35rem 0.75rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+}
+
+.ms-responsive-list__card-row dt {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ms-color-text-muted, #64748b);
+}
+
+.ms-responsive-list__card-row dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.ms-responsive-list__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.ms-responsive-list__card-actions .practice-dashboard__link-btn,
+.ms-responsive-list__card-actions .patient-threads__btn {
+  min-height: var(--ms-control-min-height, 44px);
+}
+
+@media (max-width: 640px) {
+  .ms-responsive-list__table-wrap,
+  .practice-patients__table-wrap,
+  .practice-team__table-wrap.practice-patients__table-wrap {
+    display: none;
+  }
+
+  .ms-responsive-list__cards,
+  .practice-patients__cards {
+    display: flex;
+  }
+
+  .ms-form-stack--mobile,
+  .exports-page__form,
+  .practice-patients__search-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ms-form-stack--mobile label,
+  .exports-page__form label,
+  .practice-patients__search-field {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .exports-page__form button,
+  .practice-patients__search-panel button {
+    width: 100%;
+    min-height: var(--ms-control-min-height, 44px);
+  }
+
+  .practice-dashboard__filter,
+  .practice-dashboard__field {
+    width: 100%;
+  }
+
+  .practice-dashboard__field input,
+  .practice-dashboard__field select,
+  .practice-dashboard__filter select {
+    width: 100%;
+    min-height: var(--ms-control-min-height, 44px);
+  }
+}
+
+/* Accessible horizontal scroll when table stays visible on small screens */
+.ms-table-scroll {
+  overflow-x: auto;
+  margin-top: 0.75rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ms-table-scroll__hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ms-color-text-muted, #64748b);
+}
+
+.ms-table-scroll:focus-within {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Native dialog: fit mobile viewport */
+.patient-data-control__dialog,
+.ms-dialog-surface {
+  width: min(28rem, calc(100vw - 1.5rem));
+  max-width: calc(100vw - 1.5rem);
+  max-height: min(90vh, calc(100dvh - 1.5rem));
+  margin: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  border-radius: 0.75rem;
+  background: var(--ms-color-surface, #fff);
+  color: var(--ms-color-text, #111827);
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+:root[data-theme="dark"] .patient-data-control__dialog,
+:root[data-theme="dark"] .ms-dialog-surface {
+  background: var(--ms-color-surface, #1e293b);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: var(--ms-color-text, #f1f5f9);
+}
+
+.patient-data-control__dialog::backdrop,
+.ms-dialog-surface::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+@media (max-width: 640px) {
+  .patient-data-control__dialog-actions,
+  .ms-dialog-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .patient-data-control__dialog-actions button,
+  .ms-dialog-actions button {
+    width: 100%;
+    min-height: var(--ms-control-min-height, 44px);
+  }
+}
+
+/* Patient record: compact tab bar on phone, select for jump */
+@media (max-width: 640px) {
+  .practice-record__tabs--desktop {
+    display: none;
+  }
+
+  .practice-record__tab-select-wrap {
+    display: block;
+    margin: 1rem 0;
+  }
+
+  .practice-record__tab-select {
+    width: 100%;
+    min-height: var(--ms-control-min-height, 44px);
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--ms-color-border, rgba(15, 23, 42, 0.14));
+    font: inherit;
+    background: var(--ms-color-surface, #fff);
+    color: inherit;
+  }
+
+  :root[data-theme="dark"] .practice-record__tab-select {
+    background: #0f172a;
+    border-color: rgba(148, 163, 184, 0.3);
+  }
+}
+
+@media (min-width: 641px) {
+  .practice-record__tab-select-wrap {
+    display: none;
+  }
+
+  .practice-record__tabs--desktop {
+    display: flex;
+  }
+}
+
+/* Tablet: scrollable tab strip */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .practice-record__tabs-wrap {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .practice-record__tabs {
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+  }
+
+  .practice-record__tab {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+}
+
+/* Touch-friendly controls in hubs */
+.workspace-hub__tile {
+  min-height: 108px;
+}
+
+@media (max-width: 640px) {
+  .workspace-hub {
+    padding: 1rem 0.85rem 2rem;
+  }
+
+  .workspace-hub__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-hub__tile {
+    min-height: 72px;
+    flex-direction: row;
+    align-items: center;
+  }
+}

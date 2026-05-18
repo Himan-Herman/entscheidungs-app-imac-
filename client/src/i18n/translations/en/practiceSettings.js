@@ -1,0 +1,75 @@
+export default {
+  pageTitle: "MedScoutX — Practice settings",
+  heading: "Practice settings",
+  intro:
+    "Master data, contact details, and subtle branding for the patient view. No medical advertising claims.",
+  backHub: "Back to practice overview",
+  selectPractice: "Practice profile",
+  loading: "Loading settings …",
+  loadError: "Could not load settings.",
+  save: "Save",
+  saving: "Saving …",
+  saved: "Saved.",
+  saveError: "Could not save.",
+  readOnlyNotice:
+    "You can view these settings only. Changes are limited to owners and administrators.",
+
+  sectionProfile: "Practice profile",
+  sectionContact: "Contact & address",
+  sectionHours: "Opening hours",
+  sectionBranding: "Branding",
+  sectionPrivacy: "Privacy & notices",
+  sectionTeam: "Team & permissions",
+
+  practiceName: "Practice name",
+  specialty: "Specialty / category",
+  description: "Description",
+  website: "Website",
+  phone: "Phone",
+  email: "Email",
+  address: "Address",
+  city: "City",
+  postalCode: "Postal code",
+  country: "Country",
+  preferredLanguage: "Primary language",
+  supportedLanguages: "Languages (comma-separated, e.g. de, en)",
+  openingHours: "Opening hours",
+  openingHoursHint: "e.g. Mon–Fri 8am–6pm, Sat by appointment",
+
+  displayNamePatients: "Display name for patients",
+  patientHint: "Short notice for patients",
+  accentColor: "Accent color",
+  accentColorHint: "Hex color (#0F766E). Must have sufficient contrast on white.",
+  logo: "Practice logo",
+  logoUpload: "Upload logo",
+  logoDelete: "Remove logo",
+  logoUploading: "Uploading …",
+  logoHint: "PNG, JPEG, or WebP, max. 2 MB.",
+  logoPreviewAlt: "Practice logo preview",
+
+  privacyNote:
+    "MedScoutX consent and security notices remain visible to patients and are not replaced by practice branding.",
+  teamLink: "Manage team & permissions",
+  teamLinkDesc: "Roles, invites, and access",
+
+  aiDescription: "Draft description with AI",
+  aiDescriptionLoading: "AI is drafting …",
+  aiDescriptionNotes: "Notes for the draft (optional)",
+  aiApply: "Apply draft",
+  aiSuggestionLabel: "AI suggestion – please review",
+  aiHint:
+    "AI only supports neutral wording. Medical advertising claims or healing promises are not allowed.",
+  aiError: "Could not generate AI draft.",
+
+  medscoutBrandNote: "MedScoutX — organizational patient platform",
+
+  errors: {
+    marketing_claim_forbidden: "Wording not allowed (no advertising or healing promises).",
+    accentColor_invalid: "Accent color invalid or contrast too low.",
+    logo_type_invalid: "File type not allowed. Use PNG, JPEG, or WebP.",
+    logo_missing: "Please select a file.",
+    forbidden: "You do not have permission for this action.",
+    email_invalid: "Invalid email address.",
+    supportedLanguages_invalid: "Invalid languages.",
+  },
+};

@@ -264,7 +264,17 @@ export async function createPracticeDocumentDownloadLink(
   actorRole,
   req,
 ) {
-  await assertLinkForPractice(linkId, practiceProfileId);
+  const link = await assertLinkForPractice(linkId, practiceProfileId, {
+    actorUserId: createdByUserId,
+    actorRole,
+    req,
+  });
+  const { assertConsentForLink } = await import("../consent/consentRecordService.js");
+  await assertConsentForLink(link, "optional_secure_links", {
+    actorUserId: createdByUserId,
+    actorRole,
+    req,
+  });
   const doc = await prisma.practiceDocument.findFirst({
     where: { id: documentId, practicePatientLinkId: linkId, practiceProfileId },
   });

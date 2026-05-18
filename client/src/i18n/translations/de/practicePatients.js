@@ -104,6 +104,7 @@ export default {
   sortName: "Name",
   sortCreated: "Verknüpft seit",
   recordTabsLabel: "Patientenakte-Bereiche",
+  recordTabSelect: "Bereich wählen",
   tabOverview: "Übersicht",
   tabProfile: "Patientenprofil",
   tabPreVisits: "Pre-Visits",

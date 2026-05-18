@@ -109,12 +109,18 @@
   background: rgba(255, 255, 255, 0.95);
 }
 
+.practice-patients__card-item--selected,
+.practice-patients__card-item[aria-pressed="true"] {
+  border-color: rgba(14, 116, 144, 0.45);
+  box-shadow: 0 0 0 2px rgba(14, 116, 144, 0.2);
+}
+
 :root[data-theme="dark"] .practice-patients__card-item {
   background: rgba(30, 41, 59, 0.5);
   border-color: rgba(148, 163, 184, 0.2);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 640px) {
   .practice-patients__table-wrap {
     display: none;
   }
@@ -154,11 +160,16 @@
   overflow-x: auto;
 }
 
-.practice-record__tabs {
+.practice-record__tabs,
+.practice-record__tabs--desktop {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   min-width: min-content;
+}
+
+.practice-record__tab-select-wrap {
+  display: none;
 }
 
 .practice-record__tab {

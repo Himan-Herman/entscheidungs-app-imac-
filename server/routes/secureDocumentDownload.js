@@ -6,6 +6,7 @@
 import express from "express";
 import { streamSecureDocumentDownload } from "../services/practiceDocument/secureDocumentAccessService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { logSecurityEvent } from "../services/security/securityEventService.js";
 
 const router = express.Router();
 
@@ -47,6 +48,19 @@ router.get("/:token", async (req, res) => {
       entityType: "secure_document_link",
       metadata: { error: mapped.error },
     });
+    if (mapped.error === "link_expired" || mapped.error === "link_revoked") {
+      logSecurityEvent({
+        req,
+        eventType: mapped.error === "link_expired" ? "secure_link_expired" : "revoked_resource_access",
+        metadata: { resource: "secure_document_link" },
+      });
+    } else if (mapped.error === "invalid_token" || mapped.error === "link_not_found") {
+      logSecurityEvent({
+        req,
+        eventType: "invalid_token",
+        metadata: { resource: "secure_document_link" },
+      });
+    }
     if (mapped.status >= 500) {
       console.error("[secure-download]", err?.message ?? err);
     }

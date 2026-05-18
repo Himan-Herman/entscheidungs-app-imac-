@@ -5,6 +5,7 @@ import {
 } from "../../config/aiSafetyPolicy.js";
 import { sanitizeAiOutput, shouldRegenerateUnsafeOutput } from "../aiSafetySanitizer.js";
 import { writeAuditLog } from "../auditLogService.js";
+import { logSecurityEvent } from "../security/securityEventService.js";
 import { listPatientActivity, listPracticeLinkActivity } from "./activityFeedService.js";
 
 /**
@@ -153,18 +154,15 @@ export async function generatePatientActivityAiSummary(input) {
  * @param {{ req?: import('express').Request, userId?: string, actorRole?: string, action?: string, practiceProfileId?: string, patientUserId?: string, practicePatientLinkId?: string, metadata?: Record<string, unknown> }} opts
  */
 export function logAccessDenied(opts) {
-  writeAuditLog({
+  logSecurityEvent({
     req: opts.req,
     userId: opts.userId ?? null,
     actorRole: opts.actorRole ?? null,
-    action: opts.action || "access_denied",
-    entityType: "security",
-    entityId: opts.practicePatientLinkId || opts.practiceProfileId || "global",
+    eventType: opts.action || "forbidden_api_access",
     practiceProfileId: opts.practiceProfileId ?? null,
     patientUserId: opts.patientUserId ?? null,
     practicePatientLinkId: opts.practicePatientLinkId ?? null,
-    severity: "security",
-    visibility: "internal",
+    entityId: opts.practicePatientLinkId || opts.practiceProfileId || "global",
     metadata: opts.metadata ?? null,
   });
 }

@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -14,6 +15,10 @@ import {
   SUPPORTED_LANGUAGE_CODES,
 } from "./localeConfig";
 import { sendPracticeAnalyticsEvent } from "../api/productAnalytics.js";
+import {
+  fetchUiLanguagePreference,
+  patchUiLanguagePreference,
+} from "./i18nPreferencesApi.js";
 
 const LanguageContext = createContext(null);
 
@@ -25,6 +30,7 @@ export function LanguageProvider({ children }) {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     return resolveInitialLanguage(stored, window.navigator.language);
   });
+  const profileLoadedRef = useRef(false);
 
   const setLanguage = useCallback((next) => {
     const code = typeof next === "string" ? next.toLowerCase() : "";
@@ -37,6 +43,11 @@ export function LanguageProvider({ children }) {
             metadata: { uiLanguage: resolved },
           });
         });
+        if (localStorage.getItem("medscout_token")) {
+          void patchUiLanguagePreference(resolved).catch(() => {
+            /* localStorage remains source on device */
+          });
+        }
       }
       return resolved;
     });
@@ -45,7 +56,6 @@ export function LanguageProvider({ children }) {
   useEffect(() => {
     const root = document.documentElement;
     root.lang = language;
-    /* RTL for page content (ar/fa/ckb); header/footer/nav keep dir="ltr" on their roots */
     root.dir = isRtlLanguage(language) ? "rtl" : "ltr";
     root.dataset.msTextDir = isRtlLanguage(language) ? "rtl" : "ltr";
     try {
@@ -55,13 +65,29 @@ export function LanguageProvider({ children }) {
     }
   }, [language]);
 
+  useEffect(() => {
+    if (profileLoadedRef.current) return;
+    if (!localStorage.getItem("medscout_token")) return;
+    profileLoadedRef.current = true;
+    void (async () => {
+      try {
+        const { res, data } = await fetchUiLanguagePreference();
+        if (res?.ok && data.ok && isSupportedLanguage(data.locale)) {
+          setLanguageState(data.locale);
+        }
+      } catch {
+        /* keep localStorage preference */
+      }
+    })();
+  }, []);
+
   const value = useMemo(
     () => ({
       language,
       setLanguage,
       supportedLanguages: SUPPORTED_LANGUAGE_CODES,
     }),
-    [language, setLanguage]
+    [language, setLanguage],
   );
 
   return (

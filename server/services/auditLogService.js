@@ -7,7 +7,7 @@ import { registryForAction } from "./activity/activityFeedRegistry.js";
 const prisma = new PrismaClient();
 
 const SENSITIVE_METADATA_KEYS =
-  /^(password|token|secret|authorization|cookie|email|transcript|pdf|body|symptom|diagnosis|content)$/i;
+  /^(password|token|secret|authorization|cookie|email|transcript|pdf|body|symptom|diagnosis|content|message|medication|lab|befund|thread|nachricht)$/i;
 
 function getIpSalt() {
   return process.env.AUDIT_IP_SALT || process.env.JWT_SECRET || "medscoutx-audit-salt";

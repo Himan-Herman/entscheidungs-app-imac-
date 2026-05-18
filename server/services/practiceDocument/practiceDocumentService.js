@@ -4,6 +4,10 @@ import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { getPracticeDocumentStorage } from "./storage/index.js";
 import { notifyPatientInboxOfPracticeDocument } from "./inboxNotify.js";
 import { writePracticeDocumentAudit } from "./practiceDocumentAuditService.js";
+import {
+  PRACTICE_BRANDING_SELECT,
+  practiceBrandingJson,
+} from "../../utils/practiceBranding.js";
 
 const prisma = new PrismaClient();
 const storage = getPracticeDocumentStorage();
@@ -37,7 +41,7 @@ const ALLOWED_MIME = new Set([
 const docInclude = {
   files: { orderBy: { createdAt: "asc" } },
   shares: { orderBy: { sharedAt: "desc" } },
-  practiceProfile: { select: { id: true, practiceName: true } },
+  practiceProfile: { select: PRACTICE_BRANDING_SELECT },
 };
 
 function trimText(text, max) {
@@ -79,6 +83,7 @@ function documentToJson(row) {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     practiceName: row.practiceProfile?.practiceName ?? null,
+    practice: row.practiceProfile ? practiceBrandingJson(row.practiceProfile) : null,
     shareStatus: activeShare?.status ?? null,
     files: (row.files || []).map((f) => ({
       id: f.id,
@@ -94,12 +99,14 @@ function documentToJson(row) {
  * @param {string} linkId
  * @param {string} practiceProfileId
  */
-export async function assertLinkForPractice(linkId, practiceProfileId) {
+export async function assertLinkForPractice(linkId, practiceProfileId, ctx = {}) {
   const link = await prisma.practicePatientLink.findFirst({
     where: { id: linkId, practiceProfileId },
   });
   if (!link) throw new Error("link_not_found");
   if (!LINK_ACTIVE.has(link.status)) throw new Error("link_not_active");
+  const { assertConsentForLink } = await import("../consent/consentRecordService.js");
+  await assertConsentForLink(link, "document_sharing", ctx);
   return link;
 }
 

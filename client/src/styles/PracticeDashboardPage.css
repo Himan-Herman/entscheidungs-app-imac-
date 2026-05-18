@@ -249,7 +249,7 @@
   margin-top: 8px;
 }
 
-@media (max-width: 620px) {
+@media (max-width: 640px) {
   .practice-dashboard__filters {
     grid-template-columns: 1fr;
   }
@@ -265,56 +265,119 @@
   }
 }
 
+:root[data-theme="dark"] .practice-dashboard {
+  background: #0b1220;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .practice-dashboard__header,
+:root[data-theme="dark"] .practice-dashboard__analytics,
+:root[data-theme="dark"] .practice-dashboard__filters,
+:root[data-theme="dark"] .practice-dashboard__card,
+:root[data-theme="dark"] .practice-dashboard__followup-thread {
+  background: #111827;
+  border-color: #334155;
+  color: #e2e8f0;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .practice-dashboard__intro,
+:root[data-theme="dark"] .practice-dashboard__safety,
+:root[data-theme="dark"] .practice-dashboard__role,
+:root[data-theme="dark"] .practice-dashboard__muted {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .practice-dashboard__stat-card {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+:root[data-theme="dark"] .practice-dashboard__stat-label {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .practice-dashboard__stat-value {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .practice-dashboard__analytics-privacy,
+:root[data-theme="dark"] .practice-dashboard__analytics-footnote {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .practice-dashboard__analytics-warn {
+  color: #fcd34d;
+}
+
+:root[data-theme="dark"] .practice-dashboard__field input,
+:root[data-theme="dark"] .practice-dashboard__field select,
+:root[data-theme="dark"] .practice-dashboard__followup-create input,
+:root[data-theme="dark"] .practice-dashboard__followup-create textarea,
+:root[data-theme="dark"] .practice-dashboard__followup-reply textarea,
+:root[data-theme="dark"] .practice-dashboard__followup-thread select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .practice-dashboard__link-btn,
+:root[data-theme="dark"] .practice-dashboard__card button {
+  background: rgba(14, 116, 144, 0.18);
+  color: #bae6fd;
+  border-color: rgba(14, 116, 144, 0.45);
+}
+
 @media (prefers-color-scheme: dark) {
-  .practice-dashboard {
+  :root:not([data-theme="light"]) .practice-dashboard {
     background: #0b1220;
     color: #e2e8f0;
   }
-  .practice-dashboard__header,
-  .practice-dashboard__analytics,
-  .practice-dashboard__filters,
-  .practice-dashboard__card,
-  .practice-dashboard__followup-thread {
+  :root:not([data-theme="light"]) .practice-dashboard__header,
+  :root:not([data-theme="light"]) .practice-dashboard__analytics,
+  :root:not([data-theme="light"]) .practice-dashboard__filters,
+  :root:not([data-theme="light"]) .practice-dashboard__card,
+  :root:not([data-theme="light"]) .practice-dashboard__followup-thread {
     background: #111827;
     border-color: #334155;
     color: #e2e8f0;
     box-shadow: none;
   }
-  .practice-dashboard__intro,
-  .practice-dashboard__safety,
-  .practice-dashboard__role,
-  .practice-dashboard__muted {
+  :root:not([data-theme="light"]) .practice-dashboard__intro,
+  :root:not([data-theme="light"]) .practice-dashboard__safety,
+  :root:not([data-theme="light"]) .practice-dashboard__role,
+  :root:not([data-theme="light"]) .practice-dashboard__muted {
     color: #94a3b8;
   }
-  .practice-dashboard__stat-card {
+  :root:not([data-theme="light"]) .practice-dashboard__stat-card {
     background: #0f172a;
     border-color: #334155;
   }
-  .practice-dashboard__stat-label {
+  :root:not([data-theme="light"]) .practice-dashboard__stat-label {
     color: #94a3b8;
   }
-  .practice-dashboard__stat-value {
+  :root:not([data-theme="light"]) .practice-dashboard__stat-value {
     color: #f1f5f9;
   }
-  .practice-dashboard__analytics-privacy,
-  .practice-dashboard__analytics-footnote {
+  :root:not([data-theme="light"]) .practice-dashboard__analytics-privacy,
+  :root:not([data-theme="light"]) .practice-dashboard__analytics-footnote {
     color: #94a3b8;
   }
-  .practice-dashboard__analytics-warn {
+  :root:not([data-theme="light"]) .practice-dashboard__analytics-warn {
     color: #fcd34d;
   }
-  .practice-dashboard__field input,
-  .practice-dashboard__field select,
-  .practice-dashboard__followup-create input,
-  .practice-dashboard__followup-create textarea,
-  .practice-dashboard__followup-reply textarea,
-  .practice-dashboard__followup-thread select {
+  :root:not([data-theme="light"]) .practice-dashboard__field input,
+  :root:not([data-theme="light"]) .practice-dashboard__field select,
+  :root:not([data-theme="light"]) .practice-dashboard__followup-create input,
+  :root:not([data-theme="light"]) .practice-dashboard__followup-create textarea,
+  :root:not([data-theme="light"]) .practice-dashboard__followup-reply textarea,
+  :root:not([data-theme="light"]) .practice-dashboard__followup-thread select {
     background: #0f172a;
     border-color: #334155;
     color: #e2e8f0;
   }
-  .practice-dashboard__link-btn,
-  .practice-dashboard__card button {
+  :root:not([data-theme="light"]) .practice-dashboard__link-btn,
+  :root:not([data-theme="light"]) .practice-dashboard__card button {
     background: rgba(14, 116, 144, 0.18);
     color: #bae6fd;
     border-color: rgba(14, 116, 144, 0.45);

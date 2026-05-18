@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 
 import { requireAuth } from "../middleware/requireAuth.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { logSecurityEventThrottled } from "../services/security/securityEventService.js";
 import {
   authLoginLimiter,
   authPasswordResetLimiter,
@@ -366,10 +367,24 @@ authRouter.post("/login", authLoginLimiter, async (req, res) => {
   const emailNorm = email?.trim().toLowerCase();
 
   const u = await prisma.user.findUnique({ where: { email: emailNorm } });
-  if (!u) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+  if (!u) {
+    logSecurityEventThrottled(`login_failed:${req.ip}`, {
+      req,
+      eventType: "login_failed",
+      metadata: { reason: "unknown_user" },
+    });
+    return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+  }
 
   const ok = await bcrypt.compare(password, u.passwordHash);
-  if (!ok) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+  if (!ok) {
+    logSecurityEventThrottled(`login_failed:${req.ip}`, {
+      req,
+      eventType: "login_failed",
+      metadata: { reason: "invalid_password" },
+    });
+    return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+  }
 
   if (!skipEmailVerification && !u.verified) {
     return res

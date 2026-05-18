@@ -104,6 +104,7 @@ export default {
   sortName: "Name",
   sortCreated: "Linked since",
   recordTabsLabel: "Patient record sections",
+  recordTabSelect: "Choose section",
   tabOverview: "Overview",
   tabProfile: "Patient profile",
   tabPreVisits: "Pre-Visits",

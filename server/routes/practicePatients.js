@@ -29,6 +29,8 @@ import {
 } from "../services/careRelationship/practicePatientSearchService.js";
 import { generatePracticePatientSearchAiSuggestion } from "../services/careRelationship/practicePatientSearchAiService.js";
 import { createAndRunExportJob } from "../services/export/exportJobService.js";
+import { listPracticeLinkConsents } from "../services/consent/consentRecordService.js";
+import { practiceExportLimiter } from "../middleware/ipRateLimit.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { generatePracticeLinkActivityAiSummary } from "../services/activity/activityFeedAiService.js";
 import { logAccessDenied } from "../services/activity/activityFeedAiService.js";
@@ -59,6 +61,9 @@ function mapError(err) {
   }
   if (msg === "link_not_active") {
     return { status: 409, error: msg };
+  }
+  if (msg === "consent_required") {
+    return { status: 403, error: msg };
   }
   if (msg === "link_already_exists") {
     return { status: 409, error: msg };
@@ -245,8 +250,32 @@ router.use("/:linkId/documents", practiceDocumentsRouter);
 /** Patient profile read-only (PR-8) — before /:linkId */
 router.use("/:linkId/profile", practicePatientProfileRouter);
 
+/** GET /api/practice/patients/:linkId/consents?practiceId= */
+router.get("/:linkId/consents", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const consents = await listPracticeLinkConsents(req.params.linkId, practiceId);
+    return res.json({ ok: true, consents });
+  } catch (err) {
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
 /** POST /api/practice/patients/:linkId/export */
-router.post("/:linkId/export", async (req, res) => {
+router.post("/:linkId/export", practiceExportLimiter, async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 

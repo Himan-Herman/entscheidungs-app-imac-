@@ -7,6 +7,7 @@ export default {
     "MedScoutX does not provide legal advice. Deletion requests are documented; legal retention obligations may prevent immediate full deletion.",
   backHub: "Back to patient workspace",
   openActivity: "Open activity log",
+  openConsents: "Manage consents",
   loading: "Loading…",
   loadError: "Could not load data overview.",
   featureDisabled: "This feature is not enabled in this environment yet.",

@@ -150,3 +150,15 @@ export const accountDeleteLimiter = createIpRateLimiter({
   keyPrefix: 'account:delete',
   windowMs: ONE_HOUR_MS,
 });
+
+/** POST /api/patient/exports — organizational export jobs */
+export const patientExportLimiter = createIpRateLimiter({
+  max: 20,
+  keyPrefix: 'patient:exports',
+});
+
+/** POST /api/practice/exports and per-patient export */
+export const practiceExportLimiter = createIpRateLimiter({
+  max: 25,
+  keyPrefix: 'practice:exports',
+});

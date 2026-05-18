@@ -1,11 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../auditLogService.js";
-import {
-  CARE_CONSENT_VERSION,
-  linkHasConsentScope,
-  normalizeConsentScopes,
-} from "./consentScopes.js";
 import { linkToPatientJson } from "./practicePatientLinkService.js";
+import {
+  grantConsentRecord,
+  linkHasConsentType,
+  revokeConsentRecord,
+} from "../consent/consentRecordService.js";
 import { notifyPatientInboxOfProfileAccess } from "../patientInbox/patientInboxNotify.js";
 import { notifyPracticeInboxOfProfileRevoked } from "../practiceInbox/practiceInboxNotify.js";
 
@@ -34,9 +34,9 @@ function fmtDate(iso) {
 /**
  * @param {import("@prisma/client").PracticePatientLink} link
  */
-export function practiceHasProfileAccess(link) {
+export async function practiceHasProfileAccess(link) {
   if (!LINK_READABLE.has(link.status)) return false;
-  return linkHasConsentScope(link, "profile");
+  return linkHasConsentType(link, "profile_access");
 }
 
 /**
@@ -55,7 +55,7 @@ export async function getPatientProfileForPractice(
     where: { id: linkId, practiceProfileId },
   });
   if (!link) throw new Error("link_not_found");
-  if (!practiceHasProfileAccess(link)) throw new Error("profile_access_denied");
+  if (!(await practiceHasProfileAccess(link))) throw new Error("profile_access_denied");
 
   const user = await prisma.user.findUnique({
     where: { id: link.patientUserId },
@@ -142,7 +142,7 @@ export async function getPatientProfileForPractice(
  * @param {string} patientUserId
  * @param {boolean} granted
  */
-export async function updatePatientProfileAccess(linkId, patientUserId, granted) {
+export async function updatePatientProfileAccess(linkId, patientUserId, granted, ctx = {}) {
   const id = String(linkId || "").trim();
   const uid = String(patientUserId || "").trim();
   if (!id || !uid) throw new Error("validation_required");
@@ -155,44 +155,29 @@ export async function updatePatientProfileAccess(linkId, patientUserId, granted)
     throw new Error("link_not_active");
   }
 
-  const now = new Date();
-  let scopes = normalizeConsentScopes(link.consentScopes);
-
-  if (
-    link.consentAcceptedAt &&
-    (!Array.isArray(link.consentScopes) || link.consentScopes.length === 0)
-  ) {
-    scopes = normalizeConsentScopes(["medication", "messages"]);
-  }
-
   if (granted) {
-    if (!scopes.includes("profile")) scopes.push("profile");
+    await grantConsentRecord({
+      patientUserId: uid,
+      practicePatientLinkId: id,
+      consentType: "profile_access",
+      req: ctx.req,
+    });
   } else {
-    scopes = scopes.filter((s) => s !== "profile");
+    const active = await prisma.consentRecord.findFirst({
+      where: {
+        practicePatientLinkId: id,
+        consentType: "profile_access",
+        status: "granted",
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    if (active) {
+      await revokeConsentRecord(active.id, uid, { req: ctx.req });
+    }
   }
 
-  const data = {
-    consentScopes: scopes,
-    updatedAt: now,
-  };
-
-  if (granted) {
-    data.profileAccessGrantedAt = now;
-    data.profileAccessRevokedAt = null;
-    data.profileAccessGrantedByUserId = uid;
-  } else if (linkHasConsentScope(link, "profile") || link.profileAccessGrantedAt) {
-    data.profileAccessRevokedAt = now;
-  }
-
-  if (granted && !link.consentAcceptedAt) {
-    data.consentAcceptedAt = now;
-    data.consentVersion = link.consentVersion || CARE_CONSENT_VERSION;
-    if (link.status === "invited") data.status = "active";
-  }
-
-  const row = await prisma.practicePatientLink.update({
+  const row = await prisma.practicePatientLink.findFirst({
     where: { id },
-    data,
     include: {
       practiceProfile: {
         select: {

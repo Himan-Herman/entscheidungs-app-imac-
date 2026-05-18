@@ -1,5 +1,15 @@
 // src/middleware/requireAuth.js
 import jwt from 'jsonwebtoken';
+import { logSecurityEventThrottled } from '../services/security/securityEventService.js';
+
+function clientIp(req) {
+  const xf = req.headers['x-forwarded-for'];
+  if (typeof xf === 'string' && xf.length) {
+    const first = xf.split(',')[0]?.trim();
+    if (first) return first;
+  }
+  return req.ip || req.socket?.remoteAddress || 'unknown';
+}
 
 /**
  * Bearer JWT from Authorization header (primary).
@@ -40,6 +50,11 @@ export function requireAuth(req, res, next) {
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError") {
+      logSecurityEventThrottled(`invalid_token:${clientIp(req)}`, {
+        req,
+        eventType: 'invalid_token',
+        metadata: { reason: 'expired', path: req.path },
+      });
       return res.status(401).json({
         success: false,
         code: "TOKEN_EXPIRED",
@@ -47,6 +62,11 @@ export function requireAuth(req, res, next) {
       });
     }
     if (err.name === "JsonWebTokenError") {
+      logSecurityEventThrottled(`invalid_token:${clientIp(req)}`, {
+        req,
+        eventType: 'invalid_token',
+        metadata: { reason: 'invalid', path: req.path },
+      });
       return res.status(401).json({
         success: false,
         code: "TOKEN_INVALID",

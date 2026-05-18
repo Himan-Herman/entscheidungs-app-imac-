@@ -1,0 +1,39 @@
+.language-settings-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle, #d8dee6);
+  background: var(--surface-muted, #f7f9fb);
+}
+
+.language-settings-bar__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.language-settings-bar__hint,
+.language-settings-bar__meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.92rem;
+  color: var(--text-muted, #4a5568);
+  max-width: 42rem;
+}
+
+.language-settings-bar__control {
+  flex-shrink: 0;
+}
+
+html[dir="rtl"] .language-settings-bar {
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .language-settings-bar__control {
+    width: 100%;
+  }
+}

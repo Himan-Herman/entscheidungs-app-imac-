@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../auditLogService.js";
 import { patientInboxTitleForType } from "../../constants/inboxNotificationCatalog.js";
+import {
+  PRACTICE_BRANDING_SELECT,
+  practiceBrandingJson,
+} from "../../utils/practiceBranding.js";
 
 const prisma = new PrismaClient();
 
@@ -24,7 +28,7 @@ const MAX_TARGET_URL_LEN = 2048;
 
 const includePractice = {
   practiceProfile: {
-    select: { id: true, practiceName: true },
+    select: PRACTICE_BRANDING_SELECT,
   },
 };
 
@@ -48,12 +52,7 @@ export function inboxItemToJson(row) {
     createdAt: row.createdAt,
     readAt: row.readAt,
     archivedAt: row.archivedAt,
-    practice: row.practiceProfile
-      ? {
-          id: row.practiceProfile.id,
-          practiceName: row.practiceProfile.practiceName,
-        }
-      : null,
+    practice: row.practiceProfile ? practiceBrandingJson(row.practiceProfile) : null,
   };
 }
 

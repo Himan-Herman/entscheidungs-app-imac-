@@ -1,8 +1,17 @@
 /** Current care-relationship consent document version (legal copy is maintained separately). */
 export const CARE_CONSENT_VERSION = "phase1-care-v1";
 
-/** Scopes a patient may grant per practice link (Phase 1). */
-export const CONSENT_SCOPES = Object.freeze(["medication", "messages", "profile"]);
+/** Scopes synced on PracticePatientLink.consentScopes from ConsentRecord rows. */
+export const CONSENT_SCOPES = Object.freeze([
+  "medication",
+  "messages",
+  "profile",
+  "documents",
+  "data_export",
+  "ai_organizational",
+  "email_notifications",
+  "secure_links",
+]);
 
 const SCOPE_SET = new Set(CONSENT_SCOPES);
 
@@ -36,8 +45,7 @@ export function linkHasConsentScope(link, scope) {
   if (!link?.consentAcceptedAt) return false;
   const scopes = Array.isArray(link.consentScopes) ? link.consentScopes : [];
   if (scopes.length === 0) {
-    // Grandfather: consent recorded before scopes were stored — treat as all Phase-1 scopes.
-    return SCOPE_SET.has(scope);
+    return ["profile", "medication", "messages"].includes(scope);
   }
   return scopes.includes(scope);
 }

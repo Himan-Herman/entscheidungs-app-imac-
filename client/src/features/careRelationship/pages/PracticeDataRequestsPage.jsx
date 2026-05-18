@@ -11,6 +11,7 @@ import {
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
 import "../../../styles/PatientDataControlPage.css";
+import ResponsiveTableCards from "../../../components/ResponsiveTableCards.jsx";
 
 function fmt(iso, lang) {
   if (!iso) return "—";
@@ -221,23 +222,54 @@ export default function PracticeDataRequestsPage() {
       {!loading && !error && requests.length === 0 ? <p>{t.empty}</p> : null}
 
       {!loading && !error && requests.length > 0 ? (
-        <table className="practice-patients__table" aria-label={t.listCaption}>
-          <thead>
-            <tr>
-              <th scope="col">{t.colPatient}</th>
-              <th scope="col">{t.colType}</th>
-              <th scope="col">{t.colStatus}</th>
-              <th scope="col">{t.colDate}</th>
-              <th scope="col">{t.colLink}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((row) => (
-              <tr
+        <ResponsiveTableCards
+          caption={t.listCaption}
+          table={
+            <table className="practice-patients__table">
+              <caption className="practice-team__sr-only">{t.listCaption}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t.colPatient}</th>
+                  <th scope="col">{t.colType}</th>
+                  <th scope="col">{t.colStatus}</th>
+                  <th scope="col">{t.colDate}</th>
+                  <th scope="col">{t.colLink}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {requests.map((row) => (
+                  <tr
+                    key={row.id}
+                    tabIndex={0}
+                    style={{ cursor: "pointer" }}
+                    aria-selected={selectedId === row.id}
+                    onClick={() => setSelectedId(row.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedId(row.id);
+                      }
+                    }}
+                  >
+                    <td>{patientName(row)}</td>
+                    <td>{typeLabel(row.type, t)}</td>
+                    <td>{statusLabel(row.status, t)}</td>
+                    <td>{fmt(row.createdAt, language)}</td>
+                    <td>{row.link?.status || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          }
+          cards={requests.map((row) => {
+            const selected = selectedId === row.id;
+            return (
+              <article
                 key={row.id}
+                className={`practice-patients__card-item ms-responsive-list__card${selected ? " practice-patients__card-item--selected" : ""}`}
+                role="button"
                 tabIndex={0}
-                style={{ cursor: "pointer" }}
-                aria-selected={selectedId === row.id}
+                aria-pressed={selected}
                 onClick={() => setSelectedId(row.id)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -246,15 +278,25 @@ export default function PracticeDataRequestsPage() {
                   }
                 }}
               >
-                <td>{patientName(row)}</td>
-                <td>{typeLabel(row.type, t)}</td>
-                <td>{statusLabel(row.status, t)}</td>
-                <td>{fmt(row.createdAt, language)}</td>
-                <td>{row.link?.status || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                <h2 className="practice-dashboard__muted" style={{ margin: 0, fontSize: "1rem" }}>
+                  {patientName(row)}
+                </h2>
+                <dl className="ms-responsive-list__card-row">
+                  <dt>{t.colType}</dt>
+                  <dd>{typeLabel(row.type, t)}</dd>
+                  <dt>{t.colStatus}</dt>
+                  <dd>{statusLabel(row.status, t)}</dd>
+                  <dt>{t.colDate}</dt>
+                  <dd>
+                    <time dateTime={row.createdAt}>{fmt(row.createdAt, language)}</time>
+                  </dd>
+                  <dt>{t.colLink}</dt>
+                  <dd>{row.link?.status || "—"}</dd>
+                </dl>
+              </article>
+            );
+          })}
+        />
       ) : null}
 
       {selectedId ? (

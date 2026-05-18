@@ -116,6 +116,15 @@ const PatientPracticeDocumentDetailPage = lazy(() =>
 const PatientDataControlPage = lazy(() =>
   import("./features/careRelationship/pages/PatientDataControlPage.jsx"),
 );
+const PatientExportsPage = lazy(() =>
+  import("./features/exports/pages/PatientExportsPage.jsx"),
+);
+const PatientConsentsPage = lazy(() =>
+  import("./features/consent/pages/PatientConsentsPage.jsx"),
+);
+const PracticeExportsPage = lazy(() =>
+  import("./features/exports/pages/PracticeExportsPage.jsx"),
+);
 const PracticeDataRequestsPage = lazy(() =>
   import("./features/careRelationship/pages/PracticeDataRequestsPage.jsx"),
 );
@@ -124,6 +133,9 @@ const PatientActivityPage = lazy(() =>
 );
 const PracticeAuditPage = lazy(() =>
   import("./features/activity/pages/PracticeAuditPage.jsx"),
+);
+const PracticeSecurityPage = lazy(() =>
+  import("./features/security/pages/PracticeSecurityPage.jsx"),
 );
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
@@ -273,6 +285,22 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
+                  path="/patient/exports"
+                  element={
+                    <ProtectedRoute>
+                      <PatientExportsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/consents"
+                  element={
+                    <ProtectedRoute>
+                      <PatientConsentsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/patient/practice-links"
                   element={
                     <ProtectedRoute>
@@ -305,10 +333,26 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
+                  path="/practice/security"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeSecurityPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/practice/data-requests"
                   element={
                     <ProtectedRoute>
                       <PracticeDataRequestsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/exports"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeExportsPage />
                     </ProtectedRoute>
                   }
                 />

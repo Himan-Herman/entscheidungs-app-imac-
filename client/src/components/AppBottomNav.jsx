@@ -3,11 +3,15 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   Building2,
   ClipboardList,
+  FileText,
   HeartPulse,
+  Inbox,
   LayoutDashboard,
+  MessageSquare,
   Settings2,
   Stethoscope,
   UserRound,
+  Users,
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
@@ -34,6 +38,14 @@ export function shouldShowMobileAppNav(pathname) {
   return true;
 }
 
+/** @returns {'practice-care' | 'patient-care' | 'practice-legacy' | 'patient-legacy'} */
+export function getBottomNavVariant(pathname, mode) {
+  if (pathname.startsWith("/practice")) return "practice-care";
+  if (pathname.startsWith("/patient")) return "patient-care";
+  if (mode === USER_MODES.PRACTICE) return "practice-legacy";
+  return "patient-legacy";
+}
+
 export default function AppBottomNav() {
   const { pathname } = useLocation();
   const { language } = useLanguage();
@@ -53,9 +65,63 @@ export default function AppBottomNav() {
 
   if (!shouldShowMobileAppNav(pathname)) return null;
 
-  const isPractice = mode === USER_MODES.PRACTICE;
+  const variant = getBottomNavVariant(pathname, mode);
 
-  if (isPractice) {
+  if (variant === "practice-care") {
+    return (
+      <nav className="app-bottom-nav" aria-label={t.bottomNavAria} dir="ltr">
+        <NavLink end to="/practice" className="app-bottom-nav__link">
+          <LayoutDashboard size={22} aria-hidden />
+          <span>{t.navPracticeHub}</span>
+        </NavLink>
+        <NavLink to="/practice/patients" className="app-bottom-nav__link">
+          <Users size={22} aria-hidden />
+          <span>{t.navPracticePatients}</span>
+        </NavLink>
+        <NavLink to="/practice/inbox" className="app-bottom-nav__link">
+          <Inbox size={22} aria-hidden />
+          <span>{t.navPracticeInbox}</span>
+        </NavLink>
+        <NavLink end to="/account" className="app-bottom-nav__link">
+          <UserRound size={22} aria-hidden />
+          <span>{t.navAccountHome}</span>
+        </NavLink>
+        <NavLink to="/settings/privacy" className="app-bottom-nav__link">
+          <Settings2 size={22} aria-hidden />
+          <span>{t.navPracticePrivacy}</span>
+        </NavLink>
+      </nav>
+    );
+  }
+
+  if (variant === "patient-care") {
+    return (
+      <nav className="app-bottom-nav" aria-label={t.bottomNavAria} dir="ltr">
+        <NavLink end to="/patient" className="app-bottom-nav__link">
+          <HeartPulse size={22} aria-hidden />
+          <span>{t.navPatientHub}</span>
+        </NavLink>
+        <NavLink to="/patient/inbox" className="app-bottom-nav__link">
+          <Inbox size={22} aria-hidden />
+          <span>{t.navPatientInbox}</span>
+        </NavLink>
+        <NavLink to="/patient/messages" className="app-bottom-nav__link">
+          <MessageSquare size={22} aria-hidden />
+          <span>{t.navPatientMessages}</span>
+        </NavLink>
+        <NavLink to="/patient/practice-documents" className="app-bottom-nav__link">
+          <FileText size={22} aria-hidden />
+          <span>{t.navPatientDocuments}</span>
+        </NavLink>
+        <NavLink to="/settings/privacy" className="app-bottom-nav__link">
+          <Settings2 size={22} aria-hidden />
+          <span>{t.navSettings}</span>
+        </NavLink>
+      </nav>
+    );
+  }
+
+  if (variant === "practice-legacy") {
     return (
       <nav className="app-bottom-nav" aria-label={t.bottomNavAria} dir="ltr">
         <NavLink to="/practice/dashboard" className="app-bottom-nav__link">

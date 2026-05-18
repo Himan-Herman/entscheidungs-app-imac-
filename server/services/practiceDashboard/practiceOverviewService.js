@@ -44,6 +44,7 @@ function metricsVisibilityForRole(role) {
     medication: hasPracticePermission(role, PERMISSIONS.MEDICATION_READ),
     team: hasPracticePermission(role, PERMISSIONS.TEAM_VIEW),
     audit: hasPracticePermission(role, PERMISSIONS.AUDIT_VIEW),
+    security: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
   };
 }
 
@@ -210,6 +211,7 @@ function buildQuickActions(role) {
     uploadDocument: hasPracticePermission(role, PERMISSIONS.DOCUMENTS_WRITE),
     createMedicationPlan: hasPracticePermission(role, PERMISSIONS.MEDICATION_WRITE),
     manageTeam: hasPracticePermission(role, PERMISSIONS.TEAM_MANAGE),
+    openSecurity: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
   };
 }
 

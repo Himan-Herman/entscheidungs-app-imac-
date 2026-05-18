@@ -27,10 +27,9 @@ export function formatUiDate(isoOrDate, uiLanguageCode) {
     const d =
       isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
     if (Number.isNaN(d.getTime())) return "—";
-    return new Intl.DateTimeFormat(
-      [String(uiLanguageCode || "en").toLowerCase(), "en", "de"],
-      { dateStyle: "medium" },
-    ).format(d);
+    return new Intl.DateTimeFormat(getIntlLocaleChain(uiLanguageCode), {
+      dateStyle: "medium",
+    }).format(d);
   } catch {
     return "—";
   }
@@ -42,9 +41,44 @@ export function formatUiDateTime(isoOrDate, uiLanguageCode) {
       isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
     if (Number.isNaN(d.getTime())) return "—";
     return new Intl.DateTimeFormat(
-      [String(uiLanguageCode || "en").toLowerCase(), "en", "de"],
+      getIntlLocaleChain(uiLanguageCode),
       { dateStyle: "medium", timeStyle: "short" },
     ).format(d);
+  } catch {
+    return "—";
+  }
+}
+
+/**
+ * BCP-47 chain for Intl APIs: selected → en → de.
+ * @param {string} uiLanguageCode
+ */
+export function getIntlLocaleChain(uiLanguageCode) {
+  const primary = String(uiLanguageCode || "en").toLowerCase();
+  return [primary, "en", "de"];
+}
+
+/**
+ * Relative time (e.g. "2 days ago") — organizational UI only.
+ * @param {string | Date} isoOrDate
+ * @param {string} uiLanguageCode
+ */
+export function formatUiRelativeTime(isoOrDate, uiLanguageCode) {
+  try {
+    const d = isoOrDate instanceof Date ? isoOrDate : new Date(isoOrDate);
+    if (Number.isNaN(d.getTime())) return "—";
+    const diffSec = Math.round((d.getTime() - Date.now()) / 1000);
+    const rtf = new Intl.RelativeTimeFormat(getIntlLocaleChain(uiLanguageCode), {
+      numeric: "auto",
+    });
+    const abs = Math.abs(diffSec);
+    if (abs < 60) return rtf.format(diffSec, "second");
+    const diffMin = Math.round(diffSec / 60);
+    if (Math.abs(diffMin) < 60) return rtf.format(diffMin, "minute");
+    const diffHr = Math.round(diffMin / 60);
+    if (Math.abs(diffHr) < 48) return rtf.format(diffHr, "hour");
+    const diffDay = Math.round(diffHr / 24);
+    return rtf.format(diffDay, "day");
   } catch {
     return "—";
   }

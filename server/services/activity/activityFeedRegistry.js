@@ -70,6 +70,69 @@ export const AUDIT_ACTION_REGISTRY = {
     visibility: "internal",
     audience: "practice",
   },
+  consent_record_granted: {
+    activityType: "consent_granted",
+    visibility: "patient_visible",
+    audience: "patient",
+  },
+  consent_record_revoked: {
+    activityType: "consent_revoked",
+    visibility: "patient_visible",
+    audience: "patient",
+  },
+  consent_record_expired: {
+    activityType: "consent_expired",
+    visibility: "patient_visible",
+    audience: "patient",
+  },
+  consent_access_denied: {
+    activityType: "consent_access_denied",
+    visibility: "internal",
+    audience: "practice",
+  },
+  consent_ai_explanation_created: {
+    activityType: "consent_ai_explanation",
+    visibility: "internal",
+    audience: "patient",
+  },
+  security_event: {
+    activityType: "security_event",
+    visibility: "internal",
+    severity: "security",
+    audience: "practice",
+  },
+  security_ai_summary_created: {
+    activityType: "security_ai_summary",
+    visibility: "internal",
+    severity: "security",
+    audience: "practice",
+  },
+  login_success: {
+    activityType: "login_success",
+    visibility: "internal",
+    audience: "practice",
+  },
+  logout: {
+    activityType: "logout",
+    visibility: "internal",
+    audience: "practice",
+  },
+  ui_locale_changed: {
+    activityType: "locale_changed",
+    visibility: "internal",
+    audience: "patient",
+  },
+  i18n_ai_translation_created: {
+    activityType: "i18n_ai_translation",
+    visibility: "internal",
+    audience: "patient",
+  },
+  secure_document_access_denied: {
+    activityType: "secure_download_denied",
+    visibility: "internal",
+    severity: "security",
+    audience: "practice",
+  },
   practice_patient_search_ai_suggestion: {
     activityType: "patient_search_ai",
     visibility: "internal",
@@ -347,6 +410,26 @@ export const AUDIT_ACTION_REGISTRY = {
   practice_inbox_ai_summary_created: {
     activityType: "ai_summary_created",
     visibility: "internal",
+  },
+  practice_settings_updated: {
+    activityType: "practice_settings_updated",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_logo_uploaded: {
+    activityType: "practice_logo_uploaded",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_logo_deleted: {
+    activityType: "practice_logo_deleted",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_settings_ai_description: {
+    activityType: "practice_settings_ai_description",
+    visibility: "internal",
+    audience: "practice",
   },
 };
 
