@@ -5,6 +5,10 @@ export default {
     "Organisatorische Übersicht für Ihr Praxisteam — ohne medizinische Bewertung oder Priorisierung.",
   safetyNote:
     "Keine Diagnose, keine Therapieempfehlung, keine Dringlichkeitseinstufung. Nur Workflow- und Organisationsinformationen.",
+  topNavAria: "Seitennavigation",
+  backAccount: "Mein MedScoutX",
+  linkPracticeProfiles: "Praxisprofile",
+  linkPracticeDashboard: "Praxis-Dashboard",
   selectPractice: "Praxisprofil",
   selectPracticePlaceholder: "Praxis auswählen…",
   noPracticesHint:

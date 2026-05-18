@@ -5,6 +5,10 @@ export default {
     "Organizational overview for your practice team — no medical assessment or prioritization.",
   safetyNote:
     "No diagnosis, no therapy recommendation, no urgency classification. Workflow and organizational information only.",
+  topNavAria: "Page navigation",
+  backAccount: "My MedScoutX",
+  linkPracticeProfiles: "Practice profiles",
+  linkPracticeDashboard: "Practice dashboard",
   selectPractice: "Practice profile",
   selectPracticePlaceholder: "Select practice…",
   noPracticesHint:

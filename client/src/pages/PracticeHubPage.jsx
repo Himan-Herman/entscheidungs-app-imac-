@@ -136,7 +136,6 @@ export default function PracticeHubPage() {
     () => getMessages(language).settingsPractices || getMessages("en").settingsPractices,
     [language],
   );
-
   const [practices, setPractices] = useState([]);
   const [practicesLoadError, setPracticesLoadError] = useState("");
   const [practiceId, setPracticeId] = useState("");
@@ -341,7 +340,24 @@ export default function PracticeHubPage() {
     `/practice/patients/${encodeURIComponent(linkId)}?practiceId=${encodeURIComponent(practiceId)}`;
 
   return (
-    <div className="practice-overview">
+    <motion.div className="practice-overview">
+      <nav className="practice-overview__top-nav" aria-label={t.topNavAria}>
+        <Link className="practice-overview__top-nav-link practice-overview__top-nav-link--back" to="/account">
+          ← {t.backAccount}
+        </Link>
+        <Link className="practice-overview__top-nav-link" to="/settings/practices">
+          {t.linkPracticeProfiles}
+        </Link>
+        {practiceId ? (
+          <Link
+            className="practice-overview__top-nav-link"
+            to={`/practice/dashboard?practiceId=${encodeURIComponent(practiceId)}`}
+          >
+            {t.linkPracticeDashboard}
+          </Link>
+        ) : null}
+      </nav>
+
       <header className="practice-overview__hero">
         <h1 className="practice-overview__title">{t.heading}</h1>
         <p className="practice-overview__intro">{t.intro}</p>
