@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchPatientMedicationPlans } from "../api/patientMedicationPlansApi.js";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { groupByPracticeBranding, practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 
 function fmt(iso, lang) {
@@ -58,6 +60,11 @@ export default function PatientMedicationPlansListPage() {
     load();
   }, [load]);
 
+  const grouped = useMemo(
+    () => groupByPracticeBranding(plans, (plan) => plan.practice),
+    [plans],
+  );
+
   return (
     <div className="patient-inbox">
       <Link className="patient-inbox__back" to="/patient">
@@ -81,12 +88,17 @@ export default function PatientMedicationPlansListPage() {
       ) : null}
 
       {!loading && !error && plans.length > 0 ? (
-        <ul className="patient-inbox__list" aria-label={t.listCaption}>
-          {plans.map((plan) => {
+        <div aria-label={t.listCaption}>
+          {grouped.map((group) => (
+            <section key={group.branding?.id || group.items[0]?.id} className="patient-inbox__practice-group">
+              <PracticeBrandingBar branding={group.branding} compact />
+              <ul className="patient-inbox__list">
+                {group.items.map((plan) => {
             const title =
               plan.title?.trim() ||
               t.planTitleFallback;
-            const practiceName = plan.practiceName || t.fromPractice;
+            const practiceName =
+              practiceDisplayLabel(plan.practice) || plan.practiceName || t.fromPractice;
             const published = plan.publishedAt
               ? t.publishedAt.replace("{date}", fmt(plan.publishedAt, language))
               : "";
@@ -108,8 +120,11 @@ export default function PatientMedicationPlansListPage() {
                 </Link>
               </li>
             );
-          })}
-        </ul>
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       ) : null}
     </div>
   );

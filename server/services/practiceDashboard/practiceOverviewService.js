@@ -211,6 +211,8 @@ function buildQuickActions(role) {
     uploadDocument: hasPracticePermission(role, PERMISSIONS.DOCUMENTS_WRITE),
     createMedicationPlan: hasPracticePermission(role, PERMISSIONS.MEDICATION_WRITE),
     manageTeam: hasPracticePermission(role, PERMISSIONS.TEAM_MANAGE),
+    openSettings: hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE),
+    openIntegrations: hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE),
     openSecurity: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
   };
 }

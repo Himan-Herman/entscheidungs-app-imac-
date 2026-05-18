@@ -137,6 +137,15 @@ const PracticeAuditPage = lazy(() =>
 const PracticeSecurityPage = lazy(() =>
   import("./features/security/pages/PracticeSecurityPage.jsx"),
 );
+const PracticeSettingsPage = lazy(() =>
+  import("./features/practiceSettings/pages/PracticeSettingsPage.jsx"),
+);
+const PracticeIntegrationsPage = lazy(() =>
+  import("./features/practiceIntegrations/pages/PracticeIntegrationsPage.jsx"),
+);
+const PracticeIntegrationsSandboxPage = lazy(() =>
+  import("./features/practiceIntegrations/pages/PracticeIntegrationsSandboxPage.jsx"),
+);
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
 );
@@ -329,6 +338,30 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PracticeAuditPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/settings"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/integrations/sandbox"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeIntegrationsSandboxPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/integrations"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeIntegrationsPage />
                     </ProtectedRoute>
                   }
                 />

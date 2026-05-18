@@ -8,6 +8,8 @@ import {
   submitPatientPracticeDocumentQuestion,
   viewPatientPracticeDocumentFile,
 } from "../api/patientPracticeDocumentsApi.js";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 import "../styles/PracticeDocuments.css";
 
@@ -153,11 +155,13 @@ export default function PatientPracticeDocumentDetailPage() {
       <Link className="patient-inbox__back" to="/patient/practice-documents">
         {t.backList}
       </Link>
+      {doc?.practice ? <PracticeBrandingBar branding={doc.practice} /> : null}
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{doc?.title || t.heading}</h1>
         {doc ? (
           <p className="patient-inbox__intro">
-            {doc.practiceName || t.fromPractice} · {typeLabel(doc.type, t)} · {t.statusShared}
+            {practiceDisplayLabel(doc.practice) || doc.practiceName || t.fromPractice} ·{" "}
+            {typeLabel(doc.type, t)} · {t.statusShared}
             {doc.sharedAt
               ? ` · ${t.sharedAt.replace("{date}", fmt(doc.sharedAt, language))}`
               : ""}

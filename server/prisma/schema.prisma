@@ -47,6 +47,7 @@ model User {
   patientProfiles      PatientProfile[]
   exportJobs           ExportJob[]
   consentRecords       ConsentRecord[]
+  integrationConnectionsCreated IntegrationConnection[] @relation("IntegrationConnectionCreatedBy")
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -298,6 +299,10 @@ model PracticeProfile {
   secureDocumentDeliveries SecureDocumentDelivery[]
   secureDocumentAccessTokens SecureDocumentAccessToken[]
   webhookEvents PracticeWebhookEvent[]
+  integrationConnections   IntegrationConnection[]
+  integrationJobs          IntegrationJob[]
+  integrationMappings      IntegrationMapping[]
+  externalResourceReferences ExternalResourceReference[]
 
   @@index([userId])
 }
@@ -360,6 +365,105 @@ model PracticeWebhookEvent {
 
   @@index([practiceProfileId, status])
   @@index([createdAt])
+}
+
+/// PVS/FHIR/HL7 connector configuration — no secrets in configJson; tokens via env/secret store only.
+model IntegrationConnection {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  /// fhir | hl7v2 | pvs | custom
+  type              String
+  /// fhir_generic | hl7v2_generic | pvs_sandbox | custom_placeholder
+  connectorKey      String    @default("custom_placeholder")
+  vendorName        String?
+  /// disabled | sandbox | active | error | revoked
+  status            String    @default("disabled")
+  baseUrl           String?
+  /// none | api_key | oauth2 | basic | mTLS
+  authType          String?   @default("none")
+  /// Non-secret config only — never store API keys or tokens here.
+  configJson        Json?
+  /// R4 | R4B | R5
+  fhirVersion       String?   @default("R4")
+  createdByUserId   String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  revokedAt         DateTime?
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User?           @relation("IntegrationConnectionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  jobs            IntegrationJob[]
+  mappings        IntegrationMapping[]
+
+  @@index([practiceProfileId, status])
+  @@index([practiceProfileId, type])
+}
+
+/// Import/export/sync/test jobs — metadata only, no clinical payloads.
+model IntegrationJob {
+  id                String    @id @default(cuid())
+  connectionId      String
+  practiceProfileId String
+  /// import | export | sync | test
+  type              String
+  /// inbound | outbound
+  direction         String
+  /// pending | running | completed | failed | cancelled
+  status            String    @default("pending")
+  resourceType      String?
+  practicePatientLinkId String?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  failedAt          DateTime?
+  errorCode         String?
+  createdAt         DateTime  @default(now())
+
+  connection      IntegrationConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  practiceProfile PracticeProfile       @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([practiceProfileId, createdAt])
+  @@index([connectionId, status])
+}
+
+model IntegrationMapping {
+  id                String   @id @default(cuid())
+  practiceProfileId String
+  connectionId      String?
+  sourceType        String
+  targetType        String
+  mappingJson       Json
+  version           String?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  practiceProfile PracticeProfile        @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  connection      IntegrationConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+
+  @@index([practiceProfileId, active])
+  @@index([connectionId])
+}
+
+/// Cross-system resource IDs — no clinical content.
+model ExternalResourceReference {
+  id                    String   @id @default(cuid())
+  practiceProfileId     String
+  practicePatientLinkId String?
+  patientUserId         String?
+  localResourceType     String
+  localResourceId       String
+  externalSystemType    String
+  externalResourceType  String
+  externalResourceId    String
+  externalVersion       String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([practiceProfileId, localResourceType, localResourceId])
+  @@index([practicePatientLinkId])
+  @@index([externalSystemType, externalResourceId])
 }
 
 model PracticeQrTarget {

@@ -38,3 +38,33 @@ export function isPracticeDocumentsV2Enabled() {
 export function isPracticeInboxEnabled() {
   return envFlag("PRACTICE_INBOX", false);
 }
+
+/** PVS/FHIR/HL7 integration layer (UI + APIs). Default off. */
+export function isIntegrationsEnabled() {
+  return envFlag("ENABLE_INTEGRATIONS", false);
+}
+
+/** FHIR adapter endpoints (preview/validate). Requires integrations master flag in routes. */
+export function isFhirIntegrationEnabled() {
+  return envFlag("ENABLE_FHIR_INTEGRATION", false);
+}
+
+/** HL7 v2 parse/ack preview. Requires integrations master flag in routes. */
+export function isHl7v2IntegrationEnabled() {
+  return envFlag("ENABLE_HL7V2_INTEGRATION", false);
+}
+
+/** Sandbox / test mode — sample payloads, no outbound production traffic. Default on when unset. */
+export function isPvsSandboxEnabled() {
+  return envFlag("ENABLE_PVS_SANDBOX", true);
+}
+
+/** Production PVS sync / live outbound — never default on. */
+export function isPvsProductionEnabled() {
+  return envFlag("ENABLE_PVS_PRODUCTION", false);
+}
+
+/** Whether practice integration UI/API is reachable (master OR sandbox). */
+export function isIntegrationsUiEnabled() {
+  return isIntegrationsEnabled() || isPvsSandboxEnabled();
+}

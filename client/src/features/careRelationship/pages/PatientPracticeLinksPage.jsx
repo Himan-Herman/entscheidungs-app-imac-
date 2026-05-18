@@ -6,6 +6,8 @@ import {
   fetchPatientPracticeLinks,
   patchPatientProfileAccess,
 } from "../api/patientPracticeLinksApi.js";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 
 function statusLabel(status, t) {
@@ -111,12 +113,13 @@ export default function PatientPracticeLinksPage() {
       {!loading && !error && links.length > 0 ? (
         <ul className="patient-inbox__list" aria-label={t.listCaption}>
           {links.map((link) => {
-            const practiceName = link.practice?.practiceName || "—";
+            const practiceName = practiceDisplayLabel(link.practice) || "—";
             const granted = Boolean(link.profileAccessGranted);
             const st = statusLabel(link.status, t);
 
             return (
               <li key={link.id} className="patient-inbox__item" style={{ padding: "1rem" }}>
+                <PracticeBrandingBar branding={link.practice} compact />
                 <p className="patient-inbox__item-title">{practiceName}</p>
                 <p className="patient-inbox__item-meta">{st}</p>
                 <fieldset style={{ border: "none", margin: "0.75rem 0 0", padding: 0 }}>

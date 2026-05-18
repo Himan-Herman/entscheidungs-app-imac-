@@ -235,6 +235,10 @@
   margin: 0;
 }
 
+.patient-inbox__practice-group {
+  margin-bottom: 1.5rem;
+}
+
 @media (max-width: 640px) {
   .patient-inbox {
     padding: 1rem 0.85rem 2rem;

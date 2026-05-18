@@ -1,0 +1,132 @@
+.practice-integrations {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2.5rem;
+}
+
+.practice-integrations__intro {
+  margin: 0 0 1.25rem;
+  color: var(--text-muted, #4b5563);
+  line-height: 1.5;
+}
+
+.practice-integrations__banner {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--surface-muted, #f0fdfa);
+  border: 1px solid var(--border, #99f6e4);
+  margin-bottom: 1rem;
+}
+
+.practice-integrations__section {
+  margin-bottom: 1.75rem;
+}
+
+.practice-integrations__section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+.practice-integrations__flags {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.practice-integrations__flags li {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.practice-integrations__table-wrap {
+  overflow-x: auto;
+}
+
+.practice-integrations__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.practice-integrations__table th,
+.practice-integrations__table td {
+  text-align: left;
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.practice-integrations__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.practice-integrations__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border, #d1d5db);
+  background: var(--surface, #fff);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.practice-integrations__btn:focus-visible {
+  outline: 2px solid var(--focus, #0f766e);
+  outline-offset: 2px;
+}
+
+.practice-integrations__btn--primary {
+  background: var(--accent, #0f766e);
+  color: #fff;
+  border-color: var(--accent, #0f766e);
+}
+
+.practice-integrations__pre {
+  font-size: 0.75rem;
+  overflow: auto;
+  max-height: 14rem;
+  padding: 0.75rem;
+  background: var(--surface-muted, #f9fafb);
+  border-radius: 0.375rem;
+  border: 1px solid var(--border, #e5e7eb);
+}
+
+.practice-integrations__ai-box {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border-left: 3px solid var(--accent, #0f766e);
+  background: var(--surface-muted, #f9fafb);
+}
+
+.practice-integrations__status {
+  margin: 0.5rem 0;
+}
+
+.practice-integrations__status--error {
+  color: #b91c1c;
+}
+
+.practice-integrations__status--ok {
+  color: #047857;
+}
+
+@media (max-width: 640px) {
+  .practice-integrations__actions {
+    flex-direction: column;
+  }
+  .practice-integrations__btn {
+    width: 100%;
+  }
+}

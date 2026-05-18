@@ -11,6 +11,7 @@ export const PERMISSIONS = {
   SECURITY_VIEW: "security.view",
   SETTINGS_MANAGE: "settings.manage",
   INTEGRATIONS_MANAGE: "integrations.manage",
+  INTEGRATIONS_EXPORT: "integrations.export",
   PATIENT_LINKS_READ: "patient_links.read",
   PATIENT_LINKS_WRITE: "patient_links.write",
   MESSAGES_SEND: "messages.send",
@@ -45,9 +46,11 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.MEDICATION_WRITE,
     PERMISSIONS.MEDICATION_PUBLISH,
     PERMISSIONS.DATA_REQUESTS_MANAGE,
+    PERMISSIONS.INTEGRATIONS_EXPORT,
   ]),
   doctor: new Set([
     PERMISSIONS.TEAM_VIEW,
+    PERMISSIONS.INTEGRATIONS_EXPORT,
     PERMISSIONS.PATIENT_LINKS_READ,
     PERMISSIONS.PATIENT_LINKS_WRITE,
     PERMISSIONS.MESSAGES_SEND,
@@ -116,6 +119,13 @@ export function canWritePracticePatientLinks(role) {
 
 export function canManageIntegrations(role) {
   return hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE);
+}
+
+export function canExportViaIntegrations(role) {
+  return (
+    hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_EXPORT) ||
+    hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE)
+  );
 }
 
 export function canViewIntegrationSettings(role) {

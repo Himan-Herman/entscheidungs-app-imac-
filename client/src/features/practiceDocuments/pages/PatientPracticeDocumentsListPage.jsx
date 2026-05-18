@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchPatientPracticeDocuments } from "../api/patientPracticeDocumentsApi.js";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { groupByPracticeBranding, practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 
 function fmt(iso, lang) {
@@ -71,6 +73,11 @@ export default function PatientPracticeDocumentsListPage() {
     load();
   }, [load]);
 
+  const grouped = useMemo(
+    () => groupByPracticeBranding(documents, (doc) => doc.practice),
+    [documents],
+  );
+
   return (
     <div className="patient-inbox">
       <Link className="patient-inbox__back" to="/patient">
@@ -94,9 +101,14 @@ export default function PatientPracticeDocumentsListPage() {
       ) : null}
 
       {!loading && !error && documents.length > 0 ? (
-        <ul className="patient-inbox__list" aria-label={t.listCaption}>
-          {documents.map((doc) => {
-            const practiceName = doc.practiceName || t.fromPractice;
+        <div aria-label={t.listCaption}>
+          {grouped.map((group) => (
+            <section key={group.branding?.id || group.items[0]?.id} className="patient-inbox__practice-group">
+              <PracticeBrandingBar branding={group.branding} compact />
+              <ul className="patient-inbox__list">
+                {group.items.map((doc) => {
+            const practiceName =
+              practiceDisplayLabel(doc.practice) || doc.practiceName || t.fromPractice;
             const shared = doc.sharedAt
               ? t.sharedAt.replace("{date}", fmt(doc.sharedAt, language))
               : "";
@@ -116,8 +128,11 @@ export default function PatientPracticeDocumentsListPage() {
                 </Link>
               </li>
             );
-          })}
-        </ul>
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       ) : null}
     </div>
   );

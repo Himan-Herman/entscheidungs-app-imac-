@@ -48,6 +48,7 @@ import apiErrors from "./apiErrors.js";
 import languageSettings from "./languageSettings.js";
 import responsive from "./responsive.js";
 import practiceSettings from "./practiceSettings.js";
+import practiceIntegrations from "./practiceIntegrations.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
 
@@ -102,6 +103,7 @@ export default {
   languageSettings,
   responsive,
   practiceSettings,
+  practiceIntegrations,
   intro,
   voiceInput,
 };

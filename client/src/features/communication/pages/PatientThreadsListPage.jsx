@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchPatientThreads } from "../api/patientThreadsApi.js";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import "../../../styles/PatientInboxPage.css";
 import "../../../styles/PatientThreadsPage.css";
 
@@ -41,9 +42,10 @@ export default function PatientThreadsListPage() {
     const map = new Map();
     for (const thread of threads) {
       const key = thread.practice?.id || "unknown";
-      const practiceName = thread.practice?.practiceName || t.fromPractice;
+      const practiceName =
+        thread.practice?.displayName || thread.practice?.practiceName || t.fromPractice;
       if (!map.has(key)) {
-        map.set(key, { practiceName, threads: [] });
+        map.set(key, { practiceName, branding: thread.practice, threads: [] });
       }
       map.get(key).threads.push(thread);
     }
@@ -109,6 +111,7 @@ export default function PatientThreadsListPage() {
               className="patient-threads__group"
               aria-labelledby={`practice-group-${group.practiceName.replace(/\s+/g, "-")}`}
             >
+              <PracticeBrandingBar branding={group.branding} compact />
               <h2
                 id={`practice-group-${group.practiceName.replace(/\s+/g, "-")}`}
                 className="patient-threads__group-title"

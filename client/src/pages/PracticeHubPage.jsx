@@ -476,6 +476,22 @@ export default function PracticeHubPage() {
                   {t.actionManageTeam}
                 </Link>
               ) : null}
+              {quickActions.openSettings ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/settings?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenSettings}
+                </Link>
+              ) : null}
+              {quickActions.openIntegrations ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/integrations?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenIntegrations}
+                </Link>
+              ) : null}
               {quickActions.openSecurity ? (
                 <Link
                   className="practice-overview__action"

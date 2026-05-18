@@ -11,6 +11,8 @@ import {
   postPatientConsent,
 } from "../api/patientConsentsApi.js";
 import "../../../styles/PatientDataControlPage.css";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientConsentsPage.css";
 
 function fmtDate(iso, locale) {
@@ -70,6 +72,7 @@ function ConsentCard({
 
   return (
     <li className="patient-consents__card">
+      {row.practice ? <PracticeBrandingBar branding={row.practice} compact /> : null}
       <div className="patient-consents__card-header">
         <strong>{typeLabel}</strong>
         <span className={badgeClass(row.status)} role="status">
@@ -79,7 +82,7 @@ function ConsentCard({
       <dl className="patient-consents__meta">
         <div>
           <dt>{t.practiceLabel}</dt>
-          <dd>{row.practiceName || t.notProvided}</dd>
+          <dd>{practiceDisplayLabel(row.practice) || row.practiceName || t.notProvided}</dd>
         </div>
         <div>
           <dt>{t.purposeLabel}</dt>

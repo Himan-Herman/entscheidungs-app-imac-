@@ -162,3 +162,9 @@ export const practiceExportLimiter = createIpRateLimiter({
   max: 25,
   keyPrefix: 'practice:exports',
 });
+
+/** POST /api/practice/integrations — FHIR/HL7 parse & preview */
+export const integrationParseLimiter = createIpRateLimiter({
+  max: 40,
+  keyPrefix: 'practice:integrations:parse',
+});

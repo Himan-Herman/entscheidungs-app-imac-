@@ -431,6 +431,66 @@ export const AUDIT_ACTION_REGISTRY = {
     visibility: "internal",
     audience: "practice",
   },
+  integration_connection_created: {
+    activityType: "integration_connection_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_connection_updated: {
+    activityType: "integration_connection_updated",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_connection_disabled: {
+    activityType: "integration_connection_disabled",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_connection_tested: {
+    activityType: "integration_connection_tested",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_job_started: {
+    activityType: "integration_job_started",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_job_completed: {
+    activityType: "integration_job_completed",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_job_failed: {
+    activityType: "integration_job_failed",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_export_blocked_consent: {
+    activityType: "integration_export_blocked_consent",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_fhir_preview: {
+    activityType: "integration_fhir_preview",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_hl7_parse_test: {
+    activityType: "integration_hl7_parse_test",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_ai_mapping_summary: {
+    activityType: "integration_ai_mapping_summary",
+    visibility: "internal",
+    audience: "practice",
+  },
+  integration_ai_error_explanation: {
+    activityType: "integration_ai_error_explanation",
+    visibility: "internal",
+    audience: "practice",
+  },
 };
 
 /**

@@ -8,6 +8,8 @@ import {
   fetchPatientThreadAiRewrite,
   sendPatientThreadMessage,
 } from "../api/patientThreadsApi.js";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 import "../../../styles/PatientThreadsPage.css";
 
@@ -162,10 +164,11 @@ export default function PatientThreadDetailPage() {
       <Link className="patient-inbox__back" to="/patient/messages">
         {t.backList}
       </Link>
+      <PracticeBrandingBar branding={thread.practice} />
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{title}</h1>
-        {thread.practice?.practiceName ? (
-          <p className="patient-inbox__intro">{thread.practice.practiceName}</p>
+        {practiceDisplayLabel(thread.practice) ? (
+          <p className="patient-inbox__intro">{practiceDisplayLabel(thread.practice)}</p>
         ) : null}
         {thread.status === "closed" ? (
           <p className="patient-inbox__safety" role="status">

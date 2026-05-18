@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { PRACTICE_BRANDING_SELECT, practiceBrandingJson } from "../../utils/practiceBranding.js";
 import {
   CARE_CONSENT_VERSION,
   isAllowedConsentVersion,
@@ -89,14 +90,7 @@ export function linkToPatientJson(row) {
     profileAccessGranted: linkHasConsentScope(row, "profile"),
     profileAccessGrantedAt: row.profileAccessGrantedAt,
     profileAccessRevokedAt: row.profileAccessRevokedAt,
-    practice: practice
-      ? {
-          id: practice.id,
-          practiceName: practice.practiceName,
-          publicSlug: practice.publicSlug,
-          specialty: practice.specialty,
-        }
-      : null,
+    practice: practice ? practiceBrandingJson(practice) : null,
     patientProfile: row.patientProfile
       ? {
           id: row.patientProfile.id,

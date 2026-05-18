@@ -52,6 +52,8 @@ export default {
   actionUploadDocument: "Upload document",
   actionCreateMedication: "Create medication plan",
   actionManageTeam: "Manage team",
+  actionOpenSettings: "Practice settings",
+  actionOpenIntegrations: "Integrations (PVS/FHIR)",
 
   aiHeading: "AI summary – please review",
   aiDisclaimer:

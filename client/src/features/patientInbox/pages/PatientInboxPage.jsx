@@ -8,6 +8,8 @@ import {
   markPatientInboxRead,
   postPatientInboxAiSummary,
 } from "../api/patientInboxApi.js";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { groupByPracticeBranding, practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 
 function fmt(iso, lang) {
@@ -164,9 +166,15 @@ export default function PatientInboxPage() {
 
   const sourceLabel = (item) => {
     if (item.sourceLabel?.trim()) return item.sourceLabel.trim();
-    if (item.practice?.practiceName) return item.practice.practiceName;
+    const label = practiceDisplayLabel(item.practice);
+    if (label) return label;
     return t.sourceUnknown;
   };
+
+  const groupedInbox = useMemo(
+    () => groupByPracticeBranding(items, (item) => item.practice),
+    [items],
+  );
 
   return (
     <div className="patient-inbox">
@@ -250,8 +258,12 @@ export default function PatientInboxPage() {
       ) : null}
 
       {!loading && !error && items.length > 0 ? (
-        <ul className="patient-inbox__list" aria-label={t.listCaption}>
-          {items.map((item) => {
+        <div aria-label={t.listCaption}>
+          {groupedInbox.map((group) => (
+            <section key={group.branding?.id || group.items[0]?.id} className="patient-inbox__practice-group">
+              <PracticeBrandingBar branding={group.branding} compact />
+              <ul className="patient-inbox__list">
+                {group.items.map((item) => {
             const title = resolveTitle(item);
             const statusText = statusLabel(item.status);
             const statusAria = t.statusAria.replace("{status}", statusText);
@@ -299,8 +311,11 @@ export default function PatientInboxPage() {
                 </div>
               </li>
             );
-          })}
-        </ul>
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       ) : null}
     </div>
   );

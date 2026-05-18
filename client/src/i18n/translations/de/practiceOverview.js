@@ -52,6 +52,8 @@ export default {
   actionUploadDocument: "Dokument hochladen",
   actionCreateMedication: "Medikationsplan erstellen",
   actionManageTeam: "Team verwalten",
+  actionOpenSettings: "Praxis-Einstellungen",
+  actionOpenIntegrations: "Integrationen (PVS/FHIR)",
 
   aiHeading: "KI-Zusammenfassung – bitte prüfen",
   aiDisclaimer:

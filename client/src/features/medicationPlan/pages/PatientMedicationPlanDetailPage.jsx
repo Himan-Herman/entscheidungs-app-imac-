@@ -8,6 +8,8 @@ import {
   submitPatientMedicationPlanQuestion,
 } from "../api/patientMedicationPlansApi.js";
 import MedicationPlanItemCard from "../components/MedicationPlanItemCard.jsx";
+import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 import "../../visitMedications/styles/VisitMedications.css";
 import "../styles/MedicationPlan.css";
@@ -115,11 +117,12 @@ export default function PatientMedicationPlanDetailPage() {
       <Link className="patient-inbox__back" to="/patient/medication-plans">
         {t.backList}
       </Link>
+      {plan?.practice ? <PracticeBrandingBar branding={plan.practice} /> : null}
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{title}</h1>
         {plan ? (
           <p className="patient-inbox__intro">
-            {plan.practiceName || t.fromPractice}
+            {practiceDisplayLabel(plan.practice) || plan.practiceName || t.fromPractice}
             {plan.publishedAt
               ? ` · ${t.publishedAt.replace("{date}", fmt(plan.publishedAt, language))}`
               : ""}

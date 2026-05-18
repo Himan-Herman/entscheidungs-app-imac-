@@ -10,6 +10,7 @@ import {
   isValidConsentType,
   LEGACY_SCOPE_TO_CONSENT_TYPE,
 } from "./consentTypes.js";
+import { PRACTICE_BRANDING_SELECT, practiceBrandingJson } from "../../utils/practiceBranding.js";
 
 const prisma = new PrismaClient();
 const LINK_ACTIVE = new Set(["invited", "active"]);
@@ -17,7 +18,20 @@ const LINK_ACTIVE = new Set(["invited", "active"]);
 /**
  * @param {import("@prisma/client").ConsentRecord} row
  */
-export function consentRecordToJson(row, practiceName = null) {
+/**
+ * @param {import("@prisma/client").ConsentRecord} row
+ * @param {string | import('../../utils/practiceBranding.js').ReturnType<typeof practiceBrandingJson> | null} practiceInfo
+ */
+export function consentRecordToJson(row, practiceInfo = null) {
+  const practice =
+    practiceInfo && typeof practiceInfo === "object" && practiceInfo.id
+      ? practiceInfo
+      : null;
+  const practiceName =
+    practice?.displayName ||
+    practice?.practiceName ||
+    (typeof practiceInfo === "string" ? practiceInfo : null);
+
   return {
     id: row.id,
     patientUserId: row.patientUserId,
@@ -30,6 +44,7 @@ export function consentRecordToJson(row, practiceName = null) {
     expiresAt: row.expiresAt,
     version: row.version,
     practiceName,
+    practice,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -210,7 +225,7 @@ export async function listPatientConsents(patientUserId) {
 
   const links = await prisma.practicePatientLink.findMany({
     where: { patientUserId: uid },
-    include: { practiceProfile: { select: { practiceName: true } } },
+    include: { practiceProfile: { select: PRACTICE_BRANDING_SELECT } },
   });
 
   for (const link of links) {
@@ -224,12 +239,14 @@ export async function listPatientConsents(patientUserId) {
     take: 200,
   });
 
-  const practiceNames = Object.fromEntries(
-    links.map((l) => [l.practiceProfileId, l.practiceProfile?.practiceName || null]),
+  const brandingByPractice = Object.fromEntries(
+    links
+      .filter((l) => l.practiceProfile)
+      .map((l) => [l.practiceProfileId, practiceBrandingJson(l.practiceProfile)]),
   );
 
   return rows.map((r) =>
-    consentRecordToJson(r, practiceNames[r.practiceProfileId] || null),
+    consentRecordToJson(r, brandingByPractice[r.practiceProfileId] || null),
   );
 }
 
