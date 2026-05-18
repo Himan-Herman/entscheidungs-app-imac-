@@ -340,7 +340,7 @@ export default function PracticeHubPage() {
     `/practice/patients/${encodeURIComponent(linkId)}?practiceId=${encodeURIComponent(practiceId)}`;
 
   return (
-    <motion.div className="practice-overview">
+    <div className="practice-overview">
       <nav className="practice-overview__top-nav" aria-label={t.topNavAria}>
         <Link className="practice-overview__top-nav-link practice-overview__top-nav-link--back" to="/account">
           ← {t.backAccount}
