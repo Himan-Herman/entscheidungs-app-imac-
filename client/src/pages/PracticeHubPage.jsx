@@ -344,6 +344,25 @@ export default function PracticeHubPage() {
   const patientHref = (linkId) =>
     `/practice/patients/${encodeURIComponent(linkId)}?practiceId=${encodeURIComponent(practiceId)}`;
 
+  function handlePracticeSelectChange(e) {
+    const value = e.target.value;
+    if (value === NAV_ACCOUNT) {
+      navigate("/account");
+      return;
+    }
+    if (value === NAV_PROFILES) {
+      navigate("/settings/practices");
+      return;
+    }
+    if (value === NAV_DASHBOARD) {
+      if (practiceId) {
+        navigate(`/practice/dashboard?practiceId=${encodeURIComponent(practiceId)}`);
+      }
+      return;
+    }
+    setPracticeId(value);
+  }
+
   return (
     <div className="practice-overview">
       <nav className="practice-overview__top-nav" aria-label={t.topNavAria}>
