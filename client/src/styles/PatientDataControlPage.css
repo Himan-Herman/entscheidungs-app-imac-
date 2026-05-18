@@ -1,0 +1,63 @@
+.patient-data-control__dialog {
+  max-width: 28rem;
+  border: 1px solid var(--border, #d1d5db);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  background: var(--surface, #fff);
+  color: var(--text, #111827);
+}
+
+.patient-data-control__dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.patient-data-control__dialog-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.patient-data-control__dialog-body {
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.patient-data-control__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.patient-data-control__btn--muted-danger {
+  background: #7f1d1d;
+  color: #fff;
+  border: none;
+}
+
+.patient-data-control__btn--muted-danger:disabled {
+  opacity: 0.6;
+}
+
+.patient-data-control__meta-grid {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+}
+
+.patient-data-control__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.patient-data-control__badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: #e0e7ff;
+  color: #312e81;
+}
