@@ -14,6 +14,7 @@ import PracticePatientMessagesSection from "../../communication/components/Pract
 import PracticePatientMedicationPlanSection from "../../medicationPlan/components/PracticePatientMedicationPlanSection.jsx";
 import PracticePatientDocumentsSection from "../../practiceDocuments/components/PracticePatientDocumentsSection.jsx";
 import PracticePatientProfileSection from "../components/PracticePatientProfileSection.jsx";
+import PracticePatientAssignmentSection from "../components/PracticePatientAssignmentSection.jsx";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
 
@@ -59,6 +60,8 @@ export default function PracticePatientDetailPage() {
   const [error, setError] = useState("");
 
   const readOnly = role === "viewer";
+  const canManageAssignment =
+    !readOnly && ["owner", "admin", "secretary", "practice_manager"].includes(role);
 
   const listPath = practiceId
     ? `/practice/patients?practiceId=${encodeURIComponent(practiceId)}`
@@ -184,15 +187,26 @@ export default function PracticePatientDetailPage() {
           aria-labelledby={`tab-${activeTab}`}
         >
           {activeTab === "overview" ? (
-            <PracticePatientOverviewTab
-              link={link}
-              overview={overview}
-              language={language}
-              t={t}
-              statusAria={statusAria}
-              practiceId={practiceId}
-              onNavigateTab={setTab}
-            />
+            <>
+              <PracticePatientOverviewTab
+                link={link}
+                overview={overview}
+                language={language}
+                t={t}
+                statusAria={statusAria}
+                practiceId={practiceId}
+                onNavigateTab={setTab}
+              />
+              {practiceId && linkId ? (
+                <PracticePatientAssignmentSection
+                  practiceId={practiceId}
+                  linkId={linkId}
+                  assignment={link.assignment}
+                  canManage={canManageAssignment}
+                  onUpdated={loadDetail}
+                />
+              ) : null}
+            </>
           ) : null}
 
           {activeTab === "profile" && practiceId && linkId ? (

@@ -49,6 +49,13 @@ import languageSettings from "./languageSettings.js";
 import responsive from "./responsive.js";
 import practiceSettings from "./practiceSettings.js";
 import practiceIntegrations from "./practiceIntegrations.js";
+import practiceCalendar from "./practiceCalendar.js";
+import patientAppointments from "./patientAppointments.js";
+import practiceTelemedicine from "./practiceTelemedicine.js";
+import patientTelemedicine from "./patientTelemedicine.js";
+import documentOcr from "./documentOcr.js";
+import practiceDeveloper from "./practiceDeveloper.js";
+import practiceOrganization from "./practiceOrganization.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
 
@@ -104,6 +111,13 @@ export default {
   responsive,
   practiceSettings,
   practiceIntegrations,
+  practiceCalendar,
+  patientAppointments,
+  practiceTelemedicine,
+  patientTelemedicine,
+  documentOcr,
+  practiceDeveloper,
+  practiceOrganization,
   intro,
   voiceInput,
 };

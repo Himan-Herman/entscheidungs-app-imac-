@@ -9,6 +9,7 @@ import {
   viewPatientPracticeDocumentFile,
 } from "../api/patientPracticeDocumentsApi.js";
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
+import PatientStructuredDocumentSection from "../components/PatientStructuredDocumentSection.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 import "../styles/PracticeDocuments.css";
@@ -214,6 +215,10 @@ export default function PatientPracticeDocumentDetailPage() {
 
       {doc?.description ? (
         <p className="patient-inbox__muted">{doc.description}</p>
+      ) : null}
+
+      {doc && !loading && !error ? (
+        <PatientStructuredDocumentSection documentId={documentId} />
       ) : null}
 
       {doc && !loading && !error ? (

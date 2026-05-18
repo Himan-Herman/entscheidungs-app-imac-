@@ -323,6 +323,10 @@ export async function shareDocumentWithPatient(
     practicePatientLinkId: updated.practicePatientLinkId,
   });
 
+  import("../practiceDeveloper/emitDeveloperEvents.js")
+    .then((m) => m.emitDocumentShared(updated))
+    .catch(() => {});
+
   return json;
 }
 

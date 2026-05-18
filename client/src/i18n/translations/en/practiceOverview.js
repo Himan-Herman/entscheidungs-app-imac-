@@ -54,6 +54,9 @@ export default {
   actionManageTeam: "Manage team",
   actionOpenSettings: "Practice settings",
   actionOpenIntegrations: "Integrations (PVS/FHIR)",
+  actionOpenCalendar: "Calendar",
+  actionOpenTelemedicine: "Video consultations",
+  actionOpenDeveloper: "Developer access",
 
   aiHeading: "AI summary – please review",
   aiDisclaimer:

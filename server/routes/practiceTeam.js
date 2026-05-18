@@ -21,6 +21,11 @@ import {
   getPracticePermissionsPayload,
 } from "../services/practiceTeam/practiceTeamService.js";
 import { generatePracticeTeamPermissionSummary } from "../services/practiceTeam/practiceTeamAiService.js";
+import {
+  listPracticeDoctorsInternal,
+  listPublicPracticeDoctors,
+  patchDoctorProfile,
+} from "../services/practiceTeam/practiceDoctorsService.js";
 import { getPracticeAccess } from "../utils/practiceAccess.js";
 import { hasPracticePermission, PERMISSIONS } from "../utils/practicePermissions.js";
 
@@ -183,6 +188,57 @@ router.patch("/:membershipId/revoke", async (req, res) => {
   } catch (err) {
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+router.get("/doctors", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "validation_required" });
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !hasPracticePermission(access.role, PERMISSIONS.TEAM_VIEW)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  try {
+    const data = await listPracticeDoctorsInternal(practiceId);
+    return res.json({ ok: true, practiceId, ...data });
+  } catch (err) {
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+router.get("/public-doctors", async (req, res) => {
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "validation_required" });
+  try {
+    const data = await listPublicPracticeDoctors(practiceId);
+    return res.json({ ok: true, ...data });
+  } catch (err) {
+    if (err?.message === "practice_not_found") {
+      return res.status(404).json({ ok: false, error: err.message });
+    }
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+router.patch("/:membershipId/doctor-profile", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const membershipId = String(req.params.membershipId || "").trim();
+  if (!membershipId || membershipId.startsWith("owner-")) {
+    return res.status(400).json({ ok: false, error: "member_not_found" });
+  }
+  try {
+    const profile = await patchDoctorProfile(userId, membershipId, req.body, { req });
+    return res.json({ ok: true, profile });
+  } catch (err) {
+    const msg = err?.message;
+    if (msg === "forbidden") return res.status(403).json({ ok: false, error: msg });
+    if (msg === "member_not_found") return res.status(404).json({ ok: false, error: msg });
+    if (msg === "validation_required") return res.status(400).json({ ok: false, error: msg });
+    return res.status(500).json({ ok: false, error: "request_failed" });
   }
 });
 

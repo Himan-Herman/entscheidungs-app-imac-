@@ -492,6 +492,30 @@ export default function PracticeHubPage() {
                   {t.actionOpenIntegrations}
                 </Link>
               ) : null}
+              {quickActions.openCalendar ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/calendar?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenCalendar}
+                </Link>
+              ) : null}
+              {quickActions.openTelemedicine ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/telemedicine?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenTelemedicine}
+                </Link>
+              ) : null}
+              {quickActions.openDeveloper ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/developer?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenDeveloper}
+                </Link>
+              ) : null}
               {quickActions.openSecurity ? (
                 <Link
                   className="practice-overview__action"

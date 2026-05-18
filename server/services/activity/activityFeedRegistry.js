@@ -365,6 +365,76 @@ export const AUDIT_ACTION_REGISTRY = {
   patient_thread_ai_draft: { activityType: "ai_draft", visibility: "internal" },
   medication_plan_ai_format: { activityType: "ai_draft", visibility: "internal" },
   practice_document_ai_title_draft: { activityType: "ai_draft", visibility: "internal" },
+  document_ocr_started: {
+    activityType: "document_ocr_started",
+    visibility: "internal",
+    audience: "practice",
+  },
+  document_ocr_completed: {
+    activityType: "document_ocr_completed",
+    visibility: "internal",
+    audience: "practice",
+  },
+  document_ocr_failed: {
+    activityType: "document_ocr_failed",
+    visibility: "internal",
+    audience: "practice",
+  },
+  document_ocr_result_opened: {
+    activityType: "document_ocr_result_opened",
+    visibility: "internal",
+    audience: "practice",
+  },
+  document_ocr_result_corrected: {
+    activityType: "document_ocr_result_corrected",
+    visibility: "internal",
+    audience: "practice",
+  },
+  document_ocr_result_shared: {
+    activityType: "document_ocr_result_shared",
+    visibility: "internal",
+    audience: "practice",
+  },
+  document_ocr_result_discarded: {
+    activityType: "document_ocr_result_discarded",
+    visibility: "internal",
+    audience: "practice",
+  },
+  document_ocr_structured_opened: {
+    activityType: "document_ocr_structured_opened",
+    visibility: "internal",
+    audience: "patient",
+  },
+  practice_api_client_created: {
+    activityType: "practice_api_client_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_api_token_revoked: {
+    activityType: "practice_api_token_revoked",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_webhook_endpoint_created: {
+    activityType: "practice_webhook_endpoint_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_webhook_endpoint_updated: {
+    activityType: "practice_webhook_endpoint_updated",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_webhook_test_sent: {
+    activityType: "practice_webhook_test_sent",
+    visibility: "internal",
+    audience: "practice",
+  },
+  practice_developer_ai_note: {
+    activityType: "practice_developer_ai_note",
+    visibility: "internal",
+    audience: "practice",
+  },
   access_denied: { activityType: "access_denied", visibility: "internal", severity: "security" },
   forbidden: { activityType: "access_denied", visibility: "internal", severity: "security" },
   practice_team_list_viewed: {
@@ -488,6 +558,141 @@ export const AUDIT_ACTION_REGISTRY = {
   },
   integration_ai_error_explanation: {
     activityType: "integration_ai_error_explanation",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_created: {
+    activityType: "appointment_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_updated: {
+    activityType: "appointment_updated",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_rescheduled: {
+    activityType: "appointment_rescheduled",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_cancelled: {
+    activityType: "appointment_cancelled",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_confirmed: {
+    activityType: "appointment_confirmed",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_request_created: {
+    activityType: "appointment_request_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_cancel_requested: {
+    activityType: "appointment_cancel_requested",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_type_created: {
+    activityType: "appointment_type_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_type_updated: {
+    activityType: "appointment_type_updated",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_type_archived: {
+    activityType: "appointment_type_archived",
+    visibility: "internal",
+    audience: "practice",
+  },
+  availability_created: {
+    activityType: "availability_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  availability_updated: {
+    activityType: "availability_updated",
+    visibility: "internal",
+    audience: "practice",
+  },
+  availability_deleted: {
+    activityType: "availability_deleted",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_ai_summary: {
+    activityType: "appointment_ai_summary",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_ai_reply_draft: {
+    activityType: "appointment_ai_reply_draft",
+    visibility: "internal",
+    audience: "practice",
+  },
+  appointment_ai_request_draft: {
+    activityType: "appointment_ai_request_draft",
+    visibility: "internal",
+    audience: "patient",
+  },
+  telemedicine_session_created: {
+    activityType: "telemedicine_session_created",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_consent_granted: {
+    activityType: "telemedicine_consent_granted",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_link_revoked: {
+    activityType: "telemedicine_link_revoked",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_link_opened: {
+    activityType: "telemedicine_link_opened",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_patient_waiting: {
+    activityType: "telemedicine_patient_waiting",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_session_started: {
+    activityType: "telemedicine_session_started",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_session_completed: {
+    activityType: "telemedicine_session_completed",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_session_cancelled: {
+    activityType: "telemedicine_session_cancelled",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_settings_updated: {
+    activityType: "telemedicine_settings_updated",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_ai_instructions: {
+    activityType: "telemedicine_ai_instructions",
+    visibility: "internal",
+    audience: "practice",
+  },
+  telemedicine_ai_followup: {
+    activityType: "telemedicine_ai_followup",
     visibility: "internal",
     audience: "practice",
   },

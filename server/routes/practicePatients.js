@@ -18,6 +18,16 @@ import {
   LINK_STATUSES,
 } from "../services/careRelationship/practicePatientLinkService.js";
 import {
+  assignPracticePatient,
+  unassignPracticePatient,
+  forwardPracticePatient,
+  listAssignedToMe,
+  listUnassignedPatients,
+  listAssignmentHistory,
+} from "../services/careRelationship/practicePatientAssignmentService.js";
+import { generateOrganizationalAssignmentSuggestion } from "../services/careRelationship/practiceAssignmentAiService.js";
+import { canManagePatientAssignment } from "../utils/practicePermissions.js";
+import {
   getPracticePatientRecord,
   getPracticePatientActivity,
   listPreVisitsForPracticePatient,
@@ -143,7 +153,11 @@ router.get("/", async (req, res) => {
   }
 
   try {
-    const result = await searchPracticePatients(practiceId, req.query);
+    const searchQuery = { ...req.query };
+    if (searchQuery.assignmentFilter === "assigned_to_me") {
+      searchQuery.assignedToUserId = userId;
+    }
+    const result = await searchPracticePatients(practiceId, searchQuery);
 
     const hasSearchOrFilter = Boolean(
       req.query.q ||
@@ -233,6 +247,38 @@ router.post("/link", async (req, res) => {
     console.error("[practice/patients/link]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/practice/patients/assigned-to-me?practiceId= */
+router.get("/assigned-to-me", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    const result = await listAssignedToMe(userId, practiceId);
+    return res.json({ ok: true, practiceId, ...result });
+  } catch (err) {
+    const msg = err?.message;
+    if (msg === "forbidden") return res.status(403).json({ ok: false, error: msg });
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** GET /api/practice/patients/unassigned?practiceId= */
+router.get("/unassigned", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    const result = await listUnassignedPatients(userId, practiceId);
+    return res.json({ ok: true, practiceId, ...result });
+  } catch (err) {
+    const msg = err?.message;
+    if (msg === "forbidden") return res.status(403).json({ ok: false, error: msg });
+    return res.status(500).json({ ok: false, error: "request_failed" });
   }
 });
 
@@ -546,6 +592,109 @@ router.patch("/:linkId/status", async (req, res) => {
     console.error("[practice/patients/status]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/practice/patients/:linkId/assign */
+router.patch("/:linkId/assign", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || req.body?.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    const link = await assignPracticePatient(userId, practiceId, req.params.linkId, req.body, {
+      req,
+    });
+    return res.json({ ok: true, link });
+  } catch (err) {
+    const msg = err?.message;
+    if (msg === "forbidden") return res.status(403).json({ ok: false, error: msg });
+    if (["validation_required", "assignmentType_invalid", "assignee_not_member", "link_not_found"].includes(msg)) {
+      return res.status(400).json({ ok: false, error: msg });
+    }
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** PATCH /api/practice/patients/:linkId/unassign */
+router.patch("/:linkId/unassign", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || req.body?.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    const link = await unassignPracticePatient(userId, practiceId, req.params.linkId, { req });
+    return res.json({ ok: true, link });
+  } catch (err) {
+    const msg = err?.message;
+    if (msg === "forbidden") return res.status(403).json({ ok: false, error: msg });
+    if (msg === "link_not_found") return res.status(404).json({ ok: false, error: msg });
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** PATCH /api/practice/patients/:linkId/forward */
+router.patch("/:linkId/forward", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || req.body?.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    const link = await forwardPracticePatient(userId, practiceId, req.params.linkId, req.body, {
+      req,
+    });
+    return res.json({ ok: true, link });
+  } catch (err) {
+    const msg = err?.message;
+    if (msg === "forbidden") return res.status(403).json({ ok: false, error: msg });
+    if (["validation_required", "assignmentType_invalid", "assignee_not_member", "link_not_found"].includes(msg)) {
+      return res.status(400).json({ ok: false, error: msg });
+    }
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** GET /api/practice/patients/:linkId/assignment-history?practiceId= */
+router.get("/:linkId/assignment-history", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  try {
+    const history = await listAssignmentHistory(practiceId, req.params.linkId);
+    return res.json({ ok: true, history });
+  } catch {
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** POST /api/practice/patients/:linkId/ai-assignment-suggestion */
+router.post("/:linkId/ai-assignment-suggestion", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || req.body?.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  if (!canManagePatientAssignment((await getPracticeAccess(userId, practiceId))?.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  try {
+    const result = await generateOrganizationalAssignmentSuggestion(
+      userId,
+      practiceId,
+      req.params.linkId,
+      { locale: req.body?.locale },
+      { req },
+    );
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    const msg = err?.message;
+    if (msg === "ai_not_configured") return res.status(503).json({ ok: false, error: msg });
+    if (msg === "link_not_found") return res.status(404).json({ ok: false, error: msg });
+    return res.status(500).json({ ok: false, error: "request_failed" });
   }
 });
 

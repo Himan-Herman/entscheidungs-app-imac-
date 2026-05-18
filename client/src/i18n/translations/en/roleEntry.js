@@ -52,6 +52,8 @@ export default {
   hubLinkVisitMedications: "Medications & intake",
   hubLinkInbox: "Inbox",
   hubLinkInboxSub: "New information from your practice",
+  hubLinkTelemedicine: "Video consultations",
+  hubLinkTelemedicineSub: "Scheduled video visits and waiting room",
   hubLinkThreads: "Messages",
   hubLinkThreadsSub: "Secure communication with your practice",
   hubLinkMedicationPlans: "Medication plans",

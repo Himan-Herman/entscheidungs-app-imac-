@@ -116,17 +116,24 @@ router.get("/", async (req, res) => {
 
   const filter = String(req.query.filter || "all").trim();
   let status;
+  let workflowStatus;
   if (filter === "unread" || filter === "new") status = "new";
   else if (filter === "archived") status = "archived";
   else if (filter === "read") status = "read";
   else if (filter === "done") status = "done";
+  else if (filter === "in_progress") workflowStatus = "in_progress";
+  else if (filter === "forwarded") workflowStatus = "forwarded";
 
+  const assignmentFilter = String(req.query.assignmentFilter || "").trim();
   const type = String(req.query.type || "").trim();
   const typeFilter = type && INBOX_TYPES.has(type) ? type : undefined;
 
   try {
     const result = await listPracticeInboxItems(practiceId, {
       status,
+      workflowStatus,
+      assignmentFilter,
+      actorUserId: ctx.userId,
       type: typeFilter,
       q: req.query.q,
       sort: req.query.sort,

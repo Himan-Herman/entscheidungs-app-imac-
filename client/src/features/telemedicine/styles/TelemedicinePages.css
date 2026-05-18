@@ -1,0 +1,177 @@
+.telemedicine-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 2.5rem;
+}
+
+.telemedicine-page__header {
+  margin-bottom: 1.25rem;
+}
+
+.telemedicine-page__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.telemedicine-page__nav a {
+  text-decoration: underline;
+}
+
+.telemedicine-page__intro {
+  color: var(--text-muted, #555);
+  max-width: 42rem;
+}
+
+.telemedicine-page__layout {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .telemedicine-page__layout--split {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.telemedicine-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.telemedicine-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 1rem 1.1rem;
+  border: 2px solid var(--border, #ccc);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+  cursor: pointer;
+  font: inherit;
+}
+
+.telemedicine-card:focus-visible {
+  outline: 3px solid var(--focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.telemedicine-card--selected {
+  border-color: var(--focus, #2563eb);
+}
+
+.telemedicine-card__meta {
+  font-size: 0.9rem;
+  color: var(--text-muted, #555);
+  margin-top: 0.35rem;
+}
+
+.telemedicine-panel {
+  border: 1px solid var(--border, #ddd);
+  border-radius: 12px;
+  padding: 1.25rem;
+  background: var(--surface-alt, #f8fafc);
+}
+
+.telemedicine-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.telemedicine-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.65rem 1.1rem;
+  border-radius: 10px;
+  border: 2px solid var(--border, #888);
+  background: var(--surface, #fff);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.telemedicine-btn:focus-visible {
+  outline: 3px solid var(--focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.telemedicine-btn--primary {
+  background: var(--primary, #1e40af);
+  border-color: var(--primary, #1e40af);
+  color: #fff;
+}
+
+.telemedicine-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.telemedicine-consent {
+  border: 2px solid var(--border, #888);
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.telemedicine-consent label {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.telemedicine-checklist {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.telemedicine-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid currentColor;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.telemedicine-ai {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px dashed var(--border, #999);
+  white-space: pre-wrap;
+}
+
+.telemedicine-form label {
+  display: block;
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+.telemedicine-form input,
+.telemedicine-form select,
+.telemedicine-form textarea {
+  width: 100%;
+  margin-top: 0.35rem;
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  border-radius: 8px;
+  border: 1px solid var(--border, #aaa);
+}
+
+.telemedicine-form textarea {
+  min-height: 100px;
+}

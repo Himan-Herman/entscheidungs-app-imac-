@@ -10,6 +10,14 @@ import {
   practiceLogoUrl,
 } from "../../utils/practiceBranding.js";
 import { practiceLogoStorage } from "./practiceLogoStorage.js";
+import {
+  normalizeInsuranceTriState,
+  normalizeOrganizationType,
+  organizationProfileExtras,
+  parseAccessibility,
+  parseJsonStringArray,
+  stringifyJsonArray,
+} from "../../utils/practiceOrganizationJson.js";
 
 const prisma = new PrismaClient();
 
@@ -93,6 +101,7 @@ export function settingsToJson(row, access) {
     role: access.role,
     canManage: access.canManage,
     branding: practiceBrandingJson(row),
+    organization: organizationProfileExtras(row),
     updatedAt: row.updatedAt,
   };
 }
@@ -217,6 +226,43 @@ export async function patchPracticeSettings(actorUserId, practiceId, body, ctx =
   if (Object.prototype.hasOwnProperty.call(b, "logoUrl") && !access.practice.logoStorageKey) {
     data.logoUrl = normalizeOpt(b.logoUrl, 500);
     changedFields.push("logoUrl");
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "organizationType")) {
+    data.organizationType = normalizeOrganizationType(b.organizationType);
+    changedFields.push("organizationType");
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "specialties")) {
+    data.specialtiesJson = stringifyJsonArray(parseJsonStringArray(b.specialties));
+    changedFields.push("specialties");
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "stateRegion")) {
+    data.stateRegion = normalizeOpt(b.stateRegion, 120);
+    changedFields.push("stateRegion");
+  }
+  for (const key of [
+    "acceptsPublicInsurance",
+    "acceptsPrivateInsurance",
+    "acceptsSelfPay",
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(b, key)) {
+      data[key] = normalizeInsuranceTriState(b[key]);
+      changedFields.push(key);
+    }
+  }
+  for (const key of [
+    "emergencyCareAvailable",
+    "onlineAppointmentsAvailable",
+    "videoConsultationAvailable",
+  ]) {
+    if (Object.prototype.hasOwnProperty.call(b, key)) {
+      data[key] = b[key] === null ? null : Boolean(b[key]);
+      changedFields.push(key);
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(b, "accessibility")) {
+    const acc = parseAccessibility(b.accessibility);
+    data.accessibilityJson = acc ? JSON.stringify(acc) : null;
+    changedFields.push("accessibility");
   }
 
   if (!Object.keys(data).length) throw new Error("validation_required");

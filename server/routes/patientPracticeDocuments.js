@@ -13,6 +13,8 @@ import { submitPatientPracticeDocumentQuestion } from "../services/practiceDocum
 import { createPatientDocumentDownloadLink } from "../services/practiceDocument/secureDocumentAccessService.js";
 import { generateDocumentDownloadAiNote } from "../services/practiceDocument/practiceDocumentDownloadAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { requireDocumentOcrFeature } from "../middleware/requireDocumentOcr.js";
+import { getPatientStructuredDocument } from "../services/practiceDocument/documentOcrService.js";
 
 const router = express.Router();
 
@@ -60,6 +62,32 @@ router.get("/", async (req, res) => {
     return res.json({ ok: true, documents });
   } catch (err) {
     console.error("[patient/practice-documents/list]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/patient/practice-documents/:documentId/structured */
+router.get("/:documentId/structured", requireDocumentOcrFeature, async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const out = await getPatientStructuredDocument(req.params.documentId, userId, { req });
+
+    await writeAuditLog({
+      req,
+      userId,
+      actorRole: "patient",
+      action: "document_ocr_structured_opened",
+      entityType: "document_ocr_job",
+      entityId: req.params.documentId,
+      metadata: { documentId: req.params.documentId, patientUserId: userId },
+    });
+
+    return res.json({ ok: true, ...out });
+  } catch (err) {
+    console.error("[patient/practice-documents/structured]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

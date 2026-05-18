@@ -38,7 +38,9 @@ const PRACTICE_MEMBER_ROLES = new Set([
   "owner",
   "admin",
   "doctor",
+  "secretary",
   "assistant",
+  "practice_manager",
   "viewer",
 ]);
 

@@ -10,11 +10,19 @@ import {
   PERMISSIONS,
   PRACTICE_ROLES,
 } from "../../utils/practicePermissions.js";
+import { memberProfileExtras } from "../../utils/practiceOrganizationJson.js";
 
 const prisma = new PrismaClient();
 
 export const MEMBER_STATUSES = new Set(["invited", "active", "revoked"]);
-export const ASSIGNABLE_ROLES = new Set(["admin", "doctor", "assistant", "viewer"]);
+export const ASSIGNABLE_ROLES = new Set([
+  "admin",
+  "doctor",
+  "secretary",
+  "assistant",
+  "practice_manager",
+  "viewer",
+]);
 
 function isValidEmail(v) {
   if (!v || typeof v !== "string") return false;
@@ -53,6 +61,7 @@ export function memberToJson(row, meta = {}) {
           displayName: userDisplayName(row.user),
         }
       : null,
+    profile: memberProfileExtras(row),
   };
 }
 

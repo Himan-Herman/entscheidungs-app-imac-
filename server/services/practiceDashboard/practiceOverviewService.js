@@ -213,6 +213,9 @@ function buildQuickActions(role) {
     manageTeam: hasPracticePermission(role, PERMISSIONS.TEAM_MANAGE),
     openSettings: hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE),
     openIntegrations: hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE),
+    openCalendar: hasPracticePermission(role, PERMISSIONS.CALENDAR_READ),
+    openTelemedicine: hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_READ),
+    openDeveloper: hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE),
     openSecurity: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
   };
 }

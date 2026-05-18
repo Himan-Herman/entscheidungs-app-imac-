@@ -26,6 +26,8 @@ export default {
   roleDoctor: "Ärzt:in",
   roleAssistant: "Assistenz",
   roleViewer: "Nur Lesen (Viewer)",
+  roleSecretary: "Sekretariat",
+  rolePracticeManager: "Praxismanager:in",
   statusInvited: "Eingeladen",
   statusActive: "Aktiv",
   statusRevoked: "Widerrufen",

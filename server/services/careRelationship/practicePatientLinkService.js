@@ -6,6 +6,7 @@ import {
   linkHasConsentScope,
   normalizeConsentScopes,
 } from "./consentScopes.js";
+import { assignmentExtras } from "../../utils/practiceOrganizationJson.js";
 
 const prisma = new PrismaClient();
 
@@ -31,6 +32,7 @@ export function linkToJson(row) {
     consentScopes: Array.isArray(row.consentScopes) ? row.consentScopes : null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    assignment: assignmentExtras(row),
     patient: user
       ? {
           id: user.id,

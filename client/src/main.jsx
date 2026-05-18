@@ -146,6 +146,33 @@ const PracticeIntegrationsPage = lazy(() =>
 const PracticeIntegrationsSandboxPage = lazy(() =>
   import("./features/practiceIntegrations/pages/PracticeIntegrationsSandboxPage.jsx"),
 );
+const PracticeCalendarPage = lazy(() =>
+  import("./features/practiceCalendar/pages/PracticeCalendarPage.jsx"),
+);
+const PracticeCalendarSettingsPage = lazy(() =>
+  import("./features/practiceCalendar/pages/PracticeCalendarSettingsPage.jsx"),
+);
+const PatientAppointmentsPage = lazy(() =>
+  import("./features/patientAppointments/pages/PatientAppointmentsPage.jsx"),
+);
+const PracticeTelemedicinePage = lazy(() =>
+  import("./features/telemedicine/pages/PracticeTelemedicinePage.jsx"),
+);
+const PracticeTelemedicineDetailPage = lazy(() =>
+  import("./features/telemedicine/pages/PracticeTelemedicineDetailPage.jsx"),
+);
+const PracticeVideoSettingsPage = lazy(() =>
+  import("./features/telemedicine/pages/PracticeVideoSettingsPage.jsx"),
+);
+const PracticeDeveloperPage = lazy(() =>
+  import("./features/practiceDeveloper/pages/PracticeDeveloperPage.jsx"),
+);
+const PatientTelemedicinePage = lazy(() =>
+  import("./features/telemedicine/pages/PatientTelemedicinePage.jsx"),
+);
+const PatientTelemedicineDetailPage = lazy(() =>
+  import("./features/telemedicine/pages/PatientTelemedicineDetailPage.jsx"),
+);
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
 );
@@ -362,6 +389,78 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PracticeIntegrationsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/calendar/settings"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeCalendarSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/calendar"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeCalendarPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/settings/video"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeVideoSettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/telemedicine/:sessionId"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeTelemedicineDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/telemedicine"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeTelemedicinePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/developer"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeDeveloperPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/telemedicine/:sessionId"
+                  element={
+                    <ProtectedRoute>
+                      <PatientTelemedicineDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/telemedicine"
+                  element={
+                    <ProtectedRoute>
+                      <PatientTelemedicinePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/appointments"
+                  element={
+                    <ProtectedRoute>
+                      <PatientAppointmentsPage />
                     </ProtectedRoute>
                   }
                 />

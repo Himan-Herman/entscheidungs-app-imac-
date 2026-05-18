@@ -35,6 +35,19 @@ const EMPTY_FORM = {
   patientIntroText: "",
   displayNameForPatients: "",
   accentColor: "#0F766E",
+  organizationType: "",
+  specialties: "",
+  stateRegion: "",
+  acceptsPublicInsurance: "",
+  acceptsPrivateInsurance: "",
+  acceptsSelfPay: "",
+  emergencyCareAvailable: false,
+  onlineAppointmentsAvailable: false,
+  videoConsultationAvailable: false,
+  accessibilityWheelchair: false,
+  accessibilityElevator: false,
+  accessibilityEntrance: false,
+  accessibilityRestroom: false,
 };
 
 export default function PracticeSettingsPage() {
@@ -91,6 +104,27 @@ export default function PracticeSettingsPage() {
         patientIntroText: settings.patientIntroText || "",
         displayNameForPatients: settings.displayNameForPatients || "",
         accentColor: settings.accentColor || "#0F766E",
+        organizationType: settings.organization?.organizationType || "",
+        specialties: (settings.organization?.specialties || []).join(", "),
+        stateRegion: settings.organization?.stateRegion || "",
+        acceptsPublicInsurance: settings.organization?.acceptsPublicInsurance || "",
+        acceptsPrivateInsurance: settings.organization?.acceptsPrivateInsurance || "",
+        acceptsSelfPay: settings.organization?.acceptsSelfPay || "",
+        emergencyCareAvailable: Boolean(settings.organization?.emergencyCareAvailable),
+        onlineAppointmentsAvailable: Boolean(
+          settings.organization?.onlineAppointmentsAvailable,
+        ),
+        videoConsultationAvailable: Boolean(
+          settings.organization?.videoConsultationAvailable,
+        ),
+        accessibilityWheelchair: Boolean(settings.organization?.accessibility?.wheelchair),
+        accessibilityElevator: Boolean(settings.organization?.accessibility?.elevator),
+        accessibilityEntrance: Boolean(
+          settings.organization?.accessibility?.accessibleEntrance,
+        ),
+        accessibilityRestroom: Boolean(
+          settings.organization?.accessibility?.accessibleRestroom,
+        ),
       });
       setCanManage(Boolean(settings.canManage));
       setHasUploadedLogo(Boolean(settings.hasUploadedLogo));
@@ -172,9 +206,42 @@ export default function PracticeSettingsPage() {
         .split(/[,;\s]+/)
         .map((x) => x.trim())
         .filter(Boolean);
+      const specialties = form.specialties
+        .split(/[,;]+/)
+        .map((x) => x.trim())
+        .filter(Boolean);
       const { res, data } = await patchPracticeSettings(practiceId, {
-        ...form,
+        practiceName: form.practiceName,
+        specialty: form.specialty,
+        description: form.description,
+        website: form.website,
+        phone: form.phone,
+        email: form.email,
+        address: form.address,
+        city: form.city,
+        postalCode: form.postalCode,
+        country: form.country,
+        preferredDoctorLanguage: form.preferredDoctorLanguage,
         supportedLanguages: langs,
+        openingHours: form.openingHours,
+        patientIntroText: form.patientIntroText,
+        displayNameForPatients: form.displayNameForPatients,
+        accentColor: form.accentColor,
+        organizationType: form.organizationType || null,
+        specialties,
+        stateRegion: form.stateRegion || null,
+        acceptsPublicInsurance: form.acceptsPublicInsurance || null,
+        acceptsPrivateInsurance: form.acceptsPrivateInsurance || null,
+        acceptsSelfPay: form.acceptsSelfPay || null,
+        emergencyCareAvailable: form.emergencyCareAvailable,
+        onlineAppointmentsAvailable: form.onlineAppointmentsAvailable,
+        videoConsultationAvailable: form.videoConsultationAvailable,
+        accessibility: {
+          wheelchair: form.accessibilityWheelchair,
+          elevator: form.accessibilityElevator,
+          accessibleEntrance: form.accessibilityEntrance,
+          accessibleRestroom: form.accessibilityRestroom,
+        },
       });
       if (!res.ok || !data.ok) throw new Error(data.error || "save_failed");
       await applySettings(data.settings);
@@ -360,6 +427,115 @@ export default function PracticeSettingsPage() {
                   ) : null}
                 </div>
               ) : null}
+            </section>
+
+            <section className="practice-settings__section" aria-labelledby="ps-org">
+              <h2 id="ps-org" className="practice-settings__section-title">
+                {tOrg.sectionOrganization}
+              </h2>
+              <div className="practice-settings__grid">
+                <label>
+                  <span>{tOrg.sectionOrganization}</span>
+                  <select
+                    value={form.organizationType}
+                    disabled={!canManage}
+                    onChange={(e) => updateField("organizationType", e.target.value)}
+                  >
+                    <option value="">—</option>
+                    <option value="single_practice">{tOrg.orgTypeSingle}</option>
+                    <option value="group_practice">{tOrg.orgTypeGroup}</option>
+                    <option value="mvz">{tOrg.orgTypeMvz}</option>
+                    <option value="clinic">{tOrg.orgTypeClinic}</option>
+                    <option value="outpatient">{tOrg.orgTypeOutpatient}</option>
+                    <option value="other">{tOrg.orgTypeOther}</option>
+                  </select>
+                </label>
+                <label className="practice-settings__full">
+                  <span>{tOrg.specialties}</span>
+                  <input
+                    value={form.specialties}
+                    disabled={!canManage}
+                    onChange={(e) => updateField("specialties", e.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>{tOrg.stateRegion}</span>
+                  <input
+                    value={form.stateRegion}
+                    disabled={!canManage}
+                    onChange={(e) => updateField("stateRegion", e.target.value)}
+                  />
+                </label>
+                {[
+                  ["acceptsPublicInsurance", tOrg.acceptsPublicInsurance],
+                  ["acceptsPrivateInsurance", tOrg.acceptsPrivateInsurance],
+                  ["acceptsSelfPay", tOrg.acceptsSelfPay],
+                ].map(([key, label]) => (
+                  <label key={key}>
+                    <span>{label}</span>
+                    <select
+                      value={form[key]}
+                      disabled={!canManage}
+                      onChange={(e) => updateField(key, e.target.value)}
+                    >
+                      <option value="">—</option>
+                      <option value="yes">{tOrg.insuranceYes}</option>
+                      <option value="no">{tOrg.insuranceNo}</option>
+                      <option value="unknown">{tOrg.insuranceUnknown}</option>
+                    </select>
+                  </label>
+                ))}
+                <label className="practice-settings__checkbox">
+                  <input
+                    type="checkbox"
+                    checked={form.emergencyCareAvailable}
+                    disabled={!canManage}
+                    onChange={(e) => updateField("emergencyCareAvailable", e.target.checked)}
+                  />
+                  <span>{tOrg.emergencyCare}</span>
+                </label>
+                <label className="practice-settings__checkbox">
+                  <input
+                    type="checkbox"
+                    checked={form.onlineAppointmentsAvailable}
+                    disabled={!canManage}
+                    onChange={(e) =>
+                      updateField("onlineAppointmentsAvailable", e.target.checked)
+                    }
+                  />
+                  <span>{tOrg.onlineAppointments}</span>
+                </label>
+                <label className="practice-settings__checkbox">
+                  <input
+                    type="checkbox"
+                    checked={form.videoConsultationAvailable}
+                    disabled={!canManage}
+                    onChange={(e) =>
+                      updateField("videoConsultationAvailable", e.target.checked)
+                    }
+                  />
+                  <span>{tOrg.videoConsultation}</span>
+                </label>
+              </div>
+              <fieldset className="practice-settings__fieldset">
+                <legend>{tOrg.accessibilityHeading}</legend>
+                {[
+                  ["accessibilityWheelchair", tOrg.wheelchair],
+                  ["accessibilityElevator", tOrg.elevator],
+                  ["accessibilityEntrance", tOrg.accessibleEntrance],
+                  ["accessibilityRestroom", tOrg.accessibleRestroom],
+                ].map(([key, label]) => (
+                  <label key={key} className="practice-settings__checkbox">
+                    <input
+                      type="checkbox"
+                      checked={form[key]}
+                      disabled={!canManage}
+                      onChange={(e) => updateField(key, e.target.checked)}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </fieldset>
             </section>
 
             <section className="practice-settings__section" aria-labelledby="ps-contact">

@@ -16,6 +16,7 @@ import {
   Stethoscope,
   UserRound,
   Users,
+  Video,
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
@@ -31,6 +32,12 @@ const LINKS = [
     key: "hubLinkThreads",
     subtitleKey: "hubLinkThreadsSub",
     icon: MessageSquare,
+  },
+  {
+    to: "/patient/telemedicine",
+    key: "hubLinkTelemedicine",
+    subtitleKey: "hubLinkTelemedicineSub",
+    icon: Video,
   },
   {
     to: "/patient/medication-plans",

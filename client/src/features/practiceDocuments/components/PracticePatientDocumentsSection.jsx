@@ -21,6 +21,7 @@ import {
   revokePracticeDocumentSecureLink,
 } from "../api/practiceDocumentsApi.js";
 import DeleteDocumentDialog from "./DeleteDocumentDialog.jsx";
+import PracticeDocumentOcrSection from "./PracticeDocumentOcrSection.jsx";
 import LifecycleConfirmDialog from "../../../components/lifecycle/LifecycleConfirmDialog.jsx";
 import LifecycleStatusBadge from "../../../components/lifecycle/LifecycleStatusBadge.jsx";
 import "../../../styles/PatientThreadsPage.css";
@@ -801,6 +802,17 @@ export default function PracticePatientDocumentsSection({
                 <p className="practice-dashboard__error" role="alert">
                   {downloadError}
                 </p>
+              ) : null}
+
+              {activeId && activeDoc?.files?.length > 0 && !isDeleted ? (
+                <PracticeDocumentOcrSection
+                  linkId={linkId}
+                  practiceId={practiceId}
+                  documentId={activeId}
+                  fileId={activeDoc.files[0]?.id}
+                  documentType={activeDoc.type}
+                  readOnly={readOnly}
+                />
               ) : null}
 
               {isDraft && !isDeleted ? (

@@ -4,6 +4,11 @@
 
 import express from "express";
 import { requirePracticeDocumentsV2Feature } from "../middleware/requirePracticeDocumentsV2.js";
+import { requireDocumentOcrFeature } from "../middleware/requireDocumentOcr.js";
+import {
+  hasPracticePermission,
+  PERMISSIONS,
+} from "../utils/practicePermissions.js";
 import { uploadPracticeDocument } from "../middleware/uploadPracticeDocument.js";
 import {
   getPracticeAccess,
@@ -36,6 +41,14 @@ import {
   practiceDirectDownload,
 } from "../services/practiceDocument/secureDocumentAccessService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import {
+  discardDocumentOcrResult,
+  getDocumentOcrResult,
+  getDocumentOcrStatus,
+  patchDocumentOcrResult,
+  shareDocumentOcrResult,
+  startDocumentOcr,
+} from "../services/practiceDocument/documentOcrService.js";
 
 function documentAuditMetadata(doc) {
   return {
@@ -92,7 +105,20 @@ function mapError(err) {
   if (msg === "ai_not_configured") {
     return { status: 503, error: msg };
   }
-  if (msg === "forbidden") return { status: 403, error: msg };
+  if (msg === "forbidden" || msg === "consent_required") return { status: 403, error: msg };
+  if (
+    msg === "feature_disabled" ||
+    msg === "ocr_unavailable" ||
+    msg === "ocr_disabled" ||
+    msg === "external_ocr_unavailable" ||
+    msg === "ocr_result_not_found" ||
+    msg === "ocr_result_discarded" ||
+    msg === "ocr_not_ready_to_share" ||
+    msg === "ocr_job_in_progress"
+  ) {
+    const status = msg === "feature_disabled" ? 404 : msg === "ocr_job_in_progress" ? 409 : 503;
+    return { status, error: msg };
+  }
   if (msg === "link_expired" || msg === "link_revoked" || msg === "document_unavailable") {
     return { status: 410, error: msg };
   }
@@ -338,6 +364,250 @@ router.get("/:documentId/download", async (req, res) => {
     return res.send(buffer);
   } catch (err) {
     console.error("[practice/documents/download]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** OCR / lab structuring — organizational only */
+router.post("/:documentId/ocr/start", requireDocumentOcrFeature, async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  const fileId = String(req.body?.fileId || "").trim();
+  if (!fileId) {
+    return res.status(400).json({ ok: false, error: "validation_required" });
+  }
+
+  try {
+    const doc = await getDocumentForPractice(
+      req.params.documentId,
+      req.params.linkId,
+      ctx.practiceId,
+    );
+    const out = await startDocumentOcr(
+      ctx.userId,
+      ctx.practiceId,
+      req.params.linkId,
+      req.params.documentId,
+      {
+        fileId,
+        engine: req.body?.engine,
+        locale: req.body?.locale,
+      },
+      { req, access: ctx.access },
+    );
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "document_ocr_started",
+      entityType: "document_ocr_job",
+      entityId: out.job.id,
+      metadata: {
+        documentId: req.params.documentId,
+        practiceProfileId: ctx.practiceId,
+        practicePatientLinkId: req.params.linkId,
+        patientUserId: doc.patientUserId,
+      },
+    });
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "document_ocr_completed",
+      entityType: "document_ocr_job",
+      entityId: out.job.id,
+      metadata: {
+        documentId: req.params.documentId,
+        practiceProfileId: ctx.practiceId,
+        practicePatientLinkId: req.params.linkId,
+      },
+    }).catch(() => {});
+
+    return res.status(201).json({ ok: true, ...out });
+  } catch (err) {
+    if (err?.consentType) {
+      return res.status(403).json({ ok: false, error: "consent_required", consentType: err.consentType });
+    }
+    console.error("[practice/documents/ocr/start]", err?.message ?? err);
+    const mapped = mapError(err);
+    if (mapped.error === "ocr_unavailable" || mapped.error === "ocr_disabled") {
+      await writeAuditLog({
+        req,
+        userId: ctx.userId,
+        actorRole: ctx.access.role,
+        action: "document_ocr_failed",
+        entityType: "document_ocr_job",
+        entityId: req.params.documentId,
+        metadata: {
+          documentId: req.params.documentId,
+          practiceProfileId: ctx.practiceId,
+          errorCode: mapped.error,
+        },
+      }).catch(() => {});
+    }
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+router.get("/:documentId/ocr/status", requireDocumentOcrFeature, async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const out = await getDocumentOcrStatus(
+      ctx.practiceId,
+      req.params.linkId,
+      req.params.documentId,
+      { access: ctx.access },
+    );
+    return res.json({ ok: true, ...out });
+  } catch (err) {
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+router.get("/:documentId/ocr/result", requireDocumentOcrFeature, async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const out = await getDocumentOcrResult(
+      ctx.practiceId,
+      req.params.linkId,
+      req.params.documentId,
+      { access: ctx.access },
+    );
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "document_ocr_result_opened",
+      entityType: "document_ocr_job",
+      entityId: out.job?.id || req.params.documentId,
+      metadata: {
+        documentId: req.params.documentId,
+        practiceProfileId: ctx.practiceId,
+        practicePatientLinkId: req.params.linkId,
+      },
+    }).catch(() => {});
+
+    return res.json({ ok: true, ...out });
+  } catch (err) {
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+router.patch("/:documentId/ocr/result", requireDocumentOcrFeature, async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const out = await patchDocumentOcrResult(
+      ctx.userId,
+      ctx.practiceId,
+      req.params.linkId,
+      req.params.documentId,
+      req.body || {},
+      { req, access: ctx.access },
+    );
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "document_ocr_result_corrected",
+      entityType: "document_ocr_job",
+      entityId: req.params.documentId,
+      metadata: {
+        documentId: req.params.documentId,
+        practiceProfileId: ctx.practiceId,
+        practicePatientLinkId: req.params.linkId,
+      },
+    });
+
+    return res.json({ ok: true, ...out });
+  } catch (err) {
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+router.post("/:documentId/ocr/share", requireDocumentOcrFeature, async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const doc = await getDocumentForPractice(
+      req.params.documentId,
+      req.params.linkId,
+      ctx.practiceId,
+    );
+    const out = await shareDocumentOcrResult(
+      ctx.userId,
+      ctx.practiceId,
+      req.params.linkId,
+      req.params.documentId,
+      { req, access: ctx.access },
+    );
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "document_ocr_result_shared",
+      entityType: "document_ocr_job",
+      entityId: req.params.documentId,
+      metadata: {
+        documentId: req.params.documentId,
+        practiceProfileId: ctx.practiceId,
+        practicePatientLinkId: req.params.linkId,
+        patientUserId: doc.patientUserId,
+      },
+    });
+
+    return res.json({ ok: true, ...out });
+  } catch (err) {
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+router.patch("/:documentId/ocr/discard", requireDocumentOcrFeature, async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const out = await discardDocumentOcrResult(
+      ctx.userId,
+      ctx.practiceId,
+      req.params.linkId,
+      req.params.documentId,
+      { req, access: ctx.access },
+    );
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "document_ocr_result_discarded",
+      entityType: "document_ocr_job",
+      entityId: req.params.documentId,
+      metadata: {
+        documentId: req.params.documentId,
+        practiceProfileId: ctx.practiceId,
+        practicePatientLinkId: req.params.linkId,
+      },
+    });
+
+    return res.json({ ok: true, ...out });
+  } catch (err) {
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

@@ -35,6 +35,7 @@ function statusLabel(status, t) {
 
 const EMPTY_FILTERS = {
   status: "",
+  assignmentFilter: "",
   profileShared: "",
   hasUnreadMessages: "",
   hasDocuments: "",
@@ -50,6 +51,12 @@ export default function PracticePatientsListPage() {
   );
   const tPractices = useMemo(
     () => getMessages(language).settingsPractices || getMessages("en").settingsPractices,
+    [language],
+  );
+  const tOrg = useMemo(
+    () =>
+      getMessages(language).practiceOrganization ||
+      getMessages("en").practiceOrganization,
     [language],
   );
   const [searchParams, setSearchParams] = useSearchParams();
@@ -93,6 +100,7 @@ export default function PracticePatientsListPage() {
       };
       if (searchQ.trim()) opts.q = searchQ.trim();
       if (filters.status) opts.status = filters.status;
+      if (filters.assignmentFilter) opts.assignmentFilter = filters.assignmentFilter;
       if (filters.profileShared === "yes") opts.profileShared = true;
       if (filters.profileShared === "no") opts.profileShared = false;
       if (filters.hasUnreadMessages === "yes") opts.hasUnreadMessages = true;
@@ -416,6 +424,19 @@ export default function PracticePatientsListPage() {
                       <option value="invited">{t.statusInvited}</option>
                       <option value="archived">{t.statusArchived}</option>
                       <option value="revoked">{t.statusRevoked}</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>{tOrg.assignmentHeading}</span>
+                    <select
+                      value={filters.assignmentFilter}
+                      onChange={(e) =>
+                        setFilters((f) => ({ ...f, assignmentFilter: e.target.value }))
+                      }
+                    >
+                      <option value="">{tOrg.filterAllAssignments}</option>
+                      <option value="assigned_to_me">{tOrg.filterAssignedToMe}</option>
+                      <option value="unassigned">{tOrg.filterUnassigned}</option>
                     </select>
                   </label>
                   <label>

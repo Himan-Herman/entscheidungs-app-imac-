@@ -27,6 +27,12 @@ model User {
   visitMedicationEntriesAuthored VisitMedicationEntry[] @relation("VisitMedicationCreatedBy")
   practicePatientLinks           PracticePatientLink[]  @relation("PracticePatientLinks")
   profileAccessGrants            PracticePatientLink[]  @relation("ProfileAccessGrantedBy")
+  practiceLinksAsAssignedDoctor  PracticePatientLink[]  @relation("PracticeLinkAssignedDoctor")
+  practiceLinksAsAssignedTeam    PracticePatientLink[]  @relation("PracticeLinkAssignedTeam")
+  practiceLinksAssignedBy        PracticePatientLink[]  @relation("PracticeLinkAssignedBy")
+  practiceLinksPatientDoctorPick PracticePatientLink[] @relation("PracticeLinkPatientSelectedDoctor")
+  practicePatientAssignmentsTo   PracticePatientAssignment[] @relation("PracticeAssignmentTo")
+  practicePatientAssignmentsBy   PracticePatientAssignment[] @relation("PracticeAssignmentBy")
   patientInboxItems              PatientInboxItem[]
   practicePatientThreads         PracticePatientThread[]
   medicationPlans                MedicationPlan[] @relation("MedicationPlanPatient")
@@ -37,6 +43,10 @@ model User {
   practiceDocumentSharesSharedBy PracticeDocumentShare[] @relation("PracticeDocumentShareBy")
   practiceDocumentsDeleted       PracticeDocument[] @relation("PracticeDocumentDeletedBy")
   practiceDocumentAuditEntries   PracticeDocumentAuditEntry[]
+  documentOcrJobsCreated         DocumentOcrJob[] @relation("DocumentOcrJobCreatedBy")
+  documentOcrJobsAsPatient       DocumentOcrJob[] @relation("DocumentOcrJobPatient")
+  practiceApiClientsCreated      PracticeApiClient[] @relation("PracticeApiClientCreatedBy")
+  practiceWebhookEndpointsCreated PracticeWebhookEndpoint[] @relation("PracticeWebhookEndpointCreatedBy")
   patientDataRequests          PatientDataRequest[]
   patientDataRequestsHandled     PatientDataRequest[] @relation("PatientDataRequestHandledBy")
   practiceInboxItemsAsPatient    PracticeInboxItem[]  @relation("PracticeInboxPatient")
@@ -48,6 +58,13 @@ model User {
   exportJobs           ExportJob[]
   consentRecords       ConsentRecord[]
   integrationConnectionsCreated IntegrationConnection[] @relation("IntegrationConnectionCreatedBy")
+  practiceAppointmentsAsPatient PracticeAppointment[] @relation("PracticeAppointmentPatient")
+  practiceAppointmentsCreated   PracticeAppointment[] @relation("PracticeAppointmentCreatedBy")
+  practiceAppointmentsCancelled PracticeAppointment[] @relation("PracticeAppointmentCancelledBy")
+  telemedicineSessionsAsPatient TelemedicineSession[] @relation("TelemedicinePatient")
+  telemedicineSessionsCreated   TelemedicineSession[] @relation("TelemedicineCreatedBy")
+  telemedicineParticipants      TelemedicineParticipant[] @relation("TelemedicineParticipantUser")
+  telemedicineConsents          TelemedicineConsent[] @relation("TelemedicineConsentPatient")
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -153,6 +170,7 @@ model PreVisitSession {
   appointmentReference String?
   /// When set, enables neutral calendar export (.ics) without clinical content.
   appointmentAt DateTime?
+  calendarAppointments PracticeAppointment[]
 
   @@index([userId])
   @@index([preVisitCaseId])
@@ -281,6 +299,20 @@ model PracticeProfile {
   logoStorageKey          String?
   logoMimeType            String?
   isActive                Boolean  @default(true)
+  /// single_practice | group_practice | mvz | clinic | outpatient | other
+  organizationType        String?
+  /// JSON array of specialty labels
+  specialtiesJson         String?
+  stateRegion             String?
+  /// yes | no | unknown
+  acceptsPublicInsurance    String?
+  acceptsPrivateInsurance   String?
+  acceptsSelfPay            String?
+  emergencyCareAvailable    Boolean?
+  onlineAppointmentsAvailable Boolean?
+  videoConsultationAvailable  Boolean?
+  /// JSON: wheelchair, elevator, accessibleEntrance, accessibleRestroom
+  accessibilityJson       String?
 
   user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   qrTargets PracticeQrTarget[]
@@ -303,8 +335,210 @@ model PracticeProfile {
   integrationJobs          IntegrationJob[]
   integrationMappings      IntegrationMapping[]
   externalResourceReferences ExternalResourceReference[]
+  appointmentTypes         AppointmentType[]
+  practiceAvailabilities   PracticeAvailability[]
+  practiceAppointments     PracticeAppointment[]
+  telemedicineSettings     PracticeTelemedicineSettings?
+  telemedicineSessions     TelemedicineSession[]
+  documentOcrJobs          DocumentOcrJob[]
+  apiClients               PracticeApiClient[]
+  webhookEndpoints         PracticeWebhookEndpoint[]
+  webhookDeliveries        PracticeWebhookDelivery[]
+  apiAuditEvents           PracticeApiAuditEvent[]
 
   @@index([userId])
+}
+
+/// Practice telemedicine preferences — no provider secrets in DB.
+model PracticeTelemedicineSettings {
+  id                String   @id @default(cuid())
+  practiceProfileId String   @unique
+  videoEnabled      Boolean  @default(false)
+  /// sandbox | external_link | jitsi | daily | twilio | whereby | zoom | google_meet
+  providerType      String   @default("sandbox")
+  consentVersion    String   @default("1")
+  sandboxMode       Boolean  @default(true)
+  externalLinkMode  Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+}
+
+/// Organizational video consultation session — no recordings or transcripts.
+model TelemedicineSession {
+  id                    String    @id @default(cuid())
+  appointmentId         String?   @unique
+  practiceProfileId     String
+  practicePatientLinkId String?
+  patientUserId         String?
+  providerType          String    @default("sandbox")
+  /// planned | waiting | active | completed | cancelled | failed
+  status                String    @default("planned")
+  title                 String?
+  scheduledStartAt      DateTime?
+  scheduledEndAt        DateTime?
+  startedAt             DateTime?
+  endedAt               DateTime?
+  joinUrlHash           String?
+  hostUrlHash           String?
+  providerRoomId        String?
+  linkRevokedAt         DateTime?
+  consentAcceptedAt     DateTime?
+  consentVersion        String?
+  createdByUserId       String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  appointment         PracticeAppointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  patientUser         User?                @relation("TelemedicinePatient", fields: [patientUserId], references: [id], onDelete: SetNull)
+  createdBy           User?                @relation("TelemedicineCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  participants        TelemedicineParticipant[]
+  consents            TelemedicineConsent[]
+
+  @@index([practiceProfileId, status])
+  @@index([practiceProfileId, scheduledStartAt])
+  @@index([patientUserId])
+}
+
+model TelemedicineParticipant {
+  id        String    @id @default(cuid())
+  sessionId String
+  userId    String?
+  /// patient | practice | guest
+  role      String
+  /// invited | waiting | joined | left | declined
+  status    String    @default("invited")
+  joinedAt  DateTime?
+  leftAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  session TelemedicineSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User?               @relation("TelemedicineParticipantUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([sessionId, status])
+  @@index([userId])
+}
+
+model TelemedicineConsent {
+  id              String    @id @default(cuid())
+  sessionId       String
+  patientUserId   String
+  consentVersion  String
+  /// granted | revoked
+  status          String    @default("granted")
+  grantedAt       DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  session     TelemedicineSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  patientUser User                @relation("TelemedicineConsentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, status])
+  @@index([patientUserId])
+}
+
+/// Organizational appointment types — no medical categorization.
+model AppointmentType {
+  id                String   @id @default(cuid())
+  practiceProfileId String
+  name              String
+  durationMinutes   Int      @default(30)
+  color             String?
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  appointments    PracticeAppointment[]
+  availabilities  PracticeAvailability[]
+
+  @@index([practiceProfileId, active])
+}
+
+/// Weekly availability windows — organizational scheduling only.
+model PracticeAvailability {
+  id                String   @id @default(cuid())
+  practiceProfileId String
+  appointmentTypeId String?
+  /// 0=Sunday … 6=Saturday
+  weekday           Int
+  startTime         String
+  endTime           String
+  timezone          String   @default("Europe/Berlin")
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  practiceProfile PracticeProfile  @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  appointmentType AppointmentType? @relation(fields: [appointmentTypeId], references: [id], onDelete: SetNull)
+
+  @@index([practiceProfileId, weekday, active])
+}
+
+/// Practice appointments — organizational; no clinical triage fields.
+model PracticeAppointment {
+  id                    String    @id @default(cuid())
+  practiceProfileId     String
+  practicePatientLinkId String?
+  patientUserId         String?
+  appointmentTypeId     String?
+  preVisitSessionId     String?
+  title                 String
+  /// requested | scheduled | confirmed | cancelled | completed | no_show | rescheduled
+  status                String    @default("scheduled")
+  startAt               DateTime
+  endAt                 DateTime
+  timezone              String    @default("Europe/Berlin")
+  /// practice | video | phone | external | unknown
+  locationType          String    @default("practice")
+  locationText          String?
+  patientNote           String?
+  practiceNote          String?
+  requestedStartAt      DateTime?
+  requestedEndAt        DateTime?
+  createdByUserId       String?
+  cancelledAt           DateTime?
+  cancelledByUserId     String?
+  cancellationReason    String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  patientUser         User?                @relation("PracticeAppointmentPatient", fields: [patientUserId], references: [id], onDelete: SetNull)
+  appointmentType     AppointmentType?     @relation(fields: [appointmentTypeId], references: [id], onDelete: SetNull)
+  preVisitSession     PreVisitSession?     @relation(fields: [preVisitSessionId], references: [id], onDelete: SetNull)
+  createdBy           User?                @relation("PracticeAppointmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  cancelledBy         User?                @relation("PracticeAppointmentCancelledBy", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
+  reminders           AppointmentReminder[]
+  telemedicineSession TelemedicineSession?
+
+  @@index([practiceProfileId, startAt])
+  @@index([practiceProfileId, status])
+  @@index([patientUserId, startAt])
+  @@index([practicePatientLinkId])
+}
+
+model AppointmentReminder {
+  id            String    @id @default(cuid())
+  appointmentId String
+  /// email | inbox | system
+  type          String
+  sendAt        DateTime
+  /// pending | sent | failed | cancelled
+  status        String    @default("pending")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  appointment PracticeAppointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([appointmentId, status])
+  @@index([sendAt, status])
 }
 
 /// Practice integration preferences — secrets never returned to clients; signing material encrypted at rest.
@@ -498,6 +732,19 @@ model PracticeMember {
   invitedAt         DateTime?
   acceptedAt        DateTime?
   revokedAt         DateTime?
+  displayName       String?
+  positionTitle     String?
+  specialty         String?
+  languagesJson     String?
+  visibleToPatients Boolean  @default(false)
+  acceptsPatientRequests Boolean @default(true)
+  doctorTitle       String?
+  focusArea         String?
+  officeHours       String?
+  internalContact   String?
+  onlineAppointmentsAvailable Boolean?
+  videoConsultationAvailable Boolean?
+  lastActiveAt      DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -573,13 +820,27 @@ model PracticePatientLink {
   profileAccessGrantedAt   DateTime?
   profileAccessRevokedAt   DateTime?
   profileAccessGrantedByUserId String?
+  /// unassigned | assigned | forwarded | closed
+  assignmentStatus          String    @default("unassigned")
+  assignedDoctorUserId      String?
+  assignedTeamMemberUserId  String?
+  assignedByUserId          String?
+  assignedAt                DateTime?
+  assignmentNote            String?
+  lastForwardedAt           DateTime?
+  patientSelectedDoctorUserId String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   patientUser     User            @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
   profileAccessGrantedBy User?    @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
+  assignedDoctor  User?           @relation("PracticeLinkAssignedDoctor", fields: [assignedDoctorUserId], references: [id], onDelete: SetNull)
+  assignedTeamMember User?        @relation("PracticeLinkAssignedTeam", fields: [assignedTeamMemberUserId], references: [id], onDelete: SetNull)
+  assignedBy      User?           @relation("PracticeLinkAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+  patientSelectedDoctor User?     @relation("PracticeLinkPatientSelectedDoctor", fields: [patientSelectedDoctorUserId], references: [id], onDelete: SetNull)
   patientProfile  PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+  assignments     PracticePatientAssignment[]
   inboxItems      PatientInboxItem[]
   threads         PracticePatientThread[]
   medicationPlans MedicationPlan[]
@@ -587,11 +848,39 @@ model PracticePatientLink {
   dataRequests      PatientDataRequest[]
   practiceInboxItems PracticeInboxItem[]
   secureDocumentAccessTokens SecureDocumentAccessToken[]
+  appointments               PracticeAppointment[]
+  telemedicineSessions       TelemedicineSession[]
+  documentOcrJobs            DocumentOcrJob[]
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
   @@index([patientUserId, status])
   @@index([linkedAt])
+  @@index([practiceProfileId, assignmentStatus])
+  @@index([practiceProfileId, assignedDoctorUserId])
+  @@index([practiceProfileId, assignedTeamMemberUserId])
+}
+
+/// Organizational assignment history for a practice–patient link (no clinical content).
+model PracticePatientAssignment {
+  id                    String    @id @default(cuid())
+  practicePatientLinkId String
+  assignedToUserId      String
+  assignedByUserId      String?
+  /// doctor | secretary | assistant | team
+  assignmentType        String
+  /// active | revoked | forwarded
+  status                String    @default("active")
+  note                  String?
+  createdAt             DateTime  @default(now())
+  revokedAt             DateTime?
+
+  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  assignedTo          User                @relation("PracticeAssignmentTo", fields: [assignedToUserId], references: [id], onDelete: Cascade)
+  assignedBy          User?               @relation("PracticeAssignmentBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([practicePatientLinkId, createdAt])
+  @@index([assignedToUserId, status])
 }
 
 /**
@@ -784,6 +1073,9 @@ model PracticeDocument {
   files               PracticeDocumentFile[]
   shares              PracticeDocumentShare[]
   secureAccessTokens  SecureDocumentAccessToken[]
+  ocrJobs             DocumentOcrJob[]
+  ocrResults          DocumentOcrResult[]
+  labStructuredEntries LabStructuredEntry[]
 
   @@index([practicePatientLinkId, status])
   @@index([patientUserId, status])
@@ -802,8 +1094,173 @@ model PracticeDocumentFile {
 
   document PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
   secureAccessTokens SecureDocumentAccessToken[]
+  ocrJobs            DocumentOcrJob[]
 
   @@index([documentId])
+}
+
+/// OCR / lab structuring job — metadata only in audit; no clinical payloads in logs.
+model DocumentOcrJob {
+  id                    String    @id @default(cuid())
+  documentId            String
+  fileId                String
+  practiceProfileId     String
+  practicePatientLinkId String?
+  patientUserId         String?
+  /// pending | running | completed | failed | cancelled
+  status                String    @default("pending")
+  /// local_stub | external_ocr | ai_vision | manual
+  engine                String    @default("local_stub")
+  startedAt             DateTime?
+  completedAt           DateTime?
+  failedAt              DateTime?
+  errorCode             String?
+  createdByUserId       String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  document            PracticeDocument      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  file                PracticeDocumentFile  @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile       @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink?  @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  patientUser         User?                 @relation("DocumentOcrJobPatient", fields: [patientUserId], references: [id], onDelete: SetNull)
+  createdBy           User?                 @relation("DocumentOcrJobCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  result              DocumentOcrResult?
+  labEntries          LabStructuredEntry[]
+
+  @@index([documentId, status])
+  @@index([practiceProfileId, createdAt])
+}
+
+model DocumentOcrResult {
+  id                      String   @id @default(cuid())
+  ocrJobId                String   @unique
+  documentId              String
+  /// detected | needs_review | reviewed | shared | discarded
+  reviewStatus            String   @default("needs_review")
+  extractedTextStorageKey String?
+  structuredJson          Json?
+  confidence              Float?
+  language                String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  ocrJob   DocumentOcrJob   @relation(fields: [ocrJobId], references: [id], onDelete: Cascade)
+  document PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, reviewStatus])
+}
+
+/// Lab table row — no interpretation, normal/abnormal, or risk fields.
+model LabStructuredEntry {
+  id                 String    @id @default(cuid())
+  documentId         String
+  ocrJobId           String?
+  label              String
+  valueText          String
+  unit               String?
+  referenceRangeText String?
+  collectedAt        DateTime?
+  sourcePage         Int?
+  sourceLine         Int?
+  confidence         Float?
+  createdAt          DateTime  @default(now())
+
+  document PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  ocrJob   DocumentOcrJob?  @relation(fields: [ocrJobId], references: [id], onDelete: SetNull)
+
+  @@index([documentId])
+  @@index([ocrJobId])
+}
+
+/// Machine API client — token stored as hash only.
+model PracticeApiClient {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  name              String
+  /// active | revoked | disabled
+  status            String    @default("active")
+  tokenHash         String    @unique
+  scopesJson        Json
+  createdByUserId   String?
+  lastUsedAt        DateTime?
+  revokedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User?           @relation("PracticeApiClientCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  auditEvents     PracticeApiAuditEvent[]
+
+  @@index([practiceProfileId, status])
+}
+
+/// Developer webhook endpoint (multi-endpoint per practice).
+model PracticeWebhookEndpoint {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  name              String
+  url               String
+  /// active | paused | revoked
+  status            String    @default("active")
+  secretHash        String
+  secretEnc         String?
+  eventTypesJson    Json
+  createdByUserId   String?
+  lastSuccessAt     DateTime?
+  lastFailureAt     DateTime?
+  revokedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  practiceProfile PracticeProfile         @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User?                   @relation("PracticeWebhookEndpointCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  deliveries      PracticeWebhookDelivery[]
+
+  @@index([practiceProfileId, status])
+}
+
+/// Webhook delivery attempt log — no payload bodies.
+model PracticeWebhookDelivery {
+  id                String    @id @default(cuid())
+  endpointId        String
+  practiceProfileId String
+  eventType         String
+  /// pending | delivered | failed | retrying | cancelled
+  status            String    @default("pending")
+  attemptCount      Int       @default(0)
+  lastStatusCode    Int?
+  lastErrorCode     String?
+  nextRetryAt       DateTime?
+  deliveredAt       DateTime?
+  eventId           String    @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  endpoint        PracticeWebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  practiceProfile PracticeProfile         @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId, status])
+  @@index([practiceProfileId, createdAt])
+  @@index([nextRetryAt])
+}
+
+/// External API access audit — metadata only.
+model PracticeApiAuditEvent {
+  id                String   @id @default(cuid())
+  practiceProfileId String
+  apiClientId       String?
+  action            String
+  endpoint          String?
+  statusCode        Int?
+  ipHash            String?
+  createdAt         DateTime @default(now())
+
+  practiceProfile PracticeProfile  @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  apiClient       PracticeApiClient? @relation(fields: [apiClientId], references: [id], onDelete: SetNull)
+
+  @@index([practiceProfileId, createdAt])
+  @@index([apiClientId])
 }
 
 /**

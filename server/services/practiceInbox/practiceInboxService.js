@@ -28,6 +28,9 @@ const includeRelations = {
     select: {
       id: true,
       status: true,
+      assignmentStatus: true,
+      assignedDoctorUserId: true,
+      assignedTeamMemberUserId: true,
       patientProfile: { select: { id: true, displayName: true } },
     },
   },
@@ -192,6 +195,8 @@ export async function listPracticeInboxItems(practiceProfileId, opts = {}) {
   const statusFilter =
     opts.status && INBOX_STATUSES.has(opts.status) ? opts.status : undefined;
   const typeFilter = opts.type && INBOX_TYPES.has(opts.type) ? opts.type : undefined;
+  const assignmentFilter = String(opts.assignmentFilter || "").trim();
+  const actorUserId = String(opts.actorUserId || "").trim();
 
   const limit = Math.min(200, Math.max(1, Number(opts.limit) || 50));
   const offset = Math.max(0, Number(opts.offset) || 0);
@@ -201,12 +206,43 @@ export async function listPracticeInboxItems(practiceProfileId, opts = {}) {
 
   if (statusFilter) {
     where.status = statusFilter;
+  } else if (opts.workflowStatus === "forwarded") {
+    where.practicePatientLink = { assignmentStatus: "forwarded" };
+    where.status = { not: "archived" };
+  } else if (opts.workflowStatus === "in_progress") {
+    where.status = "read";
   } else {
     where.status = { not: "archived" };
   }
 
   if (typeFilter) {
     where.type = typeFilter;
+  }
+
+  if (assignmentFilter === "assigned_to_me" && actorUserId) {
+    where.practicePatientLink = {
+      ...(typeof where.practicePatientLink === "object" ? where.practicePatientLink : {}),
+      OR: [
+        { assignedDoctorUserId: actorUserId },
+        { assignedTeamMemberUserId: actorUserId },
+      ],
+    };
+  } else if (assignmentFilter === "unassigned") {
+    where.practicePatientLink = {
+      ...(typeof where.practicePatientLink === "object" ? where.practicePatientLink : {}),
+      assignmentStatus: { in: ["unassigned", "forwarded"] },
+      assignedDoctorUserId: null,
+    };
+  } else if (assignmentFilter === "doctors") {
+    where.practicePatientLink = {
+      ...(typeof where.practicePatientLink === "object" ? where.practicePatientLink : {}),
+      assignedDoctorUserId: { not: null },
+    };
+  } else if (assignmentFilter === "secretary") {
+    where.practicePatientLink = {
+      ...(typeof where.practicePatientLink === "object" ? where.practicePatientLink : {}),
+      assignedTeamMemberUserId: { not: null },
+    };
   }
 
   const q = String(opts.q || "").trim().toLowerCase();

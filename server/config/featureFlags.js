@@ -68,3 +68,94 @@ export function isPvsProductionEnabled() {
 export function isIntegrationsUiEnabled() {
   return isIntegrationsEnabled() || isPvsSandboxEnabled();
 }
+
+/** Practice calendar / appointments. */
+export function isPracticeCalendarEnabled() {
+  return envFlag("ENABLE_PRACTICE_CALENDAR", false);
+}
+
+/** External calendar sync (Google/Outlook) — not in MVP. */
+export function isExternalCalendarSyncEnabled() {
+  return envFlag("ENABLE_EXTERNAL_CALENDAR_SYNC", false);
+}
+
+/** iCal export for appointments — gated separately from calendar UI. */
+export function isIcalExportEnabled() {
+  return envFlag("ENABLE_ICAL_EXPORT", false);
+}
+
+/** Telemedicine / video consultations. */
+export function isTelemedicineEnabled() {
+  return envFlag("ENABLE_TELEMEDICINE", false);
+}
+
+/** Sandbox video rooms (e.g. public Jitsi room names) without paid provider. */
+export function isVideoSandboxEnabled() {
+  return envFlag("ENABLE_VIDEO_SANDBOX", true);
+}
+
+/** Session recording — disabled in MVP. */
+export function isVideoRecordingEnabled() {
+  return envFlag("ENABLE_VIDEO_RECORDING", false);
+}
+
+/** Paid external video providers (Twilio/Daily/etc.). */
+export function isExternalVideoProviderEnabled() {
+  return envFlag("ENABLE_EXTERNAL_VIDEO_PROVIDER", false);
+}
+
+export function isTelemedicineUiEnabled() {
+  return isTelemedicineEnabled() || isVideoSandboxEnabled();
+}
+
+/** Document OCR — text extraction only. */
+export function isDocumentOcrEnabled() {
+  return envFlag("ENABLE_DOCUMENT_OCR", false);
+}
+
+/** Lab table structuring from OCR output. */
+export function isLabStructuringEnabled() {
+  return envFlag("ENABLE_LAB_STRUCTURING", false);
+}
+
+/** AI-assisted document structuring (organizational; no interpretation). */
+export function isAiDocumentStructuringEnabled() {
+  return envFlag("ENABLE_AI_DOCUMENT_STRUCTURING", false);
+}
+
+/** Medical lab interpretation — must remain disabled; no implementation. */
+export function isLabInterpretationEnabled() {
+  return envFlag("ENABLE_LAB_INTERPRETATION", false);
+}
+
+export function isDocumentOcrUiEnabled() {
+  if (isLabInterpretationEnabled()) return false;
+  return (
+    isDocumentOcrEnabled() ||
+    isLabStructuringEnabled() ||
+    isAiDocumentStructuringEnabled()
+  );
+}
+
+/** External practice REST API (Bearer tokens). */
+export function isPracticeApiEnabled() {
+  return envFlag("ENABLE_PRACTICE_API", false);
+}
+
+/** Multi-endpoint developer webhooks. */
+export function isPracticeWebhooksEnabled() {
+  return envFlag("ENABLE_PRACTICE_WEBHOOKS", false);
+}
+
+export function isWebhookTestModeEnabled() {
+  return envFlag("ENABLE_WEBHOOK_TEST_MODE", true);
+}
+
+/** Must stay false in MVP — no health payloads in webhooks. */
+export function isWebhookHealthDataPayloadsEnabled() {
+  return envFlag("ENABLE_WEBHOOK_HEALTH_DATA_PAYLOADS", false);
+}
+
+export function isPracticeDeveloperUiEnabled() {
+  return isPracticeApiEnabled() || isPracticeWebhooksEnabled();
+}

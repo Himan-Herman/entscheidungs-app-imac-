@@ -6,6 +6,7 @@ import DataDeletionRequestDialog from "../components/DataDeletionRequestDialog.j
 import RevokeProfileSharingDialog from "../components/RevokeProfileSharingDialog.jsx";
 import ArchiveRelationshipDialog from "../components/ArchiveRelationshipDialog.jsx";
 import ExportRequestDialog from "../components/ExportRequestDialog.jsx";
+import PatientPracticeDoctorSelect from "../components/PatientPracticeDoctorSelect.jsx";
 import {
   fetchPatientDataControl,
   patchPatientLinkArchive,
@@ -458,6 +459,14 @@ export default function PatientDataControlPage() {
                     <dd>{fmtActivity(link.lastActivityAt, language)}</dd>
                   </div>
                 </dl>
+
+                {canManage && link.practice?.id ? (
+                  <PatientPracticeDoctorSelect
+                    practiceId={link.practice.id}
+                    currentDoctorUserId={link.assignment?.patientSelectedDoctorUserId}
+                    onUpdated={loadAll}
+                  />
+                ) : null}
 
                 <div className="patient-data-control__actions">
                   <Link

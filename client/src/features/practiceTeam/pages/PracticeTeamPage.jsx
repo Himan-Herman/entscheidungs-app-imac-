@@ -16,7 +16,14 @@ import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
 import "../styles/PracticeTeamPage.css";
 
-const ASSIGNABLE_ROLES = ["admin", "doctor", "assistant", "viewer"];
+const ASSIGNABLE_ROLES = [
+  "admin",
+  "doctor",
+  "secretary",
+  "assistant",
+  "practice_manager",
+  "viewer",
+];
 
 function fmt(iso, lang) {
   if (!iso) return "—";
@@ -68,6 +75,10 @@ export default function PracticeTeamPage() {
         doctor: t.roleDoctor,
         assistant: t.roleAssistant,
         viewer: t.roleViewer,
+        secretary: t.roleSecretary || getMessages(language).practiceOrganization?.roleSecretary,
+        practice_manager:
+          t.rolePracticeManager ||
+          getMessages(language).practiceOrganization?.rolePracticeManager,
       };
       return map[role] || role;
     },

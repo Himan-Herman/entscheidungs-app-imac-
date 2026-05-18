@@ -32,9 +32,15 @@ export function parsePracticePatientSearchParams(query = {}) {
     String(query.sortDirection || "").toLowerCase() === "asc" ? "asc" : "desc";
 
   const status = String(query.status || "").trim();
+  const assignmentStatus = String(query.assignmentStatus || "").trim();
+  const assignedToUserId = String(query.assignedToUserId || "").trim();
+  const assignmentFilter = String(query.assignmentFilter || "").trim();
   return {
     q: String(query.q || "").trim().slice(0, 120),
     status: status && LINK_STATUSES.has(status) ? status : undefined,
+    assignmentStatus: assignmentStatus || undefined,
+    assignedToUserId: assignedToUserId || undefined,
+    assignmentFilter: assignmentFilter || undefined,
     profileShared: parseBoolFilter(query.profileShared),
     hasUnreadMessages: parseBoolFilter(query.hasUnreadMessages),
     hasDocuments: parseBoolFilter(query.hasDocuments),
@@ -157,6 +163,28 @@ function buildPrismaWhere(practiceProfileId, params) {
         },
       },
     };
+  }
+
+  if (params.assignmentStatus) {
+    where.assignmentStatus = params.assignmentStatus;
+  }
+
+  if (params.assignedToUserId) {
+    where.OR = [
+      { assignedDoctorUserId: params.assignedToUserId },
+      { assignedTeamMemberUserId: params.assignedToUserId },
+    ];
+  }
+
+  if (params.assignmentFilter === "assigned_to_me" && params.assignedToUserId) {
+    where.OR = [
+      { assignedDoctorUserId: params.assignedToUserId },
+      { assignedTeamMemberUserId: params.assignedToUserId },
+      { patientSelectedDoctorUserId: params.assignedToUserId },
+    ];
+  } else if (params.assignmentFilter === "unassigned") {
+    where.assignmentStatus = { in: ["unassigned", "forwarded"] };
+    where.assignedDoctorUserId = null;
   }
 
   return where;

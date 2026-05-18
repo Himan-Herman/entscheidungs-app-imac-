@@ -2,7 +2,15 @@
  * Central practice role → permission matrix (server-side source of truth).
  */
 
-export const PRACTICE_ROLES = ["owner", "admin", "doctor", "assistant", "viewer"];
+export const PRACTICE_ROLES = [
+  "owner",
+  "admin",
+  "doctor",
+  "secretary",
+  "assistant",
+  "practice_manager",
+  "viewer",
+];
 
 export const PERMISSIONS = {
   TEAM_VIEW: "team.view",
@@ -14,6 +22,7 @@ export const PERMISSIONS = {
   INTEGRATIONS_EXPORT: "integrations.export",
   PATIENT_LINKS_READ: "patient_links.read",
   PATIENT_LINKS_WRITE: "patient_links.write",
+  PATIENT_ASSIGNMENT_MANAGE: "patient_assignment.manage",
   MESSAGES_SEND: "messages.send",
   INBOX_MANAGE: "inbox.manage",
   DOCUMENTS_READ: "documents.read",
@@ -23,6 +32,12 @@ export const PERMISSIONS = {
   MEDICATION_WRITE: "medication.write",
   MEDICATION_PUBLISH: "medication.publish",
   DATA_REQUESTS_MANAGE: "data_requests.manage",
+  CALENDAR_READ: "calendar.read",
+  CALENDAR_MANAGE: "calendar.manage",
+  CALENDAR_SETTINGS: "calendar.settings",
+  TELEMEDICINE_READ: "telemedicine.read",
+  TELEMEDICINE_MANAGE: "telemedicine.manage",
+  TELEMEDICINE_SETTINGS: "telemedicine.settings",
 };
 
 /** @type {Record<string, Set<string>>} */
@@ -37,6 +52,7 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.INTEGRATIONS_MANAGE,
     PERMISSIONS.PATIENT_LINKS_READ,
     PERMISSIONS.PATIENT_LINKS_WRITE,
+    PERMISSIONS.PATIENT_ASSIGNMENT_MANAGE,
     PERMISSIONS.MESSAGES_SEND,
     PERMISSIONS.INBOX_MANAGE,
     PERMISSIONS.DOCUMENTS_READ,
@@ -47,10 +63,48 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.MEDICATION_PUBLISH,
     PERMISSIONS.DATA_REQUESTS_MANAGE,
     PERMISSIONS.INTEGRATIONS_EXPORT,
+    PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.CALENDAR_MANAGE,
+    PERMISSIONS.CALENDAR_SETTINGS,
+  ]),
+  practice_manager: new Set([
+    PERMISSIONS.TEAM_VIEW,
+    PERMISSIONS.TEAM_MANAGE,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.SETTINGS_MANAGE,
+    PERMISSIONS.PATIENT_LINKS_READ,
+    PERMISSIONS.PATIENT_LINKS_WRITE,
+    PERMISSIONS.PATIENT_ASSIGNMENT_MANAGE,
+    PERMISSIONS.MESSAGES_SEND,
+    PERMISSIONS.INBOX_MANAGE,
+    PERMISSIONS.DOCUMENTS_READ,
+    PERMISSIONS.DOCUMENTS_WRITE,
+    PERMISSIONS.MEDICATION_READ,
+    PERMISSIONS.MEDICATION_WRITE,
+    PERMISSIONS.DATA_REQUESTS_MANAGE,
+    PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.CALENDAR_MANAGE,
+    PERMISSIONS.CALENDAR_SETTINGS,
+  ]),
+  secretary: new Set([
+    PERMISSIONS.TEAM_VIEW,
+    PERMISSIONS.PATIENT_LINKS_READ,
+    PERMISSIONS.PATIENT_LINKS_WRITE,
+    PERMISSIONS.PATIENT_ASSIGNMENT_MANAGE,
+    PERMISSIONS.MESSAGES_SEND,
+    PERMISSIONS.INBOX_MANAGE,
+    PERMISSIONS.DOCUMENTS_READ,
+    PERMISSIONS.DOCUMENTS_WRITE,
+    PERMISSIONS.MEDICATION_READ,
+    PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.CALENDAR_MANAGE,
+    PERMISSIONS.TELEMEDICINE_READ,
   ]),
   doctor: new Set([
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.INTEGRATIONS_EXPORT,
+    PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.CALENDAR_MANAGE,
     PERMISSIONS.PATIENT_LINKS_READ,
     PERMISSIONS.PATIENT_LINKS_WRITE,
     PERMISSIONS.MESSAGES_SEND,
@@ -71,6 +125,10 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.DOCUMENTS_READ,
     PERMISSIONS.DOCUMENTS_WRITE,
     PERMISSIONS.MEDICATION_READ,
+    PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.CALENDAR_MANAGE,
+    PERMISSIONS.TELEMEDICINE_READ,
+    PERMISSIONS.TELEMEDICINE_MANAGE,
   ]),
   viewer: new Set([
     PERMISSIONS.TEAM_VIEW,
@@ -78,6 +136,7 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.DOCUMENTS_READ,
     PERMISSIONS.MEDICATION_READ,
     PERMISSIONS.INBOX_MANAGE,
+    PERMISSIONS.CALENDAR_READ,
   ]),
 };
 
@@ -117,6 +176,10 @@ export function canWritePracticePatientLinks(role) {
   return hasPracticePermission(role, PERMISSIONS.PATIENT_LINKS_WRITE);
 }
 
+export function canManagePatientAssignment(role) {
+  return hasPracticePermission(role, PERMISSIONS.PATIENT_ASSIGNMENT_MANAGE);
+}
+
 export function canManageIntegrations(role) {
   return hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE);
 }
@@ -132,12 +195,44 @@ export function canViewIntegrationSettings(role) {
   return (
     hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE) ||
     hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE) ||
-    ["owner", "admin", "doctor", "assistant", "viewer"].includes(String(role || ""))
+    [
+      "owner",
+      "admin",
+      "doctor",
+      "secretary",
+      "assistant",
+      "practice_manager",
+      "viewer",
+    ].includes(String(role || ""))
   );
 }
 
 export function canAccessPracticeDataApi(role) {
   return canReadPracticePatientLinks(role);
+}
+
+export function canReadCalendar(role) {
+  return hasPracticePermission(role, PERMISSIONS.CALENDAR_READ);
+}
+
+export function canManageCalendar(role) {
+  return hasPracticePermission(role, PERMISSIONS.CALENDAR_MANAGE);
+}
+
+export function canManageCalendarSettings(role) {
+  return hasPracticePermission(role, PERMISSIONS.CALENDAR_SETTINGS);
+}
+
+export function canReadTelemedicine(role) {
+  return hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_READ);
+}
+
+export function canManageTelemedicine(role) {
+  return hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_MANAGE);
+}
+
+export function canManageTelemedicineSettings(role) {
+  return hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_SETTINGS);
 }
 
 /**
