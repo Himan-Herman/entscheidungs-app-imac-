@@ -16,7 +16,9 @@
 }
 
 .telemedicine-page__nav a {
-  text-decoration: underline;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--ms-color-link, #0b6e67);
 }
 
 .telemedicine-page__intro {

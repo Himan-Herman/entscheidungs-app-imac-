@@ -174,7 +174,7 @@ export default function ForgotPassword() {
             background: "none",
             border: "none",
             color: p.linkAccent,
-            textDecoration: "underline",
+            textDecoration: "none",
             cursor: "pointer",
             fontSize: 13,
           }}

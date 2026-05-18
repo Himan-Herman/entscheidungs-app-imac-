@@ -126,13 +126,18 @@ body {
   background: var(--ms-color-bg);
 }
 
+/* Links: no underline app-wide — color and focus ring mark interactive text */
+:where(a, a:hover, a:focus, a:focus-visible, a:active) {
+  text-decoration: none;
+}
+
 /* Main content: prose links distinguishable from body text (no underline) */
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.pf-btn) {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.pf-btn) {
   color: var(--ms-color-link);
   text-decoration: none;
 }
 
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.pf-btn):hover {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.pf-btn):hover {
   color: var(--ms-color-link-hover);
   text-decoration: none;
 }

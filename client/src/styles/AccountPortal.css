@@ -361,7 +361,8 @@
 
 .account-portal-form__inline-link:hover,
 .account-portal-form__inline-link:focus-visible {
-  text-decoration: underline;
+  text-decoration: none;
+  color: var(--ms-color-accent-hover, #0d9488);
 }
 
 @media (max-width: 520px) {

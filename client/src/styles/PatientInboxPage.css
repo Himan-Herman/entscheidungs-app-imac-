@@ -42,7 +42,8 @@
 }
 
 .patient-inbox__back:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: #0f766e;
 }
 
 .patient-inbox__toolbar {

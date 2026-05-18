@@ -71,7 +71,6 @@
   .disclaimer a {
     color: #1e40af;
     text-decoration: none;
-    text-underline-offset: 3px;
   }
   
   .disclaimer a:hover {

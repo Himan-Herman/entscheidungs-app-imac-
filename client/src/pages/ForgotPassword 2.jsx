@@ -126,7 +126,7 @@ export default function ForgotPassword() {
             background: "none",
             border: "none",
             color: "#0f766e",
-            textDecoration: "underline",
+            textDecoration: "none",
             cursor: "pointer",
             fontSize: 13,
           }}

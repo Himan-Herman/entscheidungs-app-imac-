@@ -40,7 +40,7 @@
 .ms-footer__link:hover,
 .ms-footer__link:focus-visible {
   color: #0d9488;
-  text-decoration: underline;
+  text-decoration: none;
   background-color: rgba(15, 118, 110, 0.06);
 }
 

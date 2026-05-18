@@ -108,12 +108,11 @@ body {
 .legal a {
   color: #0019f8; /* dunkles Teal */
   text-decoration: none;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
 }
 
 .legal a:hover {
-  text-decoration-thickness: 2px;
+  text-decoration: none;
+  color: #0000c4;
 }
 
 /* Tastaturfokus deutlich sichtbar (WCAG) */

@@ -481,7 +481,8 @@
 }
 
 .landing-page__footer-links a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: var(--landing-accent, #0f766e);
 }
 
 .landing-page__footer-sep {

@@ -373,7 +373,7 @@ export default function Login() {
               background: "none",
               border: "none",
               color: p.linkAccent,
-              textDecoration: "underline",
+              textDecoration: "none",
               cursor: "pointer",
               fontSize: 13,
               fontWeight: 500,

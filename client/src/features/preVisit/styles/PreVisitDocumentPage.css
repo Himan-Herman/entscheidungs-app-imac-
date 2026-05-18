@@ -570,11 +570,10 @@
   font-weight: 600;
   color: var(--pvd-accent);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
 }
 
 .pre-visit-doc__account-history-link:hover {
-  border-bottom-color: rgba(14, 116, 144, 0.35);
+  color: var(--pvd-accent-hover, #0d9488);
 }
 
 .pre-visit-doc__account-history-link:focus-visible {
@@ -682,11 +681,10 @@
   font-weight: 600;
   color: var(--pvd-accent);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
 }
 
 .pre-visit-doc__history-link:hover {
-  border-bottom-color: rgba(14, 116, 144, 0.35);
+  color: var(--pvd-accent-hover, #0d9488);
 }
 
 .pre-visit-doc__history-link:focus-visible {

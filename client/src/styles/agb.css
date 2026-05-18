@@ -66,8 +66,7 @@ body.bg-agb {
 /* -------- Links -------- */
 .agb a {
   color: #2563eb;              /* Apple-/iOS-ähnliches Blau */
-  text-decoration:none;
-  text-underline-offset: 0.12em;
+  text-decoration: none;
 }
 
 .agb a:hover {

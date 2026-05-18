@@ -18,6 +18,7 @@ import {
 } from "../utils/integrationCrypto.js";
 import { enqueuePracticeWebhook } from "../services/practiceWebhookService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
+import { ensureDemoPracticeProfileForUser } from "../services/practiceDemoProfileService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -159,6 +160,11 @@ function roleAllows(role, allowed) {
 router.get("/", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  try {
+    await ensureDemoPracticeProfileForUser(userId);
+  } catch {
+    /* non-fatal — list still returns existing profiles */
+  }
   const rows = await prisma.practiceProfile.findMany({
     where: {
       OR: [
