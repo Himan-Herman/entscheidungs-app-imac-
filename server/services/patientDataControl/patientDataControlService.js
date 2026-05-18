@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { linkHasConsentScope } from "../careRelationship/consentScopes.js";
 import { linkToPatientJson } from "../careRelationship/practicePatientLinkService.js";
+import { listPatientDataRequests } from "./patientDataRequestService.js";
 
 const prisma = new PrismaClient();
 
@@ -23,7 +24,7 @@ function maxDate(dates) {
 async function buildControlItem(link) {
   const linkId = link.id;
 
-  const [medCount, docCount, threadCount, latestMed, latestDoc, latestThread, openRequest] =
+  const [medCount, docCount, threadCount, latestMed, latestDoc, latestThread, openRequests] =
     await Promise.all([
       prisma.medicationPlan.count({
         where: {
@@ -57,7 +58,7 @@ async function buildControlItem(link) {
         orderBy: { updatedAt: "desc" },
         select: { updatedAt: true },
       }),
-      prisma.patientDataRequest.findFirst({
+      prisma.patientDataRequest.findMany({
         where: {
           practicePatientLinkId: linkId,
           status: { in: ["submitted", "in_review"] },
@@ -72,6 +73,8 @@ async function buildControlItem(link) {
   return {
     ...base,
     profileAccessGranted: linkHasConsentScope(link, "profile"),
+    profileAccessGrantedAt: link.profileAccessGrantedAt,
+    profileAccessRevokedAt: link.profileAccessRevokedAt,
     hasMedicationPlans: medCount > 0,
     hasDocuments: docCount > 0,
     hasMessages: threadCount > 0,
@@ -86,7 +89,8 @@ async function buildControlItem(link) {
       latestDoc?.updatedAt,
       latestThread?.updatedAt,
     ]),
-    openDataRequest: openRequest,
+    openDataRequests: openRequests,
+    openDataRequest: openRequests[0] || null,
   };
 }
 
@@ -115,6 +119,9 @@ export async function getPatientDataControl(patientUserId) {
     orderBy: [{ updatedAt: "desc" }],
   });
 
-  const practices = await Promise.all(links.map((l) => buildControlItem(l)));
-  return { practices };
+  const [practices, requests] = await Promise.all([
+    Promise.all(links.map((l) => buildControlItem(l))),
+    listPatientDataRequests(uid),
+  ]);
+  return { practices, requests };
 }

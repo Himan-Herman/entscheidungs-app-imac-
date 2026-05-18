@@ -46,4 +46,21 @@ export default {
     "At least one medication with a name is required before publishing.",
   readOnlyHint: "Published or archived plans cannot be edited here.",
   publishedAt: "Published on {date}",
+  noteLabel: "Practice note (optional)",
+  notePlaceholder: "Internal note about this plan…",
+  delete: "Delete plan",
+  deleteConfirmTitle: "Delete medication plan?",
+  deleteConfirmHint:
+    "This action removes the medication plan from the active view. An audit entry will be stored.",
+  deleteConfirmButton: "Yes, remove permanently",
+  deleteCancel: "Cancel",
+  deleted: "Plan was removed.",
+  deleteError: "Could not delete.",
+  aiFormat: "Structure (AI draft)",
+  aiBusy: "Generating AI draft…",
+  aiError: "Could not generate AI draft.",
+  aiNotConfigured: "AI is not available in this environment.",
+  aiDraftLabel: "AI draft – please review",
+  aiDisclaimer:
+    "AI only structures existing information. It does not create dosage or treatment recommendations.",
 };

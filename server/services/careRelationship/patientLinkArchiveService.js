@@ -48,11 +48,13 @@ export async function archiveLinkForPatient(linkId, patientUserId) {
   await writeAuditLog({
     userId: uid,
     actorRole: "patient",
-    action: "practice_patient_link_archived_by_patient",
-    entityType: "PracticePatientLink",
+    action: "practice_patient_link_archived",
+    entityType: "practice_patient_link",
     entityId: row.id,
     metadata: {
       practiceProfileId: row.practiceProfileId,
+      patientUserId: row.patientUserId,
+      practicePatientLinkId: row.id,
     },
   });
 

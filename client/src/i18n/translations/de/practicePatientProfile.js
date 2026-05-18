@@ -9,7 +9,8 @@ export default {
     "Dieses Profil wurde von der Patientin / dem Patienten nicht freigegeben.",
   providedByPatient: "Vom Patienten angegeben",
   notVerifiedNote:
-    "Diese Angaben wurden vom Patienten erfasst und sind nicht durch die Praxis verifiziert.",
+    "Nicht von MedScoutX medizinisch geprüft. Diese Angaben wurden vom Patienten erfasst und sind nicht durch die Praxis verifiziert.",
+  fieldEmail: "E-Mail",
   basicHeading: "Basisdaten",
   healthHeading: "Gesundheitsangaben",
   dependentHeading: "Betreute Person",
@@ -32,4 +33,11 @@ export default {
   insurancePreferNotSay: "Keine Angabe",
   healthNotForDependent:
     "Gesundheitsangaben beziehen sich auf das Konto der betreuenden Person und werden hier nicht angezeigt.",
+  aiSummaryButton: "KI-Zusammenfassung erstellen",
+  aiSummaryHeading: "KI-Zusammenfassung – bitte prüfen",
+  aiSummaryHint:
+    "Die KI strukturiert nur vorhandene Profilangaben. Sie erstellt keine medizinische Bewertung.",
+  aiSummaryLoading: "Zusammenfassung wird erstellt …",
+  aiSummaryError: "Zusammenfassung konnte nicht erstellt werden.",
+  aiNotConfigured: "KI ist in dieser Umgebung nicht verfügbar.",
 };

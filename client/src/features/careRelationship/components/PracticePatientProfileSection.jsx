@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
-import { fetchPracticePatientProfile } from "../api/practicePatientProfileApi.js";
+import {
+  fetchPracticePatientProfile,
+  postPracticePatientProfileAiSummary,
+} from "../api/practicePatientProfileApi.js";
 import "../../../styles/PracticePatientsPage.css";
 
 function insuranceLabel(value, t) {
@@ -33,7 +36,11 @@ function ProfileField({ label, value, sourceLabel }) {
 /**
  * @param {{ linkId: string, practiceId: string }} props
  */
-export default function PracticePatientProfileSection({ linkId, practiceId }) {
+export default function PracticePatientProfileSection({
+  linkId,
+  practiceId,
+  readOnly = false,
+}) {
   const { language } = useLanguage();
   const t = useMemo(
     () =>
@@ -77,6 +84,33 @@ export default function PracticePatientProfileSection({ linkId, practiceId }) {
     load();
   }, [load]);
 
+  async function loadAiSummary() {
+    if (!linkId || !practiceId || readOnly) return;
+    setAiLoading(true);
+    setAiError("");
+    setAiSummary("");
+    try {
+      const { res, data } = await postPracticePatientProfileAiSummary(
+        linkId,
+        practiceId,
+        language,
+      );
+      if (res.status === 503 && data.error === "ai_not_configured") {
+        setAiError(t.aiNotConfigured);
+        return;
+      }
+      if (!res.ok || !data.ok) {
+        setAiError(t.aiSummaryError);
+        return;
+      }
+      setAiSummary(data.summary || "");
+    } catch {
+      setAiError(t.aiSummaryError);
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   const source = t.providedByPatient;
 
   return (
@@ -106,6 +140,49 @@ export default function PracticePatientProfileSection({ linkId, practiceId }) {
 
       {profile && !loading && !denied ? (
         <>
+          {!readOnly ? (
+            <div style={{ marginTop: "1rem" }}>
+              <button
+                type="button"
+                className="patient-threads__btn patient-threads__btn--secondary"
+                disabled={aiLoading}
+                aria-busy={aiLoading}
+                onClick={loadAiSummary}
+              >
+                {aiLoading ? t.aiSummaryLoading : t.aiSummaryButton}
+              </button>
+              {aiError ? (
+                <p className="practice-dashboard__error" role="alert" style={{ marginTop: "0.5rem" }}>
+                  {aiError}
+                </p>
+              ) : null}
+              {aiSummary ? (
+                <aside
+                  className="practice-dashboard__card"
+                  style={{ marginTop: "1rem", padding: "1rem" }}
+                  aria-labelledby="practice-profile-ai-heading"
+                >
+                  <h3
+                    id="practice-profile-ai-heading"
+                    className="practice-dashboard__analytics-heading"
+                    style={{ fontSize: "1rem" }}
+                  >
+                    {t.aiSummaryHeading}
+                  </h3>
+                  <p className="practice-dashboard__muted" role="note">
+                    {t.aiSummaryHint}
+                  </p>
+                  <pre
+                    className="practice-dashboard__muted"
+                    style={{ whiteSpace: "pre-wrap", fontFamily: "inherit", marginTop: "0.5rem" }}
+                  >
+                    {aiSummary}
+                  </pre>
+                </aside>
+              ) : null}
+            </div>
+          ) : null}
+
           {profile.dependentProfile ? (
             <div style={{ marginTop: "1rem" }}>
               <h3 className="practice-dashboard__analytics-heading" style={{ fontSize: "1rem" }}>
@@ -153,6 +230,11 @@ export default function PracticePatientProfileSection({ linkId, practiceId }) {
                   profile.basic.displayName ||
                   [profile.basic.firstName, profile.basic.lastName].filter(Boolean).join(" ")
                 }
+                sourceLabel={source}
+              />
+              <ProfileField
+                label={t.fieldEmail}
+                value={profile.basic.email}
                 sourceLabel={source}
               />
               <ProfileField

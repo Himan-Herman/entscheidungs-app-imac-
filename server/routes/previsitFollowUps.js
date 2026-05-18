@@ -2,6 +2,7 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
+import { notifyPracticeInboxOfFollowUpReply } from "../services/practiceInbox/practiceInboxNotify.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -107,10 +108,11 @@ router.post("/:threadId/messages", async (req, res) => {
       body,
     },
   });
-  await prisma.preVisitFollowUpThread.update({
+  const updatedThread = await prisma.preVisitFollowUpThread.update({
     where: { id: thread.id },
-    data: { status: "answered" },
+    data: { status: "answered", updatedAt: new Date() },
   });
+  await notifyPracticeInboxOfFollowUpReply(updatedThread);
   writeAuditLog({
     req,
     userId,

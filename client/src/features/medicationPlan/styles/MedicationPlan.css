@@ -44,3 +44,39 @@
   color: var(--success, #1a7f37);
   font-weight: 500;
 }
+
+.medication-plan__ai-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+  background: var(--surface-muted, #f6f8fa);
+}
+
+.medication-plan__ai-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.medication-plan__ai-text {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin: 0.5rem 0 0;
+  overflow-x: auto;
+}
+
+.medication-plan__delete-hint {
+  flex-basis: 100%;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #cf222e;
+  background: rgba(207, 34, 46, 0.06);
+}
+
+.patient-inbox__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}

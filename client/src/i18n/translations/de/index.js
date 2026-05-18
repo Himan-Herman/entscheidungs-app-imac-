@@ -32,6 +32,9 @@ import patientMedicationPlan from "./patientMedicationPlan.js";
 import practiceDocuments from "./practiceDocuments.js";
 import patientPracticeDocuments from "./patientPracticeDocuments.js";
 import patientPracticeLinks from "./patientPracticeLinks.js";
+import patientDataControl from "./patientDataControl.js";
+import practiceDataRequests from "./practiceDataRequests.js";
+import practiceInbox from "./practiceInbox.js";
 import practicePatientProfile from "./practicePatientProfile.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
@@ -71,6 +74,9 @@ export default {
   practiceDocuments,
   patientPracticeDocuments,
   patientPracticeLinks,
+  patientDataControl,
+  practiceDataRequests,
+  practiceInbox,
   practicePatientProfile,
   intro,
   voiceInput,

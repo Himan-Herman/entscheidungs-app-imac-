@@ -1,5 +1,5 @@
 export default {
-  sectionTitle: "Dokumente",
+  sectionTitle: "Dokumente & Befunde",
   sectionIntro:
     "Sichere Freigabe von Praxisdokumenten — keine Befundinterpretation durch MedScoutX.",
   loading: "Wird geladen …",
@@ -61,4 +61,14 @@ export default {
   deleted: "Dokument gelöscht.",
   deleteError: "Löschen fehlgeschlagen.",
   deletedReadOnly: "Dieses Dokument wurde gelöscht und ist für Patient:innen nicht mehr verfügbar.",
+  fileTooLarge: "Die Datei ist zu groß.",
+  fileTypeNotAllowed: "Dieser Dateityp ist nicht erlaubt.",
+  aiOrganize: "Organisieren (KI-Entwurf)",
+  aiTitleDraft: "Titelvorschläge (KI-Entwurf)",
+  aiBusy: "KI-Entwurf wird erstellt …",
+  aiError: "KI-Entwurf konnte nicht erstellt werden.",
+  aiNotConfigured: "KI ist in dieser Umgebung nicht verfügbar.",
+  aiDraftLabel: "KI-Entwurf – bitte prüfen",
+  aiDisclaimer:
+    "Die KI unterstützt nur bei Struktur, Formulierung und Organisation vorhandener Dokumentinformationen. Sie interpretiert keine Befunde.",
 };

@@ -5,6 +5,7 @@ import { getMessages } from "../../../i18n/translations";
 import {
   downloadPatientPracticeDocumentFile,
   fetchPatientPracticeDocument,
+  submitPatientPracticeDocumentQuestion,
 } from "../api/patientPracticeDocumentsApi.js";
 import "../../../styles/PatientInboxPage.css";
 import "../styles/PracticeDocuments.css";
@@ -55,6 +56,8 @@ export default function PatientPracticeDocumentDetailPage() {
   const [error, setError] = useState("");
   const [downloadError, setDownloadError] = useState("");
   const [unavailable, setUnavailable] = useState(false);
+  const [statusMsg, setStatusMsg] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     if (!documentId) return;
@@ -91,6 +94,22 @@ export default function PatientPracticeDocumentDetailPage() {
   useEffect(() => {
     if (doc?.title) document.title = `${doc.title} – MedScoutX`;
   }, [doc?.title]);
+
+  async function handleQuestion() {
+    setBusy(true);
+    setDownloadError("");
+    setStatusMsg("");
+    try {
+      const { res, data } = await submitPatientPracticeDocumentQuestion(documentId);
+      if (!res.ok || !data.ok) {
+        setDownloadError(t.questionError);
+        return;
+      }
+      setStatusMsg(t.questionSent);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleDownload(file) {
     setDownloadError("");
@@ -139,6 +158,31 @@ export default function PatientPracticeDocumentDetailPage() {
         <p className="patient-inbox__error" role="alert">
           {downloadError}
         </p>
+      ) : null}
+      {statusMsg ? (
+        <p className="medication-plan__success" role="status">
+          {statusMsg}
+        </p>
+      ) : null}
+
+      {doc && !loading && !error ? (
+        <div className="patient-inbox__actions">
+          <button
+            type="button"
+            className="patient-threads__btn patient-threads__btn--secondary"
+            onClick={handleQuestion}
+            disabled={busy}
+          >
+            {t.askQuestion}
+          </button>
+          <Link
+            className="patient-threads__btn patient-threads__btn--secondary"
+            to="/patient/messages"
+            style={{ textAlign: "center", textDecoration: "none" }}
+          >
+            {t.messagesLink}
+          </Link>
+        </div>
       ) : null}
 
       {doc?.description ? (

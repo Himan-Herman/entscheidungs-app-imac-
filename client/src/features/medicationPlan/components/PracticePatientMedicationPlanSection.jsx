@@ -5,7 +5,9 @@ import { getMessages } from "../../../i18n/translations";
 import {
   archivePracticeMedicationPlan,
   createPracticeMedicationPlan,
+  deletePracticeMedicationPlan,
   fetchPracticeMedicationPlan,
+  fetchPracticeMedicationPlanAiFormat,
   fetchPracticeMedicationPlans,
   publishPracticeMedicationPlan,
   updatePracticeMedicationPlan,
@@ -69,9 +71,10 @@ function rowsFromPlan(plan) {
   }));
 }
 
-function payloadFromRows(rows, title) {
+function payloadFromRows(rows, title, note) {
   return {
     title: title.trim() || undefined,
+    note: note.trim() || undefined,
     items: rows
       .filter((r) => r.medicationName.trim())
       .map((r, index) => ({
@@ -91,7 +94,11 @@ function payloadFromRows(rows, title) {
 /**
  * @param {{ linkId: string, practiceId: string }} props
  */
-export default function PracticePatientMedicationPlanSection({ linkId, practiceId }) {
+export default function PracticePatientMedicationPlanSection({
+  linkId,
+  practiceId,
+  readOnly = false,
+}) {
   const { language } = useLanguage();
   const t = useMemo(
     () =>
@@ -110,11 +117,15 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
   const [activeId, setActiveId] = useState("");
   const [activePlan, setActivePlan] = useState(null);
   const [title, setTitle] = useState("");
+  const [note, setNote] = useState("");
   const [rows, setRows] = useState([EMPTY_ROW()]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [deleteStep, setDeleteStep] = useState(0);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiPreview, setAiPreview] = useState("");
 
   const isDraft = activePlan?.status === "draft";
 
@@ -155,7 +166,10 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
         if (res.ok && data.ok) {
           setActivePlan(data.plan);
           setTitle(data.plan.title || "");
+          setNote(data.plan.note || "");
           setRows(rowsFromPlan(data.plan));
+          setDeleteStep(0);
+          setAiPreview("");
         }
       } finally {
         setBusy(false);
@@ -173,7 +187,10 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
     else {
       setActivePlan(null);
       setTitle("");
+      setNote("");
       setRows([EMPTY_ROW()]);
+      setDeleteStep(0);
+      setAiPreview("");
     }
   }, [activeId, loadPlan]);
 
@@ -223,7 +240,7 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
         linkId,
         practiceId,
         activeId,
-        payloadFromRows(rows, title),
+        payloadFromRows(rows, title, note),
       );
       if (!res.ok || !data.ok) {
         setError(t.saveError);
@@ -269,6 +286,59 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
       }
       setActivePlan(data.plan);
       setStatusMsg(t.published);
+      await loadList();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAiFormat() {
+    if (!activeId) return;
+    setAiBusy(true);
+    setError("");
+    try {
+      const { res, data } = await fetchPracticeMedicationPlanAiFormat(
+        linkId,
+        practiceId,
+        activeId,
+        { locale: language },
+      );
+      if (res.status === 503 && data.error === "ai_not_configured") {
+        setError(t.aiNotConfigured);
+        return;
+      }
+      if (!res.ok || !data.ok || !data.text) {
+        setError(t.aiError);
+        return;
+      }
+      setAiPreview(data.text);
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!activeId) return;
+    if (deleteStep < 1) {
+      setDeleteStep(1);
+      setStatusMsg("");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const { res, data } = await deletePracticeMedicationPlan(
+        linkId,
+        practiceId,
+        activeId,
+      );
+      if (!res.ok || !data.ok) {
+        setError(t.deleteError);
+        return;
+      }
+      setStatusMsg(t.deleted);
+      setActiveId("");
+      setDeleteStep(0);
       await loadList();
     } finally {
       setBusy(false);
@@ -323,16 +393,18 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
         </p>
       ) : null}
 
-      <div className="medication-plan__actions">
-        <button
-          type="button"
-          className="patient-threads__btn patient-threads__btn--primary"
-          onClick={handleNewDraft}
-          disabled={busy}
-        >
-          {t.newDraft}
-        </button>
-      </div>
+      {!readOnly ? (
+        <div className="medication-plan__actions">
+          <button
+            type="button"
+            className="patient-threads__btn patient-threads__btn--primary"
+            onClick={handleNewDraft}
+            disabled={busy}
+          >
+            {t.newDraft}
+          </button>
+        </div>
+      ) : null}
 
       {!loading && plans.length === 0 && !error ? (
         <p className="practice-dashboard__muted">{t.empty}</p>
@@ -384,6 +456,14 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={t.titlePlaceholder}
+                disabled={busy}
+              />
+              <label htmlFor="mp-note">{t.noteLabel}</label>
+              <textarea
+                id="mp-note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder={t.notePlaceholder}
                 disabled={busy}
               />
 
@@ -525,6 +605,11 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
             </form>
           ) : (
             <div className="vm-list" role="list">
+              {activePlan.note ? (
+                <p className="practice-dashboard__muted" role="note">
+                  {activePlan.note}
+                </p>
+              ) : null}
               {(activePlan.items || []).map((item) => (
                 <MedicationPlanItemCard
                   key={item.id}
@@ -536,16 +621,71 @@ export default function PracticePatientMedicationPlanSection({ linkId, practiceI
             </div>
           )}
 
-          {activePlan.status !== "archived" ? (
+          {!readOnly && activePlan ? (
             <div className="medication-plan__actions">
               <button
                 type="button"
                 className="patient-threads__btn patient-threads__btn--secondary"
-                onClick={handleArchive}
-                disabled={busy}
+                onClick={handleAiFormat}
+                disabled={busy || aiBusy}
+                aria-busy={aiBusy}
               >
-                {t.archive}
+                {aiBusy ? t.aiBusy : t.aiFormat}
               </button>
+            </div>
+          ) : null}
+
+          {aiPreview ? (
+            <div
+              className="medication-plan__ai-preview"
+              role="region"
+              aria-labelledby="mp-ai-preview-heading"
+            >
+              <h3 id="mp-ai-preview-heading" className="medication-plan__ai-title">
+                {t.aiDraftLabel}
+              </h3>
+              <p className="patient-inbox__safety">{t.aiDisclaimer}</p>
+              <pre className="medication-plan__ai-text">{aiPreview}</pre>
+            </div>
+          ) : null}
+
+          {!readOnly && activePlan ? (
+            <div className="medication-plan__actions">
+              {activePlan.status !== "archived" ? (
+                <button
+                  type="button"
+                  className="patient-threads__btn patient-threads__btn--secondary"
+                  onClick={handleArchive}
+                  disabled={busy}
+                >
+                  {t.archive}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="patient-threads__btn patient-threads__btn--secondary"
+                onClick={handleDelete}
+                disabled={busy}
+                aria-describedby={deleteStep > 0 ? "mp-delete-hint" : undefined}
+              >
+                {deleteStep > 0 ? t.deleteConfirmButton : t.delete}
+              </button>
+              {deleteStep > 0 ? (
+                <div id="mp-delete-hint" role="alert" className="medication-plan__delete-hint">
+                  <p>
+                    <strong>{t.deleteConfirmTitle}</strong>
+                  </p>
+                  <p>{t.deleteConfirmHint}</p>
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    onClick={() => setDeleteStep(0)}
+                    disabled={busy}
+                  >
+                    {t.deleteCancel}
+                  </button>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>

@@ -27,3 +27,21 @@ export async function fetchPracticePatientLink(linkId, practiceId) {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+export async function fetchPracticePatientActivity(linkId, practiceId) {
+  const q = new URLSearchParams({ practiceId });
+  const res = await authFetch(
+    `/api/practice/patients/${encodeURIComponent(linkId)}/activity?${q.toString()}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function fetchPracticePatientPreVisits(linkId, practiceId) {
+  const q = new URLSearchParams({ practiceId });
+  const res = await authFetch(
+    `/api/practice/patients/${encodeURIComponent(linkId)}/pre-visits?${q.toString()}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

@@ -34,4 +34,16 @@ export default {
   practiceLabel: "Praxis",
   systemLabel: "System",
   sendError: "Nachricht konnte nicht gesendet werden.",
+  groupedByPractice: "Nach Praxis",
+  unreadBadge: "Ungelesen",
+  unreadAria: "Ungelesene Nachrichten",
+  readAt: "Gelesen",
+  notReadYet: "Noch nicht gelesen",
+  aiDraftLabel: "KI-Entwurf – bitte prüfen",
+  aiDisclaimer:
+    "Die KI hilft nur beim Formulieren und Strukturieren vorhandener Informationen. Sie gibt keine medizinische Empfehlung.",
+  aiRewrite: "Text verbessern (KI-Entwurf)",
+  aiBusy: "KI-Entwurf wird erstellt …",
+  aiError: "KI-Entwurf konnte nicht erstellt werden.",
+  aiNotConfigured: "KI-Entwurf ist in dieser Umgebung nicht verfügbar.",
 };

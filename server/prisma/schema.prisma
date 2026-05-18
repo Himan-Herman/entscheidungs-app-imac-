@@ -25,6 +25,7 @@ model User {
   followUpCreatedThreads PreVisitFollowUpThread[] @relation("FollowUpCreatedByUser")
   visitMedicationEntriesAuthored VisitMedicationEntry[] @relation("VisitMedicationCreatedBy")
   practicePatientLinks           PracticePatientLink[]  @relation("PracticePatientLinks")
+  profileAccessGrants            PracticePatientLink[]  @relation("ProfileAccessGrantedBy")
   patientInboxItems              PatientInboxItem[]
   practicePatientThreads         PracticePatientThread[]
   medicationPlans                MedicationPlan[] @relation("MedicationPlanPatient")
@@ -37,6 +38,7 @@ model User {
   practiceDocumentAuditEntries   PracticeDocumentAuditEntry[]
   patientDataRequests          PatientDataRequest[]
   patientDataRequestsHandled     PatientDataRequest[] @relation("PatientDataRequestHandledBy")
+  practiceInboxItemsAsPatient    PracticeInboxItem[]  @relation("PracticeInboxPatient")
   auditLogs        AuditLog[]
   secureDocumentsCreated SecureDocumentDelivery[] @relation("SecureDocCreatedBy")
   patientProfiles      PatientProfile[]
@@ -263,6 +265,7 @@ model PracticeProfile {
   medicationPlans        MedicationPlan[]
   practiceDocuments      PracticeDocument[]
   patientDataRequests  PatientDataRequest[]
+  practiceInboxItems   PracticeInboxItem[]
   integrationSettings PracticeIntegrationSettings?
   secureDocumentDeliveries SecureDocumentDelivery[]
   webhookEvents PracticeWebhookEvent[]
@@ -423,19 +426,24 @@ model PracticePatientLink {
   revokedAt         DateTime?
   consentVersion    String?
   consentAcceptedAt DateTime?
-  /// Accepted scopes, e.g. ["medication","messages"] — set by patient consent API.
+  /// Accepted scopes, e.g. ["medication","messages","profile"] — set by patient consent API.
   consentScopes     Json?
+  profileAccessGrantedAt   DateTime?
+  profileAccessRevokedAt   DateTime?
+  profileAccessGrantedByUserId String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   patientUser     User            @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
+  profileAccessGrantedBy User?    @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
   patientProfile  PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
   inboxItems      PatientInboxItem[]
   threads         PracticePatientThread[]
   medicationPlans MedicationPlan[]
   practiceDocuments PracticeDocument[]
   dataRequests      PatientDataRequest[]
+  practiceInboxItems PracticeInboxItem[]
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
@@ -470,6 +478,42 @@ model PatientInboxItem {
   @@index([patientUserId, status])
   @@index([patientUserId, createdAt])
   @@index([practiceProfileId])
+}
+
+/**
+ * Practice-side operational inbox — neutral titles/summaries only in list; no clinical scoring.
+ */
+model PracticeInboxItem {
+  id                    String    @id @default(cuid())
+  practiceProfileId     String
+  practicePatientLinkId String?
+  patientUserId         String?
+  /// message | previsit | follow_up | document | medication | data_request | system
+  type                  String
+  title                 String
+  summary               String?
+  /// new | read | done | archived
+  status                String    @default("new")
+  /// normal | important — organizational only, not clinical urgency
+  priority              String    @default("normal")
+  sourceRefType         String?
+  sourceRefId           String?
+  targetUrl             String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  lastActivityAt        DateTime  @default(now())
+  readAt                DateTime?
+  doneAt                DateTime?
+  archivedAt            DateTime?
+
+  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  patientUser         User?                @relation("PracticeInboxPatient", fields: [patientUserId], references: [id], onDelete: SetNull)
+
+  @@index([practiceProfileId, status])
+  @@index([practiceProfileId, type])
+  @@index([practiceProfileId, lastActivityAt])
+  @@index([practiceProfileId, sourceRefType, sourceRefId])
 }
 
 /** Secure messaging thread tied to a practice–patient link (no anonymous threads). */
@@ -518,13 +562,16 @@ model MedicationPlan {
   practicePatientLinkId String
   practiceProfileId     String
   patientUserId         String
-  /// draft | published | archived
+  /// draft | published | archived | deleted
   status                String    @default("draft")
   version               Int       @default(1)
   title                 String?
+  note                  String?
   createdByUserId       String?
   publishedAt           DateTime?
   archivedAt            DateTime?
+  deletedAt             DateTime?
+  deletedByUserId       String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -667,6 +714,8 @@ model PatientDataRequest {
   /// submitted | in_review | completed | rejected
   status                String    @default("submitted")
   reason                String?
+  /// Practice response — organizational only, no clinical content.
+  responseNote          String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   completedAt           DateTime?

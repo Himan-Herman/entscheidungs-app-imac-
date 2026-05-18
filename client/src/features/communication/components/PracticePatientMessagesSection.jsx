@@ -7,6 +7,7 @@ import {
   createPracticeThread,
   fetchPracticeThread,
   fetchPracticeThreads,
+  fetchPracticeThreadAiDraft,
   sendPracticeThreadMessage,
 } from "../api/practiceThreadsApi.js";
 import "../../../styles/PatientThreadsPage.css";
@@ -34,7 +35,11 @@ function statusLabel(status, t) {
 /**
  * @param {{ linkId: string, practiceId: string }} props
  */
-export default function PracticePatientMessagesSection({ linkId, practiceId }) {
+export default function PracticePatientMessagesSection({
+  linkId,
+  practiceId,
+  readOnly = false,
+}) {
   const { language } = useLanguage();
   const t = useMemo(
     () => getMessages(language).practiceMessages || getMessages("en").practiceMessages,
@@ -50,6 +55,8 @@ export default function PracticePatientMessagesSection({ linkId, practiceId }) {
   const [newBody, setNewBody] = useState("");
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiHintVisible, setAiHintVisible] = useState(false);
 
   const loadList = useCallback(async () => {
     if (!linkId || !practiceId) return;
@@ -157,6 +164,32 @@ export default function PracticePatientMessagesSection({ linkId, practiceId }) {
     }
   };
 
+  const handleAiDraft = async () => {
+    if (!activeId) return;
+    setAiBusy(true);
+    setError("");
+    try {
+      const { res, data } = await fetchPracticeThreadAiDraft(
+        linkId,
+        practiceId,
+        activeId,
+        { locale: language, draftInput: reply.trim() || undefined },
+      );
+      if (res.status === 503 && data.error === "ai_not_configured") {
+        setError(t.aiNotConfigured);
+        return;
+      }
+      if (!res.ok || !data.ok || !data.text) {
+        setError(t.aiError);
+        return;
+      }
+      setReply(data.text);
+      setAiHintVisible(true);
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
   const handleArchive = async () => {
     if (!activeId) return;
     setBusy(true);
@@ -188,6 +221,13 @@ export default function PracticePatientMessagesSection({ linkId, practiceId }) {
         </p>
       ) : null}
 
+      {readOnly ? (
+        <p className="practice-dashboard__muted" role="status">
+          {t.viewerReadOnly}
+        </p>
+      ) : null}
+
+      {!readOnly ? (
       <form className="practice-messages__new" onSubmit={handleCreate}>
         <p className="practice-dashboard__muted" style={{ fontWeight: 600 }}>
           {t.newThread}
@@ -217,6 +257,7 @@ export default function PracticePatientMessagesSection({ linkId, practiceId }) {
           {t.send}
         </button>
       </form>
+      ) : null}
 
       {!loading && threads.length === 0 && !error ? (
         <p className="practice-dashboard__muted">{t.empty}</p>
@@ -263,31 +304,55 @@ export default function PracticePatientMessagesSection({ linkId, practiceId }) {
                 <span className="patient-threads__bubble-meta">
                   {msg.senderType === "patient" ? t.patientSide : t.youPractice} ·{" "}
                   {fmt(msg.createdAt, language)}
+                  {msg.senderType === "patient"
+                    ? ` · ${msg.readAt ? t.readAt : t.notReadYet}`
+                    : null}
                 </span>
               </div>
             ))}
           </div>
 
-          {activeThread.status === "open" ? (
+          {activeThread.status === "open" && !readOnly ? (
             <form className="patient-threads__compose" onSubmit={handleReply}>
+              {aiHintVisible ? (
+                <p className="patient-inbox__safety" role="status">
+                  <strong>{t.aiDraftLabel}</strong> — {t.aiDisclaimer}
+                </p>
+              ) : null}
               <label htmlFor="practice-reply">{t.replyLabel}</label>
               <textarea
                 id="practice-reply"
                 value={reply}
-                onChange={(e) => setReply(e.target.value)}
+                onChange={(e) => {
+                  setReply(e.target.value);
+                  if (aiHintVisible) setAiHintVisible(false);
+                }}
                 placeholder={t.messagePlaceholder}
-                disabled={busy}
+                disabled={busy || aiBusy}
+                aria-describedby={aiHintVisible ? "practice-ai-hint" : undefined}
               />
-              <button
-                type="submit"
-                className="patient-threads__btn patient-threads__btn--primary"
-                disabled={busy || !reply.trim()}
-              >
-                {t.send}
-              </button>
+              <div className="patient-threads__actions">
+                <button
+                  type="button"
+                  className="patient-threads__btn patient-threads__btn--secondary"
+                  onClick={handleAiDraft}
+                  disabled={busy || aiBusy}
+                  aria-busy={aiBusy}
+                >
+                  {aiBusy ? t.aiBusy : t.aiReplyDraft}
+                </button>
+                <button
+                  type="submit"
+                  className="patient-threads__btn patient-threads__btn--primary"
+                  disabled={busy || aiBusy || !reply.trim()}
+                >
+                  {t.send}
+                </button>
+              </div>
             </form>
           ) : null}
 
+          {!readOnly ? (
           <div className="patient-threads__actions">
             {activeThread.status === "open" ? (
               <button
@@ -310,6 +375,7 @@ export default function PracticePatientMessagesSection({ linkId, practiceId }) {
               </button>
             ) : null}
           </div>
+          ) : null}
         </div>
       ) : null}
     </section>

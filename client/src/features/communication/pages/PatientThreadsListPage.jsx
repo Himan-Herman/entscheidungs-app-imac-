@@ -37,6 +37,19 @@ export default function PatientThreadsListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const grouped = useMemo(() => {
+    const map = new Map();
+    for (const thread of threads) {
+      const key = thread.practice?.id || "unknown";
+      const practiceName = thread.practice?.practiceName || t.fromPractice;
+      if (!map.has(key)) {
+        map.set(key, { practiceName, threads: [] });
+      }
+      map.get(key).threads.push(thread);
+    }
+    return [...map.values()];
+  }, [threads, t.fromPractice]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -89,37 +102,67 @@ export default function PatientThreadsListPage() {
       ) : null}
 
       {!loading && !error && threads.length > 0 ? (
-        <ul className="patient-threads__list" aria-label={t.listCaption}>
-          {threads.map((thread) => {
-            const statusText = threadStatusLabel(thread.status, t);
-            const statusAria = t.statusAria.replace("{status}", statusText);
-            const title = thread.subject?.trim() || t.noSubject;
-            const practiceName = thread.practice?.practiceName || t.fromPractice;
+        <div aria-label={t.listCaption}>
+          {grouped.map((group) => (
+            <section
+              key={group.practiceName}
+              className="patient-threads__group"
+              aria-labelledby={`practice-group-${group.practiceName.replace(/\s+/g, "-")}`}
+            >
+              <h2
+                id={`practice-group-${group.practiceName.replace(/\s+/g, "-")}`}
+                className="patient-threads__group-title"
+              >
+                {group.practiceName}
+              </h2>
+              <ul className="patient-threads__list">
+                {group.threads.map((thread) => {
+                  const statusText = threadStatusLabel(thread.status, t);
+                  const statusAria = t.statusAria.replace("{status}", statusText);
+                  const title = thread.subject?.trim() || t.noSubject;
 
-            return (
-              <li key={thread.id} className="patient-threads__item">
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", flexWrap: "wrap" }}>
-                  <h2 style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>{title}</h2>
-                  <span
-                    className={`patient-threads__status patient-threads__status--${thread.status}`}
-                    aria-label={statusAria}
-                  >
-                    {statusText}
-                  </span>
-                </div>
-                <p className="patient-inbox__meta" style={{ margin: "0.5rem 0" }}>
-                  {practiceName} · {fmt(thread.updatedAt, language)}
-                </p>
-                <Link
-                  className="patient-threads__btn patient-threads__btn--primary"
-                  to={`/patient/threads/${encodeURIComponent(thread.id)}`}
-                >
-                  {t.openThread}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                  return (
+                    <li key={thread.id} className="patient-threads__item">
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "0.5rem",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 600 }}>
+                          {title}
+                        </h3>
+                        <span
+                          className={`patient-threads__status patient-threads__status--${thread.status}`}
+                          aria-label={statusAria}
+                        >
+                          {statusText}
+                          {thread.hasUnread ? ` · ${t.unreadBadge}` : ""}
+                        </span>
+                      </div>
+                      <p className="patient-inbox__meta" style={{ margin: "0.5rem 0" }}>
+                        {fmt(thread.updatedAt, language)}
+                      </p>
+                      <Link
+                        className="patient-threads__btn patient-threads__btn--primary"
+                        to={`/patient/messages/${encodeURIComponent(thread.id)}`}
+                        aria-label={
+                          thread.hasUnread
+                            ? `${t.openThread} — ${t.unreadAria}`
+                            : t.openThread
+                        }
+                      >
+                        {t.openThread}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
       ) : null}
     </div>
   );

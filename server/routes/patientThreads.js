@@ -12,6 +12,7 @@ import {
   markThreadRead,
 } from "../services/communication/practicePatientThreadService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { generatePatientMessageAiDraft } from "../services/communication/messageCommunicationAiService.js";
 
 const router = express.Router();
 
@@ -40,6 +41,9 @@ function mapError(err) {
   ) {
     return { status: 409, error: msg };
   }
+  if (msg === "ai_not_configured") {
+    return { status: 503, error: msg };
+  }
   return { status: 500, error: "request_failed" };
 }
 
@@ -66,6 +70,15 @@ router.get("/:threadId", async (req, res) => {
   try {
     await markThreadRead(req.params.threadId, "patient", { patientUserId: userId });
     const thread = await getThreadForPatientUser(req.params.threadId, userId);
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "patient_thread_read",
+      entityType: "PracticePatientThread",
+      entityId: req.params.threadId,
+    });
+
     return res.json({ ok: true, thread });
   } catch (err) {
     console.error("[patient/threads/get]", err?.message ?? err);
@@ -74,8 +87,7 @@ router.get("/:threadId", async (req, res) => {
   }
 });
 
-/** POST /api/patient/threads/:threadId/messages */
-router.post("/:threadId/messages", async (req, res) => {
+async function handlePatientMessagePost(req, res) {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
@@ -100,7 +112,13 @@ router.post("/:threadId/messages", async (req, res) => {
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
-});
+}
+
+/** POST /api/patient/messages/:threadId (alias) */
+router.post("/:threadId", handlePatientMessagePost);
+
+/** POST /api/patient/threads/:threadId/messages */
+router.post("/:threadId/messages", handlePatientMessagePost);
 
 /** PATCH /api/patient/threads/:threadId/read */
 router.patch("/:threadId/read", async (req, res) => {
@@ -111,6 +129,15 @@ router.patch("/:threadId/read", async (req, res) => {
     const thread = await markThreadRead(req.params.threadId, "patient", {
       patientUserId: userId,
     });
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "patient_thread_read",
+      entityType: "PracticePatientThread",
+      entityId: req.params.threadId,
+    });
+
     return res.json({ ok: true, thread });
   } catch (err) {
     console.error("[patient/threads/read]", err?.message ?? err);
@@ -126,9 +153,48 @@ router.patch("/:threadId/archive", async (req, res) => {
 
   try {
     const thread = await archiveThreadForPatient(req.params.threadId, userId);
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "patient_thread_archived",
+      entityType: "PracticePatientThread",
+      entityId: thread.id,
+    });
+
     return res.json({ ok: true, thread });
   } catch (err) {
     console.error("[patient/threads/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/patient/messages/:threadId/ai-rewrite */
+router.post("/:threadId/ai-rewrite", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const draft = await generatePatientMessageAiDraft({
+      threadId: req.params.threadId,
+      patientUserId: userId,
+      locale: req.body?.locale || req.headers["accept-language"],
+      mode: req.body?.mode || "rewrite",
+      draftInput: req.body?.draftInput || req.body?.body,
+    });
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "patient_thread_ai_draft",
+      entityType: "PracticePatientThread",
+      entityId: req.params.threadId,
+    });
+
+    return res.json({ ok: true, ...draft });
+  } catch (err) {
+    console.error("[patient/threads/ai-rewrite]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

@@ -34,3 +34,12 @@ export async function downloadPatientPracticeDocumentFile(documentId, fileId, fi
   a.remove();
   URL.revokeObjectURL(objectUrl);
 }
+
+export async function submitPatientPracticeDocumentQuestion(documentId) {
+  const res = await authFetch(
+    `/api/patient/practice-documents/${encodeURIComponent(documentId)}/question`,
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

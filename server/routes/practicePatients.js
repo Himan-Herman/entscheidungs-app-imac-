@@ -18,6 +18,12 @@ import {
   updatePracticePatientLinkStatus,
   LINK_STATUSES,
 } from "../services/careRelationship/practicePatientLinkService.js";
+import {
+  enrichPracticePatientLinks,
+  getPracticePatientRecord,
+  getPracticePatientActivity,
+  listPreVisitsForPracticePatient,
+} from "../services/careRelationship/practicePatientRecordService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import practicePatientThreadsRouter from "./practicePatientThreads.js";
 import practiceMedicationPlansRouter from "./practiceMedicationPlans.js";
@@ -87,11 +93,13 @@ router.get("/", async (req, res) => {
       limit: req.query.limit,
       offset: req.query.offset,
     });
+    const links = await enrichPracticePatientLinks(result.links);
     return res.json({
       ok: true,
       role: access.role,
       practiceId,
       ...result,
+      links,
     });
   } catch (err) {
     console.error("[practice/patients/list]", err?.message ?? err);
@@ -142,6 +150,8 @@ router.post("/link", async (req, res) => {
 
 /** Messaging threads (PR-5) — before /:linkId */
 router.use("/:linkId/threads", practicePatientThreadsRouter);
+/** Alias: /messages — same router */
+router.use("/:linkId/messages", practicePatientThreadsRouter);
 
 /** Medication plans v2 (PR-6) — before /:linkId */
 router.use("/:linkId/medication-plans", practiceMedicationPlansRouter);
@@ -151,6 +161,59 @@ router.use("/:linkId/documents", practiceDocumentsRouter);
 
 /** Patient profile read-only (PR-8) — before /:linkId */
 router.use("/:linkId/profile", practicePatientProfileRouter);
+
+/** GET /api/practice/patients/:linkId/activity?practiceId= */
+router.get("/:linkId/activity", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const result = await getPracticePatientActivity(req.params.linkId, practiceId);
+    return res.json({ ok: true, role: access.role, ...result });
+  } catch (err) {
+    console.error("[practice/patients/activity]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/practice/patients/:linkId/pre-visits?practiceId= */
+router.get("/:linkId/pre-visits", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const result = await listPreVisitsForPracticePatient(
+      req.params.linkId,
+      practiceId,
+    );
+    return res.json({ ok: true, role: access.role, ...result });
+  } catch (err) {
+    console.error("[practice/patients/pre-visits]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
 
 /** GET /api/practice/patients/:linkId?practiceId= */
 router.get("/:linkId", async (req, res) => {
@@ -168,8 +231,8 @@ router.get("/:linkId", async (req, res) => {
   }
 
   try {
-    const link = await getPracticePatientLink(req.params.linkId, practiceId);
-    return res.json({ ok: true, role: access.role, link });
+    const record = await getPracticePatientRecord(req.params.linkId, practiceId);
+    return res.json({ ok: true, role: access.role, ...record });
   } catch (err) {
     console.error("[practice/patients/get]", err?.message ?? err);
     const mapped = mapError(err);

@@ -43,7 +43,7 @@ export async function notifyPatientInboxOfPracticeMessage(thread) {
       type: "message",
       title,
       sourceLabel: practice?.practiceName ?? null,
-      targetUrl: `/patient/threads/${thread.id}`,
+      targetUrl: `/patient/messages/${thread.id}`,
     });
   } catch (err) {
     console.error("[communication/inbox-notify]", err?.message ?? err);

@@ -3,10 +3,12 @@ import { notifyPatientInboxOfMedicationPlan } from "./inboxNotify.js";
 
 const prisma = new PrismaClient();
 
-export const PLAN_STATUSES = new Set(["draft", "published", "archived"]);
+export const PLAN_STATUSES = new Set(["draft", "published", "archived", "deleted"]);
+const ACTIVE_PRACTICE_STATUSES = { not: "deleted" };
 const LINK_ACTIVE = new Set(["invited", "active"]);
 
 const MAX_TITLE_LEN = 200;
+const MAX_NOTE_LEN = 2000;
 const MAX_MED_NAME_LEN = 200;
 const MAX_FIELD_LEN = 500;
 const MAX_INSTRUCTIONS_LEN = 2000;
@@ -71,9 +73,11 @@ function planToJson(row) {
     status: row.status,
     version: row.version,
     title: row.title,
+    note: row.note,
     createdByUserId: row.createdByUserId,
     publishedAt: row.publishedAt,
     archivedAt: row.archivedAt,
+    deletedAt: row.deletedAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     practiceName: row.practiceProfile?.practiceName ?? null,
@@ -139,6 +143,7 @@ export async function createDraftMedicationPlan(
         status: "draft",
         version,
         title,
+        note,
         createdByUserId,
       },
     });
@@ -173,6 +178,7 @@ export async function getMedicationPlanByLink(linkId, practiceProfileId, planId)
       id: planId,
       practicePatientLinkId: linkId,
       practiceProfileId,
+      status: ACTIVE_PRACTICE_STATUSES,
     },
     include: planInclude,
   });
@@ -243,6 +249,10 @@ export async function updateDraftMedicationPlan(
     payload.title !== undefined
       ? trimText(payload.title, MAX_TITLE_LEN)
       : existing.title;
+  const note =
+    payload.note !== undefined
+      ? trimText(payload.note, MAX_NOTE_LEN)
+      : existing.note;
 
   const plan = await prisma.$transaction(async (tx) => {
     await tx.medicationPlanItem.deleteMany({
@@ -260,7 +270,7 @@ export async function updateDraftMedicationPlan(
 
     await tx.medicationPlan.update({
       where: { id: planId },
-      data: { title },
+      data: { title, note },
     });
 
     return tx.medicationPlan.findUnique({
@@ -333,6 +343,45 @@ export async function archiveMedicationPlan(planId, linkId, practiceProfileId) {
     data: {
       status: "archived",
       archivedAt: new Date(),
+    },
+    include: planInclude,
+  });
+
+  return planToJson(plan);
+}
+
+/**
+ * Soft-delete a plan (removes from active views).
+ * @param {string} planId
+ * @param {string} linkId
+ * @param {string} practiceProfileId
+ * @param {string} deletedByUserId
+ */
+export async function deleteMedicationPlan(
+  planId,
+  linkId,
+  practiceProfileId,
+  deletedByUserId,
+) {
+  await assertLinkForPractice(linkId, practiceProfileId);
+  const existing = await prisma.medicationPlan.findFirst({
+    where: {
+      id: planId,
+      practicePatientLinkId: linkId,
+      practiceProfileId,
+      status: ACTIVE_PRACTICE_STATUSES,
+    },
+  });
+  if (!existing) throw new Error("plan_not_found");
+  if (existing.status === "deleted") throw new Error("plan_already_deleted");
+
+  const now = new Date();
+  const plan = await prisma.medicationPlan.update({
+    where: { id: planId },
+    data: {
+      status: "deleted",
+      deletedAt: now,
+      deletedByUserId,
     },
     include: planInclude,
   });

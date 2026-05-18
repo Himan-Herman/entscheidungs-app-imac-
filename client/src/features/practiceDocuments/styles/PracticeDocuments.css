@@ -73,3 +73,24 @@
   gap: 0.5rem;
   justify-content: flex-end;
 }
+
+.practice-documents__ai-preview {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+  background: var(--surface-muted, #f6f8fa);
+}
+
+.practice-documents__ai-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.practice-documents__ai-text {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin: 0.5rem 0 0;
+  overflow-x: auto;
+}

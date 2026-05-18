@@ -8,7 +8,8 @@ export default {
   notShared: "This profile has not been shared by the patient.",
   providedByPatient: "Provided by the patient",
   notVerifiedNote:
-    "This information was entered by the patient and is not verified by the practice.",
+    "Not medically verified by MedScoutX. This information was entered by the patient and is not verified by the practice.",
+  fieldEmail: "Email",
   basicHeading: "Basic information",
   healthHeading: "Health information",
   dependentHeading: "Dependent profile",
@@ -31,4 +32,11 @@ export default {
   insurancePreferNotSay: "Prefer not to say",
   healthNotForDependent:
     "Health information applies to the account holder and is not shown for this dependent link.",
+  aiSummaryButton: "Create AI summary",
+  aiSummaryHeading: "AI summary – please review",
+  aiSummaryHint:
+    "AI only structures existing profile information. It does not create a medical assessment.",
+  aiSummaryLoading: "Generating summary…",
+  aiSummaryError: "Could not generate summary.",
+  aiNotConfigured: "AI is not available in this environment.",
 };

@@ -10,6 +10,8 @@ import {
   revokePracticeDocumentShare,
   sharePracticeDocument,
   updatePracticeDocumentDraft,
+  fetchPracticeDocumentAiOrganize,
+  fetchPracticeDocumentAiTitleDraft,
   uploadPracticeDocumentFile,
 } from "../api/practiceDocumentsApi.js";
 import DeleteDocumentDialog from "./DeleteDocumentDialog.jsx";
@@ -70,7 +72,11 @@ function typeLabel(type, t) {
 /**
  * @param {{ linkId: string, practiceId: string }} props
  */
-export default function PracticePatientDocumentsSection({ linkId, practiceId }) {
+export default function PracticePatientDocumentsSection({
+  linkId,
+  practiceId,
+  readOnly = false,
+}) {
   const { language } = useLanguage();
   const t = useMemo(
     () => getMessages(language).practiceDocuments || getMessages("en").practiceDocuments,
@@ -90,6 +96,8 @@ export default function PracticePatientDocumentsSection({ linkId, practiceId }) 
   const [busy, setBusy] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteStep, setDeleteStep] = useState(1);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiPreview, setAiPreview] = useState("");
 
   const isDraft = activeDoc?.status === "draft";
   const isShared = activeDoc?.status === "shared";
@@ -220,6 +228,14 @@ export default function PracticePatientDocumentsSection({ linkId, practiceId }) 
         activeId,
         file,
       );
+      if (res.status === 400 && data.error === "validation_file_too_large") {
+        setError(t.fileTooLarge);
+        return;
+      }
+      if (res.status === 400 && data.error === "validation_invalid_file_type") {
+        setError(t.fileTypeNotAllowed);
+        return;
+      }
       if (!res.ok || !data.ok) {
         setError(t.uploadError);
         return;
@@ -293,6 +309,55 @@ export default function PracticePatientDocumentsSection({ linkId, practiceId }) 
     }
   }
 
+  async function handleAiOrganize() {
+    if (!activeId) return;
+    setAiBusy(true);
+    setError("");
+    try {
+      const { res, data } = await fetchPracticeDocumentAiOrganize(
+        linkId,
+        practiceId,
+        activeId,
+        { locale: language },
+      );
+      if (res.status === 503 && data.error === "ai_not_configured") {
+        setError(t.aiNotConfigured);
+        return;
+      }
+      if (!res.ok || !data.ok || !data.text) {
+        setError(t.aiError);
+        return;
+      }
+      setAiPreview(data.text);
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  async function handleAiTitleDraft() {
+    setAiBusy(true);
+    setError("");
+    try {
+      const { res, data } = await fetchPracticeDocumentAiTitleDraft(linkId, practiceId, {
+        type: docType,
+        title: title.trim(),
+        description: description.trim(),
+        locale: language,
+      });
+      if (res.status === 503 && data.error === "ai_not_configured") {
+        setError(t.aiNotConfigured);
+        return;
+      }
+      if (!res.ok || !data.ok || !data.text) {
+        setError(t.aiError);
+        return;
+      }
+      setAiPreview(data.text);
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   function openDeleteDialog() {
     setDeleteStep(1);
     setDeleteOpen(true);
@@ -345,22 +410,24 @@ export default function PracticePatientDocumentsSection({ linkId, practiceId }) 
         </p>
       ) : null}
 
-      <div className="medication-plan__actions">
-        <button
-          type="button"
-          className="patient-threads__btn patient-threads__btn--primary"
-          onClick={() => {
-            setActiveId("");
-            setActiveDoc(null);
-            setDocType("other");
-            setTitle("");
-            setDescription("");
-          }}
-          disabled={busy}
-        >
-          {t.newDocument}
-        </button>
-      </div>
+      {!readOnly ? (
+        <div className="medication-plan__actions">
+          <button
+            type="button"
+            className="patient-threads__btn patient-threads__btn--primary"
+            onClick={() => {
+              setActiveId("");
+              setActiveDoc(null);
+              setDocType("other");
+              setTitle("");
+              setDescription("");
+            }}
+            disabled={busy}
+          >
+            {t.newDocument}
+          </button>
+        </div>
+      ) : null}
 
       {!loading && documents.length === 0 && !error && !activeId ? (
         <p className="practice-dashboard__muted">{t.empty}</p>
@@ -532,6 +599,44 @@ export default function PracticePatientDocumentsSection({ linkId, practiceId }) 
                     style={{ position: "absolute", width: 1, height: 1, overflow: "hidden" }}
                   />
                   <span className="practice-dashboard__muted">{t.uploadHint}</span>
+                </div>
+              ) : null}
+
+              {!readOnly ? (
+                <div className="medication-plan__actions">
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    onClick={handleAiTitleDraft}
+                    disabled={busy || aiBusy}
+                    aria-busy={aiBusy}
+                  >
+                    {aiBusy ? t.aiBusy : t.aiTitleDraft}
+                  </button>
+                  {activeId ? (
+                    <button
+                      type="button"
+                      className="patient-threads__btn patient-threads__btn--secondary"
+                      onClick={handleAiOrganize}
+                      disabled={busy || aiBusy}
+                    >
+                      {t.aiOrganize}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {aiPreview ? (
+                <div
+                  className="practice-documents__ai-preview"
+                  role="region"
+                  aria-labelledby="pd-ai-preview-heading"
+                >
+                  <h3 id="pd-ai-preview-heading" className="practice-documents__ai-title">
+                    {t.aiDraftLabel}
+                  </h3>
+                  <p className="patient-inbox__safety">{t.aiDisclaimer}</p>
+                  <pre className="practice-documents__ai-text">{aiPreview}</pre>
                 </div>
               ) : null}
 

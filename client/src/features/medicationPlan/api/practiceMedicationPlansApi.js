@@ -62,3 +62,30 @@ export async function archivePracticeMedicationPlan(linkId, practiceId, planId) 
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+export async function deletePracticeMedicationPlan(linkId, practiceId, planId) {
+  const res = await authFetch(
+    `${base(linkId)}/${encodeURIComponent(planId)}/delete?${qPractice(practiceId)}`,
+    { method: "PATCH" },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function fetchPracticeMedicationPlanAiFormat(
+  linkId,
+  practiceId,
+  planId,
+  { locale } = {},
+) {
+  const res = await authFetch(
+    `${base(linkId)}/${encodeURIComponent(planId)}/ai-format?${qPractice(practiceId)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale }),
+    },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

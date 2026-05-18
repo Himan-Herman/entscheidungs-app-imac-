@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../auditLogService.js";
-import { linkHasConsentScope } from "./consentScopes.js";
+import {
+  CARE_CONSENT_VERSION,
+  linkHasConsentScope,
+  normalizeConsentScopes,
+} from "./consentScopes.js";
 import { linkToPatientJson } from "./practicePatientLinkService.js";
 
 const prisma = new PrismaClient();
@@ -57,6 +61,7 @@ export async function getPatientProfileForPractice(
       id: true,
       firstName: true,
       lastName: true,
+      email: true,
       dateOfBirth: true,
       profile: true,
     },
@@ -83,12 +88,13 @@ export async function getPatientProfileForPractice(
   await writeAuditLog({
     userId: viewerUserId,
     actorRole: "practice",
-    action: "profile_viewed",
-    entityType: "PracticePatientLink",
+    action: "patient_profile_viewed",
+    entityType: "patient_profile",
     entityId: link.id,
     metadata: {
       practiceProfileId: link.practiceProfileId,
       patientUserId: link.patientUserId,
+      practicePatientLinkId: link.id,
       hasDependentProfile: Boolean(dependent),
     },
   });
@@ -101,6 +107,7 @@ export async function getPatientProfileForPractice(
     basic: {
       firstName: user.firstName,
       lastName: user.lastName,
+      email: user.email || null,
       displayName: profile?.displayName || null,
       dateOfBirth: fmtDate(user.dateOfBirth),
       preferredLanguage: profile?.preferredPatientLanguage || null,
@@ -167,6 +174,14 @@ export async function updatePatientProfileAccess(linkId, patientUserId, granted)
     updatedAt: now,
   };
 
+  if (granted) {
+    data.profileAccessGrantedAt = now;
+    data.profileAccessRevokedAt = null;
+    data.profileAccessGrantedByUserId = uid;
+  } else if (linkHasConsentScope(link, "profile") || link.profileAccessGrantedAt) {
+    data.profileAccessRevokedAt = now;
+  }
+
   if (granted && !link.consentAcceptedAt) {
     data.consentAcceptedAt = now;
     data.consentVersion = link.consentVersion || CARE_CONSENT_VERSION;
@@ -194,12 +209,13 @@ export async function updatePatientProfileAccess(linkId, patientUserId, granted)
   await writeAuditLog({
     userId: uid,
     actorRole: "patient",
-    action: granted ? "profile_access_granted" : "profile_access_revoked",
-    entityType: "PracticePatientLink",
+    action: granted ? "patient_profile_access_granted" : "patient_profile_access_revoked",
+    entityType: "patient_profile",
     entityId: row.id,
     metadata: {
       practiceProfileId: row.practiceProfileId,
       patientUserId: row.patientUserId,
+      practicePatientLinkId: row.id,
     },
   });
 

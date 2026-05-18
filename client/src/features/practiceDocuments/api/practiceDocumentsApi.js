@@ -91,3 +91,33 @@ export async function deletePracticeDocument(linkId, practiceId, documentId) {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+export async function fetchPracticeDocumentAiOrganize(linkId, practiceId, documentId, { locale } = {}) {
+  const res = await authFetch(
+    `${base(linkId)}/${encodeURIComponent(documentId)}/ai-organize?${qPractice(practiceId)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale }),
+    },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function fetchPracticeDocumentAiTitleDraft(
+  linkId,
+  practiceId,
+  { type, title, description, locale } = {},
+) {
+  const res = await authFetch(
+    `${base(linkId)}/ai-title-draft?${qPractice(practiceId)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, title, description, locale }),
+    },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

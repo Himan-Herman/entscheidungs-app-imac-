@@ -23,4 +23,15 @@ export default {
   fieldEnd: "Ende",
   fieldInstructions: "Hinweise",
   planTitleFallback: "Medikationsplan",
+  askQuestion: "Rückfrage an die Praxis",
+  questionSent: "Ihre Rückfrage wurde an die Praxis übermittelt.",
+  questionError: "Rückfrage konnte nicht gesendet werden.",
+  aiSimpleLanguage: "In einfacher Sprache (KI-Entwurf)",
+  aiBusy: "KI-Entwurf wird erstellt …",
+  aiError: "KI-Entwurf konnte nicht erstellt werden.",
+  aiNotConfigured: "KI ist in dieser Umgebung nicht verfügbar.",
+  aiDraftLabel: "KI-Entwurf – bitte prüfen",
+  aiDisclaimer:
+    "Die KI strukturiert nur vorhandene Angaben. Sie erstellt keine Dosierungs- oder Therapieempfehlung.",
+  messagesLink: "Zum sicheren Nachrichtenbereich",
 };

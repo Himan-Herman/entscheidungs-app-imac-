@@ -34,4 +34,16 @@ export default {
   practiceLabel: "Practice",
   systemLabel: "System",
   sendError: "Could not send your message.",
+  groupedByPractice: "By practice",
+  unreadBadge: "Unread",
+  unreadAria: "Unread messages",
+  readAt: "Read",
+  notReadYet: "Not read yet",
+  aiDraftLabel: "AI draft – please review",
+  aiDisclaimer:
+    "AI only helps formulate and structure existing information. It does not provide medical advice.",
+  aiRewrite: "Improve text (AI draft)",
+  aiBusy: "Generating AI draft…",
+  aiError: "Could not generate AI draft.",
+  aiNotConfigured: "AI draft is not available in this environment.",
 };

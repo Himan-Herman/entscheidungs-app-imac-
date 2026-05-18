@@ -10,12 +10,41 @@ export async function fetchPatientDataControl() {
   return { res, data };
 }
 
+export async function fetchPatientDataRequests() {
+  const res = await authFetch(REQUESTS_BASE);
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function postPatientDataRequest(body) {
   const res = await authFetch(REQUESTS_BASE, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function postPatientDataRequestAiDraft(body) {
+  const res = await authFetch(`${REQUESTS_BASE}/ai-draft`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function postPatientDataRequestAiSummary(requestId, locale) {
+  const res = await authFetch(
+    `${REQUESTS_BASE}/${encodeURIComponent(requestId)}/ai-summary`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale }),
+    },
+  );
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
@@ -46,6 +75,29 @@ export async function patchPatientProfileAccess(linkId, granted) {
 export async function fetchPracticeDataRequests(practiceId) {
   const q = new URLSearchParams({ practiceId });
   const res = await authFetch(`/api/practice/data-requests?${q}`);
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function fetchPracticeDataRequest(practiceId, requestId) {
+  const q = new URLSearchParams({ practiceId });
+  const res = await authFetch(
+    `/api/practice/data-requests/${encodeURIComponent(requestId)}?${q}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function patchPracticeDataRequestStatus(practiceId, requestId, body) {
+  const q = new URLSearchParams({ practiceId });
+  const res = await authFetch(
+    `/api/practice/data-requests/${encodeURIComponent(requestId)}/status?${q}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }

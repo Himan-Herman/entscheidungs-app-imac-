@@ -12,12 +12,22 @@ import {
 import {
   archiveMedicationPlan,
   createDraftMedicationPlan,
+  deleteMedicationPlan,
   getMedicationPlanByLink,
   listMedicationPlansForPracticePatient,
   publishMedicationPlan,
   updateDraftMedicationPlan,
 } from "../services/medicationPlan/medicationPlanService.js";
+import { generatePracticeMedicationPlanAiFormat } from "../services/medicationPlan/medicationPlanAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+
+function medicationPlanAuditMetadata(plan) {
+  return {
+    practicePatientLinkId: plan.practicePatientLinkId,
+    practiceProfileId: plan.practiceProfileId,
+    patientUserId: plan.patientUserId,
+  };
+}
 
 const router = express.Router({ mergeParams: true });
 
@@ -112,15 +122,20 @@ router.post("/", async (req, res) => {
       req.params.linkId,
       ctx.practiceId,
       ctx.userId,
-      { title: req.body?.title, items: req.body?.items },
+      {
+        title: req.body?.title,
+        note: req.body?.note,
+        items: req.body?.items,
+      },
     );
 
     await writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
-      action: "medication_plan_draft_created",
-      entityType: "MedicationPlan",
+      action: "medication_plan_created",
+      entityType: "medication_plan",
       entityId: plan.id,
+      metadata: medicationPlanAuditMetadata(plan),
     });
 
     return res.status(201).json({ ok: true, plan });
@@ -166,15 +181,20 @@ router.put("/:planId", async (req, res) => {
       req.params.planId,
       req.params.linkId,
       ctx.practiceId,
-      { title: req.body?.title, items: req.body?.items },
+      {
+        title: req.body?.title,
+        note: req.body?.note,
+        items: req.body?.items,
+      },
     );
 
     await writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
-      action: "medication_plan_draft_updated",
-      entityType: "MedicationPlan",
+      action: "medication_plan_updated",
+      entityType: "medication_plan",
       entityId: plan.id,
+      metadata: medicationPlanAuditMetadata(plan),
     });
 
     return res.json({ ok: true, plan });
@@ -204,8 +224,9 @@ router.post("/:planId/publish", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_published",
-      entityType: "MedicationPlan",
+      entityType: "medication_plan",
       entityId: plan.id,
+      metadata: medicationPlanAuditMetadata(plan),
     });
 
     return res.json({ ok: true, plan });
@@ -235,13 +256,86 @@ router.patch("/:planId/archive", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_archived",
-      entityType: "MedicationPlan",
+      entityType: "medication_plan",
       entityId: plan.id,
+      metadata: medicationPlanAuditMetadata(plan),
     });
 
     return res.json({ ok: true, plan });
   } catch (err) {
     console.error("[practice/medication-plans/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/practice/patients/:linkId/medication-plans/:planId/delete */
+router.patch("/:planId/delete", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!canWritePracticePatientLinks(ctx.access)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const plan = await deleteMedicationPlan(
+      req.params.planId,
+      req.params.linkId,
+      ctx.practiceId,
+      ctx.userId,
+    );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "medication_plan_deleted",
+      entityType: "medication_plan",
+      entityId: plan.id,
+      metadata: medicationPlanAuditMetadata(plan),
+    });
+
+    return res.json({ ok: true, plan });
+  } catch (err) {
+    console.error("[practice/medication-plans/delete]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/practice/patients/:linkId/medication-plans/:planId/ai-format */
+router.post("/:planId/ai-format", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!canWritePracticePatientLinks(ctx.access)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const draft = await generatePracticeMedicationPlanAiFormat({
+      linkId: req.params.linkId,
+      practiceProfileId: ctx.practiceId,
+      planId: req.params.planId,
+      locale: req.body?.locale || req.headers["accept-language"],
+    });
+
+    const plan = await getMedicationPlanByLink(
+      req.params.planId,
+      ctx.practiceId,
+      req.params.linkId,
+    );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "medication_plan_ai_format",
+      entityType: "medication_plan",
+      entityId: req.params.planId,
+      metadata: medicationPlanAuditMetadata(plan),
+    });
+
+    return res.json({ ok: true, ...draft });
+  } catch (err) {
+    console.error("[practice/medication-plans/ai-format]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

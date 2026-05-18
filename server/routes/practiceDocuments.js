@@ -22,7 +22,19 @@ import {
   updatePracticeDocumentDraft,
   uploadPracticeDocumentFile,
 } from "../services/practiceDocument/practiceDocumentService.js";
+import {
+  generatePracticeDocumentAiOrganize,
+  generatePracticeDocumentAiTitleDraft,
+} from "../services/practiceDocument/practiceDocumentAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+
+function documentAuditMetadata(doc) {
+  return {
+    practicePatientLinkId: doc.practicePatientLinkId,
+    practiceProfileId: doc.practiceProfileId,
+    patientUserId: doc.patientUserId,
+  };
+}
 
 const router = express.Router({ mergeParams: true });
 
@@ -66,6 +78,9 @@ function mapError(err) {
     msg === "document_already_deleted"
   ) {
     return { status: 409, error: msg };
+  }
+  if (msg === "ai_not_configured") {
+    return { status: 503, error: msg };
   }
   return { status: 500, error: "request_failed" };
 }
@@ -136,14 +151,50 @@ router.post("/", async (req, res) => {
     await writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
-      action: "practice_document_draft_created",
-      entityType: "PracticeDocument",
+      action: "practice_document_created",
+      entityType: "practice_document",
       entityId: document.id,
+      metadata: documentAuditMetadata(document),
     });
 
     return res.status(201).json({ ok: true, document });
   } catch (err) {
     console.error("[practice/documents/create]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/practice/patients/:linkId/documents/ai-title-draft */
+router.post("/ai-title-draft", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!canWritePracticePatientLinks(ctx.access)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const draft = await generatePracticeDocumentAiTitleDraft({
+      linkId: req.params.linkId,
+      practiceProfileId: ctx.practiceId,
+      type: req.body?.type,
+      title: req.body?.title,
+      description: req.body?.description,
+      locale: req.body?.locale || req.headers["accept-language"],
+    });
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "practice_document_ai_title_draft",
+      entityType: "practice_document",
+      entityId: req.params.linkId,
+      metadata: { practiceProfileId: ctx.practiceId },
+    });
+
+    return res.json({ ok: true, ...draft });
+  } catch (err) {
+    console.error("[practice/documents/ai-title]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
@@ -244,8 +295,9 @@ router.post("/:documentId/share", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_shared",
-      entityType: "PracticeDocument",
+      entityType: "practice_document_share",
       entityId: document.id,
+      metadata: documentAuditMetadata(document),
     });
 
     return res.json({ ok: true, document });
@@ -307,8 +359,9 @@ router.patch("/:documentId/archive", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_archived",
-      entityType: "PracticeDocument",
+      entityType: "practice_document",
       entityId: document.id,
+      metadata: documentAuditMetadata(document),
     });
 
     return res.json({ ok: true, document });
@@ -340,9 +393,9 @@ router.patch("/:documentId/delete", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_deleted",
-      entityType: "PracticeDocument",
+      entityType: "practice_document",
       entityId: document.id,
-      metadata: { softDelete: true },
+      metadata: { ...documentAuditMetadata(document), softDelete: true },
     });
 
     return res.json({ ok: true, document });
@@ -372,6 +425,16 @@ router.patch("/:documentId", async (req, res) => {
         description: req.body?.description,
       },
     );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "practice_document_updated",
+      entityType: "practice_document",
+      entityId: document.id,
+      metadata: documentAuditMetadata(document),
+    });
+
     return res.json({ ok: true, document });
   } catch (err) {
     console.error("[practice/documents/update-draft]", err?.message ?? err);

@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../auditLogService.js";
 import { linkHasConsentScope } from "../careRelationship/consentScopes.js";
 import { updatePatientProfileAccess } from "../careRelationship/practicePatientProfileService.js";
+import { notifyPracticeInboxOfDataRequest } from "../practiceInbox/practiceInboxNotify.js";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,9 @@ export const REQUEST_STATUSES = new Set([
   "rejected",
 ]);
 
+const OPEN_STATUSES = ["submitted", "in_review"];
 const MAX_REASON_LEN = 1000;
+const MAX_RESPONSE_NOTE_LEN = 2000;
 
 /**
  * @param {import("@prisma/client").PatientDataRequest} row
@@ -27,9 +30,104 @@ function requestToJson(row) {
     type: row.type,
     status: row.status,
     reason: row.reason,
+    responseNote: row.responseNote ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     completedAt: row.completedAt,
+  };
+}
+
+/**
+ * @param {string} requestId
+ * @param {string} actorUserId
+ * @param {"patient" | "practice"} actorKind
+ */
+export async function getPatientDataRequest(requestId, actorUserId, actorKind) {
+  const id = String(requestId || "").trim();
+  const uid = String(actorUserId || "").trim();
+  if (!id || !uid) throw new Error("validation_required");
+
+  const row = await prisma.patientDataRequest.findUnique({
+    where: { id },
+    include: {
+      patientUser: {
+        select: { id: true, firstName: true, lastName: true },
+      },
+      practiceProfile: {
+        select: { id: true, practiceName: true },
+      },
+    },
+  });
+  if (!row) throw new Error("request_not_found");
+
+  if (actorKind === "patient") {
+    if (row.patientUserId !== uid) throw new Error("forbidden");
+  } else {
+    throw new Error("validation_required");
+  }
+
+  return {
+    ...requestToJson(row),
+    practice: row.practiceProfile
+      ? { id: row.practiceProfile.id, practiceName: row.practiceProfile.practiceName }
+      : null,
+  };
+}
+
+/**
+ * @param {string} requestId
+ * @param {string} practiceProfileId
+ * @param {string} viewerUserId
+ */
+export async function getPracticeDataRequest(requestId, practiceProfileId, viewerUserId) {
+  const id = String(requestId || "").trim();
+  const pid = String(practiceProfileId || "").trim();
+  const uid = String(viewerUserId || "").trim();
+  if (!id || !pid || !uid) throw new Error("validation_required");
+
+  const row = await prisma.patientDataRequest.findFirst({
+    where: { id, practiceProfileId: pid },
+    include: {
+      patientUser: {
+        select: { id: true, firstName: true, lastName: true },
+      },
+      practicePatientLink: {
+        select: { id: true, status: true, linkedAt: true },
+      },
+    },
+  });
+  if (!row) throw new Error("request_not_found");
+
+  await writeAuditLog({
+    userId: uid,
+    actorRole: "practice",
+    action: "patient_data_request_viewed",
+    entityType: "patient_data_request",
+    entityId: row.id,
+    metadata: {
+      practiceProfileId: pid,
+      patientUserId: row.patientUserId,
+      practicePatientLinkId: row.practicePatientLinkId,
+      requestType: row.type,
+    },
+  });
+
+  return {
+    ...requestToJson(row),
+    patient: row.patientUser
+      ? {
+          id: row.patientUser.id,
+          firstName: row.patientUser.firstName,
+          lastName: row.patientUser.lastName,
+        }
+      : null,
+    link: row.practicePatientLink
+      ? {
+          id: row.practicePatientLink.id,
+          status: row.practicePatientLink.status,
+          linkedAt: row.practicePatientLink.linkedAt,
+        }
+      : null,
   };
 }
 
@@ -57,6 +155,16 @@ export async function createPatientDataRequest(input) {
     practiceProfileId = link.practiceProfileId;
   }
 
+  const existing = await prisma.patientDataRequest.findFirst({
+    where: {
+      practicePatientLinkId: linkId || undefined,
+      patientUserId,
+      type,
+      status: { in: OPEN_STATUSES },
+    },
+  });
+  if (existing) throw new Error("request_already_open");
+
   const reason = input.reason
     ? String(input.reason).trim().slice(0, MAX_REASON_LEN) || null
     : null;
@@ -78,11 +186,18 @@ export async function createPatientDataRequest(input) {
     }
   }
 
+  await notifyPracticeInboxOfDataRequest(row);
+
+  const action =
+    type === "export"
+      ? "patient_data_export_request_submitted"
+      : "patient_data_request_submitted";
+
   await writeAuditLog({
     userId: patientUserId,
     actorRole: "patient",
-    action: "patient_data_request_submitted",
-    entityType: "PatientDataRequest",
+    action,
+    entityType: "patient_data_request",
     entityId: row.id,
     metadata: {
       practiceProfileId,
@@ -98,12 +213,26 @@ export async function createPatientDataRequest(input) {
  * @param {string} patientUserId
  */
 export async function listPatientDataRequests(patientUserId) {
+  const uid = String(patientUserId || "").trim();
+  if (!uid) throw new Error("validation_required");
+
   const rows = await prisma.patientDataRequest.findMany({
-    where: { patientUserId },
+    where: { patientUserId: uid },
     orderBy: { createdAt: "desc" },
     take: 50,
+    include: {
+      practiceProfile: {
+        select: { id: true, practiceName: true },
+      },
+    },
   });
-  return rows.map(requestToJson);
+
+  return rows.map((row) => ({
+    ...requestToJson(row),
+    practice: row.practiceProfile
+      ? { id: row.practiceProfile.id, practiceName: row.practiceProfile.practiceName }
+      : null,
+  }));
 }
 
 /**
@@ -121,6 +250,9 @@ export async function listPracticeDataRequests(practiceProfileId) {
       patientUser: {
         select: { id: true, firstName: true, lastName: true },
       },
+      practicePatientLink: {
+        select: { id: true, status: true },
+      },
     },
   });
 
@@ -133,5 +265,65 @@ export async function listPracticeDataRequests(practiceProfileId) {
           lastName: row.patientUser.lastName,
         }
       : null,
+    link: row.practicePatientLink
+      ? { id: row.practicePatientLink.id, status: row.practicePatientLink.status }
+      : null,
   }));
+}
+
+/**
+ * @param {{ requestId: string, practiceProfileId: string, handlerUserId: string, status: string, responseNote?: string }} input
+ */
+export async function updatePracticeDataRequestStatus(input) {
+  const id = String(input.requestId || "").trim();
+  const pid = String(input.practiceProfileId || "").trim();
+  const handlerId = String(input.handlerUserId || "").trim();
+  const status = String(input.status || "").trim();
+
+  if (!id || !pid || !handlerId) throw new Error("validation_required");
+  if (!REQUEST_STATUSES.has(status)) throw new Error("validation_invalid_status");
+
+  const row = await prisma.patientDataRequest.findFirst({
+    where: { id, practiceProfileId: pid },
+  });
+  if (!row) throw new Error("request_not_found");
+
+  const responseNote = input.responseNote
+    ? String(input.responseNote).trim().slice(0, MAX_RESPONSE_NOTE_LEN) || null
+    : null;
+
+  const now = new Date();
+  const data = {
+    status,
+    updatedAt: now,
+    handledByUserId: handlerId,
+    responseNote: responseNote ?? row.responseNote,
+  };
+
+  if (status === "completed" || status === "rejected") {
+    data.completedAt = now;
+  }
+
+  const updated = await prisma.patientDataRequest.update({
+    where: { id },
+    data,
+  });
+
+  await writeAuditLog({
+    userId: handlerId,
+    actorRole: "practice",
+    action: "patient_data_request_status_changed",
+    entityType: "patient_data_request",
+    entityId: updated.id,
+    metadata: {
+      practiceProfileId: pid,
+      patientUserId: updated.patientUserId,
+      practicePatientLinkId: updated.practicePatientLinkId,
+      requestType: updated.type,
+      previousStatus: row.status,
+      newStatus: status,
+    },
+  });
+
+  return requestToJson(updated);
 }

@@ -1,7 +1,7 @@
 export default {
   sectionTitle: "Messages",
   sectionIntro:
-    "Secure messages with this patient — no AI replies, no diagnoses.",
+    "Secure messages with this patient — optional AI draft for wording only, no diagnoses.",
   loading: "Loading…",
   loadError: "Could not load messages.",
   featureDisabled: "Messaging is not enabled in this environment yet.",
@@ -12,6 +12,7 @@ export default {
   messageLabel: "Message",
   messagePlaceholder: "Neutral message to the patient…",
   send: "Send",
+  viewerReadOnly: "Read-only access — cannot send new messages.",
   open: "Open",
   close: "Close",
   archive: "Archive",
@@ -25,4 +26,16 @@ export default {
   replyLabel: "Reply",
   youPractice: "Practice",
   patientSide: "Patient",
+  backToRecord: "Back to patient record",
+  unreadBadge: "Unread",
+  unreadAria: "Unread messages",
+  readAt: "Read",
+  notReadYet: "Not read yet",
+  aiDraftLabel: "AI draft – please review",
+  aiDisclaimer:
+    "AI only helps formulate and structure existing information. It does not provide medical advice.",
+  aiReplyDraft: "Draft reply (AI)",
+  aiBusy: "Generating AI draft…",
+  aiError: "Could not generate AI draft.",
+  aiNotConfigured: "AI draft is not available in this environment.",
 };

@@ -45,4 +45,21 @@ export default {
   validationMedication: "Mindestens ein Medikament mit Namen ist für die Veröffentlichung nötig.",
   readOnlyHint: "Veröffentlichte oder archivierte Pläne können hier nicht bearbeitet werden.",
   publishedAt: "Veröffentlicht am {date}",
+  noteLabel: "Praxishinweis (optional)",
+  notePlaceholder: "Interner Hinweis zum Plan …",
+  delete: "Plan löschen",
+  deleteConfirmTitle: "Medikationsplan löschen?",
+  deleteConfirmHint:
+    "Diese Aktion entfernt den Medikationsplan aus der aktiven Ansicht. Ein Audit-Eintrag wird gespeichert.",
+  deleteConfirmButton: "Ja, endgültig entfernen",
+  deleteCancel: "Abbrechen",
+  deleted: "Plan wurde entfernt.",
+  deleteError: "Löschen fehlgeschlagen.",
+  aiFormat: "Strukturieren (KI-Entwurf)",
+  aiBusy: "KI-Entwurf wird erstellt …",
+  aiError: "KI-Entwurf konnte nicht erstellt werden.",
+  aiNotConfigured: "KI ist in dieser Umgebung nicht verfügbar.",
+  aiDraftLabel: "KI-Entwurf – bitte prüfen",
+  aiDisclaimer:
+    "Die KI strukturiert nur vorhandene Angaben. Sie erstellt keine Dosierungs- oder Therapieempfehlung.",
 };

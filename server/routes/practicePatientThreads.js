@@ -19,6 +19,7 @@ import {
   markThreadRead,
 } from "../services/communication/practicePatientThreadService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { generatePracticeMessageAiDraft } from "../services/communication/messageCommunicationAiService.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -52,6 +53,9 @@ function mapError(err) {
     msg === "thread_archived"
   ) {
     return { status: 409, error: msg };
+  }
+  if (msg === "ai_not_configured") {
+    return { status: 503, error: msg };
   }
   return { status: 500, error: "request_failed" };
 }
@@ -146,6 +150,15 @@ router.get("/:threadId", async (req, res) => {
       ctx.practiceId,
       ctx.linkId,
     );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: access.role,
+      action: "practice_thread_read",
+      entityType: "PracticePatientThread",
+      entityId: req.params.threadId,
+    });
+
     return res.json({ ok: true, thread: refreshed });
   } catch (err) {
     console.error("[practice/threads/get]", err?.message ?? err);
@@ -189,6 +202,74 @@ router.post("/:threadId/messages", async (req, res) => {
   }
 });
 
+/** PATCH /:threadId/read */
+router.patch("/:threadId/read", async (req, res) => {
+  const ctx = requirePracticeAccess(req, res);
+  if (!ctx) return;
+
+  const access = await getPracticeAccess(ctx.userId, ctx.practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const thread = await markThreadRead(req.params.threadId, "practice", {
+      practiceProfileId: ctx.practiceId,
+      linkId: ctx.linkId,
+    });
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: access.role,
+      action: "practice_thread_read",
+      entityType: "PracticePatientThread",
+      entityId: req.params.threadId,
+    });
+
+    return res.json({ ok: true, thread });
+  } catch (err) {
+    console.error("[practice/threads/read]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /:threadId/ai-reply-draft */
+router.post("/:threadId/ai-reply-draft", async (req, res) => {
+  const ctx = requirePracticeAccess(req, res);
+  if (!ctx) return;
+
+  const access = await getPracticeAccess(ctx.userId, ctx.practiceId);
+  if (!access || !canWritePracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const draft = await generatePracticeMessageAiDraft({
+      linkId: ctx.linkId,
+      practiceProfileId: ctx.practiceId,
+      threadId: req.params.threadId,
+      locale: req.body?.locale || req.headers["accept-language"],
+      mode: req.body?.mode || "reply_draft",
+      draftInput: req.body?.draftInput,
+    });
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: access.role,
+      action: "practice_thread_ai_draft",
+      entityType: "PracticePatientThread",
+      entityId: req.params.threadId,
+    });
+
+    return res.json({ ok: true, ...draft });
+  } catch (err) {
+    console.error("[practice/threads/ai-draft]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
 /** PATCH /:threadId/close */
 router.patch("/:threadId/close", async (req, res) => {
   const ctx = requirePracticeAccess(req, res);
@@ -205,6 +286,15 @@ router.patch("/:threadId/close", async (req, res) => {
       ctx.practiceId,
       ctx.linkId,
     );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: access.role,
+      action: "practice_thread_closed",
+      entityType: "PracticePatientThread",
+      entityId: thread.id,
+    });
+
     return res.json({ ok: true, thread });
   } catch (err) {
     console.error("[practice/threads/close]", err?.message ?? err);
@@ -229,6 +319,15 @@ router.patch("/:threadId/archive", async (req, res) => {
       ctx.practiceId,
       ctx.linkId,
     );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: access.role,
+      action: "practice_thread_archived",
+      entityType: "PracticePatientThread",
+      entityId: thread.id,
+    });
+
     return res.json({ ok: true, thread });
   } catch (err) {
     console.error("[practice/threads/archive]", err?.message ?? err);

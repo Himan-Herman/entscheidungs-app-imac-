@@ -1,7 +1,7 @@
 export default {
   sectionTitle: "Nachrichten",
   sectionIntro:
-    "Sichere Nachrichten mit dieser Patient:in — keine KI-Antworten, keine Diagnosen.",
+    "Sichere Nachrichten mit dieser Patient:in — optional KI-Entwurf nur zum Formulieren, keine Diagnosen.",
   loading: "Wird geladen …",
   loadError: "Nachrichten konnten nicht geladen werden.",
   featureDisabled: "Nachrichten sind in dieser Umgebung noch nicht aktiviert.",
@@ -12,6 +12,7 @@ export default {
   messageLabel: "Nachricht",
   messagePlaceholder: "Neutrale Nachricht an die Patient:in …",
   send: "Senden",
+  viewerReadOnly: "Nur Lesezugriff — keine neuen Nachrichten möglich.",
   open: "Öffnen",
   close: "Schließen",
   archive: "Archivieren",
@@ -25,4 +26,16 @@ export default {
   replyLabel: "Antwort",
   youPractice: "Praxis",
   patientSide: "Patient:in",
+  backToRecord: "Zurück zur Patientenakte",
+  unreadBadge: "Ungelesen",
+  unreadAria: "Ungelesene Nachrichten",
+  readAt: "Gelesen",
+  notReadYet: "Noch nicht gelesen",
+  aiDraftLabel: "KI-Entwurf – bitte prüfen",
+  aiDisclaimer:
+    "Die KI hilft nur beim Formulieren und Strukturieren vorhandener Informationen. Sie gibt keine medizinische Empfehlung.",
+  aiReplyDraft: "Antwort als Entwurf (KI)",
+  aiBusy: "KI-Entwurf wird erstellt …",
+  aiError: "KI-Entwurf konnte nicht erstellt werden.",
+  aiNotConfigured: "KI-Entwurf ist in dieser Umgebung nicht verfügbar.",
 };

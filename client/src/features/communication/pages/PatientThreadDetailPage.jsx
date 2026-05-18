@@ -5,6 +5,7 @@ import { getMessages } from "../../../i18n/translations";
 import {
   archivePatientThread,
   fetchPatientThread,
+  fetchPatientThreadAiRewrite,
   sendPatientThreadMessage,
 } from "../api/patientThreadsApi.js";
 import "../../../styles/PatientInboxPage.css";
@@ -41,6 +42,8 @@ export default function PatientThreadDetailPage() {
   const [error, setError] = useState("");
   const [sendError, setSendError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiHintVisible, setAiHintVisible] = useState(false);
 
   const load = useCallback(async () => {
     if (!threadId) return;
@@ -87,12 +90,37 @@ export default function PatientThreadDetailPage() {
       }
       if (!res.ok || !data.ok) throw new Error("send_failed");
       setReply("");
+      setAiHintVisible(false);
       setThread(data.thread);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
       setSendError(t.sendError);
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleAiRewrite = async () => {
+    if (!threadId) return;
+    setAiBusy(true);
+    setSendError("");
+    try {
+      const { res, data } = await fetchPatientThreadAiRewrite(threadId, {
+        locale: language,
+        draftInput: reply.trim() || undefined,
+      });
+      if (res.status === 503 && data.error === "ai_not_configured") {
+        setSendError(t.aiNotConfigured);
+        return;
+      }
+      if (!res.ok || !data.ok || !data.text) {
+        setSendError(t.aiError);
+        return;
+      }
+      setReply(data.text);
+      setAiHintVisible(true);
+    } finally {
+      setAiBusy(false);
     }
   };
 
@@ -117,7 +145,7 @@ export default function PatientThreadDetailPage() {
   if (error || !thread) {
     return (
       <div className="patient-threads">
-        <Link className="patient-inbox__back" to="/patient/threads">
+        <Link className="patient-inbox__back" to="/patient/messages">
           {t.backList}
         </Link>
         <p className="patient-inbox__error" role="alert">
@@ -131,7 +159,7 @@ export default function PatientThreadDetailPage() {
 
   return (
     <div className="patient-threads">
-      <Link className="patient-inbox__back" to="/patient/threads">
+      <Link className="patient-inbox__back" to="/patient/messages">
         {t.backList}
       </Link>
       <header className="patient-inbox__header">
@@ -165,6 +193,9 @@ export default function PatientThreadDetailPage() {
             {msg.body}
             <span className="patient-threads__bubble-meta">
               {senderLabel(msg.senderType, t)} · {fmt(msg.createdAt, language)}
+              {msg.senderType === "practice"
+                ? ` · ${msg.readAt ? t.readAt : t.notReadYet}`
+                : null}
             </span>
           </div>
         ))}
@@ -172,13 +203,22 @@ export default function PatientThreadDetailPage() {
 
       {canReply ? (
         <form className="patient-threads__compose" onSubmit={handleSend}>
+          {aiHintVisible ? (
+            <p className="patient-inbox__safety" role="status" id="patient-ai-hint">
+              <strong>{t.aiDraftLabel}</strong> — {t.aiDisclaimer}
+            </p>
+          ) : null}
           <label htmlFor="patient-thread-reply">{t.replyLabel}</label>
           <textarea
             id="patient-thread-reply"
             value={reply}
-            onChange={(e) => setReply(e.target.value)}
+            onChange={(e) => {
+              setReply(e.target.value);
+              if (aiHintVisible) setAiHintVisible(false);
+            }}
             placeholder={t.replyPlaceholder}
-            disabled={busy}
+            disabled={busy || aiBusy}
+            aria-describedby={aiHintVisible ? "patient-ai-hint" : undefined}
           />
           {sendError ? (
             <p className="patient-inbox__error" role="alert">
@@ -187,9 +227,18 @@ export default function PatientThreadDetailPage() {
           ) : null}
           <div className="patient-threads__actions">
             <button
+              type="button"
+              className="patient-threads__btn patient-threads__btn--secondary"
+              onClick={handleAiRewrite}
+              disabled={busy || aiBusy}
+              aria-busy={aiBusy}
+            >
+              {aiBusy ? t.aiBusy : t.aiRewrite}
+            </button>
+            <button
               type="submit"
               className="patient-threads__btn patient-threads__btn--primary"
-              disabled={busy || !reply.trim()}
+              disabled={busy || aiBusy || !reply.trim()}
             >
               {t.send}
             </button>

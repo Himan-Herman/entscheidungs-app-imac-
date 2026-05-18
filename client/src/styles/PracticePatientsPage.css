@@ -132,3 +132,129 @@
 :root[data-theme="dark"] .practice-patients__card-meta {
   color: #94a3b8;
 }
+
+.practice-patients__toolbar {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+  .practice-patients__toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.practice-record__header {
+  margin-bottom: 0.5rem;
+}
+
+.practice-record__tabs-wrap {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.practice-record__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-width: min-content;
+}
+
+.practice-record__tab {
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: transparent;
+  color: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.practice-record__tab:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.practice-record__tab--active {
+  background: #1e3a5f;
+  color: #fff;
+  border-color: #1e3a5f;
+}
+
+:root[data-theme="dark"] .practice-record__tab {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+:root[data-theme="dark"] .practice-record__tab--active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.practice-record__panel {
+  margin-top: 0.5rem;
+}
+
+.practice-record__patient-hint {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 0.9rem;
+}
+
+.practice-record__alert {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.9rem;
+}
+
+.practice-record__viewer-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.practice-record__quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.practice-record__activity-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.practice-record__activity-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.practice-record__activity-type {
+  font-weight: 600;
+}
+
+.practice-record__activity-time {
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+:root[data-theme="dark"] .practice-record__activity-time {
+  color: #94a3b8;
+}

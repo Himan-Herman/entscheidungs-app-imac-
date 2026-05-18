@@ -53,8 +53,6 @@ export default function DataDeletionRequestDialog({
       <p id="data-delete-desc" className="patient-data-control__dialog-body">
         {body}
       </p>
-      <motion-free />
-      <motion-free />
       <div className="patient-data-control__dialog-actions">
         <button
           type="button"
@@ -73,7 +71,7 @@ export default function DataDeletionRequestDialog({
         >
           {isStep2 ? t.deleteConfirmAction : t.deleteContinue}
         </button>
-      </motion-free>
+      </div>
     </dialog>
   );
 }

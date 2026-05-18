@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { linkHasConsentScope } from "../careRelationship/consentScopes.js";
 import { notifyPatientInboxOfPracticeMessage } from "./inboxNotify.js";
+import { notifyPracticeInboxOfPatientMessage } from "../practiceInbox/practiceInboxNotify.js";
 
 const prisma = new PrismaClient();
 
@@ -34,6 +35,20 @@ function messageToJson(msg) {
  * @param {import("@prisma/client").PracticePatientThread & { messages?: import("@prisma/client").PracticePatientMessage[], _count?: { messages: number } }} row
  * @param {{ includeMessages?: boolean }} [opts]
  */
+/**
+ * @param {string} threadId
+ * @param {"patient" | "practice"} unreadFromSender
+ */
+async function countUnreadFrom(threadId, unreadFromSender) {
+  return prisma.practicePatientMessage.count({
+    where: {
+      threadId,
+      senderType: unreadFromSender,
+      readAt: null,
+    },
+  });
+}
+
 function threadToJson(row, opts = {}) {
   const lastMsg =
     row.messages && row.messages.length > 0
@@ -50,6 +65,8 @@ function threadToJson(row, opts = {}) {
     updatedAt: row.updatedAt,
     closedAt: row.closedAt,
     messageCount: row._count?.messages ?? (row.messages ? row.messages.length : undefined),
+    unreadCount: opts.unreadCount ?? 0,
+    hasUnread: (opts.unreadCount ?? 0) > 0,
     lastMessage: lastMsg ? messageToJson(lastMsg) : null,
     messages:
       opts.includeMessages && row.messages
@@ -182,13 +199,16 @@ export async function listThreadsForPractice(linkId, practiceProfileId) {
     },
     orderBy: { updatedAt: "desc" },
   });
-  return rows.map((r) => {
+  const out = [];
+  for (const r of rows) {
+    const unreadCount = await countUnreadFrom(r.id, "patient");
     const withLast = {
       ...r,
       messages: r.messages?.length ? [r.messages[0]] : [],
     };
-    return threadToJson(withLast);
-  });
+    out.push(threadToJson(withLast, { unreadCount }));
+  }
+  return out;
 }
 
 /**
@@ -211,15 +231,24 @@ export async function listThreadsForPatient(patientUserId) {
     orderBy: { updatedAt: "desc" },
   });
 
-  return rows.map((r) => ({
-    ...threadToJson({
-      ...r,
-      messages: r.messages?.length ? [r.messages[0]] : [],
-    }),
-    practice: r.practiceProfile
-      ? { id: r.practiceProfile.id, practiceName: r.practiceProfile.practiceName }
-      : null,
-  }));
+  const out = [];
+  for (const r of rows) {
+    const unreadCount = await countUnreadFrom(r.id, "practice");
+    const base = threadToJson(
+      {
+        ...r,
+        messages: r.messages?.length ? [r.messages[0]] : [],
+      },
+      { unreadCount },
+    );
+    out.push({
+      ...base,
+      practice: r.practiceProfile
+        ? { id: r.practiceProfile.id, practiceName: r.practiceProfile.practiceName }
+        : null,
+    });
+  }
+  return out;
 }
 
 /**
@@ -320,6 +349,8 @@ export async function addMessageFromPatient(input) {
       _count: { select: { messages: true } },
     },
   });
+
+  await notifyPracticeInboxOfPatientMessage(updated);
 
   return {
     ...threadToJson(updated, { includeMessages: true }),

@@ -9,6 +9,8 @@ import {
   getSharedDocumentForPatient,
   listSharedDocumentsForPatient,
 } from "../services/practiceDocument/practiceDocumentService.js";
+import { submitPatientPracticeDocumentQuestion } from "../services/practiceDocument/patientPracticeDocumentQuestionService.js";
+import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
 
@@ -27,7 +29,18 @@ function mapError(err) {
   if (msg === "document_not_found" || msg === "file_not_found") {
     return { status: 404, error: msg };
   }
+  if (msg === "link_not_active") {
+    return { status: 409, error: msg };
+  }
   return { status: 500, error: "request_failed" };
+}
+
+function documentAuditMetadata(doc) {
+  return {
+    practicePatientLinkId: doc.practicePatientLinkId,
+    practiceProfileId: doc.practiceProfileId,
+    patientUserId: doc.patientUserId,
+  };
 }
 
 /** GET /api/patient/practice-documents */
@@ -52,9 +65,46 @@ router.get("/:documentId", async (req, res) => {
 
   try {
     const document = await getSharedDocumentForPatient(req.params.documentId, userId);
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "practice_document_opened",
+      entityType: "practice_document",
+      entityId: document.id,
+      metadata: documentAuditMetadata(document),
+    });
+
     return res.json({ ok: true, document });
   } catch (err) {
     console.error("[patient/practice-documents/get]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/patient/practice-documents/:documentId/question */
+router.post("/:documentId/question", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const result = await submitPatientPracticeDocumentQuestion(
+      req.params.documentId,
+      userId,
+    );
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "practice_document_question",
+      entityType: "practice_document",
+      entityId: req.params.documentId,
+    });
+
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[patient/practice-documents/question]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
@@ -76,6 +126,17 @@ router.get("/:documentId/download", async (req, res) => {
       fileId,
       userId,
     );
+
+    const document = await getSharedDocumentForPatient(req.params.documentId, userId);
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "practice_document_download",
+      entityType: "practice_document_file",
+      entityId: fileId,
+      metadata: documentAuditMetadata(document),
+    });
 
     res.setHeader("Content-Type", file.mimeType);
     res.setHeader(

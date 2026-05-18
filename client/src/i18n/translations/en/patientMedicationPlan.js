@@ -23,4 +23,15 @@ export default {
   fieldEnd: "End",
   fieldInstructions: "Instructions",
   planTitleFallback: "Medication plan",
+  askQuestion: "Ask your practice",
+  questionSent: "Your question was sent to the practice.",
+  questionError: "Could not send your question.",
+  aiSimpleLanguage: "Simple language (AI draft)",
+  aiBusy: "Generating AI draft…",
+  aiError: "Could not generate AI draft.",
+  aiNotConfigured: "AI is not available in this environment.",
+  aiDraftLabel: "AI draft – please review",
+  aiDisclaimer:
+    "AI only structures existing information. It does not create dosage or treatment recommendations.",
+  messagesLink: "Go to secure messages",
 };

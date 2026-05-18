@@ -4,24 +4,16 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchPracticePatientLink } from "../api/practicePatientsApi.js";
 import { patientDisplayName } from "../utils/patientDisplayName.js";
+import PracticePatientRecordTabs from "../components/PracticePatientRecordTabs.jsx";
+import PracticePatientOverviewTab from "../components/PracticePatientOverviewTab.jsx";
+import PracticePatientActivityTab from "../components/PracticePatientActivityTab.jsx";
+import PracticePatientPreVisitsTab from "../components/PracticePatientPreVisitsTab.jsx";
 import PracticePatientMessagesSection from "../../communication/components/PracticePatientMessagesSection.jsx";
 import PracticePatientMedicationPlanSection from "../../medicationPlan/components/PracticePatientMedicationPlanSection.jsx";
 import PracticePatientDocumentsSection from "../../practiceDocuments/components/PracticePatientDocumentsSection.jsx";
 import PracticePatientProfileSection from "../components/PracticePatientProfileSection.jsx";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
-
-function fmt(iso, lang) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  } catch {
-    return "—";
-  }
-}
 
 function statusLabel(status, t) {
   const map = {
@@ -33,19 +25,24 @@ function statusLabel(status, t) {
   return map[status] || status;
 }
 
-function DetailRow({ label, value }) {
-  return (
-    <div className="practice-patients__detail-row">
-      <dt>{label}</dt>
-      <dd>{value}</dd>
-    </div>
-  );
-}
+const VALID_TABS = new Set([
+  "overview",
+  "profile",
+  "previsits",
+  "medication",
+  "documents",
+  "messages",
+  "activity",
+]);
 
 export default function PracticePatientDetailPage() {
   const { linkId } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const practiceId = searchParams.get("practiceId") || "";
+  const activeTab = VALID_TABS.has(searchParams.get("tab") || "")
+    ? searchParams.get("tab")
+    : "overview";
+
   const { language } = useLanguage();
   const t = useMemo(
     () => getMessages(language).practicePatients || getMessages("en").practicePatients,
@@ -53,8 +50,12 @@ export default function PracticePatientDetailPage() {
   );
 
   const [link, setLink] = useState(null);
+  const [overview, setOverview] = useState(null);
+  const [role, setRole] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const readOnly = role === "viewer";
 
   const listPath = practiceId
     ? `/practice/patients?practiceId=${encodeURIComponent(practiceId)}`
@@ -72,14 +73,18 @@ export default function PracticePatientDetailPage() {
       const { res, data } = await fetchPracticePatientLink(linkId, practiceId);
       if (res.status === 404 && data.error === "feature_disabled") {
         setLink(null);
+        setOverview(null);
         setError(t.featureDisabled);
         return;
       }
       if (!res.ok || !data.ok || !data.link) throw new Error("detail_load_failed");
       setLink(data.link);
+      setOverview(data.overview || null);
+      setRole(data.role || "");
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
       setLink(null);
+      setOverview(null);
       setError(t.loadDetailError);
     } finally {
       setLoading(false);
@@ -87,12 +92,19 @@ export default function PracticePatientDetailPage() {
   }, [linkId, practiceId, t.featureDisabled, t.loadDetailError]);
 
   useEffect(() => {
-    document.title = t.detailTitle;
-  }, [t.detailTitle]);
+    document.title = t.recordPageTitle;
+  }, [t.recordPageTitle]);
 
   useEffect(() => {
     loadDetail();
   }, [loadDetail]);
+
+  const setTab = (tabId) => {
+    const next = new URLSearchParams(searchParams);
+    if (practiceId) next.set("practiceId", practiceId);
+    next.set("tab", tabId);
+    setSearchParams(next, { replace: true });
+  };
 
   if (loading) {
     return (
@@ -120,92 +132,88 @@ export default function PracticePatientDetailPage() {
   }
 
   const name = patientDisplayName(link, t.patientFallback);
-  const email = link.patient?.email?.trim() || t.emailMissing;
   const statusText = statusLabel(link.status, t);
   const statusAria = t.statusAria.replace("{status}", statusText);
 
   return (
-    <div className="practice-dashboard practice-patients">
+    <div className="practice-dashboard practice-patients practice-record">
       <div className="practice-dashboard__inner">
         <Link className="practice-dashboard__back" to={listPath}>
           {t.backList}
         </Link>
-        <header className="practice-dashboard__header">
-          <h1 className="practice-dashboard__title">{t.detailTitle}</h1>
-          <p className="practice-dashboard__intro">{name}</p>
+
+        <header className="practice-dashboard__header practice-record__header">
+          <div>
+            <h1 className="practice-dashboard__title">{t.recordTitle}</h1>
+            <p className="practice-dashboard__intro">{name}</p>
+            {readOnly ? (
+              <p className="practice-record__viewer-note" role="status">
+                {t.viewerReadOnly}
+              </p>
+            ) : null}
+          </div>
         </header>
 
-        <section className="practice-dashboard__card" aria-labelledby="patient-section-heading">
-          <h2 id="patient-section-heading" className="practice-dashboard__analytics-heading">
-            {t.detailSectionPatient}
-          </h2>
-          <dl className="practice-patients__detail-dl">
-            <DetailRow label={t.colName} value={name} />
-            <DetailRow label={t.colEmail} value={email} />
-            {link.patientProfile?.relationLabel ? (
-              <DetailRow label={t.detailRelationLabel} value={link.patientProfile.relationLabel} />
-            ) : null}
-          </dl>
-        </section>
+        <PracticePatientRecordTabs activeTab={activeTab} onTabChange={setTab} t={t} />
 
-        <section
-          className="practice-dashboard__card"
-          aria-labelledby="relationship-section-heading"
+        <div
+          className="practice-record__panel"
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
         >
-          <h2 id="relationship-section-heading" className="practice-dashboard__analytics-heading">
-            {t.detailSectionRelationship}
-          </h2>
-          <dl className="practice-patients__detail-dl">
-            <DetailRow
-              label={t.detailStatus}
-              value={
-                <span
-                  className={`practice-patients__status practice-patients__status--${link.status}`}
-                  aria-label={statusAria}
-                >
-                  {statusText}
-                </span>
-              }
+          {activeTab === "overview" ? (
+            <PracticePatientOverviewTab
+              link={link}
+              overview={overview}
+              language={language}
+              t={t}
+              statusAria={statusAria}
+              practiceId={practiceId}
+              onNavigateTab={setTab}
             />
-            <DetailRow label={t.detailLinkedAt} value={fmt(link.linkedAt, language)} />
-            <DetailRow label={t.detailUpdatedAt} value={fmt(link.updatedAt, language)} />
-            {link.revokedAt ? (
-              <DetailRow label={t.detailRevokedAt} value={fmt(link.revokedAt, language)} />
-            ) : null}
-            <DetailRow
-              label={t.detailConsentAcceptedAt}
-              value={
-                link.consentAcceptedAt
-                  ? fmt(link.consentAcceptedAt, language)
-                  : t.detailConsentMissing
-              }
+          ) : null}
+
+          {activeTab === "profile" && practiceId && linkId ? (
+            <PracticePatientProfileSection
+              linkId={linkId}
+              practiceId={practiceId}
+              readOnly={readOnly}
             />
-            {link.consentVersion ? (
-              <DetailRow label={t.detailConsentVersion} value={link.consentVersion} />
-            ) : null}
-            <DetailRow label={t.detailLinkId} value={link.id} />
-            <DetailRow label={t.detailPracticeId} value={link.practiceProfileId} />
-            {link.patientProfileId ? (
-              <DetailRow label={t.detailPatientProfileId} value={link.patientProfileId} />
-            ) : null}
-          </dl>
-        </section>
+          ) : null}
 
-        {practiceId && linkId ? (
-          <PracticePatientMessagesSection linkId={linkId} practiceId={practiceId} />
-        ) : null}
+          {activeTab === "previsits" && practiceId && linkId ? (
+            <PracticePatientPreVisitsTab linkId={linkId} practiceId={practiceId} />
+          ) : null}
 
-        {practiceId && linkId ? (
-          <PracticePatientMedicationPlanSection linkId={linkId} practiceId={practiceId} />
-        ) : null}
+          {activeTab === "medication" && practiceId && linkId ? (
+            <PracticePatientMedicationPlanSection
+              linkId={linkId}
+              practiceId={practiceId}
+              readOnly={readOnly}
+            />
+          ) : null}
 
-        {practiceId && linkId ? (
-          <PracticePatientDocumentsSection linkId={linkId} practiceId={practiceId} />
-        ) : null}
+          {activeTab === "documents" && practiceId && linkId ? (
+            <PracticePatientDocumentsSection
+              linkId={linkId}
+              practiceId={practiceId}
+              readOnly={readOnly}
+            />
+          ) : null}
 
-        {practiceId && linkId ? (
-          <PracticePatientProfileSection linkId={linkId} practiceId={practiceId} />
-        ) : null}
+          {activeTab === "messages" && practiceId && linkId ? (
+            <PracticePatientMessagesSection
+              linkId={linkId}
+              practiceId={practiceId}
+              readOnly={readOnly}
+            />
+          ) : null}
+
+          {activeTab === "activity" && practiceId && linkId ? (
+            <PracticePatientActivityTab linkId={linkId} practiceId={practiceId} />
+          ) : null}
+        </div>
       </div>
     </div>
   );

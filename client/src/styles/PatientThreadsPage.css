@@ -4,6 +4,16 @@
   padding: 1.25rem 1rem 2.5rem;
 }
 
+.patient-threads__group {
+  margin-bottom: 1.5rem;
+}
+
+.patient-threads__group-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
 .patient-threads__list {
   list-style: none;
   margin: 0;

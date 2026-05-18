@@ -24,7 +24,7 @@ import "../styles/WorkspaceHubPages.css";
 const LINKS = [
   { to: "/patient/inbox", key: "hubLinkInbox", subtitleKey: "hubLinkInboxSub", icon: Inbox },
   {
-    to: "/patient/threads",
+    to: "/patient/messages",
     key: "hubLinkThreads",
     subtitleKey: "hubLinkThreadsSub",
     icon: MessageSquare,
@@ -42,9 +42,9 @@ const LINKS = [
     icon: FolderOpen,
   },
   {
-    to: "/patient/practice-links",
-    key: "hubLinkPracticeLinks",
-    subtitleKey: "hubLinkPracticeLinksSub",
+    to: "/patient/data-control",
+    key: "hubLinkDataControl",
+    subtitleKey: "hubLinkDataControlSub",
     icon: Users,
   },
   { to: "/patient/find-practices", key: "hubLinkFindPractices", icon: MapPinned },

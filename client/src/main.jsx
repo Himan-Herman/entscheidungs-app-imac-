@@ -98,6 +98,9 @@ const PatientThreadsListPage = lazy(() =>
 const PatientThreadDetailPage = lazy(() =>
   import("./features/communication/pages/PatientThreadDetailPage.jsx"),
 );
+const PracticePatientMessagesPage = lazy(() =>
+  import("./features/communication/pages/PracticePatientMessagesPage.jsx"),
+);
 const PatientMedicationPlansListPage = lazy(() =>
   import("./features/medicationPlan/pages/PatientMedicationPlansListPage.jsx"),
 );
@@ -110,8 +113,17 @@ const PatientPracticeDocumentsListPage = lazy(() =>
 const PatientPracticeDocumentDetailPage = lazy(() =>
   import("./features/practiceDocuments/pages/PatientPracticeDocumentDetailPage.jsx"),
 );
-const PatientPracticeLinksPage = lazy(() =>
-  import("./features/careRelationship/pages/PatientPracticeLinksPage.jsx"),
+const PatientDataControlPage = lazy(() =>
+  import("./features/careRelationship/pages/PatientDataControlPage.jsx"),
+);
+const PracticeDataRequestsPage = lazy(() =>
+  import("./features/careRelationship/pages/PracticeDataRequestsPage.jsx"),
+);
+const PracticeInboxListPage = lazy(() =>
+  import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
+);
+const PracticeInboxDetailPage = lazy(() =>
+  import("./features/practiceInbox/pages/PracticeInboxDetailPage.jsx"),
 );
 const PracticeFinderPage = lazy(() =>
   import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
@@ -184,12 +196,24 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
-                  path="/patient/threads"
+                  path="/patient/messages"
                   element={
                     <ProtectedRoute>
                       <PatientThreadsListPage />
                     </ProtectedRoute>
                   }
+                />
+                <Route
+                  path="/patient/messages/:threadId"
+                  element={
+                    <ProtectedRoute>
+                      <PatientThreadDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/threads"
+                  element={<Navigate to="/patient/messages" replace />}
                 />
                 <Route
                   path="/patient/threads/:threadId"
@@ -232,10 +256,42 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
+                  path="/patient/data-control"
+                  element={
+                    <ProtectedRoute>
+                      <PatientDataControlPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/patient/practice-links"
                   element={
                     <ProtectedRoute>
-                      <PatientPracticeLinksPage />
+                      <PatientDataControlPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/data-requests"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeDataRequestsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/inbox"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeInboxListPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/inbox/:itemId"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeInboxDetailPage />
                     </ProtectedRoute>
                   }
                 />
@@ -368,6 +424,14 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PracticePatientsListPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/patients/:linkId/messages"
+                  element={
+                    <ProtectedRoute>
+                      <PracticePatientMessagesPage />
                     </ProtectedRoute>
                   }
                 />

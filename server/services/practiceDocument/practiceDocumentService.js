@@ -240,7 +240,11 @@ export async function uploadPracticeDocumentFile(
 export async function listDocumentsForPracticePatient(linkId, practiceProfileId) {
   await assertLinkForPractice(linkId, practiceProfileId);
   const rows = await prisma.practiceDocument.findMany({
-    where: { practicePatientLinkId: linkId, practiceProfileId },
+    where: {
+      practicePatientLinkId: linkId,
+      practiceProfileId,
+      status: { not: "deleted" },
+    },
     include: docInclude,
     orderBy: { createdAt: "desc" },
   });

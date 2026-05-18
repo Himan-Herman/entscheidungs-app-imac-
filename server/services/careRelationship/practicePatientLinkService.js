@@ -87,6 +87,8 @@ export function linkToPatientJson(row) {
     consentAcceptedAt: row.consentAcceptedAt,
     consentScopes: Array.isArray(row.consentScopes) ? row.consentScopes : null,
     profileAccessGranted: linkHasConsentScope(row, "profile"),
+    profileAccessGrantedAt: row.profileAccessGrantedAt,
+    profileAccessRevokedAt: row.profileAccessRevokedAt,
     practice: practice
       ? {
           id: practice.id,

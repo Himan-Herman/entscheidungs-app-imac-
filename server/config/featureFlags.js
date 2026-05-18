@@ -33,3 +33,8 @@ export function isPatientInboxEnabled() {
 export function isPracticeDocumentsV2Enabled() {
   return envFlag("PRACTICE_DOCUMENTS_V2", false);
 }
+
+/** Central practice inbox (aggregated operational items). */
+export function isPracticeInboxEnabled() {
+  return envFlag("PRACTICE_INBOX", false);
+}
