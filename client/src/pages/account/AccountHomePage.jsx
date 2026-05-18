@@ -171,9 +171,6 @@ export default function AccountHomePage() {
         </section>
       </div>
 
-      <p className="account-portal-page__footer-note">
-        <Link to="/startseite">{t.backHome}</Link>
-      </p>
     </div>
   );
 }
