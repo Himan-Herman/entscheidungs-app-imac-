@@ -29,8 +29,9 @@
   font-size: 0.88rem;
   padding: 0.65rem 0.85rem;
   border-radius: 10px;
-  border: 1px solid rgba(14, 116, 144, 0.2);
-  background: rgba(14, 116, 144, 0.06);
+  border: 1px solid var(--ms-color-border-strong, #cbd5e1);
+  background: var(--ms-color-bg-subtle, #f8fafc);
+  color: var(--ms-color-text-secondary, #334155);
 }
 
 .practice-overview__toolbar {
@@ -67,6 +68,8 @@
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary, #0f172a);
+  text-decoration: none;
+  border-bottom: none;
 }
 
 .practice-overview__cards {
@@ -172,9 +175,9 @@
   min-height: 44px;
   padding: 0.55rem 1rem;
   border-radius: 10px;
-  border: 1px solid rgba(14, 116, 144, 0.35);
-  background: rgba(14, 116, 144, 0.08);
-  color: #0e7490;
+  border: 1px solid var(--ms-color-border-strong, #cbd5e1);
+  background: var(--ms-color-surface, #ffffff);
+  color: var(--ms-color-text, #0f172a);
   font-size: 0.92rem;
   font-weight: 600;
   text-decoration: none;
@@ -182,7 +185,10 @@
 }
 
 .practice-overview__action:hover {
-  background: rgba(14, 116, 144, 0.14);
+  border-color: var(--ms-color-accent, #0f766e);
+  background: var(--ms-color-bg-subtle, #f8fafc);
+  color: var(--ms-color-text, #0f172a);
+  text-decoration: none;
 }
 
 .practice-overview__action:focus-visible {
@@ -291,6 +297,7 @@
   font-size: 0.92rem;
   font-weight: 600;
   color: #0e7490;
+  text-decoration: none;
 }
 
 :root[data-theme="dark"] .practice-overview__title,

@@ -550,7 +550,7 @@ export default function PracticeHubPage() {
                   className="practice-overview__action"
                   to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
                 >
-                  {t.actionCreateMedicationPlan}
+                  {t.actionCreateMedication}
                 </Link>
               ) : null}
               {quickActions.manageTeam ? (
