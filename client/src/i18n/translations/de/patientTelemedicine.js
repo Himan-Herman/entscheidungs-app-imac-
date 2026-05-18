@@ -33,4 +33,5 @@ export default {
   status_completed: "Abgeschlossen",
   status_cancelled: "Abgesagt",
   status_failed: "Fehlgeschlagen",
+  sessionClosed: "Diese Videosprechstunde wurde geschlossen.",
 };

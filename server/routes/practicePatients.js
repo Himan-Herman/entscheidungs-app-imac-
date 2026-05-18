@@ -38,7 +38,7 @@ import {
   anonymizeSearchQueryForAudit,
 } from "../services/careRelationship/practicePatientSearchService.js";
 import { generatePracticePatientSearchAiSuggestion } from "../services/careRelationship/practicePatientSearchAiService.js";
-import { createAndRunExportJob } from "../services/export/exportJobService.js";
+import { createExportJob } from "../services/export/exportJobService.js";
 import { listPracticeLinkConsents } from "../services/consent/consentRecordService.js";
 import { practiceExportLimiter } from "../middleware/ipRateLimit.js";
 import { writeAuditLog } from "../services/auditLogService.js";
@@ -337,7 +337,7 @@ router.post("/:linkId/export", practiceExportLimiter, async (req, res) => {
 
   try {
     const link = await getPracticePatientLink(req.params.linkId, practiceId);
-    const job = await createAndRunExportJob({
+    const job = await createExportJob({
       requestedByUserId: userId,
       actorRole: "practice",
       practiceRole: access.role,

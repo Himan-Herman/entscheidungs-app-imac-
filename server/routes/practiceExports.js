@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { getPracticeAccess } from "../utils/practiceAccess.js";
 import { canReadPracticePatientLinks } from "../utils/practicePermissions.js";
 import {
-  createAndRunExportJob,
+  createExportJob,
   getExportJobForDownload,
   listExportJobs,
 } from "../services/export/exportJobService.js";
@@ -54,7 +54,7 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const job = await createAndRunExportJob({
+    const job = await createExportJob({
       requestedByUserId: userId,
       actorRole: "practice",
       practiceRole: access.role,

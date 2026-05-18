@@ -15,9 +15,18 @@ import {
   PERMISSIONS,
 } from "../../utils/practicePermissions.js";
 import { getSharedDocumentForPatient } from "./practiceDocumentService.js";
+import { writeAuditLog } from "../auditLogService.js";
+import {
+  computeJobNextRetryAt,
+  DEFAULT_MAX_JOB_ATTEMPTS,
+  isTransientJobError,
+  JOB_STATUS,
+} from "../backgroundJobs/jobConstants.js";
 
 const prisma = new PrismaClient();
 const storage = getPracticeDocumentStorage();
+
+const OCR_ACTIVE_STATUSES = [JOB_STATUS.PENDING, JOB_STATUS.PROCESSING, "running"];
 
 const REVIEW_STATUSES = new Set([
   "detected",
@@ -27,12 +36,17 @@ const REVIEW_STATUSES = new Set([
   "discarded",
 ]);
 
+function normalizeOcrStatus(status) {
+  if (status === "running") return JOB_STATUS.PROCESSING;
+  return status;
+}
+
 function jobToJson(row) {
   return {
     id: row.id,
     documentId: row.documentId,
     fileId: row.fileId,
-    status: row.status,
+    status: normalizeOcrStatus(row.status),
     engine: row.engine,
     startedAt: row.startedAt,
     completedAt: row.completedAt,
@@ -108,7 +122,7 @@ export async function startDocumentOcr(
   );
 
   const running = await prisma.documentOcrJob.findFirst({
-    where: { documentId, status: { in: ["pending", "running"] } },
+    where: { documentId, status: { in: OCR_ACTIVE_STATUSES } },
   });
   if (running) throw new Error("ocr_job_in_progress");
 
@@ -119,39 +133,73 @@ export async function startDocumentOcr(
       practiceProfileId,
       practicePatientLinkId: linkId,
       patientUserId: document.patientUserId,
-      status: "running",
+      status: JOB_STATUS.PENDING,
       engine,
-      startedAt: new Date(),
+      locale: locale ? String(locale).slice(0, 8) : null,
       createdByUserId: actorUserId,
     },
   });
 
+  return { job: jobToJson(job) };
+}
+
+/**
+ * Worker: process one OCR job (status must be processing).
+ * @param {string} jobId
+ */
+export async function processDocumentOcrJob(jobId) {
+  const job = await prisma.documentOcrJob.findUnique({ where: { id: jobId } });
+  if (!job) return { ok: false, reason: "not_found" };
+  if (job.status === JOB_STATUS.COMPLETED) return { ok: true, alreadyCompleted: true };
+  const activeProcessing = [JOB_STATUS.PROCESSING, "running"];
+  if (!activeProcessing.includes(job.status)) {
+    return { ok: false, reason: "not_processing" };
+  }
+
+  await writeAuditLog({
+    actorRole: "system",
+    action: "ocr_job.started",
+    entityType: "document_ocr_job",
+    entityId: job.id,
+    practiceProfileId: job.practiceProfileId,
+    patientUserId: job.patientUserId,
+    practicePatientLinkId: job.practicePatientLinkId,
+    metadata: {
+      documentId: job.documentId,
+      engine: job.engine,
+      attempt: job.attemptCount + 1,
+    },
+  });
+
   try {
+    const document = await prisma.practiceDocument.findUnique({
+      where: { id: job.documentId },
+    });
+    if (!document) throw new Error("document_not_found");
+
+    const file = await prisma.practiceDocumentFile.findUnique({
+      where: { id: job.fileId },
+    });
+    if (!file) throw new Error("file_not_found");
+
     const buffer = await storage.getObject(file.storageKey);
-    const adapter = getDocumentOcrEngine(engine);
+    const adapter = getDocumentOcrEngine(job.engine);
     const extracted = await adapter.extract({
       buffer,
       mimeType: file.mimeType,
       documentType: document.type,
-      locale,
+      locale: job.locale,
     });
 
     if (!extracted.ok) {
-      await prisma.documentOcrJob.update({
-        where: { id: job.id },
-        data: {
-          status: "failed",
-          failedAt: new Date(),
-          errorCode: extracted.error || "ocr_failed",
-        },
-      });
-      throw new Error(extracted.error || "ocr_unavailable");
+      const code = extracted.error || "ocr_failed";
+      throw new Error(code);
     }
 
     const result = await prisma.documentOcrResult.create({
       data: {
         ocrJobId: job.id,
-        documentId,
+        documentId: job.documentId,
         reviewStatus: "needs_review",
         structuredJson: extracted.structuredJson,
         confidence: extracted.confidence,
@@ -162,7 +210,7 @@ export async function startDocumentOcr(
     if (extracted.entries?.length) {
       await prisma.labStructuredEntry.createMany({
         data: extracted.entries.map((e) => ({
-          documentId,
+          documentId: job.documentId,
           ocrJobId: job.id,
           label: String(e.label || "").slice(0, 200),
           valueText: String(e.valueText || "unklar").slice(0, 200),
@@ -177,31 +225,70 @@ export async function startDocumentOcr(
       });
     }
 
-    await prisma.documentOcrJob.update({
-      where: { id: job.id },
-      data: { status: "completed", completedAt: new Date() },
+    const updated = await prisma.documentOcrJob.updateMany({
+      where: { id: job.id, status: { in: activeProcessing } },
+      data: {
+        status: JOB_STATUS.COMPLETED,
+        completedAt: new Date(),
+        processingAt: null,
+        nextRetryAt: null,
+        errorCode: null,
+      },
     });
 
-    return {
-      job: jobToJson({
-        ...job,
-        status: "completed",
-        completedAt: new Date(),
-        result,
-      }),
-    };
-  } catch (err) {
-    if (err.message !== "ocr_unavailable" && err.message !== "ocr_disabled") {
-      await prisma.documentOcrJob.update({
-        where: { id: job.id },
-        data: {
-          status: "failed",
-          failedAt: new Date(),
-          errorCode: err.message?.slice(0, 80) || "ocr_failed",
-        },
-      }).catch(() => {});
+    if (updated.count === 1) {
+      await writeAuditLog({
+        actorRole: "system",
+        action: "ocr_job.completed",
+        entityType: "document_ocr_job",
+        entityId: job.id,
+        practiceProfileId: job.practiceProfileId,
+        patientUserId: job.patientUserId,
+        metadata: { documentId: job.documentId },
+      });
     }
-    throw err;
+
+    return { ok: true, completed: updated.count === 1, resultId: result.id };
+  } catch (err) {
+    const errorCode = String(err?.message || "ocr_failed").slice(0, 80);
+    const attemptCount = job.attemptCount + 1;
+    const transient = isTransientJobError(errorCode);
+
+    if (!transient || attemptCount >= DEFAULT_MAX_JOB_ATTEMPTS) {
+      await prisma.documentOcrJob.updateMany({
+        where: { id: job.id, status: { in: activeProcessing } },
+        data: {
+          status: JOB_STATUS.FAILED,
+          attemptCount,
+          failedAt: new Date(),
+          errorCode,
+          processingAt: null,
+          nextRetryAt: null,
+        },
+      });
+      await writeAuditLog({
+        actorRole: "system",
+        action: "ocr_job.failed",
+        entityType: "document_ocr_job",
+        entityId: job.id,
+        practiceProfileId: job.practiceProfileId,
+        metadata: { documentId: job.documentId, errorCode },
+      });
+      return { ok: false, failed: true, errorCode };
+    }
+
+    const nextRetryAt = computeJobNextRetryAt(attemptCount);
+    await prisma.documentOcrJob.updateMany({
+      where: { id: job.id, status: { in: activeProcessing } },
+      data: {
+        status: JOB_STATUS.PENDING,
+        attemptCount,
+        errorCode,
+        processingAt: null,
+        nextRetryAt,
+      },
+    });
+    return { ok: false, retrying: true, nextRetryAt };
   }
 }
 
@@ -410,10 +497,10 @@ export async function discardDocumentOcrResult(
     });
   }
 
-  if (job.status === "pending" || job.status === "running") {
+  if (OCR_ACTIVE_STATUSES.includes(job.status)) {
     await prisma.documentOcrJob.update({
       where: { id: job.id },
-      data: { status: "cancelled" },
+      data: { status: JOB_STATUS.CANCELLED, processingAt: null },
     });
   }
 

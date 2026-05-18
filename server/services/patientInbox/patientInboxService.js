@@ -5,6 +5,7 @@ import {
   PRACTICE_BRANDING_SELECT,
   practiceBrandingJson,
 } from "../../utils/practiceBranding.js";
+import { resolvePatientInboxDedupeKey } from "./patientInboxDedupe.js";
 
 const prisma = new PrismaClient();
 
@@ -49,6 +50,9 @@ export function inboxItemToJson(row) {
     status: row.status,
     sourceLabel: row.sourceLabel,
     targetUrl: row.targetUrl,
+    sourceRefType: row.sourceRefType,
+    sourceRefId: row.sourceRefId,
+    lastActivityAt: row.lastActivityAt,
     createdAt: row.createdAt,
     readAt: row.readAt,
     archivedAt: row.archivedAt,
@@ -68,9 +72,10 @@ function trimText(text, max) {
 }
 
 /**
- * @param {{ patientUserId: string, practiceProfileId?: string | null, practicePatientLinkId?: string | null, type: string, title?: string, summary?: string | null, sourceLabel?: string | null, targetUrl?: string | null }} input
+ * Normalize and validate inbox item fields.
+ * @param {object} input
  */
-export async function createInboxItem(input) {
+async function normalizeInboxInput(input) {
   const patientUserId = String(input.patientUserId || "").trim();
   if (!patientUserId) throw new Error("validation_required");
 
@@ -84,7 +89,6 @@ export async function createInboxItem(input) {
   );
   if (!title) throw new Error("validation_required");
   const summaryKey = input.summaryKey ? trimText(input.summaryKey, 80) : null;
-
   const summary = input.summary != null ? trimText(input.summary, MAX_SUMMARY_LEN) : null;
   const sourceLabel =
     input.sourceLabel != null ? trimText(input.sourceLabel, MAX_SOURCE_LABEL_LEN) : null;
@@ -113,36 +117,144 @@ export async function createInboxItem(input) {
   const user = await prisma.user.findUnique({ where: { id: patientUserId } });
   if (!user) throw new Error("patient_user_not_found");
 
-  const row = await prisma.patientInboxItem.create({
-    data: {
-      patientUserId,
-      practiceProfileId,
-      practicePatientLinkId,
-      type,
-      title,
-      titleKey,
-      summary,
-      summaryKey,
-      sourceLabel,
-      targetUrl,
-      status: "unread",
-    },
-    include: includePractice,
+  const sourceRefType = input.sourceRefType ? trimText(input.sourceRefType, 80) : null;
+  const sourceRefId = input.sourceRefId ? trimText(input.sourceRefId, 80) : null;
+  const dedupeKey = resolvePatientInboxDedupeKey({
+    dedupeKey: input.dedupeKey,
+    type,
+    sourceRefType,
+    sourceRefId,
+    titleKey,
   });
 
+  return {
+    patientUserId,
+    practiceProfileId,
+    practicePatientLinkId,
+    type,
+    title,
+    titleKey,
+    summary,
+    summaryKey,
+    sourceLabel,
+    targetUrl,
+    sourceRefType,
+    sourceRefId,
+    dedupeKey,
+  };
+}
+
+/**
+ * Create or bump patient inbox item (dedupe when dedupeKey is set).
+ * @param {object} input
+ */
+export async function upsertPatientInboxItem(input) {
+  const data = await normalizeInboxInput(input);
+  const now = new Date();
+
+  if (data.dedupeKey) {
+    const existing = await prisma.patientInboxItem.findFirst({
+      where: {
+        patientUserId: data.patientUserId,
+        dedupeKey: data.dedupeKey,
+        status: { not: "archived" },
+      },
+    });
+
+    if (existing) {
+      const row = await prisma.patientInboxItem.update({
+        where: { id: existing.id },
+        data: {
+          title: data.title,
+          titleKey: data.titleKey ?? existing.titleKey,
+          summary: data.summary ?? existing.summary,
+          summaryKey: data.summaryKey ?? existing.summaryKey,
+          sourceLabel: data.sourceLabel ?? existing.sourceLabel,
+          targetUrl: data.targetUrl ?? existing.targetUrl,
+          practiceProfileId: data.practiceProfileId ?? existing.practiceProfileId,
+          practicePatientLinkId:
+            data.practicePatientLinkId ?? existing.practicePatientLinkId,
+          sourceRefType: data.sourceRefType,
+          sourceRefId: data.sourceRefId,
+          status: "unread",
+          readAt: null,
+          lastActivityAt: now,
+        },
+        include: includePractice,
+      });
+
+      writeAuditLog({
+        userId: data.patientUserId,
+        actorRole: "system",
+        action: "patient_inbox_item_deduped",
+        entityType: "inbox_item",
+        entityId: row.id,
+        practiceProfileId: row.practiceProfileId,
+        patientUserId: data.patientUserId,
+        practicePatientLinkId: row.practicePatientLinkId,
+        metadata: {
+          type: data.type,
+          titleKey: data.titleKey,
+          dedupeKey: data.dedupeKey,
+        },
+      });
+
+      return { item: inboxItemToJson(row), deduped: true };
+    }
+  }
+
+  let row;
+  try {
+    row = await prisma.patientInboxItem.create({
+      data: {
+        patientUserId: data.patientUserId,
+        practiceProfileId: data.practiceProfileId,
+        practicePatientLinkId: data.practicePatientLinkId,
+        type: data.type,
+        title: data.title,
+        titleKey: data.titleKey,
+        summary: data.summary,
+        summaryKey: data.summaryKey,
+        sourceLabel: data.sourceLabel,
+        targetUrl: data.targetUrl,
+        sourceRefType: data.sourceRefType,
+        sourceRefId: data.sourceRefId,
+        dedupeKey: data.dedupeKey,
+        status: "unread",
+        lastActivityAt: now,
+      },
+      include: includePractice,
+    });
+  } catch (err) {
+    if (err?.code === "P2002" && data.dedupeKey) {
+      const retry = await upsertPatientInboxItem(input);
+      return retry;
+    }
+    throw err;
+  }
+
   writeAuditLog({
-    userId: patientUserId,
+    userId: data.patientUserId,
     actorRole: "system",
     action: "patient_inbox_item_created",
     entityType: "inbox_item",
     entityId: row.id,
-    practiceProfileId,
-    patientUserId,
-    practicePatientLinkId,
-    metadata: { type, titleKey },
+    practiceProfileId: data.practiceProfileId,
+    patientUserId: data.patientUserId,
+    practicePatientLinkId: data.practicePatientLinkId,
+    metadata: { type: data.type, titleKey: data.titleKey, dedupeKey: data.dedupeKey },
   });
 
-  return inboxItemToJson(row);
+  return { item: inboxItemToJson(row), deduped: false };
+}
+
+/**
+ * Create inbox item (no dedupe unless sourceRef/dedupeKey provided).
+ * @param {object} input
+ */
+export async function createInboxItem(input) {
+  const { item } = await upsertPatientInboxItem(input);
+  return item;
 }
 
 /**
@@ -182,7 +294,7 @@ export async function listInboxItemsForPatient(patientUserId, opts = {}) {
     prisma.patientInboxItem.findMany({
       where,
       include: includePractice,
-      orderBy: [{ createdAt: "desc" }],
+      orderBy: [{ lastActivityAt: "desc" }, { createdAt: "desc" }],
       take: limit,
       skip: offset,
     }),
@@ -218,9 +330,21 @@ export async function markInboxItemRead(itemId, patientUserId) {
     data: {
       status: "read",
       readAt: existing.readAt || now,
+      lastActivityAt: now,
     },
     include: includePractice,
   });
+
+  writeAuditLog({
+    userId: uid,
+    actorRole: "patient",
+    action: "patient_inbox_item_updated",
+    entityType: "inbox_item",
+    entityId: row.id,
+    patientUserId: uid,
+    practiceProfileId: row.practiceProfileId,
+    metadata: { status: "read" },
+  }).catch(() => {});
 
   return inboxItemToJson(row);
 }
@@ -246,9 +370,21 @@ export async function archiveInboxItem(itemId, patientUserId) {
       status: "archived",
       archivedAt: existing.archivedAt || now,
       readAt: existing.readAt || now,
+      lastActivityAt: now,
     },
     include: includePractice,
   });
+
+  writeAuditLog({
+    userId: uid,
+    actorRole: "patient",
+    action: "patient_inbox_item_updated",
+    entityType: "inbox_item",
+    entityId: row.id,
+    patientUserId: uid,
+    practiceProfileId: row.practiceProfileId,
+    metadata: { status: "archived" },
+  }).catch(() => {});
 
   return inboxItemToJson(row);
 }

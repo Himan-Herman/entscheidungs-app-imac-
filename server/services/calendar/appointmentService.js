@@ -5,6 +5,11 @@ import { writeAuditLog } from "../auditLogService.js";
 import { APPOINTMENT_STATUSES, LOCATION_TYPES } from "./calendarConstants.js";
 import { notifyAppointmentEvent } from "./appointmentNotify.js";
 import { ensureTelemedicineForAppointment } from "../telemedicine/telemedicineService.js";
+import {
+  cancelAppointmentReminders,
+  rescheduleAppointmentReminders,
+  scheduleAppointmentReminders,
+} from "../reminders/appointmentReminderSchedule.js";
 
 const prisma = new PrismaClient();
 
@@ -59,17 +64,6 @@ async function resolveLink(practiceId, linkId) {
   });
   if (!link) throw new Error("link_not_found");
   return link;
-}
-
-async function scheduleReminders(appointmentId, startAt) {
-  const sendAt = new Date(startAt.getTime() - 24 * 60 * 60 * 1000);
-  if (sendAt <= new Date()) return;
-  await prisma.appointmentReminder.createMany({
-    data: [
-      { appointmentId, type: "inbox", sendAt, status: "pending" },
-      { appointmentId, type: "system", sendAt, status: "pending" },
-    ],
-  });
 }
 
 /**
@@ -247,6 +241,9 @@ export async function patchPracticeAppointment(
   });
 
   await notifyAppointmentEvent(row, "updated");
+  if (data.startAt) {
+    await rescheduleAppointmentReminders(row.id, row.startAt);
+  }
   writeAuditLog({
     req: ctx.req,
     userId: actorUserId,
@@ -318,10 +315,7 @@ export async function cancelPracticeAppointment(
     include: { appointmentType: true },
   });
 
-  await prisma.appointmentReminder.updateMany({
-    where: { appointmentId, status: "pending" },
-    data: { status: "cancelled" },
-  });
+  await cancelAppointmentReminders(appointmentId);
 
   await notifyAppointmentEvent(row, "cancelled");
   writeAuditLog({
@@ -464,7 +458,7 @@ export async function confirmPatientAppointment(patientUserId, appointmentId, ct
     include: { appointmentType: true },
   });
 
-  await scheduleReminders(row.id, row.startAt);
+  await scheduleAppointmentReminders(row.id, row.startAt);
   await notifyAppointmentEvent(row, "confirmed");
   writeAuditLog({
     req: ctx.req,

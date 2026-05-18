@@ -39,6 +39,8 @@ export async function notifyAppointmentEvent(appt, event) {
       title: pt.de,
       summary: "Organisatorischer Terminhinweis.",
       targetUrl: apptUrlPatient,
+      sourceRefType: "appointment",
+      sourceRefId: appt.id,
     }).catch(() => {});
   }
 

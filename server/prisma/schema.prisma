@@ -525,20 +525,36 @@ model PracticeAppointment {
 }
 
 model AppointmentReminder {
-  id            String    @id @default(cuid())
-  appointmentId String
+  id               String    @id @default(cuid())
+  /// Stable idempotency key (e.g. appt:{id}:inbox:24h).
+  reminderKey      String    @unique
+  /// appointment | follow_up
+  subjectKind      String    @default("appointment")
+  appointmentId    String?
+  followUpThreadId String?
   /// email | inbox | system
-  type          String
-  sendAt        DateTime
-  /// pending | sent | failed | cancelled
-  status        String    @default("pending")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  type             String
+  /// Copy template — no clinical content in DB.
+  templateKey      String
+  sendAt           DateTime
+  /// pending | processing | sent | failed | cancelled
+  status           String    @default("pending")
+  attemptCount     Int       @default(0)
+  maxAttempts      Int       @default(5)
+  nextRetryAt      DateTime?
+  failedReason     String?
+  sentAt           DateTime?
+  processingAt     DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  appointment PracticeAppointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  appointment      PracticeAppointment?     @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  followUpThread   PreVisitFollowUpThread?  @relation(fields: [followUpThreadId], references: [id], onDelete: Cascade)
 
   @@index([appointmentId, status])
   @@index([sendAt, status])
+  @@index([status, sendAt, nextRetryAt])
+  @@index([followUpThreadId, status])
 }
 
 /// Practice integration preferences — secrets never returned to clients; signing material encrypted at rest.
@@ -588,9 +604,13 @@ model PracticeWebhookEvent {
   practiceProfileId String
   eventType         String
   payload           Json
+  /// pending | processing | delivered | retrying | failed | dead_letter | skipped
   status            String    @default("pending")
   attempts          Int       @default(0)
   lastError         String?
+  lastStatusCode    Int?
+  nextRetryAt       DateTime?
+  processingAt      DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   deliveredAt       DateTime?
@@ -599,6 +619,7 @@ model PracticeWebhookEvent {
 
   @@index([practiceProfileId, status])
   @@index([createdAt])
+  @@index([status, nextRetryAt])
 }
 
 /// PVS/FHIR/HL7 connector configuration — no secrets in configJson; tokens via env/secret store only.
@@ -779,6 +800,7 @@ model PreVisitFollowUpThread {
   patientUser    User?                    @relation("FollowUpPatientUser", fields: [patientUserId], references: [id], onDelete: SetNull)
   createdByUser  User?                    @relation("FollowUpCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
   messages       PreVisitFollowUpMessage[]
+  appointmentReminders AppointmentReminder[]
 
   @@index([preVisitSessionId])
   @@index([practiceProfileId, status])
@@ -901,6 +923,12 @@ model PatientInboxItem {
   status                String    @default("unread")
   sourceLabel           String?
   targetUrl             String?
+  /// Dedupe source (e.g. practice_document, medication_plan, patient_thread).
+  sourceRefType         String?
+  sourceRefId           String?
+  /// Stable key: type:sourceRefType:sourceRefId[:titleKey]
+  dedupeKey             String?
+  lastActivityAt        DateTime?
   createdAt             DateTime  @default(now())
   readAt                DateTime?
   archivedAt            DateTime?
@@ -909,8 +937,11 @@ model PatientInboxItem {
   practiceProfile     PracticeProfile?     @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
   practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
 
+  @@unique([patientUserId, dedupeKey])
   @@index([patientUserId, status])
   @@index([patientUserId, createdAt])
+  @@index([patientUserId, lastActivityAt])
+  @@index([patientUserId, sourceRefType, sourceRefId])
   @@index([practiceProfileId])
 }
 
@@ -1107,10 +1138,14 @@ model DocumentOcrJob {
   practiceProfileId     String
   practicePatientLinkId String?
   patientUserId         String?
-  /// pending | running | completed | failed | cancelled
+  /// pending | processing | running | completed | failed | cancelled
   status                String    @default("pending")
   /// local_stub | external_ocr | ai_vision | manual
   engine                String    @default("local_stub")
+  attemptCount          Int       @default(0)
+  nextRetryAt           DateTime?
+  processingAt          DateTime?
+  locale                String?
   startedAt             DateTime?
   completedAt           DateTime?
   failedAt              DateTime?
@@ -1130,6 +1165,7 @@ model DocumentOcrJob {
 
   @@index([documentId, status])
   @@index([practiceProfileId, createdAt])
+  @@index([status, nextRetryAt])
 }
 
 model DocumentOcrResult {
@@ -1226,13 +1262,17 @@ model PracticeWebhookDelivery {
   endpointId        String
   practiceProfileId String
   eventType         String
-  /// pending | delivered | failed | retrying | cancelled
+  /// pending | processing | delivered | retrying | failed | dead_letter | cancelled
   status            String    @default("pending")
   attemptCount      Int       @default(0)
+  maxAttempts       Int       @default(5)
   lastStatusCode    Int?
   lastErrorCode     String?
   nextRetryAt       DateTime?
+  processingAt      DateTime?
   deliveredAt       DateTime?
+  /// Metadata-only payload snapshot for delivery (no clinical text).
+  payloadJson       Json?
   eventId           String    @unique
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -1243,6 +1283,7 @@ model PracticeWebhookDelivery {
   @@index([endpointId, status])
   @@index([practiceProfileId, createdAt])
   @@index([nextRetryAt])
+  @@index([status, nextRetryAt])
 }
 
 /// External API access audit — metadata only.
@@ -1409,10 +1450,14 @@ model ExportJob {
   type                  String
   /// pdf | csv
   format                String
-  /// pending | completed | failed | expired
+  /// pending | processing | completed | failed | expired | cancelled
   status                String    @default("pending")
   storageKey            String?
   expiresAt             DateTime?
+  attemptCount          Int       @default(0)
+  nextRetryAt           DateTime?
+  processingAt          DateTime?
+  locale                String?
   createdAt             DateTime  @default(now())
   completedAt           DateTime?
   failedAt              DateTime?
@@ -1425,6 +1470,7 @@ model ExportJob {
   @@index([practiceProfileId, createdAt])
   @@index([practicePatientLinkId])
   @@index([status, expiresAt])
+  @@index([status, nextRetryAt])
 }
 
 /**

@@ -144,6 +144,11 @@ export default function PracticeTelemedicineDetailPage() {
             <p>
               <span className="telemedicine-status">{t[`status_${session.status}`] || session.status}</span>
             </p>
+            {(session.status === "cancelled" || session.status === "failed") && session.endedAt ? (
+              <p role="status" className="telemedicine-closed-hint" aria-live="polite">
+                {t.sessionClosed}
+              </p>
+            ) : null}
             <p>
               <strong>{t.scheduled}:</strong> {fmt(session.scheduledStartAt, language)}
             </p>

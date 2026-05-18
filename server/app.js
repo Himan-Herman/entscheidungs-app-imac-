@@ -73,6 +73,8 @@ import {
   publicPrevisitQrLimiter,
   publicSecureDocumentsLimiter,
 } from "./middleware/ipRateLimit.js";
+import internalRemindersRouter from "./routes/internalReminders.js";
+import internalWorkerRouter from "./routes/internalWorker.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -109,6 +111,8 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+app.use("/api/internal/reminders", internalRemindersRouter);
+app.use("/api/internal/worker", internalWorkerRouter);
 
 app.use('/api/symptom', requireAuth, symptomRoute);
 app.use('/api/symptom-thread', requireAuth, symptomThreadRoute);

@@ -12,7 +12,7 @@
  * Future: EMAIL_QUEUE_MODE=redis — enqueue only; workers consume (not implemented).
  */
 
-import { sendEmailWithPdfAttachment } from "../emailService.js";
+import { sendEmailWithPdfAttachment, sendMail } from "../emailService.js";
 
 const QUEUE_MODE = (process.env.EMAIL_QUEUE_MODE || "direct").toLowerCase();
 
@@ -31,4 +31,27 @@ export async function deliverPrevisitPdfEmail(args) {
     );
   }
   return sendEmailWithPdfAttachment(args);
+}
+
+/**
+ * Organizational appointment reminder email (no clinical content).
+ * Skips gracefully when Resend is not configured.
+ */
+export async function deliverOrganizationalReminderEmail({ to, subject, text, locale }) {
+  if (process.env.ENABLE_APPOINTMENT_EMAIL_REMINDERS !== "true") {
+    return { ok: true, skipped: true, reason: "email_reminders_disabled" };
+  }
+  if (!to || !subject) {
+    return { ok: false, reason: "invalid_email_payload" };
+  }
+  try {
+    await sendMail(to, subject, text);
+    return { ok: true, locale: locale || "de" };
+  } catch (err) {
+    const msg = String(err?.message || "");
+    if (msg.includes("RESEND") || msg.includes("nicht initialisiert")) {
+      return { ok: true, skipped: true, reason: "resend_not_configured" };
+    }
+    throw err;
+  }
 }

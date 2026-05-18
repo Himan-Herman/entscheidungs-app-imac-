@@ -402,7 +402,7 @@ router.post("/:documentId/ocr/start", requireDocumentOcrFeature, async (req, res
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
-      action: "document_ocr_started",
+      action: "document_ocr_queued",
       entityType: "document_ocr_job",
       entityId: out.job.id,
       metadata: {
@@ -413,21 +413,7 @@ router.post("/:documentId/ocr/start", requireDocumentOcrFeature, async (req, res
       },
     });
 
-    await writeAuditLog({
-      req,
-      userId: ctx.userId,
-      actorRole: ctx.access.role,
-      action: "document_ocr_completed",
-      entityType: "document_ocr_job",
-      entityId: out.job.id,
-      metadata: {
-        documentId: req.params.documentId,
-        practiceProfileId: ctx.practiceId,
-        practicePatientLinkId: req.params.linkId,
-      },
-    }).catch(() => {});
-
-    return res.status(201).json({ ok: true, ...out });
+    return res.status(202).json({ ok: true, ...out });
   } catch (err) {
     if (err?.consentType) {
       return res.status(403).json({ ok: false, error: "consent_required", consentType: err.consentType });

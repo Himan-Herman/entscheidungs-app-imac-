@@ -74,6 +74,20 @@ Safe endpoints (no secrets):
 
 Use `/api/health` or `/api/health/db` for uptime monitors.
 
+### Background workers (Render Cron)
+
+See **`docs/production/RENDER_CRON_WORKERS.md`** for full setup, curl examples, and security notes.
+
+Set `WORKER_CRON_SECRET` and `WORKER_ENABLED=true` on the API service. Primary cron:
+
+`POST /api/internal/worker/run` with `Authorization: Bearer <WORKER_CRON_SECRET>` every **5 minutes**.
+
+Queue status (aggregated counts only): `GET /api/internal/worker/status` (same auth).
+
+Without `WORKER_CRON_SECRET`, routes return `503` (`worker_not_configured`). Wrong secret → `403`.
+
+Related env (see `server/.env.example`): `PRACTICE_WEBHOOK_HTTP_ENABLED`, `ENABLE_PRACTICE_WEBHOOKS`, `WEBHOOK_WORKER_BATCH_SIZE`.
+
 ## 6. CORS
 
 `CORS_ORIGIN` must list **every** exact browser origin that calls the API (scheme + host + port). Example:

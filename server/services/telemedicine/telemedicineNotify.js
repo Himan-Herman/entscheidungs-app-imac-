@@ -4,7 +4,7 @@ import { upsertPracticeInboxItem } from "../practiceInbox/practiceInboxService.j
 
 /**
  * @param {import('@prisma/client').TelemedicineSession} session
- * @param {'created'|'consent'|'waiting'|'link'|'completed'|'cancelled'} event
+ * @param {'created'|'consent'|'waiting'|'link'|'completed'|'cancelled'|'closed'} event
  */
 export async function notifyTelemedicineEvent(session, event) {
   const practiceId = session.practiceProfileId;
@@ -17,6 +17,10 @@ export async function notifyTelemedicineEvent(session, event) {
     link: { de: "Video-Link verfügbar", en: "Video link available" },
     completed: { de: "Videosprechstunde abgeschlossen", en: "Video consultation completed" },
     cancelled: { de: "Video-Termin geändert", en: "Video appointment updated" },
+    closed: {
+      de: "Ihre Videosprechstunde wurde geschlossen.",
+      en: "Your video consultation has been closed.",
+    },
   };
 
   const practiceTitles = {
@@ -33,8 +37,14 @@ export async function notifyTelemedicineEvent(session, event) {
         practicePatientLinkId: session.practicePatientLinkId || undefined,
         type: "system",
         title: pt.de,
-        summary: "Organisatorischer Video-Hinweis.",
+        summary:
+          event === "closed"
+            ? pt.de
+            : "Organisatorischer Video-Hinweis.",
         targetUrl: targetPatient,
+        sourceRefType: "telemedicine_session",
+        sourceRefId: session.id,
+        titleKey: `telemedicine_${event}`,
       }).catch(() => {});
     }
   }

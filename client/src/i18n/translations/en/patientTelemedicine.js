@@ -33,4 +33,5 @@ export default {
   status_completed: "Completed",
   status_cancelled: "Cancelled",
   status_failed: "Failed",
+  sessionClosed: "This video consultation has been closed.",
 };

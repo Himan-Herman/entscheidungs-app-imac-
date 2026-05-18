@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
 import { notifyPracticeInboxOfFollowUpReply } from "../services/practiceInbox/practiceInboxNotify.js";
+import { cancelFollowUpReminders } from "../services/reminders/appointmentReminderSchedule.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -113,6 +114,7 @@ router.post("/:threadId/messages", async (req, res) => {
     data: { status: "answered", updatedAt: new Date() },
   });
   await notifyPracticeInboxOfFollowUpReply(updatedThread);
+  void cancelFollowUpReminders(thread.id, "patient_replied").catch(() => {});
   writeAuditLog({
     req,
     userId,

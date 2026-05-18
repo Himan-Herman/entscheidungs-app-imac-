@@ -63,6 +63,17 @@ export default function PracticeDocumentOcrSection({
     void reload();
   }, [reload]);
 
+  const jobInFlight =
+    job?.status === "pending" || job?.status === "processing" || job?.status === "running";
+
+  useEffect(() => {
+    if (!jobInFlight) return undefined;
+    const id = window.setInterval(() => {
+      void reload();
+    }, 4000);
+    return () => window.clearInterval(id);
+  }, [jobInFlight, reload]);
+
   const onStart = async () => {
     if (!fileId) {
       setError(t.selectFile);
@@ -74,11 +85,13 @@ export default function PracticeDocumentOcrSection({
     setLoading(false);
     if (!res.ok || !data.ok) {
       if (data.error === "consent_required") setError(t.consentRequired);
+      else if (data.error === "ocr_job_in_progress") setStatusMsg(t.structuringInProgress);
       else if (res.status === 503 || data.error === "ocr_unavailable") setError(t.unavailable);
       else setError(t.unavailable);
       return;
     }
-    setStatusMsg(t.autoDetectedHint);
+    setJob(data.job || null);
+    setStatusMsg(t.structuringInProgress);
     await reload();
   };
 
@@ -134,9 +147,16 @@ export default function PracticeDocumentOcrSection({
         {t.aiOcrHint} — {t.autoDetectedHint}
       </p>
 
+      {jobInFlight ? (
+        <p className="document-ocr__progress" role="status" aria-live="polite">
+          {t.structuringInProgress}
+        </p>
+      ) : null}
+
       {job ? (
         <p aria-live="polite">
           <strong>{t.jobStatus}:</strong> {t[`status_${job.status}`] || job.status}
+          {job.status === "failed" ? ` — ${t.unavailable}` : null}
           {result?.reviewStatus
             ? ` · ${t[`review_${result.reviewStatus}`] || result.reviewStatus}`
             : null}

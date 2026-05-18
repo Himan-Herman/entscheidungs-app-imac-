@@ -20,6 +20,7 @@ export default {
   downloadError: "Download failed.",
   empty: "No exports yet.",
   statusPending: "In progress",
+  statusProcessing: "Export is being created…",
   statusCompleted: "Ready",
   statusFailed: "Failed",
   statusExpired: "Expired",

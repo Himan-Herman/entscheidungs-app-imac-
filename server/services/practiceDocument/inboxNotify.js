@@ -11,5 +11,7 @@ export async function notifyPatientInboxOfPracticeDocument(doc) {
     type: "document",
     titleKey: "document",
     targetUrl: `/patient/practice-documents/${doc.id}`,
+    sourceRefType: "practice_document",
+    sourceRefId: doc.id,
   });
 }

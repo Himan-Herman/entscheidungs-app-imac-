@@ -11,5 +11,7 @@ export async function notifyPatientInboxOfMedicationPlan(plan) {
     type: "medication",
     titleKey: "medication",
     targetUrl: `/patient/medication-plans/${plan.id}`,
+    sourceRefType: "medication_plan",
+    sourceRefId: plan.id,
   });
 }

@@ -12,5 +12,7 @@ export async function notifyPatientInboxOfPracticeMessage(thread) {
     type: "message",
     titleKey: "message",
     targetUrl: `/patient/messages/${thread.id}`,
+    sourceRefType: "patient_thread",
+    sourceRefId: thread.id,
   });
 }

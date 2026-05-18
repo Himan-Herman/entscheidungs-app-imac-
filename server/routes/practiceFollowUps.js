@@ -2,6 +2,10 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
+import {
+  cancelFollowUpReminders,
+  scheduleFollowUpPatientNudge,
+} from "../services/reminders/appointmentReminderSchedule.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -149,6 +153,7 @@ router.post("/", async (req, res) => {
       metadata: { hasCaseContext: true },
     });
   }
+  void scheduleFollowUpPatientNudge(created.id).catch(() => {});
   return res.status(201).json({ ok: true, thread: threadJson(created) });
 });
 
@@ -201,6 +206,7 @@ router.post("/:threadId/messages", async (req, res) => {
     entityId: message.id,
     metadata: { threadId: thread.id, senderType: "practice" },
   });
+  void scheduleFollowUpPatientNudge(thread.id).catch(() => {});
   return res.status(201).json({ ok: true, message });
 });
 
@@ -219,6 +225,9 @@ router.put("/:threadId/status", async (req, res) => {
     data: status === "archived" ? { status, isArchived: true } : { status },
   });
   if (updated.count === 0) return res.status(404).json({ ok: false, error: "not_found" });
+  if (status === "closed" || status === "archived") {
+    void cancelFollowUpReminders(req.params.threadId, `thread_${status}`).catch(() => {});
+  }
   return res.json({ ok: true, updated: true });
 });
 
@@ -237,12 +246,14 @@ router.delete("/:threadId", async (req, res) => {
   if (!thread) return res.status(404).json({ ok: false, error: "not_found" });
   if (mode === "delete") {
     await prisma.preVisitFollowUpThread.delete({ where: { id: thread.id } });
+    void cancelFollowUpReminders(thread.id, "thread_deleted").catch(() => {});
     return res.json({ ok: true, deleted: true });
   }
   await prisma.preVisitFollowUpThread.update({
     where: { id: thread.id },
     data: { status: "archived", isArchived: true },
   });
+  void cancelFollowUpReminders(thread.id, "thread_archived").catch(() => {});
   return res.json({ ok: true, archived: true });
 });
 

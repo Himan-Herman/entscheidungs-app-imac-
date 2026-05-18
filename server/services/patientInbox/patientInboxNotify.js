@@ -4,12 +4,26 @@ import {
   patientInboxTitleForType,
   PATIENT_INBOX_TITLES,
 } from "../../constants/inboxNotificationCatalog.js";
-import { createInboxItem } from "./patientInboxService.js";
+import { upsertPatientInboxItem } from "./patientInboxService.js";
 
 const prisma = new PrismaClient();
 
 /**
- * @param {{ patientUserId: string, practiceProfileId?: string, practicePatientLinkId?: string, type: string, titleKey?: string, title?: string, summaryKey?: string, summary?: string, targetUrl?: string, sourceLabel?: string }} p
+ * @param {{
+ *   patientUserId: string,
+ *   practiceProfileId?: string,
+ *   practicePatientLinkId?: string,
+ *   type: string,
+ *   titleKey?: string,
+ *   title?: string,
+ *   summaryKey?: string,
+ *   summary?: string,
+ *   targetUrl?: string,
+ *   sourceLabel?: string,
+ *   sourceRefType?: string,
+ *   sourceRefId?: string,
+ *   dedupeKey?: string,
+ * }} p
  */
 export async function notifyPatientInbox(p) {
   if (!isPatientInboxEnabled()) return null;
@@ -31,7 +45,7 @@ export async function notifyPatientInbox(p) {
       sourceLabel = practice?.practiceName ?? null;
     }
 
-    return await createInboxItem({
+    const { item } = await upsertPatientInboxItem({
       patientUserId: p.patientUserId,
       practiceProfileId: p.practiceProfileId,
       practicePatientLinkId: p.practicePatientLinkId,
@@ -42,7 +56,11 @@ export async function notifyPatientInbox(p) {
       summary: p.summary,
       sourceLabel,
       targetUrl: p.targetUrl,
+      sourceRefType: p.sourceRefType,
+      sourceRefId: p.sourceRefId,
+      dedupeKey: p.dedupeKey,
     });
+    return item;
   } catch (err) {
     console.error("[patient-inbox/notify]", err?.message ?? err);
     return null;
@@ -54,6 +72,7 @@ export async function notifyPatientInbox(p) {
  * @param {string} previousStatus
  */
 export async function notifyPatientInboxOfDataRequestStatus(request, previousStatus) {
+  void previousStatus;
   if (!request.practiceProfileId) return null;
   const linkId = request.practicePatientLinkId;
   const targetUrl = linkId
@@ -72,6 +91,8 @@ export async function notifyPatientInboxOfDataRequestStatus(request, previousSta
     summaryKey: "data_request_status",
     summary: summaryDe,
     targetUrl,
+    sourceRefType: "data_request",
+    sourceRefId: request.id,
   });
 }
 
@@ -88,5 +109,7 @@ export async function notifyPatientInboxOfProfileAccess(link, granted) {
     type: "profile",
     titleKey: granted ? "profile_granted" : "profile_revoked",
     targetUrl,
+    sourceRefType: "practice_patient_link",
+    sourceRefId: link.id,
   });
 }

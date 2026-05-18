@@ -8,6 +8,12 @@
     "migrate:deploy": "prisma migrate deploy",
     "backfill:care-links": "node scripts/backfillPracticePatientLinks.js",
     "verify:care-links": "node scripts/verifyCareRelationship.js",
+    "verify:reminders": "node scripts/verifyAppointmentReminders.js",
+    "verify:webhooks": "node scripts/verifyWebhooks.js",
+    "verify:background-jobs": "node scripts/verifyBackgroundJobs.js",
+    "verify:patient-inbox-dedupe": "node scripts/verifyPatientInboxDedupe.js",
+    "verify:telemedicine-cleanup": "node scripts/verifyTelemedicineCleanup.js",
+    "verify:worker": "node scripts/verifyWorkerRunner.js",
     "seed:inbox": "node scripts/seedPatientInboxItem.js",
     "start": "node app.js"
   },

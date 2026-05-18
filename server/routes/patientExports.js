@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  createAndRunExportJob,
+  createExportJob,
   getExportJobForDownload,
   listExportJobs,
 } from "../services/export/exportJobService.js";
@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
   try {
-    const job = await createAndRunExportJob({
+    const job = await createExportJob({
       requestedByUserId: userId,
       actorRole: "patient",
       type: req.body?.type,

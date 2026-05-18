@@ -48,11 +48,16 @@ function fmt(iso, lang) {
 function statusLabel(status, t) {
   const map = {
     pending: t.statusPending,
+    processing: t.statusProcessing,
     completed: t.statusCompleted,
     failed: t.statusFailed,
     expired: t.statusExpired,
   };
   return map[status] || status;
+}
+
+function isExportInFlight(row) {
+  return row?.processing || row?.status === "pending" || row?.status === "processing";
 }
 
 /**
@@ -103,6 +108,16 @@ export default function ExportsPanel({ audience, practiceId, linkId, compact = f
   useEffect(() => {
     void loadExports();
   }, [loadExports]);
+
+  const hasInFlight = exports.some(isExportInFlight);
+
+  useEffect(() => {
+    if (!hasInFlight) return undefined;
+    const id = window.setInterval(() => {
+      void loadExports();
+    }, 4000);
+    return () => window.clearInterval(id);
+  }, [hasInFlight, loadExports]);
 
   const typeLabel = (type) => {
     const opt = [...PATIENT_TYPES, ...PRACTICE_RECORD_TYPES].find((o) => o.value === type);
