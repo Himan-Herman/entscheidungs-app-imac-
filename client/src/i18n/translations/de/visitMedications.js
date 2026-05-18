@@ -1,0 +1,42 @@
+export default {
+  pageTitle: "Medikamente & Einnahme — MedScoutX",
+  patientHeading: "Medikamente & Einnahme",
+  patientSub:
+    "Hier sehen Sie von Ihrer Praxis dokumentierte Medikamente und Einnahmehinweise nach einem Besuch. Keine automatische Therapieempfehlung.",
+  patientDisclaimer:
+    "Diese Angaben stammen von Ihrer Praxis und ersetzen nicht die ärztliche Aufklärung. Bei Unsicherheit wenden Sie sich an Ihre Praxis.",
+  backPatientHub: "Zurück zum Patientenbereich",
+  backList: "Zurück zur Übersicht",
+  emptyTitle: "Noch keine Einträge",
+  emptyHint:
+    "Sobald Ihre Praxis nach einem Besuch Medikamente und Einnahmehinweise freigibt, erscheinen sie hier.",
+  loadError: "Die Einträge konnten nicht geladen werden.",
+  newBadge: "Neu",
+  entryCount: "{count} Einträge",
+  openSession: "Details anzeigen",
+  practiceLabel: "Praxis",
+  visitDate: "Besuch",
+  fieldDrug: "Medikament / Tablette",
+  fieldDosage: "Dosierung (z. B. 1 Tablette)",
+  fieldFrequency: "Wie oft",
+  fieldIntake: "Wie einnehmen (z. B. morgens nach dem Essen)",
+  placeholderDrug: "z. B. Ibuprofen 400 mg",
+  placeholderDosage: "z. B. 1 Tablette",
+  placeholderFrequency: "z. B. 2× täglich",
+  placeholderIntake: "z. B. mit Wasser nach dem Essen",
+  addRow: "Weiteres Medikament hinzufügen",
+  removeRow: "Entfernen",
+  savePublish: "Speichern & für Patient:in freigeben",
+  saveDraft: "Als Entwurf speichern (nicht sichtbar)",
+  notifyPatient: "Patient:in per Rückfrage-Nachricht informieren",
+  savedOk: "Gespeichert und freigegeben.",
+  savedDraft: "Entwurf gespeichert (noch nicht für Patient:in sichtbar).",
+  saveError: "Speichern fehlgeschlagen.",
+  practiceSectionTitle: "Medikamente & Einnahme nach dem Besuch",
+  practiceSectionIntro:
+    "Tragen Sie hier ein, welche Medikamente die Patientin oder der Patient wie und wie oft einnehmen soll. Die Angaben sind reine Praxis-Dokumentation.",
+  practiceSafety:
+    "Keine KI-Empfehlung. Nur von der Praxis bestätigte Angaben. Keine Diagnose oder Dringlichkeitsbewertung.",
+  rowLabel: "Eintrag {n}",
+  validationDrug: "Bitte mindestens ein Medikament mit Häufigkeit angeben.",
+};

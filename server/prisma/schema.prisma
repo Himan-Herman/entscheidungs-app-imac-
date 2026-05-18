@@ -25,6 +25,18 @@ model User {
   followUpCreatedThreads PreVisitFollowUpThread[] @relation("FollowUpCreatedByUser")
   visitMedicationEntriesAuthored VisitMedicationEntry[] @relation("VisitMedicationCreatedBy")
   practicePatientLinks           PracticePatientLink[]  @relation("PracticePatientLinks")
+  patientInboxItems              PatientInboxItem[]
+  practicePatientThreads         PracticePatientThread[]
+  medicationPlans                MedicationPlan[] @relation("MedicationPlanPatient")
+  medicationPlansCreated         MedicationPlan[] @relation("MedicationPlanCreatedBy")
+  practiceDocuments              PracticeDocument[] @relation("PracticeDocumentPatient")
+  practiceDocumentsCreated       PracticeDocument[] @relation("PracticeDocumentCreatedBy")
+  practiceDocumentShares         PracticeDocumentShare[] @relation("PracticeDocumentSharePatient")
+  practiceDocumentSharesSharedBy PracticeDocumentShare[] @relation("PracticeDocumentShareBy")
+  practiceDocumentsDeleted       PracticeDocument[] @relation("PracticeDocumentDeletedBy")
+  practiceDocumentAuditEntries   PracticeDocumentAuditEntry[]
+  patientDataRequests          PatientDataRequest[]
+  patientDataRequestsHandled     PatientDataRequest[] @relation("PatientDataRequestHandledBy")
   auditLogs        AuditLog[]
   secureDocumentsCreated SecureDocumentDelivery[] @relation("SecureDocCreatedBy")
   patientProfiles      PatientProfile[]
@@ -246,6 +258,11 @@ model PracticeProfile {
   followUpThreads PreVisitFollowUpThread[]
   visitMedicationEntries VisitMedicationEntry[]
   practicePatientLinks PracticePatientLink[]
+  patientInboxItems    PatientInboxItem[]
+  practicePatientThreads PracticePatientThread[]
+  medicationPlans        MedicationPlan[]
+  practiceDocuments      PracticeDocument[]
+  patientDataRequests  PatientDataRequest[]
   integrationSettings PracticeIntegrationSettings?
   secureDocumentDeliveries SecureDocumentDelivery[]
   webhookEvents PracticeWebhookEvent[]
@@ -414,11 +431,255 @@ model PracticePatientLink {
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   patientUser     User            @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
   patientProfile  PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+  inboxItems      PatientInboxItem[]
+  threads         PracticePatientThread[]
+  medicationPlans MedicationPlan[]
+  practiceDocuments PracticeDocument[]
+  dataRequests      PatientDataRequest[]
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
   @@index([patientUserId, status])
   @@index([linkedAt])
+}
+
+/**
+ * Neutral patient inbox entry — no clinical content in title/summary (operational notice only).
+ */
+model PatientInboxItem {
+  id                    String    @id @default(cuid())
+  patientUserId         String
+  practiceProfileId     String?
+  practicePatientLinkId String?
+  /// medication | message | document | system
+  type                  String
+  title                 String
+  summary               String?
+  /// unread | read | archived
+  status                String    @default("unread")
+  sourceLabel           String?
+  targetUrl             String?
+  createdAt             DateTime  @default(now())
+  readAt                DateTime?
+  archivedAt            DateTime?
+
+  patientUser         User                 @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile?     @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
+  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+
+  @@index([patientUserId, status])
+  @@index([patientUserId, createdAt])
+  @@index([practiceProfileId])
+}
+
+/** Secure messaging thread tied to a practice–patient link (no anonymous threads). */
+model PracticePatientThread {
+  id                    String    @id @default(cuid())
+  practicePatientLinkId String
+  practiceProfileId     String
+  patientUserId         String
+  subject               String?
+  /// open | closed | archived
+  status                String    @default("open")
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  closedAt              DateTime?
+
+  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser         User                @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+  messages            PracticePatientMessage[]
+
+  @@index([practicePatientLinkId, status])
+  @@index([patientUserId, status])
+  @@index([practiceProfileId, updatedAt])
+}
+
+model PracticePatientMessage {
+  id           String    @id @default(cuid())
+  threadId     String
+  /// practice | patient | system
+  senderType   String
+  senderUserId String?
+  body         String
+  createdAt    DateTime  @default(now())
+  readAt       DateTime?
+
+  thread PracticePatientThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+}
+
+/**
+ * Relationship-based medication plan (v2) — practice-provided only, versioned.
+ */
+model MedicationPlan {
+  id                    String    @id @default(cuid())
+  practicePatientLinkId String
+  practiceProfileId     String
+  patientUserId         String
+  /// draft | published | archived
+  status                String    @default("draft")
+  version               Int       @default(1)
+  title                 String?
+  createdByUserId       String?
+  publishedAt           DateTime?
+  archivedAt            DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser         User                @relation("MedicationPlanPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  createdBy           User?               @relation("MedicationPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  items               MedicationPlanItem[]
+
+  @@index([practicePatientLinkId, status])
+  @@index([patientUserId, status])
+  @@index([practiceProfileId, version])
+}
+
+model MedicationPlanItem {
+  id               String    @id @default(cuid())
+  medicationPlanId String
+  medicationName   String
+  dosage           String?
+  frequency        String?
+  route            String?
+  schedule         String?
+  startDate        DateTime?
+  endDate          DateTime?
+  instructions     String?
+  sortOrder        Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  medicationPlan MedicationPlan @relation(fields: [medicationPlanId], references: [id], onDelete: Cascade)
+
+  @@index([medicationPlanId, sortOrder])
+}
+
+/**
+ * Practice-provided document for a care link — files stored externally (storageKey only).
+ */
+model PracticeDocument {
+  id                    String    @id @default(cuid())
+  practicePatientLinkId String
+  practiceProfileId     String
+  patientUserId         String
+  /// report | lab | imaging | referral | discharge | prescription_info | other
+  type                  String    @default("other")
+  title                 String
+  description           String?
+  /// draft | shared | archived | deleted
+  status                String    @default("draft")
+  createdByUserId       String?
+  sharedAt              DateTime?
+  archivedAt            DateTime?
+  deletedAt             DateTime?
+  deletedByUserId       String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser         User                @relation("PracticeDocumentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  createdBy           User?               @relation("PracticeDocumentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  deletedBy           User?               @relation("PracticeDocumentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
+  files               PracticeDocumentFile[]
+  shares              PracticeDocumentShare[]
+
+  @@index([practicePatientLinkId, status])
+  @@index([patientUserId, status])
+  @@index([practiceProfileId, createdAt])
+}
+
+model PracticeDocumentFile {
+  id               String   @id @default(cuid())
+  documentId       String
+  storageKey       String
+  originalFileName String
+  mimeType         String
+  sizeBytes        Int
+  checksum         String?
+  createdAt        DateTime @default(now())
+
+  document PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
+
+model PracticeDocumentShare {
+  id             String    @id @default(cuid())
+  documentId     String
+  patientUserId  String
+  sharedByUserId String?
+  /// active | revoked
+  status         String    @default("active")
+  sharedAt       DateTime  @default(now())
+  revokedAt      DateTime?
+  expiresAt      DateTime?
+
+  document   PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  patientUser User            @relation("PracticeDocumentSharePatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  sharedBy    User?           @relation("PracticeDocumentShareBy", fields: [sharedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([documentId, status])
+  @@index([patientUserId, status])
+}
+
+/**
+ * Operational audit for practice documents — metadata only, no clinical content.
+ */
+model PracticeDocumentAuditEntry {
+  id                String   @id @default(cuid())
+  actorUserId       String
+  /// practice | patient | system
+  actorRole         String
+  practiceProfileId String?
+  patientUserId     String?
+  /// practice_document | document_file | document_share
+  resourceType      String
+  resourceId        String
+  /// deleted | archived | share_revoked | file_deleted
+  action            String
+  reason            String?
+  metadataJson      Json?
+  createdAt         DateTime @default(now())
+
+  actorUser User @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@index([resourceType, resourceId])
+  @@index([practiceProfileId, createdAt])
+  @@index([patientUserId, createdAt])
+}
+
+/**
+ * Patient-initiated data control request (deletion, access restriction, export).
+ */
+model PatientDataRequest {
+  id                    String    @id @default(cuid())
+  patientUserId         String
+  practiceProfileId     String?
+  practicePatientLinkId String?
+  /// deletion | access_restriction | export
+  type                  String
+  /// submitted | in_review | completed | rejected
+  status                String    @default("submitted")
+  reason                String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  completedAt           DateTime?
+  handledByUserId       String?
+
+  patientUser         User                 @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile?     @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
+  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  handledBy           User?                @relation("PatientDataRequestHandledBy", fields: [handledByUserId], references: [id], onDelete: SetNull)
+
+  @@index([patientUserId, createdAt])
+  @@index([practiceProfileId, status])
+  @@index([practicePatientLinkId])
 }
 
 /** Practice-entered medication / intake plan after a visit — not AI-generated. */

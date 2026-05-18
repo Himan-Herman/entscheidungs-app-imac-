@@ -7,6 +7,7 @@ import { generatePreVisitPdf } from "../features/preVisit/pdf/generatePreVisitPd
 import { PRE_VISIT_QUESTION_STEPS, pickLocalized } from "../features/preVisit/constants/questionFlow.js";
 import { STRUCTURED_SECTION_ORDER, STRUCTURED_DOCTOR_LABELS } from "../features/preVisit/constants/structuredDoctorLabels.js";
 import "../styles/PracticeDashboardPage.css";
+import VisitMedicationEditor from "../features/visitMedications/components/VisitMedicationEditor.jsx";
 
 const STATUSES = ["new", "opened", "in_review", "completed", "archived"];
 
@@ -25,6 +26,10 @@ export default function PracticePreparationDetailPage() {
   const { language } = useLanguage();
   const t = useMemo(
     () => getMessages(language).practiceDashboard || getMessages("en").practiceDashboard,
+    [language],
+  );
+  const tMeds = useMemo(
+    () => getMessages(language).visitMedications || getMessages("en").visitMedications,
     [language],
   );
   const { id } = useParams();
@@ -285,6 +290,15 @@ export default function PracticePreparationDetailPage() {
             {canDelete ? <button type="button" onClick={() => void deleteRow()}>{t.detailDelete}</button> : null}
           </div>
           {saveInfo ? <p>{saveInfo}</p> : null}
+        </section>
+
+        <section className="practice-dashboard__card practice-dashboard__card--medications">
+          <VisitMedicationEditor
+            sessionId={row.id}
+            practiceId={practiceId}
+            t={tMeds}
+            canWrite={canWrite}
+          />
         </section>
 
         <section className="practice-dashboard__card">

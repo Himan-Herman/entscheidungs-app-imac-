@@ -1,0 +1,42 @@
+export default {
+  pageTitle: "Medications & intake — MedScoutX",
+  patientHeading: "Medications & intake",
+  patientSub:
+    "View medication and intake instructions documented by your practice after a visit. This is not an automated treatment recommendation.",
+  patientDisclaimer:
+    "This information comes from your practice and does not replace medical counselling. Contact your practice if anything is unclear.",
+  backPatientHub: "Back to patient workspace",
+  backList: "Back to overview",
+  emptyTitle: "No entries yet",
+  emptyHint:
+    "When your practice publishes medication and intake instructions after a visit, they will appear here.",
+  loadError: "Could not load entries.",
+  newBadge: "New",
+  entryCount: "{count} entries",
+  openSession: "View details",
+  practiceLabel: "Practice",
+  visitDate: "Visit",
+  fieldDrug: "Medication / tablet",
+  fieldDosage: "Dose (e.g. 1 tablet)",
+  fieldFrequency: "How often",
+  fieldIntake: "How to take (e.g. after breakfast with water)",
+  placeholderDrug: "e.g. Ibuprofen 400 mg",
+  placeholderDosage: "e.g. 1 tablet",
+  placeholderFrequency: "e.g. twice daily",
+  placeholderIntake: "e.g. with water after meals",
+  addRow: "Add another medication",
+  removeRow: "Remove",
+  savePublish: "Save & publish to patient",
+  saveDraft: "Save as draft (hidden from patient)",
+  notifyPatient: "Notify patient via follow-up message",
+  savedOk: "Saved and published to the patient.",
+  savedDraft: "Draft saved (not yet visible to the patient).",
+  saveError: "Could not save.",
+  practiceSectionTitle: "Medications & intake after visit",
+  practiceSectionIntro:
+    "Document which medications the patient should take, how, and how often. Practice-entered documentation only.",
+  practiceSafety:
+    "No AI recommendations. Practice-confirmed information only. No diagnosis or urgency assessment.",
+  rowLabel: "Entry {n}",
+  validationDrug: "Please add at least one medication with frequency.",
+};

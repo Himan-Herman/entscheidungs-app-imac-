@@ -40,6 +40,28 @@
   max-width: 42rem;
 }
 
+.previsit-followups__meds-link {
+  margin: 0 0 1rem;
+}
+
+.previsit-followups__meds-cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #0f766e;
+  background: rgba(204, 251, 241, 0.55);
+  border: 1px solid rgba(15, 118, 110, 0.35);
+}
+
+.previsit-followups__meds-cta:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 2px;
+}
+
 .previsit-followups__safety {
   margin: 0;
   padding: 14px 16px;

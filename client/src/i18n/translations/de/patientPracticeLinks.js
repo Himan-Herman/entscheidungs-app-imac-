@@ -1,0 +1,26 @@
+export default {
+  pageTitle: "Praxisverbindungen – MedScoutX",
+  heading: "Praxisverbindungen",
+  intro:
+    "Verwalten Sie, welche Informationen Sie mit verbundenen Praxen teilen.",
+  backHub: "Zurück zum Patientenbereich",
+  loading: "Wird geladen …",
+  loadError: "Verbindungen konnten nicht geladen werden.",
+  featureDisabled: "Praxisverbindungen sind in dieser Umgebung noch nicht aktiviert.",
+  empty: "Noch keine Verbindungen zu Praxen.",
+  listCaption: "Praxisverbindungen",
+  shareProfileTitle: "Profil mit Praxis teilen",
+  shareProfileHint:
+    "Wenn Sie Ihr Profil teilen, kann Ihre Praxis Ihre Basisdaten und von Ihnen eingetragenen Gesundheitsangaben sehen. Sie können diese Freigabe jederzeit widerrufen.",
+  profileAccessOn: "Profilfreigabe aktiv",
+  profileAccessOff: "Profilfreigabe inaktiv",
+  enableProfile: "Profilfreigabe erlauben",
+  disableProfile: "Profilfreigabe widerrufen",
+  saveError: "Einstellung konnte nicht gespeichert werden.",
+  savedGranted: "Profilfreigabe wurde aktiviert.",
+  savedRevoked: "Profilfreigabe wurde widerrufen.",
+  statusActive: "Aktiv",
+  statusInvited: "Eingeladen",
+  statusRevoked: "Widerrufen",
+  statusArchived: "Archiviert",
+};

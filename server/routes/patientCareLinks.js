@@ -12,6 +12,8 @@ import {
   listPatientCareLinks,
   LINK_STATUSES,
 } from "../services/careRelationship/practicePatientLinkService.js";
+import { updatePatientProfileAccess } from "../services/careRelationship/practicePatientProfileService.js";
+import { archiveLinkForPatient } from "../services/careRelationship/patientLinkArchiveService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
@@ -34,6 +36,7 @@ function mapError(err) {
   }
   if (msg === "link_not_found") return { status: 404, error: msg };
   if (msg === "link_not_active") return { status: 409, error: msg };
+  if (msg === "link_already_archived") return { status: 409, error: msg };
   return { status: 500, error: "request_failed" };
 }
 
@@ -104,6 +107,45 @@ router.post("/:linkId/consent", async (req, res) => {
     return res.json({ ok: true, link });
   } catch (err) {
     console.error("[patient/links/consent]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/patient/links/:linkId/archive */
+router.patch("/:linkId/archive", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const link = await archiveLinkForPatient(req.params.linkId, userId);
+    return res.json({ ok: true, link });
+  } catch (err) {
+    console.error("[patient/links/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/patient/links/:linkId/profile-access */
+router.patch("/:linkId/profile-access", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const granted = req.body?.granted;
+  if (typeof granted !== "boolean") {
+    return res.status(400).json({ ok: false, error: "validation_required" });
+  }
+
+  try {
+    const link = await updatePatientProfileAccess(
+      req.params.linkId,
+      userId,
+      granted,
+    );
+    return res.json({ ok: true, link });
+  } catch (err) {
+    console.error("[patient/links/profile-access]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

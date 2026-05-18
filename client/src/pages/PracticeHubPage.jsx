@@ -17,6 +17,7 @@ const TILES = [
   { to: "/settings/practices", key: "hubLinkProfiles", Icon: Building2 },
   { to: "/settings/practices", key: "hubLinkQr", Icon: QrCode },
   { to: "/practice/dashboard", key: "hubLinkDashboard", Icon: LayoutDashboard },
+  { to: "/practice/patients", key: "hubLinkPatients", Icon: UsersRound },
   { to: "/pre-visit/follow-ups", key: "hubLinkFollowUps", Icon: ClipboardList },
   { to: "/practice/dashboard", key: "hubLinkIntegrations", Icon: Plug },
   { to: "/practice/dashboard", key: "hubLinkAnalytics", Icon: BarChart3 },

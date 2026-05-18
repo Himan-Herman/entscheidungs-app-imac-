@@ -119,6 +119,17 @@
   line-height: 1.35;
 }
 
+.workspace-hub__tile-sub {
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #64748b;
+}
+
+:root[data-theme="dark"] .workspace-hub__tile-sub {
+  color: #94a3b8;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .workspace-hub__tile:hover {
     transform: none;

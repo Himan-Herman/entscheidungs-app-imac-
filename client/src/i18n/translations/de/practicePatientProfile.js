@@ -1,0 +1,35 @@
+export default {
+  sectionTitle: "Patientenprofil",
+  sectionIntro:
+    "Nur von der Patientin / dem Patienten freigegebene Basis- und Gesundheitsangaben — read-only, nicht verifiziert.",
+  loading: "Wird geladen …",
+  loadError: "Profil konnte nicht geladen werden.",
+  featureDisabled: "Patientenprofil ist in dieser Umgebung noch nicht aktiviert.",
+  notShared:
+    "Dieses Profil wurde von der Patientin / dem Patienten nicht freigegeben.",
+  providedByPatient: "Vom Patienten angegeben",
+  notVerifiedNote:
+    "Diese Angaben wurden vom Patienten erfasst und sind nicht durch die Praxis verifiziert.",
+  basicHeading: "Basisdaten",
+  healthHeading: "Gesundheitsangaben",
+  dependentHeading: "Betreute Person",
+  fieldName: "Name",
+  fieldDateOfBirth: "Geburtsdatum",
+  fieldLanguage: "Sprache",
+  fieldGender: "Anrede / Geschlecht",
+  fieldEmergency: "Notfallkontakt / Hinweis",
+  fieldInsurance: "Versicherungsart",
+  fieldAllergies: "Allergien",
+  fieldMedications: "Aktuelle Medikamente (vom Patienten)",
+  fieldChronic: "Vorerkrankungen",
+  fieldImportantNotes: "Wichtige Hinweise",
+  fieldRelation: "Beziehung",
+  noValue: "Keine Angabe",
+  insuranceStatutory: "Gesetzlich",
+  insurancePrivate: "Privat",
+  insuranceSelfPay: "Selbstzahler",
+  insuranceOther: "Sonstiges",
+  insurancePreferNotSay: "Keine Angabe",
+  healthNotForDependent:
+    "Gesundheitsangaben beziehen sich auf das Konto der betreuenden Person und werden hier nicht angezeigt.",
+};

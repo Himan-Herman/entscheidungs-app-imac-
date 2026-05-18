@@ -19,6 +19,10 @@ import {
   LINK_STATUSES,
 } from "../services/careRelationship/practicePatientLinkService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import practicePatientThreadsRouter from "./practicePatientThreads.js";
+import practiceMedicationPlansRouter from "./practiceMedicationPlans.js";
+import practiceDocumentsRouter from "./practiceDocuments.js";
+import practicePatientProfileRouter from "./practicePatientProfile.js";
 
 const router = express.Router();
 
@@ -135,6 +139,18 @@ router.post("/link", async (req, res) => {
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
 });
+
+/** Messaging threads (PR-5) — before /:linkId */
+router.use("/:linkId/threads", practicePatientThreadsRouter);
+
+/** Medication plans v2 (PR-6) — before /:linkId */
+router.use("/:linkId/medication-plans", practiceMedicationPlansRouter);
+
+/** Practice documents (PR-7) — before /:linkId */
+router.use("/:linkId/documents", practiceDocumentsRouter);
+
+/** Patient profile read-only (PR-8) — before /:linkId */
+router.use("/:linkId/profile", practicePatientProfileRouter);
 
 /** GET /api/practice/patients/:linkId?practiceId= */
 router.get("/:linkId", async (req, res) => {

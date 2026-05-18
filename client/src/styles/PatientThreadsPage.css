@@ -1,0 +1,180 @@
+.patient-threads {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2.5rem;
+}
+
+.patient-threads__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.patient-threads__item {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+:root[data-theme="dark"] .patient-threads__item {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.patient-threads__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.patient-threads__bubble {
+  max-width: 92%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.patient-threads__bubble--patient {
+  align-self: flex-end;
+  background: #e0f2fe;
+  color: #0c4a6e;
+}
+
+.patient-threads__bubble--practice {
+  align-self: flex-start;
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+:root[data-theme="dark"] .patient-threads__bubble--patient {
+  background: #164e63;
+  color: #e0f2fe;
+}
+
+:root[data-theme="dark"] .patient-threads__bubble--practice {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.patient-threads__bubble-meta {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.patient-threads__compose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.patient-threads__compose label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.patient-threads__compose textarea {
+  min-height: 100px;
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  font: inherit;
+  resize: vertical;
+}
+
+.patient-threads__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.patient-threads__btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.patient-threads__btn--primary {
+  background: #0e7490;
+  color: #fff;
+}
+
+.patient-threads__btn--secondary {
+  background: transparent;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  color: inherit;
+}
+
+.patient-threads__btn:focus-visible,
+.patient-threads__compose textarea:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.patient-threads__status {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.patient-threads__status--open {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.patient-threads__status--closed {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.patient-threads__status--archived {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.practice-messages__new {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(15, 23, 42, 0.15);
+}
+
+.practice-messages__new label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.practice-messages__new input,
+.practice-messages__new textarea {
+  width: 100%;
+  margin-bottom: 0.65rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  font: inherit;
+}
+
+.practice-messages__thread-view {
+  margin-top: 1rem;
+}

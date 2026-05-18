@@ -58,6 +58,9 @@ const PreVisitFollowUpsPage = lazy(() =>
 const PreVisitFollowUpThreadPage = lazy(() =>
   import("./features/preVisit/pages/PreVisitFollowUpThreadPage.jsx"),
 );
+const PatientVisitMedicationsPage = lazy(() =>
+  import("./features/visitMedications/pages/PatientVisitMedicationsPage.jsx"),
+);
 
 const SettingsDoctorContactsPage = lazy(() =>
   import("./pages/SettingsDoctorContactsPage.jsx"),
@@ -66,6 +69,12 @@ const SettingsPracticesPage = lazy(() => import("./pages/SettingsPracticesPage.j
 const PracticeDashboardPage = lazy(() => import("./pages/PracticeDashboardPage.jsx"));
 const PracticePreparationDetailPage = lazy(() =>
   import("./pages/PracticePreparationDetailPage.jsx"),
+);
+const PracticePatientsListPage = lazy(() =>
+  import("./features/careRelationship/pages/PracticePatientsListPage.jsx"),
+);
+const PracticePatientDetailPage = lazy(() =>
+  import("./features/careRelationship/pages/PracticePatientDetailPage.jsx"),
 );
 const SettingsPrivacyPage = lazy(() => import("./pages/SettingsPrivacyPage.jsx"));
 
@@ -80,6 +89,30 @@ const AccountHealthProfilePage = lazy(() =>
 const AccountProfilesPage = lazy(() => import("./pages/account/AccountProfilesPage.jsx"));
 const AccountDataPage = lazy(() => import("./pages/account/AccountDataPage.jsx"));
 const PatientHubPage = lazy(() => import("./pages/PatientHubPage.jsx"));
+const PatientInboxPage = lazy(() =>
+  import("./features/patientInbox/pages/PatientInboxPage.jsx"),
+);
+const PatientThreadsListPage = lazy(() =>
+  import("./features/communication/pages/PatientThreadsListPage.jsx"),
+);
+const PatientThreadDetailPage = lazy(() =>
+  import("./features/communication/pages/PatientThreadDetailPage.jsx"),
+);
+const PatientMedicationPlansListPage = lazy(() =>
+  import("./features/medicationPlan/pages/PatientMedicationPlansListPage.jsx"),
+);
+const PatientMedicationPlanDetailPage = lazy(() =>
+  import("./features/medicationPlan/pages/PatientMedicationPlanDetailPage.jsx"),
+);
+const PatientPracticeDocumentsListPage = lazy(() =>
+  import("./features/practiceDocuments/pages/PatientPracticeDocumentsListPage.jsx"),
+);
+const PatientPracticeDocumentDetailPage = lazy(() =>
+  import("./features/practiceDocuments/pages/PatientPracticeDocumentDetailPage.jsx"),
+);
+const PatientPracticeLinksPage = lazy(() =>
+  import("./features/careRelationship/pages/PatientPracticeLinksPage.jsx"),
+);
 const PracticeFinderPage = lazy(() =>
   import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
 );
@@ -139,6 +172,70 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PatientHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/inbox"
+                  element={
+                    <ProtectedRoute>
+                      <PatientInboxPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/threads"
+                  element={
+                    <ProtectedRoute>
+                      <PatientThreadsListPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/threads/:threadId"
+                  element={
+                    <ProtectedRoute>
+                      <PatientThreadDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/medication-plans"
+                  element={
+                    <ProtectedRoute>
+                      <PatientMedicationPlansListPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/medication-plans/:planId"
+                  element={
+                    <ProtectedRoute>
+                      <PatientMedicationPlanDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/practice-documents"
+                  element={
+                    <ProtectedRoute>
+                      <PatientPracticeDocumentsListPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/practice-documents/:documentId"
+                  element={
+                    <ProtectedRoute>
+                      <PatientPracticeDocumentDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/practice-links"
+                  element={
+                    <ProtectedRoute>
+                      <PatientPracticeLinksPage />
                     </ProtectedRoute>
                   }
                 />
@@ -267,6 +364,22 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
+                  path="/practice/patients"
+                  element={
+                    <ProtectedRoute>
+                      <PracticePatientsListPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/patients/:linkId"
+                  element={
+                    <ProtectedRoute>
+                      <PracticePatientDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/practice/dashboard/preparations/:id"
                   element={
                     <ProtectedRoute>
@@ -305,6 +418,22 @@ createRoot(document.getElementById("root")).render(
                 />
                 <Route path="/pre-visit/my-preparations" element={<PreVisitAccountHistoryPage />} />
                 <Route path="/pre-visit/history" element={<PreVisitHistoryPage />} />
+                <Route
+                  path="/pre-visit/medications"
+                  element={
+                    <ProtectedRoute>
+                      <PatientVisitMedicationsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/pre-visit/medications/:sessionId"
+                  element={
+                    <ProtectedRoute>
+                      <PatientVisitMedicationsPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route
                   path="/pre-visit/follow-ups"
                   element={

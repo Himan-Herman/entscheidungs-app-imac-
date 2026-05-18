@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import {
   CARE_CONSENT_VERSION,
   isAllowedConsentVersion,
+  linkHasConsentScope,
   normalizeConsentScopes,
 } from "./consentScopes.js";
 
@@ -85,6 +86,7 @@ export function linkToPatientJson(row) {
     consentVersion: row.consentVersion,
     consentAcceptedAt: row.consentAcceptedAt,
     consentScopes: Array.isArray(row.consentScopes) ? row.consentScopes : null,
+    profileAccessGranted: linkHasConsentScope(row, "profile"),
     practice: practice
       ? {
           id: practice.id,

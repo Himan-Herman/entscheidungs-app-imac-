@@ -8,6 +8,7 @@
     "migrate:deploy": "prisma migrate deploy",
     "backfill:care-links": "node scripts/backfillPracticePatientLinks.js",
     "verify:care-links": "node scripts/verifyCareRelationship.js",
+    "seed:inbox": "node scripts/seedPatientInboxItem.js",
     "start": "node app.js"
   },
   "keywords": [],

@@ -14,6 +14,7 @@ import legal from "../legal/en/index.js";
 import settingsDoctorContacts from "./settingsDoctorContacts.js";
 import settingsPractices from "./settingsPractices.js";
 import practiceDashboard from "./practiceDashboard.js";
+import practicePatients from "./practicePatients.js";
 import settingsPrivacy from "./settingsPrivacy.js";
 import accountPortal from "./accountPortal.js";
 import appShell from "./appShell.js";
@@ -22,6 +23,16 @@ import imageAnalysis from "./imageAnalysis.js";
 import bodyMap from "./bodyMap.js";
 import roleEntry from "./roleEntry.js";
 import practiceFinder from "./practiceFinder.js";
+import visitMedications from "./visitMedications.js";
+import patientInbox from "./patientInbox.js";
+import patientThreads from "./patientThreads.js";
+import practiceMessages from "./practiceMessages.js";
+import practiceMedicationPlan from "./practiceMedicationPlan.js";
+import patientMedicationPlan from "./patientMedicationPlan.js";
+import practiceDocuments from "./practiceDocuments.js";
+import patientPracticeDocuments from "./patientPracticeDocuments.js";
+import patientPracticeLinks from "./patientPracticeLinks.js";
+import practicePatientProfile from "./practicePatientProfile.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
 
@@ -42,6 +53,7 @@ export default {
   settingsDoctorContacts,
   settingsPractices,
   practiceDashboard,
+  practicePatients,
   settingsPrivacy,
   accountPortal,
   appShell,
@@ -50,6 +62,16 @@ export default {
   bodyMap,
   roleEntry,
   practiceFinder,
+  visitMedications,
+  patientInbox,
+  patientThreads,
+  practiceMessages,
+  practiceMedicationPlan,
+  patientMedicationPlan,
+  practiceDocuments,
+  patientPracticeDocuments,
+  patientPracticeLinks,
+  practicePatientProfile,
   intro,
   voiceInput,
 };

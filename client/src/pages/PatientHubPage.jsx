@@ -4,25 +4,56 @@ import {
   Activity,
   ClipboardList,
   FileText,
+  FolderOpen,
   HeartPulse,
   Heart,
   ImageIcon,
   Map as MapIcon,
+  Inbox,
+  MessageSquare,
   MapPinned,
+  Pill,
   Stethoscope,
   UserRound,
+  Users,
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import "../styles/WorkspaceHubPages.css";
 
 const LINKS = [
+  { to: "/patient/inbox", key: "hubLinkInbox", subtitleKey: "hubLinkInboxSub", icon: Inbox },
+  {
+    to: "/patient/threads",
+    key: "hubLinkThreads",
+    subtitleKey: "hubLinkThreadsSub",
+    icon: MessageSquare,
+  },
+  {
+    to: "/patient/medication-plans",
+    key: "hubLinkMedicationPlans",
+    subtitleKey: "hubLinkMedicationPlansSub",
+    icon: Pill,
+  },
+  {
+    to: "/patient/practice-documents",
+    key: "hubLinkPracticeDocuments",
+    subtitleKey: "hubLinkPracticeDocumentsSub",
+    icon: FolderOpen,
+  },
+  {
+    to: "/patient/practice-links",
+    key: "hubLinkPracticeLinks",
+    subtitleKey: "hubLinkPracticeLinksSub",
+    icon: Users,
+  },
   { to: "/patient/find-practices", key: "hubLinkFindPractices", icon: MapPinned },
   { to: "/account/health", key: "hubLinkHealthProfile", icon: Heart },
   { to: "/pre-visit", key: "hubLinkPreVisit", icon: HeartPulse },
   { to: "/symptom", key: "hubLinkSymptom", icon: Activity },
   { to: "/bild", key: "hubLinkImage", icon: ImageIcon },
   { to: "/region-start", key: "hubLinkBody", icon: MapIcon },
+  { to: "/pre-visit/medications", key: "hubLinkVisitMedications", icon: Pill },
   { to: "/pre-visit/my-preparations", key: "hubLinkMyPrep", icon: ClipboardList },
   { to: "/pre-visit/cases", key: "hubLinkCases", icon: Stethoscope },
   { to: "/settings/doctor-contacts", key: "hubLinkDoctors", icon: UserRound },
@@ -59,6 +90,9 @@ export default function PatientHubPage() {
                 <TileIcon size={22} strokeWidth={1.75} />
               </span>
               <span className="workspace-hub__tile-label">{t[link.key]}</span>
+              {link.subtitleKey ? (
+                <span className="workspace-hub__tile-sub">{t[link.subtitleKey]}</span>
+              ) : null}
             </Link>
           );
         })}

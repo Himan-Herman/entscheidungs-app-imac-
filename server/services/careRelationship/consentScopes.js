@@ -2,7 +2,7 @@
 export const CARE_CONSENT_VERSION = "phase1-care-v1";
 
 /** Scopes a patient may grant per practice link (Phase 1). */
-export const CONSENT_SCOPES = Object.freeze(["medication", "messages"]);
+export const CONSENT_SCOPES = Object.freeze(["medication", "messages", "profile"]);
 
 const SCOPE_SET = new Set(CONSENT_SCOPES);
 

@@ -14,7 +14,7 @@ export function isCareRelationshipEnabled() {
   return envFlag("CARE_RELATIONSHIP_ENABLED", false);
 }
 
-/** MedicationPlan v2 — not implemented in PR-0..2. */
+/** MedicationPlan v2 (PR-6) — relationship-based plans. */
 export function isMedicationPlanV2Enabled() {
   return envFlag("MEDICATION_PLAN_V2", false);
 }
@@ -27,4 +27,9 @@ export function isCommunicationV2Enabled() {
 /** Patient inbox — not implemented in PR-0..2. */
 export function isPatientInboxEnabled() {
   return envFlag("PATIENT_INBOX", false);
+}
+
+/** Practice document sharing on care links (PR-7). */
+export function isPracticeDocumentsV2Enabled() {
+  return envFlag("PRACTICE_DOCUMENTS_V2", false);
 }

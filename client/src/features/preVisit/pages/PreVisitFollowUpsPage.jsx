@@ -20,6 +20,10 @@ function fmt(iso, lang) {
 export default function PreVisitFollowUpsPage() {
   const { language } = useLanguage();
   const t = useMemo(() => getMessages(language).preVisit.followUps, [language]);
+  const tMeds = useMemo(
+    () => getMessages(language).visitMedications || getMessages("en").visitMedications,
+    [language],
+  );
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,6 +67,11 @@ export default function PreVisitFollowUpsPage() {
         <h1 className="previsit-followups__title">{t.title}</h1>
         <p className="previsit-followups__lead">{t.intro}</p>
         <p className="previsit-followups__safety">{t.safetyNote}</p>
+        <p className="previsit-followups__meds-link">
+          <Link to="/pre-visit/medications" className="previsit-followups__meds-cta">
+            {tMeds.patientHeading} →
+          </Link>
+        </p>
         {loading ? (
           <p className="previsit-followups__status" role="status" aria-live="polite">
             {t.loading}

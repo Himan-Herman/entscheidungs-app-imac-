@@ -33,6 +33,7 @@ export default {
   cardStatus: "Status",
   cardPdf: "PDF",
   cardOpen: "Detail öffnen",
+  navPatients: "Patient:innen",
   cardNoPdf: "Noch nicht erstellt",
   cardPdfReady: "PDF verfügbar",
   detailBack: "Zurück zum Dashboard",

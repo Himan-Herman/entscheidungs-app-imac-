@@ -1,0 +1,75 @@
+.practice-documents__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.practice-documents__file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.practice-documents__file-list li {
+  padding: 0.35rem 0;
+  font-size: 0.9rem;
+}
+
+.practice-documents__upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.practice-documents__btn--danger {
+  background: #b42318;
+  color: #fff;
+  border: 1px solid #912018;
+}
+
+.practice-documents__btn--danger:hover:not(:disabled) {
+  background: #912018;
+}
+
+.practice-documents__btn--danger:focus-visible {
+  outline: 2px solid #b42318;
+  outline-offset: 2px;
+}
+
+.practice-documents__btn--delete-outline {
+  background: transparent;
+  color: #b42318;
+  border: 1px solid #b42318;
+}
+
+.practice-documents__dialog {
+  max-width: 28rem;
+  width: calc(100% - 2rem);
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.practice-documents__dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.practice-documents__dialog-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.practice-documents__dialog-body {
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.practice-documents__dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

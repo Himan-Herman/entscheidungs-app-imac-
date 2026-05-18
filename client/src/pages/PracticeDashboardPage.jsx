@@ -172,10 +172,17 @@ export default function PracticeDashboardPage() {
           <h1 className="practice-dashboard__title">{t.heading}</h1>
           <p className="practice-dashboard__intro">{t.intro}</p>
           <p className="practice-dashboard__safety">{t.safetyNote}</p>
-          <div className="practice-dashboard__header-links">
+          <nav className="practice-dashboard__header-links" aria-label={t.heading}>
+            {practiceId ? (
+              <Link
+                to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
+              >
+                {t.navPatients}
+              </Link>
+            ) : null}
             <Link to="/settings/practices">{tPractices.heading}</Link>
             <Link to="/startseite">{tPractices.backHome}</Link>
-          </div>
+          </nav>
         </header>
 
         {analyticsSummary ? (
