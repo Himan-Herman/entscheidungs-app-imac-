@@ -32,6 +32,7 @@ import publicDocumentsRouter from "./routes/publicDocuments.js";
 import practiceApiDataRouter from "./routes/practiceApiData.js";
 import placesRouter from "./routes/places.js";
 import practiceFinderRouter from "./routes/practiceFinder.js";
+import practicePatientsRouter from "./routes/practicePatients.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
@@ -90,6 +91,8 @@ app.use("/api/ki", kiRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
 app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
 app.use("/api/practices", requireAuth, practicesRouter);
+/** Care relationships (Phase 1) — mount before /api/practice catch-alls; flag-gated */
+app.use("/api/practice/patients", requireAuth, practicePatientsRouter);
 app.use("/api/practice-dashboard", requireAuth, practiceDashboardRouter);
 app.use("/api/practice/follow-ups", requireAuth, practiceFollowUpsRouter);
 app.use("/api/previsit/follow-ups", requireAuth, previsitFollowUpsRouter);

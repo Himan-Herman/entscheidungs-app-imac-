@@ -23,6 +23,8 @@ model User {
   practiceMemberships PracticeMember[]
   followUpPatientThreads PreVisitFollowUpThread[] @relation("FollowUpPatientUser")
   followUpCreatedThreads PreVisitFollowUpThread[] @relation("FollowUpCreatedByUser")
+  visitMedicationEntriesAuthored VisitMedicationEntry[] @relation("VisitMedicationCreatedBy")
+  practicePatientLinks           PracticePatientLink[]  @relation("PracticePatientLinks")
   auditLogs        AuditLog[]
   secureDocumentsCreated SecureDocumentDelivery[] @relation("SecureDocCreatedBy")
   patientProfiles      PatientProfile[]
@@ -113,6 +115,7 @@ model PreVisitSession {
   practiceQrTarget PracticeQrTarget? @relation(fields: [practiceQrTargetId], references: [id], onDelete: SetNull)
   followUpThreads PreVisitFollowUpThread[]
   secureDocumentDeliveries SecureDocumentDelivery[]
+  visitMedicationEntries VisitMedicationEntry[]
   patientProfile PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
 
   /// Optional opaque appointment reference (manual text or future external id).
@@ -177,6 +180,7 @@ model PatientProfile {
 
   user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   sessions PreVisitSession[]
+  practicePatientLinks PracticePatientLink[]
 
   @@index([userId])
 }
@@ -240,6 +244,8 @@ model PracticeProfile {
   members   PracticeMember[]
   preVisitSessions PreVisitSession[]
   followUpThreads PreVisitFollowUpThread[]
+  visitMedicationEntries VisitMedicationEntry[]
+  practicePatientLinks PracticePatientLink[]
   integrationSettings PracticeIntegrationSettings?
   secureDocumentDeliveries SecureDocumentDelivery[]
   webhookEvents PracticeWebhookEvent[]
@@ -383,6 +389,61 @@ model PreVisitFollowUpMessage {
   thread      PreVisitFollowUpThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@index([threadId, createdAt])
+}
+
+/**
+ * Explicit care relationship between a practice and a patient account (or dependent profile).
+ * Central anchor for medication, messaging, and documents in later phases — not tied to a single PreVisitSession.
+ */
+model PracticePatientLink {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  patientUserId     String
+  patientProfileId  String?
+  /// invited | active | revoked | archived
+  status            String    @default("invited")
+  linkedAt          DateTime  @default(now())
+  revokedAt         DateTime?
+  consentVersion    String?
+  consentAcceptedAt DateTime?
+  /// Accepted scopes, e.g. ["medication","messages"] — set by patient consent API.
+  consentScopes     Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser     User            @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
+  patientProfile  PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+
+  @@unique([practiceProfileId, patientUserId, patientProfileId])
+  @@index([practiceProfileId, status])
+  @@index([patientUserId, status])
+  @@index([linkedAt])
+}
+
+/** Practice-entered medication / intake plan after a visit — not AI-generated. */
+model VisitMedicationEntry {
+  id                 String    @id @default(cuid())
+  preVisitSessionId  String
+  practiceProfileId  String
+  createdByUserId    String
+  drugName           String
+  dosage             String?
+  frequency          String
+  intakeInstructions String?
+  sortOrder          Int       @default(0)
+  publishedAt        DateTime?
+  patientViewedAt    DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  session         PreVisitSession @relation(fields: [preVisitSessionId], references: [id], onDelete: Cascade)
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User            @relation("VisitMedicationCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([preVisitSessionId, publishedAt])
+  @@index([practiceProfileId])
+  @@index([createdByUserId])
 }
 
 datasource db {

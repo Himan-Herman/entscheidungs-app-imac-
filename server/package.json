@@ -6,6 +6,7 @@
   "scripts": {
     "build": "prisma generate",
     "migrate:deploy": "prisma migrate deploy",
+    "backfill:care-links": "node scripts/backfillPracticePatientLinks.js",
     "start": "node app.js"
   },
   "keywords": [],

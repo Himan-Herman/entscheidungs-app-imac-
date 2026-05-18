@@ -29,3 +29,13 @@ export function canViewIntegrationSettings(role) {
 export function canAccessPracticeDataApi(role) {
   return ["owner", "admin", "doctor", "assistant"].includes(role);
 }
+
+/** Practice ↔ patient links (CareRelationship) — read. */
+export function canReadPracticePatientLinks(role) {
+  return ["owner", "admin", "doctor", "assistant", "viewer"].includes(role);
+}
+
+/** Create or update patient links (not archive-only admin). */
+export function canWritePracticePatientLinks(role) {
+  return ["owner", "admin", "doctor", "assistant"].includes(role);
+}
