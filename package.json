@@ -4,9 +4,9 @@
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
-    "build": "prisma generate",
-    "migrate:deploy": "prisma migrate deploy",
-    "start": "node app.js",
+    "build": "npm ci --prefix server && npm run build --prefix server",
+    "migrate:deploy": "npm run migrate:deploy --prefix server",
+    "start": "npm run start --prefix server",
     "client:dev": "npm --prefix client run dev",
     "client:build": "npm --prefix client run build",
     "client:preview": "npm --prefix client run preview"

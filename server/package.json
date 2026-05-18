@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "prisma generate",
+    "build": "npx prisma generate",
     "migrate:deploy": "prisma migrate deploy",
     "backfill:care-links": "node scripts/backfillPracticePatientLinks.js",
     "verify:care-links": "node scripts/verifyCareRelationship.js",
