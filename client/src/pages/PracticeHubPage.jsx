@@ -545,14 +545,6 @@ export default function PracticeHubPage() {
                   {t.actionUploadDocument}
                 </Link>
               ) : null}
-              {quickActions.createMedicationPlan ? (
-                <Link
-                  className="practice-overview__action"
-                  to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
-                >
-                  {t.actionCreateMedication}
-                </Link>
-              ) : null}
               {quickActions.manageTeam ? (
                 <Link
                   className="practice-overview__action"
