@@ -18,7 +18,10 @@ import {
 } from "../utils/integrationCrypto.js";
 import { enqueuePracticeWebhook } from "../services/practiceWebhookService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
-import { ensureDemoPracticeProfileForUser } from "../services/practiceDemoProfileService.js";
+import {
+  ensureDemoPracticeProfileForUser,
+  isPracticeDemoProfileEnabled,
+} from "../services/practiceDemoProfileService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -162,8 +165,8 @@ router.get("/", async (req, res) => {
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
   try {
     await ensureDemoPracticeProfileForUser(userId);
-  } catch {
-    /* non-fatal — list still returns existing profiles */
+  } catch (err) {
+    console.error("[practices] ensure demo profile failed:", err?.message || err);
   }
   const rows = await prisma.practiceProfile.findMany({
     where: {
@@ -175,6 +178,35 @@ router.get("/", async (req, res) => {
     orderBy: { updatedAt: "desc" },
   });
   return res.json({ ok: true, practices: rows.map(profileJson) });
+});
+
+router.post("/ensure-demo", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!isPracticeDemoProfileEnabled()) {
+    return res.status(403).json({ ok: false, error: "demo_profile_disabled" });
+  }
+  try {
+    const practice = await ensureDemoPracticeProfileForUser(userId);
+    const rows = await prisma.practiceProfile.findMany({
+      where: {
+        OR: [
+          { userId },
+          { members: { some: { userId, status: "active" } } },
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+    return res.json({
+      ok: true,
+      created: Boolean(practice),
+      practice: practice ? profileJson(practice) : null,
+      practices: rows.map(profileJson),
+    });
+  } catch (err) {
+    console.error("[practices] POST ensure-demo failed:", err?.message || err);
+    return res.status(500).json({ ok: false, error: "ensure_demo_failed" });
+  }
 });
 
 router.post("/", async (req, res) => {

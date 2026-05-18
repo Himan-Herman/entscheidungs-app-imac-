@@ -4,12 +4,9 @@ const prisma = new PrismaClient();
 
 export const DEMO_PRACTICE_NAME = "Medscout Klinik";
 
-/** Demo profile for empty accounts — on in non-production unless PRACTICE_DEMO_PROFILE_ENABLED=false. */
+/** Demo profile for empty accounts — on by default; set PRACTICE_DEMO_PROFILE_ENABLED=false to disable. */
 export function isPracticeDemoProfileEnabled() {
-  const flag = process.env.PRACTICE_DEMO_PROFILE_ENABLED;
-  if (flag === "false") return false;
-  if (flag === "true") return true;
-  return process.env.NODE_ENV !== "production";
+  return process.env.PRACTICE_DEMO_PROFILE_ENABLED !== "false";
 }
 
 function demoSlugForUser(userId) {

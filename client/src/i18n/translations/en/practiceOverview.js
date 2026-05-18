@@ -11,6 +11,10 @@ export default {
     "No practice profile is linked to your account yet. Create a practice or accept a team invitation.",
   practicesLoadError: "Could not load practice profiles. Please sign in again.",
   openTeamLink: "Team & invitations",
+  createDemoPractice: "Create test practice “Medscout Klinik”",
+  createDemoPracticeLoading: "Creating test practice…",
+  createDemoPracticeError:
+    "Could not create the test practice. Check the server connection or create one manually under Practice profiles.",
   loading: "Loading overview…",
   loadError: "Could not load the practice overview.",
   activityLoadError: "Could not load recent activity.",

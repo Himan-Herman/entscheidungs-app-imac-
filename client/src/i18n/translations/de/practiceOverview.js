@@ -11,6 +11,10 @@ export default {
     "Es ist noch kein Praxisprofil mit Ihrem Konto verknüpft. Legen Sie eine Praxis an oder nehmen Sie eine Team-Einladung an.",
   practicesLoadError: "Praxisprofile konnten nicht geladen werden. Bitte erneut anmelden.",
   openTeamLink: "Team & Einladungen",
+  createDemoPractice: "Test-Praxis „Medscout Klinik“ anlegen",
+  createDemoPracticeLoading: "Test-Praxis wird angelegt …",
+  createDemoPracticeError:
+    "Die Test-Praxis konnte nicht angelegt werden. Bitte Server-Verbindung prüfen oder unter Praxisprofile manuell anlegen.",
   loading: "Übersicht wird geladen …",
   loadError: "Die Praxis-Übersicht konnte nicht geladen werden.",
   activityLoadError: "Letzte Aktivitäten konnten nicht geladen werden.",

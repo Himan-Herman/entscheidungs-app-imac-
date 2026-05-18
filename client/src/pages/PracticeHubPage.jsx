@@ -10,7 +10,7 @@ import {
   Shield,
   UsersRound,
 } from "lucide-react";
-import { authFetch } from "../api/authFetch.js";
+import { ensureDemoPractice, fetchPractices } from "../api/practicesApi.js";
 import {
   fetchPracticeOverviewActivity,
   fetchPracticeOverviewSummary,
@@ -150,26 +150,63 @@ export default function PracticeHubPage() {
   const [aiDisclaimer, setAiDisclaimer] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+  const [demoCreating, setDemoCreating] = useState(false);
+  const [demoCreateError, setDemoCreateError] = useState("");
+
+  const applyPracticeRows = useCallback((rows) => {
+    const list = Array.isArray(rows) ? rows : [];
+    setPractices(list);
+    setPracticeId((prev) => {
+      if (prev && list.some((p) => p.id === prev)) return prev;
+      return list[0]?.id || "";
+    });
+    return list;
+  }, []);
 
   const loadPractices = useCallback(async () => {
     setPracticesLoadError("");
+    setDemoCreateError("");
     try {
-      const res = await authFetch("/api/practices");
-      const data = await res.json().catch(() => ({}));
+      let { res, data } = await fetchPractices();
       if (!res.ok) throw new Error("load_practices_failed");
-      const rows = Array.isArray(data.practices) ? data.practices : [];
-      setPractices(rows);
-      setPracticeId((prev) => {
-        if (prev && rows.some((p) => p.id === prev)) return prev;
-        return rows[0]?.id || "";
-      });
+      let rows = applyPracticeRows(data.practices);
+
+      if (rows.length === 0) {
+        const ensured = await ensureDemoPractice();
+        if (ensured.res.ok) {
+          rows = applyPracticeRows(ensured.data.practices);
+        }
+        if (rows.length === 0) {
+          const retry = await fetchPractices();
+          if (retry.res.ok) {
+            rows = applyPracticeRows(retry.data.practices);
+          }
+        }
+      }
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
       setPractices([]);
       setPracticeId("");
       setPracticesLoadError(t.practicesLoadError);
     }
-  }, [t.practicesLoadError]);
+  }, [applyPracticeRows, t.practicesLoadError]);
+
+  const handleCreateDemoPractice = useCallback(async () => {
+    setDemoCreating(true);
+    setDemoCreateError("");
+    setPracticesLoadError("");
+    try {
+      const { res, data } = await ensureDemoPractice();
+      if (!res.ok) throw new Error(data?.error || "ensure_demo_failed");
+      const rows = applyPracticeRows(data.practices);
+      if (!rows.length) throw new Error("ensure_demo_empty");
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setDemoCreateError(t.createDemoPracticeError);
+    } finally {
+      setDemoCreating(false);
+    }
+  }, [applyPracticeRows, t.createDemoPracticeError]);
 
   const loadSummary = useCallback(async () => {
     if (!practiceId) {
@@ -348,6 +385,15 @@ export default function PracticeHubPage() {
         <div className="practice-overview__empty-practices" role="status">
           <p>{t.noPracticesHint}</p>
           <p className="practice-overview__empty-practices-actions">
+            <button
+              type="button"
+              className="practice-overview__action"
+              onClick={() => void handleCreateDemoPractice()}
+              disabled={demoCreating}
+            >
+              {demoCreating ? t.createDemoPracticeLoading : t.createDemoPractice}
+            </button>
+            {" · "}
             <Link className="practice-overview__action" to="/settings/practices">
               {tPractices.heading}
             </Link>
@@ -356,6 +402,11 @@ export default function PracticeHubPage() {
               {t.openTeamLink}
             </Link>
           </p>
+          {demoCreateError ? (
+            <p className="practice-overview__status practice-overview__status--error" role="alert">
+              {demoCreateError}
+            </p>
+          ) : null}
         </div>
       ) : null}
 
