@@ -127,12 +127,12 @@ body {
 }
 
 /* Main content: prose links distinguishable from body text (no underline) */
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.pf-btn) {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.pf-btn) {
   color: var(--ms-color-link);
   text-decoration: none;
 }
 
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.pf-btn):hover {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.pf-btn):hover {
   color: var(--ms-color-link-hover);
   text-decoration: none;
 }

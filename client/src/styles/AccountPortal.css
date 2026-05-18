@@ -6,10 +6,11 @@
 
 .account-portal__mode-strip {
   margin-bottom: 16px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 118, 110, 0.2);
-  background: rgba(15, 118, 110, 0.06);
+  padding: 14px 16px;
+  border-radius: var(--ms-radius-md, 12px);
+  border: 1px solid var(--ms-color-border-strong, #cbd5e1);
+  background: var(--ms-color-bg-subtle, #f8fafc);
+  color: var(--ms-color-text, #0f172a);
 }
 
 .account-portal__mode-field {
@@ -22,24 +23,39 @@
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  opacity: 0.88;
+  color: var(--ms-color-text-secondary, #334155);
 }
 
 .account-portal__mode-select {
+  box-sizing: border-box;
+  width: 100%;
   min-height: 44px;
-  padding: 8px 12px;
+  padding: 8px 40px 8px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--ms-color-border-strong, #cbd5e1);
   font: inherit;
-  background: var(--color-bg, #fff);
-  color: inherit;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-color: #ffffff;
+  color: #0f172a;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23475569' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.account-portal__mode-select:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring, #0284c7);
+  outline-offset: 2px;
+  border-color: var(--ms-color-accent, #0f766e);
 }
 
 .account-portal__mode-hint {
   margin: 8px 0 0;
   font-size: 0.85rem;
-  opacity: 0.85;
-  line-height: 1.4;
+  line-height: 1.45;
+  color: var(--ms-color-text-muted, #475569);
 }
 
 .account-portal__shell {
@@ -178,18 +194,31 @@
   min-height: 44px;
   padding: 0 16px;
   border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #fff;
+  border: 1px solid var(--ms-color-border-strong, #cbd5e1);
+  background: var(--ms-color-surface, #fff);
   font: inherit;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  color: inherit;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.account-portal__btn:hover {
+  border-color: var(--ms-color-accent, #0f766e);
+  background: var(--ms-color-bg-subtle, #f8fafc);
+  color: var(--ms-color-text, #0f172a);
 }
 
 .account-portal__btn--primary {
-  background: #0f766e;
-  border-color: #0f766e;
-  color: #fff;
+  background: var(--ms-color-accent, #0f766e);
+  border-color: var(--ms-color-accent, #0f766e);
+  color: var(--ms-color-on-accent, #ffffff);
+}
+
+.account-portal__btn--primary:hover {
+  background: var(--ms-color-accent-hover, #0d9488);
+  border-color: var(--ms-color-accent-hover, #0d9488);
+  color: var(--ms-color-on-accent, #ffffff);
 }
 
 .account-portal__btn--small {
@@ -468,4 +497,78 @@
 [data-theme="dark"] .account-portal-card {
   background: rgba(15, 23, 42, 0.65);
   border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .account-portal__mode-strip,
+[data-theme="dark"] .account-portal__mode-strip {
+  background: var(--ms-color-bg-subtle, #0f172a);
+  border-color: var(--ms-color-border, rgba(148, 163, 184, 0.25));
+  color: var(--ms-color-text, #f1f5f9);
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .account-portal__mode-label,
+[data-theme="dark"] .account-portal__mode-label {
+  color: var(--ms-color-text-secondary, #cbd5e1);
+}
+
+:root[data-theme="dark"] .account-portal__mode-select,
+[data-theme="dark"] .account-portal__mode-select {
+  background-color: #1e293b;
+  color: #f1f5f9;
+  border-color: #475569;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="dark"] .account-portal__mode-select option,
+[data-theme="dark"] .account-portal__mode-select option {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .account-portal__mode-hint,
+[data-theme="dark"] .account-portal__mode-hint {
+  color: var(--ms-color-text-muted, #94a3b8);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .account-portal__mode-strip {
+    color-scheme: dark;
+  }
+
+  :root:not([data-theme="light"]) .account-portal__mode-label {
+    color: #cbd5e1;
+  }
+
+  :root:not([data-theme="light"]) .account-portal__mode-select {
+    background-color: #1e293b;
+    color: #f1f5f9;
+    border-color: #475569;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  }
+
+  :root:not([data-theme="light"]) .account-portal__mode-select option {
+    background-color: #1e293b;
+    color: #f1f5f9;
+  }
+
+  :root:not([data-theme="light"]) .account-portal__mode-hint {
+    color: #94a3b8;
+  }
+}
+
+:root[data-theme="dark"] .account-portal__btn {
+  background: var(--ms-color-surface, #1e293b);
+  color: var(--ms-color-text, #f1f5f9);
+  border-color: var(--ms-color-border, rgba(148, 163, 184, 0.3));
+}
+
+:root[data-theme="dark"] .account-portal__btn:hover {
+  background: var(--ms-color-bg-subtle, #0f172a);
+  color: var(--ms-color-text, #f1f5f9);
+}
+
+:root[data-theme="dark"] .account-portal__btn--primary,
+:root[data-theme="dark"] .account-portal__btn--primary:hover {
+  color: var(--ms-color-on-accent, #ffffff);
 }

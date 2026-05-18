@@ -7,6 +7,10 @@ export default {
     "Keine Diagnose, keine Therapieempfehlung, keine Dringlichkeitseinstufung. Nur Workflow- und Organisationsinformationen.",
   selectPractice: "Praxisprofil",
   selectPracticePlaceholder: "Praxis auswählen…",
+  noPracticesHint:
+    "Es ist noch kein Praxisprofil mit Ihrem Konto verknüpft. Legen Sie eine Praxis an oder nehmen Sie eine Team-Einladung an.",
+  practicesLoadError: "Praxisprofile konnten nicht geladen werden. Bitte erneut anmelden.",
+  openTeamLink: "Team & Einladungen",
   loading: "Übersicht wird geladen …",
   loadError: "Die Praxis-Übersicht konnte nicht geladen werden.",
   activityLoadError: "Letzte Aktivitäten konnten nicht geladen werden.",

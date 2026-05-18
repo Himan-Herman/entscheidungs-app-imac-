@@ -7,6 +7,10 @@ export default {
     "No diagnosis, no therapy recommendation, no urgency classification. Workflow and organizational information only.",
   selectPractice: "Practice profile",
   selectPracticePlaceholder: "Select practice…",
+  noPracticesHint:
+    "No practice profile is linked to your account yet. Create a practice or accept a team invitation.",
+  practicesLoadError: "Could not load practice profiles. Please sign in again.",
+  openTeamLink: "Team & invitations",
   loading: "Loading overview…",
   loadError: "Could not load the practice overview.",
   activityLoadError: "Could not load recent activity.",

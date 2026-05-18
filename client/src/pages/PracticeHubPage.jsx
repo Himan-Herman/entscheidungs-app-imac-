@@ -19,7 +19,6 @@ import {
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import "../styles/PracticeOverviewPage.css";
-import LanguageSettingsBar from "../components/language/LanguageSettingsBar.jsx";
 import { formatUiDateTime } from "../i18n/intlLocale.js";
 
 function fmtDate(iso, lang) {
@@ -133,8 +132,13 @@ export default function PracticeHubPage() {
     () => getMessages(language).practiceTeam || getMessages("en").practiceTeam,
     [language],
   );
+  const tPractices = useMemo(
+    () => getMessages(language).settingsPractices || getMessages("en").settingsPractices,
+    [language],
+  );
 
   const [practices, setPractices] = useState([]);
+  const [practicesLoadError, setPracticesLoadError] = useState("");
   const [practiceId, setPracticeId] = useState("");
   const [summary, setSummary] = useState(null);
   const [activity, setActivity] = useState([]);
@@ -148,13 +152,24 @@ export default function PracticeHubPage() {
   const [aiError, setAiError] = useState("");
 
   const loadPractices = useCallback(async () => {
-    const res = await authFetch("/api/practices");
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error("load_practices_failed");
-    const rows = Array.isArray(data.practices) ? data.practices : [];
-    setPractices(rows);
-    if (!practiceId && rows[0]?.id) setPracticeId(rows[0].id);
-  }, [practiceId]);
+    setPracticesLoadError("");
+    try {
+      const res = await authFetch("/api/practices");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error("load_practices_failed");
+      const rows = Array.isArray(data.practices) ? data.practices : [];
+      setPractices(rows);
+      setPracticeId((prev) => {
+        if (prev && rows.some((p) => p.id === prev)) return prev;
+        return rows[0]?.id || "";
+      });
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setPractices([]);
+      setPracticeId("");
+      setPracticesLoadError(t.practicesLoadError);
+    }
+  }, [t.practicesLoadError]);
 
   const loadSummary = useCallback(async () => {
     if (!practiceId) {
@@ -203,7 +218,7 @@ export default function PracticeHubPage() {
   }, [t.pageTitle]);
 
   useEffect(() => {
-    void loadPractices().catch(() => {});
+    void loadPractices();
   }, [loadPractices]);
 
   useEffect(() => {
@@ -298,8 +313,6 @@ export default function PracticeHubPage() {
         </p>
       </header>
 
-      <LanguageSettingsBar />
-
       <div className="practice-overview__toolbar">
         <label htmlFor="practice-overview-select">{t.selectPractice}</label>
         <select
@@ -324,6 +337,27 @@ export default function PracticeHubPage() {
           </p>
         ) : null}
       </div>
+
+      {practicesLoadError ? (
+        <p className="practice-overview__status practice-overview__status--error" role="alert">
+          {practicesLoadError}
+        </p>
+      ) : null}
+
+      {!practicesLoadError && !practices.length ? (
+        <div className="practice-overview__empty-practices" role="status">
+          <p>{t.noPracticesHint}</p>
+          <p className="practice-overview__empty-practices-actions">
+            <Link className="practice-overview__action" to="/settings/practices">
+              {tPractices.heading}
+            </Link>
+            {" · "}
+            <Link className="practice-overview__action" to="/practice/team">
+              {t.openTeamLink}
+            </Link>
+          </p>
+        </div>
+      ) : null}
 
       {error ? (
         <p className="practice-overview__status practice-overview__status--error" role="alert">
