@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Activity,
   ClipboardList,
@@ -122,7 +122,12 @@ const ROLE_LABEL_KEYS = {
   viewer: "roleViewer",
 };
 
+const NAV_ACCOUNT = "__nav_account__";
+const NAV_PROFILES = "__nav_profiles__";
+const NAV_DASHBOARD = "__nav_dashboard__";
+
 export default function PracticeHubPage() {
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const t = useMemo(
     () => getMessages(language).practiceOverview || getMessages("en").practiceOverview,
@@ -371,18 +376,28 @@ export default function PracticeHubPage() {
         <select
           id="practice-overview-select"
           className="practice-overview__select"
-          value={practiceId}
-          onChange={(e) => setPracticeId(e.target.value)}
-          disabled={!practices.length}
+          value={practiceId || ""}
+          onChange={handlePracticeSelectChange}
         >
-          {!practices.length ? (
-            <option value="">{t.selectPracticePlaceholder}</option>
-          ) : null}
-          {practices.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.practiceName || p.id}
-            </option>
-          ))}
+          <optgroup label={t.selectNavGroup}>
+            <option value={NAV_ACCOUNT}>{t.selectOptionAccount}</option>
+            <option value={NAV_PROFILES}>{t.selectOptionProfiles}</option>
+            {practiceId ? (
+              <option value={NAV_DASHBOARD}>{t.selectOptionDashboard}</option>
+            ) : null}
+          </optgroup>
+          <optgroup label={t.selectPracticeGroup}>
+            {!practices.length ? (
+              <option value="" disabled>
+                {t.selectPracticePlaceholder}
+              </option>
+            ) : null}
+            {practices.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.practiceName || p.id}
+              </option>
+            ))}
+          </optgroup>
         </select>
         {summary?.role ? (
           <p className="practice-overview__role">

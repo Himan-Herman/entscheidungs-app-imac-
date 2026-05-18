@@ -10,6 +10,11 @@ export default {
   linkPracticeProfiles: "Praxisprofile",
   linkPracticeDashboard: "Praxis-Dashboard",
   selectPractice: "Praxisprofil",
+  selectNavGroup: "Navigation",
+  selectPracticeGroup: "Ihre Praxis",
+  selectOptionAccount: "← Mein MedScoutX (Konto-Übersicht)",
+  selectOptionProfiles: "Praxisprofile verwalten",
+  selectOptionDashboard: "Praxis-Dashboard öffnen",
   selectPracticePlaceholder: "Praxis auswählen…",
   noPracticesHint:
     "Es ist noch kein Praxisprofil mit Ihrem Konto verknüpft. Legen Sie eine Praxis an oder nehmen Sie eine Team-Einladung an.",

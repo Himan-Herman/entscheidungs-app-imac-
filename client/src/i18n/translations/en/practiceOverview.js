@@ -10,6 +10,11 @@ export default {
   linkPracticeProfiles: "Practice profiles",
   linkPracticeDashboard: "Practice dashboard",
   selectPractice: "Practice profile",
+  selectNavGroup: "Navigation",
+  selectPracticeGroup: "Your practice",
+  selectOptionAccount: "← My MedScoutX (account overview)",
+  selectOptionProfiles: "Manage practice profiles",
+  selectOptionDashboard: "Open practice dashboard",
   selectPracticePlaceholder: "Select practice…",
   noPracticesHint:
     "No practice profile is linked to your account yet. Create a practice or accept a team invitation.",
