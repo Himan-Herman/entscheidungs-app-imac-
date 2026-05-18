@@ -32,9 +32,7 @@ export default function DataDeletionRequestDialog({
 
   const isStep2 = step === 2;
   const title = isStep2 ? t.deleteConfirmTitle2 : t.deleteConfirmTitle1;
-  const body = isStep2
-    ? t.deleteConfirmBody2
-    : t.deleteConfirmBody1.replace("{practice}", practiceName || "—");
+  const body = isStep2 ? t.deleteConfirmBody2 : t.deleteConfirmBody1;
 
   return (
     <dialog

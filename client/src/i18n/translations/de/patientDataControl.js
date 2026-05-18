@@ -6,6 +6,7 @@ export default {
   privacyNotice:
     "MedScoutX ersetzt keine Rechtsberatung. Löschanfragen werden dokumentiert; gesetzliche Aufbewahrungspflichten können eine sofortige Vollständiglöschung verhindern.",
   backHub: "Zurück zum Patientenbereich",
+  openActivity: "Aktivitätsprotokoll öffnen",
   loading: "Wird geladen …",
   loadError: "Datenübersicht konnte nicht geladen werden.",
   featureDisabled: "Diese Funktion ist in dieser Umgebung noch nicht aktiviert.",

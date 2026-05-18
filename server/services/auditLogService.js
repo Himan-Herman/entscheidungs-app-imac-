@@ -2,6 +2,7 @@
 // Fire-and-forget operational logging. Never pass medical narrative, PDF bytes, or raw AI output.
 import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
+import { registryForAction } from "./activity/activityFeedRegistry.js";
 
 const prisma = new PrismaClient();
 
@@ -63,6 +64,11 @@ export function sanitizeAuditMetadata(value, depth = 0) {
  *   action: string;
  *   entityType?: string | null;
  *   entityId?: string | null;
+ *   practiceProfileId?: string | null;
+ *   patientUserId?: string | null;
+ *   practicePatientLinkId?: string | null;
+ *   severity?: string | null;
+ *   visibility?: string | null;
  *   metadata?: Record<string, unknown> | null;
  * }} opts
  */
@@ -76,6 +82,22 @@ export function writeAuditLog(opts) {
     entityId = null,
     metadata = null,
   } = opts;
+
+  const metaObj =
+    metadata && typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
+
+  const reg = registryForAction(action);
+  const practiceProfileId =
+    opts.practiceProfileId ??
+    (typeof metaObj.practiceProfileId === "string" ? metaObj.practiceProfileId : null);
+  const patientUserId =
+    opts.patientUserId ??
+    (typeof metaObj.patientUserId === "string" ? metaObj.patientUserId : null);
+  const practicePatientLinkId =
+    opts.practicePatientLinkId ??
+    (typeof metaObj.practicePatientLinkId === "string" ? metaObj.practicePatientLinkId : null);
+  const severity = opts.severity || reg?.severity || "info";
+  const visibility = opts.visibility || reg?.visibility || "internal";
 
   const ip =
     req?.headers?.["x-forwarded-for"]?.split?.(",")?.[0]?.trim?.() ||
@@ -105,6 +127,11 @@ export function writeAuditLog(opts) {
         action,
         entityType: entityType || null,
         entityId: entityId || null,
+        practiceProfileId,
+        patientUserId,
+        practicePatientLinkId,
+        severity,
+        visibility,
         ipHash,
         userAgent: ua,
         metadata: metaJson ?? undefined,

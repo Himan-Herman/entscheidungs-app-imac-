@@ -8,10 +8,14 @@ import express from "express";
 import { requirePatientInboxFeature } from "../middleware/requirePatientInbox.js";
 import {
   archiveInboxItem,
+  restoreInboxItem,
+  countUnreadPatientInbox,
   listInboxItemsForPatient,
   markInboxItemRead,
   INBOX_STATUSES,
+  INBOX_TYPES,
 } from "../services/patientInbox/patientInboxService.js";
+import { generatePatientInboxAiSummary } from "../services/patientInbox/patientInboxAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
@@ -34,13 +38,47 @@ function mapError(err) {
   if (msg === "item_not_found" || msg === "link_not_found" || msg === "practice_not_found") {
     return { status: 404, error: msg };
   }
-  if (msg === "item_archived") {
+  if (msg === "item_archived" || msg === "item_not_archived") {
     return { status: 409, error: msg };
   }
+  if (msg === "ai_not_configured") return { status: 503, error: msg };
   return { status: 500, error: "request_failed" };
 }
 
-/** GET /api/patient/inbox?status=&limit=&offset= */
+/** GET /api/patient/inbox/count */
+router.get("/count", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const unreadCount = await countUnreadPatientInbox(userId);
+    return res.json({ ok: true, unreadCount });
+  } catch (err) {
+    console.error("[patient/inbox/count]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** POST /api/patient/inbox/ai-summary */
+router.post("/ai-summary", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const result = await generatePatientInboxAiSummary(
+      userId,
+      { locale: req.body?.locale || req.query.locale },
+      { req },
+    );
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[patient/inbox/ai-summary]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/patient/inbox?status=&type=&limit=&offset= */
 router.get("/", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
@@ -50,12 +88,30 @@ router.get("/", async (req, res) => {
     return res.status(400).json({ ok: false, error: "validation_invalid_status" });
   }
 
+  const type = String(req.query.type || "").trim();
+  if (type && !INBOX_TYPES.has(type)) {
+    return res.status(400).json({ ok: false, error: "validation_invalid_type" });
+  }
+
   try {
     const result = await listInboxItemsForPatient(userId, {
       status: status || undefined,
+      type: type || undefined,
       limit: req.query.limit,
       offset: req.query.offset,
     });
+
+    await writeAuditLog({
+      req,
+      userId,
+      actorRole: "patient",
+      action: "patient_inbox_opened",
+      entityType: "inbox_item",
+      entityId: userId,
+      patientUserId: userId,
+      metadata: { itemCount: result.items.length },
+    });
+
     return res.json({ ok: true, ...result });
   } catch (err) {
     console.error("[patient/inbox/list]", err?.message ?? err);
@@ -73,11 +129,15 @@ router.patch("/:itemId/read", async (req, res) => {
     const item = await markInboxItemRead(req.params.itemId, userId);
 
     await writeAuditLog({
+      req,
       userId,
       actorRole: "patient",
       action: "patient_inbox_item_read",
-      entityType: "PatientInboxItem",
+      entityType: "inbox_item",
       entityId: item.id,
+      practiceProfileId: item.practiceProfileId,
+      patientUserId: userId,
+      practicePatientLinkId: item.practicePatientLinkId,
       metadata: { type: item.type },
     });
 
@@ -98,17 +158,50 @@ router.patch("/:itemId/archive", async (req, res) => {
     const item = await archiveInboxItem(req.params.itemId, userId);
 
     await writeAuditLog({
+      req,
       userId,
       actorRole: "patient",
       action: "patient_inbox_item_archived",
-      entityType: "PatientInboxItem",
+      entityType: "inbox_item",
       entityId: item.id,
+      practiceProfileId: item.practiceProfileId,
+      patientUserId: userId,
+      practicePatientLinkId: item.practicePatientLinkId,
       metadata: { type: item.type },
     });
 
     return res.json({ ok: true, item });
   } catch (err) {
     console.error("[patient/inbox/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/patient/inbox/:itemId/restore */
+router.patch("/:itemId/restore", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const item = await restoreInboxItem(req.params.itemId, userId);
+
+    await writeAuditLog({
+      req,
+      userId,
+      actorRole: "patient",
+      action: "patient_inbox_item_restored",
+      entityType: "inbox_item",
+      entityId: item.id,
+      practiceProfileId: item.practiceProfileId,
+      patientUserId: userId,
+      practicePatientLinkId: item.practicePatientLinkId,
+      metadata: { type: item.type },
+    });
+
+    return res.json({ ok: true, item });
+  } catch (err) {
+    console.error("[patient/inbox/restore]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

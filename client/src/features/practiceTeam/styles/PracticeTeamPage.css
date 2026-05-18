@@ -1,0 +1,223 @@
+.practice-team__your-role {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.practice-team__hint,
+.practice-team__status {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--surface-muted, #f4f6f8);
+  margin: 1rem 0;
+}
+
+.practice-team__pending {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle, #dde3ea);
+  border-radius: 10px;
+}
+
+.practice-team__pending-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.practice-team__pending-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.practice-team__pending-list button {
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+}
+
+.practice-team__invite {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle, #dde3ea);
+}
+
+.practice-team__invite-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .practice-team__invite-form {
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+  }
+}
+
+.practice-team__invite-form input,
+.practice-team__invite-form select,
+.practice-team__filters input,
+.practice-team__filters select {
+  min-height: 44px;
+  width: 100%;
+}
+
+.practice-team__invite-form button {
+  min-height: 44px;
+  padding: 0.6rem 1.25rem;
+}
+
+.practice-team__filters {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .practice-team__filters {
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+}
+
+.practice-team__table-wrap {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
+.practice-team__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.practice-team__table th,
+.practice-team__table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle, #e8ecf0);
+  vertical-align: top;
+}
+
+.practice-team__table th {
+  font-weight: 600;
+}
+
+.practice-team__table select,
+.practice-team__table button {
+  min-height: 44px;
+}
+
+.practice-team__badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  background: #e8f0fe;
+  color: #1a4d8f;
+}
+
+.practice-team__status-pill {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.practice-team__status-pill--active {
+  background: #e6f4ea;
+  color: #137333;
+}
+
+.practice-team__status-pill--invited {
+  background: #fef7e0;
+  color: #8a6d00;
+}
+
+.practice-team__status-pill--revoked {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+.practice-team__meta {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted, #5f6368);
+  margin-top: 0.25rem;
+}
+
+.practice-team__danger {
+  color: #b3261e;
+  border: 1px solid #b3261e;
+  background: transparent;
+  border-radius: 6px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.practice-team__danger:focus-visible,
+.practice-team__invite-form button:focus-visible,
+.practice-team__pending-list button:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+.practice-team__ai {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px dashed var(--border-subtle, #c5cdd8);
+}
+
+.practice-team__ai-disclaimer {
+  font-size: 0.9rem;
+  color: var(--text-muted, #5f6368);
+}
+
+.practice-team__ai-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin: 1rem 0;
+}
+
+.practice-team__ai-controls button {
+  min-height: 44px;
+}
+
+.practice-team__ai-output {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fb;
+  border-radius: 8px;
+}
+
+.practice-team__ai-label {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.practice-team__ai-output pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+  margin: 0;
+}
+
+.practice-team__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}

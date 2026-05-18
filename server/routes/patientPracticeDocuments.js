@@ -10,6 +10,8 @@ import {
   listSharedDocumentsForPatient,
 } from "../services/practiceDocument/practiceDocumentService.js";
 import { submitPatientPracticeDocumentQuestion } from "../services/practiceDocument/patientPracticeDocumentQuestionService.js";
+import { createPatientDocumentDownloadLink } from "../services/practiceDocument/secureDocumentAccessService.js";
+import { generateDocumentDownloadAiNote } from "../services/practiceDocument/practiceDocumentDownloadAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
@@ -32,6 +34,11 @@ function mapError(err) {
   if (msg === "link_not_active") {
     return { status: 409, error: msg };
   }
+  if (msg === "forbidden") return { status: 403, error: msg };
+  if (msg === "link_expired" || msg === "link_revoked" || msg === "invalid_token") {
+    return { status: 410, error: msg };
+  }
+  if (msg === "ai_not_configured") return { status: 503, error: msg };
   return { status: 500, error: "request_failed" };
 }
 
@@ -110,7 +117,61 @@ router.post("/:documentId/question", async (req, res) => {
   }
 });
 
-/** GET /api/patient/practice-documents/:documentId/download?fileId= */
+/** POST /api/patient/practice-documents/:documentId/download-link */
+router.post("/:documentId/download-link", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const fileId = String(req.body?.fileId || "").trim();
+  if (!fileId) {
+    return res.status(400).json({ ok: false, error: "validation_required" });
+  }
+
+  try {
+    const link = await createPatientDocumentDownloadLink(
+      req.params.documentId,
+      fileId,
+      userId,
+      req,
+    );
+    return res.json({ ok: true, ...link });
+  } catch (err) {
+    console.error("[patient/practice-documents/download-link]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/patient/practice-documents/:documentId/ai-download-note */
+router.post("/:documentId/ai-download-note", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const document = await getSharedDocumentForPatient(req.params.documentId, userId);
+    const file = document.files?.[0];
+    const result = await generateDocumentDownloadAiNote(
+      {
+        documentType: document.type,
+        fileName: file?.originalFileName,
+        mimeType: file?.mimeType,
+        locale: req.body?.locale,
+        userId,
+        actorRole: "patient",
+        documentId: document.id,
+        practiceProfileId: document.practiceProfileId,
+      },
+      { req },
+    );
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[patient/practice-documents/ai-download-note]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/patient/practice-documents/:documentId/download?fileId=&disposition=inline|attachment */
 router.get("/:documentId/download", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
@@ -129,11 +190,20 @@ router.get("/:documentId/download", async (req, res) => {
 
     const document = await getSharedDocumentForPatient(req.params.documentId, userId);
 
+    const disposition =
+      String(req.query.disposition || "").trim() === "inline" &&
+      file.mimeType === "application/pdf"
+        ? "inline"
+        : "attachment";
+
     await writeAuditLog({
       userId,
       actorRole: "patient",
-      action: "practice_document_download",
-      entityType: "practice_document_file",
+      action:
+        disposition === "inline"
+          ? "practice_document_viewed"
+          : "practice_document_download",
+      entityType: "document_download",
       entityId: fileId,
       metadata: documentAuditMetadata(document),
     });
@@ -141,7 +211,7 @@ router.get("/:documentId/download", async (req, res) => {
     res.setHeader("Content-Type", file.mimeType);
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${encodeURIComponent(file.originalFileName)}"`,
+      `${disposition}; filename="${encodeURIComponent(file.originalFileName)}"`,
     );
     res.setHeader("Cache-Control", "private, no-store");
     res.setHeader("X-Content-Type-Options", "nosniff");

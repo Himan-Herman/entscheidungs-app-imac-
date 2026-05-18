@@ -7,10 +7,12 @@ import { requireCommunicationV2Feature } from "../middleware/requireCommunicatio
 import {
   addMessageFromPatient,
   archiveThreadForPatient,
+  restoreThreadForPatient,
   getThreadForPatientUser,
   listThreadsForPatient,
   markThreadRead,
 } from "../services/communication/practicePatientThreadService.js";
+import { parseIncludeArchived } from "../utils/lifecycleStatus.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { generatePatientMessageAiDraft } from "../services/communication/messageCommunicationAiService.js";
 
@@ -37,7 +39,8 @@ function mapError(err) {
   if (
     msg === "link_not_active" ||
     msg === "thread_closed" ||
-    msg === "thread_archived"
+    msg === "thread_archived" ||
+    msg === "thread_not_archived"
   ) {
     return { status: 409, error: msg };
   }
@@ -53,7 +56,9 @@ router.get("/", async (req, res) => {
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
   try {
-    const threads = await listThreadsForPatient(userId);
+    const threads = await listThreadsForPatient(userId, {
+      includeArchived: parseIncludeArchived(req),
+    });
     return res.json({ ok: true, threads });
   } catch (err) {
     console.error("[patient/threads/list]", err?.message ?? err);
@@ -165,6 +170,30 @@ router.patch("/:threadId/archive", async (req, res) => {
     return res.json({ ok: true, thread });
   } catch (err) {
     console.error("[patient/threads/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/patient/threads/:threadId/restore */
+router.patch("/:threadId/restore", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const thread = await restoreThreadForPatient(req.params.threadId, userId);
+
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "patient_thread_restored",
+      entityType: "PracticePatientThread",
+      entityId: thread.id,
+    });
+
+    return res.json({ ok: true, thread });
+  } catch (err) {
+    console.error("[patient/threads/restore]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

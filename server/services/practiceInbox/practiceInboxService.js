@@ -8,6 +8,7 @@ export const INBOX_TYPES = new Set([
   "follow_up",
   "document",
   "medication",
+  "profile",
   "data_request",
   "system",
 ]);
@@ -49,7 +50,9 @@ export function practiceInboxItemToJson(row) {
     patientUserId: row.patientUserId,
     type: row.type,
     title: row.title,
+    titleKey: row.titleKey,
     summary: row.summary,
+    summaryKey: row.summaryKey,
     status: row.status,
     priority: row.priority,
     sourceRefType: row.sourceRefType,
@@ -110,7 +113,9 @@ export async function upsertPracticeInboxItem(input) {
     patientUserId: input.patientUserId || null,
     type,
     title,
+    titleKey: input.titleKey ? trimText(input.titleKey, 80) : null,
     summary: input.summary != null ? trimText(input.summary, MAX_SUMMARY_LEN) : null,
+    summaryKey: input.summaryKey ? trimText(input.summaryKey, 80) : null,
     priority,
     sourceRefType: input.sourceRefType || null,
     sourceRefId: input.sourceRefId || null,
@@ -150,7 +155,30 @@ export async function upsertPracticeInboxItem(input) {
     data: { ...data, status: "new" },
     include: includeRelations,
   });
+
+  writeAuditLog({
+    actorRole: "system",
+    action: "practice_inbox_item_created",
+    entityType: "inbox_item",
+    entityId: row.id,
+    practiceProfileId: pid,
+    patientUserId: row.patientUserId,
+    practicePatientLinkId: row.practicePatientLinkId,
+    metadata: { type: row.type, titleKey: row.titleKey },
+  });
+
   return practiceInboxItemToJson(row);
+}
+
+/**
+ * @param {string} practiceProfileId
+ */
+export async function countNewPracticeInbox(practiceProfileId) {
+  const pid = String(practiceProfileId || "").trim();
+  if (!pid) return 0;
+  return prisma.practiceInboxItem.count({
+    where: { practiceProfileId: pid, status: "new" },
+  });
 }
 
 /**
@@ -364,5 +392,20 @@ export async function archivePracticeInboxItem(itemId, practiceProfileId) {
   return updateItemStatus(itemId, practiceProfileId, "archived", {
     archivedAt: existing.archivedAt || now,
     readAt: existing.readAt || now,
+  });
+}
+
+export async function restorePracticeInboxItem(itemId, practiceProfileId) {
+  const existing = await prisma.practiceInboxItem.findFirst({
+    where: { id: itemId, practiceProfileId },
+  });
+  if (!existing) throw new Error("item_not_found");
+  if (existing.status !== "archived") throw new Error("item_not_archived");
+
+  const prior =
+    existing.doneAt ? "done" : existing.readAt ? "read" : existing.status === "new" ? "new" : "read";
+
+  return updateItemStatus(itemId, practiceProfileId, prior, {
+    archivedAt: null,
   });
 }

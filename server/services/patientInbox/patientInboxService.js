@@ -1,8 +1,17 @@
 import { PrismaClient } from "@prisma/client";
+import { writeAuditLog } from "../auditLogService.js";
+import { patientInboxTitleForType } from "../../constants/inboxNotificationCatalog.js";
 
 const prisma = new PrismaClient();
 
-export const INBOX_TYPES = new Set(["medication", "message", "document", "system"]);
+export const INBOX_TYPES = new Set([
+  "medication",
+  "message",
+  "document",
+  "profile",
+  "data_request",
+  "system",
+]);
 export const INBOX_STATUSES = new Set(["unread", "read", "archived"]);
 
 /** Default neutral title — callers should prefer this over clinical wording. */
@@ -30,7 +39,9 @@ export function inboxItemToJson(row) {
     practicePatientLinkId: row.practicePatientLinkId,
     type: row.type,
     title: row.title,
+    titleKey: row.titleKey,
     summary: row.summary,
+    summaryKey: row.summaryKey,
     status: row.status,
     sourceLabel: row.sourceLabel,
     targetUrl: row.targetUrl,
@@ -67,8 +78,13 @@ export async function createInboxItem(input) {
   const type = String(input.type || "").trim();
   if (!INBOX_TYPES.has(type)) throw new Error("validation_invalid_type");
 
-  const title = trimText(input.title || NEUTRAL_INBOX_TITLE, MAX_TITLE_LEN);
+  const titleKey = input.titleKey ? trimText(input.titleKey, 80) : null;
+  const title = trimText(
+    input.title || patientInboxTitleForType(type, null) || NEUTRAL_INBOX_TITLE,
+    MAX_TITLE_LEN,
+  );
   if (!title) throw new Error("validation_required");
+  const summaryKey = input.summaryKey ? trimText(input.summaryKey, 80) : null;
 
   const summary = input.summary != null ? trimText(input.summary, MAX_SUMMARY_LEN) : null;
   const sourceLabel =
@@ -105,7 +121,9 @@ export async function createInboxItem(input) {
       practicePatientLinkId,
       type,
       title,
+      titleKey,
       summary,
+      summaryKey,
       sourceLabel,
       targetUrl,
       status: "unread",
@@ -113,12 +131,35 @@ export async function createInboxItem(input) {
     include: includePractice,
   });
 
+  writeAuditLog({
+    userId: patientUserId,
+    actorRole: "system",
+    action: "patient_inbox_item_created",
+    entityType: "inbox_item",
+    entityId: row.id,
+    practiceProfileId,
+    patientUserId,
+    practicePatientLinkId,
+    metadata: { type, titleKey },
+  });
+
   return inboxItemToJson(row);
 }
 
 /**
  * @param {string} patientUserId
- * @param {{ status?: string, limit?: number, offset?: number }} [opts]
+ */
+export async function countUnreadPatientInbox(patientUserId) {
+  const uid = String(patientUserId || "").trim();
+  if (!uid) return 0;
+  return prisma.patientInboxItem.count({
+    where: { patientUserId: uid, status: "unread" },
+  });
+}
+
+/**
+ * @param {string} patientUserId
+ * @param {{ status?: string, type?: string, limit?: number, offset?: number }} [opts]
  */
 export async function listInboxItemsForPatient(patientUserId, opts = {}) {
   const uid = String(patientUserId || "").trim();
@@ -126,12 +167,15 @@ export async function listInboxItemsForPatient(patientUserId, opts = {}) {
 
   const statusFilter =
     opts.status && INBOX_STATUSES.has(opts.status) ? opts.status : undefined;
+  const typeFilter =
+    opts.type && INBOX_TYPES.has(opts.type) ? opts.type : undefined;
 
   const limit = Math.min(100, Math.max(1, Number(opts.limit) || 50));
   const offset = Math.max(0, Number(opts.offset) || 0);
 
   const where = {
     patientUserId: uid,
+    ...(typeFilter ? { type: typeFilter } : {}),
     ...(statusFilter ? { status: statusFilter } : { status: { not: "archived" } }),
   };
 
@@ -203,6 +247,33 @@ export async function archiveInboxItem(itemId, patientUserId) {
       status: "archived",
       archivedAt: existing.archivedAt || now,
       readAt: existing.readAt || now,
+    },
+    include: includePractice,
+  });
+
+  return inboxItemToJson(row);
+}
+
+/**
+ * @param {string} itemId
+ * @param {string} patientUserId
+ */
+export async function restoreInboxItem(itemId, patientUserId) {
+  const id = String(itemId || "").trim();
+  const uid = String(patientUserId || "").trim();
+  if (!id || !uid) throw new Error("validation_required");
+
+  const existing = await prisma.patientInboxItem.findFirst({
+    where: { id, patientUserId: uid },
+  });
+  if (!existing) throw new Error("item_not_found");
+  if (existing.status !== "archived") throw new Error("item_not_archived");
+
+  const row = await prisma.patientInboxItem.update({
+    where: { id },
+    data: {
+      status: existing.readAt ? "read" : "unread",
+      archivedAt: null,
     },
     include: includePractice,
   });

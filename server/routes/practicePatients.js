@@ -13,18 +13,25 @@ import {
 } from "../utils/practiceAccess.js";
 import {
   createPracticePatientLink,
-  listPracticePatientLinks,
   getPracticePatientLink,
   updatePracticePatientLinkStatus,
   LINK_STATUSES,
 } from "../services/careRelationship/practicePatientLinkService.js";
 import {
-  enrichPracticePatientLinks,
   getPracticePatientRecord,
   getPracticePatientActivity,
   listPreVisitsForPracticePatient,
 } from "../services/careRelationship/practicePatientRecordService.js";
+import {
+  searchPracticePatients,
+  searchPracticePatientRecord,
+  anonymizeSearchQueryForAudit,
+} from "../services/careRelationship/practicePatientSearchService.js";
+import { generatePracticePatientSearchAiSuggestion } from "../services/careRelationship/practicePatientSearchAiService.js";
+import { createAndRunExportJob } from "../services/export/exportJobService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { generatePracticeLinkActivityAiSummary } from "../services/activity/activityFeedAiService.js";
+import { logAccessDenied } from "../services/activity/activityFeedAiService.js";
 import practicePatientThreadsRouter from "./practicePatientThreads.js";
 import practiceMedicationPlansRouter from "./practiceMedicationPlans.js";
 import practiceDocumentsRouter from "./practiceDocuments.js";
@@ -67,7 +74,50 @@ function mapError(err) {
   return { status: 500, error: "request_failed" };
 }
 
-/** GET /api/practice/patients?practiceId=&status=&limit=&offset= */
+/** POST /api/practice/patients/search/ai-filter-suggestion */
+router.post("/search/ai-filter-suggestion", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.body?.practiceId || req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const result = await generatePracticePatientSearchAiSuggestion({
+      locale: req.body?.locale || req.query.locale,
+      q: req.body?.q,
+      activeFilters: req.body?.filters,
+    });
+
+    await writeAuditLog({
+      req,
+      userId,
+      actorRole: access.role,
+      action: "practice_patient_search_ai_suggestion",
+      entityType: "practice_patient_search",
+      entityId: practiceId,
+      practiceProfileId: practiceId,
+      metadata: {
+        queryHint: anonymizeSearchQueryForAudit(req.body?.q),
+        suggestedKeys: Object.keys(result.suggested || {}),
+      },
+    });
+
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[practice/patients/search/ai]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** GET /api/practice/patients?practiceId=&q=&status=&... */
 router.get("/", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
@@ -88,18 +138,51 @@ router.get("/", async (req, res) => {
   }
 
   try {
-    const result = await listPracticePatientLinks(practiceId, {
-      status: status || undefined,
-      limit: req.query.limit,
-      offset: req.query.offset,
-    });
-    const links = await enrichPracticePatientLinks(result.links);
+    const result = await searchPracticePatients(practiceId, req.query);
+
+    const hasSearchOrFilter = Boolean(
+      req.query.q ||
+        req.query.status ||
+        req.query.profileShared != null ||
+        req.query.hasUnreadMessages != null ||
+        req.query.hasDocuments != null ||
+        req.query.hasMedicationPlan != null ||
+        req.query.hasOpenDataRequest != null,
+    );
+
+    if (hasSearchOrFilter) {
+      await writeAuditLog({
+        req,
+        userId,
+        actorRole: access.role,
+        action: "practice_patient_search_executed",
+        entityType: "practice_patient_search",
+        entityId: practiceId,
+        practiceProfileId: practiceId,
+        metadata: {
+          queryHint: anonymizeSearchQueryForAudit(req.query.q),
+          resultCount: result.total,
+          filtersApplied: result.filters,
+        },
+      });
+    } else {
+      await writeAuditLog({
+        req,
+        userId,
+        actorRole: access.role,
+        action: "practice_patient_list_opened",
+        entityType: "practice_patient_list",
+        entityId: practiceId,
+        practiceProfileId: practiceId,
+        metadata: { total: result.total },
+      });
+    }
+
     return res.json({
       ok: true,
       role: access.role,
       practiceId,
       ...result,
-      links,
     });
   } catch (err) {
     console.error("[practice/patients/list]", err?.message ?? err);
@@ -162,8 +245,50 @@ router.use("/:linkId/documents", practiceDocumentsRouter);
 /** Patient profile read-only (PR-8) — before /:linkId */
 router.use("/:linkId/profile", practicePatientProfileRouter);
 
-/** GET /api/practice/patients/:linkId/activity?practiceId= */
-router.get("/:linkId/activity", async (req, res) => {
+/** POST /api/practice/patients/:linkId/export */
+router.post("/:linkId/export", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.body?.practiceId || req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const link = await getPracticePatientLink(req.params.linkId, practiceId);
+    const job = await createAndRunExportJob({
+      requestedByUserId: userId,
+      actorRole: "practice",
+      practiceRole: access.role,
+      type: req.body?.type || "patient_summary",
+      format: req.body?.format || "pdf",
+      locale: req.body?.locale,
+      practiceProfileId: practiceId,
+      practicePatientLinkId: link.id,
+      patientUserId: link.patientUserId,
+      req,
+    });
+    return res.status(201).json({ ok: true, export: job, role: access.role });
+  } catch (err) {
+    const msg = err?.message || "export_failed";
+    if (msg === "forbidden") return res.status(403).json({ ok: false, error: msg });
+    if (msg === "link_not_found") return res.status(404).json({ ok: false, error: msg });
+    if (msg === "validation_invalid_export_type" || msg === "validation_invalid_format") {
+      return res.status(400).json({ ok: false, error: msg });
+    }
+    console.error("[practice/patients/export]", msg);
+    return res.status(500).json({ ok: false, error: "export_failed" });
+  }
+});
+
+/** GET /api/practice/patients/:linkId/search?practiceId=&q= */
+router.get("/:linkId/search", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
@@ -178,10 +303,104 @@ router.get("/:linkId/activity", async (req, res) => {
   }
 
   try {
-    const result = await getPracticePatientActivity(req.params.linkId, practiceId);
+    const result = await searchPracticePatientRecord(
+      req.params.linkId,
+      practiceId,
+      req.query.q,
+    );
+
+    if (req.query.q) {
+      await writeAuditLog({
+        req,
+        userId,
+        actorRole: access.role,
+        action: "practice_patient_record_search",
+        entityType: "practice_patient_record",
+        entityId: req.params.linkId,
+        practiceProfileId: practiceId,
+        practicePatientLinkId: req.params.linkId,
+        metadata: {
+          queryHint: anonymizeSearchQueryForAudit(req.query.q),
+          resultCount: result.results?.length || 0,
+        },
+      });
+    }
+
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[practice/patients/record-search]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/practice/patients/:linkId/activity?practiceId= */
+router.get("/:linkId/activity", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    logAccessDenied({
+      req,
+      userId,
+      actorRole: access?.role || "unknown",
+      practiceProfileId: practiceId,
+      practicePatientLinkId: req.params.linkId,
+      metadata: { route: "practice_patient_activity" },
+    });
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const result = await getPracticePatientActivity(req.params.linkId, practiceId, {
+      type: req.query.type,
+      q: req.query.q,
+      from: req.query.from,
+      to: req.query.to,
+    });
     return res.json({ ok: true, role: access.role, ...result });
   } catch (err) {
     console.error("[practice/patients/activity]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/practice/patients/:linkId/activity/ai-summary */
+router.post("/:linkId/activity/ai-summary", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canReadPracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const result = await generatePracticeLinkActivityAiSummary({
+      linkId: req.params.linkId,
+      practiceProfileId: practiceId,
+      viewerUserId: userId,
+      locale: req.body?.locale || req.query.locale,
+    });
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[practice/patients/activity/ai-summary]", err?.message ?? err);
+    const msg = err?.message || "request_failed";
+    if (msg === "ai_not_configured") {
+      return res.status(503).json({ ok: false, error: msg });
+    }
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
@@ -232,6 +451,23 @@ router.get("/:linkId", async (req, res) => {
 
   try {
     const record = await getPracticePatientRecord(req.params.linkId, practiceId);
+
+    if (String(req.query.fromSearch || "").toLowerCase() === "true") {
+      await writeAuditLog({
+        req,
+        userId,
+        actorRole: access.role,
+        action: "practice_patient_record_opened_from_search",
+        entityType: "practice_patient_record",
+        entityId: req.params.linkId,
+        practiceProfileId: practiceId,
+        practicePatientLinkId: req.params.linkId,
+        metadata: {
+          queryHint: anonymizeSearchQueryForAudit(req.query.q),
+        },
+      });
+    }
+
     return res.json({ ok: true, role: access.role, ...record });
   } catch (err) {
     console.error("[practice/patients/get]", err?.message ?? err);

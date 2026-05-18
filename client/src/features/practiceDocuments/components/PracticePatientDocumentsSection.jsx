@@ -3,6 +3,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import {
   archivePracticeDocument,
+  restorePracticeDocument,
   deletePracticeDocument,
   createPracticeDocument,
   fetchPracticeDocument,
@@ -13,8 +14,15 @@ import {
   fetchPracticeDocumentAiOrganize,
   fetchPracticeDocumentAiTitleDraft,
   uploadPracticeDocumentFile,
+  viewPracticeDocumentFile,
+  downloadPracticeDocumentFile,
+  createPracticeDocumentSecureLink,
+  fetchPracticeDocumentSecureLinks,
+  revokePracticeDocumentSecureLink,
 } from "../api/practiceDocumentsApi.js";
 import DeleteDocumentDialog from "./DeleteDocumentDialog.jsx";
+import LifecycleConfirmDialog from "../../../components/lifecycle/LifecycleConfirmDialog.jsx";
+import LifecycleStatusBadge from "../../../components/lifecycle/LifecycleStatusBadge.jsx";
 import "../../../styles/PatientThreadsPage.css";
 import "../styles/PracticeDocuments.css";
 
@@ -82,6 +90,10 @@ export default function PracticePatientDocumentsSection({
     () => getMessages(language).practiceDocuments || getMessages("en").practiceDocuments,
     [language],
   );
+  const lt = useMemo(
+    () => getMessages(language).archiveLifecycle || getMessages("en").archiveLifecycle,
+    [language],
+  );
 
   const fileInputRef = useRef(null);
   const [documents, setDocuments] = useState([]);
@@ -98,6 +110,12 @@ export default function PracticePatientDocumentsSection({
   const [deleteStep, setDeleteStep] = useState(1);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiPreview, setAiPreview] = useState("");
+  const [secureLinks, setSecureLinks] = useState([]);
+  const [lastSecureUrl, setLastSecureUrl] = useState("");
+  const [downloadError, setDownloadError] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveStep, setArchiveStep] = useState(1);
 
   const isDraft = activeDoc?.status === "draft";
   const isShared = activeDoc?.status === "shared";
@@ -108,7 +126,9 @@ export default function PracticePatientDocumentsSection({
     setLoading(true);
     setError("");
     try {
-      const { res, data } = await fetchPracticeDocuments(linkId, practiceId);
+      const { res, data } = await fetchPracticeDocuments(linkId, practiceId, {
+        includeArchived: showArchived,
+      });
       if (res.status === 404 && data.error === "feature_disabled") {
         setDocuments([]);
         setError(t.featureDisabled);
@@ -124,10 +144,29 @@ export default function PracticePatientDocumentsSection({
     }
   }, [linkId, practiceId, t.featureDisabled, t.loadError]);
 
+  const loadSecureLinks = useCallback(
+    async (documentId) => {
+      if (!documentId || !practiceId) {
+        setSecureLinks([]);
+        return;
+      }
+      try {
+        const { res, data } = await fetchPracticeDocumentSecureLinks(practiceId, documentId);
+        if (res.ok && data.ok) {
+          setSecureLinks(Array.isArray(data.links) ? data.links : []);
+        }
+      } catch {
+        setSecureLinks([]);
+      }
+    },
+    [practiceId],
+  );
+
   const loadDoc = useCallback(
     async (documentId) => {
       if (!documentId) {
         setActiveDoc(null);
+        setSecureLinks([]);
         return;
       }
       setBusy(true);
@@ -138,13 +177,61 @@ export default function PracticePatientDocumentsSection({
           setDocType(data.document.type || "other");
           setTitle(data.document.title || "");
           setDescription(data.document.description || "");
+          await loadSecureLinks(documentId);
         }
       } finally {
         setBusy(false);
       }
     },
-    [linkId, practiceId],
+    [linkId, practiceId, loadSecureLinks],
   );
+
+  async function handleFileDownload(file, inline) {
+    if (!activeId || !file) return;
+    setDownloadError("");
+    try {
+      if (inline) {
+        await viewPracticeDocumentFile(linkId, practiceId, activeId, file.id, file.originalFileName);
+      } else {
+        await downloadPracticeDocumentFile(linkId, practiceId, activeId, file.id, file.originalFileName);
+      }
+    } catch (e) {
+      if (e?.message === "forbidden") setDownloadError(t.permissionDenied);
+      else if (e?.message === "document_unavailable") setDownloadError(t.notAvailable);
+      else setDownloadError(t.downloadError);
+    }
+  }
+
+  async function handleCreateSecureLink(file) {
+    if (!activeId || !file || readOnly) return;
+    setDownloadError("");
+    try {
+      const { res, data } = await createPracticeDocumentSecureLink(
+        linkId,
+        practiceId,
+        activeId,
+        file.id,
+      );
+      if (!res.ok || !data.ok) throw new Error("link_failed");
+      setLastSecureUrl(data.downloadUrl || "");
+      setStatusMsg(t.secureLinkCreated);
+      await loadSecureLinks(activeId);
+    } catch {
+      setDownloadError(t.linkError);
+    }
+  }
+
+  async function handleRevokeLink(tokenId) {
+    setDownloadError("");
+    try {
+      const { res, data } = await revokePracticeDocumentSecureLink(practiceId, tokenId);
+      if (!res.ok || !data.ok) throw new Error("revoke_failed");
+      setStatusMsg(t.linkRevoked);
+      await loadSecureLinks(activeId);
+    } catch {
+      setDownloadError(t.linkError);
+    }
+  }
 
   useEffect(() => {
     loadList();
@@ -290,19 +377,57 @@ export default function PracticePatientDocumentsSection({
     }
   }
 
-  async function handleArchive() {
+  function openArchiveDialog() {
+    setArchiveStep(1);
+    setArchiveOpen(true);
+  }
+
+  function closeArchiveDialog() {
+    setArchiveOpen(false);
+    setArchiveStep(1);
+  }
+
+  async function handleArchiveConfirm() {
     if (!activeId) return;
     setBusy(true);
     setError("");
     setStatusMsg("");
     try {
       const { res, data } = await archivePracticeDocument(linkId, practiceId, activeId);
+      if (res.status === 403) {
+        setError(lt.forbidden);
+        return;
+      }
       if (!res.ok || !data.ok) {
-        setError(t.archiveError);
+        setError(lt.archiveError);
         return;
       }
       setActiveDoc(data.document);
-      setStatusMsg(t.archived);
+      setStatusMsg(lt.archiveSuccess);
+      closeArchiveDialog();
+      await loadList();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleRestore() {
+    if (!activeId) return;
+    setBusy(true);
+    setError("");
+    setStatusMsg("");
+    try {
+      const { res, data } = await restorePracticeDocument(linkId, practiceId, activeId);
+      if (res.status === 403) {
+        setError(lt.forbidden);
+        return;
+      }
+      if (!res.ok || !data.ok) {
+        setError(lt.restoreError);
+        return;
+      }
+      setActiveDoc(data.document);
+      setStatusMsg(lt.restoreSuccess);
       await loadList();
     } finally {
       setBusy(false);
@@ -409,6 +534,17 @@ export default function PracticePatientDocumentsSection({
           {statusMsg}
         </p>
       ) : null}
+
+      <div className="medication-plan__actions">
+        <label className="practice-dashboard__muted">
+          <input
+            type="checkbox"
+            checked={showArchived}
+            onChange={(e) => setShowArchived(e.target.checked)}
+          />{" "}
+          {showArchived ? lt.hideArchive : lt.showArchive}
+        </label>
+      </div>
 
       {!readOnly ? (
         <div className="medication-plan__actions">
@@ -577,11 +713,94 @@ export default function PracticePatientDocumentsSection({
                   <ul className="practice-documents__file-list">
                     {activeDoc.files.map((f) => (
                       <li key={f.id}>
-                        {f.originalFileName} · {t.fileSize.replace("{size}", formatBytes(f.sizeBytes))}
+                        <span>
+                          {f.originalFileName} ·{" "}
+                          {t.fileSize.replace("{size}", formatBytes(f.sizeBytes))}
+                        </span>
+                        {!isDeleted ? (
+                          <div className="practice-documents__file-actions">
+                            <button
+                              type="button"
+                              className="patient-threads__btn patient-threads__btn--secondary"
+                              onClick={() => void handleFileDownload(f, true)}
+                              aria-label={`${t.viewDocument} ${f.originalFileName}`}
+                            >
+                              {t.viewDocument}
+                            </button>
+                            <button
+                              type="button"
+                              className="patient-threads__btn patient-threads__btn--primary"
+                              onClick={() => void handleFileDownload(f, false)}
+                              aria-label={`${t.download} ${f.originalFileName}`}
+                            >
+                              {t.download}
+                            </button>
+                            {!readOnly ? (
+                              <button
+                                type="button"
+                                className="patient-threads__btn patient-threads__btn--secondary"
+                                onClick={() => void handleCreateSecureLink(f)}
+                                aria-label={`${t.createSecureLink} ${f.originalFileName}`}
+                              >
+                                {t.createSecureLink}
+                              </button>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </li>
                     ))}
                   </ul>
+                  {!readOnly && !isDeleted ? (
+                    <p className="practice-dashboard__muted" role="note">
+                      {t.secureLinkHint}
+                    </p>
+                  ) : null}
+                  {lastSecureUrl ? (
+                    <p className="practice-dashboard__muted">
+                      <button
+                        type="button"
+                        className="patient-threads__btn patient-threads__btn--secondary"
+                        onClick={() => {
+                          void navigator.clipboard?.writeText(lastSecureUrl);
+                          setStatusMsg(t.secureLinkCopy);
+                        }}
+                      >
+                        {t.secureLinkCopy}
+                      </button>
+                    </p>
+                  ) : null}
+                  {secureLinks.length > 0 ? (
+                    <div>
+                      <p className="practice-dashboard__muted" style={{ fontWeight: 600 }}>
+                        {t.activeLinks}
+                      </p>
+                      <ul className="practice-documents__file-list">
+                        {secureLinks.map((link) => (
+                          <li key={link.id}>
+                            {link.fileId} · {t.linkExpires.replace("{date}", fmt(link.expiresAt, language))}
+                            {link.usedAt ? ` · ${t.linkUsed}` : ""}
+                            {!readOnly ? (
+                              <button
+                                type="button"
+                                className="patient-threads__btn patient-threads__btn--secondary"
+                                style={{ marginTop: "0.35rem" }}
+                                onClick={() => void handleRevokeLink(link.id)}
+                              >
+                                {t.revokeLink}
+                              </button>
+                            ) : null}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </div>
+              ) : null}
+
+              {downloadError ? (
+                <p className="practice-dashboard__error" role="alert">
+                  {downloadError}
+                </p>
               ) : null}
 
               {isDraft && !isDeleted ? (

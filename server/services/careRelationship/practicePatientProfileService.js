@@ -6,6 +6,8 @@ import {
   normalizeConsentScopes,
 } from "./consentScopes.js";
 import { linkToPatientJson } from "./practicePatientLinkService.js";
+import { notifyPatientInboxOfProfileAccess } from "../patientInbox/patientInboxNotify.js";
+import { notifyPracticeInboxOfProfileRevoked } from "../practiceInbox/practiceInboxNotify.js";
 
 const prisma = new PrismaClient();
 
@@ -218,6 +220,13 @@ export async function updatePatientProfileAccess(linkId, patientUserId, granted)
       practicePatientLinkId: row.id,
     },
   });
+
+  if (granted) {
+    await notifyPatientInboxOfProfileAccess(row, true);
+  } else {
+    await notifyPatientInboxOfProfileAccess(row, false);
+    await notifyPracticeInboxOfProfileRevoked(row);
+  }
 
   return linkToPatientJson(row);
 }

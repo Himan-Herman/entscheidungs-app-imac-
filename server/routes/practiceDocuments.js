@@ -9,9 +9,13 @@ import {
   getPracticeAccess,
   canReadPracticePatientLinks,
   canWritePracticePatientLinks,
+  canPracticeSoftDelete,
+  canPracticeRestoreFromArchive,
 } from "../utils/practiceAccess.js";
+import { parseIncludeArchived } from "../utils/lifecycleStatus.js";
 import {
   archiveDocument,
+  restoreArchivedDocument,
   softDeletePracticeDocument,
   createPracticeDocumentDraft,
   getDocumentForPractice,
@@ -26,6 +30,11 @@ import {
   generatePracticeDocumentAiOrganize,
   generatePracticeDocumentAiTitleDraft,
 } from "../services/practiceDocument/practiceDocumentAiService.js";
+import { generateDocumentDownloadAiNote } from "../services/practiceDocument/practiceDocumentDownloadAiService.js";
+import {
+  createPracticeDocumentDownloadLink,
+  practiceDirectDownload,
+} from "../services/practiceDocument/secureDocumentAccessService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 function documentAuditMetadata(doc) {
@@ -75,12 +84,17 @@ function mapError(err) {
     msg === "document_archived" ||
     msg === "document_already_archived" ||
     msg === "document_deleted" ||
-    msg === "document_already_deleted"
+    msg === "document_already_deleted" ||
+    msg === "document_not_archived"
   ) {
     return { status: 409, error: msg };
   }
   if (msg === "ai_not_configured") {
     return { status: 503, error: msg };
+  }
+  if (msg === "forbidden") return { status: 403, error: msg };
+  if (msg === "link_expired" || msg === "link_revoked" || msg === "document_unavailable") {
+    return { status: 410, error: msg };
   }
   return { status: 500, error: "request_failed" };
 }
@@ -119,6 +133,7 @@ router.get("/", async (req, res) => {
     const documents = await listDocumentsForPracticePatient(
       req.params.linkId,
       ctx.practiceId,
+      { includeArchived: parseIncludeArchived(req) },
     );
     return res.json({ ok: true, documents });
   } catch (err) {
@@ -195,6 +210,134 @@ router.post("/ai-title-draft", async (req, res) => {
     return res.json({ ok: true, ...draft });
   } catch (err) {
     console.error("[practice/documents/ai-title]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/practice/patients/:linkId/documents/:documentId/download-link */
+router.post("/:documentId/download-link", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!hasPracticePermission(ctx.access.role, PERMISSIONS.DOCUMENTS_READ)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  const fileId = String(req.body?.fileId || "").trim();
+  if (!fileId) {
+    return res.status(400).json({ ok: false, error: "validation_required" });
+  }
+
+  try {
+    const link = await createPracticeDocumentDownloadLink(
+      req.params.documentId,
+      fileId,
+      req.params.linkId,
+      ctx.practiceId,
+      ctx.userId,
+      ctx.access.role,
+      req,
+    );
+    return res.json({ ok: true, ...link });
+  } catch (err) {
+    console.error("[practice/documents/download-link]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** POST /api/practice/patients/:linkId/documents/:documentId/ai-download-note */
+router.post("/:documentId/ai-download-note", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!canReadPracticePatientLinks(ctx.access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const document = await getDocumentForPractice(
+      req.params.documentId,
+      req.params.linkId,
+      ctx.practiceId,
+    );
+    const file = document.files?.[0];
+    const result = await generateDocumentDownloadAiNote(
+      {
+        documentType: document.type,
+        fileName: file?.originalFileName,
+        mimeType: file?.mimeType,
+        locale: req.body?.locale,
+        userId: ctx.userId,
+        actorRole: ctx.access.role,
+        documentId: document.id,
+        practiceProfileId: ctx.practiceId,
+      },
+      { req },
+    );
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[practice/documents/ai-download-note]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/practice/patients/:linkId/documents/:documentId/download?fileId=&disposition= */
+router.get("/:documentId/download", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!hasPracticePermission(ctx.access.role, PERMISSIONS.DOCUMENTS_READ)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  const fileId = String(req.query.fileId || "").trim();
+  if (!fileId) {
+    return res.status(400).json({ ok: false, error: "validation_required" });
+  }
+
+  try {
+    const { file, buffer } = await practiceDirectDownload(
+      req.params.documentId,
+      fileId,
+      req.params.linkId,
+      ctx.practiceId,
+    );
+
+    const document = await getDocumentForPractice(
+      req.params.documentId,
+      req.params.linkId,
+      ctx.practiceId,
+    );
+
+    const disposition =
+      String(req.query.disposition || "").trim() === "inline" &&
+      file.mimeType === "application/pdf"
+        ? "inline"
+        : "attachment";
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action:
+        disposition === "inline"
+          ? "practice_document_viewed"
+          : "practice_document_download",
+      entityType: "document_download",
+      entityId: fileId,
+      metadata: documentAuditMetadata(document),
+    });
+
+    res.setHeader("Content-Type", file.mimeType);
+    res.setHeader(
+      "Content-Disposition",
+      `${disposition}; filename="${encodeURIComponent(file.originalFileName)}"`,
+    );
+    res.setHeader("Cache-Control", "private, no-store");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    return res.send(buffer);
+  } catch (err) {
+    console.error("[practice/documents/download]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
@@ -372,11 +515,44 @@ router.patch("/:documentId/archive", async (req, res) => {
   }
 });
 
+/** PATCH /api/practice/patients/:linkId/documents/:documentId/restore */
+router.patch("/:documentId/restore", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!canPracticeRestoreFromArchive(ctx.access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const document = await restoreArchivedDocument(
+      req.params.documentId,
+      req.params.linkId,
+      ctx.practiceId,
+      ctx.userId,
+    );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "practice_document_restored",
+      entityType: "practice_document",
+      entityId: document.id,
+      metadata: documentAuditMetadata(document),
+    });
+
+    return res.json({ ok: true, document });
+  } catch (err) {
+    console.error("[practice/documents/restore]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
 /** PATCH /api/practice/patients/:linkId/documents/:documentId/delete — soft delete */
 router.patch("/:documentId/delete", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!canPracticeSoftDelete(ctx.access.role)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 

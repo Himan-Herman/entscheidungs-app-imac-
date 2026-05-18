@@ -2,6 +2,23 @@ import { authFetch } from "../../../api/authFetch.js";
 
 const BASE = "/api/practice/inbox";
 
+export async function fetchPracticeInboxCount(practiceId) {
+  const q = new URLSearchParams({ practiceId });
+  const res = await authFetch(`${BASE}/count?${q}`);
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function postPracticeInboxListAiSummary(practiceId, locale) {
+  const res = await authFetch(`${BASE}/ai-summary`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ practiceId, locale }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function fetchPracticeInbox(practiceId, params = {}) {
   const q = new URLSearchParams({ practiceId });
   if (params.filter) q.set("filter", params.filter);

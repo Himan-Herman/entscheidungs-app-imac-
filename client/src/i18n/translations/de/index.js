@@ -14,6 +14,7 @@ import legal from "../legal/de/index.js";
 import settingsDoctorContacts from "./settingsDoctorContacts.js";
 import settingsPractices from "./settingsPractices.js";
 import practiceDashboard from "./practiceDashboard.js";
+import practiceOverview from "./practiceOverview.js";
 import practicePatients from "./practicePatients.js";
 import settingsPrivacy from "./settingsPrivacy.js";
 import accountPortal from "./accountPortal.js";
@@ -36,6 +37,11 @@ import patientDataControl from "./patientDataControl.js";
 import practiceDataRequests from "./practiceDataRequests.js";
 import practiceInbox from "./practiceInbox.js";
 import practicePatientProfile from "./practicePatientProfile.js";
+import patientActivity from "./patientActivity.js";
+import practiceAudit from "./practiceAudit.js";
+import practiceTeam from "./practiceTeam.js";
+import archiveLifecycle from "./archiveLifecycle.js";
+import exports from "./exports.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
 
@@ -56,6 +62,7 @@ export default {
   settingsDoctorContacts,
   settingsPractices,
   practiceDashboard,
+  practiceOverview,
   practicePatients,
   settingsPrivacy,
   accountPortal,
@@ -78,6 +85,10 @@ export default {
   practiceDataRequests,
   practiceInbox,
   practicePatientProfile,
+  patientActivity,
+  practiceAudit,
+  practiceTeam,
+  archiveLifecycle,
   intro,
   voiceInput,
 };

@@ -6,6 +6,7 @@ import {
   downloadPatientPracticeDocumentFile,
   fetchPatientPracticeDocument,
   submitPatientPracticeDocumentQuestion,
+  viewPatientPracticeDocumentFile,
 } from "../api/patientPracticeDocumentsApi.js";
 import "../../../styles/PatientInboxPage.css";
 import "../styles/PracticeDocuments.css";
@@ -111,6 +112,28 @@ export default function PatientPracticeDocumentDetailPage() {
     }
   }
 
+  function mapDownloadError(message) {
+    if (message === "forbidden") return t.permissionDenied;
+    if (message === "link_expired") return t.linkExpired;
+    if (message === "link_revoked") return t.linkRevoked;
+    if (message === "document_unavailable") return t.notAvailable;
+    return t.downloadError;
+  }
+
+  async function handleView(file) {
+    setDownloadError("");
+    try {
+      await viewPatientPracticeDocumentFile(documentId, file.id, file.originalFileName);
+    } catch (e) {
+      if (e?.message === "document_unavailable") {
+        setUnavailable(true);
+        setDoc(null);
+        return;
+      }
+      setDownloadError(mapDownloadError(e?.message));
+    }
+  }
+
   async function handleDownload(file) {
     setDownloadError("");
     try {
@@ -121,7 +144,7 @@ export default function PatientPracticeDocumentDetailPage() {
         setDoc(null);
         return;
       }
-      setDownloadError(t.downloadError);
+      setDownloadError(mapDownloadError(e?.message));
     }
   }
 
@@ -201,14 +224,24 @@ export default function PatientPracticeDocumentDetailPage() {
                   {file.originalFileName} ·{" "}
                   {t.fileSize.replace("{size}", formatBytes(file.sizeBytes))}
                 </span>
-                <button
-                  type="button"
-                  className="patient-threads__btn patient-threads__btn--primary"
-                  style={{ marginTop: "0.35rem" }}
-                  onClick={() => handleDownload(file)}
-                >
-                  {file.mimeType === "application/pdf" ? t.view : t.download}
-                </button>
+                <div className="practice-documents__file-actions">
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    onClick={() => void handleView(file)}
+                    aria-label={`${t.viewDocument} ${file.originalFileName}`}
+                  >
+                    {t.viewDocument}
+                  </button>
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--primary"
+                    onClick={() => void handleDownload(file)}
+                    aria-label={`${t.download} ${file.originalFileName}`}
+                  >
+                    {t.download}
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

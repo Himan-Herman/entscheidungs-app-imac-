@@ -1,63 +1,565 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BarChart3,
-  Building2,
+  Activity,
   ClipboardList,
+  FileText,
   Inbox,
-  LayoutDashboard,
-  Plug,
-  QrCode,
+  MessageSquare,
+  Pill,
+  Shield,
   UsersRound,
 } from "lucide-react";
+import { authFetch } from "../api/authFetch.js";
+import {
+  fetchPracticeOverviewActivity,
+  fetchPracticeOverviewSummary,
+  postPracticeOverviewAiSummary,
+} from "../features/practiceOverview/api/practiceOverviewApi.js";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
-import "../styles/WorkspaceHubPages.css";
+import "../styles/PracticeOverviewPage.css";
 
-const TILES = [
-  { to: "/settings/practices", key: "hubLinkProfiles", Icon: Building2 },
-  { to: "/settings/practices", key: "hubLinkQr", Icon: QrCode },
-  { to: "/practice/dashboard", key: "hubLinkDashboard", Icon: LayoutDashboard },
-  { to: "/practice/patients", key: "hubLinkPatients", Icon: UsersRound },
-  { to: "/practice/inbox", key: "hubLinkPracticeInbox", Icon: Inbox },
-  { to: "/practice/data-requests", key: "hubLinkPracticeDataRequests", Icon: ClipboardList },
-  { to: "/pre-visit/follow-ups", key: "hubLinkFollowUps", Icon: ClipboardList },
-  { to: "/practice/dashboard", key: "hubLinkIntegrations", Icon: Plug },
-  { to: "/practice/dashboard", key: "hubLinkAnalytics", Icon: BarChart3 },
-  { to: "/account/profiles", key: "hubLinkProfilesTeam", Icon: UsersRound },
+function fmtDate(iso, lang) {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  } catch {
+    return "—";
+  }
+}
+
+function fmtMetric(value, notProvided) {
+  if (value == null) return notProvided;
+  return String(value);
+}
+
+const CARD_DEFS = [
+  {
+    id: "inbox",
+    visibilityKey: "inbox",
+    metricKey: "unreadInboxItems",
+    labelKey: "cardInbox",
+    to: (practiceId) => `/practice/inbox?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: Inbox,
+  },
+  {
+    id: "patients",
+    visibilityKey: "patients",
+    metricKey: "activePatientLinks",
+    labelKey: "cardPatients",
+    to: (practiceId) => `/practice/patients?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: UsersRound,
+  },
+  {
+    id: "messages",
+    visibilityKey: "messages",
+    metricKey: "openMessages",
+    labelKey: "cardMessages",
+    to: (practiceId) => `/practice/patients?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: MessageSquare,
+  },
+  {
+    id: "documents",
+    visibilityKey: "documents",
+    metricKey: "newDocumentShares",
+    labelKey: "cardDocuments",
+    to: (practiceId) => `/practice/patients?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: FileText,
+  },
+  {
+    id: "medication",
+    visibilityKey: "medication",
+    metricKey: "publishedMedicationPlans",
+    labelKey: "cardMedication",
+    to: (practiceId) => `/practice/patients?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: Pill,
+  },
+  {
+    id: "dataRequests",
+    visibilityKey: "dataRequests",
+    metricKey: "openDataRequests",
+    labelKey: "cardDataRequests",
+    to: (practiceId) => `/practice/data-requests?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: ClipboardList,
+  },
+  {
+    id: "team",
+    visibilityKey: "team",
+    labelKey: "cardTeam",
+    to: (practiceId) => `/practice/team?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: Shield,
+  },
+  {
+    id: "activity",
+    visibilityKey: "patients",
+    labelKey: "cardActivity",
+    to: (practiceId, hasAudit) =>
+      hasAudit
+        ? `/practice/audit?practiceId=${encodeURIComponent(practiceId)}`
+        : "#practice-overview-activity",
+    Icon: Activity,
+  },
 ];
+
+const ACTIVITY_LABEL_KEYS = {
+  message: "activityMessage",
+  document_shared: "activityDocumentShared",
+  medication_published: "activityMedicationPublished",
+  profile_access_changed: "activityProfileAccess",
+  data_request: "activityDataRequest",
+  relationship_archived: "activityRelationshipArchived",
+};
+
+const ROLE_LABEL_KEYS = {
+  owner: "roleOwner",
+  admin: "roleAdmin",
+  doctor: "roleDoctor",
+  assistant: "roleAssistant",
+  viewer: "roleViewer",
+};
 
 export default function PracticeHubPage() {
   const { language } = useLanguage();
-  const t = useMemo(() => {
-    const m = getMessages(language);
-    return m.roleEntry ?? getMessages("en").roleEntry;
-  }, [language]);
+  const t = useMemo(
+    () => getMessages(language).practiceOverview || getMessages("en").practiceOverview,
+    [language],
+  );
+  const tTeam = useMemo(
+    () => getMessages(language).practiceTeam || getMessages("en").practiceTeam,
+    [language],
+  );
+
+  const [practices, setPractices] = useState([]);
+  const [practiceId, setPracticeId] = useState("");
+  const [summary, setSummary] = useState(null);
+  const [activity, setActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activityLoading, setActivityLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activityError, setActivityError] = useState("");
+  const [aiText, setAiText] = useState("");
+  const [aiDisclaimer, setAiDisclaimer] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+  const loadPractices = useCallback(async () => {
+    const res = await authFetch("/api/practices");
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error("load_practices_failed");
+    const rows = Array.isArray(data.practices) ? data.practices : [];
+    setPractices(rows);
+    if (!practiceId && rows[0]?.id) setPracticeId(rows[0].id);
+  }, [practiceId]);
+
+  const loadSummary = useCallback(async () => {
+    if (!practiceId) {
+      setSummary(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError("");
+    try {
+      const { res, data } = await fetchPracticeOverviewSummary(practiceId);
+      if (!res.ok || !data.ok) throw new Error("summary_failed");
+      setSummary(data);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setSummary(null);
+      setError(t.loadError);
+    } finally {
+      setLoading(false);
+    }
+  }, [practiceId, t.loadError]);
+
+  const loadActivity = useCallback(async () => {
+    if (!practiceId) {
+      setActivity([]);
+      setActivityLoading(false);
+      return;
+    }
+    setActivityLoading(true);
+    setActivityError("");
+    try {
+      const { res, data } = await fetchPracticeOverviewActivity(practiceId);
+      if (!res.ok || !data.ok) throw new Error("activity_failed");
+      setActivity(Array.isArray(data.events) ? data.events : []);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setActivity([]);
+      setActivityError(t.activityLoadError);
+    } finally {
+      setActivityLoading(false);
+    }
+  }, [practiceId, t.activityLoadError]);
 
   useEffect(() => {
-    document.title = t.practiceHub.pageTitle;
-  }, [t.practiceHub.pageTitle]);
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
+
+  useEffect(() => {
+    void loadPractices().catch(() => {});
+  }, [loadPractices]);
+
+  useEffect(() => {
+    void loadSummary();
+    void loadActivity();
+    setAiText("");
+    setAiDisclaimer("");
+    setAiError("");
+  }, [loadSummary, loadActivity]);
+
+  const visibility = summary?.visibility || {};
+  const metrics = summary?.metrics || {};
+  const quickActions = summary?.quickActions || {};
+
+  const visibleCards = useMemo(
+    () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
+    [visibility],
+  );
+
+  const metricRows = useMemo(() => {
+    const rows = [];
+    if (visibility.inbox) {
+      rows.push({ key: "unreadInbox", label: t.metricUnreadInbox, value: metrics.unreadInboxItems });
+    }
+    if (visibility.messages) {
+      rows.push({ key: "messages", label: t.metricOpenMessages, value: metrics.openMessages });
+    }
+    if (visibility.dataRequests) {
+      rows.push({
+        key: "dataReq",
+        label: t.metricOpenDataRequests,
+        value: metrics.openDataRequests,
+      });
+    }
+    if (visibility.patients) {
+      rows.push({
+        key: "patients",
+        label: t.metricActivePatients,
+        value: metrics.activePatientLinks,
+      });
+    }
+    if (visibility.documents) {
+      rows.push({
+        key: "docs",
+        label: t.metricNewDocuments,
+        value: metrics.newDocumentShares,
+      });
+    }
+    if (visibility.medication) {
+      rows.push({
+        key: "meds",
+        label: t.metricPublishedMeds,
+        value: metrics.publishedMedicationPlans,
+      });
+    }
+    return rows;
+  }, [metrics, t, visibility]);
+
+  const roleLabel = useMemo(() => {
+    const role = summary?.role || "";
+    const key = ROLE_LABEL_KEYS[role];
+    return key && tTeam[key] ? tTeam[key] : role || t.notProvided;
+  }, [summary?.role, t.notProvided, tTeam]);
+
+  const runAiSummary = async () => {
+    if (!practiceId) return;
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const { res, data } = await postPracticeOverviewAiSummary(practiceId, language);
+      if (!res.ok || !data.ok) throw new Error("ai_failed");
+      setAiText(String(data.summary || ""));
+      setAiDisclaimer(String(data.disclaimer || t.aiDisclaimer));
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setAiError(t.aiError);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const patientHref = (linkId) =>
+    `/practice/patients/${encodeURIComponent(linkId)}?practiceId=${encodeURIComponent(practiceId)}`;
 
   return (
-    <div className="workspace-hub workspace-hub--practice">
-      <header className="workspace-hub__hero">
-        <h1 className="workspace-hub__title">{t.practiceHub.heading}</h1>
-        <p className="workspace-hub__sub">{t.practiceHub.sub}</p>
+    <div className="practice-overview">
+      <header className="practice-overview__hero">
+        <h1 className="practice-overview__title">{t.heading}</h1>
+        <p className="practice-overview__intro">{t.intro}</p>
+        <p className="practice-overview__safety" role="note">
+          {t.safetyNote}
+        </p>
       </header>
 
-      <nav className="workspace-hub__grid" aria-label={t.practiceHub.heading}>
-        {TILES.map((tile) => {
-          const TileIcon = tile.Icon;
-          return (
-            <Link key={`${tile.to}-${tile.key}`} className="workspace-hub__tile" to={tile.to}>
-              <span className="workspace-hub__tile-icon" aria-hidden>
-                <TileIcon size={22} strokeWidth={1.75} />
-              </span>
-              <span className="workspace-hub__tile-label">{t[tile.key]}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="practice-overview__toolbar">
+        <label htmlFor="practice-overview-select">{t.selectPractice}</label>
+        <select
+          id="practice-overview-select"
+          className="practice-overview__select"
+          value={practiceId}
+          onChange={(e) => setPracticeId(e.target.value)}
+          disabled={!practices.length}
+        >
+          {!practices.length ? (
+            <option value="">{t.selectPracticePlaceholder}</option>
+          ) : null}
+          {practices.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.practiceName || p.id}
+            </option>
+          ))}
+        </select>
+        {summary?.role ? (
+          <p className="practice-overview__role">
+            {t.roleLabel}: <strong>{roleLabel}</strong>
+          </p>
+        ) : null}
+      </div>
+
+      {error ? (
+        <p className="practice-overview__status practice-overview__status--error" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      {loading ? (
+        <p className="practice-overview__status" aria-live="polite">
+          {t.loading}
+        </p>
+      ) : null}
+
+      {!loading && summary ? (
+        <>
+          <section aria-labelledby="practice-overview-cards-heading">
+            <h2 id="practice-overview-cards-heading" className="practice-overview__section-title">
+              {t.cardsHeading}
+            </h2>
+            <nav className="practice-overview__cards" aria-label={t.cardsHeading}>
+              {visibleCards.map((card) => {
+                const CardIcon = card.Icon;
+                const href =
+                  card.id === "activity"
+                    ? card.to(practiceId, Boolean(visibility.audit))
+                    : card.to(practiceId);
+                const metricValue =
+                  card.metricKey != null ? metrics[card.metricKey] : null;
+                return (
+                  <Link
+                    key={card.id}
+                    className="practice-overview__card"
+                    to={href}
+                    aria-label={`${t[card.labelKey]}${metricValue != null ? `: ${metricValue}` : ""}`}
+                  >
+                    <span className="practice-overview__card-icon" aria-hidden>
+                      <CardIcon size={22} strokeWidth={1.75} />
+                    </span>
+                    <span className="practice-overview__card-label">{t[card.labelKey]}</span>
+                    {card.metricKey != null ? (
+                      <span className="practice-overview__card-metric" aria-hidden>
+                        {fmtMetric(metricValue, t.notProvided)}
+                      </span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </nav>
+          </section>
+
+          {metricRows.length > 0 ? (
+            <section aria-labelledby="practice-overview-metrics-heading">
+              <h2 id="practice-overview-metrics-heading" className="practice-overview__section-title">
+                {t.metricsHeading}
+              </h2>
+              <dl className="practice-overview__metrics-grid">
+                {metricRows.map((row) => (
+                  <div key={row.key} className="practice-overview__metric">
+                    <dt>{row.label}</dt>
+                    <dd aria-label={`${row.label}: ${fmtMetric(row.value, t.notProvided)}`}>
+                      {fmtMetric(row.value, t.notProvided)}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : (
+            <p className="practice-overview__status">{t.emptyMetrics}</p>
+          )}
+
+          {visibility.patients &&
+          Array.isArray(metrics.recentlyActivePatients) &&
+          metrics.recentlyActivePatients.length > 0 ? (
+            <section aria-labelledby="practice-overview-recent-patients-heading">
+              <h2
+                id="practice-overview-recent-patients-heading"
+                className="practice-overview__section-title"
+              >
+                {t.metricRecentPatients}
+              </h2>
+              <ul className="practice-overview__recent-patients">
+                {metrics.recentlyActivePatients.map((row) => (
+                  <li key={row.linkId} className="practice-overview__recent-patient">
+                    <Link
+                      className="practice-overview__activity-link"
+                      to={patientHref(row.linkId)}
+                      aria-label={t.recentPatientAria}
+                    >
+                      {t.recentPatientLink}
+                    </Link>
+                    <time dateTime={row.lastActivityAt} className="practice-overview__activity-time">
+                      {fmtDate(row.lastActivityAt, language)}
+                    </time>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          <section aria-labelledby="practice-overview-actions-heading">
+            <h2 id="practice-overview-actions-heading" className="practice-overview__section-title">
+              {t.quickActionsHeading}
+            </h2>
+            <div className="practice-overview__actions">
+              {quickActions.searchPatient ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionSearchPatient}
+                </Link>
+              ) : null}
+              {quickActions.openInbox ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/inbox?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenInbox}
+                </Link>
+              ) : null}
+              {quickActions.newMessage ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionNewMessage}
+                </Link>
+              ) : null}
+              {quickActions.uploadDocument ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionUploadDocument}
+                </Link>
+              ) : null}
+              {quickActions.createMedicationPlan ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionCreateMedicationPlan}
+                </Link>
+              ) : null}
+              {quickActions.manageTeam ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/team?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionManageTeam}
+                </Link>
+              ) : null}
+            </div>
+          </section>
+
+          <section id="practice-overview-activity" aria-labelledby="practice-overview-activity-heading">
+            <h2 id="practice-overview-activity-heading" className="practice-overview__section-title">
+              {t.recentActivityHeading}
+            </h2>
+            {activityLoading ? (
+              <p className="practice-overview__status" aria-live="polite">
+                {t.loading}
+              </p>
+            ) : null}
+            {activityError ? (
+              <p className="practice-overview__status practice-overview__status--error" role="alert">
+                {activityError}
+              </p>
+            ) : null}
+            {!activityLoading && !activityError && activity.length === 0 ? (
+              <p className="practice-overview__status">{t.emptyActivity}</p>
+            ) : null}
+            {!activityLoading && activity.length > 0 ? (
+              <ul className="practice-overview__activity-list">
+                {activity.map((ev) => {
+                  const labelKey = ACTIVITY_LABEL_KEYS[ev.type];
+                  const label = labelKey ? t[labelKey] : ev.type;
+                  return (
+                    <li key={ev.id} className="practice-overview__activity-item">
+                      <span className="practice-overview__activity-type">{label}</span>
+                      <time
+                        className="practice-overview__activity-time"
+                        dateTime={ev.occurredAt}
+                      >
+                        {fmtDate(ev.occurredAt, language)}
+                      </time>
+                      {ev.practicePatientLinkId ? (
+                        <Link
+                          className="practice-overview__activity-link"
+                          to={patientHref(ev.practicePatientLinkId)}
+                        >
+                          {t.recentPatientLink}
+                        </Link>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </section>
+
+          <section className="practice-overview__ai" aria-labelledby="practice-overview-ai-heading">
+            <h2 id="practice-overview-ai-heading" className="practice-overview__section-title">
+              {t.aiHeading}
+            </h2>
+            <p className="practice-overview__ai-disclaimer">{t.aiDisclaimer}</p>
+            <button
+              type="button"
+              className="practice-overview__action practice-overview__action--secondary"
+              onClick={() => void runAiSummary()}
+              disabled={aiLoading || !practiceId}
+            >
+              {aiLoading ? t.aiLoading : t.aiLoad}
+            </button>
+            {aiError ? (
+              <p className="practice-overview__status practice-overview__status--error" role="alert">
+                {aiError}
+              </p>
+            ) : null}
+            {aiText ? (
+              <pre className="practice-overview__ai-text" aria-live="polite">
+                {aiText}
+              </pre>
+            ) : (
+              !aiLoading && <p className="practice-overview__status">{t.aiEmpty}</p>
+            )}
+            {aiDisclaimer ? (
+              <p className="practice-overview__ai-disclaimer">{aiDisclaimer}</p>
+            ) : null}
+          </section>
+
+          <Link
+            className="practice-overview__footer-link"
+            to={`/practice/dashboard?practiceId=${encodeURIComponent(practiceId)}`}
+          >
+            {t.preVisitLink}
+          </Link>
+        </>
+      ) : null}
     </div>
   );
 }

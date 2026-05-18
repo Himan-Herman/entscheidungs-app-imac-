@@ -8,9 +8,13 @@ import {
   getPracticeAccess,
   canReadPracticePatientLinks,
   canWritePracticePatientLinks,
+  canPracticeSoftDelete,
+  canPracticeRestoreFromArchive,
 } from "../utils/practiceAccess.js";
+import { parseIncludeArchived } from "../utils/lifecycleStatus.js";
 import {
   archiveMedicationPlan,
+  restoreArchivedMedicationPlan,
   createDraftMedicationPlan,
   deleteMedicationPlan,
   getMedicationPlanByLink,
@@ -59,7 +63,8 @@ function mapError(err) {
     msg === "link_not_active" ||
     msg === "plan_not_editable" ||
     msg === "plan_not_publishable" ||
-    msg === "plan_already_archived"
+    msg === "plan_already_archived" ||
+    msg === "plan_not_archived"
   ) {
     return { status: 409, error: msg };
   }
@@ -100,6 +105,7 @@ router.get("/", async (req, res) => {
     const plans = await listMedicationPlansForPracticePatient(
       req.params.linkId,
       ctx.practiceId,
+      { includeArchived: parseIncludeArchived(req) },
     );
     return res.json({ ok: true, plans });
   } catch (err) {
@@ -269,11 +275,43 @@ router.patch("/:planId/archive", async (req, res) => {
   }
 });
 
+/** PATCH /api/practice/patients/:linkId/medication-plans/:planId/restore */
+router.patch("/:planId/restore", async (req, res) => {
+  const ctx = await requirePracticeAccess(req);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!canPracticeRestoreFromArchive(ctx.access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const plan = await restoreArchivedMedicationPlan(
+      req.params.planId,
+      req.params.linkId,
+      ctx.practiceId,
+    );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "medication_plan_restored",
+      entityType: "medication_plan",
+      entityId: plan.id,
+      metadata: medicationPlanAuditMetadata(plan),
+    });
+
+    return res.json({ ok: true, plan });
+  } catch (err) {
+    console.error("[practice/medication-plans/restore]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
 /** PATCH /api/practice/patients/:linkId/medication-plans/:planId/delete */
 router.patch("/:planId/delete", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!canPracticeSoftDelete(ctx.access.role)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 

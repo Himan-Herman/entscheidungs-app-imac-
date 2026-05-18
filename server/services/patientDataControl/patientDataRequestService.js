@@ -3,6 +3,7 @@ import { writeAuditLog } from "../auditLogService.js";
 import { linkHasConsentScope } from "../careRelationship/consentScopes.js";
 import { updatePatientProfileAccess } from "../careRelationship/practicePatientProfileService.js";
 import { notifyPracticeInboxOfDataRequest } from "../practiceInbox/practiceInboxNotify.js";
+import { notifyPatientInboxOfDataRequestStatus } from "../patientInbox/patientInboxNotify.js";
 
 const prisma = new PrismaClient();
 
@@ -324,6 +325,10 @@ export async function updatePracticeDataRequestStatus(input) {
       newStatus: status,
     },
   });
+
+  if (status !== row.status) {
+    await notifyPatientInboxOfDataRequestStatus(updated, row.status);
+  }
 
   return requestToJson(updated);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Activity,
@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
+import InboxCountBadge from "../components/InboxCountBadge.jsx";
 import "../styles/WorkspaceHubPages.css";
 
 const LINKS = [
@@ -47,6 +49,12 @@ const LINKS = [
     subtitleKey: "hubLinkDataControlSub",
     icon: Users,
   },
+  {
+    to: "/patient/activity",
+    key: "hubLinkPatientActivity",
+    subtitleKey: "hubLinkPatientActivitySub",
+    icon: Activity,
+  },
   { to: "/patient/find-practices", key: "hubLinkFindPractices", icon: MapPinned },
   { to: "/account/health", key: "hubLinkHealthProfile", icon: Heart },
   { to: "/pre-visit", key: "hubLinkPreVisit", icon: HeartPulse },
@@ -67,9 +75,28 @@ export default function PatientHubPage() {
     return m.roleEntry ?? getMessages("en").roleEntry;
   }, [language]);
 
+  const tInbox = useMemo(
+    () => getMessages(language).patientInbox || getMessages("en").patientInbox,
+    [language],
+  );
+  const [inboxUnread, setInboxUnread] = useState(0);
+
+  const loadInboxCount = useCallback(async () => {
+    try {
+      const { res, data } = await fetchPatientInboxCount();
+      if (res.ok && data.ok) setInboxUnread(Number(data.unreadCount) || 0);
+    } catch {
+      /* optional feature */
+    }
+  }, []);
+
   useEffect(() => {
     document.title = t.patientHub.pageTitle;
   }, [t.patientHub.pageTitle]);
+
+  useEffect(() => {
+    void loadInboxCount();
+  }, [loadInboxCount]);
 
   return (
     <div className="workspace-hub">
@@ -89,7 +116,15 @@ export default function PatientHubPage() {
               <span className="workspace-hub__tile-icon" aria-hidden>
                 <TileIcon size={22} strokeWidth={1.75} />
               </span>
-              <span className="workspace-hub__tile-label">{t[link.key]}</span>
+              <span className="workspace-hub__tile-label">
+                {t[link.key]}
+                {link.key === "hubLinkInbox" ? (
+                  <InboxCountBadge
+                    count={inboxUnread}
+                    label={tInbox.badgeAria}
+                  />
+                ) : null}
+              </span>
               {link.subtitleKey ? (
                 <span className="workspace-hub__tile-sub">{t[link.subtitleKey]}</span>
               ) : null}

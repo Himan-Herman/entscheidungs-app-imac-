@@ -189,10 +189,14 @@ export async function createThread(input) {
  * @param {string} linkId
  * @param {string} practiceProfileId
  */
-export async function listThreadsForPractice(linkId, practiceProfileId) {
+export async function listThreadsForPractice(linkId, practiceProfileId, opts = {}) {
   await assertLinkForPractice(linkId, practiceProfileId);
   const rows = await prisma.practicePatientThread.findMany({
-    where: { practicePatientLinkId: linkId, practiceProfileId },
+    where: {
+      practicePatientLinkId: linkId,
+      practiceProfileId,
+      ...(opts.includeArchived ? {} : { status: { not: "archived" } }),
+    },
     include: {
       messages: { orderBy: { createdAt: "desc" }, take: 1 },
       _count: { select: { messages: true } },
@@ -214,14 +218,14 @@ export async function listThreadsForPractice(linkId, practiceProfileId) {
 /**
  * @param {string} patientUserId
  */
-export async function listThreadsForPatient(patientUserId) {
+export async function listThreadsForPatient(patientUserId, opts = {}) {
   const uid = String(patientUserId || "").trim();
   if (!uid) throw new Error("validation_required");
 
   const rows = await prisma.practicePatientThread.findMany({
     where: {
       patientUserId: uid,
-      status: { not: "archived" },
+      ...(opts.includeArchived ? {} : { status: { not: "archived" } }),
     },
     include: {
       messages: { orderBy: { createdAt: "desc" }, take: 1 },
@@ -431,7 +435,31 @@ export async function archiveThreadForPractice(threadId, practiceProfileId, link
   const now = new Date();
   const row = await prisma.practicePatientThread.update({
     where: { id: existing.id },
-    data: { status: "archived", updatedAt: now },
+    data: { status: "archived", archivedAt: now, updatedAt: now },
+    include: {
+      messages: { orderBy: { createdAt: "asc" } },
+      _count: { select: { messages: true } },
+    },
+  });
+  return threadToJson(row, { includeMessages: true });
+}
+
+/**
+ * @param {string} threadId
+ * @param {string} practiceProfileId
+ * @param {string} linkId
+ */
+export async function restoreThreadForPractice(threadId, practiceProfileId, linkId) {
+  const existing = await getThreadForPractice(threadId, practiceProfileId, linkId);
+  if (existing.status !== "archived") throw new Error("thread_not_archived");
+  const now = new Date();
+  const row = await prisma.practicePatientThread.update({
+    where: { id: existing.id },
+    data: {
+      status: existing.closedAt ? "closed" : "open",
+      archivedAt: null,
+      updatedAt: now,
+    },
     include: {
       messages: { orderBy: { createdAt: "asc" } },
       _count: { select: { messages: true } },
@@ -449,7 +477,36 @@ export async function archiveThreadForPatient(threadId, patientUserId) {
   const now = new Date();
   const row = await prisma.practicePatientThread.update({
     where: { id: existing.id },
-    data: { status: "archived", updatedAt: now },
+    data: { status: "archived", archivedAt: now, updatedAt: now },
+    include: {
+      messages: { orderBy: { createdAt: "asc" } },
+      practiceProfile: { select: { id: true, practiceName: true } },
+      _count: { select: { messages: true } },
+    },
+  });
+  return {
+    ...threadToJson(row, { includeMessages: true }),
+    practice: row.practiceProfile
+      ? { id: row.practiceProfile.id, practiceName: row.practiceProfile.practiceName }
+      : null,
+  };
+}
+
+/**
+ * @param {string} threadId
+ * @param {string} patientUserId
+ */
+export async function restoreThreadForPatient(threadId, patientUserId) {
+  const existing = await getThreadForPatient(threadId, patientUserId);
+  if (existing.status !== "archived") throw new Error("thread_not_archived");
+  const now = new Date();
+  const row = await prisma.practicePatientThread.update({
+    where: { id: existing.id },
+    data: {
+      status: existing.closedAt ? "closed" : "open",
+      archivedAt: null,
+      updatedAt: now,
+    },
     include: {
       messages: { orderBy: { createdAt: "asc" } },
       practiceProfile: { select: { id: true, practiceName: true } },

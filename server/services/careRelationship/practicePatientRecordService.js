@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { linkHasConsentScope } from "./consentScopes.js";
 import { getPracticePatientLink } from "./practicePatientLinkService.js";
+import { listPracticeLinkActivity } from "../activity/activityFeedService.js";
 
 const prisma = new PrismaClient();
 
@@ -109,204 +110,13 @@ export async function getPracticePatientOverview(linkId, practiceProfileId) {
   };
 }
 
-const ACTIVITY_ACTION_MAP = {
-  practice_document_shared: "document_shared",
-  practice_document_share_revoked: "document_share_revoked",
-  practice_document_archived: "document_archived",
-  practice_document_deleted: "document_deleted",
-  practice_thread_message_sent: "message_sent",
-  patient_thread_message_sent: "message_sent",
-  profile_access_granted: "profile_access_granted",
-  profile_access_revoked: "profile_access_revoked",
-  medication_plan_published: "medication_plan_published",
-  practice_patient_link_status_updated: "relationship_status_changed",
-  practice_patient_link_archived_by_patient: "relationship_archived",
-  patient_data_request_submitted: "data_request_submitted",
-  practice_thread_created: "thread_created",
-};
-
-const DOC_AUDIT_ACTION_MAP = {
-  share_revoked: "document_share_revoked",
-  archived: "document_archived",
-  deleted: "document_deleted",
-};
-
 /**
  * @param {string} linkId
  * @param {string} practiceProfileId
+ * @param {{ type?: string, q?: string, from?: string, to?: string }} [query]
  */
-export async function getPracticePatientActivity(linkId, practiceProfileId) {
-  const row = await prisma.practicePatientLink.findFirst({
-    where: { id: linkId, practiceProfileId },
-  });
-  if (!row) throw new Error("link_not_found");
-
-  /** @type {{ id: string, type: string, occurredAt: Date, actorRole: string }[]} */
-  const events = [];
-
-  const [shares, messages, plans, dataRequests, audits, docAudits] =
-    await Promise.all([
-      prisma.practiceDocumentShare.findMany({
-        where: { document: { practicePatientLinkId: linkId } },
-        orderBy: { sharedAt: "desc" },
-        take: 25,
-        select: { id: true, sharedAt: true },
-      }),
-      prisma.practicePatientMessage.findMany({
-        where: { thread: { practicePatientLinkId: linkId } },
-        orderBy: { createdAt: "desc" },
-        take: 30,
-        select: { id: true, createdAt: true, senderType: true },
-      }),
-      prisma.medicationPlan.findMany({
-        where: {
-          practicePatientLinkId: linkId,
-          status: "published",
-          publishedAt: { not: null },
-        },
-        orderBy: { publishedAt: "desc" },
-        take: 20,
-        select: { id: true, publishedAt: true },
-      }),
-      prisma.patientDataRequest.findMany({
-        where: { practicePatientLinkId: linkId },
-        orderBy: { createdAt: "desc" },
-        take: 15,
-        select: { id: true, type: true, createdAt: true },
-      }),
-      prisma.auditLog.findMany({
-        where: {
-          entityType: "PracticePatientLink",
-          entityId: linkId,
-          action: {
-            in: [
-              "profile_access_granted",
-              "profile_access_revoked",
-              "practice_patient_link_status_updated",
-              "practice_patient_link_archived_by_patient",
-              "practice_patient_link_created",
-              "practice_patient_link_consent_accepted",
-            ],
-          },
-        },
-        orderBy: { createdAt: "desc" },
-        take: 30,
-        select: { id: true, action: true, createdAt: true, actorRole: true },
-      }),
-      prisma.practiceDocumentAuditEntry.findMany({
-        where: {
-          practiceProfileId,
-          patientUserId: row.patientUserId,
-        },
-        orderBy: { createdAt: "desc" },
-        take: 25,
-        select: { id: true, action: true, createdAt: true, actorRole: true },
-      }),
-    ]);
-
-  for (const s of shares) {
-    events.push({
-      id: `share-${s.id}`,
-      type: "document_shared",
-      occurredAt: s.sharedAt,
-      actorRole: "practice",
-    });
-  }
-
-  for (const m of messages) {
-    events.push({
-      id: `msg-${m.id}`,
-      type: "message_sent",
-      occurredAt: m.createdAt,
-      actorRole: m.senderType === "patient" ? "patient" : "practice",
-    });
-  }
-
-  for (const p of plans) {
-    if (!p.publishedAt) continue;
-    events.push({
-      id: `plan-${p.id}`,
-      type: "medication_plan_published",
-      occurredAt: p.publishedAt,
-      actorRole: "practice",
-    });
-  }
-
-  for (const r of dataRequests) {
-    events.push({
-      id: `req-${r.id}`,
-      type: "data_request_submitted",
-      occurredAt: r.createdAt,
-      actorRole: "patient",
-    });
-  }
-
-  for (const a of audits) {
-    const type = ACTIVITY_ACTION_MAP[a.action];
-    if (!type || type === "profile_viewed") continue;
-    events.push({
-      id: `audit-${a.id}`,
-      type,
-      occurredAt: a.createdAt,
-      actorRole: a.actorRole === "patient" ? "patient" : "practice",
-    });
-  }
-
-  for (const d of docAudits) {
-    const type = DOC_AUDIT_ACTION_MAP[d.action];
-    if (!type) continue;
-    events.push({
-      id: `doc-audit-${d.id}`,
-      type,
-      occurredAt: d.createdAt,
-      actorRole: d.actorRole === "patient" ? "patient" : "practice",
-    });
-  }
-
-  const planIds = (
-    await prisma.medicationPlan.findMany({
-      where: { practicePatientLinkId: linkId },
-      select: { id: true },
-    })
-  ).map((x) => x.id);
-
-  if (planIds.length > 0) {
-    const medicationAudits = await prisma.auditLog.findMany({
-      where: {
-        action: "medication_plan_published",
-        entityType: "MedicationPlan",
-        entityId: { in: planIds },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      select: { id: true, action: true, createdAt: true, actorRole: true },
-    });
-
-    for (const a of medicationAudits) {
-      const type = ACTIVITY_ACTION_MAP[a.action];
-      if (!type) continue;
-      events.push({
-        id: `audit-med-${a.id}`,
-        type,
-        occurredAt: a.createdAt,
-        actorRole: "practice",
-      });
-    }
-  }
-
-  events.sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt));
-
-  const seen = new Set();
-  const deduped = [];
-  for (const e of events) {
-    const key = `${e.type}-${e.occurredAt}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    deduped.push(e);
-    if (deduped.length >= 50) break;
-  }
-
-  return { events: deduped };
+export async function getPracticePatientActivity(linkId, practiceProfileId, query = {}) {
+  return listPracticeLinkActivity(linkId, practiceProfileId, query);
 }
 
 /**
@@ -319,7 +129,8 @@ export async function enrichPracticePatientLinks(links) {
   const practiceProfileId = links[0].practiceProfileId;
   const userIds = [...new Set(links.map((l) => l.patientUserId))];
 
-  const [docCounts, threadAgg, docMax, threadMax, visitMax] = await Promise.all([
+  const [docCounts, threadAgg, docMax, threadMax, visitMax, medPlanLinks, openReqLinks, unreadAgg] =
+    await Promise.all([
     prisma.practiceDocument.groupBy({
       by: ["practicePatientLinkId"],
       where: {
@@ -354,7 +165,45 @@ export async function enrichPracticePatientLinks(links) {
       },
       _max: { updatedAt: true },
     }),
+    prisma.medicationPlan.groupBy({
+      by: ["practicePatientLinkId"],
+      where: {
+        practicePatientLinkId: { in: linkIds },
+        status: "published",
+      },
+      _count: { _all: true },
+    }),
+    prisma.patientDataRequest.groupBy({
+      by: ["practicePatientLinkId"],
+      where: {
+        practicePatientLinkId: { in: linkIds },
+        status: { in: ["submitted", "in_review"] },
+      },
+      _count: { _all: true },
+    }),
+    prisma.practicePatientMessage.groupBy({
+      by: ["threadId"],
+      where: {
+        senderType: "patient",
+        readAt: null,
+        thread: { practicePatientLinkId: { in: linkIds } },
+      },
+      _count: { _all: true },
+    }),
   ]);
+
+  const threadsByLink = await prisma.practicePatientThread.findMany({
+    where: { practicePatientLinkId: { in: linkIds } },
+    select: { id: true, practicePatientLinkId: true },
+  });
+  const threadLinkMap = Object.fromEntries(threadsByLink.map((t) => [t.id, t.practicePatientLinkId]));
+  const unreadByLink = {};
+  for (const row of unreadAgg) {
+    const linkIdForThread = threadLinkMap[row.threadId];
+    if (!linkIdForThread) continue;
+    unreadByLink[linkIdForThread] =
+      (unreadByLink[linkIdForThread] || 0) + row._count._all;
+  }
 
   const docCountMap = Object.fromEntries(
     docCounts.map((r) => [r.practicePatientLinkId, r._count._all]),
@@ -373,6 +222,12 @@ export async function enrichPracticePatientLinks(links) {
   const visitMaxMap = Object.fromEntries(
     visitMax.map((r) => [r.userId, r._max.updatedAt]),
   );
+  const medPlanMap = Object.fromEntries(
+    medPlanLinks.map((r) => [r.practicePatientLinkId, r._count._all > 0]),
+  );
+  const openReqMap = Object.fromEntries(
+    openReqLinks.map((r) => [r.practicePatientLinkId, r._count._all > 0]),
+  );
 
   return links.map((link) => {
     let lastActivityAt = link.updatedAt;
@@ -389,6 +244,11 @@ export async function enrichPracticePatientLinks(links) {
       summary: {
         documentCount: docCountMap[link.id] || 0,
         messageCount: msgCountMap[link.id] || 0,
+        unreadMessageCount: unreadByLink[link.id] || 0,
+        hasUnreadMessages: (unreadByLink[link.id] || 0) > 0,
+        hasDocuments: (docCountMap[link.id] || 0) > 0,
+        hasPublishedMedicationPlan: Boolean(medPlanMap[link.id]),
+        hasOpenDataRequest: Boolean(openReqMap[link.id]),
         lastActivityAt,
         lastVisitAt: visitMaxMap[link.patientUserId] || null,
       },

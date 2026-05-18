@@ -119,6 +119,12 @@ const PatientDataControlPage = lazy(() =>
 const PracticeDataRequestsPage = lazy(() =>
   import("./features/careRelationship/pages/PracticeDataRequestsPage.jsx"),
 );
+const PatientActivityPage = lazy(() =>
+  import("./features/activity/pages/PatientActivityPage.jsx"),
+);
+const PracticeAuditPage = lazy(() =>
+  import("./features/activity/pages/PracticeAuditPage.jsx"),
+);
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
 );
@@ -129,6 +135,9 @@ const PracticeFinderPage = lazy(() =>
   import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
 );
 const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
+const PracticeTeamPage = lazy(() =>
+  import("./features/practiceTeam/pages/PracticeTeamPage.jsx"),
+);
 
 function RouteFallback() {
   const { language } = useLanguage();
@@ -268,6 +277,30 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PatientDataControlPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/activity"
+                  element={
+                    <ProtectedRoute>
+                      <PatientActivityPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/team"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeTeamPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/audit"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeAuditPage />
                     </ProtectedRoute>
                   }
                 />

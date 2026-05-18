@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { notifyPatientInboxOfMedicationPlan } from "./inboxNotify.js";
 
 const prisma = new PrismaClient();
@@ -343,6 +344,34 @@ export async function archiveMedicationPlan(planId, linkId, practiceProfileId) {
     data: {
       status: "archived",
       archivedAt: new Date(),
+    },
+    include: planInclude,
+  });
+
+  return planToJson(plan);
+}
+
+/**
+ * Restore archived plan to published if it was published before, else draft.
+ */
+export async function restoreArchivedMedicationPlan(planId, linkId, practiceProfileId) {
+  await assertLinkForPractice(linkId, practiceProfileId);
+  const existing = await prisma.medicationPlan.findFirst({
+    where: {
+      id: planId,
+      practicePatientLinkId: linkId,
+      practiceProfileId,
+      status: "archived",
+    },
+  });
+  if (!existing) throw new Error("plan_not_archived");
+
+  const nextStatus = existing.publishedAt ? "published" : "draft";
+  const plan = await prisma.medicationPlan.update({
+    where: { id: planId },
+    data: {
+      status: nextStatus,
+      archivedAt: null,
     },
     include: planInclude,
   });

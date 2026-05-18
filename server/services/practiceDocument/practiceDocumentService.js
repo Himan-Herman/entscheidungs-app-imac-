@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
+import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { getPracticeDocumentStorage } from "./storage/index.js";
 import { notifyPatientInboxOfPracticeDocument } from "./inboxNotify.js";
 import { writePracticeDocumentAudit } from "./practiceDocumentAuditService.js";
@@ -112,6 +113,7 @@ async function loadDocumentForPractice(documentId, linkId, practiceProfileId) {
     include: docInclude,
   });
   if (!doc) throw new Error("document_not_found");
+  if (doc.status === "deleted") throw new Error("document_unavailable");
   return doc;
 }
 
@@ -237,13 +239,17 @@ export async function uploadPracticeDocumentFile(
  * @param {string} linkId
  * @param {string} practiceProfileId
  */
-export async function listDocumentsForPracticePatient(linkId, practiceProfileId) {
+export async function listDocumentsForPracticePatient(
+  linkId,
+  practiceProfileId,
+  opts = {},
+) {
   await assertLinkForPractice(linkId, practiceProfileId);
   const rows = await prisma.practiceDocument.findMany({
     where: {
       practicePatientLinkId: linkId,
       practiceProfileId,
-      status: { not: "deleted" },
+      ...practiceResourceStatusWhere({ includeArchived: opts.includeArchived }),
     },
     include: docInclude,
     orderBy: { createdAt: "desc" },
@@ -402,6 +408,45 @@ export async function archiveDocument(
 }
 
 /**
+ * Restore archived document to previous active state (shared if was shared, else draft).
+ */
+export async function restoreArchivedDocument(
+  documentId,
+  linkId,
+  practiceProfileId,
+  actorUserId,
+) {
+  const doc = await loadDocumentForPractice(documentId, linkId, practiceProfileId);
+  if (doc.status !== "archived") throw new Error("document_not_archived");
+
+  const nextStatus = doc.sharedAt ? "shared" : "draft";
+  const updated = await prisma.practiceDocument.update({
+    where: { id: documentId },
+    data: {
+      status: nextStatus,
+      archivedAt: null,
+    },
+    include: docInclude,
+  });
+
+  await writePracticeDocumentAudit({
+    actorUserId,
+    actorRole: "practice",
+    practiceProfileId: doc.practiceProfileId,
+    patientUserId: doc.patientUserId,
+    resourceType: "practice_document",
+    resourceId: doc.id,
+    action: "restored",
+    metadata: {
+      documentType: doc.type,
+      restoredToStatus: nextStatus,
+    },
+  });
+
+  return documentToJson(updated);
+}
+
+/**
  * Soft-delete: status deleted, revoke shares, keep DB rows + storage for retention.
  * @param {string} documentId
  * @param {string} linkId
@@ -476,7 +521,7 @@ export async function listSharedDocumentsForPatient(patientUserId) {
   return rows.map((r) => documentToJson(r));
 }
 
-async function loadSharedDocumentForPatient(documentId, patientUserId) {
+export async function loadSharedDocumentForPatient(documentId, patientUserId) {
   const doc = await prisma.practiceDocument.findFirst({
     where: { id: documentId, patientUserId },
     include: docInclude,

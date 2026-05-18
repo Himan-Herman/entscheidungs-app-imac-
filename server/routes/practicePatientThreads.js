@@ -8,9 +8,12 @@ import {
   getPracticeAccess,
   canReadPracticePatientLinks,
   canWritePracticePatientLinks,
+  canPracticeRestoreFromArchive,
 } from "../utils/practiceAccess.js";
+import { parseIncludeArchived } from "../utils/lifecycleStatus.js";
 import {
   archiveThreadForPractice,
+  restoreThreadForPractice,
   addMessageFromPractice,
   closeThread,
   createThread,
@@ -50,7 +53,8 @@ function mapError(err) {
   if (
     msg === "link_not_active" ||
     msg === "thread_closed" ||
-    msg === "thread_archived"
+    msg === "thread_archived" ||
+    msg === "thread_not_archived"
   ) {
     return { status: 409, error: msg };
   }
@@ -58,6 +62,14 @@ function mapError(err) {
     return { status: 503, error: msg };
   }
   return { status: 500, error: "request_failed" };
+}
+
+function threadAuditMeta(ctx, thread) {
+  return {
+    practiceProfileId: ctx.practiceId,
+    practicePatientLinkId: ctx.linkId,
+    patientUserId: thread?.patientUserId ?? null,
+  };
 }
 
 function requirePracticeAccess(req, res) {
@@ -85,7 +97,9 @@ router.get("/", async (req, res) => {
   }
 
   try {
-    const threads = await listThreadsForPractice(ctx.linkId, ctx.practiceId);
+    const threads = await listThreadsForPractice(ctx.linkId, ctx.practiceId, {
+      includeArchived: parseIncludeArchived(req),
+    });
     return res.json({ ok: true, threads });
   } catch (err) {
     console.error("[practice/threads/list]", err?.message ?? err);
@@ -117,8 +131,9 @@ router.post("/", async (req, res) => {
       userId: ctx.userId,
       actorRole: access.role,
       action: "practice_thread_created",
-      entityType: "PracticePatientThread",
+      entityType: "practice_patient_thread",
       entityId: thread.id,
+      metadata: threadAuditMeta(ctx, thread),
     });
 
     return res.status(201).json({ ok: true, thread });
@@ -291,8 +306,9 @@ router.patch("/:threadId/close", async (req, res) => {
       userId: ctx.userId,
       actorRole: access.role,
       action: "practice_thread_closed",
-      entityType: "PracticePatientThread",
+      entityType: "practice_patient_thread",
       entityId: thread.id,
+      metadata: threadAuditMeta(ctx, thread),
     });
 
     return res.json({ ok: true, thread });
@@ -324,13 +340,48 @@ router.patch("/:threadId/archive", async (req, res) => {
       userId: ctx.userId,
       actorRole: access.role,
       action: "practice_thread_archived",
-      entityType: "PracticePatientThread",
+      entityType: "practice_patient_thread",
       entityId: thread.id,
+      metadata: threadAuditMeta(ctx, thread),
     });
 
     return res.json({ ok: true, thread });
   } catch (err) {
     console.error("[practice/threads/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /:threadId/restore */
+router.patch("/:threadId/restore", async (req, res) => {
+  const ctx = requirePracticeAccess(req, res);
+  if (!ctx) return;
+
+  const access = await getPracticeAccess(ctx.userId, ctx.practiceId);
+  if (!access || !canPracticeRestoreFromArchive(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const thread = await restoreThreadForPractice(
+      req.params.threadId,
+      ctx.practiceId,
+      ctx.linkId,
+    );
+
+    await writeAuditLog({
+      userId: ctx.userId,
+      actorRole: access.role,
+      action: "practice_thread_restored",
+      entityType: "practice_patient_thread",
+      entityId: thread.id,
+      metadata: threadAuditMeta(ctx, thread),
+    });
+
+    return res.json({ ok: true, thread });
+  } catch (err) {
+    console.error("[practice/threads/restore]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

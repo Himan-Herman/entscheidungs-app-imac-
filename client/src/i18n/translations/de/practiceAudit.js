@@ -1,0 +1,22 @@
+export default {
+  pageTitle: "Audit-Protokoll – Praxis",
+  heading: "Audit-Protokoll",
+  intro:
+    "Technische Nachvollziehbarkeit für Compliance — nur Metadaten, keine medizinischen Inhalte.",
+  backHub: "Zurück zum Praxisbereich",
+  loading: "Wird geladen …",
+  loadError: "Audit-Protokoll konnte nicht geladen werden.",
+  empty: "Keine Einträge.",
+  listCaption: "Audit-Einträge",
+  selectPractice: "Praxis auswählen",
+  colAction: "Aktion",
+  colRole: "Rolle",
+  colSeverity: "Schwere",
+  colVisibility: "Sichtbarkeit",
+  colDate: "Datum",
+  filterSeverity: "Schweregrad",
+  filterSeverityAll: "Alle",
+  severityInfo: "Info",
+  severityWarning: "Warnung",
+  severitySecurity: "Sicherheit",
+};

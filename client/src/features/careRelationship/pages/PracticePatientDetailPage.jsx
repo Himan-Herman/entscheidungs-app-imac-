@@ -5,6 +5,7 @@ import { getMessages } from "../../../i18n/translations";
 import { fetchPracticePatientLink } from "../api/practicePatientsApi.js";
 import { patientDisplayName } from "../utils/patientDisplayName.js";
 import PracticePatientRecordTabs from "../components/PracticePatientRecordTabs.jsx";
+import PracticePatientRecordSearch from "../components/PracticePatientRecordSearch.jsx";
 import PracticePatientOverviewTab from "../components/PracticePatientOverviewTab.jsx";
 import PracticePatientActivityTab from "../components/PracticePatientActivityTab.jsx";
 import PracticePatientPreVisitsTab from "../components/PracticePatientPreVisitsTab.jsx";
@@ -39,6 +40,7 @@ export default function PracticePatientDetailPage() {
   const { linkId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const practiceId = searchParams.get("practiceId") || "";
+  const fromSearch = searchParams.get("fromSearch") === "true";
   const activeTab = VALID_TABS.has(searchParams.get("tab") || "")
     ? searchParams.get("tab")
     : "overview";
@@ -89,7 +91,7 @@ export default function PracticePatientDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [linkId, practiceId, t.featureDisabled, t.loadDetailError]);
+  }, [linkId, practiceId, fromSearch, t.featureDisabled, t.loadDetailError]);
 
   useEffect(() => {
     document.title = t.recordPageTitle;
@@ -153,6 +155,15 @@ export default function PracticePatientDetailPage() {
             ) : null}
           </div>
         </header>
+
+        {practiceId && linkId ? (
+          <PracticePatientRecordSearch
+            linkId={linkId}
+            practiceId={practiceId}
+            t={t}
+            onNavigateTab={setTab}
+          />
+        ) : null}
 
         <PracticePatientRecordTabs activeTab={activeTab} onTabChange={setTab} t={t} />
 

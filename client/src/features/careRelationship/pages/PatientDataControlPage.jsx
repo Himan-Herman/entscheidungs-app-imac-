@@ -4,11 +4,15 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import DataDeletionRequestDialog from "../components/DataDeletionRequestDialog.jsx";
 import RevokeProfileSharingDialog from "../components/RevokeProfileSharingDialog.jsx";
+import ArchiveRelationshipDialog from "../components/ArchiveRelationshipDialog.jsx";
+import ExportRequestDialog from "../components/ExportRequestDialog.jsx";
 import {
   fetchPatientDataControl,
   patchPatientLinkArchive,
   patchPatientProfileAccess,
   postPatientDataRequest,
+  postPatientDataRequestAiDraft,
+  postPatientDataRequestAiSummary,
 } from "../api/patientDataControlApi.js";
 import "../../../styles/PatientInboxPage.css";
 import "../../../styles/PatientDataControlPage.css";
@@ -19,6 +23,25 @@ function statusLabel(status, t) {
     invited: t.statusInvited,
     revoked: t.statusRevoked,
     archived: t.statusArchived,
+  };
+  return map[status] || status;
+}
+
+function requestTypeLabel(type, t) {
+  const map = {
+    deletion: t.typeDeletion,
+    access_restriction: t.typeAccessRestriction,
+    export: t.typeExport,
+  };
+  return map[type] || type;
+}
+
+function requestStatusLabel(status, t) {
+  const map = {
+    submitted: t.statusSubmitted,
+    in_review: t.statusInReview,
+    completed: t.statusCompleted,
+    rejected: t.statusRejected,
   };
   return map[status] || status;
 }
@@ -39,6 +62,11 @@ function indicatorLabel(has, t) {
   return has ? t.indicatorYes : t.indicatorNo;
 }
 
+function hasOpenType(link, type) {
+  const open = link.openDataRequests || [];
+  return open.some((r) => r.type === type);
+}
+
 export default function PatientDataControlPage() {
   const { language } = useLanguage();
   const t = useMemo(
@@ -49,16 +77,33 @@ export default function PatientDataControlPage() {
   );
 
   const [practices, setPractices] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
   const [busyId, setBusyId] = useState("");
+
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleteStep, setDeleteStep] = useState(1);
   const [deleteBusy, setDeleteBusy] = useState(false);
+
   const [revokeTarget, setRevokeTarget] = useState(null);
   const [revokeStep, setRevokeStep] = useState(1);
   const [revokeBusy, setRevokeBusy] = useState(false);
+
+  const [archiveTarget, setArchiveTarget] = useState(null);
+  const [archiveStep, setArchiveStep] = useState(1);
+  const [archiveBusy, setArchiveBusy] = useState(false);
+
+  const [exportTarget, setExportTarget] = useState(null);
+  const [exportStep, setExportStep] = useState(1);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportReason, setExportReason] = useState("");
+  const [exportAiBusy, setExportAiBusy] = useState(false);
+
+  const [aiSummaryId, setAiSummaryId] = useState("");
+  const [aiSummaryText, setAiSummaryText] = useState("");
+  const [aiSummaryBusy, setAiSummaryBusy] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -67,14 +112,17 @@ export default function PatientDataControlPage() {
       const { res, data } = await fetchPatientDataControl();
       if (res.status === 404 && data.error === "feature_disabled") {
         setPractices([]);
+        setRequests([]);
         setError(t.featureDisabled);
         return;
       }
       if (!res.ok || !data.ok) throw new Error("load_failed");
       setPractices(Array.isArray(data.practices) ? data.practices : []);
+      setRequests(Array.isArray(data.requests) ? data.requests : []);
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
       setPractices([]);
+      setRequests([]);
       setError(t.loadError);
     } finally {
       setLoading(false);
@@ -136,21 +184,33 @@ export default function PatientDataControlPage() {
     }
   }
 
-  async function archiveLink(link) {
-    if (!window.confirm(t.archiveConfirm)) return;
-    setBusyId(link.id);
+  function openArchiveDialog(link) {
+    setArchiveTarget(link);
+    setArchiveStep(1);
+  }
+
+  function closeArchiveDialog() {
+    setArchiveTarget(null);
+    setArchiveStep(1);
+    setArchiveBusy(false);
+  }
+
+  async function confirmArchive() {
+    if (!archiveTarget) return;
+    setArchiveBusy(true);
     setError("");
     setStatusMsg("");
     try {
-      const { res, data } = await patchPatientLinkArchive(link.id);
+      const { res, data } = await patchPatientLinkArchive(archiveTarget.id);
       if (!res.ok || !data.ok) {
         setError(t.archiveError);
         return;
       }
       setStatusMsg(t.archiveSuccess);
+      closeArchiveDialog();
       await load();
     } finally {
-      setBusyId("");
+      setArchiveBusy(false);
     }
   }
 
@@ -174,6 +234,10 @@ export default function PatientDataControlPage() {
         practicePatientLinkId: deleteTarget.id,
         type: "deletion",
       });
+      if (res.status === 409 && data.error === "request_already_open") {
+        setError(t.requestAlreadyOpen);
+        return;
+      }
       if (!res.ok || !data.ok) {
         setError(t.requestError);
         return;
@@ -186,6 +250,82 @@ export default function PatientDataControlPage() {
     }
   }
 
+  function openExportDialog(link) {
+    setExportTarget(link);
+    setExportStep(1);
+    setExportReason("");
+  }
+
+  function closeExportDialog() {
+    setExportTarget(null);
+    setExportStep(1);
+    setExportBusy(false);
+    setExportReason("");
+    setExportAiBusy(false);
+  }
+
+  async function loadExportAiDraft() {
+    if (!exportTarget) return;
+    setExportAiBusy(true);
+    try {
+      const { res, data } = await postPatientDataRequestAiDraft({
+        type: "export",
+        locale: language,
+        practiceName: exportTarget.practice?.practiceName,
+      });
+      if (!res.ok || !data.ok) {
+        setError(t.aiDraftError);
+        return;
+      }
+      if (data.draft) setExportReason(data.draft);
+    } finally {
+      setExportAiBusy(false);
+    }
+  }
+
+  async function submitExportRequest() {
+    if (!exportTarget) return;
+    setExportBusy(true);
+    setError("");
+    try {
+      const { res, data } = await postPatientDataRequest({
+        practicePatientLinkId: exportTarget.id,
+        type: "export",
+        reason: exportReason.trim() || undefined,
+      });
+      if (res.status === 409 && data.error === "request_already_open") {
+        setError(t.requestAlreadyOpen);
+        return;
+      }
+      if (!res.ok || !data.ok) {
+        setError(t.requestError);
+        return;
+      }
+      setStatusMsg(t.requestExportSuccess);
+      closeExportDialog();
+      await load();
+    } finally {
+      setExportBusy(false);
+    }
+  }
+
+  async function explainRequest(requestId) {
+    setAiSummaryId(requestId);
+    setAiSummaryText("");
+    setAiSummaryBusy(true);
+    setError("");
+    try {
+      const { res, data } = await postPatientDataRequestAiSummary(requestId, language);
+      if (!res.ok || !data.ok) {
+        setError(t.aiSummaryError);
+        return;
+      }
+      setAiSummaryText(data.summary || "");
+    } finally {
+      setAiSummaryBusy(false);
+    }
+  }
+
   return (
     <div className="patient-inbox">
       <Link className="patient-inbox__back" to="/patient">
@@ -194,6 +334,14 @@ export default function PatientDataControlPage() {
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{t.heading}</h1>
         <p className="patient-inbox__intro">{t.intro}</p>
+        <p className="patient-data-control__privacy" role="note">
+          {t.privacyNotice}
+        </p>
+        <p style={{ marginTop: "0.75rem" }}>
+          <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/activity">
+            {t.openActivity}
+          </Link>
+        </p>
       </header>
 
       {loading ? <p className="patient-inbox__muted">{t.loading}</p> : null}
@@ -208,6 +356,45 @@ export default function PatientDataControlPage() {
         </p>
       ) : null}
 
+      {!loading && !error && requests.length > 0 ? (
+        <section className="patient-data-control__requests-panel" aria-labelledby="data-requests-heading">
+          <h2 id="data-requests-heading" className="patient-inbox__item-title">
+            {t.requestsSectionTitle}
+          </h2>
+          <p className="patient-inbox__muted">{t.requestsSectionIntro}</p>
+          <ul className="patient-inbox__list">
+            {requests.map((req) => (
+              <li key={req.id} className="patient-inbox__item" style={{ padding: "0.75rem 1rem" }}>
+                <p className="patient-inbox__item-title">
+                  {req.practice?.practiceName || "—"} — {requestTypeLabel(req.type, t)}
+                </p>
+                <p className="patient-inbox__item-meta">
+                  {requestStatusLabel(req.status, t)} · {fmtActivity(req.createdAt, language)}
+                </p>
+                <button
+                  type="button"
+                  className="patient-threads__btn patient-threads__btn--secondary"
+                  style={{ marginTop: "0.5rem" }}
+                  disabled={aiSummaryBusy && aiSummaryId === req.id}
+                  onClick={() => explainRequest(req.id)}
+                >
+                  {aiSummaryBusy && aiSummaryId === req.id ? t.aiSummaryLoading : t.aiSummaryButton}
+                </button>
+                {aiSummaryId === req.id && aiSummaryText ? (
+                  <aside className="patient-data-control__ai-box" aria-labelledby={`ai-sum-${req.id}`}>
+                    <h3 id={`ai-sum-${req.id}`} className="patient-inbox__item-meta" style={{ fontWeight: 600 }}>
+                      {t.aiSummaryHeading}
+                    </h3>
+                    <p className="patient-data-control__ai-hint">{t.aiHint}</p>
+                    <p style={{ whiteSpace: "pre-wrap", margin: "0.35rem 0 0" }}>{aiSummaryText}</p>
+                  </aside>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {!loading && !error && practices.length === 0 ? (
         <p className="patient-inbox__muted">{t.empty}</p>
       ) : null}
@@ -218,17 +405,28 @@ export default function PatientDataControlPage() {
             const practiceName = link.practice?.practiceName || "—";
             const granted = Boolean(link.profileAccessGranted);
             const st = statusLabel(link.status, t);
-            const canManage =
-              link.status === "active" || link.status === "invited";
-            const hasPending = Boolean(link.openDataRequest);
+            const canManage = link.status === "active" || link.status === "invited";
+            const pendingDeletion =
+              hasOpenType(link, "deletion") || hasOpenType(link, "access_restriction");
+            const pendingExport = hasOpenType(link, "export");
 
             return (
-              <li key={link.id} className="patient-inbox__item" style={{ padding: "1rem" }}>
+              <li key={link.id} className="patient-inbox__item patient-data-control__card">
                 <p className="patient-inbox__item-title">{practiceName}</p>
                 <p className="patient-inbox__item-meta">{st}</p>
-                {hasPending ? (
+                {link.linkedAt ? (
+                  <p className="patient-inbox__item-meta">
+                    {t.linkedSince}: {fmtActivity(link.linkedAt, language)}
+                  </p>
+                ) : null}
+                {pendingDeletion ? (
                   <p className="patient-data-control__badge" role="status">
-                    {t.requestPending}
+                    {t.requestPendingDeletion}
+                  </p>
+                ) : null}
+                {pendingExport ? (
+                  <p className="patient-data-control__badge patient-data-control__badge--export" role="status">
+                    {t.requestPendingExport}
                   </p>
                 ) : null}
 
@@ -277,68 +475,82 @@ export default function PatientDataControlPage() {
                 </div>
 
                 {canManage ? (
-                  <fieldset style={{ border: "none", margin: "1rem 0 0", padding: 0 }}>
-                    <legend className="patient-inbox__item-title" style={{ fontSize: "1rem" }}>
-                      {t.profileSharingSectionTitle}
-                    </legend>
-                    <p className="patient-inbox__muted">{t.shareProfileHint}</p>
-                    <p className="patient-inbox__item-meta" role="status" aria-live="polite">
-                      {granted ? t.profileAccessOn : t.profileAccessOff}
-                    </p>
-                    {link.profileAccessGrantedAt ? (
-                      <p className="patient-inbox__item-meta">
-                        {t.grantedAtLabel}: {fmtActivity(link.profileAccessGrantedAt, language)}
+                  <>
+                    <fieldset className="patient-data-control__fieldset">
+                      <legend className="patient-data-control__legend">{t.profileSharingSectionTitle}</legend>
+                      <p className="patient-inbox__muted">{t.shareProfileHint}</p>
+                      <p className="patient-inbox__item-meta" role="status" aria-live="polite">
+                        {granted ? t.profileAccessOn : t.profileAccessOff}
                       </p>
-                    ) : null}
-                    {!granted && link.profileAccessRevokedAt ? (
-                      <p className="patient-inbox__item-meta">
-                        {t.revokedAtLabel}: {fmtActivity(link.profileAccessRevokedAt, language)}
-                      </p>
-                    ) : null}
-                    <div className="patient-data-control__actions" style={{ marginTop: "0.5rem" }}>
-                      {!granted ? (
+                      {link.profileAccessGrantedAt ? (
+                        <p className="patient-inbox__item-meta">
+                          {t.grantedAtLabel}: {fmtActivity(link.profileAccessGrantedAt, language)}
+                        </p>
+                      ) : null}
+                      {!granted && link.profileAccessRevokedAt ? (
+                        <p className="patient-inbox__item-meta">
+                          {t.revokedAtLabel}: {fmtActivity(link.profileAccessRevokedAt, language)}
+                        </p>
+                      ) : null}
+                      <div className="patient-data-control__actions">
+                        {!granted ? (
+                          <button
+                            type="button"
+                            className="patient-threads__btn patient-threads__btn--secondary"
+                            disabled={busyId === link.id}
+                            aria-label={t.grantProfile}
+                            onClick={() => grantProfile(link)}
+                          >
+                            {t.grantProfile}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="patient-threads__btn patient-data-control__btn--muted-danger"
+                            disabled={busyId === link.id}
+                            aria-label={t.revokeProfile}
+                            onClick={() => openRevokeDialog(link)}
+                          >
+                            {t.revokeProfile}
+                          </button>
+                        )}
+                      </div>
+                    </fieldset>
+
+                    <fieldset className="patient-data-control__fieldset">
+                      <legend className="patient-data-control__legend">{t.dataActionsTitle}</legend>
+                      <div className="patient-data-control__actions">
                         <button
                           type="button"
                           className="patient-threads__btn patient-threads__btn--secondary"
                           disabled={busyId === link.id}
-                          aria-label={t.grantProfile}
-                          onClick={() => grantProfile(link)}
+                          onClick={() => openArchiveDialog(link)}
                         >
-                          {t.grantProfile}
+                          {t.archiveLink}
                         </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="patient-threads__btn patient-data-control__btn--muted-danger"
-                          disabled={busyId === link.id}
-                          aria-label={t.revokeProfile}
-                          onClick={() => openRevokeDialog(link)}
-                        >
-                          {t.revokeProfile}
-                        </button>
-                      )}
-                    </div>
-                    <div className="patient-data-control__actions" style={{ marginTop: "0.75rem" }}>
-                      <button
-                        type="button"
-                        className="patient-threads__btn patient-threads__btn--secondary"
-                        disabled={busyId === link.id || link.status === "archived"}
-                        onClick={() => archiveLink(link)}
-                      >
-                        {t.archiveLink}
-                      </button>
-                      {!hasPending ? (
-                        <button
-                          type="button"
-                          className="patient-threads__btn patient-data-control__btn--muted-danger"
-                          disabled={busyId === link.id}
-                          onClick={() => openDeleteDialog(link)}
-                        >
-                          {t.requestDeletion}
-                        </button>
-                      ) : null}
-                    </div>
-                  </fieldset>
+                        {!pendingExport ? (
+                          <button
+                            type="button"
+                            className="patient-threads__btn patient-threads__btn--secondary"
+                            disabled={busyId === link.id}
+                            onClick={() => openExportDialog(link)}
+                          >
+                            {t.requestExport}
+                          </button>
+                        ) : null}
+                        {!pendingDeletion ? (
+                          <button
+                            type="button"
+                            className="patient-threads__btn patient-data-control__btn--muted-danger"
+                            disabled={busyId === link.id}
+                            onClick={() => openDeleteDialog(link)}
+                          >
+                            {t.requestDeletion}
+                          </button>
+                        ) : null}
+                      </div>
+                    </fieldset>
+                  </>
                 ) : null}
               </li>
             );
@@ -366,6 +578,32 @@ export default function PatientDataControlPage() {
         onCancel={closeRevokeDialog}
         onConfirmStep1={() => setRevokeStep(2)}
         onConfirmStep2={confirmRevokeProfile}
+      />
+
+      <ArchiveRelationshipDialog
+        open={Boolean(archiveTarget)}
+        step={archiveStep}
+        busy={archiveBusy}
+        practiceName={archiveTarget?.practice?.practiceName}
+        t={t}
+        onCancel={closeArchiveDialog}
+        onConfirmStep1={() => setArchiveStep(2)}
+        onConfirmStep2={confirmArchive}
+      />
+
+      <ExportRequestDialog
+        open={Boolean(exportTarget)}
+        step={exportStep}
+        busy={exportBusy}
+        practiceName={exportTarget?.practice?.practiceName}
+        reason={exportReason}
+        onReasonChange={setExportReason}
+        aiBusy={exportAiBusy}
+        onAiDraft={loadExportAiDraft}
+        t={t}
+        onCancel={closeExportDialog}
+        onConfirmStep1={() => setExportStep(2)}
+        onConfirmStep2={submitExportRequest}
       />
     </div>
   );

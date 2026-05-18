@@ -21,6 +21,7 @@ model User {
   preVisitCases    PreVisitCase[]
   practiceProfiles PracticeProfile[]
   practiceMemberships PracticeMember[]
+  practiceInvitesSent PracticeMember[] @relation("PracticeMemberInvitedBy")
   followUpPatientThreads PreVisitFollowUpThread[] @relation("FollowUpPatientUser")
   followUpCreatedThreads PreVisitFollowUpThread[] @relation("FollowUpCreatedByUser")
   visitMedicationEntriesAuthored VisitMedicationEntry[] @relation("VisitMedicationCreatedBy")
@@ -41,25 +42,39 @@ model User {
   practiceInboxItemsAsPatient    PracticeInboxItem[]  @relation("PracticeInboxPatient")
   auditLogs        AuditLog[]
   secureDocumentsCreated SecureDocumentDelivery[] @relation("SecureDocCreatedBy")
+  secureDocumentAccessTokens SecureDocumentAccessToken[]
+  secureDocumentAccessCreated SecureDocumentAccessToken[] @relation("SecureDocAccessCreatedBy")
   patientProfiles      PatientProfile[]
+  exportJobs           ExportJob[]
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  actorRole   String?
-  action      String
-  entityType  String?
-  entityId    String?
-  createdAt   DateTime @default(now())
-  ipHash      String?
-  userAgent   String?
-  metadata    Json?
+  id                    String   @id @default(cuid())
+  userId                String?
+  actorRole             String?
+  action                String
+  entityType            String?
+  entityId              String?
+  practiceProfileId     String?
+  patientUserId         String?
+  practicePatientLinkId String?
+  /// info | warning | security
+  severity              String   @default("info")
+  /// internal | practice_visible | patient_visible
+  visibility            String   @default("internal")
+  createdAt             DateTime @default(now())
+  ipHash                String?
+  userAgent             String?
+  metadata              Json?
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([practiceProfileId, createdAt])
+  @@index([patientUserId, createdAt])
+  @@index([practicePatientLinkId, createdAt])
+  @@index([visibility, createdAt])
 }
 
 /**
@@ -268,6 +283,7 @@ model PracticeProfile {
   practiceInboxItems   PracticeInboxItem[]
   integrationSettings PracticeIntegrationSettings?
   secureDocumentDeliveries SecureDocumentDelivery[]
+  secureDocumentAccessTokens SecureDocumentAccessToken[]
   webhookEvents PracticeWebhookEvent[]
 
   @@index([userId])
@@ -355,18 +371,27 @@ model PracticeQrTarget {
 }
 
 model PracticeMember {
-  id              String   @id @default(cuid())
+  id                String    @id @default(cuid())
   practiceProfileId String
-  userId          String
-  role            String
-  createdAt       DateTime @default(now())
+  userId            String
+  role              String
+  /// invited | active | revoked
+  status            String    @default("active")
+  invitedByUserId   String?
+  invitedAt         DateTime?
+  acceptedAt        DateTime?
+  revokedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitedBy       User?           @relation("PracticeMemberInvitedBy", fields: [invitedByUserId], references: [id], onDelete: SetNull)
 
   @@unique([practiceProfileId, userId])
   @@index([userId])
   @@index([practiceProfileId, role])
+  @@index([practiceProfileId, status])
 }
 
 model PreVisitFollowUpThread {
@@ -444,6 +469,7 @@ model PracticePatientLink {
   practiceDocuments PracticeDocument[]
   dataRequests      PatientDataRequest[]
   practiceInboxItems PracticeInboxItem[]
+  secureDocumentAccessTokens SecureDocumentAccessToken[]
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
@@ -459,10 +485,12 @@ model PatientInboxItem {
   patientUserId         String
   practiceProfileId     String?
   practicePatientLinkId String?
-  /// medication | message | document | system
+  /// medication | message | document | profile | data_request | system
   type                  String
   title                 String
+  titleKey              String?
   summary               String?
+  summaryKey            String?
   /// unread | read | archived
   status                String    @default("unread")
   sourceLabel           String?
@@ -488,10 +516,12 @@ model PracticeInboxItem {
   practiceProfileId     String
   practicePatientLinkId String?
   patientUserId         String?
-  /// message | previsit | follow_up | document | medication | data_request | system
+  /// message | previsit | follow_up | document | medication | profile | data_request | system
   type                  String
   title                 String
+  titleKey              String?
   summary               String?
+  summaryKey            String?
   /// new | read | done | archived
   status                String    @default("new")
   /// normal | important — organizational only, not clinical urgency
@@ -528,6 +558,7 @@ model PracticePatientThread {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   closedAt              DateTime?
+  archivedAt            DateTime?
 
   practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
   practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
@@ -635,6 +666,7 @@ model PracticeDocument {
   deletedBy           User?               @relation("PracticeDocumentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
   files               PracticeDocumentFile[]
   shares              PracticeDocumentShare[]
+  secureAccessTokens  SecureDocumentAccessToken[]
 
   @@index([practicePatientLinkId, status])
   @@index([patientUserId, status])
@@ -652,8 +684,40 @@ model PracticeDocumentFile {
   createdAt        DateTime @default(now())
 
   document PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  secureAccessTokens SecureDocumentAccessToken[]
 
   @@index([documentId])
+}
+
+/**
+ * Short-lived hashed token for secure practice document download (no public storage URLs).
+ */
+model SecureDocumentAccessToken {
+  id                    String    @id @default(cuid())
+  documentId            String
+  fileId                String?
+  tokenHash             String    @unique
+  /// patient | practice
+  audience              String
+  userId                String?
+  practiceProfileId     String?
+  practicePatientLinkId String?
+  createdByUserId       String?
+  expiresAt             DateTime
+  usedAt                DateTime?
+  revokedAt             DateTime?
+  createdAt             DateTime  @default(now())
+
+  document            PracticeDocument      @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  file                PracticeDocumentFile? @relation(fields: [fileId], references: [id], onDelete: SetNull)
+  user                User?                 @relation(fields: [userId], references: [id], onDelete: SetNull)
+  practiceProfile     PracticeProfile?      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink?  @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  createdBy           User?                 @relation("SecureDocAccessCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([documentId])
+  @@index([practiceProfileId])
+  @@index([expiresAt])
 }
 
 model PracticeDocumentShare {
@@ -754,6 +818,39 @@ model VisitMedicationEntry {
   @@index([preVisitSessionId, publishedAt])
   @@index([practiceProfileId])
   @@index([createdByUserId])
+}
+
+/**
+ * Server-generated export artifacts — metadata only on row; file bytes in storageKey.
+ */
+model ExportJob {
+  id                    String    @id @default(cuid())
+  requestedByUserId     String
+  /// patient | practice | system
+  actorRole             String
+  practiceProfileId     String?
+  patientUserId         String?
+  practicePatientLinkId String?
+  /// export type slug (medication_plans, patient_summary, …)
+  type                  String
+  /// pdf | csv
+  format                String
+  /// pending | completed | failed | expired
+  status                String    @default("pending")
+  storageKey            String?
+  expiresAt             DateTime?
+  createdAt             DateTime  @default(now())
+  completedAt           DateTime?
+  failedAt              DateTime?
+  errorCode             String?
+
+  requestedBy User @relation(fields: [requestedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([requestedByUserId, createdAt])
+  @@index([patientUserId, createdAt])
+  @@index([practiceProfileId, createdAt])
+  @@index([practicePatientLinkId])
+  @@index([status, expiresAt])
 }
 
 datasource db {

@@ -1,0 +1,314 @@
+.practice-overview {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+.practice-overview__hero {
+  margin-bottom: 1.5rem;
+}
+
+.practice-overview__title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary, #0f172a);
+}
+
+.practice-overview__intro,
+.practice-overview__safety {
+  margin: 0 0 0.65rem;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--text-muted, #475569);
+  max-width: 44rem;
+}
+
+.practice-overview__safety {
+  font-size: 0.88rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  background: rgba(14, 116, 144, 0.06);
+}
+
+.practice-overview__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.practice-overview__toolbar label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted, #475569);
+}
+
+.practice-overview__select {
+  min-width: min(100%, 240px);
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: var(--surface, #fff);
+  color: var(--text-primary, #0f172a);
+  font-size: 0.95rem;
+}
+
+.practice-overview__role {
+  font-size: 0.88rem;
+  color: var(--text-muted, #64748b);
+}
+
+.practice-overview__section-title {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+}
+
+.practice-overview__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .practice-overview__cards {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+.practice-overview__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 108px;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--surface, rgba(255, 255, 255, 0.95));
+  color: var(--text-primary, #0f172a);
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.practice-overview__card:hover {
+  border-color: rgba(14, 116, 144, 0.35);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.practice-overview__card:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.practice-overview__card-icon {
+  display: flex;
+  color: #0e7490;
+}
+
+.practice-overview__card-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.practice-overview__card-metric {
+  margin-top: auto;
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-overview__metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.practice-overview__metric {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  background: var(--surface-muted, rgba(248, 250, 252, 0.9));
+}
+
+.practice-overview__metric dt {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+}
+
+.practice-overview__metric dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary, #0f172a);
+}
+
+.practice-overview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 1.75rem;
+}
+
+.practice-overview__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(14, 116, 144, 0.35);
+  background: rgba(14, 116, 144, 0.08);
+  color: #0e7490;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.practice-overview__action:hover {
+  background: rgba(14, 116, 144, 0.14);
+}
+
+.practice-overview__action:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.practice-overview__action--secondary {
+  border-color: rgba(15, 23, 42, 0.12);
+  background: var(--surface, #fff);
+  color: var(--text-primary, #334155);
+}
+
+.practice-overview__activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.practice-overview__activity-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  align-items: baseline;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.practice-overview__activity-item:last-child {
+  border-bottom: none;
+}
+
+.practice-overview__activity-type {
+  font-weight: 600;
+  color: var(--text-primary, #0f172a);
+}
+
+.practice-overview__activity-time {
+  font-size: 0.88rem;
+  color: var(--text-muted, #64748b);
+}
+
+.practice-overview__activity-link {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0e7490;
+  text-decoration: none;
+}
+
+.practice-overview__activity-link:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.practice-overview__recent-patients {
+  list-style: none;
+  margin: 0 0 1.75rem;
+  padding: 0;
+}
+
+.practice-overview__recent-patient {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.practice-overview__ai {
+  margin-top: 1.5rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(14, 116, 144, 0.35);
+  background: rgba(14, 116, 144, 0.04);
+}
+
+.practice-overview__ai-text {
+  margin: 0.75rem 0 0;
+  white-space: pre-wrap;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-primary, #334155);
+}
+
+.practice-overview__ai-disclaimer {
+  margin: 0.65rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted, #64748b);
+}
+
+.practice-overview__status {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--text-muted, #64748b);
+}
+
+.practice-overview__status--error {
+  background: rgba(220, 38, 38, 0.08);
+  color: #b91c1c;
+}
+
+.practice-overview__footer-link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #0e7490;
+}
+
+:root[data-theme="dark"] .practice-overview__title,
+:root[data-theme="dark"] .practice-overview__section-title,
+:root[data-theme="dark"] .practice-overview__card-label,
+:root[data-theme="dark"] .practice-overview__metric dd,
+:root[data-theme="dark"] .practice-overview__activity-type {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .practice-overview__card,
+:root[data-theme="dark"] .practice-overview__select,
+:root[data-theme="dark"] .practice-overview__action--secondary {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(148, 163, 184, 0.15);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .practice-overview__metric {
+  background: rgba(15, 23, 42, 0.6);
+}

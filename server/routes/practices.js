@@ -5,6 +5,7 @@ import { writeAuditLog } from "../services/auditLogService.js";
 import {
   canManageIntegrations,
   canViewIntegrationSettings,
+  getPracticeAccess,
 } from "../utils/practiceAccess.js";
 import {
   DOCUMENT_DELIVERY_MODES,
@@ -112,7 +113,12 @@ function memberJson(row) {
     practiceProfileId: row.practiceProfileId,
     userId: row.userId,
     role: row.role,
+    status: row.status,
+    invitedAt: row.invitedAt,
+    acceptedAt: row.acceptedAt,
+    revokedAt: row.revokedAt,
     createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -141,16 +147,7 @@ function defaultIntegrationSettingsShape() {
 }
 
 async function resolvePracticeAccess(userId, practiceId) {
-  const practice = await prisma.practiceProfile.findUnique({
-    where: { id: practiceId },
-  });
-  if (!practice) return null;
-  if (practice.userId === userId) return { practice, role: "owner" };
-  const member = await prisma.practiceMember.findUnique({
-    where: { practiceProfileId_userId: { practiceProfileId: practiceId, userId } },
-  });
-  if (!member) return null;
-  return { practice, role: member.role };
+  return getPracticeAccess(userId, practiceId);
 }
 
 function roleAllows(role, allowed) {
@@ -164,7 +161,7 @@ router.get("/", async (req, res) => {
     where: {
       OR: [
         { userId },
-        { members: { some: { userId } } },
+        { members: { some: { userId, status: "active" } } },
       ],
     },
     orderBy: { updatedAt: "desc" },
@@ -461,7 +458,19 @@ router.post("/:id/members", async (req, res) => {
       practiceProfileId: access.practice.id,
       userId: memberUserId,
       role,
+      status: "active",
+      acceptedAt: new Date(),
     },
+  });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_team_member_invited",
+    entityType: "practice_membership",
+    entityId: row.id,
+    practiceProfileId: access.practice.id,
+    metadata: { targetUserId: memberUserId, role, status: row.status, legacyRoute: true },
   });
   return res.status(201).json({ ok: true, member: memberJson(row) });
 });
@@ -492,6 +501,16 @@ router.put("/:id/members/:memberId", async (req, res) => {
     where: { id: existing.id },
     data: { role },
   });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_team_member_role_changed",
+    entityType: "practice_membership",
+    entityId: row.id,
+    practiceProfileId: access.practice.id,
+    metadata: { previousRole: existing.role, newRole: role, legacyRoute: true },
+  });
   return res.json({ ok: true, member: memberJson(row) });
 });
 
@@ -510,8 +529,21 @@ router.delete("/:id/members/:memberId", async (req, res) => {
   if (existing.role === "owner") {
     return res.status(400).json({ ok: false, error: "owner_member_cannot_be_deleted" });
   }
-  await prisma.practiceMember.delete({ where: { id: existing.id } });
-  return res.json({ ok: true, deleted: true });
+  const row = await prisma.practiceMember.update({
+    where: { id: existing.id },
+    data: { status: "revoked", revokedAt: new Date() },
+  });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_team_member_revoked",
+    entityType: "practice_membership",
+    entityId: row.id,
+    practiceProfileId: access.practice.id,
+    metadata: { targetUserId: row.userId, legacyRoute: true },
+  });
+  return res.json({ ok: true, deleted: true, member: memberJson(row) });
 });
 
 router.get("/:id/integration-settings", async (req, res) => {

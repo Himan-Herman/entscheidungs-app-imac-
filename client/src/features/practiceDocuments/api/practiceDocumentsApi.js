@@ -1,4 +1,5 @@
 import { authFetch } from "../../../api/authFetch.js";
+import { fetchAuthenticatedFileBlob } from "./documentDownloadHelpers.js";
 
 function qPractice(practiceId) {
   return new URLSearchParams({ practiceId }).toString();
@@ -8,8 +9,10 @@ function base(linkId) {
   return `/api/practice/patients/${encodeURIComponent(linkId)}/documents`;
 }
 
-export async function fetchPracticeDocuments(linkId, practiceId) {
-  const res = await authFetch(`${base(linkId)}?${qPractice(practiceId)}`);
+export async function fetchPracticeDocuments(linkId, practiceId, { includeArchived = false } = {}) {
+  const qs = new URLSearchParams({ practiceId });
+  if (includeArchived) qs.set("includeArchived", "true");
+  const res = await authFetch(`${base(linkId)}?${qs.toString()}`);
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
@@ -83,6 +86,15 @@ export async function archivePracticeDocument(linkId, practiceId, documentId) {
   return { res, data };
 }
 
+export async function restorePracticeDocument(linkId, practiceId, documentId) {
+  const res = await authFetch(
+    `${base(linkId)}/${encodeURIComponent(documentId)}/restore?${qPractice(practiceId)}`,
+    { method: "PATCH" },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function deletePracticeDocument(linkId, practiceId, documentId) {
   const res = await authFetch(
     `${base(linkId)}/${encodeURIComponent(documentId)}/delete?${qPractice(practiceId)}`,
@@ -100,6 +112,45 @@ export async function fetchPracticeDocumentAiOrganize(linkId, practiceId, docume
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ locale }),
     },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function viewPracticeDocumentFile(linkId, practiceId, documentId, fileId, fileName) {
+  const url = `${base(linkId)}/${encodeURIComponent(documentId)}/download?${qPractice(practiceId)}&fileId=${encodeURIComponent(fileId)}&disposition=inline`;
+  await fetchAuthenticatedFileBlob(url, { disposition: "inline", fileName });
+}
+
+export async function downloadPracticeDocumentFile(linkId, practiceId, documentId, fileId, fileName) {
+  const url = `${base(linkId)}/${encodeURIComponent(documentId)}/download?${qPractice(practiceId)}&fileId=${encodeURIComponent(fileId)}`;
+  await fetchAuthenticatedFileBlob(url, { fileName: fileName || "document" });
+}
+
+export async function createPracticeDocumentSecureLink(linkId, practiceId, documentId, fileId) {
+  const res = await authFetch(
+    `${base(linkId)}/${encodeURIComponent(documentId)}/download-link?${qPractice(practiceId)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileId }),
+    },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function fetchPracticeDocumentSecureLinks(practiceId, documentId) {
+  const q = new URLSearchParams({ practiceId, documentId });
+  const res = await authFetch(`/api/practice/documents/secure-links?${q}`);
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function revokePracticeDocumentSecureLink(practiceId, tokenId) {
+  const res = await authFetch(
+    `/api/practice/documents/secure-links/${encodeURIComponent(tokenId)}/revoke?practiceId=${encodeURIComponent(practiceId)}`,
+    { method: "PATCH" },
   );
   const data = await res.json().catch(() => ({}));
   return { res, data };

@@ -3,7 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { authFetch } from "../../../api/authFetch.js";
-import { fetchPracticeInbox } from "../api/practiceInboxApi.js";
+import {
+  fetchPracticeInbox,
+  postPracticeInboxListAiSummary,
+} from "../api/practiceInboxApi.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
 import "../../../styles/PatientInboxPage.css";
@@ -52,6 +55,7 @@ function typeLabel(type, t) {
     document: t.typeDocument,
     medication: t.typeMedication,
     data_request: t.typeDataRequest,
+    profile: t.typeProfile,
     system: t.typeSystem,
   };
   return map[type] || type;
@@ -63,6 +67,7 @@ const FILTER_TYPE_MAP = {
   document: "document",
   medication: "medication",
   data_request: "data_request",
+  profile: "profile",
 };
 
 export default function PracticeInboxListPage() {
@@ -81,6 +86,8 @@ export default function PracticeInboxListPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("activity");
+  const [aiSummary, setAiSummary] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
 
   const loadPractices = useCallback(async () => {
     const res = await authFetch("/api/practices");
@@ -260,6 +267,7 @@ export default function PracticeInboxListPage() {
                 <option value="document">{t.filterDocuments}</option>
                 <option value="medication">{t.filterMedication}</option>
                 <option value="data_request">{t.filterDataRequests}</option>
+                <option value="profile">{t.filterProfile}</option>
                 <option value="archived">{t.filterArchived}</option>
               </select>
             </label>
@@ -275,6 +283,39 @@ export default function PracticeInboxListPage() {
                 <option value="status">{t.sortStatus}</option>
               </select>
             </label>
+            <div className="practice-dashboard__field">
+              <button
+                type="button"
+                className="practice-dashboard__link-btn"
+                disabled={aiBusy || !practiceId}
+                onClick={async () => {
+                  setAiBusy(true);
+                  setAiSummary("");
+                  try {
+                    const { res, data } = await postPracticeInboxListAiSummary(
+                      practiceId,
+                      language,
+                    );
+                    if (!res.ok || !data.ok) throw new Error("ai_failed");
+                    setAiSummary(data.summary || "");
+                  } catch {
+                    setAiSummary(t.aiError);
+                  } finally {
+                    setAiBusy(false);
+                  }
+                }}
+              >
+                {aiBusy ? t.aiLoading : t.aiListSummaryBtn}
+              </button>
+            </div>
+          </section>
+        ) : null}
+
+        {aiSummary ? (
+          <section className="patient-inbox__ai" aria-live="polite">
+            <p className="patient-inbox__ai-label">{t.aiListSuggestionLabel}</p>
+            <p className="patient-inbox__muted">{t.aiListDisclaimer}</p>
+            <pre className="patient-inbox__ai-pre">{aiSummary}</pre>
           </section>
         ) : null}
 

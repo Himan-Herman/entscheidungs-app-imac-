@@ -45,10 +45,8 @@ export async function notifyPracticeInboxOfPatientMessage(thread) {
     type: "message",
     titleDe: "Neue Patientennachricht",
     titleEn: "New patient message",
-    summaryDe: thread.subject?.trim() ? `Betreff: ${thread.subject.trim().slice(0, 120)}` : "Neue Nachricht im sicheren Thread.",
-    summaryEn: thread.subject?.trim()
-      ? `Subject: ${thread.subject.trim().slice(0, 120)}`
-      : "New message in secure thread.",
+    summaryDe: "Neue Nachricht im sicheren Bereich.",
+    summaryEn: "New message in the secure workspace.",
     sourceRefType: "thread",
     sourceRefId: thread.id,
     targetUrl,
@@ -178,6 +176,28 @@ export async function notifyPracticeInboxOfMedicationQuestion(plan) {
     summaryEn: "Patient asked a question — please handle in the secure workspace.",
     sourceRefType: "medication_plan",
     sourceRefId: plan.id,
+    targetUrl,
+  });
+}
+
+/**
+ * @param {{ id: string, patientUserId: string, practiceProfileId: string }} link
+ */
+export async function notifyPracticeInboxOfProfileRevoked(link) {
+  const linkId = link.id;
+  const targetUrl = `/practice/patients/${linkId}?practiceId=${link.practiceProfileId}&tab=profile`;
+
+  return notify({
+    practiceProfileId: link.practiceProfileId,
+    practicePatientLinkId: linkId,
+    patientUserId: link.patientUserId,
+    type: "profile",
+    titleDe: "Profilfreigabe widerrufen",
+    titleEn: "Profile sharing revoked",
+    summaryDe: "Patient:in hat die Profilfreigabe beendet.",
+    summaryEn: "Patient ended profile sharing.",
+    sourceRefType: "practice_patient_link",
+    sourceRefId: link.id,
     targetUrl,
   });
 }

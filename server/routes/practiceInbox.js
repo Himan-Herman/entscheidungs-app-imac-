@@ -8,6 +8,7 @@ import { requirePracticeInboxFeature } from "../middleware/requirePracticeInbox.
 import {
   getPracticeAccess,
   canReadPracticePatientLinks,
+  canPracticeRestoreFromArchive,
 } from "../utils/practiceAccess.js";
 import {
   listPracticeInboxItems,
@@ -15,9 +16,12 @@ import {
   markPracticeInboxRead,
   markPracticeInboxDone,
   archivePracticeInboxItem,
+  restorePracticeInboxItem,
+  countNewPracticeInbox,
   INBOX_TYPES,
 } from "../services/practiceInbox/practiceInboxService.js";
 import { generatePracticeInboxAiAssist } from "../services/practiceInbox/practiceInboxAiService.js";
+import { generatePracticeInboxListAiSummary } from "../services/practiceInbox/practiceInboxListAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
@@ -36,7 +40,7 @@ function mapError(err) {
   }
   if (msg === "validation_invalid_type") return { status: 400, error: msg };
   if (msg === "item_not_found") return { status: 404, error: msg };
-  if (msg === "item_archived") return { status: 409, error: msg };
+  if (msg === "item_archived" || msg === "item_not_archived") return { status: 409, error: msg };
   if (msg === "ai_not_configured") return { status: 503, error: msg };
   if (msg === "forbidden") return { status: 403, error: msg };
   return { status: 500, error: "request_failed" };
@@ -52,6 +56,53 @@ async function requirePracticeRead(req, practiceId) {
   }
   return { userId, access };
 }
+
+/** GET /api/practice/inbox/count?practiceId= */
+router.get("/count", async (req, res) => {
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const ctx = await requirePracticeRead(req, practiceId);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const newCount = await countNewPracticeInbox(practiceId);
+    return res.json({ ok: true, newCount, unreadCount: newCount });
+  } catch (err) {
+    console.error("[practice/inbox/count]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/** POST /api/practice/inbox/ai-summary */
+router.post("/ai-summary", async (req, res) => {
+  const practiceId = String(req.body?.practiceId || req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const ctx = await requirePracticeRead(req, practiceId);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const result = await generatePracticeInboxListAiSummary(
+      practiceId,
+      {
+        locale: req.body?.locale || req.query.locale,
+        userId: ctx.userId,
+        actorRole: ctx.access.role,
+      },
+      { req },
+    );
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[practice/inbox/ai-summary]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
 
 /** GET /api/practice/inbox?practiceId=&filter=&type=&q=&sort= */
 router.get("/", async (req, res) => {
@@ -82,6 +133,18 @@ router.get("/", async (req, res) => {
       limit: req.query.limit,
       offset: req.query.offset,
     });
+
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "practice_inbox_opened",
+      entityType: "inbox_item",
+      entityId: practiceId,
+      practiceProfileId: practiceId,
+      metadata: { itemCount: result.items.length },
+    });
+
     return res.json({ ok: true, role: ctx.access.role, practiceId, ...result });
   } catch (err) {
     console.error("[practice/inbox/list]", err?.message ?? err);
@@ -107,7 +170,7 @@ router.get("/:itemId", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_inbox_item_opened",
-      entityType: "PracticeInboxItem",
+      entityType: "inbox_item",
       entityId: req.params.itemId,
       metadata: { type: result.item.type },
     });
@@ -136,7 +199,7 @@ router.patch("/:itemId/read", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_inbox_item_read",
-      entityType: "PracticeInboxItem",
+      entityType: "inbox_item",
       entityId: item.id,
       metadata: { type: item.type },
     });
@@ -165,7 +228,7 @@ router.patch("/:itemId/done", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_inbox_item_done",
-      entityType: "PracticeInboxItem",
+      entityType: "inbox_item",
       entityId: item.id,
       metadata: { type: item.type },
     });
@@ -194,13 +257,45 @@ router.patch("/:itemId/archive", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_inbox_item_archived",
-      entityType: "PracticeInboxItem",
+      entityType: "inbox_item",
       entityId: item.id,
       metadata: { type: item.type },
     });
     return res.json({ ok: true, item });
   } catch (err) {
     console.error("[practice/inbox/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/practice/inbox/:itemId/restore */
+router.patch("/:itemId/restore", async (req, res) => {
+  const practiceId = String(req.body?.practiceId || req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const ctx = await requirePracticeRead(req, practiceId);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+  if (!canPracticeRestoreFromArchive(ctx.access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const item = await restorePracticeInboxItem(req.params.itemId, practiceId);
+    await writeAuditLog({
+      req,
+      userId: ctx.userId,
+      actorRole: ctx.access.role,
+      action: "practice_inbox_item_restored",
+      entityType: "inbox_item",
+      entityId: item.id,
+      metadata: { type: item.type },
+    });
+    return res.json({ ok: true, item });
+  } catch (err) {
+    console.error("[practice/inbox/restore]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
@@ -229,7 +324,7 @@ router.post("/:itemId/ai-summary", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_inbox_ai_summary_created",
-      entityType: "PracticeInboxItem",
+      entityType: "inbox_item",
       entityId: req.params.itemId,
     });
     return res.json({ ok: true, ...result });
@@ -263,7 +358,7 @@ router.post("/:itemId/ai-reply-draft", async (req, res) => {
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_inbox_ai_reply_draft_created",
-      entityType: "PracticeInboxItem",
+      entityType: "inbox_item",
       entityId: req.params.itemId,
     });
     return res.json({ ok: true, ...result });
