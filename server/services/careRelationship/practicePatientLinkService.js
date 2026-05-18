@@ -286,6 +286,34 @@ export async function updatePracticePatientLinkStatus(
   return linkToJson(row);
 }
 
+/** @alias createPracticePatientLink */
+export const createLink = createPracticePatientLink;
+
+/** @alias listPracticePatientLinks */
+export const listLinksByPractice = listPracticePatientLinks;
+
+/** @alias getPracticePatientLink */
+export const getLinkById = getPracticePatientLink;
+
+/** @alias updatePracticePatientLinkStatus */
+export const updateLinkStatus = updatePracticePatientLinkStatus;
+
+/**
+ * @param {string} linkId
+ * @param {string} practiceProfileId
+ */
+export async function revokeLink(linkId, practiceProfileId) {
+  return updatePracticePatientLinkStatus(linkId, practiceProfileId, "revoked");
+}
+
+/**
+ * @param {string} linkId
+ * @param {string} practiceProfileId
+ */
+export async function archiveLink(linkId, practiceProfileId) {
+  return updatePracticePatientLinkStatus(linkId, practiceProfileId, "archived");
+}
+
 /**
  * For later phases: ensure a link exists when a Pre-Visit session is tied to a practice.
  * Not wired to routes in Step 1 — call only from future hooks behind a feature flag.
