@@ -14,6 +14,8 @@
     "verify:patient-inbox-dedupe": "node scripts/verifyPatientInboxDedupe.js",
     "verify:telemedicine-cleanup": "node scripts/verifyTelemedicineCleanup.js",
     "verify:worker": "node scripts/verifyWorkerRunner.js",
+    "analyze:dedupe": "node scripts/analyzeDuplicateConstraints.js",
+    "dedupe:constraints": "node scripts/dedupeDuplicateConstraints.js --dry-run",
     "seed:inbox": "node scripts/seedPatientInboxItem.js",
     "start": "node app.js"
   },
