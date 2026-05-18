@@ -1,15 +1,16 @@
 /**
- * Safe dedupe before unique constraints (AppointmentReminder.reminderKey,
- * PatientInboxItem patientUserId+dedupeKey).
+ * Safe dedupe before unique constraints (schema-aware).
+ * Default: --dry-run | Apply: --execute --confirm
  *
- * Default: --dry-run (no writes)
- * Apply:   node scripts/dedupeDuplicateConstraints.js --execute --confirm
- *
- * Requires DATABASE_URL. Run analyzeDuplicateConstraints.js first.
+ * Requires columns from migrate deploy. If columns missing, exits 0 with instructions.
  */
 
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import {
+  columnExists,
+  logColumnMissing,
+} from "./lib/schemaColumns.js";
 
 const prisma = new PrismaClient();
 
@@ -37,10 +38,9 @@ WITH ranked AS (
         id ASC
     ) AS rn
   FROM "AppointmentReminder"
+  WHERE "reminderKey" IS NOT NULL AND TRIM("reminderKey") != ''
 ),
-to_remove AS (
-  SELECT id FROM ranked WHERE rn > 1
-)
+to_remove AS (SELECT id FROM ranked WHERE rn > 1)
 SELECT id FROM to_remove
 `;
 
@@ -64,15 +64,42 @@ WITH ranked AS (
   FROM "PatientInboxItem"
   WHERE "dedupeKey" IS NOT NULL AND TRIM("dedupeKey") != ''
 ),
-to_remove AS (
-  SELECT id FROM ranked WHERE rn > 1
-)
+to_remove AS (SELECT id FROM ranked WHERE rn > 1)
 SELECT id FROM to_remove
 `;
 
-async function countIds(sql) {
+async function idsIfColumn(sql, hasColumn, table, column) {
+  if (!hasColumn) {
+    logColumnMissing(table, column);
+    return null;
+  }
   const rows = await prisma.$queryRawUnsafe(sql);
   return rows.map((r) => r.id);
+}
+
+async function countDuplicateGroups(hasReminderKey, hasDedupeKey) {
+  let r = 0;
+  let i = 0;
+  if (hasReminderKey) {
+    const rows = await prisma.$queryRaw`
+      SELECT COUNT(*)::int AS n FROM (
+        SELECT "reminderKey" FROM "AppointmentReminder"
+        GROUP BY "reminderKey" HAVING COUNT(*) > 1
+      ) x
+    `;
+    r = rows[0]?.n ?? 0;
+  }
+  if (hasDedupeKey) {
+    const rows = await prisma.$queryRaw`
+      SELECT COUNT(*)::int AS n FROM (
+        SELECT "patientUserId", "dedupeKey" FROM "PatientInboxItem"
+        WHERE "dedupeKey" IS NOT NULL AND TRIM("dedupeKey") != ''
+        GROUP BY "patientUserId", "dedupeKey" HAVING COUNT(*) > 1
+      ) x
+    `;
+    i = rows[0]?.n ?? 0;
+  }
+  return { r, i };
 }
 
 async function main() {
@@ -81,70 +108,65 @@ async function main() {
     process.exit(1);
   }
 
+  const hasReminderKey = await columnExists(prisma, "AppointmentReminder", "reminderKey");
+  const hasDedupeKey = await columnExists(prisma, "PatientInboxItem", "dedupeKey");
+
+  console.log(`[dedupe] mode=${dryRun ? "DRY-RUN" : "EXECUTE"}`);
+  console.log(`[dedupe] schema: reminderKey=${hasReminderKey} dedupeKey=${hasDedupeKey}`);
+
+  if (!hasReminderKey && !hasDedupeKey) {
+    console.log(
+      "[dedupe] Nothing to do — run `npx prisma migrate deploy` first (adds columns, backfill, dedupe, indexes).",
+    );
+    return;
+  }
+
   if (!dryRun && !confirmed) {
     console.error("Refusing to write without --execute --confirm");
     process.exit(1);
   }
 
-  const reminderIds = await countIds(REMINDER_DELETE_SQL);
-  const inboxIds = await countIds(INBOX_DELETE_SQL);
+  const reminderIds = await idsIfColumn(
+    REMINDER_DELETE_SQL,
+    hasReminderKey,
+    "AppointmentReminder",
+    "reminderKey",
+  );
+  const inboxIds = await idsIfColumn(
+    INBOX_DELETE_SQL,
+    hasDedupeKey,
+    "PatientInboxItem",
+    "dedupeKey",
+  );
 
-  console.log(`[dedupe] mode=${dryRun ? "DRY-RUN" : "EXECUTE"}`);
-  console.log(`[dedupe] AppointmentReminder rows to delete: ${reminderIds.length}`);
-  console.log(`[dedupe] PatientInboxItem rows to delete: ${inboxIds.length}`);
+  const rCount = reminderIds === null ? 0 : reminderIds.length;
+  const iCount = inboxIds === null ? 0 : inboxIds.length;
+
+  console.log(`[dedupe] AppointmentReminder rows to delete: ${rCount}`);
+  console.log(`[dedupe] PatientInboxItem rows to delete: ${iCount}`);
 
   if (dryRun) {
-    if (reminderIds.length) {
-      console.log("[dedupe] sample reminder ids:", reminderIds.slice(0, 5).join(", "));
-    }
-    if (inboxIds.length) {
-      console.log("[dedupe] sample inbox ids:", inboxIds.slice(0, 5).join(", "));
-    }
-    console.log("[dedupe] No changes made. Re-run with --execute --confirm to apply.");
+    if (rCount) console.log("[dedupe] sample reminder ids:", reminderIds.slice(0, 5).join(", "));
+    if (iCount) console.log("[dedupe] sample inbox ids:", inboxIds.slice(0, 5).join(", "));
+    console.log("[dedupe] No changes made.");
     return;
   }
 
   await prisma.$transaction(async (tx) => {
-    if (reminderIds.length) {
-      const r = await tx.appointmentReminder.deleteMany({
-        where: { id: { in: reminderIds } },
-      });
+    if (reminderIds?.length) {
+      const r = await tx.appointmentReminder.deleteMany({ where: { id: { in: reminderIds } } });
       console.log(`[dedupe] deleted AppointmentReminder: ${r.count}`);
     }
-    if (inboxIds.length) {
-      const r = await tx.patientInboxItem.deleteMany({
-        where: { id: { in: inboxIds } },
-      });
+    if (inboxIds?.length) {
+      const r = await tx.patientInboxItem.deleteMany({ where: { id: { in: inboxIds } } });
       console.log(`[dedupe] deleted PatientInboxItem: ${r.count}`);
     }
   });
 
-  const rDup = await txCheckReminder();
-  const iDup = await txCheckInbox();
-  console.log(`[dedupe] post-check reminder duplicate groups: ${rDup}`);
-  console.log(`[dedupe] post-check inbox duplicate groups: ${iDup}`);
-  console.log("[dedupe] Done. Safe to run: npx prisma migrate deploy OR npx prisma db push");
-}
-
-async function txCheckReminder() {
-  const rows = await prisma.$queryRaw`
-    SELECT COUNT(*)::int AS n FROM (
-      SELECT "reminderKey" FROM "AppointmentReminder"
-      GROUP BY "reminderKey" HAVING COUNT(*) > 1
-    ) x
-  `;
-  return rows[0]?.n ?? 0;
-}
-
-async function txCheckInbox() {
-  const rows = await prisma.$queryRaw`
-    SELECT COUNT(*)::int AS n FROM (
-      SELECT "patientUserId", "dedupeKey" FROM "PatientInboxItem"
-      WHERE "dedupeKey" IS NOT NULL AND TRIM("dedupeKey") != ''
-      GROUP BY "patientUserId", "dedupeKey" HAVING COUNT(*) > 1
-    ) x
-  `;
-  return rows[0]?.n ?? 0;
+  const post = await countDuplicateGroups(hasReminderKey, hasDedupeKey);
+  console.log(`[dedupe] post-check reminder duplicate groups: ${post.r}`);
+  console.log(`[dedupe] post-check inbox duplicate groups: ${post.i}`);
+  console.log("[dedupe] Done.");
 }
 
 main()

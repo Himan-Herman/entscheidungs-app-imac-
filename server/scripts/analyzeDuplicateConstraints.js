@@ -1,12 +1,16 @@
 /**
  * Read-only analysis: duplicates blocking unique constraints.
+ * Schema-aware: skips tables/columns not yet migrated.
  * Usage: node scripts/analyzeDuplicateConstraints.js
- *
- * Requires DATABASE_URL. No writes.
  */
 
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import {
+  columnExists,
+  getSchemaConstraintState,
+  logColumnMissing,
+} from "./lib/schemaColumns.js";
 
 const prisma = new PrismaClient();
 
@@ -14,7 +18,14 @@ function section(title) {
   console.log(`\n=== ${title} ===`);
 }
 
-async function reminderDuplicates() {
+async function reminderDuplicates(hasReminderKey) {
+  section("AppointmentReminder.reminderKey");
+
+  if (!hasReminderKey) {
+    logColumnMissing("AppointmentReminder", "reminderKey");
+    return;
+  }
+
   const groups = await prisma.$queryRaw`
     SELECT "reminderKey", COUNT(*)::int AS cnt
     FROM "AppointmentReminder"
@@ -33,7 +44,6 @@ async function reminderDuplicates() {
     ) t
   `;
 
-  section("AppointmentReminder.reminderKey");
   console.log("Duplicate groups:", groups.length);
   console.log("Rows to remove (if dedupe):", totalExtra[0]?.rows_to_remove ?? 0);
 
@@ -71,21 +81,21 @@ async function reminderDuplicates() {
   if (groups.length > 15) {
     console.log(`  ... and ${groups.length - 15} more groups`);
   }
-
-  const legacyDupes = await prisma.$queryRaw`
-    SELECT COUNT(*)::int AS n
-    FROM (
-      SELECT "reminderKey"
-      FROM "AppointmentReminder"
-      WHERE "reminderKey" LIKE 'legacy:%'
-      GROUP BY "reminderKey"
-      HAVING COUNT(*) > 1
-    ) x
-  `;
-  console.log("Duplicate groups with legacy: prefix:", legacyDupes[0]?.n ?? 0);
 }
 
-async function inboxDuplicates() {
+async function inboxDuplicates(hasDedupeKey) {
+  section("PatientInboxItem(patientUserId, dedupeKey)");
+
+  if (!hasDedupeKey) {
+    logColumnMissing("PatientInboxItem", "dedupeKey");
+    return;
+  }
+
+  const nullDedupe = await prisma.$queryRaw`
+    SELECT COUNT(*)::int AS n FROM "PatientInboxItem"
+    WHERE "dedupeKey" IS NULL OR TRIM("dedupeKey") = ''
+  `;
+
   const groups = await prisma.$queryRaw`
     SELECT "patientUserId", "dedupeKey", COUNT(*)::int AS cnt
     FROM "PatientInboxItem"
@@ -106,12 +116,6 @@ async function inboxDuplicates() {
     ) t
   `;
 
-  const nullDedupe = await prisma.$queryRaw`
-    SELECT COUNT(*)::int AS n FROM "PatientInboxItem"
-    WHERE "dedupeKey" IS NULL OR TRIM("dedupeKey") = ''
-  `;
-
-  section("PatientInboxItem(patientUserId, dedupeKey)");
   console.log("Rows with NULL/empty dedupeKey (unique allows many):", nullDedupe[0]?.n ?? 0);
   console.log("Duplicate groups:", groups.length);
   console.log("Rows to remove (if dedupe):", totalExtra[0]?.rows_to_remove ?? 0);
@@ -149,23 +153,6 @@ async function inboxDuplicates() {
   if (groups.length > 15) {
     console.log(`  ... and ${groups.length - 15} more groups`);
   }
-
-  const archivedMix = await prisma.$queryRaw`
-    SELECT COUNT(*)::int AS groups_with_archived_and_active
-    FROM (
-      SELECT "patientUserId", "dedupeKey"
-      FROM "PatientInboxItem"
-      WHERE "dedupeKey" IS NOT NULL AND TRIM("dedupeKey") != ''
-      GROUP BY "patientUserId", "dedupeKey"
-      HAVING COUNT(*) > 1
-         AND COUNT(*) FILTER (WHERE status = 'archived') >= 1
-         AND COUNT(*) FILTER (WHERE status != 'archived') >= 1
-    ) x
-  `;
-  console.log(
-    "Groups with both archived and non-archived (keep prefers unread/read):",
-    archivedMix[0]?.groups_with_archived_and_active ?? 0,
-  );
 }
 
 async function main() {
@@ -174,10 +161,30 @@ async function main() {
     process.exit(1);
   }
 
+  const state = await getSchemaConstraintState(prisma);
+
   console.log("[analyze] Connected — read-only duplicate constraint report");
-  await reminderDuplicates();
-  await inboxDuplicates();
-  console.log("\n[analyze] Done. Run dedupeDuplicateConstraints.js --dry-run before --execute.");
+  console.log("[analyze] Schema state:", state);
+
+  if (!state.reminderKey && !state.dedupeKey) {
+    console.log(
+      "\n[analyze] Neither target column exists yet. Run migrate deploy first; analyze/dedupe scripts are for post-column / pre-unique-check only.",
+    );
+    return;
+  }
+
+  await reminderDuplicates(state.reminderKey);
+  await inboxDuplicates(state.dedupeKey);
+
+  if (state.reminderUnique && state.inboxUnique) {
+    console.log("\n[analyze] Unique indexes already present — constraints are applied.");
+  } else if (state.reminderKey || state.dedupeKey) {
+    console.log(
+      "\n[analyze] Columns exist; unique indexes may still be missing. Use migrate deploy (includes dedupe migration) or dedupe script if duplicates remain.",
+    );
+  }
+
+  console.log("\n[analyze] Done.");
 }
 
 main()

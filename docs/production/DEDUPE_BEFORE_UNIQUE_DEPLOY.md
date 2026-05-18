@@ -42,44 +42,35 @@ Rows with **NULL** `dedupeKey` are **not** deduped (Postgres allows multiple NUL
 
 ## Procedure (production)
 
+Production may **not** have `reminderKey` / `dedupeKey` yet (only `db push` in build, migrations never applied). **Order matters.**
+
 1. **Backup** Postgres (Render snapshot or `pg_dump`).
 
-2. **Analyze** (read-only):
+2. **Apply migrations** (adds columns, backfill, dedupe, unique indexes):
 
    ```bash
    cd server
-   node scripts/analyzeDuplicateConstraints.js
+   npx prisma migrate deploy
    ```
 
-3. **Dry-run**:
+   Key migration: `20260621180000_dedupe_before_unique_constraints` (self-contained if `20260621140000` / `20260621170000` were skipped).
+
+3. **Render settings**: Build = `npm ci && npx prisma generate` only. Start = `npx prisma migrate deploy && node app.js`. **No** `db push` in build.
+
+4. **Optional verify** (only **after** step 2 — scripts skip missing columns):
 
    ```bash
+   node scripts/analyzeDuplicateConstraints.js
    node scripts/dedupeDuplicateConstraints.js --dry-run
    ```
 
-4. **Execute** (after reviewing output):
+   If duplicates remain after migrate deploy:
 
    ```bash
    node scripts/dedupeDuplicateConstraints.js --execute --confirm
    ```
 
-   Or via migration (same SQL):
-
-   ```bash
-   npx prisma migrate deploy
-   ```
-
-   Migration: `20260621180000_dedupe_before_unique_constraints`
-
-5. **Verify** analyze shows 0 duplicate groups.
-
-6. **Deploy schema**:
-
-   ```bash
-   npx prisma db push
-   # or
-   npx prisma migrate deploy
-   ```
+5. **Redeploy** API service.
 
 ## Data loss
 
