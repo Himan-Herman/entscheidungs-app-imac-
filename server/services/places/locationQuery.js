@@ -130,15 +130,11 @@ export async function geocodeManualLocation(input, language) {
   }
 
   let lastError = null;
-  for (let i = 0; i < candidates.length; i++) {
-    const query = candidates[i];
-    const isLast = i === candidates.length - 1;
-    const opts = region && !isLast ? { region } : {};
+  for (const query of candidates) {
     try {
-      return await geocodeAddress(query, language, opts);
+      return await geocodeAddress(query, language, { region });
     } catch (err) {
       lastError = err;
-      if (err?.message !== "geocode_zero") throw err;
     }
   }
   throw lastError || new Error("geocode_zero");
