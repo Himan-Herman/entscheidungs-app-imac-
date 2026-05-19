@@ -1,11 +1,11 @@
-// src/pages/KoerperSymptomChat.jsx
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
-  useSearchParams,
-  useNavigate,
-  useLocation,
   Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
 } from "react-router-dom";
+import { FaPaperPlane } from "react-icons/fa";
 
 import "../styles/KoerperSymptomChat.css";
 import "../styles/PatientChatInputDesktop.css";
@@ -14,41 +14,54 @@ import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { readBodyMapConsent } from "../features/bodyMap/bodyMapSession";
+import {
+  loadBodyMapChatState,
+  useBodyMapChat,
+} from "../features/bodyMap/hooks/useBodyMapChat.js";
+import BodyMapChatThread from "../features/bodyMap/components/BodyMapChatThread.jsx";
+import BodyMapSummaryCard from "../features/bodyMap/components/BodyMapSummaryCard.jsx";
 import DisclaimerShort from "../components/DisclaimerShort";
 import VoiceInput from "../components/VoiceInput.jsx";
-import { FaPaperPlane } from "react-icons/fa";
-import { authFetch } from "../api/authFetch";
-import SpeakButton from "../components/SpeakButton";
 
-const THREAD_API = "/api/koerpersymptomthread";
-const LS_CHAT_KEY = "koerperChatVerlauf";
-const LS_THREAD_KEY = "koerperThreadId";
-const MAX_CHARS = 1200;
-
-function interpolateRegion(template, region) {
-  return template.replace(/\{\{region\}\}/g, region);
-}
-
-function interpolateMax(template, max) {
-  return template.replace(/\{\{max\}\}/g, String(max));
-}
-
-function introExistsForOrgan(messages, organKey) {
-  return messages.some(
-    (m) =>
-      m.role === "assistant" &&
-      (m.bodyMapIntro === true && m.introOrgan === organKey),
-  );
+function interpolate(template, vars) {
+  let out = template;
+  for (const [key, value] of Object.entries(vars)) {
+    out = out.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), String(value));
+  }
+  return out;
 }
 
 export default function KoerperSymptomChat() {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const inputRef = useRef(null);
 
   const tc = useMemo(() => {
     const b = getMessages(language);
     return b.bodyMap?.chat ?? getMessages("en").bodyMap.chat;
   }, [language]);
+
+  const initialState = useMemo(() => loadBodyMapChatState(), []);
+
+  const organ = searchParams.get("organ");
+  const organLabel = organ ? organ.replace(/_/g, " ") : "";
+  const seite =
+    searchParams.get("seite") ||
+    sessionStorage.getItem("koerperSeite") ||
+    "vorderseite";
+
+  const chat = useBodyMapChat({
+    initialVerlauf: initialState.verlauf,
+    initialThreadId: initialState.threadId,
+    initialSummary: initialState.summary,
+    organ,
+    organLabel,
+    language: language === "en" ? "en" : "de",
+    tc,
+  });
 
   const voiceLabels = useMemo(
     () => ({
@@ -60,43 +73,19 @@ export default function KoerperSymptomChat() {
     [tc],
   );
 
-  const [eingabe, setEingabe] = useState("");
-  const [verlauf, setVerlauf] = useState(() => {
-    try {
-      const raw = localStorage.getItem(LS_CHAT_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      console.warn("[LS read] koerperChatVerlauf fehlgeschlagen:", e);
-      return [];
-    }
-  });
-  const [threadId, setThreadId] = useState(() => {
-    try {
-      return localStorage.getItem(LS_THREAD_KEY) || "";
-    } catch (e) {
-      console.warn("[LS read] koerperThreadId fehlgeschlagen:", e);
-      return "";
-    }
-  });
-  const [isSending, setIsSending] = useState(false);
-
-  const [searchParams, setSearchParams] = useSearchParams();
-  const organ = searchParams.get("organ");
-
-  const organLabel = organ ? organ.replace(/_/g, " ") : "";
-
-  const seite =
-    searchParams.get("seite") ||
-    sessionStorage.getItem("koerperSeite") ||
-    "vorderseite";
-
-  const chatRef = useRef(null);
-  const inputRef = useRef(null);
-  const lastIntroOrganRef = useRef(null);
-
-  const navigate = useNavigate();
-  const location = useLocation();
-  const fromReset = location.state?.fromReset === true;
+  const threadLabels = useMemo(
+    () => ({
+      placeholderEmpty: tc.placeholderEmpty,
+      placeholderExample: tc.placeholderExample,
+      loadingLine: chat.isSummarizing ? tc.summarizingLine : tc.loadingLine,
+      userLabel: tc.userLabel,
+      assistantLabel: tc.assistantLabel,
+      speakAria: tc.speakAria,
+      messageLabel: tc.messageLabel,
+      threadAria: tc.threadAria,
+    }),
+    [chat.isSummarizing, tc],
+  );
 
   useEffect(() => {
     document.title = tc.pageTitle;
@@ -108,410 +97,206 @@ export default function KoerperSymptomChat() {
     }
   }, [navigate]);
 
-  const autoResize = (el) => {
-    if (!el) return;
-    el.style.height = "auto";
-    const maxH = 160;
-    el.style.height = Math.min(el.scrollHeight, maxH) + "px";
-  };
-
   useEffect(() => {
     if (location.state?.from) {
       sessionStorage.setItem("lastMapRoute", location.state.from);
     }
-    if (seite) {
-      sessionStorage.setItem("koerperSeite", seite);
-    }
-  }, [seite, location]);
+    if (seite) sessionStorage.setItem("koerperSeite", seite);
+  }, [location.state?.from, seite]);
 
-  useEffect(() => {
-    if (fromReset) {
-      sessionStorage.removeItem("koerperSeite");
-      sessionStorage.removeItem("lastMapRoute");
-    }
-  }, [fromReset]);
-
-  useEffect(() => {
-    if (!organ) return;
-
-    if (introExistsForOrgan(verlauf, organ)) {
-      lastIntroOrganRef.current = organ;
-      return;
-    }
-
-    if (lastIntroOrganRef.current !== organ) {
-      const neueStartFrage = {
-        role: "assistant",
-        content: interpolateRegion(tc.introAssistant, organLabel),
-        bodyMapIntro: true,
-        introOrgan: organ,
-      };
-      setVerlauf((prev) => {
-        const neu = [...prev, neueStartFrage];
-        try {
-          localStorage.setItem(LS_CHAT_KEY, JSON.stringify(neu));
-        } catch (e) {
-          console.warn("[LS write] koerperChatVerlauf fehlgeschlagen:", e);
-        }
-        return neu;
-      });
-      lastIntroOrganRef.current = organ;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organ]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LS_CHAT_KEY, JSON.stringify(verlauf));
-    } catch (e) {
-      console.warn("[LS write] koerperChatVerlauf fehlgeschlagen:", e);
-    }
-  }, [verlauf]);
-
-  useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTo({
-        top: chatRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, [verlauf]);
-
-  const frageSenden = async (textOverride) => {
-    const raw = typeof textOverride === "string" ? textOverride : eingabe;
-    const aktuelleFrage = (raw || "").trim();
-    if (!aktuelleFrage || isSending) return;
-
-    if (typeof navigator !== "undefined" && !navigator.onLine) {
-      setVerlauf((prev) => [
-        ...prev,
-        { role: "assistant", content: tc.offlineError },
-      ]);
-      return;
-    }
-
-    const userMsg = { role: "user", content: aktuelleFrage };
-    const basisVerlauf = [...verlauf, userMsg];
-
-    const mitUhr = [
-      ...basisVerlauf,
-      {
-        role: "assistant",
-        content: tc.loadingLine,
-      },
-    ];
-    setVerlauf(mitUhr);
-    setEingabe("");
-    setIsSending(true);
-
-    try {
-      const payload = {
-        threadId: threadId || null,
-        organName: organ || organLabel,
-        verlauf:
-          !threadId && organ
-            ? [
-                {
-                  role: "user",
-                  content: `[Body map — visit preparation] Marked region: "${organ}". Neutral notes only; no diagnosis.`,
-                },
-                userMsg,
-              ]
-            : [userMsg],
-      };
-
-      const response = await authFetch(THREAD_API, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        console.error("[Thread API] HTTP", response.status);
-        const fertigFehler = [
-          ...basisVerlauf,
-          {
-            role: "assistant",
-            content: tc.httpError,
-          },
-        ];
-        setVerlauf(fertigFehler);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.threadId && data.threadId !== threadId) {
-        setThreadId(data.threadId);
-        try {
-          localStorage.setItem(LS_THREAD_KEY, data.threadId);
-        } catch (e) {
-          console.warn("[LS write] koerperThreadId fehlgeschlagen:", e);
-        }
-      }
-
-      const fertig = [
-        ...basisVerlauf,
-        {
-          role: "assistant",
-          content: data.antwort || "…",
-        },
-      ];
-      setVerlauf(fertig);
-    } catch (error) {
-      console.error("Fehler bei der KI-Antwort:", error);
-      const mitFehler = [
-        ...basisVerlauf,
-        {
-          role: "assistant",
-          content: tc.serverError,
-        },
-      ];
-      setVerlauf(mitFehler);
-    } finally {
-      setIsSending(false);
-    }
+  const autoResize = (el) => {
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      frageSenden();
+      void chat.sendMessage();
     }
   };
 
   const handleVoice = (text) => {
-    setEingabe((text || "").slice(0, MAX_CHARS));
+    chat.setEingabe((text || "").slice(0, chat.maxChars));
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
-  const neustart = () => {
-    setVerlauf([]);
-    setEingabe("");
-    setThreadId("");
-    try {
-      localStorage.removeItem(LS_CHAT_KEY);
-      localStorage.removeItem(LS_THREAD_KEY);
-    } catch (e) {
-      console.warn("[LS remove] failed:", e);
-    }
-    if (lastIntroOrganRef?.current !== undefined)
-      lastIntroOrganRef.current = null;
+  const mapBackHref =
+    seite === "rueckseite" ? "/rueckseite" : "/koerperregionen";
 
+  const neustart = useCallback(() => {
+    chat.resetAll();
     setSearchParams({});
     sessionStorage.removeItem("koerperSeite");
     sessionStorage.removeItem("lastMapRoute");
-
     navigate("/region-start", { replace: true, state: { fromReset: true } });
-  };
+  }, [chat, navigate, setSearchParams]);
 
-  const clearVerlauf = () => {
-    try {
-      localStorage.removeItem(LS_CHAT_KEY);
-    } catch (e) {
-      console.warn("[LS remove] koerperChatVerlauf löschen fehlgeschlagen:", e);
-    }
+  const errorMessage =
+    chat.errorKey && tc[chat.errorKey] ? tc[chat.errorKey] : null;
 
-    if (organ) {
-      const neueStartFrage = {
-        role: "assistant",
-        content: interpolateRegion(tc.introAssistant, organLabel),
-        bodyMapIntro: true,
-        introOrgan: organ,
-      };
+  const maxLabel = interpolate(tc.maxCharsLabel, { max: chat.maxChars });
+  const canFinish = chat.userTurnCount >= 1 && !chat.isSending && !chat.isSummarizing;
 
-      const neu = [neueStartFrage];
-      setVerlauf(neu);
-
-      lastIntroOrganRef.current = organ;
-
-      try {
-        localStorage.setItem(LS_CHAT_KEY, JSON.stringify(neu));
-      } catch (e) {
-        console.warn("[LS write] koerperChatVerlauf nach Reset fehlgeschlagen:", e);
-      }
-    } else {
-      setVerlauf([]);
-    }
-  };
-
-  const zeichenAnzahl = eingabe.length;
-  const maxLabel = interpolateMax(tc.maxCharsLabel, MAX_CHARS);
+  if (!organ) {
+    return (
+      <main
+        className={`body-map-page body-map-page--${theme}`}
+        data-theme={theme}
+        role="main"
+      >
+        <div className="body-map-page__shell">
+          <section className="body-map-empty" aria-labelledby="body-map-empty-title">
+            <h1 id="body-map-empty-title">{tc.noRegionTitle}</h1>
+            <p>{tc.noRegionBody}</p>
+            <Link className="body-map-btn body-map-btn--primary" to="/region-start">
+              {tc.noRegionCta}
+            </Link>
+          </section>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main
-      className={`koerper-page koerper-page--${theme}`}
+      className={`body-map-page body-map-page--${theme}`}
       data-theme={theme}
-      aria-labelledby="koerper-heading"
+      aria-labelledby="body-map-chat-title"
       role="main"
       dir="ltr"
     >
-      <div className="koerper-shell">
-        <header className="koerper-header">
-          <div className="koerper-header-text">
-            <h1 id="koerper-heading" className="koerper-title">
+      <div className="body-map-page__shell">
+        <header className="body-map-page__header">
+          <div className="body-map-page__header-text">
+            <p className="body-map-page__eyebrow">{tc.chip1}</p>
+            <h1 id="body-map-chat-title" className="body-map-page__title">
               {tc.title}
             </h1>
-            <p className="koerper-subtitle">{tc.subtitle}</p>
-            <p className="koerper-organ-hint">
+            <p className="body-map-page__subtitle">{tc.subtitle}</p>
+            <p className="body-map-page__privacy">
               {tc.accountDataHint}{" "}
               <Link to="/settings/privacy">{tc.accountDataLink}</Link>
             </p>
           </div>
-          <div className="koerper-header-meta" aria-hidden="true">
-            <span className="chip chip--accent">{tc.chip1}</span>
-            <span className="chip chip--soft">{tc.chip2}</span>
+          <div className="body-map-page__meta">
+            <span className="body-map-chip body-map-chip--region" title={organLabel}>
+              {tc.regionBadge}: {organLabel}
+            </span>
+            <Link
+              className="body-map-btn body-map-btn--ghost"
+              to={mapBackHref}
+              aria-label={tc.backToMapAria}
+            >
+              {tc.backToMap}
+            </Link>
           </div>
         </header>
 
-        <section
-          className="koerper-disclaimer-section"
-          aria-label={tc.sectionChat}
-        >
+        <section className="body-map-page__disclaimer" aria-label={tc.sectionChat}>
           <DisclaimerShort />
         </section>
 
+        {errorMessage ? (
+          <p className="body-map-page__error" role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
+
         <section
-          className="symptomchat-container"
+          className="body-map-chat-card"
           aria-label={tc.sectionChat}
         >
-          <header className="chat-top-row">
-            <h2 className="chat-title">{tc.chatHeading}</h2>
-            <div className="chat-top-actions">
+          <header className="body-map-chat-card__top">
+            <h2 className="body-map-chat-card__title">{tc.chatHeading}</h2>
+            <div className="body-map-chat-card__actions">
               <button
                 type="button"
-                className="btn btn--ghost"
+                className="body-map-btn body-map-btn--ghost"
                 onClick={neustart}
                 title={tc.btnNewChatTitle}
               >
                 ↻ {tc.btnNewChat}
               </button>
-
               <button
                 type="button"
-                className="btn btn--ghost-danger"
-                onClick={clearVerlauf}
+                className="body-map-btn body-map-btn--ghost-danger"
+                onClick={chat.clearChat}
                 title={tc.btnClearHistoryTitle}
               >
-                🧹 {tc.btnClearHistory}
+                {tc.btnClearHistory}
               </button>
             </div>
           </header>
 
-          <p className="koerper-chat-intro">{tc.chatIntro}</p>
+          <p className="body-map-chat-card__intro">{tc.chatIntro}</p>
 
-          <div
-            className="chatverlauf"
-            ref={chatRef}
-            role="log"
-            aria-live="polite"
-            aria-relevant="additions"
-          >
-            {verlauf.length === 0 && (
-              <p className="chat-placeholder">
-                {tc.placeholderEmpty}
-                <br />
-                <span className="chat-placeholder-example">
-                  {tc.placeholderExample}
-                </span>
-              </p>
-            )}
+          <BodyMapChatThread messages={chat.verlauf} labels={threadLabels} />
 
-            {verlauf.map((nachricht, index) => {
-              const isUser = nachricht.role === "user";
-              return (
-                <article
-                  key={index}
-                  className={`chat-bubble ${isUser ? "user" : "assistant"}`}
-                  aria-label={`${index + 1}: ${isUser ? tc.userLabel : tc.assistantLabel}`}
-                >
-                  {isUser ? (
-                    <>
-                      <strong className="bubble-label">
-                        {tc.userLabel}:
-                      </strong>
-                      <p className="bubble-text">{nachricht.content}</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="bubble-header-row">
-                        <strong className="bubble-label">
-                          {tc.assistantLabel}:
-                        </strong>
-                        <SpeakButton
-                          text={nachricht.content || ""}
-                          className="tts-btn"
-                          ariaLabel={tc.speakAria}
-                        />
-                      </div>
-                      <p className="bubble-text">{nachricht.content}</p>
-                    </>
-                  )}
-                </article>
-              );
-            })}
+          <div className="body-map-chat-card__finish-row">
+            <button
+              type="button"
+              className="body-map-btn body-map-btn--primary"
+              disabled={!canFinish}
+              title={canFinish ? tc.btnFinishTitle : tc.btnFinishDisabledHint}
+              onClick={() => void chat.requestSummary()}
+            >
+              {tc.btnFinish}
+            </button>
           </div>
 
-          <div className="eingabe-bereich patient-chat-composer">
-            <div className="eingabe-label-row">
-              <label htmlFor="koerper-eingabe" className="eingabe-label">
+          <div className="body-map-composer patient-chat-composer">
+            <div className="body-map-composer__label-row">
+              <label htmlFor="koerper-eingabe" className="body-map-composer__label">
                 {tc.inputLabel}
               </label>
-              <span className="eingabe-hint">{maxLabel}</span>
+              <span className="body-map-composer__hint">{maxLabel}</span>
             </div>
 
-            {organ ? (
-              <p className="koerper-organ-hint">
-                <strong>{tc.organHintIntro}</strong>{" "}
-                <span className="koerper-organ-example">
-                  {interpolateRegion(tc.organHintExample, organLabel)}
-                </span>{" "}
-                {tc.organHintOutro}
-              </p>
-            ) : null}
+            <p className="body-map-composer__region-hint">
+              <strong>{tc.organHintIntro}</strong>{" "}
+              <span>{interpolate(tc.organHintExample, { region: organLabel })}</span>{" "}
+              {tc.organHintOutro}
+            </p>
 
             <textarea
               id="koerper-eingabe"
               ref={inputRef}
-              className="chat-textarea"
+              className="body-map-composer__textarea chat-textarea"
               placeholder={tc.inputPlaceholder}
-              value={eingabe}
-              maxLength={MAX_CHARS}
+              value={chat.eingabe}
+              maxLength={chat.maxChars}
               rows={1}
+              disabled={chat.isSending || chat.isSummarizing}
               onChange={(e) =>
-                setEingabe(e.target.value.slice(0, MAX_CHARS))
+                chat.setEingabe(e.target.value.slice(0, chat.maxChars))
               }
               onInput={(e) => autoResize(e.target)}
               onKeyDown={handleKeyDown}
               aria-label={tc.inputLabel}
             />
 
-            <div className="eingabe-actions">
+            <div className="body-map-composer__actions">
               <span
-                className={`char-count ${
-                  zeichenAnzahl >= MAX_CHARS ? "limit" : ""
+                className={`body-map-composer__count ${
+                  chat.eingabe.length >= chat.maxChars ? "body-map-composer__count--limit" : ""
                 }`}
                 aria-live="polite"
               >
-                {zeichenAnzahl}/{MAX_CHARS}
+                {chat.eingabe.length}/{chat.maxChars}
               </span>
-
               <div className="patient-chat-action-group">
-                <div className="voice-wrap">
-                  <VoiceInput
-                    onTranscribed={handleVoice}
-                    notice={tc.micNotice}
-                    labels={voiceLabels}
-                  />
-                </div>
-
+                <VoiceInput
+                  onTranscribed={handleVoice}
+                  notice={tc.micNotice}
+                  labels={voiceLabels}
+                />
                 <button
                   type="button"
-                  className="send-btn"
-                  onClick={() => frageSenden()}
-                  disabled={isSending}
+                  className="body-map-composer__send send-btn"
+                  onClick={() => void chat.sendMessage()}
+                  disabled={chat.isSending || chat.isSummarizing}
                   aria-label={tc.sendAria}
                 >
                   <FaPaperPlane aria-hidden="true" />
@@ -520,6 +305,10 @@ export default function KoerperSymptomChat() {
             </div>
           </div>
         </section>
+
+        {chat.summary ? (
+          <BodyMapSummaryCard summary={chat.summary} labels={tc} />
+        ) : null}
       </div>
     </main>
   );

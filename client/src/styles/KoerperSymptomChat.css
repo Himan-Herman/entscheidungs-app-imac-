@@ -1,734 +1,508 @@
-/* Grundlayout der Seite */
-.koerper-page {
+/* Body map chat — MedScoutX patient area (design tokens, WCAG-oriented) */
+
+.body-map-page {
   min-height: 100vh;
-  padding: 2.5rem 1.5rem 3rem;
+  padding: var(--ms-space-5) var(--ms-space-4) var(--ms-space-6);
   box-sizing: border-box;
   display: flex;
   justify-content: center;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", sans-serif;
+  font-family: var(--ms-font-sans);
+  background: var(--ms-color-bg-subtle);
+  color: var(--ms-color-text);
 }
 
-/* Light / Dark Hintergrund wie bei den anderen Seiten */
-.koerper-page--light {
-  background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.2), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.18), transparent 55%),
-    linear-gradient(135deg, #f4f7fb 0%, #eef3f8 40%, #e5ecf5 100%);
-  color: #0f172a;
-}
-
-.koerper-page--dark {
-  background:
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.25), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.18), transparent 55%),
-    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.25), transparent 55%),
-    linear-gradient(135deg, #020617 0%, #020617 40%, #020617 100%);
-  color: #e5e7eb;
-}
-
-.koerper-shell {
+.body-map-page__shell {
   width: 100%;
   max-width: 1120px;
   margin: 0 auto;
 }
 
-/* Header oben */
-.koerper-header {
+.body-map-page__header {
   display: flex;
   justify-content: space-between;
-  gap: 1.5rem;
   align-items: flex-start;
-  margin-bottom: 1.75rem;
+  gap: var(--ms-space-4);
+  margin-bottom: var(--ms-space-4);
 }
 
-.koerper-header-text {
-  flex: 1 1 auto;
+.body-map-page__eyebrow {
+  margin: 0 0 var(--ms-space-1);
+  font-size: var(--ms-text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ms-color-accent);
 }
 
-.koerper-title {
-  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+.body-map-page__title {
+  margin: 0 0 var(--ms-space-2);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: 700;
-  letter-spacing: 0.02em;
-  margin: 0 0 0.4rem;
+  line-height: var(--ms-leading-tight);
 }
 
-.koerper-subtitle {
+.body-map-page__subtitle {
   margin: 0;
-  font-size: clamp(0.95rem, 1.4vw, 1.05rem);
-  line-height: 1.5;
-  color: rgba(15, 23, 42, 0.75);
+  font-size: var(--ms-text-sm);
+  line-height: var(--ms-leading-normal);
+  color: var(--ms-color-text-secondary);
+  max-width: 42rem;
 }
 
-.koerper-page--dark .koerper-subtitle {
-  color: rgba(226, 232, 240, 0.8);
+.body-map-page__privacy {
+  margin: var(--ms-space-2) 0 0;
+  font-size: var(--ms-text-xs);
+  color: var(--ms-color-text-muted);
 }
 
-.koerper-chat-intro {
-  margin: 0.75rem 0 0;
-  font-size: 0.92rem;
-  line-height: 1.45;
-  color: rgba(15, 23, 42, 0.82);
+.body-map-page__privacy a {
+  color: var(--ms-color-link);
+  font-weight: 600;
 }
 
-.koerper-page--dark .koerper-chat-intro {
-  color: rgba(226, 232, 240, 0.88);
+.body-map-page__privacy a:hover {
+  color: var(--ms-color-link-hover);
 }
 
-/* Chips rechts oben */
-.koerper-header-meta {
+.body-map-page__meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.5rem;
+  gap: var(--ms-space-2);
+  flex-shrink: 0;
 }
 
-.chip {
+.body-map-page__disclaimer {
+  margin-bottom: var(--ms-space-4);
+}
+
+.body-map-page__error {
+  margin: 0 0 var(--ms-space-3);
+  padding: var(--ms-space-3) var(--ms-space-4);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-danger-bg);
+  color: var(--ms-color-danger);
+  font-size: var(--ms-text-sm);
+  font-weight: 600;
+}
+
+.body-map-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--ms-radius-pill);
+  font-size: var(--ms-text-xs);
+  font-weight: 600;
+  border: 1px solid var(--ms-color-border-strong);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+}
+
+.body-map-chip--region {
+  border-color: var(--ms-color-accent);
+  color: var(--ms-color-accent);
+  background: color-mix(in srgb, var(--ms-color-accent) 10%, var(--ms-color-surface));
+}
+
+.body-map-btn {
+  min-height: var(--ms-control-min-height);
+  padding: 0.5rem 1rem;
+  border-radius: var(--ms-radius-pill);
+  font-size: var(--ms-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.35rem 1.4rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  white-space: nowrap;
+  gap: 0.35rem;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-/* Aktiver Bereich */
-.chip--accent {
-  background: linear-gradient(90deg, #22c1c3, #16a34a);
-  color: #ffffff;
-  box-shadow: 0 10px 24px rgba(34, 197, 94, 0.35);
+.body-map-btn:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
 }
 
-/* Zweiter Bereich – in Light-Mode gut lesbar */
-.koerper-page[data-theme="light"] .chip--soft {
-  color: #4b5563;
-  background-color: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.9);
-  font-weight: 500;
+.body-map-btn--primary {
+  background: var(--ms-color-accent);
+  color: var(--ms-color-on-accent);
+  border-color: var(--ms-color-accent);
 }
 
-.koerper-page[data-theme="dark"] .chip--soft {
-  color: rgba(226, 232, 240, 0.96);
-  background-color: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(148, 163, 184, 0.7);
+.body-map-btn--primary:hover:not(:disabled) {
+  background: var(--ms-color-accent-hover);
 }
 
-/* Disclaimer */
-.koerper-disclaimer-section {
-  margin-bottom: 1.75rem;
+.body-map-btn--primary:disabled {
+  opacity: var(--ms-disabled-opacity);
+  cursor: not-allowed;
 }
 
-/* Chat-Card */
-.symptomchat-container {
-  background-color: rgba(248, 250, 252, 0.95);
-  border-radius: 22px;
-  box-shadow:
-    0 22px 45px rgba(15, 23, 42, 0.18),
-    0 0 0 1px rgba(148, 163, 184, 0.15);
-  padding: 1.4rem 1.6rem 1.4rem;
+.body-map-btn--secondary {
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  border-color: var(--ms-color-border-strong);
+}
+
+.body-map-btn--secondary:hover {
+  background: var(--ms-color-bg-subtle);
+}
+
+.body-map-btn--ghost {
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  border-color: var(--ms-color-border-strong);
+}
+
+.body-map-btn--ghost:hover {
+  background: var(--ms-color-bg-subtle);
+}
+
+.body-map-btn--ghost-danger {
+  background: var(--ms-color-danger-bg);
+  color: var(--ms-color-danger);
+  border-color: color-mix(in srgb, var(--ms-color-danger) 35%, transparent);
+}
+
+.body-map-chat-card {
+  background: var(--ms-color-surface);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-xl);
+  box-shadow: var(--ms-shadow-md);
+  padding: var(--ms-space-4);
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: var(--ms-space-3);
 }
 
-.koerper-page--dark .symptomchat-container {
-  background: radial-gradient(circle at top left, #0f172a, #020617 55%);
-  box-shadow:
-    0 22px 45px rgba(15, 23, 42, 0.8),
-    0 0 0 1px rgba(30, 64, 175, 0.7);
-}
-
-/* Kopfzeile im Chat */
-.chat-top-row {
+.body-map-chat-card__top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.chat-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-/* Reset-Button */
-.reset-btn {
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  background-color: transparent;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: inline-flex;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.koerper-page--dark .reset-btn {
-  border-color: rgba(148, 163, 184, 0.9);
-  color: #e5e7eb;
-}
-
-.reset-btn:hover {
-  background-color: rgba(148, 163, 184, 0.12);
-}
-
-/* Chatverlauf */
-.chatverlauf {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 18px;
-  padding: 0.9rem 1rem;
-  max-height: 330px;
-  overflow-y: auto;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-}
-
-.koerper-page--dark .chatverlauf {
-  background: rgba(15, 23, 42, 0.9);
-  border-color: rgba(51, 65, 85, 0.9);
-}
-
-/* Platzhalter, wenn noch kein Verlauf */
-.chat-placeholder {
-  font-size: 0.93rem;
-  color: rgba(100, 116, 139, 0.95);
-}
-
-.koerper-page--dark .chat-placeholder {
-  color: rgba(203, 213, 225, 0.9);
-}
-
-.chat-placeholder-example {
-  display: inline-block;
-  margin-top: 0.35rem;
-  font-style: italic;
-}
-
-/* Nachrichtenblasen */
-.chat-bubble {
-  margin-bottom: 0.65rem;
-  padding: 0.55rem 0.8rem;
-  border-radius: 14px;
-  font-size: 0.95rem;
-  line-height: 1.45;
-  max-width: 100%;
-}
-
-.chat-bubble.user {
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  align-self: flex-end;
-}
-
-.koerper-page--dark .chat-bubble.user {
-  background: rgba(37, 99, 235, 0.22);
-  border-color: rgba(59, 130, 246, 0.65);
-}
-
-.chat-bubble.assistant {
-  background: rgba(15, 23, 42, 0.03);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-}
-
-.koerper-page--dark .chat-bubble.assistant {
-  background: rgba(15, 23, 42, 0.85);
-  border-color: rgba(51, 65, 85, 0.95);
-}
-
-.bubble-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.2rem;
-}
-
-.bubble-label {
-  font-weight: 600;
-  margin-right: 0.2rem;
-}
-
-.bubble-text {
-  margin: 0.1rem 0 0;
-}
-
-/* TTS-Button */
-.tts-btn {
-  border: none;
-  border-radius: 999px;
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: rgba(37, 99, 235, 0.08);
-}
-
-.koerper-page--dark .tts-btn {
-  background: rgba(37, 99, 235, 0.22);
-}
-
-.tts-btn:hover {
-  filter: brightness(1.05);
-}
-
-/* Eingabebereich */
-.eingabe-bereich {
-  margin-top: 0.4rem;
-  padding: 0.75rem 0.6rem 0.1rem;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #0b1530 0%, #020617 100%);
-  color: #e5e7eb;
-}
-
-.koerper-page--light .eingabe-bereich {
-  background: linear-gradient(135deg, #0b1530 0%, #020617 100%);
-}
-
-/* Label + Max-150-Zeichen – responsive wie bei SymptomChat */
-.eingabe-label-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  column-gap: clamp(8px, 2vw, 18px);
+  align-items: flex-start;
+  gap: var(--ms-space-3);
   flex-wrap: wrap;
-  margin-bottom: 8px;
 }
 
-.eingabe-label {
-  font-size: clamp(1rem, 1.4vw, 1.1rem);
-  font-weight: 600;
+.body-map-chat-card__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ms-color-text);
 }
 
-.eingabe-hint {
-  font-size: clamp(0.8rem, 1.2vw, 0.95rem);
-  opacity: 0.8;
+.body-map-chat-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ms-space-2);
 }
 
-/* Textarea */
-.chat-textarea {
+.body-map-chat-card__intro {
+  margin: 0;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text-secondary);
+}
+
+.body-map-chat-card__finish-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.body-map-chat__thread {
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  padding: var(--ms-space-3);
+  border-radius: var(--ms-radius-lg);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-bg-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-2);
+}
+
+.body-map-chat__placeholder {
+  margin: 0;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text-muted);
+}
+
+.body-map-chat__placeholder-example {
+  display: block;
+  margin-top: var(--ms-space-2);
+  font-style: italic;
+  color: var(--ms-color-text-secondary);
+}
+
+.body-map-chat__bubble {
+  max-width: 92%;
+  padding: var(--ms-space-3);
+  border-radius: var(--ms-radius-lg);
+  font-size: var(--ms-text-sm);
+  line-height: var(--ms-leading-normal);
+}
+
+.body-map-chat__bubble--user {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--ms-color-accent) 14%, var(--ms-color-surface));
+  border: 1px solid color-mix(in srgb, var(--ms-color-accent) 35%, transparent);
+  color: var(--ms-color-text);
+}
+
+.body-map-chat__bubble--assistant {
+  align-self: flex-start;
+  background: var(--ms-color-surface);
+  border: 1px solid var(--ms-color-border);
+  color: var(--ms-color-text);
+}
+
+.body-map-chat__bubble-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ms-space-2);
+  margin-bottom: var(--ms-space-1);
+}
+
+.body-map-chat__bubble-label {
+  font-size: var(--ms-text-xs);
+  font-weight: 700;
+  color: var(--ms-color-text-secondary);
+}
+
+.body-map-chat__bubble-text {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.body-map-chat__tts {
+  flex-shrink: 0;
+}
+
+.body-map-composer {
+  margin-top: var(--ms-space-2);
+  padding: var(--ms-space-3);
+  border-radius: var(--ms-radius-lg);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-bg-subtle);
+}
+
+.body-map-composer__label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--ms-space-2);
+  margin-bottom: var(--ms-space-2);
+}
+
+.body-map-composer__label {
+  font-size: var(--ms-text-sm);
+  font-weight: 700;
+  color: var(--ms-color-text);
+}
+
+.body-map-composer__hint {
+  font-size: var(--ms-text-xs);
+  color: var(--ms-color-text-muted);
+}
+
+.body-map-composer__region-hint {
+  margin: 0 0 var(--ms-space-2);
+  font-size: var(--ms-text-xs);
+  color: var(--ms-color-text-secondary);
+  line-height: var(--ms-leading-normal);
+}
+
+.body-map-composer__textarea {
   width: 100%;
-  resize: none;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  padding: 0.6rem 0.7rem;
-  font-size: 0.95rem;
+  min-height: 96px;
+  resize: vertical;
+  border-radius: var(--ms-radius-md);
+  border: 1px solid var(--ms-color-border-strong);
+  padding: var(--ms-space-3);
   font-family: inherit;
-  margin-bottom: 0.55rem;
-  background-color: #f9fafb;
-  color: #0f172a;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text);
+  background: var(--ms-color-surface);
 }
 
-.koerper-page--dark .chat-textarea {
-  background-color: #020617;
-  color: #e5e7eb;
-  border-color: rgba(51, 65, 85, 0.9);
+.body-map-composer__textarea::placeholder {
+  color: var(--ms-color-text-placeholder);
 }
 
-.chat-textarea::placeholder {
-  color: rgba(148, 163, 184, 0.9);
+.body-map-composer__textarea:focus {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 1px;
+  border-color: var(--ms-color-focus-ring);
 }
 
-/* Zeile mit Zeichenanzahl + Voice + Senden */
-.eingabe-actions {
+.body-map-composer__actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: var(--ms-space-3);
+  margin-top: var(--ms-space-2);
 }
 
-.char-count {
-  font-size: 0.85rem;
-  color: rgba(148, 163, 184, 0.95);
+.body-map-composer__count {
   margin-right: auto;
+  font-size: var(--ms-text-xs);
+  color: var(--ms-color-text-muted);
 }
 
-.char-count.limit {
-  color: #f97316;
-}
-
-/* Voice-Button + Wrapper */
-.voice-wrap {
-  display: flex;
-  align-items: center;
-}
-
-/* Voice-Button kommt aus VoiceInput, wir geben nur allgemeines Styling */
-.voice-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.45);
-  background-color: #2563eb;
-  color: #ffffff;
-}
-
-.voice-btn:hover {
-  filter: brightness(1.05);
-}
-
-/* Senden-Button – rechteckig mit soften Ecken */
-.send-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.45);
-  background-color: #2563eb;
-  color: #ffffff;
-}
-
-.send-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-  box-shadow: none;
-}
-
-.send-btn:hover:not(:disabled) {
-  filter: brightness(1.05);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .koerper-page {
-    padding: 1.6rem 1rem 2.2rem;
-  }
-
-  .koerper-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .koerper-header-meta {
-    align-items: flex-start;
-  }
-
-  .symptomchat-container {
-    padding: 1.1rem 1.1rem 1.2rem;
-  }
-
-  .chatverlauf {
-    max-height: 260px;
-  }
-}
-
-/* Kopfzeile im Chat */
-.chat-top-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-}
-
-.chat-title {
-  margin: 0;
-  font-size: 1.1rem;
+.body-map-composer__count--limit {
+  color: var(--ms-color-danger);
   font-weight: 600;
 }
 
-/* Container für die beiden Buttons oben rechts */
-.chat-top-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-/* Generische Button-Styles (wie auf anderen Seiten) */
-.btn {
-  border-radius: 999px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.9rem;
+.body-map-composer__send {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ms-radius-md);
+  border: none;
+  background: var(--ms-color-accent);
+  color: var(--ms-color-on-accent);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  border: 1px solid transparent;
-  background: transparent;
+  justify-content: center;
 }
 
-/* Neutraler Ghost-Button */
-.btn--ghost {
-  border-color: rgba(148, 163, 184, 0.7);
-  background-color: rgba(255, 255, 255, 0.8);
-  color: #0f172a;
+.body-map-composer__send:disabled {
+  opacity: var(--ms-disabled-opacity);
+  cursor: not-allowed;
 }
 
-.koerper-page--dark .btn--ghost {
-  border-color: rgba(148, 163, 184, 0.9);
-  background-color: rgba(15, 23, 42, 0.95);
-  color: #e5e7eb;
+.body-map-composer__send:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
 }
 
-.btn--ghost:hover {
-  background-color: rgba(148, 163, 184, 0.12);
+.body-map-summary {
+  margin-top: var(--ms-space-5);
+  padding: var(--ms-space-5);
+  border-radius: var(--ms-radius-xl);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface);
+  box-shadow: var(--ms-shadow-sm);
 }
 
-/* Gefährlicher Ghost-Button (Verlauf löschen) */
-.btn--ghost-danger {
-  border-color: rgba(248, 113, 113, 0.9);
-  background-color: rgba(254, 242, 242, 0.95);
-  color: #b91c1c;
-}
-
-.koerper-page--dark .btn--ghost-danger {
-  border-color: rgba(248, 113, 113, 0.9);
-  background-color: rgba(210, 173, 173, 0.95);
-  color: #fdfbfb;
-}
-
-.btn--ghost-danger:hover {
-  filter: brightness(1.03);
-}
-
-/* … der Rest (eingabe-label-row, chatverlauf, voice-btn, send-btn, usw.)
-   kann so bleiben wie in der vorherigen Version, die wir schon gebaut haben. */
-
-/* Für Handy: Header und Disclaimer stapeln, ohne Chaos */
-@media (max-width: 768px) {
-  .koerper-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .koerper-header-meta {
-    align-items: flex-start;
-  }
-
-  .chat-top-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .chat-top-actions {
-    align-self: stretch;
-    justify-content: flex-start;
-  }
-}
-.koerper-organ-hint {
-  font-size: 0.85rem;
-  margin: 0 0 0.4rem;
-  color: #4b5563;           /* grau auf Light Mode */
-  line-height: 1.4;
-}
-
-.koerper-organ-example {
-  font-style: italic;
-  white-space: nowrap;
-}
-
-/* Dark Mode Variante */
-.koerper-page--dark .koerper-organ-hint {
-  color: #e5e7eb;
-}
-/* Header-Layout */
-.chat-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.chat-header-left .chat-title {
-  font-size: clamp(1.2rem, 2vw, 1.5rem);
+.body-map-summary__title {
+  margin: 0 0 var(--ms-space-2);
+  font-size: 1.25rem;
   font-weight: 700;
 }
 
-/* Button-Grundstil im Header */
-.btn-header {
-  border-radius: 999px;
-  padding: 0.45rem 1.1rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border: 1px solid transparent;
-  cursor: pointer;
-  display: inline-flex;
+.body-map-summary__hint {
+  margin: 0 0 var(--ms-space-4);
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text-secondary);
+}
+
+.body-map-summary__grid {
+  margin: 0;
+  display: grid;
+  gap: var(--ms-space-3);
+}
+
+.body-map-summary__row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) 1fr;
+  gap: var(--ms-space-2) var(--ms-space-4);
+  align-items: start;
+}
+
+.body-map-summary__row--full {
+  grid-template-columns: 1fr;
+}
+
+.body-map-summary__row dt {
+  margin: 0;
+  font-size: var(--ms-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ms-color-text-muted);
+}
+
+.body-map-summary__row dd {
+  margin: 0;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text);
+  line-height: var(--ms-leading-normal);
+}
+
+.body-map-summary__specialty-lead {
+  margin: 0 0 var(--ms-space-2);
+  font-weight: 600;
+  color: var(--ms-color-text-secondary);
+}
+
+.body-map-summary__list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.body-map-summary__actions {
+  margin-top: var(--ms-space-4);
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  transition: background-color 0.18s ease, border-color 0.18s ease,
-    color 0.18s ease, box-shadow 0.18s ease;
+  gap: var(--ms-space-3);
+  flex-wrap: wrap;
 }
 
-/* neutrales „Neues Gespräch“ */
-.btn-header--ghost {
-  background: rgba(148, 163, 184, 0.08);
-  border-color: rgba(148, 163, 184, 0.5);
-  color: #e5e7eb;
+.body-map-summary__copy-status {
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-success);
+  font-weight: 600;
 }
 
-.btn-header--ghost:hover {
-  background: rgba(148, 163, 184, 0.16);
+.body-map-empty {
+  padding: var(--ms-space-6);
+  text-align: center;
+  border-radius: var(--ms-radius-xl);
+  background: var(--ms-color-surface);
+  border: 1px solid var(--ms-color-border);
 }
 
-/* weicher Rosa-Danger-Button */
-.btn-header--soft-danger {
-  background: #fee2e2;         /* hellrosa */
-  border-color: #fecaca;
-  color: #f5b9b9;              /* dunkles Rot für Text/Icon */
+.body-map-empty h1 {
+  margin: 0 0 var(--ms-space-3);
 }
 
-.btn-header--soft-danger:hover {
-  background: #fecaca;
-  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.25);
+.body-map-empty p {
+  margin: 0 0 var(--ms-space-4);
+  color: var(--ms-color-text-secondary);
 }
 
-/* Dark-Mode-Varianten */
-.koerper-page--dark .btn-header--ghost {
-  background: rgba(148, 163, 184, 0.16);
-  border-color: rgba(148, 163, 184, 0.6);
-  color: #e5e7eb;
+@media (max-width: 768px) {
+  .body-map-page {
+    padding: var(--ms-space-4) var(--ms-space-3) var(--ms-space-5);
+  }
+
+  .body-map-page__header {
+    flex-direction: column;
+  }
+
+  .body-map-page__meta {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .body-map-summary__row {
+    grid-template-columns: 1fr;
+  }
+
+  .body-map-chat__thread {
+    max-height: 50vh;
+  }
 }
 
-.koerper-page--dark .btn-header--soft-danger {
-  background: rgba(248, 113, 113, 0.16);
-  border-color: rgba(241, 198, 198, 0.7);
-  color: #fecaca;
-}
-
-.koerper-page--dark .btn-header--soft-danger:hover {
-  background: rgba(248, 113, 113, 0.26);
-}
-/* --- Hinweistext unter der Überschrift --- */
-.region-hint {
-  font-size: clamp(0.85rem, 1.6vw, 1rem);
-  line-height: 1.45;
-  margin-top: 2px;
-  margin-bottom: 10px;
-  font-weight: 400;
-  transition: color 0.2s ease;
-}
-
-/* Light Mode → gut lesbar */
-.koerper-page--light .region-hint {
-  color: rgba(235, 236, 239, 0.72);   /* #0f172a dunkelblau-grau */
-}
-
-/* Dark Mode → etwas heller, aber sichtbar */
-.koerper-page--dark .region-hint {
-  color: rgba(255, 255, 255, 0.987); /* #f1f5f9 */
-}
-/* ---------- Hellerer Hinweistext im Light-Mode ---------- */
-.koerper-page--light .koerper-organ-hint {
-  color: #fefefe; /* sehr gut lesbar, modernes Slate-Dunkelblau */
-  opacity: 0.95;  /* fast volle Deckkraft */
-}
-
-/* Beispieltext "In meiner Region…" ebenfalls heller */
-.koerper-page--light .koerper-organ-example {
-  color: #eff0f3; /* etwas stärker, sehr gut lesbar */
-  font-weight: 500;
-}
-.btn {
-  font-weight: 500;
-  border-radius: 22px;
-  padding: 0.55rem 1.1rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-/* ---------- LIGHT MODE BUTTONS ---------- */
-
-.koerper-page--light .btn--ghost {
-  background-color: #f0f4f8;
-  border: 1px solid #d0d7df;
-  color: #1e293b; /* dunkelblau / sehr lesbar */
-}
-
-.koerper-page--light .btn--ghost-danger {
-  background-color: #f8d2d2;
-  border: 1px solid #e8b3b3;
-  color: #7a1f1f; /* edles dunkles Rot — lesbar, professionell */
-}
-
-/* Hover-Effekte */
-.koerper-page--light .btn--ghost:hover {
-  background-color: #e2e8f0;
-}
-
-.koerper-page--light .btn--ghost-danger:hover {
-  background-color: #f4c5c5;
-}
-/* ---------- DARK MODE BUTTONS ---------- */
-
-.koerper-page--dark .btn--ghost {
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #f0f4f8; /* weißlich – perfekte Lesbarkeit */
-}
-
-.koerper-page--dark .btn--ghost-danger {
-  background-color: rgba(255, 80, 80, 0.25);
-  border: 1px solid rgba(255, 120, 120, 0.35);
-  color: #fff; /* immer weiß im Dark Mode */
-}
-
-/* Hover */
-.koerper-page--dark .btn--ghost:hover {
-  background-color: rgba(255, 255, 255, 0.14);
-}
-
-.koerper-page--dark .btn--ghost-danger:hover {
-  background-color: rgba(255, 90, 90, 0.35);
-}
-
-/* -------------------------------------------------
-   Bessere Lesbarkeit des Platzhalters im Textfeld
-   (speziell auf iOS / Handy)
--------------------------------------------------- */
-
-/* LIGHT MODE */
-.koerper-page--light .chat-textarea::placeholder {
-  color: #6b7280;           /* gut lesbares Grau */
-  opacity: 0.95;
-  font-size: 0.95rem;
-}
-
-.koerper-page--light .chat-textarea::-webkit-input-placeholder {
-  color: #6b7280;
-  opacity: 0.95;
-}
-
-.koerper-page--light .chat-textarea::-moz-placeholder {
-  color: #6b7280;
-  opacity: 0.95;
-}
-
-.koerper-page--light .chat-textarea:-ms-input-placeholder {
-  color: #6b7280;
-  opacity: 0.95;
-}
-
-/* DARK MODE */
-.koerper-page--dark .chat-textarea::placeholder {
-  color: rgba(226, 232, 240, 0.9); /* fast weiß, aber weich */
-  font-size: 0.95rem;
-}
-
-.koerper-page--dark .chat-textarea::-webkit-input-placeholder {
-  color: rgba(226, 232, 240, 0.9);
-}
-
-.koerper-page--dark .chat-textarea::-moz-placeholder {
-  color: rgba(226, 232, 240, 0.9);
-}
-
-.koerper-page--dark .chat-textarea:-ms-input-placeholder {
-  color: rgba(226, 232, 240, 0.9);
-}
-.chat-textarea {
-  min-height: 120px;
+/* Legacy class aliases (map pages / shared composer) */
+.koerper-page,
+.koerper-shell,
+.koerper-header,
+.symptomchat-container,
+.chatverlauf,
+.chat-bubble {
+  /* retained for older map routes if referenced */
 }
