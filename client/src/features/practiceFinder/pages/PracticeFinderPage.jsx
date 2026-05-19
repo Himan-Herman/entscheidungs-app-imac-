@@ -78,9 +78,11 @@ export default function PracticeFinderPage() {
         return;
       }
       setLocalError(null);
+      const manualLocation =
+        form.city.trim() || form.postalCode.trim() || form.addressLine.trim();
       await search.runSearch(form, {
         append,
-        coords: geo.coords,
+        coords: manualLocation ? null : geo.coords,
         pageToken: append ? search.nextPageToken : null,
       });
     },

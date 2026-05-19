@@ -4,7 +4,10 @@ import {
   isPlacesDemoModeEnabled,
   PlacesServiceUnavailableError,
 } from "../../config/placesEnv.js";
-import { geocodeAddress } from "./geocoding.js";
+import {
+  geocodeManualLocation,
+  hasManualLocationFields,
+} from "./locationQuery.js";
 import { googlePlacesTextSearch } from "./googlePlacesClient.js";
 import { rankPracticeResults } from "./ranking.js";
 import { buildDemoResults } from "./demoResults.js";
@@ -18,10 +21,6 @@ function clampRadius(km) {
   const n = Number(km);
   if (!Number.isFinite(n)) return DEFAULT_RADIUS_KM;
   return Math.min(MAX_RADIUS_KM, Math.max(1, Math.round(n)));
-}
-
-function buildLocationQuery({ country, postalCode, city, addressLine }) {
-  return [addressLine, postalCode, city, country].filter(Boolean).join(", ");
 }
 
 function buildTextQuery(specialty, country, city) {
@@ -54,13 +53,7 @@ export async function runPracticeSearch(input) {
     Number.isFinite(lng);
 
   if (!hasCoords) {
-    const geoQuery = buildLocationQuery({
-      country,
-      postalCode: input.postalCode,
-      city: input.city,
-      addressLine: input.addressLine,
-    });
-    if (!geoQuery || geoQuery === country) {
+    if (!hasManualLocationFields(input)) {
       throw new Error("validation_location_required");
     }
 
@@ -68,7 +61,15 @@ export async function runPracticeSearch(input) {
       lat = 52.52;
       lng = 13.405;
     } else {
-      const geo = await geocodeAddress(geoQuery, language);
+      const geo = await geocodeManualLocation(
+        {
+          country,
+          postalCode: input.postalCode,
+          city: input.city,
+          addressLine: input.addressLine,
+        },
+        language,
+      );
       lat = geo.lat;
       lng = geo.lng;
     }
