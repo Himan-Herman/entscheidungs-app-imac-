@@ -20,9 +20,18 @@ export default {
   offlineTitle: "You appear to be offline.",
   offlineDetail:
     "Sign-in, cloud save, QR codes, email sending, and server-backed speech need an internet connection. Local preparation drafts and PDF generation may still work if data is already on this device.",
-  installHint: "MedScoutX can be installed as an app on your device.",
+  installTitle: "Install MedScoutX as an app",
+  installSubtitle:
+    "Use MedScoutX faster from your home screen or desktop.",
   installAction: "Install",
+  installLater: "Later",
+  installNever: "Don’t show again",
+  installCloseAria: "Close install hint",
+  installAria: "Install MedScoutX as an app",
+  installIosHint: "Tap Share, then “Add to Home Screen”.",
+  installMacSafariHint:
+    "In Safari: File menu → “Add to Dock” (or Share → “Add to Dock”).",
+  installHint: "MedScoutX can be installed as an app on your device.",
   installDismiss: "Not now",
-  installAria: "Install MedScoutX",
   routeLoadingAria: "Loading screen",
 };
