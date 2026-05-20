@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { authFetch } from "../../../api/authFetch.js";
+import { CHAT_KIND_SYMPTOM_CHECK } from "../../patientChatHistory/constants.js";
+import {
+  createSession,
+  getActiveSessionId,
+  getSession,
+  migrateLegacyIfNeeded,
+  setActiveSession,
+  upsertSession,
+  deleteSession,
+  clearLegacyKeys,
+} from "../../patientChatHistory/store.js";
 import {
   LOADING_MARKER,
   LS_CONSENT_KEY,
@@ -19,36 +30,65 @@ function readJsonStorage(key, fallback) {
   }
 }
 
-function writeStorage(key, value) {
-  try {
-    if (value === null || value === undefined) {
-      localStorage.removeItem(key);
-    } else {
-      localStorage.setItem(
-        key,
-        typeof value === "string" ? value : JSON.stringify(value),
-      );
-    }
-  } catch {
-    /* ignore */
-  }
-}
-
 function introExists(messages) {
   return messages.some((m) => m.role === "assistant" && m.symptomIntro);
 }
 
+function buildIntroMessage(organHint, t) {
+  const introContent = organHint
+    ? t.introWithOrgan.replace(/\{\{organ\}\}/g, organHint)
+    : t.introAssistant;
+  return { role: "assistant", content: introContent, symptomIntro: true };
+}
+
+function pickSymptomSession(organHint, language) {
+  const legacy = {
+    verlauf: readJsonStorage(LS_VERLAUF_KEY, []),
+    threadId: (() => {
+      try {
+        const raw = localStorage.getItem(LS_THREAD_KEY);
+        return raw && raw !== "null" && raw !== "undefined" ? raw : null;
+      } catch {
+        return null;
+      }
+    })(),
+    summary: readJsonStorage(LS_SUMMARY_KEY, null),
+  };
+
+  migrateLegacyIfNeeded(CHAT_KIND_SYMPTOM_CHECK, {
+    legacy,
+    buildSession: (id) => ({
+      id,
+      kind: CHAT_KIND_SYMPTOM_CHECK,
+      verlauf: legacy.verlauf,
+      threadId: legacy.threadId,
+      summary: legacy.summary,
+      organHint,
+      language,
+      createdAt: new Date().toISOString(),
+    }),
+  });
+
+  clearLegacyKeys([LS_VERLAUF_KEY, LS_THREAD_KEY, LS_SUMMARY_KEY]);
+
+  const activeId = getActiveSessionId(CHAT_KIND_SYMPTOM_CHECK);
+  if (activeId) {
+    const active = getSession(CHAT_KIND_SYMPTOM_CHECK, activeId);
+    if (active) return active;
+  }
+
+  return createSession(CHAT_KIND_SYMPTOM_CHECK, {
+    organHint,
+    language,
+    verlauf: [],
+  });
+}
+
 /**
  * @param {object} opts
- * @param {import('../symptomTypes.js').SymptomChatMessage[]} opts.initialVerlauf
- * @param {string | null} opts.initialThreadId
- * @param {import('../symptomTypes.js').SymptomCheckSummary | null} opts.initialSummary
- * @param {string | null} opts.organHint
- * @param {'de'|'en'} opts.language
- * @param {Record<string, string>} opts.t
- * @param {boolean} opts.consentOk
  */
 export function useSymptomCheckChat({
+  initialSessionId = "",
   initialVerlauf = [],
   initialThreadId = null,
   initialSummary = null,
@@ -57,6 +97,7 @@ export function useSymptomCheckChat({
   t,
   consentOk,
 }) {
+  const [sessionId, setSessionId] = useState(initialSessionId);
   const [eingabe, setEingabe] = useState("");
   const [verlauf, setVerlauf] = useState(initialVerlauf);
   const [threadId, setThreadId] = useState(initialThreadId);
@@ -65,23 +106,30 @@ export function useSymptomCheckChat({
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [errorKey, setErrorKey] = useState(null);
   const introAddedRef = useRef(initialVerlauf.some((m) => m.symptomIntro));
+  const createdAtRef = useRef(
+    getSession(CHAT_KIND_SYMPTOM_CHECK, initialSessionId)?.createdAt ||
+      new Date().toISOString(),
+  );
 
   const userTurnCount = verlauf.filter((m) => m.role === "user").length;
 
-  useEffect(() => {
-    if (!consentOk) return;
-    writeStorage(LS_VERLAUF_KEY, verlauf);
-  }, [verlauf, consentOk]);
+  const persistSession = useCallback(() => {
+    if (!consentOk || !sessionId) return;
+    upsertSession({
+      id: sessionId,
+      kind: CHAT_KIND_SYMPTOM_CHECK,
+      createdAt: createdAtRef.current,
+      verlauf,
+      threadId,
+      summary,
+      organHint,
+      language,
+    });
+  }, [consentOk, sessionId, verlauf, threadId, summary, organHint, language]);
 
   useEffect(() => {
-    if (!consentOk) return;
-    writeStorage(LS_THREAD_KEY, threadId);
-  }, [threadId, consentOk]);
-
-  useEffect(() => {
-    if (!consentOk) return;
-    writeStorage(LS_SUMMARY_KEY, summary);
-  }, [summary, consentOk]);
+    persistSession();
+  }, [persistSession]);
 
   useEffect(() => {
     if (!consentOk) return;
@@ -91,15 +139,9 @@ export function useSymptomCheckChat({
         return prev;
       }
       introAddedRef.current = true;
-      const introContent = organHint
-        ? t.introWithOrgan.replace(/\{\{organ\}\}/g, organHint)
-        : t.introAssistant;
-      return [
-        ...prev,
-        { role: "assistant", content: introContent, symptomIntro: true },
-      ];
+      return [...prev, buildIntroMessage(organHint, t)];
     });
-  }, [consentOk, organHint, t.introAssistant, t.introWithOrgan]);
+  }, [consentOk, organHint, t]);
 
   const transcript = useCallback(
     () =>
@@ -252,29 +294,83 @@ export function useSymptomCheckChat({
     userTurnCount,
   ]);
 
-  const clearChat = useCallback(() => {
-    setSummary(null);
-    writeStorage(LS_SUMMARY_KEY, null);
-    introAddedRef.current = false;
-    const introContent = organHint
-      ? t.introWithOrgan.replace(/\{\{organ\}\}/g, organHint)
-      : t.introAssistant;
-    setVerlauf([{ role: "assistant", content: introContent, symptomIntro: true }]);
-    introAddedRef.current = true;
-  }, [organHint, t.introAssistant, t.introWithOrgan]);
-
-  const resetAll = useCallback(() => {
-    setVerlauf([]);
+  const applySession = useCallback((session) => {
+    if (!session) return null;
+    setActiveSession(CHAT_KIND_SYMPTOM_CHECK, session.id);
+    createdAtRef.current = session.createdAt;
+    setSessionId(session.id);
+    setVerlauf(session.verlauf || []);
+    setThreadId(session.threadId || null);
+    setSummary(session.summary || null);
     setEingabe("");
-    setThreadId(null);
-    setSummary(null);
-    introAddedRef.current = false;
-    writeStorage(LS_VERLAUF_KEY, null);
-    writeStorage(LS_THREAD_KEY, null);
-    writeStorage(LS_SUMMARY_KEY, null);
+    setErrorKey(null);
+    introAddedRef.current = (session.verlauf || []).some((m) => m.symptomIntro);
+    return session;
   }, []);
 
+  const startNewConversation = useCallback(() => {
+    if (!consentOk) return null;
+    persistSession();
+    const intro = [buildIntroMessage(organHint, t)];
+    const sess = createSession(CHAT_KIND_SYMPTOM_CHECK, {
+      organHint,
+      language,
+      verlauf: intro,
+      threadId: null,
+      summary: null,
+    });
+    createdAtRef.current = sess.createdAt;
+    introAddedRef.current = true;
+    setSessionId(sess.id);
+    setVerlauf(intro);
+    setThreadId(null);
+    setSummary(null);
+    setEingabe("");
+    setErrorKey(null);
+    return sess;
+  }, [consentOk, organHint, language, persistSession, t]);
+
+  const openSession = useCallback(
+    (id) => {
+      const session = getSession(CHAT_KIND_SYMPTOM_CHECK, id);
+      return applySession(session);
+    },
+    [applySession],
+  );
+
+  const deleteConversation = useCallback(
+    (id) => {
+      const targetId = id || sessionId;
+      if (!targetId) return null;
+      const wasActive = targetId === sessionId;
+      const nextActiveId = deleteSession(CHAT_KIND_SYMPTOM_CHECK, targetId);
+
+      if (!wasActive) return nextActiveId;
+
+      if (nextActiveId) {
+        return applySession(getSession(CHAT_KIND_SYMPTOM_CHECK, nextActiveId));
+      }
+
+      const sess = createSession(CHAT_KIND_SYMPTOM_CHECK, {
+        organHint,
+        language,
+        verlauf: [buildIntroMessage(organHint, t)],
+      });
+      introAddedRef.current = true;
+      return applySession(sess);
+    },
+    [sessionId, organHint, language, applySession, t],
+  );
+
+  const clearChat = useCallback(() => {
+    setSummary(null);
+    introAddedRef.current = true;
+    setVerlauf([buildIntroMessage(organHint, t)]);
+    setThreadId(null);
+  }, [organHint, t]);
+
   return {
+    sessionId,
     eingabe,
     setEingabe,
     verlauf,
@@ -286,27 +382,21 @@ export function useSymptomCheckChat({
     sendMessage,
     requestSummary,
     clearChat,
-    resetAll,
+    startNewConversation,
+    openSession,
+    deleteConversation,
     userTurnCount,
     maxChars: MAX_SYMPTOM_CHARS,
   };
 }
 
-export function loadSymptomCheckState() {
-  let threadId = null;
-  try {
-    const raw = localStorage.getItem(LS_THREAD_KEY);
-    if (raw && raw !== "null" && raw !== "undefined" && raw.trim()) {
-      threadId = raw;
-    }
-  } catch {
-    /* ignore */
-  }
-
+export function loadSymptomCheckState(organHint, language) {
+  const session = pickSymptomSession(organHint, language);
   return {
-    verlauf: readJsonStorage(LS_VERLAUF_KEY, []),
-    threadId,
-    summary: readJsonStorage(LS_SUMMARY_KEY, null),
+    sessionId: session.id,
+    verlauf: session.verlauf || [],
+    threadId: session.threadId,
+    summary: session.summary || null,
     consentOk: (() => {
       try {
         return localStorage.getItem(LS_CONSENT_KEY) === "1";

@@ -1,0 +1,35 @@
+export default {
+  fabLabel: "Meda öffnen — medizinische Begriffe erklären",
+  fabTitle: "Meda — Wissensassistent",
+  panelTitle: "Meda",
+  panelSubtitle: "Medizinische Begriffe & allgemeine Gesundheitsthemen",
+  closeAria: "Meda schließen",
+  intro:
+    "Hallo, ich bin Meda. Ich helfe dir dabei, medizinische Begriffe und allgemeine Gesundheitsthemen besser zu verstehen.",
+  disclaimer:
+    "Keine Diagnose, keine Therapieempfehlung, keine Dringlichkeitseinschätzung.",
+  inputLabel: "Deine Frage",
+  inputPlaceholder: "Kurz fragen …",
+  sendAria: "Frage senden",
+  clearChat: "Chat leeren",
+  clearChatAria: "Unterhaltung in diesem Fenster löschen",
+  assistantLabel: "Meda",
+  userLabel: "Du",
+  threadAria: "Meda Chat",
+  messageLabel: "Nachricht",
+  loadingLine: "Einen Moment …",
+  remaining: "Noch {{count}} von {{limit}} Fragen in 24 Stunden",
+  rateLimit:
+    "Du hast das tägliche Limit erreicht. Bitte versuche es in 24 Stunden erneut.",
+  serverError: "Das hat nicht geklappt. Bitte später erneut versuchen.",
+  tooLong: "Bitte kürzer formulieren (max. 400 Zeichen).",
+  blocked: "Diese Anfrage kann ich so nicht beantworten.",
+  unavailable: "Meda ist gerade nicht verfügbar.",
+  suggestions: [
+    "Was bedeutet Blutdruck?",
+    "Was macht ein Kardiologe?",
+    "Was bedeutet Entzündung?",
+    "Wie bereite ich mich auf einen Arzttermin vor?",
+    "Was ist ein MRT?",
+  ],
+};

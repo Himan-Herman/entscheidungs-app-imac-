@@ -75,6 +75,7 @@ import {
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
+import medaRouter from "./routes/meda.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -118,6 +119,7 @@ app.use('/api/symptom', requireAuth, symptomRoute);
 app.use('/api/symptom-thread', requireAuth, symptomThreadRoute);
 app.use('/api/textsymptom', requireAuth, symptomThreadRoute);
 app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
+app.use('/api/meda', medaRouter);
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/i18n', i18nRouter);

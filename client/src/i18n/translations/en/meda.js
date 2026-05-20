@@ -1,0 +1,35 @@
+export default {
+  fabLabel: "Open Meda — explain medical terms",
+  fabTitle: "Meda — knowledge assistant",
+  panelTitle: "Meda",
+  panelSubtitle: "Medical terms & general health topics",
+  closeAria: "Close Meda",
+  intro:
+    "Hello, I'm Meda. I help you better understand medical terms and general health topics.",
+  disclaimer:
+    "No diagnosis, no treatment advice, no urgency assessment.",
+  inputLabel: "Your question",
+  inputPlaceholder: "Ask briefly …",
+  sendAria: "Send question",
+  clearChat: "Clear chat",
+  clearChatAria: "Clear conversation in this panel",
+  assistantLabel: "Meda",
+  userLabel: "You",
+  threadAria: "Meda chat",
+  messageLabel: "Message",
+  loadingLine: "One moment …",
+  remaining: "{{count}} of {{limit}} questions left in 24 hours",
+  rateLimit:
+    "You reached today's limit. Please try again in 24 hours.",
+  serverError: "Something went wrong. Please try again later.",
+  tooLong: "Please use a shorter question (max. 400 characters).",
+  blocked: "I cannot answer that request in this form.",
+  unavailable: "Meda is not available right now.",
+  suggestions: [
+    "What does blood pressure mean?",
+    "What does a cardiologist do?",
+    "What does inflammation mean?",
+    "How do I prepare for a doctor visit?",
+    "What is an MRI?",
+  ],
+};

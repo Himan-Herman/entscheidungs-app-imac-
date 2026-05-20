@@ -20,9 +20,10 @@ export default {
   hintSeverity: "Wie würden Sie es beschreiben?",
   hintAssociated: "Tritt es dauerhaft oder zeitweise auf?",
   newChat: "Neues Gespräch",
-  newChatAria: "Neues Gespräch starten und Kontext zurücksetzen",
-  clearHistory: "Chat löschen",
-  clearHistoryAria: "Gespeicherten Verlauf auf diesem Gerät löschen",
+  newChatAria: "Neues Gespräch starten; das aktuelle bleibt im Verlauf",
+  clearHistory: "Aktuelles Gespräch löschen",
+  clearHistoryAria: "Dieses Gespräch aus dem Verlauf entfernen",
+  defaultConversationTitle: "Symptomgespräch",
   chatTitle: "Gespräch",
   chatIntro:
     "Kurze Rückfragen strukturieren Ihre Angaben — keine klinische Bewertung.",

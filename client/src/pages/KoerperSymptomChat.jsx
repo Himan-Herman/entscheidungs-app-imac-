@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Link,
   useLocation,
@@ -8,7 +8,9 @@ import {
 import { FaPaperPlane } from "react-icons/fa";
 
 import "../styles/KoerperSymptomChat.css";
+import "../styles/PatientChatComposer.css";
 import "../styles/PatientChatInputDesktop.css";
+import "../features/patientChatHistory/styles/PatientChatHistory.css";
 
 import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -22,6 +24,10 @@ import BodyMapChatThread from "../features/bodyMap/components/BodyMapChatThread.
 import BodyMapSummaryCard from "../features/bodyMap/components/BodyMapSummaryCard.jsx";
 import DisclaimerShort from "../components/DisclaimerShort";
 import VoiceInput from "../components/VoiceInput.jsx";
+import PatientChatHistoryPanel from "../features/patientChatHistory/components/PatientChatHistoryPanel.jsx";
+import ConfirmDeleteDialog from "../features/patientChatHistory/components/ConfirmDeleteDialog.jsx";
+import { CHAT_KIND_BODY_MAP } from "../features/patientChatHistory/constants.js";
+import { usePatientChatHistory } from "../features/patientChatHistory/hooks/usePatientChatHistory.js";
 
 function interpolate(template, vars) {
   let out = template;
@@ -39,28 +45,59 @@ export default function KoerperSymptomChat() {
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
 
-  const tc = useMemo(() => {
-    const b = getMessages(language);
-    return b.bodyMap?.chat ?? getMessages("en").bodyMap.chat;
-  }, [language]);
-
-  const initialState = useMemo(() => loadBodyMapChatState(), []);
-
   const organ = searchParams.get("organ");
   const organLabel = organ ? organ.replace(/_/g, " ") : "";
   const seite =
     searchParams.get("seite") ||
     sessionStorage.getItem("koerperSeite") ||
     "vorderseite";
+  const locale = language === "en" ? "en" : "de";
+
+  const tc = useMemo(() => {
+    const b = getMessages(language);
+    return b.bodyMap?.chat ?? getMessages("en").bodyMap.chat;
+  }, [language]);
+
+  const historyLabels = useMemo(() => {
+    const h = getMessages(language).patientChatHistory ?? getMessages("en").patientChatHistory;
+    return {
+      ...h,
+      defaultBodyMapTitle: tc.defaultRegionConversation,
+      defaultSymptomTitle: "",
+    };
+  }, [language, tc.defaultRegionConversation]);
+
+  const initialState = useMemo(
+    () =>
+      loadBodyMapChatState({
+        organ,
+        organLabel,
+        seite,
+        language: locale,
+      }),
+    [organ, organLabel, seite, locale],
+  );
+
+  const [regionFilterOn, setRegionFilterOn] = useState(true);
+  const [confirmDeleteCurrent, setConfirmDeleteCurrent] = useState(false);
 
   const chat = useBodyMapChat({
+    initialSessionId: initialState.sessionId,
     initialVerlauf: initialState.verlauf,
     initialThreadId: initialState.threadId,
     initialSummary: initialState.summary,
     organ,
     organLabel,
-    language: language === "en" ? "en" : "de",
+    seite,
+    language: locale,
     tc,
+  });
+
+  const history = usePatientChatHistory({
+    kind: CHAT_KIND_BODY_MAP,
+    organFilter: regionFilterOn && organ ? organ : null,
+    language: locale,
+    labels: historyLabels,
   });
 
   const voiceLabels = useMemo(
@@ -125,13 +162,38 @@ export default function KoerperSymptomChat() {
   const mapBackHref =
     seite === "rueckseite" ? "/rueckseite" : "/koerperregionen";
 
-  const neustart = useCallback(() => {
-    chat.resetAll();
-    setSearchParams({});
-    sessionStorage.removeItem("koerperSeite");
-    sessionStorage.removeItem("lastMapRoute");
-    navigate("/region-start", { replace: true, state: { fromReset: true } });
-  }, [chat, navigate, setSearchParams]);
+  const handleNewConversation = useCallback(() => {
+    chat.startNewConversation();
+    history.refresh();
+  }, [chat, history]);
+
+  const handleOpenHistorySession = useCallback(
+    (id) => {
+      const session = chat.openSession(id);
+      history.openSession(id);
+      history.refresh();
+      if (session?.organ) {
+        const nextSeite = session.seite || "vorderseite";
+        setSearchParams({ organ: session.organ, seite: nextSeite });
+        sessionStorage.setItem("koerperSeite", nextSeite);
+      }
+    },
+    [chat, history, setSearchParams],
+  );
+
+  const handleDeleteHistorySession = useCallback(
+    (id) => {
+      chat.deleteConversation(id);
+      history.refresh();
+    },
+    [chat, history],
+  );
+
+  const handleDeleteCurrent = useCallback(() => {
+    chat.deleteConversation(chat.sessionId);
+    setConfirmDeleteCurrent(false);
+    history.refresh();
+  }, [chat, history]);
 
   const errorMessage =
     chat.errorKey && tc[chat.errorKey] ? tc[chat.errorKey] : null;
@@ -214,21 +276,35 @@ export default function KoerperSymptomChat() {
               <button
                 type="button"
                 className="body-map-btn body-map-btn--ghost"
-                onClick={neustart}
+                onClick={handleNewConversation}
                 title={tc.btnNewChatTitle}
+                aria-label={tc.btnNewChatTitle}
               >
                 ↻ {tc.btnNewChat}
               </button>
               <button
                 type="button"
                 className="body-map-btn body-map-btn--ghost-danger"
-                onClick={chat.clearChat}
+                onClick={() => setConfirmDeleteCurrent(true)}
                 title={tc.btnClearHistoryTitle}
+                aria-label={tc.btnClearHistoryTitle}
               >
                 {tc.btnClearHistory}
               </button>
             </div>
           </header>
+
+          <PatientChatHistoryPanel
+            sessions={history.sessions}
+            activeId={chat.sessionId}
+            labels={historyLabels}
+            language={locale}
+            showRegionFilter={Boolean(organ)}
+            regionFilterOn={regionFilterOn}
+            onToggleRegionFilter={() => setRegionFilterOn((v) => !v)}
+            onOpen={handleOpenHistorySession}
+            onDelete={handleDeleteHistorySession}
+          />
 
           <p className="body-map-chat-card__intro">{tc.chatIntro}</p>
 
@@ -277,10 +353,12 @@ export default function KoerperSymptomChat() {
               aria-label={tc.inputLabel}
             />
 
-            <div className="body-map-composer__actions">
+            <div className="patient-chat-composer__toolbar body-map-composer__actions">
               <span
-                className={`body-map-composer__count ${
-                  chat.eingabe.length >= chat.maxChars ? "body-map-composer__count--limit" : ""
+                className={`patient-chat-composer__count body-map-composer__count ${
+                  chat.eingabe.length >= chat.maxChars
+                    ? "patient-chat-composer__count--limit body-map-composer__count--limit"
+                    : ""
                 }`}
                 aria-live="polite"
               >
@@ -291,6 +369,8 @@ export default function KoerperSymptomChat() {
                   onTranscribed={handleVoice}
                   notice={tc.micNotice}
                   labels={voiceLabels}
+                  className="voice-wrap"
+                  compact
                 />
                 <button
                   type="button"
@@ -309,6 +389,16 @@ export default function KoerperSymptomChat() {
         {chat.summary ? (
           <BodyMapSummaryCard summary={chat.summary} labels={tc} />
         ) : null}
+
+        <ConfirmDeleteDialog
+          open={confirmDeleteCurrent}
+          title={historyLabels.deleteConfirmTitle}
+          body={historyLabels.deleteConfirmBody}
+          confirmLabel={historyLabels.deleteConfirmAction}
+          cancelLabel={historyLabels.deleteCancel}
+          onCancel={() => setConfirmDeleteCurrent(false)}
+          onConfirm={handleDeleteCurrent}
+        />
       </div>
     </main>
   );

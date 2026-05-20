@@ -394,42 +394,7 @@
   outline-offset: 1px;
 }
 
-.symptom-check-composer__actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--ms-space-3);
-  margin-top: var(--ms-space-2);
-}
-
-.symptom-check-composer__count {
-  margin-right: auto;
-  font-size: var(--ms-text-xs);
-  color: var(--ms-color-text-muted);
-}
-
-.symptom-check-composer__count--limit {
-  color: var(--ms-color-danger);
-  font-weight: 600;
-}
-
-.symptom-check-composer__send {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--ms-radius-md);
-  border: none;
-  background: var(--ms-color-accent);
-  color: var(--ms-color-on-accent);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.symptom-check-composer__send:disabled {
-  opacity: var(--ms-disabled-opacity);
-  cursor: not-allowed;
-}
+/* Composer toolbar: PatientChatComposer.css */
 
 .symptom-check-summary {
   grid-column: 1 / -1;

@@ -5,7 +5,13 @@ import { authFetch } from "../api/authFetch";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 
-export default function VoiceInput({ onTranscribed, notice, labels, className }) {
+export default function VoiceInput({
+  onTranscribed,
+  notice,
+  labels,
+  className = "voice-wrap",
+  compact = false,
+}) {
   const [isRecording, setIsRecording] = useState(false);
   const [, setStatus] = useState("");
   const [, setAudioURL] = useState(null);
@@ -96,10 +102,22 @@ export default function VoiceInput({ onTranscribed, notice, labels, className })
     }
   };
 
+  const wrapClass = className || (compact ? "voice-wrap" : "voice-input");
+
   return (
-    <div className={className || undefined} style={className ? undefined : { marginTop: "1rem" }}>
+    <div
+      className={wrapClass}
+      style={wrapClass === "voice-input" ? { marginTop: "1rem" } : undefined}
+    >
       {notice ? (
-        <p className="voice-input__notice" id={noticeId}>
+        <p
+          className={
+            compact
+              ? "voice-input__notice voice-input__notice--sr"
+              : "voice-input__notice"
+          }
+          id={noticeId}
+        >
           {notice}
         </p>
       ) : null}

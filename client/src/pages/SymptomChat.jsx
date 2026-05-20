@@ -3,7 +3,9 @@ import { Link, useSearchParams } from "react-router-dom";
 import { FaPaperPlane } from "react-icons/fa";
 
 import "../styles/SymptomChat.css";
+import "../styles/PatientChatComposer.css";
 import "../styles/PatientChatInputDesktop.css";
+import "../features/patientChatHistory/styles/PatientChatHistory.css";
 
 import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -19,6 +21,10 @@ import {
   persistSymptomConsent,
   useSymptomCheckChat,
 } from "../features/symptomCheck/hooks/useSymptomCheckChat.js";
+import PatientChatHistoryPanel from "../features/patientChatHistory/components/PatientChatHistoryPanel.jsx";
+import ConfirmDeleteDialog from "../features/patientChatHistory/components/ConfirmDeleteDialog.jsx";
+import { CHAT_KIND_SYMPTOM_CHECK } from "../features/patientChatHistory/constants.js";
+import { usePatientChatHistory } from "../features/patientChatHistory/hooks/usePatientChatHistory.js";
 
 function interpolate(template, vars) {
   let out = template;
@@ -35,9 +41,14 @@ export default function SymptomChat() {
   const [searchParams] = useSearchParams();
   const organ = searchParams.get("organ");
   const organHint = organ ? organ.replace(/_/g, " ") : null;
+  const locale = language === "en" ? "en" : "de";
 
-  const initial = useMemo(() => loadSymptomCheckState(), []);
+  const initial = useMemo(
+    () => loadSymptomCheckState(organHint, locale),
+    [organHint, locale],
+  );
   const [consentOk, setConsentOk] = useState(initial.consentOk);
+  const [confirmDeleteCurrent, setConfirmDeleteCurrent] = useState(false);
   const [consentDraft, setConsentDraft] = useState(false);
   const [copyStatus, setCopyStatus] = useState("");
   const textareaRef = useRef(null);
@@ -47,14 +58,30 @@ export default function SymptomChat() {
     return bundle.symptomCheck ?? getMessages("en").symptomCheck;
   }, [language]);
 
+  const historyLabels = useMemo(() => {
+    const h = getMessages(language).patientChatHistory ?? getMessages("en").patientChatHistory;
+    return {
+      ...h,
+      defaultSymptomTitle: t.defaultConversationTitle,
+      defaultBodyMapTitle: "",
+    };
+  }, [language, t.defaultConversationTitle]);
+
   const chat = useSymptomCheckChat({
+    initialSessionId: initial.sessionId,
     initialVerlauf: initial.verlauf,
     initialThreadId: initial.threadId,
     initialSummary: initial.summary,
     organHint,
-    language: language === "en" ? "en" : "de",
+    language: locale,
     t,
     consentOk,
+  });
+
+  const history = usePatientChatHistory({
+    kind: CHAT_KIND_SYMPTOM_CHECK,
+    language: locale,
+    labels: historyLabels,
   });
 
   useEffect(() => {
@@ -156,6 +183,34 @@ export default function SymptomChat() {
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   };
 
+  const handleNewConversation = useCallback(() => {
+    chat.startNewConversation();
+    history.refresh();
+  }, [chat, history]);
+
+  const handleOpenHistorySession = useCallback(
+    (id) => {
+      chat.openSession(id);
+      history.openSession(id);
+      history.refresh();
+    },
+    [chat, history],
+  );
+
+  const handleDeleteHistorySession = useCallback(
+    (id) => {
+      chat.deleteConversation(id);
+      history.refresh();
+    },
+    [chat, history],
+  );
+
+  const handleDeleteCurrent = useCallback(() => {
+    chat.deleteConversation(chat.sessionId);
+    setConfirmDeleteCurrent(false);
+    history.refresh();
+  }, [chat, history]);
+
   const hasExportable = chat.verlauf.some(
     (m) =>
       (m.role === "user" || m.role === "assistant") &&
@@ -250,7 +305,7 @@ export default function SymptomChat() {
                 <button
                   type="button"
                   className="symptom-check-btn symptom-check-btn--ghost"
-                  onClick={chat.resetAll}
+                  onClick={handleNewConversation}
                   aria-label={t.newChatAria}
                 >
                   ↻ {t.newChat}
@@ -258,12 +313,22 @@ export default function SymptomChat() {
                 <button
                   type="button"
                   className="symptom-check-btn symptom-check-btn--ghost-danger"
-                  onClick={chat.clearChat}
+                  onClick={() => setConfirmDeleteCurrent(true)}
                   aria-label={t.clearHistoryAria}
                 >
                   {t.clearHistory}
                 </button>
               </div>
+
+              <PatientChatHistoryPanel
+                className="pch-panel--sidebar"
+                sessions={history.sessions}
+                activeId={chat.sessionId}
+                labels={historyLabels}
+                language={locale}
+                onOpen={handleOpenHistorySession}
+                onDelete={handleDeleteHistorySession}
+              />
 
               {hasExportable ? (
                 <div className="symptom-check-export">
@@ -355,11 +420,11 @@ export default function SymptomChat() {
                   aria-label={t.inputLabel}
                 />
 
-                <div className="symptom-check-composer__actions">
+                <div className="patient-chat-composer__toolbar symptom-check-composer__actions">
                   <span
-                    className={`symptom-check-composer__count ${
+                    className={`patient-chat-composer__count symptom-check-composer__count ${
                       chat.eingabe.length >= chat.maxChars
-                        ? "symptom-check-composer__count--limit"
+                        ? "patient-chat-composer__count--limit symptom-check-composer__count--limit"
                         : ""
                     }`}
                     aria-live="polite"
@@ -371,6 +436,8 @@ export default function SymptomChat() {
                       onTranscribed={handleVoice}
                       labels={voiceLabels}
                       notice={t.micNotice}
+                      className="voice-wrap"
+                      compact
                     />
                     <button
                       type="button"
@@ -395,6 +462,16 @@ export default function SymptomChat() {
             {chat.summary ? (
               <SymptomSummaryCard summary={chat.summary} labels={t} />
             ) : null}
+
+            <ConfirmDeleteDialog
+              open={confirmDeleteCurrent}
+              title={historyLabels.deleteConfirmTitle}
+              body={historyLabels.deleteConfirmBody}
+              confirmLabel={historyLabels.deleteConfirmAction}
+              cancelLabel={historyLabels.deleteCancel}
+              onCancel={() => setConfirmDeleteCurrent(false)}
+              onConfirm={handleDeleteCurrent}
+            />
           </div>
         )}
       </div>

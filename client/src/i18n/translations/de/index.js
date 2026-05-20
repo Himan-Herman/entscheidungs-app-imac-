@@ -58,6 +58,8 @@ import practiceDeveloper from "./practiceDeveloper.js";
 import practiceOrganization from "./practiceOrganization.js";
 import intro from "./intro.js";
 import voiceInput from "./voiceInput.js";
+import meda from "./meda.js";
+import patientChatHistory from "./patientChatHistory.js";
 
 export default {
   header,
@@ -120,4 +122,6 @@ export default {
   practiceOrganization,
   intro,
   voiceInput,
+  meda,
+  patientChatHistory,
 };

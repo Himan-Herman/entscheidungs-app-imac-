@@ -1,0 +1,280 @@
+/* Patient chat history panel — Symptom Check + Body Map */
+
+.pch-panel {
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-color-bg-subtle);
+  padding: var(--ms-space-2) var(--ms-space-3);
+}
+
+.pch-panel__toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ms-space-2);
+  padding: var(--ms-space-2) 0;
+  border: none;
+  background: transparent;
+  color: var(--ms-color-text);
+  font-size: var(--ms-text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pch-panel__toggle:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--ms-radius-sm);
+}
+
+.pch-panel__chevron {
+  color: var(--ms-color-text-muted);
+  font-size: 0.85rem;
+}
+
+.pch-panel__filter {
+  display: flex;
+  align-items: center;
+  gap: var(--ms-space-2);
+  font-size: var(--ms-text-xs);
+  color: var(--ms-color-text-secondary);
+  margin-bottom: var(--ms-space-2);
+  cursor: pointer;
+}
+
+.pch-panel__filter input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--ms-color-accent);
+}
+
+.pch-panel__list--open {
+  margin-top: var(--ms-space-2);
+}
+
+.pch-panel__empty {
+  margin: 0;
+  padding: var(--ms-space-2) 0;
+  font-size: var(--ms-text-xs);
+  color: var(--ms-color-text-muted);
+}
+
+.pch-panel__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-2);
+  max-height: min(40vh, 320px);
+  overflow-y: auto;
+}
+
+.pch-card {
+  padding: var(--ms-space-3);
+  border-radius: var(--ms-radius-md);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface);
+}
+
+.pch-card--active {
+  border-color: var(--ms-color-accent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ms-color-accent) 35%, transparent);
+}
+
+.pch-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ms-space-2);
+  margin-bottom: var(--ms-space-1);
+}
+
+.pch-card__date {
+  font-size: var(--ms-text-xs);
+  color: var(--ms-color-text-muted);
+}
+
+.pch-card__type {
+  font-size: var(--ms-text-xs);
+  font-weight: 600;
+  color: var(--ms-color-text-secondary);
+}
+
+.pch-card__status {
+  font-size: var(--ms-text-xs);
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--ms-radius-pill);
+  background: var(--ms-color-bg-subtle);
+  color: var(--ms-color-text-secondary);
+}
+
+.pch-card__status--completed {
+  color: var(--ms-color-success);
+  background: color-mix(in srgb, var(--ms-color-success) 12%, var(--ms-color-surface));
+}
+
+.pch-card__status--active {
+  color: var(--ms-color-accent);
+  background: color-mix(in srgb, var(--ms-color-accent) 12%, var(--ms-color-surface));
+}
+
+.pch-card__title-text {
+  margin: 0 0 var(--ms-space-1);
+  font-size: var(--ms-text-sm);
+  font-weight: 600;
+  color: var(--ms-color-text);
+  line-height: var(--ms-leading-normal);
+  word-break: break-word;
+}
+
+.pch-card__current {
+  margin: 0 0 var(--ms-space-2);
+  font-size: var(--ms-text-xs);
+  font-weight: 700;
+  color: var(--ms-color-accent);
+}
+
+.pch-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ms-space-2);
+}
+
+.pch-card__btn {
+  min-height: 2.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--ms-radius-pill);
+  font-size: var(--ms-text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--ms-color-border-strong);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+}
+
+.pch-card__btn:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.pch-card__btn--open:hover:not(:disabled) {
+  border-color: var(--ms-color-accent);
+  color: var(--ms-color-accent);
+}
+
+.pch-card__btn--open:disabled {
+  opacity: var(--ms-disabled-opacity);
+  cursor: default;
+}
+
+.pch-card__btn--delete {
+  color: var(--ms-color-danger);
+  border-color: color-mix(in srgb, var(--ms-color-danger) 40%, transparent);
+  background: var(--ms-color-danger-bg);
+}
+
+.pch-card__btn--delete:hover {
+  filter: brightness(0.97);
+}
+
+/* Desktop: always expanded in sidebar */
+@media (min-width: 901px) {
+  .pch-panel--sidebar {
+    padding: var(--ms-space-3);
+  }
+
+  .pch-panel--sidebar .pch-panel__toggle {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  .pch-panel--sidebar .pch-panel__chevron {
+    display: none;
+  }
+
+  .pch-panel--sidebar .pch-panel__list {
+    display: block !important;
+  }
+
+  .pch-panel--sidebar .pch-panel__list[hidden] {
+    display: block !important;
+    visibility: visible;
+  }
+
+  .pch-panel--sidebar .pch-panel__toggle {
+    padding-bottom: var(--ms-space-1);
+  }
+}
+
+/* Confirm dialog */
+.pch-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: color-mix(in srgb, var(--ms-color-text) 45%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ms-space-4);
+}
+
+.pch-dialog {
+  width: min(24rem, 100%);
+  padding: var(--ms-space-4);
+  border-radius: var(--ms-radius-xl);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface);
+  box-shadow: var(--ms-shadow-lg);
+  color: var(--ms-color-text);
+}
+
+.pch-dialog__title {
+  margin: 0 0 var(--ms-space-2);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.pch-dialog__body {
+  margin: 0 0 var(--ms-space-4);
+  font-size: var(--ms-text-sm);
+  line-height: var(--ms-leading-normal);
+  color: var(--ms-color-text-secondary);
+}
+
+.pch-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ms-space-2);
+  flex-wrap: wrap;
+}
+
+.pch-dialog__btn {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--ms-radius-pill);
+  font-size: var(--ms-text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.pch-dialog__btn:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.pch-dialog__btn--ghost {
+  background: var(--ms-color-surface);
+  border-color: var(--ms-color-border-strong);
+  color: var(--ms-color-text);
+}
+
+.pch-dialog__btn--danger {
+  background: var(--ms-color-danger);
+  color: var(--ms-color-on-accent, #fff);
+  border-color: var(--ms-color-danger);
+}

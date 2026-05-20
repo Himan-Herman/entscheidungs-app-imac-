@@ -1,0 +1,157 @@
+/**
+ * Shared patient chat composer (Symptom Check + Body Map).
+ * Mobile-first: textarea → count row → mic + send side by side.
+ */
+
+.patient-chat-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-2);
+}
+
+.patient-chat-composer .chat-textarea {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Toolbar: counter left, actions right */
+.patient-chat-composer__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ms-space-2);
+  flex-wrap: nowrap;
+  margin-top: var(--ms-space-1);
+  min-height: 2.75rem;
+}
+
+.patient-chat-composer__count {
+  font-size: var(--ms-text-xs);
+  line-height: 1.2;
+  color: var(--ms-color-text-muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.patient-chat-composer__count--limit {
+  color: var(--ms-color-danger);
+  font-weight: 600;
+}
+
+.patient-chat-action-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ms-space-2);
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* Voice — no block margin; button aligned with send */
+.patient-chat-composer .voice-wrap {
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.patient-chat-composer .voice-input__notice,
+.patient-chat-composer .voice-input__notice--sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.patient-chat-composer .voice-btn,
+.patient-chat-composer .send-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  border-radius: var(--ms-radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+
+.patient-chat-composer .voice-btn {
+  border: 1px solid var(--ms-color-border-strong);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-accent);
+}
+
+.patient-chat-composer .voice-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ms-color-accent) 10%, var(--ms-color-surface));
+  border-color: var(--ms-color-accent);
+}
+
+.patient-chat-composer .voice-btn:focus-visible,
+.patient-chat-composer .send-btn:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.patient-chat-composer .send-btn {
+  border: none;
+  background: var(--ms-color-accent);
+  color: var(--ms-color-on-accent);
+}
+
+.patient-chat-composer .send-btn:hover:not(:disabled) {
+  background: var(--ms-color-accent-hover);
+}
+
+.patient-chat-composer .send-btn:disabled,
+.patient-chat-composer .voice-btn:disabled {
+  opacity: var(--ms-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.patient-chat-composer .voice-btn svg,
+.patient-chat-composer .send-btn svg {
+  font-size: 1.1rem;
+}
+
+/* Tablet: slightly larger touch targets */
+@media (min-width: 640px) {
+  .patient-chat-composer .voice-btn,
+  .patient-chat-composer .send-btn {
+    width: 3rem;
+    height: 3rem;
+    min-width: 3rem;
+    min-height: 3rem;
+  }
+}
+
+/* Desktop: toolbar stays under textarea; optional wider gap */
+@media (min-width: 901px) {
+  .patient-chat-composer__toolbar {
+    margin-top: var(--ms-space-2);
+    gap: var(--ms-space-3);
+  }
+
+  .patient-chat-action-group {
+    gap: var(--ms-space-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patient-chat-composer .voice-btn,
+  .patient-chat-composer .send-btn {
+    transition: none;
+  }
+}

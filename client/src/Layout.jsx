@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import OfflineBanner from "./components/OfflineBanner.jsx";
 import PwaInstallHint from "./components/PwaInstallHint.jsx";
 import AppBottomNav, { shouldShowMobileAppNav } from "./components/AppBottomNav.jsx";
+import MedaWidget, { shouldShowMedaWidget } from "./features/meda/components/MedaWidget.jsx";
 import "./styles/layout.css";
 import "./components/AppBottomNav.css";
 
@@ -27,6 +28,7 @@ export default function Layout() {
     (isLegal && (!isLoggedIn || forcePublic));
 
   const showMobileShell = isLoggedIn && shouldShowMobileAppNav(pathname);
+  const showMeda = shouldShowMedaWidget(pathname, isLoggedIn);
 
   return (
     <div
@@ -47,6 +49,7 @@ export default function Layout() {
       </main>
       {!hideHeader && !hideFooter && <Footer />}
       {showMobileShell ? <AppBottomNav /> : null}
+      {showMeda ? <MedaWidget /> : null}
     </div>
   );
 }

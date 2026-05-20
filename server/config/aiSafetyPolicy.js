@@ -3,10 +3,11 @@
  * No diagnosis, triage, treatment, specialist routing, urgency scoring, or certainty claims.
  */
 
-/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'generic'} AiSafetyModule */
+/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'meda'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'generic'} AiSafetyModule */
 
 export const AI_MODULES = {
   SYMPTOM_CHECK: "symptom_check",
+  MEDA: "meda",
   IMAGE_ANALYSIS: "image_analysis",
   BODY_MAP: "body_map",
   PREVISIT_INTAKE: "previsit_intake",
@@ -124,6 +125,7 @@ export function getOutputSafetyPatterns(module) {
       return [...base, ...IMAGE_EXTRA];
     case AI_MODULES.SYMPTOM_CHECK:
     case AI_MODULES.BODY_MAP:
+    case AI_MODULES.MEDA:
       return [...base, ...SYMPTOM_EXTRA];
     case AI_MODULES.PREVISIT_INTAKE:
     case AI_MODULES.PREVISIT_ADAPTIVE:
@@ -157,6 +159,10 @@ export const SAFE_FALLBACKS = {
   [AI_MODULES.BODY_MAP]: {
     de: "Die Antwort konnte nicht sicher formuliert werden. Bitte ergänzen Sie Ihre Notizen in eigenen Worten; medizinische Fragen besprechen Sie direkt mit medizinischem Fachpersonal.",
     en: "This reply could not be safely worded. Please add notes in your own words and discuss medical questions directly with healthcare professionals.",
+  },
+  [AI_MODULES.MEDA]: {
+    de: "Dazu kann ich keine sichere Kurzantwort geben. Bei persönlichen Beschwerden wende dich bitte an medizinisches Fachpersonal.",
+    en: "I cannot provide a safe short answer on that. For personal symptoms, please speak with a healthcare professional.",
   },
   [AI_MODULES.PREVISIT_INTAKE]: {
     de: "Die Rückfrage konnte nicht sicher formuliert werden. Bitte ergänzen Sie den Abschnitt in eigenen Worten.",
