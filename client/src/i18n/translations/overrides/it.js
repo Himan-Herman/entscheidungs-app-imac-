@@ -8,6 +8,9 @@ import itCore from "./it/it.core.js";
 import itAccount from "./it/it.account.js";
 import itModules from "./it/it.modules.js";
 import itPractice from "./it/it.practice.js";
+import itPatient from "./it/it.patient.js";
+import itMedicalInterpreter from "./it/it.medicalInterpreter.js";
+import itPracticeModules from "./it/it.practice.modules.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
@@ -171,6 +174,9 @@ const itBase = {
 };
 
 export default deepMerge(
-  deepMerge(deepMerge(deepMerge(itBase, itCore), itAccount), itModules),
-  itPractice,
+  deepMerge(
+    deepMerge(deepMerge(deepMerge(itBase, itCore), itAccount), itModules),
+    itPractice,
+  ),
+  deepMerge(deepMerge(itPatient, itMedicalInterpreter), itPracticeModules),
 );

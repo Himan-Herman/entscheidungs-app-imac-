@@ -94,6 +94,7 @@ export default {
       "La preparazione non può essere salvata ora.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Doctor visit preparation",
+    sessionTitleIt: "Preparazione alla visita medica",
     viewMyPreparations: "Le mie preparazioni",
     mainNavAria:
       "Versione medico, export PDF, torna al riepilogo",

@@ -639,7 +639,9 @@ export default function PreVisitDocumentPage() {
               ? t.sessionTitleFr || t.sessionTitleEn
               : language === "es"
                 ? t.sessionTitleEs || t.sessionTitleEn
-                : t.sessionTitleEn,
+                : language === "it"
+                  ? t.sessionTitleIt || t.sessionTitleEn
+                  : t.sessionTitleEn,
         status: latest.pdfDownloaded ? "pdf_created" : "draft",
         pdfDownloaded: !!latest.pdfDownloaded,
         ...(caseLinkId ? { preVisitCaseId: caseLinkId } : {}),
