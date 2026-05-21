@@ -21,25 +21,23 @@
   pointer-events: auto;
 }
 
-/* Meda FAB — dark green circle + logo only (see brand mockup) */
+/* Meda FAB — logo fills full circle, no extra color ring */
 .meda-widget__fab {
-  --meda-fab-green: #2f6861;
-  --meda-fab-green-ring: #4a8f82;
   width: 3.5rem;
   height: 3.5rem;
   padding: 0;
+  border: none;
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--meda-fab-green-ring) 55%, transparent);
-  background: var(--meda-fab-green);
-  box-shadow: var(--ms-shadow-lg);
+  background: transparent;
+  box-shadow:
+    0 4px 14px color-mix(in srgb, #0f2926 22%, transparent),
+    0 2px 6px color-mix(in srgb, #000 12%, transparent);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   position: relative;
   flex-shrink: 0;
   overflow: visible;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
   animation: meda-fab-heartbeat 3.8s ease-in-out infinite;
   transform-origin: center center;
 }
@@ -48,10 +46,10 @@
 .meda-widget__fab::after {
   content: "";
   position: absolute;
-  inset: -2px;
+  inset: 0;
   border-radius: 50%;
-  border: 1px solid color-mix(in srgb, #fff 18%, transparent);
   pointer-events: none;
+  box-shadow: 0 0 0 0 color-mix(in srgb, #1a3d38 14%, transparent);
   animation: meda-fab-ripple 3.8s ease-out infinite;
 }
 
@@ -65,24 +63,25 @@
 
 .meda-widget__fab:hover {
   box-shadow:
-    var(--ms-shadow-lg),
-    0 0 0 3px color-mix(in srgb, var(--meda-fab-green-ring) 40%, transparent);
+    0 8px 22px color-mix(in srgb, #0f2926 28%, transparent),
+    0 3px 8px color-mix(in srgb, #000 14%, transparent);
 }
 
 .meda-widget__fab:focus-visible {
   outline: 2px solid var(--ms-color-focus-ring);
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
 
 .meda-widget__fab-logo {
-  width: 2.125rem;
-  height: 2.125rem;
-  border-radius: 10px;
-  object-fit: contain;
-  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
   display: block;
   position: relative;
   z-index: 1;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, #000 8%, transparent);
 }
 
 /* Very slow, calm double-pulse — long pause between cycles */
@@ -109,12 +108,14 @@
 @keyframes meda-fab-ripple {
   0% {
     transform: scale(1);
-    opacity: 0.28;
+    opacity: 0.35;
+    box-shadow: 0 0 0 0 color-mix(in srgb, #1a3d38 12%, transparent);
   }
   55%,
   100% {
-    transform: scale(1.22);
+    transform: scale(1.12);
     opacity: 0;
+    box-shadow: 0 0 0 6px transparent;
   }
 }
 

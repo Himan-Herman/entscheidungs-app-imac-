@@ -50,8 +50,8 @@ export default function MedaWidget() {
           className="meda-widget__fab-logo"
           src={medscoutLogo}
           alt=""
-          width={34}
-          height={34}
+          width={56}
+          height={56}
           aria-hidden
         />
       </button>
