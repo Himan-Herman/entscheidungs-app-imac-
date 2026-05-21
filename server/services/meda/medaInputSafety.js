@@ -13,15 +13,17 @@ const BLOCKED_PATTERNS = [
   /how\s+to\s+(make|synthesize)\s+(drugs|bombs)/i,
 ];
 
+/** Personal diagnosis / treatment only — not general term questions. */
 const DIAGNOSIS_ATTEMPT = [
-  /habe\s+ich\s+(eine|ein)?\s*/i,
-  /habe\s+ich\s+\w+/i,
-  /do\s+i\s+have\s+/i,
+  /habe\s+ich\s+(krebs|tumor|eine\s+krankheit|eine\s+infektion|eine\s+erkältung|grippe|covid)/i,
+  /do\s+i\s+have\s+(cancer|a\s+disease|an\s+infection|covid|flu)/i,
   /ist\s+das\s+(gefährlich|krebs|tumor)/i,
   /should\s+i\s+take\s+\w+/i,
-  /welches\s+medikament/i,
+  /welches\s+medikament\s+(soll|nehme)/i,
   /what\s+is\s+wrong\s+with\s+me/i,
-  /was\s+habe\s+ich/i,
+  /was\s+habe\s+ich\s+für\s+(eine\s+)?krankheit/i,
+  /kannst\s+du\s+(mir\s+)?diagnos/i,
+  /can\s+you\s+diagnos/i,
 ];
 
 /**

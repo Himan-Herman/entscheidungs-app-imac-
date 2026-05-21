@@ -9,8 +9,8 @@ import { AI_MODULES } from "../../config/aiSafetyPolicy.js";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const DIAGNOSIS_REFUSAL = {
-  de: "Ich kann keine Diagnose stellen. Bitte wende dich bei medizinischen Beschwerden an medizinisches Fachpersonal.",
-  en: "I cannot provide a diagnosis. Please contact healthcare professionals for medical concerns.",
+  de: "Dazu kann ich keine Diagnose stellen. Bei Beschwerden bitte medizinisches Fachpersonal kontaktieren.",
+  en: "I cannot diagnose. For symptoms, please contact a healthcare professional.",
 };
 
 /**
@@ -61,20 +61,24 @@ export async function runMedaChat(userId, input) {
   const completion = await openai.chat.completions.create({
     model: getMedaOpenAiModel(),
     messages,
-    max_tokens: 220,
-    temperature: 0.35,
+    max_tokens: 100,
+    temperature: 0.3,
   });
 
   const raw = completion.choices[0]?.message?.content?.trim() || "";
   const safe = sanitizeAiOutput(raw, { module: AI_MODULES.MEDA, locale });
 
-  const updatedQuota = recordMedaQuestion(userId);
+  const countsTowardQuota = !safe.used_fallback;
+  const updatedQuota = countsTowardQuota
+    ? recordMedaQuestion(userId)
+    : getMedaQuota(userId);
 
   return {
     ok: true,
     reply: safe.text,
     quota: updatedQuota,
     refused: false,
+    counted: countsTowardQuota,
   };
 }
 

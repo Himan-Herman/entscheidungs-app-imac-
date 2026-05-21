@@ -46,6 +46,14 @@ assert(
   validateMedaInput("Habe ich Krebs?").diagnosisAttempt === true,
   "diagnosis attempt flagged",
 );
+assert(
+  validateMedaInput("Was bedeutet Blutdruck?").diagnosisAttempt === false,
+  "term question not flagged as diagnosis",
+);
+assert(
+  validateMedaInput("Was macht ein Kardiologe?").diagnosisAttempt === false,
+  "specialty question not flagged as diagnosis",
+);
 
 _resetMedaRateLimits();
 const user = "test-user-meda";
@@ -55,6 +63,10 @@ recordMedaQuestion(user);
 recordMedaQuestion(user);
 assert(getMedaQuota(user).remaining === 0, "quota exhausted after 3");
 assert(getMedaQuota(user).ok === false, "quota blocks 4th");
+assert(
+  typeof getMedaQuota(user).resetAt === "number" && getMedaQuota(user).resetAt > Date.now(),
+  "resetAt set when limit reached",
+);
 _resetMedaRateLimits();
 
 const unsafe =

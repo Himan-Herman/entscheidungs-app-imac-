@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchMedaStatus, sendMedaMessage } from "../api/medaApi.js";
 import { MEDA_MAX_HISTORY, MEDA_MAX_INPUT } from "../constants.js";
+import { formatMedaRateLimitMessage } from "../utils/formatMedaQuota.js";
 
 const LOADING = "__meda_loading__";
 
@@ -22,7 +23,10 @@ export function useMedaChat(language, t) {
       const data = await fetchMedaStatus(language);
       const on = data.enabled !== false;
       setEnabled(on);
-      if (data.quota) setQuota(data.quota);
+      if (data.quota) {
+        setQuota(data.quota);
+        if (data.quota.remaining <= 0) setErrorKey("rateLimit");
+      }
       if (!on) setErrorKey("unavailable");
     } catch {
       setEnabled(false);
@@ -65,6 +69,7 @@ export function useMedaChat(language, t) {
           language,
         });
         setQuota(data.quota);
+        if (data.quota?.remaining <= 0) setErrorKey("rateLimit");
         setMessages((prev) => [
           ...prev.filter((m) => !m.loading),
           { role: "assistant", content: data.reply },
@@ -90,8 +95,17 @@ export function useMedaChat(language, t) {
 
   const clearChat = useCallback(() => {
     setMessages([]);
-    setErrorKey(null);
-  }, []);
+    if (quota && quota.remaining <= 0) {
+      setErrorKey("rateLimit");
+    } else {
+      setErrorKey(null);
+    }
+  }, [quota]);
+
+  const rateLimitMessage = useMemo(
+    () => formatMedaRateLimitMessage(t, quota, language),
+    [t, quota, language],
+  );
 
   return {
     open,
@@ -101,6 +115,7 @@ export function useMedaChat(language, t) {
     setInput: (v) => setInput(String(v).slice(0, MEDA_MAX_INPUT)),
     loading,
     errorKey,
+    rateLimitMessage,
     quota,
     enabled,
     send,

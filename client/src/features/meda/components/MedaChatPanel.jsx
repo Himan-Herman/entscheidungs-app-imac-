@@ -47,7 +47,13 @@ export default function MedaChatPanel({ chat, t, suggestions, onClose }) {
   }, [chat.messages]);
 
   const showIntro = chat.messages.length === 0;
-  const errorText = chat.errorKey ? t[chat.errorKey] : null;
+  const errorText =
+    chat.errorKey === "rateLimit"
+      ? chat.rateLimitMessage
+      : chat.errorKey
+        ? t[chat.errorKey]
+        : null;
+  const quotaExhausted = chat.quota && chat.quota.remaining <= 0;
   const remainingText =
     chat.quota && chat.quota.limit
       ? t.remaining
@@ -106,7 +112,7 @@ export default function MedaChatPanel({ chat, t, suggestions, onClose }) {
       <div className="meda-panel__scroll" ref={threadRef}>
         <p className="meda-panel__disclaimer">{t.disclaimer}</p>
 
-        {remainingText ? (
+        {remainingText && !quotaExhausted ? (
           <p className="meda-panel__quota" aria-live="polite">
             {remainingText}
           </p>

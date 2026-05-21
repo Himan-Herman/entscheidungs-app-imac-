@@ -22,9 +22,11 @@ export default {
   threadAria: "Meda chat",
   messageLabel: "Message",
   loadingLine: "One moment …",
-  remaining: "{{count}} of {{limit}} questions left in 24 hours",
+  remaining: "{{count}} of {{limit}} questions left (limit: 3 per 24 hours)",
   rateLimit:
-    "You reached today's limit. Please try again in 24 hours.",
+    "Limit reached: up to 3 questions per 24 hours. Meda will be available again after that.",
+  rateLimitAt:
+    "Limit reached (3 questions per 24 hours). You can ask again from {{time}}.",
   serverError: "Something went wrong. Please try again later.",
   tooLong: "Please use a shorter question (max. 400 characters).",
   blocked: "I cannot answer that request in this form.",

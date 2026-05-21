@@ -22,9 +22,11 @@ export default {
   threadAria: "Meda Chat",
   messageLabel: "Nachricht",
   loadingLine: "Einen Moment …",
-  remaining: "Noch {{count}} von {{limit}} Fragen in 24 Stunden",
+  remaining: "Noch {{count}} von {{limit}} Fragen (Limit: 3 pro 24 Stunden)",
   rateLimit:
-    "Du hast das tägliche Limit erreicht. Bitte versuche es in 24 Stunden erneut.",
+    "Limit erreicht: maximal 3 Fragen in 24 Stunden. Danach ist Meda wieder verfügbar.",
+  rateLimitAt:
+    "Limit erreicht (3 Fragen in 24 Stunden). Nächste Frage möglich ab {{time}}.",
   serverError: "Das hat nicht geklappt. Bitte später erneut versuchen.",
   tooLong: "Bitte kürzer formulieren (max. 400 Zeichen).",
   blocked: "Diese Anfrage kann ich so nicht beantworten.",
