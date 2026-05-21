@@ -54,6 +54,10 @@ export default {
   hubLinkInboxSub: "New information from your practice",
   hubLinkTelemedicine: "Video consultations",
   hubLinkTelemedicineSub: "Scheduled video visits and waiting room",
+  hubLinkInterpreter: "Medical Interpreter",
+  hubLinkInterpreterSub: "Live translation & communication support",
+  hubLinkInterpreterAria:
+    "Open Medical Interpreter — communication support only, not diagnosis or treatment advice",
   hubLinkThreads: "Messages",
   hubLinkThreadsSub: "Secure communication with your practice",
   hubLinkMedicationPlans: "Medication plans",

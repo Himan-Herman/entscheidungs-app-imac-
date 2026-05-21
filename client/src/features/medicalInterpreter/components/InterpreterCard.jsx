@@ -5,7 +5,7 @@ import { isMedicalInterpreterClientEnabled } from "../config/isMedicalInterprete
 import "../styles/MedicalInterpreter.css";
 
 /**
- * B2C patient hub entry — one dedicated Medical Interpreter card (not in tile grid).
+ * Standalone hub promo card (optional). Patient hub uses grid tile in PatientHubPage.jsx.
  */
 export default function InterpreterCard() {
   const t = useMedicalInterpreterMessages();

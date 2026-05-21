@@ -54,6 +54,10 @@ export default {
   hubLinkInboxSub: "Neue Informationen von deiner Praxis",
   hubLinkTelemedicine: "Videosprechstunden",
   hubLinkTelemedicineSub: "Geplante Video-Termine und Warteraum",
+  hubLinkInterpreter: "Medizinischer Dolmetscher",
+  hubLinkInterpreterSub: "Live-Übersetzung & Gesprächshilfe",
+  hubLinkInterpreterAria:
+    "Medizinischer Dolmetscher öffnen — Kommunikationshilfe ohne Diagnose oder Behandlungsempfehlung",
   hubLinkThreads: "Nachrichten",
   hubLinkThreadsSub: "Sichere Kommunikation mit deiner Praxis",
   hubLinkMedicationPlans: "Medikationspläne",

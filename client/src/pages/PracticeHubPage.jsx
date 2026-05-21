@@ -288,8 +288,7 @@ export default function PracticeHubPage() {
     [visibility],
   );
 
-  const showInterpreterCard =
-    b2bInterpreterClientOn && Boolean(practiceId) && visibility.interpreter === true;
+  const showInterpreterCard = b2bInterpreterClientOn && Boolean(practiceId);
 
   const metricRows = useMemo(() => {
     const rows = [];

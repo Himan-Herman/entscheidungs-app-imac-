@@ -5,12 +5,11 @@
 export default {
   hub: {
     title: "Medical Interpreter",
-    subtitle:
-      "Communicate safely when you and your care team speak different languages.",
+    subtitle: "Live translation & communication support",
     cta: "Start conversation",
     newConversation: "Start new conversation",
     trustLine:
-      "Communication support only — no diagnosis, no urgency assessment, no treatment recommendation.",
+      "Communication support only — no diagnosis or treatment recommendation.",
     privacyLine:
       "Microphone only with your permission. Conversation content stays on this device by default.",
     ariaLabel: "Open Medical Interpreter module",

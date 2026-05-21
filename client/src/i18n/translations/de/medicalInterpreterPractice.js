@@ -11,9 +11,8 @@ export default {
   },
   hubCard: {
     title: "Medizinischer Dolmetscher",
-    description:
-      "Mehrsprachige Kommunikationshilfe für Gespräche in der Praxis. Keine Patientengespräche ohne ausdrückliche Freigabe.",
-    badge: "Nur Kommunikation",
+    description: "Mehrsprachige Kommunikation — nur Gesprächshilfe, keine Diagnose.",
+    badge: "Kommunikation",
     ariaLabel: "Medizinischen Dolmetscher für diese Praxis öffnen",
   },
   hub: {

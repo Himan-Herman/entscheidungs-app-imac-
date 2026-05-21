@@ -4,20 +4,19 @@
  */
 export default {
   hub: {
-    title: "Medizin-Dolmetscher",
-    subtitle:
-      "Sicher kommunizieren, wenn Sie und Ihr Behandlungsteam unterschiedliche Sprachen sprechen.",
+    title: "Medizinischer Dolmetscher",
+    subtitle: "Live-Übersetzung & Gesprächshilfe",
     cta: "Gespräch starten",
     newConversation: "Neues Gespräch starten",
     trustLine:
-      "Nur Kommunikationsunterstützung — keine Diagnose, keine Dringlichkeitseinschätzung, keine Behandlungsempfehlung.",
+      "Nur Kommunikationshilfe — keine Diagnose und keine Behandlungsempfehlung.",
     privacyLine:
       "Mikrofon nur mit Ihrer Erlaubnis. Gesprächsinhalte standardmäßig nur auf diesem Gerät.",
     ariaLabel: "Modul Medizin-Dolmetscher öffnen",
   },
 
   chrome: {
-    moduleTitle: "Medizin-Dolmetscher",
+    moduleTitle: "Medizinischer Dolmetscher",
     backToHub: "Zurück zum Patientenbereich",
     backToSetup: "Zurück zur Vorbereitung",
   },

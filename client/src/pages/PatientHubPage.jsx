@@ -11,6 +11,7 @@ import {
   Map as MapIcon,
   Inbox,
   MessageSquare,
+  Languages,
   MapPinned,
   Pill,
   Stethoscope,
@@ -22,7 +23,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
 import InboxCountBadge from "../components/InboxCountBadge.jsx";
-import InterpreterCard from "../features/medicalInterpreter/components/InterpreterCard.jsx";
+import { isMedicalInterpreterClientEnabled } from "../features/medicalInterpreter/config/isMedicalInterpreterEnabled.js";
 import "../styles/WorkspaceHubPages.css";
 
 const LINKS = [
@@ -76,6 +77,15 @@ const LINKS = [
   { to: "/account/documents", key: "hubLinkDocuments", icon: FileText },
 ];
 
+const INTERPRETER_HUB_LINK = {
+  to: "/patient/interpreter",
+  key: "hubLinkInterpreter",
+  subtitleKey: "hubLinkInterpreterSub",
+  ariaKey: "hubLinkInterpreterAria",
+  icon: Languages,
+  tileClass: "workspace-hub__tile--interpreter",
+};
+
 export default function PatientHubPage() {
   const { language } = useLanguage();
   const t = useMemo(() => {
@@ -106,6 +116,15 @@ export default function PatientHubPage() {
     void loadInboxCount();
   }, [loadInboxCount]);
 
+  const hubLinks = useMemo(() => {
+    if (!isMedicalInterpreterClientEnabled()) return LINKS;
+    const links = [...LINKS];
+    const telemedicineIndex = links.findIndex((l) => l.key === "hubLinkTelemedicine");
+    const insertAt = telemedicineIndex >= 0 ? telemedicineIndex + 1 : 3;
+    links.splice(insertAt, 0, INTERPRETER_HUB_LINK);
+    return links;
+  }, []);
+
   return (
     <div className="workspace-hub">
       <header className="workspace-hub__hero">
@@ -116,13 +135,28 @@ export default function PatientHubPage() {
         </Link>
       </header>
 
-      <InterpreterCard />
-
       <nav className="workspace-hub__grid" aria-label={t.patientHub.heading}>
-        {LINKS.map((link) => {
+        {hubLinks.map((link) => {
           const TileIcon = link.icon;
+          const tileClass = [
+            "workspace-hub__tile",
+            link.tileClass || "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          const ariaLabel =
+            link.ariaKey && t[link.ariaKey]
+              ? t[link.ariaKey]
+              : link.subtitleKey
+                ? `${t[link.key]}. ${t[link.subtitleKey]}`
+                : t[link.key];
           return (
-            <Link key={link.to} className="workspace-hub__tile" to={link.to}>
+            <Link
+              key={link.to}
+              className={tileClass}
+              to={link.to}
+              aria-label={ariaLabel}
+            >
               <span className="workspace-hub__tile-icon" aria-hidden>
                 <TileIcon size={22} strokeWidth={1.75} />
               </span>

@@ -75,7 +75,8 @@
     transform 0.15s ease;
 }
 
-.workspace-hub--practice .workspace-hub__tile {
+.workspace-hub--practice .workspace-hub__tile,
+.workspace-hub__tile--interpreter {
   border-top: 2px solid rgba(13, 148, 136, 0.5);
 }
 

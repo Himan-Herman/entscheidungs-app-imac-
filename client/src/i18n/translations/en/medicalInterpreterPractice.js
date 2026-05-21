@@ -11,9 +11,8 @@ export default {
   },
   hubCard: {
     title: "Medical Interpreter",
-    description:
-      "Multilingual communication support for visits. No patient conversations are shown until a patient chooses to share.",
-    badge: "Communication only",
+    description: "Multilingual communication — conversation support only, not diagnosis.",
+    badge: "Communication",
     ariaLabel: "Open Medical Interpreter for this practice",
   },
   hub: {
