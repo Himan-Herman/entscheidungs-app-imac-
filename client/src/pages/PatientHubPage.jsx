@@ -22,6 +22,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
 import InboxCountBadge from "../components/InboxCountBadge.jsx";
+import InterpreterCard from "../features/medicalInterpreter/components/InterpreterCard.jsx";
 import "../styles/WorkspaceHubPages.css";
 
 const LINKS = [
@@ -114,6 +115,8 @@ export default function PatientHubPage() {
           {t.patientHub.classic}
         </Link>
       </header>
+
+      <InterpreterCard />
 
       <nav className="workspace-hub__grid" aria-label={t.patientHub.heading}>
         {LINKS.map((link) => {

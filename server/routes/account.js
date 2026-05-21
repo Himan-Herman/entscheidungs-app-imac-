@@ -135,6 +135,38 @@ router.get("/export", accountExportLimiter, async (req, res) => {
       messages: t.messages,
     }));
 
+    const interpreterCloudSessionCount =
+      await prisma.interpreterCloudSession.count({
+        where: { userId },
+      });
+    const interpreterCloudPreference =
+      await prisma.interpreterCloudPreference.findUnique({
+        where: { userId },
+        select: {
+          cloudEnabled: true,
+          consentGrantedAt: true,
+          consentRevokedAt: true,
+          consentVersion: true,
+        },
+      });
+    const interpreterCloudConsentEvents = await prisma.consentRecord.findMany({
+      where: {
+        patientUserId: userId,
+        consentType: "interpreter_cloud_storage",
+        practicePatientLinkId: null,
+      },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: {
+        id: true,
+        status: true,
+        grantedAt: true,
+        revokedAt: true,
+        version: true,
+        createdAt: true,
+      },
+    });
+
     const auditForExport = (user.auditLogs || []).map((a) => ({
       id: a.id,
       action: a.action,
@@ -182,6 +214,31 @@ router.get("/export", accountExportLimiter, async (req, res) => {
       preVisitCases: user.preVisitCases,
       followUpThreadsPatient: redactThreads,
       auditLog: auditForExport,
+      medicalInterpreterCloud: {
+        sessionCount: interpreterCloudSessionCount,
+        preference: interpreterCloudPreference
+          ? {
+              cloudEnabled: interpreterCloudPreference.cloudEnabled,
+              consentVersion: interpreterCloudPreference.consentVersion,
+              consentGrantedAt:
+                interpreterCloudPreference.consentGrantedAt?.toISOString?.() ??
+                null,
+              consentRevokedAt:
+                interpreterCloudPreference.consentRevokedAt?.toISOString?.() ??
+                null,
+            }
+          : null,
+        consentEvents: interpreterCloudConsentEvents.map((r) => ({
+          id: r.id,
+          status: r.status,
+          grantedAt: r.grantedAt?.toISOString?.() ?? r.grantedAt,
+          revokedAt: r.revokedAt?.toISOString?.() ?? r.revokedAt,
+          version: r.version,
+          createdAt: r.createdAt?.toISOString?.() ?? r.createdAt,
+        })),
+        note:
+          "Conversation text is stored encrypted on the server only when you explicitly save to your account. Audio is never stored. Full text is available via interpreter cloud session export APIs when signed in.",
+      },
     };
 
     return res.json({
@@ -227,6 +284,8 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       await tx.auditLog.deleteMany({ where: { userId } });
       await tx.practiceProfile.deleteMany({ where: { userId } });
       await tx.practiceMember.deleteMany({ where: { userId } });
+      await tx.interpreterCloudSession.deleteMany({ where: { userId } });
+      await tx.interpreterCloudPreference.deleteMany({ where: { userId } });
     });
 
     return res.json({ ok: true, deleted: true, scope: "user_previsit_practice_artifacts" });

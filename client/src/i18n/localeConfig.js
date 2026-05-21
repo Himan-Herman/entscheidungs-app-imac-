@@ -1,8 +1,11 @@
 /** Persisted preference — keep stable for existing users. */
 export const LANGUAGE_STORAGE_KEY = "medscout_language";
 
-/** Right-to-left UI scripts — `dir` on `<html>` set in LanguageProvider. */
-export const RTL_LANGUAGE_CODES = ["ar", "fa", "ckb"];
+/**
+ * Right-to-left UI scripts — `dir` on `<html>` set in LanguageProvider.
+ * Kurdish Kurmancî (ku) uses Latin script and stays LTR.
+ */
+export const RTL_LANGUAGE_CODES = ["ar", "fa", "ckb", "he", "ur"];
 
 export function isRtlLanguage(code) {
   return (
@@ -34,6 +37,8 @@ export const LOCALE_OPTIONS = [
   { code: "hr", nativeName: "Hrvatski" },
   { code: "bs", nativeName: "Bosanski" },
   { code: "sr", nativeName: "Srpski" },
+  { code: "he", nativeName: "עברית" },
+  { code: "ur", nativeName: "اردو" },
 ];
 
 export const SUPPORTED_LANGUAGE_CODES = LOCALE_OPTIONS.map((o) => o.code);

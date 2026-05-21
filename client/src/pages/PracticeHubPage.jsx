@@ -7,9 +7,11 @@ import {
   Inbox,
   MessageSquare,
   Pill,
+  Languages,
   Shield,
   UsersRound,
 } from "lucide-react";
+import { isMedicalInterpreterB2bClientEnabled } from "../features/medicalInterpreter/config/isMedicalInterpreterB2bEnabled.js";
 import { ensureDemoPractice, fetchPractices } from "../api/practicesApi.js";
 import {
   fetchPracticeOverviewActivity,
@@ -141,6 +143,13 @@ export default function PracticeHubPage() {
     () => getMessages(language).settingsPractices || getMessages("en").settingsPractices,
     [language],
   );
+  const tInterp = useMemo(
+    () =>
+      getMessages(language).medicalInterpreterPractice ||
+      getMessages("en").medicalInterpreterPractice,
+    [language],
+  );
+  const b2bInterpreterClientOn = isMedicalInterpreterB2bClientEnabled();
   const [practices, setPractices] = useState([]);
   const [practicesLoadError, setPracticesLoadError] = useState("");
   const [practiceId, setPracticeId] = useState("");
@@ -278,6 +287,9 @@ export default function PracticeHubPage() {
     () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
     [visibility],
   );
+
+  const showInterpreterCard =
+    b2bInterpreterClientOn && Boolean(practiceId) && visibility.interpreter === true;
 
   const metricRows = useMemo(() => {
     const rows = [];
@@ -506,6 +518,22 @@ export default function PracticeHubPage() {
                   </Link>
                 );
               })}
+              {showInterpreterCard ? (
+                <Link
+                  className="practice-overview__card practice-overview__card--interpreter"
+                  to={`/practice/interpreter?practiceId=${encodeURIComponent(practiceId)}`}
+                  aria-label={tInterp.hubCard.ariaLabel}
+                >
+                  <span className="practice-overview__card-icon" aria-hidden>
+                    <Languages size={22} strokeWidth={1.75} />
+                  </span>
+                  <span className="practice-overview__card-label">{tInterp.hubCard.title}</span>
+                  <span className="practice-overview__card-desc">{tInterp.hubCard.description}</span>
+                  <span className="practice-overview__card-badge" role="status">
+                    {tInterp.hubCard.badge}
+                  </span>
+                </Link>
+              ) : null}
             </nav>
           </section>
 

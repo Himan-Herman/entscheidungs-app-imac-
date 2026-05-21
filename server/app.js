@@ -76,6 +76,9 @@ import {
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
 import medaRouter from "./routes/meda.js";
+import interpreterRouter from "./routes/interpreter.js";
+import interpreterPublicInviteRouter from "./routes/interpreterPublicInvite.js";
+import { interpreterInviteValidateLimiter } from "./middleware/interpreterRateLimit.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -120,6 +123,14 @@ app.use('/api/symptom-thread', requireAuth, symptomThreadRoute);
 app.use('/api/textsymptom', requireAuth, symptomThreadRoute);
 app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
 app.use('/api/meda', medaRouter);
+/** Medical Interpreter — public invite validation (Phase 4.6, no auth). */
+app.use(
+  '/api/interpreter',
+  interpreterInviteValidateLimiter,
+  interpreterPublicInviteRouter,
+);
+/** Medical Interpreter (B2C + B2B practice) — flag-gated; auth required. */
+app.use('/api/interpreter', requireAuth, interpreterRouter);
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/i18n', i18nRouter);

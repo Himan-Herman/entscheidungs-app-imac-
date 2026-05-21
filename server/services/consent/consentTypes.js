@@ -8,6 +8,8 @@ export const CONSENT_TYPES = Object.freeze([
   "ai_organizational_assistance",
   "optional_email_notifications",
   "optional_secure_links",
+  "interpreter_cloud_storage",
+  "interpreter_practice_share",
 ]);
 
 export const CONSENT_STATUSES = new Set(["granted", "revoked", "expired"]);

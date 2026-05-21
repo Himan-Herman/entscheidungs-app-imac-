@@ -9,7 +9,7 @@ const FIFTEEN_MIN_MS = 15 * 60 * 1000;
 /** Shared expiry window for all limiters in this module. */
 export const RATE_LIMIT_WINDOW_MS = FIFTEEN_MIN_MS;
 
-function getClientIp(req) {
+export function getClientIp(req) {
   const xf = req.headers['x-forwarded-for'];
   if (typeof xf === 'string' && xf.length) {
     const first = xf.split(',')[0]?.trim();
@@ -168,3 +168,12 @@ export const integrationParseLimiter = createIpRateLimiter({
   max: 40,
   keyPrefix: 'practice:integrations:parse',
 });
+
+/** @deprecated Use interpreterRateLimit.js — kept for import stability during migration */
+export {
+  interpreterSharedLimiter,
+  interpreterTranscribeLimiter,
+  interpreterTranslateLimiter,
+  interpreterSimplifyLimiter,
+  interpreterSpeakLimiter,
+} from "./interpreterRateLimit.js";

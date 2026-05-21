@@ -159,3 +159,71 @@ export function isWebhookHealthDataPayloadsEnabled() {
 export function isPracticeDeveloperUiEnabled() {
   return isPracticeApiEnabled() || isPracticeWebhooksEnabled();
 }
+
+/**
+ * B2C Medical Interpreter — live multilingual healthcare communication only.
+ * Not symptom check, diagnosis, triage, or treatment recommendation.
+ * Default off until MEDICAL_INTERPRETER_ENABLED is set.
+ */
+export function isMedicalInterpreterEnabled() {
+  return envFlag("MEDICAL_INTERPRETER_ENABLED", false);
+}
+
+/**
+ * Medical Interpreter text-to-speech (OpenAI TTS).
+ * Default on when the interpreter module is enabled; set INTERPRETER_TTS_ENABLED=false to disable.
+ */
+export function isInterpreterTtsEnabled() {
+  if (!isMedicalInterpreterEnabled()) return false;
+  const raw = process.env.INTERPRETER_TTS_ENABLED;
+  if (raw === undefined || raw === "") return true;
+  return raw === "true" || raw === "1";
+}
+
+/**
+ * Medical Interpreter encrypted cloud session storage (Phase 3.2).
+ * Default off. Requires MEDICAL_INTERPRETER_ENABLED and valid INTERPRETER_CLOUD_MASTER_KEY at runtime for writes.
+ */
+export function isInterpreterCloudEnabled() {
+  if (!isMedicalInterpreterEnabled()) return false;
+  return envFlag("INTERPRETER_CLOUD_ENABLED", false);
+}
+
+/**
+ * Medical Interpreter B2B practice/clinic layer (Phase 4.2+).
+ * Separate from B2C patient routes — no diagnosis, triage, or treatment guidance.
+ * Patient consent is required before any practice access to session content (later phases).
+ * Default off until MEDICAL_INTERPRETER_B2B_ENABLED is set.
+ */
+export function isMedicalInterpreterB2bEnabled() {
+  if (!isMedicalInterpreterEnabled()) return false;
+  return envFlag("MEDICAL_INTERPRETER_B2B_ENABLED", false);
+}
+
+/**
+ * Experimental chunked streaming STT for interpreter (Phase 5.3).
+ * Default off. Does not replace batch PTT transcribe.
+ */
+export function isInterpreterStreamingSttEnabled() {
+  if (!isMedicalInterpreterEnabled()) return false;
+  return envFlag("MEDICAL_INTERPRETER_STREAMING_STT_ENABLED", false);
+}
+
+/**
+ * Near-realtime translation preview for streaming transcript (Phase 5.4).
+ * Default off. Does not replace confirm-before-save translate flow.
+ */
+export function isInterpreterNearRealtimeTranslationEnabled() {
+  if (!isMedicalInterpreterEnabled()) return false;
+  return envFlag("MEDICAL_INTERPRETER_NEAR_REALTIME_TRANSLATION_ENABLED", false);
+}
+
+/**
+ * Near-realtime / streaming TTS playback (Phase 5.5).
+ * Default off. Requires base TTS capability when enabled.
+ */
+export function isInterpreterStreamingTtsEnabled() {
+  if (!isMedicalInterpreterEnabled()) return false;
+  if (!isInterpreterTtsEnabled()) return false;
+  return envFlag("MEDICAL_INTERPRETER_STREAMING_TTS_ENABLED", false);
+}

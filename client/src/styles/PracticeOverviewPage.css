@@ -183,6 +183,21 @@
   font-variant-numeric: tabular-nums;
 }
 
+.practice-overview__card-desc {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  opacity: 0.88;
+}
+
+.practice-overview__card-badge {
+  margin-top: auto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #0e7490;
+}
+
 .practice-overview__metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

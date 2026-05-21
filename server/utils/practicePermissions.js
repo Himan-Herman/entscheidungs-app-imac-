@@ -38,6 +38,12 @@ export const PERMISSIONS = {
   TELEMEDICINE_READ: "telemedicine.read",
   TELEMEDICINE_MANAGE: "telemedicine.manage",
   TELEMEDICINE_SETTINGS: "telemedicine.settings",
+  /** Medical Interpreter B2B — communication support only (Phase 4.3+). */
+  INTERPRETER_VIEW: "interpreter.view",
+  INTERPRETER_INVITE: "interpreter.invite",
+  INTERPRETER_MANAGE: "interpreter.manage",
+  INTERPRETER_EXPORT: "interpreter.export",
+  INTERPRETER_ADMIN: "interpreter.admin",
 };
 
 /** @type {Record<string, Set<string>>} */
@@ -66,6 +72,11 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.CALENDAR_READ,
     PERMISSIONS.CALENDAR_MANAGE,
     PERMISSIONS.CALENDAR_SETTINGS,
+    PERMISSIONS.INTERPRETER_VIEW,
+    PERMISSIONS.INTERPRETER_INVITE,
+    PERMISSIONS.INTERPRETER_MANAGE,
+    PERMISSIONS.INTERPRETER_EXPORT,
+    PERMISSIONS.INTERPRETER_ADMIN,
   ]),
   practice_manager: new Set([
     PERMISSIONS.TEAM_VIEW,
@@ -85,6 +96,11 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.CALENDAR_READ,
     PERMISSIONS.CALENDAR_MANAGE,
     PERMISSIONS.CALENDAR_SETTINGS,
+    PERMISSIONS.INTERPRETER_VIEW,
+    PERMISSIONS.INTERPRETER_INVITE,
+    PERMISSIONS.INTERPRETER_MANAGE,
+    PERMISSIONS.INTERPRETER_EXPORT,
+    PERMISSIONS.INTERPRETER_ADMIN,
   ]),
   secretary: new Set([
     PERMISSIONS.TEAM_VIEW,
@@ -99,6 +115,8 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.CALENDAR_READ,
     PERMISSIONS.CALENDAR_MANAGE,
     PERMISSIONS.TELEMEDICINE_READ,
+    PERMISSIONS.INTERPRETER_VIEW,
+    PERMISSIONS.INTERPRETER_INVITE,
   ]),
   doctor: new Set([
     PERMISSIONS.TEAM_VIEW,
@@ -116,6 +134,8 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.MEDICATION_WRITE,
     PERMISSIONS.MEDICATION_PUBLISH,
     PERMISSIONS.DATA_REQUESTS_MANAGE,
+    PERMISSIONS.INTERPRETER_VIEW,
+    PERMISSIONS.INTERPRETER_EXPORT,
   ]),
   assistant: new Set([
     PERMISSIONS.TEAM_VIEW,
@@ -129,6 +149,7 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.CALENDAR_MANAGE,
     PERMISSIONS.TELEMEDICINE_READ,
     PERMISSIONS.TELEMEDICINE_MANAGE,
+    PERMISSIONS.INTERPRETER_VIEW,
   ]),
   viewer: new Set([
     PERMISSIONS.TEAM_VIEW,
@@ -137,6 +158,7 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.MEDICATION_READ,
     PERMISSIONS.INBOX_MANAGE,
     PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.INTERPRETER_VIEW,
   ]),
 };
 
@@ -233,6 +255,34 @@ export function canManageTelemedicine(role) {
 
 export function canManageTelemedicineSettings(role) {
   return hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_SETTINGS);
+}
+
+export function canViewInterpreterPractice(role) {
+  return hasPracticePermission(role, PERMISSIONS.INTERPRETER_VIEW);
+}
+
+export function canManageInterpreterPractice(role) {
+  return hasPracticePermission(role, PERMISSIONS.INTERPRETER_MANAGE);
+}
+
+export function canAdminInterpreterPractice(role) {
+  return hasPracticePermission(role, PERMISSIONS.INTERPRETER_ADMIN);
+}
+
+export function canInviteInterpreterPractice(role) {
+  return (
+    hasPracticePermission(role, PERMISSIONS.INTERPRETER_INVITE) ||
+    hasPracticePermission(role, PERMISSIONS.INTERPRETER_MANAGE) ||
+    hasPracticePermission(role, PERMISSIONS.INTERPRETER_ADMIN)
+  );
+}
+
+export function canExportInterpreterPractice(role) {
+  return (
+    hasPracticePermission(role, PERMISSIONS.INTERPRETER_EXPORT) ||
+    hasPracticePermission(role, PERMISSIONS.INTERPRETER_MANAGE) ||
+    hasPracticePermission(role, PERMISSIONS.INTERPRETER_ADMIN)
+  );
 }
 
 /**

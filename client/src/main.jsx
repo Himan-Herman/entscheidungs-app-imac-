@@ -89,6 +89,21 @@ const AccountHealthProfilePage = lazy(() =>
 const AccountProfilesPage = lazy(() => import("./pages/account/AccountProfilesPage.jsx"));
 const AccountDataPage = lazy(() => import("./pages/account/AccountDataPage.jsx"));
 const PatientHubPage = lazy(() => import("./pages/PatientHubPage.jsx"));
+const InterpreterHomePage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterHomePage.jsx"),
+);
+const InterpreterSetupPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterSetupPage.jsx"),
+);
+const InterpreterLivePage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterLivePage.jsx"),
+);
+const InterpreterReviewPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterReviewPage.jsx"),
+);
+const MedicalInterpreterFeatureGate = lazy(() =>
+  import("./features/medicalInterpreter/components/MedicalInterpreterFeatureGate.jsx"),
+);
 const PatientInboxPage = lazy(() =>
   import("./features/patientInbox/pages/PatientInboxPage.jsx"),
 );
@@ -183,6 +198,27 @@ const PracticeFinderPage = lazy(() =>
   import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
 );
 const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
+const InterpreterPracticeHubPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPracticeHubPage.jsx"),
+);
+const InterpreterPracticeDashboardPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPracticeDashboardPage.jsx"),
+);
+const InterpreterPracticeInvitesPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPracticeInvitesPage.jsx"),
+);
+const InterpreterPracticeSessionsPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPracticeSessionsPage.jsx"),
+);
+const InterpreterPracticeSessionDetailPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPracticeSessionDetailPage.jsx"),
+);
+const InterpreterInviteLandingPage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterInviteLandingPage.jsx"),
+);
+const InterpreterInviteLegacyRedirect = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterInviteLegacyRedirect.jsx"),
+);
 const PracticeTeamPage = lazy(() =>
   import("./features/practiceTeam/pages/PracticeTeamPage.jsx"),
 );
@@ -241,6 +277,46 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PatientHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/interpreter/setup"
+                  element={
+                    <ProtectedRoute>
+                      <MedicalInterpreterFeatureGate>
+                        <InterpreterSetupPage />
+                      </MedicalInterpreterFeatureGate>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/interpreter/live"
+                  element={
+                    <ProtectedRoute>
+                      <MedicalInterpreterFeatureGate>
+                        <InterpreterLivePage />
+                      </MedicalInterpreterFeatureGate>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/interpreter/review"
+                  element={
+                    <ProtectedRoute>
+                      <MedicalInterpreterFeatureGate>
+                        <InterpreterReviewPage />
+                      </MedicalInterpreterFeatureGate>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/interpreter"
+                  element={
+                    <ProtectedRoute>
+                      <MedicalInterpreterFeatureGate>
+                        <InterpreterHomePage />
+                      </MedicalInterpreterFeatureGate>
                     </ProtectedRoute>
                   }
                 />
@@ -621,6 +697,54 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
+                  path="/practice/interpreter/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <InterpreterPracticeDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/interpreter/invites/new"
+                  element={
+                    <ProtectedRoute>
+                      <InterpreterPracticeInvitesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/interpreter/invites"
+                  element={
+                    <ProtectedRoute>
+                      <InterpreterPracticeInvitesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/interpreter/sessions/:id"
+                  element={
+                    <ProtectedRoute>
+                      <InterpreterPracticeSessionDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/interpreter/sessions"
+                  element={
+                    <ProtectedRoute>
+                      <InterpreterPracticeSessionsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/interpreter"
+                  element={
+                    <ProtectedRoute>
+                      <InterpreterPracticeHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/practice/dashboard"
                   element={
                     <ProtectedRoute>
@@ -727,6 +851,14 @@ createRoot(document.getElementById("root")).render(
                 <Route path="/pre-visit/review" element={<PreVisitReviewPage />} />
                 <Route path="/pre-visit" element={<PreVisitLanguagePage />} />
                 <Route path="/pre-visit/qr/:qrToken" element={<PreVisitQrLandingPage />} />
+                <Route
+                  path="/i/interpreter/:token"
+                  element={<InterpreterInviteLandingPage />}
+                />
+                <Route
+                  path="/interpreter/invite/:token"
+                  element={<InterpreterInviteLegacyRedirect />}
+                />
                 <Route path="/arztgespraech" element={<Navigate to="/pre-visit" replace />} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />

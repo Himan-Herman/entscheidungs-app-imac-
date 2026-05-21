@@ -1,0 +1,116 @@
+/**
+ * Medical Interpreter — multilingual & RTL layout (Phase 2.6).
+ * Uses system font stacks — no embedded font payloads.
+ */
+
+.interp-root {
+  --interp-font-stack-latin: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --interp-font-stack-arabic: "Noto Naskh Arabic", "Geeza Pro", "Segoe UI", "Helvetica Neue",
+    Arial, sans-serif;
+  --interp-font-stack-unified: system-ui, -apple-system, "Segoe UI", "Noto Naskh Arabic",
+    "Geeza Pro", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--interp-font-stack-unified);
+}
+
+.interpreter-multilingual {
+  unicode-bidi: isolate;
+  text-align: start;
+}
+
+.interpreter-multilingual--mixed {
+  unicode-bidi: plaintext;
+}
+
+[dir="rtl"] .interpreter-multilingual {
+  text-align: start;
+}
+
+.interpreter-prose {
+  font-family: inherit;
+}
+
+.interpreter-live__textarea.interpreter-prose {
+  font-family: inherit;
+  text-align: start;
+  unicode-bidi: plaintext;
+}
+
+.interpreter-setup__select {
+  font-family: inherit;
+  text-align: start;
+}
+
+.interpreter-setup__select option {
+  font-family: inherit;
+}
+
+/* Logical borders — mirror safely in RTL UI */
+.interpreter-live__translation-text--uncertain,
+.interpreter-review__turn-text--uncertain,
+.interpreter-live__translation-text.interpreter-multilingual--uncertain {
+  border-inline-start: 3px solid var(--interp-color-caution-border, #ca8a04);
+  padding-inline-start: var(--ms-space-3);
+}
+
+.interpreter-review__turn-block--original {
+  border-inline-start: 3px solid var(--ms-color-border);
+  padding-inline-start: var(--ms-space-3);
+}
+
+.interpreter-live__speaker-direction {
+  text-align: center;
+}
+
+[dir="rtl"] .interpreter-history__card-head {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .interpreter-review__meta-row {
+  text-align: start;
+}
+
+[dir="rtl"] .interpreter-dialog__actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .interpreter-setup__actions {
+  flex-direction: row-reverse;
+}
+
+.interpreter-live__mixed-direction-note,
+.interpreter-review__mixed-direction-note {
+  margin: 0 0 var(--ms-space-3);
+  padding: var(--ms-space-2) var(--ms-space-3);
+  font-size: var(--ms-text-sm);
+  line-height: var(--interp-leading-prose);
+  color: var(--ms-color-text-muted);
+  background: var(--interp-color-panel-muted);
+  border-radius: var(--ms-radius-md);
+  border: 1px solid var(--ms-color-border);
+}
+
+.interpreter-setup__language-filter {
+  margin-bottom: var(--ms-space-3);
+}
+
+.interpreter-setup__language-filter-input {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--ms-space-2) var(--ms-space-3);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  font-family: inherit;
+  font-size: var(--ms-text-base);
+  text-align: start;
+}
+
+.interpreter-setup__language-option-native {
+  unicode-bidi: isolate;
+}
+
+@media (max-width: 480px) {
+  .interpreter-review__turn-meta {
+    word-break: break-word;
+  }
+}

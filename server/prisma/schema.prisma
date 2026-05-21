@@ -65,6 +65,13 @@ model User {
   telemedicineSessionsCreated   TelemedicineSession[] @relation("TelemedicineCreatedBy")
   telemedicineParticipants      TelemedicineParticipant[] @relation("TelemedicineParticipantUser")
   telemedicineConsents          TelemedicineConsent[] @relation("TelemedicineConsentPatient")
+  interpreterCloudPreference    InterpreterCloudPreference?
+  interpreterCloudSessions      InterpreterCloudSession[]
+  interpreterCloudSessionPayloads InterpreterCloudSessionPayload[]
+  interpreterInvitesCreated     PracticeInterpreterInvite[] @relation("InterpreterInviteCreatedBy")
+  interpreterInvitesRevoked     PracticeInterpreterInvite[] @relation("InterpreterInviteRevokedBy")
+  interpreterSessionLinksAsPatient PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkPatient")
+  interpreterSessionLinksRevoked PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -345,6 +352,8 @@ model PracticeProfile {
   webhookEndpoints         PracticeWebhookEndpoint[]
   webhookDeliveries        PracticeWebhookDelivery[]
   apiAuditEvents           PracticeApiAuditEvent[]
+  interpreterInvites       PracticeInterpreterInvite[]
+  interpreterSessionLinks    PracticeInterpreterSessionLink[]
 
   @@index([userId])
 }
@@ -1500,6 +1509,170 @@ model ConsentRecord {
   @@index([practiceProfileId, consentType])
   @@index([practicePatientLinkId, consentType, status])
   @@index([status, expiresAt])
+}
+
+/// B2C Medical Interpreter — optional encrypted cloud storage (explicit consent only).
+model InterpreterCloudPreference {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  cloudEnabled     Boolean   @default(false)
+  consentVersion   String?
+  consentGrantedAt DateTime?
+  consentRevokedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Session metadata (plaintext organizational fields only).
+/// Turn text is stored encrypted in InterpreterCloudSessionPayload (not per-row turns table).
+model InterpreterCloudSession {
+  id                  String    @id @default(cuid())
+  userId              String
+  /// Optional org/practice scope for future enterprise features — never grants practice access.
+  organizationId      String?
+  practiceProfileId   String?
+  /// Client-side session UUID (InterpreterSession.sessionId).
+  clientSessionId     String
+  status              String
+  patientLanguage     String    @db.VarChar(12)
+  doctorLanguage      String    @db.VarChar(12)
+  conversationTitle   String?   @db.VarChar(200)
+  doctorName          String?   @db.VarChar(120)
+  practiceName        String?   @db.VarChar(120)
+  specialty           String?   @db.VarChar(120)
+  appointmentDateTime DateTime?
+  profileConsentUsed    Boolean   @default(false)
+  cloudStorageConsent   Boolean   @default(false)
+  schemaVersion       Int       @default(1)
+  endedAt             DateTime?
+  turnCount           Int       @default(0)
+  charCount           Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  deletedAt           DateTime?
+
+  user    User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payload InterpreterCloudSessionPayload?
+
+  @@unique([userId, clientSessionId])
+  @@index([userId, updatedAt])
+  @@index([userId, deletedAt])
+  @@index([organizationId])
+  @@index([practiceProfileId])
+}
+
+/// Encrypted turn payload — no audio columns.
+model InterpreterCloudSessionPayload {
+  id             String   @id @default(cuid())
+  sessionId      String   @unique
+  userId         String
+  payloadEnc     String   @db.Text
+  payloadVersion Int      @default(1)
+  checksumSha256 String?  @db.VarChar(64)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  session InterpreterCloudSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// B2B Medical Interpreter — hashed invite tokens for QR/link entry (Phase 4.6+).
+/// No patient transcript or session content stored on this model.
+model PracticeInterpreterInvite {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  createdByUserId   String
+  displayName       String?   @db.VarChar(80)
+  /// waiting_room | reception | doctor_room | remote | other
+  inviteType        String    @db.VarChar(32)
+  /// SHA-256 hex of raw token — plaintext token never stored.
+  tokenHash         String    @unique
+  /// First 8 chars of token for staff list identification only.
+  tokenPrefix       String?   @db.VarChar(12)
+  status            String    @default("active")
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  revokedByUserId   String?
+  maxUses           Int?
+  usageCount        Int       @default(0)
+  metadataVersion   String    @default("interpreter-invite-v1") @db.VarChar(32)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User            @relation("InterpreterInviteCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  revokedBy       User?           @relation("InterpreterInviteRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  usages          PracticeInterpreterInviteUsage[]
+  sessionLinks    PracticeInterpreterSessionLink[]
+
+  @@index([practiceProfileId, status])
+  @@index([practiceProfileId, createdAt])
+  @@index([status, expiresAt])
+}
+
+/// Optional usage audit — IP hash only; no patient linkage in Phase 4.6.
+model PracticeInterpreterInviteUsage {
+  id        String   @id @default(cuid())
+  inviteId  String
+  usedAt    DateTime @default(now())
+  ipHash    String?  @db.VarChar(64)
+
+  invite PracticeInterpreterInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+
+  @@index([inviteId, usedAt])
+}
+
+/// B2B — patient consent link between practice and interpreter session (Phase 4).
+/// No audio; conversation documentation only after explicit patient consent.
+model PracticeInterpreterSessionLink {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  patientUserId     String
+  inviteId          String?
+  /// Client-side interpreter session UUID.
+  clientSessionId   String    @db.VarChar(36)
+  consentRecordId   String?
+  /// pending | granted | revoked
+  consentStatus     String    @default("pending")
+  consentGrantedAt  DateTime?
+  consentRevokedAt  DateTime?
+  revokedByUserId   String?
+  metadataVersion   String    @default("interpreter-practice-link-v1") @db.VarChar(32)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser     User            @relation("InterpreterSessionLinkPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  invite          PracticeInterpreterInvite? @relation(fields: [inviteId], references: [id], onDelete: SetNull)
+  revokedBy       User?           @relation("InterpreterSessionLinkRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  payload         PracticeInterpreterSharePayload?
+
+  @@unique([practiceProfileId, patientUserId, clientSessionId])
+  @@index([practiceProfileId, consentStatus])
+  @@index([practiceProfileId, consentGrantedAt])
+  @@index([patientUserId, consentStatus])
+}
+
+/// Encrypted conversation documentation shared with practice (no audio).
+model PracticeInterpreterSharePayload {
+  id              String   @id @default(cuid())
+  linkId          String   @unique
+  payloadEnc      String   @db.Text
+  checksumSha256  String   @db.VarChar(64)
+  schemaVersion   Int
+  turnCount       Int
+  charCount       Int
+  patientLanguage String   @db.VarChar(16)
+  doctorLanguage  String   @db.VarChar(16)
+  sessionStatus   String   @db.VarChar(16)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  link PracticeInterpreterSessionLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
 }
 
 datasource db {

@@ -1,0 +1,307 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  INTERPRETER_MIN_BLOB_BYTES,
+  INTERPRETER_RECORDING_MAX_MS,
+  INTERPRETER_RECORDING_MIN_MS,
+  INTERPRETER_RECORDING_TIMESLICE_MS,
+} from "../utils/interpreterAudioConstants.js";
+
+/**
+ * Push-to-talk recorder — microphone only while recording.
+ * No localStorage; streams and blobs are released after each clip.
+ *
+ * Limitations (Phase 2.3): no VAD/noise suppression — only duration/size
+ * checks for empty, accidental, or near-silent clips.
+ *
+ * @param {{
+ *   maxMs?: number;
+ *   minMs?: number;
+ *   timesliceMs?: number;
+ *   onRecorded?: (payload: { blob: Blob, mimeType: string, durationMs: number }) => void | Promise<void>;
+ *   onMaxDuration?: () => void;
+ *   onRecordingStart?: () => void;
+ * }} options
+ */
+export function useInterpreterRecorder({
+  maxMs = INTERPRETER_RECORDING_MAX_MS,
+  minMs = INTERPRETER_RECORDING_MIN_MS,
+  timesliceMs = INTERPRETER_RECORDING_TIMESLICE_MS,
+  onRecorded,
+  onMaxDuration,
+  onRecordingStart,
+} = {}) {
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
+  /** @type {'mic_denied'|'mic_unavailable'|'too_short'|null} */
+  const [recorderError, setRecorderError] = useState(null);
+
+  const mediaRecorderRef = useRef(null);
+  const streamRef = useRef(null);
+  const chunksRef = useRef([]);
+  const mimeRef = useRef("audio/webm");
+  const startTimeRef = useRef(0);
+  const stopTimerRef = useRef(null);
+  const startingRef = useRef(false);
+  const stoppingRef = useRef(false);
+  const onRecordedRef = useRef(onRecorded);
+  const onMaxDurationRef = useRef(onMaxDuration);
+  const onRecordingStartRef = useRef(onRecordingStart);
+
+  useEffect(() => {
+    onRecordedRef.current = onRecorded;
+  }, [onRecorded]);
+  useEffect(() => {
+    onMaxDurationRef.current = onMaxDuration;
+  }, [onMaxDuration]);
+  useEffect(() => {
+    onRecordingStartRef.current = onRecordingStart;
+  }, [onRecordingStart]);
+
+  const cleanupStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => {
+        try {
+          t.stop();
+        } catch {
+          /* track may already be stopped */
+        }
+      });
+      streamRef.current = null;
+    }
+  }, []);
+
+  const disposeActiveRecording = useCallback(() => {
+    if (stopTimerRef.current) {
+      clearTimeout(stopTimerRef.current);
+      stopTimerRef.current = null;
+    }
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      try {
+        recorder.onstop = null;
+        recorder.onerror = null;
+        recorder.stop();
+      } catch {
+        /* ignore */
+      }
+    }
+    mediaRecorderRef.current = null;
+    chunksRef.current = [];
+    stoppingRef.current = false;
+    setIsStopping(false);
+    setIsRecording(false);
+    setIsPreparing(false);
+    cleanupStream();
+  }, [cleanupStream]);
+
+  const resetRecorderState = useCallback(() => {
+    disposeActiveRecording();
+    startingRef.current = false;
+  }, [disposeActiveRecording]);
+
+  const clearRecorderError = useCallback(() => {
+    setRecorderError(null);
+  }, []);
+
+  const cancelRecording = useCallback(() => {
+    disposeActiveRecording();
+    startingRef.current = false;
+  }, [disposeActiveRecording]);
+
+  const stopRecording = useCallback(() => {
+    if (stoppingRef.current || isStopping) return;
+    if (!mediaRecorderRef.current && !isRecording && !isPreparing) {
+      return;
+    }
+    if (stopTimerRef.current) {
+      clearTimeout(stopTimerRef.current);
+      stopTimerRef.current = null;
+    }
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state === "recording") {
+      stoppingRef.current = true;
+      setIsStopping(true);
+      try {
+        recorder.stop();
+      } catch {
+        stoppingRef.current = false;
+        resetRecorderState();
+      }
+    } else {
+      resetRecorderState();
+    }
+  }, [isRecording, isPreparing, isStopping, resetRecorderState]);
+
+  const startRecording = useCallback(async () => {
+    if (
+      startingRef.current ||
+      stoppingRef.current ||
+      isPreparing ||
+      isRecording ||
+      isStopping
+    ) {
+      return false;
+    }
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
+      return false;
+    }
+    if (
+      typeof navigator === "undefined" ||
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
+      setRecorderError("mic_unavailable");
+      return false;
+    }
+
+    startingRef.current = true;
+    setRecorderError(null);
+    setIsPreparing(true);
+
+    disposeActiveRecording();
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      streamRef.current = stream;
+
+      let mime = "audio/webm";
+      if (typeof MediaRecorder.isTypeSupported === "function") {
+        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+          mime = "audio/webm;codecs=opus";
+        } else if (!MediaRecorder.isTypeSupported("audio/webm")) {
+          if (MediaRecorder.isTypeSupported("audio/mp4")) mime = "audio/mp4";
+          else if (MediaRecorder.isTypeSupported("audio/ogg")) mime = "audio/ogg";
+        }
+      }
+      mimeRef.current = mime.split(";")[0];
+
+      const recorder = (() => {
+        try {
+          return new MediaRecorder(stream, { mimeType: mime });
+        } catch {
+          return new MediaRecorder(stream);
+        }
+      })();
+
+      mediaRecorderRef.current = recorder;
+      chunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data?.size > 0) chunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        stoppingRef.current = false;
+        cleanupStream();
+        setIsRecording(false);
+        setIsPreparing(false);
+
+        const durationMs = Math.max(0, Date.now() - startTimeRef.current);
+        const blob = new Blob(chunksRef.current, { type: mimeRef.current });
+        chunksRef.current = [];
+        mediaRecorderRef.current = null;
+
+        if (durationMs < minMs || blob.size < INTERPRETER_MIN_BLOB_BYTES) {
+          setRecorderError("too_short");
+          return;
+        }
+
+        void onRecordedRef.current?.({
+          blob,
+          mimeType: mimeRef.current,
+          durationMs,
+        });
+      };
+
+      recorder.onerror = () => {
+        stoppingRef.current = false;
+        resetRecorderState();
+        setRecorderError("mic_unavailable");
+      };
+
+      startTimeRef.current = Date.now();
+      try {
+        recorder.start(timesliceMs);
+      } catch {
+        resetRecorderState();
+        setRecorderError("mic_unavailable");
+        return false;
+      }
+
+      setIsPreparing(false);
+      setIsRecording(true);
+      onRecordingStartRef.current?.();
+
+      stopTimerRef.current = setTimeout(() => {
+        if (mediaRecorderRef.current?.state === "recording") {
+          onMaxDurationRef.current?.();
+          stopRecording();
+        }
+      }, maxMs);
+
+      return true;
+    } catch (err) {
+      resetRecorderState();
+      if (err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError") {
+        setRecorderError("mic_denied");
+      } else {
+        setRecorderError("mic_unavailable");
+      }
+      return false;
+    } finally {
+      startingRef.current = false;
+    }
+  }, [
+    cleanupStream,
+    disposeActiveRecording,
+    isPreparing,
+    isRecording,
+    isStopping,
+    maxMs,
+    minMs,
+    resetRecorderState,
+    stopRecording,
+    timesliceMs,
+  ]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        cancelRecording();
+      }
+    };
+    const onPageHide = () => cancelRecording();
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onPageHide);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", onPageHide);
+      cancelRecording();
+    };
+  }, [cancelRecording]);
+
+  return {
+    isPreparing,
+    isRecording,
+    isStopping,
+    isBusy:
+      isPreparing || isRecording || isStopping || startingRef.current,
+    recorderError,
+    clearRecorderError,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+  };
+}
