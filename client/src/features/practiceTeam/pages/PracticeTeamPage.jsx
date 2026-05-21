@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { authFetch } from "../../../api/authFetch.js";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   acceptPracticeTeamInvite,
   fetchPendingTeamInvites,
@@ -28,7 +29,7 @@ const ASSIGNABLE_ROLES = [
 function fmt(iso, lang) {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

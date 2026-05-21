@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
+import { PATIENT_UI_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { useAuthFlowPalette } from "../ThemeMode";
@@ -99,7 +100,11 @@ export default function ResetPassword() {
             marginBottom: 18,
           }}
         >
-          <GlobalLanguageSelector label={navCopy.languageLabel} compact />
+          <GlobalLanguageSelector
+            label={navCopy.languageLabel}
+            compact
+            selectableLocaleCodes={PATIENT_UI_SELECTABLE_LOCALE_CODES}
+          />
         </div>
 
         <h1

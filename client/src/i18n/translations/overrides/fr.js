@@ -7,6 +7,9 @@ import frCore from "./fr/fr.core.js";
 import frAccount from "./fr/fr.account.js";
 import frModules from "./fr/fr.modules.js";
 import frPractice from "./fr/fr.practice.js";
+import frPatient from "./fr/fr.patient.js";
+import frMedicalInterpreter from "./fr/fr.medicalInterpreter.js";
+import frPracticeModules from "./fr/fr.practice.modules.js";
 
 const frBase = {
   legal: legalFr,
@@ -209,6 +212,9 @@ const frBase = {
 
 /** fr → merging layers: extended FR modules override base; runtime getMessages merges fr → en → de per key */
 export default deepMerge(
-  deepMerge(deepMerge(deepMerge(frBase, frCore), frAccount), frModules),
-  frPractice,
+  deepMerge(
+    deepMerge(deepMerge(deepMerge(frBase, frCore), frAccount), frModules),
+    frPractice,
+  ),
+  deepMerge(deepMerge(frPatient, frMedicalInterpreter), frPracticeModules),
 );

@@ -102,8 +102,9 @@ export default {
       "La préparation n’a pas pu être enregistrée pour le moment.",
     emailPdfConsent:
       "Je confirme que ce document peut contenir des informations de santé personnelles et peut être envoyé au cabinet/médecin sélectionné.",
-    sessionTitleDe: "Vorbereitung Arztgespräch",
-    sessionTitleEn: "Doctor visit preparation",
+    sessionTitleDe: "Préparation de la consultation médicale",
+    sessionTitleEn: "Préparation de la consultation médicale",
+    sessionTitleFr: "Préparation de la consultation médicale",
     viewMyPreparations: "Voir mes préparations",
     mainNavAria:
       "Version médecin, export PDF, retour au récapitulatif",

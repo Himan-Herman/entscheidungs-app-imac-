@@ -16,6 +16,10 @@ import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
+import {
+  PATIENT_UI_SELECTABLE_LOCALE_CODES,
+  PRACTICE_UI_SELECTABLE_LOCALE_CODES,
+} from "../i18n/localeConfig";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
 import { runInterpreterLogoutCleanup } from "../features/medicalInterpreter/utils/interpreterAccountScope.js";
@@ -145,7 +149,15 @@ export default function Header() {
             </button>
 
             <div className="ms-header__language">
-              <GlobalLanguageSelector label={copy.languageLabel} compact />
+              <GlobalLanguageSelector
+                label={copy.languageLabel}
+                compact
+                selectableLocaleCodes={
+                  isPractice
+                    ? PRACTICE_UI_SELECTABLE_LOCALE_CODES
+                    : PATIENT_UI_SELECTABLE_LOCALE_CODES
+                }
+              />
             </div>
           </div>
 

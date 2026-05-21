@@ -7,6 +7,7 @@ import RevokeProfileSharingDialog from "../components/RevokeProfileSharingDialog
 import ArchiveRelationshipDialog from "../components/ArchiveRelationshipDialog.jsx";
 import ExportRequestDialog from "../components/ExportRequestDialog.jsx";
 import PatientPracticeDoctorSelect from "../components/PatientPracticeDoctorSelect.jsx";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   fetchPatientDataControl,
   patchPatientLinkArchive,
@@ -50,7 +51,7 @@ function requestStatusLabel(status, t) {
 function fmtActivity(iso, lang) {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

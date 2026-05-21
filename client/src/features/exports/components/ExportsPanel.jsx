@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   fetchPatientExports,
   postPatientExport,
@@ -36,7 +37,7 @@ const PRACTICE_RECORD_TYPES = [
 function fmt(iso, lang) {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

@@ -4,6 +4,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import { hydrateSessionFromArchiveItem } from "../constants/preVisitSession.js";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   clearPreVisitArchive,
   deletePreVisitArchiveItem,
@@ -32,7 +33,7 @@ function formatSaved(iso, uiLang) {
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "—";
-    const localeTag = uiLang === "de" ? "de-DE" : "en-GB";
+    const localeTag = getPrimaryIntlLocale(uiLang);
     return new Intl.DateTimeFormat(localeTag, {
       dateStyle: "medium",
       timeStyle: "short",

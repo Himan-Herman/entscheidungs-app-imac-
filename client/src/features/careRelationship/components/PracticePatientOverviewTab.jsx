@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
 function fmt(iso, lang) {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

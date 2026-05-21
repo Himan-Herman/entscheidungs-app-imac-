@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
-import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
+import {
+  formatLanguageDisplayName,
+  getPrimaryIntlLocale,
+} from "../../../i18n/intlLocale.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
@@ -291,7 +294,7 @@ export default function PreVisitDocumentPage() {
         setLongitudinalPdfErr(t.longitudinalLoadOverviewError);
         return;
       }
-      const localeTag = language === "de" ? "de-DE" : "en-GB";
+      const localeTag = getPrimaryIntlLocale(language);
       const lines = data.case.sessions.map((s) => {
         const d = new Date(s.createdAt);
         const ds = Number.isNaN(d.getTime())
@@ -629,7 +632,12 @@ export default function PreVisitDocumentPage() {
           latest.aiSafetyNotice.trim()
             ? latest.aiSafetyNotice.trim()
             : null,
-        title: language === "de" ? t.sessionTitleDe : t.sessionTitleEn,
+        title:
+          language === "de"
+            ? t.sessionTitleDe
+            : language === "fr"
+              ? t.sessionTitleFr || t.sessionTitleEn
+              : t.sessionTitleEn,
         status: latest.pdfDownloaded ? "pdf_created" : "draft",
         pdfDownloaded: !!latest.pdfDownloaded,
         ...(caseLinkId ? { preVisitCaseId: caseLinkId } : {}),

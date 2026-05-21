@@ -1,3 +1,4 @@
+import { getPrimaryIntlLocale } from '../../i18n/intlLocale.js';
 import {
   SESSION_STATUS_COMPLETED,
   SESSION_STATUS_DRAFT,
@@ -40,7 +41,7 @@ export function buildSessionTitle(session, locale, labels) {
 function formatShortDate(iso, locale) {
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString(locale === "en" ? "en-GB" : "de-DE", {
+    return d.toLocaleDateString(getPrimaryIntlLocale(locale), {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

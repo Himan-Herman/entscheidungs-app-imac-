@@ -58,6 +58,14 @@ export function getIntlLocaleChain(uiLanguageCode) {
   return [primary, "en", "de"];
 }
 
+/** BCP-47 tag for dates/times in UI (patient DE / EN / FR). */
+export function getPrimaryIntlLocale(uiLanguageCode) {
+  const code = String(uiLanguageCode || "en").toLowerCase();
+  if (code === "de") return "de-DE";
+  if (code === "fr") return "fr-FR";
+  return "en-GB";
+}
+
 /**
  * Relative time (e.g. "2 days ago") — organizational UI only.
  * @param {string | Date} isoOrDate

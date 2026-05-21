@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { authFetch } from "../../../api/authFetch.js";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   cancelAppointment,
   createAppointment,
@@ -16,7 +17,7 @@ import "../styles/PracticeCalendarPage.css";
 
 function fmt(iso, lang) {
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

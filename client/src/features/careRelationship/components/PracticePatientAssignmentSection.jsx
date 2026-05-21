@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   assignPracticePatient,
   fetchAiAssignmentSuggestion,
@@ -220,7 +221,7 @@ export default function PracticePatientAssignmentSection({
             {history.map((h) => (
               <li key={h.id}>
                 {h.assignedTo?.displayName || h.assignedToUserId} — {h.assignmentType} —{" "}
-                {new Date(h.createdAt).toLocaleString(language === "de" ? "de-DE" : "en-GB")}
+                {new Date(h.createdAt).toLocaleString(getPrimaryIntlLocale(language))}
               </li>
             ))}
           </ul>

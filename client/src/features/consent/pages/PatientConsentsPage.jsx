@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
+import { getIntlLocaleChain } from "../../../i18n/intlLocale.js";
 import { getMessages } from "../../../i18n/translations";
 import RevokeConsentDialog from "../components/RevokeConsentDialog.jsx";
 import {
@@ -15,10 +16,11 @@ import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBa
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientConsentsPage.css";
 
-function fmtDate(iso, locale) {
+function fmtDate(iso, uiLanguage) {
   if (!iso) return null;
   try {
-    return new Date(iso).toLocaleDateString(locale === "de" ? "de-DE" : "en-GB", {
+    const [primary] = getIntlLocaleChain(uiLanguage);
+    return new Date(iso).toLocaleDateString(primary, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -161,7 +163,7 @@ function ConsentCard({
 
 export default function PatientConsentsPage() {
   const { language } = useLanguage();
-  const locale = language === "de" ? "de" : "en";
+  const locale = getIntlLocaleChain(language)[0];
   const t = useMemo(
     () => getMessages(language).patientConsents || getMessages("en").patientConsents,
     [language],

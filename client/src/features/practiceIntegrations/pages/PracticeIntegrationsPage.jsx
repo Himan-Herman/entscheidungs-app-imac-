@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { authFetch } from "../../../api/authFetch.js";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   createIntegrationConnection,
   createIntegrationJob,
@@ -394,7 +395,7 @@ export default function PracticeIntegrationsPage() {
                         <td>{j.type}</td>
                         <td>{j.direction}</td>
                         <td>{j.status}</td>
-                        <td>{new Date(j.createdAt).toLocaleString(language === "de" ? "de-DE" : "en-GB")}</td>
+                        <td>{new Date(j.createdAt).toLocaleString(getPrimaryIntlLocale(language))}</td>
                       </tr>
                     ))}
                   </tbody>

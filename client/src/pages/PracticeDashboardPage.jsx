@@ -5,12 +5,13 @@ import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
 import { detectDeviceType, sendPracticeAnalyticsEvent } from "../api/productAnalytics.js";
 import "../styles/PracticeDashboardPage.css";
+import { getPrimaryIntlLocale } from '../i18n/intlLocale.js';
 
 const STATUSES = ["new", "opened", "in_review", "completed", "archived"];
 
 function fmt(iso, lang) {
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

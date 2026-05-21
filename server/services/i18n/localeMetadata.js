@@ -28,6 +28,20 @@ export const LOCALE_OPTIONS = [
 
 export const HEADER_SELECTABLE_LOCALE_CODES = ["de", "en"];
 
+/** Patient workspace UI — keep in sync with client PATIENT_UI_SELECTABLE_LOCALE_CODES */
+export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr"];
+
+/** Practice workspace UI — keep in sync with client PRACTICE_UI_SELECTABLE_LOCALE_CODES */
+export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr"];
+
+export const UI_FULLY_SUPPORTED_LOCALE_CODES = [
+  ...new Set([
+    ...HEADER_SELECTABLE_LOCALE_CODES,
+    ...PATIENT_UI_SELECTABLE_LOCALE_CODES,
+    ...PRACTICE_UI_SELECTABLE_LOCALE_CODES,
+  ]),
+];
+
 const SUPPORTED = new Set(LOCALE_OPTIONS.map((o) => o.code));
 
 export function isRtlLanguage(code) {

@@ -1,5 +1,6 @@
 import React, { useId, useState } from "react";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog.jsx";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   SESSION_STATUS_ACTIVE,
   SESSION_STATUS_COMPLETED,
@@ -16,7 +17,7 @@ function interpolate(template, vars) {
 
 function formatDateTime(iso, locale) {
   try {
-    return new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "de-DE", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(locale), {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

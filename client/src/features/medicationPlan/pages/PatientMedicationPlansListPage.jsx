@@ -6,10 +6,11 @@ import { fetchPatientMedicationPlans } from "../api/patientMedicationPlansApi.js
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import { groupByPracticeBranding, practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
 function fmt(iso, lang) {
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

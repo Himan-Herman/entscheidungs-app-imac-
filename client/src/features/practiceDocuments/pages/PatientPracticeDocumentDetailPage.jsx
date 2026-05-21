@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   downloadPatientPracticeDocumentFile,
   fetchPatientPracticeDocument,
@@ -16,7 +17,7 @@ import "../styles/PracticeDocuments.css";
 
 function fmt(iso, lang) {
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });

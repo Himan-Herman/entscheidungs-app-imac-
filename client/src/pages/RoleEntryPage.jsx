@@ -5,6 +5,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
 import { getMessages } from "../i18n/translations";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
+import { PATIENT_UI_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import {
   USER_MODES,
   writeUserMode,
@@ -78,7 +79,11 @@ export default function RoleEntryPage() {
               <Moon size={20} aria-hidden />
             )}
           </button>
-          <GlobalLanguageSelector label={copyHeader.languageLabel} compact />
+          <GlobalLanguageSelector
+            label={copyHeader.languageLabel}
+            compact
+            selectableLocaleCodes={PATIENT_UI_SELECTABLE_LOCALE_CODES}
+          />
         </div>
       </header>
 

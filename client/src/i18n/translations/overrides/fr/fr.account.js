@@ -131,8 +131,20 @@ export default {
     navPracticeDashboard: "Tableau de bord",
     navPracticeProfiles: "Établissements",
     navPracticeFollowUps: "Suivi",
+    navPracticeHub: "Vue d’ensemble",
+    navPracticePatients: "Patient·es",
+    navPracticeInbox: "Boîte de réception",
     navAccountHome: "Compte",
     navPracticePrivacy: "Confidentialité",
+    installTitle: "Installer MedScoutX comme application",
+    installSubtitle:
+      "Accédez plus vite à MedScoutX depuis l’écran d’accueil ou le bureau.",
+    installLater: "Plus tard",
+    installNever: "Ne plus afficher",
+    installCloseAria: "Fermer l’invite d’installation",
+    installIosHint: "Appuyez sur Partager, puis « Sur l’écran d’accueil ».",
+    installMacSafariHint:
+      "Dans Safari : Fichier → « Ajouter au Dock » (ou Partager → « Ajouter au Dock »).",
     bottomNavAria: "Navigation principale de l’application",
     offlineTitle: "Connexion réseau indisponible ou instable.",
     offlineDetail:

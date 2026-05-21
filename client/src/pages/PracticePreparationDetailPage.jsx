@@ -8,12 +8,13 @@ import { PRE_VISIT_QUESTION_STEPS, pickLocalized } from "../features/preVisit/co
 import { STRUCTURED_SECTION_ORDER, STRUCTURED_DOCTOR_LABELS } from "../features/preVisit/constants/structuredDoctorLabels.js";
 import "../styles/PracticeDashboardPage.css";
 import VisitMedicationEditor from "../features/visitMedications/components/VisitMedicationEditor.jsx";
+import { getPrimaryIntlLocale } from '../i18n/intlLocale.js';
 
 const STATUSES = ["new", "opened", "in_review", "completed", "archived"];
 
 function fmt(iso, lang) {
   try {
-    return new Date(iso).toLocaleString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
