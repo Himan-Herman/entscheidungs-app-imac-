@@ -28,16 +28,9 @@ export default function MedicalInterpreterFeatureGate({ children }) {
   const t = useMedicalInterpreterMessages();
   const server = useInterpreterServerStatus();
   const clientOn = isMedicalInterpreterClientEnabled();
+  const serverOn = server.enabled === true;
 
-  if (!clientOn) {
-    return <DisabledShell t={t} message={t.empty.moduleDisabled} />;
-  }
-
-  if (!server.loading && server.enabled === false) {
-    return <DisabledShell t={t} message={t.empty.moduleDisabled} />;
-  }
-
-  if (server.loading) {
+  if (!clientOn && server.loading) {
     return (
       <main className="medical-interpreter-page interp-root" id="main-content" aria-busy="true">
         <p className="interpreter-empty-state" role="status">
@@ -45,6 +38,14 @@ export default function MedicalInterpreterFeatureGate({ children }) {
         </p>
       </main>
     );
+  }
+
+  if (!clientOn && !serverOn) {
+    return <DisabledShell t={t} message={t.empty.moduleDisabled} />;
+  }
+
+  if (clientOn && !server.loading && server.enabled === false) {
+    return <DisabledShell t={t} message={t.empty.moduleDisabled} />;
   }
 
   return (

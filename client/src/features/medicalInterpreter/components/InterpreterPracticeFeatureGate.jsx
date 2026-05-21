@@ -27,18 +27,15 @@ export default function InterpreterPracticeFeatureGate({
   });
 
   useEffect(() => {
-    if (!clientOn) {
-      setServer({ loading: false, enabled: false, canView: false });
-      return undefined;
-    }
     let cancelled = false;
+    setServer({ loading: true, enabled: null, canView: null });
     void fetchInterpreterPracticeStatus(
       practiceId ? { practiceId } : {},
     ).then((result) => {
       if (!cancelled) {
         setServer({
           loading: false,
-          enabled: result.enabled === true,
+          enabled: result.enabled === true && result.interpreterEnabled === true,
           canView: result.canView !== false,
         });
       }
@@ -46,28 +43,11 @@ export default function InterpreterPracticeFeatureGate({
     return () => {
       cancelled = true;
     };
-  }, [clientOn, practiceId]);
+  }, [practiceId]);
 
   const hubBackTo = practiceId
     ? practiceInterpreterPath("/practice", practiceId)
     : "/practice";
-
-  if (!clientOn) {
-    return (
-      <main className="medical-interpreter-disabled interp-root" id="main-content">
-        <div className="medical-interpreter-disabled__card">
-          <h1 className="medical-interpreter-disabled__title">{t.chrome.moduleTitle}</h1>
-          <p className="medical-interpreter-disabled__text">{t.empty.moduleDisabled}</p>
-          <p className="medical-interpreter-safety" role="note">
-            {t.safety.communicationOnly}
-          </p>
-        </div>
-        <Link className="medical-interpreter-page__back" to="/practice">
-          {t.chrome.backToPractice}
-        </Link>
-      </main>
-    );
-  }
 
   if (requirePracticeId && !practiceId) {
     return (

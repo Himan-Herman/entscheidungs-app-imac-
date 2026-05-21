@@ -23,7 +23,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
 import InboxCountBadge from "../components/InboxCountBadge.jsx";
-import { isMedicalInterpreterClientEnabled } from "../features/medicalInterpreter/config/isMedicalInterpreterEnabled.js";
+import { usePatientInterpreterHubVisible } from "../features/medicalInterpreter/hooks/useInterpreterHubVisibility.js";
 import "../styles/WorkspaceHubPages.css";
 
 const LINKS = [
@@ -98,6 +98,7 @@ export default function PatientHubPage() {
     [language],
   );
   const [inboxUnread, setInboxUnread] = useState(0);
+  const interpreterHub = usePatientInterpreterHubVisible();
 
   const loadInboxCount = useCallback(async () => {
     try {
@@ -117,13 +118,13 @@ export default function PatientHubPage() {
   }, [loadInboxCount]);
 
   const hubLinks = useMemo(() => {
-    if (!isMedicalInterpreterClientEnabled()) return LINKS;
+    if (!interpreterHub.visible) return LINKS;
     const links = [...LINKS];
     const telemedicineIndex = links.findIndex((l) => l.key === "hubLinkTelemedicine");
     const insertAt = telemedicineIndex >= 0 ? telemedicineIndex + 1 : 3;
     links.splice(insertAt, 0, INTERPRETER_HUB_LINK);
     return links;
-  }, []);
+  }, [interpreterHub.visible]);
 
   return (
     <div className="workspace-hub">

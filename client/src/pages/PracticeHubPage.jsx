@@ -11,7 +11,7 @@ import {
   Shield,
   UsersRound,
 } from "lucide-react";
-import { isMedicalInterpreterB2bClientEnabled } from "../features/medicalInterpreter/config/isMedicalInterpreterB2bEnabled.js";
+import { usePracticeInterpreterHubVisible } from "../features/medicalInterpreter/hooks/useInterpreterHubVisibility.js";
 import { ensureDemoPractice, fetchPractices } from "../api/practicesApi.js";
 import {
   fetchPracticeOverviewActivity,
@@ -149,7 +149,6 @@ export default function PracticeHubPage() {
       getMessages("en").medicalInterpreterPractice,
     [language],
   );
-  const b2bInterpreterClientOn = isMedicalInterpreterB2bClientEnabled();
   const [practices, setPractices] = useState([]);
   const [practicesLoadError, setPracticesLoadError] = useState("");
   const [practiceId, setPracticeId] = useState("");
@@ -165,6 +164,7 @@ export default function PracticeHubPage() {
   const [aiError, setAiError] = useState("");
   const [demoCreating, setDemoCreating] = useState(false);
   const [demoCreateError, setDemoCreateError] = useState("");
+  const interpreterHub = usePracticeInterpreterHubVisible(practiceId);
 
   const applyPracticeRows = useCallback((rows) => {
     const list = Array.isArray(rows) ? rows : [];
@@ -288,7 +288,7 @@ export default function PracticeHubPage() {
     [visibility],
   );
 
-  const showInterpreterCard = b2bInterpreterClientOn && Boolean(practiceId);
+  const showInterpreterCard = interpreterHub.visible;
 
   const metricRows = useMemo(() => {
     const rows = [];
