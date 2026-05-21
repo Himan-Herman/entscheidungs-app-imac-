@@ -168,12 +168,3 @@ export const integrationParseLimiter = createIpRateLimiter({
   max: 40,
   keyPrefix: 'practice:integrations:parse',
 });
-
-/** @deprecated Use interpreterRateLimit.js — kept for import stability during migration */
-export {
-  interpreterSharedLimiter,
-  interpreterTranscribeLimiter,
-  interpreterTranslateLimiter,
-  interpreterSimplifyLimiter,
-  interpreterSpeakLimiter,
-} from "./interpreterRateLimit.js";
