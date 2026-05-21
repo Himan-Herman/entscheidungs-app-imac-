@@ -1,6 +1,10 @@
 export default {
   fabLabel: "Open Meda — explain medical terms",
   fabTitle: "Meda — knowledge assistant",
+  brandAria: "MedScoutX — Meda knowledge assistant",
+  brandTagline: "Term orientation — not diagnosis",
+  expandInputAria: "Enlarge input field",
+  collapseInputAria: "Reduce input field",
   panelTitle: "Meda",
   panelSubtitle: "Medical terms & general health topics",
   closeAria: "Close Meda",

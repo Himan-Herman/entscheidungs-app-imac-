@@ -19,10 +19,10 @@
   --interp-leading-ui: var(--ms-leading-normal);
   --interp-letter-prose: 0.01em;
 
-  /* Healthcare-safe action colors (aligned with MedScoutX accent) */
+  /* Healthcare-safe action colors — high contrast on filled buttons (DE/EN, a11y) */
   --interp-color-action: var(--ms-color-accent);
   --interp-color-action-hover: var(--ms-color-accent-hover);
-  --interp-color-on-action: var(--ms-color-on-accent);
+  --interp-color-on-action: #ffffff;
 
   /* Surfaces */
   --interp-color-panel: var(--ms-color-surface);
@@ -64,6 +64,10 @@
 :root[data-theme="dark"] .medical-interpreter-page,
 :root[data-theme="dark"] .interpreter-hub-card,
 :root[data-theme="dark"] .medical-interpreter-disabled {
+  --interp-color-action: var(--ms-color-accent-active);
+  --interp-color-action-hover: var(--ms-color-accent);
+  --interp-color-on-action: #ffffff;
+
   --interp-color-safety-bg: color-mix(in srgb, var(--ms-color-accent) 10%, var(--ms-color-bg-subtle));
   --interp-color-safety-border: color-mix(in srgb, var(--ms-color-accent) 22%, var(--ms-color-border));
 

@@ -195,12 +195,17 @@
 }
 
 .interpreter-hub-card__cta:hover {
-  filter: brightness(1.05);
+  background: var(--interp-color-action-hover);
+  color: var(--interp-color-on-action);
 }
 
 .interpreter-hub-card__cta:focus-visible {
   outline: 2px solid var(--ms-color-focus-ring, #0e7490);
   outline-offset: 2px;
+}
+
+.interpreter-hub-card__cta:visited {
+  color: var(--interp-color-on-action);
 }
 
 .medical-interpreter-page {
@@ -277,18 +282,30 @@
   outline-offset: 2px;
 }
 
-.medical-interpreter-page__nav-link--primary {
+.medical-interpreter-page__nav-link--primary,
+.medical-interpreter-page__nav-link--primary:hover,
+.medical-interpreter-page__nav-link--primary:focus,
+.medical-interpreter-page__nav-link--primary:focus-visible,
+.medical-interpreter-page__nav-link--primary:visited {
   background: var(--interp-color-action);
-  border-color: transparent;
+  border-color: var(--interp-color-action);
   color: var(--interp-color-on-action);
 }
 
-.medical-interpreter-page__nav-link--primary:hover {
+.medical-interpreter-page__nav-link--primary:hover,
+.medical-interpreter-page__nav-link--primary:focus-visible {
   background: var(--interp-color-action-hover);
+  border-color: var(--interp-color-action-hover);
+  color: var(--interp-color-on-action);
 }
 
-.medical-interpreter-page__nav-link:hover {
+.medical-interpreter-page__nav-link:not(.medical-interpreter-page__nav-link--primary):hover {
   border-color: var(--ms-color-border-strong);
+  color: var(--ms-color-text);
+}
+
+.medical-interpreter-page__nav-link:not(.medical-interpreter-page__nav-link--primary):focus-visible {
+  color: var(--ms-color-text);
 }
 
 .medical-interpreter-disabled {
@@ -2088,9 +2105,19 @@
 }
 
 @media (forced-colors: active) {
+  .medical-interpreter-page__nav-link--primary,
+  .interpreter-hub-card__cta,
+  .interpreter-live__ptt-btn:not(.interpreter-live__ptt-btn--recording) {
+    forced-color-adjust: none;
+    background: ButtonFace;
+    border: 2px solid ButtonText;
+    color: ButtonText;
+  }
+
   .medical-interpreter-page__nav-link:focus-visible,
   .interpreter-live__ptt-btn:focus-visible,
-  .interpreter-dialog__input:focus-visible {
+  .interpreter-dialog__input:focus-visible,
+  .interpreter-hub-card__cta:focus-visible {
     outline: 3px solid CanvasText;
   }
 }

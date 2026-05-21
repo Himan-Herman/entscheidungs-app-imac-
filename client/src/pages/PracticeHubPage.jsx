@@ -527,10 +527,6 @@ export default function PracticeHubPage() {
                     <Languages size={22} strokeWidth={1.75} />
                   </span>
                   <span className="practice-overview__card-label">{tInterp.hubCard.title}</span>
-                  <span className="practice-overview__card-desc">{tInterp.hubCard.description}</span>
-                  <span className="practice-overview__card-badge" role="status">
-                    {tInterp.hubCard.badge}
-                  </span>
                 </Link>
               ) : null}
             </nav>

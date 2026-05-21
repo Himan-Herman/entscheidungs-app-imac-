@@ -93,7 +93,7 @@
   --ms-color-accent: #14b8a6;
   --ms-color-accent-hover: #2dd4bf;
   --ms-color-accent-active: #0d9488;
-  --ms-color-on-accent: #042f2e;
+  --ms-color-on-accent: #f8fafc;
 
   --ms-color-link: #5eead4;
   --ms-color-link-hover: #99f6e4;
@@ -132,12 +132,12 @@ body {
 }
 
 /* Main content: prose links distinguishable from body text (no underline) */
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn) {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn):not(.medical-interpreter-page__nav-link):not(.interpreter-hub-card__cta) {
   color: var(--ms-color-link);
   text-decoration: none;
 }
 
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn):hover {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn):not(.medical-interpreter-page__nav-link):not(.interpreter-hub-card__cta):hover {
   color: var(--ms-color-link-hover);
   text-decoration: none;
 }

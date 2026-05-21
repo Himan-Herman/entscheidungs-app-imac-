@@ -1,6 +1,10 @@
 export default {
   fabLabel: "Meda öffnen — medizinische Begriffe erklären",
   fabTitle: "Meda — Wissensassistent",
+  brandAria: "MedScoutX — Meda Wissensassistent",
+  brandTagline: "Orientierung zu Begriffen — keine Diagnose",
+  expandInputAria: "Eingabefeld vergrößern",
+  collapseInputAria: "Eingabefeld verkleinern",
   panelTitle: "Meda",
   panelSubtitle: "Medizinische Begriffe & allgemeine Gesundheitsthemen",
   closeAria: "Meda schließen",

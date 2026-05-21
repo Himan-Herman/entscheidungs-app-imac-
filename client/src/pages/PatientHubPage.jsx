@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import deRoleEntry from "../i18n/translations/de/roleEntry.js";
+import enRoleEntry from "../i18n/translations/en/roleEntry.js";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
 import InboxCountBadge from "../components/InboxCountBadge.jsx";
 import { usePatientInterpreterHubVisible } from "../features/medicalInterpreter/hooks/useInterpreterHubVisibility.js";
@@ -64,17 +66,72 @@ const LINKS = [
     subtitleKey: "hubLinkPatientActivitySub",
     icon: Activity,
   },
-  { to: "/patient/find-practices", key: "hubLinkFindPractices", icon: MapPinned },
-  { to: "/account/health", key: "hubLinkHealthProfile", icon: Heart },
-  { to: "/pre-visit", key: "hubLinkPreVisit", icon: HeartPulse },
-  { to: "/symptom", key: "hubLinkSymptom", icon: Activity },
-  { to: "/bild", key: "hubLinkImage", icon: ImageIcon },
-  { to: "/region-start", key: "hubLinkBody", icon: MapIcon },
-  { to: "/pre-visit/medications", key: "hubLinkVisitMedications", icon: Pill },
-  { to: "/pre-visit/my-preparations", key: "hubLinkMyPrep", icon: ClipboardList },
-  { to: "/pre-visit/cases", key: "hubLinkCases", icon: Stethoscope },
-  { to: "/settings/doctor-contacts", key: "hubLinkDoctors", icon: UserRound },
-  { to: "/account/documents", key: "hubLinkDocuments", icon: FileText },
+  {
+    to: "/patient/find-practices",
+    key: "hubLinkFindPractices",
+    subtitleKey: "hubLinkFindPracticesSub",
+    icon: MapPinned,
+  },
+  {
+    to: "/account/health",
+    key: "hubLinkHealthProfile",
+    subtitleKey: "hubLinkHealthProfileSub",
+    icon: Heart,
+  },
+  {
+    to: "/pre-visit",
+    key: "hubLinkPreVisit",
+    subtitleKey: "hubLinkPreVisitSub",
+    icon: HeartPulse,
+  },
+  {
+    to: "/symptom",
+    key: "hubLinkSymptom",
+    subtitleKey: "hubLinkSymptomSub",
+    icon: Activity,
+  },
+  {
+    to: "/bild",
+    key: "hubLinkImage",
+    subtitleKey: "hubLinkImageSub",
+    icon: ImageIcon,
+  },
+  {
+    to: "/region-start",
+    key: "hubLinkBody",
+    subtitleKey: "hubLinkBodySub",
+    icon: MapIcon,
+  },
+  {
+    to: "/pre-visit/medications",
+    key: "hubLinkVisitMedications",
+    subtitleKey: "hubLinkVisitMedicationsSub",
+    icon: Pill,
+  },
+  {
+    to: "/pre-visit/my-preparations",
+    key: "hubLinkMyPrep",
+    subtitleKey: "hubLinkMyPrepSub",
+    icon: ClipboardList,
+  },
+  {
+    to: "/pre-visit/cases",
+    key: "hubLinkCases",
+    subtitleKey: "hubLinkCasesSub",
+    icon: Stethoscope,
+  },
+  {
+    to: "/settings/doctor-contacts",
+    key: "hubLinkDoctors",
+    subtitleKey: "hubLinkDoctorsSub",
+    icon: UserRound,
+  },
+  {
+    to: "/account/documents",
+    key: "hubLinkDocuments",
+    subtitleKey: "hubLinkDocumentsSub",
+    icon: FileText,
+  },
 ];
 
 const INTERPRETER_HUB_LINK = {
@@ -85,6 +142,17 @@ const INTERPRETER_HUB_LINK = {
   icon: Languages,
   tileClass: "workspace-hub__tile--interpreter",
 };
+
+/** Subtitle copy — DE/EN source files so keys are never missing after partial i18n overrides. */
+function hubTileSubtitle(roleEntry, subtitleKey) {
+  if (!subtitleKey) return "";
+  return (
+    roleEntry[subtitleKey] ||
+    enRoleEntry[subtitleKey] ||
+    deRoleEntry[subtitleKey] ||
+    ""
+  );
+}
 
 export default function PatientHubPage() {
   const { language } = useLanguage();
@@ -138,6 +206,9 @@ export default function PatientHubPage() {
 
       <nav className="workspace-hub__grid" aria-label={t.patientHub.heading}>
         {hubLinks.map((link) => {
+          const subtitle = link.subtitleKey
+            ? hubTileSubtitle(t, link.subtitleKey)
+            : "";
           const TileIcon = link.icon;
           const tileClass = [
             "workspace-hub__tile",
@@ -148,8 +219,8 @@ export default function PatientHubPage() {
           const ariaLabel =
             link.ariaKey && t[link.ariaKey]
               ? t[link.ariaKey]
-              : link.subtitleKey
-                ? `${t[link.key]}. ${t[link.subtitleKey]}`
+              : subtitle
+                ? `${t[link.key]}. ${subtitle}`
                 : t[link.key];
           return (
             <Link
@@ -170,8 +241,8 @@ export default function PatientHubPage() {
                   />
                 ) : null}
               </span>
-              {link.subtitleKey ? (
-                <span className="workspace-hub__tile-sub">{t[link.subtitleKey]}</span>
+              {subtitle ? (
+                <span className="workspace-hub__tile-sub">{subtitle}</span>
               ) : null}
             </Link>
           );
