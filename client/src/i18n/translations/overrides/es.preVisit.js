@@ -102,8 +102,9 @@ export default {
       "No se pudo guardar la preparación ahora.",
     emailPdfConsent:
       "Confirmo que este documento puede contener información de salud personal y que puede enviarse al centro/médico seleccionado.",
-    sessionTitleDe: "Vorbereitung Arztgespräch",
-    sessionTitleEn: "Doctor visit preparation",
+    sessionTitleDe: "Preparación de la consulta médica",
+    sessionTitleEn: "Preparación de la consulta médica",
+    sessionTitleEs: "Preparación de la consulta médica",
     viewMyPreparations: "Ver mis preparaciones",
     mainNavAria:
       "Versión para el médico, exportar PDF, volver al resumen",

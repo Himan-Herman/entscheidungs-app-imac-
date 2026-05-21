@@ -58,11 +58,12 @@ export function getIntlLocaleChain(uiLanguageCode) {
   return [primary, "en", "de"];
 }
 
-/** BCP-47 tag for dates/times in UI (patient DE / EN / FR). */
+/** BCP-47 tag for dates/times in UI (DE / EN / FR / ES). */
 export function getPrimaryIntlLocale(uiLanguageCode) {
   const code = String(uiLanguageCode || "en").toLowerCase();
   if (code === "de") return "de-DE";
   if (code === "fr") return "fr-FR";
+  if (code === "es") return "es-ES";
   return "en-GB";
 }
 

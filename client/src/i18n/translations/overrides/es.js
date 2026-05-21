@@ -7,6 +7,9 @@ import esCore from "./es/es.core.js";
 import esAccount from "./es/es.account.js";
 import esModules from "./es/es.modules.js";
 import esPractice from "./es/es.practice.js";
+import esPatient from "./es/es.patient.js";
+import esMedicalInterpreter from "./es/es.medicalInterpreter.js";
+import esPracticeModules from "./es/es.practice.modules.js";
 
 /** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
 const esBase = {
@@ -209,6 +212,9 @@ const esBase = {
 };
 
 export default deepMerge(
-  deepMerge(deepMerge(deepMerge(esBase, esCore), esAccount), esModules),
-  esPractice,
+  deepMerge(
+    deepMerge(deepMerge(deepMerge(esBase, esCore), esAccount), esModules),
+    esPractice,
+  ),
+  deepMerge(deepMerge(esPatient, esMedicalInterpreter), esPracticeModules),
 );

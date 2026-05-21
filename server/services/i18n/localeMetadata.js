@@ -29,10 +29,10 @@ export const LOCALE_OPTIONS = [
 export const HEADER_SELECTABLE_LOCALE_CODES = ["de", "en"];
 
 /** Patient workspace UI — keep in sync with client PATIENT_UI_SELECTABLE_LOCALE_CODES */
-export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr"];
+export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es"];
 
 /** Practice workspace UI — keep in sync with client PRACTICE_UI_SELECTABLE_LOCALE_CODES */
-export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr"];
+export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es"];
 
 export const UI_FULLY_SUPPORTED_LOCALE_CODES = [
   ...new Set([

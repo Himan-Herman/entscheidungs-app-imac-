@@ -46,11 +46,11 @@ export const SUPPORTED_LANGUAGE_CODES = LOCALE_OPTIONS.map((o) => o.code);
 /** Header language picker: only these locales are selectable; others stay visible but disabled. */
 export const HEADER_SELECTABLE_LOCALE_CODES = ["de", "en"];
 
-/** Patient workspace: full UI in DE, EN, or FR. */
-export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr"];
+/** Patient workspace: full UI in DE, EN, FR, or ES. */
+export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es"];
 
-/** Practice workspace: full UI in DE, EN, or FR. */
-export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr"];
+/** Practice workspace: full UI in DE, EN, FR, or ES. */
+export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es"];
 
 export function isSupportedLanguage(code) {
   return typeof code === "string" && SUPPORTED_LANGUAGE_CODES.includes(code);

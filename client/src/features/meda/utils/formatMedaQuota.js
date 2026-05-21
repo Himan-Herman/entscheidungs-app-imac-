@@ -5,7 +5,13 @@
 export function formatMedaResetTime(resetAtMs, language) {
   if (!resetAtMs || !Number.isFinite(resetAtMs)) return null;
   const locale =
-    language === "en" ? "en-GB" : language === "fr" ? "fr-FR" : "de-DE";
+    language === "en"
+      ? "en-GB"
+      : language === "fr"
+        ? "fr-FR"
+        : language === "es"
+          ? "es-ES"
+          : "de-DE";
   return new Date(resetAtMs).toLocaleString(locale, {
     day: "numeric",
     month: "short",
