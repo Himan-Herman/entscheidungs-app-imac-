@@ -55,19 +55,35 @@
   outline-offset: 3px;
 }
 
-.meda-widget__fab-icon {
-  font-size: 1.35rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.04em;
+.meda-widget__fab-logo {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 6px;
+  object-fit: contain;
+  flex-shrink: 0;
+  transform-origin: center center;
+  animation: meda-fab-heartbeat 1.35s ease-in-out infinite;
+  will-change: transform;
 }
 
-.meda-widget__fab-heart {
-  position: absolute;
-  top: 0.35rem;
-  right: 0.4rem;
-  font-size: 0.55rem;
-  opacity: 0.85;
+/* Light double-pulse — resting heartbeat feel */
+@keyframes meda-fab-heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  12% {
+    transform: scale(1.07);
+  }
+  24% {
+    transform: scale(1);
+  }
+  36% {
+    transform: scale(1.05);
+  }
+  48% {
+    transform: scale(1);
+  }
 }
 
 /* Panel shell */
@@ -102,6 +118,9 @@
   }
   .meda-widget__fab {
     transition: none;
+  }
+  .meda-widget__fab-logo {
+    animation: none;
   }
 }
 

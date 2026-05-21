@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from "react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import medscoutLogo from "../../../assets/img/medscout-logo.png";
 import { useMedaChat } from "../hooks/useMedaChat.js";
 import MedaChatPanel from "./MedaChatPanel.jsx";
 import "../styles/MedaWidget.css";
@@ -45,12 +46,14 @@ export default function MedaWidget() {
         aria-expanded={chat.open}
         onClick={() => chat.setOpen((v) => !v)}
       >
-        <span className="meda-widget__fab-icon" aria-hidden="true">
-          M
-        </span>
-        <span className="meda-widget__fab-heart" aria-hidden="true">
-          ♥
-        </span>
+        <img
+          className="meda-widget__fab-logo"
+          src={medscoutLogo}
+          alt=""
+          width={28}
+          height={28}
+          aria-hidden
+        />
       </button>
     </div>
   );
