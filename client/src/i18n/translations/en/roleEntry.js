@@ -38,6 +38,13 @@ export default {
     sub: "Structured preparation and documentation — not a substitute for medical care.",
     classic: "Classic overview (all modules)",
   },
+  patientPracticeHub: {
+    pageTitle: "My practice — MedScoutX",
+    heading: "My practice",
+    sub: "Messages, appointments, documents, and everything about your connected practices.",
+    back: "Back to patient workspace",
+    navAria: "Practice features",
+  },
   practiceHub: {
     pageTitle: "Practice workspace — MedScoutX",
     heading: "Practice workspace",
@@ -45,6 +52,12 @@ export default {
   },
   hubLinkFindPractices: "Find medical practices worldwide",
   hubLinkFindPracticesSub: "Search practices and request a connection",
+  hubLinkMyPractice: "My practice",
+  hubLinkMyPracticeSub: "Messages, appointments, documents, and practice data",
+  hubLinkMyPracticeAria:
+    "Open My practice — messages, appointments, documents, and practice data",
+  hubLinkAppointments: "My appointments",
+  hubLinkAppointmentsSub: "Organizational appointments with your practices",
   hubLinkHealthProfile: "Health profile",
   hubLinkHealthProfileSub: "Basic details for preparation and records",
   hubLinkPreVisit: "Pre-Visit",

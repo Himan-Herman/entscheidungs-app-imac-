@@ -3,16 +3,11 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
-import { usePatientInterpreterHubVisible } from "../features/medicalInterpreter/hooks/useInterpreterHubVisibility.js";
 import PatientHubTiles from "./PatientHubTiles.jsx";
-import {
-  INTERPRETER_HUB_LINK,
-  PATIENT_MAIN_HUB_LINKS,
-  PATIENT_MY_PRACTICE_HUB_LINK,
-} from "./patientHubLinks.js";
+import { PATIENT_PRACTICE_HUB_LINKS } from "./patientHubLinks.js";
 import "../styles/WorkspaceHubPages.css";
 
-export default function PatientHubPage() {
+export default function PatientPracticeHubPage() {
   const { language } = useLanguage();
   const t = useMemo(() => {
     const m = getMessages(language);
@@ -23,8 +18,8 @@ export default function PatientHubPage() {
     () => getMessages(language).patientInbox || getMessages("en").patientInbox,
     [language],
   );
+
   const [inboxUnread, setInboxUnread] = useState(0);
-  const interpreterHub = usePatientInterpreterHubVisible();
 
   const loadInboxCount = useCallback(async () => {
     try {
@@ -36,37 +31,27 @@ export default function PatientHubPage() {
   }, []);
 
   useEffect(() => {
-    document.title = t.patientHub.pageTitle;
-  }, [t.patientHub.pageTitle]);
+    document.title = t.patientPracticeHub.pageTitle;
+  }, [t.patientPracticeHub.pageTitle]);
 
   useEffect(() => {
     void loadInboxCount();
   }, [loadInboxCount]);
 
-  const hubLinks = useMemo(() => {
-    const links = [PATIENT_MY_PRACTICE_HUB_LINK, ...PATIENT_MAIN_HUB_LINKS];
-    if (!interpreterHub.visible) return links;
-
-    const preVisitIndex = links.findIndex((l) => l.key === "hubLinkPreVisit");
-    const insertAt = preVisitIndex >= 0 ? preVisitIndex + 1 : 3;
-    links.splice(insertAt, 0, INTERPRETER_HUB_LINK);
-    return links;
-  }, [interpreterHub.visible]);
-
   return (
-    <div className="workspace-hub">
+    <div className="workspace-hub workspace-hub--practice">
       <header className="workspace-hub__hero">
-        <h1 className="workspace-hub__title">{t.patientHub.heading}</h1>
-        <p className="workspace-hub__sub">{t.patientHub.sub}</p>
-        <Link className="workspace-hub__classic" to="/startseite">
-          {t.patientHub.classic}
+        <Link className="workspace-hub__classic" to="/patient">
+          {t.patientPracticeHub.back}
         </Link>
+        <h1 className="workspace-hub__title">{t.patientPracticeHub.heading}</h1>
+        <p className="workspace-hub__sub">{t.patientPracticeHub.sub}</p>
       </header>
 
       <PatientHubTiles
-        links={hubLinks}
+        links={PATIENT_PRACTICE_HUB_LINKS}
         t={t}
-        navAriaLabel={t.patientHub.heading}
+        navAriaLabel={t.patientPracticeHub.navAria}
         inboxUnread={inboxUnread}
         inboxBadgeLabel={tInbox.badgeAria}
       />
