@@ -38,7 +38,7 @@ Rules:
 
 ${ALLOWED_COMMUNICATION_STYLE}`;
 
-function normalizeAnswers(input) {
+export function normalizeAnswers(input) {
   const src =
     input && typeof input === 'object' && !Array.isArray(input) ? input : {};
   const out = {};

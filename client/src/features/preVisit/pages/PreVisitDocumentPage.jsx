@@ -17,6 +17,7 @@ import {
   isAiDoctorVersionFresh,
   loadPreVisitSession,
   normalizeLongitudinalCase,
+  normalizeAssistantQuestions,
   savePreVisitSession,
   setCaseTimelineData,
   setLongitudinalCaseData,
@@ -34,6 +35,7 @@ import {
 } from "../pdf/generatePreVisitPdf.js";
 import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
+import AssistantQuestionsPanel from "../components/AssistantQuestionsPanel.jsx";
 import "../styles/PreVisitDocumentPage.css";
 
 export default function PreVisitDocumentPage() {
@@ -45,6 +47,16 @@ export default function PreVisitDocumentPage() {
     () => getMessages(language).preVisit.caseDetail,
     [language],
   );
+  const assistantLabels = useMemo(
+    () => t.assistantQuestions || {},
+    [t.assistantQuestions],
+  );
+
+  const assistantPreview = useMemo(
+    () => normalizeAssistantQuestions(session?.assistantQuestions),
+    [session?.assistantQuestions],
+  );
+
   const pdfLabelOverrides = useMemo(
     () => ({
       patientAddedNewInformationLabel: t.timelinePatientAddedNewInformation,
@@ -59,6 +71,10 @@ export default function PreVisitDocumentPage() {
       continuityRecurringConcernsLabel: tCaseDetail.continuityConcerns,
       longitudinalSessionsOverviewHeading: t.longitudinalPdfSessionsOverview,
       longitudinalRelatedReportsHeading: t.longitudinalPdfRelatedReports,
+      assistantQuestionsHeading: t.assistantQuestions?.pdfSectionHeading,
+      assistantQuestionPatientLabel: t.assistantQuestions?.pdfPatientQuestionLabel,
+      assistantQuestionDoctorLabel: t.assistantQuestions?.pdfDoctorQuestionLabel,
+      assistantAnswerPatientLabel: t.assistantQuestions?.pdfPatientAnswerLabel,
     }),
     [t, tCaseDetail],
   );
@@ -622,10 +638,29 @@ export default function PreVisitDocumentPage() {
       const caseLinkId =
         normalizeLongitudinalCase(latest.longitudinalCase)?.caseId || "";
 
+      const assistantItems = normalizeAssistantQuestions(
+        latest.assistantQuestions,
+      );
+      const answersWithAssistant =
+        assistantItems?.items?.length
+          ? {
+              ...answersForAccountWithTimeline,
+              assistantQuestionPrep: {
+                items: assistantItems.items.map((row) => ({
+                  id: row.id,
+                  patientQuestion: row.patientQuestion,
+                  doctorQuestion: row.doctorQuestion,
+                  patientAnswer: row.patientAnswer || "",
+                })),
+                safetyNotice: assistantItems.safetyNotice || "",
+              },
+            }
+          : answersForAccountWithTimeline;
+
       const payload = {
         patientLanguage: latest.patientLanguage || "de",
         doctorLanguage: dl || null,
-        answers: answersForAccountWithTimeline,
+        answers: answersWithAssistant,
         aiDoctorVersion: latest.aiDoctorVersion ?? null,
         aiSafetyNotice:
           typeof latest.aiSafetyNotice === "string" &&
@@ -774,6 +809,14 @@ export default function PreVisitDocumentPage() {
             {t.doctorLangHint}
           </p>
         </div>
+
+        <AssistantQuestionsPanel
+          session={session}
+          setSession={setSession}
+          patientLanguage={patientLang}
+          doctorLanguage={doctorLang}
+          labels={assistantLabels}
+        />
 
         <div className="pre-visit-doc__field pre-visit-doc__field--identity">
           <h2 className="pre-visit-doc__recipient-heading">{t.patientMetaSection}</h2>
@@ -1169,6 +1212,50 @@ export default function PreVisitDocumentPage() {
               })}
             </div>
           </section>
+
+          {assistantPreview?.items?.length ? (
+            <section
+              className="pre-visit-doc__section-block"
+              aria-labelledby="previsit-assistant-q-heading"
+            >
+              <h2
+                id="previsit-assistant-q-heading"
+                className="pre-visit-doc__section-heading"
+              >
+                {assistantLabels.previewSectionTitle ||
+                  assistantLabels.sectionTitle}
+              </h2>
+              <div className="pre-visit-doc__rows">
+                {assistantPreview.items.map((item, index) => {
+                  const answerEmpty = !String(item.patientAnswer || "").trim();
+                  return (
+                    <div key={item.id} className="pre-visit-doc__row">
+                      <p className="pre-visit-doc__row-label">
+                        {assistantLabels.questionCounter
+                          ?.replace("{{current}}", String(index + 1))
+                          .replace(
+                            "{{total}}",
+                            String(assistantPreview.items.length),
+                          )}{" "}
+                        — {item.patientQuestion}
+                      </p>
+                      <p className="pre-visit-doc__row-meta">
+                        {assistantLabels.doctorVersionLabel}:{" "}
+                        {item.doctorQuestion}
+                      </p>
+                      <p
+                        className={`pre-visit-doc__row-value ${
+                          answerEmpty ? "pre-visit-doc__row-value--empty" : ""
+                        }`}
+                      >
+                        {answerEmpty ? t.empty : item.patientAnswer}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
 
           <p className="pre-visit-doc__block-note">{t.disclaimer}</p>
         </div>

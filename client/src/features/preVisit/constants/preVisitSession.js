@@ -580,6 +580,124 @@ export function hydrateSessionFromArchiveItem(item) {
 }
 
 /**
+ * Fingerprint for assistant-questions cache (answers + languages + timeline topic).
+ */
+export function computeAssistantQuestionsFingerprint(session) {
+  const answers = session?.answers || {};
+  const empty = createEmptyAnswers();
+  const norm = {};
+  for (const k of Object.keys(empty)) {
+    norm[k] = answers[k] != null ? String(answers[k]) : "";
+  }
+  const ct = session?.caseTimeline || {};
+  return JSON.stringify({
+    patientLanguage: String(session?.patientLanguage || "de"),
+    doctorLanguage: String(
+      session?.doctorLanguage || session?.patientLanguage || "de"
+    ),
+    answers: norm,
+    caseTopic: String(ct.caseTopic || ""),
+    relatedSessionId: String(ct.relatedSessionId || ""),
+    longitudinalSnippet: String(
+      session?.longitudinalCase?.compactTimelineSnippet || ""
+    ).slice(0, 400),
+  });
+}
+
+export function normalizeAssistantQuestions(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const items = Array.isArray(raw.items) ? raw.items : [];
+  const normalized = [];
+  for (let i = 0; i < items.length; i++) {
+    const row = items[i];
+    if (!row || typeof row !== "object") continue;
+    const patientQuestion =
+      row.patientQuestion != null ? String(row.patientQuestion).trim() : "";
+    const doctorQuestion =
+      row.doctorQuestion != null ? String(row.doctorQuestion).trim() : "";
+    if (!patientQuestion || !doctorQuestion) continue;
+    normalized.push({
+      id:
+        row.id != null && String(row.id).trim()
+          ? String(row.id).trim()
+          : `q${i + 1}`,
+      patientQuestion,
+      doctorQuestion,
+      patientAnswer:
+        row.patientAnswer != null ? String(row.patientAnswer) : "",
+    });
+  }
+  if (normalized.length < 2) return null;
+  return {
+    items: normalized,
+    fingerprint:
+      raw.fingerprint != null ? String(raw.fingerprint) : "",
+    safetyNotice:
+      raw.safetyNotice != null ? String(raw.safetyNotice).trim() : "",
+  };
+}
+
+export function isAssistantQuestionsFresh(session) {
+  const aq = normalizeAssistantQuestions(session?.assistantQuestions);
+  if (!aq?.fingerprint) return false;
+  return aq.fingerprint === computeAssistantQuestionsFingerprint(session);
+}
+
+/**
+ * @param {{ questions: object[], safetyNotice?: string }} payload
+ */
+export function setAssistantQuestions(payload, sessionOverride) {
+  const base = sessionOverride || loadPreVisitSession();
+  if (!base) return null;
+  const items = Array.isArray(payload?.questions)
+    ? payload.questions.map((q, i) => ({
+        id: q?.id != null ? String(q.id) : `q${i + 1}`,
+        patientQuestion: String(q?.patientQuestion || "").trim(),
+        doctorQuestion: String(q?.doctorQuestion || "").trim(),
+        patientAnswer: "",
+      }))
+    : [];
+  const filtered = items.filter(
+    (q) => q.patientQuestion && q.doctorQuestion
+  );
+  if (filtered.length < 2) return null;
+  const next = {
+    ...base,
+    assistantQuestions: {
+      items: filtered.map((q) => {
+        const prev = base.assistantQuestions?.items?.find((p) => p.id === q.id);
+        return prev?.patientAnswer
+          ? { ...q, patientAnswer: prev.patientAnswer }
+          : q;
+      }),
+      fingerprint: computeAssistantQuestionsFingerprint(base),
+      safetyNotice:
+        payload?.safetyNotice != null
+          ? String(payload.safetyNotice).trim()
+          : "",
+    },
+  };
+  savePreVisitSession(next);
+  return next;
+}
+
+export function updateAssistantQuestionAnswer(id, answer) {
+  const base = loadPreVisitSession();
+  if (!base?.assistantQuestions?.items) return null;
+  const items = base.assistantQuestions.items.map((row) =>
+    row.id === id
+      ? { ...row, patientAnswer: answer != null ? String(answer) : "" }
+      : row
+  );
+  const next = {
+    ...base,
+    assistantQuestions: { ...base.assistantQuestions, items },
+  };
+  savePreVisitSession(next);
+  return next;
+}
+
+/**
  * Removes intake session and selected patient language.
  */
 export function clearFullSession() {

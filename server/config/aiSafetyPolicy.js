@@ -15,6 +15,8 @@ export const AI_MODULES = {
   PREVISIT_HISTORY_DIFF: "previsit_history_diff",
   PREVISIT_CASE_CONTINUITY: "previsit_case_continuity",
   PREVISIT_DOCTOR_TRANSFORM: "previsit_doctor_transform",
+  /** Bilingual assistant-style orientation questions (questions only, no answers) */
+  PREVISIT_ASSISTANT_QUESTIONS: "previsit_assistant_questions",
   /** Reserved for future AI-assisted follow-up message formatting */
   PREVISIT_FOLLOWUP_FORMAT: "previsit_followup_format",
   /**
@@ -219,6 +221,7 @@ export function getOutputSafetyPatterns(module) {
     case AI_MODULES.PREVISIT_HISTORY_DIFF:
     case AI_MODULES.PREVISIT_CASE_CONTINUITY:
     case AI_MODULES.PREVISIT_DOCTOR_TRANSFORM:
+    case AI_MODULES.PREVISIT_ASSISTANT_QUESTIONS:
       return [...base, ...SYMPTOM_EXTRA];
     case AI_MODULES.PREVISIT_FOLLOWUP_FORMAT:
       return [...base, ...SYMPTOM_EXTRA];
@@ -276,6 +279,10 @@ export const SAFE_FALLBACKS = {
   [AI_MODULES.PREVISIT_DOCTOR_TRANSFORM]: {
     de: "Ein Teil der Texte konnte nicht sicher übernommen werden und wurde gekürzt. Inhaltliche Fragen bitte direkt mit dem Behandlungsteam klären.",
     en: "Some text could not be safely retained and was shortened. Please clarify content questions directly with the care team.",
+  },
+  [AI_MODULES.PREVISIT_ASSISTANT_QUESTIONS]: {
+    de: "Die Orientierungsfragen konnten nicht sicher formuliert werden. Bitte ergänzen Sie Ihre Angaben in eigenen Worten.",
+    en: "The orientation questions could not be safely worded. Please add your notes in your own words.",
   },
   [AI_MODULES.PREVISIT_FOLLOWUP_FORMAT]: {
     de: "Der Text konnte nicht in einer sicheren Form ausgegeben werden. Bitte formulieren Sie neutral und klären Sie medizinische Fragen mit medizinischem Fachpersonal.",

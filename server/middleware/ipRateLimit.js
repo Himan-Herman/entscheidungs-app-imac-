@@ -75,6 +75,12 @@ export const previsitHistoryDiffLimiter = createIpRateLimiter({
   keyPrefix: 'previsit:history-diff',
 });
 
+/** POST /api/previsit/assistant-questions — bilingual orientation questions; 10 / 15 min / IP */
+export const previsitAssistantQuestionsLimiter = createIpRateLimiter({
+  max: 10,
+  keyPrefix: 'previsit:assistant-questions',
+});
+
 /** POST /api/previsit/cases/:caseId/continuity-summary — case continuity; 10 / 15 min / IP */
 export const previsitCaseContinuityLimiter = createIpRateLimiter({
   max: 10,

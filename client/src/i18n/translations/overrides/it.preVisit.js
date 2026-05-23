@@ -107,6 +107,33 @@ export default {
       relevantDocuments: "Documenti rilevanti",
       patientQuestions: "Domande per il medico",
     },
+    assistantQuestions: {
+      sectionTitle: "Domande di orientamento per la visita",
+      intro:
+        "In base alle tue indicazioni su sintomi, decorso e preparazione, l’IA propone alcune domande strutturanti — formulate come un’assistente medica, senza valutazione clinica.",
+      noAiAnswersNote:
+        "Vengono suggerite solo domande. Rispondi con parole tue; il medico legge le risposte nel PDF.",
+      generateButton: "Crea domande di orientamento",
+      generating: "Preparazione domande…",
+      successStatus:
+        "Le domande di orientamento sono state create dalle tue indicazioni.",
+      error:
+        "Le domande di orientamento non possono essere create ora. Puoi continuare o riprovare più tardi.",
+      staleHint:
+        "Le tue indicazioni sono cambiate. Rigenera le domande per allinearle allo stato attuale.",
+      emptyState:
+        "Nessuna domanda di orientamento ancora. Creale facoltativamente per preparare il colloquio.",
+      questionCounter: "Domanda {{current}} di {{total}}",
+      doctorVersionLabel: "Formulazione per il medico",
+      answerLabel: "La tua risposta (per il medico)",
+      answerPlaceholder:
+        "La tua risposta con parole tue — solo da te, non dall’IA…",
+      previewSectionTitle: "Domande di orientamento con le tue risposte",
+      pdfSectionHeading: "Domande di orientamento (risposte del paziente)",
+      pdfPatientQuestionLabel: "Domanda (paziente)",
+      pdfDoctorQuestionLabel: "Domanda (medico)",
+      pdfPatientAnswerLabel: "Risposta del paziente",
+    },
   },
   localHistory: {
     pageTitle: "Sessioni salvate — Pre-visita — MedScoutX",

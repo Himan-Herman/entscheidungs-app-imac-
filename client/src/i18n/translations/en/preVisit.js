@@ -233,6 +233,33 @@ export default {
       relevantDocuments: "Relevant documents",
       patientQuestions: "Questions for the doctor",
     },
+    assistantQuestions: {
+      sectionTitle: "Orientation questions for your visit",
+      intro:
+        "Based on your entries about symptoms, course and preparation, the AI suggests a few structuring questions — phrased like a medical assistant, without medical assessment.",
+      noAiAnswersNote:
+        "Only questions are suggested. You answer in your own words; the doctor reads these in the PDF.",
+      generateButton: "Create orientation questions",
+      generating: "Preparing questions …",
+      successStatus:
+        "Orientation questions were created from your entries.",
+      error:
+        "Orientation questions could not be created right now. You can continue or try again later.",
+      staleHint:
+        "Your entries have changed. Regenerate the questions so they match your current information.",
+      emptyState:
+        "No orientation questions yet. Create them optionally to prepare for the conversation.",
+      questionCounter: "Question {{current}} of {{total}}",
+      doctorVersionLabel: "Wording for the doctor",
+      answerLabel: "Your answer (for the doctor)",
+      answerPlaceholder:
+        "Your answer in your own words — from you only, not from the AI …",
+      previewSectionTitle: "Orientation questions with your answers",
+      pdfSectionHeading: "Orientation questions (patient answers)",
+      pdfPatientQuestionLabel: "Question (patient)",
+      pdfDoctorQuestionLabel: "Question (doctor)",
+      pdfPatientAnswerLabel: "Patient answer",
+    },
   },
   pdf: {
     legalNotice:
@@ -265,6 +292,10 @@ export default {
     longitudinalContinuitySubheading:
       "Continuity summary (patient statements only)",
     followUpHeading: "Documented follow-up questions",
+    assistantQuestionsHeading: "Orientation questions (patient answers)",
+    assistantQuestionPatientLabel: "Question (patient)",
+    assistantQuestionDoctorLabel: "Question (doctor)",
+    assistantAnswerPatientLabel: "Patient answer",
     followUpSenderPractice: "Practice",
     followUpSenderPatient: "Patient",
     followUpSenderSystem: "System",

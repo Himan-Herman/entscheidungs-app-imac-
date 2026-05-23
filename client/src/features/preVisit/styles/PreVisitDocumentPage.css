@@ -189,6 +189,13 @@
   color: var(--pvd-accent);
 }
 
+.pre-visit-doc__row-meta {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--pvd-subtle, #64748b);
+}
+
 .pre-visit-doc__row-value {
   margin: 0;
   font-size: 0.98rem;

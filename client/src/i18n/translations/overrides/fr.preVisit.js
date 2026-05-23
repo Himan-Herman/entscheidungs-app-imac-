@@ -117,6 +117,33 @@ export default {
       relevantDocuments: "Documents pertinents",
       patientQuestions: "Questions pour le médecin",
     },
+    assistantQuestions: {
+      sectionTitle: "Questions d’orientation pour la consultation",
+      intro:
+        "À partir de vos indications sur les symptômes, l’évolution et la préparation, l’IA propose quelques questions structurantes — formulées comme une assistante médicale, sans évaluation médicale.",
+      noAiAnswersNote:
+        "Seules des questions sont proposées. Vous répondez avec vos propres mots ; le médecin lit vos réponses dans le PDF.",
+      generateButton: "Créer les questions d’orientation",
+      generating: "Préparation des questions…",
+      successStatus:
+        "Les questions d’orientation ont été créées à partir de vos indications.",
+      error:
+        "Les questions d’orientation n’ont pas pu être créées pour le moment. Vous pouvez continuer ou réessayer plus tard.",
+      staleHint:
+        "Vos indications ont changé. Recréez les questions pour qu’elles correspondent à l’état actuel.",
+      emptyState:
+        "Pas encore de questions d’orientation. Créez-les en option pour préparer la consultation.",
+      questionCounter: "Question {{current}} sur {{total}}",
+      doctorVersionLabel: "Formulation pour le médecin",
+      answerLabel: "Votre réponse (pour le médecin)",
+      answerPlaceholder:
+        "Votre réponse avec vos propres mots — de vous seulement, pas de l’IA…",
+      previewSectionTitle: "Questions d’orientation avec vos réponses",
+      pdfSectionHeading: "Questions d’orientation (réponses du patient)",
+      pdfPatientQuestionLabel: "Question (patient)",
+      pdfDoctorQuestionLabel: "Question (médecin)",
+      pdfPatientAnswerLabel: "Réponse du patient",
+    },
   },
   localHistory: {
     pageTitle: "Sessions enregistrées — Pré-consultation — MedScoutX",

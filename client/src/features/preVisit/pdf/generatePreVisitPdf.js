@@ -109,6 +109,12 @@ function legacyDefaultLabels(isEnglishUi) {
       ? "Continuity summary (patient statements only)"
       : "Kontinuitätszusammenfassung (nur Patientenangaben)",
     followUpHeading: en ? "Documented follow-up questions" : "Dokumentierte Rückfragen",
+    assistantQuestionsHeading: en
+      ? "Assistant orientation questions (patient answers)"
+      : "Orientierungsfragen (Patientenantworten)",
+    assistantQuestionPatientLabel: en ? "Question (patient)" : "Frage (Patient)",
+    assistantQuestionDoctorLabel: en ? "Question (doctor)" : "Frage (Arzt)",
+    assistantAnswerPatientLabel: en ? "Patient answer" : "Patientenantwort",
     followUpSenderPractice: en ? "Practice" : "Praxis",
     followUpSenderPatient: en ? "Patient" : "Patient",
     followUpSenderSystem: en ? "System" : "System",
@@ -574,6 +580,60 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     const raw = answers[step.key] ?? "";
     const title = pickLocalized(step.title, patientLang);
     writeFieldBlock(`${title}`, raw, L.empty);
+  }
+
+  const assistantItems = Array.isArray(session?.assistantQuestions?.items)
+    ? session.assistantQuestions.items.filter(
+        (row) =>
+          row &&
+          typeof row === "object" &&
+          String(row.patientQuestion || "").trim() &&
+          String(row.doctorQuestion || "").trim()
+      )
+    : [];
+  if (assistantItems.length >= 2) {
+    gap(4);
+    writeSectionHeading(
+      L.assistantQuestionsHeading ||
+        "Assistant orientation questions (patient answers)"
+    );
+    assistantItems.forEach((item, index) => {
+      const n = index + 1;
+      const patientQ = String(item.patientQuestion || "").trim();
+      const doctorQ = String(item.doctorQuestion || "").trim();
+      const patientA = String(item.patientAnswer || "").trim();
+      writeFieldBlock(
+        `${L.assistantQuestionPatientLabel || "Question (patient)"} ${n}`,
+        patientQ,
+        L.empty
+      );
+      writeFieldBlock(
+        `${L.assistantQuestionDoctorLabel || "Question (doctor)"} ${n}`,
+        doctorQ,
+        L.empty
+      );
+      writeFieldBlock(
+        `${L.assistantAnswerPatientLabel || "Patient answer"} ${n}`,
+        patientA,
+        L.empty
+      );
+    });
+    if (session.assistantQuestions?.safetyNotice?.trim()) {
+      gap(2);
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(metaSize);
+      doc.setTextColor(...COL.slateMuted);
+      const notice = session.assistantQuestions.safetyNotice.trim();
+      const lines = doc.splitTextToSize(notice, contentW);
+      const lh = lineHeightMm(metaSize);
+      for (const ln of lines) {
+        needSpace(lh + 1);
+        doc.text(ln, margin, y);
+        y += lh;
+      }
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...COL.slate);
+    }
   }
 
   if (

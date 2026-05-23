@@ -235,6 +235,33 @@ export default {
       relevantDocuments: "Relevante Dokumente",
       patientQuestions: "Fragen an den Arzt",
     },
+    assistantQuestions: {
+      sectionTitle: "Orientierungsfragen für das Gespräch",
+      intro:
+        "Auf Basis Ihrer Angaben zu Beschwerden, Verlauf und Vorbereitung schlägt die KI einige strukturierende Fragen vor — formuliert wie eine medizinische Assistenz, ohne medizinische Bewertung.",
+      noAiAnswersNote:
+        "Es werden nur Fragen vorgeschlagen. Antworten geben Sie selbst in eigenen Worten; der Arzt liest diese im PDF.",
+      generateButton: "Orientierungsfragen erstellen",
+      generating: "Fragen werden vorbereitet …",
+      successStatus:
+        "Die Orientierungsfragen wurden auf Basis Ihrer Angaben erstellt.",
+      error:
+        "Die Orientierungsfragen konnten gerade nicht erstellt werden. Sie können fortfahren oder es später erneut versuchen.",
+      staleHint:
+        "Ihre Angaben haben sich geändert. Erstellen Sie die Fragen erneut, damit sie zum aktuellen Stand passen.",
+      emptyState:
+        "Noch keine Orientierungsfragen. Erstellen Sie sie optional, um sich auf das Gespräch vorzubereiten.",
+      questionCounter: "Frage {{current}} von {{total}}",
+      doctorVersionLabel: "Formulierung für den Arzt",
+      answerLabel: "Ihre Antwort (für den Arzt)",
+      answerPlaceholder:
+        "Ihre Antwort in eigenen Worten — nur von Ihnen, nicht von der KI …",
+      previewSectionTitle: "Orientierungsfragen mit Ihren Antworten",
+      pdfSectionHeading: "Orientierungsfragen (Patientenantworten)",
+      pdfPatientQuestionLabel: "Frage (Patient)",
+      pdfDoctorQuestionLabel: "Frage (Arzt)",
+      pdfPatientAnswerLabel: "Patientenantwort",
+    },
   },
   pdf: {
     legalNotice:
@@ -268,6 +295,10 @@ export default {
     longitudinalContinuitySubheading:
       "Kontinuitätszusammenfassung (nur Patientenangaben)",
     followUpHeading: "Dokumentierte Rückfragen",
+    assistantQuestionsHeading: "Orientierungsfragen (Patientenantworten)",
+    assistantQuestionPatientLabel: "Frage (Patient)",
+    assistantQuestionDoctorLabel: "Frage (Arzt)",
+    assistantAnswerPatientLabel: "Patientenantwort",
     followUpSenderPractice: "Praxis",
     followUpSenderPatient: "Patient",
     followUpSenderSystem: "System",
