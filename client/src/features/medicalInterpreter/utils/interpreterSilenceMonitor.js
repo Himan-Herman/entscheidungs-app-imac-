@@ -11,6 +11,7 @@ const DEFAULT_MIN_SPEECH_MS = 500;
  * @param {{
  *   silenceMs: number;
  *   onSilence: () => void;
+ *   onPhaseChange?: (phase: 'listening' | 'silence_waiting') => void;
  *   minSpeechMs?: number;
  *   silenceRms?: number;
  *   checkIntervalMs?: number;
@@ -21,6 +22,7 @@ export function startInterpreterSilenceMonitor(stream, options) {
   const {
     silenceMs,
     onSilence,
+    onPhaseChange,
     minSpeechMs = DEFAULT_MIN_SPEECH_MS,
     silenceRms = DEFAULT_SILENCE_RMS,
     checkIntervalMs = DEFAULT_CHECK_INTERVAL_MS,
@@ -77,6 +79,9 @@ export function startInterpreterSilenceMonitor(stream, options) {
           heardSpeech = true;
           speechStartedAt = now;
         }
+        if (silenceStartedAt) {
+          onPhaseChange?.("listening");
+        }
         silenceStartedAt = 0;
         return;
       }
@@ -87,6 +92,7 @@ export function startInterpreterSilenceMonitor(stream, options) {
 
       if (!silenceStartedAt) {
         silenceStartedAt = now;
+        onPhaseChange?.("silence_waiting");
         return;
       }
 

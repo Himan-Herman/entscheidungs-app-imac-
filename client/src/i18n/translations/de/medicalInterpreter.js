@@ -4,9 +4,9 @@
  */
 export default {
   hub: {
-    title: "Arztgespräch übersetzen",
-    subtitle: "Live-Übersetzung für Patient:innen und Praxen",
-    cta: "Gespräch starten",
+    title: "Arztgespräch live übersetzen",
+    subtitle: "Live-Übersetzung zwischen Patient:in und Arzt/Praxis",
+    cta: "Dolmetscher starten",
     newConversation: "Neues Gespräch starten",
     trustLine:
       "Nur Kommunikationshilfe — keine Diagnose und keine Behandlungsempfehlung.",
@@ -35,10 +35,10 @@ export default {
   },
 
   start: {
-    pageTitle: "MedScoutX — Gespräch vorbereiten",
-    heading: "Arztgespräch übersetzen",
+    pageTitle: "MedScoutX — Dolmetscher einrichten",
+    heading: "Arztgespräch live übersetzen",
     intro:
-      "Bereiten Sie ein mehrsprachiges Gespräch mit Ihrem Behandlungsteam vor. Die Einrichtung dauert nur wenige Schritte.",
+      "Richten Sie eine Live-Übersetzung zwischen Ihnen und Ihrer Arztpraxis ein.",
     stepOf: "Schritt {{current}} von {{total}}",
     back: "Zurück",
     next: "Weiter",
@@ -67,11 +67,20 @@ export default {
 
   profile: {
     heading: "Profil für dieses Gespräch",
+    patientHeading: "Pflichtangaben zur Patient:in",
+    patientNameLabel: "Name der Patient:in *",
+    patientNamePlaceholder: "Name der Patient:in eingeben",
+    patientNameHint:
+      "Dieser Name erscheint in der Gesprächsdokumentation und im PDF.",
+    patientNameLockedHint:
+      "Mit Ihrer ausdrücklichen Zustimmung wird der gespeicherte Profilname für dieses Gespräch verwendet.",
+    patientNameRequired:
+      "Bitte geben Sie den Namen der Patient:in ein oder verwenden Sie den gespeicherten Profilnamen.",
     intro:
-      "Optional: Daten aus Ihrem Konto für dieses Gespräch verwenden (z. B. für eine spätere Dokumentation).",
-    consentLabel: "Gespeicherte Profildaten für dieses Gespräch verwenden",
+      "Optional: Verwenden Sie mit Ihrer Zustimmung den gespeicherten Kontonamen und weitere Profildaten für die Gesprächsdokumentation.",
+    consentLabel: "Gespeicherten Profilnamen für dieses Gespräch verwenden: {{name}}",
     consentHint:
-      "Name, Geburtsdatum und Kontakt — nur wenn Sie zustimmen. Keine Gesundheitsdaten aus dem Gesundheitsprofil.",
+      "Mit Ihrer Zustimmung können Name und optionale Kontaktdaten in das Gesprächs-PDF übernommen werden. Gesundheitsprofildaten werden nicht verwendet.",
     accountLink: "In den Kontoeinstellungen bearbeiten",
     loadError:
       "Profil konnte nicht geladen werden. Sie können ohne Profildaten fortfahren.",
@@ -88,8 +97,6 @@ export default {
     doctorNamePlaceholder: "z. B. Dr. Schmidt",
     practiceName: "Praxis oder Klinik",
     practiceNamePlaceholder: "Name der Einrichtung",
-    specialty: "Fachrichtung",
-    specialtyPlaceholder: "z. B. Allgemeinmedizin",
     appointmentDate: "Termin (Datum)",
     conversationTitle: "Titel für dieses Gespräch",
     conversationTitlePlaceholder: "z. B. Kontrolltermin",
@@ -133,7 +140,7 @@ export default {
   conversation: {
     heading: "Gesprächsverlauf",
     intro:
-      "Sprechen Sie einfach — nach 3 Sekunden Stille wird erkannt, übersetzt, mündlich wiedergegeben und danach wieder zugehört.",
+      "Sprechen Sie natürlich. Nach etwa 2 Sekunden Stille wird der Beitrag abgeschlossen, übersetzt, vorgelesen und danach kann die nächste Person sprechen.",
     listening: "Hört zu — sprechen Sie jetzt",
     waiting: "Warten auf die erste Äußerung …",
     patientLabel: "Patient:in",
@@ -402,13 +409,13 @@ export default {
   },
 
   pdf: {
-    documentTitle: "Medizin-Dolmetscher — Gesprächsdokumentation",
+    documentTitle: "Medical Interpreter / Arztgespräch-Übersetzung",
     documentSubtitle:
-      "Zusammenfassung zur Kommunikationsunterstützung · übersetztes Gesprächsprotokoll",
+      "Gesprächsdokumentation · übersetztes Gesprächsprotokoll · Kommunikationsnachweis",
     legalParagraph1:
-      "Dieses Dokument unterstützt nur die Kommunikation. Es ist kein medizinischer Datensatz, kein Diagnosebericht, keine klinische Bewertung und keine Behandlungszusammenfassung.",
+      "Diese Dokumentation unterstützt nur die Kommunikation. Sie ist keine Diagnose, keine Dringlichkeitseinschätzung und keine Behandlungsempfehlung.",
     legalParagraph2:
-      "Es enthält keine Diagnose, keine Dringlichkeitseinschätzung und keine Behandlungsempfehlungen.",
+      "Sie enthält keine medizinische Interpretation, keine Medikamentenempfehlung und keine Facharzt-Empfehlung.",
     legalParagraph3:
       "Automatische Spracherkennung und Übersetzung können ungenau oder unvollständig sein.",
     sessionTitleLabel: "Titel des Gesprächs",
@@ -417,7 +424,7 @@ export default {
     patientEmailLabel: "E-Mail",
     patientPhoneLabel: "Telefon",
     generatedNote:
-      "Lokal auf diesem Gerät erstellt · MedScoutX Medizin-Dolmetscher",
+      "Erstellt von MedScoutX · nur Kommunikationsunterstützung · automatische Transkription/Übersetzung kann Fehler enthalten",
     footerPage: "Seite",
     filenamePrefix: "medscoutx-dolmetscher",
     exportLoading: "PDF wird erstellt …",
@@ -457,6 +464,49 @@ export default {
     turnBlocked: "Übersetzung nicht verfügbar (Sicherheit)",
     turnError: "Dieser Beitrag konnte nicht abgeschlossen werden",
     backToList: "Alle Gespräche",
+  },
+
+  liveSession: {
+    subtitle: "Live-Übersetzung zwischen Patient:in und Arzt/Praxis",
+    languagePairLabel: "Aktives Sprachenpaar",
+    sessionDetails: "Gesprächsdetails",
+    statusLabel: "Status:",
+    statusIdle: "Bereit, das Live-Gespräch zu starten",
+    statusListening: "Hört gerade zu",
+    statusSilenceWaiting: "Kurze Pause erkannt — wird gleich abgeschlossen",
+    statusTranscribing: "Aktueller Beitrag wird transkribiert",
+    statusTranslating: "Aktueller Beitrag wird übersetzt",
+    statusSpeaking: "Übersetzung wird laut vorgelesen",
+    statusPaused: "Gespräch pausiert",
+    statusEnded: "Gespräch beendet",
+    statusError: "Ein Fehler braucht Ihre Aufmerksamkeit",
+    processingHint:
+      "Es wird nur übersetzt, was gesagt wurde. Es werden keine Diagnosen oder medizinischen Ratschläge ergänzt.",
+    voiceProfileBadge: "Professionelle neutrale Dolmetsch-Stimme",
+    speakerHeading: "Wer spricht jetzt?",
+    startButton: "Live-Gespräch starten",
+    pauseButton: "Pausieren",
+    resumeButton: "Fortsetzen",
+    playbackHeading: "Sprachausgabe",
+    playbackNote:
+      "Im Live-Modus wird jede abgeschlossene Übersetzung automatisch vorgelesen, um das Gespräch zu unterstützen.",
+    speedHeading: "Sprechtempo",
+    speedNormal: "Normal",
+    speedSlow: "Langsam",
+    replayButton: "Letzte Übersetzung erneut abspielen",
+    stopPlaybackButton: "Wiedergabe stoppen",
+    originalLabel: "Original",
+    translationForDoctor: "Übersetzung für Arzt/Praxis",
+    translationForPatient: "Übersetzung für Patient:in",
+    pendingTranslation:
+      "Die Übersetzung erscheint, sobald dieser Beitrag verarbeitet wurde.",
+    noConversationYet:
+      "Noch keine dokumentierten Beiträge. Starten Sie das Gespräch und sprechen Sie dann.",
+    noSpeechDetected:
+      "In diesem Beitrag wurde keine Sprache erkannt. Bitte erneut versuchen.",
+    noTranscriptResult:
+      "Für diesen Beitrag wurde kein Text erkannt. Bitte erneut versuchen.",
+    readyForNextSpeaker: "Bereit für die nächste sprechende Person.",
   },
 
   confirm: {

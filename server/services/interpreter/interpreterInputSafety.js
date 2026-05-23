@@ -387,10 +387,11 @@ export function validateInterpreterSimplifyInput(body) {
   return { ok: true, text: rawText, language, speaker };
 }
 
-const ALLOWED_VOICE_PREFERENCES = new Set(["neutral"]);
+const ALLOWED_VOICE_PREFERENCES = new Set(["neutral", "neutral_medical"]);
+const ALLOWED_VOICE_SPEEDS = new Set(["normal", "slow"]);
 
 /**
- * @param {{ text?: string, language?: string, voicePreference?: string }} body
+ * @param {{ text?: string, language?: string, voicePreference?: string, voiceSpeed?: string }} body
  */
 export function validateInterpreterSpeakInput(body) {
   const bodyCheck = assertInterpreterJsonBody(body);
@@ -437,12 +438,25 @@ export function validateInterpreterSpeakInput(body) {
     voicePreference = v;
   }
 
-  return { ok: true, text: rawText, language, voicePreference };
+  let voiceSpeed;
+  if (body?.voiceSpeed != null && String(body.voiceSpeed).trim()) {
+    const speed = String(body.voiceSpeed).trim().toLowerCase();
+    if (!ALLOWED_VOICE_SPEEDS.has(speed)) {
+      return {
+        ok: false,
+        code: "validation_unsupported_speed",
+        message: "Unsupported voice speed.",
+      };
+    }
+    voiceSpeed = speed;
+  }
+
+  return { ok: true, text: rawText, language, voicePreference, voiceSpeed };
 }
 
 /**
  * Stream / near-realtime TTS — smaller max length, no persistence.
- * @param {{ text?: string, language?: string, voicePreference?: string }} body
+ * @param {{ text?: string, language?: string, voicePreference?: string, voiceSpeed?: string }} body
  */
 export function validateInterpreterStreamSpeakInput(body) {
   const bodyCheck = assertInterpreterJsonBody(body);
@@ -489,7 +503,20 @@ export function validateInterpreterStreamSpeakInput(body) {
     voicePreference = v;
   }
 
-  return { ok: true, text: rawText, language, voicePreference };
+  let voiceSpeed;
+  if (body?.voiceSpeed != null && String(body.voiceSpeed).trim()) {
+    const speed = String(body.voiceSpeed).trim().toLowerCase();
+    if (!ALLOWED_VOICE_SPEEDS.has(speed)) {
+      return {
+        ok: false,
+        code: "validation_unsupported_speed",
+        message: "Unsupported voice speed.",
+      };
+    }
+    voiceSpeed = speed;
+  }
+
+  return { ok: true, text: rawText, language, voicePreference, voiceSpeed };
 }
 
 /**

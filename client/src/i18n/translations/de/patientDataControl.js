@@ -5,7 +5,7 @@ export default {
     "Zentrale Übersicht Ihrer Praxisverbindungen, Freigaben und Datenanfragen. Sie behalten die Kontrolle — ohne automatische Löschung medizinischer Unterlagen.",
   privacyNotice:
     "MedScoutX ersetzt keine Rechtsberatung. Löschanfragen werden dokumentiert; gesetzliche Aufbewahrungspflichten können eine sofortige Vollständiglöschung verhindern.",
-  backHub: "Zurück zum Patientenbereich",
+  backHub: "Zurück zu Meine Praxis",
   openActivity: "Aktivitätsprotokoll öffnen",
   openConsents: "Zustimmungen verwalten",
   loading: "Wird geladen …",

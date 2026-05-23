@@ -57,8 +57,8 @@ export default function InterpreterHomePage() {
   }, []);
 
   useEffect(() => {
-    document.title = t.start.pageTitle;
-  }, [t.start.pageTitle]);
+    document.title = `${t.hub.title} | MedScoutX`;
+  }, [t.hub.title]);
 
   const handleClearAllConfirm = () => {
     clearAllInterpreterSessions();
@@ -78,8 +78,8 @@ export default function InterpreterHomePage() {
         {t.chrome.backToHub}
       </Link>
 
-      <h1 className="medical-interpreter-page__title">{t.start.heading}</h1>
-      <p className="medical-interpreter-page__intro">{t.start.intro}</p>
+      <h1 className="medical-interpreter-page__title">{t.hub.title}</h1>
+      <p className="medical-interpreter-page__intro">{t.hub.subtitle}</p>
 
       <p className="medical-interpreter-safety" role="note">
         {t.safety.strip}

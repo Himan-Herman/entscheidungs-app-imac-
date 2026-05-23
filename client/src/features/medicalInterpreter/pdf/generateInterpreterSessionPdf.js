@@ -11,6 +11,7 @@ import {
   TURN_STATUS_BLOCKED,
   TURN_STATUS_DRAFT,
   TURN_STATUS_ERROR,
+  TURN_STATUS_SPOKEN,
   TURN_STATUS_TRANSLATED,
   SPEAKER_DOCTOR,
 } from "../constants.js";
@@ -24,7 +25,6 @@ import {
   groupTurnsIntoSections,
   sectionLabelForKind,
 } from "../utils/sessionTurnSections.js";
-import { getTurnReviewNotes } from "../utils/interpreterTranslationQuality.js";
 import { isRtlLanguage } from "../../../i18n/localeConfig.js";
 import {
   hasMixedScriptText,
@@ -84,6 +84,7 @@ function sanitizePdfText(v) {
 }
 
 function getPatientDisplayName(session) {
+  if (session?.patientName?.trim()) return session.patientName.trim();
   const profile = session?.profileSnapshot;
   if (!profile) return null;
   const name = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
@@ -376,7 +377,6 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
       const colW = (contentW - gap) / 2;
       const leftX = margin;
       const rightX = margin + colW + gap;
-      const startY = y;
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(noticeSize);
@@ -468,12 +468,13 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
       : "";
 
     if (
-      turn.status === TURN_STATUS_TRANSLATED &&
+      (turn.status === TURN_STATUS_TRANSLATED ||
+        turn.status === TURN_STATUS_SPOKEN) &&
       turn.translatedText?.trim()
     ) {
       drawSideBySideTurn(
         L.review.originalLabel,
-        turn.originalText,
+        turn.originalTranscript || turn.originalText,
         L.review.translatedLabel,
         turn.translatedText,
         turn.sourceLanguage,
@@ -481,7 +482,12 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
         turnTime,
       );
     } else {
-      drawTurnField(L.review.originalLabel, turn.originalText, undefined, turn.sourceLanguage);
+      drawTurnField(
+        L.review.originalLabel,
+        turn.originalTranscript || turn.originalText,
+        undefined,
+        turn.sourceLanguage,
+      );
       if (turnTime) {
         drawTurnField("", turnTime);
       }

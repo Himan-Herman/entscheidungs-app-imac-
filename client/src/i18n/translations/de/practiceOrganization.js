@@ -70,6 +70,8 @@ export default {
     "Die KI unterstützt nur organisatorisch, z. B. bei Sprache, Terminart oder Zuständigkeit. Sie trifft keine medizinische Entscheidung.",
   assignmentHistory: "Verlauf der Zuständigkeit",
   saveAssignment: "Zuordnung speichern",
+  assignmentSaved: "Zuordnung gespeichert.",
+  saveError: "Speichern fehlgeschlagen.",
   selectTeamMember: "Teammitglied wählen",
   noDoctorsVisible: "Keine Ärzt:innen für die Auswahl freigegeben.",
 };

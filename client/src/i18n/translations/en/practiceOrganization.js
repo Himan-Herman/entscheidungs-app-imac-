@@ -70,6 +70,8 @@ export default {
     "AI only supports organizational tasks, such as language, appointment type, or responsibility. It does not make medical decisions.",
   assignmentHistory: "Assignment history",
   saveAssignment: "Save assignment",
+  assignmentSaved: "Assignment saved.",
+  saveError: "Could not save.",
   selectTeamMember: "Select team member",
   noDoctorsVisible: "No doctors available for selection.",
 };

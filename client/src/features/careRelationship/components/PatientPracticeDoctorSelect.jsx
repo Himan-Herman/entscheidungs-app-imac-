@@ -44,9 +44,9 @@ export default function PatientPracticeDoctorSelect({ practiceId, currentDoctorU
         mode === "doctor" && doctorId ? doctorId : null,
       );
       onUpdated?.();
-      setMsg("OK");
+      setMsg(t.assignmentSaved);
     } catch (e) {
-      setMsg(e.message);
+      setMsg(e.message === "SESSION_EXPIRED" ? "" : t.saveError || e.message);
     } finally {
       setBusy(false);
     }
@@ -94,7 +94,12 @@ export default function PatientPracticeDoctorSelect({ practiceId, currentDoctorU
           </select>
         </label>
       ) : null}
-      <button type="button" className="pp-btn pp-btn-primary" disabled={busy} onClick={save}>
+      <button
+        type="button"
+        className="patient-threads__btn patient-threads__btn--secondary"
+        disabled={busy}
+        onClick={save}
+      >
         {t.saveAssignment}
       </button>
       {msg ? (

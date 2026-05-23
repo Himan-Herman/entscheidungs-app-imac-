@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import DataDeletionRequestDialog from "../components/DataDeletionRequestDialog.jsx";
@@ -17,6 +17,7 @@ import {
   postPatientDataRequestAiSummary,
 } from "../api/patientDataControlApi.js";
 import "../../../styles/PatientInboxPage.css";
+import "../../../styles/PatientThreadsPage.css";
 import "../../../styles/PatientDataControlPage.css";
 
 function statusLabel(status, t) {
@@ -71,6 +72,8 @@ function hasOpenType(link, type) {
 
 export default function PatientDataControlPage() {
   const { language } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const focusLinkId = searchParams.get("linkId")?.trim() || "";
   const t = useMemo(
     () =>
       getMessages(language).patientDataControl ||
@@ -138,6 +141,14 @@ export default function PatientDataControlPage() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    if (!focusLinkId || loading || error) return;
+    const el = document.getElementById(`data-control-link-${focusLinkId}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    el.focus({ preventScroll: true });
+  }, [focusLinkId, loading, error, practices]);
 
   async function grantProfile(link) {
     setBusyId(link.id);
@@ -330,7 +341,7 @@ export default function PatientDataControlPage() {
 
   return (
     <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient">
+      <Link className="patient-inbox__back" to="/patient/practice">
         {t.backHub}
       </Link>
       <header className="patient-inbox__header">
@@ -364,42 +375,46 @@ export default function PatientDataControlPage() {
         </p>
       ) : null}
 
-      {!loading && !error && requests.length > 0 ? (
+      {!loading && !error ? (
         <section className="patient-data-control__requests-panel" aria-labelledby="data-requests-heading">
           <h2 id="data-requests-heading" className="patient-inbox__item-title">
             {t.requestsSectionTitle}
           </h2>
           <p className="patient-inbox__muted">{t.requestsSectionIntro}</p>
-          <ul className="patient-inbox__list">
-            {requests.map((req) => (
-              <li key={req.id} className="patient-inbox__item" style={{ padding: "0.75rem 1rem" }}>
-                <p className="patient-inbox__item-title">
-                  {req.practice?.practiceName || "—"} — {requestTypeLabel(req.type, t)}
-                </p>
-                <p className="patient-inbox__item-meta">
-                  {requestStatusLabel(req.status, t)} · {fmtActivity(req.createdAt, language)}
-                </p>
-                <button
-                  type="button"
-                  className="patient-threads__btn patient-threads__btn--secondary"
-                  style={{ marginTop: "0.5rem" }}
-                  disabled={aiSummaryBusy && aiSummaryId === req.id}
-                  onClick={() => explainRequest(req.id)}
-                >
-                  {aiSummaryBusy && aiSummaryId === req.id ? t.aiSummaryLoading : t.aiSummaryButton}
-                </button>
-                {aiSummaryId === req.id && aiSummaryText ? (
-                  <aside className="patient-data-control__ai-box" aria-labelledby={`ai-sum-${req.id}`}>
-                    <h3 id={`ai-sum-${req.id}`} className="patient-inbox__item-meta" style={{ fontWeight: 600 }}>
-                      {t.aiSummaryHeading}
-                    </h3>
-                    <p className="patient-data-control__ai-hint">{t.aiHint}</p>
-                    <p style={{ whiteSpace: "pre-wrap", margin: "0.35rem 0 0" }}>{aiSummaryText}</p>
-                  </aside>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+          {requests.length > 0 ? (
+            <ul className="patient-inbox__list">
+              {requests.map((req) => (
+                <li key={req.id} className="patient-inbox__item" style={{ padding: "0.75rem 1rem" }}>
+                  <p className="patient-inbox__item-title">
+                    {req.practice?.practiceName || "—"} — {requestTypeLabel(req.type, t)}
+                  </p>
+                  <p className="patient-inbox__item-meta">
+                    {requestStatusLabel(req.status, t)} · {fmtActivity(req.createdAt, language)}
+                  </p>
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    style={{ marginTop: "0.5rem" }}
+                    disabled={aiSummaryBusy && aiSummaryId === req.id}
+                    onClick={() => explainRequest(req.id)}
+                  >
+                    {aiSummaryBusy && aiSummaryId === req.id ? t.aiSummaryLoading : t.aiSummaryButton}
+                  </button>
+                  {aiSummaryId === req.id && aiSummaryText ? (
+                    <aside className="patient-data-control__ai-box" aria-labelledby={`ai-sum-${req.id}`}>
+                      <h3 id={`ai-sum-${req.id}`} className="patient-inbox__item-meta" style={{ fontWeight: 600 }}>
+                        {t.aiSummaryHeading}
+                      </h3>
+                      <p className="patient-data-control__ai-hint">{t.aiHint}</p>
+                      <p style={{ whiteSpace: "pre-wrap", margin: "0.35rem 0 0" }}>{aiSummaryText}</p>
+                    </aside>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="patient-inbox__muted">{t.requestsEmpty}</p>
+          )}
         </section>
       ) : null}
 
@@ -419,7 +434,12 @@ export default function PatientDataControlPage() {
             const pendingExport = hasOpenType(link, "export");
 
             return (
-              <li key={link.id} className="patient-inbox__item patient-data-control__card">
+              <li
+                key={link.id}
+                id={`data-control-link-${link.id}`}
+                className="patient-inbox__item patient-data-control__card"
+                tabIndex={focusLinkId === link.id ? -1 : undefined}
+              >
                 <p className="patient-inbox__item-title">{practiceName}</p>
                 <p className="patient-inbox__item-meta">{st}</p>
                 {link.linkedAt ? (
@@ -465,7 +485,7 @@ export default function PatientDataControlPage() {
                   <PatientPracticeDoctorSelect
                     practiceId={link.practice.id}
                     currentDoctorUserId={link.assignment?.patientSelectedDoctorUserId}
-                    onUpdated={loadAll}
+                    onUpdated={load}
                   />
                 ) : null}
 

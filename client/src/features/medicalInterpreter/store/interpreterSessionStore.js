@@ -21,6 +21,7 @@ import {
   SPEAKER_DOCTOR,
   SPEAKER_PATIENT,
   TURN_STATUS_DRAFT,
+  TURN_STATUS_TRANSCRIBED,
 } from "../constants.js";
 import {
   stripForbiddenPersistedFields,
@@ -47,7 +48,9 @@ const SESSION_STATUSES = new Set([
 const TURN_STATUSES = new Set([
   "draft",
   "confirmed",
+  "transcribed",
   "translated",
+  "spoken",
   "blocked",
   "error",
 ]);
@@ -68,6 +71,16 @@ function storageKey() {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function buildProfileDisplayName(profileSnapshot) {
+  if (!profileSnapshot) return undefined;
+  const name = [profileSnapshot.firstName, profileSnapshot.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim()
+    .slice(0, 160);
+  return name || undefined;
 }
 
 export function generateSessionId() {
@@ -217,6 +230,10 @@ export function normalizeSession(raw) {
     status,
     patientLanguage,
     doctorLanguage,
+    patientName:
+      typeof o.patientName === "string"
+        ? o.patientName.trim().slice(0, 160)
+        : buildProfileDisplayName(profileSnapshot),
     conversationTitle:
       typeof o.conversationTitle === "string"
         ? o.conversationTitle.trim().slice(0, 200)
@@ -263,8 +280,10 @@ function normalizeTurn(raw) {
   const targetLanguage =
     typeof t.targetLanguage === "string" ? t.targetLanguage.trim().slice(0, 12) : "";
   const originalText =
-    typeof t.originalText === "string"
-      ? t.originalText.trim().slice(0, INTERPRETER_MAX_TURN_CHARS)
+    typeof t.originalTranscript === "string"
+      ? t.originalTranscript.trim().slice(0, INTERPRETER_MAX_TURN_CHARS)
+      : typeof t.originalText === "string"
+        ? t.originalText.trim().slice(0, INTERPRETER_MAX_TURN_CHARS)
       : "";
 
   const status =
@@ -273,8 +292,19 @@ function normalizeTurn(raw) {
   return {
     turnId,
     speaker,
+    speakerLabel:
+      typeof t.speakerLabel === "string"
+        ? t.speakerLabel.trim().slice(0, 120)
+        : undefined,
     sourceLanguage,
     targetLanguage,
+    timestamp:
+      typeof t.timestamp === "string"
+        ? t.timestamp
+        : typeof t.createdAt === "string"
+          ? t.createdAt
+          : nowIso(),
+    originalTranscript: originalText,
     originalText,
     translatedText:
       typeof t.translatedText === "string"
@@ -299,6 +329,7 @@ function normalizeTurn(raw) {
     unclearSource: t.unclearSource === true ? true : undefined,
     createdAt: typeof t.createdAt === "string" ? t.createdAt : nowIso(),
     editedAt: typeof t.editedAt === "string" ? t.editedAt : undefined,
+    edited: t.edited === true,
     status,
   };
 }
@@ -351,6 +382,7 @@ export function createSession(seed = {}) {
     status: SESSION_STATUS_DRAFT,
     patientLanguage: seed.patientLanguage ?? "",
     doctorLanguage: seed.doctorLanguage ?? "",
+    patientName: seed.patientName ?? "",
     profileConsentUsed: seed.profileConsentUsed === true,
     storageConsent: seed.storageConsent === true,
     turns: [],
@@ -446,7 +478,10 @@ export function addTurn(sessionId, seed = {}) {
     sourceLanguage: seed.sourceLanguage ?? session.patientLanguage,
     targetLanguage: seed.targetLanguage ?? session.doctorLanguage,
     originalText: seed.originalText ?? "",
+    originalTranscript: seed.originalTranscript ?? seed.originalText ?? "",
+    speakerLabel: seed.speakerLabel ?? undefined,
     status: TURN_STATUS_DRAFT,
+    timestamp: seed.timestamp ?? nowIso(),
     createdAt: nowIso(),
     ...seed,
   });
@@ -473,9 +508,24 @@ export function updateTurn(sessionId, turnId, patch = {}) {
   const idx = session.turns.findIndex((t) => t.turnId === turnId);
   if (idx < 0) return null;
 
+  const originalBefore = session.turns[idx]?.originalText ?? "";
+  const nextOriginal =
+    typeof patch.originalTranscript === "string"
+      ? patch.originalTranscript
+      : typeof patch.originalText === "string"
+        ? patch.originalText
+        : originalBefore;
+
   const merged = {
     ...session.turns[idx],
     ...patch,
+    originalText: nextOriginal,
+    originalTranscript: nextOriginal,
+    edited:
+      patch.edited === true ||
+      (typeof patch.originalText === "string" && patch.originalText !== originalBefore) ||
+      (typeof patch.originalTranscript === "string" &&
+        patch.originalTranscript !== originalBefore),
     editedAt: nowIso(),
   };
   const nextTurn = normalizeTurn(merged);

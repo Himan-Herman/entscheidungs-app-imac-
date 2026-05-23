@@ -3,7 +3,7 @@ import { authFetch } from "../../../api/authFetch.js";
 /**
  * Streaming / preview TTS — flag-gated, max 600 chars server-side.
  *
- * @param {{ text: string, language: string, voicePreference?: string }} params
+ * @param {{ text: string, language: string, voicePreference?: string, voiceSpeed?: string }} params
  * @param {{ signal?: AbortSignal }} [options]
  */
 export async function speakStreamText(params, options = {}) {
@@ -14,7 +14,8 @@ export async function speakStreamText(params, options = {}) {
       body: JSON.stringify({
         text: params.text,
         language: params.language,
-        voicePreference: params.voicePreference ?? "neutral",
+        voicePreference: params.voicePreference ?? "neutral_medical",
+        voiceSpeed: params.voiceSpeed ?? "normal",
       }),
       signal: options.signal,
     });

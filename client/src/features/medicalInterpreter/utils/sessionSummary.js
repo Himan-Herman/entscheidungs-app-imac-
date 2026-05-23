@@ -1,5 +1,6 @@
 import {
   TURN_STATUS_DRAFT,
+  TURN_STATUS_SPOKEN,
   TURN_STATUS_TRANSLATED,
   SPEAKER_DOCTOR,
   SPEAKER_PATIENT,
@@ -18,7 +19,12 @@ export function getSessionSummaryStats(session) {
   let clinician = 0;
 
   for (const turn of turns) {
-    if (turn.status === TURN_STATUS_TRANSLATED) translated += 1;
+    if (
+      turn.status === TURN_STATUS_TRANSLATED ||
+      turn.status === TURN_STATUS_SPOKEN
+    ) {
+      translated += 1;
+    }
     if (turn.status === TURN_STATUS_DRAFT) draft += 1;
     if (turn.speaker === SPEAKER_PATIENT) patient += 1;
     if (turn.speaker === SPEAKER_DOCTOR) clinician += 1;

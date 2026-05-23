@@ -25,8 +25,11 @@
  * @typedef {Object} InterpreterTurn
  * @property {string} turnId
  * @property {InterpreterSpeaker} speaker
+ * @property {string} [speakerLabel]
  * @property {string} sourceLanguage
  * @property {string} targetLanguage
+ * @property {string} [timestamp]
+ * @property {string} [originalTranscript]
  * @property {string} originalText
  * @property {string} [translatedText]
  * @property {string} [simplifiedText]
@@ -37,6 +40,7 @@
  * @property {boolean} [unclearSource]
  * @property {string} createdAt
  * @property {string} [editedAt]
+ * @property {boolean} [edited]
  * @property {InterpreterTurnStatus} status
  */
 
@@ -49,6 +53,7 @@
  * @property {InterpreterSessionStatus} status
  * @property {string} patientLanguage
  * @property {string} doctorLanguage
+ * @property {string} [patientName]
  * @property {string} [conversationTitle]
  * @property {string} [doctorName]
  * @property {string} [practiceName]

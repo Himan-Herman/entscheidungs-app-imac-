@@ -11,7 +11,9 @@ export const SESSION_STATUS_ENDED = "ended";
 
 export const TURN_STATUS_DRAFT = "draft";
 export const TURN_STATUS_CONFIRMED = "confirmed";
+export const TURN_STATUS_TRANSCRIBED = "transcribed";
 export const TURN_STATUS_TRANSLATED = "translated";
+export const TURN_STATUS_SPOKEN = "spoken";
 export const TURN_STATUS_BLOCKED = "blocked";
 export const TURN_STATUS_ERROR = "error";
 

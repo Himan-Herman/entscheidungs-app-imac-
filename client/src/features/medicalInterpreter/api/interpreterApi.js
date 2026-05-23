@@ -297,7 +297,7 @@ export async function simplifyTurn(params, options = {}) {
 }
 
 /**
- * @param {{ text: string, language: string, voicePreference?: string }} params
+ * @param {{ text: string, language: string, voicePreference?: string, voiceSpeed?: string }} params
  * @returns {Promise<
  *   | { ok: true, blob: Blob, contentType: string }
  *   | { ok: false, code: InterpreterApiErrorCode, message?: string }
@@ -311,7 +311,8 @@ export async function speakText(params, options = {}) {
       body: JSON.stringify({
         text: params.text,
         language: params.language,
-        voicePreference: params.voicePreference ?? "neutral",
+        voicePreference: params.voicePreference ?? "neutral_medical",
+        voiceSpeed: params.voiceSpeed ?? "normal",
       }),
       signal: options.signal,
     });
@@ -339,7 +340,7 @@ export async function speakText(params, options = {}) {
     };
   } catch (err) {
     if (err?.name === "AbortError") {
-      return { ok: false, code: "generic" };
+      return { ok: false, code: "cancelled" };
     }
     return { ok: false, code: classifyFetchError(err) };
   }

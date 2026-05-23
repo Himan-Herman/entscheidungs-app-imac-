@@ -5,7 +5,6 @@
  *   conversationTitle: string;
  *   doctorName: string;
  *   practiceName: string;
- *   specialty: string;
  *   appointmentDateTime: string;
  *   onFieldChange: (field: string, value: string) => void;
  *   labels: object;
@@ -17,7 +16,6 @@ export default function InterpreterSetupDoctorDetails({
   conversationTitle,
   doctorName,
   practiceName,
-  specialty,
   appointmentDateTime,
   onFieldChange,
   labels: t,
@@ -79,22 +77,6 @@ export default function InterpreterSetupDoctorDetails({
             placeholder={t.doctorInfo.practiceNamePlaceholder}
             autoComplete="organization"
             maxLength={200}
-          />
-        </div>
-
-        <div className="interpreter-setup__field">
-          <label className="interpreter-setup__label" htmlFor="interp-specialty">
-            {t.doctorInfo.specialty}
-          </label>
-          <input
-            id="interp-specialty"
-            type="text"
-            className="interpreter-setup__input"
-            value={specialty}
-            onChange={(e) => onFieldChange("specialty", e.target.value)}
-            placeholder={t.doctorInfo.specialtyPlaceholder}
-            autoComplete="off"
-            maxLength={120}
           />
         </div>
 

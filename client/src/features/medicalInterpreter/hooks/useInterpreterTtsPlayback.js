@@ -7,23 +7,28 @@ import {
 } from "../config/isStreamingTtsEnabled.js";
 
 /** @typedef {'translation' | 'simplified' | 'preview'} SpeakTarget */
+/** @typedef {'normal' | 'slow'} InterpreterVoiceSpeed */
 
 /**
  * @param {string} language
  * @param {string} text
+ * @param {string} voiceProfile
+ * @param {InterpreterVoiceSpeed} voiceSpeed
  */
-function cacheKey(language, text) {
-  return `${language}::${text}`;
+function cacheKey(language, text, voiceProfile, voiceSpeed) {
+  return `${language}::${voiceProfile}::${voiceSpeed}::${text}`;
 }
 
 /**
  * In-memory TTS playback — no persistence. Revokes object URLs on stop/unmount.
  * Optional stream endpoint + LRU blob cache for cost control (Phase 5.5).
  *
- * @param {{ streamSpeakEnabled?: boolean }} [opts]
+ * @param {{ streamSpeakEnabled?: boolean, voiceProfile?: string, voiceSpeed?: InterpreterVoiceSpeed }} [opts]
  */
 export function useInterpreterTtsPlayback(opts = {}) {
   const streamSpeakEnabled = opts.streamSpeakEnabled === true;
+  const voiceProfile = opts.voiceProfile || "neutral_medical";
+  const voiceSpeed = opts.voiceSpeed === "slow" ? "slow" : "normal";
 
   /** @type {'idle' | 'loading' | 'playing'} */
   const [phase, setPhase] = useState("idle");
@@ -40,7 +45,7 @@ export function useInterpreterTtsPlayback(opts = {}) {
   /** @type {Map<string, Blob>} */
   const blobCacheRef = useRef(new Map());
   const lastFetchRef = useRef({ key: "", at: 0 });
-  /** @type {import('react').MutableRefObject<{ text: string, language: string, target: SpeakTarget, useStream: boolean } | null>} */
+  /** @type {import('react').MutableRefObject<{ text: string, language: string, target: SpeakTarget, useStream: boolean, voiceProfile?: string, voiceSpeed?: InterpreterVoiceSpeed } | null>} */
   const lastPlayParamsRef = useRef(null);
 
   const evictCacheIfNeeded = useCallback(() => {
@@ -168,8 +173,15 @@ export function useInterpreterTtsPlayback(opts = {}) {
   );
 
   const fetchSpeechBlob = useCallback(
-    async (text, language, useStream, signal) => {
-      const key = cacheKey(language, text);
+    async (text, language, useStream, signal, requestedVoiceProfile, requestedVoiceSpeed) => {
+      const activeVoiceProfile = requestedVoiceProfile || voiceProfile;
+      const activeVoiceSpeed = requestedVoiceSpeed || voiceSpeed;
+      const key = cacheKey(
+        language,
+        text,
+        activeVoiceProfile,
+        activeVoiceSpeed,
+      );
       const cached = blobCacheRef.current.get(key);
       if (cached) {
         return { ok: true, blob: cached, fromCache: true };
@@ -187,7 +199,12 @@ export function useInterpreterTtsPlayback(opts = {}) {
         useStream && streamSpeakEnabled ? speakStreamText : speakText;
 
       const result = await fetcher(
-        { text, language, voicePreference: "neutral" },
+        {
+          text,
+          language,
+          voicePreference: activeVoiceProfile,
+          voiceSpeed: activeVoiceSpeed,
+        },
         { signal },
       );
 
@@ -200,7 +217,7 @@ export function useInterpreterTtsPlayback(opts = {}) {
       evictCacheIfNeeded();
       return { ok: true, blob: result.blob, fromCache: false };
     },
-    [streamSpeakEnabled, evictCacheIfNeeded],
+    [streamSpeakEnabled, evictCacheIfNeeded, voiceProfile, voiceSpeed],
   );
 
   /**
@@ -208,12 +225,22 @@ export function useInterpreterTtsPlayback(opts = {}) {
    *   text: string;
    *   language: string;
    *   target: SpeakTarget;
-   *   useStreamEndpoint?: boolean;
-   *   awaitEnd?: boolean;
-   * }} params
-   */
+ *   useStreamEndpoint?: boolean;
+ *   awaitEnd?: boolean;
+ *   voiceProfile?: string;
+ *   voiceSpeed?: InterpreterVoiceSpeed;
+ * }} params
+ */
   const playText = useCallback(
-    async ({ text, language, target, useStreamEndpoint = false, awaitEnd = false }) => {
+    async ({
+      text,
+      language,
+      target,
+      useStreamEndpoint = false,
+      awaitEnd = false,
+      voiceProfile: voiceProfileOverride,
+      voiceSpeed: voiceSpeedOverride,
+    }) => {
       const trimmed = String(text || "").trim();
       if (!trimmed) return { ok: false };
 
@@ -243,6 +270,8 @@ export function useInterpreterTtsPlayback(opts = {}) {
         language,
         target,
         useStream,
+        voiceProfile: voiceProfileOverride || voiceProfile,
+        voiceSpeed: voiceSpeedOverride || voiceSpeed,
       };
 
       const ac = new AbortController();
@@ -254,6 +283,8 @@ export function useInterpreterTtsPlayback(opts = {}) {
           language,
           useStream,
           ac.signal,
+          voiceProfileOverride || voiceProfile,
+          voiceSpeedOverride || voiceSpeed,
         );
 
         if (ac.signal.aborted) {
@@ -294,6 +325,8 @@ export function useInterpreterTtsPlayback(opts = {}) {
       streamSpeakEnabled,
       fetchSpeechBlob,
       playBlob,
+      voiceProfile,
+      voiceSpeed,
     ],
   );
 

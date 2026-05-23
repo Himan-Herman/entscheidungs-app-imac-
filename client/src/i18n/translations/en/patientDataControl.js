@@ -5,7 +5,7 @@ export default {
     "Central overview of your practice connections, permissions, and data requests. You stay in control — medical records are not hard-deleted automatically.",
   privacyNotice:
     "MedScoutX does not provide legal advice. Deletion requests are documented; legal retention obligations may prevent immediate full deletion.",
-  backHub: "Back to patient workspace",
+  backHub: "Back to My practice",
   openActivity: "Open activity log",
   openConsents: "Manage consents",
   loading: "Loading…",

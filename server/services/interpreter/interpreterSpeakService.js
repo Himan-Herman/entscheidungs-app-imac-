@@ -1,17 +1,68 @@
 import { openai } from "../../openaiClient.js";
 import { isInterpreterAiConfigured } from "../../config/interpreterEnv.js";
 
-const DEFAULT_TTS_MODEL = "tts-1";
+const DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
 
-/** OpenAI TTS voice for neutral preference (no generative rewrite). */
+/** Legacy fallback voice that works across older OpenAI TTS models. */
 const VOICE_NEUTRAL = "alloy";
+/** Higher-quality neutral voice used when the configured model supports it. */
+const VOICE_NEUTRAL_MEDICAL = "cedar";
+
+const VOICE_SPEEDS = {
+  normal: 0.96,
+  slow: 0.88,
+};
+
+function supportsAdvancedInterpreterTts(model) {
+  return /^gpt-4o-mini-tts$/i.test(String(model || "").trim());
+}
 
 /**
  * @param {string} [preference]
+ * @param {string} [language]
+ * @param {string} [model]
  */
-function resolveOpenAiVoice(preference) {
-  if (preference === "neutral" || !preference) return VOICE_NEUTRAL;
+function resolveOpenAiVoice(preference, language, model) {
+  void language;
+  if (preference === "neutral_medical" && supportsAdvancedInterpreterTts(model)) {
+    return VOICE_NEUTRAL_MEDICAL;
+  }
+  if (preference === "neutral" || preference === "neutral_medical" || !preference) {
+    return VOICE_NEUTRAL;
+  }
   return VOICE_NEUTRAL;
+}
+
+/**
+ * @param {string} [voiceSpeed]
+ */
+function resolveSpeechSpeed(voiceSpeed) {
+  if (voiceSpeed === "slow") return VOICE_SPEEDS.slow;
+  return VOICE_SPEEDS.normal;
+}
+
+/**
+ * @param {string} [preference]
+ * @param {string} [language]
+ * @param {string} [voiceSpeed]
+ * @param {string} [model]
+ */
+function resolveSpeechInstructions(preference, language, voiceSpeed, model) {
+  if (!supportsAdvancedInterpreterTts(model)) return undefined;
+  if (preference !== "neutral_medical") return undefined;
+
+  const pacing =
+    voiceSpeed === "slow"
+      ? "Speak slowly, calmly, and evenly for patient understanding."
+      : "Speak calmly, clearly, and evenly at a measured pace.";
+
+  return [
+    `Read the text exactly as written in ${language || "the target language"}.`,
+    "Use a professional, neutral, healthcare-appropriate interpreter voice.",
+    pacing,
+    "Avoid dramatic intonation, playful delivery, and marketing-style emphasis.",
+    "Keep pronunciation precise and balanced.",
+  ].join(" ");
 }
 
 export function getInterpreterTtsModel() {
@@ -22,7 +73,7 @@ export function getInterpreterTtsModel() {
 /**
  * Text-to-speech only — reads the submitted text verbatim (no LLM, no medical generation).
  *
- * @param {{ text: string, language: string, voicePreference?: string }} params
+ * @param {{ text: string, language: string, voicePreference?: string, voiceSpeed?: string }} params
  * @returns {Promise<
  *   | { ok: true, buffer: Buffer, contentType: string }
  *   | { ok: false, code: string, message: string, statusCode: number }
@@ -38,14 +89,27 @@ export async function synthesizeInterpreterSpeech(params) {
     };
   }
 
-  const voice = resolveOpenAiVoice(params.voicePreference);
-  void params.language;
+  const model = getInterpreterTtsModel();
+  const voice = resolveOpenAiVoice(
+    params.voicePreference,
+    params.language,
+    model,
+  );
+  const speed = resolveSpeechSpeed(params.voiceSpeed);
+  const instructions = resolveSpeechInstructions(
+    params.voicePreference,
+    params.language,
+    params.voiceSpeed,
+    model,
+  );
 
   try {
     const speech = await openai.audio.speech.create({
-      model: getInterpreterTtsModel(),
+      model,
       voice,
       input: params.text,
+      speed,
+      ...(instructions ? { instructions } : {}),
       response_format: "mp3",
     });
     const buffer = Buffer.from(await speech.arrayBuffer());
@@ -59,3 +123,6 @@ export async function synthesizeInterpreterSpeech(params) {
     };
   }
 }
+
+// TODO: Re-evaluate provider voice coverage if multilingual neutrality is not strong
+// enough across all supported interpreter languages.

@@ -354,7 +354,7 @@ router.post(
 
 /**
  * POST /api/interpreter/speak
- * Body: { text, language, voicePreference? }
+ * Body: { text, language, voicePreference?, voiceSpeed? }
  * Returns audio/mpeg (no storage). TTS only — no generative medical content.
  */
 router.post(
@@ -378,6 +378,7 @@ router.post(
         text: validated.text,
         language: validated.language,
         voicePreference: validated.voicePreference,
+        voiceSpeed: validated.voiceSpeed,
       });
 
       if (!result.ok) {

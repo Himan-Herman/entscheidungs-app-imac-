@@ -1,14 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
-import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import {
   fetchPatientActivity,
   postPatientActivityAiSummary,
 } from "../api/patientActivityApi.js";
 import "../../../styles/PatientInboxPage.css";
+import "../../../styles/PatientThreadsPage.css";
 import "../../../styles/PatientDataControlPage.css";
+
+const LIST_LIMIT = 80;
 
 function fmt(iso, lang) {
   if (!iso) return "—";
@@ -27,23 +30,21 @@ function typeLabel(type, t) {
   return t[key] || type;
 }
 
-const TYPE_OPTIONS = [
-  "document_shared",
-  "message_received",
-  "message_sent",
-  "medication_plan_published",
-  "profile_viewed",
-  "profile_access_granted",
-  "profile_access_revoked",
-  "data_request_updated",
-  "relationship_archived",
-];
-
 export default function PatientActivityPage() {
   const { language } = useLanguage();
+  const [searchParams] = useSearchParams();
   const t = useMemo(
     () => getMessages(language).patientActivity || getMessages("en").patientActivity,
     [language],
+  );
+
+  const typeOptions = useMemo(
+    () =>
+      Object.keys(t)
+        .filter((k) => k.startsWith("type_"))
+        .map((k) => k.slice(5))
+        .sort(),
+    [t],
   );
 
   const [events, setEvents] = useState([]);
@@ -54,21 +55,42 @@ export default function PatientActivityPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [linkId, setLinkId] = useState("");
+  const [filters, setFilters] = useState({
+    type: "",
+    search: "",
+    from: "",
+    to: "",
+    linkId: "",
+  });
   const [practices, setPractices] = useState([]);
   const [aiSummary, setAiSummary] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
+
+  const practiceNameByLink = useMemo(() => {
+    const map = new Map();
+    for (const p of practices) {
+      if (p.linkId) map.set(p.linkId, p.practice?.practiceName || null);
+    }
+    return map;
+  }, [practices]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const { res, data } = await fetchPatientActivity({
-        type: typeFilter || undefined,
-        q: search.trim() || undefined,
-        from: from || undefined,
-        to: to || undefined,
-        linkId: linkId || undefined,
+        type: filters.type || undefined,
+        q: filters.search.trim() || undefined,
+        from: filters.from || undefined,
+        to: filters.to || undefined,
+        linkId: filters.linkId || undefined,
       });
+      if (res.status === 404 && data.error === "feature_disabled") {
+        setEvents([]);
+        setPractices([]);
+        setError(t.featureDisabled);
+        return;
+      }
       if (!res.ok || !data.ok) throw new Error("load_failed");
       setEvents(Array.isArray(data.events) ? data.events : []);
       setPractices(Array.isArray(data.practices) ? data.practices : []);
@@ -79,23 +101,48 @@ export default function PatientActivityPage() {
     } finally {
       setLoading(false);
     }
-  }, [typeFilter, search, from, to, linkId, t.loadError]);
+  }, [filters, t.featureDisabled, t.loadError]);
 
   useEffect(() => {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
 
   useEffect(() => {
+    const lid = searchParams.get("linkId")?.trim();
+    if (lid) {
+      setLinkId(lid);
+      setFilters((prev) => ({ ...prev, linkId: lid }));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     load();
   }, [load]);
+
+  function applyFilters(e) {
+    e.preventDefault();
+    setFilters({
+      type: typeFilter,
+      search,
+      from,
+      to,
+      linkId,
+    });
+  }
+
+  function onPracticeFilterChange(value) {
+    setLinkId(value);
+    setFilters((prev) => ({ ...prev, linkId: value }));
+  }
 
   async function loadAi() {
     setAiBusy(true);
     setAiSummary("");
+    setError("");
     try {
       const { res, data } = await postPatientActivityAiSummary({
         locale: language,
-        linkId: linkId || undefined,
+        linkId: filters.linkId || undefined,
       });
       if (res.status === 503 && data.error === "ai_not_configured") {
         setError(t.aiNotConfigured);
@@ -113,29 +160,25 @@ export default function PatientActivityPage() {
 
   return (
     <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient">
-        {t.backHub}
-      </Link>
-      <Link className="patient-inbox__back" to="/patient/data-control" style={{ marginLeft: "1rem" }}>
-        {t.backDataControl}
-      </Link>
+      <nav className="patient-activity__nav" aria-label={t.backHub}>
+        <Link className="patient-inbox__back" to="/patient/practice">
+          {t.backHub}
+        </Link>
+        <Link className="patient-inbox__back" to="/patient/data-control">
+          {t.backDataControl}
+        </Link>
+      </nav>
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{t.heading}</h1>
         <p className="patient-inbox__intro">{t.intro}</p>
       </header>
 
-      <form
-        className="patient-data-control__filters"
-        onSubmit={(e) => {
-          e.preventDefault();
-          load();
-        }}
-      >
+      <form className="patient-data-control__filters" onSubmit={applyFilters}>
         <label>
           <span>{t.filterType}</span>
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
             <option value="">{t.filterTypeAll}</option>
-            {TYPE_OPTIONS.map((opt) => (
+            {typeOptions.map((opt) => (
               <option key={opt} value={opt}>
                 {typeLabel(opt, t)}
               </option>
@@ -144,12 +187,16 @@ export default function PatientActivityPage() {
         </label>
         {practices.length > 0 ? (
           <label>
-            <span>{t.allPractices}</span>
-            <select value={linkId} onChange={(e) => setLinkId(e.target.value)}>
+            <span>{t.filterPractice}</span>
+            <select
+              value={linkId}
+              onChange={(e) => onPracticeFilterChange(e.target.value)}
+              aria-label={t.filterPractice}
+            >
               <option value="">{t.allPractices}</option>
               {practices.map((p) => (
                 <option key={p.linkId} value={p.linkId}>
-                  {p.practice?.practiceName || p.linkId}
+                  {p.practice?.practiceName || t.practiceUnknown}
                 </option>
               ))}
             </select>
@@ -187,15 +234,19 @@ export default function PatientActivityPage() {
 
       {aiSummary ? (
         <aside className="patient-data-control__ai-box" aria-labelledby="patient-act-ai">
-          <h2 id="patient-act-ai" className="patient-inbox__item-title" style={{ fontSize: "1rem" }}>
+          <h2 id="patient-act-ai" className="patient-inbox__item-title patient-activity__ai-title">
             {t.aiSummaryHeading}
           </h2>
           <p className="patient-data-control__ai-hint">{t.aiSummaryHint}</p>
-          <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{aiSummary}</p>
+          <p className="patient-activity__ai-body">{aiSummary}</p>
         </aside>
       ) : null}
 
-      {loading ? <p className="patient-inbox__muted">{t.loading}</p> : null}
+      {loading ? (
+        <p className="patient-inbox__muted" role="status" aria-live="polite">
+          {t.loading}
+        </p>
+      ) : null}
       {error ? (
         <p className="patient-inbox__error" role="alert">
           {error}
@@ -206,16 +257,35 @@ export default function PatientActivityPage() {
       ) : null}
 
       {!loading && !error && events.length > 0 ? (
-        <ul className="practice-record__activity-list" aria-label={t.listLabel}>
-          {events.map((ev) => (
-            <li key={ev.id} className="practice-record__activity-item">
-              <span className="practice-record__activity-type">{typeLabel(ev.type, t)}</span>
-              <time className="practice-record__activity-time" dateTime={ev.occurredAt}>
-                {fmt(ev.occurredAt, language)}
-              </time>
-            </li>
-          ))}
-        </ul>
+        <>
+          {events.length >= LIST_LIMIT ? (
+            <p className="patient-inbox__muted" role="status">
+              {t.listLimitNote.replace("{count}", String(LIST_LIMIT))}
+            </p>
+          ) : null}
+          <ul className="practice-record__activity-list" aria-label={t.listLabel}>
+            {events.map((ev) => {
+              const practiceName = ev.practicePatientLinkId
+                ? practiceNameByLink.get(ev.practicePatientLinkId)
+                : null;
+              return (
+                <li key={ev.id} className="practice-record__activity-item">
+                  <div className="practice-record__activity-main">
+                    <span className="practice-record__activity-type">
+                      {typeLabel(ev.type, t)}
+                    </span>
+                    {practiceName ? (
+                      <span className="practice-record__activity-practice">{practiceName}</span>
+                    ) : null}
+                  </div>
+                  <time className="practice-record__activity-time" dateTime={ev.occurredAt}>
+                    {fmt(ev.occurredAt, language)}
+                  </time>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       ) : null}
     </div>
   );

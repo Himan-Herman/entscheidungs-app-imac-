@@ -18,10 +18,8 @@ import {
 import {
   buildProfileSnapshotFromSettings,
   fetchInterpreterProfileSettings,
-  hasUsableProfileSettings,
 } from "../api/interpreterProfileApi.js";
 import InterpreterSetupLanguageFields from "../components/InterpreterSetupLanguageFields.jsx";
-import InterpreterSetupProfileConsent from "../components/InterpreterSetupProfileConsent.jsx";
 import InterpreterSetupDoctorDetails from "../components/InterpreterSetupDoctorDetails.jsx";
 import { INTERPRETER_SETUP_LANGUAGE_CODES } from "../constants/setupLanguages.js";
 import InterpreterCloudSetupNote from "../components/InterpreterCloudSetupNote.jsx";
@@ -67,22 +65,30 @@ export default function InterpreterSetupPage() {
   const [sessionId, setSessionId] = useState(null);
   const [patientLanguage, setPatientLanguage] = useState("");
   const [doctorLanguage, setDoctorLanguage] = useState("");
+  const [patientName, setPatientName] = useState("");
   const [conversationTitle, setConversationTitle] = useState("");
   const [doctorName, setDoctorName] = useState("");
   const [practiceName, setPracticeName] = useState("");
-  const [specialty, setSpecialty] = useState("");
   const [appointmentDateTime, setAppointmentDateTime] = useState("");
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [profileConsent, setProfileConsent] = useState(false);
   const [profileSectionVisible, setProfileSectionVisible] = useState(false);
   const [profileLoadError, setProfileLoadError] = useState("");
   const [languageError, setLanguageError] = useState("");
+  const [patientNameError, setPatientNameError] = useState("");
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [privacyError, setPrivacyError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const profileSettingsRef = useRef(null);
   const cloud = useInterpreterCloud();
+  const profileDisplayName = (() => {
+    const data = profileSettingsRef.current;
+    if (!data) return "";
+    const first = String(data.user?.firstName || "").trim();
+    const last = String(data.user?.lastName || "").trim();
+    return [first, last].filter(Boolean).join(" ").trim();
+  })();
 
   useEffect(() => {
     document.title = t.start.pageTitle;
@@ -92,17 +98,16 @@ export default function InterpreterSetupPage() {
     setSessionId(session.sessionId);
     setPatientLanguage(session.patientLanguage || "");
     setDoctorLanguage(session.doctorLanguage || "");
+    setPatientName(session.patientName || "");
     setConversationTitle(session.conversationTitle || "");
     setDoctorName(session.doctorName || "");
     setPracticeName(session.practiceName || "");
-    setSpecialty(session.specialty || "");
     setAppointmentDateTime(toDatetimeLocalValue(session.appointmentDateTime));
     setProfileConsent(session.profileConsentUsed === true);
     const hasOptional =
       Boolean(session.conversationTitle) ||
       Boolean(session.doctorName) ||
       Boolean(session.practiceName) ||
-      Boolean(session.specialty) ||
       Boolean(session.appointmentDateTime);
     setDetailsOpen(hasOptional);
   }, []);
@@ -133,7 +138,10 @@ export default function InterpreterSetupPage() {
         return;
       }
       profileSettingsRef.current = result;
-      const usable = hasUsableProfileSettings(result);
+      const usable = Boolean(
+        String(result.user?.firstName || "").trim() ||
+          String(result.user?.lastName || "").trim(),
+      );
       setProfileSectionVisible(usable);
       setProfileLoadError("");
 
@@ -166,7 +174,6 @@ export default function InterpreterSetupPage() {
     if (field === "conversationTitle") setConversationTitle(value);
     if (field === "doctorName") setDoctorName(value);
     if (field === "practiceName") setPracticeName(value);
-    if (field === "specialty") setSpecialty(value);
     if (field === "appointmentDateTime") setAppointmentDateTime(value);
   }, []);
 
@@ -178,6 +185,16 @@ export default function InterpreterSetupPage() {
     setLanguageError("");
     return true;
   }, [patientLanguage, doctorLanguage, t.languages.required]);
+
+  const validatePatientName = useCallback(() => {
+    const effectiveName = profileConsent ? profileDisplayName : patientName.trim();
+    if (!effectiveName) {
+      setPatientNameError(t.profile.patientNameRequired);
+      return false;
+    }
+    setPatientNameError("");
+    return true;
+  }, [patientName, profileConsent, profileDisplayName, t.profile.patientNameRequired]);
 
   const buildSessionPatch = useCallback(() => {
     /** @type {import('../types.js').InterpreterProfileSnapshot | undefined} */
@@ -202,13 +219,13 @@ export default function InterpreterSetupPage() {
     return {
       patientLanguage: patientLanguage.trim(),
       doctorLanguage: doctorLanguage.trim(),
+      patientName: (profileConsent ? profileDisplayName : patientName).trim() || undefined,
       conversationTitle: conversationTitle.trim() || undefined,
       doctorName: doctorName.trim() || undefined,
       practiceName:
         practiceName.trim() ||
         inviteContext?.practiceDisplayName?.trim() ||
         undefined,
-      specialty: specialty.trim() || undefined,
       appointmentDateTime: fromDatetimeLocalValue(appointmentDateTime),
       profileConsentUsed,
       profileSnapshot: profileConsentUsed ? profileSnapshot : undefined,
@@ -221,16 +238,18 @@ export default function InterpreterSetupPage() {
     conversationTitle,
     doctorLanguage,
     doctorName,
+    patientName,
     patientLanguage,
     practiceName,
     profileConsent,
-    specialty,
+    profileDisplayName,
     inviteContext,
   ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateLanguages()) return;
+    if (!validatePatientName()) return;
     if (!privacyAccepted) {
       setPrivacyError(t.privacy.acceptRequired);
       return;
@@ -326,13 +345,90 @@ export default function InterpreterSetupPage() {
           labels={t}
         />
 
-        <InterpreterSetupProfileConsent
-          visible={profileSectionVisible}
-          checked={profileConsent}
-          onCheckedChange={setProfileConsent}
-          loadError={profileLoadError}
-          labels={t}
-        />
+        <section
+          className="interpreter-setup__section interpreter-setup__section--patient"
+          aria-labelledby="interp-setup-patient-heading"
+        >
+          <h2 id="interp-setup-patient-heading" className="interpreter-setup__subheading">
+            {t.profile.patientHeading}
+          </h2>
+          <div className="interpreter-setup__field">
+            <label className="interpreter-setup__label" htmlFor="interp-patient-name">
+              {t.profile.patientNameLabel}
+            </label>
+            <input
+              id="interp-patient-name"
+              type="text"
+              className="interpreter-setup__input"
+              value={profileConsent ? profileDisplayName : patientName}
+              onChange={(e) => {
+                setPatientName(e.target.value);
+                if (patientNameError) setPatientNameError("");
+              }}
+              disabled={profileConsent}
+              aria-required="true"
+              aria-invalid={patientNameError ? true : undefined}
+              aria-describedby={
+                patientNameError
+                  ? "interp-patient-name-hint interp-patient-name-error"
+                  : "interp-patient-name-hint"
+              }
+              autoComplete="name"
+              maxLength={160}
+              placeholder={t.profile.patientNamePlaceholder}
+            />
+            <p id="interp-patient-name-hint" className="interpreter-setup__hint">
+              {profileConsent ? t.profile.patientNameLockedHint : t.profile.patientNameHint}
+            </p>
+            {patientNameError ? (
+              <p
+                id="interp-patient-name-error"
+                className="interpreter-setup__error"
+                role="alert"
+              >
+                {patientNameError}
+              </p>
+            ) : null}
+          </div>
+
+          {profileSectionVisible ? (
+            <>
+              <div className="interpreter-setup__checkbox-row">
+                <input
+                  type="checkbox"
+                  id="interp-profile-consent"
+                  className="interpreter-setup__checkbox"
+                  checked={profileConsent}
+                  onChange={(e) => {
+                    setProfileConsent(e.target.checked);
+                    if (e.target.checked) {
+                      setPatientNameError("");
+                    }
+                  }}
+                  aria-describedby="interp-profile-consent-hint"
+                />
+                <label
+                  htmlFor="interp-profile-consent"
+                  className="interpreter-setup__checkbox-label"
+                >
+                  {t.profile.consentLabel.replace("{{name}}", profileDisplayName)}
+                </label>
+              </div>
+              <p id="interp-profile-consent-hint" className="interpreter-setup__hint">
+                {t.profile.consentHint}
+              </p>
+              <Link className="interpreter-setup__text-link" to="/account/personal">
+                {t.profile.accountLink}
+              </Link>
+            </>
+          ) : null}
+
+          {profileLoadError ? (
+            <p className="interpreter-setup__hint" role="status">
+              {profileLoadError}
+            </p>
+          ) : null}
+        </section>
 
         <InterpreterSetupDoctorDetails
           open={detailsOpen}
@@ -340,7 +436,6 @@ export default function InterpreterSetupPage() {
           conversationTitle={conversationTitle}
           doctorName={doctorName}
           practiceName={practiceName}
-          specialty={specialty}
           appointmentDateTime={appointmentDateTime}
           onFieldChange={onFieldChange}
           labels={t}

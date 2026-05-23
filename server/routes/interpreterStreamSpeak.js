@@ -67,7 +67,7 @@ router.use(interpreterSharedLimiter);
 
 /**
  * POST /api/interpreter/stream/speak
- * Body: { text, language, voicePreference? }
+ * Body: { text, language, voicePreference?, voiceSpeed? }
  */
 router.post(
   "/speak",
@@ -96,6 +96,7 @@ router.post(
         text: validated.text,
         language: validated.language,
         voicePreference: validated.voicePreference,
+        voiceSpeed: validated.voiceSpeed,
       });
 
       if (!result.ok) {

@@ -23,6 +23,7 @@ import { startInterpreterSilenceMonitor } from "../utils/interpreterSilenceMonit
  *   onRecorded?: (payload: { blob: Blob, mimeType: string, durationMs: number }) => void | Promise<void>;
  *   onMaxDuration?: () => void;
  *   onRecordingStart?: () => void;
+ *   onSilencePhaseChange?: (phase: 'listening' | 'silence_waiting') => void;
  *   silenceAutoStopMs?: number;
  * }} options
  */
@@ -33,6 +34,7 @@ export function useInterpreterRecorder({
   onRecorded,
   onMaxDuration,
   onRecordingStart,
+  onSilencePhaseChange,
   silenceAutoStopMs = INTERPRETER_SILENCE_AUTO_STOP_MS,
 } = {}) {
   const [isPreparing, setIsPreparing] = useState(false);
@@ -52,6 +54,7 @@ export function useInterpreterRecorder({
   const onRecordedRef = useRef(onRecorded);
   const onMaxDurationRef = useRef(onMaxDuration);
   const onRecordingStartRef = useRef(onRecordingStart);
+  const onSilencePhaseChangeRef = useRef(onSilencePhaseChange);
   const stopSilenceMonitorRef = useRef(null);
 
   useEffect(() => {
@@ -63,6 +66,9 @@ export function useInterpreterRecorder({
   useEffect(() => {
     onRecordingStartRef.current = onRecordingStart;
   }, [onRecordingStart]);
+  useEffect(() => {
+    onSilencePhaseChangeRef.current = onSilencePhaseChange;
+  }, [onSilencePhaseChange]);
 
   const cleanupStream = useCallback(() => {
     if (streamRef.current) {
@@ -253,6 +259,7 @@ export function useInterpreterRecorder({
       setIsPreparing(false);
       setIsRecording(true);
       onRecordingStartRef.current?.();
+      onSilencePhaseChangeRef.current?.("listening");
 
       if (silenceAutoStopMs > 0 && streamRef.current) {
         stopSilenceMonitor();
@@ -261,6 +268,9 @@ export function useInterpreterRecorder({
           {
             silenceMs: silenceAutoStopMs,
             minSpeechMs: INTERPRETER_SILENCE_MIN_SPEECH_MS,
+            onPhaseChange: (phase) => {
+              onSilencePhaseChangeRef.current?.(phase);
+            },
             onSilence: () => {
               if (mediaRecorderRef.current?.state === "recording") {
                 stopRecording();

@@ -1,1741 +1,826 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   interpreterErrorMessage,
-  simplifyTurn,
   transcribeAudio,
   translateTurn,
 } from "../api/interpreterApi.js";
+import InterpreterPlaybackStatus from "./InterpreterPlaybackStatus.jsx";
+import InterpreterSpeakerToggle from "./InterpreterSpeakerToggle.jsx";
 import { useInterpreterRecorder } from "../hooks/useInterpreterRecorder.js";
 import { useInterpreterTtsPlayback } from "../hooks/useInterpreterTtsPlayback.js";
 import { useMedicalInterpreterMessages } from "../hooks/useMedicalInterpreterMessages.js";
 import {
   SESSION_STATUS_ACTIVE,
   SESSION_STATUS_ENDED,
+  SPEAKER_DOCTOR,
   SPEAKER_PATIENT,
-  TURN_STATUS_BLOCKED,
-  TURN_STATUS_CONFIRMED,
-  TURN_STATUS_DRAFT,
   TURN_STATUS_ERROR,
+  TURN_STATUS_SPOKEN,
+  TURN_STATUS_TRANSCRIBED,
   TURN_STATUS_TRANSLATED,
 } from "../constants.js";
 import {
   addTurn,
-  deleteSession,
-  deleteTurn,
   endSession,
-  maybeApplyAutoSessionTitle,
   getCurrentSession,
   getSession,
-  hasPendingDraftTurn,
   updateSessionMetadata,
   updateTurn,
 } from "../store/interpreterSessionStore.js";
-import { useInterpreterDraftGuard } from "../hooks/useInterpreterDraftGuard.js";
-import InterpreterConfirmDialog from "./InterpreterConfirmDialog.jsx";
-import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { useLanguage } from "../../../i18n/LanguageContext";
-import { INTERPRETER_TRANSCRIBE_RETRY_DELAY_MS } from "../utils/interpreterAudioConstants.js";
+import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { detectLikelySilentBlob } from "../utils/interpreterAudioLevel.js";
-import {
-  derivePttPhase,
-  isPttCaptureActive,
-  pttPhaseStatusLabel,
-  PTT_PHASE,
-} from "../utils/interpreterPttPhase.js";
-import { INTERPRETER_REQUEST_RETRY_DELAY_MS } from "../utils/interpreterReliabilityConstants.js";
 import { languagesForSpeaker } from "../utils/liveLanguages.js";
-import { sessionIsMixedDirection } from "../utils/interpreterLocale.js";
-import { isRetryableInterpreterCode } from "../utils/interpreterRetry.js";
-import { useMountedRef } from "../hooks/useMountedRef.js";
-import { useInterpreterConnectivity } from "../hooks/useInterpreterConnectivity.js";
-import InterpreterConnectivityBanner from "./InterpreterConnectivityBanner.jsx";
-import InterpreterRecoveryBanner from "./InterpreterRecoveryBanner.jsx";
-import InterpreterLiveHeader from "./InterpreterLiveHeader.jsx";
-import InterpreterSpeakerToggle from "./InterpreterSpeakerToggle.jsx";
-import InterpreterPushToTalkPanel from "./InterpreterPushToTalkPanel.jsx";
-import InterpreterTranscriptPanel from "./InterpreterTranscriptPanel.jsx";
-import InterpreterTranslationPanel from "./InterpreterTranslationPanel.jsx";
-import InterpreterSimplifiedPanel from "./InterpreterSimplifiedPanel.jsx";
-import InterpreterSessionActions from "./InterpreterSessionActions.jsx";
-import InterpreterStreamingPanel from "./InterpreterStreamingPanel.jsx";
-import InterpreterNearRealtimePreviewPanel from "./InterpreterNearRealtimePreviewPanel.jsx";
-import { useInterpreterStreamCapture } from "../hooks/useInterpreterStreamCapture.js";
-import { useInterpreterNearRealtimePreview } from "../hooks/useInterpreterNearRealtimePreview.js";
-import { useInterpreterServerStatus } from "../hooks/useInterpreterServerStatus.js";
-import {
-  isStreamingSttClientEnabled,
-} from "../config/isStreamingSttEnabled.js";
-import { isNearRealtimeTranslationClientEnabled } from "../config/isNearRealtimeTranslationEnabled.js";
-import { isStreamingTtsClientEnabled } from "../config/isStreamingTtsEnabled.js";
-import InterpreterPlaybackStatus from "./InterpreterPlaybackStatus.jsx";
-import InterpreterConversationFeed from "./InterpreterConversationFeed.jsx";
-import InterpreterLiveChat from "./InterpreterLiveChat.jsx";
-import { detectSpeakerFromLanguage } from "../utils/detectSpeakerFromLanguage.js";
 import { downloadInterpreterSessionPdf } from "../pdf/generateInterpreterSessionPdf.js";
 import { getSessionDisplayTitle } from "../utils/sessionDisplayTitle.js";
-import { useInterpreterCloud } from "../hooks/useInterpreterCloud.js";
-import { saveSessionToCloud } from "../utils/interpreterCloudSync.js";
-import { deleteCloudSession } from "../api/interpreterCloudApi.js";
+import "../styles/MedicalInterpreter.css";
 
-const CONTINUOUS_CONVERSATION_MODE = true;
-const AUTO_LISTEN_DELAY_MS = 500;
+const LIVE_PHASE = {
+  IDLE: "idle",
+  LISTENING: "listening",
+  SILENCE_WAITING: "silence_waiting",
+  TRANSCRIBING: "transcribing",
+  TRANSLATING: "translating",
+  SPEAKING_TRANSLATION: "speaking_translation",
+  PAUSED: "paused",
+  ENDED: "ended",
+  ERROR: "error",
+};
 
-/** @param {string | undefined} apiConfidence */
-function mapTranscribeConfidence(apiConfidence) {
-  if (apiConfidence === "high") return "high";
-  if (apiConfidence === "medium" || apiConfidence === "low") return "low";
-  return undefined;
+const PHASE_TRANSITIONS = {
+  [LIVE_PHASE.IDLE]: new Set([
+    LIVE_PHASE.LISTENING,
+    LIVE_PHASE.PAUSED,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.ERROR,
+  ]),
+  [LIVE_PHASE.LISTENING]: new Set([
+    LIVE_PHASE.SILENCE_WAITING,
+    LIVE_PHASE.TRANSCRIBING,
+    LIVE_PHASE.PAUSED,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.ERROR,
+  ]),
+  [LIVE_PHASE.SILENCE_WAITING]: new Set([
+    LIVE_PHASE.LISTENING,
+    LIVE_PHASE.TRANSCRIBING,
+    LIVE_PHASE.PAUSED,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.ERROR,
+  ]),
+  [LIVE_PHASE.TRANSCRIBING]: new Set([
+    LIVE_PHASE.TRANSLATING,
+    LIVE_PHASE.PAUSED,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.ERROR,
+  ]),
+  [LIVE_PHASE.TRANSLATING]: new Set([
+    LIVE_PHASE.SPEAKING_TRANSLATION,
+    LIVE_PHASE.PAUSED,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.ERROR,
+  ]),
+  [LIVE_PHASE.SPEAKING_TRANSLATION]: new Set([
+    LIVE_PHASE.LISTENING,
+    LIVE_PHASE.PAUSED,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.ERROR,
+  ]),
+  [LIVE_PHASE.PAUSED]: new Set([
+    LIVE_PHASE.LISTENING,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.ERROR,
+    LIVE_PHASE.IDLE,
+  ]),
+  [LIVE_PHASE.ENDED]: new Set([]),
+  [LIVE_PHASE.ERROR]: new Set([
+    LIVE_PHASE.LISTENING,
+    LIVE_PHASE.PAUSED,
+    LIVE_PHASE.ENDED,
+    LIVE_PHASE.IDLE,
+  ]),
+};
+
+const AUTO_RESTART_DELAY_MS = 260;
+const INTERPRETER_VOICE_PROFILE = "neutral_medical";
+
+function nextPhase(currentPhase, requestedPhase) {
+  if (currentPhase === requestedPhase) return currentPhase;
+  if (requestedPhase === LIVE_PHASE.ERROR || requestedPhase === LIVE_PHASE.ENDED) {
+    return requestedPhase;
+  }
+  if (PHASE_TRANSITIONS[currentPhase]?.has(requestedPhase)) {
+    return requestedPhase;
+  }
+  return currentPhase;
 }
 
-/**
- * @param {'mic_denied'|'mic_unavailable'|'too_short'} code
- * @param {object} t
- */
-function recorderErrorMessage(code, t) {
-  if (code === "mic_denied") return t.pushToTalk.micDenied;
-  if (code === "too_short") return t.pushToTalk.tooShort;
-  return t.errors.generic;
+function oppositeSpeaker(speaker) {
+  return speaker === SPEAKER_PATIENT ? SPEAKER_DOCTOR : SPEAKER_PATIENT;
+}
+
+function formatTurnTime(value, uiLanguage) {
+  if (!value) return "";
+  try {
+    return new Date(value).toLocaleTimeString(uiLanguage || "de", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
+
+function speakerLabelFor(speaker, labels) {
+  return speaker === SPEAKER_DOCTOR
+    ? labels.conversation.clinicianLabel
+    : labels.conversation.patientLabel;
 }
 
 export default function InterpreterLiveRoom() {
   const t = useMedicalInterpreterMessages();
   const { language: uiLanguage } = useLanguage();
-  const navigate = useNavigate();
-  const errorAlertRef = useRef(null);
-  const transcriptRef = useRef(null);
-  const mountedRef = useMountedRef();
-  const transcribeInFlightRef = useRef(false);
-  const translateInFlightRef = useRef(false);
-  const simplifyInFlightRef = useRef(false);
-  const sessionActionInFlightRef = useRef(false);
-  const streamCancelRef = useRef(() => {});
-  const discardNearRealtimeRef = useRef(() => {});
+  const alertRef = useRef(null);
+  const autoRestartTimerRef = useRef(null);
   const transcribeAbortRef = useRef(null);
   const translateAbortRef = useRef(null);
-  const simplifyAbortRef = useRef(null);
-  const connectivity = useInterpreterConnectivity();
-  const serverStatus = useInterpreterServerStatus();
-  const cloud = useInterpreterCloud();
-  const streamingFeatureAvailable =
-    isStreamingSttClientEnabled() && serverStatus.streamingSttEnabled === true;
-  const nearRealtimeFeatureAvailable =
-    isNearRealtimeTranslationClientEnabled() &&
-    serverStatus.nearRealtimeTranslationEnabled === true &&
-    streamingFeatureAvailable;
-  const streamingTtsFeatureAvailable =
-    isStreamingTtsClientEnabled() &&
-    serverStatus.streamingTtsEnabled === true &&
-    serverStatus.ttsEnabled === true;
+  const runTokenRef = useRef(0);
+  const processingRef = useRef(false);
 
   const [session, setSession] = useState(() => getCurrentSession());
-  const [previewPlaybackEnabled, setPreviewPlaybackEnabled] = useState(false);
   const [speaker, setSpeaker] = useState(SPEAKER_PATIENT);
-  const [activeTurnId, setActiveTurnId] = useState(null);
-  const [draftText, setDraftText] = useState("");
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [isSimplifying, setIsSimplifying] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [maxDurationReached, setMaxDurationReached] = useState(false);
-  const [confirmAction, setConfirmAction] = useState(null);
-  const [liveMessage, setLiveMessage] = useState("");
-  /** @type {'translate'|'simplify'|null} */
-  const [recoveryAction, setRecoveryAction] = useState(null);
-  const [sessionActionBusy, setSessionActionBusy] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const continuousListenBootstrappedRef = useRef(false);
-  const autoListenTimerRef = useRef(null);
-  const scheduleAutoListenRef = useRef(() => {});
-  const startRecordingRef = useRef(null);
-  const speakBusyRef = useRef(false);
+  const [phase, setPhaseState] = useState(() =>
+    getCurrentSession()?.status === SESSION_STATUS_ENDED
+      ? LIVE_PHASE.ENDED
+      : LIVE_PHASE.IDLE,
+  );
+  const [errorMessage, setErrorMessage] = useState("");
+  const [liveAnnouncement, setLiveAnnouncement] = useState("");
+  const [pdfReady, setPdfReady] = useState(() => {
+    const current = getCurrentSession();
+    return current?.status === SESSION_STATUS_ENDED && (current?.turns?.length || 0) > 0;
+  });
+  const [exportMessage, setExportMessage] = useState("");
+  const [voiceSpeed, setVoiceSpeed] = useState("normal");
+  const [lastPlaybackRequest, setLastPlaybackRequest] = useState(null);
+
+  const sessionRef = useRef(session);
+  const speakerRef = useRef(speaker);
+  const phaseRef = useRef(phase);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  useEffect(() => {
+    speakerRef.current = speaker;
+  }, [speaker]);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
 
   const reloadSession = useCallback(() => {
-    const next = getCurrentSession();
-    if (mountedRef.current) setSession(next);
-    return next;
-  }, [mountedRef]);
+    const fresh = sessionRef.current?.sessionId
+      ? getSession(sessionRef.current.sessionId)
+      : getCurrentSession();
+    setSession(fresh);
+    sessionRef.current = fresh;
+    return fresh;
+  }, []);
 
-  const syncSessionToCloudQuiet = useCallback(
-    async (sessionId) => {
-      if (!cloud.accountConsent || !cloud.canUseCloud) return;
-      const fresh = getSession(sessionId);
-      if (!fresh?.turns?.length) return;
-      const onCloud = cloud.cloudSessionIds.has(sessionId);
-      await saveSessionToCloud(fresh, { alreadyOnCloud: onCloud });
-      if (mountedRef.current) reloadSession();
-    },
-    [
-      cloud.accountConsent,
-      cloud.canUseCloud,
-      cloud.cloudSessionIds,
-      reloadSession,
-      mountedRef,
-    ],
-  );
+  const setPhase = useCallback((requestedPhase) => {
+    setPhaseState((current) => nextPhase(current, requestedPhase));
+  }, []);
 
-  const announceError = useCallback(
-    (message) => {
-      if (!mountedRef.current) return;
-      setErrorMessage(message);
-      requestAnimationFrame(() => {
-        if (mountedRef.current) errorAlertRef.current?.focus();
-      });
-    },
-    [mountedRef],
-  );
-
-  const announceStatus = useCallback(
-    (message) => {
-      if (!mountedRef.current) return;
-      setLiveMessage("");
-      requestAnimationFrame(() => {
-        if (mountedRef.current) setLiveMessage(message);
-      });
-    },
-    [mountedRef],
-  );
-
-  const abortAllRequests = useCallback(() => {
-    transcribeAbortRef.current?.abort();
-    translateAbortRef.current?.abort();
-    simplifyAbortRef.current?.abort();
+  const clearAutoRestart = useCallback(() => {
+    if (autoRestartTimerRef.current) {
+      clearTimeout(autoRestartTimerRef.current);
+      autoRestartTimerRef.current = null;
+    }
   }, []);
 
   const {
-    activeTarget: speakTarget,
-    playText: playSpeakText,
+    playText,
     stopAllPlayback,
-    retryPlayback,
-    lastErrorCode: speakLastErrorCode,
     isLoading: isSpeakLoading,
     isPlaying: isSpeakPlaying,
   } = useInterpreterTtsPlayback({
-    streamSpeakEnabled: streamingTtsFeatureAvailable,
+    voiceProfile: INTERPRETER_VOICE_PROFILE,
+    voiceSpeed,
   });
 
-  useEffect(() => {
-    speakBusyRef.current = isSpeakLoading || isSpeakPlaying;
-  }, [isSpeakLoading, isSpeakPlaying]);
-
-  const runTranscribe = useCallback(
-    async (blob, mimeType, sessionSnapshot, speakerSnapshot, signal, options = {}) => {
-      const autoDetectLanguage = options.autoDetectLanguage === true;
-      const langs = languagesForSpeaker(sessionSnapshot, speakerSnapshot);
-      const filename = mimeType?.includes("mp4")
-        ? "recording.m4a"
-        : mimeType?.includes("ogg")
-          ? "recording.ogg"
-          : "recording.webm";
-
-      const transcribeOpts = {
-        filename,
-        signal,
-        ...(autoDetectLanguage ? {} : { language: langs.sourceLanguage }),
-      };
-
-      let result = await transcribeAudio(blob, transcribeOpts);
-
-      if (
-        !result.ok &&
-        result.code === "network" &&
-        !signal.aborted &&
-        typeof navigator !== "undefined" &&
-        navigator.onLine !== false
-      ) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, INTERPRETER_TRANSCRIBE_RETRY_DELAY_MS);
-        });
-        if (!signal.aborted) {
-          result = await transcribeAudio(blob, transcribeOpts);
-        }
-      }
-
-      return result;
-    },
-    [],
-  );
-
-  const runTranslateDraft = useCallback(
-    async ({
-      sessionId,
-      turnId,
-      text,
-      sourceLanguage,
-      targetLanguage,
-      turnSpeaker,
-      priorConfidence,
-    }) => {
-      if (translateInFlightRef.current) return;
-      const trimmed = String(text || "").trim();
-      if (!trimmed || !sessionId || !turnId) return;
-
-      if (!connectivity.isOnline) {
-        announceError(t.errors.offline);
-        return;
-      }
-
-      translateInFlightRef.current = true;
-      translateAbortRef.current?.abort();
-      translateAbortRef.current = new AbortController();
-      const { signal } = translateAbortRef.current;
-
-      if (mountedRef.current) {
-        setIsTranslating(true);
-        setErrorMessage(null);
-        setRecoveryAction(null);
-      }
-      announceStatus(t.room.statusTranslating);
-
-      try {
-        updateTurn(sessionId, turnId, {
-          originalText: trimmed,
-          status: TURN_STATUS_CONFIRMED,
-        });
-        reloadSession();
-
-        const translateParams = {
-          text: trimmed,
-          sourceLanguage,
-          targetLanguage,
-          speaker: turnSpeaker,
-        };
-
-        let result = await translateTurn(translateParams, { signal });
-
-        if (
-          !result.ok &&
-          isRetryableInterpreterCode(result.code) &&
-          !signal.aborted &&
-          connectivity.isOnline
-        ) {
-          await new Promise((resolve) => {
-            setTimeout(resolve, INTERPRETER_REQUEST_RETRY_DELAY_MS);
-          });
-          if (!signal.aborted && mountedRef.current) {
-            result = await translateTurn(translateParams, { signal });
-          }
-        }
-
-        if (!mountedRef.current) return;
-
-        if (result.ok) {
-          const confidence =
-            result.confidence === "low" || result.uncertain
-              ? "low"
-              : priorConfidence === "low"
-                ? "low"
-                : priorConfidence;
-
-          updateTurn(sessionId, turnId, {
-            originalText: trimmed,
-            translatedText: result.translatedText,
-            status: TURN_STATUS_TRANSLATED,
-            confidence,
-            translationDirection:
-              result.translationDirection ||
-              `${sourceLanguage}->${targetLanguage}`,
-            translationUncertain: result.uncertain === true ? true : undefined,
-            terminologyWarning:
-              result.terminologyWarning === true ? true : undefined,
-            unclearSource: result.unclearSource === true ? true : undefined,
-          });
-          setActiveTurnId(null);
-          reloadSession();
-          maybeApplyAutoSessionTitle(sessionId, t, uiLanguage);
-          reloadSession();
-          announceStatus(t.room.statusSpeaking);
-
-          if (
-            CONTINUOUS_CONVERSATION_MODE &&
-            result.translatedText?.trim() &&
-            serverStatus.ttsEnabled !== false
-          ) {
-            await playSpeakText({
-              text: result.translatedText,
-              language: targetLanguage,
-              target: "translation",
-              awaitEnd: true,
-            });
-          }
-
-          announceStatus(t.room.statusReadyForNext);
-          if (CONTINUOUS_CONVERSATION_MODE) {
-            void syncSessionToCloudQuiet(sessionId);
-            scheduleAutoListenRef.current();
-          }
-          return;
-        }
-
-        if (result.code === "cancelled") return;
-
-        if (result.code === "blocked") {
-          updateTurn(sessionId, turnId, {
-            originalText: trimmed,
-            status: TURN_STATUS_BLOCKED,
-            translatedText: undefined,
-            translationDirection: undefined,
-            translationUncertain: undefined,
-            terminologyWarning: undefined,
-            unclearSource: undefined,
-          });
-          announceError(
-            interpreterErrorMessage("blocked", t, result.message),
-          );
-          reloadSession();
-          if (CONTINUOUS_CONVERSATION_MODE) {
-            scheduleAutoListenRef.current();
-          }
-          return;
-        }
-
-        updateTurn(sessionId, turnId, {
-          originalText: trimmed,
-          status: TURN_STATUS_DRAFT,
-        });
-        reloadSession();
-        if (isRetryableInterpreterCode(result.code)) {
-          setRecoveryAction("translate");
-        }
-        announceError(interpreterErrorMessage(result.code, t, result.message));
-        if (CONTINUOUS_CONVERSATION_MODE) {
-          scheduleAutoListenRef.current();
-        }
-      } catch {
-        if (mountedRef.current) {
-          updateTurn(sessionId, turnId, {
-            originalText: trimmed,
-            status: TURN_STATUS_DRAFT,
-          });
-          reloadSession();
-          setRecoveryAction("translate");
-          announceError(t.errors.generic);
-          if (CONTINUOUS_CONVERSATION_MODE) {
-            scheduleAutoListenRef.current();
-          }
-        }
-      } finally {
-        translateInFlightRef.current = false;
-        if (mountedRef.current) setIsTranslating(false);
-      }
-    },
-    [
-      t,
-      uiLanguage,
-      reloadSession,
-      announceError,
-      announceStatus,
-      connectivity.isOnline,
-      mountedRef,
-      playSpeakText,
-      serverStatus.ttsEnabled,
-      syncSessionToCloudQuiet,
-    ],
-  );
-
-  const handleRecorded = useCallback(
-    async ({ blob, mimeType }) => {
-      const current = getCurrentSession();
-      if (
-        !current ||
-        transcribeInFlightRef.current ||
-        translateInFlightRef.current ||
-        simplifyInFlightRef.current ||
-        speakBusyRef.current
-      ) {
-        return;
-      }
-
-      if (!connectivity.isOnline) {
-        announceError(t.errors.offline);
-        return;
-      }
-
-      const silence = await detectLikelySilentBlob(blob);
-      if (silence.silent && !silence.skipped) {
-        if (CONTINUOUS_CONVERSATION_MODE) {
-          scheduleAutoListenRef.current();
-          return;
-        }
-        announceError(t.pushToTalk.likelySilent);
-        return;
-      }
-
-      transcribeInFlightRef.current = true;
-      transcribeAbortRef.current?.abort();
-      transcribeAbortRef.current = new AbortController();
-      const { signal } = transcribeAbortRef.current;
-
-      if (mountedRef.current) {
-        setIsTranscribing(true);
-        setErrorMessage(null);
-        setRecoveryAction(null);
-        setMaxDurationReached(false);
-      }
-      announceStatus(t.room.statusTranscribing);
-
-      try {
-        const result = await runTranscribe(
-          blob,
-          mimeType,
-          current,
-          speaker,
-          signal,
-          { autoDetectLanguage: CONTINUOUS_CONVERSATION_MODE },
-        );
-        if (!mountedRef.current) return;
-
-        if (!result.ok) {
-          if (result.code === "cancelled") return;
-          if (result.code === "validation") {
-            if (CONTINUOUS_CONVERSATION_MODE) {
-              scheduleAutoListenRef.current();
-              return;
-            }
-            announceError(t.pushToTalk.tooShort);
-            return;
-          }
-          announceError(
-            interpreterErrorMessage(result.code, t, result.message),
-          );
-          if (CONTINUOUS_CONVERSATION_MODE) {
-            scheduleAutoListenRef.current();
-          }
-          return;
-        }
-
-        const transcript = result.transcript.trim();
-        if (!transcript) {
-          if (CONTINUOUS_CONVERSATION_MODE) {
-            scheduleAutoListenRef.current();
-            return;
-          }
-          announceError(t.pushToTalk.tooShort);
-          return;
-        }
-
-        const detectedSpeaker = CONTINUOUS_CONVERSATION_MODE
-          ? detectSpeakerFromLanguage(result.language, current, speaker)
-          : speaker;
-        if (detectedSpeaker !== speaker) {
-          setSpeaker(detectedSpeaker);
-        }
-
-        const langs = languagesForSpeaker(current, detectedSpeaker);
-        const turn = addTurn(current.sessionId, {
-          speaker: detectedSpeaker,
-          sourceLanguage: langs.sourceLanguage,
-          targetLanguage: langs.targetLanguage,
-          originalText: transcript,
-          status: TURN_STATUS_DRAFT,
-          confidence: mapTranscribeConfidence(result.confidence),
-        });
-
-        if (turn) {
-          if (!CONTINUOUS_CONVERSATION_MODE) {
-            setActiveTurnId(turn.turnId);
-            setDraftText(transcript);
-            requestAnimationFrame(() => {
-              if (mountedRef.current) transcriptRef.current?.focus();
-            });
-          }
-          reloadSession();
-          transcribeInFlightRef.current = false;
-          if (mountedRef.current) setIsTranscribing(false);
-          await runTranslateDraft({
-            sessionId: current.sessionId,
-            turnId: turn.turnId,
-            text: transcript,
-            sourceLanguage: langs.sourceLanguage,
-            targetLanguage: langs.targetLanguage,
-            turnSpeaker: detectedSpeaker,
-            priorConfidence: mapTranscribeConfidence(result.confidence),
-          });
-        }
-      } catch {
-        if (mountedRef.current) {
-          if (CONTINUOUS_CONVERSATION_MODE) {
-            scheduleAutoListenRef.current();
-          } else {
-            announceError(t.errors.generic);
-          }
-        }
-      } finally {
-        transcribeInFlightRef.current = false;
-        if (mountedRef.current) setIsTranscribing(false);
-      }
-    },
-    [
-      speaker,
-      t,
-      reloadSession,
-      announceError,
-      announceStatus,
-      runTranscribe,
-      runTranslateDraft,
-      connectivity.isOnline,
-      mountedRef,
-    ],
-  );
-
-  const streamCapture = useInterpreterStreamCapture({
-    languageHint: session
-      ? languagesForSpeaker(session, speaker).sourceLanguage
-      : undefined,
-    onStatusMessage: (msg) => {
-      const labels = {
-        streaming: t.streaming.statusConnected,
-        finalizing: t.streaming.statusFinalizing,
-        max_duration: t.streaming.maxDurationReached,
-      };
-      const text = labels[msg] || (typeof msg === "string" ? msg : "");
-      if (text) announceStatus(text);
-    },
-    onError: (code) => {
-      const message =
-        code === "mic_denied"
-          ? t.pushToTalk.micDenied
-          :         code === "unsupported_browser"
-            ? t.streaming.unsupportedBrowser
-            : code === "stream_backpressure"
-              ? t.streaming.backpressureError
-              : t.streaming.errorGeneric;
-      announceError(message);
-    },
-  });
-
-  const {
-    isPreparing,
-    isRecording,
-    isStopping,
-    isBusy: recorderBusy,
-    recorderError,
-    clearRecorderError,
-    startRecording,
-    stopRecording,
-    cancelRecording,
-  } = useInterpreterRecorder({
-    onRecorded: handleRecorded,
-    onMaxDuration: () => setMaxDurationReached(true),
-    onRecordingStart: () => {
-      setMaxDurationReached(false);
-      stopAllPlayback();
-      announceStatus(
-        CONTINUOUS_CONVERSATION_MODE
-          ? t.conversation.listening
-          : t.room.statusRecording,
-      );
-    },
-  });
-
-  startRecordingRef.current = startRecording;
-
-  useEffect(() => {
-    const current = getCurrentSession();
-    if (
-      current &&
-      current.status !== SESSION_STATUS_ENDED &&
-      current.status !== SESSION_STATUS_ACTIVE
-    ) {
-      updateSessionMetadata(current.sessionId, { status: SESSION_STATUS_ACTIVE });
-      reloadSession();
-    }
-  }, [reloadSession]);
-
-  useEffect(() => {
-    if (recorderError) {
-      announceError(recorderErrorMessage(recorderError, t));
-    }
-  }, [recorderError, t, announceError]);
-
-  useEffect(() => {
-    if (!connectivity.showOfflineBanner) return;
-    abortAllRequests();
-    cancelRecording();
-    streamCancelRef.current();
-    stopAllPlayback();
-    if (mountedRef.current) {
-      setIsTranscribing(false);
-      setIsTranslating(false);
-      setIsSimplifying(false);
-    }
-    transcribeInFlightRef.current = false;
-    translateInFlightRef.current = false;
-    simplifyInFlightRef.current = false;
-  }, [
-    connectivity.showOfflineBanner,
-    abortAllRequests,
-    cancelRecording,
-    stopAllPlayback,
-    mountedRef,
-  ]);
-
-  useEffect(() => {
-    if (!connectivity.showReconnectedBanner || !mountedRef.current) return;
-    setErrorMessage(null);
-  }, [connectivity.showReconnectedBanner, mountedRef]);
-
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === "visible") reloadSession();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [reloadSession]);
-
-  const displayTurn = useMemo(() => {
-    const turns = session?.turns ?? [];
-    if (!turns.length) return null;
-    if (activeTurnId) {
-      return turns.find((turn) => turn.turnId === activeTurnId) ?? null;
-    }
-    return turns[turns.length - 1];
-  }, [session, activeTurnId]);
-
-  useEffect(() => {
-    if (displayTurn?.status === TURN_STATUS_DRAFT) {
-      setDraftText(displayTurn.originalText || "");
-    } else if (displayTurn) {
-      setDraftText(displayTurn.originalText || "");
-    }
-  }, [displayTurn]);
-
-  useEffect(() => {
-    if (!session?.sessionId || !displayTurn || displayTurn.status !== TURN_STATUS_DRAFT) {
-      return undefined;
-    }
-    const stored = (displayTurn.originalText || "").trim();
-    const next = draftText.trim();
-    if (next === stored) return undefined;
-    const timer = window.setTimeout(() => {
-      updateTurn(session.sessionId, displayTurn.turnId, { originalText: draftText });
-      reloadSession();
-    }, 400);
-    return () => window.clearTimeout(timer);
-  }, [draftText, displayTurn, session?.sessionId, reloadSession]);
-
-  const sessionEnded = session?.status === SESSION_STATUS_ENDED;
-  const hasDraftTurn =
-    !CONTINUOUS_CONVERSATION_MODE && displayTurn?.status === TURN_STATUS_DRAFT;
-
-  const clearAutoListenTimer = useCallback(() => {
-    if (autoListenTimerRef.current) {
-      clearTimeout(autoListenTimerRef.current);
-      autoListenTimerRef.current = null;
-    }
+  const cancelInFlight = useCallback(() => {
+    runTokenRef.current += 1;
+    transcribeAbortRef.current?.abort();
+    translateAbortRef.current?.abort();
+    transcribeAbortRef.current = null;
+    translateAbortRef.current = null;
+    processingRef.current = false;
   }, []);
 
-  scheduleAutoListenRef.current = () => {
-    if (!CONTINUOUS_CONVERSATION_MODE || sessionEnded) return;
-    clearAutoListenTimer();
-    autoListenTimerRef.current = window.setTimeout(() => {
-      autoListenTimerRef.current = null;
-      if (!mountedRef.current) return;
-      const current = getCurrentSession();
-      if (!current || current.status === SESSION_STATUS_ENDED) return;
-      if (
-        transcribeInFlightRef.current ||
-        translateInFlightRef.current ||
-        simplifyInFlightRef.current ||
-        speakBusyRef.current
-      ) {
-        scheduleAutoListenRef.current();
-        return;
-      }
-      void startRecordingRef.current?.();
-    }, AUTO_LISTEN_DELAY_MS);
-  };
-
-  const streamLangs = session
-    ? languagesForSpeaker(session, speaker)
-    : { sourceLanguage: undefined, targetLanguage: undefined };
-
-  const streamSourceStable =
-    streamCapture.phase !== "connecting" && streamCapture.phase !== "finalizing";
-
-  streamCancelRef.current = () => {
-    void streamCapture.cancelStream();
-  };
-
-  const nearRealtimePreview = useInterpreterNearRealtimePreview({
-    enabled:
-      nearRealtimeFeatureAvailable &&
-      Boolean(streamCapture.previewText.trim()) &&
-      !hasDraftTurn,
-    sourceText: streamCapture.previewText,
-    sourceLanguage: streamLangs.sourceLanguage,
-    targetLanguage: streamLangs.targetLanguage,
-    speaker,
-    isSourceStable: streamSourceStable,
-    onError: () => {
-      announceError(t.nearRealtime.errorGeneric);
-    },
-  });
-
-  discardNearRealtimeRef.current = nearRealtimePreview.discardPreview;
-
-  useEffect(() => {
-    return () => {
-      abortAllRequests();
-      cancelRecording();
-      streamCancelRef.current();
-      stopAllPlayback();
-      discardNearRealtimeRef.current();
-      transcribeInFlightRef.current = false;
-      translateInFlightRef.current = false;
-      simplifyInFlightRef.current = false;
-    };
-  }, [abortAllRequests, cancelRecording, stopAllPlayback]);
-
-  useEffect(() => {
-    if (!session) {
-      navigate("/patient/interpreter", { replace: true });
-    }
-  }, [session, navigate]);
-
-  const draftPending =
-    !sessionEnded &&
-    hasDraftTurn &&
-    Boolean(draftText.trim());
-
-  const discardActiveDraft = useCallback(() => {
-    if (!session?.sessionId || !displayTurn || displayTurn.status !== TURN_STATUS_DRAFT) {
-      return;
-    }
-    deleteTurn(session.sessionId, displayTurn.turnId);
-    setActiveTurnId(null);
-    setDraftText("");
-    reloadSession();
-  }, [session?.sessionId, displayTurn, reloadSession]);
-
-  const flushDraftToStore = useCallback(() => {
-    if (!session?.sessionId || !displayTurn || displayTurn.status !== TURN_STATUS_DRAFT) {
-      return;
-    }
-    const trimmed = draftText.trim();
-    if (!trimmed) return;
-    updateTurn(session.sessionId, displayTurn.turnId, { originalText: draftText });
-  }, [session?.sessionId, displayTurn, draftText]);
-
-  const {
-    leaveDialogOpen,
-    cancelLeave,
-    confirmLeave: confirmLeaveBase,
-    requestLeave,
-  } = useInterpreterDraftGuard(draftPending, discardActiveDraft, flushDraftToStore);
-
-  const confirmLeave = useCallback(() => {
-    void streamCapture.cancelStream();
-    cancelRecording();
+  const stopRuntime = useCallback(() => {
+    clearAutoRestart();
+    cancelInFlight();
     stopAllPlayback();
-    nearRealtimePreview.discardPreview();
-    setPreviewPlaybackEnabled(false);
-    confirmLeaveBase();
-  }, [
-    streamCapture,
-    cancelRecording,
-    stopAllPlayback,
-    nearRealtimePreview,
-    confirmLeaveBase,
-  ]);
+  }, [cancelInFlight, clearAutoRestart, stopAllPlayback]);
 
-  const handleBackNavigation = useCallback(
-    (event) => {
-      if (!draftPending) return;
-      event.preventDefault();
-      requestLeave(() => navigate("/patient/interpreter"));
+  const announce = useCallback((message) => {
+    setLiveAnnouncement("");
+    requestAnimationFrame(() => setLiveAnnouncement(message));
+  }, []);
+
+  const showError = useCallback(
+    (message) => {
+      setErrorMessage(message);
+      setPhase(LIVE_PHASE.ERROR);
+      requestAnimationFrame(() => alertRef.current?.focus());
     },
-    [draftPending, requestLeave, navigate],
+    [setPhase],
   );
 
-  const pttPhase = useMemo(
-    () =>
-      derivePttPhase({
-        sessionEnded,
-        isPreparing,
-        isRecording,
-        isStopping,
-        isTranscribing,
-        isTranslating,
-        isSimplifying,
-        turnStatus: displayTurn?.status,
-      }),
-    [
-      sessionEnded,
-      isPreparing,
-      isRecording,
-      isStopping,
-      isTranscribing,
-      isTranslating,
-      isSimplifying,
-      displayTurn?.status,
-    ],
-  );
-
-  const streamActive = streamCapture.isActive;
-
-  const busy =
-    isPttCaptureActive(pttPhase) ||
-    pttPhase === PTT_PHASE.TRANSCRIBING ||
-    pttPhase === PTT_PHASE.TRANSLATING ||
-    streamActive ||
-    isSpeakLoading ||
-    isSpeakPlaying;
-
-  const liveChatPhase = useMemo(() => {
-    if (isSpeakPlaying || isSpeakLoading) return "speaking";
-    if (isTranslating) return "translating";
-    if (isTranscribing) return "transcribing";
-    if (isRecording && !isPreparing && !isStopping) return "listening";
-    if (busy) return "busy";
-    return "ready";
-  }, [
-    isSpeakPlaying,
-    isSpeakLoading,
-    isTranslating,
-    isTranscribing,
-    isRecording,
-    isPreparing,
-    isStopping,
-    busy,
-  ]);
-
-  const statusLabel = useMemo(() => {
-    if (
-      CONTINUOUS_CONVERSATION_MODE &&
-      isRecording &&
-      !isTranscribing &&
-      !isTranslating
-    ) {
-      return t.conversation.listening;
+  const statusText = useMemo(() => {
+    switch (phase) {
+      case LIVE_PHASE.LISTENING:
+        return t.liveSession.statusListening;
+      case LIVE_PHASE.SILENCE_WAITING:
+        return t.liveSession.statusSilenceWaiting;
+      case LIVE_PHASE.TRANSCRIBING:
+        return t.liveSession.statusTranscribing;
+      case LIVE_PHASE.TRANSLATING:
+        return t.liveSession.statusTranslating;
+      case LIVE_PHASE.SPEAKING_TRANSLATION:
+        return t.liveSession.statusSpeaking;
+      case LIVE_PHASE.PAUSED:
+        return t.liveSession.statusPaused;
+      case LIVE_PHASE.ENDED:
+        return t.liveSession.statusEnded;
+      case LIVE_PHASE.ERROR:
+        return t.liveSession.statusError;
+      default:
+        return t.liveSession.statusIdle;
     }
-    if (streamCapture.phase === "streaming") return t.streaming.statusConnected;
-    if (streamCapture.phase === "finalizing") return t.streaming.statusFinalizing;
-    if (streamCapture.phase === "connecting") return t.streaming.statusConnecting;
-    if (isSpeakPlaying) return t.room.statusSpeaking;
-    if (isSpeakLoading) return t.speak.loading;
-    if (isSimplifying && pttPhase !== PTT_PHASE.TRANSLATING) {
-      return t.room.statusSimplifying;
-    }
-    return pttPhaseStatusLabel(pttPhase, t);
-  }, [
-    streamCapture.phase,
-    isSpeakPlaying,
-    isSpeakLoading,
-    isSimplifying,
-    pttPhase,
-    t,
-  ]);
+  }, [phase, t.liveSession]);
 
-  useEffect(() => {
-    if (!CONTINUOUS_CONVERSATION_MODE || !session || sessionEnded) return;
-    if (continuousListenBootstrappedRef.current) return;
-    if (recorderError === "mic_denied" || !connectivity.isOnline) return;
-    if (isRecording || isPreparing || isStopping || isTranscribing || isTranslating) {
-      return;
-    }
-    continuousListenBootstrappedRef.current = true;
-    scheduleAutoListenRef.current();
-  }, [
-    session,
-    sessionEnded,
-    recorderError,
-    connectivity.isOnline,
-    isRecording,
-    isPreparing,
-    isStopping,
-    isTranscribing,
-    isTranslating,
-  ]);
+  const languagePairLabel = useMemo(() => {
+    if (!session) return "";
+    const patient = formatLanguageDisplayName(uiLanguage, session.patientLanguage) || session.patientLanguage;
+    const doctor = formatLanguageDisplayName(uiLanguage, session.doctorLanguage) || session.doctorLanguage;
+    return t.room.languagesLabel
+      .replace("{{patient}}", patient)
+      .replace("{{doctor}}", doctor);
+  }, [session, t.room.languagesLabel, uiLanguage]);
 
-  const recoveredDraftsRef = useRef(new Set());
-
-  useEffect(() => {
-    if (!CONTINUOUS_CONVERSATION_MODE || !session || sessionEnded) return;
-    if (
-      translateInFlightRef.current ||
-      transcribeInFlightRef.current ||
-      isRecording ||
-      isPreparing ||
-      isStopping ||
-      isTranslating ||
-      isTranscribing
-    ) {
-      return;
-    }
-    const stuckDraft = [...(session.turns ?? [])]
-      .reverse()
-      .find(
-        (turn) =>
-          turn.status === TURN_STATUS_DRAFT &&
-          turn.originalText?.trim() &&
-          !turn.translatedText?.trim() &&
-          !recoveredDraftsRef.current.has(turn.turnId),
-      );
-    if (!stuckDraft) return;
-
-    recoveredDraftsRef.current.add(stuckDraft.turnId);
-    const langs =
-      stuckDraft.sourceLanguage && stuckDraft.targetLanguage
-        ? {
-            sourceLanguage: stuckDraft.sourceLanguage,
-            targetLanguage: stuckDraft.targetLanguage,
-          }
-        : languagesForSpeaker(session, stuckDraft.speaker);
-
-    void runTranslateDraft({
-      sessionId: session.sessionId,
-      turnId: stuckDraft.turnId,
-      text: stuckDraft.originalText,
-      sourceLanguage: langs.sourceLanguage,
-      targetLanguage: langs.targetLanguage,
-      turnSpeaker: stuckDraft.speaker,
-      priorConfidence: stuckDraft.confidence,
-    });
-  }, [
-    session,
-    sessionEnded,
-    isRecording,
-    isPreparing,
-    isStopping,
-    isTranslating,
-    isTranscribing,
-    runTranslateDraft,
-  ]);
-
-  useEffect(() => () => clearAutoListenTimer(), [clearAutoListenTimer]);
-
-  const speakerDisabled =
-    sessionEnded ||
-    isRecording ||
-    isPreparing ||
-    isStopping ||
-    isTranscribing ||
-    isTranslating ||
-    isSimplifying ||
-    hasDraftTurn ||
-    streamActive;
-
-  const pttDisabledReason = useMemo(() => {
-    if (sessionEnded) return t.room.statusReadyForNext;
-    if (hasDraftTurn) return t.pushToTalk.disabledDraft;
-    if (
-      isTranscribing ||
-      isTranslating ||
-      isSimplifying ||
-      isPreparing ||
-      isStopping
-    ) {
-      return t.pushToTalk.disabledBusy;
-    }
-    if (!connectivity.isOnline) return t.pushToTalk.disabledOffline;
-    return "";
-  }, [
-    sessionEnded,
-    hasDraftTurn,
-    isTranscribing,
-    isTranslating,
-    isSimplifying,
-    isPreparing,
-    isStopping,
-    connectivity.isOnline,
-    t,
-  ]);
-
-  const handleListenTranslation = async () => {
-    if (!displayTurn?.translatedText?.trim()) return;
-    if (!serverStatus.ttsEnabled) {
-      announceError(t.errors.ttsDisabled);
-      return;
-    }
-    if (isRecording || isPreparing || isStopping) {
-      cancelRecording();
-    }
-    stopAllPlayback();
-    const result = await playSpeakText({
-      text: displayTurn.translatedText,
-      language: displayTurn.targetLanguage,
-      target: "translation",
-      useStreamEndpoint: false,
-    });
-    if (!result.ok && result.code) {
-      announceError(
-        interpreterErrorMessage(result.code, t, result.message),
-      );
-    } else if (!result.ok) {
-      announceError(t.errors.speakFailed);
-    } else if (result.ok) {
-      announceStatus(t.speak.playbackPlaying);
-    }
-  };
-
-  const handleListenPreviewTranslation = async () => {
-    const text = nearRealtimePreview.previewTranslation.trim();
-    if (!text || !streamingTtsFeatureAvailable || !previewPlaybackEnabled) {
-      return;
-    }
-    if (nearRealtimePreview.isStale) {
-      announceError(t.streamingTts.staleBlockPlayback);
-      return;
-    }
-    if (isRecording || isPreparing || isStopping) {
-      cancelRecording();
-    }
-    if (streamActive) {
-      announceError(t.streaming.disabledWhileStreaming);
-      return;
-    }
-    stopAllPlayback();
-    const langs = session ? languagesForSpeaker(session, speaker) : null;
-    if (!langs?.targetLanguage) return;
-
-    const result = await playSpeakText({
-      text,
-      language: langs.targetLanguage,
-      target: "preview",
-      useStreamEndpoint: true,
-    });
-    if (!result.ok && result.code) {
-      if (result.code === "rate_limited") {
-        announceError(t.errors.rateLimited);
-      } else {
-        announceError(
-          result.code === "speak_failed" || result.code === "network"
-            ? t.streamingTts.errorGeneric
-            : interpreterErrorMessage(result.code, t, result.message),
-        );
-      }
-    } else if (result.ok) {
-      announceStatus(t.speak.playbackPlaying);
-    }
-  };
-
-  const handleListenSimplified = async () => {
-    if (!displayTurn?.simplifiedText?.trim()) return;
-    if (isRecording || isPreparing || isStopping) {
-      cancelRecording();
-    }
-    stopAllPlayback();
-    const result = await playSpeakText({
-      text: displayTurn.simplifiedText,
-      language: displayTurn.targetLanguage,
-      target: "simplified",
-      useStreamEndpoint: false,
-    });
-    if (!result.ok && result.code) {
-      announceError(
-        interpreterErrorMessage(result.code, t, result.message),
-      );
-    } else if (!result.ok) {
-      announceError(t.errors.speakFailed);
-    }
-  };
-
-  const applyStreamTranscriptAsDraft = useCallback(
-    (transcript, confidence) => {
-      const current = getCurrentSession();
-      if (!current || !transcript.trim()) return;
-      const langs = languagesForSpeaker(current, speaker);
-      const turn = addTurn(current.sessionId, {
-        speaker,
-        sourceLanguage: langs.sourceLanguage,
-        targetLanguage: langs.targetLanguage,
-        originalText: transcript.trim(),
-        status: TURN_STATUS_DRAFT,
-        confidence: mapTranscribeConfidence(confidence),
-      });
-      if (turn) {
-        setActiveTurnId(turn.turnId);
-        setDraftText(transcript.trim());
-        reloadSession();
-        announceStatus(t.room.statusEditingDraft);
-        requestAnimationFrame(() => {
-          if (mountedRef.current) transcriptRef.current?.focus();
-        });
-      }
-    },
-    [speaker, reloadSession, announceStatus, mountedRef],
-  );
-
-  const handleStreamStart = useCallback(() => {
-    if (!streamingFeatureAvailable || streamActive) return;
-    stopAllPlayback();
-    cancelRecording();
-    nearRealtimePreview.discardPreview();
-    setErrorMessage(null);
-    void streamCapture.startStreaming();
-  }, [
-    streamingFeatureAvailable,
-    streamActive,
-    stopAllPlayback,
-    cancelRecording,
-    nearRealtimePreview,
-    streamCapture,
-  ]);
-
-  const handleStreamStop = useCallback(() => {
-    void (async () => {
-      const result = await streamCapture.stopStreaming();
-      if (result.ok && result.transcript) {
-        announceStatus(t.streaming.previewReady);
-      }
-    })();
-  }, [streamCapture, announceStatus, t.streaming.previewReady]);
-
-  const handleStreamUseAsDraft = useCallback(() => {
-    const text = streamCapture.previewText.trim();
-    if (!text) return;
-    nearRealtimePreview.discardPreview();
-    applyStreamTranscriptAsDraft(text, streamCapture.previewConfidence);
-  }, [
-    streamCapture.previewText,
-    streamCapture.previewConfidence,
-    applyStreamTranscriptAsDraft,
-    nearRealtimePreview,
-  ]);
-
-  const handleToggleRecording = async () => {
-    if (!session || sessionEnded || streamActive) return;
-    if (session && hasPendingDraftTurn(session)) {
-      announceStatus(t.pushToTalk.disabledDraft);
-      return;
-    }
-    if (
-      isStopping ||
-      isPreparing ||
-      recorderBusy ||
-      transcribeInFlightRef.current ||
-      translateInFlightRef.current ||
-      simplifyInFlightRef.current ||
-      isTranslating ||
-      isSimplifying ||
-      isTranscribing
-    ) {
-      return;
-    }
-    stopAllPlayback();
-    nearRealtimePreview.discardPreview();
-    if (recorderError !== "mic_denied") {
-      clearRecorderError();
-    }
-    setErrorMessage(null);
-
-    if (isRecording || isStopping) {
-      stopRecording();
-      return;
-    }
-
-    if (!connectivity.isOnline) {
-      announceError(t.errors.offline);
-      return;
-    }
-
-    if (hasDraftTurn) {
-      return;
-    }
-
-    setActiveTurnId(null);
-    await startRecording();
-  };
-
-  const handleRetryMic = useCallback(() => {
-    clearRecorderError();
-    setErrorMessage(null);
-    if (!connectivity.isOnline) {
-      announceError(t.errors.offline);
-      return;
-    }
-    if (hasDraftTurn || sessionEnded) return;
-    setActiveTurnId(null);
-    void startRecording();
-  }, [
-    clearRecorderError,
-    connectivity.isOnline,
-    hasDraftTurn,
-    sessionEnded,
-    announceError,
-    t.errors.offline,
-    startRecording,
-  ]);
-
-  const handleSpeakerChange = useCallback(
-    (nextSpeaker) => {
-      if (nextSpeaker === speaker) return;
-      if (
-        isTranscribing ||
-        isTranslating ||
-        isSimplifying ||
-        transcribeInFlightRef.current ||
-        translateInFlightRef.current
-      ) {
-        announceStatus(t.pushToTalk.disabledBusy);
-        return;
-      }
-      if (isRecording || isPreparing || isStopping) {
-        cancelRecording();
-      }
-      if (streamCapture.isActive) {
-        void streamCapture.cancelStream();
-      }
-      nearRealtimePreview.discardPreview();
-      stopAllPlayback();
-      abortAllRequests();
-      setSpeaker(nextSpeaker);
-      announceStatus(
-        nextSpeaker === SPEAKER_PATIENT
-          ? t.room.turnPatient
-          : t.room.turnClinician,
-      );
-    },
-    [
-      speaker,
-      isRecording,
-      isPreparing,
-      isStopping,
-      abortAllRequests,
-      cancelRecording,
-      stopAllPlayback,
-      announceStatus,
-      t.room.turnPatient,
-      t.room.turnClinician,
-      streamCapture,
-      nearRealtimePreview,
-      isTranscribing,
-      isTranslating,
-      isSimplifying,
-      t.pushToTalk.disabledBusy,
-    ],
-  );
-
-  const speakerDirectionLabel = useMemo(() => {
+  const currentDirectionLabel = useMemo(() => {
     if (!session) return "";
     const langs = languagesForSpeaker(session, speaker);
-    const source = formatLanguageDisplayName(uiLanguage, langs.sourceLanguage);
-    const target = formatLanguageDisplayName(uiLanguage, langs.targetLanguage);
+    const source = formatLanguageDisplayName(uiLanguage, langs.sourceLanguage) || langs.sourceLanguage;
+    const target = formatLanguageDisplayName(uiLanguage, langs.targetLanguage) || langs.targetLanguage;
     return t.room.speakerDirection
       .replace("{{source}}", source)
       .replace("{{target}}", target);
-  }, [session, speaker, uiLanguage, t.room.speakerDirection]);
+  }, [session, speaker, t.room.speakerDirection, uiLanguage]);
 
-  const runConfirmTranslate = useCallback(async () => {
-    if (!session || !displayTurn || displayTurn.status !== TURN_STATUS_DRAFT) {
-      return;
-    }
-    await runTranslateDraft({
-      sessionId: session.sessionId,
-      turnId: displayTurn.turnId,
-      text: draftText,
-      sourceLanguage: displayTurn.sourceLanguage,
-      targetLanguage: displayTurn.targetLanguage,
-      turnSpeaker: displayTurn.speaker,
-      priorConfidence: displayTurn.confidence,
-    });
-  }, [session, displayTurn, draftText, runTranslateDraft]);
-
-  const handleConfirmTranscript = () => {
-    void runConfirmTranslate();
-  };
-
-  const runSimplify = useCallback(async () => {
-    if (simplifyInFlightRef.current || translateInFlightRef.current) return;
-    if (!session || !displayTurn) return;
-    const translated = displayTurn.translatedText?.trim();
-    if (displayTurn.status !== TURN_STATUS_TRANSLATED || !translated) return;
-
-    if (!connectivity.isOnline) {
-      announceError(t.errors.offline);
-      return;
-    }
-
-    simplifyInFlightRef.current = true;
-    simplifyAbortRef.current?.abort();
-    simplifyAbortRef.current = new AbortController();
-    const { signal } = simplifyAbortRef.current;
-
-    if (mountedRef.current) {
-      setIsSimplifying(true);
-      setErrorMessage(null);
-      setRecoveryAction(null);
-    }
-    announceStatus(t.room.statusSimplifying);
-
-    const simplifyParams = {
-      text: translated,
-      language: displayTurn.targetLanguage,
-      speaker: displayTurn.speaker,
-    };
-
-    try {
-      let result = await simplifyTurn(simplifyParams, { signal });
-
-      if (
-        !result.ok &&
-        isRetryableInterpreterCode(result.code) &&
-        !signal.aborted &&
-        connectivity.isOnline
-      ) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, INTERPRETER_REQUEST_RETRY_DELAY_MS);
-        });
-        if (!signal.aborted && mountedRef.current) {
-          result = await simplifyTurn(simplifyParams, { signal });
-        }
-      }
-
-      if (!mountedRef.current) return;
-
-      if (result.ok) {
-        updateTurn(session.sessionId, displayTurn.turnId, {
-          simplifiedText: result.simplifiedText,
-        });
-        reloadSession();
+  const handlePhaseFromSilence = useCallback(
+    (silencePhase) => {
+      if (phaseRef.current === LIVE_PHASE.PAUSED || phaseRef.current === LIVE_PHASE.ENDED) {
         return;
       }
-
-      if (result.code === "cancelled") return;
-
-      if (result.code === "blocked") {
-        announceError(
-          interpreterErrorMessage("blocked", t, result.message),
-        );
-        return;
+      if (silencePhase === "silence_waiting") {
+        setPhase(LIVE_PHASE.SILENCE_WAITING);
+      } else if (silencePhase === "listening") {
+        setPhase(LIVE_PHASE.LISTENING);
       }
-
-      if (isRetryableInterpreterCode(result.code)) {
-        setRecoveryAction("simplify");
-      }
-      announceError(interpreterErrorMessage(result.code, t, result.message));
-    } finally {
-      simplifyInFlightRef.current = false;
-      if (mountedRef.current) setIsSimplifying(false);
-    }
-  }, [
-    session,
-    displayTurn,
-    t,
-    reloadSession,
-    announceError,
-    announceStatus,
-    connectivity.isOnline,
-    mountedRef,
-  ]);
-
-  const handleSimplifyLanguage = () => {
-    void runSimplify();
-  };
-
-  const handleRecoveryRetry = useCallback(() => {
-    if (!connectivity.isOnline) {
-      announceError(t.errors.offline);
-      return;
-    }
-    const action = recoveryAction;
-    setRecoveryAction(null);
-    setErrorMessage(null);
-    if (action === "simplify") {
-      void runSimplify();
-      return;
-    }
-    if (action === "translate") {
-      void runConfirmTranslate();
-    }
-  }, [
-    connectivity.isOnline,
-    recoveryAction,
-    announceError,
-    t.errors.offline,
-    runSimplify,
-    runConfirmTranslate,
-  ]);
-
-  const handleHideSimplified = () => {
-    if (!session || !displayTurn) return;
-    updateTurn(session.sessionId, displayTurn.turnId, {
-      simplifiedText: undefined,
-    });
-    reloadSession();
-  };
-
-  const doEndSession = useCallback(async () => {
-    if (!session || sessionActionInFlightRef.current) return;
-    sessionActionInFlightRef.current = true;
-    if (mountedRef.current) setSessionActionBusy(true);
-    announceStatus(t.conversation.endingSession);
-    clearAutoListenTimer();
-    continuousListenBootstrappedRef.current = false;
-    abortAllRequests();
-    cancelRecording();
-    void streamCapture.cancelStream();
-    stopAllPlayback();
-    const sessionId = session.sessionId;
-    endSession(sessionId, t, uiLanguage);
-    void syncSessionToCloudQuiet(sessionId);
-    reloadSession();
-    sessionActionInFlightRef.current = false;
-    if (mountedRef.current) setSessionActionBusy(false);
-    navigate("/patient/interpreter", { replace: true });
-  }, [
-    session,
-    reloadSession,
-    t,
-    uiLanguage,
-    abortAllRequests,
-    cancelRecording,
-    streamCapture,
-    stopAllPlayback,
-    mountedRef,
-    clearAutoListenTimer,
-    navigate,
-    announceStatus,
-    syncSessionToCloudQuiet,
-  ]);
-
-  const handleDownloadPdf = useCallback(async () => {
-    if (!session || isExporting || sessionActionBusy) return;
-    const fresh = getSession(session.sessionId) || session;
-    const hasTurns = (fresh.turns?.length ?? 0) > 0;
-    if (!hasTurns) {
-      announceError(t.pdf.exportNoTurns);
-      return;
-    }
-    if (mountedRef.current) setIsExporting(true);
-    try {
-      const title = getSessionDisplayTitle(fresh, t, uiLanguage);
-      const result = downloadInterpreterSessionPdf(fresh, title, t);
-      if (!mountedRef.current) return;
-      if (result.ok) {
-        announceStatus(t.pdf.exportSuccess);
-        return;
-      }
-      announceError(
-        result.code === "no_turns" ? t.pdf.exportNoTurns : t.pdf.exportFailed,
-      );
-    } finally {
-      if (mountedRef.current) setIsExporting(false);
-    }
-  }, [
-    session,
-    isExporting,
-    sessionActionBusy,
-    t,
-    uiLanguage,
-    announceStatus,
-    announceError,
-    mountedRef,
-  ]);
-
-  const handleEndSession = () => {
-    if (!session || sessionEnded || sessionActionBusy || busy) return;
-    if (!CONTINUOUS_CONVERSATION_MODE) {
-      flushDraftToStore();
-      const current = reloadSession();
-      if (current && hasPendingDraftTurn(current)) {
-        setConfirmAction("end");
-        return;
-      }
-    }
-    void doEndSession();
-  };
-
-  const handleDeleteSession = () => {
-    if (!session || sessionActionBusy || busy) return;
-    setConfirmAction("delete");
-  };
-
-  const handleDeleteConfirm = () => {
-    if (!session || sessionActionInFlightRef.current) return;
-    sessionActionInFlightRef.current = true;
-    if (mountedRef.current) setSessionActionBusy(true);
-    abortAllRequests();
-    cancelRecording();
-    void streamCapture.cancelStream();
-    stopAllPlayback();
-    const id = session.sessionId;
-    if (cloud.accountConsent && cloud.cloudSessionIds.has(id)) {
-      void deleteCloudSession(id);
-    }
-    deleteSession(id);
-    setConfirmAction(null);
-    sessionActionInFlightRef.current = false;
-    announceStatus(t.history.deleted);
-    navigate("/patient/interpreter", { replace: true });
-  };
-
-  if (!session) {
-    return (
-      <main className="medical-interpreter-page interp-root" id="main-content">
-        <p className="interpreter-empty-state" role="status">
-          {t.languages.loadingDefaults}
-        </p>
-      </main>
-    );
-  }
-
-  const canConfirm =
-    displayTurn?.status === TURN_STATUS_DRAFT &&
-    Boolean(draftText.trim()) &&
-    !busy;
-
-  const pttDisabled =
-    sessionEnded ||
-    isPreparing ||
-    isStopping ||
-    isTranscribing ||
-    isTranslating ||
-    isSimplifying ||
-    isSpeakLoading ||
-    isSpeakPlaying ||
-    (!CONTINUOUS_CONVERSATION_MODE && hasDraftTurn) ||
-    streamActive ||
-    !connectivity.isOnline;
-
-  const statusBarClass = [
-    "interpreter-status-bar",
-    isPttCaptureActive(pttPhase) ? "interpreter-status-bar--recording" : "",
-    busy && !isPttCaptureActive(pttPhase) ? "interpreter-status-bar--busy" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const sessionDialogs = (
-    <>
-      <InterpreterConfirmDialog
-        open={leaveDialogOpen}
-        title={t.confirm.leaveTitle}
-        body={t.confirm.leaveBody}
-        confirmLabel={t.confirm.discardDraft}
-        cancelLabel={t.confirm.keepEditing}
-        onConfirm={confirmLeave}
-        onCancel={cancelLeave}
-        danger
-      />
-
-      <InterpreterConfirmDialog
-        open={confirmAction === "delete"}
-        title={t.confirm.deleteTitle}
-        body={t.confirm.deleteBody}
-        confirmLabel={t.confirm.confirmDelete}
-        cancelLabel={t.confirm.cancel}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setConfirmAction(null)}
-        danger
-      />
-
-      <InterpreterConfirmDialog
-        open={confirmAction === "end"}
-        title={t.confirm.endTitle}
-        body={t.confirm.endWithDraftBody}
-        confirmLabel={t.confirm.endAnyway}
-        cancelLabel={t.confirm.keepEditing}
-        onConfirm={() => {
-          setConfirmAction(null);
-          if (!sessionActionInFlightRef.current) void doEndSession();
-        }}
-        onCancel={() => setConfirmAction(null)}
-      />
-    </>
+    },
+    [setPhase],
   );
 
-  if (CONTINUOUS_CONVERSATION_MODE) {
-    return (
-      <>
-        {connectivity.showOfflineBanner ? (
-          <InterpreterConnectivityBanner
-            variant="offline"
-            message={t.reliability.offlineBanner}
-          />
-        ) : null}
-        <InterpreterLiveChat
-          session={session}
-          turns={session.turns}
-          phase={liveChatPhase}
-          errorMessage={errorMessage}
-          micDenied={recorderError === "mic_denied"}
-          onRetryMic={handleRetryMic}
-          onBack={handleBackNavigation}
-          onEnd={handleEndSession}
-          onDownloadPdf={() => void handleDownloadPdf()}
-          onDelete={handleDeleteSession}
-          endDisabled={busy || sessionActionBusy}
-          pdfDisabled={
-            busy || sessionActionBusy || isExporting || !(session.turns?.length ?? 0)
-          }
-          deleteDisabled={busy || sessionActionBusy}
-          isExporting={isExporting}
-          labels={t}
-        />
-        {sessionDialogs}
-      </>
-    );
-  }
+  const scheduleNextListening = useCallback(() => {
+    clearAutoRestart();
+    if (
+      !sessionRef.current ||
+      phaseRef.current === LIVE_PHASE.PAUSED ||
+      phaseRef.current === LIVE_PHASE.ENDED ||
+      phaseRef.current === LIVE_PHASE.ERROR
+    ) {
+      return;
+    }
+    autoRestartTimerRef.current = setTimeout(() => {
+      autoRestartTimerRef.current = null;
+      void startRecordingRef.current?.();
+    }, AUTO_RESTART_DELAY_MS);
+  }, [clearAutoRestart]);
+
+  const processRecordedSegment = useCallback(
+    async ({ blob, mimeType }) => {
+      if (processingRef.current) return;
+      const activeSession = sessionRef.current;
+      if (!activeSession?.sessionId || activeSession.status === SESSION_STATUS_ENDED) {
+        return;
+      }
+
+      processingRef.current = true;
+      setErrorMessage("");
+      setExportMessage("");
+      setLastPlaybackRequest(null);
+      const runToken = runTokenRef.current;
+      const activeSpeaker = speakerRef.current;
+      const { sourceLanguage, targetLanguage } = languagesForSpeaker(
+        activeSession,
+        activeSpeaker,
+      );
+
+      try {
+        const silenceCheck = await detectLikelySilentBlob(blob);
+        if (runToken !== runTokenRef.current) return;
+        if (silenceCheck.silent) {
+          announce(t.liveSession.noSpeechDetected);
+          setPhase(LIVE_PHASE.LISTENING);
+          scheduleNextListening();
+          return;
+        }
+
+        setPhase(LIVE_PHASE.TRANSCRIBING);
+        announce(t.liveSession.statusTranscribing);
+        const transcribeController = new AbortController();
+        transcribeAbortRef.current = transcribeController;
+        const transcriptResult = await transcribeAudio(blob, {
+          filename: mimeType?.includes("ogg") ? "utterance.ogg" : "utterance.webm",
+          language: sourceLanguage,
+          signal: transcribeController.signal,
+        });
+        transcribeAbortRef.current = null;
+
+        if (runToken !== runTokenRef.current) return;
+        if (!transcriptResult.ok) {
+          if (transcriptResult.code === "cancelled") return;
+          showError(interpreterErrorMessage(transcriptResult.code, t, transcriptResult.message));
+          return;
+        }
+
+        const originalTranscript = String(transcriptResult.transcript || "").trim();
+        if (!originalTranscript) {
+          showError(t.liveSession.noTranscriptResult);
+          return;
+        }
+
+        const createdTurn = addTurn(activeSession.sessionId, {
+          speaker: activeSpeaker,
+          speakerLabel: speakerLabelFor(activeSpeaker, t),
+          sourceLanguage,
+          targetLanguage,
+          originalText: originalTranscript,
+          originalTranscript,
+          confidence:
+            transcriptResult.confidence === "high"
+              ? "high"
+              : transcriptResult.confidence
+                ? "low"
+                : undefined,
+          timestamp: new Date().toISOString(),
+          status: TURN_STATUS_TRANSCRIBED,
+        });
+
+        if (!createdTurn) {
+          showError(t.errors.generic);
+          return;
+        }
+
+        reloadSession();
+
+        setPhase(LIVE_PHASE.TRANSLATING);
+        announce(t.liveSession.statusTranslating);
+        const translateController = new AbortController();
+        translateAbortRef.current = translateController;
+        const translationResult = await translateTurn(
+          {
+            text: originalTranscript,
+            sourceLanguage,
+            targetLanguage,
+            speaker: activeSpeaker,
+          },
+          { signal: translateController.signal },
+        );
+        translateAbortRef.current = null;
+
+        if (runToken !== runTokenRef.current) return;
+        if (!translationResult.ok) {
+          if (translationResult.code === "cancelled") return;
+          updateTurn(activeSession.sessionId, createdTurn.turnId, {
+            status: TURN_STATUS_ERROR,
+          });
+          reloadSession();
+          showError(interpreterErrorMessage(translationResult.code, t, translationResult.message));
+          return;
+        }
+
+        updateTurn(activeSession.sessionId, createdTurn.turnId, {
+          translatedText: translationResult.translatedText,
+          translationDirection: translationResult.translationDirection,
+          confidence:
+            translationResult.confidence === "high"
+              ? "high"
+              : translationResult.confidence
+                ? "low"
+                : createdTurn.confidence,
+          status: TURN_STATUS_TRANSLATED,
+        });
+        reloadSession();
+
+        setPhase(LIVE_PHASE.SPEAKING_TRANSLATION);
+        announce(t.liveSession.statusSpeaking);
+        const speechResult = await playText({
+          text: translationResult.translatedText,
+          language: targetLanguage,
+          target: "translation",
+          awaitEnd: true,
+          voiceProfile: INTERPRETER_VOICE_PROFILE,
+          voiceSpeed,
+        });
+
+        if (runToken !== runTokenRef.current) return;
+        if (!speechResult.ok) {
+          updateTurn(activeSession.sessionId, createdTurn.turnId, {
+            status: TURN_STATUS_TRANSLATED,
+          });
+          reloadSession();
+          showError(interpreterErrorMessage(speechResult.code, t, speechResult.message));
+          return;
+        }
+
+        updateTurn(activeSession.sessionId, createdTurn.turnId, {
+          status: TURN_STATUS_SPOKEN,
+        });
+        setLastPlaybackRequest({
+          text: translationResult.translatedText,
+          language: targetLanguage,
+          target: "translation",
+          awaitEnd: true,
+          voiceProfile: INTERPRETER_VOICE_PROFILE,
+          voiceSpeed,
+        });
+        updateSessionMetadata(activeSession.sessionId, {
+          status: SESSION_STATUS_ACTIVE,
+        });
+        reloadSession();
+        setSpeaker(oppositeSpeaker(activeSpeaker));
+        setPhase(LIVE_PHASE.LISTENING);
+        announce(t.liveSession.readyForNextSpeaker);
+        scheduleNextListening();
+      } finally {
+        processingRef.current = false;
+      }
+    },
+    [announce, playText, reloadSession, scheduleNextListening, setPhase, showError, t, voiceSpeed],
+  );
+
+  const {
+    isPreparing,
+    isRecording,
+    isStopping,
+    recorderError,
+    clearRecorderError,
+    startRecording,
+    cancelRecording,
+  } = useInterpreterRecorder({
+    silenceAutoStopMs: 2_000,
+    onRecordingStart: () => {
+      setPhase(LIVE_PHASE.LISTENING);
+      announce(t.liveSession.statusListening);
+    },
+    onSilencePhaseChange: handlePhaseFromSilence,
+    onRecorded: processRecordedSegment,
+  });
+
+  const startRecordingRef = useRef(startRecording);
+  useEffect(() => {
+    startRecordingRef.current = async () => {
+      if (
+        !sessionRef.current?.sessionId ||
+        processingRef.current ||
+        isSpeakLoading ||
+        isSpeakPlaying ||
+        phaseRef.current === LIVE_PHASE.PAUSED ||
+        phaseRef.current === LIVE_PHASE.ENDED
+      ) {
+        return false;
+      }
+      clearRecorderError();
+      setErrorMessage("");
+      const started = await startRecording();
+      if (!started && recorderError) {
+        showError(
+          recorderError === "mic_denied"
+            ? t.pushToTalk.micDenied
+            : recorderError === "too_short"
+              ? t.pushToTalk.tooShort
+              : t.errors.generic,
+        );
+      }
+      return started;
+    };
+  }, [
+    clearRecorderError,
+    isSpeakLoading,
+    isSpeakPlaying,
+    recorderError,
+    showError,
+    startRecording,
+    t,
+  ]);
+
+  const handleStartConversation = useCallback(async () => {
+    setPdfReady(false);
+    setExportMessage("");
+    setErrorMessage("");
+    setPhase(LIVE_PHASE.IDLE);
+    await startRecordingRef.current?.();
+  }, [setPhase]);
+
+  const handlePauseConversation = useCallback(() => {
+    stopRuntime();
+    cancelRecording();
+    setPhase(LIVE_PHASE.PAUSED);
+    announce(t.liveSession.statusPaused);
+  }, [announce, cancelRecording, setPhase, stopRuntime, t.liveSession.statusPaused]);
+
+  const handleResumeConversation = useCallback(async () => {
+    setErrorMessage("");
+    setExportMessage("");
+    setPhase(LIVE_PHASE.IDLE);
+    await startRecordingRef.current?.();
+  }, [setPhase]);
+
+  const handleEndConversation = useCallback(() => {
+    stopRuntime();
+    cancelRecording();
+    const current = sessionRef.current;
+    if (!current?.sessionId) return;
+    const ended = endSession(current.sessionId, t, uiLanguage);
+    setSession(ended);
+    sessionRef.current = ended;
+    setPdfReady(Boolean(ended?.turns?.length));
+    setPhase(LIVE_PHASE.ENDED);
+    announce(t.sessionActions.ended);
+  }, [announce, cancelRecording, stopRuntime, t, uiLanguage, setPhase]);
+
+  const handleDownloadPdf = useCallback(() => {
+    const current = reloadSession();
+    if (!current) return;
+    const title = getSessionDisplayTitle(current, t, uiLanguage);
+    const result = downloadInterpreterSessionPdf(current, title, t);
+    setExportMessage(result.ok ? t.pdf.exportSuccess : t.pdf.exportFailed);
+  }, [reloadSession, t, uiLanguage]);
+
+  const handleReplayLastTranslation = useCallback(async () => {
+    if (!lastPlaybackRequest || isSpeakLoading || isSpeakPlaying) return;
+    setErrorMessage("");
+    setExportMessage("");
+    const replayResult = await playText({
+      ...lastPlaybackRequest,
+      voiceProfile: INTERPRETER_VOICE_PROFILE,
+      voiceSpeed,
+    });
+    if (!replayResult.ok && replayResult.code !== "cancelled") {
+      showError(interpreterErrorMessage(replayResult.code, t, replayResult.message));
+    }
+  }, [
+    isSpeakLoading,
+    isSpeakPlaying,
+    lastPlaybackRequest,
+    playText,
+    showError,
+    t,
+    voiceSpeed,
+  ]);
+
+  useEffect(() => {
+    if (!session?.sessionId) return;
+    document.title = t.room.pageTitle;
+  }, [session, t.room.pageTitle]);
+
+  useEffect(() => {
+    if (!recorderError) return;
+    if (recorderError === "mic_denied") {
+      showError(t.pushToTalk.micDenied);
+    } else if (recorderError === "too_short") {
+      showError(t.pushToTalk.tooShort);
+    } else {
+      showError(t.errors.generic);
+    }
+  }, [recorderError, showError, t]);
+
+  useEffect(() => {
+    return () => {
+      stopRuntime();
+      cancelRecording();
+    };
+  }, [cancelRecording, stopRuntime]);
+
+  const turns = session?.turns ?? [];
+  const hasTurns = turns.length > 0;
+  const controlsDisabled =
+    isPreparing ||
+    isStopping ||
+    processingRef.current ||
+    isSpeakLoading ||
+    isSpeakPlaying ||
+    phase === LIVE_PHASE.ENDED;
 
   return (
     <main
       className="medical-interpreter-page medical-interpreter-page--live interp-root"
       id="main-content"
-      aria-busy={busy}
     >
-      <Link
-        className="medical-interpreter-page__back"
-        to="/patient/interpreter"
-        onClick={handleBackNavigation}
-      >
+      <Link className="medical-interpreter-page__back" to="/patient/interpreter">
         {t.chrome.backToInterpreterHome}
       </Link>
 
-      {liveMessage ? (
-        <p className="interpreter-live__status-live" role="status" aria-live="polite">
-          {liveMessage}
-        </p>
-      ) : null}
-
-      {connectivity.showOfflineBanner ? (
-        <InterpreterConnectivityBanner
-          variant="offline"
-          message={t.reliability.offlineBanner}
-        />
-      ) : null}
-
-      {connectivity.showReconnectedBanner ? (
-        <InterpreterConnectivityBanner
-          variant="reconnected"
-          message={t.reliability.reconnectedBanner}
-        />
-      ) : null}
-
-      {recoveryAction ? (
-        <InterpreterRecoveryBanner
-          message={t.reliability.recoveryBody}
-          retryLabel={t.reliability.retryAction}
-          dismissLabel={t.reliability.dismissRecovery}
-          onRetry={handleRecoveryRetry}
-          onDismiss={() => {
-            setRecoveryAction(null);
-            setErrorMessage(null);
-          }}
-          busy={isTranslating || isSimplifying}
-        />
-      ) : null}
-
-      <InterpreterLiveHeader
-        session={session}
-        statusLabel={statusLabel}
-        labels={t}
-      />
+      <header className="interpreter-live-shell__header">
+        <div>
+          <h1 className="medical-interpreter-page__title">{t.room.heading}</h1>
+          <p className="medical-interpreter-page__intro">{t.liveSession.subtitle}</p>
+        </div>
+        <div className="interpreter-live-shell__pair" aria-label={t.liveSession.languagePairLabel}>
+          {languagePairLabel}
+        </div>
+      </header>
 
       <p className="medical-interpreter-safety" role="note">
-        {t.room.disclaimerStrip}
+        {t.safety.communicationOnly}
       </p>
 
-      {CONTINUOUS_CONVERSATION_MODE ? (
-        <p className="interpreter-live__continuous-intro" role="note">
-          {t.conversation.intro}
-        </p>
-      ) : null}
+      <section className="interpreter-live-shell__setup-summary" aria-labelledby="interp-live-meta">
+        <h2 id="interp-live-meta" className="interpreter-live-shell__section-title">
+          {t.liveSession.sessionDetails}
+        </h2>
+        <dl className="interpreter-live-shell__meta-grid">
+          <div>
+            <dt>{t.profile.patientNameLabel}</dt>
+            <dd>{session?.patientName || "—"}</dd>
+          </div>
+          <div>
+            <dt>{t.languages.patientLabel}</dt>
+            <dd>{formatLanguageDisplayName(uiLanguage, session?.patientLanguage || "") || session?.patientLanguage || "—"}</dd>
+          </div>
+          <div>
+            <dt>{t.languages.doctorLabel}</dt>
+            <dd>{formatLanguageDisplayName(uiLanguage, session?.doctorLanguage || "") || session?.doctorLanguage || "—"}</dd>
+          </div>
+          <div>
+            <dt>{t.doctorInfo.doctorName}</dt>
+            <dd>{session?.doctorName || "—"}</dd>
+          </div>
+          <div>
+            <dt>{t.doctorInfo.practiceName}</dt>
+            <dd>{session?.practiceName || "—"}</dd>
+          </div>
+          <div>
+            <dt>{t.doctorInfo.appointmentDate}</dt>
+            <dd>{session?.appointmentDateTime ? new Date(session.appointmentDateTime).toLocaleString(uiLanguage || "de") : "—"}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="interpreter-live-shell__controls" aria-labelledby="interp-live-controls">
+        <div className="interpreter-status-bar interpreter-status-bar--busy" role="status" aria-live="polite">
+          <strong>{t.liveSession.statusLabel}</strong> {statusText}
+        </div>
+        <div className="interpreter-live-shell__status-detail">
+          <span className="interpreter-live-shell__status-chip">
+            {currentDirectionLabel}
+          </span>
+          <span className="interpreter-live-shell__status-chip">
+            {t.liveSession.processingHint}
+          </span>
+          <span className="interpreter-live-shell__status-chip">
+            {t.liveSession.voiceProfileBadge}
+          </span>
+        </div>
+
+        <div className="interpreter-live-shell__speaker-wrap">
+          <h2 id="interp-live-controls" className="interpreter-live-shell__section-title">
+            {t.liveSession.speakerHeading}
+          </h2>
+          <InterpreterSpeakerToggle
+            speaker={speaker}
+            onSpeakerChange={setSpeaker}
+            disabled={controlsDisabled || isRecording}
+            labels={t}
+          />
+        </div>
+
+        <div className="interpreter-live-shell__button-row">
+          <button
+            type="button"
+            className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary interpreter-live-shell__action interpreter-live-shell__action--start"
+            onClick={handleStartConversation}
+            disabled={
+              isRecording ||
+              isPreparing ||
+              isStopping ||
+              processingRef.current ||
+              isSpeakLoading ||
+              isSpeakPlaying ||
+              phase === LIVE_PHASE.ENDED
+            }
+          >
+            {t.liveSession.startButton}
+          </button>
+          <button
+            type="button"
+            className="medical-interpreter-page__nav-link interpreter-live-shell__action"
+            onClick={handlePauseConversation}
+            disabled={
+              phase === LIVE_PHASE.IDLE ||
+              phase === LIVE_PHASE.PAUSED ||
+              phase === LIVE_PHASE.ENDED
+            }
+          >
+            {t.liveSession.pauseButton}
+          </button>
+          <button
+            type="button"
+            className="medical-interpreter-page__nav-link interpreter-live-shell__action"
+            onClick={handleResumeConversation}
+            disabled={phase !== LIVE_PHASE.PAUSED && phase !== LIVE_PHASE.ERROR}
+          >
+            {t.liveSession.resumeButton}
+          </button>
+          <button
+            type="button"
+            className="medical-interpreter-page__nav-link interpreter-live__action-danger interpreter-live-shell__action"
+            onClick={handleEndConversation}
+            disabled={phase === LIVE_PHASE.ENDED}
+          >
+            {t.sessionActions.end}
+          </button>
+        </div>
+
+        <div className="interpreter-live-shell__playback-panel">
+          <h3 className="interpreter-live-shell__playback-heading">
+            {t.liveSession.playbackHeading}
+          </h3>
+          <p className="interpreter-live-shell__playback-note">
+            {t.liveSession.playbackNote}
+          </p>
+          <div
+            className="interpreter-live-shell__speed-toggle"
+            role="group"
+            aria-label={t.liveSession.speedHeading}
+          >
+            <button
+              type="button"
+              className={`interpreter-live-shell__speed-option${voiceSpeed === "normal" ? " interpreter-live-shell__speed-option--active" : ""}`}
+              aria-pressed={voiceSpeed === "normal"}
+              onClick={() => setVoiceSpeed("normal")}
+            >
+              {t.liveSession.speedNormal}
+            </button>
+            <button
+              type="button"
+              className={`interpreter-live-shell__speed-option${voiceSpeed === "slow" ? " interpreter-live-shell__speed-option--active" : ""}`}
+              aria-pressed={voiceSpeed === "slow"}
+              onClick={() => setVoiceSpeed("slow")}
+            >
+              {t.liveSession.speedSlow}
+            </button>
+          </div>
+
+          <InterpreterPlaybackStatus
+            visible
+            isLoading={isSpeakLoading}
+            isPlaying={isSpeakPlaying}
+            onStop={stopAllPlayback}
+            labels={t}
+          />
+
+          <div className="interpreter-live-shell__playback-actions">
+            <button
+              type="button"
+              className="medical-interpreter-page__nav-link interpreter-live-shell__playback-action"
+              onClick={handleReplayLastTranslation}
+              disabled={!lastPlaybackRequest || isSpeakLoading || isSpeakPlaying}
+            >
+              {t.liveSession.replayButton}
+            </button>
+            <button
+              type="button"
+              className="medical-interpreter-page__nav-link interpreter-live-shell__playback-action"
+              onClick={stopAllPlayback}
+              disabled={!isSpeakLoading && !isSpeakPlaying}
+            >
+              {t.liveSession.stopPlaybackButton}
+            </button>
+          </div>
+        </div>
+      </section>
 
       {errorMessage ? (
         <div
-          ref={errorAlertRef}
+          ref={alertRef}
           className="interpreter-feedback interpreter-feedback--error"
           role="alert"
           tabIndex={-1}
@@ -1744,190 +829,85 @@ export default function InterpreterLiveRoom() {
         </div>
       ) : null}
 
-      <div
-        className={statusBarClass}
-        aria-live="polite"
-        aria-atomic="true"
-        aria-label={t.aria.liveRegion}
-      >
-        {statusLabel}
-        {maxDurationReached ? ` ${t.pushToTalk.maxDurationHint}` : ""}
+      {exportMessage ? (
+        <div className="interpreter-feedback" role="status" aria-live="polite">
+          {exportMessage}
+        </div>
+      ) : null}
+
+      <div className="sr-only" role="status" aria-live="polite">
+        {liveAnnouncement || statusText}
       </div>
 
-      <InterpreterPlaybackStatus
-        visible={
-          (isSpeakLoading || isSpeakPlaying) &&
-          (serverStatus.ttsEnabled || streamingTtsFeatureAvailable)
-        }
-        isLoading={isSpeakLoading}
-        isPlaying={isSpeakPlaying}
-        onStop={stopAllPlayback}
-        stopDisabled={sessionEnded}
-        labels={t}
-      />
+      <section className="interpreter-live-shell__conversation" aria-labelledby="interp-live-conversation">
+        <div className="interpreter-live-shell__conversation-head">
+          <h2 id="interp-live-conversation" className="interpreter-live-shell__section-title">
+            {t.review.timelineHeading}
+          </h2>
+          {pdfReady ? (
+            <button
+              type="button"
+              className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary"
+              onClick={handleDownloadPdf}
+            >
+              {t.sessionActions.export}
+            </button>
+          ) : null}
+        </div>
 
-      {!CONTINUOUS_CONVERSATION_MODE ? (
-        <>
-      <InterpreterSpeakerToggle
-        speaker={speaker}
-        onSpeakerChange={handleSpeakerChange}
-        disabled={speakerDisabled}
-        labels={t}
-      />
+        {hasTurns ? (
+          <ol className="interpreter-live-shell__turn-list">
+            {turns.map((turn) => {
+              const turnSpeakerLabel =
+                turn.speakerLabel || speakerLabelFor(turn.speaker, t);
+              const timeLabel = formatTurnTime(
+                turn.timestamp || turn.createdAt,
+                uiLanguage,
+              );
+              const translationHeading =
+                turn.speaker === SPEAKER_DOCTOR
+                  ? t.liveSession.translationForPatient
+                  : t.liveSession.translationForDoctor;
 
-      {speakerDirectionLabel ? (
-        <p className="interpreter-live__speaker-direction" id="interp-speaker-direction">
-          {speakerDirectionLabel}
-        </p>
-      ) : null}
+              return (
+                <li key={turn.turnId} className="interpreter-live-shell__turn-card">
+                  <div className="interpreter-live-shell__turn-top">
+                    <div>
+                      <strong>{turnSpeakerLabel}</strong>
+                      <span className="interpreter-live-shell__turn-time">
+                        {timeLabel}
+                      </span>
+                    </div>
+                    <span className="interpreter-live-shell__turn-status">
+                      {turn.status}
+                    </span>
+                  </div>
 
-      {session && sessionIsMixedDirection(session) ? (
-        <p className="interpreter-live__mixed-direction-note" role="note">
-          {t.languages.mixedDirectionNote}
-        </p>
-      ) : null}
+                  <div className="interpreter-live-shell__turn-block">
+                    <p className="interpreter-live-shell__turn-label">
+                      {t.liveSession.originalLabel}
+                    </p>
+                    <p className="interpreter-live-shell__turn-text">
+                      {turn.originalTranscript || turn.originalText}
+                    </p>
+                  </div>
 
-      <InterpreterTranscriptPanel
-        turn={displayTurn}
-        draftText={draftText}
-        onDraftTextChange={setDraftText}
-        onConfirm={handleConfirmTranscript}
-        canConfirm={canConfirm}
-        isBusy={isTranscribing || isTranslating || isSimplifying}
-        showLowConfidence={
-          displayTurn?.status === TURN_STATUS_DRAFT &&
-          displayTurn.confidence === "low"
-        }
-        textareaRef={transcriptRef}
-        labels={t}
-      />
-
-      {hasDraftTurn ? (
-        <p className="interpreter-live__draft-saved" role="status">
-          {t.transcript.draftSavedHint}
-        </p>
-      ) : null}
-
-      <InterpreterTranslationPanel
-        turn={displayTurn}
-        session={session}
-        onListen={handleListenTranslation}
-        listenDisabled={busy && !isSpeakPlaying}
-        listenLoading={isSpeakLoading && speakTarget === "translation"}
-        listenPlaying={isSpeakPlaying && speakTarget === "translation"}
-        labels={t}
-      />
-
-      <InterpreterSimplifiedPanel
-        turn={displayTurn}
-        isSimplifying={isSimplifying}
-        onSimplify={handleSimplifyLanguage}
-        onHideSimplified={handleHideSimplified}
-        onListenSimplified={handleListenSimplified}
-        listenDisabled={busy && !(isSpeakPlaying && speakTarget === "simplified")}
-        listenLoading={isSpeakLoading && speakTarget === "simplified"}
-        listenPlaying={isSpeakPlaying && speakTarget === "simplified"}
-        labels={t}
-      />
-
-      <InterpreterStreamingPanel
-        available={streamingFeatureAvailable}
-        phase={streamCapture.phase}
-        isActive={streamActive}
-        connectionLabel={streamCapture.connectionLabel}
-        previewText={streamCapture.previewText}
-        stagedMessage={streamCapture.stagedMessage}
-        previewConfidence={streamCapture.previewConfidence}
-        browserSupported={streamCapture.browserSupported}
-        disabled={busy || hasDraftTurn || sessionEnded}
-        onStart={handleStreamStart}
-        onStop={handleStreamStop}
-        onCancel={() => {
-          nearRealtimePreview.discardPreview();
-          void streamCapture.cancelStream();
-        }}
-        onUseAsDraft={handleStreamUseAsDraft}
-        canUseAsDraft={
-          Boolean(streamCapture.previewText.trim()) &&
-          !streamActive &&
-          !hasDraftTurn
-        }
-        labels={t}
-      />
-
-      <InterpreterNearRealtimePreviewPanel
-        available={nearRealtimeFeatureAvailable}
-        isLoading={nearRealtimePreview.isLoading}
-        previewTranslation={nearRealtimePreview.previewTranslation}
-        isStale={nearRealtimePreview.isStale}
-        uncertain={nearRealtimePreview.uncertain}
-        terminologyWarning={nearRealtimePreview.terminologyWarning}
-        unclearSource={nearRealtimePreview.unclearSource}
-        hasSourceText={Boolean(streamCapture.previewText.trim())}
-        disabled={busy || hasDraftTurn || sessionEnded}
-        onDiscard={() => {
-          nearRealtimePreview.discardPreview();
-          if (speakTarget === "preview") stopAllPlayback();
-        }}
-        streamingTtsAvailable={streamingTtsFeatureAvailable}
-        previewPlaybackEnabled={previewPlaybackEnabled}
-        onPreviewPlaybackEnabledChange={setPreviewPlaybackEnabled}
-        onPlayPreview={() => void handleListenPreviewTranslation()}
-        previewListenLoading={isSpeakLoading && speakTarget === "preview"}
-        previewListenPlaying={isSpeakPlaying && speakTarget === "preview"}
-        previewListenDisabled={
-          busy ||
-          streamActive ||
-          nearRealtimePreview.isStale ||
-          !connectivity.isOnline
-        }
-        onRetryPlayback={() => void retryPlayback()}
-        showPlaybackRetry={
-          speakTarget === "preview" && Boolean(speakLastErrorCode)
-        }
-        labels={t}
-      />
-        </>
-      ) : (
-        <InterpreterConversationFeed turns={session.turns} labels={t} />
-      )}
-
-      <InterpreterPushToTalkPanel
-        isRecording={isRecording}
-        isPreparing={isPreparing}
-        isStopping={isStopping}
-        onToggleRecording={() => void handleToggleRecording()}
-        disabled={pttDisabled}
-        disabledReason={
-          streamActive ? t.streaming.disabledWhileStreaming : pttDisabledReason
-        }
-        privacyNote={t.privacy.body3}
-        micDenied={recorderError === "mic_denied"}
-        onRetryMic={handleRetryMic}
-        autoMode={CONTINUOUS_CONVERSATION_MODE}
-        statusLabel={statusLabel}
-        labels={t}
-      />
-
-      <InterpreterSessionActions
-        sessionId={session.sessionId}
-        onEndSession={handleEndSession}
-        onDeleteSession={handleDeleteSession}
-        onDownloadPdf={() => void handleDownloadPdf()}
-        sessionEnded={sessionEnded}
-        actionsDisabled={busy || sessionActionBusy}
-        hasTurns={(session.turns?.length ?? 0) > 0}
-        isExporting={isExporting}
-        labels={t}
-      />
-
-      {CONTINUOUS_CONVERSATION_MODE ? (
-        <p className="interpreter-live__end-hint" role="note">
-          {t.conversation.endHint}
-        </p>
-      ) : null}
-
-      {sessionDialogs}
+                  <div className="interpreter-live-shell__turn-block">
+                    <p className="interpreter-live-shell__turn-label">
+                      {translationHeading}
+                    </p>
+                    <p className="interpreter-live-shell__turn-text">
+                      {turn.translatedText || t.liveSession.pendingTranslation}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        ) : (
+          <p className="interpreter-empty-state">{t.liveSession.noConversationYet}</p>
+        )}
+      </section>
     </main>
   );
 }
