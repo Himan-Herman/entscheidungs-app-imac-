@@ -91,6 +91,14 @@ export default function PatientThreadDetailPage() {
         setSendError(t.consentRequired);
         return;
       }
+      if (res.status === 409 && data.error === "thread_closed") {
+        setSendError(t.threadClosed);
+        return;
+      }
+      if (res.status === 409 && data.error === "thread_archived") {
+        setSendError(t.threadArchived);
+        return;
+      }
       if (!res.ok || !data.ok) throw new Error("send_failed");
       setReply("");
       setAiHintVisible(false);
@@ -140,6 +148,9 @@ export default function PatientThreadDetailPage() {
   if (loading) {
     return (
       <div className="patient-threads">
+        <Link className="patient-inbox__back" to="/patient/messages">
+          {t.backList}
+        </Link>
         <p className="patient-inbox__muted">{t.loading}</p>
       </div>
     );

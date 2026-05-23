@@ -84,7 +84,7 @@ export default function PatientThreadsListPage() {
 
   return (
     <div className="patient-inbox patient-threads">
-      <Link className="patient-inbox__back" to="/patient">
+      <Link className="patient-inbox__back" to="/patient/practice">
         {t.backHub}
       </Link>
       <header className="patient-inbox__header">

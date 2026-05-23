@@ -133,13 +133,15 @@ export default {
   conversation: {
     heading: "Gesprächsverlauf",
     intro:
-      "Sprechen Sie einfach — nach 3 Sekunden Pause erkennt das System die Sprache, übersetzt automatisch und hört danach wieder zu.",
+      "Sprechen Sie einfach — nach 3 Sekunden Stille wird erkannt, übersetzt, mündlich wiedergegeben und danach wieder zugehört.",
     listening: "Hört zu — sprechen Sie jetzt",
     waiting: "Warten auf die erste Äußerung …",
     patientLabel: "Patient:in",
     clinicianLabel: "Behandlungsteam / Arzt",
     translationPending: "Übersetzung wird erstellt …",
-    endHint: "„Gespräch beenden“ lädt ein PDF mit dem vollständigen Verlauf herunter.",
+    endHint: "„Gespräch beenden“ beendet die Sitzung für beide Seiten und lädt ein PDF mit dem vollständigen Verlauf herunter.",
+    endingSession: "Gespräch wird beendet …",
+    preparingPdf: "PDF wird vorbereitet …",
   },
 
   room: {
@@ -396,6 +398,9 @@ export default {
       "Automatische Spracherkennung und Übersetzung können ungenau oder unvollständig sein.",
     sessionTitleLabel: "Titel des Gesprächs",
     patientNameLabel: "Patient:in",
+    patientDateOfBirthLabel: "Geburtsdatum",
+    patientEmailLabel: "E-Mail",
+    patientPhoneLabel: "Telefon",
     generatedNote:
       "Lokal auf diesem Gerät erstellt · MedScoutX Medizin-Dolmetscher",
     footerPage: "Seite",
@@ -466,6 +471,7 @@ export default {
   sessionActions: {
     heading: "Gespräch",
     end: "Gespräch beenden",
+    endPreparing: "Wird beendet …",
     endHint: "Gespräch als abgeschlossen markiert.",
     ended: "Gespräch beendet.",
     leave: "Raum verlassen",

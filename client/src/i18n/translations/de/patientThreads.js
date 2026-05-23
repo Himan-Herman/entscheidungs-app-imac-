@@ -5,7 +5,7 @@ export default {
     "Sichere Nachrichten mit Ihrer Praxis — keine automatischen medizinischen Antworten.",
   safetyNote:
     "Teilen Sie keine Notfalldaten. Bei akuten Beschwerden wenden Sie sich an den Notruf oder eine Praxis.",
-  backHub: "Zurück zum Patientenbereich",
+  backHub: "Zurück zu Meine Praxis",
   backList: "Zurück zur Übersicht",
   loading: "Wird geladen …",
   loadError: "Nachrichten konnten nicht geladen werden.",

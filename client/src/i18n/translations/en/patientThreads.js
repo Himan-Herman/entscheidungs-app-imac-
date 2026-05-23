@@ -5,7 +5,7 @@ export default {
     "Secure messages with your practice — no automatic medical replies.",
   safetyNote:
     "Do not share emergency details here. For acute symptoms, call emergency services or a clinic.",
-  backHub: "Back to patient workspace",
+  backHub: "Back to My practice",
   backList: "Back to list",
   loading: "Loading…",
   loadError: "Could not load messages.",

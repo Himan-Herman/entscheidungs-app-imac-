@@ -99,7 +99,7 @@ export function useInterpreterTtsPlayback(opts = {}) {
   }, []);
 
   const playBlob = useCallback(
-    async (blob, target, signal) => {
+    async (blob, target, signal, awaitEnd = false) => {
       if (typeof Audio === "undefined") {
         return { ok: false, code: "speak_unsupported" };
       }
@@ -109,19 +109,60 @@ export function useInterpreterTtsPlayback(opts = {}) {
       const el = new Audio(url);
       audioRef.current = el;
 
-      const onEnded = () => stopPlayback();
-      el.addEventListener("ended", onEnded, { once: true });
-      el.addEventListener("error", onEnded, { once: true });
+      const cleanupListeners = () => {
+        el.removeEventListener("ended", onEnded);
+        el.removeEventListener("error", onError);
+      };
 
-      await el.play();
+      const onEnded = () => {
+        cleanupListeners();
+        stopPlayback();
+      };
+      const onError = () => {
+        cleanupListeners();
+        stopPlayback();
+      };
+
+      try {
+        await el.play();
+      } catch {
+        cleanupListeners();
+        stopPlayback();
+        return { ok: false, code: "speak_failed" };
+      }
+
       if (signal.aborted) {
+        cleanupListeners();
         stopPlayback();
         return { ok: false };
       }
 
       setPhase("playing");
       setActiveTarget(target);
-      return { ok: true };
+
+      if (!awaitEnd) {
+        el.addEventListener("ended", onEnded, { once: true });
+        el.addEventListener("error", onError, { once: true });
+        return { ok: true };
+      }
+
+      return new Promise((resolve) => {
+        const finish = (result) => {
+          cleanupListeners();
+          stopPlayback();
+          resolve(result);
+        };
+        el.addEventListener(
+          "ended",
+          () => finish({ ok: true }),
+          { once: true },
+        );
+        el.addEventListener(
+          "error",
+          () => finish({ ok: false, code: "speak_failed" }),
+          { once: true },
+        );
+      });
     },
     [stopPlayback],
   );
@@ -168,10 +209,11 @@ export function useInterpreterTtsPlayback(opts = {}) {
    *   language: string;
    *   target: SpeakTarget;
    *   useStreamEndpoint?: boolean;
+   *   awaitEnd?: boolean;
    * }} params
    */
   const playText = useCallback(
-    async ({ text, language, target, useStreamEndpoint = false }) => {
+    async ({ text, language, target, useStreamEndpoint = false, awaitEnd = false }) => {
       const trimmed = String(text || "").trim();
       if (!trimmed) return { ok: false };
 
@@ -225,7 +267,12 @@ export function useInterpreterTtsPlayback(opts = {}) {
           return { ok: false, code, message: speech.message };
         }
 
-        const played = await playBlob(speech.blob, target, ac.signal);
+        const played = await playBlob(
+          speech.blob,
+          target,
+          ac.signal,
+          awaitEnd,
+        );
         if (!played.ok) {
           setLastErrorCode(played.code || "speak_failed");
           return played;

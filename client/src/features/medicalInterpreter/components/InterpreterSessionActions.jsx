@@ -43,7 +43,9 @@ export default function InterpreterSessionActions({
             disabled={actionsDisabled}
             aria-busy={actionsDisabled}
           >
-            {t.sessionActions.end}
+            {actionsDisabled
+              ? t.sessionActions.endPreparing || t.sessionActions.end
+              : t.sessionActions.end}
           </button>
         ) : null}
 

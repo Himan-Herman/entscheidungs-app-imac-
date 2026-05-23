@@ -144,6 +144,29 @@
   color: #64748b;
 }
 
+:root[data-theme="dark"] .patient-inbox__meta {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .patient-inbox__status--unread {
+  background: rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+}
+
+:root[data-theme="dark"] .patient-inbox__status--read {
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .patient-inbox__status--archived {
+  background: rgba(100, 116, 139, 0.25);
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .patient-inbox__error {
+  color: #fca5a5;
+}
+
 .patient-inbox__summary {
   margin: 0 0 0.75rem;
   font-size: 0.95rem;
@@ -205,12 +228,30 @@
   background: #fff;
   font-size: 0.88rem;
   cursor: pointer;
+  color: #0f172a;
+}
+
+:root[data-theme="dark"] .patient-inbox__filter-btn {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #f1f5f9;
 }
 
 .patient-inbox__filter-btn--active {
   background: #e0f2fe;
   border-color: #0e7490;
   font-weight: 600;
+}
+
+:root[data-theme="dark"] .patient-inbox__filter-btn--active {
+  background: rgba(14, 116, 144, 0.35);
+  border-color: #38bdf8;
+  color: #f1f5f9;
+}
+
+.patient-inbox__filter-btn:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
 }
 
 .patient-inbox__ai-block {

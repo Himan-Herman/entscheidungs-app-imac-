@@ -125,6 +125,18 @@
   border: 1px solid rgba(15, 23, 42, 0.15);
   font: inherit;
   resize: vertical;
+  background: #fff;
+  color: #0f172a;
+}
+
+:root[data-theme="dark"] .patient-threads__compose textarea {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .patient-threads__compose textarea::placeholder {
+  color: #64748b;
 }
 
 .patient-threads__actions {
@@ -156,6 +168,11 @@
   color: inherit;
 }
 
+:root[data-theme="dark"] .patient-threads__btn--secondary {
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #f1f5f9;
+}
+
 .patient-threads__btn:focus-visible,
 .patient-threads__compose textarea:focus-visible {
   outline: 2px solid #0e7490;
@@ -183,6 +200,21 @@
 .patient-threads__status--archived {
   background: #e2e8f0;
   color: #475569;
+}
+
+:root[data-theme="dark"] .patient-threads__status--open {
+  background: #14532d;
+  color: #bbf7d0;
+}
+
+:root[data-theme="dark"] .patient-threads__status--closed {
+  background: #713f12;
+  color: #fde68a;
+}
+
+:root[data-theme="dark"] .patient-threads__status--archived {
+  background: #334155;
+  color: #cbd5e1;
 }
 
 .practice-messages__new {

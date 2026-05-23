@@ -142,6 +142,7 @@ export default function InterpreterLiveRoom() {
   const autoListenTimerRef = useRef(null);
   const scheduleAutoListenRef = useRef(() => {});
   const startRecordingRef = useRef(null);
+  const speakBusyRef = useRef(false);
 
   const reloadSession = useCallback(() => {
     const next = getCurrentSession();
@@ -188,6 +189,10 @@ export default function InterpreterLiveRoom() {
   } = useInterpreterTtsPlayback({
     streamSpeakEnabled: streamingTtsFeatureAvailable,
   });
+
+  useEffect(() => {
+    speakBusyRef.current = isSpeakLoading || isSpeakPlaying;
+  }, [isSpeakLoading, isSpeakPlaying]);
 
   const runTranscribe = useCallback(
     async (blob, mimeType, sessionSnapshot, speakerSnapshot, signal, options = {}) => {
@@ -315,6 +320,21 @@ export default function InterpreterLiveRoom() {
           reloadSession();
           maybeApplyAutoSessionTitle(sessionId, t, uiLanguage);
           reloadSession();
+          announceStatus(t.room.statusSpeaking);
+
+          if (
+            CONTINUOUS_CONVERSATION_MODE &&
+            result.translatedText?.trim() &&
+            serverStatus.ttsEnabled !== false
+          ) {
+            await playSpeakText({
+              text: result.translatedText,
+              language: targetLanguage,
+              target: "translation",
+              awaitEnd: true,
+            });
+          }
+
           announceStatus(t.room.statusReadyForNext);
           if (CONTINUOUS_CONVERSATION_MODE) {
             scheduleAutoListenRef.current();
@@ -382,6 +402,8 @@ export default function InterpreterLiveRoom() {
       announceStatus,
       connectivity.isOnline,
       mountedRef,
+      playSpeakText,
+      serverStatus.ttsEnabled,
     ],
   );
 
@@ -392,7 +414,8 @@ export default function InterpreterLiveRoom() {
         !current ||
         transcribeInFlightRef.current ||
         translateInFlightRef.current ||
-        simplifyInFlightRef.current
+        simplifyInFlightRef.current ||
+        speakBusyRef.current
       ) {
         return;
       }
@@ -686,8 +709,10 @@ export default function InterpreterLiveRoom() {
       if (
         transcribeInFlightRef.current ||
         translateInFlightRef.current ||
-        simplifyInFlightRef.current
+        simplifyInFlightRef.current ||
+        speakBusyRef.current
       ) {
+        scheduleAutoListenRef.current();
         return;
       }
       void startRecordingRef.current?.();
@@ -827,7 +852,8 @@ export default function InterpreterLiveRoom() {
     pttPhase === PTT_PHASE.TRANSCRIBING ||
     pttPhase === PTT_PHASE.TRANSLATING ||
     streamActive ||
-    isSpeakLoading;
+    isSpeakLoading ||
+    isSpeakPlaying;
 
   const statusLabel = useMemo(() => {
     if (
@@ -1330,10 +1356,11 @@ export default function InterpreterLiveRoom() {
     reloadSession();
   };
 
-  const doEndSession = useCallback(() => {
+  const doEndSession = useCallback(async () => {
     if (!session || sessionActionInFlightRef.current) return;
     sessionActionInFlightRef.current = true;
     if (mountedRef.current) setSessionActionBusy(true);
+    announceStatus(t.conversation.endingSession);
     clearAutoListenTimer();
     continuousListenBootstrappedRef.current = false;
     abortAllRequests();
@@ -1344,6 +1371,12 @@ export default function InterpreterLiveRoom() {
     endSession(sessionId, t, uiLanguage);
     const endedSession = getSession(sessionId);
     if (endedSession?.turns?.length) {
+      announceStatus(t.conversation.preparingPdf);
+      await new Promise((resolve) => {
+        window.requestAnimationFrame(() => {
+          window.setTimeout(resolve, 120);
+        });
+      });
       downloadInterpreterSessionPdf(
         endedSession,
         getSessionDisplayTitle(endedSession, t, uiLanguage),
@@ -1366,6 +1399,7 @@ export default function InterpreterLiveRoom() {
     mountedRef,
     clearAutoListenTimer,
     navigate,
+    announceStatus,
   ]);
 
   const handleEndSession = () => {
@@ -1378,7 +1412,7 @@ export default function InterpreterLiveRoom() {
         return;
       }
     }
-    doEndSession();
+    void doEndSession();
   };
 
   const handleDeleteSession = () => {
@@ -1424,6 +1458,8 @@ export default function InterpreterLiveRoom() {
     isTranscribing ||
     isTranslating ||
     isSimplifying ||
+    isSpeakLoading ||
+    isSpeakPlaying ||
     (!CONTINUOUS_CONVERSATION_MODE && hasDraftTurn) ||
     streamActive ||
     !connectivity.isOnline;
@@ -1523,7 +1559,6 @@ export default function InterpreterLiveRoom() {
 
       <InterpreterPlaybackStatus
         visible={
-          !CONTINUOUS_CONVERSATION_MODE &&
           (isSpeakLoading || isSpeakPlaying) &&
           (serverStatus.ttsEnabled || streamingTtsFeatureAvailable)
         }
@@ -1720,7 +1755,7 @@ export default function InterpreterLiveRoom() {
         cancelLabel={t.confirm.keepEditing}
         onConfirm={() => {
           setConfirmAction(null);
-          if (!sessionActionInFlightRef.current) doEndSession();
+          if (!sessionActionInFlightRef.current) void doEndSession();
         }}
         onCancel={() => setConfirmAction(null)}
       />

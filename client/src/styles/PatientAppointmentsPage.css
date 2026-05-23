@@ -1,0 +1,74 @@
+.patient-appt__row {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font: inherit;
+}
+
+.patient-appt__row:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.patient-appt__row[aria-current="true"] {
+  border-color: #0e7490;
+  box-shadow: 0 0 0 1px rgba(14, 116, 144, 0.35);
+}
+
+.patient-appt__panel {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+:root[data-theme="dark"] .patient-appt__panel {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.patient-appt__form label {
+  display: block;
+  margin: 0.65rem 0 0.25rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.patient-appt__form select,
+.patient-appt__form input,
+.patient-appt__form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  font: inherit;
+  background: #fff;
+  color: #0f172a;
+}
+
+:root[data-theme="dark"] .patient-appt__form select,
+:root[data-theme="dark"] .patient-appt__form input,
+:root[data-theme="dark"] .patient-appt__form textarea {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #f1f5f9;
+}
+
+.patient-appt__form select:focus-visible,
+.patient-appt__form input:focus-visible,
+.patient-appt__form textarea:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.patient-appt__form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}

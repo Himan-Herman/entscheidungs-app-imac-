@@ -3,6 +3,7 @@
  * jsPDF only; session data never leaves the device. Light, print-friendly styling.
  */
 import { jsPDF } from "jspdf";
+import medscoutLogoUrl from "../../../assets/img/medscout-logo.png";
 import {
   SESSION_STATUS_ACTIVE,
   SESSION_STATUS_DRAFT,
@@ -87,6 +88,13 @@ function getPatientDisplayName(session) {
   if (!profile) return null;
   const name = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
   return name || null;
+}
+
+function getProfileField(session, key) {
+  const profile = session?.profileSnapshot;
+  if (!profile || profile[key] == null) return null;
+  const v = String(profile[key]).trim();
+  return v || null;
 }
 
 function lineHeightMm(fontSizePt) {
@@ -209,12 +217,21 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
   }
 
   // —— Header ——
-  doc.setTextColor(...COL.teal);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  needSpace(lineHeightMm(11));
-  doc.text("MedScoutX", margin, y);
-  y += lineHeightMm(11) + 2;
+  try {
+    doc.addImage(medscoutLogoUrl, "PNG", margin, y - 1, 14, 14);
+    doc.setTextColor(...COL.teal);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.text("MedScoutX", margin + 17, y + 4);
+    y += 16;
+  } catch {
+    doc.setTextColor(...COL.teal);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    needSpace(lineHeightMm(11));
+    doc.text("MedScoutX", margin, y);
+    y += lineHeightMm(11) + 2;
+  }
 
   doc.setTextColor(...COL.slate);
   doc.setFontSize(titleSize);
@@ -262,6 +279,18 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
   const patientName = getPatientDisplayName(session);
   if (patientName) {
     drawMetaRow(L.pdf.patientNameLabel, patientName);
+  }
+  const patientDob = getProfileField(session, "dateOfBirth");
+  if (patientDob) {
+    drawMetaRow(L.pdf.patientDateOfBirthLabel, patientDob);
+  }
+  const patientEmail = getProfileField(session, "email");
+  if (patientEmail) {
+    drawMetaRow(L.pdf.patientEmailLabel, patientEmail);
+  }
+  const patientPhone = getProfileField(session, "phone");
+  if (patientPhone) {
+    drawMetaRow(L.pdf.patientPhoneLabel, patientPhone);
   }
   if (session.practiceName?.trim()) {
     drawMetaRow(L.doctorInfo.practiceName, session.practiceName);

@@ -1,9 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { authFetch } from "../../../api/authFetch.js";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
-import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
+import {
+  PRE_VISIT_QUESTION_STEPS,
+} from "../../preVisit/constants/questionFlow.js";
+import {
+  PREVISIT_LOCALE_STORAGE_KEY,
+  computePreVisitAiFingerprint,
+  savePreVisitSession,
+} from "../../preVisit/constants/preVisitSession.js";
 import {
   cancelRequestPatientAppointment,
   confirmPatientAppointment,
@@ -11,6 +19,7 @@ import {
   requestPatientAppointment,
 } from "../api/patientAppointmentsApi.js";
 import "../../../styles/PatientInboxPage.css";
+import "../../../styles/PatientAppointmentsPage.css";
 
 function fmt(iso, lang) {
   try {
@@ -23,7 +32,39 @@ function fmt(iso, lang) {
   }
 }
 
+function hydratePreVisitSession(record) {
+  const answers =
+    record.answers && typeof record.answers === "object" && !Array.isArray(record.answers)
+      ? JSON.parse(JSON.stringify(record.answers))
+      : {};
+  const doctorLang = record.doctorLanguage || record.patientLanguage || "de";
+  const patientLang = record.patientLanguage || "de";
+  const payload = {
+    patientLanguage: patientLang,
+    doctorLanguage: doctorLang,
+    answers,
+    stepIndex: PRE_VISIT_QUESTION_STEPS.length - 1,
+  };
+  if (record.aiDoctorVersion != null) {
+    payload.aiDoctorVersion = record.aiDoctorVersion;
+    payload.aiSafetyNotice =
+      typeof record.aiSafetyNotice === "string" ? record.aiSafetyNotice : "";
+    payload.aiDoctorVersionFingerprint = computePreVisitAiFingerprint(
+      answers,
+      doctorLang,
+    );
+  }
+  savePreVisitSession(payload);
+  try {
+    sessionStorage.setItem(PREVISIT_LOCALE_STORAGE_KEY, patientLang);
+  } catch {
+    /* ignore */
+  }
+}
+
 export default function PatientAppointmentsPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { language } = useLanguage();
   const t = useMemo(
     () =>
@@ -47,15 +88,24 @@ export default function PatientAppointmentsPage() {
 
   const reload = useCallback(async () => {
     const { res, data } = await fetchPatientAppointments();
-    if (res.status === 404 && data.error === "feature_disabled") throw new Error("feature_disabled");
+    if (res.status === 404 && data.error === "feature_disabled") {
+      throw new Error("feature_disabled");
+    }
     if (!res.ok) throw new Error(data.error || "load_failed");
-    setAppointments(data.appointments || []);
+    const list = data.appointments || [];
+    setAppointments(list);
+    return list;
   }, []);
+
+  useEffect(() => {
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
+      setError("");
       try {
         const linksRes = await authFetch("/api/patient/links");
         const linksData = await linksRes.json().catch(() => ({}));
@@ -68,9 +118,16 @@ export default function PatientAppointmentsPage() {
             }));
           }
         }
-        await reload();
+        const list = await reload();
+        const deepLinkId = searchParams.get("appointmentId");
+        if (!cancelled && deepLinkId) {
+          const match = list.find((a) => a.id === deepLinkId);
+          if (match) setSelected(match);
+        }
       } catch (e) {
-        if (!cancelled) setError(t.loadError);
+        if (!cancelled) {
+          setError(e?.message === "feature_disabled" ? t.featureDisabled : t.loadError);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -78,11 +135,12 @@ export default function PatientAppointmentsPage() {
     return () => {
       cancelled = true;
     };
-  }, [reload, t.loadError]);
+  }, [reload, searchParams, t.featureDisabled, t.loadError]);
 
   const submitRequest = async (e) => {
     e.preventDefault();
     setBusy(true);
+    setError("");
     try {
       const { res, data } = await requestPatientAppointment({
         practiceProfileId: requestForm.practiceProfileId,
@@ -100,7 +158,7 @@ export default function PatientAppointmentsPage() {
       setShowRequest(false);
       setSelected(data.appointment);
     } catch {
-      setError(t.loadError);
+      setError(t.actionError);
     } finally {
       setBusy(false);
     }
@@ -109,13 +167,14 @@ export default function PatientAppointmentsPage() {
   const confirm = async () => {
     if (!selected) return;
     setBusy(true);
+    setError("");
     try {
       const { res, data } = await confirmPatientAppointment(selected.id);
-      if (!res.ok) throw new Error("failed");
+      if (!res.ok) throw new Error(data.error || "failed");
       await reload();
       setSelected(data.appointment);
     } catch {
-      setError(t.loadError);
+      setError(t.actionError);
     } finally {
       setBusy(false);
     }
@@ -124,32 +183,54 @@ export default function PatientAppointmentsPage() {
   const cancelReq = async () => {
     if (!selected) return;
     setBusy(true);
+    setError("");
     try {
       const { res, data } = await cancelRequestPatientAppointment(selected.id, {});
-      if (!res.ok) throw new Error("failed");
+      if (!res.ok) throw new Error(data.error || "failed");
       await reload();
       setSelected(data.appointment);
     } catch {
-      setError(t.loadError);
+      setError(t.actionError);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const openPreparation = async () => {
+    if (!selected?.preVisitSessionId) return;
+    setBusy(true);
+    setError("");
+    try {
+      const res = await authFetch(
+        `/api/previsit/sessions/${encodeURIComponent(selected.preVisitSessionId)}`,
+      );
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.session) throw new Error("get");
+      hydratePreVisitSession(data.session);
+      navigate("/pre-visit/document");
+    } catch {
+      setError(t.preparationOpenError);
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <main className="patient-inbox-page" aria-labelledby="patient-appt-heading">
-      <header className="patient-inbox-page__header">
-        <h1 id="patient-appt-heading">{t.heading}</h1>
-        <p>{t.intro}</p>
-        <Link className="patient-inbox__back" to="/patient">
-          {t.backHub}
-        </Link>
+    <main className="patient-inbox" aria-labelledby="patient-appt-heading">
+      <Link className="patient-inbox__back" to="/patient/practice">
+        {t.backHub}
+      </Link>
+      <header className="patient-inbox__header">
+        <h1 id="patient-appt-heading" className="patient-inbox__title">
+          {t.heading}
+        </h1>
+        <p className="patient-inbox__intro">{t.intro}</p>
       </header>
 
-      <div className="patient-inbox-page__actions">
+      <div className="patient-inbox__actions">
         <button
           type="button"
-          className="patient-inbox-page__btn patient-inbox-page__btn--primary"
+          className="patient-inbox__btn patient-inbox__btn--primary"
           onClick={() => setShowRequest(true)}
         >
           {t.requestAppointment}
@@ -157,15 +238,19 @@ export default function PatientAppointmentsPage() {
       </div>
 
       {loading ? (
-        <p aria-live="polite">{t.loading}</p>
+        <p className="patient-inbox__muted" aria-live="polite">
+          {t.loading}
+        </p>
       ) : null}
       {error ? (
-        <p role="alert">{error}</p>
+        <p className="patient-inbox__error" role="alert">
+          {error}
+        </p>
       ) : null}
 
       {showRequest ? (
-        <form className="patient-inbox-page__panel" onSubmit={submitRequest}>
-          <h2>{t.requestAppointment}</h2>
+        <form className="patient-appt__panel patient-appt__form" onSubmit={submitRequest}>
+          <h2 className="patient-inbox__item-title">{t.requestAppointment}</h2>
           <label htmlFor="req-practice">{t.selectPractice}</label>
           <select
             id="req-practice"
@@ -206,28 +291,45 @@ export default function PatientAppointmentsPage() {
             value={requestForm.patientNote}
             onChange={(e) => setRequestForm((f) => ({ ...f, patientNote: e.target.value }))}
           />
-          <button type="submit" className="patient-inbox-page__btn patient-inbox-page__btn--primary" disabled={busy}>
-            {t.submitRequest}
-          </button>
+          <div className="patient-appt__form-actions">
+            <button
+              type="submit"
+              className="patient-inbox__btn patient-inbox__btn--primary"
+              disabled={busy}
+            >
+              {t.submitRequest}
+            </button>
+            <button
+              type="button"
+              className="patient-inbox__btn patient-inbox__btn--secondary"
+              disabled={busy}
+              onClick={() => setShowRequest(false)}
+            >
+              {t.cancelRequest}
+            </button>
+          </div>
         </form>
       ) : null}
 
-      <ul className="patient-inbox-page__list patient-inbox__practice-group">
+      <ul className="patient-inbox__list" aria-label={t.listCaption}>
         {appointments.length === 0 && !loading ? (
-          <li>{t.empty}</li>
+          <li className="patient-inbox__muted">{t.empty}</li>
         ) : (
           appointments.map((a) => (
             <li key={a.id}>
               <button
                 type="button"
-                className="patient-inbox-page__item"
+                className="patient-inbox__item patient-appt__row"
                 onClick={() => setSelected(a)}
                 aria-current={selected?.id === a.id ? "true" : undefined}
+                aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
               >
                 <strong>{a.title}</strong>
-                <span>{a.practiceName || t.notProvided}</span>
-                <span>{fmt(a.startAt, language)}</span>
-                <span>{t[`status_${a.status}`] || a.status}</span>
+                <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
+                <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
+                <span className="patient-inbox__meta">
+                  {t[`status_${a.status}`] || a.status}
+                </span>
               </button>
             </li>
           ))
@@ -235,18 +337,20 @@ export default function PatientAppointmentsPage() {
       </ul>
 
       {selected ? (
-        <section className="patient-inbox-page__panel" aria-label={t.heading}>
-          <h2>{selected.title}</h2>
-          <p>
+        <section className="patient-appt__panel" aria-label={t.detailHeading}>
+          <h2 className="patient-inbox__item-title">{selected.title}</h2>
+          <p className="patient-inbox__meta">
             <strong>{t.status}:</strong> {t[`status_${selected.status}`] || selected.status}
           </p>
-          <p>{fmt(selected.startAt, language)}</p>
-          {selected.patientNote ? <p>{selected.patientNote}</p> : null}
-          <div className="patient-inbox-page__actions">
+          <p className="patient-inbox__meta">{fmt(selected.startAt, language)}</p>
+          {selected.patientNote ? (
+            <p className="patient-inbox__summary">{selected.patientNote}</p>
+          ) : null}
+          <div className="patient-inbox__actions">
             {["scheduled", "requested", "rescheduled"].includes(selected.status) ? (
               <button
                 type="button"
-                className="patient-inbox-page__btn patient-inbox-page__btn--primary"
+                className="patient-inbox__btn patient-inbox__btn--primary"
                 disabled={busy}
                 onClick={confirm}
               >
@@ -254,17 +358,24 @@ export default function PatientAppointmentsPage() {
               </button>
             ) : null}
             {!["cancelled"].includes(selected.status) ? (
-              <button type="button" className="patient-inbox-page__btn" disabled={busy} onClick={cancelReq}>
+              <button
+                type="button"
+                className="patient-inbox__btn patient-inbox__btn--secondary"
+                disabled={busy}
+                onClick={cancelReq}
+              >
                 {t.requestCancellation}
               </button>
             ) : null}
             {selected.preVisitSessionId ? (
-              <Link
-                className="patient-inbox-page__btn"
-                to={`/previsit/cases?session=${selected.preVisitSessionId}`}
+              <button
+                type="button"
+                className="patient-inbox__btn patient-inbox__btn--secondary"
+                disabled={busy}
+                onClick={openPreparation}
               >
                 {t.openPreparation}
-              </Link>
+              </button>
             ) : null}
           </div>
         </section>

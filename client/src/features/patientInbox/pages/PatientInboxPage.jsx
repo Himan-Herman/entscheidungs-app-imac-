@@ -179,7 +179,7 @@ export default function PatientInboxPage() {
 
   return (
     <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient">
+      <Link className="patient-inbox__back" to="/patient/practice">
         {t.backHub}
       </Link>
 
@@ -189,7 +189,7 @@ export default function PatientInboxPage() {
         <p className="patient-inbox__safety">{t.safetyNote}</p>
       </header>
 
-      <div className="patient-inbox__toolbar" role="toolbar" aria-label={t.filterAll}>
+      <div className="patient-inbox__toolbar" role="toolbar" aria-label={t.filterToolbarAria}>
         {TYPE_FILTERS.map((f) => (
           <button
             key={f.id}

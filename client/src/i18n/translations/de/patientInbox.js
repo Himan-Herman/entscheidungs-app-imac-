@@ -4,7 +4,8 @@ export default {
   intro: "Neue Informationen von deiner Praxis — neutral und ohne medizinische Details.",
   safetyNote:
     "Öffnen Sie verlinkte Bereiche nur, wenn Sie eine Nachricht von Ihrer Praxis erwarten. Kein Ersatz für medizinische Beratung.",
-  backHub: "Zurück zum Patientenbereich",
+  backHub: "Zurück zu Meine Praxis",
+  filterToolbarAria: "Postfach filtern",
   loading: "Wird geladen …",
   loadError: "Postfach konnte nicht geladen werden.",
   featureDisabled:

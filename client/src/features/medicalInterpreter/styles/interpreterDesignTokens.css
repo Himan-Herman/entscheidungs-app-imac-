@@ -27,6 +27,12 @@
   /* Surfaces */
   --interp-color-panel: var(--ms-color-surface);
   --interp-color-panel-muted: var(--ms-color-bg-subtle);
+  --interp-text-muted: var(--ms-color-text-muted);
+  --interp-border: var(--ms-color-border);
+  --interp-text: var(--ms-color-text);
+  --interp-surface: var(--ms-color-surface);
+  --interp-surface-muted: var(--ms-color-bg-subtle);
+  --interp-accent: var(--ms-color-accent);
   --interp-color-safety-bg: color-mix(in srgb, var(--ms-color-accent) 6%, var(--ms-color-bg-subtle));
   --interp-color-safety-border: color-mix(in srgb, var(--ms-color-accent) 18%, var(--ms-color-border));
 

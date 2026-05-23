@@ -131,13 +131,15 @@ export default {
   conversation: {
     heading: "Conversation log",
     intro:
-      "Just speak — after 3 seconds of silence the system detects the language, translates automatically, and listens again.",
+      "Just speak — after 3 seconds of silence speech is recognized, translated, read aloud, then the system listens again.",
     listening: "Listening — speak now",
     waiting: "Waiting for the first utterance …",
     patientLabel: "Patient",
     clinicianLabel: "Care team / clinician",
     translationPending: "Translation in progress …",
-    endHint: "“End conversation” downloads a PDF with the full log.",
+    endHint: "“End conversation” ends the session for both sides and downloads a PDF with the full log.",
+    endingSession: "Ending conversation …",
+    preparingPdf: "Preparing PDF …",
   },
 
   room: {
@@ -384,6 +386,9 @@ export default {
       "Automatic transcription and translation may be inaccurate or incomplete.",
     sessionTitleLabel: "Conversation title",
     patientNameLabel: "Patient",
+    patientDateOfBirthLabel: "Date of birth",
+    patientEmailLabel: "Email",
+    patientPhoneLabel: "Phone",
     generatedNote: "Generated locally on this device · MedScoutX Medical Interpreter",
     footerPage: "Page",
     filenamePrefix: "medscoutx-interpreter",
@@ -452,6 +457,7 @@ export default {
   sessionActions: {
     heading: "Conversation",
     end: "End conversation",
+    endPreparing: "Ending …",
     endHint: "Conversation marked as completed.",
     ended: "Conversation ended.",
     leave: "Leave room",

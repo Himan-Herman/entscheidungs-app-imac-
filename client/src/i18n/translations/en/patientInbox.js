@@ -4,7 +4,8 @@ export default {
   intro: "New information from your practice — neutral and without medical details.",
   safetyNote:
     "Only open linked areas if you expect a message from your practice. Not a substitute for medical advice.",
-  backHub: "Back to patient workspace",
+  backHub: "Back to My practice",
+  filterToolbarAria: "Filter inbox",
   loading: "Loading…",
   loadError: "Could not load your inbox.",
   featureDisabled:
