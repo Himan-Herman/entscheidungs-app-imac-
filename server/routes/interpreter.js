@@ -126,10 +126,6 @@ router.use("/near-realtime", interpreterNearRealtimeTranslateRouter);
 /** B2B practice layer — separate from B2C; gated by MEDICAL_INTERPRETER_B2B_ENABLED. */
 router.use("/practice", interpreterPracticeRouter);
 
-/** Patient practice sharing + invite consent (auth required). */
-router.use(interpreterInvitePatientRouter);
-router.use(interpreterPatientSharingRouter);
-
 router.use(interpreterCloudPreferenceRouter);
 router.use(interpreterCloudExportRouter);
 router.use(interpreterCloudSessionsRouter);
@@ -402,5 +398,9 @@ router.post(
     }
   },
 );
+
+/** Patient practice sharing + invite consent (auth required). */
+router.use(interpreterInvitePatientRouter);
+router.use(interpreterPatientSharingRouter);
 
 export default router;
