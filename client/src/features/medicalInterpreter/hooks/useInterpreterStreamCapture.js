@@ -8,6 +8,8 @@ import {
 } from "../api/interpreterStreamApi.js";
 import { isStreamingSttBrowserSupported } from "../config/isStreamingSttEnabled.js";
 import { INTERPRETER_STREAM_MAX_DURATION_MS } from "../constants/streaming.js";
+import { INTERPRETER_SILENCE_AUTO_STOP_MS } from "../utils/interpreterAudioConstants.js";
+import { startInterpreterSilenceMonitor } from "../utils/interpreterSilenceMonitor.js";
 
 const CHUNK_TIMESLICE_MS = 1000;
 const POLL_INTERVAL_MS = 900;
@@ -22,6 +24,10 @@ const MAX_PENDING_CHUNKS = 12;
  *   onStatusMessage?: (msg: string) => void;
  *   onError?: (message: string) => void;
  *   onDraftPreview?: (payload: { text: string; confidence?: string; provisional: boolean }) => void;
+ *   onRecordingStart?: () => void;
+ *   onSilencePhaseChange?: (phase: 'listening' | 'silence_waiting') => void;
+ *   onFinalized?: (payload: { transcript: string; confidence?: string; language?: string }) => void | Promise<void>;
+ *   silenceAutoStopMs?: number;
  * }} opts
  */
 export function useInterpreterStreamCapture(opts = {}) {
@@ -46,6 +52,7 @@ export function useInterpreterStreamCapture(opts = {}) {
   const mountedRef = useRef(true);
   const startingRef = useRef(false);
   const optsRef = useRef(opts);
+  const stopSilenceMonitorRef = useRef(null);
   /** @type {import('react').MutableRefObject<(() => Promise<{ ok: boolean; transcript?: string }>) | null>} */
   const stopStreamingRef = useRef(null);
 
@@ -70,6 +77,8 @@ export function useInterpreterStreamCapture(opts = {}) {
       maxDurationTimerRef.current = null;
     }
     pendingChunksRef.current = [];
+    stopSilenceMonitorRef.current?.();
+    stopSilenceMonitorRef.current = null;
     const recorder = mediaRecorderRef.current;
     if (recorder && recorder.state !== "inactive") {
       try {
@@ -227,6 +236,20 @@ export function useInterpreterStreamCapture(opts = {}) {
     setConnectionLabel(result.status === "processing" ? "processing" : "connected");
   }, []);
 
+  const monitorSilence = useCallback((stream) => {
+    stopSilenceMonitorRef.current?.();
+    stopSilenceMonitorRef.current = startInterpreterSilenceMonitor(stream, {
+      silenceMs: optsRef.current.silenceAutoStopMs ?? INTERPRETER_SILENCE_AUTO_STOP_MS,
+      minSpeechMs: 220,
+      onPhaseChange: (phase) => {
+        optsRef.current.onSilencePhaseChange?.(phase);
+      },
+      onSilence: () => {
+        void stopStreamingRef.current?.();
+      },
+    });
+  }, []);
+
   const startStreaming = useCallback(async () => {
     if (!isStreamingSttBrowserSupported()) {
       optsRef.current.onError?.("unsupported_browser");
@@ -300,9 +323,11 @@ export function useInterpreterStreamCapture(opts = {}) {
       };
 
       recorder.start(CHUNK_TIMESLICE_MS);
+      monitorSilence(stream);
       setPhase("streaming");
       setConnectionLabel("connected");
       optsRef.current.onStatusMessage?.("streaming");
+      optsRef.current.onRecordingStart?.();
 
       pollTimerRef.current = setInterval(() => {
         void pollStatus();
@@ -328,7 +353,7 @@ export function useInterpreterStreamCapture(opts = {}) {
       }
       return false;
     }
-  }, [phase, enqueueChunk, pollStatus, cancelStream]);
+  }, [phase, enqueueChunk, monitorSilence, pollStatus, cancelStream]);
 
   const stopStreaming = useCallback(async () => {
     const id = streamIdRef.current;
@@ -383,11 +408,16 @@ export function useInterpreterStreamCapture(opts = {}) {
     setConnectionLabel("");
     setStagedMessage("");
 
-    return {
-      ok: true,
+    const finalizedPayload = {
       transcript: text,
       confidence: result.confidence,
+      language: result.language,
     };
+    if (text) {
+      await optsRef.current.onFinalized?.(finalizedPayload);
+    }
+
+    return { ok: true, ...finalizedPayload };
   }, [phase, cleanupMedia, cancelStream, processUploadQueue]);
 
   stopStreamingRef.current = stopStreaming;

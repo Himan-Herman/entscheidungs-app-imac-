@@ -5,10 +5,15 @@ import {
   transcribeAudio,
   translateTurn,
 } from "../api/interpreterApi.js";
+import { translateNearRealtimePreview } from "../api/interpreterNearRealtimeApi.js";
 import InterpreterPlaybackStatus from "./InterpreterPlaybackStatus.jsx";
 import { useInterpreterRecorder } from "../hooks/useInterpreterRecorder.js";
+import { useInterpreterStreamCapture } from "../hooks/useInterpreterStreamCapture.js";
+import { useInterpreterServerStatus } from "../hooks/useInterpreterServerStatus.js";
 import { useInterpreterTtsPlayback } from "../hooks/useInterpreterTtsPlayback.js";
 import { useMedicalInterpreterMessages } from "../hooks/useMedicalInterpreterMessages.js";
+import { isNearRealtimeTranslationClientEnabled } from "../config/isNearRealtimeTranslationEnabled.js";
+import { isStreamingSttClientEnabled } from "../config/isStreamingSttEnabled.js";
 import {
   SESSION_STATUS_ACTIVE,
   SESSION_STATUS_ENDED,
@@ -160,9 +165,11 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
   const translateAbortRef = useRef(null);
   const runTokenRef = useRef(0);
   const processingRef = useRef(false);
+  const startListeningRef = useRef(null);
   const initialSessionRef = useRef(
     sessionId ? getSession(sessionId) || getCurrentSession() : getCurrentSession(),
   );
+  const interpreterServerStatus = useInterpreterServerStatus();
 
   const [session, setSession] = useState(() => initialSessionRef.current);
   const [speaker, setSpeakerState] = useState(() =>
@@ -182,6 +189,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
   const [exportMessage, setExportMessage] = useState("");
   const [voiceSpeed, setVoiceSpeed] = useState("normal");
   const [lastPlaybackRequest, setLastPlaybackRequest] = useState(null);
+  const [draftTranscript, setDraftTranscript] = useState("");
 
   const sessionRef = useRef(session);
   const speakerRef = useRef(speaker);
@@ -198,6 +206,31 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
   useEffect(() => {
     phaseRef.current = phase;
   }, [phase]);
+
+  const streamingModeAvailable = useMemo(
+    () =>
+      isStreamingSttClientEnabled() &&
+      interpreterServerStatus.streamingSttEnabled === true,
+    [interpreterServerStatus.streamingSttEnabled],
+  );
+
+  const nearRealtimeFastTranslateAvailable = useMemo(
+    () =>
+      isNearRealtimeTranslationClientEnabled() &&
+      interpreterServerStatus.nearRealtimeTranslationEnabled === true,
+    [interpreterServerStatus.nearRealtimeTranslationEnabled],
+  );
+
+  const streamLanguageHint = useMemo(() => {
+    if (!session) return undefined;
+    const patientLanguage = String(session.patientLanguage || "").trim().toLowerCase();
+    const doctorLanguage = String(session.doctorLanguage || "").trim().toLowerCase();
+    if (!patientLanguage || !doctorLanguage) return undefined;
+    if (patientLanguage !== doctorLanguage && (session.turns?.length || 0) === 0) {
+      return undefined;
+    }
+    return languagesForSpeaker(session, speaker).sourceLanguage;
+  }, [session, speaker]);
 
   const reloadSession = useCallback(() => {
     const targetSessionId = sessionId || sessionRef.current?.sessionId;
@@ -258,6 +291,55 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     setLiveAnnouncement("");
     requestAnimationFrame(() => setLiveAnnouncement(message));
   }, []);
+
+  const translateLiveTurn = useCallback(
+    async ({ text, sourceLanguage, targetLanguage, speaker: turnSpeaker, signal }) => {
+      if (nearRealtimeFastTranslateAvailable && String(text || "").trim().length <= 600) {
+        const fastResult = await translateNearRealtimePreview(
+          {
+            text,
+            sourceLanguage,
+            targetLanguage,
+            speaker: turnSpeaker,
+          },
+          { signal },
+        );
+
+        if (fastResult.ok) {
+          return {
+            ok: true,
+            translatedText: fastResult.translatedText,
+            sourceLanguage,
+            targetLanguage,
+            translationDirection: `${sourceLanguage}->${targetLanguage}`,
+            confidence: fastResult.confidence,
+            uncertain: fastResult.uncertain === true,
+            terminologyWarning: fastResult.terminologyWarning === true,
+            unclearSource: fastResult.unclearSource === true,
+          };
+        }
+
+        if (fastResult.error === "cancelled") {
+          return { ok: false, code: "cancelled", message: fastResult.message };
+        }
+
+        if (fastResult.error === "unsafe_medical_content") {
+          return { ok: false, code: "blocked", message: fastResult.message };
+        }
+      }
+
+      return translateTurn(
+        {
+          text,
+          sourceLanguage,
+          targetLanguage,
+          speaker: turnSpeaker,
+        },
+        { signal },
+      );
+    },
+    [nearRealtimeFastTranslateAvailable],
+  );
 
   const showError = useCallback(
     (message) => {
@@ -355,7 +437,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
         return;
       }
 
-      void startRecordingRef.current?.().then((started) => {
+      void startListeningRef.current?.().then((started) => {
         if (started) {
           autoRestartTimerRef.current = null;
           autoRestartAttemptRef.current = 0;
@@ -382,70 +464,46 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     );
   }, [clearAutoRestart]);
 
-  const processRecordedSegment = useCallback(
-    async ({ blob, mimeType }) => {
+  const finalizeTurnFromTranscript = useCallback(
+    async ({
+      originalTranscript,
+      detectedLanguage,
+      confidence,
+      activeSession = sessionRef.current,
+      fallbackSpeaker = speakerRef.current,
+    }) => {
       if (processingRef.current) return;
-      const activeSession = sessionRef.current;
       if (!activeSession?.sessionId || activeSession.status === SESSION_STATUS_ENDED) {
         return;
       }
 
+      const cleanedTranscript = String(originalTranscript || "").trim();
+      if (!cleanedTranscript) {
+        showError(t.liveSession.noTranscriptResult);
+        return;
+      }
+
       processingRef.current = true;
+      setDraftTranscript("");
       setErrorMessage("");
       setExportMessage("");
       setLastPlaybackRequest(null);
+
       const runToken = runTokenRef.current;
-      const fallbackSpeaker = speakerRef.current;
       const isFirstTurn = (activeSession.turns?.length || 0) === 0;
       const shouldAutoDetectSpeaker =
         String(activeSession.patientLanguage || "").trim().toLowerCase() !==
         String(activeSession.doctorLanguage || "").trim().toLowerCase();
 
       try {
-        const silenceCheck = await detectLikelySilentBlob(blob);
-        if (runToken !== runTokenRef.current) return;
-        if (silenceCheck.silent) {
-          announce(t.liveSession.noSpeechDetected);
-          setPhase(LIVE_PHASE.LISTENING);
-          scheduleNextListening();
-          return;
-        }
-
-        setPhase(LIVE_PHASE.TRANSCRIBING);
-        announce(t.liveSession.statusTranscribing);
-        const transcribeController = new AbortController();
-        transcribeAbortRef.current = transcribeController;
-        const transcriptResult = await transcribeAudio(blob, {
-          filename: mimeType?.includes("ogg") ? "utterance.ogg" : "utterance.webm",
-          language: shouldAutoDetectSpeaker
-            ? undefined
-            : activeSession.patientLanguage,
-          signal: transcribeController.signal,
-        });
-        transcribeAbortRef.current = null;
-
-        if (runToken !== runTokenRef.current) return;
-        if (!transcriptResult.ok) {
-          if (transcriptResult.code === "cancelled") return;
-          showError(interpreterErrorMessage(transcriptResult.code, t, transcriptResult.message));
-          return;
-        }
-
-        const originalTranscript = String(transcriptResult.transcript || "").trim();
-        if (!originalTranscript) {
-          showError(t.liveSession.noTranscriptResult);
-          return;
-        }
-
-        const detectedSpeaker = detectSpeakerFromLanguage(
-          transcriptResult.language,
-          originalTranscript,
-          activeSession,
-          fallbackSpeaker,
-        );
         const resolvedSpeaker = isFirstTurn
           ? shouldAutoDetectSpeaker
-            ? detectedSpeaker
+            ? detectSpeakerFromLanguage(
+                detectedLanguage,
+                cleanedTranscript,
+                activeSession,
+                fallbackSpeaker,
+              )
             : fallbackSpeaker
           : fallbackSpeaker;
         const { sourceLanguage, targetLanguage } = languagesForSpeaker(
@@ -459,14 +517,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
           speakerLabel: speakerLabelFor(resolvedSpeaker, t),
           sourceLanguage,
           targetLanguage,
-          originalText: originalTranscript,
-          originalTranscript,
+          originalText: cleanedTranscript,
+          originalTranscript: cleanedTranscript,
           confidence:
-            transcriptResult.confidence === "high"
-              ? "high"
-              : transcriptResult.confidence
-                ? "low"
-                : undefined,
+            confidence === "high" ? "high" : confidence ? "low" : undefined,
           timestamp: new Date().toISOString(),
           status: TURN_STATUS_TRANSCRIBED,
         });
@@ -482,9 +536,9 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
         announce(t.liveSession.statusTranslating);
         const translateController = new AbortController();
         translateAbortRef.current = translateController;
-        const translationResult = await translateTurn(
+        const translationResult = await translateLiveTurn(
           {
-            text: originalTranscript,
+            text: cleanedTranscript,
             sourceLanguage,
             targetLanguage,
             speaker: resolvedSpeaker,
@@ -500,7 +554,13 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
             status: TURN_STATUS_ERROR,
           });
           reloadSession();
-          showError(interpreterErrorMessage(translationResult.code, t, translationResult.message));
+          showError(
+            interpreterErrorMessage(
+              translationResult.code,
+              t,
+              translationResult.message,
+            ),
+          );
           return;
         }
 
@@ -567,7 +627,79 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
         processingRef.current = false;
       }
     },
-    [announce, playText, reloadSession, scheduleNextListening, setActiveSpeaker, setPhase, showError, t, voiceSpeed],
+    [
+      announce,
+      playText,
+      reloadSession,
+      scheduleNextListening,
+      setActiveSpeaker,
+      setPhase,
+      showError,
+      t,
+      translateLiveTurn,
+      voiceSpeed,
+    ],
+  );
+
+  const processRecordedSegment = useCallback(
+    async ({ blob, mimeType }) => {
+      if (processingRef.current) return;
+      const activeSession = sessionRef.current;
+      if (!activeSession?.sessionId || activeSession.status === SESSION_STATUS_ENDED) {
+        return;
+      }
+
+      processingRef.current = true;
+      setErrorMessage("");
+      setExportMessage("");
+      setLastPlaybackRequest(null);
+      const runToken = runTokenRef.current;
+      const fallbackSpeaker = speakerRef.current;
+
+      try {
+        const silenceCheck = await detectLikelySilentBlob(blob);
+        if (runToken !== runTokenRef.current) return;
+        if (silenceCheck.silent) {
+          announce(t.liveSession.noSpeechDetected);
+          setPhase(LIVE_PHASE.LISTENING);
+          scheduleNextListening();
+          return;
+        }
+
+        setPhase(LIVE_PHASE.TRANSCRIBING);
+        announce(t.liveSession.statusTranscribing);
+        const transcribeController = new AbortController();
+        transcribeAbortRef.current = transcribeController;
+        const transcriptResult = await transcribeAudio(blob, {
+          filename: mimeType?.includes("ogg") ? "utterance.ogg" : "utterance.webm",
+          language: shouldAutoDetectSpeaker
+            ? undefined
+            : activeSession.patientLanguage,
+          signal: transcribeController.signal,
+        });
+        transcribeAbortRef.current = null;
+
+        if (runToken !== runTokenRef.current) return;
+        if (!transcriptResult.ok) {
+          if (transcriptResult.code === "cancelled") return;
+          showError(interpreterErrorMessage(transcriptResult.code, t, transcriptResult.message));
+          return;
+        }
+
+        const originalTranscript = String(transcriptResult.transcript || "").trim();
+        if (runToken !== runTokenRef.current) return;
+        await finalizeTurnFromTranscript({
+          originalTranscript,
+          detectedLanguage: transcriptResult.language,
+          confidence: transcriptResult.confidence,
+          activeSession,
+          fallbackSpeaker,
+        });
+      } finally {
+        processingRef.current = false;
+      }
+    },
+    [announce, finalizeTurnFromTranscript, scheduleNextListening, setPhase, showError, t],
   );
 
   const {
