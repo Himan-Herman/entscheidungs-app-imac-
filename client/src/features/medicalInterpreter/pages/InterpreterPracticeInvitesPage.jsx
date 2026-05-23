@@ -37,6 +37,10 @@ function InterpreterPracticeInvitesContent() {
   );
   const [revokeTarget, setRevokeTarget] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [inviteType, setInviteType] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [ttlHours, setTtlHours] = useState("");
+  const [formError, setFormError] = useState("");
   const generateRef = useRef(null);
 
   const dashboardHref = practiceInterpreterPath(
@@ -102,15 +106,37 @@ function InterpreterPracticeInvitesContent() {
     }
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (event) => {
+    event?.preventDefault?.();
     if (!canManage || busy) return;
+    if (!inviteType.trim()) {
+      setFormError(t.invites.inviteTypeRequired);
+      generateRef.current?.focus();
+      return;
+    }
+    setFormError("");
     setBusy(true);
     setCreatedLink(null);
-    const result = await createPracticeInterpreterInvite({
+
+    const payload = {
       practiceId,
-      inviteType: "other",
-      ttlHours: 168,
-    });
+      inviteType: inviteType.trim(),
+    };
+    const trimmedName = displayName.trim();
+    if (trimmedName) {
+      payload.displayName = trimmedName;
+    }
+    const ttlRaw = ttlHours.trim();
+    if (ttlRaw) {
+      const parsed = Number.parseInt(ttlRaw, 10);
+      if (Number.isFinite(parsed) && parsed >= 1 && parsed <= 720) {
+        payload.ttlHours = parsed;
+      }
+    } else {
+      payload.ttlHours = 168;
+    }
+
+    const result = await createPracticeInterpreterInvite(payload);
     setBusy(false);
     if (result.ok && result.invitePath) {
       const fullPath =
@@ -164,15 +190,103 @@ function InterpreterPracticeInvitesContent() {
           {t.invites.placeholderNote}
         </p>
         {canManage ? (
-          <button
-            ref={generateRef}
-            type="button"
-            className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary"
-            disabled={busy}
-            onClick={() => void handleGenerate()}
+          <form
+            className="interpreter-setup__form interp-practice-invites__form"
+            onSubmit={(event) => void handleGenerate(event)}
+            noValidate
           >
-            {busy ? t.invites.generating : t.invites.generateButton}
-          </button>
+            <p className="interpreter-setup__hint">{t.invites.requiredLegend}</p>
+
+            <div className="interpreter-setup__field">
+              <label className="interpreter-setup__label" htmlFor="interp-invite-type">
+                {t.invites.inviteTypeLabel}
+              </label>
+              <span className="interpreter-setup__hint" id="interp-invite-type-hint">
+                {t.invites.inviteTypeHint}
+              </span>
+              <select
+                id="interp-invite-type"
+                ref={generateRef}
+                className="interpreter-setup__select"
+                value={inviteType}
+                onChange={(event) => {
+                  setInviteType(event.target.value);
+                  if (formError) setFormError("");
+                }}
+                aria-required="true"
+                aria-invalid={formError ? true : undefined}
+                aria-describedby={
+                  formError
+                    ? "interp-invite-type-hint interp-invite-form-error"
+                    : "interp-invite-type-hint"
+                }
+              >
+                <option value="">{t.invites.inviteTypeSelectEmpty}</option>
+                <option value="waiting_room">{t.invites.inviteTypeWaitingRoom}</option>
+                <option value="reception">{t.invites.inviteTypeReception}</option>
+                <option value="doctor_room">{t.invites.inviteTypeDoctorRoom}</option>
+                <option value="remote">{t.invites.inviteTypeRemote}</option>
+                <option value="other">{t.invites.inviteTypeOther}</option>
+              </select>
+            </div>
+
+            <div className="interpreter-setup__field">
+              <label className="interpreter-setup__label" htmlFor="interp-invite-display-name">
+                {t.invites.displayNameLabel}
+              </label>
+              <span className="interpreter-setup__hint" id="interp-invite-display-name-hint">
+                {t.invites.displayNameHint}
+              </span>
+              <input
+                id="interp-invite-display-name"
+                type="text"
+                className="interpreter-setup__input"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                placeholder={t.invites.displayNamePlaceholder}
+                maxLength={80}
+                aria-describedby="interp-invite-display-name-hint"
+              />
+            </div>
+
+            <div className="interpreter-setup__field">
+              <label className="interpreter-setup__label" htmlFor="interp-invite-ttl">
+                {t.invites.ttlHoursLabel}
+              </label>
+              <span className="interpreter-setup__hint" id="interp-invite-ttl-hint">
+                {t.invites.ttlHoursHint}
+              </span>
+              <input
+                id="interp-invite-ttl"
+                type="number"
+                className="interpreter-setup__input"
+                value={ttlHours}
+                onChange={(event) => setTtlHours(event.target.value)}
+                min={1}
+                max={720}
+                placeholder="168"
+                aria-describedby="interp-invite-ttl-hint"
+              />
+            </div>
+
+            {formError ? (
+              <p
+                id="interp-invite-form-error"
+                className="interpreter-setup__error"
+                role="alert"
+              >
+                {formError}
+              </p>
+            ) : null}
+
+            <button
+              type="submit"
+              className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary"
+              disabled={busy}
+            >
+              {busy ? t.invites.generating : t.invites.generateButton}
+            </button>
+          </form>
         ) : (
           <p className="interpreter-empty-state" role="status">
             {t.invites.managePermissionRequired}

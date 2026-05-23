@@ -1,20 +1,18 @@
 export default {
   pageTitle: "Medikationspläne – MedScoutX",
   heading: "Medikationspläne",
-  intro: "Veröffentlichte Angaben Ihrer Praxis — nur zur Orientierung.",
+  intro:
+    "Tragen Sie hier Ihre eigenen Medikamente ein, planen Einnahmezeiten und können Erinnerungen aktivieren — unabhängig von Ihrer Praxis.",
   safetyNote:
-    "Diese Angaben wurden von Ihrer Praxis bereitgestellt. MedScoutX erstellt keine Therapieempfehlung.",
+    "Orientierungshilfe nur für Sie. Keine Diagnose, keine Dosierungs- oder Therapieempfehlung, keine Wechselwirkungsprüfung. Bitte wichtige Fragen mit Arzt oder Apotheke klären.",
   backHub: "Zurück zum Patientenbereich",
   backList: "Zurück zur Übersicht",
   loading: "Wird geladen …",
-  loadError: "Medikationspläne konnten nicht geladen werden.",
-  featureDisabled: "Medikationspläne sind in dieser Umgebung noch nicht aktiviert.",
-  empty: "Noch keine veröffentlichten Medikationspläne.",
-  listCaption: "Medikationspläne",
-  fromPractice: "Ihre Praxis",
-  versionLabel: "Version {version}",
-  publishedAt: "Veröffentlicht am {date}",
-  openPlan: "Plan öffnen",
+  loadError: "Daten konnten nicht geladen werden.",
+  featureDisabled: "Dieser Bereich ist in dieser Umgebung noch nicht aktiviert.",
+  empty: "Noch keine eigenen Medikamente eingetragen.",
+  listCaption: "Ihre Medikamente",
+  addMedication: "Medikament hinzufügen",
   fieldDosage: "Dosierung",
   fieldFrequency: "Häufigkeit",
   fieldRoute: "Verabreichungsweg",
@@ -22,7 +20,18 @@ export default {
   fieldStart: "Start",
   fieldEnd: "Ende",
   fieldInstructions: "Hinweise",
-  planTitleFallback: "Medikationsplan",
+  planTitleFallback: "Medikament",
+  reminderConsentLabel:
+    "Erinnerungen auf diesem Gerät erlauben (optional, jederzeit abschaltbar)",
+  reminderConsentHint:
+    "MedScoutX sendet keine medizinischen Empfehlungen — nur von Ihnen eingetragene Erinnerungen.",
+  practiceSectionTitle: "Pläne von Ihrer Praxis (optional)",
+  practiceSectionIntro:
+    "Falls Ihre Praxis Ihnen einen Medikationsplan freigegeben hat, finden Sie ihn hier getrennt von Ihren eigenen Einträgen.",
+  fromPractice: "Ihre Praxis",
+  versionLabel: "Version {version}",
+  publishedAt: "Veröffentlicht am {date}",
+  openPlan: "Praxisplan öffnen",
   askQuestion: "Rückfrage an die Praxis",
   questionSent: "Ihre Rückfrage wurde an die Praxis übermittelt.",
   questionError: "Rückfrage konnte nicht gesendet werden.",
@@ -34,4 +43,37 @@ export default {
   aiDisclaimer:
     "Die KI strukturiert nur vorhandene Angaben. Sie erstellt keine Dosierungs- oder Therapieempfehlung.",
   messagesLink: "Zum sicheren Nachrichtenbereich",
+  ownForm: {
+    addTitle: "Medikament eintragen",
+    editTitle: "Medikament bearbeiten",
+    requiredHint: "Nur der Medikamentenname ist Pflicht (*). Alle anderen Felder sind optional.",
+    nameLabel: "Medikament *",
+    nameRequired: "Bitte geben Sie den Namen des Medikaments ein.",
+    dosageLabel: "Dosierung (optional)",
+    dosagePlaceholder: "z. B. 1 Tablette",
+    scheduleLabel: "Einnahmezeiten (optional)",
+    schedulePlaceholder: "z. B. morgens und abends",
+    startLabel: "Startdatum (optional)",
+    endLabel: "Enddatum (optional)",
+    notesLabel: "Notiz (optional)",
+    freeTextLabel: "Freitext (optional)",
+    freeTextPlaceholder:
+      "z. B. Metformin 500 mg\nmorgens und abends mit dem Essen",
+    freeTextApply: "In Felder übernehmen",
+    aiAssistHint:
+      "Hilft nur beim Ausfüllen der Felder — keine medizinische Bewertung.",
+    reminderItemLabel: "Erinnerung für dieses Medikament",
+    reminderNeedsConsent:
+      "Bitte aktivieren Sie oben zuerst die Erinnerungen, wenn Sie benachrichtigt werden möchten.",
+    cancel: "Abbrechen",
+    save: "Speichern",
+  },
+  ownCard: {
+    reminderOn: "Erinnerung an",
+    endWarning:
+      "Endet in {days} Tag(en). Bitte rechtzeitig Arzt oder Apotheke kontaktieren.",
+    edit: "Bearbeiten",
+    delete: "Entfernen",
+    deleteConfirm: "Dieses Medikament wirklich entfernen?",
+  },
 };

@@ -4,19 +4,19 @@
  */
 export default {
   hub: {
-    title: "Interprète médical",
-    subtitle: "Traduction en direct et soutien à la communication",
+    title: "Traduire la consultation médicale",
+    subtitle: "Traduction en direct pour patient·es et cabinets",
     cta: "Démarrer la conversation",
     newConversation: "Nouvelle conversation",
     trustLine:
       "Soutien à la communication uniquement — pas de diagnostic ni de recommandation de traitement.",
     privacyLine:
       "Microphone uniquement avec votre autorisation. Le contenu des conversations reste par défaut sur cet appareil.",
-    ariaLabel: "Ouvrir le module Interprète médical",
+    ariaLabel: "Ouvrir traduire la consultation médicale",
   },
 
   chrome: {
-    moduleTitle: "Interprète médical",
+    moduleTitle: "Traduire la consultation médicale",
     backToHub: "Retour à l'espace patient",
     backToSetup: "Retour à la configuration",
   },
@@ -35,7 +35,7 @@ export default {
 
   start: {
     pageTitle: "MedScoutX — Préparer la conversation",
-    heading: "Interprète médical",
+    heading: "Traduire la consultation médicale",
     intro:
       "Préparez une conversation multilingue avec votre équipe soignante. La configuration ne prend que quelques étapes.",
     stepOf: "Étape {{current}} sur {{total}}",

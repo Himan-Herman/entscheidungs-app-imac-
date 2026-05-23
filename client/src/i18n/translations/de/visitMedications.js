@@ -2,7 +2,7 @@ export default {
   pageTitle: "Medikamente & Einnahme — MedScoutX",
   patientHeading: "Medikamente & Einnahme",
   patientSub:
-    "Hier sehen Sie von Ihrer Praxis dokumentierte Medikamente und Einnahmehinweise nach einem Besuch. Keine automatische Therapieempfehlung.",
+    "Hier sehen Sie von Ihrer Praxis dokumentierte Medikamente und Einnahmehinweise nach einem Besuch — getrennt von „Medikationspläne“ (eigene Einträge). Keine automatische Therapieempfehlung.",
   patientDisclaimer:
     "Diese Angaben stammen von Ihrer Praxis und ersetzen nicht die ärztliche Aufklärung. Bei Unsicherheit wenden Sie sich an Ihre Praxis.",
   backPatientHub: "Zurück zum Patientenbereich",

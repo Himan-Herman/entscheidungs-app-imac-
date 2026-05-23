@@ -4,20 +4,21 @@
  */
 export default {
   hub: {
-    title: "Medical Interpreter",
-    subtitle: "Live translation & communication support",
+    title: "Translate your doctor visit",
+    subtitle: "Live translation for patients and practices",
     cta: "Start conversation",
     newConversation: "Start new conversation",
     trustLine:
       "Communication support only — no diagnosis or treatment recommendation.",
     privacyLine:
       "Microphone only with your permission. Conversation content stays on this device by default.",
-    ariaLabel: "Open Medical Interpreter module",
+    ariaLabel: "Open translate your doctor visit",
   },
 
   chrome: {
-    moduleTitle: "Medical Interpreter",
+    moduleTitle: "Translate your doctor visit",
     backToHub: "Back to patient area",
+    backToInterpreterHome: "Back to interpreter home",
     backToSetup: "Back to setup",
   },
 
@@ -35,7 +36,7 @@ export default {
 
   start: {
     pageTitle: "MedScoutX — Prepare conversation",
-    heading: "Medical Interpreter",
+    heading: "Translate your doctor visit",
     intro:
       "Prepare a multilingual conversation with your care team. Setup takes only a few steps.",
     stepOf: "Step {{current}} of {{total}}",

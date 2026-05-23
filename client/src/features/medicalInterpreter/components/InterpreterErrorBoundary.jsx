@@ -39,6 +39,7 @@ export default class InterpreterErrorBoundary extends Component {
           <Link
             className="medical-interpreter-page__back"
             to={homePath}
+            replace
             onClick={this.handleBack}
           >
             {reliability.errorBoundaryBack}

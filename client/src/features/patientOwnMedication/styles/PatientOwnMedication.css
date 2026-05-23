@@ -1,0 +1,220 @@
+.patient-own-med__section {
+  margin-bottom: 2rem;
+}
+
+.patient-own-med__section-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.patient-own-med__consent {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid var(--ms-border, #d0d5dd);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  background: var(--ms-surface-muted, #f8fafc);
+}
+
+.patient-own-med__consent input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.patient-own-med__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.patient-own-med__btn--primary {
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+}
+
+.patient-own-med__btn--secondary {
+  background: #fff;
+  border-color: var(--ms-border, #d0d5dd);
+  color: inherit;
+}
+
+.patient-own-med__btn--danger {
+  background: #fff;
+  border-color: #f87171;
+  color: #b91c1c;
+}
+
+.patient-own-med__form {
+  padding: 1rem;
+  border: 1px solid var(--ms-border, #d0d5dd);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  background: var(--ms-surface, #fff);
+}
+
+.patient-own-med__form-title {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.patient-own-med__label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  font-size: 1rem;
+}
+
+.patient-own-med__hint {
+  font-size: 0.9rem;
+  color: var(--ms-text-muted, #64748b);
+  margin: 0.35rem 0 0.75rem;
+}
+
+.patient-own-med__field {
+  margin-bottom: 1rem;
+}
+
+.patient-own-med__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 520px) {
+  .patient-own-med__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.patient-own-med__input,
+.patient-own-med__textarea {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid var(--ms-border, #d0d5dd);
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.patient-own-med__textarea {
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.patient-own-med__free-text {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--ms-border, #e2e8f0);
+}
+
+.patient-own-med__checkbox-row {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.patient-own-med__checkbox-row input {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-top: 0.15rem;
+}
+
+.patient-own-med__checkbox-label {
+  font-size: 1rem;
+}
+
+.patient-own-med__error {
+  color: #b91c1c;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.patient-own-med__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.patient-own-med__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.patient-own-med__card {
+  padding: 1rem;
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: 12px;
+  background: var(--ms-surface, #fff);
+}
+
+.patient-own-med__card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.patient-own-med__card-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.patient-own-med__badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: #e0f2fe;
+  color: #0369a1;
+  white-space: nowrap;
+}
+
+.patient-own-med__card-line {
+  margin: 0.25rem 0;
+  font-size: 1rem;
+}
+
+.patient-own-med__card-k {
+  font-weight: 600;
+}
+
+.patient-own-med__warn {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  font-size: 0.95rem;
+}
+
+.patient-own-med__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.patient-own-med__practice-section {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--ms-border, #e2e8f0);
+}

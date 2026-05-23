@@ -4,20 +4,21 @@
  */
 export default {
   hub: {
-    title: "Medizinischer Dolmetscher",
-    subtitle: "Live-Übersetzung & Gesprächshilfe",
+    title: "Arztgespräch übersetzen",
+    subtitle: "Live-Übersetzung für Patient:innen und Praxen",
     cta: "Gespräch starten",
     newConversation: "Neues Gespräch starten",
     trustLine:
       "Nur Kommunikationshilfe — keine Diagnose und keine Behandlungsempfehlung.",
     privacyLine:
       "Mikrofon nur mit Ihrer Erlaubnis. Gesprächsinhalte standardmäßig nur auf diesem Gerät.",
-    ariaLabel: "Modul Medizin-Dolmetscher öffnen",
+    ariaLabel: "Arztgespräch übersetzen öffnen",
   },
 
   chrome: {
-    moduleTitle: "Medizinischer Dolmetscher",
+    moduleTitle: "Arztgespräch übersetzen",
     backToHub: "Zurück zum Patientenbereich",
+    backToInterpreterHome: "Zurück zur Dolmetscher-Startseite",
     backToSetup: "Zurück zur Vorbereitung",
   },
 
@@ -35,7 +36,7 @@ export default {
 
   start: {
     pageTitle: "MedScoutX — Gespräch vorbereiten",
-    heading: "Medizin-Dolmetscher",
+    heading: "Arztgespräch übersetzen",
     intro:
       "Bereiten Sie ein mehrsprachiges Gespräch mit Ihrem Behandlungsteam vor. Die Einrichtung dauert nur wenige Schritte.",
     stepOf: "Schritt {{current}} von {{total}}",

@@ -97,7 +97,6 @@ export default function InterpreterLiveRoom() {
   const translateInFlightRef = useRef(false);
   const simplifyInFlightRef = useRef(false);
   const sessionActionInFlightRef = useRef(false);
-  const pendingAutoTranslateRef = useRef(false);
   const streamCancelRef = useRef(() => {});
   const discardNearRealtimeRef = useRef(() => {});
   const transcribeAbortRef = useRef(null);
@@ -217,6 +216,152 @@ export default function InterpreterLiveRoom() {
     [],
   );
 
+  const runTranslateDraft = useCallback(
+    async ({
+      sessionId,
+      turnId,
+      text,
+      sourceLanguage,
+      targetLanguage,
+      turnSpeaker,
+      priorConfidence,
+    }) => {
+      if (translateInFlightRef.current || transcribeInFlightRef.current) return;
+      const trimmed = String(text || "").trim();
+      if (!trimmed || !sessionId || !turnId) return;
+
+      if (!connectivity.isOnline) {
+        announceError(t.errors.offline);
+        return;
+      }
+
+      translateInFlightRef.current = true;
+      translateAbortRef.current?.abort();
+      translateAbortRef.current = new AbortController();
+      const { signal } = translateAbortRef.current;
+
+      if (mountedRef.current) {
+        setIsTranslating(true);
+        setErrorMessage(null);
+        setRecoveryAction(null);
+      }
+      announceStatus(t.room.statusTranslating);
+
+      try {
+        updateTurn(sessionId, turnId, {
+          originalText: trimmed,
+          status: TURN_STATUS_CONFIRMED,
+        });
+        reloadSession();
+
+        const translateParams = {
+          text: trimmed,
+          sourceLanguage,
+          targetLanguage,
+          speaker: turnSpeaker,
+        };
+
+        let result = await translateTurn(translateParams, { signal });
+
+        if (
+          !result.ok &&
+          isRetryableInterpreterCode(result.code) &&
+          !signal.aborted &&
+          connectivity.isOnline
+        ) {
+          await new Promise((resolve) => {
+            setTimeout(resolve, INTERPRETER_REQUEST_RETRY_DELAY_MS);
+          });
+          if (!signal.aborted && mountedRef.current) {
+            result = await translateTurn(translateParams, { signal });
+          }
+        }
+
+        if (!mountedRef.current) return;
+
+        if (result.ok) {
+          const confidence =
+            result.confidence === "low" || result.uncertain
+              ? "low"
+              : priorConfidence === "low"
+                ? "low"
+                : priorConfidence;
+
+          updateTurn(sessionId, turnId, {
+            originalText: trimmed,
+            translatedText: result.translatedText,
+            status: TURN_STATUS_TRANSLATED,
+            confidence,
+            translationDirection:
+              result.translationDirection ||
+              `${sourceLanguage}->${targetLanguage}`,
+            translationUncertain: result.uncertain === true ? true : undefined,
+            terminologyWarning:
+              result.terminologyWarning === true ? true : undefined,
+            unclearSource: result.unclearSource === true ? true : undefined,
+          });
+          setActiveTurnId(null);
+          reloadSession();
+          maybeApplyAutoSessionTitle(sessionId, t, uiLanguage);
+          reloadSession();
+          announceStatus(t.room.statusReadyForNext);
+          return;
+        }
+
+        if (result.code === "cancelled") return;
+
+        if (result.code === "blocked") {
+          updateTurn(sessionId, turnId, {
+            originalText: trimmed,
+            status: TURN_STATUS_BLOCKED,
+            translatedText: undefined,
+            translationDirection: undefined,
+            translationUncertain: undefined,
+            terminologyWarning: undefined,
+            unclearSource: undefined,
+          });
+          announceError(
+            interpreterErrorMessage("blocked", t, result.message),
+          );
+          reloadSession();
+          return;
+        }
+
+        updateTurn(sessionId, turnId, {
+          originalText: trimmed,
+          status: TURN_STATUS_DRAFT,
+        });
+        reloadSession();
+        if (isRetryableInterpreterCode(result.code)) {
+          setRecoveryAction("translate");
+        }
+        announceError(interpreterErrorMessage(result.code, t, result.message));
+      } catch {
+        if (mountedRef.current) {
+          updateTurn(sessionId, turnId, {
+            originalText: trimmed,
+            status: TURN_STATUS_DRAFT,
+          });
+          reloadSession();
+          setRecoveryAction("translate");
+          announceError(t.errors.generic);
+        }
+      } finally {
+        translateInFlightRef.current = false;
+        if (mountedRef.current) setIsTranslating(false);
+      }
+    },
+    [
+      t,
+      uiLanguage,
+      reloadSession,
+      announceError,
+      announceStatus,
+      connectivity.isOnline,
+      mountedRef,
+    ],
+  );
+
   const handleRecorded = useCallback(
     async ({ blob, mimeType }) => {
       const current = getCurrentSession();
@@ -258,7 +403,7 @@ export default function InterpreterLiveRoom() {
         if (!mountedRef.current) return;
 
         if (!result.ok) {
-          if (result.code === "cancelled" || result.code === "generic") return;
+          if (result.code === "cancelled") return;
           if (result.code === "validation") {
             announceError(t.pushToTalk.tooShort);
             return;
@@ -289,11 +434,23 @@ export default function InterpreterLiveRoom() {
           setActiveTurnId(turn.turnId);
           setDraftText(transcript);
           reloadSession();
-          pendingAutoTranslateRef.current = true;
           announceStatus(t.room.statusTranslating);
           requestAnimationFrame(() => {
             if (mountedRef.current) transcriptRef.current?.focus();
           });
+          void runTranslateDraft({
+            sessionId: current.sessionId,
+            turnId: turn.turnId,
+            text: transcript,
+            sourceLanguage: langs.sourceLanguage,
+            targetLanguage: langs.targetLanguage,
+            turnSpeaker: speaker,
+            priorConfidence: mapTranscribeConfidence(result.confidence),
+          });
+        }
+      } catch {
+        if (mountedRef.current) {
+          announceError(t.errors.generic);
         }
       } finally {
         transcribeInFlightRef.current = false;
@@ -307,6 +464,7 @@ export default function InterpreterLiveRoom() {
       announceError,
       announceStatus,
       runTranscribe,
+      runTranslateDraft,
       connectivity.isOnline,
       mountedRef,
     ],
@@ -382,7 +540,6 @@ export default function InterpreterLiveRoom() {
     cancelRecording();
     streamCancelRef.current();
     stopAllPlayback();
-    pendingAutoTranslateRef.current = false;
     if (mountedRef.current) {
       setIsTranscribing(false);
       setIsTranslating(false);
@@ -903,165 +1060,23 @@ export default function InterpreterLiveRoom() {
   }, [session, speaker, uiLanguage, t.room.speakerDirection]);
 
   const runConfirmTranslate = useCallback(async () => {
-    if (translateInFlightRef.current || transcribeInFlightRef.current) return;
     if (!session || !displayTurn || displayTurn.status !== TURN_STATUS_DRAFT) {
       return;
     }
-    const text = draftText.trim();
-    if (!text) return;
-
-    if (!connectivity.isOnline) {
-      announceError(t.errors.offline);
-      return;
-    }
-
-    translateInFlightRef.current = true;
-    translateAbortRef.current?.abort();
-    translateAbortRef.current = new AbortController();
-    const { signal } = translateAbortRef.current;
-
-    if (mountedRef.current) {
-      setIsTranslating(true);
-      setErrorMessage(null);
-      setRecoveryAction(null);
-    }
-    announceStatus(t.room.statusTranslating);
-
-    const turnId = displayTurn.turnId;
-    const sessionId = session.sessionId;
-
-    try {
-      updateTurn(sessionId, turnId, {
-        originalText: text,
-        status: TURN_STATUS_CONFIRMED,
-      });
-      reloadSession();
-
-      const translateParams = {
-        text,
-        sourceLanguage: displayTurn.sourceLanguage,
-        targetLanguage: displayTurn.targetLanguage,
-        speaker: displayTurn.speaker,
-      };
-
-      let result = await translateTurn(translateParams, { signal });
-
-      if (
-        !result.ok &&
-        isRetryableInterpreterCode(result.code) &&
-        !signal.aborted &&
-        connectivity.isOnline
-      ) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, INTERPRETER_REQUEST_RETRY_DELAY_MS);
-        });
-        if (!signal.aborted && mountedRef.current) {
-          result = await translateTurn(translateParams, { signal });
-        }
-      }
-
-      if (!mountedRef.current) return;
-
-      if (result.ok) {
-        const confidence =
-          result.confidence === "low" || result.uncertain
-            ? "low"
-            : displayTurn.confidence === "low"
-              ? "low"
-              : displayTurn.confidence;
-
-        updateTurn(sessionId, turnId, {
-          originalText: text,
-          translatedText: result.translatedText,
-          status: TURN_STATUS_TRANSLATED,
-          confidence,
-          translationDirection:
-            result.translationDirection ||
-            `${displayTurn.sourceLanguage}->${displayTurn.targetLanguage}`,
-          translationUncertain: result.uncertain === true ? true : undefined,
-          terminologyWarning:
-            result.terminologyWarning === true ? true : undefined,
-          unclearSource: result.unclearSource === true ? true : undefined,
-        });
-        setActiveTurnId(null);
-        reloadSession();
-        maybeApplyAutoSessionTitle(sessionId, t, uiLanguage);
-        reloadSession();
-        announceStatus(t.room.statusReadyForNext);
-        return;
-      }
-
-      if (result.code === "cancelled") return;
-
-      if (result.code === "blocked") {
-        updateTurn(sessionId, turnId, {
-          originalText: text,
-          status: TURN_STATUS_BLOCKED,
-          translatedText: undefined,
-          translationDirection: undefined,
-          translationUncertain: undefined,
-          terminologyWarning: undefined,
-          unclearSource: undefined,
-        });
-        announceError(
-          interpreterErrorMessage("blocked", t, result.message),
-        );
-        reloadSession();
-        return;
-      }
-
-      updateTurn(sessionId, turnId, {
-        originalText: text,
-        status: TURN_STATUS_DRAFT,
-      });
-      reloadSession();
-      if (isRetryableInterpreterCode(result.code)) {
-        setRecoveryAction("translate");
-      }
-      announceError(interpreterErrorMessage(result.code, t, result.message));
-    } finally {
-      translateInFlightRef.current = false;
-      if (mountedRef.current) setIsTranslating(false);
-    }
-  }, [
-    session,
-    displayTurn,
-    draftText,
-    t,
-    uiLanguage,
-    reloadSession,
-    announceError,
-    announceStatus,
-    connectivity.isOnline,
-    mountedRef,
-  ]);
+    await runTranslateDraft({
+      sessionId: session.sessionId,
+      turnId: displayTurn.turnId,
+      text: draftText,
+      sourceLanguage: displayTurn.sourceLanguage,
+      targetLanguage: displayTurn.targetLanguage,
+      turnSpeaker: displayTurn.speaker,
+      priorConfidence: displayTurn.confidence,
+    });
+  }, [session, displayTurn, draftText, runTranslateDraft]);
 
   const handleConfirmTranscript = () => {
     void runConfirmTranslate();
   };
-
-  useEffect(() => {
-    if (!pendingAutoTranslateRef.current) return;
-    if (!session || !displayTurn || displayTurn.status !== TURN_STATUS_DRAFT) {
-      return;
-    }
-    if (!draftText.trim() || isTranscribing) return;
-    if (
-      transcribeInFlightRef.current ||
-      translateInFlightRef.current ||
-      simplifyInFlightRef.current
-    ) {
-      return;
-    }
-    pendingAutoTranslateRef.current = false;
-    void runConfirmTranslate();
-  }, [
-    session,
-    displayTurn,
-    draftText,
-    isTranscribing,
-    runConfirmTranslate,
-  ]);
 
   const runSimplify = useCallback(async () => {
     if (simplifyInFlightRef.current || translateInFlightRef.current) return;
@@ -1285,7 +1300,7 @@ export default function InterpreterLiveRoom() {
         className="medical-interpreter-page__back"
         to="/patient/interpreter"
       >
-        {t.chrome.backToHub}
+        {t.chrome.backToInterpreterHome}
       </Link>
 
       {liveMessage ? (

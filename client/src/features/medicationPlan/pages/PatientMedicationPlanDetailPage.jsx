@@ -115,7 +115,7 @@ export default function PatientMedicationPlanDetailPage() {
 
   return (
     <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient/medication-plans">
+      <Link className="patient-inbox__back" to="/patient/medication-plans#practice-meds-heading">
         {t.backList}
       </Link>
       {plan?.practice ? <PracticeBrandingBar branding={plan.practice} /> : null}

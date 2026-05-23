@@ -10,8 +10,14 @@ import { useLanguage } from "../../../i18n/LanguageContext";
  */
 export default function InterpreterLiveHeader({ session, statusLabel, labels: t }) {
   const { language: uiLanguage } = useLanguage();
-  const patientLabel = formatLanguageDisplayName(uiLanguage, session.patientLanguage);
-  const doctorLabel = formatLanguageDisplayName(uiLanguage, session.doctorLanguage);
+  const patientLabel =
+    formatLanguageDisplayName(uiLanguage, session.patientLanguage) ||
+    session.patientLanguage ||
+    "—";
+  const doctorLabel =
+    formatLanguageDisplayName(uiLanguage, session.doctorLanguage) ||
+    session.doctorLanguage ||
+    "—";
   const title =
     session.conversationTitle?.trim() || t.room.heading;
 

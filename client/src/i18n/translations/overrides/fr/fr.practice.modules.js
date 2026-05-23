@@ -1264,16 +1264,16 @@ export default {
         "Soutien à la communication uniquement — pas de diagnostic, de triage ni de conseil de traitement.",
     },
     hubCard: {
-      title: "Interprète médical",
+      title: "Communication multilingue",
       description:
-        "Communication multilingue — soutien à la conversation uniquement, pas de diagnostic.",
+        "Communication sécurisée pour les patient·es internationaux·ales",
       badge: "Communication",
       ariaLabel:
-        "Ouvrir l’interprète médical pour cet établissement",
+        "Ouvrir la communication multilingue pour cet établissement",
     },
     hub: {
-      pageTitle: "Interprète médical — Établissement",
-      heading: "Interprète médical",
+      pageTitle: "Communication multilingue — Établissement",
+      heading: "Communication multilingue",
       intro:
         "Facilitez la communication entre patients et soignants pendant les consultations, dans plusieurs langues. Les sessions patient restent sous le contrôle du patient jusqu’à ce qu’il choisisse de partager.",
       placeholder:

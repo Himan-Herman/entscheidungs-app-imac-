@@ -521,12 +521,13 @@ export default function PracticeHubPage() {
                 <Link
                   className="practice-overview__card practice-overview__card--interpreter"
                   to={`/practice/interpreter?practiceId=${encodeURIComponent(practiceId)}`}
-                  aria-label={tInterp.hubCard.ariaLabel}
+                  aria-label={`${tInterp.hubCard.title}. ${tInterp.hubCard.description}`}
                 >
                   <span className="practice-overview__card-icon" aria-hidden>
                     <Languages size={22} strokeWidth={1.75} />
                   </span>
                   <span className="practice-overview__card-label">{tInterp.hubCard.title}</span>
+                  <span className="practice-overview__card-desc">{tInterp.hubCard.description}</span>
                 </Link>
               ) : null}
             </nav>

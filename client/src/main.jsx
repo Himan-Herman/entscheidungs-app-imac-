@@ -365,7 +365,7 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
-                  path="/patient/medication-plans/:planId"
+                  path="/patient/medication-plans/practice/:planId"
                   element={
                     <ProtectedRoute>
                       <PatientMedicationPlanDetailPage />

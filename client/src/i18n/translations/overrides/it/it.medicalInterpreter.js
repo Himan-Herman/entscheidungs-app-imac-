@@ -4,19 +4,19 @@
  */
 export default {
   hub: {
-    title: "Interprete medico",
-    subtitle: "Traduzione in tempo reale e supporto alla comunicazione",
+    title: "Tradurre la visita medica",
+    subtitle: "Traduzione live per pazienti e studi",
     cta: "Avvia conversazione",
     newConversation: "Nuova conversazione",
     trustLine:
       "Solo supporto alla comunicazione — senza diagnosi né raccomandazioni terapeutiche.",
     privacyLine:
       "Microfono solo con la tua autorizzazione. Il contenuto delle conversazioni resta per impostazione predefinita su questo dispositivo.",
-    ariaLabel: "Apri il modulo Interprete medico",
+    ariaLabel: "Apri tradurre la visita medica",
   },
 
   chrome: {
-    moduleTitle: "Interprete medico",
+    moduleTitle: "Tradurre la visita medica",
     backToHub: "Torna all’area paziente",
     backToSetup: "Torna alla configurazione",
   },
@@ -35,7 +35,7 @@ export default {
 
   start: {
     pageTitle: "MedScoutX — Prepara la conversazione",
-    heading: "Interprete medico",
+    heading: "Tradurre la visita medica",
     intro:
       "Prepara una conversazione multilingue con il tuo team sanitario. La configurazione richiede solo pochi passaggi.",
     stepOf: "Passaggio {{current}} di {{total}}",
