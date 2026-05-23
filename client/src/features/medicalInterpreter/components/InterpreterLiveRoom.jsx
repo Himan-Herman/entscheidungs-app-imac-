@@ -169,14 +169,14 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     nextExpectedSpeakerFromSession(initialSessionRef.current),
   );
   const [phase, setPhaseState] = useState(() =>
-    getCurrentSession()?.status === SESSION_STATUS_ENDED
+    initialSessionRef.current?.status === SESSION_STATUS_ENDED
       ? LIVE_PHASE.ENDED
       : LIVE_PHASE.IDLE,
   );
   const [errorMessage, setErrorMessage] = useState("");
   const [liveAnnouncement, setLiveAnnouncement] = useState("");
   const [pdfReady, setPdfReady] = useState(() => {
-    const current = getCurrentSession();
+    const current = initialSessionRef.current;
     return current?.status === SESSION_STATUS_ENDED && (current?.turns?.length || 0) > 0;
   });
   const [exportMessage, setExportMessage] = useState("");
@@ -206,9 +206,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
       : sessionRef.current?.sessionId
       ? getSession(sessionRef.current.sessionId)
       : getCurrentSession();
-    setSession(fresh);
-    sessionRef.current = fresh;
-    return fresh;
+    const stableSession = fresh || sessionRef.current || initialSessionRef.current || null;
+    setSession(stableSession);
+    sessionRef.current = stableSession;
+    return stableSession;
   }, [sessionId]);
 
   const setActiveSpeaker = useCallback((nextSpeaker) => {
