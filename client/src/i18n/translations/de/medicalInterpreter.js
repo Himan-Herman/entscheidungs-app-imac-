@@ -139,7 +139,8 @@ export default {
     patientLabel: "Patient:in",
     clinicianLabel: "Behandlungsteam / Arzt",
     translationPending: "Übersetzung wird erstellt …",
-    endHint: "„Gespräch beenden“ beendet die Sitzung für beide Seiten und lädt ein PDF mit dem vollständigen Verlauf herunter.",
+    endHint:
+      "„Gespräch beenden“ beendet die automatische Übersetzung. „PDF herunterladen“ speichert den zweisprachigen Verlauf auf Ihrem Gerät.",
     endingSession: "Gespräch wird beendet …",
     preparingPdf: "PDF wird vorbereitet …",
   },

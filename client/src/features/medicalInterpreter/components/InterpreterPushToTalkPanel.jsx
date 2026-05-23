@@ -9,6 +9,8 @@
  *   privacyNote?: string;
  *   micDenied?: boolean;
  *   onRetryMic?: () => void;
+ *   autoMode?: boolean;
+ *   statusLabel?: string;
  *   labels: object;
  * }} props
  */
@@ -22,6 +24,8 @@ export default function InterpreterPushToTalkPanel({
   privacyNote,
   micDenied = false,
   onRetryMic,
+  autoMode = false,
+  statusLabel = "",
   labels: t,
 }) {
   const btnClass = [
@@ -56,15 +60,40 @@ export default function InterpreterPushToTalkPanel({
     .filter(Boolean)
     .join(" ");
 
+  const autoStatusText =
+    statusLabel ||
+    (isRecording
+      ? t.conversation?.listening || t.pushToTalk.stop
+      : isPreparing || isStopping
+        ? t.pushToTalk.preparing
+        : t.conversation?.waiting || t.room.statusIdle);
+
   return (
-    <section className="interpreter-live__ptt" aria-labelledby="interp-ptt-heading">
+    <section
+      className={
+        autoMode
+          ? "interpreter-live__ptt interpreter-live__ptt--auto"
+          : "interpreter-live__ptt"
+      }
+      aria-labelledby="interp-ptt-heading"
+    >
       <h2 id="interp-ptt-heading" className="interpreter-live__section-title visually-hidden">
-        {t.pushToTalk.record}
+        {autoMode ? t.conversation?.heading || t.pushToTalk.record : t.pushToTalk.record}
       </h2>
       {privacyNote ? (
         <p className="interpreter-live__ptt-privacy" id="interp-ptt-privacy">
           {privacyNote}
         </p>
+      ) : null}
+      {autoMode ? (
+        <div
+          className="interpreter-live__auto-listen"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <p className="interpreter-live__auto-listen-label">{autoStatusText}</p>
+        </div>
       ) : null}
       {disabled && disabledReason ? (
         <p id="interp-ptt-disabled-reason" className="visually-hidden">
@@ -91,6 +120,7 @@ export default function InterpreterPushToTalkPanel({
           ) : null}
         </div>
       ) : null}
+      {!autoMode ? (
       <button
         type="button"
         className={btnClass}
@@ -104,12 +134,15 @@ export default function InterpreterPushToTalkPanel({
       >
         <span className="interpreter-live__ptt-label">{label}</span>
       </button>
-      {t.pushToTalk.liveHint ? (
+      ) : null}
+      {!autoMode && t.pushToTalk.liveHint ? (
         <p className="interpreter-live__ptt-live-hint" role="note">
           {t.pushToTalk.liveHint}
         </p>
       ) : null}
+      {!autoMode ? (
       <p className="interpreter-live__ptt-keyboard-hint">{t.pushToTalk.keyboardHint}</p>
+      ) : null}
     </section>
   );
 }

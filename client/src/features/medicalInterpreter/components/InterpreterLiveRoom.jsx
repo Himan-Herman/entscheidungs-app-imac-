@@ -73,6 +73,9 @@ import InterpreterConversationFeed from "./InterpreterConversationFeed.jsx";
 import { detectSpeakerFromLanguage } from "../utils/detectSpeakerFromLanguage.js";
 import { downloadInterpreterSessionPdf } from "../pdf/generateInterpreterSessionPdf.js";
 import { getSessionDisplayTitle } from "../utils/sessionDisplayTitle.js";
+import { useInterpreterCloud } from "../hooks/useInterpreterCloud.js";
+import { saveSessionToCloud } from "../utils/interpreterCloudSync.js";
+import { deleteCloudSession } from "../api/interpreterCloudApi.js";
 
 const CONTINUOUS_CONVERSATION_MODE = true;
 const AUTO_LISTEN_DELAY_MS = 500;
@@ -112,6 +115,7 @@ export default function InterpreterLiveRoom() {
   const simplifyAbortRef = useRef(null);
   const connectivity = useInterpreterConnectivity();
   const serverStatus = useInterpreterServerStatus();
+  const cloud = useInterpreterCloud();
   const streamingFeatureAvailable =
     isStreamingSttClientEnabled() && serverStatus.streamingSttEnabled === true;
   const nearRealtimeFeatureAvailable =
@@ -138,6 +142,7 @@ export default function InterpreterLiveRoom() {
   /** @type {'translate'|'simplify'|null} */
   const [recoveryAction, setRecoveryAction] = useState(null);
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const continuousListenBootstrappedRef = useRef(false);
   const autoListenTimerRef = useRef(null);
   const scheduleAutoListenRef = useRef(() => {});
@@ -149,6 +154,24 @@ export default function InterpreterLiveRoom() {
     if (mountedRef.current) setSession(next);
     return next;
   }, [mountedRef]);
+
+  const syncSessionToCloudQuiet = useCallback(
+    async (sessionId) => {
+      if (!cloud.accountConsent || !cloud.canUseCloud) return;
+      const fresh = getSession(sessionId);
+      if (!fresh?.turns?.length) return;
+      const onCloud = cloud.cloudSessionIds.has(sessionId);
+      await saveSessionToCloud(fresh, { alreadyOnCloud: onCloud });
+      if (mountedRef.current) reloadSession();
+    },
+    [
+      cloud.accountConsent,
+      cloud.canUseCloud,
+      cloud.cloudSessionIds,
+      reloadSession,
+      mountedRef,
+    ],
+  );
 
   const announceError = useCallback(
     (message) => {
@@ -337,6 +360,7 @@ export default function InterpreterLiveRoom() {
 
           announceStatus(t.room.statusReadyForNext);
           if (CONTINUOUS_CONVERSATION_MODE) {
+            void syncSessionToCloudQuiet(sessionId);
             scheduleAutoListenRef.current();
           }
           return;
@@ -1369,20 +1393,7 @@ export default function InterpreterLiveRoom() {
     stopAllPlayback();
     const sessionId = session.sessionId;
     endSession(sessionId, t, uiLanguage);
-    const endedSession = getSession(sessionId);
-    if (endedSession?.turns?.length) {
-      announceStatus(t.conversation.preparingPdf);
-      await new Promise((resolve) => {
-        window.requestAnimationFrame(() => {
-          window.setTimeout(resolve, 120);
-        });
-      });
-      downloadInterpreterSessionPdf(
-        endedSession,
-        getSessionDisplayTitle(endedSession, t, uiLanguage),
-        t,
-      );
-    }
+    await syncSessionToCloudQuiet(sessionId);
     reloadSession();
     sessionActionInFlightRef.current = false;
     if (mountedRef.current) setSessionActionBusy(false);
@@ -1400,6 +1411,41 @@ export default function InterpreterLiveRoom() {
     clearAutoListenTimer,
     navigate,
     announceStatus,
+    syncSessionToCloudQuiet,
+  ]);
+
+  const handleDownloadPdf = useCallback(async () => {
+    if (!session || isExporting || sessionActionBusy) return;
+    const fresh = getSession(session.sessionId) || session;
+    const hasTurns = (fresh.turns?.length ?? 0) > 0;
+    if (!hasTurns) {
+      announceError(t.pdf.exportNoTurns);
+      return;
+    }
+    if (mountedRef.current) setIsExporting(true);
+    try {
+      const title = getSessionDisplayTitle(fresh, t, uiLanguage);
+      const result = downloadInterpreterSessionPdf(fresh, title, t);
+      if (!mountedRef.current) return;
+      if (result.ok) {
+        announceStatus(t.pdf.exportSuccess);
+        return;
+      }
+      announceError(
+        result.code === "no_turns" ? t.pdf.exportNoTurns : t.pdf.exportFailed,
+      );
+    } finally {
+      if (mountedRef.current) setIsExporting(false);
+    }
+  }, [
+    session,
+    isExporting,
+    sessionActionBusy,
+    t,
+    uiLanguage,
+    announceStatus,
+    announceError,
+    mountedRef,
   ]);
 
   const handleEndSession = () => {
@@ -1429,6 +1475,9 @@ export default function InterpreterLiveRoom() {
     void streamCapture.cancelStream();
     stopAllPlayback();
     const id = session.sessionId;
+    if (cloud.accountConsent && cloud.cloudSessionIds.has(id)) {
+      void deleteCloudSession(id);
+    }
     deleteSession(id);
     setConfirmAction(null);
     sessionActionInFlightRef.current = false;
@@ -1707,6 +1756,8 @@ export default function InterpreterLiveRoom() {
         privacyNote={t.privacy.body3}
         micDenied={recorderError === "mic_denied"}
         onRetryMic={handleRetryMic}
+        autoMode={CONTINUOUS_CONVERSATION_MODE}
+        statusLabel={statusLabel}
         labels={t}
       />
 
@@ -1714,8 +1765,11 @@ export default function InterpreterLiveRoom() {
         sessionId={session.sessionId}
         onEndSession={handleEndSession}
         onDeleteSession={handleDeleteSession}
+        onDownloadPdf={() => void handleDownloadPdf()}
         sessionEnded={sessionEnded}
         actionsDisabled={busy || sessionActionBusy}
+        hasTurns={(session.turns?.length ?? 0) > 0}
+        isExporting={isExporting}
         labels={t}
       />
 

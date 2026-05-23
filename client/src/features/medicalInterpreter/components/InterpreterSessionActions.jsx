@@ -5,8 +5,11 @@ import { Link } from "react-router-dom";
  *   sessionId: string;
  *   onEndSession: () => void;
  *   onDeleteSession: () => void;
+ *   onDownloadPdf?: () => void;
  *   sessionEnded?: boolean;
  *   actionsDisabled?: boolean;
+ *   hasTurns?: boolean;
+ *   isExporting?: boolean;
  *   labels: object;
  * }} props
  */
@@ -14,10 +17,15 @@ export default function InterpreterSessionActions({
   sessionId,
   onEndSession,
   onDeleteSession,
+  onDownloadPdf,
   sessionEnded = false,
   actionsDisabled = false,
+  hasTurns = false,
+  isExporting = false,
   labels: t,
 }) {
+  const exportDisabled = actionsDisabled || isExporting || !hasTurns;
+
   return (
     <section
       className="interpreter-live__actions"
@@ -49,8 +57,19 @@ export default function InterpreterSessionActions({
           </button>
         ) : null}
 
-        <Link
+        <button
+          type="button"
           className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary"
+          onClick={() => onDownloadPdf?.()}
+          disabled={exportDisabled}
+          aria-busy={isExporting}
+          aria-disabled={exportDisabled}
+        >
+          {isExporting ? t.pdf.exportLoading : t.sessionActions.export}
+        </button>
+
+        <Link
+          className="medical-interpreter-page__nav-link"
           to={`/patient/interpreter/review?sessionId=${encodeURIComponent(sessionId)}`}
         >
           {t.history.review}
@@ -64,18 +83,11 @@ export default function InterpreterSessionActions({
         >
           {t.sessionActions.delete}
         </button>
-
-        <button
-          type="button"
-          className="medical-interpreter-page__nav-link"
-          disabled
-          title={t.sessionActions.exportUnavailable}
-          aria-disabled="true"
-        >
-          {t.sessionActions.export}
-        </button>
       </div>
-      <p className="interpreter-setup__hint">{t.sessionActions.exportUnavailable}</p>
+
+      <p className="interpreter-setup__hint">
+        {hasTurns ? t.sessionActions.exportHint : t.sessionActions.exportUnavailable}
+      </p>
     </section>
   );
 }

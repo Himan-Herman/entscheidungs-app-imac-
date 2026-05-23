@@ -177,3 +177,56 @@
 .telemedicine-form textarea {
   min-height: 100px;
 }
+
+.telemedicine-closed-hint {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted, #64748b);
+  font-weight: 600;
+}
+
+:root[data-theme="dark"] .telemedicine-page h1,
+:root[data-theme="dark"] .telemedicine-page h2 {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .telemedicine-page__intro,
+:root[data-theme="dark"] .telemedicine-card__meta,
+:root[data-theme="dark"] .telemedicine-closed-hint {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .telemedicine-card {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .telemedicine-panel {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .telemedicine-btn {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .telemedicine-btn--primary {
+  background: #1e40af;
+  border-color: #1e40af;
+  color: #fff;
+}
+
+:root[data-theme="dark"] .telemedicine-consent {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+:root[data-theme="dark"] .telemedicine-form input,
+:root[data-theme="dark"] .telemedicine-form select,
+:root[data-theme="dark"] .telemedicine-form textarea {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #f1f5f9;
+}

@@ -4,10 +4,12 @@ export default {
   heading: "Meine Videosprechstunden",
   intro:
     "Organisatorische Videosprechstunden — MedScoutX zeichnet nicht auf und erstellt keine medizinische Bewertung.",
-  backHub: "Zurück zur Übersicht",
+  backHub: "Zurück zu Meine Praxis",
   backList: "Zurück zur Liste",
   loading: "Wird geladen …",
   loadError: "Videosprechstunden konnten nicht geladen werden.",
+  actionError: "Aktion konnte nicht ausgeführt werden.",
+  sessionNotFound: "Videosprechstunde nicht gefunden.",
   featureDisabled: "Telemedizin ist derzeit nicht verfügbar.",
   noSessions: "Keine geplanten Videosprechstunden.",
   status: "Status",
@@ -34,4 +36,5 @@ export default {
   status_cancelled: "Abgesagt",
   status_failed: "Fehlgeschlagen",
   sessionClosed: "Diese Videosprechstunde wurde geschlossen.",
+  sessionExpired: "Der geplante Zeitraum dieser Videosprechstunde ist abgelaufen. Bitte wenden Sie sich an Ihre Praxis.",
 };

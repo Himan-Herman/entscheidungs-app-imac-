@@ -34,7 +34,7 @@ export default function PatientTelemedicinePage() {
     setLoading(true);
     setError("");
     const { res, data } = await fetchPatientTelemedicineSessions();
-    if (res.status === 404) {
+    if (res.status === 404 && data.error === "feature_disabled") {
       setError(t.featureDisabled);
       setSessions([]);
     } else if (!res.ok || !data.ok) {
@@ -59,7 +59,7 @@ export default function PatientTelemedicinePage() {
       <header className="workspace-hub__hero">
         <h1>{t.heading}</h1>
         <p className="workspace-hub__sub">{t.intro}</p>
-        <Link className="workspace-hub__classic" to="/patient">
+        <Link className="workspace-hub__classic" to="/patient/practice">
           {t.backHub}
         </Link>
       </header>
@@ -82,6 +82,7 @@ export default function PatientTelemedicinePage() {
                   type="button"
                   className="telemedicine-card"
                   onClick={() => navigate(`/patient/telemedicine/${s.id}`)}
+                  aria-label={`${s.title || s.id}, ${t[`status_${s.status}`] || s.status}, ${fmt(s.scheduledStartAt, language)}`}
                 >
                   <strong>{s.title || s.id}</strong>
                   <div className="telemedicine-card__meta">

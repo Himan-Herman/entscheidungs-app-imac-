@@ -627,10 +627,12 @@ export default {
     heading: "Mis teleconsultas",
     intro:
       "Teleconsultas organizativas — MedScoutX no graba las sesiones ni ofrece evaluación médica.",
-    backHub: "Volver al resumen",
+    backHub: "Volver a Mi consultorio",
     backList: "Volver a la lista",
     loading: "Cargando…",
     loadError: "No se han podido cargar las teleconsultas.",
+    actionError: "No se ha podido completar la acción.",
+    sessionNotFound: "Teleconsulta no encontrada.",
     featureDisabled: "La telemedicina no está disponible por el momento.",
     noSessions: "No hay teleconsultas programadas.",
     status: "Estado",
@@ -657,6 +659,8 @@ export default {
     status_cancelled: "Cancelada",
     status_failed: "Fallida",
     sessionClosed: "Esta teleconsulta ha finalizado.",
+    sessionExpired:
+      "El horario previsto de esta teleconsulta ha pasado. Contacte con su consultorio.",
   },
 
   patientChatHistory: {

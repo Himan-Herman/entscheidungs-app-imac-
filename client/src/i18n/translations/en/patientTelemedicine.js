@@ -4,10 +4,12 @@ export default {
   heading: "My video consultations",
   intro:
     "Organizational video consultations — MedScoutX does not record sessions or provide medical assessments.",
-  backHub: "Back to overview",
+  backHub: "Back to My practice",
   backList: "Back to list",
   loading: "Loading …",
   loadError: "Could not load video consultations.",
+  actionError: "Could not complete this action.",
+  sessionNotFound: "Video consultation not found.",
   featureDisabled: "Telemedicine is currently unavailable.",
   noSessions: "No scheduled video consultations.",
   status: "Status",
@@ -34,4 +36,5 @@ export default {
   status_cancelled: "Cancelled",
   status_failed: "Failed",
   sessionClosed: "This video consultation has been closed.",
+  sessionExpired: "The scheduled time for this video consultation has passed. Please contact your practice.",
 };

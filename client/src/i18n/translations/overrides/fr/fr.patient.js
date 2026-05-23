@@ -627,10 +627,12 @@ export default {
     heading: "Mes téléconsultations",
     intro:
       "Téléconsultations organisationnelles — MedScoutX n’enregistre pas les sessions ni ne fournit d’évaluation médicale.",
-    backHub: "Retour à la vue d’ensemble",
+    backHub: "Retour à Mon cabinet",
     backList: "Retour à la liste",
     loading: "Chargement…",
     loadError: "Impossible de charger les téléconsultations.",
+    actionError: "Impossible d’effectuer cette action.",
+    sessionNotFound: "Téléconsultation introuvable.",
     featureDisabled: "La télémédecine n’est pas disponible pour le moment.",
     noSessions: "Aucune téléconsultation planifiée.",
     status: "Statut",
@@ -657,6 +659,8 @@ export default {
     status_cancelled: "Annulée",
     status_failed: "Échouée",
     sessionClosed: "Cette téléconsultation est terminée.",
+    sessionExpired:
+      "L’horaire prévu de cette téléconsultation est passé. Veuillez contacter votre cabinet.",
   },
 
   patientChatHistory: {

@@ -137,7 +137,8 @@ export default {
     patientLabel: "Patient",
     clinicianLabel: "Care team / clinician",
     translationPending: "Translation in progress …",
-    endHint: "“End conversation” ends the session for both sides and downloads a PDF with the full log.",
+    endHint:
+      "“End conversation” stops automatic translation. “Download PDF” saves the bilingual log on your device.",
     endingSession: "Ending conversation …",
     preparingPdf: "Preparing PDF …",
   },

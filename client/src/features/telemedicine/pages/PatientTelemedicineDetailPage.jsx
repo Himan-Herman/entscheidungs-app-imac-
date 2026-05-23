@@ -24,6 +24,16 @@ function fmt(iso, lang) {
   }
 }
 
+function isTerminalStatus(status) {
+  return ["completed", "cancelled", "failed"].includes(status);
+}
+
+function isExpiredSession(session) {
+  if (!session?.scheduledEndAt) return false;
+  if (!["planned", "waiting"].includes(session.status)) return false;
+  return new Date(session.scheduledEndAt).getTime() < Date.now();
+}
+
 export default function PatientTelemedicineDetailPage() {
   const { sessionId } = useParams();
   const { language } = useLanguage();
@@ -43,14 +53,20 @@ export default function PatientTelemedicineDetailPage() {
     setLoading(true);
     setError("");
     const { res, data } = await fetchPatientTelemedicineSession(sessionId);
-    if (!res.ok || !data.ok) {
-      setError(res.status === 404 ? t.featureDisabled : t.loadError);
+    if (res.status === 404 && data.error === "feature_disabled") {
+      setError(t.featureDisabled);
+      setSession(null);
+    } else if (res.status === 404 && data.error === "session_not_found") {
+      setError(t.sessionNotFound);
+      setSession(null);
+    } else if (!res.ok || !data.ok) {
+      setError(t.loadError);
       setSession(null);
     } else {
       setSession(data.session);
     }
     setLoading(false);
-  }, [sessionId, t.featureDisabled, t.loadError]);
+  }, [sessionId, t.featureDisabled, t.loadError, t.sessionNotFound]);
 
   useEffect(() => {
     document.title = t.detailTitle;
@@ -65,12 +81,15 @@ export default function PatientTelemedicineDetailPage() {
   const onConsent = async () => {
     if (!consentChecked) return;
     setBusy(true);
+    setError("");
     const { res, data } = await grantTelemedicineConsent(sessionId);
     setBusy(false);
     if (res.ok && data.ok) {
       setSession(data.session);
     } else if (data.error === "link_revoked") {
       setError(t.linkRevoked);
+    } else {
+      setError(t.actionError);
     }
   };
 
@@ -82,7 +101,7 @@ export default function PatientTelemedicineDetailPage() {
     if (!res.ok) {
       if (data.error === "consent_required") setError(t.consentRequired);
       else if (data.error === "link_revoked") setError(t.linkRevoked);
-      else setError(t.loadError);
+      else setError(t.actionError);
       return;
     }
     if (data.session) setSession(data.session);
@@ -97,11 +116,13 @@ export default function PatientTelemedicineDetailPage() {
     await reload();
   };
 
+  const canJoin = session && !session.linkRevoked && !isTerminalStatus(session.status) && !isExpiredSession(session);
+
   return (
     <main className="telemedicine-page workspace-hub" lang={language}>
-      <nav className="telemedicine-page__nav">
+      <nav className="telemedicine-page__nav" aria-label={t.backList}>
         <Link to="/patient/telemedicine">{t.backList}</Link>
-        <Link to="/patient">{t.backHub}</Link>
+        <Link to="/patient/practice">{t.backHub}</Link>
       </nav>
       <h1>{session?.title || t.heading}</h1>
 
@@ -119,9 +140,14 @@ export default function PatientTelemedicineDetailPage() {
               {t[`status_${session.status}`] || session.status}
             </span>
           </p>
-          {(session.status === "cancelled" || session.status === "failed") && session.endedAt ? (
+          {isTerminalStatus(session.status) ? (
             <p role="status" className="telemedicine-closed-hint" aria-live="polite">
               {t.sessionClosed}
+            </p>
+          ) : null}
+          {isExpiredSession(session) ? (
+            <p role="status" className="telemedicine-closed-hint" aria-live="polite">
+              {t.sessionExpired}
             </p>
           ) : null}
           <p>
@@ -139,18 +165,19 @@ export default function PatientTelemedicineDetailPage() {
 
           {session.linkRevoked ? (
             <p role="alert">{t.linkRevoked}</p>
-          ) : (
+          ) : canJoin ? (
             <>
               {!hasConsent ? (
                 <section className="telemedicine-consent" aria-labelledby="tm-consent-heading">
                   <h2 id="tm-consent-heading">{t.consentHeading}</h2>
-                  <p>{t.consentRequired}</p>
-                  <label>
+                  <p id="tm-consent-intro">{t.consentRequired}</p>
+                  <label htmlFor="tm-consent-checkbox">
                     <input
+                      id="tm-consent-checkbox"
                       type="checkbox"
                       checked={consentChecked}
                       onChange={(e) => setConsentChecked(e.target.checked)}
-                      aria-describedby="tm-consent-text"
+                      aria-describedby="tm-consent-intro tm-consent-text"
                     />
                     <span id="tm-consent-text">{t.consentText}</span>
                   </label>
@@ -200,7 +227,7 @@ export default function PatientTelemedicineDetailPage() {
                 </div>
               ) : null}
             </>
-          )}
+          ) : null}
         </div>
       ) : null}
     </main>
