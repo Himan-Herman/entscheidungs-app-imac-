@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { isMedicalInterpreterClientEnabled } from "../config/isMedicalInterpreterEnabled.js";
 import { useInterpreterServerStatus } from "../hooks/useInterpreterServerStatus.js";
 import { useMedicalInterpreterMessages } from "../hooks/useMedicalInterpreterMessages.js";
@@ -25,6 +25,7 @@ function DisabledShell({ t, message }) {
 }
 
 export default function MedicalInterpreterFeatureGate({ children }) {
+  const location = useLocation();
   const t = useMedicalInterpreterMessages();
   const server = useInterpreterServerStatus();
   const clientOn = isMedicalInterpreterClientEnabled();
@@ -49,7 +50,11 @@ export default function MedicalInterpreterFeatureGate({ children }) {
   }
 
   return (
-    <InterpreterErrorBoundary labels={t}>
+    <InterpreterErrorBoundary
+      key={location.pathname}
+      labels={t}
+      homePath="/patient/interpreter"
+    >
       {children}
     </InterpreterErrorBoundary>
   );

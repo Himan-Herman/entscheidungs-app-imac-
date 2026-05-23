@@ -48,9 +48,10 @@ export default {
   languages: {
     heading: "Choose languages",
     intro:
-      "Which languages will you and your care team use during the visit?",
-    patientLabel: "Your language",
-    doctorLabel: "Care team language",
+      "Only the two languages are required. You can skip everything else.",
+    requiredLegend: "Fields marked with * are required",
+    patientLabel: "Your language *",
+    doctorLabel: "Care team language *",
     patientHint: "The language you speak",
     doctorHint: "The language the care team speaks",
     required: "Please select both languages.",
@@ -108,7 +109,7 @@ export default {
       "Allows you to continue and reopen on this device. You can delete the conversation later.",
     noStorageWarning:
       "Without saving, this conversation is lost when you leave the page.",
-    acceptLabel: "I have read and understood the notices",
+    acceptLabel: "I have read and understood the notices *",
     acceptRequired: "Please confirm the notices.",
     beginCta: "Begin conversation",
     legalLinks:
@@ -243,6 +244,8 @@ export default {
     stopping: "Finishing recording …",
     maxDurationHint: "Maximum recording length reached. Please stop recording.",
     keyboardHint: "Tip: select the speak button, then press Space or Enter.",
+    liveHint:
+      "Tap, speak — after about 2–3 seconds of silence it translates automatically.",
     disabledDraft:
       "Finish reviewing the current text before starting a new recording.",
     disabledBusy: "Please wait until the current step is finished.",

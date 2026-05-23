@@ -8,9 +8,11 @@ import {
 } from "../constants.js";
 import {
   deleteSession,
+  getCurrentSession,
   renameSession,
   setCurrentSessionId,
 } from "../store/interpreterSessionStore.js";
+import { isSessionReadyForLive } from "../utils/sessionReady.js";
 import { formatInterpreterDateTime } from "../utils/formatInterpreterDate.js";
 import {
   getLanguageNativeName,
@@ -54,6 +56,11 @@ export default function InterpreterSessionHistoryList({
 
   const handleContinue = (sessionId) => {
     setCurrentSessionId(sessionId);
+    const current = getCurrentSession();
+    if (!isSessionReadyForLive(current)) {
+      navigate("/patient/interpreter/setup", { replace: false });
+      return;
+    }
     navigate("/patient/interpreter/live");
   };
 

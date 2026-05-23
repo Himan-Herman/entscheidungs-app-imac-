@@ -4,7 +4,10 @@ import {
   INTERPRETER_RECORDING_MAX_MS,
   INTERPRETER_RECORDING_MIN_MS,
   INTERPRETER_RECORDING_TIMESLICE_MS,
+  INTERPRETER_SILENCE_AUTO_STOP_MS,
+  INTERPRETER_SILENCE_MIN_SPEECH_MS,
 } from "../utils/interpreterAudioConstants.js";
+import { startInterpreterSilenceMonitor } from "../utils/interpreterSilenceMonitor.js";
 
 /**
  * Push-to-talk recorder — microphone only while recording.
@@ -20,6 +23,7 @@ import {
  *   onRecorded?: (payload: { blob: Blob, mimeType: string, durationMs: number }) => void | Promise<void>;
  *   onMaxDuration?: () => void;
  *   onRecordingStart?: () => void;
+ *   silenceAutoStopMs?: number;
  * }} options
  */
 export function useInterpreterRecorder({
@@ -29,6 +33,7 @@ export function useInterpreterRecorder({
   onRecorded,
   onMaxDuration,
   onRecordingStart,
+  silenceAutoStopMs = INTERPRETER_SILENCE_AUTO_STOP_MS,
 } = {}) {
   const [isPreparing, setIsPreparing] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -47,6 +52,7 @@ export function useInterpreterRecorder({
   const onRecordedRef = useRef(onRecorded);
   const onMaxDurationRef = useRef(onMaxDuration);
   const onRecordingStartRef = useRef(onRecordingStart);
+  const stopSilenceMonitorRef = useRef(null);
 
   useEffect(() => {
     onRecordedRef.current = onRecorded;
@@ -71,7 +77,13 @@ export function useInterpreterRecorder({
     }
   }, []);
 
+  const stopSilenceMonitor = useCallback(() => {
+    stopSilenceMonitorRef.current?.();
+    stopSilenceMonitorRef.current = null;
+  }, []);
+
   const disposeActiveRecording = useCallback(() => {
+    stopSilenceMonitor();
     if (stopTimerRef.current) {
       clearTimeout(stopTimerRef.current);
       stopTimerRef.current = null;
@@ -93,7 +105,7 @@ export function useInterpreterRecorder({
     setIsRecording(false);
     setIsPreparing(false);
     cleanupStream();
-  }, [cleanupStream]);
+  }, [cleanupStream, stopSilenceMonitor]);
 
   const resetRecorderState = useCallback(() => {
     disposeActiveRecording();
@@ -242,6 +254,22 @@ export function useInterpreterRecorder({
       setIsRecording(true);
       onRecordingStartRef.current?.();
 
+      if (silenceAutoStopMs > 0 && streamRef.current) {
+        stopSilenceMonitor();
+        stopSilenceMonitorRef.current = startInterpreterSilenceMonitor(
+          streamRef.current,
+          {
+            silenceMs: silenceAutoStopMs,
+            minSpeechMs: INTERPRETER_SILENCE_MIN_SPEECH_MS,
+            onSilence: () => {
+              if (mediaRecorderRef.current?.state === "recording") {
+                stopRecording();
+              }
+            },
+          },
+        );
+      }
+
       stopTimerRef.current = setTimeout(() => {
         if (mediaRecorderRef.current?.state === "recording") {
           onMaxDurationRef.current?.();
@@ -272,6 +300,8 @@ export function useInterpreterRecorder({
     resetRecorderState,
     stopRecording,
     timesliceMs,
+    silenceAutoStopMs,
+    stopSilenceMonitor,
   ]);
 
   useEffect(() => {

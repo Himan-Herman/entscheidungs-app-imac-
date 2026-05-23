@@ -48,9 +48,10 @@ export default {
   languages: {
     heading: "Sprachen wählen",
     intro:
-      "In welchen Sprachen sprechen Sie und Ihr Behandlungsteam während des Termins?",
-    patientLabel: "Ihre Sprache",
-    doctorLabel: "Sprache des Behandlungsteams",
+      "Nur die beiden Sprachen sind Pflicht. Alle weiteren Angaben können Sie überspringen.",
+    requiredLegend: "Mit * gekennzeichnet = Pflichtfeld",
+    patientLabel: "Ihre Sprache *",
+    doctorLabel: "Sprache des Behandlungsteams *",
     patientHint: "Die Sprache, in der Sie sprechen",
     doctorHint: "Die Sprache, in der das Behandlungsteam spricht",
     required: "Bitte wählen Sie beide Sprachen.",
@@ -94,7 +95,7 @@ export default {
   },
 
   privacy: {
-    heading: "Hinweise und Einwilligung",
+    heading: "Kurz bestätigen",
     body1:
       "Dieses Modul unterstützt Übersetzung und Dokumentation von Gesprächen zwischen Ihnen und Ihrem Behandlungsteam. Es stellt keine Diagnose dar und enthält keine Dringlichkeitseinschätzung oder Behandlungsempfehlung.",
     body2:
@@ -108,7 +109,7 @@ export default {
       "Ermöglicht Fortsetzung und erneutes Öffnen auf diesem Gerät. Sie können das Gespräch später löschen.",
     noStorageWarning:
       "Ohne Speicherung geht dieses Gespräch beim Verlassen der Seite verloren.",
-    acceptLabel: "Ich habe die Hinweise gelesen und verstanden",
+    acceptLabel: "Ich habe die Hinweise gelesen und verstanden *",
     acceptRequired: "Bitte bestätigen Sie die Hinweise.",
     beginCta: "Gespräch beginnen",
     legalLinks:
@@ -250,6 +251,8 @@ export default {
     maxDurationHint: "Maximale Aufnahmedauer erreicht. Bitte Aufnahme beenden.",
     keyboardHint:
       "Tipp: Sprech-Button auswählen, dann Leertaste oder Eingabetaste.",
+    liveHint:
+      "Tippen, sprechen — nach etwa 2–3 Sekunden Pause wird automatisch übersetzt.",
     disabledDraft:
       "Bitte zuerst den aktuellen Text prüfen, bevor Sie neu aufnehmen.",
     disabledBusy: "Bitte warten, bis der aktuelle Schritt abgeschlossen ist.",

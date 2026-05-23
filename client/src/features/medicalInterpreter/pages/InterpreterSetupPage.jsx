@@ -268,6 +268,7 @@ export default function InterpreterSetupPage() {
 
       <h1 className="medical-interpreter-page__title">{t.languages.heading}</h1>
       <p className="medical-interpreter-page__intro">{t.languages.intro}</p>
+      <p className="interpreter-setup__hint">{t.languages.requiredLegend}</p>
 
       <p className="medical-interpreter-safety" role="note">
         {t.safety.strip}

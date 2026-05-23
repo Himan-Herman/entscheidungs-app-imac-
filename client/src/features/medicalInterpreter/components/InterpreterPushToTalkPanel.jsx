@@ -104,6 +104,11 @@ export default function InterpreterPushToTalkPanel({
       >
         <span className="interpreter-live__ptt-label">{label}</span>
       </button>
+      {t.pushToTalk.liveHint ? (
+        <p className="interpreter-live__ptt-live-hint" role="note">
+          {t.pushToTalk.liveHint}
+        </p>
+      ) : null}
       <p className="interpreter-live__ptt-keyboard-hint">{t.pushToTalk.keyboardHint}</p>
     </section>
   );

@@ -11,7 +11,7 @@ export function isNearRealtimeTranslationClientEnabled() {
 export const NEAR_REALTIME_PREVIEW_MIN_CHARS = 20;
 
 /** Debounce after transcript text stops changing (ms). */
-export const NEAR_REALTIME_PREVIEW_DEBOUNCE_MS = 1400;
+export const NEAR_REALTIME_PREVIEW_DEBOUNCE_MS = 2_500;
 
 /** Max preview source length sent to API (must match server). */
 export const NEAR_REALTIME_PREVIEW_MAX_CHARS = 600;

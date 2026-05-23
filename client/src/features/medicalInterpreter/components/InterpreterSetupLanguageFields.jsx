@@ -68,26 +68,31 @@ export default function InterpreterSetupLanguageFields({
       <legend className="interpreter-setup__legend">{t.languages.heading}</legend>
       <p className="interpreter-setup__hint">{t.languages.intro}</p>
 
-      <div className="interpreter-setup__language-filter">
-        <label className="interpreter-setup__label" htmlFor={filterId}>
+      <details className="interpreter-setup__language-filter-details">
+        <summary className="interpreter-setup__summary interpreter-setup__summary--inline">
           {t.languages.searchLabel}
-        </label>
-        <input
-          id={filterId}
-          type="search"
-          className="interpreter-setup__language-filter-input"
-          value={filterQuery}
-          onChange={(e) => setFilterQuery(e.target.value)}
-          placeholder={t.languages.searchPlaceholder}
-          aria-label={t.aria.languageSearch}
-          autoComplete="off"
-        />
-        {filterQuery.trim() && filteredOptions.length === 0 ? (
-          <p className="interpreter-setup__hint" role="status">
-            {t.languages.searchEmpty}
-          </p>
-        ) : null}
-      </div>
+        </summary>
+        <div className="interpreter-setup__language-filter">
+          <label className="interpreter-setup__label visually-hidden" htmlFor={filterId}>
+            {t.languages.searchLabel}
+          </label>
+          <input
+            id={filterId}
+            type="search"
+            className="interpreter-setup__language-filter-input"
+            value={filterQuery}
+            onChange={(e) => setFilterQuery(e.target.value)}
+            placeholder={t.languages.searchPlaceholder}
+            aria-label={t.aria.languageSearch}
+            autoComplete="off"
+          />
+          {filterQuery.trim() && filteredOptions.length === 0 ? (
+            <p className="interpreter-setup__hint" role="status">
+              {t.languages.searchEmpty}
+            </p>
+          ) : null}
+        </div>
+      </details>
 
       <div className="interpreter-setup__field">
         <label className="interpreter-setup__label" htmlFor={patientId}>

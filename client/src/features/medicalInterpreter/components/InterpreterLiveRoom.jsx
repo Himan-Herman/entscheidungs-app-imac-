@@ -97,6 +97,9 @@ export default function InterpreterLiveRoom() {
   const translateInFlightRef = useRef(false);
   const simplifyInFlightRef = useRef(false);
   const sessionActionInFlightRef = useRef(false);
+  const pendingAutoTranslateRef = useRef(false);
+  const streamCancelRef = useRef(() => {});
+  const discardNearRealtimeRef = useRef(() => {});
   const transcribeAbortRef = useRef(null);
   const translateAbortRef = useRef(null);
   const simplifyAbortRef = useRef(null);
@@ -286,7 +289,8 @@ export default function InterpreterLiveRoom() {
           setActiveTurnId(turn.turnId);
           setDraftText(transcript);
           reloadSession();
-          announceStatus(t.room.statusEditingDraft);
+          pendingAutoTranslateRef.current = true;
+          announceStatus(t.room.statusTranslating);
           requestAnimationFrame(() => {
             if (mountedRef.current) transcriptRef.current?.focus();
           });
@@ -376,8 +380,9 @@ export default function InterpreterLiveRoom() {
     if (!connectivity.showOfflineBanner) return;
     abortAllRequests();
     cancelRecording();
-    void streamCapture.cancelStream();
+    streamCancelRef.current();
     stopAllPlayback();
+    pendingAutoTranslateRef.current = false;
     if (mountedRef.current) {
       setIsTranscribing(false);
       setIsTranslating(false);
@@ -390,7 +395,6 @@ export default function InterpreterLiveRoom() {
     connectivity.showOfflineBanner,
     abortAllRequests,
     cancelRecording,
-    streamCapture,
     stopAllPlayback,
     mountedRef,
   ]);
@@ -409,11 +413,12 @@ export default function InterpreterLiveRoom() {
   }, [reloadSession]);
 
   const displayTurn = useMemo(() => {
-    if (!session?.turns?.length) return null;
+    const turns = session?.turns ?? [];
+    if (!turns.length) return null;
     if (activeTurnId) {
-      return session.turns.find((turn) => turn.turnId === activeTurnId) ?? null;
+      return turns.find((turn) => turn.turnId === activeTurnId) ?? null;
     }
-    return session.turns[session.turns.length - 1];
+    return turns[turns.length - 1];
   }, [session, activeTurnId]);
 
   useEffect(() => {
@@ -448,6 +453,10 @@ export default function InterpreterLiveRoom() {
   const streamSourceStable =
     streamCapture.phase !== "connecting" && streamCapture.phase !== "finalizing";
 
+  streamCancelRef.current = () => {
+    void streamCapture.cancelStream();
+  };
+
   const nearRealtimePreview = useInterpreterNearRealtimePreview({
     enabled:
       nearRealtimeFeatureAvailable &&
@@ -463,24 +472,26 @@ export default function InterpreterLiveRoom() {
     },
   });
 
+  discardNearRealtimeRef.current = nearRealtimePreview.discardPreview;
+
   useEffect(() => {
     return () => {
       abortAllRequests();
       cancelRecording();
-      void streamCapture.cancelStream();
+      streamCancelRef.current();
       stopAllPlayback();
-      nearRealtimePreview.discardPreview();
+      discardNearRealtimeRef.current();
       transcribeInFlightRef.current = false;
       translateInFlightRef.current = false;
       simplifyInFlightRef.current = false;
     };
-  }, [
-    abortAllRequests,
-    cancelRecording,
-    streamCapture,
-    stopAllPlayback,
-    nearRealtimePreview,
-  ]);
+  }, [abortAllRequests, cancelRecording, stopAllPlayback]);
+
+  useEffect(() => {
+    if (!session) {
+      navigate("/patient/interpreter", { replace: true });
+    }
+  }, [session, navigate]);
 
   const draftPending =
     !sessionEnded &&
@@ -1029,6 +1040,29 @@ export default function InterpreterLiveRoom() {
     void runConfirmTranslate();
   };
 
+  useEffect(() => {
+    if (!pendingAutoTranslateRef.current) return;
+    if (!session || !displayTurn || displayTurn.status !== TURN_STATUS_DRAFT) {
+      return;
+    }
+    if (!draftText.trim() || isTranscribing) return;
+    if (
+      transcribeInFlightRef.current ||
+      translateInFlightRef.current ||
+      simplifyInFlightRef.current
+    ) {
+      return;
+    }
+    pendingAutoTranslateRef.current = false;
+    void runConfirmTranslate();
+  }, [
+    session,
+    displayTurn,
+    draftText,
+    isTranscribing,
+    runConfirmTranslate,
+  ]);
+
   const runSimplify = useCallback(async () => {
     if (simplifyInFlightRef.current || translateInFlightRef.current) return;
     if (!session || !displayTurn) return;
@@ -1208,7 +1242,13 @@ export default function InterpreterLiveRoom() {
   };
 
   if (!session) {
-    return null;
+    return (
+      <main className="medical-interpreter-page interp-root" id="main-content">
+        <p className="interpreter-empty-state" role="status">
+          {t.languages.loadingDefaults}
+        </p>
+      </main>
+    );
   }
 
   const canConfirm =
