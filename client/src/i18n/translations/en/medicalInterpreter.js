@@ -467,6 +467,7 @@ export default {
     statusError: "An error needs your attention",
     autoModeBadge: "Auto",
     autoDetectSpeakerLabel: "Language auto-detect",
+    firstTurnOpenLabel: "Patient or doctor starts",
     speakerHeading: "Who is speaking now?",
     autoModeHint:
       "After each translation, the other side continues automatically.",
@@ -487,6 +488,7 @@ export default {
     noSpeechDetected: "No speech was detected in that turn. Please try again.",
     noTranscriptResult: "No transcript was returned for this turn. Please try again.",
     readyForNextSpeaker: "Ready for the next speaker.",
+    readyForEither: "Tone: patient or doctor can start now.",
     readyForDoctor: "Doctor or practice team speaks now.",
     readyForPatient: "Patient speaks now.",
   },

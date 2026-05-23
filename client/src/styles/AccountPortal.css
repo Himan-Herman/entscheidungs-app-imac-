@@ -280,6 +280,32 @@
 .account-portal-doc-list__title {
   display: block;
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.account-portal-page__inline-link {
+  font-weight: 600;
+  color: #0f766e;
+  text-decoration: none;
+}
+
+.account-portal-page__inline-link:hover {
+  text-decoration: underline;
+}
+
+.account-portal-page__inline-link:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.account-portal__error-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .account-portal-doc-list__meta {
@@ -410,6 +436,15 @@
 
 :root[data-theme="dark"] .account-portal-form__inline-link {
   color: #5eead4;
+}
+
+:root[data-theme="dark"] .account-portal-doc-list__item {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .account-portal-page__inline-link {
+  color: #2dd4bf;
 }
 
 :root[data-theme="dark"] .account-portal-page__back {

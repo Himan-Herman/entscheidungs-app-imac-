@@ -44,6 +44,13 @@ export default {
     documentsTitle: "Documentos",
     documentsIntro:
       "PDF y enlaces seguros relacionados con sus preparativos. MedScoutX no interpreta el contenido clínico.",
+    documentsPracticeHint:
+      "Los documentos compartidos por su consultorio figuran por separado en",
+    linkPracticeDocuments: "Documentos del consultorio",
+    secureLinkFallback: "Enlace seguro",
+    kindPreparation: "Preparativo",
+    kindSecureLink: "Enlace seguro",
+    retryLoad: "Reintentar",
     statusDraft: "Borrador",
     statusCreated: "Creado",
     statusSharedLink: "Enlace seguro",

@@ -31,6 +31,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { detectLikelySilentBlob } from "../utils/interpreterAudioLevel.js";
 import { detectSpeakerFromLanguage } from "../utils/detectSpeakerFromLanguage.js";
+import { INTERPRETER_SILENCE_AUTO_STOP_MS } from "../utils/interpreterAudioConstants.js";
 import { playInterpreterTurnSignal } from "../utils/interpreterTurnSignal.js";
 import { languagesForSpeaker } from "../utils/liveLanguages.js";
 import { downloadInterpreterSessionPdf } from "../pdf/generateInterpreterSessionPdf.js";
@@ -103,9 +104,9 @@ const PHASE_TRANSITIONS = {
   ]),
 };
 
-const AUTO_RESTART_DELAY_MS = 120;
-const AUTO_RESTART_RETRY_MS = 140;
-const AUTO_RESTART_MAX_ATTEMPTS = 8;
+const AUTO_RESTART_DELAY_MS = 70;
+const AUTO_RESTART_RETRY_MS = 90;
+const AUTO_RESTART_MAX_ATTEMPTS = 10;
 const INTERPRETER_VOICE_PROFILE = "neutral_medical";
 
 function nextPhase(currentPhase, requestedPhase) {
@@ -310,10 +311,12 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
 
   const turns = session?.turns ?? [];
   const hasTurns = turns.length > 0;
-  const activeSpeakerLabel = useMemo(
-    () => (hasTurns ? speakerLabelFor(speaker, t) : t.liveSession.autoDetectSpeakerLabel),
-    [hasTurns, speaker, t],
-  );
+  const activeSpeakerLabel = useMemo(() => {
+    if (!hasTurns) {
+      return t.liveSession.firstTurnOpenLabel;
+    }
+    return speakerLabelFor(speaker, t);
+  }, [hasTurns, speaker, t]);
 
   const handlePhaseFromSilence = useCallback(
     (silencePhase) => {
@@ -392,6 +395,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
       setLastPlaybackRequest(null);
       const runToken = runTokenRef.current;
       const fallbackSpeaker = speakerRef.current;
+      const isFirstTurn = (activeSession.turns?.length || 0) === 0;
       const shouldAutoDetectSpeaker =
         String(activeSession.patientLanguage || "").trim().toLowerCase() !==
         String(activeSession.doctorLanguage || "").trim().toLowerCase();
@@ -438,8 +442,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
           activeSession,
           fallbackSpeaker,
         );
-        const resolvedSpeaker = shouldAutoDetectSpeaker
-          ? detectedSpeaker
+        const resolvedSpeaker = isFirstTurn
+          ? shouldAutoDetectSpeaker
+            ? detectedSpeaker
+            : fallbackSpeaker
           : fallbackSpeaker;
         const { sourceLanguage, targetLanguage } = languagesForSpeaker(
           activeSession,
@@ -572,7 +578,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     startRecording,
     cancelRecording,
   } = useInterpreterRecorder({
-    silenceAutoStopMs: 2_000,
+    silenceAutoStopMs: INTERPRETER_SILENCE_AUTO_STOP_MS,
     onRecordingStart: () => {
       setPhase(LIVE_PHASE.LISTENING);
       announce(t.liveSession.statusListening);
@@ -621,8 +627,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     setExportMessage("");
     setErrorMessage("");
     setPhase(LIVE_PHASE.IDLE);
+    await playInterpreterTurnSignal();
+    announce(t.liveSession.readyForEither);
     await startRecordingRef.current?.();
-  }, [setPhase]);
+  }, [announce, setPhase, t.liveSession.readyForEither]);
 
   const handleEndConversation = useCallback(() => {
     stopRuntime();

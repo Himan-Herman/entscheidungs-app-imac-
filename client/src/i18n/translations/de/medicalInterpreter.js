@@ -482,6 +482,7 @@ export default {
     statusError: "Ein Fehler braucht Ihre Aufmerksamkeit",
     autoModeBadge: "Auto",
     autoDetectSpeakerLabel: "Sprache wird erkannt",
+    firstTurnOpenLabel: "Patient oder Arzt beginnt",
     speakerHeading: "Wer spricht jetzt?",
     autoModeHint:
       "Nach jeder Übersetzung ist automatisch die andere Seite dran.",
@@ -506,6 +507,7 @@ export default {
     noTranscriptResult:
       "Für diesen Beitrag wurde kein Text erkannt. Bitte erneut versuchen.",
     readyForNextSpeaker: "Bereit für die nächste sprechende Person.",
+    readyForEither: "Signalton: Patient oder Arzt kann jetzt beginnen.",
     readyForDoctor: "Arzt/Praxis spricht jetzt.",
     readyForPatient: "Patient:in spricht jetzt.",
   },

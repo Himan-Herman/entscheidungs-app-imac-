@@ -43,6 +43,13 @@ export default {
   documentsTitle: "Dokumente",
   documentsIntro:
     "PDFs und sichere Links zu Ihren Vorbereitungen. MedScoutX wertet keine medizinischen Inhalte aus.",
+  documentsPracticeHint:
+    "Von Ihrer Praxis freigegebene Unterlagen sind separat unter",
+  linkPracticeDocuments: "Praxisdokumente",
+  secureLinkFallback: "Sicherer Link",
+  kindPreparation: "Vorbereitung",
+  kindSecureLink: "Sicherer Link",
+  retryLoad: "Erneut laden",
   statusDraft: "Entwurf",
   statusCreated: "Erstellt",
   statusSharedLink: "Sicherer Link",
