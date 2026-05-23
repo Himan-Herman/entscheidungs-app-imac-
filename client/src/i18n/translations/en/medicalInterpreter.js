@@ -128,6 +128,18 @@ export default {
     currentTurn: "Current utterance",
   },
 
+  conversation: {
+    heading: "Conversation log",
+    intro:
+      "Just speak — after 3 seconds of silence the system detects the language, translates automatically, and listens again.",
+    listening: "Listening — speak now",
+    waiting: "Waiting for the first utterance …",
+    patientLabel: "Patient",
+    clinicianLabel: "Care team / clinician",
+    translationPending: "Translation in progress …",
+    endHint: "“End conversation” downloads a PDF with the full log.",
+  },
+
   room: {
     pageTitle: "MedScoutX — Live conversation",
     heading: "Live conversation",
@@ -246,7 +258,7 @@ export default {
     maxDurationHint: "Maximum recording length reached. Please stop recording.",
     keyboardHint: "Tip: select the speak button, then press Space or Enter.",
     liveHint:
-      "Tap, speak — after about 2–3 seconds of silence it translates automatically.",
+      "Speak — after 3 seconds of silence it detects, translates, and listens again automatically.",
     disabledDraft:
       "Finish reviewing the current text before starting a new recording.",
     disabledBusy: "Please wait until the current step is finished.",
@@ -371,6 +383,7 @@ export default {
     legalParagraph3:
       "Automatic transcription and translation may be inaccurate or incomplete.",
     sessionTitleLabel: "Conversation title",
+    patientNameLabel: "Patient",
     generatedNote: "Generated locally on this device · MedScoutX Medical Interpreter",
     footerPage: "Page",
     filenamePrefix: "medscoutx-interpreter",

@@ -130,6 +130,18 @@ export default {
     currentTurn: "Aktuelle Äußerung",
   },
 
+  conversation: {
+    heading: "Gesprächsverlauf",
+    intro:
+      "Sprechen Sie einfach — nach 3 Sekunden Pause erkennt das System die Sprache, übersetzt automatisch und hört danach wieder zu.",
+    listening: "Hört zu — sprechen Sie jetzt",
+    waiting: "Warten auf die erste Äußerung …",
+    patientLabel: "Patient:in",
+    clinicianLabel: "Behandlungsteam / Arzt",
+    translationPending: "Übersetzung wird erstellt …",
+    endHint: "„Gespräch beenden“ lädt ein PDF mit dem vollständigen Verlauf herunter.",
+  },
+
   room: {
     pageTitle: "MedScoutX — Live-Gespräch",
     heading: "Live-Gespräch",
@@ -253,7 +265,7 @@ export default {
     keyboardHint:
       "Tipp: Sprech-Button auswählen, dann Leertaste oder Eingabetaste.",
     liveHint:
-      "Tippen, sprechen — nach etwa 2–3 Sekunden Pause wird automatisch übersetzt.",
+      "Sprechen Sie — nach 3 Sekunden Pause wird automatisch erkannt, übersetzt und wieder zugehört.",
     disabledDraft:
       "Bitte zuerst den aktuellen Text prüfen, bevor Sie neu aufnehmen.",
     disabledBusy: "Bitte warten, bis der aktuelle Schritt abgeschlossen ist.",
@@ -383,6 +395,7 @@ export default {
     legalParagraph3:
       "Automatische Spracherkennung und Übersetzung können ungenau oder unvollständig sein.",
     sessionTitleLabel: "Titel des Gesprächs",
+    patientNameLabel: "Patient:in",
     generatedNote:
       "Lokal auf diesem Gerät erstellt · MedScoutX Medizin-Dolmetscher",
     footerPage: "Seite",

@@ -26,6 +26,7 @@ import {
   endSession,
   maybeApplyAutoSessionTitle,
   getCurrentSession,
+  getSession,
   hasPendingDraftTurn,
   updateSessionMetadata,
   updateTurn,
@@ -68,6 +69,13 @@ import {
 import { isNearRealtimeTranslationClientEnabled } from "../config/isNearRealtimeTranslationEnabled.js";
 import { isStreamingTtsClientEnabled } from "../config/isStreamingTtsEnabled.js";
 import InterpreterPlaybackStatus from "./InterpreterPlaybackStatus.jsx";
+import InterpreterConversationFeed from "./InterpreterConversationFeed.jsx";
+import { detectSpeakerFromLanguage } from "../utils/detectSpeakerFromLanguage.js";
+import { downloadInterpreterSessionPdf } from "../pdf/generateInterpreterSessionPdf.js";
+import { getSessionDisplayTitle } from "../utils/sessionDisplayTitle.js";
+
+const CONTINUOUS_CONVERSATION_MODE = true;
+const AUTO_LISTEN_DELAY_MS = 500;
 
 /** @param {string | undefined} apiConfidence */
 function mapTranscribeConfidence(apiConfidence) {
@@ -130,6 +138,10 @@ export default function InterpreterLiveRoom() {
   /** @type {'translate'|'simplify'|null} */
   const [recoveryAction, setRecoveryAction] = useState(null);
   const [sessionActionBusy, setSessionActionBusy] = useState(false);
+  const continuousListenBootstrappedRef = useRef(false);
+  const autoListenTimerRef = useRef(null);
+  const scheduleAutoListenRef = useRef(() => {});
+  const startRecordingRef = useRef(null);
 
   const reloadSession = useCallback(() => {
     const next = getCurrentSession();
@@ -178,7 +190,8 @@ export default function InterpreterLiveRoom() {
   });
 
   const runTranscribe = useCallback(
-    async (blob, mimeType, sessionSnapshot, speakerSnapshot, signal) => {
+    async (blob, mimeType, sessionSnapshot, speakerSnapshot, signal, options = {}) => {
+      const autoDetectLanguage = options.autoDetectLanguage === true;
       const langs = languagesForSpeaker(sessionSnapshot, speakerSnapshot);
       const filename = mimeType?.includes("mp4")
         ? "recording.m4a"
@@ -186,11 +199,13 @@ export default function InterpreterLiveRoom() {
           ? "recording.ogg"
           : "recording.webm";
 
-      let result = await transcribeAudio(blob, {
-        language: langs.sourceLanguage,
+      const transcribeOpts = {
         filename,
         signal,
-      });
+        ...(autoDetectLanguage ? {} : { language: langs.sourceLanguage }),
+      };
+
+      let result = await transcribeAudio(blob, transcribeOpts);
 
       if (
         !result.ok &&
@@ -203,11 +218,7 @@ export default function InterpreterLiveRoom() {
           setTimeout(resolve, INTERPRETER_TRANSCRIBE_RETRY_DELAY_MS);
         });
         if (!signal.aborted) {
-          result = await transcribeAudio(blob, {
-            language: langs.sourceLanguage,
-            filename,
-            signal,
-          });
+          result = await transcribeAudio(blob, transcribeOpts);
         }
       }
 
@@ -305,6 +316,9 @@ export default function InterpreterLiveRoom() {
           maybeApplyAutoSessionTitle(sessionId, t, uiLanguage);
           reloadSession();
           announceStatus(t.room.statusReadyForNext);
+          if (CONTINUOUS_CONVERSATION_MODE) {
+            scheduleAutoListenRef.current();
+          }
           return;
         }
 
@@ -324,6 +338,9 @@ export default function InterpreterLiveRoom() {
             interpreterErrorMessage("blocked", t, result.message),
           );
           reloadSession();
+          if (CONTINUOUS_CONVERSATION_MODE) {
+            scheduleAutoListenRef.current();
+          }
           return;
         }
 
@@ -336,6 +353,9 @@ export default function InterpreterLiveRoom() {
           setRecoveryAction("translate");
         }
         announceError(interpreterErrorMessage(result.code, t, result.message));
+        if (CONTINUOUS_CONVERSATION_MODE) {
+          scheduleAutoListenRef.current();
+        }
       } catch {
         if (mountedRef.current) {
           updateTurn(sessionId, turnId, {
@@ -345,6 +365,9 @@ export default function InterpreterLiveRoom() {
           reloadSession();
           setRecoveryAction("translate");
           announceError(t.errors.generic);
+          if (CONTINUOUS_CONVERSATION_MODE) {
+            scheduleAutoListenRef.current();
+          }
         }
       } finally {
         translateInFlightRef.current = false;
@@ -381,6 +404,10 @@ export default function InterpreterLiveRoom() {
 
       const silence = await detectLikelySilentBlob(blob);
       if (silence.silent && !silence.skipped) {
+        if (CONTINUOUS_CONVERSATION_MODE) {
+          scheduleAutoListenRef.current();
+          return;
+        }
         announceError(t.pushToTalk.likelySilent);
         return;
       }
@@ -399,30 +426,55 @@ export default function InterpreterLiveRoom() {
       announceStatus(t.room.statusTranscribing);
 
       try {
-        const result = await runTranscribe(blob, mimeType, current, speaker, signal);
+        const result = await runTranscribe(
+          blob,
+          mimeType,
+          current,
+          speaker,
+          signal,
+          { autoDetectLanguage: CONTINUOUS_CONVERSATION_MODE },
+        );
         if (!mountedRef.current) return;
 
         if (!result.ok) {
           if (result.code === "cancelled") return;
           if (result.code === "validation") {
+            if (CONTINUOUS_CONVERSATION_MODE) {
+              scheduleAutoListenRef.current();
+              return;
+            }
             announceError(t.pushToTalk.tooShort);
             return;
           }
           announceError(
             interpreterErrorMessage(result.code, t, result.message),
           );
+          if (CONTINUOUS_CONVERSATION_MODE) {
+            scheduleAutoListenRef.current();
+          }
           return;
         }
 
         const transcript = result.transcript.trim();
         if (!transcript) {
+          if (CONTINUOUS_CONVERSATION_MODE) {
+            scheduleAutoListenRef.current();
+            return;
+          }
           announceError(t.pushToTalk.tooShort);
           return;
         }
 
-        const langs = languagesForSpeaker(current, speaker);
+        const detectedSpeaker = CONTINUOUS_CONVERSATION_MODE
+          ? detectSpeakerFromLanguage(result.language, current, speaker)
+          : speaker;
+        if (detectedSpeaker !== speaker) {
+          setSpeaker(detectedSpeaker);
+        }
+
+        const langs = languagesForSpeaker(current, detectedSpeaker);
         const turn = addTurn(current.sessionId, {
-          speaker,
+          speaker: detectedSpeaker,
           sourceLanguage: langs.sourceLanguage,
           targetLanguage: langs.targetLanguage,
           originalText: transcript,
@@ -431,26 +483,32 @@ export default function InterpreterLiveRoom() {
         });
 
         if (turn) {
-          setActiveTurnId(turn.turnId);
-          setDraftText(transcript);
+          if (!CONTINUOUS_CONVERSATION_MODE) {
+            setActiveTurnId(turn.turnId);
+            setDraftText(transcript);
+            requestAnimationFrame(() => {
+              if (mountedRef.current) transcriptRef.current?.focus();
+            });
+          }
           reloadSession();
           announceStatus(t.room.statusTranslating);
-          requestAnimationFrame(() => {
-            if (mountedRef.current) transcriptRef.current?.focus();
-          });
           void runTranslateDraft({
             sessionId: current.sessionId,
             turnId: turn.turnId,
             text: transcript,
             sourceLanguage: langs.sourceLanguage,
             targetLanguage: langs.targetLanguage,
-            turnSpeaker: speaker,
+            turnSpeaker: detectedSpeaker,
             priorConfidence: mapTranscribeConfidence(result.confidence),
           });
         }
       } catch {
         if (mountedRef.current) {
-          announceError(t.errors.generic);
+          if (CONTINUOUS_CONVERSATION_MODE) {
+            scheduleAutoListenRef.current();
+          } else {
+            announceError(t.errors.generic);
+          }
         }
       } finally {
         transcribeInFlightRef.current = false;
@@ -512,9 +570,15 @@ export default function InterpreterLiveRoom() {
     onRecordingStart: () => {
       setMaxDurationReached(false);
       stopAllPlayback();
-      announceStatus(t.room.statusRecording);
+      announceStatus(
+        CONTINUOUS_CONVERSATION_MODE
+          ? t.conversation.listening
+          : t.room.statusRecording,
+      );
     },
   });
+
+  startRecordingRef.current = startRecording;
 
   useEffect(() => {
     const current = getCurrentSession();
@@ -601,7 +665,34 @@ export default function InterpreterLiveRoom() {
   }, [draftText, displayTurn, session?.sessionId, reloadSession]);
 
   const sessionEnded = session?.status === SESSION_STATUS_ENDED;
-  const hasDraftTurn = displayTurn?.status === TURN_STATUS_DRAFT;
+  const hasDraftTurn =
+    !CONTINUOUS_CONVERSATION_MODE && displayTurn?.status === TURN_STATUS_DRAFT;
+
+  const clearAutoListenTimer = useCallback(() => {
+    if (autoListenTimerRef.current) {
+      clearTimeout(autoListenTimerRef.current);
+      autoListenTimerRef.current = null;
+    }
+  }, []);
+
+  scheduleAutoListenRef.current = () => {
+    if (!CONTINUOUS_CONVERSATION_MODE || sessionEnded) return;
+    clearAutoListenTimer();
+    autoListenTimerRef.current = window.setTimeout(() => {
+      autoListenTimerRef.current = null;
+      if (!mountedRef.current) return;
+      const current = getCurrentSession();
+      if (!current || current.status === SESSION_STATUS_ENDED) return;
+      if (
+        transcribeInFlightRef.current ||
+        translateInFlightRef.current ||
+        simplifyInFlightRef.current
+      ) {
+        return;
+      }
+      void startRecordingRef.current?.();
+    }, AUTO_LISTEN_DELAY_MS);
+  };
 
   const streamLangs = session
     ? languagesForSpeaker(session, speaker)
@@ -739,6 +830,14 @@ export default function InterpreterLiveRoom() {
     isSpeakLoading;
 
   const statusLabel = useMemo(() => {
+    if (
+      CONTINUOUS_CONVERSATION_MODE &&
+      isRecording &&
+      !isTranscribing &&
+      !isTranslating
+    ) {
+      return t.conversation.listening;
+    }
     if (streamCapture.phase === "streaming") return t.streaming.statusConnected;
     if (streamCapture.phase === "finalizing") return t.streaming.statusFinalizing;
     if (streamCapture.phase === "connecting") return t.streaming.statusConnecting;
@@ -756,6 +855,29 @@ export default function InterpreterLiveRoom() {
     pttPhase,
     t,
   ]);
+
+  useEffect(() => {
+    if (!CONTINUOUS_CONVERSATION_MODE || !session || sessionEnded) return;
+    if (continuousListenBootstrappedRef.current) return;
+    if (recorderError === "mic_denied" || !connectivity.isOnline) return;
+    if (isRecording || isPreparing || isStopping || isTranscribing || isTranslating) {
+      return;
+    }
+    continuousListenBootstrappedRef.current = true;
+    scheduleAutoListenRef.current();
+  }, [
+    session,
+    sessionEnded,
+    recorderError,
+    connectivity.isOnline,
+    isRecording,
+    isPreparing,
+    isStopping,
+    isTranscribing,
+    isTranslating,
+  ]);
+
+  useEffect(() => () => clearAutoListenTimer(), [clearAutoListenTimer]);
 
   const speakerDisabled =
     sessionEnded ||
@@ -1212,19 +1334,29 @@ export default function InterpreterLiveRoom() {
     if (!session || sessionActionInFlightRef.current) return;
     sessionActionInFlightRef.current = true;
     if (mountedRef.current) setSessionActionBusy(true);
+    clearAutoListenTimer();
+    continuousListenBootstrappedRef.current = false;
     abortAllRequests();
     cancelRecording();
-      void streamCapture.cancelStream();
+    void streamCapture.cancelStream();
     stopAllPlayback();
-    endSession(session.sessionId, t, uiLanguage);
+    const sessionId = session.sessionId;
+    endSession(sessionId, t, uiLanguage);
+    const endedSession = getSession(sessionId);
+    if (endedSession?.turns?.length) {
+      downloadInterpreterSessionPdf(
+        endedSession,
+        getSessionDisplayTitle(endedSession, t, uiLanguage),
+        t,
+      );
+    }
     reloadSession();
-    announceStatus(t.sessionActions.ended);
     sessionActionInFlightRef.current = false;
     if (mountedRef.current) setSessionActionBusy(false);
+    navigate("/patient/interpreter", { replace: true });
   }, [
     session,
     reloadSession,
-    announceStatus,
     t,
     uiLanguage,
     abortAllRequests,
@@ -1232,15 +1364,19 @@ export default function InterpreterLiveRoom() {
     streamCapture,
     stopAllPlayback,
     mountedRef,
+    clearAutoListenTimer,
+    navigate,
   ]);
 
   const handleEndSession = () => {
     if (!session || sessionEnded || sessionActionBusy || busy) return;
-    flushDraftToStore();
-    const current = reloadSession();
-    if (current && hasPendingDraftTurn(current)) {
-      setConfirmAction("end");
-      return;
+    if (!CONTINUOUS_CONVERSATION_MODE) {
+      flushDraftToStore();
+      const current = reloadSession();
+      if (current && hasPendingDraftTurn(current)) {
+        setConfirmAction("end");
+        return;
+      }
     }
     doEndSession();
   };
@@ -1288,7 +1424,7 @@ export default function InterpreterLiveRoom() {
     isTranscribing ||
     isTranslating ||
     isSimplifying ||
-    hasDraftTurn ||
+    (!CONTINUOUS_CONVERSATION_MODE && hasDraftTurn) ||
     streamActive ||
     !connectivity.isOnline;
 
@@ -1358,6 +1494,12 @@ export default function InterpreterLiveRoom() {
         {t.room.disclaimerStrip}
       </p>
 
+      {CONTINUOUS_CONVERSATION_MODE ? (
+        <p className="interpreter-live__continuous-intro" role="note">
+          {t.conversation.intro}
+        </p>
+      ) : null}
+
       {errorMessage ? (
         <div
           ref={errorAlertRef}
@@ -1381,6 +1523,7 @@ export default function InterpreterLiveRoom() {
 
       <InterpreterPlaybackStatus
         visible={
+          !CONTINUOUS_CONVERSATION_MODE &&
           (isSpeakLoading || isSpeakPlaying) &&
           (serverStatus.ttsEnabled || streamingTtsFeatureAvailable)
         }
@@ -1391,6 +1534,8 @@ export default function InterpreterLiveRoom() {
         labels={t}
       />
 
+      {!CONTINUOUS_CONVERSATION_MODE ? (
+        <>
       <InterpreterSpeakerToggle
         speaker={speaker}
         onSpeakerChange={handleSpeakerChange}
@@ -1510,6 +1655,10 @@ export default function InterpreterLiveRoom() {
         }
         labels={t}
       />
+        </>
+      ) : (
+        <InterpreterConversationFeed turns={session.turns} labels={t} />
+      )}
 
       <InterpreterPushToTalkPanel
         isRecording={isRecording}
@@ -1534,6 +1683,12 @@ export default function InterpreterLiveRoom() {
         actionsDisabled={busy || sessionActionBusy}
         labels={t}
       />
+
+      {CONTINUOUS_CONVERSATION_MODE ? (
+        <p className="interpreter-live__end-hint" role="note">
+          {t.conversation.endHint}
+        </p>
+      ) : null}
 
       <InterpreterConfirmDialog
         open={leaveDialogOpen}

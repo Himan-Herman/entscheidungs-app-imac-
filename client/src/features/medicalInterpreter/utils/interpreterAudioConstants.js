@@ -25,7 +25,7 @@ export const INTERPRETER_TRANSCRIBE_TIMEOUT_MS = 45_000;
 export const INTERPRETER_TRANSCRIBE_RETRY_DELAY_MS = 900;
 
 /** After this much silence following speech, PTT recording stops automatically. */
-export const INTERPRETER_SILENCE_AUTO_STOP_MS = 2_500;
+export const INTERPRETER_SILENCE_AUTO_STOP_MS = 3_000;
 
 /** Minimum voiced audio before silence auto-stop applies. */
 export const INTERPRETER_SILENCE_MIN_SPEECH_MS = 500;

@@ -4,17 +4,19 @@
   position: fixed;
   z-index: 900;
   right: max(1rem, env(safe-area-inset-right));
-  bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  left: auto;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--ms-space-3);
   pointer-events: none;
+  max-width: min(22rem, calc(100vw - 2rem));
 }
 
 .meda-widget[data-open="true"] {
   bottom: calc(1rem + env(safe-area-inset-bottom));
-  align-items: stretch;
+  align-items: flex-end;
 }
 
 .meda-widget > * {
@@ -517,21 +519,23 @@
 
 @media (max-width: 640px) {
   .meda-widget {
-    right: max(0.5rem, env(safe-area-inset-right));
-    left: max(0.5rem, env(safe-area-inset-left));
-    bottom: calc(5.25rem + env(safe-area-inset-bottom));
-    align-items: stretch;
+    right: max(0.75rem, env(safe-area-inset-right));
+    left: auto;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    align-items: flex-end;
+    max-width: min(22rem, calc(100vw - 1.5rem));
   }
 
   .meda-widget[data-open="true"] {
-    bottom: calc(4.75rem + env(safe-area-inset-bottom));
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    align-items: flex-end;
   }
 
   .meda-panel {
-    width: 100%;
+    width: min(22rem, calc(100vw - 1.5rem));
     max-width: none;
     max-height: min(
-      calc(100dvh - 5.5rem - env(safe-area-inset-top, 0px)),
+      calc(100dvh - 2rem - env(safe-area-inset-top, 0px)),
       36rem
     );
   }
@@ -541,18 +545,18 @@
   }
 }
 
-/* Mobile bottom nav — lift panel above nav bar */
+/* Mobile bottom nav — keep FAB/panel anchored bottom-right, above nav bar */
 .layout-app--mobile-shell .meda-widget {
-  bottom: calc(5.75rem + env(safe-area-inset-bottom));
+  bottom: calc(5.25rem + env(safe-area-inset-bottom));
 }
 
 .layout-app--mobile-shell .meda-widget[data-open="true"] {
-  bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  bottom: calc(4.75rem + env(safe-area-inset-bottom));
 }
 
 .layout-app--mobile-shell .meda-panel {
   max-height: min(
-    calc(100dvh - 5rem - env(safe-area-inset-bottom) - env(safe-area-inset-top, 0px)),
+    calc(100dvh - 5.5rem - env(safe-area-inset-bottom) - env(safe-area-inset-top, 0px)),
     34rem
   );
 }

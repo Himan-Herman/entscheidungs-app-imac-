@@ -25,6 +25,7 @@ import InterpreterSetupProfileConsent from "../components/InterpreterSetupProfil
 import InterpreterSetupDoctorDetails from "../components/InterpreterSetupDoctorDetails.jsx";
 import { INTERPRETER_SETUP_LANGUAGE_CODES } from "../constants/setupLanguages.js";
 import InterpreterCloudSetupNote from "../components/InterpreterCloudSetupNote.jsx";
+import { setInterpreterAck } from "../utils/interpreterAck.js";
 import { useInterpreterCloud } from "../hooks/useInterpreterCloud.js";
 import "../styles/MedicalInterpreter.css";
 
@@ -76,6 +77,8 @@ export default function InterpreterSetupPage() {
   const [profileSectionVisible, setProfileSectionVisible] = useState(false);
   const [profileLoadError, setProfileLoadError] = useState("");
   const [languageError, setLanguageError] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [privacyError, setPrivacyError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const profileSettingsRef = useRef(null);
@@ -209,7 +212,7 @@ export default function InterpreterSetupPage() {
       appointmentDateTime: fromDatetimeLocalValue(appointmentDateTime),
       profileConsentUsed,
       profileSnapshot: profileConsentUsed ? profileSnapshot : undefined,
-      storageConsent: false,
+      storageConsent: true,
       status: SESSION_STATUS_DRAFT,
       inviteContext: sessionInviteContext,
     };
@@ -228,6 +231,11 @@ export default function InterpreterSetupPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateLanguages()) return;
+    if (!privacyAccepted) {
+      setPrivacyError(t.privacy.acceptRequired);
+      return;
+    }
+    setPrivacyError("");
 
     setSubmitting(true);
     try {
@@ -251,6 +259,7 @@ export default function InterpreterSetupPage() {
       }
 
       setCurrentSessionId(id);
+      setInterpreterAck();
       if (inviteContext) {
         clearInterpreterInviteContext();
       }
@@ -338,6 +347,49 @@ export default function InterpreterSetupPage() {
         />
 
         <InterpreterCloudSetupNote labels={t} canUseCloud={cloud.canUseCloud} />
+
+        <div className="interpreter-setup__checkbox-row">
+          <input
+            type="checkbox"
+            id="interp-setup-privacy-accept"
+            className="interpreter-setup__checkbox"
+            checked={privacyAccepted}
+            onChange={(e) => {
+              setPrivacyAccepted(e.target.checked);
+              if (e.target.checked) setPrivacyError("");
+            }}
+            aria-required="true"
+            aria-invalid={privacyError ? true : undefined}
+            aria-describedby={
+              privacyError
+                ? "interp-setup-privacy-error interp-setup-privacy-hint"
+                : "interp-setup-privacy-hint"
+            }
+          />
+          <label
+            htmlFor="interp-setup-privacy-accept"
+            className="interpreter-setup__checkbox-label"
+          >
+            {t.privacy.acceptLabel}
+          </label>
+        </div>
+        <p id="interp-setup-privacy-hint" className="interpreter-setup__hint">
+          {t.privacy.body2}
+        </p>
+        <p className="interpreter-privacy__legal-links">
+          <Link to="/datenschutz">{t.privacy.linkPrivacy}</Link>
+          <span aria-hidden="true"> · </span>
+          <Link to="/disclaimer">{t.privacy.linkDisclaimer}</Link>
+        </p>
+        {privacyError ? (
+          <p
+            id="interp-setup-privacy-error"
+            className="interpreter-setup__error"
+            role="alert"
+          >
+            {privacyError}
+          </p>
+        ) : null}
 
         <div className="interpreter-setup__actions">
           <Link

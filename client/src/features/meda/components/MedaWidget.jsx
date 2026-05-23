@@ -7,7 +7,7 @@ import MedaChatPanel from "./MedaChatPanel.jsx";
 import "../styles/MedaWidget.css";
 
 /**
- * Floating Meda assistant — show on logged-in patient routes.
+ * Floating Meda assistant — patient hub start pages only.
  */
 export default function MedaWidget() {
   const { language } = useLanguage();
@@ -61,8 +61,5 @@ export default function MedaWidget() {
 
 export function shouldShowMedaWidget(pathname, isLoggedIn) {
   if (!isLoggedIn) return false;
-  if (pathname.startsWith("/practice")) return false;
-  if (pathname === "/register" || pathname === "/login") return false;
-  if (pathname === "/" || pathname === "/landing") return false;
-  return true;
+  return pathname === "/patient" || pathname === "/startseite";
 }

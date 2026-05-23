@@ -2121,3 +2121,103 @@
     outline: 3px solid CanvasText;
   }
 }
+
+.interpreter-live__continuous-intro {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: var(--interp-surface-muted, #f8fafc);
+  color: var(--interp-text-muted, #475569);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.interpreter-conversation-feed {
+  margin: 0 0 1.25rem;
+}
+
+.interpreter-conversation-feed__empty {
+  margin: 0 0 1rem;
+  color: var(--interp-text-muted, #64748b);
+}
+
+.interpreter-conversation-feed__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.interpreter-conversation-feed__item {
+  border: 1px solid var(--interp-border, #e2e8f0);
+  border-radius: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: var(--interp-surface, #fff);
+}
+
+.interpreter-conversation-feed__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.interpreter-conversation-feed__speaker {
+  font-weight: 600;
+  color: var(--interp-accent, #0e7490);
+}
+
+.interpreter-conversation-feed__time {
+  font-size: 0.85rem;
+  color: var(--interp-text-muted, #64748b);
+}
+
+.interpreter-conversation-feed__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.interpreter-conversation-feed__col-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--interp-text-muted, #64748b);
+  margin-bottom: 0.35rem;
+}
+
+.interpreter-conversation-feed__col p {
+  margin: 0;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.interpreter-conversation-feed__col--translation {
+  border-left: 1px solid var(--interp-border, #e2e8f0);
+  padding-left: 0.75rem;
+}
+
+.interpreter-live__end-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: var(--interp-text-muted, #64748b);
+}
+
+@media (max-width: 640px) {
+  .interpreter-conversation-feed__columns {
+    grid-template-columns: 1fr;
+  }
+
+  .interpreter-conversation-feed__col--translation {
+    border-left: none;
+    border-top: 1px solid var(--interp-border, #e2e8f0);
+    padding-left: 0;
+    padding-top: 0.75rem;
+  }
+}

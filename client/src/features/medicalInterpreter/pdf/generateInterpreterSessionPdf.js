@@ -82,6 +82,13 @@ function sanitizePdfText(v) {
     .trimEnd();
 }
 
+function getPatientDisplayName(session) {
+  const profile = session?.profileSnapshot;
+  if (!profile) return null;
+  const name = [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim();
+  return name || null;
+}
+
 function lineHeightMm(fontSizePt) {
   return fontSizePt * 0.352778 * 1.35;
 }
@@ -252,6 +259,10 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
   if (session.doctorName?.trim()) {
     drawMetaRow(L.doctorInfo.doctorName, session.doctorName);
   }
+  const patientName = getPatientDisplayName(session);
+  if (patientName) {
+    drawMetaRow(L.pdf.patientNameLabel, patientName);
+  }
   if (session.practiceName?.trim()) {
     drawMetaRow(L.doctorInfo.practiceName, session.practiceName);
   }
@@ -331,6 +342,59 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
     doc.setTextColor(...COL.slate);
     y = blockStart + headerH + 3;
 
+    function drawSideBySideTurn(originalLabel, originalText, translatedLabel, translatedText, sourceLang, targetLang, timeLabel) {
+      const gap = 4;
+      const colW = (contentW - gap) / 2;
+      const leftX = margin;
+      const rightX = margin + colW + gap;
+      const startY = y;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(noticeSize);
+      doc.setTextColor(...COL.slateMuted);
+      if (timeLabel) {
+        needSpace(lineHeightMm(noticeSize));
+        doc.text(timeLabel, margin, y);
+        y += lineHeightMm(noticeSize) + 1;
+      }
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(labelSize);
+      doc.setTextColor(...COL.slateMuted);
+      needSpace(lineHeightMm(labelSize));
+      doc.text(originalLabel, leftX, y);
+      doc.text(translatedLabel, rightX, y);
+      y += lineHeightMm(labelSize) + 1;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(bodySize);
+      doc.setTextColor(...COL.slate);
+      const leftLines = doc.splitTextToSize(sanitizePdfText(originalText || "—"), colW);
+      const rightLines = doc.splitTextToSize(sanitizePdfText(translatedText || "—"), colW);
+      const lineCount = Math.max(leftLines.length, rightLines.length);
+      const lh = lineHeightMm(bodySize);
+
+      for (let i = 0; i < lineCount; i += 1) {
+        needSpace(lh);
+        const rowY = y;
+        if (leftLines[i]) {
+          doc.text(leftLines[i], leftX, rowY, {
+            align: textAlignFor(leftLines[i], sourceLang),
+          });
+        }
+        if (rightLines[i]) {
+          doc.text(rightLines[i], rightX, rowY);
+        }
+        y += lh;
+      }
+
+      gap(4);
+      doc.setDrawColor(...COL.rule);
+      needSpace(1);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 2;
+    }
+
     function drawTurnField(label, body, note, languageCode) {
       if (note && !String(label || "").trim() && !String(body || "").trim()) {
         gap(1);
@@ -366,7 +430,34 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
       gap(3);
     }
 
-    drawTurnField(L.review.originalLabel, turn.originalText, undefined, turn.sourceLanguage);
+    drawWrappedText(langNote, contentW - 4, bodySize);
+    doc.setTextColor(...COL.slate);
+    y = blockStart + headerH + 3;
+
+    const turnTime = turn.createdAt
+      ? formatInterpreterDateTime(turn.createdAt)
+      : "";
+
+    if (
+      turn.status === TURN_STATUS_TRANSLATED &&
+      turn.translatedText?.trim()
+    ) {
+      drawSideBySideTurn(
+        L.review.originalLabel,
+        turn.originalText,
+        L.review.translatedLabel,
+        turn.translatedText,
+        turn.sourceLanguage,
+        turn.targetLanguage,
+        turnTime,
+      );
+    } else {
+      drawTurnField(L.review.originalLabel, turn.originalText, undefined, turn.sourceLanguage);
+      if (turnTime) {
+        drawTurnField("", turnTime);
+      }
+    }
+
     if (turn.status === TURN_STATUS_DRAFT && turn.confidence === "low") {
       drawTurnField("", "", L.transcript.lowConfidenceInput);
     }
@@ -377,13 +468,6 @@ export function buildInterpreterSessionPdf(session, sessionTitle, L) {
       drawTurnField("", "", L.review.turnBlocked);
     } else if (turn.status === TURN_STATUS_ERROR) {
       drawTurnField("", "", L.review.turnError);
-    } else     if (
-      turn.status === TURN_STATUS_TRANSLATED &&
-      turn.translatedText?.trim()
-    ) {
-      const notes = getTurnReviewNotes(turn, L);
-      const note = notes.length ? notes.join(" ") : undefined;
-      drawTurnField(L.review.translatedLabel, turn.translatedText, note, turn.targetLanguage);
     }
 
     if (turn.simplifiedText?.trim()) {
