@@ -79,6 +79,19 @@ export default {
   },
 
   roleEntry: {
+    patientPracticeHub: {
+      pageTitle: "Il mio studio — MedScoutX",
+      heading: "Il mio studio",
+      sub: "Messaggi, appuntamenti, documenti e tutto ciò che riguarda i tuoi studi collegati.",
+      back: "Torna all’area paziente",
+      navAria: "Funzioni studio",
+    },
+    hubLinkMyPractice: "Il mio studio",
+    hubLinkMyPracticeSub: "Messaggi, appuntamenti, documenti e dati dello studio",
+    hubLinkMyPracticeAria:
+      "Apri Il mio studio — messaggi, appuntamenti, documenti e dati dello studio",
+    hubLinkAppointments: "I miei appuntamenti",
+    hubLinkAppointmentsSub: "Appuntamenti organizzativi con i tuoi studi",
     hubLinkFindPractices: "Cerca studio medico",
     hubLinkFindPracticesSub: "Cerca studi e richiedi un collegamento",
     hubLinkHealthProfile: "Profilo salute",

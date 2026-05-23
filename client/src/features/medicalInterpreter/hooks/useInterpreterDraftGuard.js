@@ -1,21 +1,16 @@
-import { useCallback, useEffect } from "react";
-import { useBlocker } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * Blocks in-app navigation while a draft transcript is pending; optional tab-close warning.
+ * Blocks tab close while a draft transcript is pending; optional in-app leave prompt.
+ * Does not use useBlocker — that hook requires createBrowserRouter / RouterProvider.
  *
  * @param {boolean} enabled
  * @param {() => void} [onDiscardDraft] — remove draft turn before navigation proceeds
  * @param {() => void} [onNavigationBlocked] — flush draft to storage when leave is blocked
  */
 export function useInterpreterDraftGuard(enabled, onDiscardDraft, onNavigationBlocked) {
-  const blocker = useBlocker(enabled);
-
-  useEffect(() => {
-    if (blocker.state === "blocked") {
-      onNavigationBlocked?.();
-    }
-  }, [blocker.state, onNavigationBlocked]);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const pendingActionRef = useRef(null);
 
   useEffect(() => {
     if (!enabled) return undefined;
@@ -28,21 +23,36 @@ export function useInterpreterDraftGuard(enabled, onDiscardDraft, onNavigationBl
   }, [enabled]);
 
   const cancelLeave = useCallback(() => {
-    if (blocker.state === "blocked") {
-      blocker.reset();
-    }
-  }, [blocker]);
+    setLeaveDialogOpen(false);
+    pendingActionRef.current = null;
+  }, []);
 
   const confirmLeave = useCallback(() => {
     onDiscardDraft?.();
-    if (blocker.state === "blocked") {
-      blocker.proceed();
-    }
-  }, [blocker, onDiscardDraft]);
+    setLeaveDialogOpen(false);
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    action?.();
+  }, [onDiscardDraft]);
+
+  /** Show leave dialog before in-app navigation (e.g. back link). */
+  const requestLeave = useCallback(
+    (proceed) => {
+      if (!enabled) {
+        proceed?.();
+        return;
+      }
+      onNavigationBlocked?.();
+      pendingActionRef.current = proceed ?? null;
+      setLeaveDialogOpen(true);
+    },
+    [enabled, onNavigationBlocked],
+  );
 
   return {
-    leaveDialogOpen: blocker.state === "blocked",
+    leaveDialogOpen,
     cancelLeave,
     confirmLeave,
+    requestLeave,
   };
 }

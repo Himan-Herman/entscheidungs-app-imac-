@@ -675,9 +675,10 @@ export default function InterpreterLiveRoom() {
   }, [session?.sessionId, displayTurn, draftText]);
 
   const {
-    dialogOpen: leaveDialogOpen,
+    leaveDialogOpen,
     cancelLeave,
     confirmLeave: confirmLeaveBase,
+    requestLeave,
   } = useInterpreterDraftGuard(draftPending, discardActiveDraft, flushDraftToStore);
 
   const confirmLeave = useCallback(() => {
@@ -694,6 +695,15 @@ export default function InterpreterLiveRoom() {
     nearRealtimePreview,
     confirmLeaveBase,
   ]);
+
+  const handleBackNavigation = useCallback(
+    (event) => {
+      if (!draftPending) return;
+      event.preventDefault();
+      requestLeave(() => navigate("/patient/interpreter"));
+    },
+    [draftPending, requestLeave, navigate],
+  );
 
   const pttPhase = useMemo(
     () =>
@@ -1299,6 +1309,7 @@ export default function InterpreterLiveRoom() {
       <Link
         className="medical-interpreter-page__back"
         to="/patient/interpreter"
+        onClick={handleBackNavigation}
       >
         {t.chrome.backToInterpreterHome}
       </Link>

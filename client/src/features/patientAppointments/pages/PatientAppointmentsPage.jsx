@@ -141,9 +141,9 @@ export default function PatientAppointmentsPage() {
       <header className="patient-inbox-page__header">
         <h1 id="patient-appt-heading">{t.heading}</h1>
         <p>{t.intro}</p>
-        <p>
-          <Link to="/patient/hub">{t.backHub || "Hub"}</Link>
-        </p>
+        <Link className="patient-inbox__back" to="/patient">
+          {t.backHub}
+        </Link>
       </header>
 
       <div className="patient-inbox-page__actions">

@@ -79,6 +79,19 @@ export default {
   },
 
   roleEntry: {
+    patientPracticeHub: {
+      pageTitle: "Mon cabinet — MedScoutX",
+      heading: "Mon cabinet",
+      sub: "Messages, rendez-vous, documents et tout ce qui concerne vos cabinets connectés.",
+      back: "Retour à l’espace patient",
+      navAria: "Fonctions cabinet",
+    },
+    hubLinkMyPractice: "Mon cabinet",
+    hubLinkMyPracticeSub: "Messages, rendez-vous, documents et données du cabinet",
+    hubLinkMyPracticeAria:
+      "Ouvrir Mon cabinet — messages, rendez-vous, documents et données du cabinet",
+    hubLinkAppointments: "Mes rendez-vous",
+    hubLinkAppointmentsSub: "Rendez-vous organisationnels avec vos cabinets",
     hubLinkFindPractices: "Trouver un cabinet médical",
     hubLinkFindPracticesSub: "Rechercher des cabinets et demander une connexion",
     hubLinkHealthProfile: "Profil de santé",

@@ -79,6 +79,19 @@ export default {
   },
 
   roleEntry: {
+    patientPracticeHub: {
+      pageTitle: "Mi consultorio — MedScoutX",
+      heading: "Mi consultorio",
+      sub: "Mensajes, citas, documentos y todo lo relacionado con sus consultorios conectados.",
+      back: "Volver al espacio del paciente",
+      navAria: "Funciones del consultorio",
+    },
+    hubLinkMyPractice: "Mi consultorio",
+    hubLinkMyPracticeSub: "Mensajes, citas, documentos y datos del consultorio",
+    hubLinkMyPracticeAria:
+      "Abrir Mi consultorio — mensajes, citas, documentos y datos del consultorio",
+    hubLinkAppointments: "Mis citas",
+    hubLinkAppointmentsSub: "Citas organizativas con sus consultorios",
     hubLinkFindPractices: "Buscar consultorio médico",
     hubLinkFindPracticesSub: "Buscar consultorios y solicitar una conexión",
     hubLinkHealthProfile: "Perfil de salud",
