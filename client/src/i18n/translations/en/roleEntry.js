@@ -45,6 +45,13 @@ export default {
     back: "Back to patient workspace",
     navAria: "Practice features",
   },
+  patientOrientationHub: {
+    pageTitle: "Capture symptoms — MedScoutX",
+    heading: "Capture symptoms",
+    sub: "Symptom Check, image analysis, and body map — structured preparation only, not a diagnosis or treatment advice.",
+    back: "Back to patient workspace",
+    navAria: "Orientation tools",
+  },
   practiceHub: {
     pageTitle: "Practice workspace — MedScoutX",
     heading: "Practice workspace",
@@ -56,6 +63,10 @@ export default {
   hubLinkMyPracticeSub: "Messages, appointments, documents, and practice data",
   hubLinkMyPracticeAria:
     "Open My practice — messages, appointments, documents, and practice data",
+  hubLinkOrientation: "Capture symptoms",
+  hubLinkOrientationSub: "Symptom Check, image analysis, and body map",
+  hubLinkOrientationAria:
+    "Open Capture symptoms — Symptom Check, image analysis, and body map, not a diagnosis",
   hubLinkAppointments: "My appointments",
   hubLinkAppointmentsSub: "Organizational appointments with your practices",
   hubLinkHealthProfile: "Health profile",

@@ -18,6 +18,7 @@ import {
   Users,
   Video,
   Building2,
+  ListChecks,
 } from "lucide-react";
 
 /** @typedef {{ to: string; key: string; subtitleKey?: string; ariaKey?: string; icon: import('react').ComponentType<{ size?: number; strokeWidth?: number }>; tileClass?: string }} PatientHubLink */
@@ -81,6 +82,37 @@ export const PATIENT_PRACTICE_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
   },
 ]);
 
+/** Symptom Check, Bildanalyse, Körperkarte — grouped under „Beschwerden erfassen“. */
+export const PATIENT_ORIENTATION_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
+  {
+    to: "/symptom",
+    key: "hubLinkSymptom",
+    subtitleKey: "hubLinkSymptomSub",
+    icon: Activity,
+  },
+  {
+    to: "/bild",
+    key: "hubLinkImage",
+    subtitleKey: "hubLinkImageSub",
+    icon: ImageIcon,
+  },
+  {
+    to: "/region-start",
+    key: "hubLinkBody",
+    subtitleKey: "hubLinkBodySub",
+    icon: MapIcon,
+  },
+]);
+
+export const PATIENT_ORIENTATION_MAIN_HUB_LINK = /** @type {PatientHubLink} */ ({
+  to: "/patient/orientation",
+  key: "hubLinkOrientation",
+  subtitleKey: "hubLinkOrientationSub",
+  ariaKey: "hubLinkOrientationAria",
+  icon: ListChecks,
+  tileClass: "workspace-hub__tile--orientation-hub",
+});
+
 /** B2C / personal — remain on the main patient overview. */
 export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
   {
@@ -101,24 +133,7 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     subtitleKey: "hubLinkPreVisitSub",
     icon: HeartPulse,
   },
-  {
-    to: "/symptom",
-    key: "hubLinkSymptom",
-    subtitleKey: "hubLinkSymptomSub",
-    icon: Activity,
-  },
-  {
-    to: "/bild",
-    key: "hubLinkImage",
-    subtitleKey: "hubLinkImageSub",
-    icon: ImageIcon,
-  },
-  {
-    to: "/region-start",
-    key: "hubLinkBody",
-    subtitleKey: "hubLinkBodySub",
-    icon: MapIcon,
-  },
+  PATIENT_ORIENTATION_MAIN_HUB_LINK,
   {
     to: "/pre-visit/my-preparations",
     key: "hubLinkMyPrep",

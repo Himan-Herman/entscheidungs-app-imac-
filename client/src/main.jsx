@@ -92,6 +92,9 @@ const PatientHubPage = lazy(() => import("./pages/PatientHubPage.jsx"));
 const PatientPracticeHubPage = lazy(() =>
   import("./pages/PatientPracticeHubPage.jsx"),
 );
+const PatientOrientationHubPage = lazy(() =>
+  import("./pages/PatientOrientationHubPage.jsx"),
+);
 const InterpreterHomePage = lazy(() =>
   import("./features/medicalInterpreter/pages/InterpreterHomePage.jsx"),
 );
@@ -288,6 +291,14 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PatientPracticeHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/orientation"
+                  element={
+                    <ProtectedRoute>
+                      <PatientOrientationHubPage />
                     </ProtectedRoute>
                   }
                 />

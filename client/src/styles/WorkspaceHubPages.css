@@ -76,8 +76,10 @@
 }
 
 .workspace-hub--practice .workspace-hub__tile,
+.workspace-hub--orientation .workspace-hub__tile,
 .workspace-hub__tile--interpreter,
-.workspace-hub__tile--practice-hub {
+.workspace-hub__tile--practice-hub,
+.workspace-hub__tile--orientation-hub {
   border-top: 2px solid rgba(13, 148, 136, 0.5);
 }
 

@@ -45,6 +45,13 @@ export default {
     back: "Zurück zum Patientenbereich",
     navAria: "Praxis-Funktionen",
   },
+  patientOrientationHub: {
+    pageTitle: "Beschwerden erfassen — MedScoutX",
+    heading: "Beschwerden erfassen",
+    sub: "Symptom Check, Bildanalyse und Körperkarte — zur strukturierten Vorbereitung, ohne Diagnose oder Behandlungsempfehlung.",
+    back: "Zurück zum Patientenbereich",
+    navAria: "Orientierungshilfen",
+  },
   practiceHub: {
     pageTitle: "Praxisbereich — MedScoutX",
     heading: "Praxisbereich",
@@ -56,6 +63,10 @@ export default {
   hubLinkMyPracticeSub: "Nachrichten, Termine, Dokumente und Praxisdaten",
   hubLinkMyPracticeAria:
     "Meine Praxis öffnen — Nachrichten, Termine, Dokumente und Praxisdaten",
+  hubLinkOrientation: "Beschwerden erfassen",
+  hubLinkOrientationSub: "Symptom Check, Bildanalyse und Körperkarte",
+  hubLinkOrientationAria:
+    "Beschwerden erfassen öffnen — Symptom Check, Bildanalyse und Körperkarte, ohne Diagnose",
   hubLinkAppointments: "Meine Termine",
   hubLinkAppointmentsSub: "Organisatorische Termine mit Ihren Praxen",
   hubLinkHealthProfile: "Gesundheitsprofil",
