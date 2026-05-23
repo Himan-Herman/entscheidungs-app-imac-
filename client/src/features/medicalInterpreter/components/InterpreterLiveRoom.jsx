@@ -293,7 +293,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
   }, []);
 
   const translateLiveTurn = useCallback(
-    async ({ text, sourceLanguage, targetLanguage, speaker: turnSpeaker, signal }) => {
+    async (
+      { text, sourceLanguage, targetLanguage, speaker: turnSpeaker },
+      options = {},
+    ) => {
       if (nearRealtimeFastTranslateAvailable && String(text || "").trim().length <= 600) {
         const fastResult = await translateNearRealtimePreview(
           {
@@ -302,7 +305,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
             targetLanguage,
             speaker: turnSpeaker,
           },
-          { signal },
+          { signal: options.signal },
         );
 
         if (fastResult.ok) {
@@ -335,7 +338,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
           targetLanguage,
           speaker: turnSpeaker,
         },
-        { signal },
+        { signal: options.signal },
       );
     },
     [nearRealtimeFastTranslateAvailable],
@@ -728,7 +731,6 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
   const {
     phase: streamPhase,
     isActive: isStreamingActive,
-    previewText: streamPreviewText,
     browserSupported: streamingBrowserSupported,
     startStreaming,
     cancelStream,
@@ -755,6 +757,12 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
       showError(t.errors.generic);
     },
     onFinalized: async ({ transcript, confidence, language }) => {
+      if (!String(transcript || "").trim()) {
+        announce(t.liveSession.noSpeechDetected);
+        setPhase(LIVE_PHASE.LISTENING);
+        scheduleNextListening();
+        return;
+      }
       await finalizeTurnFromTranscript({
         originalTranscript: transcript,
         detectedLanguage: language,
@@ -767,6 +775,14 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
 
   const shouldUseStreamingMode =
     streamingModeAvailable && streamingBrowserSupported;
+
+  useEffect(() => {
+    if (!shouldUseStreamingMode) return;
+    if (streamPhase === "finalizing" && phaseRef.current !== LIVE_PHASE.TRANSLATING) {
+      setPhase(LIVE_PHASE.TRANSCRIBING);
+      announce(t.liveSession.statusTranscribing);
+    }
+  }, [announce, setPhase, shouldUseStreamingMode, streamPhase, t.liveSession.statusTranscribing]);
 
   const startRecordingRef = useRef(startRecording);
   useEffect(() => {
@@ -813,13 +829,16 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
       ) {
         return false;
       }
+      if (isStreamingSttClientEnabled() && interpreterServerStatus.loading) {
+        return false;
+      }
       setDraftTranscript("");
       if (shouldUseStreamingMode) {
         return startStreaming();
       }
       return startRecordingRef.current?.();
     };
-  }, [shouldUseStreamingMode, startStreaming]);
+  }, [interpreterServerStatus.loading, shouldUseStreamingMode, startStreaming]);
 
   const handleStartConversation = useCallback(async () => {
     setPdfReady(false);
@@ -933,6 +952,11 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
             {currentDirectionLabel}
           </span>
         </div>
+        {draftTranscript ? (
+          <div className="interpreter-feedback" role="status" aria-live="polite">
+            {draftTranscript}
+          </div>
+        ) : null}
 
         <div className="interpreter-live-shell__button-row">
           <button
@@ -940,7 +964,9 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
             className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary interpreter-live-shell__action interpreter-live-shell__action--start"
             onClick={handleStartConversation}
             disabled={
+              (isStreamingSttClientEnabled() && interpreterServerStatus.loading) ||
               isRecording ||
+              isStreamingActive ||
               isPreparing ||
               isStopping ||
               processingRef.current ||

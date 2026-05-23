@@ -413,9 +413,7 @@ export function useInterpreterStreamCapture(opts = {}) {
       confidence: result.confidence,
       language: result.language,
     };
-    if (text) {
-      await optsRef.current.onFinalized?.(finalizedPayload);
-    }
+    await optsRef.current.onFinalized?.(finalizedPayload);
 
     return { ok: true, ...finalizedPayload };
   }, [phase, cleanupMedia, cancelStream, processUploadQueue]);
