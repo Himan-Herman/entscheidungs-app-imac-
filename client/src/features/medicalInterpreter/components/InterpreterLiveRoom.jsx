@@ -653,8 +653,12 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
       setErrorMessage("");
       setExportMessage("");
       setLastPlaybackRequest(null);
+      setDraftTranscript("");
       const runToken = runTokenRef.current;
       const fallbackSpeaker = speakerRef.current;
+      const shouldAutoDetectSpeaker =
+        String(activeSession.patientLanguage || "").trim().toLowerCase() !==
+        String(activeSession.doctorLanguage || "").trim().toLowerCase();
 
       try {
         const silenceCheck = await detectLikelySilentBlob(blob);
@@ -688,6 +692,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
 
         const originalTranscript = String(transcriptResult.transcript || "").trim();
         if (runToken !== runTokenRef.current) return;
+        processingRef.current = false;
         await finalizeTurnFromTranscript({
           originalTranscript,
           detectedLanguage: transcriptResult.language,
@@ -719,6 +724,49 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     onSilencePhaseChange: handlePhaseFromSilence,
     onRecorded: processRecordedSegment,
   });
+
+  const {
+    phase: streamPhase,
+    isActive: isStreamingActive,
+    previewText: streamPreviewText,
+    browserSupported: streamingBrowserSupported,
+    startStreaming,
+    cancelStream,
+  } = useInterpreterStreamCapture({
+    languageHint: streamLanguageHint,
+    silenceAutoStopMs: INTERPRETER_SILENCE_AUTO_STOP_MS,
+    onRecordingStart: () => {
+      setPhase(LIVE_PHASE.LISTENING);
+      announce(t.liveSession.statusListening);
+    },
+    onSilencePhaseChange: handlePhaseFromSilence,
+    onDraftPreview: ({ text }) => {
+      setDraftTranscript(String(text || "").trim());
+    },
+    onError: (code) => {
+      if (code === "mic_denied") {
+        showError(t.pushToTalk.micDenied);
+        return;
+      }
+      if (code === "stream_backpressure") {
+        showError(t.errors.network);
+        return;
+      }
+      showError(t.errors.generic);
+    },
+    onFinalized: async ({ transcript, confidence, language }) => {
+      await finalizeTurnFromTranscript({
+        originalTranscript: transcript,
+        detectedLanguage: language,
+        confidence,
+        activeSession: sessionRef.current,
+        fallbackSpeaker: speakerRef.current,
+      });
+    },
+  });
+
+  const shouldUseStreamingMode =
+    streamingModeAvailable && streamingBrowserSupported;
 
   const startRecordingRef = useRef(startRecording);
   useEffect(() => {
@@ -755,18 +803,38 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     t,
   ]);
 
+  useEffect(() => {
+    startListeningRef.current = async () => {
+      if (
+        !sessionRef.current?.sessionId ||
+        processingRef.current ||
+        phaseRef.current === LIVE_PHASE.PAUSED ||
+        phaseRef.current === LIVE_PHASE.ENDED
+      ) {
+        return false;
+      }
+      setDraftTranscript("");
+      if (shouldUseStreamingMode) {
+        return startStreaming();
+      }
+      return startRecordingRef.current?.();
+    };
+  }, [shouldUseStreamingMode, startStreaming]);
+
   const handleStartConversation = useCallback(async () => {
     setPdfReady(false);
     setExportMessage("");
     setErrorMessage("");
+    setDraftTranscript("");
     setPhase(LIVE_PHASE.IDLE);
     await playInterpreterTurnSignal();
     announce(t.liveSession.readyForEither);
-    await startRecordingRef.current?.();
+    await startListeningRef.current?.();
   }, [announce, setPhase, t.liveSession.readyForEither]);
 
   const handleEndConversation = useCallback(() => {
     stopRuntime();
+    cancelStream();
     cancelRecording();
     const current = sessionRef.current;
     if (!current?.sessionId) return;
@@ -776,7 +844,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     setPdfReady(Boolean(ended?.turns?.length));
     setPhase(LIVE_PHASE.ENDED);
     announce(t.sessionActions.ended);
-  }, [announce, cancelRecording, stopRuntime, t, uiLanguage, setPhase]);
+  }, [announce, cancelRecording, cancelStream, stopRuntime, t, uiLanguage, setPhase]);
 
   const handleDownloadPdf = useCallback(() => {
     const current = reloadSession();
@@ -827,9 +895,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
   useEffect(() => {
     return () => {
       stopRuntime();
+      cancelStream();
       cancelRecording();
     };
-  }, [cancelRecording, stopRuntime]);
+  }, [cancelRecording, cancelStream, stopRuntime]);
 
   return (
     <main
