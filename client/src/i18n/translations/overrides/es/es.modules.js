@@ -38,6 +38,8 @@ export default {
     intro:
       "Gestione los contactos para compartir su preparación antes de la consulta. Solo usted puede ver estas entradas.",
     backHome: "Volver al inicio",
+    backPatientHub: "Volver al espacio del paciente",
+    retryLoad: "Reintentar",
     addContact: "Añadir contacto",
     save: "Guardar",
     cancel: "Cancelar",
@@ -49,6 +51,8 @@ export default {
     loadingContacts: "Cargando…",
     loadError: "No se han podido cargar los contactos.",
     saveError: "No se ha podido guardar el contacto.",
+    saveErrorName: "Introduzca un nombre válido.",
+    saveErrorEmail: "Introduzca una dirección de correo válida.",
     deleteError: "No se ha podido eliminar el contacto.",
     fieldDoctorName: "Nombre del profesional",
     fieldPracticeName: "Centro / clínica",
@@ -59,6 +63,9 @@ export default {
     fieldNote: "Nota (opcional)",
     requiredHint: "Los campos obligatorios están indicados.",
     cardAria: "Contacto clínico",
+    linkEmail: "Enviar correo",
+    linkPhone: "Llamar",
+    linkAddress: "Cómo llegar",
   },
   symptomCheck: {
     pageTitle: "Revisión guiada de síntomas — MedScoutX",

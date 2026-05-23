@@ -16,6 +16,19 @@ const EMPTY_FORM = {
   note: "",
 };
 
+function telHref(phone) {
+  const raw = String(phone ?? "").trim();
+  if (!raw) return "";
+  const normalized = raw.replace(/[^\d+]/g, "");
+  return normalized ? `tel:${normalized}` : "";
+}
+
+function mapsHref(address) {
+  const q = String(address ?? "").trim();
+  if (!q) return "";
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
 export default function SettingsDoctorContactsPage() {
   const { language } = useLanguage();
   const t = useMemo(() => {
@@ -112,7 +125,8 @@ export default function SettingsDoctorContactsPage() {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data?.message || "save_failed");
+        const code = data?.error || data?.message || "save_failed";
+        throw new Error(code);
       }
       setShowForm(false);
       setEditingId(null);
@@ -120,7 +134,9 @@ export default function SettingsDoctorContactsPage() {
       await load();
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
-      setSaveError(t.saveError);
+      if (e?.message === "email_invalid") setSaveError(t.saveErrorEmail);
+      else if (e?.message === "doctorName_invalid") setSaveError(t.saveErrorName);
+      else setSaveError(t.saveError);
     } finally {
       setSaving(false);
     }
@@ -152,15 +168,22 @@ export default function SettingsDoctorContactsPage() {
         <header className="settings-doctors__header">
           <h1 className="settings-doctors__title">{t.heading}</h1>
           <p className="settings-doctors__intro">{t.intro}</p>
-          <Link className="settings-doctors__back" to="/startseite">
-            {t.backHome}
+          <Link className="settings-doctors__back" to="/patient">
+            {t.backPatientHub}
           </Link>
         </header>
 
         {loadError ? (
-          <p className="settings-doctors__error" role="alert">
-            {loadError}
-          </p>
+          <div className="settings-doctors__error-wrap" role="alert">
+            <p className="settings-doctors__error">{loadError}</p>
+            <button
+              type="button"
+              className="settings-doctors__btn settings-doctors__btn--ghost"
+              onClick={() => void load()}
+            >
+              {t.retryLoad}
+            </button>
+          </div>
         ) : null}
 
         <div className="settings-doctors__toolbar">
@@ -303,9 +326,13 @@ export default function SettingsDoctorContactsPage() {
             <p className="settings-doctors__empty">{t.empty}</p>
           ) : (
             <ul className="settings-doctors__list">
-              {contacts.map((c) => (
+              {contacts.map((c) => {
+                const cardLabel = `${t.cardAria}: ${c.doctorName}`;
+                const phoneLink = telHref(c.phone);
+                const addressLink = mapsHref(c.address);
+                return (
                 <li key={c.id} className="settings-doctors__card">
-                  <article aria-label={t.cardAria}>
+                  <article aria-label={cardLabel}>
                     <h3 className="settings-doctors__card-title">
                       {c.doctorName}
                     </h3>
@@ -317,12 +344,40 @@ export default function SettingsDoctorContactsPage() {
                         {c.specialty}
                       </p>
                     ) : null}
-                    <p className="settings-doctors__card-line">{c.email}</p>
-                    {c.phone ? (
-                      <p className="settings-doctors__card-line">{c.phone}</p>
+                    {c.email ? (
+                      <p className="settings-doctors__card-line">
+                        <a
+                          className="settings-doctors__link"
+                          href={`mailto:${encodeURIComponent(c.email)}`}
+                          aria-label={`${t.linkEmail}: ${c.doctorName}`}
+                        >
+                          {c.email}
+                        </a>
+                      </p>
                     ) : null}
-                    {c.address ? (
-                      <p className="settings-doctors__card-line">{c.address}</p>
+                    {c.phone && phoneLink ? (
+                      <p className="settings-doctors__card-line">
+                        <a
+                          className="settings-doctors__link"
+                          href={phoneLink}
+                          aria-label={`${t.linkPhone}: ${c.doctorName}`}
+                        >
+                          {c.phone}
+                        </a>
+                      </p>
+                    ) : null}
+                    {c.address && addressLink ? (
+                      <p className="settings-doctors__card-line">
+                        <a
+                          className="settings-doctors__link"
+                          href={addressLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${t.linkAddress}: ${c.doctorName}`}
+                        >
+                          {c.address}
+                        </a>
+                      </p>
                     ) : null}
                     {c.note ? (
                       <p className="settings-doctors__card-note">{c.note}</p>
@@ -332,6 +387,7 @@ export default function SettingsDoctorContactsPage() {
                         type="button"
                         className="settings-doctors__btn settings-doctors__btn--ghost"
                         onClick={() => openEdit(c)}
+                        aria-label={`${t.edit}: ${c.doctorName}`}
                       >
                         {t.edit}
                       </button>
@@ -339,13 +395,15 @@ export default function SettingsDoctorContactsPage() {
                         type="button"
                         className="settings-doctors__btn settings-doctors__btn--danger"
                         onClick={() => void handleDelete(c.id)}
+                        aria-label={`${t.delete}: ${c.doctorName}`}
                       >
                         {t.delete}
                       </button>
                     </div>
                   </article>
                 </li>
-              ))}
+              );
+              })}
             </ul>
           )}
         </section>

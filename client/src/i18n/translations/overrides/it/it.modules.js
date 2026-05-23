@@ -38,6 +38,8 @@ export default {
     intro:
       "Gestisci i contatti per condividere la preparazione prima della visita. Solo tu puoi vedere queste voci.",
     backHome: "Torna all’inizio",
+    backPatientHub: "Torna all’area paziente",
+    retryLoad: "Riprova",
     addContact: "Aggiungi contatto",
     save: "Salva",
     cancel: "Annulla",
@@ -59,6 +61,9 @@ export default {
     fieldNote: "Nota (facoltativo)",
     requiredHint: "I campi obbligatori sono indicati.",
     cardAria: "Contatto clinico",
+    linkEmail: "Invia e-mail",
+    linkPhone: "Chiama",
+    linkAddress: "Indicazioni stradali",
   },
   symptomCheck: {
     pageTitle: "Raccolta guidata dei sintomi — MedScoutX",

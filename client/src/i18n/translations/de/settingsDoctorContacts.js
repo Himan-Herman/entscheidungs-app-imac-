@@ -4,6 +4,8 @@ export default {
   intro:
     "Verwalten Sie hier Kontakte für die Übergabe Ihrer Pre-Visit-Unterlagen. Nur Sie können diese Einträge sehen.",
   backHome: "Zur Startseite",
+  backPatientHub: "Zurück zum Patientenbereich",
+  retryLoad: "Erneut laden",
   addContact: "Kontakt hinzufügen",
   save: "Speichern",
   cancel: "Abbrechen",
@@ -26,4 +28,7 @@ export default {
   fieldNote: "Hinweis (optional)",
   requiredHint: "Pflichtfelder sind gekennzeichnet.",
   cardAria: "Arztkontakt",
+  linkEmail: "E-Mail senden",
+  linkPhone: "Anrufen",
+  linkAddress: "Route planen",
 };

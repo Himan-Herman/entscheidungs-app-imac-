@@ -86,6 +86,21 @@ export default {
       back: "Volver al espacio del paciente",
       navAria: "Funciones del consultorio",
     },
+    patientOrientationHub: {
+      pageTitle: "Registrar síntomas — MedScoutX",
+      heading: "Registrar síntomas",
+      sub: "Revisión guiada de síntomas, descripción de imágenes y mapa corporal — solo preparación estructurada, sin diagnóstico ni consejo terapéutico.",
+      back: "Volver al espacio del paciente",
+      navAria: "Herramientas de orientación",
+    },
+    hubLinkOrientation: "Registrar síntomas",
+    hubLinkOrientationSub:
+      "Revisión guiada de síntomas, descripción de imágenes y mapa corporal",
+    hubLinkOrientationAria:
+      "Abrir Registrar síntomas — revisión guiada, descripción de imágenes y mapa corporal, sin diagnóstico",
+    hubLinkSymptom: "Revisión guiada de síntomas",
+    hubLinkImage: "Descripción estructurada de imágenes",
+    hubLinkBody: "Mapa corporal",
     hubLinkMyPractice: "Mi consultorio",
     hubLinkMyPracticeSub: "Mensajes, citas, documentos y datos del consultorio",
     hubLinkMyPracticeAria:

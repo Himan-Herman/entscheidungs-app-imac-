@@ -282,7 +282,7 @@ export default function InterpreterSetupPage() {
       if (inviteContext) {
         clearInterpreterInviteContext();
       }
-      navigate("/patient/interpreter/live", { replace: false });
+      navigate(`/patient/interpreter/live?sessionId=${encodeURIComponent(id)}`, { replace: false });
     } finally {
       setSubmitting(false);
     }

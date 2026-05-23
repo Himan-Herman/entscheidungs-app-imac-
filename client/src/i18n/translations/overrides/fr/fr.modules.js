@@ -38,6 +38,8 @@ export default {
     intro:
       "Gérez les contacts pour votre préparation de consultation. Entrées visibles uniquement par vous.",
     backHome: "Retour à l’accueil",
+    backPatientHub: "Retour à l’espace patient",
+    retryLoad: "Réessayer",
     addContact: "Ajouter un contact",
     save: "Enregistrer",
     cancel: "Annuler",
@@ -59,6 +61,9 @@ export default {
     fieldNote: "Note (facultatif)",
     requiredHint: "Les champs obligatoires sont indiqués.",
     cardAria: "Contact médical",
+    linkEmail: "Envoyer un e-mail",
+    linkPhone: "Appeler",
+    linkAddress: "Itinéraire",
   },
   symptomCheck: {
     pageTitle: "Bilan symptomatique — MedScoutX",

@@ -127,7 +127,7 @@ export default function InterpreterReviewPage() {
       return;
     }
     setCurrentSessionId(session.sessionId);
-    navigate("/patient/interpreter/live");
+    navigate(`/patient/interpreter/live?sessionId=${encodeURIComponent(session.sessionId)}`);
   };
 
   const handleRenameConfirm = (title) => {

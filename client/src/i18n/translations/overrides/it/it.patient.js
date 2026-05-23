@@ -86,6 +86,21 @@ export default {
       back: "Torna all’area paziente",
       navAria: "Funzioni studio",
     },
+    patientOrientationHub: {
+      pageTitle: "Registrare i sintomi — MedScoutX",
+      heading: "Registrare i sintomi",
+      sub: "Raccolta guidata dei sintomi, descrizione delle immagini e mappa corporea — solo preparazione strutturata, senza diagnosi né consigli terapeutici.",
+      back: "Torna all’area paziente",
+      navAria: "Strumenti di orientamento",
+    },
+    hubLinkOrientation: "Registrare i sintomi",
+    hubLinkOrientationSub:
+      "Raccolta guidata dei sintomi, descrizione delle immagini e mappa corporea",
+    hubLinkOrientationAria:
+      "Apri Registrare i sintomi — raccolta guidata, descrizione immagini e mappa corporea, senza diagnosi",
+    hubLinkSymptom: "Raccolta guidata dei sintomi",
+    hubLinkImage: "Descrizione strutturata delle immagini",
+    hubLinkBody: "Mappa corporea",
     hubLinkMyPractice: "Il mio studio",
     hubLinkMyPracticeSub: "Messaggi, appuntamenti, documenti e dati dello studio",
     hubLinkMyPracticeAria:

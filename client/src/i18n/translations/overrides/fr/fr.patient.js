@@ -86,6 +86,21 @@ export default {
       back: "Retour à l’espace patient",
       navAria: "Fonctions cabinet",
     },
+    patientOrientationHub: {
+      pageTitle: "Recenser les symptômes — MedScoutX",
+      heading: "Recenser les symptômes",
+      sub: "Bilan symptomatique, description d’images et schéma corporel — pour une préparation structurée, sans diagnostic ni conseil thérapeutique.",
+      back: "Retour à l’espace patient",
+      navAria: "Outils d’orientation",
+    },
+    hubLinkOrientation: "Recenser les symptômes",
+    hubLinkOrientationSub:
+      "Bilan symptomatique, description d’images et schéma corporel",
+    hubLinkOrientationAria:
+      "Ouvrir Recenser les symptômes — bilan symptomatique, description d’images et schéma corporel, sans diagnostic",
+    hubLinkSymptom: "Bilan symptomatique",
+    hubLinkImage: "Description d’images",
+    hubLinkBody: "Schéma corporel",
     hubLinkMyPractice: "Mon cabinet",
     hubLinkMyPracticeSub: "Messages, rendez-vous, documents et données du cabinet",
     hubLinkMyPracticeAria:

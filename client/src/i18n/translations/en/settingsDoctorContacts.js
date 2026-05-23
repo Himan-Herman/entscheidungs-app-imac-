@@ -4,6 +4,8 @@ export default {
   intro:
     "Manage contacts for sharing your pre-visit preparation. Only you can see these entries.",
   backHome: "Back to home",
+  backPatientHub: "Back to patient workspace",
+  retryLoad: "Try again",
   addContact: "Add contact",
   save: "Save",
   cancel: "Cancel",
@@ -15,6 +17,8 @@ export default {
   loadingContacts: "Loading…",
   loadError: "Contacts could not be loaded.",
   saveError: "The contact could not be saved.",
+  saveErrorName: "Please enter a valid name.",
+  saveErrorEmail: "Please enter a valid email address.",
   deleteError: "The contact could not be deleted.",
   fieldDoctorName: "Doctor name",
   fieldPracticeName: "Practice / clinic",
@@ -25,4 +29,7 @@ export default {
   fieldNote: "Note (optional)",
   requiredHint: "Required fields are indicated.",
   cardAria: "Doctor contact",
+  linkEmail: "Send email",
+  linkPhone: "Call",
+  linkAddress: "Get directions",
 };

@@ -14,6 +14,7 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #0f172a;
+  overflow-wrap: anywhere;
 }
 
 :root[data-theme="dark"] .workspace-hub__title {
@@ -26,6 +27,7 @@
   line-height: 1.55;
   color: #475569;
   max-width: 42rem;
+  overflow-wrap: anywhere;
 }
 
 :root[data-theme="dark"] .workspace-hub__sub {
@@ -42,6 +44,20 @@
 
 .workspace-hub__classic:hover {
   color: #0f766e;
+}
+
+.workspace-hub__classic:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+:root[data-theme="dark"] .workspace-hub__classic {
+  color: #2dd4bf;
+}
+
+:root[data-theme="dark"] .workspace-hub__classic:hover {
+  color: #5eead4;
 }
 
 .workspace-hub__grid {
@@ -119,6 +135,8 @@
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .workspace-hub__tile-sub {
@@ -130,6 +148,8 @@
   font-weight: 500;
   line-height: 1.4;
   color: var(--ms-color-text-muted, #64748b);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .workspace-hub__tile .workspace-hub__tile-sub {

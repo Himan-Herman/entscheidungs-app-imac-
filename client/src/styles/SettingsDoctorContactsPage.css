@@ -34,6 +34,7 @@
   font-size: clamp(1.35rem, 3.5vw, 1.55rem);
   font-weight: 650;
   letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .settings-doctors__intro {
@@ -52,6 +53,32 @@
 
 .settings-doctors__back:hover {
   text-decoration: none;
+}
+
+.settings-doctors__back:focus-visible,
+.settings-doctors__btn:focus-visible,
+.settings-doctors__link:focus-visible {
+  outline: 2px solid var(--sd-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.settings-doctors__link {
+  color: var(--sd-accent);
+  font-weight: 600;
+  text-decoration: none;
+  word-break: break-word;
+}
+
+.settings-doctors__link:hover {
+  text-decoration: underline;
+}
+
+.settings-doctors__error-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .settings-doctors__toolbar {
@@ -246,4 +273,8 @@
 :root[data-theme="dark"] .settings-doctors__btn--ghost {
   background: rgba(30, 41, 59, 0.65);
   color: var(--sd-text);
+}
+
+:root[data-theme="dark"] .settings-doctors__link {
+  color: #2dd4bf;
 }

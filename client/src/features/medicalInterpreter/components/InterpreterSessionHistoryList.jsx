@@ -61,7 +61,7 @@ export default function InterpreterSessionHistoryList({
       navigate("/patient/interpreter/setup", { replace: false });
       return;
     }
-    navigate("/patient/interpreter/live");
+    navigate(`/patient/interpreter/live?sessionId=${encodeURIComponent(sessionId)}`);
   };
 
   const handleRenameConfirm = (title) => {

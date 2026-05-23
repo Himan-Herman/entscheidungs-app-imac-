@@ -149,7 +149,7 @@ function nextExpectedSpeakerFromSession(session) {
   return SPEAKER_PATIENT;
 }
 
-export default function InterpreterLiveRoom() {
+export default function InterpreterLiveRoom({ sessionId = "" }) {
   const t = useMedicalInterpreterMessages();
   const { language: uiLanguage } = useLanguage();
   const alertRef = useRef(null);
@@ -159,7 +159,9 @@ export default function InterpreterLiveRoom() {
   const translateAbortRef = useRef(null);
   const runTokenRef = useRef(0);
   const processingRef = useRef(false);
-  const initialSessionRef = useRef(getCurrentSession());
+  const initialSessionRef = useRef(
+    sessionId ? getSession(sessionId) || getCurrentSession() : getCurrentSession(),
+  );
 
   const [session, setSession] = useState(() => initialSessionRef.current);
   const [speaker, setSpeakerState] = useState(() =>
@@ -197,13 +199,16 @@ export default function InterpreterLiveRoom() {
   }, [phase]);
 
   const reloadSession = useCallback(() => {
-    const fresh = sessionRef.current?.sessionId
+    const targetSessionId = sessionId || sessionRef.current?.sessionId;
+    const fresh = targetSessionId
+      ? getSession(targetSessionId)
+      : sessionRef.current?.sessionId
       ? getSession(sessionRef.current.sessionId)
       : getCurrentSession();
     setSession(fresh);
     sessionRef.current = fresh;
     return fresh;
-  }, []);
+  }, [sessionId]);
 
   const setActiveSpeaker = useCallback((nextSpeaker) => {
     speakerRef.current = nextSpeaker;
