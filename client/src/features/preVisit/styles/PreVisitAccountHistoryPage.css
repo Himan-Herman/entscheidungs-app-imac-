@@ -96,6 +96,13 @@
   font-style: italic;
 }
 
+.pre-visit-account__error-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
 .pre-visit-account__error {
   margin: 0;
   padding: 12px 14px;
@@ -110,6 +117,10 @@
 .pre-visit-account__empty {
   margin: 0;
   padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   text-align: center;
   font-size: 1rem;
   line-height: 1.55;
@@ -118,6 +129,10 @@
   border: 1px solid var(--pva-border);
   border-radius: 14px;
   box-shadow: var(--pva-shadow);
+}
+
+.pre-visit-account__empty p {
+  margin: 0;
 }
 
 .pre-visit-account__list {
@@ -131,6 +146,12 @@
 
 .pre-visit-account__card-wrap {
   margin: 0;
+  border-radius: 16px;
+  transition: box-shadow 0.2s ease;
+}
+
+.pre-visit-account__card-wrap--focus {
+  box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.45);
 }
 
 .pre-visit-account__card {
@@ -151,6 +172,8 @@
   letter-spacing: -0.02em;
   line-height: 1.3;
   color: var(--pva-text);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pre-visit-account__meta {
@@ -221,6 +244,11 @@
   cursor: not-allowed;
 }
 
+.pre-visit-account__btn:focus-visible {
+  outline: 2px solid var(--pva-accent);
+  outline-offset: 3px;
+}
+
 .pre-visit-account__btn--login {
   border-color: rgba(14, 116, 144, 0.35);
   color: var(--pva-accent);
@@ -228,6 +256,16 @@
 }
 
 .pre-visit-account__btn--login:hover {
+  background: rgba(14, 116, 144, 0.1);
+}
+
+.pre-visit-account__btn--secondary {
+  border-color: rgba(14, 116, 144, 0.35);
+  color: var(--pva-accent);
+  background: rgba(14, 116, 144, 0.06);
+}
+
+.pre-visit-account__btn--secondary:hover:not(:disabled) {
   background: rgba(14, 116, 144, 0.1);
 }
 

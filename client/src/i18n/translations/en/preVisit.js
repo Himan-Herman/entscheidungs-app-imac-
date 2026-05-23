@@ -475,6 +475,9 @@ export default {
     loadError:
       "The list could not be loaded right now. Please try again later.",
     empty: "No preparations have been saved to your account yet.",
+    startNewPrep: "Start new preparation",
+    retryLoad: "Try again",
+    listAriaLabel: "Saved preparations",
     patientLang: "Patient language",
     doctorLang: "Doctor language",
     created: "Created",

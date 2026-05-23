@@ -192,6 +192,10 @@ export default {
     statusDraft: "Borrador",
     statusPdfCreated: "PDF creado",
     statusCompleted: "Completado",
+    linkCases: "Abrir mis registros",
+    startNewPrep: "Iniciar nueva preparación",
+    retryLoad: "Reintentar",
+    listAriaLabel: "Preparaciones guardadas",
   },
   cases: {
     backPracticeHub: "Volver a Mi consultorio",

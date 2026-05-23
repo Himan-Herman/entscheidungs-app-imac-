@@ -102,7 +102,9 @@ const PHASE_TRANSITIONS = {
   ]),
 };
 
-const AUTO_RESTART_DELAY_MS = 260;
+const AUTO_RESTART_DELAY_MS = 120;
+const AUTO_RESTART_RETRY_MS = 140;
+const AUTO_RESTART_MAX_ATTEMPTS = 8;
 const INTERPRETER_VOICE_PROFILE = "neutral_medical";
 
 function nextPhase(currentPhase, requestedPhase) {
@@ -139,18 +141,29 @@ function speakerLabelFor(speaker, labels) {
     : labels.conversation.patientLabel;
 }
 
+function nextExpectedSpeakerFromSession(session) {
+  const lastSpeaker = session?.turns?.[session.turns.length - 1]?.speaker;
+  if (lastSpeaker === SPEAKER_DOCTOR) return SPEAKER_PATIENT;
+  if (lastSpeaker === SPEAKER_PATIENT) return SPEAKER_DOCTOR;
+  return SPEAKER_PATIENT;
+}
+
 export default function InterpreterLiveRoom() {
   const t = useMedicalInterpreterMessages();
   const { language: uiLanguage } = useLanguage();
   const alertRef = useRef(null);
   const autoRestartTimerRef = useRef(null);
+  const autoRestartAttemptRef = useRef(0);
   const transcribeAbortRef = useRef(null);
   const translateAbortRef = useRef(null);
   const runTokenRef = useRef(0);
   const processingRef = useRef(false);
+  const initialSessionRef = useRef(getCurrentSession());
 
-  const [session, setSession] = useState(() => getCurrentSession());
-  const [speaker, setSpeaker] = useState(SPEAKER_PATIENT);
+  const [session, setSession] = useState(() => initialSessionRef.current);
+  const [speaker, setSpeakerState] = useState(() =>
+    nextExpectedSpeakerFromSession(initialSessionRef.current),
+  );
   const [phase, setPhaseState] = useState(() =>
     getCurrentSession()?.status === SESSION_STATUS_ENDED
       ? LIVE_PHASE.ENDED
@@ -191,6 +204,11 @@ export default function InterpreterLiveRoom() {
     return fresh;
   }, []);
 
+  const setActiveSpeaker = useCallback((nextSpeaker) => {
+    speakerRef.current = nextSpeaker;
+    setSpeakerState(nextSpeaker);
+  }, []);
+
   const setPhase = useCallback((requestedPhase) => {
     setPhaseState((current) => nextPhase(current, requestedPhase));
   }, []);
@@ -200,6 +218,7 @@ export default function InterpreterLiveRoom() {
       clearTimeout(autoRestartTimerRef.current);
       autoRestartTimerRef.current = null;
     }
+    autoRestartAttemptRef.current = 0;
   }, []);
 
   const {
@@ -312,10 +331,43 @@ export default function InterpreterLiveRoom() {
     ) {
       return;
     }
-    autoRestartTimerRef.current = setTimeout(() => {
-      autoRestartTimerRef.current = null;
-      void startRecordingRef.current?.();
-    }, AUTO_RESTART_DELAY_MS);
+    const attemptAutoRestart = () => {
+      if (
+        !sessionRef.current ||
+        phaseRef.current === LIVE_PHASE.PAUSED ||
+        phaseRef.current === LIVE_PHASE.ENDED ||
+        phaseRef.current === LIVE_PHASE.ERROR
+      ) {
+        autoRestartTimerRef.current = null;
+        autoRestartAttemptRef.current = 0;
+        return;
+      }
+
+      void startRecordingRef.current?.().then((started) => {
+        if (started) {
+          autoRestartTimerRef.current = null;
+          autoRestartAttemptRef.current = 0;
+          return;
+        }
+
+        if (autoRestartAttemptRef.current >= AUTO_RESTART_MAX_ATTEMPTS) {
+          autoRestartTimerRef.current = null;
+          autoRestartAttemptRef.current = 0;
+          return;
+        }
+
+        autoRestartAttemptRef.current += 1;
+        autoRestartTimerRef.current = setTimeout(
+          attemptAutoRestart,
+          AUTO_RESTART_RETRY_MS,
+        );
+      });
+    };
+
+    autoRestartTimerRef.current = setTimeout(
+      attemptAutoRestart,
+      AUTO_RESTART_DELAY_MS,
+    );
   }, [clearAutoRestart]);
 
   const processRecordedSegment = useCallback(
@@ -377,15 +429,18 @@ export default function InterpreterLiveRoom() {
           activeSession,
           fallbackSpeaker,
         );
+        const resolvedSpeaker = shouldAutoDetectSpeaker
+          ? detectedSpeaker
+          : fallbackSpeaker;
         const { sourceLanguage, targetLanguage } = languagesForSpeaker(
           activeSession,
-          detectedSpeaker,
+          resolvedSpeaker,
         );
-        setSpeaker(detectedSpeaker);
+        setActiveSpeaker(resolvedSpeaker);
 
         const createdTurn = addTurn(activeSession.sessionId, {
-          speaker: detectedSpeaker,
-          speakerLabel: speakerLabelFor(detectedSpeaker, t),
+          speaker: resolvedSpeaker,
+          speakerLabel: speakerLabelFor(resolvedSpeaker, t),
           sourceLanguage,
           targetLanguage,
           originalText: originalTranscript,
@@ -416,7 +471,7 @@ export default function InterpreterLiveRoom() {
             text: originalTranscript,
             sourceLanguage,
             targetLanguage,
-            speaker: detectedSpeaker,
+            speaker: resolvedSpeaker,
           },
           { signal: translateController.signal },
         );
@@ -452,6 +507,7 @@ export default function InterpreterLiveRoom() {
           text: translationResult.translatedText,
           language: targetLanguage,
           target: "translation",
+          useStreamEndpoint: true,
           awaitEnd: true,
           voiceProfile: INTERPRETER_VOICE_PROFILE,
           voiceSpeed,
@@ -482,10 +538,10 @@ export default function InterpreterLiveRoom() {
           status: SESSION_STATUS_ACTIVE,
         });
         reloadSession();
-        setSpeaker(oppositeSpeaker(detectedSpeaker));
+        setActiveSpeaker(oppositeSpeaker(resolvedSpeaker));
         setPhase(LIVE_PHASE.LISTENING);
         announce(
-          detectedSpeaker === SPEAKER_PATIENT
+          resolvedSpeaker === SPEAKER_PATIENT
             ? t.liveSession.readyForDoctor
             : t.liveSession.readyForPatient,
         );
@@ -494,7 +550,7 @@ export default function InterpreterLiveRoom() {
         processingRef.current = false;
       }
     },
-    [announce, playText, reloadSession, scheduleNextListening, setPhase, showError, t, voiceSpeed],
+    [announce, playText, reloadSession, scheduleNextListening, setActiveSpeaker, setPhase, showError, t, voiceSpeed],
   );
 
   const {
@@ -521,8 +577,6 @@ export default function InterpreterLiveRoom() {
       if (
         !sessionRef.current?.sessionId ||
         processingRef.current ||
-        isSpeakLoading ||
-        isSpeakPlaying ||
         phaseRef.current === LIVE_PHASE.PAUSED ||
         phaseRef.current === LIVE_PHASE.ENDED
       ) {

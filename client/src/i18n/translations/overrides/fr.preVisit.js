@@ -192,6 +192,10 @@ export default {
     statusDraft: "Brouillon",
     statusPdfCreated: "PDF créé",
     statusCompleted: "Terminé",
+    linkCases: "Ouvrir mes parcours",
+    startNewPrep: "Démarrer une nouvelle préparation",
+    retryLoad: "Réessayer",
+    listAriaLabel: "Préparations enregistrées",
   },
   cases: {
     backPracticeHub: "Retour à Mon cabinet",

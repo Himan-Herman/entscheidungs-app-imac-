@@ -195,18 +195,44 @@ export function useInterpreterTtsPlayback(opts = {}) {
         return { ok: false, code: "rate_limited" };
       }
 
-      const fetcher =
-        useStream && streamSpeakEnabled ? speakStreamText : speakText;
-
-      const result = await fetcher(
-        {
-          text,
-          language,
-          voicePreference: activeVoiceProfile,
-          voiceSpeed: activeVoiceSpeed,
-        },
-        { signal },
-      );
+      let result;
+      if (useStream && streamSpeakEnabled) {
+        result = await speakStreamText(
+          {
+            text,
+            language,
+            voicePreference: activeVoiceProfile,
+            voiceSpeed: activeVoiceSpeed,
+          },
+          { signal },
+        );
+        if (
+          !result.ok &&
+          result.code !== "cancelled" &&
+          result.code !== "network" &&
+          result.code !== "rate_limited"
+        ) {
+          result = await speakText(
+            {
+              text,
+              language,
+              voicePreference: activeVoiceProfile,
+              voiceSpeed: activeVoiceSpeed,
+            },
+            { signal },
+          );
+        }
+      } else {
+        result = await speakText(
+          {
+            text,
+            language,
+            voicePreference: activeVoiceProfile,
+            voiceSpeed: activeVoiceSpeed,
+          },
+          { signal },
+        );
+      }
 
       if (!result.ok || !result.blob) {
         return result;
@@ -257,7 +283,7 @@ export function useInterpreterTtsPlayback(opts = {}) {
         return { ok: false, code: "busy" };
       }
 
-      const useStream = useStreamEndpoint && streamSpeakEnabled && target === "preview";
+      const useStream = useStreamEndpoint && streamSpeakEnabled;
 
       stopPlayback();
       playInFlightRef.current = true;

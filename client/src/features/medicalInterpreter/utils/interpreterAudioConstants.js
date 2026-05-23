@@ -16,7 +16,7 @@ export const INTERPRETER_MIN_BLOB_BYTES = 400;
  * MediaRecorder timeslice — improves ondataavailable on iOS Safari and
  * reduces risk of empty blobs when stop() is called before a chunk flush.
  */
-export const INTERPRETER_RECORDING_TIMESLICE_MS = 500;
+export const INTERPRETER_RECORDING_TIMESLICE_MS = 250;
 
 /** Upload + Whisper processing budget (client-side abort). */
 export const INTERPRETER_TRANSCRIBE_TIMEOUT_MS = 45_000;
@@ -28,4 +28,4 @@ export const INTERPRETER_TRANSCRIBE_RETRY_DELAY_MS = 900;
 export const INTERPRETER_SILENCE_AUTO_STOP_MS = 2_000;
 
 /** Minimum voiced audio before silence auto-stop applies. */
-export const INTERPRETER_SILENCE_MIN_SPEECH_MS = 500;
+export const INTERPRETER_SILENCE_MIN_SPEECH_MS = 350;

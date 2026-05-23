@@ -182,6 +182,10 @@ export default {
     statusDraft: "Bozza",
     statusPdfCreated: "PDF creato",
     statusCompleted: "Completato",
+    linkCases: "Apri le mie cronologie",
+    startNewPrep: "Avvia nuova preparazione",
+    retryLoad: "Riprova",
+    listAriaLabel: "Preparazioni salvate",
   },
   cases: {
     backPracticeHub: "Torna al mio studio",

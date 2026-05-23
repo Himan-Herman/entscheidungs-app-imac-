@@ -3,8 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { authFetch } from "../../../api/authFetch.js";
-import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
-import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
+import {
+  formatLanguageDisplayName,
+  getPrimaryIntlLocale,
+} from "../../../i18n/intlLocale.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
 } from "../constants/questionFlow.js";
@@ -18,9 +20,7 @@ import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitAccountHistoryPage.css";
 
 function langLabel(code, uiLang) {
-  const opt = PRE_VISIT_LANGUAGE_OPTIONS.find((o) => o.id === code);
-  if (!opt) return code || "—";
-  return uiLang === "de" ? opt.labelDe : opt.labelEn;
+  return formatLanguageDisplayName(uiLang, code);
 }
 
 function previewFromAnswers(answers, maxLen = 140) {
@@ -190,6 +190,21 @@ export default function PreVisitAccountHistoryPage() {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
 
+  const focusSessionId = location.state?.focusSessionId;
+
+  useEffect(() => {
+    const id = typeof focusSessionId === "string" ? focusSessionId.trim() : "";
+    if (!id || loading || sessions.length === 0) return;
+    const el = document.getElementById(`prep-session-${id}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    el.classList.add("pre-visit-account__card-wrap--focus");
+    const tmr = window.setTimeout(() => {
+      el.classList.remove("pre-visit-account__card-wrap--focus");
+    }, 4000);
+    return () => window.clearTimeout(tmr);
+  }, [focusSessionId, loading, sessions]);
+
   function cardTitle(row) {
     return (typeof row.title === "string" && row.title.trim()) || t.defaultTitle;
   }
@@ -274,20 +289,36 @@ export default function PreVisitAccountHistoryPage() {
         ) : null}
 
         {hasAuthToken && error ? (
-          <p className="pre-visit-account__error" role="alert">
-            {error}
-          </p>
+          <div className="pre-visit-account__error-wrap" role="alert">
+            <p className="pre-visit-account__error">{error}</p>
+            <button
+              type="button"
+              className="pre-visit-account__btn pre-visit-account__btn--secondary"
+              onClick={() => void fetchSessions()}
+            >
+              {t.retryLoad}
+            </button>
+          </div>
         ) : null}
 
         {hasAuthToken && showEmpty ? (
-          <p className="pre-visit-account__empty">{t.empty}</p>
+          <div className="pre-visit-account__empty">
+            <p>{t.empty}</p>
+            <Link className="pre-visit-account__btn pre-visit-account__btn--primary" to="/pre-visit">
+              {t.startNewPrep}
+            </Link>
+          </div>
         ) : null}
 
         {hasAuthToken && !loading && !error && sessions.length > 0 ? (
           <>
-            <ul className="pre-visit-account__list">
+            <ul className="pre-visit-account__list" aria-label={t.listAriaLabel}>
               {sessions.map((row) => (
-                <li key={row.id} className="pre-visit-account__card-wrap">
+                <li
+                  key={row.id}
+                  id={row.id ? `prep-session-${row.id}` : undefined}
+                  className="pre-visit-account__card-wrap"
+                >
                   <article className="pre-visit-account__card">
                     <h3 className="pre-visit-account__card-title">
                       {cardTitle(row)}
@@ -328,6 +359,7 @@ export default function PreVisitAccountHistoryPage() {
                         type="button"
                         className="pre-visit-account__btn pre-visit-account__btn--primary"
                         onClick={() => handleOpen(row)}
+                        aria-label={`${t.open}: ${cardTitle(row)}`}
                       >
                         {t.open}
                       </button>
@@ -336,6 +368,7 @@ export default function PreVisitAccountHistoryPage() {
                         className="pre-visit-account__btn pre-visit-account__btn--danger"
                         disabled={deleteBusyId === row.id || deleteAllBusy}
                         onClick={() => handleDeleteOne(row.id)}
+                        aria-label={`${t.deleteOne}: ${cardTitle(row)}`}
                       >
                         {t.deleteOne}
                       </button>

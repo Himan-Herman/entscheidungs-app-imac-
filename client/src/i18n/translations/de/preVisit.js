@@ -478,6 +478,9 @@ export default {
       "Die Liste konnte gerade nicht geladen werden. Bitte versuchen Sie es später erneut.",
     empty:
       "Es sind noch keine Vorbereitungen in Ihrem Konto gespeichert.",
+    startNewPrep: "Neue Vorbereitung starten",
+    retryLoad: "Erneut laden",
+    listAriaLabel: "Gespeicherte Vorbereitungen",
     patientLang: "Patientensprache",
     doctorLang: "Arztsprache",
     created: "Erstellt",
