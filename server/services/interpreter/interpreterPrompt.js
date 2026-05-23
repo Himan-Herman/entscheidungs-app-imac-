@@ -1,5 +1,6 @@
 import { MEDICAL_INTERPRETER_COMMUNICATION_STYLE } from "../../config/aiSafetyPolicy.js";
 import { formatAnchorsForPrompt } from "./interpreterTerminology.js";
+import { describeInterpreterLanguage } from "./interpreterLanguageLabels.js";
 
 /**
  * Short system prompt — single confirmed turn only (no session history).
@@ -30,9 +31,11 @@ Translation rules (strict):
 export function buildInterpreterTranslateUserMessage(params) {
   const anchorBlock = formatAnchorsForPrompt(params.anchors || []);
   const anchorSection = anchorBlock ? `\n\n${anchorBlock}\n` : "";
+  const sourceLanguage = describeInterpreterLanguage(params.sourceLanguage);
+  const targetLanguage = describeInterpreterLanguage(params.targetLanguage);
 
-  return `Translate this ${params.speaker} utterance from ${params.sourceLanguage} to ${params.targetLanguage}.
-Return only the translation.${anchorSection}
+  return `Translate this ${params.speaker} utterance from ${sourceLanguage} to ${targetLanguage}.
+Return only the translation in ${targetLanguage}.${anchorSection}
 
 Utterance:
 """

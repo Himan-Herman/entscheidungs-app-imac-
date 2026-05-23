@@ -53,7 +53,7 @@ export async function translateInterpreterTurn(input) {
       model: getInterpreterOpenAiModel(),
       messages,
       max_tokens: 450,
-      temperature: 0.15,
+      temperature: 0,
     });
 
     const raw = completion.choices[0]?.message?.content?.trim() || "";

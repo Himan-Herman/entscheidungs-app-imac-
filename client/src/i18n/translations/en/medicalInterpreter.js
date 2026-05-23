@@ -466,6 +466,7 @@ export default {
     statusEnded: "Conversation ended",
     statusError: "An error needs your attention",
     autoModeBadge: "Auto",
+    autoDetectSpeakerLabel: "Language auto-detect",
     speakerHeading: "Who is speaking now?",
     autoModeHint:
       "After each translation, the other side continues automatically.",

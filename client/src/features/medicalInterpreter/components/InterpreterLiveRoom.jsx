@@ -31,6 +31,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { detectLikelySilentBlob } from "../utils/interpreterAudioLevel.js";
 import { detectSpeakerFromLanguage } from "../utils/detectSpeakerFromLanguage.js";
+import { playInterpreterTurnSignal } from "../utils/interpreterTurnSignal.js";
 import { languagesForSpeaker } from "../utils/liveLanguages.js";
 import { downloadInterpreterSessionPdf } from "../pdf/generateInterpreterSessionPdf.js";
 import { getSessionDisplayTitle } from "../utils/sessionDisplayTitle.js";
@@ -302,9 +303,11 @@ export default function InterpreterLiveRoom() {
       .replace("{{target}}", target);
   }, [session, speaker, t.room.speakerDirection, uiLanguage]);
 
+  const turns = session?.turns ?? [];
+  const hasTurns = turns.length > 0;
   const activeSpeakerLabel = useMemo(
-    () => speakerLabelFor(speaker, t),
-    [speaker, t],
+    () => (hasTurns ? speakerLabelFor(speaker, t) : t.liveSession.autoDetectSpeakerLabel),
+    [hasTurns, speaker, t],
   );
 
   const handlePhaseFromSilence = useCallback(
@@ -426,6 +429,7 @@ export default function InterpreterLiveRoom() {
 
         const detectedSpeaker = detectSpeakerFromLanguage(
           transcriptResult.language,
+          originalTranscript,
           activeSession,
           fallbackSpeaker,
         );
@@ -539,6 +543,7 @@ export default function InterpreterLiveRoom() {
         });
         reloadSession();
         setActiveSpeaker(oppositeSpeaker(resolvedSpeaker));
+        await playInterpreterTurnSignal();
         setPhase(LIVE_PHASE.LISTENING);
         announce(
           resolvedSpeaker === SPEAKER_PATIENT
@@ -680,8 +685,6 @@ export default function InterpreterLiveRoom() {
     };
   }, [cancelRecording, stopRuntime]);
 
-  const turns = session?.turns ?? [];
-  const hasTurns = turns.length > 0;
   return (
     <main
       className="medical-interpreter-page medical-interpreter-page--live interp-root"

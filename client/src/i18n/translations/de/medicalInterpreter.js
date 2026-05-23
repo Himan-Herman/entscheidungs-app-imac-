@@ -481,6 +481,7 @@ export default {
     statusEnded: "Gespräch beendet",
     statusError: "Ein Fehler braucht Ihre Aufmerksamkeit",
     autoModeBadge: "Auto",
+    autoDetectSpeakerLabel: "Sprache wird erkannt",
     speakerHeading: "Wer spricht jetzt?",
     autoModeHint:
       "Nach jeder Übersetzung ist automatisch die andere Seite dran.",
