@@ -76,6 +76,11 @@ export default function PatientPracticeDocumentDetailPage() {
         setError(t.featureDisabled);
         return;
       }
+      if (res.status === 404 && data.error === "document_not_found") {
+        setDoc(null);
+        setError(t.documentNotFound);
+        return;
+      }
       if (res.status === 410 && data.error === "document_unavailable") {
         setDoc(null);
         setUnavailable(true);
@@ -90,15 +95,15 @@ export default function PatientPracticeDocumentDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [documentId, t.featureDisabled, t.loadError]);
+  }, [documentId, t.documentNotFound, t.featureDisabled, t.loadError]);
+
+  useEffect(() => {
+    document.title = doc?.title ? `${doc.title} – MedScoutX` : t.detailPageTitle;
+  }, [doc?.title, t.detailPageTitle]);
 
   useEffect(() => {
     load();
   }, [load]);
-
-  useEffect(() => {
-    if (doc?.title) document.title = `${doc.title} – MedScoutX`;
-  }, [doc?.title]);
 
   async function handleQuestion() {
     setBusy(true);
@@ -153,7 +158,7 @@ export default function PatientPracticeDocumentDetailPage() {
   }
 
   return (
-    <div className="patient-inbox">
+    <div className="patient-inbox practice-documents-detail">
       <Link className="patient-inbox__back" to="/patient/practice-documents">
         {t.backList}
       </Link>
@@ -172,7 +177,13 @@ export default function PatientPracticeDocumentDetailPage() {
         <p className="patient-inbox__safety">{t.safetyNote}</p>
       </header>
 
-      {loading ? <p className="patient-inbox__muted">{t.loading}</p> : null}
+      {loading ? (
+        <>
+          <p className="patient-inbox__muted" aria-live="polite">
+            {t.loading}
+          </p>
+        </>
+      ) : null}
       {unavailable ? (
         <p className="patient-inbox__error" role="alert">
           {t.notAvailable}
@@ -198,14 +209,14 @@ export default function PatientPracticeDocumentDetailPage() {
         <div className="patient-inbox__actions">
           <button
             type="button"
-            className="patient-threads__btn patient-threads__btn--secondary"
+            className="patient-inbox__btn patient-inbox__btn--secondary"
             onClick={handleQuestion}
             disabled={busy}
           >
             {t.askQuestion}
           </button>
           <Link
-            className="patient-threads__btn patient-threads__btn--secondary"
+            className="patient-inbox__btn patient-inbox__btn--secondary"
             to="/patient/messages"
             style={{ textAlign: "center", textDecoration: "none" }}
           >
@@ -228,16 +239,19 @@ export default function PatientPracticeDocumentDetailPage() {
             {t.filesHeading}
           </h2>
           <ul className="practice-documents__file-list">
-            {(doc.files || []).map((file) => (
+            {(doc.files || []).length === 0 ? (
+              <li className="patient-inbox__muted">{t.noFiles}</li>
+            ) : (
+              (doc.files || []).map((file) => (
               <li key={file.id}>
-                <span>
+                <span className="practice-documents__file-name">
                   {file.originalFileName} ·{" "}
                   {t.fileSize.replace("{size}", formatBytes(file.sizeBytes))}
                 </span>
                 <div className="practice-documents__file-actions">
                   <button
                     type="button"
-                    className="patient-threads__btn patient-threads__btn--secondary"
+                    className="patient-inbox__btn patient-inbox__btn--secondary"
                     onClick={() => void handleView(file)}
                     aria-label={`${t.viewDocument} ${file.originalFileName}`}
                   >
@@ -245,7 +259,7 @@ export default function PatientPracticeDocumentDetailPage() {
                   </button>
                   <button
                     type="button"
-                    className="patient-threads__btn patient-threads__btn--primary"
+                    className="patient-inbox__btn patient-inbox__btn--primary"
                     onClick={() => void handleDownload(file)}
                     aria-label={`${t.download} ${file.originalFileName}`}
                   >
@@ -253,7 +267,8 @@ export default function PatientPracticeDocumentDetailPage() {
                   </button>
                 </div>
               </li>
-            ))}
+              ))
+            )}
           </ul>
         </section>
       ) : null}

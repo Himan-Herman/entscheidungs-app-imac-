@@ -138,11 +138,25 @@ export default {
     waiting: "Warten auf die erste Äußerung …",
     patientLabel: "Patient:in",
     clinicianLabel: "Behandlungsteam / Arzt",
-    translationPending: "Übersetzung wird erstellt …",
+    translationPending: "…",
     endHint:
       "„Gespräch beenden“ beendet die automatische Übersetzung. „PDF herunterladen“ speichert den zweisprachigen Verlauf auf Ihrem Gerät.",
     endingSession: "Gespräch wird beendet …",
     preparingPdf: "PDF wird vorbereitet …",
+  },
+
+  chat: {
+    liveTitle: "Live-Übersetzung",
+    empty: "Sprechen Sie — die Übersetzung erscheint automatisch.",
+    listening: "Hört zu",
+    transcribing: "Erkennt Sprache",
+    translating: "Übersetzt",
+    speaking: "Spricht",
+    ready: "Bereit",
+    translation: "Übersetzung",
+    end: "Beenden",
+    pdf: "PDF",
+    delete: "Löschen",
   },
 
   room: {

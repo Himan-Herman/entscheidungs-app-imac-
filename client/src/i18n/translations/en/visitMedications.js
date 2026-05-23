@@ -5,12 +5,15 @@ export default {
     "View medication and intake instructions documented by your practice after a visit. This is not an automated treatment recommendation.",
   patientDisclaimer:
     "This information comes from your practice and does not replace medical counselling. Contact your practice if anything is unclear.",
-  backPatientHub: "Back to patient workspace",
+  backPatientHub: "Back to My practice",
   backList: "Back to overview",
+  loading: "Loading…",
+  emptySession: "No medications have been published for this visit yet.",
   emptyTitle: "No entries yet",
   emptyHint:
     "When your practice publishes medication and intake instructions after a visit, they will appear here.",
   loadError: "Could not load entries.",
+  notFound: "This visit was not found or is no longer available.",
   newBadge: "New",
   entryCount: "{count} entries",
   openSession: "View details",

@@ -5,12 +5,15 @@ export default {
     "Hier sehen Sie von Ihrer Praxis dokumentierte Medikamente und Einnahmehinweise nach einem Besuch — getrennt von „Medikationspläne“ (eigene Einträge). Keine automatische Therapieempfehlung.",
   patientDisclaimer:
     "Diese Angaben stammen von Ihrer Praxis und ersetzen nicht die ärztliche Aufklärung. Bei Unsicherheit wenden Sie sich an Ihre Praxis.",
-  backPatientHub: "Zurück zum Patientenbereich",
+  backPatientHub: "Zurück zu Meine Praxis",
   backList: "Zurück zur Übersicht",
+  loading: "Wird geladen …",
+  emptySession: "Für diesen Besuch wurden noch keine Medikamente freigegeben.",
   emptyTitle: "Noch keine Einträge",
   emptyHint:
     "Sobald Ihre Praxis nach einem Besuch Medikamente und Einnahmehinweise freigibt, erscheinen sie hier.",
   loadError: "Die Einträge konnten nicht geladen werden.",
+  notFound: "Dieser Besuch wurde nicht gefunden oder ist nicht mehr verfügbar.",
   newBadge: "Neu",
   entryCount: "{count} Einträge",
   openSession: "Details anzeigen",

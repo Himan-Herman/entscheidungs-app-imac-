@@ -146,6 +146,8 @@
   margin: 0 0 0.65rem;
   font-size: 1.08rem;
   color: #0f172a;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .vm-card__dl {
@@ -169,6 +171,13 @@
 .vm-card__row dd {
   margin: 0;
   color: #0f172a;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.vm-session-card__top strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .vm-editor {
@@ -378,9 +387,23 @@
 
 :root[data-theme="dark"] .vm-page__sub,
 :root[data-theme="dark"] .vm-card__row dd,
+:root[data-theme="dark"] .vm-card__row dt,
+:root[data-theme="dark"] .vm-session-card__meta,
+:root[data-theme="dark"] .vm-field span,
 :root[data-theme="dark"] .vm-field input,
 :root[data-theme="dark"] .vm-field textarea {
   color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .vm-empty {
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .vm-alert--error {
+  background: rgba(127, 29, 29, 0.35);
+  color: #fecaca;
+  border-color: rgba(248, 113, 113, 0.45);
 }
 
 :root[data-theme="dark"] .vm-page__disclaimer {

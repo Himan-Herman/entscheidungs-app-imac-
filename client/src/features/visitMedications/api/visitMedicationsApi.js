@@ -27,7 +27,11 @@ export async function savePracticeMedications(sessionId, practiceId, payload) {
 export async function fetchPatientMedicationSessions() {
   const res = await authFetch("/api/previsit/visit-medications");
   const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.ok) throw new Error(data.error || "load_failed");
+  if (!res.ok || !data.ok) {
+    const err = new Error(data.error || "load_failed");
+    err.code = data.error;
+    throw err;
+  }
   return data.sessions || [];
 }
 
@@ -37,6 +41,10 @@ export async function fetchPatientSessionMedications(sessionId, { markViewed = f
     `/api/previsit/visit-medications/session/${encodeURIComponent(sessionId)}${q}`,
   );
   const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.ok) throw new Error(data.error || "load_failed");
+  if (!res.ok || !data.ok) {
+    const err = new Error(data.error || "load_failed");
+    err.code = data.error;
+    throw err;
+  }
   return data;
 }

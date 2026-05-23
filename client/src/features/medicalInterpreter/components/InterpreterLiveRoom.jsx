@@ -70,6 +70,7 @@ import { isNearRealtimeTranslationClientEnabled } from "../config/isNearRealtime
 import { isStreamingTtsClientEnabled } from "../config/isStreamingTtsEnabled.js";
 import InterpreterPlaybackStatus from "./InterpreterPlaybackStatus.jsx";
 import InterpreterConversationFeed from "./InterpreterConversationFeed.jsx";
+import InterpreterLiveChat from "./InterpreterLiveChat.jsx";
 import { detectSpeakerFromLanguage } from "../utils/detectSpeakerFromLanguage.js";
 import { downloadInterpreterSessionPdf } from "../pdf/generateInterpreterSessionPdf.js";
 import { getSessionDisplayTitle } from "../utils/sessionDisplayTitle.js";
@@ -265,7 +266,7 @@ export default function InterpreterLiveRoom() {
       turnSpeaker,
       priorConfidence,
     }) => {
-      if (translateInFlightRef.current || transcribeInFlightRef.current) return;
+      if (translateInFlightRef.current) return;
       const trimmed = String(text || "").trim();
       if (!trimmed || !sessionId || !turnId) return;
 
@@ -428,6 +429,7 @@ export default function InterpreterLiveRoom() {
       mountedRef,
       playSpeakText,
       serverStatus.ttsEnabled,
+      syncSessionToCloudQuiet,
     ],
   );
 
@@ -538,8 +540,9 @@ export default function InterpreterLiveRoom() {
             });
           }
           reloadSession();
-          announceStatus(t.room.statusTranslating);
-          void runTranslateDraft({
+          transcribeInFlightRef.current = false;
+          if (mountedRef.current) setIsTranscribing(false);
+          await runTranslateDraft({
             sessionId: current.sessionId,
             turnId: turn.turnId,
             text: transcript,
@@ -879,6 +882,24 @@ export default function InterpreterLiveRoom() {
     isSpeakLoading ||
     isSpeakPlaying;
 
+  const liveChatPhase = useMemo(() => {
+    if (isSpeakPlaying || isSpeakLoading) return "speaking";
+    if (isTranslating) return "translating";
+    if (isTranscribing) return "transcribing";
+    if (isRecording && !isPreparing && !isStopping) return "listening";
+    if (busy) return "busy";
+    return "ready";
+  }, [
+    isSpeakPlaying,
+    isSpeakLoading,
+    isTranslating,
+    isTranscribing,
+    isRecording,
+    isPreparing,
+    isStopping,
+    busy,
+  ]);
+
   const statusLabel = useMemo(() => {
     if (
       CONTINUOUS_CONVERSATION_MODE &&
@@ -925,6 +946,61 @@ export default function InterpreterLiveRoom() {
     isStopping,
     isTranscribing,
     isTranslating,
+  ]);
+
+  const recoveredDraftsRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!CONTINUOUS_CONVERSATION_MODE || !session || sessionEnded) return;
+    if (
+      translateInFlightRef.current ||
+      transcribeInFlightRef.current ||
+      isRecording ||
+      isPreparing ||
+      isStopping ||
+      isTranslating ||
+      isTranscribing
+    ) {
+      return;
+    }
+    const stuckDraft = [...(session.turns ?? [])]
+      .reverse()
+      .find(
+        (turn) =>
+          turn.status === TURN_STATUS_DRAFT &&
+          turn.originalText?.trim() &&
+          !turn.translatedText?.trim() &&
+          !recoveredDraftsRef.current.has(turn.turnId),
+      );
+    if (!stuckDraft) return;
+
+    recoveredDraftsRef.current.add(stuckDraft.turnId);
+    const langs =
+      stuckDraft.sourceLanguage && stuckDraft.targetLanguage
+        ? {
+            sourceLanguage: stuckDraft.sourceLanguage,
+            targetLanguage: stuckDraft.targetLanguage,
+          }
+        : languagesForSpeaker(session, stuckDraft.speaker);
+
+    void runTranslateDraft({
+      sessionId: session.sessionId,
+      turnId: stuckDraft.turnId,
+      text: stuckDraft.originalText,
+      sourceLanguage: langs.sourceLanguage,
+      targetLanguage: langs.targetLanguage,
+      turnSpeaker: stuckDraft.speaker,
+      priorConfidence: stuckDraft.confidence,
+    });
+  }, [
+    session,
+    sessionEnded,
+    isRecording,
+    isPreparing,
+    isStopping,
+    isTranslating,
+    isTranscribing,
+    runTranslateDraft,
   ]);
 
   useEffect(() => () => clearAutoListenTimer(), [clearAutoListenTimer]);
@@ -1393,7 +1469,7 @@ export default function InterpreterLiveRoom() {
     stopAllPlayback();
     const sessionId = session.sessionId;
     endSession(sessionId, t, uiLanguage);
-    await syncSessionToCloudQuiet(sessionId);
+    void syncSessionToCloudQuiet(sessionId);
     reloadSession();
     sessionActionInFlightRef.current = false;
     if (mountedRef.current) setSessionActionBusy(false);
@@ -1520,6 +1596,78 @@ export default function InterpreterLiveRoom() {
   ]
     .filter(Boolean)
     .join(" ");
+
+  const sessionDialogs = (
+    <>
+      <InterpreterConfirmDialog
+        open={leaveDialogOpen}
+        title={t.confirm.leaveTitle}
+        body={t.confirm.leaveBody}
+        confirmLabel={t.confirm.discardDraft}
+        cancelLabel={t.confirm.keepEditing}
+        onConfirm={confirmLeave}
+        onCancel={cancelLeave}
+        danger
+      />
+
+      <InterpreterConfirmDialog
+        open={confirmAction === "delete"}
+        title={t.confirm.deleteTitle}
+        body={t.confirm.deleteBody}
+        confirmLabel={t.confirm.confirmDelete}
+        cancelLabel={t.confirm.cancel}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmAction(null)}
+        danger
+      />
+
+      <InterpreterConfirmDialog
+        open={confirmAction === "end"}
+        title={t.confirm.endTitle}
+        body={t.confirm.endWithDraftBody}
+        confirmLabel={t.confirm.endAnyway}
+        cancelLabel={t.confirm.keepEditing}
+        onConfirm={() => {
+          setConfirmAction(null);
+          if (!sessionActionInFlightRef.current) void doEndSession();
+        }}
+        onCancel={() => setConfirmAction(null)}
+      />
+    </>
+  );
+
+  if (CONTINUOUS_CONVERSATION_MODE) {
+    return (
+      <>
+        {connectivity.showOfflineBanner ? (
+          <InterpreterConnectivityBanner
+            variant="offline"
+            message={t.reliability.offlineBanner}
+          />
+        ) : null}
+        <InterpreterLiveChat
+          session={session}
+          turns={session.turns}
+          phase={liveChatPhase}
+          errorMessage={errorMessage}
+          micDenied={recorderError === "mic_denied"}
+          onRetryMic={handleRetryMic}
+          onBack={handleBackNavigation}
+          onEnd={handleEndSession}
+          onDownloadPdf={() => void handleDownloadPdf()}
+          onDelete={handleDeleteSession}
+          endDisabled={busy || sessionActionBusy}
+          pdfDisabled={
+            busy || sessionActionBusy || isExporting || !(session.turns?.length ?? 0)
+          }
+          deleteDisabled={busy || sessionActionBusy}
+          isExporting={isExporting}
+          labels={t}
+        />
+        {sessionDialogs}
+      </>
+    );
+  }
 
   return (
     <main
@@ -1779,40 +1927,7 @@ export default function InterpreterLiveRoom() {
         </p>
       ) : null}
 
-      <InterpreterConfirmDialog
-        open={leaveDialogOpen}
-        title={t.confirm.leaveTitle}
-        body={t.confirm.leaveBody}
-        confirmLabel={t.confirm.discardDraft}
-        cancelLabel={t.confirm.keepEditing}
-        onConfirm={confirmLeave}
-        onCancel={cancelLeave}
-        danger
-      />
-
-      <InterpreterConfirmDialog
-        open={confirmAction === "delete"}
-        title={t.confirm.deleteTitle}
-        body={t.confirm.deleteBody}
-        confirmLabel={t.confirm.confirmDelete}
-        cancelLabel={t.confirm.cancel}
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setConfirmAction(null)}
-        danger
-      />
-
-      <InterpreterConfirmDialog
-        open={confirmAction === "end"}
-        title={t.confirm.endTitle}
-        body={t.confirm.endWithDraftBody}
-        confirmLabel={t.confirm.endAnyway}
-        cancelLabel={t.confirm.keepEditing}
-        onConfirm={() => {
-          setConfirmAction(null);
-          if (!sessionActionInFlightRef.current) void doEndSession();
-        }}
-        onCancel={() => setConfirmAction(null)}
-      />
+      {sessionDialogs}
     </main>
   );
 }

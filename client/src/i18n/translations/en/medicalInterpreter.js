@@ -136,11 +136,25 @@ export default {
     waiting: "Waiting for the first utterance …",
     patientLabel: "Patient",
     clinicianLabel: "Care team / clinician",
-    translationPending: "Translation in progress …",
+    translationPending: "…",
     endHint:
       "“End conversation” stops automatic translation. “Download PDF” saves the bilingual log on your device.",
     endingSession: "Ending conversation …",
     preparingPdf: "Preparing PDF …",
+  },
+
+  chat: {
+    liveTitle: "Live translation",
+    empty: "Start speaking — translation appears automatically.",
+    listening: "Listening",
+    transcribing: "Recognizing",
+    translating: "Translating",
+    speaking: "Speaking",
+    ready: "Ready",
+    translation: "Translation",
+    end: "End",
+    pdf: "PDF",
+    delete: "Delete",
   },
 
   room: {

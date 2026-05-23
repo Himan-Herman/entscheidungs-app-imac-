@@ -4,7 +4,7 @@ import { ArrowLeft, Pill } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import VisitMedicationCard from "../components/VisitMedicationCard.jsx";
-import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import {
   fetchPatientMedicationSessions,
   fetchPatientSessionMedications,
@@ -52,11 +52,12 @@ export default function PatientVisitMedicationsPage() {
     async (id) => {
       setLoading(true);
       setError("");
+      setDetail(null);
       try {
         const data = await fetchPatientSessionMedications(id, { markViewed: true });
         setDetail(data);
-      } catch {
-        setError(t.loadError);
+      } catch (err) {
+        setError(err?.code === "session_not_found" ? t.notFound : t.loadError);
         setDetail(null);
       } finally {
         setLoading(false);
@@ -73,14 +74,15 @@ export default function PatientVisitMedicationsPage() {
     if (sessionId) {
       void loadDetail(sessionId);
     } else {
+      setDetail(null);
       void loadList();
     }
   }, [sessionId, loadDetail, loadList]);
 
-  if (sessionId && detail) {
+  if (sessionId) {
     return (
       <div className="vm-page">
-        <nav className="vm-page__nav">
+        <nav className="vm-page__nav" aria-label={t.backList}>
           <Link to="/pre-visit/medications" className="vm-page__back">
             <ArrowLeft size={18} aria-hidden />
             {t.backList}
@@ -89,28 +91,53 @@ export default function PatientVisitMedicationsPage() {
         <header className="vm-page__hero">
           <Pill size={28} aria-hidden className="vm-page__hero-icon" />
           <h1 className="vm-page__title">
-            {detail.session?.practiceName || t.patientHeading}
+            {detail?.session?.practiceName || t.patientHeading}
           </h1>
-          <p className="vm-page__sub">
-            {t.visitDate}: {fmt(detail.session?.createdAt, language)}
-          </p>
+          {detail?.session?.createdAt ? (
+            <p className="vm-page__sub">
+              {t.visitDate}: {fmt(detail.session.createdAt, language)}
+            </p>
+          ) : null}
         </header>
         <p className="vm-page__disclaimer" role="note">
           {t.patientDisclaimer}
         </p>
-        <div className="vm-page__list">
-          {detail.entries?.map((entry) => (
-            <VisitMedicationCard key={entry.id} entry={entry} t={t} />
-          ))}
-        </div>
+
+        {error ? (
+          <p className="vm-alert vm-alert--error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        {loading ? (
+          <p className="vm-status" role="status" aria-live="polite">
+            {t.loading}
+          </p>
+        ) : null}
+
+        {!loading && !error && detail?.entries?.length ? (
+          <div className="vm-page__list" aria-label={t.patientHeading}>
+            {detail.entries.map((entry) => (
+              <VisitMedicationCard key={entry.id} entry={entry} t={t} />
+            ))}
+          </div>
+        ) : null}
+
+        {!loading && !error && detail && !(detail.entries?.length > 0) ? (
+          <section className="vm-empty" aria-labelledby="vm-session-empty-title">
+            <h2 id="vm-session-empty-title" className="vm-empty__title">
+              {t.emptySession}
+            </h2>
+          </section>
+        ) : null}
       </div>
     );
   }
 
   return (
     <div className="vm-page">
-      <nav className="vm-page__nav">
-        <Link to="/patient" className="vm-page__back">
+      <nav className="vm-page__nav" aria-label={t.backPatientHub}>
+        <Link to="/patient/practice" className="vm-page__back">
           <ArrowLeft size={18} aria-hidden />
           {t.backPatientHub}
         </Link>
@@ -131,8 +158,8 @@ export default function PatientVisitMedicationsPage() {
       ) : null}
 
       {loading ? (
-        <p className="vm-status" role="status">
-          …
+        <p className="vm-status" role="status" aria-live="polite">
+          {t.loading}
         </p>
       ) : sessions.length === 0 ? (
         <section className="vm-empty" aria-labelledby="vm-empty-title">
@@ -147,12 +174,13 @@ export default function PatientVisitMedicationsPage() {
           </p>
         </section>
       ) : (
-        <ul className="vm-session-list">
+        <ul className="vm-session-list" aria-label={t.patientHeading}>
           {sessions.map((s) => (
             <li key={s.sessionId}>
               <Link
                 to={`/pre-visit/medications/${encodeURIComponent(s.sessionId)}`}
                 className="vm-session-card"
+                aria-label={`${s.practiceName || t.practiceLabel}, ${t.visitDate} ${fmt(s.sessionCreatedAt || s.publishedAt, language)}, ${t.entryCount.replace("{count}", String(s.entryCount))}`}
               >
                 <div className="vm-session-card__top">
                   <strong>{s.practiceName || t.practiceLabel}</strong>

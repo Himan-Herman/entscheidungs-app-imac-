@@ -5,6 +5,51 @@
   margin-top: 1rem;
 }
 
+/* Patient list links (used on /patient/practice-documents) */
+.practice-documents-list .patient-inbox__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.practice-documents-list .patient-inbox__link:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.practice-documents-list .patient-inbox__item-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0f172a;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:root[data-theme="dark"] .practice-documents-list .patient-inbox__item-title {
+  color: #f1f5f9;
+}
+
+.practice-documents-list .patient-inbox__item-meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  overflow-wrap: anywhere;
+}
+
+:root[data-theme="dark"] .practice-documents-list .patient-inbox__item-meta {
+  color: #94a3b8;
+}
+
+.practice-documents-list .patient-inbox__item-action {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0e7490;
+}
+
 .practice-documents__file-list {
   list-style: none;
   padding: 0;
@@ -12,8 +57,19 @@
 }
 
 .practice-documents__file-list li {
-  padding: 0.35rem 0;
+  padding: 0.75rem 0;
   font-size: 0.9rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="dark"] .practice-documents__file-list li {
+  border-bottom-color: rgba(148, 163, 184, 0.15);
+}
+
+.practice-documents__file-name {
+  display: block;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .practice-documents__file-actions {
@@ -23,14 +79,18 @@
   margin-top: 0.5rem;
 }
 
-.practice-documents__file-actions .patient-threads__btn {
+.practice-documents__file-actions .patient-inbox__btn {
   min-height: 2.75rem;
-  min-width: 2.75rem;
 }
 
-.practice-documents__file-actions .patient-threads__btn:focus-visible {
-  outline: 2px solid var(--focus, #0969da);
+.practice-documents__file-actions .patient-inbox__btn:focus-visible {
+  outline: 2px solid #0e7490;
   outline-offset: 2px;
+}
+
+.practice-documents-detail .patient-inbox__title {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .practice-documents__upload-row {
@@ -110,4 +170,16 @@
   font-size: 0.95rem;
   margin: 0.5rem 0 0;
   overflow-x: auto;
+}
+
+:root[data-theme="dark"] .practice-documents__ai-preview {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .practice-documents__dialog {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #f1f5f9;
 }

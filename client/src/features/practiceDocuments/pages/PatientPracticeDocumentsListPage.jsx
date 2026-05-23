@@ -6,6 +6,7 @@ import { fetchPatientPracticeDocuments } from "../api/patientPracticeDocumentsAp
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import { groupByPracticeBranding, practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
+import "../styles/PracticeDocuments.css";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
 function fmt(iso, lang) {
@@ -80,8 +81,8 @@ export default function PatientPracticeDocumentsListPage() {
   );
 
   return (
-    <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient">
+    <div className="patient-inbox practice-documents-list">
+      <Link className="patient-inbox__back" to="/patient/practice">
         {t.backHub}
       </Link>
       <header className="patient-inbox__header">
@@ -119,6 +120,7 @@ export default function PatientPracticeDocumentsListPage() {
                 <Link
                   className="patient-inbox__link"
                   to={`/patient/practice-documents/${doc.id}`}
+                  aria-label={`${t.openDocument}: ${doc.title}`}
                 >
                   <span className="patient-inbox__item-title">{doc.title}</span>
                   <span className="patient-inbox__item-meta">
