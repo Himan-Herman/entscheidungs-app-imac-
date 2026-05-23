@@ -19,6 +19,9 @@ import {
   SESSION_STATUS_ENDED,
   SPEAKER_DOCTOR,
   SPEAKER_PATIENT,
+  TURN_STATUS_BLOCKED,
+  TURN_STATUS_CONFIRMED,
+  TURN_STATUS_DRAFT,
   TURN_STATUS_ERROR,
   TURN_STATUS_SPOKEN,
   TURN_STATUS_TRANSCRIBED,
@@ -153,6 +156,40 @@ function nextExpectedSpeakerFromSession(session) {
   if (lastSpeaker === SPEAKER_DOCTOR) return SPEAKER_PATIENT;
   if (lastSpeaker === SPEAKER_PATIENT) return SPEAKER_DOCTOR;
   return SPEAKER_PATIENT;
+}
+
+function turnStatusLabel(turn, labels) {
+  switch (turn?.status) {
+    case TURN_STATUS_SPOKEN:
+      return labels.liveSession.turnStatusSpoken;
+    case TURN_STATUS_TRANSLATED:
+      return labels.liveSession.turnStatusTranslated;
+    case TURN_STATUS_TRANSCRIBED:
+    case TURN_STATUS_CONFIRMED:
+      return labels.liveSession.turnStatusProcessing;
+    case TURN_STATUS_DRAFT:
+      return labels.review.turnDraft;
+    case TURN_STATUS_BLOCKED:
+      return labels.review.turnBlocked;
+    case TURN_STATUS_ERROR:
+      return labels.review.turnError;
+    default:
+      return labels.liveSession.turnStatusProcessing;
+  }
+}
+
+function turnStatusClassName(status) {
+  switch (status) {
+    case TURN_STATUS_SPOKEN:
+      return "interpreter-live-shell__turn-status--spoken";
+    case TURN_STATUS_TRANSLATED:
+      return "interpreter-live-shell__turn-status--translated";
+    case TURN_STATUS_ERROR:
+    case TURN_STATUS_BLOCKED:
+      return "interpreter-live-shell__turn-status--error";
+    default:
+      return "interpreter-live-shell__turn-status--processing";
+  }
 }
 
 export default function InterpreterLiveRoom({ sessionId = "" }) {
@@ -942,19 +979,24 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
           <strong>{t.liveSession.statusLabel}</strong> {statusText}
         </div>
         <div className="interpreter-live-shell__status-detail">
-          <span className="interpreter-live-shell__status-chip">
+          <span className="interpreter-live-shell__status-chip interpreter-live-shell__status-chip--speaker">
             {activeSpeakerLabel}
           </span>
-          <span className="interpreter-live-shell__status-chip">
+          <span className="interpreter-live-shell__status-chip interpreter-live-shell__status-chip--mode">
             {t.liveSession.autoModeBadge}
           </span>
-          <span className="interpreter-live-shell__status-chip">
+          <span className="interpreter-live-shell__status-chip interpreter-live-shell__status-chip--direction">
             {currentDirectionLabel}
           </span>
         </div>
         {draftTranscript ? (
-          <div className="interpreter-feedback" role="status" aria-live="polite">
-            {draftTranscript}
+          <div className="interpreter-live-shell__draft" role="status" aria-live="polite">
+            <p className="interpreter-live-shell__draft-label">
+              {t.liveSession.livePreviewLabel}
+            </p>
+            <p className="interpreter-live-shell__draft-text" dir="auto">
+              {draftTranscript}
+            </p>
           </div>
         ) : null}
 
@@ -1081,7 +1123,12 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
         </div>
 
         {hasTurns ? (
-          <ol className="interpreter-live-shell__turn-list">
+          <ol
+            className="interpreter-live-shell__turn-list"
+            role="log"
+            aria-live="polite"
+            aria-relevant="additions text"
+          >
             {turns.map((turn) => {
               const turnSpeakerLabel =
                 turn.speakerLabel || speakerLabelFor(turn.speaker, t);
@@ -1103,8 +1150,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
                         {timeLabel}
                       </span>
                     </div>
-                    <span className="interpreter-live-shell__turn-status">
-                      {turn.status}
+                    <span
+                      className={`interpreter-live-shell__turn-status ${turnStatusClassName(turn.status)}`}
+                    >
+                      {turnStatusLabel(turn, t)}
                     </span>
                   </div>
 

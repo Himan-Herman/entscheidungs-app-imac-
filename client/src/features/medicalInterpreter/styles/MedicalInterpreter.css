@@ -421,6 +421,46 @@
   font-weight: 600;
 }
 
+.interpreter-live-shell__status-chip--speaker {
+  border-color: color-mix(in srgb, var(--interp-color-action) 38%, transparent);
+  background: color-mix(in srgb, var(--interp-color-action) 12%, white);
+  color: var(--interp-color-action);
+}
+
+.interpreter-live-shell__status-chip--mode {
+  background: var(--ms-color-surface);
+}
+
+.interpreter-live-shell__status-chip--direction {
+  background: color-mix(in srgb, var(--interp-color-panel-muted) 60%, white);
+}
+
+.interpreter-live-shell__draft {
+  margin-bottom: var(--ms-space-4);
+  padding: var(--ms-space-3);
+  border-radius: var(--ms-radius-md);
+  border: 1px solid color-mix(in srgb, var(--interp-color-action) 28%, var(--ms-color-border));
+  background: color-mix(in srgb, var(--interp-color-action) 6%, white);
+}
+
+.interpreter-live-shell__draft-label {
+  margin: 0 0 0.35rem;
+  font-size: var(--ms-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ms-color-text-muted);
+}
+
+.interpreter-live-shell__draft-text {
+  margin: 0;
+  font-size: var(--ms-text-base);
+  line-height: 1.55;
+  color: var(--ms-color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .interpreter-live-shell__speaker-wrap {
   margin-bottom: var(--ms-space-4);
 }
@@ -562,6 +602,24 @@
   text-transform: capitalize;
 }
 
+.interpreter-live-shell__turn-status--processing {
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text-muted);
+}
+
+.interpreter-live-shell__turn-status--translated,
+.interpreter-live-shell__turn-status--spoken {
+  border-color: color-mix(in srgb, var(--interp-color-action) 28%, transparent);
+  background: color-mix(in srgb, var(--interp-color-action) 10%, white);
+  color: var(--interp-color-action);
+}
+
+.interpreter-live-shell__turn-status--error {
+  border-color: color-mix(in srgb, var(--ms-color-danger, #b42318) 35%, transparent);
+  background: color-mix(in srgb, var(--ms-color-danger, #b42318) 8%, white);
+  color: var(--ms-color-danger, #b42318);
+}
+
 .interpreter-live-shell__turn-block + .interpreter-live-shell__turn-block {
   margin-top: var(--ms-space-3);
 }
@@ -606,6 +664,10 @@
   .interpreter-live-shell__status-chip {
     width: 100%;
     justify-content: center;
+  }
+
+  .interpreter-live-shell__draft {
+    padding: var(--ms-space-3);
   }
 }
 

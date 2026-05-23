@@ -140,7 +140,7 @@ export default {
   conversation: {
     heading: "Gesprächsverlauf",
     intro:
-      "Sprechen Sie natürlich. Nach etwa 2 Sekunden Stille wird der Beitrag abgeschlossen, übersetzt, vorgelesen und danach kann die nächste Person sprechen.",
+      "Sprechen Sie natürlich. Nach einer kurzen Pause wird der Beitrag abgeschlossen, übersetzt, vorgelesen und danach kann die nächste Person sprechen.",
     listening: "Hört zu — sprechen Sie jetzt",
     waiting: "Warten auf die erste Äußerung …",
     patientLabel: "Patient:in",
@@ -289,7 +289,7 @@ export default {
     keyboardHint:
       "Tipp: Sprech-Button auswählen, dann Leertaste oder Eingabetaste.",
     liveHint:
-      "Sprechen Sie — nach etwa 2 Sekunden Pause wird automatisch erkannt, übersetzt und weiter zugehört.",
+      "Sprechen Sie — nach einer kurzen Pause wird automatisch erkannt, übersetzt und weiter zugehört.",
     disabledDraft:
       "Bitte zuerst den aktuellen Text prüfen, bevor Sie neu aufnehmen.",
     disabledBusy: "Bitte warten, bis der aktuelle Schritt abgeschlossen ist.",
@@ -424,7 +424,7 @@ export default {
     patientEmailLabel: "E-Mail",
     patientPhoneLabel: "Telefon",
     generatedNote:
-      "Erstellt von MedScoutX · nur Kommunikationsunterstützung · automatische Transkription/Übersetzung kann Fehler enthalten",
+      "Erstellt von MedScoutX · nur Kommunikationsunterstützung · automatische Transkription/Übersetzung kann Fehler enthalten · wichtige Inhalte bitte mit medizinischem Fachpersonal prüfen",
     footerPage: "Seite",
     filenamePrefix: "medscoutx-dolmetscher",
     exportLoading: "PDF wird erstellt …",
@@ -473,7 +473,7 @@ export default {
     statusLabel: "Status:",
     statusIdle: "Bereit, das Live-Gespräch zu starten",
     statusListening: "Hört gerade zu",
-    statusSilenceWaiting: "Kurze Pause erkannt — wird gleich abgeschlossen",
+    statusSilenceWaiting: "Kurze Pause erkannt",
     statusTranscribing: "Aktueller Beitrag wird transkribiert",
     statusTranslating: "Aktueller Beitrag wird übersetzt",
     statusSpeaking: "Übersetzung wird laut vorgelesen",
@@ -495,13 +495,17 @@ export default {
     speedSlow: "Langsam",
     replayButton: "Letzte Übersetzung",
     stopPlaybackButton: "Stopp",
+    livePreviewLabel: "Live-Text",
+    turnStatusProcessing: "Wird verarbeitet",
+    turnStatusTranslated: "Übersetzt",
+    turnStatusSpoken: "Vorgelesen",
     originalLabel: "Original",
     translationForDoctor: "Übersetzung für Arzt/Praxis",
     translationForPatient: "Übersetzung für Patient:in",
     pendingTranslation:
       "Die Übersetzung erscheint, sobald dieser Beitrag verarbeitet wurde.",
     noConversationYet:
-      "Noch keine dokumentierten Beiträge. Starten Sie das Gespräch und sprechen Sie dann.",
+      "Noch keine dokumentierten Beiträge. Starten Sie das Gespräch und sprechen Sie.",
     noSpeechDetected:
       "In diesem Beitrag wurde keine Sprache erkannt. Bitte erneut versuchen.",
     noTranscriptResult:
