@@ -290,6 +290,13 @@ a.pf-btn--primary svg {
 .pf-card__title {
   margin: 0;
   font-size: 1.08rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.pf-card__address span {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pf-card__specialty {
@@ -424,4 +431,24 @@ a.pf-btn--primary svg {
 :root[data-theme="dark"] .pf-btn--primary svg,
 :root[data-theme="dark"] a.pf-btn--primary svg {
   color: currentColor;
+}
+
+:root[data-theme="dark"] .pf-page__sub,
+:root[data-theme="dark"] .pf-results__sort-note,
+:root[data-theme="dark"] .pf-empty__hint {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .pf-location {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+:root[data-theme="dark"] .pf-empty {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.5);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .pf-unavailable {
+  background: color-mix(in srgb, var(--color-danger, #c62828) 12%, rgba(15, 23, 42, 0.9));
 }

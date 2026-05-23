@@ -480,16 +480,14 @@ export default {
     statusPaused: "Gespräch pausiert",
     statusEnded: "Gespräch beendet",
     statusError: "Ein Fehler braucht Ihre Aufmerksamkeit",
-    processingHint:
-      "Es wird nur übersetzt, was gesagt wurde. Es werden keine Diagnosen oder medizinischen Ratschläge ergänzt.",
-    voiceProfileBadge: "Professionelle neutrale Dolmetsch-Stimme",
+    autoModeBadge: "Automatik aktiv",
     speakerHeading: "Wer spricht jetzt?",
+    autoModeHint:
+      "Nach jeder Übersetzung hört die andere Seite automatisch weiter zu. Nur bei Bedarf manuell wechseln.",
     startButton: "Live-Gespräch starten",
     pauseButton: "Pausieren",
     resumeButton: "Fortsetzen",
     playbackHeading: "Sprachausgabe",
-    playbackNote:
-      "Im Live-Modus wird jede abgeschlossene Übersetzung automatisch vorgelesen, um das Gespräch zu unterstützen.",
     speedHeading: "Sprechtempo",
     speedNormal: "Normal",
     speedSlow: "Langsam",
@@ -507,6 +505,8 @@ export default {
     noTranscriptResult:
       "Für diesen Beitrag wurde kein Text erkannt. Bitte erneut versuchen.",
     readyForNextSpeaker: "Bereit für die nächste sprechende Person.",
+    readyForDoctor: "Behandlungsteam kann jetzt direkt sprechen.",
+    readyForPatient: "Patient:in kann jetzt direkt sprechen.",
   },
 
   confirm: {

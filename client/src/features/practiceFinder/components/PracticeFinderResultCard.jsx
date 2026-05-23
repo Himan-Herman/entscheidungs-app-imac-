@@ -5,7 +5,8 @@ function formatSpecialty(raw, fallback) {
   return raw.replace(/_/g, " ");
 }
 
-export default function PracticeFinderResultCard({ item, t }) {
+export default function PracticeFinderResultCard({ item, t, cardIndex }) {
+  const titleId = `pf-card-title-${cardIndex}`;
   const specialty = formatSpecialty(item.specialty, t.cardSpecialtyFallback);
   const ratingLabel =
     item.rating != null
@@ -17,9 +18,9 @@ export default function PracticeFinderResultCard({ item, t }) {
       : null;
 
   return (
-    <article className="pf-card" aria-labelledby={`pf-card-${item.placeId}`}>
+    <article className="pf-card" aria-labelledby={titleId}>
       <header className="pf-card__head">
-        <h3 id={`pf-card-${item.placeId}`} className="pf-card__title">
+        <h3 id={titleId} className="pf-card__title">
           {item.name}
         </h3>
         <p className="pf-card__specialty">{specialty}</p>
@@ -33,7 +34,11 @@ export default function PracticeFinderResultCard({ item, t }) {
       <dl className="pf-card__meta">
         <div className="pf-card__meta-row">
           <dt>{t.fieldDistance}</dt>
-          <dd>{t.cardDistance.replace("{value}", String(item.distanceKm))}</dd>
+          <dd>
+            {item.distanceKm != null
+              ? t.cardDistance.replace("{value}", String(item.distanceKm))
+              : "—"}
+          </dd>
         </div>
         <div className="pf-card__meta-row">
           <dt>{t.cardRating}</dt>

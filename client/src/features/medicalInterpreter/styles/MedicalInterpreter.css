@@ -425,6 +425,13 @@
   margin-bottom: var(--ms-space-4);
 }
 
+.interpreter-live-shell__speaker-hint {
+  margin: 0 0 var(--ms-space-3);
+  color: var(--ms-color-text-muted);
+  font-size: var(--ms-text-sm);
+  line-height: 1.45;
+}
+
 .interpreter-live-shell__button-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -454,17 +461,10 @@
 }
 
 .interpreter-live-shell__playback-heading {
-  margin: 0 0 var(--ms-space-2);
+  margin: 0 0 var(--ms-space-3);
   font-size: var(--ms-text-sm);
   font-weight: 700;
   color: var(--ms-color-text);
-}
-
-.interpreter-live-shell__playback-note {
-  margin: 0 0 var(--ms-space-3);
-  color: var(--ms-color-text-muted);
-  font-size: var(--ms-text-sm);
-  line-height: 1.5;
 }
 
 .interpreter-live-shell__speed-toggle {

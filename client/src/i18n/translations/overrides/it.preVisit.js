@@ -182,4 +182,15 @@ export default {
     statusPdfCreated: "PDF creato",
     statusCompleted: "Completato",
   },
+  cases: {
+    backPracticeHub: "Torna al mio studio",
+    title: "Le mie cronologie",
+    pageTitle: "MedScoutX — Le mie cronologie",
+  },
+  caseDetail: {
+    backPracticeHub: "Torna al mio studio",
+    backToList: "Tutte le cronologie",
+    notFound: "Questa cronologia non è stata trovata o non è più disponibile.",
+    unnamedSession: "Preparazione senza titolo",
+  },
 };

@@ -100,7 +100,7 @@ export default function PracticeFinderPage() {
   return (
     <div className="pf-page">
       <nav className="pf-page__nav" aria-label={t.navAria}>
-        <Link to="/patient" className="pf-page__back">
+        <Link to="/patient/practice" className="pf-page__back">
           <ArrowLeft size={18} aria-hidden />
           {t.backPatientHub}
         </Link>

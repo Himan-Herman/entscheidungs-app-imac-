@@ -465,15 +465,14 @@ export default {
     statusPaused: "Conversation paused",
     statusEnded: "Conversation ended",
     statusError: "An error needs your attention",
-    processingHint: "Translate only what was said. No diagnosis or medical advice is added.",
-    voiceProfileBadge: "Professional neutral interpreter voice",
+    autoModeBadge: "Auto switch on",
     speakerHeading: "Who is speaking now?",
+    autoModeHint:
+      "After each translation, the other side can continue automatically. Only switch manually if needed.",
     startButton: "Start live conversation",
     pauseButton: "Pause",
     resumeButton: "Resume",
     playbackHeading: "Speech playback",
-    playbackNote:
-      "In live mode, each finalized translation is spoken aloud automatically to support the conversation.",
     speedHeading: "Voice speed",
     speedNormal: "Normal",
     speedSlow: "Slow",
@@ -487,6 +486,8 @@ export default {
     noSpeechDetected: "No speech was detected in that turn. Please try again.",
     noTranscriptResult: "No transcript was returned for this turn. Please try again.",
     readyForNextSpeaker: "Ready for the next speaker.",
+    readyForDoctor: "The doctor or practice team can speak now.",
+    readyForPatient: "The patient can speak now.",
   },
 
   confirm: {

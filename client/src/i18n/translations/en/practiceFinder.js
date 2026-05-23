@@ -45,7 +45,7 @@ export default {
   errorGeocode: "Address could not be located. Check your entries.",
   errorGeocodeNotFound: "No location found for these details.",
   errorRateLimit: "Too many searches. Please wait a moment.",
-  backPatientHub: "Back to patient workspace",
+  backPatientHub: "Back to My practice",
   fieldDistance: "Distance",
   cardDistance: "{value} km away",
   cardRating: "Rating",

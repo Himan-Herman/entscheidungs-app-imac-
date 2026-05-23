@@ -37,9 +37,9 @@ export default function PracticeFinderResultsList({
       ) : null}
       <p className="pf-results__sort-note">{t.sortNotice}</p>
       <ul className="pf-results__list">
-        {results.map((item) => (
+        {results.map((item, index) => (
           <li key={item.placeId}>
-            <PracticeFinderResultCard item={item} t={t} />
+            <PracticeFinderResultCard item={item} t={t} cardIndex={index} />
           </li>
         ))}
       </ul>

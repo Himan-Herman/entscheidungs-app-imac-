@@ -4,6 +4,19 @@ import { searchPlaces } from "../api/placesApi.js";
 /** Matches server PRACTICE_SEARCH_PAGE_SIZE — max results per search / load-more. */
 const RESULTS_PAGE_SIZE = 10;
 
+const PLACES_LANGUAGE = {
+  de: "de",
+  en: "en",
+  fr: "fr",
+  es: "es",
+  it: "it",
+};
+
+function placesLanguage(uiLanguage) {
+  const code = String(uiLanguage || "en").toLowerCase();
+  return PLACES_LANGUAGE[code] ?? "en";
+}
+
 const INITIAL = {
   results: [],
   nextPageToken: null,
@@ -35,7 +48,7 @@ export function usePracticeFinderSearch(uiLanguage) {
           latitude: coords?.latitude ?? null,
           longitude: coords?.longitude ?? null,
           pageToken: append ? pageToken : null,
-          language: uiLanguage === "de" ? "de" : "en",
+          language: placesLanguage(uiLanguage),
         });
 
         const batch = (payload.results || []).slice(0, RESULTS_PAGE_SIZE);

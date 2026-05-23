@@ -192,4 +192,15 @@ export default {
     statusPdfCreated: "PDF creado",
     statusCompleted: "Completado",
   },
+  cases: {
+    backPracticeHub: "Volver a Mi consultorio",
+    title: "Mis registros",
+    pageTitle: "MedScoutX — Mis registros",
+  },
+  caseDetail: {
+    backPracticeHub: "Volver a Mi consultorio",
+    backToList: "Todos los registros",
+    notFound: "Este registro no se ha encontrado o ya no está disponible.",
+    unnamedSession: "Preparación sin título",
+  },
 };

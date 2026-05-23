@@ -110,6 +110,11 @@ export default function PreVisitCasesPage() {
   return (
     <div className="pre-visit-cases">
       <div className="pre-visit-cases__inner">
+        <nav className="pre-visit-cases__hub-back" aria-label={t.backPracticeHub}>
+          <Link className="pre-visit-cases__link" to="/patient/practice">
+            {t.backPracticeHub}
+          </Link>
+        </nav>
         <PreVisitModuleChrome />
         <header className="pre-visit-cases__header">
           <h1 className="pre-visit-cases__title">{t.title}</h1>
@@ -207,7 +212,11 @@ export default function PreVisitCasesPage() {
           <ul className="pre-visit-cases__list">
             {cases.map((c) => (
               <li key={c.id}>
-                <Link className="pre-visit-cases__card" to={`/pre-visit/cases/${c.id}`}>
+                <Link
+                  className="pre-visit-cases__card"
+                  to={`/pre-visit/cases/${encodeURIComponent(c.id)}`}
+                  aria-label={c.title}
+                >
                   <h2 className="pre-visit-cases__card-title">{c.title}</h2>
                   {c.category ? (
                     <p className="pre-visit-cases__card-meta">{c.category}</p>

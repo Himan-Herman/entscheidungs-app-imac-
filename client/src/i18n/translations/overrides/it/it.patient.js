@@ -788,7 +788,7 @@ export default {
     errorGeocode: "Indirizzo non trovato. Controlla i dati inseriti.",
     errorGeocodeNotFound: "Nessun luogo trovato con questi dati.",
     errorRateLimit: "Troppe ricerche. Attendi un momento.",
-    backPatientHub: "Torna all’area paziente",
+    backPatientHub: "Torna al mio studio",
     fieldDistance: "Distanza",
     cardDistance: "A {value} km",
     cardRating: "Valutazione",

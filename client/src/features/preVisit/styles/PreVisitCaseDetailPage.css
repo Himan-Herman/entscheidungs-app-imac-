@@ -15,10 +15,23 @@
   gap: 18px;
 }
 
+.pre-visit-case-detail__crumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .pre-visit-case-detail__crumb a {
   color: #0e7490;
   font-weight: 600;
   text-decoration: none;
+}
+
+.pre-visit-case-detail__title {
+  margin: 0;
+  font-size: 1.5rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pre-visit-case-detail__header {
@@ -27,9 +40,12 @@
   gap: 8px;
 }
 
-.pre-visit-case-detail__title {
-  margin: 0;
-  font-size: 1.5rem;
+.pre-visit-case-detail__timeline-reason,
+.pre-visit-case-detail__timeline-meta,
+.pre-visit-case-detail__diff-block p,
+.pre-visit-case-detail__continuity p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pre-visit-case-detail__badge {
@@ -261,4 +277,54 @@
   .pre-visit-case-detail__timeline-date {
     color: #94a3b8;
   }
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__form,
+:root[data-theme="dark"] .pre-visit-case-detail__section,
+:root[data-theme="dark"] .pre-visit-case-detail__timeline-card,
+:root[data-theme="dark"] .pre-visit-case-detail__btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__timeline-card {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), #1e293b);
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__btn--primary {
+  background: #0e7490;
+  border-color: #0e7490;
+  color: #ecfeff;
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__btn--danger {
+  background: #3f1d2e;
+  border-color: #6b213f;
+  color: #fecdd3;
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__hint,
+:root[data-theme="dark"] .pre-visit-case-detail__muted,
+:root[data-theme="dark"] .pre-visit-case-detail__timeline-date,
+:root[data-theme="dark"] .pre-visit-case-detail__crumb a {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__crumb a {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__error {
+  color: #fecaca;
+}
+
+:root[data-theme="dark"] .pre-visit-case-detail__badge {
+  background: #334155;
+  color: #e2e8f0;
 }

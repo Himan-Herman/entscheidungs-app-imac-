@@ -467,7 +467,11 @@ export default function InterpreterLiveRoom() {
         reloadSession();
         setSpeaker(oppositeSpeaker(activeSpeaker));
         setPhase(LIVE_PHASE.LISTENING);
-        announce(t.liveSession.readyForNextSpeaker);
+        announce(
+          activeSpeaker === SPEAKER_PATIENT
+            ? t.liveSession.readyForDoctor
+            : t.liveSession.readyForPatient,
+        );
         scheduleNextListening();
       } finally {
         processingRef.current = false;
@@ -641,48 +645,11 @@ export default function InterpreterLiveRoom() {
       <header className="interpreter-live-shell__header">
         <div>
           <h1 className="medical-interpreter-page__title">{t.room.heading}</h1>
-          <p className="medical-interpreter-page__intro">{t.liveSession.subtitle}</p>
         </div>
         <div className="interpreter-live-shell__pair" aria-label={t.liveSession.languagePairLabel}>
           {languagePairLabel}
         </div>
       </header>
-
-      <p className="medical-interpreter-safety" role="note">
-        {t.safety.communicationOnly}
-      </p>
-
-      <section className="interpreter-live-shell__setup-summary" aria-labelledby="interp-live-meta">
-        <h2 id="interp-live-meta" className="interpreter-live-shell__section-title">
-          {t.liveSession.sessionDetails}
-        </h2>
-        <dl className="interpreter-live-shell__meta-grid">
-          <div>
-            <dt>{t.profile.patientNameLabel}</dt>
-            <dd>{session?.patientName || "—"}</dd>
-          </div>
-          <div>
-            <dt>{t.languages.patientLabel}</dt>
-            <dd>{formatLanguageDisplayName(uiLanguage, session?.patientLanguage || "") || session?.patientLanguage || "—"}</dd>
-          </div>
-          <div>
-            <dt>{t.languages.doctorLabel}</dt>
-            <dd>{formatLanguageDisplayName(uiLanguage, session?.doctorLanguage || "") || session?.doctorLanguage || "—"}</dd>
-          </div>
-          <div>
-            <dt>{t.doctorInfo.doctorName}</dt>
-            <dd>{session?.doctorName || "—"}</dd>
-          </div>
-          <div>
-            <dt>{t.doctorInfo.practiceName}</dt>
-            <dd>{session?.practiceName || "—"}</dd>
-          </div>
-          <div>
-            <dt>{t.doctorInfo.appointmentDate}</dt>
-            <dd>{session?.appointmentDateTime ? new Date(session.appointmentDateTime).toLocaleString(uiLanguage || "de") : "—"}</dd>
-          </div>
-        </dl>
-      </section>
 
       <section className="interpreter-live-shell__controls" aria-labelledby="interp-live-controls">
         <div className="interpreter-status-bar interpreter-status-bar--busy" role="status" aria-live="polite">
@@ -693,10 +660,7 @@ export default function InterpreterLiveRoom() {
             {currentDirectionLabel}
           </span>
           <span className="interpreter-live-shell__status-chip">
-            {t.liveSession.processingHint}
-          </span>
-          <span className="interpreter-live-shell__status-chip">
-            {t.liveSession.voiceProfileBadge}
+            {t.liveSession.autoModeBadge}
           </span>
         </div>
 
@@ -704,6 +668,9 @@ export default function InterpreterLiveRoom() {
           <h2 id="interp-live-controls" className="interpreter-live-shell__section-title">
             {t.liveSession.speakerHeading}
           </h2>
+          <p className="interpreter-live-shell__speaker-hint">
+            {t.liveSession.autoModeHint}
+          </p>
           <InterpreterSpeakerToggle
             speaker={speaker}
             onSpeakerChange={setSpeaker}
@@ -763,9 +730,6 @@ export default function InterpreterLiveRoom() {
           <h3 className="interpreter-live-shell__playback-heading">
             {t.liveSession.playbackHeading}
           </h3>
-          <p className="interpreter-live-shell__playback-note">
-            {t.liveSession.playbackNote}
-          </p>
           <div
             className="interpreter-live-shell__speed-toggle"
             role="group"

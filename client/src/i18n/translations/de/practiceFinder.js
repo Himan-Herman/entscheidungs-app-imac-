@@ -49,7 +49,7 @@ export default {
   errorGeocode: "Adresse konnte nicht gefunden werden. Eingaben prüfen.",
   errorGeocodeNotFound: "Für diese Angaben wurde kein Ort gefunden.",
   errorRateLimit: "Zu viele Suchanfragen. Bitte kurz warten.",
-  backPatientHub: "Zurück zum Patientenbereich",
+  backPatientHub: "Zurück zu Meine Praxis",
   fieldDistance: "Entfernung",
   cardDistance: "{value} km entfernt",
   cardRating: "Bewertung",

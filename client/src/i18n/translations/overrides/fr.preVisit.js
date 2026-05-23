@@ -192,4 +192,15 @@ export default {
     statusPdfCreated: "PDF créé",
     statusCompleted: "Terminé",
   },
+  cases: {
+    backPracticeHub: "Retour à Mon cabinet",
+    title: "Mes dossiers",
+    pageTitle: "MedScoutX — Mes dossiers",
+  },
+  caseDetail: {
+    backPracticeHub: "Retour à Mon cabinet",
+    backToList: "Tous les dossiers",
+    notFound: "Ce dossier est introuvable ou n’est plus disponible.",
+    unnamedSession: "Préparation sans titre",
+  },
 };

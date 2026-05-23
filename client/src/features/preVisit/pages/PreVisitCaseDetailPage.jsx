@@ -48,6 +48,11 @@ export default function PreVisitCaseDetailPage() {
     try {
       const res = await authFetch(`/api/previsit/cases/${encodeURIComponent(caseId)}`);
       const data = await res.json().catch(() => ({}));
+      if (res.status === 404 && data.error === "not_found") {
+        setError(t.notFound);
+        setDetail(null);
+        return;
+      }
       if (!res.ok || !data.ok) throw new Error("load");
       setDetail(data.case);
       setEditTitle(data.case?.title || "");
@@ -60,7 +65,7 @@ export default function PreVisitCaseDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [caseId, hasToken, t.loadError]);
+  }, [caseId, hasToken, t.loadError, t.notFound]);
 
   const loadSessionsPool = useCallback(async () => {
     if (!hasToken) return;
@@ -400,7 +405,8 @@ export default function PreVisitCaseDetailPage() {
     <div className="pre-visit-case-detail">
       <div className="pre-visit-case-detail__inner">
         <PreVisitModuleChrome />
-        <nav className="pre-visit-case-detail__crumb">
+        <nav className="pre-visit-case-detail__crumb" aria-label={t.backPracticeHub}>
+          <Link to="/patient/practice">{t.backPracticeHub}</Link>
           <Link to="/pre-visit/cases">{t.backToList}</Link>
         </nav>
 
@@ -409,6 +415,10 @@ export default function PreVisitCaseDetailPage() {
           <p className="pre-visit-case-detail__error" role="alert">
             {error}
           </p>
+        ) : null}
+
+        {!loading && !error && !detail ? (
+          <p className="pre-visit-case-detail__muted">{t.notFound}</p>
         ) : null}
 
         {!loading && detail ? (
@@ -493,7 +503,7 @@ export default function PreVisitCaseDetailPage() {
                   <option value="">{t.selectSession}</option>
                   {attachable.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {formatUiDateTime(s.createdAt, language)} — {(s.title || "").trim() || s.id.slice(0, 8)}
+                      {formatUiDateTime(s.createdAt, language)} — {(s.title || "").trim() || t.unnamedSession}
                     </option>
                   ))}
                 </select>

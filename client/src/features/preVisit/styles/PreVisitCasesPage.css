@@ -136,9 +136,15 @@
   border-color: rgba(14, 116, 144, 0.25);
 }
 
+.pre-visit-cases__hub-back {
+  margin-bottom: 4px;
+}
+
 .pre-visit-cases__card-title {
   margin: 0 0 4px;
   font-size: 1.05rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pre-visit-cases__card-meta {
@@ -151,6 +157,8 @@
   margin: 8px 0 0;
   font-size: 0.9rem;
   color: #334155;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pre-visit-cases__error {
@@ -226,4 +234,52 @@
     border-color: #0e7490;
     color: #ecfeff;
   }
+  .pre-visit-cases__card-desc {
+    color: #cbd5e1;
+  }
+  .pre-visit-cases__error {
+    color: #fecaca;
+  }
+}
+
+:root[data-theme="dark"] .pre-visit-cases {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .pre-visit-cases__intro,
+:root[data-theme="dark"] .pre-visit-cases__safety,
+:root[data-theme="dark"] .pre-visit-cases__muted,
+:root[data-theme="dark"] .pre-visit-cases__empty,
+:root[data-theme="dark"] .pre-visit-cases__check {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .pre-visit-cases__search,
+:root[data-theme="dark"] .pre-visit-cases__input,
+:root[data-theme="dark"] .pre-visit-cases__textarea,
+:root[data-theme="dark"] .pre-visit-cases__btn,
+:root[data-theme="dark"] .pre-visit-cases__form,
+:root[data-theme="dark"] .pre-visit-cases__card {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .pre-visit-cases__btn--primary {
+  background: #0e7490;
+  border-color: #0e7490;
+  color: #ecfeff;
+}
+
+:root[data-theme="dark"] .pre-visit-cases__card-desc {
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .pre-visit-cases__error {
+  color: #fecaca;
+}
+
+:root[data-theme="dark"] .pre-visit-cases__link {
+  color: #5eead4;
 }
