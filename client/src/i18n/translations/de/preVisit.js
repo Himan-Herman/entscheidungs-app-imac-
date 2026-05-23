@@ -24,6 +24,7 @@ export default {
   },
   chrome: {
     backHome: "Zurück zur MedScoutX-Startseite",
+    backPatientHub: "Zurück zum Patientenbereich",
     moduleLabel: "Arztgespräch vorbereiten",
     safety:
       "Dieses Modul dient nur der Vorbereitung und Dokumentation Ihrer Angaben. Es ersetzt keine ärztliche Beratung.",

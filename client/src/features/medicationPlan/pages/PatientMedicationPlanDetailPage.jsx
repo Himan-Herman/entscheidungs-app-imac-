@@ -12,6 +12,7 @@ import MedicationPlanItemCard from "../components/MedicationPlanItemCard.jsx";
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
+import "../../../styles/PatientThreadsPage.css";
 import "../../visitMedications/styles/VisitMedications.css";
 import "../styles/MedicationPlan.css";
 
@@ -53,6 +54,11 @@ export default function PatientMedicationPlanDetailPage() {
       if (res.status === 404 && data.error === "feature_disabled") {
         setPlan(null);
         setError(t.featureDisabled);
+        return;
+      }
+      if (res.status === 404 && data.error === "plan_not_found") {
+        setPlan(null);
+        setError(t.planNotFound);
         return;
       }
       if (!res.ok || !data.ok) throw new Error("load_failed");
@@ -115,7 +121,7 @@ export default function PatientMedicationPlanDetailPage() {
 
   return (
     <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient/medication-plans#practice-meds-heading">
+      <Link className="patient-inbox__back" to="/patient/medication-plans">
         {t.backList}
       </Link>
       {plan?.practice ? <PracticeBrandingBar branding={plan.practice} /> : null}

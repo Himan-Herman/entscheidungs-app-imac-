@@ -74,6 +74,16 @@
   background: rgba(207, 34, 46, 0.06);
 }
 
+:root[data-theme="dark"] .medication-plan__ai-preview {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .medication-plan__success {
+  color: #86efac;
+}
+
 .patient-inbox__actions {
   display: flex;
   flex-wrap: wrap;

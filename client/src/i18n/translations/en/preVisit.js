@@ -23,6 +23,7 @@ export default {
   },
   chrome: {
     backHome: "Back to MedScoutX home",
+    backPatientHub: "Back to patient workspace",
     moduleLabel: "Prepare doctor visit",
     safety:
       "This module is only for preparing and documenting your information. It does not replace medical advice.",

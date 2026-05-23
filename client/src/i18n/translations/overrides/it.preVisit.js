@@ -15,6 +15,7 @@ export default {
   },
   chrome: {
     backHome: "Torna alla home MedScoutX",
+    backPatientHub: "Torna all’area paziente",
     moduleLabel: "Prepara la visita medica",
     safety:
       "Questo modulo serve solo a preparare e documentare le tue informazioni. Non sostituisce il parere medico.",

@@ -245,28 +245,38 @@ export default {
   patientMedicationPlan: {
     pageTitle: "Piani terapeutici — MedScoutX",
     heading: "Piani terapeutici",
-    intro: "Informazioni pubblicate dal tuo studio — solo a titolo orientativo.",
+    intro:
+      "Inserisci qui i tuoi farmaci, pianifica gli orari di assunzione e attiva eventuali promemoria — indipendentemente dallo studio.",
     safetyNote:
-      "Queste informazioni provengono dal tuo studio. MedScoutX non formula raccomandazioni terapeutiche.",
+      "Solo orientamento. Nessuna diagnosi, consiglio su dosaggio o terapia, né controllo delle interazioni. Per domande mediche contatta medico o farmacia.",
     backHub: "Torna all’area paziente",
-    backList: "Torna all’elenco",
+    backList: "Torna alla panoramica",
     loading: "Caricamento…",
-    loadError: "Impossibile caricare i piani terapeutici.",
-    featureDisabled: "I piani terapeutici non sono attivi qui.",
-    empty: "Nessun piano terapeutico pubblicato.",
-    listCaption: "Piani terapeutici",
+    loadError: "Impossibile caricare i dati.",
+    planNotFound: "Questo piano terapeutico dello studio non è disponibile.",
+    featureDisabled: "Questa sezione non è attiva in questo ambiente.",
+    empty: "Nessun farmaco personale inserito.",
+    listCaption: "I tuoi farmaci",
+    addMedication: "Aggiungi farmaco",
+    reminderConsentLabel:
+      "Consenti promemoria su questo dispositivo (opzionale, disattivabile)",
+    reminderConsentHint:
+      "MedScoutX non invia raccomandazioni mediche — solo i promemoria che inserisci.",
+    practiceSectionTitle: "Piani dello studio (opzionale)",
+    practiceSectionIntro:
+      "Se lo studio ti ha condiviso un piano terapeutico, lo trovi qui separato dalle tue voci personali.",
     fromPractice: "Il tuo studio",
     versionLabel: "Versione {version}",
     publishedAt: "Pubblicato il {date}",
-    openPlan: "Apri il piano",
+    openPlan: "Apri piano dello studio",
     fieldDosage: "Posologia",
     fieldFrequency: "Frequenza",
     fieldRoute: "Via di somministrazione",
-    fieldSchedule: "Orario",
+    fieldSchedule: "Orario di assunzione",
     fieldStart: "Inizio",
     fieldEnd: "Fine",
-    fieldInstructions: "Istruzioni",
-    planTitleFallback: "Piano terapeutico",
+    fieldInstructions: "Note",
+    planTitleFallback: "Farmaco",
     askQuestion: "Domanda allo studio",
     questionSent: "La tua domanda è stata inviata allo studio.",
     questionError: "Impossibile inviare la domanda.",
@@ -278,6 +288,41 @@ export default {
     aiDisclaimer:
       "L’IA struttura informazioni esistenti. Nessuna posologia né raccomandazione terapeutica.",
     messagesLink: "Vai ai messaggi sicuri",
+    ownForm: {
+      addTitle: "Inserisci farmaco",
+      editTitle: "Modifica farmaco",
+      requiredHint:
+        "Solo il nome del farmaco è obbligatorio (*). Tutti gli altri campi sono facoltativi.",
+      nameLabel: "Farmaco *",
+      nameRequired: "Inserisci il nome del farmaco.",
+      endBeforeStart: "La data di fine non può precedere la data di inizio.",
+      dosageLabel: "Posologia (facoltativo)",
+      dosagePlaceholder: "es. 1 compressa",
+      scheduleLabel: "Orari di assunzione (facoltativo)",
+      schedulePlaceholder: "es. mattina e sera",
+      startLabel: "Data di inizio (facoltativo)",
+      endLabel: "Data di fine (facoltativo)",
+      notesLabel: "Nota (facoltativo)",
+      freeTextLabel: "Testo libero (facoltativo)",
+      freeTextPlaceholder:
+        "es. Metformina 500 mg\nmattina e sera ai pasti",
+      freeTextApply: "Applica ai campi",
+      aiAssistHint:
+        "Aiuta solo a compilare i campi — nessuna valutazione medica.",
+      reminderItemLabel: "Promemoria per questo farmaco",
+      reminderNeedsConsent:
+        "Attiva prima i promemoria sopra se desideri ricevere notifiche.",
+      cancel: "Annulla",
+      save: "Salva",
+    },
+    ownCard: {
+      reminderOn: "Promemoria attivo",
+      endWarning:
+        "Termina tra {days} giorno/i. Contatta medico o farmacia in tempo.",
+      edit: "Modifica",
+      delete: "Rimuovi",
+      deleteConfirm: "Rimuovere questo farmaco?",
+    },
   },
 
   patientPracticeDocuments: {

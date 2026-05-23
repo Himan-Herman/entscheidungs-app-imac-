@@ -181,7 +181,7 @@ export default {
     statusEditingDraft: "Gesprochenen Text prüfen, dann übersetzen",
     statusBlocked: "Übersetzung blockiert — bitte Text anpassen",
     statusError: "Bei diesem Beitrag ist ein Fehler aufgetreten",
-    speakerDirection: "Sie sprechen {{source}} · Übersetzung nach {{target}}",
+    speakerDirection: "{{source}} → {{target}}",
     turnPatient: "Sie sprechen",
     turnClinician: "Behandlungsteam spricht",
     speakerTogglePatient: "Ich spreche",
@@ -289,7 +289,7 @@ export default {
     keyboardHint:
       "Tipp: Sprech-Button auswählen, dann Leertaste oder Eingabetaste.",
     liveHint:
-      "Sprechen Sie — nach 3 Sekunden Pause wird automatisch erkannt, übersetzt und wieder zugehört.",
+      "Sprechen Sie — nach etwa 2 Sekunden Pause wird automatisch erkannt, übersetzt und weiter zugehört.",
     disabledDraft:
       "Bitte zuerst den aktuellen Text prüfen, bevor Sie neu aufnehmen.",
     disabledBusy: "Bitte warten, bis der aktuelle Schritt abgeschlossen ist.",
@@ -480,19 +480,19 @@ export default {
     statusPaused: "Gespräch pausiert",
     statusEnded: "Gespräch beendet",
     statusError: "Ein Fehler braucht Ihre Aufmerksamkeit",
-    autoModeBadge: "Automatik aktiv",
+    autoModeBadge: "Auto",
     speakerHeading: "Wer spricht jetzt?",
     autoModeHint:
-      "Nach jeder Übersetzung hört die andere Seite automatisch weiter zu. Nur bei Bedarf manuell wechseln.",
-    startButton: "Live-Gespräch starten",
+      "Nach jeder Übersetzung ist automatisch die andere Seite dran.",
+    startButton: "Start",
     pauseButton: "Pausieren",
     resumeButton: "Fortsetzen",
-    playbackHeading: "Sprachausgabe",
+    playbackHeading: "Stimme",
     speedHeading: "Sprechtempo",
     speedNormal: "Normal",
     speedSlow: "Langsam",
-    replayButton: "Letzte Übersetzung erneut abspielen",
-    stopPlaybackButton: "Wiedergabe stoppen",
+    replayButton: "Letzte Übersetzung",
+    stopPlaybackButton: "Stopp",
     originalLabel: "Original",
     translationForDoctor: "Übersetzung für Arzt/Praxis",
     translationForPatient: "Übersetzung für Patient:in",
@@ -505,8 +505,8 @@ export default {
     noTranscriptResult:
       "Für diesen Beitrag wurde kein Text erkannt. Bitte erneut versuchen.",
     readyForNextSpeaker: "Bereit für die nächste sprechende Person.",
-    readyForDoctor: "Behandlungsteam kann jetzt direkt sprechen.",
-    readyForPatient: "Patient:in kann jetzt direkt sprechen.",
+    readyForDoctor: "Arzt/Praxis spricht jetzt.",
+    readyForPatient: "Patient:in spricht jetzt.",
   },
 
   confirm: {

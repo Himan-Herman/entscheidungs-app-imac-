@@ -6,7 +6,6 @@ import {
   translateTurn,
 } from "../api/interpreterApi.js";
 import InterpreterPlaybackStatus from "./InterpreterPlaybackStatus.jsx";
-import InterpreterSpeakerToggle from "./InterpreterSpeakerToggle.jsx";
 import { useInterpreterRecorder } from "../hooks/useInterpreterRecorder.js";
 import { useInterpreterTtsPlayback } from "../hooks/useInterpreterTtsPlayback.js";
 import { useMedicalInterpreterMessages } from "../hooks/useMedicalInterpreterMessages.js";
@@ -31,6 +30,7 @@ import {
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { detectLikelySilentBlob } from "../utils/interpreterAudioLevel.js";
+import { detectSpeakerFromLanguage } from "../utils/detectSpeakerFromLanguage.js";
 import { languagesForSpeaker } from "../utils/liveLanguages.js";
 import { downloadInterpreterSessionPdf } from "../pdf/generateInterpreterSessionPdf.js";
 import { getSessionDisplayTitle } from "../utils/sessionDisplayTitle.js";
@@ -283,6 +283,11 @@ export default function InterpreterLiveRoom() {
       .replace("{{target}}", target);
   }, [session, speaker, t.room.speakerDirection, uiLanguage]);
 
+  const activeSpeakerLabel = useMemo(
+    () => speakerLabelFor(speaker, t),
+    [speaker, t],
+  );
+
   const handlePhaseFromSilence = useCallback(
     (silencePhase) => {
       if (phaseRef.current === LIVE_PHASE.PAUSED || phaseRef.current === LIVE_PHASE.ENDED) {
@@ -326,11 +331,10 @@ export default function InterpreterLiveRoom() {
       setExportMessage("");
       setLastPlaybackRequest(null);
       const runToken = runTokenRef.current;
-      const activeSpeaker = speakerRef.current;
-      const { sourceLanguage, targetLanguage } = languagesForSpeaker(
-        activeSession,
-        activeSpeaker,
-      );
+      const fallbackSpeaker = speakerRef.current;
+      const shouldAutoDetectSpeaker =
+        String(activeSession.patientLanguage || "").trim().toLowerCase() !==
+        String(activeSession.doctorLanguage || "").trim().toLowerCase();
 
       try {
         const silenceCheck = await detectLikelySilentBlob(blob);
@@ -348,7 +352,9 @@ export default function InterpreterLiveRoom() {
         transcribeAbortRef.current = transcribeController;
         const transcriptResult = await transcribeAudio(blob, {
           filename: mimeType?.includes("ogg") ? "utterance.ogg" : "utterance.webm",
-          language: sourceLanguage,
+          language: shouldAutoDetectSpeaker
+            ? undefined
+            : activeSession.patientLanguage,
           signal: transcribeController.signal,
         });
         transcribeAbortRef.current = null;
@@ -366,9 +372,20 @@ export default function InterpreterLiveRoom() {
           return;
         }
 
+        const detectedSpeaker = detectSpeakerFromLanguage(
+          transcriptResult.language,
+          activeSession,
+          fallbackSpeaker,
+        );
+        const { sourceLanguage, targetLanguage } = languagesForSpeaker(
+          activeSession,
+          detectedSpeaker,
+        );
+        setSpeaker(detectedSpeaker);
+
         const createdTurn = addTurn(activeSession.sessionId, {
-          speaker: activeSpeaker,
-          speakerLabel: speakerLabelFor(activeSpeaker, t),
+          speaker: detectedSpeaker,
+          speakerLabel: speakerLabelFor(detectedSpeaker, t),
           sourceLanguage,
           targetLanguage,
           originalText: originalTranscript,
@@ -399,7 +416,7 @@ export default function InterpreterLiveRoom() {
             text: originalTranscript,
             sourceLanguage,
             targetLanguage,
-            speaker: activeSpeaker,
+            speaker: detectedSpeaker,
           },
           { signal: translateController.signal },
         );
@@ -465,10 +482,10 @@ export default function InterpreterLiveRoom() {
           status: SESSION_STATUS_ACTIVE,
         });
         reloadSession();
-        setSpeaker(oppositeSpeaker(activeSpeaker));
+        setSpeaker(oppositeSpeaker(detectedSpeaker));
         setPhase(LIVE_PHASE.LISTENING);
         announce(
-          activeSpeaker === SPEAKER_PATIENT
+          detectedSpeaker === SPEAKER_PATIENT
             ? t.liveSession.readyForDoctor
             : t.liveSession.readyForPatient,
         );
@@ -543,20 +560,6 @@ export default function InterpreterLiveRoom() {
     await startRecordingRef.current?.();
   }, [setPhase]);
 
-  const handlePauseConversation = useCallback(() => {
-    stopRuntime();
-    cancelRecording();
-    setPhase(LIVE_PHASE.PAUSED);
-    announce(t.liveSession.statusPaused);
-  }, [announce, cancelRecording, setPhase, stopRuntime, t.liveSession.statusPaused]);
-
-  const handleResumeConversation = useCallback(async () => {
-    setErrorMessage("");
-    setExportMessage("");
-    setPhase(LIVE_PHASE.IDLE);
-    await startRecordingRef.current?.();
-  }, [setPhase]);
-
   const handleEndConversation = useCallback(() => {
     stopRuntime();
     cancelRecording();
@@ -625,14 +628,6 @@ export default function InterpreterLiveRoom() {
 
   const turns = session?.turns ?? [];
   const hasTurns = turns.length > 0;
-  const controlsDisabled =
-    isPreparing ||
-    isStopping ||
-    processingRef.current ||
-    isSpeakLoading ||
-    isSpeakPlaying ||
-    phase === LIVE_PHASE.ENDED;
-
   return (
     <main
       className="medical-interpreter-page medical-interpreter-page--live interp-root"
@@ -657,26 +652,14 @@ export default function InterpreterLiveRoom() {
         </div>
         <div className="interpreter-live-shell__status-detail">
           <span className="interpreter-live-shell__status-chip">
-            {currentDirectionLabel}
+            {activeSpeakerLabel}
           </span>
           <span className="interpreter-live-shell__status-chip">
             {t.liveSession.autoModeBadge}
           </span>
-        </div>
-
-        <div className="interpreter-live-shell__speaker-wrap">
-          <h2 id="interp-live-controls" className="interpreter-live-shell__section-title">
-            {t.liveSession.speakerHeading}
-          </h2>
-          <p className="interpreter-live-shell__speaker-hint">
-            {t.liveSession.autoModeHint}
-          </p>
-          <InterpreterSpeakerToggle
-            speaker={speaker}
-            onSpeakerChange={setSpeaker}
-            disabled={controlsDisabled || isRecording}
-            labels={t}
-          />
+          <span className="interpreter-live-shell__status-chip">
+            {currentDirectionLabel}
+          </span>
         </div>
 
         <div className="interpreter-live-shell__button-row">
@@ -695,26 +678,6 @@ export default function InterpreterLiveRoom() {
             }
           >
             {t.liveSession.startButton}
-          </button>
-          <button
-            type="button"
-            className="medical-interpreter-page__nav-link interpreter-live-shell__action"
-            onClick={handlePauseConversation}
-            disabled={
-              phase === LIVE_PHASE.IDLE ||
-              phase === LIVE_PHASE.PAUSED ||
-              phase === LIVE_PHASE.ENDED
-            }
-          >
-            {t.liveSession.pauseButton}
-          </button>
-          <button
-            type="button"
-            className="medical-interpreter-page__nav-link interpreter-live-shell__action"
-            onClick={handleResumeConversation}
-            disabled={phase !== LIVE_PHASE.PAUSED && phase !== LIVE_PHASE.ERROR}
-          >
-            {t.liveSession.resumeButton}
           </button>
           <button
             type="button"

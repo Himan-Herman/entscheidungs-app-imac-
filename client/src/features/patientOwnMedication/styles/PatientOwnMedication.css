@@ -176,6 +176,8 @@
 .patient-own-med__card-title {
   margin: 0;
   font-size: 1.1rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .patient-own-med__badge {
@@ -217,4 +219,67 @@
   margin-top: 2.5rem;
   padding-top: 1.5rem;
   border-top: 2px solid var(--ms-border, #e2e8f0);
+}
+
+.patient-own-med__input:focus-visible,
+.patient-own-med__textarea:focus-visible,
+.patient-own-med__btn:focus-visible,
+.patient-own-med__consent input:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+.medication-plan-item__title {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+:root[data-theme="dark"] .patient-own-med__consent,
+:root[data-theme="dark"] .patient-own-med__form,
+:root[data-theme="dark"] .patient-own-med__card {
+  background: rgba(15, 23, 42, 0.85);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .patient-own-med__hint {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .patient-own-med__btn--secondary,
+:root[data-theme="dark"] .patient-own-med__btn--danger {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .patient-own-med__btn--danger {
+  border-color: #f87171;
+  color: #fecaca;
+}
+
+:root[data-theme="dark"] .patient-own-med__input,
+:root[data-theme="dark"] .patient-own-med__textarea {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .patient-own-med__badge {
+  background: rgba(14, 116, 144, 0.35);
+  color: #7dd3fc;
+}
+
+:root[data-theme="dark"] .patient-own-med__warn {
+  background: rgba(154, 52, 18, 0.25);
+  border-color: #fdba74;
+  color: #fed7aa;
+}
+
+:root[data-theme="dark"] .patient-own-med__error {
+  color: #fecaca;
+}
+
+:root[data-theme="dark"] .patient-own-med__practice-section {
+  border-top-color: rgba(148, 163, 184, 0.3);
 }

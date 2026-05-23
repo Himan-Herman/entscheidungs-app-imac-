@@ -15,6 +15,7 @@ export default {
   },
   chrome: {
     backHome: "Retour à l’accueil MedScoutX",
+    backPatientHub: "Retour à l’espace patient",
     moduleLabel: "Préparer la consultation",
     safety:
       "Ce module sert uniquement à préparer et documenter vos informations. Il ne remplace pas un avis médical.",

@@ -4,7 +4,24 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
-import { PREVISIT_LOCALE_STORAGE_KEY, loadPreVisitSession } from "../constants/preVisitSession.js";
+import {
+  PREVISIT_LOCALE_STORAGE_KEY,
+  loadPreVisitSession,
+} from "../constants/preVisitSession.js";
+
+function readInitialPatientLocale() {
+  const allowed = new Set(PRE_VISIT_LANGUAGE_OPTIONS.map((o) => o.id));
+  try {
+    const stored = sessionStorage.getItem(PREVISIT_LOCALE_STORAGE_KEY);
+    if (stored && allowed.has(stored)) return stored;
+  } catch {
+    /* ignore */
+  }
+  const session = loadPreVisitSession();
+  const fromSession = session?.patientLanguage;
+  if (fromSession && allowed.has(fromSession)) return fromSession;
+  return "de";
+}
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
 import "../styles/PreVisitLanguagePage.css";
@@ -14,7 +31,7 @@ export default function PreVisitLanguagePage() {
   const { language } = useLanguage();
   const t = useMemo(() => getMessages(language).preVisit.language, [language]);
 
-  const [selectedLocale, setSelectedLocale] = useState("de");
+  const [selectedLocale, setSelectedLocale] = useState(readInitialPatientLocale);
 
   useEffect(() => {
     document.title = t.pageTitle;

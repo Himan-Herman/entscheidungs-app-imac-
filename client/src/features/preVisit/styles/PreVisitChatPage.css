@@ -114,6 +114,8 @@
   resize: vertical;
   scrollbar-gutter: stable;
   box-sizing: border-box;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .pre-visit-chat__textarea:focus {

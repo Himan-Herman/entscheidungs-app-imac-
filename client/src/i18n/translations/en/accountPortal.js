@@ -5,6 +5,7 @@ export default {
   navDoctors: "Doctors",
   navPersonal: "Personal details",
   navHealthProfile: "Health profile",
+  backPatientHub: "Back to patient workspace",
   navProfiles: "Profiles",
   navData: "Privacy & data",
   navFollowUps: "Follow-ups",
@@ -123,6 +124,11 @@ export default {
   healthProfileDisclaimer:
     "For orientation only — not a diagnosis, emergency assessment, or treatment recommendation. In an emergency, call local emergency services.",
   healthProfileNameHint: "Name and date of birth:",
+  healthSaveSuccess: "Health profile saved.",
+  healthInvalidHeight: "Please enter a height between 50 and 250 cm.",
+  healthInvalidWeight: "Please enter a weight between 20 and 500 kg.",
+  medicationsProfileHint:
+    "Account health overview — separate from “Medication plans” on the patient home screen.",
   healthSectionInsurance: "Insurance",
   healthSectionBody: "Height & weight",
   healthSectionHistory: "Allergies & conditions",

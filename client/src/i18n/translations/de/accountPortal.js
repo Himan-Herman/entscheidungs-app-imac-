@@ -5,6 +5,7 @@ export default {
   navDoctors: "Ärzte",
   navPersonal: "Persönliche Angaben",
   navHealthProfile: "Gesundheitsprofil",
+  backPatientHub: "Zurück zum Patientenbereich",
   navProfiles: "Profile",
   navData: "Datenschutz & Daten",
   navFollowUps: "Rückfragen",
@@ -126,6 +127,11 @@ export default {
   healthProfileDisclaimer:
     "Nur zur Orientierung — keine Diagnose, kein Notfallhinweis und keine Behandlungsempfehlung. Im Notfall lokale Notrufnummern wählen.",
   healthProfileNameHint: "Name und Geburtsdatum:",
+  healthSaveSuccess: "Gesundheitsprofil gespeichert.",
+  healthInvalidHeight: "Bitte eine Größe zwischen 50 und 250 cm eingeben.",
+  healthInvalidWeight: "Bitte ein Gewicht zwischen 20 und 500 kg eingeben.",
+  medicationsProfileHint:
+    "Übersicht Ihrer Stammdaten — getrennt von „Eigene Medikationspläne“ in der Patientenübersicht.",
   healthSectionInsurance: "Versicherung",
   healthSectionBody: "Größe & Gewicht",
   healthSectionHistory: "Allergien & Vorerkrankungen",

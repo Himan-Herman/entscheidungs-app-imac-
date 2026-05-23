@@ -1,7 +1,9 @@
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
+
 function fmtDate(iso, lang) {
   if (!iso) return null;
   try {
-    return new Date(iso).toLocaleDateString(lang === "de" ? "de-DE" : "en-GB", {
+    return new Date(iso).toLocaleDateString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
     });
   } catch {
@@ -15,7 +17,9 @@ export default function MedicationPlanItemCard({ item, t, language }) {
 
   return (
     <article className="vm-card">
-      <h3 className="vm-card__title">{item.medicationName}</h3>
+      <h3 className="vm-card__title medication-plan-item__title">
+        {item.medicationName}
+      </h3>
       <dl className="vm-card__dl">
         {item.dosage ? (
           <div className="vm-card__row">

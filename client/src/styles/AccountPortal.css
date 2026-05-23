@@ -113,6 +113,26 @@
   min-height: 40vh;
 }
 
+.account-portal-page__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #0f766e;
+  text-decoration: none;
+}
+
+.account-portal-page__back:hover {
+  text-decoration: underline;
+}
+
+.account-portal-page__back:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
 .account-portal-page__hero {
   margin-bottom: 20px;
 }
@@ -392,6 +412,22 @@
   color: #5eead4;
 }
 
+:root[data-theme="dark"] .account-portal-page__back {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .account-portal-form__input,
+:root[data-theme="dark"] .account-portal-form__textarea {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .account-portal-page__title,
+:root[data-theme="dark"] .account-portal-page__lead {
+  color: #e2e8f0;
+}
+
 .account-portal-form__field {
   display: grid;
   gap: 6px;
@@ -411,6 +447,20 @@
   border-radius: 12px;
   border: 1px solid rgba(15, 23, 42, 0.15);
   font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.account-portal-form__input:focus-visible,
+.account-portal-form__textarea:focus-visible,
+.account-portal__btn:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+.account-portal-form__textarea {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .account-portal-form__textarea {

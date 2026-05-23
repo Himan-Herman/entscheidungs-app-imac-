@@ -47,6 +47,7 @@ export default function PatientOwnMedicationCard({ entry, onEdit, onDelete, labe
           type="button"
           className="patient-own-med__btn patient-own-med__btn--secondary"
           onClick={onEdit}
+          aria-label={`${t.ownCard.edit}: ${entry.name}`}
         >
           {t.ownCard.edit}
         </button>
@@ -54,6 +55,7 @@ export default function PatientOwnMedicationCard({ entry, onEdit, onDelete, labe
           type="button"
           className="patient-own-med__btn patient-own-med__btn--danger"
           onClick={onDelete}
+          aria-label={`${t.ownCard.delete}: ${entry.name}`}
         >
           {t.ownCard.delete}
         </button>

@@ -6,7 +6,8 @@ const DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
 /** Legacy fallback voice that works across older OpenAI TTS models. */
 const VOICE_NEUTRAL = "alloy";
 /** Higher-quality neutral voice used when the configured model supports it. */
-const VOICE_NEUTRAL_MEDICAL = "cedar";
+const VOICE_NEUTRAL_MEDICAL = "marin";
+const VOICE_ADVANCED_FALLBACK = "alloy";
 
 const VOICE_SPEEDS = {
   normal: 0.96,
@@ -104,16 +105,36 @@ export async function synthesizeInterpreterSpeech(params) {
   );
 
   try {
-    const speech = await openai.audio.speech.create({
-      model,
-      voice,
-      input: params.text,
-      speed,
-      ...(instructions ? { instructions } : {}),
-      response_format: "mp3",
-    });
-    const buffer = Buffer.from(await speech.arrayBuffer());
-    return { ok: true, buffer, contentType: "audio/mpeg" };
+    const createSpeech = async (voiceName, speechInstructions) => {
+      const speech = await openai.audio.speech.create({
+        model,
+        voice: voiceName,
+        input: params.text,
+        speed,
+        ...(speechInstructions ? { instructions: speechInstructions } : {}),
+        response_format: "wav",
+      });
+      return Buffer.from(await speech.arrayBuffer());
+    };
+
+    try {
+      const buffer = await createSpeech(voice, instructions);
+      return { ok: true, buffer, contentType: "audio/wav" };
+    } catch (primaryError) {
+      const shouldTryFallback =
+        supportsAdvancedInterpreterTts(model) &&
+        voice !== VOICE_ADVANCED_FALLBACK;
+
+      if (!shouldTryFallback) {
+        throw primaryError;
+      }
+
+      const fallbackBuffer = await createSpeech(
+        VOICE_ADVANCED_FALLBACK,
+        resolveSpeechInstructions("neutral", params.language, params.voiceSpeed, model),
+      );
+      return { ok: true, buffer: fallbackBuffer, contentType: "audio/wav" };
+    }
   } catch (_err) {
     return {
       ok: false,

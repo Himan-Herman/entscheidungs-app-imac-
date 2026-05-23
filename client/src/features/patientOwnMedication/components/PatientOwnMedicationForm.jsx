@@ -61,6 +61,10 @@ export default function PatientOwnMedicationForm({
       setError(t.ownForm.nameRequired);
       return;
     }
+    if (fields.startDate && fields.endDate && fields.endDate < fields.startDate) {
+      setError(t.ownForm.endBeforeStart);
+      return;
+    }
     setError("");
     onSave({
       id: initial?.id || generateOwnMedicationId(),

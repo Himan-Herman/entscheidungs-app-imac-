@@ -245,28 +245,38 @@ export default {
   patientMedicationPlan: {
     pageTitle: "Plans de médication — MedScoutX",
     heading: "Plans de médication",
-    intro: "Informations publiées par votre cabinet — à titre d’orientation uniquement.",
+    intro:
+      "Saisissez ici vos propres médicaments, planifiez les prises et activez éventuellement des rappels — indépendamment de votre cabinet.",
     safetyNote:
-      "Ces informations viennent de votre cabinet. MedScoutX ne formule pas de recommandations de traitement.",
+      "Aide à l’orientation uniquement. Pas de diagnostic, de conseil posologique ou thérapeutique, ni de contrôle d’interactions. Pour les questions médicales, contactez votre médecin ou pharmacie.",
     backHub: "Retour à l’espace patient",
-    backList: "Retour à la liste",
+    backList: "Retour à l’aperçu",
     loading: "Chargement…",
-    loadError: "Impossible de charger les plans de médication.",
-    featureDisabled: "Les plans de médication ne sont pas activés ici.",
-    empty: "Aucun plan de médication publié pour le moment.",
-    listCaption: "Plans de médication",
+    loadError: "Impossible de charger les données.",
+    planNotFound: "Ce plan de médication du cabinet n’est pas disponible.",
+    featureDisabled: "Cette section n’est pas activée dans cet environnement.",
+    empty: "Aucun médicament personnel saisi pour le moment.",
+    listCaption: "Vos médicaments",
+    addMedication: "Ajouter un médicament",
+    reminderConsentLabel:
+      "Autoriser les rappels sur cet appareil (facultatif, désactivable à tout moment)",
+    reminderConsentHint:
+      "MedScoutX n’envoie pas de recommandations médicales — seulement les rappels que vous avez saisis.",
+    practiceSectionTitle: "Plans de votre cabinet (facultatif)",
+    practiceSectionIntro:
+      "Si votre cabinet vous a partagé un plan de médication, il apparaît ici, séparé de vos saisies personnelles.",
     fromPractice: "Votre cabinet",
     versionLabel: "Version {version}",
     publishedAt: "Publié le {date}",
-    openPlan: "Ouvrir le plan",
+    openPlan: "Ouvrir le plan du cabinet",
     fieldDosage: "Posologie",
     fieldFrequency: "Fréquence",
     fieldRoute: "Voie d’administration",
-    fieldSchedule: "Horaire",
+    fieldSchedule: "Horaire de prise",
     fieldStart: "Début",
     fieldEnd: "Fin",
-    fieldInstructions: "Instructions",
-    planTitleFallback: "Plan de médication",
+    fieldInstructions: "Remarques",
+    planTitleFallback: "Médicament",
     askQuestion: "Question au cabinet",
     questionSent: "Votre question a été envoyée au cabinet.",
     questionError: "Impossible d’envoyer votre question.",
@@ -278,6 +288,41 @@ export default {
     aiDisclaimer:
       "L’IA structure des informations existantes. Pas de posologie ni de recommandation de traitement.",
     messagesLink: "Aller aux messages sécurisés",
+    ownForm: {
+      addTitle: "Saisir un médicament",
+      editTitle: "Modifier le médicament",
+      requiredHint:
+        "Seul le nom du médicament est obligatoire (*). Tous les autres champs sont facultatifs.",
+      nameLabel: "Médicament *",
+      nameRequired: "Veuillez saisir le nom du médicament.",
+      endBeforeStart: "La date de fin ne peut pas être antérieure à la date de début.",
+      dosageLabel: "Posologie (facultatif)",
+      dosagePlaceholder: "p. ex. 1 comprimé",
+      scheduleLabel: "Horaires de prise (facultatif)",
+      schedulePlaceholder: "p. ex. matin et soir",
+      startLabel: "Date de début (facultatif)",
+      endLabel: "Date de fin (facultatif)",
+      notesLabel: "Note (facultatif)",
+      freeTextLabel: "Texte libre (facultatif)",
+      freeTextPlaceholder:
+        "p. ex. Metformine 500 mg\nmatin et soir au repas",
+      freeTextApply: "Appliquer aux champs",
+      aiAssistHint:
+        "Aide uniquement à remplir les champs — pas d’évaluation médicale.",
+      reminderItemLabel: "Rappel pour ce médicament",
+      reminderNeedsConsent:
+        "Veuillez d’abord activer les rappels ci-dessus si vous souhaitez être notifié.",
+      cancel: "Annuler",
+      save: "Enregistrer",
+    },
+    ownCard: {
+      reminderOn: "Rappel activé",
+      endWarning:
+        "Se termine dans {days} jour(s). Contactez votre médecin ou pharmacie à temps.",
+      edit: "Modifier",
+      delete: "Supprimer",
+      deleteConfirm: "Supprimer ce médicament ?",
+    },
   },
 
   patientPracticeDocuments: {

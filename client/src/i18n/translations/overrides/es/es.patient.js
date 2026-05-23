@@ -245,28 +245,38 @@ export default {
   patientMedicationPlan: {
     pageTitle: "Planes de medicación — MedScoutX",
     heading: "Planes de medicación",
-    intro: "Información publicada por su consultorio — solo a título orientativo.",
+    intro:
+      "Registre aquí sus propios medicamentos, planifique las tomas y active recordatorios opcionales — independientemente de su consultorio.",
     safetyNote:
-      "Esta información procede de su consultorio. MedScoutX no formula recomendaciones de tratamiento.",
+      "Solo orientación. Sin diagnóstico, consejo de dosificación o tratamiento ni comprobación de interacciones. Consulte a su médico o farmacia para dudas médicas.",
     backHub: "Volver al espacio del paciente",
-    backList: "Volver a la lista",
+    backList: "Volver al resumen",
     loading: "Cargando…",
-    loadError: "No se han podido cargar los planes de medicación.",
-    featureDisabled: "Los planes de medicación no están activados aquí.",
-    empty: "Aún no hay ningún plan de medicación publicado.",
-    listCaption: "Planes de medicación",
+    loadError: "No se han podido cargar los datos.",
+    planNotFound: "Este plan de medicación del consultorio no está disponible.",
+    featureDisabled: "Esta sección no está activada en este entorno.",
+    empty: "Aún no ha registrado medicamentos propios.",
+    listCaption: "Sus medicamentos",
+    addMedication: "Añadir medicamento",
+    reminderConsentLabel:
+      "Permitir recordatorios en este dispositivo (opcional, se puede desactivar)",
+    reminderConsentHint:
+      "MedScoutX no envía recomendaciones médicas — solo los recordatorios que usted introduce.",
+    practiceSectionTitle: "Planes de su consultorio (opcional)",
+    practiceSectionIntro:
+      "Si su consultorio le ha compartido un plan de medicación, aparece aquí separado de sus entradas propias.",
     fromPractice: "Su consultorio",
     versionLabel: "Versión {version}",
     publishedAt: "Publicado el {date}",
-    openPlan: "Abrir el plan",
+    openPlan: "Abrir plan del consultorio",
     fieldDosage: "Posología",
     fieldFrequency: "Frecuencia",
     fieldRoute: "Vía de administración",
-    fieldSchedule: "Horario",
+    fieldSchedule: "Horario de toma",
     fieldStart: "Inicio",
     fieldEnd: "Fin",
-    fieldInstructions: "Instrucciones",
-    planTitleFallback: "Plan de medicación",
+    fieldInstructions: "Notas",
+    planTitleFallback: "Medicamento",
     askQuestion: "Pregunta al consultorio",
     questionSent: "Su pregunta se ha enviado al consultorio.",
     questionError: "No se ha podido enviar su pregunta.",
@@ -278,6 +288,41 @@ export default {
     aiDisclaimer:
       "La IA estructura información existente. Sin posología ni recomendación de tratamiento.",
     messagesLink: "Ir a los mensajes seguros",
+    ownForm: {
+      addTitle: "Registrar medicamento",
+      editTitle: "Editar medicamento",
+      requiredHint:
+        "Solo el nombre del medicamento es obligatorio (*). Los demás campos son opcionales.",
+      nameLabel: "Medicamento *",
+      nameRequired: "Introduzca el nombre del medicamento.",
+      endBeforeStart: "La fecha de fin no puede ser anterior a la de inicio.",
+      dosageLabel: "Posología (opcional)",
+      dosagePlaceholder: "p. ej. 1 comprimido",
+      scheduleLabel: "Horarios de toma (opcional)",
+      schedulePlaceholder: "p. ej. mañana y noche",
+      startLabel: "Fecha de inicio (opcional)",
+      endLabel: "Fecha de fin (opcional)",
+      notesLabel: "Nota (opcional)",
+      freeTextLabel: "Texto libre (opcional)",
+      freeTextPlaceholder:
+        "p. ej. Metformina 500 mg\nmañana y noche con las comidas",
+      freeTextApply: "Aplicar a los campos",
+      aiAssistHint:
+        "Solo ayuda a rellenar campos — sin valoración médica.",
+      reminderItemLabel: "Recordatorio para este medicamento",
+      reminderNeedsConsent:
+        "Active primero los recordatorios arriba si desea recibir avisos.",
+      cancel: "Cancelar",
+      save: "Guardar",
+    },
+    ownCard: {
+      reminderOn: "Recordatorio activo",
+      endWarning:
+        "Termina en {days} día(s). Contacte a tiempo con su médico o farmacia.",
+      edit: "Editar",
+      delete: "Eliminar",
+      deleteConfirm: "¿Eliminar este medicamento?",
+    },
   },
 
   patientPracticeDocuments: {

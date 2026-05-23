@@ -95,8 +95,26 @@ export default function AccountHealthProfilePage() {
     setOk(false);
   }
 
+  function validateMetrics() {
+    if (form.heightCm !== "") {
+      const h = Number(form.heightCm);
+      if (!Number.isFinite(h) || h < 50 || h > 250) return t.healthInvalidHeight;
+    }
+    if (form.weightKg !== "") {
+      const w = Number(form.weightKg);
+      if (!Number.isFinite(w) || w < 20 || w > 500) return t.healthInvalidWeight;
+    }
+    return "";
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
+    const metricError = validateMetrics();
+    if (metricError) {
+      setError(metricError);
+      setOk(false);
+      return;
+    }
     setSaving(true);
     setError("");
     setOk(false);
@@ -143,6 +161,9 @@ export default function AccountHealthProfilePage() {
 
   return (
     <div className="account-portal-page">
+      <Link className="account-portal-page__back" to="/patient">
+        {t.backPatientHub}
+      </Link>
       <h1 className="account-portal-page__title">{t.healthProfileTitle}</h1>
       <p className="account-portal-page__lead">{t.healthProfileIntro}</p>
       <p className="account-portal-page__notice" role="note">
@@ -177,6 +198,7 @@ export default function AccountHealthProfilePage() {
         className="account-portal-form account-portal-form--wide"
         onSubmit={onSubmit}
         noValidate
+        aria-label={t.healthProfileTitle}
       >
         <fieldset className="account-portal-form__section">
           <legend>{t.healthSectionInsurance}</legend>
@@ -253,6 +275,7 @@ export default function AccountHealthProfilePage() {
             <textarea
               className="account-portal-form__textarea"
               rows={3}
+              maxLength={4000}
               value={form.allergies}
               onChange={(e) => upd("allergies", e.target.value)}
               placeholder={t.placeholderAllergies}
@@ -264,6 +287,7 @@ export default function AccountHealthProfilePage() {
             <textarea
               className="account-portal-form__textarea"
               rows={3}
+              maxLength={4000}
               value={form.chronicConditions}
               onChange={(e) => upd("chronicConditions", e.target.value)}
               placeholder={t.placeholderChronic}
@@ -275,12 +299,14 @@ export default function AccountHealthProfilePage() {
             <textarea
               className="account-portal-form__textarea"
               rows={3}
+              maxLength={4000}
               value={form.regularMedications}
               onChange={(e) => upd("regularMedications", e.target.value)}
               placeholder={t.placeholderMedications}
               autoComplete="off"
             />
           </label>
+          <p className="account-portal-form__hint">{t.medicationsProfileHint}</p>
         </fieldset>
 
         <fieldset className="account-portal-form__section">
