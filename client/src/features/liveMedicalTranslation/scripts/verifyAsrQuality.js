@@ -4,8 +4,11 @@
  */
 import {
   isLikelyEmptyOrNoiseTranscript,
+  isLikelyHallucinatedTranslation,
   resolveTurnStatus,
+  sanitizeUnclearTurn,
 } from "../utils/asrQuality.js";
+import { getMedaUnclearRepeatPhrase } from "../utils/repeatPhrase.js";
 
 function assert(condition, message) {
   if (!condition) {
@@ -16,6 +19,7 @@ function assert(condition, message) {
 
 assert(isLikelyEmptyOrNoiseTranscript(""), "empty transcript");
 assert(isLikelyEmptyOrNoiseTranscript("..."), "punctuation-only transcript");
+assert(isLikelyEmptyOrNoiseTranscript("hm"), "filler transcript");
 
 assert(
   resolveTurnStatus({
@@ -38,10 +42,10 @@ assert(
 assert(
   resolveTurnStatus({
     originalText: "Hello",
-    translatedText: "The previous statement was unclear. Please repeat.",
+    translatedText: getMedaUnclearRepeatPhrase("en"),
     targetLanguage: "en",
   }) === "unclear",
-  "unclear phrase marks unclear",
+  "meda unclear phrase marks unclear",
 );
 
 assert(
@@ -53,5 +57,35 @@ assert(
   }) === "unclear",
   "overlap marks unclear",
 );
+
+assert(
+  isLikelyHallucinatedTranslation("", "I have cough and phlegm."),
+  "empty original with invented symptoms is hallucination",
+);
+
+assert(
+  isLikelyHallucinatedTranslation("...", "Since yesterday."),
+  "noise original with invented duration is hallucination",
+);
+
+assert(
+  !isLikelyHallucinatedTranslation("Seit gestern.", "Since yesterday."),
+  "faithful short translation is not hallucination",
+);
+
+const sanitized = sanitizeUnclearTurn({
+  originalText: "",
+  translatedText: "I have cough and phlegm.",
+  targetLanguage: "en",
+  repeatPhrase: getMedaUnclearRepeatPhrase("en"),
+});
+
+assert(sanitized.status === "unclear", "sanitize marks unclear");
+assert(sanitized.originalText === "", "sanitize hides unreliable original");
+assert(
+  sanitized.translatedText === getMedaUnclearRepeatPhrase("en"),
+  "sanitize replaces invented translation with repeat phrase",
+);
+assert(sanitized.needsRepeatSpeech, "sanitize requests corrective speech");
 
 console.log("verifyAsrQuality: OK");

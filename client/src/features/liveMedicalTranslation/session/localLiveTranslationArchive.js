@@ -25,6 +25,25 @@ function newId() {
 }
 
 /**
+ * @param {{ savedAt?: string; exportData?: { sessionEndedAt?: string; sessionStartedAt?: string } }} item
+ */
+export function getArchiveItemSortTime(item) {
+  const ended = item?.exportData?.sessionEndedAt;
+  const saved = item?.savedAt;
+  const started = item?.exportData?.sessionStartedAt;
+  const candidate = ended || saved || started;
+  const time = candidate ? new Date(candidate).getTime() : 0;
+  return Number.isFinite(time) ? time : 0;
+}
+
+/**
+ * @param {Array<{ id?: string; savedAt?: string; exportData?: object }>} items
+ */
+function sortArchiveItemsNewestFirst(items) {
+  return [...items].sort((a, b) => getArchiveItemSortTime(b) - getArchiveItemSortTime(a));
+}
+
+/**
  * @param {ReturnType<typeof import("../utils/sessionMetadata.js").buildExportMetadata>} exportData
  */
 export function saveLiveTranslationArchiveItem(exportData) {
@@ -46,7 +65,7 @@ export function saveLiveTranslationArchiveItem(exportData) {
 
 /** @returns {Array<{ id: string; savedAt: string; exportData: object }>} */
 export function listLiveTranslationArchiveItems() {
-  return readArchiveArray();
+  return sortArchiveItemsNewestFirst(readArchiveArray());
 }
 
 export function getLiveTranslationArchiveItem(id) {

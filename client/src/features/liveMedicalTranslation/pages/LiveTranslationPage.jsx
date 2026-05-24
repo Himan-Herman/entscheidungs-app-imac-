@@ -7,11 +7,13 @@ import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { isLiveMedicalTranslationEnabled } from "../featureFlag.js";
 import { LIVE_TRANSLATION_LANGUAGE_OPTIONS } from "../languages.js";
 import { buildLanguageRouting } from "../utils/routing.js";
+import { buildDirectionLabel, isLanguageRoutingEnabled } from "../utils/languageBasedRouting.js";
 import { useLiveTranslationSession } from "../hooks/useLiveTranslationSession.js";
 import { playSpeakerSwitchSound } from "../utils/speakerSwitchFeedback.js";
 import SetupPracticeAccordion from "../components/SetupPracticeAccordion.jsx";
 import PlanBControls from "../components/PlanBControls.jsx";
 import LiveTranslationArchivePanel from "../components/LiveTranslationArchivePanel.jsx";
+import LiveTranslationTurnHistory from "../components/LiveTranslationTurnHistory.jsx";
 import {
   buildExportMetadata,
   buildSessionMetadata,
@@ -20,8 +22,14 @@ import {
 import { saveLiveTranslationArchiveItem } from "../session/localLiveTranslationArchive.js";
 import { downloadLiveTranslationPdf } from "../pdf/generateLiveTranslationPdf.js";
 import { LIVE_SESSION_MAX_MS } from "../utils/sessionTimer.js";
-import { getMedaIntroText } from "../utils/medaIntro.js";
-import { isSetupComplete, isValidBirthDate, normalizePatientName } from "../utils/setupValidation.js";
+import { getMedaIntroText, getMedaReadinessPhrase } from "../utils/medaIntro.js";
+import {
+  isActivationSoundMuted,
+  setActivationSoundMuted,
+} from "../utils/medaActivationFeedback.js";
+import { isSetupComplete, isValidBirthDate, isPreliveStartReady, normalizePatientName, normalizeDoctorPracticeName } from "../utils/setupValidation.js";
+import { fetchLiveTranslationProfilePrefill } from "../utils/patientProfilePrefill.js";
+import { GENDER_FORM_OF_ADDRESS_CODES } from "../utils/genderFormOfAddress.js";
 import "../styles/LiveTranslationPage.css";
 
 function resolveInitialLanguage(language, role) {
@@ -45,30 +53,6 @@ function formatBirthDateDisplay(isoDate, lang) {
   }
 }
 
-function turnStatusLabel(status, t) {
-  switch (status) {
-    case "unclear":
-      return t.turn.statusUnclear;
-    case "corrected":
-      return t.turn.statusCorrected;
-    case "replayed":
-      return t.turn.statusReplayed;
-    default:
-      return t.turn.statusTranslated;
-  }
-}
-
-function formatTurnTime(iso, lang) {
-  try {
-    return new Date(iso).toLocaleTimeString(getPrimaryIntlLocale(lang), {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-}
-
 export default function LiveTranslationPage() {
   const { language } = useLanguage();
   const t = useMemo(
@@ -89,9 +73,21 @@ export default function LiveTranslationPage() {
     /** @type {"patient" | "doctor"} */ ("patient"),
   );
   const [autoSwitchSpeaker, setAutoSwitchSpeaker] = useState(true);
+  const [activationSoundMuted, setActivationSoundMutedState] = useState(() =>
+    isActivationSoundMuted(),
+  );
   const [speakerSwitchAnim, setSpeakerSwitchAnim] = useState(false);
   const [patientName, setPatientName] = useState("");
   const [birthDate, setBirthDate] = useState("");
+  const [genderOrFormOfAddress, setGenderOrFormOfAddress] = useState("");
+  const [profilePrefilled, setProfilePrefilled] = useState(false);
+  const [profilePrefillAvailable, setProfilePrefillAvailable] = useState(false);
+  const [preparedForOtherPerson, setPreparedForOtherPerson] = useState(false);
+  const [doctorPracticeName, setDoctorPracticeName] = useState("");
+  const [participantConsent, setParticipantConsent] = useState(false);
+  const [medicalPurposeConsent, setMedicalPurposeConsent] = useState(false);
+  const [translationLimitationsConsent, setTranslationLimitationsConsent] = useState(false);
+  const [preliveError, setPreliveError] = useState("");
   const [practiceInfo, setPracticeInfo] = useState(() => ({ ...EMPTY_PRACTICE_INFO }));
   const [sessionMetadata, setSessionMetadata] = useState(
     /** @type {ReturnType<typeof buildSessionMetadata> | null} */ (null),
@@ -102,13 +98,18 @@ export default function LiveTranslationPage() {
   const [exportData, setExportData] = useState(
     /** @type {ReturnType<typeof buildExportMetadata> | null} */ (null),
   );
-  const [showArchive, setShowArchive] = useState(false);
+  const [archiveRefreshKey, setArchiveRefreshKey] = useState(0);
   const [unclearBanner, setUnclearBanner] = useState("");
+  const [wrongLanguageBanner, setWrongLanguageBanner] = useState("");
   const [sessionWarning, setSessionWarning] = useState("");
   const [autoEnded, setAutoEnded] = useState(false);
   const [localSaveState, setLocalSaveState] = useState(/** @type {"idle" | "saved" | "declined"} */ ("idle"));
   const [scopeWarningVisible, setScopeWarningVisible] = useState(false);
+  const [manualSpeakerOverride, setManualSpeakerOverride] = useState(false);
   const skipLanguageRoutingRef = useRef(false);
+  const profilePrefillSnapshotRef = useRef(
+    /** @type {import("../utils/patientProfilePrefill.js").LiveTranslationProfilePrefill | null} */ (null),
+  );
   const pdfDownloadRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const turnsRef = useRef(/** @type {Array<Record<string, unknown>>} */ ([]));
 
@@ -133,6 +134,76 @@ export default function LiveTranslationPage() {
     [patientLanguage, t],
   );
 
+  const medaReadinessPhrase = useMemo(
+    () => getMedaReadinessPhrase(doctorLanguage, t),
+    [doctorLanguage, t],
+  );
+
+  const handleActivationSoundMutedChange = useCallback((muted) => {
+    setActivationSoundMutedState(muted);
+    setActivationSoundMuted(muted);
+  }, []);
+
+  const applyProfilePrefill = useCallback((prefill) => {
+    profilePrefillSnapshotRef.current = prefill;
+    setProfilePrefillAvailable(true);
+    if (prefill.patientName) setPatientName(prefill.patientName);
+    if (prefill.birthDate) setBirthDate(prefill.birthDate);
+    if (prefill.genderOrFormOfAddress) setGenderOrFormOfAddress(prefill.genderOrFormOfAddress);
+    if (prefill.patientLanguage) setPatientLanguage(prefill.patientLanguage);
+    if (prefill.doctorLanguage) setDoctorLanguage(prefill.doctorLanguage);
+    setProfilePrefilled(true);
+    setPreparedForOtherPerson(false);
+  }, []);
+
+  const handlePreparedForOtherPersonChange = useCallback((checked) => {
+    setPreparedForOtherPerson(checked);
+    if (checked) {
+      setPatientName("");
+      setBirthDate("");
+      setGenderOrFormOfAddress("");
+      setProfilePrefilled(false);
+      return;
+    }
+    const snapshot = profilePrefillSnapshotRef.current;
+    if (snapshot) {
+      if (snapshot.patientName) setPatientName(snapshot.patientName);
+      if (snapshot.birthDate) setBirthDate(snapshot.birthDate);
+      if (snapshot.genderOrFormOfAddress) setGenderOrFormOfAddress(snapshot.genderOrFormOfAddress);
+      if (snapshot.patientLanguage) setPatientLanguage(snapshot.patientLanguage);
+      if (snapshot.doctorLanguage) setDoctorLanguage(snapshot.doctorLanguage);
+      setProfilePrefilled(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (step !== "setup") return undefined;
+    let cancelled = false;
+    void fetchLiveTranslationProfilePrefill().then((prefill) => {
+      if (cancelled || !prefill) return;
+      applyProfilePrefill(prefill);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [applyProfilePrefill, step]);
+
+  const genderOptions = useMemo(
+    () =>
+      GENDER_FORM_OF_ADDRESS_CODES.map((code) => ({
+        code,
+        label:
+          code === "female"
+            ? t.setup.genderFemale
+            : code === "male"
+              ? t.setup.genderMale
+              : code === "diverse"
+                ? t.setup.genderDiverse
+                : t.setup.genderNone,
+      })),
+    [t.setup.genderDiverse, t.setup.genderFemale, t.setup.genderMale, t.setup.genderNone],
+  );
+
   const instructionOptions = useMemo(
     () => ({
       medicalDomainWarningDe: t.warnings.medicalDomainDe,
@@ -144,10 +215,12 @@ export default function LiveTranslationPage() {
   const handleSpeakerFromLanguage = useCallback((speaker) => {
     setActiveSpeaker(speaker);
     setLanguageUncertain(false);
+    setManualSpeakerOverride(false);
+    skipLanguageRoutingRef.current = false;
   }, []);
 
-  const handleLanguageUncertain = useCallback(() => {
-    setLanguageUncertain(true);
+  const handleLanguageUncertain = useCallback((uncertain = true) => {
+    setLanguageUncertain(Boolean(uncertain));
   }, []);
 
   const handleUnclearTurn = useCallback(
@@ -160,6 +233,11 @@ export default function LiveTranslationPage() {
     },
     [t.warnings.overlapDetected, t.warnings.unclearRecognition],
   );
+
+  const handleWrongLanguagePair = useCallback(() => {
+    setWrongLanguageBanner(t.warnings.wrongLanguagePair);
+    setLanguageUncertain(false);
+  }, [t.warnings.wrongLanguagePair]);
 
   const handleSessionTimeWarning = useCallback(
     ({ markMs }) => {
@@ -184,6 +262,7 @@ export default function LiveTranslationPage() {
 
   const handleManualSpeakerSelect = useCallback((speaker) => {
     skipLanguageRoutingRef.current = true;
+    setManualSpeakerOverride(true);
     setLanguageUncertain(false);
     setActiveSpeaker(speaker);
   }, []);
@@ -200,7 +279,9 @@ export default function LiveTranslationPage() {
     stopVoiceOutput,
     replayLatestTranslation,
     submitCorrection,
+    submitCorrectionForTurn,
     askToRepeat,
+    askToRepeatForTurn,
     resumeAudioPlayback,
     pauseConversation,
     resumeConversation,
@@ -213,13 +294,16 @@ export default function LiveTranslationPage() {
     activeSpeaker,
     enabled: sessionActive,
     introText: medaIntroText,
-    languageBasedRouting: true,
+    activationReadinessText: medaReadinessPhrase,
+    activationSoundEnabled: !activationSoundMuted,
+    languageBasedRouting: isLanguageRoutingEnabled(patientLanguage, doctorLanguage),
     skipLanguageRoutingRef,
     instructionOptions,
     autoSwitchSpeaker,
     onTurnComplete: handleTurnComplete,
     onSpeakerFromLanguage: handleSpeakerFromLanguage,
     onLanguageUncertain: handleLanguageUncertain,
+    onWrongLanguagePair: handleWrongLanguagePair,
     onUnclearTurn: handleUnclearTurn,
     onSessionTimeWarning: handleSessionTimeWarning,
     onSessionAutoEnd: handleSessionAutoEnd,
@@ -247,8 +331,11 @@ export default function LiveTranslationPage() {
       setSessionActive(false);
       setLanguageUncertain(false);
       setUnclearBanner("");
+      setWrongLanguageBanner("");
       setSessionWarning("");
       setScopeWarningVisible(false);
+      setManualSpeakerOverride(false);
+      skipLanguageRoutingRef.current = false;
       setAutoEnded(autoEnd);
       setLocalSaveState("idle");
       setStep("ended");
@@ -260,6 +347,8 @@ export default function LiveTranslationPage() {
 
   const endSessionRef = useRef(endSession);
   endSessionRef.current = endSession;
+  const disconnectSessionRef = useRef(disconnectSession);
+  disconnectSessionRef.current = disconnectSession;
 
   useEffect(() => {
     document.title = t.pageTitle;
@@ -267,7 +356,7 @@ export default function LiveTranslationPage() {
 
   useEffect(() => {
     return () => {
-      endSessionRef.current();
+      disconnectSessionRef.current();
     };
   }, []);
 
@@ -313,7 +402,19 @@ export default function LiveTranslationPage() {
     activeSpeaker === "patient" ? t.live.patientSpeaker : t.live.doctorSpeaker;
   const speakerBannerLabel =
     activeSpeaker === "patient" ? t.live.speakerBannerPatient : t.live.speakerBannerDoctor;
-  const directionLabel = `${displayRouting.sourceLanguageName} → ${displayRouting.targetLanguageName}`;
+  const languageRoutingActive =
+    isLanguageRoutingEnabled(patientLanguage, doctorLanguage) && !manualSpeakerOverride;
+  const directionLabel = useMemo(
+    () =>
+      buildDirectionLabel({
+        activeSpeaker,
+        patientLanguageLabel: patientLabel,
+        doctorLanguageLabel: doctorLabel,
+        patientRoleLabel: t.turn.speakerPatient,
+        doctorRoleLabel: t.turn.speakerDoctor,
+      }),
+    [activeSpeaker, doctorLabel, patientLabel, t.turn.speakerDoctor, t.turn.speakerPatient],
+  );
 
   const latestTurn = turns.length > 0 ? turns[turns.length - 1] : null;
   const latestTurnId = latestTurn?.id ?? null;
@@ -353,6 +454,24 @@ export default function LiveTranslationPage() {
     [birthDate, doctorLanguage, patientLanguage, patientName],
   );
 
+  const canStartLive = useMemo(
+    () =>
+      isPreliveStartReady({
+        patientName,
+        participantConsent,
+        medicalPurposeConsent,
+        translationLimitationsConsent,
+      }),
+    [medicalPurposeConsent, participantConsent, patientName, translationLimitationsConsent],
+  );
+
+  const resetPreliveConsent = useCallback(() => {
+    setParticipantConsent(false);
+    setMedicalPurposeConsent(false);
+    setTranslationLimitationsConsent(false);
+    setPreliveError("");
+  }, []);
+
   const handlePracticeChange = useCallback((field, value) => {
     setPracticeInfo((prev) => ({ ...prev, [field]: value }));
   }, []);
@@ -384,6 +503,7 @@ export default function LiveTranslationPage() {
       return;
     }
     setFormError("");
+    resetPreliveConsent();
     setSessionMetadata(
       buildSessionMetadata({
         patientName: name,
@@ -391,24 +511,81 @@ export default function LiveTranslationPage() {
         patientLanguage,
         doctorLanguage,
         practice: practiceInfo,
+        genderOrFormOfAddress: genderOrFormOfAddress || undefined,
+        profilePrefilled,
+        preparedForOtherPerson,
       }),
     );
     setStep("prelive");
-  }, [birthDate, doctorLanguage, patientLanguage, patientName, practiceInfo, t]);
+  }, [
+    birthDate,
+    doctorLanguage,
+    genderOrFormOfAddress,
+    patientLanguage,
+    patientName,
+    practiceInfo,
+    preparedForOtherPerson,
+    profilePrefilled,
+    resetPreliveConsent,
+    t,
+  ]);
 
   const handleSessionStart = useCallback(() => {
+    const name = normalizePatientName(patientName);
+    if (!name) {
+      setPreliveError(t.prelive.patientNameRequired);
+      return;
+    }
+    if (!participantConsent || !medicalPurposeConsent || !translationLimitationsConsent) {
+      setPreliveError(t.prelive.consentRequired);
+      return;
+    }
+
+    setPreliveError("");
     setLanguageUncertain(false);
     setUnclearBanner("");
+    setWrongLanguageBanner("");
     setSessionWarning("");
+    setScopeWarningVisible(false);
     setAutoEnded(false);
+    setManualSpeakerOverride(false);
     skipLanguageRoutingRef.current = false;
+    const consentAt = new Date().toISOString();
+    const trimmedDoctorPractice = normalizeDoctorPracticeName(doctorPracticeName);
     setSessionMetadata((prev) =>
-      prev ? { ...prev, sessionStartedAt: new Date().toISOString() } : prev,
+      prev
+        ? {
+            ...prev,
+            patientName: name,
+            birthDate,
+            genderOrFormOfAddress: genderOrFormOfAddress || undefined,
+            profilePrefilled,
+            preparedForOtherPerson,
+            ...(trimmedDoctorPractice ? { doctorPracticeName: trimmedDoctorPractice } : {}),
+            sessionStartedAt: consentAt,
+            consentConfirmedAt: consentAt,
+            medicalPurposeConfirmed: true,
+            translationLimitationsConfirmed: true,
+          }
+        : prev,
     );
     resumeAudioPlayback();
     setStep("active");
     setSessionActive(true);
-  }, [resumeAudioPlayback]);
+  }, [
+    birthDate,
+    doctorPracticeName,
+    genderOrFormOfAddress,
+    medicalPurposeConsent,
+    participantConsent,
+    patientName,
+    preparedForOtherPerson,
+    profilePrefilled,
+    resumeAudioPlayback,
+    t.prelive.consentRequired,
+    t.prelive.patientNameRequired,
+    translationLimitationsConsent,
+  ]);
 
   const handleEnd = useCallback(() => {
     finishSession({ autoEnd: false });
@@ -423,6 +600,7 @@ export default function LiveTranslationPage() {
     if (!exportData) return;
     try {
       saveLiveTranslationArchiveItem(exportData);
+      setArchiveRefreshKey((k) => k + 1);
       setLocalSaveState("saved");
     } catch {
       setLocalSaveState("idle");
@@ -439,16 +617,19 @@ export default function LiveTranslationPage() {
     setSessionMetadata(null);
     setExportData(null);
     setLanguageUncertain(false);
+    setArchiveRefreshKey((k) => k + 1);
+    resetPreliveConsent();
     setStep("setup");
-  }, [endSession]);
+  }, [endSession, resetPreliveConsent]);
 
   const handleNewConversation = useCallback(() => {
     endSession();
     setSessionActive(false);
     setExportData(null);
     setLanguageUncertain(false);
+    resetPreliveConsent();
     setStep("prelive");
-  }, [endSession]);
+  }, [endSession, resetPreliveConsent]);
 
   useEffect(() => {
     if (step !== "ended") return;
@@ -465,7 +646,15 @@ export default function LiveTranslationPage() {
   }
 
   return (
-    <div className="live-translation">
+    <div
+      className={[
+        "live-translation",
+        step === "setup" ? "live-translation--setup" : "",
+        step === "active" ? "live-translation--active" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <Link className="live-translation__back" to="/patient">
         <ArrowLeft size={18} aria-hidden />
         {t.backToHub}
@@ -496,6 +685,17 @@ export default function LiveTranslationPage() {
 
       {step === "setup" ? (
         <>
+        <section
+          className="live-translation__saved-section"
+          aria-labelledby="live-translation-saved-heading"
+        >
+          <LiveTranslationArchivePanel
+            t={t}
+            uiLanguage={language}
+            refreshToken={archiveRefreshKey}
+          />
+        </section>
+
         <form
           className="live-translation__form"
           onSubmit={(e) => {
@@ -503,6 +703,12 @@ export default function LiveTranslationPage() {
             handleSetupContinue();
           }}
         >
+          {profilePrefillAvailable ? (
+            <p className="live-translation__profile-hint" role="note">
+              {t.setup.profilePrefillHint}
+            </p>
+          ) : null}
+
           <div className="live-translation__field">
             <label htmlFor="live-translation-patient-name">
               {t.setup.patientNameLabel}{" "}
@@ -541,6 +747,40 @@ export default function LiveTranslationPage() {
               onChange={(e) => setBirthDate(e.target.value)}
             />
           </div>
+
+          <div className="live-translation__field">
+            <label htmlFor="live-translation-gender">{t.setup.genderLabel}</label>
+            <select
+              id="live-translation-gender"
+              value={genderOrFormOfAddress}
+              onChange={(e) => setGenderOrFormOfAddress(e.target.value)}
+            >
+              <option value="">{t.setup.genderPlaceholder}</option>
+              {genderOptions.map((opt) => (
+                <option key={opt.code} value={opt.code}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {profilePrefillAvailable ? (
+            <label className="live-translation__auto-switch">
+              <input
+                type="checkbox"
+                checked={preparedForOtherPerson}
+                onChange={(e) => handlePreparedForOtherPersonChange(e.target.checked)}
+              />
+              <span>
+                <span className="live-translation__auto-switch-label">
+                  {t.setup.preparedForOtherPersonLabel}
+                </span>
+                <span className="live-translation__auto-switch-hint">
+                  {t.setup.preparedForOtherPersonHint}
+                </span>
+              </span>
+            </label>
+          ) : null}
 
           <div className="live-translation__field">
             <label htmlFor="live-translation-patient-language">
@@ -615,21 +855,6 @@ export default function LiveTranslationPage() {
             {t.setup.continueButton}
           </button>
         </form>
-        <button
-          type="button"
-          className="live-translation__secondary live-translation__archive-toggle"
-          onClick={() => setShowArchive((v) => !v)}
-          aria-expanded={showArchive}
-        >
-          {t.setup.viewSavedSessions}
-        </button>
-        {showArchive ? (
-          <LiveTranslationArchivePanel
-            t={t}
-            uiLanguage={language}
-            onClose={() => setShowArchive(false)}
-          />
-        ) : null}
         </>
       ) : step === "ended" ? (
         <div
@@ -696,21 +921,21 @@ export default function LiveTranslationPage() {
           </div>
         </div>
       ) : step === "prelive" ? (
-        <div className="live-translation__prelive">
+        <form
+          className="live-translation__prelive"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSessionStart();
+          }}
+        >
           <div className="live-translation__context">
             {sessionMetadata ? (
-              <>
-                <div className="live-translation__context-row">
-                  <span className="live-translation__context-label">{t.live.patientName}</span>
-                  <span className="live-translation__context-value">{sessionMetadata.patientName}</span>
-                </div>
-                <div className="live-translation__context-row">
-                  <span className="live-translation__context-label">{t.live.birthDate}</span>
-                  <span className="live-translation__context-value">
-                    {formatBirthDateDisplay(sessionMetadata.birthDate, language)}
-                  </span>
-                </div>
-              </>
+              <div className="live-translation__context-row">
+                <span className="live-translation__context-label">{t.live.birthDate}</span>
+                <span className="live-translation__context-value">
+                  {formatBirthDateDisplay(sessionMetadata.birthDate, language)}
+                </span>
+              </div>
             ) : null}
             <div className="live-translation__context-row">
               <span className="live-translation__context-label">{t.live.patientLanguage}</span>
@@ -726,10 +951,115 @@ export default function LiveTranslationPage() {
             {t.prelive.quietEnvironmentNotice}
           </p>
 
+          <div className="live-translation__identity">
+            <div className="live-translation__field">
+              <label htmlFor="live-translation-prelive-patient-name">
+                {t.prelive.patientNameLabel}{" "}
+                <span className="live-translation__required" aria-hidden>
+                  *
+                </span>
+                <span className="live-translation__sr-only">{t.setup.requiredIndicator}</span>
+              </label>
+              <input
+                id="live-translation-prelive-patient-name"
+                type="text"
+                autoComplete="name"
+                required
+                aria-required="true"
+                aria-invalid={preliveError === t.prelive.patientNameRequired}
+                value={patientName}
+                onChange={(e) => {
+                  setPatientName(e.target.value);
+                  if (preliveError) setPreliveError("");
+                }}
+              />
+            </div>
+
+            <div className="live-translation__field">
+              <label htmlFor="live-translation-prelive-doctor-practice">
+                {t.prelive.doctorPracticeNameLabel}
+              </label>
+              <input
+                id="live-translation-prelive-doctor-practice"
+                type="text"
+                autoComplete="organization"
+                value={doctorPracticeName}
+                onChange={(e) => setDoctorPracticeName(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <fieldset className="live-translation__consent" aria-label={t.prelive.consentFieldsetAria}>
+            <legend className="live-translation__consent-title">{t.prelive.consentSectionTitle}</legend>
+            <div className="live-translation__consent-options">
+              <label className="live-translation__consent-option">
+                <input
+                  type="checkbox"
+                  checked={participantConsent}
+                  required
+                  aria-required="true"
+                  onChange={(e) => {
+                    setParticipantConsent(e.target.checked);
+                    if (preliveError) setPreliveError("");
+                  }}
+                />
+                <span>{t.prelive.consentParticipantLabel}</span>
+              </label>
+              <label className="live-translation__consent-option">
+                <input
+                  type="checkbox"
+                  checked={medicalPurposeConsent}
+                  required
+                  aria-required="true"
+                  onChange={(e) => {
+                    setMedicalPurposeConsent(e.target.checked);
+                    if (preliveError) setPreliveError("");
+                  }}
+                />
+                <span>{t.prelive.consentMedicalPurposeLabel}</span>
+              </label>
+              <label className="live-translation__consent-option">
+                <input
+                  type="checkbox"
+                  checked={translationLimitationsConsent}
+                  required
+                  aria-required="true"
+                  onChange={(e) => {
+                    setTranslationLimitationsConsent(e.target.checked);
+                    if (preliveError) setPreliveError("");
+                  }}
+                />
+                <span>{t.prelive.consentTranslationLimitationsLabel}</span>
+              </label>
+            </div>
+          </fieldset>
+
           <div className="live-translation__meda-intro-preview" role="note">
             <span className="live-translation__meda-intro-label">{t.live.medaIntroHeading}</span>
             <p>{medaIntroText}</p>
           </div>
+
+          <label className="live-translation__auto-switch">
+            <input
+              type="checkbox"
+              checked={activationSoundMuted}
+              onChange={(e) => handleActivationSoundMutedChange(e.target.checked)}
+            />
+            <span>
+              <span className="live-translation__auto-switch-label">
+                {t.prelive.activationSoundMuteLabel}
+              </span>
+              <span className="live-translation__auto-switch-hint">
+                {t.prelive.activationSoundMuteHint}
+              </span>
+            </span>
+          </label>
+
+          {preliveError ? (
+            <p className="live-translation__error" role="alert" id="live-translation-prelive-error">
+              {preliveError}
+            </p>
+          ) : null}
 
           <div className="live-translation__actions">
             <button
@@ -740,17 +1070,18 @@ export default function LiveTranslationPage() {
               {t.prelive.backToSetup}
             </button>
             <button
-              type="button"
+              type="submit"
               className="live-translation__primary"
               aria-label={t.prelive.startAria}
-              onClick={handleSessionStart}
+              aria-describedby={preliveError ? "live-translation-prelive-error" : undefined}
+              disabled={!canStartLive}
             >
               {t.prelive.startButton}
             </button>
           </div>
-        </div>
+        </form>
       ) : (
-        <>
+        <div className="live-translation__session-layout">
           <div
             className="live-translation__context"
             aria-live="polite"
@@ -811,6 +1142,13 @@ export default function LiveTranslationPage() {
           >
             <p className="live-translation__speaker-banner-title">{speakerBannerLabel}</p>
             <p className="live-translation__speaker-banner-direction">{directionLabel}</p>
+            {languageRoutingActive ? (
+              <p className="live-translation__speaker-banner-routing">{t.live.languageRoutingActive}</p>
+            ) : manualSpeakerOverride ? (
+              <p className="live-translation__speaker-banner-routing live-translation__speaker-banner-routing--manual">
+                {t.live.manualSpeakerActive}
+              </p>
+            ) : null}
             {autoSwitchSpeaker ? (
               <p className="live-translation__speaker-banner-auto">{t.live.autoSwitchActive}</p>
             ) : null}
@@ -851,6 +1189,12 @@ export default function LiveTranslationPage() {
           {sessionWarning ? (
             <p className="live-translation__warning live-translation__warning--timer" role="status">
               {sessionWarning}
+            </p>
+          ) : null}
+
+          {wrongLanguageBanner ? (
+            <p className="live-translation__warning live-translation__warning--wrong-language" role="alert">
+              {wrongLanguageBanner}
             </p>
           ) : null}
 
@@ -971,7 +1315,13 @@ export default function LiveTranslationPage() {
             >
               <span className="live-translation__speaker-title">{t.live.patientSpeaker}</span>
               <span className="live-translation__speaker-dir">
-                {patientLabel} → {doctorLabel}
+                {buildDirectionLabel({
+                  activeSpeaker: "patient",
+                  patientLanguageLabel: patientLabel,
+                  doctorLanguageLabel: doctorLabel,
+                  patientRoleLabel: t.turn.speakerPatient,
+                  doctorRoleLabel: t.turn.speakerDoctor,
+                })}
               </span>
             </button>
             <button
@@ -988,7 +1338,13 @@ export default function LiveTranslationPage() {
             >
               <span className="live-translation__speaker-title">{t.live.doctorSpeaker}</span>
               <span className="live-translation__speaker-dir">
-                {doctorLabel} → {patientLabel}
+                {buildDirectionLabel({
+                  activeSpeaker: "doctor",
+                  patientLanguageLabel: patientLabel,
+                  doctorLanguageLabel: doctorLabel,
+                  patientRoleLabel: t.turn.speakerPatient,
+                  doctorRoleLabel: t.turn.speakerDoctor,
+                })}
               </span>
             </button>
           </div>
@@ -1017,6 +1373,17 @@ export default function LiveTranslationPage() {
             onAskRepeat={() => void askToRepeat()}
             onSubmitCorrection={submitCorrection}
           />
+
+          <LiveTranslationTurnHistory
+            turns={turns}
+            t={t}
+            uiLanguage={language}
+            disabled={planBDisabled}
+            onRepeatTurn={askToRepeatForTurn}
+            onSubmitCorrection={submitCorrectionForTurn}
+          />
+
+          <div className="live-translation__session-controls-spacer" aria-hidden />
 
           <div className="live-translation__actions live-translation__actions--inline live-translation__actions--session">
             {connectionStatus === "error" ? (
@@ -1055,103 +1422,7 @@ export default function LiveTranslationPage() {
               {t.live.endButton}
             </button>
           </div>
-
-          {turns.length > 0 ? (
-            <section className="live-translation__turns" aria-label={t.live.turnHistory}>
-              <h2 className="live-translation__turns-title">{t.live.turnHistory}</h2>
-              <ol className="live-translation__turns-list">
-                {turns.map((turn, index) => {
-                  const speakerLabel =
-                    turn.speaker === "patient" ? t.turn.speakerPatient : t.turn.speakerDoctor;
-                  const sourceLabel = LIVE_TRANSLATION_LANGUAGE_OPTIONS.find(
-                    (o) => o.code === turn.sourceLanguage,
-                  )?.label || turn.sourceLanguage;
-                  const targetLabel = LIVE_TRANSLATION_LANGUAGE_OPTIONS.find(
-                    (o) => o.code === turn.targetLanguage,
-                  )?.label || turn.targetLanguage;
-                  const hasCorrectionChild = turns.some((t) => t.correctsTurnId === turn.id);
-
-                  return (
-                    <li
-                      key={turn.id || `${turn.timestamp}-${index}`}
-                      className={[
-                        "live-translation__turn",
-                        turn.status === "corrected" ? "live-translation__turn--corrected" : "",
-                        turn.status === "unclear" ? "live-translation__turn--unclear" : "",
-                        hasCorrectionChild ? "live-translation__turn--superseded" : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      <header className="live-translation__turn-header">
-                        <span className="live-translation__turn-speaker">{speakerLabel}</span>
-                        <span className="live-translation__turn-meta">
-                          {sourceLabel} → {targetLabel}
-                          {turn.timestamp ? (
-                            <time dateTime={turn.timestamp}>
-                              {" · "}
-                              {formatTurnTime(turn.timestamp, language)}
-                            </time>
-                          ) : null}
-                        </span>
-                        <span
-                          className={[
-                            "live-translation__turn-status",
-                            `live-translation__turn-status--${turn.status}`,
-                          ].join(" ")}
-                        >
-                          {turnStatusLabel(turn.status, t)}
-                        </span>
-                      </header>
-
-                      {turn.status === "corrected" && (turn.wrongOriginalText || turn.wrongTranslatedText) ? (
-                        <div className="live-translation__turn-wrong">
-                          <span className="live-translation__turn-field-label">
-                            {t.turn.wrongVersion}
-                          </span>
-                          {turn.wrongOriginalText ? (
-                            <p className="live-translation__turn-original">{turn.wrongOriginalText}</p>
-                          ) : null}
-                          {turn.wrongTranslatedText ? (
-                            <p className="live-translation__turn-translated">{turn.wrongTranslatedText}</p>
-                          ) : null}
-                        </div>
-                      ) : null}
-
-                      {turn.status === "corrected" ? (
-                        <p className="live-translation__turn-field-label live-translation__turn-corrected-label">
-                          {t.turn.correctedVersion}
-                        </p>
-                      ) : null}
-
-                      {turn.originalText ? (
-                        <p className="live-translation__turn-original">
-                          <span className="live-translation__turn-field-label">
-                            {t.turn.original}
-                          </span>
-                          {turn.originalText}
-                        </p>
-                      ) : turn.status !== "corrected" ? (
-                        <p className="live-translation__turn-original live-translation__turn-original--missing">
-                          <span className="live-translation__turn-field-label">
-                            {t.turn.original}
-                          </span>
-                          {t.turn.originalMissing}
-                        </p>
-                      ) : null}
-                      <p className="live-translation__turn-translated">
-                        <span className="live-translation__turn-field-label">
-                          {t.turn.translated}
-                        </span>
-                        {turn.translatedText}
-                      </p>
-                    </li>
-                  );
-                })}
-              </ol>
-            </section>
-          ) : null}
-        </>
+        </div>
       )}
     </div>
   );

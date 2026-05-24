@@ -6,6 +6,15 @@ import { jsPDF } from "jspdf";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { liveTranslationLanguageLabel } from "../languages.js";
+import {
+  resolveGenderFormOfAddressLabel,
+  shouldIncludeGenderInPdf,
+} from "../utils/genderFormOfAddress.js";
+import {
+  computePdfLogoSizeMm,
+  drawMedScoutxPdfBrandMark,
+  resolveMedScoutxPdfLogo,
+} from "./medScoutxPdfBranding.js";
 
 const COL = {
   slate: [15, 23, 42],
@@ -31,6 +40,60 @@ function lineHeightMm(fontSizePt) {
   return fontSizePt * 0.352778 * 1.35;
 }
 
+/**
+ * @param {import("jspdf").jsPDF} doc
+ * @param {ReturnType<typeof defaultPdfLabels>} L
+ * @param {{
+ *   pageWidth: number;
+ *   margin: number;
+ *   contentW: number;
+ *   generatedAt: string;
+ *   logo: { dataUrl: string; naturalWidth: number; naturalHeight: number; source?: string } | null;
+ * }} opts
+ * @returns {{ y: number; brandSource: string; usedLogoFallback: boolean }}
+ */
+function drawPdfHeader(doc, L, opts) {
+  const { pageWidth, margin, contentW, generatedAt, logo } = opts;
+  const titleSize = 16;
+  const headerY = margin;
+
+  const brand = drawMedScoutxPdfBrandMark(doc, {
+    pageWidth,
+    margin,
+    y: headerY,
+    logo,
+  });
+
+  const titleMaxW = contentW - brand.logoWidthMm - 6;
+  doc.setTextColor(...COL.slate);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(titleSize);
+  const titleLines = doc.splitTextToSize(sanitizePdfText(L.documentTitle), Math.max(titleMaxW, contentW * 0.45));
+  let titleY = headerY + lineHeightMm(titleSize);
+  for (const line of titleLines) {
+    doc.text(line, margin, titleY);
+    titleY += lineHeightMm(titleSize);
+  }
+
+  const metaY = Math.max(titleY, headerY + brand.logoHeightMm) + 2;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...COL.slateMuted);
+  doc.text(generatedAt, margin, metaY + lineHeightMm(10));
+  doc.setTextColor(...COL.slate);
+
+  const ruleY = metaY + lineHeightMm(10) + 4;
+  doc.setDrawColor(...COL.rule);
+  doc.setLineWidth(0.35);
+  doc.line(margin, ruleY, pageWidth - margin, ruleY);
+
+  return {
+    y: ruleY + 5,
+    brandSource: brand.usedFallback ? "wordmark" : logo?.source || "logo",
+    usedLogoFallback: brand.usedFallback,
+  };
+}
+
 function defaultPdfLabels(uiLanguage) {
   const M = getMessages(uiLanguage);
   const pdf = M.liveMedicalTranslation?.pdf;
@@ -49,6 +112,7 @@ function defaultPdfLabels(uiLanguage) {
         sectionConversation: "Gesprächsprotokoll",
         patientName: "Name",
         birthDate: "Geburtsdatum",
+        genderOrFormOfAddress: "Geschlecht / Anrede",
         patientLanguage: "Patientensprache",
         doctorLanguage: "Arzt-/Praxissprache",
         practiceName: "Praxisname",
@@ -71,6 +135,7 @@ function defaultPdfLabels(uiLanguage) {
         originalMissing: "Original nicht sicher erkannt",
         statusTranslated: "Übersetzt",
         statusUnclear: "Unklar",
+        statusWrongLanguage: "Falsche Sprache",
         statusCorrected: "Korrigiert",
         statusReplayed: "Erneut vorgelesen",
         wrongVersion: "Ursprüngliche Version",
@@ -89,6 +154,7 @@ function defaultPdfLabels(uiLanguage) {
         sectionConversation: "Conversation record",
         patientName: "Name",
         birthDate: "Date of birth",
+        genderOrFormOfAddress: "Gender / form of address",
         patientLanguage: "Patient language",
         doctorLanguage: "Doctor/practice language",
         practiceName: "Practice name",
@@ -111,6 +177,7 @@ function defaultPdfLabels(uiLanguage) {
         originalMissing: "Original not reliably recognized",
         statusTranslated: "Translated",
         statusUnclear: "Unclear",
+        statusWrongLanguage: "Wrong language",
         statusCorrected: "Corrected",
         statusReplayed: "Replayed",
         wrongVersion: "Original version",
@@ -150,6 +217,8 @@ function statusLabel(L, status) {
   switch (status) {
     case "unclear":
       return L.statusUnclear;
+    case "wrongLanguage":
+      return L.statusWrongLanguage;
     case "corrected":
       return L.statusCorrected;
     case "replayed":
@@ -181,8 +250,9 @@ function applyFooters(doc, L, pageWidth, pageHeight, margin, generatedAt) {
 /**
  * @param {ReturnType<typeof import("../utils/sessionMetadata.js").buildExportMetadata>} exportData
  * @param {string} uiLanguage
+ * @param {{ logo?: { dataUrl: string; naturalWidth: number; naturalHeight: number; source?: string } | null }} [options]
  */
-export function buildLiveTranslationPdfDocument(exportData, uiLanguage) {
+export function buildLiveTranslationPdfDocument(exportData, uiLanguage, options = {}) {
   if (!exportData) return null;
 
   const L = defaultPdfLabels(uiLanguage);
@@ -191,16 +261,22 @@ export function buildLiveTranslationPdfDocument(exportData, uiLanguage) {
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 18;
   const contentW = pageWidth - 2 * margin;
-  let y = margin;
 
   const bodySize = 10;
   const labelSize = 9.5;
   const sectionSize = 12;
-  const titleSize = 16;
-  const brandSize = 11;
 
   const generatedAt = formatDateTime(exportData.sessionEndedAt || new Date().toISOString(), uiLanguage);
   const contentBottomY = () => pageHeight - margin - FOOTER_RESERVE_MM;
+
+  const header = drawPdfHeader(doc, L, {
+    pageWidth,
+    margin,
+    contentW,
+    generatedAt,
+    logo: options.logo ?? null,
+  });
+  let y = header.y;
 
   function needSpace(mm) {
     if (y + mm > contentBottomY()) {
@@ -251,25 +327,6 @@ export function buildLiveTranslationPdfDocument(exportData, uiLanguage) {
     gap(4);
   }
 
-  // Header
-  doc.setTextColor(...COL.teal);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(brandSize);
-  needSpace(lineHeightMm(brandSize));
-  doc.text("MedScoutX", margin, y);
-  y += lineHeightMm(brandSize) + 2;
-
-  doc.setTextColor(...COL.slate);
-  doc.setFontSize(titleSize);
-  drawWrapped(L.documentTitle, contentW, titleSize);
-  gap(2);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(bodySize);
-  doc.setTextColor(...COL.slateMuted);
-  drawWrapped(generatedAt, contentW, bodySize);
-  doc.setTextColor(...COL.slate);
-  gap(4);
-
   // Safety notice box
   const safetyLines = doc.splitTextToSize(sanitizePdfText(L.safetyNotice), contentW - 8);
   const boxH = safetyLines.length * lineHeightMm(8.5) + 8;
@@ -291,10 +348,17 @@ export function buildLiveTranslationPdfDocument(exportData, uiLanguage) {
   const patientLang = liveTranslationLanguageLabel(exportData.patientLanguage);
   const doctorLang = liveTranslationLanguageLabel(exportData.doctorLanguage);
   const practice = exportData.practice || {};
+  const pdfMessages = getMessages(uiLanguage).liveMedicalTranslation || getMessages("en").liveMedicalTranslation;
 
   drawSectionTitle(L.sectionPatient);
   drawMetaRow(L.patientName, exportData.patientName);
   drawMetaRow(L.birthDate, formatBirthDate(exportData.birthDate, uiLanguage));
+  if (shouldIncludeGenderInPdf(exportData.genderOrFormOfAddress)) {
+    const genderValue = resolveGenderFormOfAddressLabel(exportData.genderOrFormOfAddress, pdfMessages);
+    if (genderValue) {
+      drawMetaRow(L.genderOrFormOfAddress, genderValue);
+    }
+  }
   drawMetaRow(L.patientLanguage, patientLang);
 
   const practiceRows = [
@@ -414,16 +478,35 @@ export function buildLiveTranslationPdfDocument(exportData, uiLanguage) {
   const datePart = (exportData.sessionEndedAt || "").slice(0, 10) || "export";
   const filename = L.filename.replace(".pdf", `-${datePart}.pdf`);
 
-  return { doc, pdfFilename: filename };
+  return {
+    doc,
+    pdfFilename: filename,
+    brandSource: header.brandSource,
+    usedLogoFallback: header.usedLogoFallback,
+    logoSizeMm: options.logo
+      ? computePdfLogoSizeMm(options.logo)
+      : null,
+  };
 }
 
 /**
  * @param {ReturnType<typeof buildExportMetadata>} exportData
  * @param {string} uiLanguage
  */
-export function downloadLiveTranslationPdf(exportData, uiLanguage) {
-  const built = buildLiveTranslationPdfDocument(exportData, uiLanguage);
+export async function downloadLiveTranslationPdf(exportData, uiLanguage) {
+  const logo = await resolveMedScoutxPdfLogo();
+  const built = buildLiveTranslationPdfDocument(exportData, uiLanguage, { logo });
   if (!built) return false;
   built.doc.save(built.pdfFilename);
   return true;
+}
+
+/**
+ * Sync build helper for tests (logo optional).
+ * @param {ReturnType<typeof buildExportMetadata>} exportData
+ * @param {string} uiLanguage
+ * @param {{ logo?: { dataUrl: string; naturalWidth: number; naturalHeight: number; source?: string } | null }} [options]
+ */
+export function buildLiveTranslationPdfForTest(exportData, uiLanguage, options = {}) {
+  return buildLiveTranslationPdfDocument(exportData, uiLanguage, options);
 }

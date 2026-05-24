@@ -1,3 +1,5 @@
+import { isMedaUnclearPhrase } from "./repeatPhrase.js";
+
 /** Lightweight medical glossary protection — keep small and maintainable. */
 
 export const MEDICAL_GLOSSARY = {
@@ -43,9 +45,6 @@ DE "Ich habe keine Allergien." → Correct EN: "I have no allergies." Wrong: "I 
 
 /** @param {string} text @param {string} targetLanguage */
 export function isUnclearTranslationPhrase(text, targetLanguage) {
-  if (!text || typeof text !== "string") return false;
-  const normalized = text.trim().toLowerCase();
-  const de = "die vorherige aussage war unklar";
-  const en = "the previous statement was unclear";
-  return normalized.includes(de) || normalized.includes(en);
+  void targetLanguage;
+  return isMedaUnclearPhrase(text);
 }

@@ -44,3 +44,25 @@ export function isSetupComplete(fields) {
     fields.patientLanguage !== fields.doctorLanguage
   );
 }
+
+/** @param {string} value */
+export function normalizeDoctorPracticeName(value) {
+  return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
+}
+
+/**
+ * @param {{
+ *   patientName: string;
+ *   participantConsent: boolean;
+ *   medicalPurposeConsent: boolean;
+ *   translationLimitationsConsent: boolean;
+ * }} fields
+ */
+export function isPreliveStartReady(fields) {
+  return (
+    normalizePatientName(fields.patientName).length > 0 &&
+    Boolean(fields.participantConsent) &&
+    Boolean(fields.medicalPurposeConsent) &&
+    Boolean(fields.translationLimitationsConsent)
+  );
+}

@@ -75,7 +75,10 @@ CURRENT MODE:
 - Listen/transcribe: ${routing.sourceLanguageName} (${routing.sourceLanguage})
 - Translate and speak aloud: ${routing.targetLanguageName} (${routing.targetLanguage})
 
-${buildFidelityRulesBlock(routing.targetLanguage)}
+${buildFidelityRulesBlock(routing.targetLanguage, {
+  patientLanguage: routing.patientLanguage,
+  doctorLanguage: routing.doctorLanguage,
+})}
 
 ${buildMedicalScopeBlock()}
 

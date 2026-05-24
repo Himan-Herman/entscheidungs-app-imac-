@@ -1,4 +1,4 @@
-import { normalizePatientName } from "./setupValidation.js";
+import { normalizePatientName, normalizeDoctorPracticeName } from "./setupValidation.js";
 
 /** @typedef {{
  *   practiceName: string;
@@ -26,7 +26,14 @@ export const EMPTY_PRACTICE_INFO = /** @type {LiveTranslationPracticeInfo} */ ({
  *   patientLanguage: string;
  *   doctorLanguage: string;
  *   practice?: Partial<LiveTranslationPracticeInfo>;
+ *   doctorPracticeName?: string;
  *   sessionStartedAt?: string;
+ *   consentConfirmedAt?: string;
+ *   medicalPurposeConfirmed?: boolean;
+ *   translationLimitationsConfirmed?: boolean;
+ *   genderOrFormOfAddress?: string;
+ *   profilePrefilled?: boolean;
+ *   preparedForOtherPerson?: boolean;
  * }} input
  */
 export function buildSessionMetadata(input) {
@@ -34,6 +41,9 @@ export function buildSessionMetadata(input) {
   const trimmedPractice = Object.fromEntries(
     Object.entries(practice).map(([key, value]) => [key, typeof value === "string" ? value.trim() : ""]),
   );
+  const doctorPracticeName = normalizeDoctorPracticeName(input.doctorPracticeName || "");
+  const genderOrFormOfAddress =
+    typeof input.genderOrFormOfAddress === "string" ? input.genderOrFormOfAddress.trim() : "";
 
   return {
     productName: "MedScoutX",
@@ -43,6 +53,17 @@ export function buildSessionMetadata(input) {
     patientLanguage: input.patientLanguage,
     doctorLanguage: input.doctorLanguage,
     practice: trimmedPractice,
+    profilePrefilled: Boolean(input.profilePrefilled),
+    preparedForOtherPerson: Boolean(input.preparedForOtherPerson),
+    ...(genderOrFormOfAddress ? { genderOrFormOfAddress } : {}),
+    ...(doctorPracticeName ? { doctorPracticeName } : {}),
+    ...(input.consentConfirmedAt
+      ? {
+          consentConfirmedAt: input.consentConfirmedAt,
+          medicalPurposeConfirmed: Boolean(input.medicalPurposeConfirmed),
+          translationLimitationsConfirmed: Boolean(input.translationLimitationsConfirmed),
+        }
+      : {}),
   };
 }
 

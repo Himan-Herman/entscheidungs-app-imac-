@@ -8,3 +8,14 @@ export function getMedaIntroText(patientLanguageCode, t) {
   const intro = t.medaIntro || {};
   return intro[code] || intro.en || intro.de || "";
 }
+
+/**
+ * Short spoken readiness phrase after session activation (doctor/practice language).
+ * @param {string} doctorLanguageCode
+ * @param {{ medaReadiness?: Record<string, string> }} t
+ */
+export function getMedaReadinessPhrase(doctorLanguageCode, t) {
+  const code = (doctorLanguageCode || "de").toLowerCase();
+  const phrases = t.medaReadiness || {};
+  return phrases[code] || phrases.de || phrases.en || "";
+}

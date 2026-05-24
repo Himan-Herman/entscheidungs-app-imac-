@@ -31,6 +31,15 @@ export function resolveLiveSessionWarnAtMs(maxMs) {
 }
 
 /**
+ * @param {number} accumulatedMs
+ * @param {number | null} runningSince
+ * @param {number} [now]
+ */
+export function computeActiveSessionElapsedMs(accumulatedMs, runningSince, now = Date.now()) {
+  return accumulatedMs + (runningSince != null ? now - runningSince : 0);
+}
+
+/**
  * @param {number} elapsedMs
  * @param {number} maxMs
  */
