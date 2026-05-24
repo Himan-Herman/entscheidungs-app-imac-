@@ -83,12 +83,32 @@ export function useInterpreterRecorder({
     }
   }, []);
 
+  const ensureStream = useCallback(async () => {
+    const activeTracks =
+      streamRef.current?.getAudioTracks?.().filter((track) => track.readyState === "live") ||
+      [];
+    if (streamRef.current && activeTracks.length > 0) {
+      return streamRef.current;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      },
+    });
+    streamRef.current = stream;
+    return stream;
+  }, []);
+
   const stopSilenceMonitor = useCallback(() => {
     stopSilenceMonitorRef.current?.();
     stopSilenceMonitorRef.current = null;
   }, []);
 
-  const disposeActiveRecording = useCallback(() => {
+  const disposeActiveRecording = useCallback((options = {}) => {
+    const preserveStream = options.preserveStream === true;
     stopSilenceMonitor();
     if (stopTimerRef.current) {
       clearTimeout(stopTimerRef.current);
@@ -110,11 +130,13 @@ export function useInterpreterRecorder({
     setIsStopping(false);
     setIsRecording(false);
     setIsPreparing(false);
-    cleanupStream();
+    if (!preserveStream) {
+      cleanupStream();
+    }
   }, [cleanupStream, stopSilenceMonitor]);
 
   const resetRecorderState = useCallback(() => {
-    disposeActiveRecording();
+    disposeActiveRecording({ preserveStream: true });
     startingRef.current = false;
   }, [disposeActiveRecording]);
 
@@ -123,7 +145,7 @@ export function useInterpreterRecorder({
   }, []);
 
   const cancelRecording = useCallback(() => {
-    disposeActiveRecording();
+    disposeActiveRecording({ preserveStream: false });
     startingRef.current = false;
   }, [disposeActiveRecording]);
 
@@ -180,17 +202,10 @@ export function useInterpreterRecorder({
     setRecorderError(null);
     setIsPreparing(true);
 
-    disposeActiveRecording();
+    disposeActiveRecording({ preserveStream: true });
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      streamRef.current = stream;
+      const stream = await ensureStream();
 
       let mime = "audio/webm";
       if (typeof MediaRecorder.isTypeSupported === "function") {
@@ -220,7 +235,11 @@ export function useInterpreterRecorder({
 
       recorder.onstop = () => {
         stoppingRef.current = false;
-        cleanupStream();
+        stopSilenceMonitor();
+        if (stopTimerRef.current) {
+          clearTimeout(stopTimerRef.current);
+          stopTimerRef.current = null;
+        }
         setIsRecording(false);
         setIsPreparing(false);
 
@@ -300,7 +319,7 @@ export function useInterpreterRecorder({
       startingRef.current = false;
     }
   }, [
-    cleanupStream,
+    ensureStream,
     disposeActiveRecording,
     isPreparing,
     isRecording,

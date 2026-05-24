@@ -67,7 +67,21 @@ export function useInterpreterStreamCapture(opts = {}) {
     };
   }, []);
 
-  const cleanupMedia = useCallback(() => {
+  const stopStreamTracks = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => {
+        try {
+          t.stop();
+        } catch {
+          /* ignore */
+        }
+      });
+      streamRef.current = null;
+    }
+  }, []);
+
+  const cleanupMedia = useCallback((options = {}) => {
+    const preserveStream = options.preserveStream === true;
     if (pollTimerRef.current) {
       clearInterval(pollTimerRef.current);
       pollTimerRef.current = null;
@@ -91,16 +105,28 @@ export function useInterpreterStreamCapture(opts = {}) {
       }
     }
     mediaRecorderRef.current = null;
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => {
-        try {
-          t.stop();
-        } catch {
-          /* ignore */
-        }
-      });
-      streamRef.current = null;
+    if (!preserveStream) {
+      stopStreamTracks();
     }
+  }, [stopStreamTracks]);
+
+  const ensureStream = useCallback(async () => {
+    const activeTracks =
+      streamRef.current?.getAudioTracks?.().filter((track) => track.readyState === "live") ||
+      [];
+    if (streamRef.current && activeTracks.length > 0) {
+      return streamRef.current;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      },
+    });
+    streamRef.current = stream;
+    return stream;
   }, []);
 
   const resetUiIdle = useCallback(() => {
@@ -114,7 +140,7 @@ export function useInterpreterStreamCapture(opts = {}) {
 
   const cancelStream = useCallback(async () => {
     const id = streamIdRef.current;
-    cleanupMedia();
+    cleanupMedia({ preserveStream: false });
     streamIdRef.current = null;
     uploadInFlightRef.current = false;
     if (id) {
@@ -280,14 +306,7 @@ export function useInterpreterStreamCapture(opts = {}) {
     streamIdRef.current = started.streamId;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      streamRef.current = stream;
+      const stream = await ensureStream();
 
       let mime = "audio/webm";
       if (typeof MediaRecorder.isTypeSupported === "function") {
@@ -353,7 +372,7 @@ export function useInterpreterStreamCapture(opts = {}) {
       }
       return false;
     }
-  }, [phase, enqueueChunk, monitorSilence, pollStatus, cancelStream]);
+  }, [phase, ensureStream, enqueueChunk, monitorSilence, pollStatus, cancelStream]);
 
   const stopStreaming = useCallback(async () => {
     const id = streamIdRef.current;
@@ -372,7 +391,7 @@ export function useInterpreterStreamCapture(opts = {}) {
     setConnectionLabel("finalizing");
     optsRef.current.onStatusMessage?.("finalizing");
 
-    cleanupMedia();
+    cleanupMedia({ preserveStream: true });
 
     const drainDeadline = Date.now() + 8000;
     while (

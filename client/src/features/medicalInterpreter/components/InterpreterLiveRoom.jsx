@@ -115,6 +115,7 @@ const PHASE_TRANSITIONS = {
 const AUTO_RESTART_DELAY_MS = 70;
 const AUTO_RESTART_RETRY_MS = 90;
 const AUTO_RESTART_MAX_ATTEMPTS = 10;
+const LISTENING_WATCHDOG_DELAY_MS = 700;
 const INTERPRETER_VOICE_PROFILE = "neutral_medical";
 
 function nextPhase(currentPhase, requestedPhase) {
@@ -198,6 +199,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
   const alertRef = useRef(null);
   const autoRestartTimerRef = useRef(null);
   const autoRestartAttemptRef = useRef(0);
+  const listeningWatchdogTimerRef = useRef(null);
   const transcribeAbortRef = useRef(null);
   const translateAbortRef = useRef(null);
   const runTokenRef = useRef(0);
@@ -299,6 +301,13 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     autoRestartAttemptRef.current = 0;
   }, []);
 
+  const clearListeningWatchdog = useCallback(() => {
+    if (listeningWatchdogTimerRef.current) {
+      clearTimeout(listeningWatchdogTimerRef.current);
+      listeningWatchdogTimerRef.current = null;
+    }
+  }, []);
+
   const {
     playText,
     stopAllPlayback,
@@ -320,9 +329,10 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
 
   const stopRuntime = useCallback(() => {
     clearAutoRestart();
+    clearListeningWatchdog();
     cancelInFlight();
     stopAllPlayback();
-  }, [cancelInFlight, clearAutoRestart, stopAllPlayback]);
+  }, [cancelInFlight, clearAutoRestart, clearListeningWatchdog, stopAllPlayback]);
 
   const announce = useCallback((message) => {
     setLiveAnnouncement("");
@@ -487,6 +497,8 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
         if (autoRestartAttemptRef.current >= AUTO_RESTART_MAX_ATTEMPTS) {
           autoRestartTimerRef.current = null;
           autoRestartAttemptRef.current = 0;
+          setPhase(LIVE_PHASE.IDLE);
+          announce(t.liveSession.statusIdle);
           return;
         }
 
@@ -502,7 +514,7 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
       attemptAutoRestart,
       AUTO_RESTART_DELAY_MS,
     );
-  }, [clearAutoRestart]);
+  }, [announce, clearAutoRestart, setPhase, t.liveSession.statusIdle]);
 
   const finalizeTurnFromTranscript = useCallback(
     async ({
@@ -871,11 +883,63 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
       }
       setDraftTranscript("");
       if (shouldUseStreamingMode) {
-        return startStreaming();
+        const started = await startStreaming();
+        if (started) {
+          return true;
+        }
       }
       return startRecordingRef.current?.();
     };
   }, [interpreterServerStatus.loading, shouldUseStreamingMode, startStreaming]);
+
+  useEffect(() => {
+    clearListeningWatchdog();
+    if (
+      phase !== LIVE_PHASE.LISTENING ||
+      !session?.sessionId ||
+      session.status === SESSION_STATUS_ENDED ||
+      isRecording ||
+      isStreamingActive ||
+      isPreparing ||
+      isStopping ||
+      isSpeakLoading ||
+      isSpeakPlaying ||
+      processingRef.current
+    ) {
+      return undefined;
+    }
+
+    listeningWatchdogTimerRef.current = setTimeout(() => {
+      if (
+        phaseRef.current !== LIVE_PHASE.LISTENING ||
+        isRecording ||
+        isStreamingActive ||
+        isPreparing ||
+        isStopping ||
+        isSpeakLoading ||
+        isSpeakPlaying ||
+        processingRef.current
+      ) {
+        return;
+      }
+      scheduleNextListening();
+    }, LISTENING_WATCHDOG_DELAY_MS);
+
+    return () => {
+      clearListeningWatchdog();
+    };
+  }, [
+    clearListeningWatchdog,
+    isPreparing,
+    isRecording,
+    isSpeakLoading,
+    isSpeakPlaying,
+    isStopping,
+    isStreamingActive,
+    phase,
+    scheduleNextListening,
+    session,
+  ]);
 
   const handleStartConversation = useCallback(async () => {
     setPdfReady(false);
