@@ -58,6 +58,9 @@ export function startInterpreterSilenceMonitor(stream, options) {
     if (!Ctx) return stop;
 
     audioContext = new Ctx();
+    if (audioContext.state === "suspended") {
+      void audioContext.resume().catch(() => {});
+    }
     const source = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;

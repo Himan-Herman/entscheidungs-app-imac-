@@ -112,6 +112,9 @@ export function useInterpreterTtsPlayback(opts = {}) {
       const url = URL.createObjectURL(blob);
       objectUrlRef.current = url;
       const el = new Audio(url);
+      el.preload = "auto";
+      el.playsInline = true;
+      el.setAttribute("playsinline", "");
       audioRef.current = el;
 
       const cleanupListeners = () => {

@@ -471,15 +471,15 @@ export default {
     languagePairLabel: "Aktives Sprachenpaar",
     sessionDetails: "Gesprächsdetails",
     statusLabel: "Status:",
-    statusIdle: "Bereit, das Live-Gespräch zu starten",
-    statusListening: "Hört gerade zu",
-    statusSilenceWaiting: "Kurze Pause erkannt",
-    statusTranscribing: "Aktueller Beitrag wird transkribiert",
-    statusTranslating: "Aktueller Beitrag wird übersetzt",
-    statusSpeaking: "Übersetzung wird laut vorgelesen",
+    statusIdle: "Bereit",
+    statusListening: "Hört zu",
+    statusSilenceWaiting: "Wartet auf das Ende des Beitrags",
+    statusTranscribing: "Transkribiert den aktuellen Beitrag",
+    statusTranslating: "Übersetzt den aktuellen Beitrag",
+    statusSpeaking: "Spricht die Übersetzung vor",
     statusPaused: "Gespräch pausiert",
     statusEnded: "Gespräch beendet",
-    statusError: "Ein Fehler braucht Ihre Aufmerksamkeit",
+    statusError: "Bitte Mikrofon oder Verbindung prüfen",
     autoModeBadge: "Auto",
     autoDetectSpeakerLabel: "Sprache wird erkannt",
     firstTurnOpenLabel: "Patient oder Arzt beginnt",
@@ -505,15 +505,15 @@ export default {
     pendingTranslation:
       "Die Übersetzung erscheint, sobald dieser Beitrag verarbeitet wurde.",
     noConversationYet:
-      "Noch keine dokumentierten Beiträge. Starten Sie das Gespräch und sprechen Sie.",
+      "Noch keine dokumentierten Beiträge. Starten Sie das Gespräch und sprechen Sie natürlich.",
     noSpeechDetected:
-      "In diesem Beitrag wurde keine Sprache erkannt. Bitte erneut versuchen.",
+      "Es wurde keine klare Sprache erkannt. Bitte sprechen Sie erneut.",
     noTranscriptResult:
-      "Für diesen Beitrag wurde kein Text erkannt. Bitte erneut versuchen.",
+      "Für diesen Beitrag konnte kein Text erkannt werden. Bitte erneut sprechen.",
     readyForNextSpeaker: "Bereit für die nächste sprechende Person.",
-    readyForEither: "Signalton: Patient oder Arzt kann jetzt beginnen.",
-    readyForDoctor: "Arzt/Praxis spricht jetzt.",
-    readyForPatient: "Patient:in spricht jetzt.",
+    readyForEither: "Signalton: Patient:in oder Arzt/Praxis kann jetzt beginnen.",
+    readyForDoctor: "Signalton: Arzt/Praxis spricht jetzt.",
+    readyForPatient: "Signalton: Patient:in spricht jetzt.",
   },
 
   confirm: {
@@ -544,7 +544,7 @@ export default {
     heading: "Gespräch",
     end: "Gespräch beenden",
     endPreparing: "Wird beendet …",
-    endHint: "Gespräch als abgeschlossen markiert.",
+    endHint: "Das Gespräch wurde auf diesem Gerät als abgeschlossen markiert.",
     ended: "Gespräch beendet.",
     leave: "Raum verlassen",
     leaveConfirm:
@@ -552,7 +552,7 @@ export default {
     delete: "Auf diesem Gerät löschen",
     deleteConfirm: "Gespräch wirklich von diesem Gerät löschen?",
     export: "PDF herunterladen",
-    exportHint: "Gesprächsdokumentation als PDF auf diesem Gerät speichern.",
+    exportHint: "Die Gesprächsdokumentation als PDF auf dieses Gerät herunterladen.",
     exportUnavailable:
       "Mindestens ein dokumentierter Beitrag ist nötig, bevor exportiert werden kann.",
   },

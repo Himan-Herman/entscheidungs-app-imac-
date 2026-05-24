@@ -7,19 +7,29 @@ const TURN_SIGNAL_DURATION_MS = 120;
 const TURN_SIGNAL_GAIN = 0.045;
 const TURN_SIGNAL_START_HZ = 1046;
 const TURN_SIGNAL_END_HZ = 1318;
+let sharedTurnSignalContext = null;
 
-export async function playInterpreterTurnSignal() {
-  if (typeof window === "undefined") return;
+async function getTurnSignalContext() {
+  if (typeof window === "undefined") return null;
 
   const AudioCtor = window.AudioContext || window.webkitAudioContext;
-  if (!AudioCtor) return;
+  if (!AudioCtor) return null;
 
-  let context;
+  if (!sharedTurnSignalContext || sharedTurnSignalContext.state === "closed") {
+    sharedTurnSignalContext = new AudioCtor();
+  }
+
+  if (sharedTurnSignalContext.state === "suspended") {
+    await sharedTurnSignalContext.resume();
+  }
+
+  return sharedTurnSignalContext;
+}
+
+export async function playInterpreterTurnSignal() {
   try {
-    context = new AudioCtor();
-    if (context.state === "suspended") {
-      await context.resume();
-    }
+    const context = await getTurnSignalContext();
+    if (!context) return;
 
     const oscillator = context.createOscillator();
     const gain = context.createGain();
@@ -50,11 +60,5 @@ export async function playInterpreterTurnSignal() {
     });
   } catch {
     /* ignore short cue failures */
-  } finally {
-    try {
-      await context?.close();
-    } catch {
-      /* ignore */
-    }
   }
 }

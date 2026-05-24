@@ -70,6 +70,12 @@ export function useInterpreterRecorder({
     onSilencePhaseChangeRef.current = onSilencePhaseChange;
   }, [onSilencePhaseChange]);
 
+  const markStreamStale = useCallback((stream) => {
+    if (streamRef.current === stream) {
+      streamRef.current = null;
+    }
+  }, []);
+
   const cleanupStream = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => {
@@ -84,11 +90,16 @@ export function useInterpreterRecorder({
   }, []);
 
   const ensureStream = useCallback(async () => {
-    const activeTracks =
-      streamRef.current?.getAudioTracks?.().filter((track) => track.readyState === "live") ||
-      [];
-    if (streamRef.current && activeTracks.length > 0) {
+    const usableTracks =
+      streamRef.current?.getAudioTracks?.().filter(
+        (track) => track.readyState === "live" && track.muted !== true,
+      ) || [];
+    if (streamRef.current && usableTracks.length > 0) {
       return streamRef.current;
+    }
+
+    if (streamRef.current) {
+      cleanupStream();
     }
 
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -98,9 +109,19 @@ export function useInterpreterRecorder({
         autoGainControl: true,
       },
     });
+
+    const handleStreamStale = () => {
+      markStreamStale(stream);
+    };
+
+    stream.addEventListener?.("inactive", handleStreamStale, { once: true });
+    stream.getAudioTracks().forEach((track) => {
+      track.addEventListener?.("ended", handleStreamStale, { once: true });
+    });
+
     streamRef.current = stream;
     return stream;
-  }, []);
+  }, [cleanupStream, markStreamStale]);
 
   const stopSilenceMonitor = useCallback(() => {
     stopSilenceMonitorRef.current?.();

@@ -8,12 +8,10 @@ import {
 import { translateNearRealtimePreview } from "../api/interpreterNearRealtimeApi.js";
 import InterpreterPlaybackStatus from "./InterpreterPlaybackStatus.jsx";
 import { useInterpreterRecorder } from "../hooks/useInterpreterRecorder.js";
-import { useInterpreterStreamCapture } from "../hooks/useInterpreterStreamCapture.js";
 import { useInterpreterServerStatus } from "../hooks/useInterpreterServerStatus.js";
 import { useInterpreterTtsPlayback } from "../hooks/useInterpreterTtsPlayback.js";
 import { useMedicalInterpreterMessages } from "../hooks/useMedicalInterpreterMessages.js";
 import { isNearRealtimeTranslationClientEnabled } from "../config/isNearRealtimeTranslationEnabled.js";
-import { isStreamingSttClientEnabled } from "../config/isStreamingSttEnabled.js";
 import {
   SESSION_STATUS_ACTIVE,
   SESSION_STATUS_ENDED,
@@ -116,6 +114,7 @@ const AUTO_RESTART_DELAY_MS = 70;
 const AUTO_RESTART_RETRY_MS = 90;
 const AUTO_RESTART_MAX_ATTEMPTS = 10;
 const LISTENING_WATCHDOG_DELAY_MS = 700;
+const POST_PLAYBACK_HANDOFF_DELAY_MS = 180;
 const INTERPRETER_VOICE_PROFILE = "neutral_medical";
 
 function nextPhase(currentPhase, requestedPhase) {
@@ -131,6 +130,12 @@ function nextPhase(currentPhase, requestedPhase) {
 
 function oppositeSpeaker(speaker) {
   return speaker === SPEAKER_PATIENT ? SPEAKER_DOCTOR : SPEAKER_PATIENT;
+}
+
+function waitForHandoff(delayMs = POST_PLAYBACK_HANDOFF_DELAY_MS) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, delayMs);
+  });
 }
 
 function formatTurnTime(value, uiLanguage) {
@@ -210,6 +215,7 @@ export default function InterpreterLiveRoom({
   const runTokenRef = useRef(0);
   const processingRef = useRef(false);
   const startListeningRef = useRef(null);
+  const loopEnabledRef = useRef(false);
   const initialSessionRef = useRef(
     sessionId ? getSession(sessionId) || getCurrentSession() : getCurrentSession(),
   );
@@ -251,30 +257,12 @@ export default function InterpreterLiveRoom({
     phaseRef.current = phase;
   }, [phase]);
 
-  const streamingModeAvailable = useMemo(
-    () =>
-      isStreamingSttClientEnabled() &&
-      interpreterServerStatus.streamingSttEnabled === true,
-    [interpreterServerStatus.streamingSttEnabled],
-  );
-
   const nearRealtimeFastTranslateAvailable = useMemo(
     () =>
       isNearRealtimeTranslationClientEnabled() &&
       interpreterServerStatus.nearRealtimeTranslationEnabled === true,
     [interpreterServerStatus.nearRealtimeTranslationEnabled],
   );
-
-  const streamLanguageHint = useMemo(() => {
-    if (!session) return undefined;
-    const patientLanguage = String(session.patientLanguage || "").trim().toLowerCase();
-    const doctorLanguage = String(session.doctorLanguage || "").trim().toLowerCase();
-    if (!patientLanguage || !doctorLanguage) return undefined;
-    if (patientLanguage !== doctorLanguage && (session.turns?.length || 0) === 0) {
-      return undefined;
-    }
-    return languagesForSpeaker(session, speaker).sourceLanguage;
-  }, [session, speaker]);
 
   const reloadSession = useCallback(() => {
     const targetSessionId = sessionId || sessionRef.current?.sessionId;
@@ -333,6 +321,7 @@ export default function InterpreterLiveRoom({
   }, []);
 
   const stopRuntime = useCallback(() => {
+    loopEnabledRef.current = false;
     clearAutoRestart();
     clearListeningWatchdog();
     cancelInFlight();
@@ -398,6 +387,7 @@ export default function InterpreterLiveRoom({
 
   const showError = useCallback(
     (message) => {
+      loopEnabledRef.current = false;
       setErrorMessage(message);
       setPhase(LIVE_PHASE.ERROR);
       requestAnimationFrame(() => alertRef.current?.focus());
@@ -449,12 +439,38 @@ export default function InterpreterLiveRoom({
 
   const turns = session?.turns ?? [];
   const hasTurns = turns.length > 0;
+  const showHeader = !embedded;
+  const showConversation = !embedded;
   const activeSpeakerLabel = useMemo(() => {
     if (!hasTurns) {
       return t.liveSession.firstTurnOpenLabel;
     }
     return speakerLabelFor(speaker, t);
   }, [hasTurns, speaker, t]);
+
+  const turnPrompt = useMemo(() => {
+    if (phase === LIVE_PHASE.ENDED) {
+      return t.sessionActions.ended;
+    }
+    if (phase === LIVE_PHASE.ERROR) {
+      return t.liveSession.statusError;
+    }
+    if (!hasTurns) {
+      return t.liveSession.readyForEither;
+    }
+    return speaker === SPEAKER_DOCTOR
+      ? t.liveSession.readyForDoctor
+      : t.liveSession.readyForPatient;
+  }, [
+    hasTurns,
+    phase,
+    speaker,
+    t.liveSession.readyForDoctor,
+    t.liveSession.readyForEither,
+    t.liveSession.readyForPatient,
+    t.liveSession.statusError,
+    t.sessionActions.ended,
+  ]);
 
   const handlePhaseFromSilence = useCallback(
     (silencePhase) => {
@@ -473,6 +489,7 @@ export default function InterpreterLiveRoom({
   const scheduleNextListening = useCallback(() => {
     clearAutoRestart();
     if (
+      !loopEnabledRef.current ||
       !sessionRef.current ||
       phaseRef.current === LIVE_PHASE.PAUSED ||
       phaseRef.current === LIVE_PHASE.ENDED ||
@@ -482,6 +499,7 @@ export default function InterpreterLiveRoom({
     }
     const attemptAutoRestart = () => {
       if (
+        !loopEnabledRef.current ||
         !sessionRef.current ||
         phaseRef.current === LIVE_PHASE.PAUSED ||
         phaseRef.current === LIVE_PHASE.ENDED ||
@@ -520,6 +538,16 @@ export default function InterpreterLiveRoom({
       AUTO_RESTART_DELAY_MS,
     );
   }, [announce, clearAutoRestart, setPhase, t.liveSession.statusIdle]);
+
+  const recoverFromShortRecording = useCallback(() => {
+    if (!loopEnabledRef.current || phaseRef.current === LIVE_PHASE.ENDED) {
+      return;
+    }
+    setErrorMessage("");
+    announce(t.liveSession.noSpeechDetected);
+    setPhase(LIVE_PHASE.LISTENING);
+    scheduleNextListening();
+  }, [announce, scheduleNextListening, setPhase, t.liveSession.noSpeechDetected]);
 
   const finalizeTurnFromTranscript = useCallback(
     async ({
@@ -673,6 +701,7 @@ export default function InterpreterLiveRoom({
         reloadSession();
         setActiveSpeaker(oppositeSpeaker(resolvedSpeaker));
         await playInterpreterTurnSignal();
+        await waitForHandoff();
         setPhase(LIVE_PHASE.LISTENING);
         announce(
           resolvedSpeaker === SPEAKER_PATIENT
@@ -782,66 +811,60 @@ export default function InterpreterLiveRoom({
     onRecorded: processRecordedSegment,
   });
 
-  const {
-    phase: streamPhase,
-    isActive: isStreamingActive,
-    browserSupported: streamingBrowserSupported,
-    startStreaming,
-    cancelStream,
-  } = useInterpreterStreamCapture({
-    languageHint: streamLanguageHint,
-    silenceAutoStopMs: INTERPRETER_SILENCE_AUTO_STOP_MS,
-    onRecordingStart: () => {
-      setPhase(LIVE_PHASE.LISTENING);
-      announce(t.liveSession.statusListening);
-    },
-    onSilencePhaseChange: handlePhaseFromSilence,
-    onDraftPreview: ({ text }) => {
-      setDraftTranscript(String(text || "").trim());
-    },
-    onError: (code) => {
-      if (code === "mic_denied") {
-        showError(t.pushToTalk.micDenied);
-        return;
-      }
-      if (code === "stream_backpressure") {
-        showError(t.errors.network);
-        return;
-      }
-      showError(t.errors.generic);
-    },
-    onFinalized: async ({ transcript, confidence, language }) => {
-      if (!String(transcript || "").trim()) {
-        announce(t.liveSession.noSpeechDetected);
-        setPhase(LIVE_PHASE.LISTENING);
-        scheduleNextListening();
-        return;
-      }
-      await finalizeTurnFromTranscript({
-        originalTranscript: transcript,
-        detectedLanguage: language,
-        confidence,
-        activeSession: sessionRef.current,
-        fallbackSpeaker: speakerRef.current,
-      });
-    },
-  });
+  const liveLoopBusy =
+    isRecording ||
+    isPreparing ||
+    isStopping ||
+    processingRef.current ||
+    isSpeakLoading ||
+    isSpeakPlaying;
 
-  const shouldUseStreamingMode =
-    streamingModeAvailable && streamingBrowserSupported;
-
-  useEffect(() => {
-    if (!shouldUseStreamingMode) return;
-    if (streamPhase === "finalizing" && phaseRef.current !== LIVE_PHASE.TRANSLATING) {
-      setPhase(LIVE_PHASE.TRANSCRIBING);
-      announce(t.liveSession.statusTranscribing);
+  const resumeListeningIfNeeded = useCallback(() => {
+    if (
+      typeof document !== "undefined" &&
+      document.visibilityState === "hidden"
+    ) {
+      return;
     }
-  }, [announce, setPhase, shouldUseStreamingMode, streamPhase, t.liveSession.statusTranscribing]);
+    if (
+      !loopEnabledRef.current ||
+      !sessionRef.current?.sessionId ||
+      sessionRef.current.status === SESSION_STATUS_ENDED ||
+      phaseRef.current === LIVE_PHASE.PAUSED ||
+      phaseRef.current === LIVE_PHASE.ENDED ||
+      phaseRef.current === LIVE_PHASE.ERROR ||
+      isPreparing ||
+      isRecording ||
+      isStopping ||
+      isSpeakLoading ||
+      isSpeakPlaying ||
+      processingRef.current
+    ) {
+      return;
+    }
+
+    if (
+      phaseRef.current === LIVE_PHASE.IDLE ||
+      phaseRef.current === LIVE_PHASE.SILENCE_WAITING
+    ) {
+      setPhase(LIVE_PHASE.LISTENING);
+    }
+    scheduleNextListening();
+  }, [
+    isPreparing,
+    isRecording,
+    isSpeakLoading,
+    isSpeakPlaying,
+    isStopping,
+    scheduleNextListening,
+    setPhase,
+  ]);
 
   const startRecordingRef = useRef(startRecording);
   useEffect(() => {
     startRecordingRef.current = async () => {
       if (
+        !loopEnabledRef.current ||
         !sessionRef.current?.sessionId ||
         processingRef.current ||
         phaseRef.current === LIVE_PHASE.PAUSED ||
@@ -853,6 +876,10 @@ export default function InterpreterLiveRoom({
       setErrorMessage("");
       const started = await startRecording();
       if (!started && recorderError) {
+        if (recorderError === "too_short") {
+          recoverFromShortRecording();
+          return false;
+        }
         showError(
           recorderError === "mic_denied"
             ? t.pushToTalk.micDenied
@@ -868,6 +895,7 @@ export default function InterpreterLiveRoom({
     isSpeakLoading,
     isSpeakPlaying,
     recorderError,
+    recoverFromShortRecording,
     showError,
     startRecording,
     t,
@@ -883,19 +911,10 @@ export default function InterpreterLiveRoom({
       ) {
         return false;
       }
-      if (isStreamingSttClientEnabled() && interpreterServerStatus.loading) {
-        return false;
-      }
       setDraftTranscript("");
-      if (shouldUseStreamingMode) {
-        const started = await startStreaming();
-        if (started) {
-          return true;
-        }
-      }
       return startRecordingRef.current?.();
     };
-  }, [interpreterServerStatus.loading, shouldUseStreamingMode, startStreaming]);
+  }, []);
 
   useEffect(() => {
     clearListeningWatchdog();
@@ -904,7 +923,6 @@ export default function InterpreterLiveRoom({
       !session?.sessionId ||
       session.status === SESSION_STATUS_ENDED ||
       isRecording ||
-      isStreamingActive ||
       isPreparing ||
       isStopping ||
       isSpeakLoading ||
@@ -918,7 +936,6 @@ export default function InterpreterLiveRoom({
       if (
         phaseRef.current !== LIVE_PHASE.LISTENING ||
         isRecording ||
-        isStreamingActive ||
         isPreparing ||
         isStopping ||
         isSpeakLoading ||
@@ -940,26 +957,81 @@ export default function InterpreterLiveRoom({
     isSpeakLoading,
     isSpeakPlaying,
     isStopping,
-    isStreamingActive,
     phase,
     scheduleNextListening,
     session,
   ]);
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        resumeListeningIfNeeded();
+      }
+    };
+    const handleFocus = () => {
+      resumeListeningIfNeeded();
+    };
+    const handlePageShow = () => {
+      resumeListeningIfNeeded();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, [resumeListeningIfNeeded]);
+
   const handleStartConversation = useCallback(async () => {
+    const current = reloadSession();
+    const nextSpeaker = current ? nextExpectedSpeakerFromSession(current) : SPEAKER_PATIENT;
+    loopEnabledRef.current = true;
+    if (current?.sessionId) {
+      const activeSession = updateSessionMetadata(current.sessionId, {
+        status: SESSION_STATUS_ACTIVE,
+      });
+      if (activeSession) {
+        setSession(activeSession);
+        sessionRef.current = activeSession;
+      }
+    }
+    setActiveSpeaker(nextSpeaker);
     setPdfReady(false);
     setExportMessage("");
     setErrorMessage("");
     setDraftTranscript("");
     setPhase(LIVE_PHASE.IDLE);
     await playInterpreterTurnSignal();
-    announce(t.liveSession.readyForEither);
-    await startListeningRef.current?.();
-  }, [announce, setPhase, t.liveSession.readyForEither]);
+    await waitForHandoff(120);
+    announce(
+      current?.turns?.length
+        ? nextSpeaker === SPEAKER_DOCTOR
+          ? t.liveSession.readyForDoctor
+          : t.liveSession.readyForPatient
+        : t.liveSession.readyForEither,
+    );
+    const started = await startListeningRef.current?.();
+    if (!started) {
+      scheduleNextListening();
+    }
+  }, [
+    announce,
+    reloadSession,
+    scheduleNextListening,
+    setActiveSpeaker,
+    setPhase,
+    t.liveSession.readyForDoctor,
+    t.liveSession.readyForEither,
+    t.liveSession.readyForPatient,
+  ]);
 
   const handleEndConversation = useCallback(() => {
+    loopEnabledRef.current = false;
     stopRuntime();
-    cancelStream();
     cancelRecording();
     const current = sessionRef.current;
     if (!current?.sessionId) return;
@@ -969,7 +1041,7 @@ export default function InterpreterLiveRoom({
     setPdfReady(Boolean(ended?.turns?.length));
     setPhase(LIVE_PHASE.ENDED);
     announce(t.sessionActions.ended);
-  }, [announce, cancelRecording, cancelStream, stopRuntime, t, uiLanguage, setPhase]);
+  }, [announce, cancelRecording, stopRuntime, t, uiLanguage, setPhase]);
 
   const handleDownloadPdf = useCallback(() => {
     const current = reloadSession();
@@ -1011,19 +1083,18 @@ export default function InterpreterLiveRoom({
     if (recorderError === "mic_denied") {
       showError(t.pushToTalk.micDenied);
     } else if (recorderError === "too_short") {
-      showError(t.pushToTalk.tooShort);
+      recoverFromShortRecording();
     } else {
       showError(t.errors.generic);
     }
-  }, [recorderError, showError, t]);
+  }, [recorderError, recoverFromShortRecording, showError, t]);
 
   useEffect(() => {
     return () => {
       stopRuntime();
-      cancelStream();
       cancelRecording();
     };
-  }, [cancelRecording, cancelStream, stopRuntime]);
+  }, [cancelRecording, stopRuntime]);
 
   const content = (
     <>
@@ -1033,18 +1104,21 @@ export default function InterpreterLiveRoom({
         </Link>
       ) : null}
 
-      <header className="interpreter-live-shell__header">
-        <div>
-          <h1 className={embedded ? "interpreter-live-shell__embedded-title" : "medical-interpreter-page__title"}>
-            {t.room.heading}
-          </h1>
-        </div>
-        <div className="interpreter-live-shell__pair" aria-label={t.liveSession.languagePairLabel}>
-          {languagePairLabel}
-        </div>
-      </header>
+      {showHeader ? (
+        <header className="interpreter-live-shell__header">
+          <div>
+            <h1 className="medical-interpreter-page__title">{t.room.heading}</h1>
+          </div>
+          <div className="interpreter-live-shell__pair" aria-label={t.liveSession.languagePairLabel}>
+            {languagePairLabel}
+          </div>
+        </header>
+      ) : null}
 
-      <section className="interpreter-live-shell__controls" aria-labelledby="interp-live-controls">
+      <section
+        className={`interpreter-live-shell__controls${embedded ? " interpreter-live-shell__controls--embedded" : ""}`}
+        aria-labelledby="interp-live-controls"
+      >
         <div className="interpreter-status-bar interpreter-status-bar--busy" role="status" aria-live="polite">
           <strong>{t.liveSession.statusLabel}</strong> {statusText}
         </div>
@@ -1052,12 +1126,17 @@ export default function InterpreterLiveRoom({
           <span className="interpreter-live-shell__status-chip interpreter-live-shell__status-chip--speaker">
             {activeSpeakerLabel}
           </span>
-          <span className="interpreter-live-shell__status-chip interpreter-live-shell__status-chip--mode">
-            {t.liveSession.autoModeBadge}
-          </span>
           <span className="interpreter-live-shell__status-chip interpreter-live-shell__status-chip--direction">
             {currentDirectionLabel}
           </span>
+        </div>
+        <div
+          className={`interpreter-live-shell__turn-banner${phase === LIVE_PHASE.SPEAKING_TRANSLATION ? " interpreter-live-shell__turn-banner--busy" : ""}`}
+          role="status"
+          aria-live="polite"
+        >
+          <p className="interpreter-live-shell__turn-banner-label">{t.liveSession.statusLabel}</p>
+          <p className="interpreter-live-shell__turn-banner-text">{turnPrompt}</p>
         </div>
         {draftTranscript ? (
           <div className="interpreter-live-shell__draft" role="status" aria-live="polite">
@@ -1070,87 +1149,84 @@ export default function InterpreterLiveRoom({
           </div>
         ) : null}
 
-        <div className="interpreter-live-shell__button-row">
-          <button
-            type="button"
-            className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary interpreter-live-shell__action interpreter-live-shell__action--start"
+        <div className="interpreter-live-shell__control-grid">
+          <div className="interpreter-live-shell__actions-panel">
+            <div className="interpreter-live-shell__button-row">
+              <button
+                type="button"
+                className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary interpreter-live-shell__action interpreter-live-shell__action--start"
             onClick={handleStartConversation}
             disabled={
-              (isStreamingSttClientEnabled() && interpreterServerStatus.loading) ||
-              isRecording ||
-              isStreamingActive ||
-              isPreparing ||
-              isStopping ||
-              processingRef.current ||
-              isSpeakLoading ||
-              isSpeakPlaying ||
+              liveLoopBusy ||
               phase === LIVE_PHASE.ENDED
             }
           >
-            {t.liveSession.startButton}
-          </button>
-          <button
-            type="button"
-            className="medical-interpreter-page__nav-link interpreter-live__action-danger interpreter-live-shell__action"
-            onClick={handleEndConversation}
-            disabled={phase === LIVE_PHASE.ENDED}
-          >
-            {t.sessionActions.end}
-          </button>
-        </div>
-
-        <div className="interpreter-live-shell__playback-panel">
-          <h3 className="interpreter-live-shell__playback-heading">
-            {t.liveSession.playbackHeading}
-          </h3>
-          <div
-            className="interpreter-live-shell__speed-toggle"
-            role="group"
-            aria-label={t.liveSession.speedHeading}
-          >
-            <button
-              type="button"
-              className={`interpreter-live-shell__speed-option${voiceSpeed === "normal" ? " interpreter-live-shell__speed-option--active" : ""}`}
-              aria-pressed={voiceSpeed === "normal"}
-              onClick={() => setVoiceSpeed("normal")}
-            >
-              {t.liveSession.speedNormal}
-            </button>
-            <button
-              type="button"
-              className={`interpreter-live-shell__speed-option${voiceSpeed === "slow" ? " interpreter-live-shell__speed-option--active" : ""}`}
-              aria-pressed={voiceSpeed === "slow"}
-              onClick={() => setVoiceSpeed("slow")}
-            >
-              {t.liveSession.speedSlow}
-            </button>
+                {t.liveSession.startButton}
+              </button>
+              <button
+                type="button"
+                className="medical-interpreter-page__nav-link interpreter-live__action-danger interpreter-live-shell__action"
+                onClick={handleEndConversation}
+                disabled={phase === LIVE_PHASE.ENDED}
+              >
+                {t.sessionActions.end}
+              </button>
+            </div>
           </div>
 
-          <InterpreterPlaybackStatus
-            visible
-            isLoading={isSpeakLoading}
-            isPlaying={isSpeakPlaying}
-            onStop={stopAllPlayback}
-            labels={t}
-          />
+          <div className="interpreter-live-shell__playback-panel">
+            <h3 className="interpreter-live-shell__playback-heading">
+              {t.liveSession.playbackHeading}
+            </h3>
+            <div
+              className="interpreter-live-shell__speed-toggle"
+              role="group"
+              aria-label={t.liveSession.speedHeading}
+            >
+              <button
+                type="button"
+                className={`interpreter-live-shell__speed-option${voiceSpeed === "normal" ? " interpreter-live-shell__speed-option--active" : ""}`}
+                aria-pressed={voiceSpeed === "normal"}
+                onClick={() => setVoiceSpeed("normal")}
+              >
+                {t.liveSession.speedNormal}
+              </button>
+              <button
+                type="button"
+                className={`interpreter-live-shell__speed-option${voiceSpeed === "slow" ? " interpreter-live-shell__speed-option--active" : ""}`}
+                aria-pressed={voiceSpeed === "slow"}
+                onClick={() => setVoiceSpeed("slow")}
+              >
+                {t.liveSession.speedSlow}
+              </button>
+            </div>
 
-          <div className="interpreter-live-shell__playback-actions">
-            <button
-              type="button"
-              className="medical-interpreter-page__nav-link interpreter-live-shell__playback-action"
-              onClick={handleReplayLastTranslation}
-              disabled={!lastPlaybackRequest || isSpeakLoading || isSpeakPlaying}
-            >
-              {t.liveSession.replayButton}
-            </button>
-            <button
-              type="button"
-              className="medical-interpreter-page__nav-link interpreter-live-shell__playback-action"
-              onClick={stopAllPlayback}
-              disabled={!isSpeakLoading && !isSpeakPlaying}
-            >
-              {t.liveSession.stopPlaybackButton}
-            </button>
+            <InterpreterPlaybackStatus
+              visible
+              isLoading={isSpeakLoading}
+              isPlaying={isSpeakPlaying}
+              onStop={stopAllPlayback}
+              labels={t}
+            />
+
+            <div className="interpreter-live-shell__playback-actions">
+              <button
+                type="button"
+                className="medical-interpreter-page__nav-link interpreter-live-shell__playback-action"
+                onClick={handleReplayLastTranslation}
+                disabled={!lastPlaybackRequest || liveLoopBusy}
+              >
+                {t.liveSession.replayButton}
+              </button>
+              <button
+                type="button"
+                className="medical-interpreter-page__nav-link interpreter-live-shell__playback-action"
+                onClick={stopAllPlayback}
+                disabled={!isSpeakLoading && !isSpeakPlaying}
+              >
+                {t.liveSession.stopPlaybackButton}
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -1176,82 +1252,84 @@ export default function InterpreterLiveRoom({
         {liveAnnouncement || statusText}
       </div>
 
-      <section className="interpreter-live-shell__conversation" aria-labelledby="interp-live-conversation">
-        <div className="interpreter-live-shell__conversation-head">
-          <h2 id="interp-live-conversation" className="interpreter-live-shell__section-title">
-            {t.review.timelineHeading}
-          </h2>
-          {pdfReady ? (
-            <button
-              type="button"
-              className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary"
-              onClick={handleDownloadPdf}
+      {showConversation ? (
+        <section className="interpreter-live-shell__conversation" aria-labelledby="interp-live-conversation">
+          <div className="interpreter-live-shell__conversation-head">
+            <h2 id="interp-live-conversation" className="interpreter-live-shell__section-title">
+              {t.review.timelineHeading}
+            </h2>
+            {pdfReady ? (
+              <button
+                type="button"
+                className="medical-interpreter-page__nav-link medical-interpreter-page__nav-link--primary"
+                onClick={handleDownloadPdf}
+              >
+                {t.sessionActions.export}
+              </button>
+            ) : null}
+          </div>
+
+          {hasTurns ? (
+            <ol
+              className="interpreter-live-shell__turn-list"
+              role="log"
+              aria-live="polite"
+              aria-relevant="additions text"
             >
-              {t.sessionActions.export}
-            </button>
-          ) : null}
-        </div>
+              {turns.map((turn) => {
+                const turnSpeakerLabel =
+                  turn.speakerLabel || speakerLabelFor(turn.speaker, t);
+                const timeLabel = formatTurnTime(
+                  turn.timestamp || turn.createdAt,
+                  uiLanguage,
+                );
+                const translationHeading =
+                  turn.speaker === SPEAKER_DOCTOR
+                    ? t.liveSession.translationForPatient
+                    : t.liveSession.translationForDoctor;
 
-        {hasTurns ? (
-          <ol
-            className="interpreter-live-shell__turn-list"
-            role="log"
-            aria-live="polite"
-            aria-relevant="additions text"
-          >
-            {turns.map((turn) => {
-              const turnSpeakerLabel =
-                turn.speakerLabel || speakerLabelFor(turn.speaker, t);
-              const timeLabel = formatTurnTime(
-                turn.timestamp || turn.createdAt,
-                uiLanguage,
-              );
-              const translationHeading =
-                turn.speaker === SPEAKER_DOCTOR
-                  ? t.liveSession.translationForPatient
-                  : t.liveSession.translationForDoctor;
-
-              return (
-                <li key={turn.turnId} className="interpreter-live-shell__turn-card">
-                  <div className="interpreter-live-shell__turn-top">
-                    <div>
-                      <strong>{turnSpeakerLabel}</strong>
-                      <span className="interpreter-live-shell__turn-time">
-                        {timeLabel}
+                return (
+                  <li key={turn.turnId} className="interpreter-live-shell__turn-card">
+                    <div className="interpreter-live-shell__turn-top">
+                      <div>
+                        <strong>{turnSpeakerLabel}</strong>
+                        <span className="interpreter-live-shell__turn-time">
+                          {timeLabel}
+                        </span>
+                      </div>
+                      <span
+                        className={`interpreter-live-shell__turn-status ${turnStatusClassName(turn.status)}`}
+                      >
+                        {turnStatusLabel(turn, t)}
                       </span>
                     </div>
-                    <span
-                      className={`interpreter-live-shell__turn-status ${turnStatusClassName(turn.status)}`}
-                    >
-                      {turnStatusLabel(turn, t)}
-                    </span>
-                  </div>
 
-                  <div className="interpreter-live-shell__turn-block">
-                    <p className="interpreter-live-shell__turn-label">
-                      {t.liveSession.originalLabel}
-                    </p>
-                    <p className="interpreter-live-shell__turn-text">
-                      {turn.originalTranscript || turn.originalText}
-                    </p>
-                  </div>
+                    <div className="interpreter-live-shell__turn-block">
+                      <p className="interpreter-live-shell__turn-label">
+                        {t.liveSession.originalLabel}
+                      </p>
+                      <p className="interpreter-live-shell__turn-text">
+                        {turn.originalTranscript || turn.originalText}
+                      </p>
+                    </div>
 
-                  <div className="interpreter-live-shell__turn-block">
-                    <p className="interpreter-live-shell__turn-label">
-                      {translationHeading}
-                    </p>
-                    <p className="interpreter-live-shell__turn-text">
-                      {turn.translatedText || t.liveSession.pendingTranslation}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        ) : (
-          <p className="interpreter-empty-state">{t.liveSession.noConversationYet}</p>
-        )}
-      </section>
+                    <div className="interpreter-live-shell__turn-block">
+                      <p className="interpreter-live-shell__turn-label">
+                        {translationHeading}
+                      </p>
+                      <p className="interpreter-live-shell__turn-text">
+                        {turn.translatedText || t.liveSession.pendingTranslation}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          ) : (
+            <p className="interpreter-empty-state">{t.liveSession.noConversationYet}</p>
+          )}
+        </section>
+      ) : null}
     </>
   );
 
