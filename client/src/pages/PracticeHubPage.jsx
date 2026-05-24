@@ -520,7 +520,7 @@ export default function PracticeHubPage() {
               {showInterpreterCard ? (
                 <Link
                   className="practice-overview__card practice-overview__card--interpreter"
-                  to={`/practice/interpreter?practiceId=${encodeURIComponent(practiceId)}`}
+                  to={`/interpreter?entry=practice&practiceId=${encodeURIComponent(practiceId)}`}
                   aria-label={`${tInterp.hubCard.title}. ${tInterp.hubCard.description}`}
                 >
                   <span className="practice-overview__card-icon" aria-hidden>

@@ -193,7 +193,12 @@ function turnStatusClassName(status) {
   }
 }
 
-export default function InterpreterLiveRoom({ sessionId = "" }) {
+export default function InterpreterLiveRoom({
+  sessionId = "",
+  embedded = false,
+  homePath = "/interpreter?entry=patient",
+  hideBackLink = false,
+}) {
   const t = useMedicalInterpreterMessages();
   const { language: uiLanguage } = useLanguage();
   const alertRef = useRef(null);
@@ -1020,18 +1025,19 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
     };
   }, [cancelRecording, cancelStream, stopRuntime]);
 
-  return (
-    <main
-      className="medical-interpreter-page medical-interpreter-page--live interp-root"
-      id="main-content"
-    >
-      <Link className="medical-interpreter-page__back" to="/patient/interpreter">
-        {t.chrome.backToInterpreterHome}
-      </Link>
+  const content = (
+    <>
+      {!hideBackLink ? (
+        <Link className="medical-interpreter-page__back" to={homePath}>
+          {t.chrome.backToInterpreterHome}
+        </Link>
+      ) : null}
 
       <header className="interpreter-live-shell__header">
         <div>
-          <h1 className="medical-interpreter-page__title">{t.room.heading}</h1>
+          <h1 className={embedded ? "interpreter-live-shell__embedded-title" : "medical-interpreter-page__title"}>
+            {t.room.heading}
+          </h1>
         </div>
         <div className="interpreter-live-shell__pair" aria-label={t.liveSession.languagePairLabel}>
           {languagePairLabel}
@@ -1246,6 +1252,19 @@ export default function InterpreterLiveRoom({ sessionId = "" }) {
           <p className="interpreter-empty-state">{t.liveSession.noConversationYet}</p>
         )}
       </section>
+    </>
+  );
+
+  if (embedded) {
+    return <section className="interpreter-live-shell interpreter-live-shell--embedded">{content}</section>;
+  }
+
+  return (
+    <main
+      className="medical-interpreter-page medical-interpreter-page--live interp-root"
+      id="main-content"
+    >
+      {content}
     </main>
   );
 }

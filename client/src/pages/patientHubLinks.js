@@ -164,7 +164,7 @@ export const PATIENT_MY_PRACTICE_HUB_LINK = /** @type {PatientHubLink} */ ({
 });
 
 export const INTERPRETER_HUB_LINK = /** @type {PatientHubLink} */ ({
-  to: "/patient/interpreter",
+  to: "/interpreter?entry=patient",
   key: "hubLinkInterpreter",
   subtitleKey: "hubLinkInterpreterSub",
   ariaKey: "hubLinkInterpreterAria",
