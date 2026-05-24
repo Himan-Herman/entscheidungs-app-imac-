@@ -85,6 +85,10 @@ export default {
   hubLinkInboxSub: "Neue Informationen von deiner Praxis",
   hubLinkTelemedicine: "Videosprechstunden",
   hubLinkTelemedicineSub: "Geplante Video-Termine und Warteraum",
+  hubLinkLiveTranslation: "Arztgespräch übersetzen",
+  hubLinkLiveTranslationSub: "Live-Übersetzung zwischen Patient:in und Arzt/Praxis",
+  hubLinkLiveTranslationAria:
+    "Arztgespräch übersetzen öffnen — Live-Übersetzung ohne Diagnose oder Behandlungsempfehlung",
   hubLinkInterpreter: "Arztgespräch übersetzen",
   hubLinkInterpreterSub: "Live-Übersetzung für Patient:innen und Praxen",
   hubLinkInterpreterAria:

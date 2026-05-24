@@ -269,7 +269,10 @@
   background: rgba(14, 116, 144, 0.1);
 }
 
-.pre-visit-account__btn--primary {
+.pre-visit-account__btn--primary,
+.pre-visit-account__btn--primary:hover,
+.pre-visit-account__btn--primary:focus-visible,
+.pre-visit-account__btn--primary:visited {
   background: var(--pva-accent);
   color: #ffffff;
   border-color: rgba(14, 116, 144, 0.3);
@@ -278,6 +281,7 @@
 
 .pre-visit-account__btn--primary:hover:not(:disabled) {
   background: #0c6278;
+  color: #ffffff;
 }
 
 .pre-visit-account__btn--danger {
@@ -395,8 +399,18 @@
   border-top-color: rgba(148, 163, 184, 0.18);
 }
 
+:root[data-theme="dark"] .pre-visit-account__btn--primary,
+:root[data-theme="dark"] .pre-visit-account__btn--primary:hover,
+:root[data-theme="dark"] .pre-visit-account__btn--primary:focus-visible,
+:root[data-theme="dark"] .pre-visit-account__btn--primary:visited {
+  background: var(--pva-accent);
+  color: #ffffff;
+  border-color: rgba(20, 184, 166, 0.35);
+}
+
 :root[data-theme="dark"] .pre-visit-account__btn--primary:hover:not(:disabled) {
   background: #0d9488;
+  color: #ffffff;
 }
 
 :root[data-theme="dark"] .pre-visit-account__error {

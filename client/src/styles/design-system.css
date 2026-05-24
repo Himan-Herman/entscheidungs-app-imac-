@@ -132,12 +132,12 @@ body {
 }
 
 /* Main content: prose links distinguishable from body text (no underline) */
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn):not(.medical-interpreter-page__nav-link):not(.interpreter-hub-card__cta) {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.pre-visit-account__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn):not(.medical-interpreter-page__nav-link):not(.interpreter-hub-card__cta) {
   color: var(--ms-color-link);
   text-decoration: none;
 }
 
-#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn):not(.medical-interpreter-page__nav-link):not(.interpreter-hub-card__cta):hover {
+#main a:not(.workspace-hub__tile):not(.account-portal__nav-link):not(.account-portal__btn):not(.pre-visit-account__btn):not(.practice-overview__action):not(.practice-overview__card):not(.practice-overview__activity-link):not(.practice-overview__top-nav-link):not(.landing-page__cta):not(.landing-page__ghost-link):not(.landing-page__solid-link):not(.pf-btn):not(.medical-interpreter-page__nav-link):not(.interpreter-hub-card__cta):hover {
   color: var(--ms-color-link-hover);
   text-decoration: none;
 }

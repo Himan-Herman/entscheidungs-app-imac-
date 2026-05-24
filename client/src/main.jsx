@@ -95,6 +95,9 @@ const PatientPracticeHubPage = lazy(() =>
 const PatientOrientationHubPage = lazy(() =>
   import("./pages/PatientOrientationHubPage.jsx"),
 );
+const LiveTranslationPage = lazy(() =>
+  import("./features/liveMedicalTranslation/pages/LiveTranslationPage.jsx"),
+);
 const PatientInboxPage = lazy(() =>
   import("./features/patientInbox/pages/PatientInboxPage.jsx"),
 );
@@ -263,6 +266,14 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PatientOrientationHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/live-translation"
+                  element={
+                    <ProtectedRoute>
+                      <LiveTranslationPage />
                     </ProtectedRoute>
                   }
                 />

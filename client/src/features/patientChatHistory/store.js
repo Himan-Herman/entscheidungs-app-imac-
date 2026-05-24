@@ -3,6 +3,7 @@ import {
   CHAT_KIND_SYMPTOM_CHECK,
   HISTORY_STORE_PREFIX,
   HISTORY_STORE_VERSION,
+  SESSION_STATUS_DRAFT,
 } from "./constants.js";
 import { deriveSessionStatus, newSessionId } from "./sessionUtils.js";
 

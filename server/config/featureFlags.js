@@ -170,6 +170,15 @@ export function isMedicalInterpreterEnabled() {
 }
 
 /**
+ * B2C live medical conversation translation (OpenAI Realtime).
+ * Translation only — no diagnosis, triage, or treatment guidance.
+ * Default off until LIVE_MEDICAL_TRANSLATION_ENABLED is set.
+ */
+export function isLiveMedicalTranslationEnabled() {
+  return envFlag("LIVE_MEDICAL_TRANSLATION_ENABLED", false);
+}
+
+/**
  * Medical Interpreter text-to-speech (OpenAI TTS).
  * Default on when the interpreter module is enabled; set INTERPRETER_TTS_ENABLED=false to disable.
  */

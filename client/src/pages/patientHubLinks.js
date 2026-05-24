@@ -18,6 +18,7 @@ import {
   Video,
   Building2,
   ListChecks,
+  Languages,
 } from "lucide-react";
 
 /** @typedef {{ to: string; key: string; subtitleKey?: string; ariaKey?: string; icon: import('react').ComponentType<{ size?: number; strokeWidth?: number }>; tileClass?: string }} PatientHubLink */
@@ -114,6 +115,13 @@ export const PATIENT_ORIENTATION_MAIN_HUB_LINK = /** @type {PatientHubLink} */ (
 
 /** B2C / personal — remain on the main patient overview. */
 export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
+  {
+    to: "/patient/live-translation",
+    key: "hubLinkLiveTranslation",
+    subtitleKey: "hubLinkLiveTranslationSub",
+    ariaKey: "hubLinkLiveTranslationAria",
+    icon: Languages,
+  },
   {
     to: "/patient/medication-plans",
     key: "hubLinkMedicationPlans",
