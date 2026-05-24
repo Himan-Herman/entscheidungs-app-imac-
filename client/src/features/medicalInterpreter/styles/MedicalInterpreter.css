@@ -2843,3 +2843,195 @@
   outline: 2px solid var(--interp-accent, #0e7490);
   outline-offset: 2px;
 }
+
+.interpreter-reset__hero {
+  display: grid;
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.interpreter-reset__eyebrow {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--interp-accent, #0e7490);
+}
+
+.interpreter-reset__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+.interpreter-reset__card,
+.interpreter-reset__form,
+.interpreter-reset__session-card,
+.interpreter-reset__turn-card {
+  border: 1px solid var(--interp-border);
+  border-radius: 24px;
+  background: var(--interp-surface);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.interpreter-reset__card,
+.interpreter-reset__form {
+  padding: 1.25rem;
+}
+
+.interpreter-reset__card-title {
+  margin: 0 0 0.8rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--interp-text);
+}
+
+.interpreter-reset__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--interp-text-muted);
+  display: grid;
+  gap: 0.55rem;
+}
+
+.interpreter-reset__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.interpreter-reset__actions--inline {
+  margin-top: 0.75rem;
+}
+
+.interpreter-reset__history {
+  display: grid;
+  gap: 1rem;
+}
+
+.interpreter-reset__session-list,
+.interpreter-reset__turn-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.interpreter-reset__session-card,
+.interpreter-reset__turn-card {
+  padding: 1.1rem 1.15rem;
+}
+
+.interpreter-reset__session-top,
+.interpreter-reset__turn-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.55rem;
+}
+
+.interpreter-reset__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--interp-accent, #0e7490) 24%, var(--interp-border));
+  background: color-mix(in srgb, var(--interp-accent, #0e7490) 10%, var(--interp-surface));
+  color: var(--interp-accent, #0e7490);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.interpreter-reset__meta {
+  margin: 0;
+  color: var(--interp-text-muted);
+}
+
+.interpreter-reset__form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.interpreter-reset__field {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--interp-text);
+}
+
+.interpreter-reset__input {
+  min-height: 52px;
+  padding: 0.8rem 0.95rem;
+  border-radius: 16px;
+  border: 1px solid var(--interp-border);
+  background: var(--interp-surface);
+  color: var(--interp-text);
+  font: inherit;
+}
+
+.interpreter-reset__input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--interp-accent, #0e7490) 22%, white 78%);
+  outline-offset: 2px;
+  border-color: var(--interp-accent, #0e7490);
+}
+
+.interpreter-reset__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 1rem 0;
+  color: var(--interp-text);
+}
+
+.interpreter-reset__details {
+  margin: 1rem 0 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--interp-border);
+}
+
+.interpreter-reset__details > summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--interp-accent, #0e7490);
+  margin-bottom: 1rem;
+}
+
+.interpreter-reset__turn-block + .interpreter-reset__turn-block {
+  margin-top: 0.9rem;
+}
+
+.interpreter-reset__turn-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--interp-text-muted);
+}
+
+.interpreter-reset__turn-text {
+  margin: 0;
+  color: var(--interp-text);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .interpreter-reset__session-top,
+  .interpreter-reset__turn-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .interpreter-reset__actions {
+    width: 100%;
+    align-items: stretch;
+  }
+}

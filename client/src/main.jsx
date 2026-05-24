@@ -95,17 +95,17 @@ const PatientPracticeHubPage = lazy(() =>
 const PatientOrientationHubPage = lazy(() =>
   import("./pages/PatientOrientationHubPage.jsx"),
 );
-const InterpreterHomePage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterHomePage.jsx"),
+const InterpreterPatientHomeWorkspacePage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPatientHomeWorkspacePage.jsx"),
 );
-const InterpreterSetupPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterSetupPage.jsx"),
+const InterpreterPatientSetupWorkspacePage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPatientSetupWorkspacePage.jsx"),
 );
 const InterpreterLivePage = lazy(() =>
   import("./features/medicalInterpreter/pages/InterpreterLivePage.jsx"),
 );
-const InterpreterReviewPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterReviewPage.jsx"),
+const InterpreterPatientReviewWorkspacePage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPatientReviewWorkspacePage.jsx"),
 );
 const MedicalInterpreterFeatureGate = lazy(() =>
   import("./features/medicalInterpreter/components/MedicalInterpreterFeatureGate.jsx"),
@@ -204,20 +204,8 @@ const PracticeFinderPage = lazy(() =>
   import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
 );
 const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
-const InterpreterPracticeHubPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterPracticeHubPage.jsx"),
-);
-const InterpreterPracticeDashboardPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterPracticeDashboardPage.jsx"),
-);
-const InterpreterPracticeInvitesPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterPracticeInvitesPage.jsx"),
-);
-const InterpreterPracticeSessionsPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterPracticeSessionsPage.jsx"),
-);
-const InterpreterPracticeSessionDetailPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterPracticeSessionDetailPage.jsx"),
+const InterpreterPracticeWorkspacePage = lazy(() =>
+  import("./features/medicalInterpreter/pages/InterpreterPracticeWorkspacePage.jsx"),
 );
 const InterpreterInviteLandingPage = lazy(() =>
   import("./features/medicalInterpreter/pages/InterpreterInviteLandingPage.jsx"),
@@ -307,7 +295,7 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <MedicalInterpreterFeatureGate>
-                        <InterpreterSetupPage />
+                        <InterpreterPatientSetupWorkspacePage />
                       </MedicalInterpreterFeatureGate>
                     </ProtectedRoute>
                   }
@@ -327,7 +315,7 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <MedicalInterpreterFeatureGate>
-                        <InterpreterReviewPage />
+                        <InterpreterPatientReviewWorkspacePage />
                       </MedicalInterpreterFeatureGate>
                     </ProtectedRoute>
                   }
@@ -337,7 +325,7 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <MedicalInterpreterFeatureGate>
-                        <InterpreterHomePage />
+                        <InterpreterPatientHomeWorkspacePage />
                       </MedicalInterpreterFeatureGate>
                     </ProtectedRoute>
                   }
@@ -719,50 +707,10 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
-                  path="/practice/interpreter/dashboard"
+                  path="/practice/interpreter/*"
                   element={
                     <ProtectedRoute>
-                      <InterpreterPracticeDashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/practice/interpreter/invites/new"
-                  element={
-                    <ProtectedRoute>
-                      <InterpreterPracticeInvitesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/practice/interpreter/invites"
-                  element={
-                    <ProtectedRoute>
-                      <InterpreterPracticeInvitesPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/practice/interpreter/sessions/:id"
-                  element={
-                    <ProtectedRoute>
-                      <InterpreterPracticeSessionDetailPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/practice/interpreter/sessions"
-                  element={
-                    <ProtectedRoute>
-                      <InterpreterPracticeSessionsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/practice/interpreter"
-                  element={
-                    <ProtectedRoute>
-                      <InterpreterPracticeHubPage />
+                      <InterpreterPracticeWorkspacePage />
                     </ProtectedRoute>
                   }
                 />
