@@ -3,10 +3,8 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
-import { usePatientInterpreterHubVisible } from "../features/medicalInterpreter/hooks/useInterpreterHubVisibility.js";
 import PatientHubTiles from "./PatientHubTiles.jsx";
 import {
-  INTERPRETER_HUB_LINK,
   PATIENT_MAIN_HUB_LINKS,
   PATIENT_MY_PRACTICE_HUB_LINK,
 } from "./patientHubLinks.js";
@@ -24,7 +22,6 @@ export default function PatientHubPage() {
     [language],
   );
   const [inboxUnread, setInboxUnread] = useState(0);
-  const interpreterHub = usePatientInterpreterHubVisible();
 
   const loadInboxCount = useCallback(async () => {
     try {
@@ -43,15 +40,10 @@ export default function PatientHubPage() {
     void loadInboxCount();
   }, [loadInboxCount]);
 
-  const hubLinks = useMemo(() => {
-    const links = [PATIENT_MY_PRACTICE_HUB_LINK, ...PATIENT_MAIN_HUB_LINKS];
-    if (!interpreterHub.visible) return links;
-
-    const preVisitIndex = links.findIndex((l) => l.key === "hubLinkPreVisit");
-    const insertAt = preVisitIndex >= 0 ? preVisitIndex + 1 : 3;
-    links.splice(insertAt, 0, INTERPRETER_HUB_LINK);
-    return links;
-  }, [interpreterHub.visible]);
+  const hubLinks = useMemo(
+    () => [PATIENT_MY_PRACTICE_HUB_LINK, ...PATIENT_MAIN_HUB_LINKS],
+    [],
+  );
 
   return (
     <div className="workspace-hub">

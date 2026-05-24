@@ -8,7 +8,6 @@ import {
   PENDING_MODE_KEY,
   USER_MODES,
 } from "../utils/userMode.js";
-import { consumePostLoginInterpreterRedirect } from "../features/medicalInterpreter/utils/interpreterInviteContext.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -78,12 +77,6 @@ export default function Login() {
         sessionStorage.removeItem(PENDING_MODE_KEY);
       } catch {
         /* ignore */
-      }
-
-      const inviteRedirect = consumePostLoginInterpreterRedirect();
-      if (inviteRedirect) {
-        navigate(inviteRedirect, { replace: true });
-        return;
       }
 
       navigate("/intro", { replace: true });

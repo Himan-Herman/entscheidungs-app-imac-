@@ -95,15 +95,6 @@ const PatientPracticeHubPage = lazy(() =>
 const PatientOrientationHubPage = lazy(() =>
   import("./pages/PatientOrientationHubPage.jsx"),
 );
-const InterpreterWorkspacePage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterWorkspacePage.jsx"),
-);
-const InterpreterLegacyRedirectPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterLegacyRedirectPage.jsx"),
-);
-const MedicalInterpreterFeatureGate = lazy(() =>
-  import("./features/medicalInterpreter/components/MedicalInterpreterFeatureGate.jsx"),
-);
 const PatientInboxPage = lazy(() =>
   import("./features/patientInbox/pages/PatientInboxPage.jsx"),
 );
@@ -198,12 +189,6 @@ const PracticeFinderPage = lazy(() =>
   import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
 );
 const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
-const InterpreterInviteLandingPage = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterInviteLandingPage.jsx"),
-);
-const InterpreterInviteLegacyRedirect = lazy(() =>
-  import("./features/medicalInterpreter/pages/InterpreterInviteLegacyRedirect.jsx"),
-);
 const PracticeTeamPage = lazy(() =>
   import("./features/practiceTeam/pages/PracticeTeamPage.jsx"),
 );
@@ -278,24 +263,6 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PatientOrientationHubPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/interpreter"
-                  element={
-                    <ProtectedRoute>
-                      <MedicalInterpreterFeatureGate>
-                        <InterpreterWorkspacePage />
-                      </MedicalInterpreterFeatureGate>
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/patient/interpreter/*"
-                  element={
-                    <ProtectedRoute>
-                      <InterpreterLegacyRedirectPage />
                     </ProtectedRoute>
                   }
                 />
@@ -676,14 +643,6 @@ createRoot(document.getElementById("root")).render(
                   }
                 />
                 <Route
-                  path="/practice/interpreter/*"
-                  element={
-                    <ProtectedRoute>
-                      <InterpreterLegacyRedirectPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path="/practice/dashboard"
                   element={
                     <ProtectedRoute>
@@ -790,14 +749,6 @@ createRoot(document.getElementById("root")).render(
                 <Route path="/pre-visit/review" element={<PreVisitReviewPage />} />
                 <Route path="/pre-visit" element={<PreVisitLanguagePage />} />
                 <Route path="/pre-visit/qr/:qrToken" element={<PreVisitQrLandingPage />} />
-                <Route
-                  path="/i/interpreter/:token"
-                  element={<InterpreterInviteLandingPage />}
-                />
-                <Route
-                  path="/interpreter/invite/:token"
-                  element={<InterpreterInviteLegacyRedirect />}
-                />
                 <Route path="/arztgespraech" element={<Navigate to="/pre-visit" replace />} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />

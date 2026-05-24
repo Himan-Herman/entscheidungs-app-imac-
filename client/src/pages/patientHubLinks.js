@@ -10,7 +10,6 @@ import {
   Map as MapIcon,
   Inbox,
   MessageSquare,
-  Languages,
   MapPinned,
   Pill,
   Stethoscope,
@@ -161,13 +160,4 @@ export const PATIENT_MY_PRACTICE_HUB_LINK = /** @type {PatientHubLink} */ ({
   ariaKey: "hubLinkMyPracticeAria",
   icon: Building2,
   tileClass: "workspace-hub__tile--practice-hub",
-});
-
-export const INTERPRETER_HUB_LINK = /** @type {PatientHubLink} */ ({
-  to: "/interpreter?entry=patient",
-  key: "hubLinkInterpreter",
-  subtitleKey: "hubLinkInterpreterSub",
-  ariaKey: "hubLinkInterpreterAria",
-  icon: Languages,
-  tileClass: "workspace-hub__tile--interpreter",
 });

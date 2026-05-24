@@ -22,7 +22,6 @@ import {
 } from "../i18n/localeConfig";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
-import { runInterpreterLogoutCleanup } from "../features/medicalInterpreter/utils/interpreterAccountScope.js";
 import { readUserMode, writeUserMode, USER_MODES } from "../utils/userMode.js";
 import "../styles/Header.css";
 
@@ -104,7 +103,6 @@ export default function Header() {
     }
     localStorage.removeItem("medscout_token");
     localStorage.removeItem("medscout_user_id");
-    runInterpreterLogoutCleanup();
     localStorage.removeItem("symptom_thread_id");
     localStorage.removeItem("koerper_thread_id");
     localStorage.removeItem("textsymptom_thread_id");

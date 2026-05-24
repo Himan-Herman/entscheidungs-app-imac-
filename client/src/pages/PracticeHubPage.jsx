@@ -7,11 +7,9 @@ import {
   Inbox,
   MessageSquare,
   Pill,
-  Languages,
   Shield,
   UsersRound,
 } from "lucide-react";
-import { usePracticeInterpreterHubVisible } from "../features/medicalInterpreter/hooks/useInterpreterHubVisibility.js";
 import { ensureDemoPractice, fetchPractices } from "../api/practicesApi.js";
 import {
   fetchPracticeOverviewActivity,
@@ -143,12 +141,6 @@ export default function PracticeHubPage() {
     () => getMessages(language).settingsPractices || getMessages("en").settingsPractices,
     [language],
   );
-  const tInterp = useMemo(
-    () =>
-      getMessages(language).medicalInterpreterPractice ||
-      getMessages("en").medicalInterpreterPractice,
-    [language],
-  );
   const [practices, setPractices] = useState([]);
   const [practicesLoadError, setPracticesLoadError] = useState("");
   const [practiceId, setPracticeId] = useState("");
@@ -164,8 +156,6 @@ export default function PracticeHubPage() {
   const [aiError, setAiError] = useState("");
   const [demoCreating, setDemoCreating] = useState(false);
   const [demoCreateError, setDemoCreateError] = useState("");
-  const interpreterHub = usePracticeInterpreterHubVisible(practiceId);
-
   const applyPracticeRows = useCallback((rows) => {
     const list = Array.isArray(rows) ? rows : [];
     setPractices(list);
@@ -287,8 +277,6 @@ export default function PracticeHubPage() {
     () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
     [visibility],
   );
-
-  const showInterpreterCard = interpreterHub.visible;
 
   const metricRows = useMemo(() => {
     const rows = [];
@@ -517,19 +505,6 @@ export default function PracticeHubPage() {
                   </Link>
                 );
               })}
-              {showInterpreterCard ? (
-                <Link
-                  className="practice-overview__card practice-overview__card--interpreter"
-                  to={`/interpreter?entry=practice&practiceId=${encodeURIComponent(practiceId)}`}
-                  aria-label={`${tInterp.hubCard.title}. ${tInterp.hubCard.description}`}
-                >
-                  <span className="practice-overview__card-icon" aria-hidden>
-                    <Languages size={22} strokeWidth={1.75} />
-                  </span>
-                  <span className="practice-overview__card-label">{tInterp.hubCard.title}</span>
-                  <span className="practice-overview__card-desc">{tInterp.hubCard.description}</span>
-                </Link>
-              ) : null}
             </nav>
           </section>
 
