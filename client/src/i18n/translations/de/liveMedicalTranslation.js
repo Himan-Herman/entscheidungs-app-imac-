@@ -61,6 +61,8 @@ export default {
     unclearRecognition: "Nicht sicher erkannt — bitte wiederholen.",
     overlapDetected:
       "Gleichzeitiges Sprechen erkannt — bitte nacheinander sprechen und den Satz wiederholen.",
+    unrelatedHealthcare:
+      "Dieses Gespräch wirkt nicht wie ein medizinischer Kontext. Meda ist für Arzt-, Praxis-, Klinik-, Apotheken- und Gesundheitskommunikation gedacht. Möchten Sie trotzdem fortfahren?",
   },
   live: {
     heading: "Live-Gespräch",
@@ -108,6 +110,14 @@ export default {
     sessionWarn5Min: "Noch 5 Minuten — das Gespräch endet automatisch nach 30 Minuten.",
     sessionWarn1Min: "Noch 1 Minute — das Gespräch endet bald automatisch.",
     sessionAutoEndNotice: "Maximale Gesprächsdauer erreicht — Gespräch wurde beendet.",
+    pauseButton: "Gespräch pausieren",
+    pauseAria: "Live-Gespräch pausieren — Mikrofon und Übersetzung anhalten",
+    resumeButton: "Gespräch fortsetzen",
+    resumeAria: "Live-Gespräch fortsetzen — Mikrofon wieder aktivieren",
+    continueAnyway: "Fortfahren",
+    continueAnywayAria: "Trotzdem mit dem Gespräch fortfahren",
+    pauseDueToUnrelated: "Pausieren",
+    pauseDueToUnrelatedAria: "Gespräch wegen nicht-medizinischem Kontext pausieren",
   },
   turn: {
     speakerPatient: "Patient",
@@ -125,11 +135,13 @@ export default {
   status: {
     idle: "Bereit",
     connecting: "Verbindung wird aufgebaut…",
+    reconnecting: "Verbindung wird wiederhergestellt…",
     introducing: "Meda stellt sich vor…",
     connected: "Meda ist bereit",
     listening: "Meda hört zu",
     translating: "Meda übersetzt",
     speaking: "Meda spricht",
+    paused: "Meda pausiert",
     error: "Verbindungsfehler",
     ended: "Beendet",
     micOn: "Aktiv",

@@ -1,16 +1,12 @@
-/** Healthcare-only scope block for server Realtime instructions. */
-export function buildMedicalScopeBlock(patientLanguage) {
-  const warningDe =
-    "Diese Funktion ist nur für medizinische Gespräche gedacht. Bitte nutzen Sie sie für Arzt-, Praxis-, Klinik-, Apotheken- oder Gesundheitskommunikation.";
-  const warningEn =
-    "This feature is intended only for healthcare conversations. Please use it for doctor, practice, clinic, pharmacy, or health communication.";
-  const warning = patientLanguage === "de" ? warningDe : warningEn;
-
+/** Healthcare scope guidance for server Realtime instructions — translation-first, no in-model refusals. */
+export function buildMedicalScopeBlock() {
   return `
-MEDICAL DOMAIN (strict):
-- ONLY translate healthcare communication: doctor-patient, clinic/hospital, practice, pharmacy, rehabilitation, nursing/care, and health-insurance-related healthcare communication when relevant.
-- Do NOT translate unrelated topics: shopping, tourism, restaurants, general small talk, business negotiation, legal advice, school/university, or other non-healthcare conversation.
-- If input is clearly outside healthcare context, say ONLY: "${warning}"
-- Do not act as a general-purpose translator.
+MEDICAL SCOPE (healthcare context assumed):
+- The user opened Meda medical translation — assume doctor-patient or healthcare communication until sustained unrelated content is clear.
+- ALWAYS translate faithfully. NEVER refuse, block, or replace a translation with a scope warning.
+- ALWAYS translate consultation openers and intake questions, including greetings and phrases such as: "How can I help you?", "What brings you here today?", "Please tell me what happened.", "Do you have pain?", "Since when?", "Can you describe it?", and similar clinical intake language — even if the phrase alone sounds generic.
+- Allowed domains: doctor/practice, clinic/hospital, pharmacy, nursing/care, rehabilitation, health insurance in healthcare context, medical administration, appointments, and registration.
+- Do NOT act as a general conversation partner — translate only. Do NOT output messages about "this feature is only for medical conversations".
+- If content appears unrelated (shopping, tourism, restaurants, unrelated school/university, general casual chat), still translate literally; the app UI handles scope separately.
 `.trim();
 }

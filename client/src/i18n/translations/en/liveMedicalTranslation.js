@@ -61,6 +61,8 @@ export default {
     unclearRecognition: "Not reliably recognized — please repeat.",
     overlapDetected:
       "Simultaneous speech detected — please speak one after another and repeat the phrase.",
+    unrelatedHealthcare:
+      "This conversation does not appear to be a healthcare context. Meda is intended for doctor, practice, clinic, pharmacy, and health communication. Would you like to continue anyway?",
   },
   live: {
     heading: "Live conversation",
@@ -108,6 +110,14 @@ export default {
     sessionWarn5Min: "5 minutes left — the conversation will end automatically after 30 minutes.",
     sessionWarn1Min: "1 minute left — the conversation will end soon.",
     sessionAutoEndNotice: "Maximum session duration reached — conversation ended.",
+    pauseButton: "Pause conversation",
+    pauseAria: "Pause live conversation — stop microphone and translation",
+    resumeButton: "Resume conversation",
+    resumeAria: "Resume live conversation — re-enable microphone",
+    continueAnyway: "Continue",
+    continueAnywayAria: "Continue the conversation anyway",
+    pauseDueToUnrelated: "Pause",
+    pauseDueToUnrelatedAria: "Pause conversation due to non-healthcare context",
   },
   turn: {
     speakerPatient: "Patient",
@@ -125,11 +135,13 @@ export default {
   status: {
     idle: "Ready",
     connecting: "Connecting…",
+    reconnecting: "Restoring connection…",
     introducing: "Meda is introducing herself…",
     connected: "Meda is ready",
     listening: "Meda is listening",
     translating: "Meda is translating",
     speaking: "Meda is speaking",
+    paused: "Meda is paused",
     error: "Connection error",
     ended: "Ended",
     micOn: "Active",

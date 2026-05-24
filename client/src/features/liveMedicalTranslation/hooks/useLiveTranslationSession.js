@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createLiveTranslationRealtimeSession } from "../api/liveTranslationApi.js";
-import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL, resolveOpenAiTranscriptionLanguage } from "../constants.js";
+import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL } from "../constants.js";
 import { buildLanguageRouting } from "../utils/routing.js";
-import { buildClientSideInstructions } from "../utils/translationInstructions.js";
+import { buildCompactClientInstructions, buildFaithfulRetryInstructions } from "../utils/translationInstructions.js";
+import { buildRuntimeSessionUpdatePayload } from "../utils/realtimeSessionUpdate.js";
+import { classifyRealtimeError, isCancelledOrFailedResponseDone } from "../utils/realtimeErrorPolicy.js";
+import { logRealtimeDiag, summarizeRealtimeEvent } from "../utils/realtimeDiagnostics.js";
 import { resolveTurnStatus, isLikelyEmptyOrNoiseTranscript } from "../utils/asrQuality.js";
 import {
   formatSessionTimer,
@@ -11,6 +14,11 @@ import {
 } from "../utils/sessionTimer.js";
 import { getRepeatPhrase } from "../utils/repeatPhrase.js";
 import { resolveSpeakerFromDetectedLanguage } from "../utils/languageBasedRouting.js";
+import {
+  isModelScopeRefusal,
+  shouldRetryScopeRefusal,
+  shouldShowScopeWarning,
+} from "../utils/medicalScopePolicy.js";
 import {
   extractDetectedLanguage,
   extractOriginalText,
@@ -45,7 +53,7 @@ function resolveConnectExceptionErrorKey(err) {
   return "webrtcConnectionFailed";
 }
 
-/** @typedef {"idle" | "connecting" | "introducing" | "connected" | "listening" | "translating" | "speaking" | "error" | "ended"} LiveTranslationConnectionStatus */
+/** @typedef {"idle" | "connecting" | "reconnecting" | "introducing" | "connected" | "listening" | "translating" | "speaking" | "paused" | "error" | "ended"} LiveTranslationConnectionStatus */
 
 /**
  * @typedef {"translated" | "unclear" | "corrected" | "replayed"} LiveTranslationTurnStatus
@@ -68,7 +76,7 @@ function resolveConnectExceptionErrorKey(err) {
  * }} LiveTranslationTurn
  */
 
-/** @typedef {{ type: "correction"; sourceText: string; correctsTurnId: string; routing: ReturnType<typeof buildLanguageRouting> } | { type: "replay" } | { type: "repeat"; phrase: string } | null} PendingPlanB */
+/** @typedef {{ type: "correction"; sourceText: string; correctsTurnId: string; routing: ReturnType<typeof buildLanguageRouting>; wrongOriginalText?: string; wrongTranslatedText?: string } | { type: "replay" } | { type: "repeat"; phrase: string } | { type: "scopeRetry"; sourceText: string; routing: ReturnType<typeof buildLanguageRouting> } | null} PendingPlanB */
 
 /**
  * @param {{
@@ -87,6 +95,7 @@ function resolveConnectExceptionErrorKey(err) {
  *   onUnclearTurn?: (info?: { overlapDetected?: boolean; missingOriginal?: boolean }) => void;
  *   onSessionTimeWarning?: (info: { elapsedMs: number; markMs: number; maxMs: number }) => void;
  *   onSessionAutoEnd?: () => void;
+ *   onScopeWarning?: () => void;
  * }} config
  */
 export function useLiveTranslationSession({
@@ -105,6 +114,7 @@ export function useLiveTranslationSession({
   onUnclearTurn,
   onSessionTimeWarning,
   onSessionAutoEnd,
+  onScopeWarning,
 }) {
   const [connectionStatus, setConnectionStatus] = useState(
     /** @type {LiveTranslationConnectionStatus} */ ("idle"),
@@ -157,6 +167,13 @@ export function useLiveTranslationSession({
   const onSessionTimeWarningRef = useRef(onSessionTimeWarning);
   const onSessionAutoEndRef = useRef(onSessionAutoEnd);
   const sessionMaxMsRef = useRef(resolveLiveSessionMaxMs());
+  const responseActiveRef = useRef(false);
+  const speakerUpdateTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
+  const lastSessionUpdateSigRef = useRef("");
+  const pausedRef = useRef(false);
+  const scopeContinueRef = useRef(false);
+  const scopeWarningShownRef = useRef(false);
+  const onScopeWarningRef = useRef(onScopeWarning);
 
   sessionConfigRef.current = { patientLanguage, doctorLanguage, activeSpeaker };
   autoSwitchSpeakerRef.current = autoSwitchSpeaker;
@@ -171,6 +188,7 @@ export function useLiveTranslationSession({
   onUnclearTurnRef.current = onUnclearTurn;
   onSessionTimeWarningRef.current = onSessionTimeWarning;
   onSessionAutoEndRef.current = onSessionAutoEnd;
+  onScopeWarningRef.current = onScopeWarning;
   sessionMaxMsRef.current = resolveLiveSessionMaxMs();
 
   const safeSetState = useCallback((setter) => {
@@ -247,6 +265,15 @@ export function useLiveTranslationSession({
     introPlayedRef.current = false;
     overlapDetectedRef.current = false;
     sessionStartedAtRef.current = null;
+    responseActiveRef.current = false;
+    lastSessionUpdateSigRef.current = "";
+    pausedRef.current = false;
+    scopeContinueRef.current = false;
+    scopeWarningShownRef.current = false;
+    if (speakerUpdateTimerRef.current) {
+      clearTimeout(speakerUpdateTimerRef.current);
+      speakerUpdateTimerRef.current = null;
+    }
     clearSessionTimer();
     dcRef.current?.close();
     dcRef.current = null;
@@ -260,6 +287,17 @@ export function useLiveTranslationSession({
     }
     stopMic();
   }, [clearSessionTimer, stopMic]);
+
+  const maybeTriggerScopeWarning = useCallback(() => {
+    if (scopeWarningShownRef.current || scopeContinueRef.current) return;
+    const elapsed = sessionStartedAtRef.current
+      ? Date.now() - sessionStartedAtRef.current
+      : 0;
+    if (shouldShowScopeWarning(turnsRef.current, elapsed, scopeContinueRef.current)) {
+      scopeWarningShownRef.current = true;
+      onScopeWarningRef.current?.();
+    }
+  }, []);
 
   const appendTurn = useCallback(
     (originalText, translatedText, meta = {}) => {
@@ -306,16 +344,22 @@ export function useLiveTranslationSession({
       currentTranslatedRef.current = trimmed;
       latestReplayTextRef.current = trimmed;
       safeSetState(() => {
-        setTurns((prev) => [...prev, turn]);
+        setTurns((prev) => {
+          const next = [...prev, turn];
+          turnsRef.current = next;
+          return next;
+        });
         setCurrentTranslatedText(trimmed);
       });
       pendingOriginalRef.current = "";
+
+      maybeTriggerScopeWarning();
 
       if (status === "translated" && autoSwitchSpeakerRef.current && onTurnCompleteRef.current) {
         onTurnCompleteRef.current(turn.speaker);
       }
     },
-    [safeSetState],
+    [maybeTriggerScopeWarning, safeSetState],
   );
 
   const endSession = useCallback(() => {
@@ -349,9 +393,10 @@ export function useLiveTranslationSession({
   }, [safeSetState, teardown]);
 
   const cancelActiveResponse = useCallback(() => {
+    if (!responseActiveRef.current) return;
     const dc = dcRef.current;
     if (dc?.readyState === "open") {
-      suppressErrorsUntilRef.current = Date.now() + 2000;
+      suppressErrorsUntilRef.current = Date.now() + 3500;
       dc.send(JSON.stringify({ type: "response.cancel" }));
     }
   }, []);
@@ -366,8 +411,45 @@ export function useLiveTranslationSession({
       }
     }
     cancelActiveResponse();
-    safeSetState(() => setConnectionStatus("connected"));
+    safeSetState(() => {
+      if (!pausedRef.current) {
+        setConnectionStatus("connected");
+      }
+    });
   }, [cancelActiveResponse, safeSetState]);
+
+  const pauseConversation = useCallback(() => {
+    if (pausedRef.current || connectionStatusRef.current === "ended") return;
+    pausedRef.current = true;
+    stopVoiceOutput();
+    if (micTrackRef.current) {
+      micTrackRef.current.enabled = false;
+    }
+    safeSetState(() => {
+      setConnectionStatus("paused");
+      setMicrophoneStatus("off");
+    });
+  }, [safeSetState, stopVoiceOutput]);
+
+  const resumeConversation = useCallback(() => {
+    if (!pausedRef.current) return;
+    pausedRef.current = false;
+    if (micTrackRef.current) {
+      micTrackRef.current.enabled = true;
+    }
+    safeSetState(() => {
+      setConnectionStatus("connected");
+      setMicrophoneStatus("on");
+    });
+  }, [safeSetState]);
+
+  const confirmScopeContinue = useCallback(() => {
+    scopeContinueRef.current = true;
+    scopeWarningShownRef.current = false;
+    if (pausedRef.current) {
+      resumeConversation();
+    }
+  }, [resumeConversation]);
 
   const speakExactText = useCallback(
     (text, planB) => {
@@ -377,6 +459,7 @@ export function useLiveTranslationSession({
 
       pendingPlanBRef.current = planB;
       cancelActiveResponse();
+      responseActiveRef.current = true;
       safeSetState(() => setConnectionStatus("speaking"));
       dc.send(
         JSON.stringify({
@@ -384,6 +467,33 @@ export function useLiveTranslationSession({
           response: {
             modalities: ["audio"],
             instructions: `Say exactly and only the following in a calm, professional tone. Do not translate, add, or change anything: "${trimmed}"`,
+          },
+        }),
+      );
+      return true;
+    },
+    [cancelActiveResponse, safeSetState],
+  );
+
+  const requestFaithfulTranslationRetry = useCallback(
+    (sourceText, routing) => {
+      const dc = dcRef.current;
+      const trimmed = sourceText?.trim();
+      if (!dc || dc.readyState !== "open" || !trimmed || pausedRef.current) return false;
+
+      turnContextRef.current = routing;
+      pendingPlanBRef.current = { type: "scopeRetry", sourceText: trimmed, routing };
+      cancelActiveResponse();
+      responseActiveRef.current = true;
+      safeSetState(() => setConnectionStatus("translating"));
+
+      const hint = buildFaithfulRetryInstructions(routing);
+      dc.send(
+        JSON.stringify({
+          type: "response.create",
+          response: {
+            modalities: ["audio"],
+            instructions: `${hint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
           },
         }),
       );
@@ -401,15 +511,16 @@ export function useLiveTranslationSession({
       turnContextRef.current = routing;
       pendingPlanBRef.current = planB;
       cancelActiveResponse();
+      responseActiveRef.current = true;
       safeSetState(() => setConnectionStatus("translating"));
 
-      const fidelityHint = buildClientSideInstructions(routing, instructionOptionsRef.current);
+      const compactHint = buildCompactClientInstructions(routing);
       dc.send(
         JSON.stringify({
           type: "response.create",
           response: {
             modalities: ["audio"],
-            instructions: `${fidelityHint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
+            instructions: `${compactHint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
           },
         }),
       );
@@ -463,6 +574,7 @@ export function useLiveTranslationSession({
     if (!dc || dc.readyState !== "open" || !text || introPlayedRef.current) return;
 
     introPlayedRef.current = true;
+    responseActiveRef.current = true;
     safeSetState(() => setConnectionStatus("introducing"));
     dc.send(
       JSON.stringify({
@@ -501,10 +613,113 @@ export function useLiveTranslationSession({
     [skipLanguageRoutingRef],
   );
 
+  const finalizeTranslationOutput = useCallback(
+    (translated) => {
+      const planB = pendingPlanBRef.current;
+      if (planB?.type === "correction") {
+        appendTurn(planB.sourceText, translated, {
+          status: "corrected",
+          correctsTurnId: planB.correctsTurnId,
+          wrongOriginalText: planB.wrongOriginalText,
+          wrongTranslatedText: planB.wrongTranslatedText,
+          allowDuplicate: true,
+          speaker: planB.routing.activeSpeaker,
+          sourceLanguage: planB.routing.sourceLanguage,
+          targetLanguage: planB.routing.targetLanguage,
+        });
+        pendingPlanBRef.current = null;
+        return;
+      }
+
+      if (planB?.type === "replay" || planB?.type === "repeat") {
+        latestReplayTextRef.current = translated;
+        safeSetState(() => setCurrentTranslatedText(translated));
+        pendingPlanBRef.current = null;
+        return;
+      }
+
+      if (planB?.type === "scopeRetry") {
+        appendTurn(planB.sourceText, translated, {
+          speaker: planB.routing.activeSpeaker,
+          sourceLanguage: planB.routing.sourceLanguage,
+          targetLanguage: planB.routing.targetLanguage,
+          allowDuplicate: true,
+        });
+        pendingPlanBRef.current = null;
+        return;
+      }
+
+      const original = pendingOriginalRef.current;
+      const routing = turnContextRef.current;
+      const completedTurns = turnsRef.current.filter(
+        (t) => t.status === "translated" || t.status === "corrected",
+      ).length;
+      const elapsed = sessionStartedAtRef.current
+        ? Date.now() - sessionStartedAtRef.current
+        : 0;
+
+      if (
+        shouldRetryScopeRefusal(
+          completedTurns,
+          elapsed,
+          scopeContinueRef.current,
+          original,
+          translated,
+        )
+      ) {
+        currentTranslatedRef.current = "";
+        safeSetState(() => setCurrentTranslatedText(""));
+        requestFaithfulTranslationRetry(original, routing);
+        return;
+      }
+
+      if (isModelScopeRefusal(translated, instructionOptionsRef.current)) {
+        if (!scopeWarningShownRef.current) {
+          scopeWarningShownRef.current = true;
+          onScopeWarningRef.current?.();
+        }
+        stopVoiceOutput();
+        currentTranslatedRef.current = "";
+        safeSetState(() => setCurrentTranslatedText(""));
+        return;
+      }
+
+      const overlap = overlapDetectedRef.current;
+      overlapDetectedRef.current = false;
+      appendTurn(original, translated, { overlapDetected: overlap });
+    },
+    [
+      appendTurn,
+      requestFaithfulTranslationRetry,
+      safeSetState,
+      stopVoiceOutput,
+    ],
+  );
+
+  const setActivityStatus = useCallback(
+    (status) => {
+      if (pausedRef.current) return;
+      safeSetState(() => setConnectionStatus(status));
+    },
+    [safeSetState],
+  );
+
   const handleServerEvent = useCallback(
     (event) => {
       if (!event || typeof event !== "object") return;
       const type = event.type;
+
+      if (pausedRef.current) {
+        const blockedWhilePaused = [
+          "input_audio_buffer.speech_started",
+          "input_audio_buffer.speech_stopped",
+          "conversation.item.input_audio_transcription.completed",
+          "input_audio_buffer.transcription.completed",
+          "conversation.item.input_audio_transcription.delta",
+          "input_audio_buffer.transcription.delta",
+        ];
+        if (blockedWhilePaused.includes(type)) return;
+      }
 
       if (type === "session.created") {
         connectedRef.current = true;
@@ -526,15 +741,13 @@ export function useLiveTranslationSession({
         turnContextRef.current = buildLanguageRouting(sessionConfigRef.current);
         pendingOriginalRef.current = "";
         currentTranslatedRef.current = "";
-        safeSetState(() => {
-          setCurrentTranslatedText("");
-          setConnectionStatus("listening");
-        });
+        safeSetState(() => setCurrentTranslatedText(""));
+        setActivityStatus("listening");
         return;
       }
 
       if (type === "input_audio_buffer.speech_stopped") {
-        safeSetState(() => setConnectionStatus("translating"));
+        setActivityStatus("translating");
         return;
       }
 
@@ -573,21 +786,22 @@ export function useLiveTranslationSession({
           currentTranslatedRef.current += delta;
           safeSetState(() => {
             setCurrentTranslatedText(currentTranslatedRef.current);
-            setConnectionStatus("speaking");
+            setActivityStatus("speaking");
           });
         } else {
-          safeSetState(() => setConnectionStatus("speaking"));
+          setActivityStatus("speaking");
         }
         return;
       }
 
       if (type === "response.created" || type === "response.output_item.added") {
-        safeSetState(() => setConnectionStatus("translating"));
+        responseActiveRef.current = true;
+        setActivityStatus("translating");
         return;
       }
 
       if (type === "response.audio.delta") {
-        safeSetState(() => setConnectionStatus("speaking"));
+        setActivityStatus("speaking");
         return;
       }
 
@@ -599,33 +813,15 @@ export function useLiveTranslationSession({
           extractTranslatedText(event) || currentTranslatedRef.current;
         if (translated) {
           currentTranslatedRef.current = translated;
-          const planB = pendingPlanBRef.current;
-          if (planB?.type === "correction") {
-            appendTurn(planB.sourceText, translated, {
-              status: "corrected",
-              correctsTurnId: planB.correctsTurnId,
-              wrongOriginalText: planB.wrongOriginalText,
-              wrongTranslatedText: planB.wrongTranslatedText,
-              allowDuplicate: true,
-              speaker: planB.routing.activeSpeaker,
-              sourceLanguage: planB.routing.sourceLanguage,
-              targetLanguage: planB.routing.targetLanguage,
-            });
-            pendingPlanBRef.current = null;
-          } else if (planB?.type === "replay" || planB?.type === "repeat") {
-            latestReplayTextRef.current = translated;
-            safeSetState(() => setCurrentTranslatedText(translated));
-            pendingPlanBRef.current = null;
-          } else {
-            const overlap = overlapDetectedRef.current;
-            overlapDetectedRef.current = false;
-            appendTurn(pendingOriginalRef.current, translated, { overlapDetected: overlap });
-          }
+          finalizeTranslationOutput(translated);
         }
         if (skipLanguageRoutingRef) {
           skipLanguageRoutingRef.current = false;
         }
-        safeSetState(() => setConnectionStatus("connected"));
+        responseActiveRef.current = false;
+        safeSetState(() => {
+          setConnectionStatus(pausedRef.current ? "paused" : "connected");
+        });
         return;
       }
 
@@ -640,24 +836,58 @@ export function useLiveTranslationSession({
           currentTranslatedRef.current = translated;
           safeSetState(() => setCurrentTranslatedText(translated));
         }
-        safeSetState(() => setConnectionStatus("connected"));
+        safeSetState(() => {
+          setConnectionStatus(pausedRef.current ? "paused" : "connected");
+        });
         return;
       }
 
       if (type === "response.done") {
+        responseActiveRef.current = false;
+        if (isCancelledOrFailedResponseDone(event)) {
+          logRealtimeDiag("response_done_non_success", summarizeRealtimeEvent(event));
+          safeSetState(() => setConnectionStatus("connected"));
+          return;
+        }
         safeSetState(() => setConnectionStatus("connected"));
         return;
       }
 
       if (type === "error") {
+        const summary = summarizeRealtimeEvent(event);
+        const classified = classifyRealtimeError(event);
+        logRealtimeDiag("realtime_error", { ...summary, ...classified });
+
         if (Date.now() < suppressErrorsUntilRef.current) return;
-        safeSetState(() => {
-          setConnectionStatus("error");
-          setErrorKey("realtimeChannelError");
-        });
+        if (classified.ignorable) return;
+
+        const dcOpen = dcRef.current?.readyState === "open";
+        const pc = pcRef.current;
+        const pcState = pc?.connectionState;
+        const pcFailed = pcState === "failed" || pcState === "closed";
+
+        if (classified.fatal || !dcOpen || pcFailed) {
+          safeSetState(() => {
+            setConnectionStatus("error");
+            setErrorKey("realtimeChannelError");
+          });
+          return;
+        }
+
+        // Transient error while channel still open — stay connected, do not collapse session.
+        logRealtimeDiag("realtime_error_recoverable", summary);
+        return;
       }
     },
-    [appendTurn, applyLanguageRouting, safeSetState, sendMedaIntro, skipLanguageRoutingRef, startSessionTimer],
+    [
+      applyLanguageRouting,
+      finalizeTranslationOutput,
+      safeSetState,
+      sendMedaIntro,
+      setActivityStatus,
+      skipLanguageRoutingRef,
+      startSessionTimer,
+    ],
   );
 
   const sendSpeakerUpdate = useCallback(() => {
@@ -673,33 +903,48 @@ export function useLiveTranslationSession({
     const routing = buildLanguageRouting(sessionConfigRef.current);
     turnContextRef.current = routing;
 
-    suppressErrorsUntilRef.current = Date.now() + 2000;
-    dc.send(JSON.stringify({ type: "response.cancel" }));
-    const txLanguage = resolveOpenAiTranscriptionLanguage(routing.sourceLanguage);
-    dc.send(
-      JSON.stringify({
-        type: "session.update",
-        session: {
-          instructions: buildClientSideInstructions(routing, instructionOptionsRef.current),
-          audio: {
-            input: {
-              transcription: {
-                model: transcriptionModelRef.current,
-                ...(txLanguage ? { language: txLanguage } : {}),
-              },
-            },
-          },
-        },
-      }),
-    );
+    const updateSig = `${routing.activeSpeaker}|${routing.sourceLanguage}|${routing.targetLanguage}`;
+    if (updateSig === lastSessionUpdateSigRef.current) {
+      return;
+    }
+    lastSessionUpdateSigRef.current = updateSig;
+
+    cancelActiveResponse();
+
+    const payload = buildRuntimeSessionUpdatePayload(routing);
+    logRealtimeDiag("session_update_send", {
+      activeSpeaker: routing.activeSpeaker,
+      sourceLanguage: routing.sourceLanguage,
+      targetLanguage: routing.targetLanguage,
+      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
+    });
+    dc.send(JSON.stringify(payload));
+
     currentTranslatedRef.current = "";
     lastTurnSignatureRef.current = "";
     safeSetState(() => {
       setCurrentTranslatedText("");
-      setConnectionStatus("connected");
+      if (
+        connectionStatusRef.current !== "introducing" &&
+        connectionStatusRef.current !== "speaking" &&
+        connectionStatusRef.current !== "paused"
+      ) {
+        setConnectionStatus("connected");
+      }
     });
     pendingOriginalRef.current = "";
-  }, [safeSetState]);
+  }, [cancelActiveResponse, safeSetState]);
+
+  const scheduleSpeakerUpdate = useCallback(() => {
+    pendingSpeakerUpdateRef.current = true;
+    if (speakerUpdateTimerRef.current) {
+      clearTimeout(speakerUpdateTimerRef.current);
+    }
+    speakerUpdateTimerRef.current = setTimeout(() => {
+      speakerUpdateTimerRef.current = null;
+      sendSpeakerUpdate();
+    }, 400);
+  }, [sendSpeakerUpdate]);
 
   const connect = useCallback(async () => {
     if (!mountedRef.current) return;
@@ -753,6 +998,21 @@ export function useLiveTranslationSession({
       const pc = new RTCPeerConnection(REALTIME_PEER_CONNECTION_CONFIG);
       pcRef.current = pc;
 
+      pc.onconnectionstatechange = () => {
+        logRealtimeDiag("pc_connection_state", { state: pc.connectionState });
+        if (pc.connectionState === "failed" || pc.connectionState === "closed") {
+          if (connectedRef.current) {
+            safeSetState(() => {
+              setConnectionStatus("error");
+              setErrorKey("realtimeChannelError");
+            });
+          }
+        }
+      };
+      pc.oniceconnectionstatechange = () => {
+        logRealtimeDiag("pc_ice_state", { state: pc.iceConnectionState });
+      };
+
       const audioEl = document.createElement("audio");
       attachOutputAudio(audioEl);
       audioElRef.current = audioEl;
@@ -786,16 +1046,36 @@ export function useLiveTranslationSession({
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
       dc.addEventListener("open", () => {
-        sendMedaIntro();
+        logRealtimeDiag("dc_open", { readyState: dc.readyState });
+        if (!introPlayedRef.current) {
+          sendMedaIntro();
+        }
         if (pendingSpeakerUpdateRef.current) {
           sendSpeakerUpdate();
         }
       });
+      dc.addEventListener("error", () => {
+        logRealtimeDiag("dc_error", { readyState: dc.readyState });
+      });
+      dc.addEventListener("close", () => {
+        logRealtimeDiag("dc_close", { readyState: dc.readyState });
+        if (connectedRef.current && mountedRef.current) {
+          safeSetState(() => {
+            setConnectionStatus("error");
+            setErrorKey("realtimeChannelError");
+          });
+        }
+      });
       dc.addEventListener("message", (e) => {
         try {
-          handleServerEvent(JSON.parse(String(e.data)));
+          const parsed = JSON.parse(String(e.data));
+          const summary = summarizeRealtimeEvent(parsed);
+          if (summary.type === "error" || summary.errorCode) {
+            logRealtimeDiag("dc_message_error_event", summary);
+          }
+          handleServerEvent(parsed);
         } catch {
-          /* ignore malformed events */
+          logRealtimeDiag("dc_message_parse_failed", {});
         }
       });
 
@@ -876,8 +1156,8 @@ export function useLiveTranslationSession({
     if (!connectedRef.current) return;
     if (prevSpeakerRef.current === activeSpeaker) return;
     prevSpeakerRef.current = activeSpeaker;
-    sendSpeakerUpdate();
-  }, [activeSpeaker, connectionStatus, enabled, sendSpeakerUpdate]);
+    scheduleSpeakerUpdate();
+  }, [activeSpeaker, enabled, scheduleSpeakerUpdate]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -909,7 +1189,7 @@ export function useLiveTranslationSession({
       teardown();
       safeSetState(() => {
         setErrorKey("");
-        setConnectionStatus("connecting");
+        setConnectionStatus("reconnecting");
       });
       await connect();
     } finally {
@@ -939,6 +1219,10 @@ export function useLiveTranslationSession({
     submitCorrection,
     askToRepeat,
     resumeAudioPlayback,
+    pauseConversation,
+    resumeConversation,
+    confirmScopeContinue,
+    isPaused: connectionStatus === "paused",
     latestReplayText: latestReplayTextRef.current,
   };
 }

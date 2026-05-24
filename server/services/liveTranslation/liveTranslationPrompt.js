@@ -77,7 +77,7 @@ CURRENT MODE:
 
 ${buildFidelityRulesBlock(routing.targetLanguage)}
 
-${buildMedicalScopeBlock(routing.patientLanguage)}
+${buildMedicalScopeBlock()}
 
 Translation boundaries:
 - Do NOT diagnose, triage, classify urgency, recommend treatment, give medication advice, suggest specialists, explain symptoms medically, or infer missing content.

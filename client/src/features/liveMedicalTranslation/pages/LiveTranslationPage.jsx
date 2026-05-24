@@ -107,6 +107,7 @@ export default function LiveTranslationPage() {
   const [sessionWarning, setSessionWarning] = useState("");
   const [autoEnded, setAutoEnded] = useState(false);
   const [localSaveState, setLocalSaveState] = useState(/** @type {"idle" | "saved" | "declined"} */ ("idle"));
+  const [scopeWarningVisible, setScopeWarningVisible] = useState(false);
   const skipLanguageRoutingRef = useRef(false);
   const pdfDownloadRef = useRef(/** @type {HTMLDivElement | null} */ (null));
   const turnsRef = useRef(/** @type {Array<Record<string, unknown>>} */ ([]));
@@ -177,6 +178,10 @@ export default function LiveTranslationPage() {
     finishSessionRef.current?.({ autoEnd: true });
   }, []);
 
+  const handleScopeWarning = useCallback(() => {
+    setScopeWarningVisible(true);
+  }, []);
+
   const handleManualSpeakerSelect = useCallback((speaker) => {
     skipLanguageRoutingRef.current = true;
     setLanguageUncertain(false);
@@ -197,6 +202,10 @@ export default function LiveTranslationPage() {
     submitCorrection,
     askToRepeat,
     resumeAudioPlayback,
+    pauseConversation,
+    resumeConversation,
+    confirmScopeContinue,
+    isPaused,
     sessionTimerLabel,
   } = useLiveTranslationSession({
     patientLanguage,
@@ -214,6 +223,7 @@ export default function LiveTranslationPage() {
     onUnclearTurn: handleUnclearTurn,
     onSessionTimeWarning: handleSessionTimeWarning,
     onSessionAutoEnd: handleSessionAutoEnd,
+    onScopeWarning: handleScopeWarning,
   });
 
   turnsRef.current = turns;
@@ -238,6 +248,7 @@ export default function LiveTranslationPage() {
       setLanguageUncertain(false);
       setUnclearBanner("");
       setSessionWarning("");
+      setScopeWarningVisible(false);
       setAutoEnded(autoEnd);
       setLocalSaveState("idle");
       setStep("ended");
@@ -284,7 +295,8 @@ export default function LiveTranslationPage() {
     connectionStatus === "introducing" ||
     connectionStatus === "listening" ||
     connectionStatus === "translating" ||
-    connectionStatus === "speaking";
+    connectionStatus === "speaking" ||
+    connectionStatus === "paused";
   const activityClass =
     connectionStatus === "introducing"
       ? "live-translation__activity--introducing"
@@ -294,7 +306,9 @@ export default function LiveTranslationPage() {
         ? "live-translation__activity--translating"
         : connectionStatus === "speaking"
           ? "live-translation__activity--speaking"
-          : "";
+          : connectionStatus === "paused"
+            ? "live-translation__activity--paused"
+            : "";
   const activeSpeakerLabel =
     activeSpeaker === "patient" ? t.live.patientSpeaker : t.live.doctorSpeaker;
   const speakerBannerLabel =
@@ -304,7 +318,29 @@ export default function LiveTranslationPage() {
   const latestTurn = turns.length > 0 ? turns[turns.length - 1] : null;
   const latestTurnId = latestTurn?.id ?? null;
   const canReplay = Boolean(latestTurn?.translatedText?.trim());
-  const planBDisabled = connectionStatus === "connecting" || connectionStatus === "ended";
+  const planBDisabled =
+    connectionStatus === "connecting" ||
+    connectionStatus === "reconnecting" ||
+    connectionStatus === "ended" ||
+    connectionStatus === "paused";
+
+  const handleScopeContinue = useCallback(() => {
+    setScopeWarningVisible(false);
+    confirmScopeContinue();
+  }, [confirmScopeContinue]);
+
+  const handleScopePause = useCallback(() => {
+    setScopeWarningVisible(false);
+    pauseConversation();
+  }, [pauseConversation]);
+
+  const handleTogglePause = useCallback(() => {
+    if (isPaused) {
+      resumeConversation();
+    } else {
+      pauseConversation();
+    }
+  }, [isPaused, pauseConversation, resumeConversation]);
 
   const canStartSession = useMemo(
     () =>
@@ -824,6 +860,32 @@ export default function LiveTranslationPage() {
             </p>
           ) : null}
 
+          {scopeWarningVisible ? (
+            <div className="live-translation__scope-warning" role="dialog" aria-labelledby="scope-warning-title">
+              <p id="scope-warning-title" className="live-translation__scope-warning-text">
+                {t.warnings.unrelatedHealthcare}
+              </p>
+              <div className="live-translation__scope-warning-actions">
+                <button
+                  type="button"
+                  className="live-translation__primary"
+                  aria-label={t.live.continueAnywayAria}
+                  onClick={handleScopeContinue}
+                >
+                  {t.live.continueAnyway}
+                </button>
+                <button
+                  type="button"
+                  className="live-translation__secondary"
+                  aria-label={t.live.pauseDueToUnrelatedAria}
+                  onClick={handleScopePause}
+                >
+                  {t.live.pauseDueToUnrelated}
+                </button>
+              </div>
+            </div>
+          ) : null}
+
           {languageUncertain ? (
             <p className="live-translation__warning" role="status">
               {t.warnings.languageUncertain}
@@ -840,10 +902,12 @@ export default function LiveTranslationPage() {
                   connectionStatus === "error"
                     ? "live-translation__status-value--error"
                     : connectionStatus === "connected" ||
+                        connectionStatus === "reconnecting" ||
                         connectionStatus === "introducing" ||
                         connectionStatus === "listening" ||
                         connectionStatus === "translating" ||
-                        connectionStatus === "speaking"
+                        connectionStatus === "speaking" ||
+                        connectionStatus === "paused"
                       ? "live-translation__status-value--ok"
                       : "",
                 ]
@@ -954,7 +1018,7 @@ export default function LiveTranslationPage() {
             onSubmitCorrection={submitCorrection}
           />
 
-          <div className="live-translation__actions live-translation__actions--inline">
+          <div className="live-translation__actions live-translation__actions--inline live-translation__actions--session">
             {connectionStatus === "error" ? (
               <button
                 type="button"
@@ -963,6 +1027,16 @@ export default function LiveTranslationPage() {
                 onClick={() => void reconnect()}
               >
                 {t.live.reconnectButton}
+              </button>
+            ) : null}
+            {sessionActive && connectionStatus !== "ended" && connectionStatus !== "connecting" ? (
+              <button
+                type="button"
+                className="live-translation__secondary"
+                aria-label={isPaused ? t.live.resumeAria : t.live.pauseAria}
+                onClick={handleTogglePause}
+              >
+                {isPaused ? t.live.resumeButton : t.live.pauseButton}
               </button>
             ) : null}
             <button
