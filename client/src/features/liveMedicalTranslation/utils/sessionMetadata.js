@@ -47,22 +47,46 @@ export function buildSessionMetadata(input) {
 }
 
 /**
- * Merge live transcript turns into export-ready metadata (PDF integration later).
+ * Merge live transcript turns into export-ready metadata for client-side PDF.
  * @param {ReturnType<typeof buildSessionMetadata>} metadata
- * @param {Array<{ speaker: string; sourceLanguage: string; targetLanguage: string; originalText: string; originalMissing?: boolean; translatedText: string; timestamp: string }>} turns
+ * @param {Array<{
+ *   id?: string;
+ *   speaker: string;
+ *   sourceLanguage: string;
+ *   targetLanguage: string;
+ *   originalText: string;
+ *   originalMissing?: boolean;
+ *   translatedText: string;
+ *   timestamp: string;
+ *   status?: string;
+ *   correctsTurnId?: string;
+ *   wrongOriginalText?: string;
+ *   wrongTranslatedText?: string;
+ * }>} turns
+ * @param {{ autoSwitchSpeaker?: boolean; sessionEndedAt?: string }} [options]
  */
-export function buildExportMetadata(metadata, turns) {
+export function buildExportMetadata(metadata, turns, options = {}) {
+  const sorted = [...turns].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  );
+
   return {
     ...metadata,
-    sessionEndedAt: new Date().toISOString(),
-    transcript: turns.map((turn) => ({
+    sessionEndedAt: options.sessionEndedAt || new Date().toISOString(),
+    autoSwitchSpeaker: Boolean(options.autoSwitchSpeaker),
+    transcript: sorted.map((turn) => ({
+      id: turn.id,
       speaker: turn.speaker,
       sourceLanguage: turn.sourceLanguage,
       targetLanguage: turn.targetLanguage,
       originalText: turn.originalText,
-      originalMissing: turn.originalMissing,
+      originalMissing: Boolean(turn.originalMissing),
       translatedText: turn.translatedText,
       timestamp: turn.timestamp,
+      status: turn.status || "translated",
+      correctsTurnId: turn.correctsTurnId,
+      wrongOriginalText: turn.wrongOriginalText,
+      wrongTranslatedText: turn.wrongTranslatedText,
     })),
   };
 }

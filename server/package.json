@@ -17,7 +17,8 @@
     "analyze:dedupe": "node scripts/analyzeDuplicateConstraints.js",
     "dedupe:constraints": "node scripts/dedupeDuplicateConstraints.js --dry-run",
     "seed:inbox": "node scripts/seedPatientInboxItem.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "verify:live-translation-fidelity": "node scripts/verifyLiveTranslationFidelity.js"
   },
   "keywords": [],
   "author": "",

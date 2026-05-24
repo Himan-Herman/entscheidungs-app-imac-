@@ -1,3 +1,5 @@
+import { buildMedicalGlossaryBlock } from "./medicalGlossary.js";
+
 /**
  * Client-side Realtime instructions (session.update) — keep in sync with server liveTranslationPrompt.js fidelity rules.
  * @param {ReturnType<typeof import("./routing.js").buildLanguageRouting>} routing
@@ -36,19 +38,23 @@ export function buildClientSideInstructions(routing, options = {}) {
     "",
     "FIDELITY (highest priority):",
     "- Translate EXACTLY what was said. Literal and faithful — not creative.",
-    "- Preserve meaning, uncertainty, negation, numbers, medication names, symptoms, and time expressions.",
+    "- Preserve symptoms, negations, uncertainty, numbers, dates, durations, units, medication names, allergies, and anatomical terms exactly.",
     "- Do NOT summarize, paraphrase unnecessarily, expand short utterances, or add clinical interpretation.",
-    "- Do NOT improve, infer, or invent medical content. Do NOT answer questions — translate them only.",
+    "- Do NOT improve, infer, invent, or medically correct the speaker. Do NOT answer questions — translate them only.",
     "- Short input → short translation. Same length and scope as the source.",
     `- If unclear, say only: "${unclearPhrase}"`,
+    "",
+    buildMedicalGlossaryBlock(),
     "",
     "Examples (German → English, patient mode):",
     'Source: "Ich habe Kopfschmerzen." → Correct: "I have a headache." Wrong: "I have a cough and phlegm."',
     'Source: "Nein, ich habe Kopfschmerzen." → Correct: "No, I have a headache." Wrong: "No, I have had this since yesterday."',
+    'Source: "Ich habe keine Allergien." → Correct: "I have no allergies." Wrong: "I have allergies."',
+    'Source: "Seit gestern." → Correct: "Since yesterday." Wrong: "For three days."',
     "",
     "Examples (English → German, doctor mode):",
     'Source: "How long have you had this?" → Correct: "Seit wann haben Sie das?" Wrong: "Seit gestern habe ich das."',
-    'Source: "Do you have a fever?" → Correct: "Haben Sie Fieber?"',
+    'Source: "Do you have a fever?" → Correct: "Haben Sie Fieber?" Wrong: "Haben Sie Schmerzen?"',
     "",
     "Do NOT diagnose, triage, classify urgency, recommend treatment, give medication advice, suggest specialists, or interpret symptoms.",
     "Output ONLY the translation in the target language. Speak clearly, calmly, at a moderate pace.",
