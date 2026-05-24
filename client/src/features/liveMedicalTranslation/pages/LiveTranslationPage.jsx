@@ -8,6 +8,7 @@ import { isLiveMedicalTranslationEnabled } from "../featureFlag.js";
 import { LIVE_TRANSLATION_LANGUAGE_OPTIONS } from "../languages.js";
 import { buildLanguageRouting } from "../utils/routing.js";
 import { useLiveTranslationSession } from "../hooks/useLiveTranslationSession.js";
+import { playSpeakerSwitchSound } from "../utils/speakerSwitchFeedback.js";
 import "../styles/LiveTranslationPage.css";
 
 function resolveInitialLanguage(language, role) {
@@ -47,8 +48,26 @@ export default function LiveTranslationPage() {
   const [activeSpeaker, setActiveSpeaker] = useState(
     /** @type {"patient" | "doctor"} */ ("patient"),
   );
+  const [autoSwitchSpeaker, setAutoSwitchSpeaker] = useState(true);
+  const [speakerSwitchAnim, setSpeakerSwitchAnim] = useState(false);
   const [formError, setFormError] = useState("");
   const [sessionActive, setSessionActive] = useState(false);
+
+  const handleTurnComplete = useCallback(
+    (completedSpeaker) => {
+      if (!autoSwitchSpeaker) return;
+      setActiveSpeaker(completedSpeaker === "patient" ? "doctor" : "patient");
+      setSpeakerSwitchAnim(true);
+      playSpeakerSwitchSound();
+    },
+    [autoSwitchSpeaker],
+  );
+
+  useEffect(() => {
+    if (!speakerSwitchAnim) return undefined;
+    const timer = window.setTimeout(() => setSpeakerSwitchAnim(false), 480);
+    return () => window.clearTimeout(timer);
+  }, [speakerSwitchAnim, activeSpeaker]);
 
   const {
     connectionStatus,
@@ -63,6 +82,8 @@ export default function LiveTranslationPage() {
     doctorLanguage,
     activeSpeaker,
     enabled: sessionActive,
+    autoSwitchSpeaker,
+    onTurnComplete: handleTurnComplete,
   });
 
   const endSessionRef = useRef(endSession);
@@ -112,6 +133,8 @@ export default function LiveTranslationPage() {
           : "";
   const activeSpeakerLabel =
     activeSpeaker === "patient" ? t.live.patientSpeaker : t.live.doctorSpeaker;
+  const speakerBannerLabel =
+    activeSpeaker === "patient" ? t.live.speakerBannerPatient : t.live.speakerBannerDoctor;
   const directionLabel = `${displayRouting.sourceLanguageName} → ${displayRouting.targetLanguageName}`;
 
   const handleStart = useCallback(() => {
@@ -218,6 +241,18 @@ export default function LiveTranslationPage() {
             </p>
           ) : null}
 
+          <label className="live-translation__auto-switch">
+            <input
+              type="checkbox"
+              checked={autoSwitchSpeaker}
+              onChange={(e) => setAutoSwitchSpeaker(e.target.checked)}
+            />
+            <span>
+              <span className="live-translation__auto-switch-label">{t.setup.autoSwitchLabel}</span>
+              <span className="live-translation__auto-switch-hint">{t.setup.autoSwitchHint}</span>
+            </span>
+          </label>
+
           <button type="submit" className="live-translation__primary" aria-label={t.setup.startAria}>
             {t.setup.startButton}
           </button>
@@ -253,6 +288,26 @@ export default function LiveTranslationPage() {
                 <span className="live-translation__direction"> ({directionLabel})</span>
               </span>
             </div>
+          </div>
+
+          <div
+            className={[
+              "live-translation__speaker-banner",
+              activeSpeaker === "patient"
+                ? "live-translation__speaker-banner--patient"
+                : "live-translation__speaker-banner--doctor",
+              speakerSwitchAnim ? "live-translation__speaker-banner--switching" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            role="status"
+            aria-live="polite"
+          >
+            <p className="live-translation__speaker-banner-title">{speakerBannerLabel}</p>
+            <p className="live-translation__speaker-banner-direction">{directionLabel}</p>
+            {autoSwitchSpeaker ? (
+              <p className="live-translation__speaker-banner-auto">{t.live.autoSwitchActive}</p>
+            ) : null}
           </div>
 
           {isSessionLive ? (
@@ -307,6 +362,20 @@ export default function LiveTranslationPage() {
               {t.errors[errorKey]}
             </p>
           ) : null}
+
+          <label className="live-translation__auto-switch live-translation__auto-switch--live">
+            <input
+              type="checkbox"
+              checked={autoSwitchSpeaker}
+              onChange={(e) => setAutoSwitchSpeaker(e.target.checked)}
+            />
+            <span>
+              <span className="live-translation__auto-switch-label">{t.live.autoSwitchToggle}</span>
+              {autoSwitchSpeaker ? (
+                <span className="live-translation__auto-switch-hint">{t.live.autoSwitchActive}</span>
+              ) : null}
+            </span>
+          </label>
 
           <div
             className="live-translation__speakers"
@@ -426,7 +495,14 @@ export default function LiveTranslationPage() {
                           </span>
                           {turn.originalText}
                         </p>
-                      ) : null}
+                      ) : (
+                        <p className="live-translation__turn-original live-translation__turn-original--missing">
+                          <span className="live-translation__turn-field-label">
+                            {t.turn.original}
+                          </span>
+                          {t.turn.originalMissing}
+                        </p>
+                      )}
                       <p className="live-translation__turn-translated">
                         <span className="live-translation__turn-field-label">
                           {t.turn.translated}

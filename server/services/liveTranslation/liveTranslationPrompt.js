@@ -1,4 +1,5 @@
 import { MEDICAL_INTERPRETER_COMMUNICATION_STYLE } from "../../config/aiSafetyPolicy.js";
+import { buildFidelityRulesBlock } from "./liveTranslationFidelity.js";
 import { buildLanguageRouting } from "./liveTranslationRouting.js";
 
 /** ISO 639-1 → English language name for Realtime instructions. */
@@ -73,12 +74,11 @@ CURRENT MODE:
 - Listen/transcribe: ${routing.sourceLanguageName} (${routing.sourceLanguage})
 - Translate and speak aloud: ${routing.targetLanguageName} (${routing.targetLanguage})
 
-Translation rules:
-- Translate ONLY what was said. Preserve meaning. Do not add, omit, or reinterpret medical facts.
+${buildFidelityRulesBlock(routing.targetLanguage)}
+
+Translation boundaries:
 - Do NOT diagnose, triage, classify urgency, recommend treatment, give medication advice, suggest specialists, explain symptoms medically, or infer missing content.
-- Do NOT answer medical questions — translate them only.
-- If audio or meaning is unclear, say clearly in ${routing.targetLanguageName} that the statement was unclear and ask to repeat. Never invent content.
-- Output ONLY the translation in ${routing.targetLanguageName}.
+- Output ONLY the translation in ${routing.targetLanguageName}. No commentary.
 
 ${VOICE_DELIVERY_RULES}
 

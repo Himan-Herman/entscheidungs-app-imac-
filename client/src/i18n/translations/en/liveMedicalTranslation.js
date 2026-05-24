@@ -14,12 +14,19 @@ export default {
     languagesMustDiffer: "Languages must be different.",
     startButton: "Start live conversation",
     startAria: "Start live translation and enable microphone",
+    autoSwitchLabel: "Automatic speaker switch",
+    autoSwitchHint:
+      "After each completed translation, the active side switches — ping-pong flow without AI speaker detection.",
   },
   live: {
     heading: "Live conversation",
     patientLanguage: "Patient language",
     doctorLanguage: "Doctor/practice language",
     currentlyActive: "Currently active",
+    speakerBannerPatient: "Now speaking: Patient",
+    speakerBannerDoctor: "Now speaking: Doctor/practice",
+    autoSwitchActive: "Automatic switch active",
+    autoSwitchToggle: "Automatic speaker switch",
     connectionStatus: "Connection",
     microphoneStatus: "Microphone",
     currentTranslation: "Current translation",
@@ -40,6 +47,7 @@ export default {
     speakerDoctor: "Doctor/practice",
     original: "Original:",
     translated: "Translation:",
+    originalMissing: "Original not reliably recognized",
   },
   status: {
     idle: "Ready",

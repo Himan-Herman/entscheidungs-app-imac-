@@ -14,12 +14,19 @@ export default {
     languagesMustDiffer: "Die Sprachen müssen unterschiedlich sein.",
     startButton: "Live-Gespräch starten",
     startAria: "Live-Übersetzung starten und Mikrofon aktivieren",
+    autoSwitchLabel: "Automatischer Sprecherwechsel",
+    autoSwitchHint:
+      "Nach jeder abgeschlossenen Übersetzung wechselt die aktive Seite — Ping-Pong ohne automatische Sprechererkennung.",
   },
   live: {
     heading: "Live-Gespräch",
     patientLanguage: "Patientensprache",
     doctorLanguage: "Arzt-/Praxissprache",
     currentlyActive: "Aktuell aktiv",
+    speakerBannerPatient: "Jetzt spricht: Patient",
+    speakerBannerDoctor: "Jetzt spricht: Arzt/Praxis",
+    autoSwitchActive: "Automatischer Wechsel aktiv",
+    autoSwitchToggle: "Automatischer Sprecherwechsel",
     connectionStatus: "Verbindung",
     microphoneStatus: "Mikrofon",
     currentTranslation: "Aktuelle Übersetzung",
@@ -40,6 +47,7 @@ export default {
     speakerDoctor: "Arzt/Praxis",
     original: "Original:",
     translated: "Übersetzung:",
+    originalMissing: "Original nicht sicher erkannt",
   },
   status: {
     idle: "Bereit",

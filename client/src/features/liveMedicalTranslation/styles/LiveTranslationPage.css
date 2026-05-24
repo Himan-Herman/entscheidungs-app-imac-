@@ -81,6 +81,110 @@
   font-size: 0.92rem;
 }
 
+.live-translation__auto-switch {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border, #d8dee6);
+  border-radius: 0.65rem;
+  background: var(--surface, #fff);
+  cursor: pointer;
+}
+
+.live-translation__auto-switch input {
+  margin-top: 0.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+  accent-color: var(--accent, #1a6b5c);
+}
+
+.live-translation__auto-switch-label {
+  display: block;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.live-translation__auto-switch-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.88rem;
+  color: var(--text-muted, #5a6472);
+  line-height: 1.4;
+}
+
+.live-translation__auto-switch--live {
+  margin-bottom: 0.85rem;
+}
+
+.live-translation__speaker-banner {
+  margin: 0 0 1.25rem;
+  padding: 1.25rem 1.1rem;
+  border-radius: 0.85rem;
+  border: 2px solid var(--border, #d8dee6);
+  text-align: center;
+  transition:
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
+}
+
+.live-translation__speaker-banner--switching {
+  animation: live-translation-banner-switch 0.48s ease-out;
+}
+
+@keyframes live-translation-banner-switch {
+  0% {
+    box-shadow: 0 0 0 0 rgba(26, 107, 92, 0);
+  }
+  40% {
+    box-shadow: 0 0 0 4px rgba(26, 107, 92, 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(26, 107, 92, 0);
+  }
+}
+
+.live-translation__speaker-banner--patient {
+  background: var(--accent-soft, #e7f3f0);
+  border-color: var(--accent, #1a6b5c);
+}
+
+.live-translation__speaker-banner--doctor {
+  background: #eef2f7;
+  border-color: #5a6472;
+}
+
+.live-translation__speaker-banner-title {
+  margin: 0;
+  font-size: clamp(1.25rem, 4.5vw, 1.55rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.live-translation__speaker-banner-direction {
+  margin: 0.45rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-muted, #5a6472);
+}
+
+.live-translation__speaker-banner-auto {
+  margin: 0.55rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent, #1a6b5c);
+}
+
+.live-translation__turn-original--missing {
+  color: var(--text-muted, #5a6472);
+  font-style: italic;
+}
+
 .live-translation__primary,
 .live-translation__secondary,
 .live-translation__speaker {
@@ -274,6 +378,16 @@
   margin: 1rem 0 1.25rem;
 }
 
+.live-translation__speaker--active {
+  background: var(--accent-soft, #e7f3f0);
+  border-color: var(--accent, #1a6b5c);
+  box-shadow: inset 0 0 0 1px var(--accent, #1a6b5c);
+  transition:
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
+}
+
 .live-translation__speaker {
   flex-direction: column;
   align-items: stretch;
@@ -282,6 +396,10 @@
   background: var(--surface, #fff);
   color: var(--text, #1b2430);
   border-color: var(--border, #d8dee6);
+  transition:
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease;
 }
 
 .live-translation__speaker-title {
@@ -292,12 +410,6 @@
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--text-muted, #5a6472);
-}
-
-.live-translation__speaker--active {
-  background: var(--accent-soft, #e7f3f0);
-  border-color: var(--accent, #1a6b5c);
-  box-shadow: inset 0 0 0 1px var(--accent, #1a6b5c);
 }
 
 .live-translation__speaker:hover,
@@ -406,8 +518,29 @@
 
 @media (max-width: 639px) {
   .live-translation {
-    /* Bottom nav (~64px) + action row — keep primary controls tappable */
-    padding-bottom: calc(10.5rem + env(safe-area-inset-bottom, 0px));
+    padding: 1rem 0.85rem calc(11rem + env(safe-area-inset-bottom, 0px));
+    padding-left: max(0.85rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.85rem, env(safe-area-inset-right, 0px));
+  }
+
+  .live-translation__speaker-banner {
+    margin-bottom: 1.35rem;
+    padding: 1.35rem 1rem;
+  }
+
+  .live-translation__speakers {
+    gap: 1rem;
+    margin: 1.15rem 0 1.35rem;
+  }
+
+  .live-translation__turn {
+    padding: 1rem 0.9rem;
+  }
+
+  .live-translation__turn-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
   }
 
   .live-translation__form {

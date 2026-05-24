@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createLiveTranslationRealtimeSession } from "../api/liveTranslationApi.js";
 import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL, resolveOpenAiTranscriptionLanguage } from "../constants.js";
 import { buildLanguageRouting } from "../utils/routing.js";
+import { buildClientSideInstructions } from "../utils/translationInstructions.js";
 import {
   extractOriginalText,
   extractTranslatedText,
@@ -43,6 +44,7 @@ function resolveConnectExceptionErrorKey(err) {
  *   sourceLanguage: string;
  *   targetLanguage: string;
  *   originalText: string;
+ *   originalMissing: boolean;
  *   translatedText: string;
  *   timestamp: string;
  * }} LiveTranslationTurn
@@ -54,6 +56,8 @@ function resolveConnectExceptionErrorKey(err) {
  *   doctorLanguage: string;
  *   activeSpeaker: "patient" | "doctor";
  *   enabled: boolean;
+ *   autoSwitchSpeaker?: boolean;
+ *   onTurnComplete?: (completedSpeaker: "patient" | "doctor") => void;
  * }} config
  */
 export function useLiveTranslationSession({
@@ -61,6 +65,8 @@ export function useLiveTranslationSession({
   doctorLanguage,
   activeSpeaker,
   enabled,
+  autoSwitchSpeaker = false,
+  onTurnComplete,
 }) {
   const [connectionStatus, setConnectionStatus] = useState(
     /** @type {LiveTranslationConnectionStatus} */ ("idle"),
@@ -86,11 +92,15 @@ export function useLiveTranslationSession({
   const outputStreamIdRef = useRef(/** @type {string | null} */ (null));
   const lastTurnSignatureRef = useRef("");
   const suppressErrorsUntilRef = useRef(0);
+  const autoSwitchSpeakerRef = useRef(autoSwitchSpeaker);
+  const onTurnCompleteRef = useRef(onTurnComplete);
   const turnContextRef = useRef(
     buildLanguageRouting({ patientLanguage, doctorLanguage, activeSpeaker }),
   );
 
   sessionConfigRef.current = { patientLanguage, doctorLanguage, activeSpeaker };
+  autoSwitchSpeakerRef.current = autoSwitchSpeaker;
+  onTurnCompleteRef.current = onTurnComplete;
 
   const safeSetState = useCallback((setter) => {
     if (mountedRef.current) setter();
@@ -137,11 +147,13 @@ export function useLiveTranslationSession({
       const routing = turnContextRef.current;
       if (!translatedText.trim()) return;
 
+      const original = originalText.trim();
       const turn = {
         speaker: routing.activeSpeaker,
         sourceLanguage: routing.sourceLanguage,
         targetLanguage: routing.targetLanguage,
-        originalText: originalText.trim(),
+        originalText: original,
+        originalMissing: !original,
         translatedText: translatedText.trim(),
         timestamp: new Date().toISOString(),
       };
@@ -157,6 +169,10 @@ export function useLiveTranslationSession({
         setCurrentTranslatedText(trimmed);
       });
       pendingOriginalRef.current = "";
+
+      if (autoSwitchSpeakerRef.current && onTurnCompleteRef.current) {
+        onTurnCompleteRef.current(turn.speaker);
+      }
     },
     [safeSetState],
   );
@@ -535,19 +551,4 @@ export function useLiveTranslationSession({
     endSession,
     reconnect,
   };
-}
-
-/** @param {ReturnType<typeof buildLanguageRouting>} routing */
-function buildClientSideInstructions(routing) {
-  return [
-    "You are a live medical conversation translator ONLY.",
-    `activeSpeaker=${routing.activeSpeaker}; patientLanguage=${routing.patientLanguage}; doctorLanguage=${routing.doctorLanguage}; sourceLanguage=${routing.sourceLanguage}; targetLanguage=${routing.targetLanguage}.`,
-    `When activeSpeaker is patient, translate from ${routing.patientLanguageName} to ${routing.doctorLanguageName}.`,
-    `When activeSpeaker is doctor, translate from ${routing.doctorLanguageName} to ${routing.patientLanguageName}.`,
-    "Do not infer speaker identity. Use only activeSpeaker from the UI.",
-    `Current: listen ${routing.sourceLanguageName}, speak translation in ${routing.targetLanguageName}.`,
-    "Translate only what was said. Do not diagnose, triage, recommend treatment, add medical facts, or interpret symptoms.",
-    "If unclear, say it was unclear in the target language. Never invent content.",
-    "Speak clearly, calmly, and at a moderate pace.",
-  ].join(" ");
 }
