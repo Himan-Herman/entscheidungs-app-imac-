@@ -1,5 +1,6 @@
 import { MEDICAL_INTERPRETER_COMMUNICATION_STYLE } from "../../config/aiSafetyPolicy.js";
 import { buildFidelityRulesBlock } from "./liveTranslationFidelity.js";
+import { buildMedicalScopeBlock } from "./liveTranslationMedicalScope.js";
 import { buildLanguageRouting } from "./liveTranslationRouting.js";
 
 /** ISO 639-1 → English language name for Realtime instructions. */
@@ -75,6 +76,8 @@ CURRENT MODE:
 - Translate and speak aloud: ${routing.targetLanguageName} (${routing.targetLanguage})
 
 ${buildFidelityRulesBlock(routing.targetLanguage)}
+
+${buildMedicalScopeBlock(routing.patientLanguage)}
 
 Translation boundaries:
 - Do NOT diagnose, triage, classify urgency, recommend treatment, give medication advice, suggest specialists, explain symptoms medically, or infer missing content.

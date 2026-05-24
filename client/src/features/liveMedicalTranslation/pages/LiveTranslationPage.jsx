@@ -9,6 +9,13 @@ import { LIVE_TRANSLATION_LANGUAGE_OPTIONS } from "../languages.js";
 import { buildLanguageRouting } from "../utils/routing.js";
 import { useLiveTranslationSession } from "../hooks/useLiveTranslationSession.js";
 import { playSpeakerSwitchSound } from "../utils/speakerSwitchFeedback.js";
+import SetupPracticeAccordion from "../components/SetupPracticeAccordion.jsx";
+import {
+  buildSessionMetadata,
+  EMPTY_PRACTICE_INFO,
+} from "../utils/sessionMetadata.js";
+import { getMedaIntroText } from "../utils/medaIntro.js";
+import { isSetupComplete, isValidBirthDate, normalizePatientName } from "../utils/setupValidation.js";
 import "../styles/LiveTranslationPage.css";
 
 function resolveInitialLanguage(language, role) {
@@ -16,6 +23,20 @@ function resolveInitialLanguage(language, role) {
     return ["de", "en", "fr", "es", "it"].includes(language) ? language : "de";
   }
   return language === "de" ? "en" : "de";
+}
+
+function formatBirthDateDisplay(isoDate, lang) {
+  try {
+    const [year, month, day] = isoDate.split("-").map(Number);
+    if (!year || !month || !day) return isoDate;
+    return new Date(year, month - 1, day).toLocaleDateString(getPrimaryIntlLocale(lang), {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  } catch {
+    return isoDate;
+  }
 }
 
 function formatTurnTime(iso, lang) {
@@ -38,7 +59,7 @@ export default function LiveTranslationPage() {
     [language],
   );
 
-  const [step, setStep] = useState(/** @type {"setup" | "live"} */ ("setup"));
+  const [step, setStep] = useState(/** @type {"setup" | "prelive" | "active"} */ ("setup"));
   const [patientLanguage, setPatientLanguage] = useState(() =>
     resolveInitialLanguage(language, "patient"),
   );
@@ -50,8 +71,16 @@ export default function LiveTranslationPage() {
   );
   const [autoSwitchSpeaker, setAutoSwitchSpeaker] = useState(true);
   const [speakerSwitchAnim, setSpeakerSwitchAnim] = useState(false);
+  const [patientName, setPatientName] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [practiceInfo, setPracticeInfo] = useState(() => ({ ...EMPTY_PRACTICE_INFO }));
+  const [sessionMetadata, setSessionMetadata] = useState(
+    /** @type {ReturnType<typeof buildSessionMetadata> | null} */ (null),
+  );
   const [formError, setFormError] = useState("");
   const [sessionActive, setSessionActive] = useState(false);
+  const [languageUncertain, setLanguageUncertain] = useState(false);
+  const skipLanguageRoutingRef = useRef(false);
 
   const handleTurnComplete = useCallback(
     (completedSpeaker) => {
@@ -69,6 +98,34 @@ export default function LiveTranslationPage() {
     return () => window.clearTimeout(timer);
   }, [speakerSwitchAnim, activeSpeaker]);
 
+  const medaIntroText = useMemo(
+    () => getMedaIntroText(patientLanguage, t),
+    [patientLanguage, t],
+  );
+
+  const instructionOptions = useMemo(
+    () => ({
+      medicalDomainWarningDe: t.warnings.medicalDomainDe,
+      medicalDomainWarningEn: t.warnings.medicalDomainEn,
+    }),
+    [t],
+  );
+
+  const handleSpeakerFromLanguage = useCallback((speaker) => {
+    setActiveSpeaker(speaker);
+    setLanguageUncertain(false);
+  }, []);
+
+  const handleLanguageUncertain = useCallback(() => {
+    setLanguageUncertain(true);
+  }, []);
+
+  const handleManualSpeakerSelect = useCallback((speaker) => {
+    skipLanguageRoutingRef.current = true;
+    setLanguageUncertain(false);
+    setActiveSpeaker(speaker);
+  }, []);
+
   const {
     connectionStatus,
     microphoneStatus,
@@ -82,8 +139,14 @@ export default function LiveTranslationPage() {
     doctorLanguage,
     activeSpeaker,
     enabled: sessionActive,
+    introText: medaIntroText,
+    languageBasedRouting: true,
+    skipLanguageRoutingRef,
+    instructionOptions,
     autoSwitchSpeaker,
     onTurnComplete: handleTurnComplete,
+    onSpeakerFromLanguage: handleSpeakerFromLanguage,
+    onLanguageUncertain: handleLanguageUncertain,
   });
 
   const endSessionRef = useRef(endSession);
@@ -120,11 +183,14 @@ export default function LiveTranslationPage() {
   const connectionLabel = t.status[connectionStatus] || connectionStatus;
   const micLabel = microphoneStatus === "on" ? t.status.micOn : t.status.micOff;
   const isSessionLive =
+    connectionStatus === "introducing" ||
     connectionStatus === "listening" ||
     connectionStatus === "translating" ||
     connectionStatus === "speaking";
   const activityClass =
-    connectionStatus === "listening"
+    connectionStatus === "introducing"
+      ? "live-translation__activity--introducing"
+      : connectionStatus === "listening"
       ? "live-translation__activity--listening"
       : connectionStatus === "translating"
         ? "live-translation__activity--translating"
@@ -137,7 +203,35 @@ export default function LiveTranslationPage() {
     activeSpeaker === "patient" ? t.live.speakerBannerPatient : t.live.speakerBannerDoctor;
   const directionLabel = `${displayRouting.sourceLanguageName} → ${displayRouting.targetLanguageName}`;
 
-  const handleStart = useCallback(() => {
+  const canStartSession = useMemo(
+    () =>
+      isSetupComplete({
+        patientName,
+        birthDate,
+        patientLanguage,
+        doctorLanguage,
+      }),
+    [birthDate, doctorLanguage, patientLanguage, patientName],
+  );
+
+  const handlePracticeChange = useCallback((field, value) => {
+    setPracticeInfo((prev) => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleSetupContinue = useCallback(() => {
+    const name = normalizePatientName(patientName);
+    if (!name) {
+      setFormError(t.setup.patientNameRequired);
+      return;
+    }
+    if (!birthDate) {
+      setFormError(t.setup.birthDateRequired);
+      return;
+    }
+    if (!isValidBirthDate(birthDate)) {
+      setFormError(t.setup.birthDateInvalid);
+      return;
+    }
     if (!patientLanguage) {
       setFormError(t.setup.patientLanguageRequired);
       return;
@@ -151,19 +245,37 @@ export default function LiveTranslationPage() {
       return;
     }
     setFormError("");
-    setStep("live");
+    setSessionMetadata(
+      buildSessionMetadata({
+        patientName: name,
+        birthDate,
+        patientLanguage,
+        doctorLanguage,
+        practice: practiceInfo,
+      }),
+    );
+    setStep("prelive");
+  }, [birthDate, doctorLanguage, patientLanguage, patientName, practiceInfo, t]);
+
+  const handleSessionStart = useCallback(() => {
+    setLanguageUncertain(false);
+    skipLanguageRoutingRef.current = false;
+    setStep("active");
     setSessionActive(true);
-  }, [doctorLanguage, patientLanguage, t]);
+  }, []);
 
   const handleEnd = useCallback(() => {
     endSession();
     setSessionActive(false);
-    setStep("setup");
+    setLanguageUncertain(false);
+    setStep("prelive");
   }, [endSession]);
 
   const handleBackToSetup = useCallback(() => {
     endSession();
     setSessionActive(false);
+    setSessionMetadata(null);
+    setLanguageUncertain(false);
     setStep("setup");
   }, [endSession]);
 
@@ -180,10 +292,16 @@ export default function LiveTranslationPage() {
 
       <header className="live-translation__hero">
         <h1 className="live-translation__title">
-          {step === "setup" ? t.setup.heading : t.live.heading}
+          {step === "setup"
+            ? t.setup.heading
+            : step === "prelive"
+              ? t.prelive.heading
+              : t.live.heading}
         </h1>
         {step === "setup" ? (
           <p className="live-translation__sub">{t.setup.subheading}</p>
+        ) : step === "prelive" ? (
+          <p className="live-translation__sub">{t.prelive.subheading}</p>
         ) : null}
       </header>
 
@@ -196,18 +314,61 @@ export default function LiveTranslationPage() {
           className="live-translation__form"
           onSubmit={(e) => {
             e.preventDefault();
-            handleStart();
+            handleSetupContinue();
           }}
         >
           <div className="live-translation__field">
+            <label htmlFor="live-translation-patient-name">
+              {t.setup.patientNameLabel}{" "}
+              <span className="live-translation__required" aria-hidden>
+                *
+              </span>
+              <span className="live-translation__sr-only">{t.setup.requiredIndicator}</span>
+            </label>
+            <input
+              id="live-translation-patient-name"
+              type="text"
+              autoComplete="name"
+              required
+              aria-required="true"
+              value={patientName}
+              onChange={(e) => setPatientName(e.target.value)}
+            />
+          </div>
+
+          <div className="live-translation__field">
+            <label htmlFor="live-translation-birth-date">
+              {t.setup.birthDateLabel}{" "}
+              <span className="live-translation__required" aria-hidden>
+                *
+              </span>
+              <span className="live-translation__sr-only">{t.setup.requiredIndicator}</span>
+            </label>
+            <input
+              id="live-translation-birth-date"
+              type="date"
+              required
+              aria-required="true"
+              max={new Date().toISOString().slice(0, 10)}
+              min="1900-01-01"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+            />
+          </div>
+
+          <div className="live-translation__field">
             <label htmlFor="live-translation-patient-language">
-              {t.setup.patientLanguageLabel} *
+              {t.setup.patientLanguageLabel}{" "}
+              <span className="live-translation__required" aria-hidden>
+                *
+              </span>
             </label>
             <select
               id="live-translation-patient-language"
               value={patientLanguage}
               onChange={(e) => setPatientLanguage(e.target.value)}
               required
+              aria-required="true"
             >
               {LIVE_TRANSLATION_LANGUAGE_OPTIONS.map((opt) => (
                 <option key={opt.code} value={opt.code}>
@@ -219,13 +380,17 @@ export default function LiveTranslationPage() {
 
           <div className="live-translation__field">
             <label htmlFor="live-translation-doctor-language">
-              {t.setup.doctorLanguageLabel} *
+              {t.setup.doctorLanguageLabel}{" "}
+              <span className="live-translation__required" aria-hidden>
+                *
+              </span>
             </label>
             <select
               id="live-translation-doctor-language"
               value={doctorLanguage}
               onChange={(e) => setDoctorLanguage(e.target.value)}
               required
+              aria-required="true"
             >
               {LIVE_TRANSLATION_LANGUAGE_OPTIONS.map((opt) => (
                 <option key={opt.code} value={opt.code}>
@@ -234,6 +399,8 @@ export default function LiveTranslationPage() {
               ))}
             </select>
           </div>
+
+          <SetupPracticeAccordion t={t.setup} practice={practiceInfo} onChange={handlePracticeChange} />
 
           {formError ? (
             <p className="live-translation__error" role="alert">
@@ -253,10 +420,65 @@ export default function LiveTranslationPage() {
             </span>
           </label>
 
-          <button type="submit" className="live-translation__primary" aria-label={t.setup.startAria}>
-            {t.setup.startButton}
+          <button
+            type="submit"
+            className="live-translation__primary"
+            aria-label={t.setup.continueAria}
+            disabled={!canStartSession}
+          >
+            {t.setup.continueButton}
           </button>
         </form>
+      ) : step === "prelive" ? (
+        <div className="live-translation__prelive">
+          <div className="live-translation__context">
+            {sessionMetadata ? (
+              <>
+                <div className="live-translation__context-row">
+                  <span className="live-translation__context-label">{t.live.patientName}</span>
+                  <span className="live-translation__context-value">{sessionMetadata.patientName}</span>
+                </div>
+                <div className="live-translation__context-row">
+                  <span className="live-translation__context-label">{t.live.birthDate}</span>
+                  <span className="live-translation__context-value">
+                    {formatBirthDateDisplay(sessionMetadata.birthDate, language)}
+                  </span>
+                </div>
+              </>
+            ) : null}
+            <div className="live-translation__context-row">
+              <span className="live-translation__context-label">{t.live.patientLanguage}</span>
+              <span className="live-translation__context-value">{patientLabel}</span>
+            </div>
+            <div className="live-translation__context-row">
+              <span className="live-translation__context-label">{t.live.doctorLanguage}</span>
+              <span className="live-translation__context-value">{doctorLabel}</span>
+            </div>
+          </div>
+
+          <div className="live-translation__meda-intro-preview" role="note">
+            <span className="live-translation__meda-intro-label">{t.live.medaIntroHeading}</span>
+            <p>{medaIntroText}</p>
+          </div>
+
+          <div className="live-translation__actions">
+            <button
+              type="button"
+              className="live-translation__secondary"
+              onClick={handleBackToSetup}
+            >
+              {t.prelive.backToSetup}
+            </button>
+            <button
+              type="button"
+              className="live-translation__primary"
+              aria-label={t.prelive.startAria}
+              onClick={handleSessionStart}
+            >
+              {t.prelive.startButton}
+            </button>
+          </div>
+        </div>
       ) : (
         <>
           <div
@@ -265,6 +487,20 @@ export default function LiveTranslationPage() {
             aria-atomic="true"
             aria-label={t.aria.liveRegion}
           >
+            {sessionMetadata ? (
+              <>
+                <div className="live-translation__context-row">
+                  <span className="live-translation__context-label">{t.live.patientName}</span>
+                  <span className="live-translation__context-value">{sessionMetadata.patientName}</span>
+                </div>
+                <div className="live-translation__context-row">
+                  <span className="live-translation__context-label">{t.live.birthDate}</span>
+                  <span className="live-translation__context-value">
+                    {formatBirthDateDisplay(sessionMetadata.birthDate, language)}
+                  </span>
+                </div>
+              </>
+            ) : null}
             <div className="live-translation__context-row">
               <span className="live-translation__context-label">{t.live.patientLanguage}</span>
               <span className="live-translation__context-value">{patientLabel}</span>
@@ -310,16 +546,37 @@ export default function LiveTranslationPage() {
             ) : null}
           </div>
 
-          {isSessionLive ? (
-            <div
-              className={["live-translation__activity", activityClass].filter(Boolean).join(" ")}
-              role="status"
-              aria-live="polite"
-            >
-              <span className="live-translation__activity-dot" aria-hidden />
-              <span>{connectionLabel}</span>
+          <div
+            className={[
+              "live-translation__meda-status",
+              activityClass,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            role="status"
+            aria-live="polite"
+          >
+            <span className="live-translation__activity-dot" aria-hidden />
+            <div className="live-translation__meda-status-copy">
+              <span className="live-translation__meda-status-title">{connectionLabel}</span>
+              <span className="live-translation__meda-status-direction">{directionLabel}</span>
+              <span className="live-translation__meda-status-hint">{t.live.speakOneAtATime}</span>
+            </div>
+          </div>
+
+          {(connectionStatus === "introducing" || connectionStatus === "connected") && medaIntroText ? (
+            <div className="live-translation__meda-intro-preview live-translation__meda-intro-preview--live" role="note">
+              <span className="live-translation__meda-intro-label">{t.live.medaIntroHeading}</span>
+              <p>{medaIntroText}</p>
             </div>
           ) : null}
+
+          {languageUncertain ? (
+            <p className="live-translation__warning" role="status">
+              {t.warnings.languageUncertain}
+            </p>
+          ) : null}
+
 
           <div className="live-translation__status-grid">
             <div className="live-translation__status-item">
@@ -330,6 +587,7 @@ export default function LiveTranslationPage() {
                   connectionStatus === "error"
                     ? "live-translation__status-value--error"
                     : connectionStatus === "connected" ||
+                        connectionStatus === "introducing" ||
                         connectionStatus === "listening" ||
                         connectionStatus === "translating" ||
                         connectionStatus === "speaking"
@@ -392,7 +650,7 @@ export default function LiveTranslationPage() {
                 .join(" ")}
               aria-pressed={activeSpeaker === "patient"}
               aria-label={t.live.patientSpeakerAria}
-              onClick={() => setActiveSpeaker("patient")}
+              onClick={() => handleManualSpeakerSelect("patient")}
             >
               <span className="live-translation__speaker-title">{t.live.patientSpeaker}</span>
               <span className="live-translation__speaker-dir">
@@ -409,7 +667,7 @@ export default function LiveTranslationPage() {
                 .join(" ")}
               aria-pressed={activeSpeaker === "doctor"}
               aria-label={t.live.doctorSpeakerAria}
-              onClick={() => setActiveSpeaker("doctor")}
+              onClick={() => handleManualSpeakerSelect("doctor")}
             >
               <span className="live-translation__speaker-title">{t.live.doctorSpeaker}</span>
               <span className="live-translation__speaker-dir">

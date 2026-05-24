@@ -3,7 +3,9 @@ import { createLiveTranslationRealtimeSession } from "../api/liveTranslationApi.
 import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL, resolveOpenAiTranscriptionLanguage } from "../constants.js";
 import { buildLanguageRouting } from "../utils/routing.js";
 import { buildClientSideInstructions } from "../utils/translationInstructions.js";
+import { resolveSpeakerFromDetectedLanguage } from "../utils/languageBasedRouting.js";
 import {
+  extractDetectedLanguage,
   extractOriginalText,
   extractTranslatedText,
   REALTIME_PEER_CONNECTION_CONFIG,
@@ -36,7 +38,7 @@ function resolveConnectExceptionErrorKey(err) {
   return "webrtcConnectionFailed";
 }
 
-/** @typedef {"idle" | "connecting" | "connected" | "listening" | "translating" | "speaking" | "error" | "ended"} LiveTranslationConnectionStatus */
+/** @typedef {"idle" | "connecting" | "introducing" | "connected" | "listening" | "translating" | "speaking" | "error" | "ended"} LiveTranslationConnectionStatus */
 
 /**
  * @typedef {{
@@ -56,8 +58,14 @@ function resolveConnectExceptionErrorKey(err) {
  *   doctorLanguage: string;
  *   activeSpeaker: "patient" | "doctor";
  *   enabled: boolean;
+ *   introText?: string;
+ *   languageBasedRouting?: boolean;
+ *   skipLanguageRoutingRef?: React.MutableRefObject<boolean>;
+ *   instructionOptions?: { medicalDomainWarningDe?: string; medicalDomainWarningEn?: string };
  *   autoSwitchSpeaker?: boolean;
  *   onTurnComplete?: (completedSpeaker: "patient" | "doctor") => void;
+ *   onSpeakerFromLanguage?: (speaker: "patient" | "doctor") => void;
+ *   onLanguageUncertain?: () => void;
  * }} config
  */
 export function useLiveTranslationSession({
@@ -65,8 +73,14 @@ export function useLiveTranslationSession({
   doctorLanguage,
   activeSpeaker,
   enabled,
+  introText = "",
+  languageBasedRouting = true,
+  skipLanguageRoutingRef,
+  instructionOptions = {},
   autoSwitchSpeaker = false,
   onTurnComplete,
+  onSpeakerFromLanguage,
+  onLanguageUncertain,
 }) {
   const [connectionStatus, setConnectionStatus] = useState(
     /** @type {LiveTranslationConnectionStatus} */ ("idle"),
@@ -94,6 +108,12 @@ export function useLiveTranslationSession({
   const suppressErrorsUntilRef = useRef(0);
   const autoSwitchSpeakerRef = useRef(autoSwitchSpeaker);
   const onTurnCompleteRef = useRef(onTurnComplete);
+  const onSpeakerFromLanguageRef = useRef(onSpeakerFromLanguage);
+  const onLanguageUncertainRef = useRef(onLanguageUncertain);
+  const introTextRef = useRef(introText);
+  const introPlayedRef = useRef(false);
+  const languageBasedRoutingRef = useRef(languageBasedRouting);
+  const instructionOptionsRef = useRef(instructionOptions);
   const turnContextRef = useRef(
     buildLanguageRouting({ patientLanguage, doctorLanguage, activeSpeaker }),
   );
@@ -101,6 +121,11 @@ export function useLiveTranslationSession({
   sessionConfigRef.current = { patientLanguage, doctorLanguage, activeSpeaker };
   autoSwitchSpeakerRef.current = autoSwitchSpeaker;
   onTurnCompleteRef.current = onTurnComplete;
+  onSpeakerFromLanguageRef.current = onSpeakerFromLanguage;
+  onLanguageUncertainRef.current = onLanguageUncertain;
+  introTextRef.current = introText;
+  languageBasedRoutingRef.current = languageBasedRouting;
+  instructionOptionsRef.current = instructionOptions;
 
   const safeSetState = useCallback((setter) => {
     if (mountedRef.current) setter();
@@ -129,6 +154,7 @@ export function useLiveTranslationSession({
     outputStreamIdRef.current = null;
     currentTranslatedRef.current = "";
     lastTurnSignatureRef.current = "";
+    introPlayedRef.current = false;
     dcRef.current?.close();
     dcRef.current = null;
     pcRef.current?.close();
@@ -188,7 +214,52 @@ export function useLiveTranslationSession({
     pendingOriginalRef.current = "";
     currentTranslatedRef.current = "";
     lastTurnSignatureRef.current = "";
+    introPlayedRef.current = false;
   }, [safeSetState, teardown]);
+
+  const sendMedaIntro = useCallback(() => {
+    const dc = dcRef.current;
+    const text = introTextRef.current?.trim();
+    if (!dc || dc.readyState !== "open" || !text || introPlayedRef.current) return;
+
+    introPlayedRef.current = true;
+    safeSetState(() => setConnectionStatus("introducing"));
+    dc.send(
+      JSON.stringify({
+        type: "response.create",
+        response: {
+          modalities: ["audio"],
+          instructions: `Say exactly and only the following in a calm, professional tone. Do not add anything else: "${text}"`,
+        },
+      }),
+    );
+  }, [safeSetState]);
+
+  const applyLanguageRouting = useCallback(
+    (event) => {
+      if (!languageBasedRoutingRef.current) return;
+      if (skipLanguageRoutingRef?.current) return;
+
+      const cfg = sessionConfigRef.current;
+      const detected = extractDetectedLanguage(event);
+      const result = resolveSpeakerFromDetectedLanguage(
+        detected,
+        cfg.patientLanguage,
+        cfg.doctorLanguage,
+        cfg.activeSpeaker,
+      );
+
+      if (result.uncertain) {
+        onLanguageUncertainRef.current?.();
+        return;
+      }
+
+      if (result.speaker !== cfg.activeSpeaker) {
+        onSpeakerFromLanguageRef.current?.(result.speaker);
+      }
+    },
+    [skipLanguageRoutingRef],
+  );
 
   const handleServerEvent = useCallback(
     (event) => {
@@ -200,6 +271,7 @@ export function useLiveTranslationSession({
           setConnectionStatus("connected");
           setMicrophoneStatus("on");
         });
+        sendMedaIntro();
         return;
       }
 
@@ -221,15 +293,23 @@ export function useLiveTranslationSession({
 
       if (
         type === "conversation.item.input_audio_transcription.completed" ||
+        type === "input_audio_buffer.transcription.completed"
+      ) {
+        const transcript = extractOriginalText(event);
+        if (transcript) {
+          pendingOriginalRef.current = transcript;
+        }
+        applyLanguageRouting(event);
+        return;
+      }
+
+      if (
         type === "conversation.item.input_audio_transcription.delta" ||
-        type === "input_audio_buffer.transcription.completed" ||
         type === "input_audio_buffer.transcription.delta"
       ) {
         const transcript = extractOriginalText(event);
         if (transcript) {
-          pendingOriginalRef.current = type.endsWith(".delta")
-            ? `${pendingOriginalRef.current}${transcript}`
-            : transcript;
+          pendingOriginalRef.current = `${pendingOriginalRef.current}${transcript}`;
         }
         return;
       }
@@ -274,6 +354,9 @@ export function useLiveTranslationSession({
           currentTranslatedRef.current = translated;
           appendTurn(pendingOriginalRef.current, translated);
         }
+        if (skipLanguageRoutingRef) {
+          skipLanguageRoutingRef.current = false;
+        }
         safeSetState(() => setConnectionStatus("connected"));
         return;
       }
@@ -306,7 +389,7 @@ export function useLiveTranslationSession({
         });
       }
     },
-    [appendTurn, safeSetState],
+    [appendTurn, applyLanguageRouting, safeSetState, sendMedaIntro, skipLanguageRoutingRef],
   );
 
   const sendSpeakerUpdate = useCallback(() => {
@@ -329,7 +412,7 @@ export function useLiveTranslationSession({
       JSON.stringify({
         type: "session.update",
         session: {
-          instructions: buildClientSideInstructions(routing),
+          instructions: buildClientSideInstructions(routing, instructionOptionsRef.current),
           audio: {
             input: {
               transcription: {
@@ -430,6 +513,7 @@ export function useLiveTranslationSession({
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
       dc.addEventListener("open", () => {
+        sendMedaIntro();
         if (pendingSpeakerUpdateRef.current) {
           sendSpeakerUpdate();
         }
@@ -501,7 +585,7 @@ export function useLiveTranslationSession({
         setConnectionStatus("error");
       });
     }
-  }, [attachOutputAudio, handleServerEvent, safeSetState, sendSpeakerUpdate, teardown]);
+  }, [attachOutputAudio, handleServerEvent, safeSetState, sendMedaIntro, sendSpeakerUpdate, teardown]);
 
   useEffect(() => {
     if (!enabled) return undefined;

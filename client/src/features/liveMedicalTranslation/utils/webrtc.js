@@ -90,3 +90,35 @@ export function extractOriginalText(event) {
 
   return "";
 }
+
+/**
+ * Extract detected language code from Realtime transcription events (language-based routing).
+ * @param {Record<string, unknown>} event
+ */
+export function extractDetectedLanguage(event) {
+  if (!event || typeof event !== "object") return null;
+
+  const candidates = [
+    event.language,
+    event.detected_language,
+    event.transcription && typeof event.transcription === "object"
+      ? event.transcription.language
+      : null,
+  ];
+
+  for (const value of candidates) {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim().toLowerCase();
+    }
+  }
+
+  const item = event.item;
+  if (item && typeof item === "object") {
+    const itemLang = item.language;
+    if (typeof itemLang === "string" && itemLang.trim()) {
+      return itemLang.trim().toLowerCase();
+    }
+  }
+
+  return null;
+}
