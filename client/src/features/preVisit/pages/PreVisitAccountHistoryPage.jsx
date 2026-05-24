@@ -7,30 +7,23 @@ import {
   formatLanguageDisplayName,
   getPrimaryIntlLocale,
 } from "../../../i18n/intlLocale.js";
+import { hydrateSessionFromArchiveItem } from "../constants/preVisitSession.js";
 import {
-  PRE_VISIT_QUESTION_STEPS,
-} from "../constants/questionFlow.js";
+  clearPreVisitArchive,
+  deletePreVisitArchiveItem,
+  listPreVisitArchiveItems,
+} from "../session/localPreVisitArchive.js";
 import {
-  computePreVisitAiFingerprint,
-  normalizeLongitudinalCase,
-  PREVISIT_LOCALE_STORAGE_KEY,
-  savePreVisitSession,
-} from "../constants/preVisitSession.js";
+  hydrateServerSessionToLocal,
+  isAccountSessionCompleted,
+  previewFromAnswers,
+  resolveAccountSessionResumeTarget,
+} from "../utils/preVisitResumeUtils.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitAccountHistoryPage.css";
 
 function langLabel(code, uiLang) {
   return formatLanguageDisplayName(uiLang, code);
-}
-
-function previewFromAnswers(answers, maxLen = 140) {
-  const raw =
-    String(answers?.appointmentReason || "").trim() ||
-    String(answers?.symptomsOwnWords || "").trim() ||
-    "";
-  if (!raw) return "—";
-  if (raw.length <= maxLen) return raw;
-  return `${raw.slice(0, maxLen).trim()}…`;
 }
 
 function formatCreated(iso, uiLang) {
@@ -59,74 +52,19 @@ function statusText(status, t) {
   }
 }
 
-function hydrateServerSessionToLocal(record) {
-  const answers =
-    record.answers &&
-    typeof record.answers === "object" &&
-    !Array.isArray(record.answers)
-      ? JSON.parse(JSON.stringify(record.answers))
-      : {};
-  const doctorLang = record.doctorLanguage || record.patientLanguage || "de";
-  const patientLang = record.patientLanguage || "de";
-  const completedStep = PRE_VISIT_QUESTION_STEPS.length - 1;
-
-  const payload = {
-    patientLanguage: patientLang,
-    doctorLanguage: doctorLang,
-    answers,
-    stepIndex: completedStep,
-  };
-
-  if (record.aiDoctorVersion != null) {
-    payload.aiDoctorVersion = record.aiDoctorVersion;
-    payload.aiSafetyNotice =
-      typeof record.aiSafetyNotice === "string" ? record.aiSafetyNotice : "";
-    payload.aiDoctorVersionFingerprint = computePreVisitAiFingerprint(
-      answers,
-      doctorLang,
-    );
-  }
-
-  const caseTimeline =
-    answers?.caseTimeline &&
-    typeof answers.caseTimeline === "object" &&
-    !Array.isArray(answers.caseTimeline)
-      ? answers.caseTimeline
-      : null;
-  if (caseTimeline) {
-    payload.caseTimeline = {
-      relatedSessionId: String(caseTimeline.relatedSessionId || ""),
-      caseTopic: String(caseTimeline.caseTopic || ""),
-      includeInPdf: Boolean(caseTimeline.includeInPdf),
-      summary:
-        caseTimeline.summary && typeof caseTimeline.summary === "object"
-          ? caseTimeline.summary
-          : null,
-    };
-  }
-
-  if (record.pdfDownloaded === true) {
-    payload.pdfDownloaded = true;
-  } else if (record.status === "pdf_created") {
-    payload.pdfDownloaded = true;
-  }
-
-  const cid =
-    typeof record.preVisitCaseId === "string"
-      ? record.preVisitCaseId.trim()
-      : "";
-  if (cid) {
-    const nl = normalizeLongitudinalCase({ caseId: cid });
-    if (nl) payload.longitudinalCase = nl;
-  }
-
-  savePreVisitSession(payload);
-  try {
-    sessionStorage.setItem(PREVISIT_LOCALE_STORAGE_KEY, patientLang);
-  } catch {
-    /* ignore */
+function statusClass(status) {
+  switch (status) {
+    case "pdf_created":
+      return "pre-visit-account__status--pdf";
+    case "completed":
+      return "pre-visit-account__status--done";
+    case "draft":
+    default:
+      return "pre-visit-account__status--draft";
   }
 }
+
+const STATUS_FILTERS = ["all", "draft", "pdf_created", "completed"];
 
 export default function PreVisitAccountHistoryPage() {
   const { language } = useLanguage();
@@ -142,8 +80,15 @@ export default function PreVisitAccountHistoryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [sessions, setSessions] = useState([]);
+  const [deviceItems, setDeviceItems] = useState(() => listPreVisitArchiveItems());
   const [deleteBusyId, setDeleteBusyId] = useState(null);
   const [deleteAllBusy, setDeleteAllBusy] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const refreshDeviceItems = useCallback(() => {
+    setDeviceItems(listPreVisitArchiveItems());
+  }, []);
 
   useEffect(() => {
     setHasAuthToken(!!localStorage.getItem("medscout_token"));
@@ -190,6 +135,20 @@ export default function PreVisitAccountHistoryPage() {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
 
+  useEffect(() => {
+    refreshDeviceItems();
+  }, [refreshDeviceItems, location.hash]);
+
+  useEffect(() => {
+    if (location.hash !== "#device-storage") return;
+    const el = document.getElementById("device-storage");
+    if (!el) return;
+    const tmr = window.setTimeout(() => {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+    return () => window.clearTimeout(tmr);
+  }, [location.hash, deviceItems.length, loading]);
+
   const focusSessionId = location.state?.focusSessionId;
 
   useEffect(() => {
@@ -205,16 +164,55 @@ export default function PreVisitAccountHistoryPage() {
     return () => window.clearTimeout(tmr);
   }, [focusSessionId, loading, sessions]);
 
+  const filteredSessions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return sessions.filter((row) => {
+      if (statusFilter !== "all" && row.status !== statusFilter) return false;
+      if (!q) return true;
+      const title =
+        (typeof row.title === "string" && row.title.trim()) || t.defaultTitle;
+      const preview = previewFromAnswers(row.answers);
+      return `${title} ${preview}`.toLowerCase().includes(q);
+    });
+  }, [sessions, searchQuery, statusFilter, t.defaultTitle]);
+
+  const sortedDeviceItems = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return [...deviceItems]
+      .filter((item) => {
+        if (!q) return true;
+        const preview = previewFromAnswers(item.answers);
+        return preview.toLowerCase().includes(q);
+      })
+      .sort((a, b) => {
+        const ta = new Date(a.createdAt || 0).getTime();
+        const tb = new Date(b.createdAt || 0).getTime();
+        return tb - ta;
+      });
+  }, [deviceItems, searchQuery]);
+
   function cardTitle(row) {
     return (typeof row.title === "string" && row.title.trim()) || t.defaultTitle;
   }
 
-  function handleOpen(record) {
+  function handleOpenAccount(record) {
+    const target = resolveAccountSessionResumeTarget(record);
+    hydrateServerSessionToLocal(record, { resumeTarget: target });
+    navigate(target.path, { state: target.state });
+  }
+
+  function handleDownloadPdfAccount(record) {
     hydrateServerSessionToLocal(record);
-    navigate("/pre-visit/document");
+    navigate("/pre-visit/document", { state: { fromArchive: true, autoDownloadPdf: true } });
+  }
+
+  function handleOpenDevice(item) {
+    if (!hydrateSessionFromArchiveItem(item)) return;
+    navigate("/pre-visit/document", { state: { fromArchive: true } });
   }
 
   async function handleDeleteOne(id) {
+    if (!window.confirm(t.confirmDeleteOne)) return;
     setDeleteBusyId(id);
     setError(null);
     try {
@@ -232,6 +230,12 @@ export default function PreVisitAccountHistoryPage() {
     } finally {
       setDeleteBusyId(null);
     }
+  }
+
+  function handleDeleteDevice(id) {
+    if (!window.confirm(t.confirmDeleteDevice)) return;
+    deletePreVisitArchiveItem(id);
+    refreshDeviceItems();
   }
 
   async function handleDeleteAll() {
@@ -255,23 +259,73 @@ export default function PreVisitAccountHistoryPage() {
     }
   }
 
-  const showEmpty =
-    !loading && !error && hasAuthToken && sessions.length === 0;
+  function handleClearDeviceAll() {
+    if (!window.confirm(t.confirmClearDevice)) return;
+    clearPreVisitArchive();
+    refreshDeviceItems();
+  }
+
+  const showGlobalEmpty =
+    sortedDeviceItems.length === 0 &&
+    (!hasAuthToken || (!loading && !error && sessions.length === 0));
+
+  const showToolbar =
+    hasAuthToken && (sessions.length > 0 || sortedDeviceItems.length > 0);
 
   return (
-    <div className="pre-visit-account">
+    <div className="pre-visit-account pre-visit-account--workspace">
       <div className="pre-visit-account__inner">
-        <PreVisitModuleChrome />
+        <PreVisitModuleChrome variant="library" />
 
         <header className="pre-visit-account__header">
+          <span className="pre-visit-account__badge">{t.workspaceBadge}</span>
           <h1 className="pre-visit-account__title">{t.title}</h1>
           <p className="pre-visit-account__subtitle">{t.subtitle}</p>
-          {hasAuthToken ? (
-            <Link className="pre-visit-account__cases-link" to="/pre-visit/cases">
-              {t.linkCases}
+          <div className="pre-visit-account__quick-links">
+            {hasAuthToken ? (
+              <Link className="pre-visit-account__quick-link" to="/pre-visit/cases">
+                {t.linkCases}
+              </Link>
+            ) : null}
+            <Link className="pre-visit-account__quick-link" to="/account/documents">
+              {t.linkDocuments}
             </Link>
-          ) : null}
+          </div>
+          <p className="pre-visit-account__quick-hint">{t.linkDocumentsHint}</p>
         </header>
+
+        {showToolbar ? (
+          <div className="pre-visit-account__toolbar" role="search">
+            <label className="pre-visit-account__toolbar-field">
+              <span className="pre-visit-account__toolbar-label">{t.searchLabel}</span>
+              <input
+                type="search"
+                className="pre-visit-account__search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.searchPlaceholder}
+              />
+            </label>
+            {hasAuthToken && sessions.length > 0 ? (
+              <label className="pre-visit-account__toolbar-field pre-visit-account__toolbar-field--filter">
+                <span className="pre-visit-account__toolbar-label">{t.filterLabel}</span>
+                <select
+                  className="pre-visit-account__filter"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  {STATUS_FILTERS.map((key) => (
+                    <option key={key} value={key}>
+                      {key === "all"
+                        ? t.filterAll
+                        : statusText(key, t)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+          </div>
+        ) : null}
 
         {!hasAuthToken ? (
           <div className="pre-visit-account__gate">
@@ -301,74 +355,206 @@ export default function PreVisitAccountHistoryPage() {
           </div>
         ) : null}
 
-        {hasAuthToken && showEmpty ? (
+        {showGlobalEmpty ? (
           <div className="pre-visit-account__empty">
             <p>{t.empty}</p>
-            <Link className="pre-visit-account__btn pre-visit-account__btn--primary" to="/pre-visit">
+            <p className="pre-visit-account__empty-hint">{t.emptyHint}</p>
+            <Link
+              className="pre-visit-account__btn pre-visit-account__btn--secondary"
+              to="/pre-visit"
+            >
               {t.startNewPrep}
             </Link>
           </div>
         ) : null}
 
         {hasAuthToken && !loading && !error && sessions.length > 0 ? (
-          <>
-            <ul className="pre-visit-account__list" aria-label={t.listAriaLabel}>
-              {sessions.map((row) => (
-                <li
-                  key={row.id}
-                  id={row.id ? `prep-session-${row.id}` : undefined}
-                  className="pre-visit-account__card-wrap"
+          <section className="pre-visit-account__section" aria-labelledby="prep-account-heading">
+            <h2 id="prep-account-heading" className="pre-visit-account__section-title">
+              {t.sectionAccount}
+            </h2>
+            <p className="pre-visit-account__section-hint">{t.sectionAccountHint}</p>
+
+            {filteredSessions.length === 0 ? (
+              <p className="pre-visit-account__no-results" role="status">
+                {t.noAccountResults}
+              </p>
+            ) : (
+              <ul className="pre-visit-account__list" aria-label={t.listAriaLabel}>
+                {filteredSessions.map((row) => {
+                  const completed = isAccountSessionCompleted(row);
+                  const primaryLabel = completed ? t.open : t.resume;
+                  return (
+                    <li
+                      key={row.id}
+                      id={row.id ? `prep-session-${row.id}` : undefined}
+                      className="pre-visit-account__card-wrap"
+                    >
+                      <article className="pre-visit-account__card">
+                        <div className="pre-visit-account__card-head">
+                          <h3 className="pre-visit-account__card-title">
+                            {cardTitle(row)}
+                          </h3>
+                          <div className="pre-visit-account__badges">
+                            <span className="pre-visit-account__storage-badge">
+                              {t.storageAccount}
+                            </span>
+                            <span
+                              className={`pre-visit-account__status ${statusClass(row.status)}`}
+                            >
+                              {statusText(row.status, t)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="pre-visit-account__meta">
+                          <div className="pre-visit-account__meta-item">
+                            <span className="pre-visit-account__meta-label">{t.created}</span>
+                            <span className="pre-visit-account__meta-value">
+                              {formatCreated(row.createdAt, language)}
+                            </span>
+                          </div>
+                          <div className="pre-visit-account__meta-item">
+                            <span className="pre-visit-account__meta-label">{t.patientLang}</span>
+                            <span className="pre-visit-account__meta-value">
+                              {langLabel(row.patientLanguage, language)}
+                            </span>
+                          </div>
+                          <div className="pre-visit-account__meta-item">
+                            <span className="pre-visit-account__meta-label">{t.doctorLang}</span>
+                            <span className="pre-visit-account__meta-value">
+                              {row.doctorLanguage
+                                ? langLabel(row.doctorLanguage, language)
+                                : "—"}
+                            </span>
+                          </div>
+                          {row.preVisitCaseId ? (
+                            <div className="pre-visit-account__meta-item">
+                              <span className="pre-visit-account__meta-label">{t.linkedCase}</span>
+                              <span className="pre-visit-account__meta-value">
+                                <Link
+                                  className="pre-visit-account__inline-link"
+                                  to={`/pre-visit/cases/${encodeURIComponent(row.preVisitCaseId)}`}
+                                >
+                                  {t.linkCases}
+                                </Link>
+                              </span>
+                            </div>
+                          ) : null}
+                        </div>
+                        <p className="pre-visit-account__preview">
+                          {previewFromAnswers(row.answers)}
+                        </p>
+                        <div className="pre-visit-account__actions">
+                          <button
+                            type="button"
+                            className="pre-visit-account__btn pre-visit-account__btn--primary"
+                            onClick={() => handleOpenAccount(row)}
+                            aria-label={`${primaryLabel}: ${cardTitle(row)}`}
+                          >
+                            {primaryLabel}
+                          </button>
+                          {completed ? (
+                            <button
+                              type="button"
+                              className="pre-visit-account__btn pre-visit-account__btn--secondary"
+                              onClick={() => handleDownloadPdfAccount(row)}
+                              aria-label={`${t.downloadPdf}: ${cardTitle(row)}`}
+                            >
+                              {t.downloadPdf}
+                            </button>
+                          ) : null}
+                          <button
+                            type="button"
+                            className="pre-visit-account__btn pre-visit-account__btn--danger"
+                            disabled={deleteBusyId === row.id || deleteAllBusy}
+                            onClick={() => handleDeleteOne(row.id)}
+                            aria-label={`${t.deleteOne}: ${cardTitle(row)}`}
+                          >
+                            {t.deleteOne}
+                          </button>
+                        </div>
+                      </article>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            {sessions.length > 0 ? (
+              <div className="pre-visit-account__danger-zone">
+                <button
+                  type="button"
+                  className="pre-visit-account__btn pre-visit-account__btn--danger-secondary"
+                  disabled={deleteAllBusy || !!deleteBusyId}
+                  onClick={handleDeleteAll}
                 >
-                  <article className="pre-visit-account__card">
-                    <h3 className="pre-visit-account__card-title">
-                      {cardTitle(row)}
-                    </h3>
+                  {t.deleteAll}
+                </button>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
+        {sortedDeviceItems.length > 0 ? (
+          <section
+            id="device-storage"
+            className="pre-visit-account__section pre-visit-account__section--device"
+            aria-labelledby="prep-device-heading"
+          >
+            <h2 id="prep-device-heading" className="pre-visit-account__section-title">
+              {t.sectionDevice}
+            </h2>
+            <p className="pre-visit-account__section-hint">{t.sectionDeviceHint}</p>
+            <ul className="pre-visit-account__list" aria-label={t.sectionDevice}>
+              {sortedDeviceItems.map((item) => (
+                <li key={item.id} className="pre-visit-account__card-wrap">
+                  <article className="pre-visit-account__card pre-visit-account__card--device">
+                    <div className="pre-visit-account__card-head">
+                      <h3 className="pre-visit-account__card-title">{t.defaultTitle}</h3>
+                      <div className="pre-visit-account__badges">
+                        <span className="pre-visit-account__storage-badge pre-visit-account__storage-badge--device">
+                          {t.storageDevice}
+                        </span>
+                        <span className="pre-visit-account__status pre-visit-account__status--local">
+                          {t.statusLocalSaved}
+                        </span>
+                      </div>
+                    </div>
                     <div className="pre-visit-account__meta">
                       <div className="pre-visit-account__meta-item">
-                        <span className="pre-visit-account__meta-label">{t.created}</span>
+                        <span className="pre-visit-account__meta-label">{t.savedAt}</span>
                         <span className="pre-visit-account__meta-value">
-                          {formatCreated(row.createdAt, language)}
+                          {formatCreated(item.createdAt, language)}
                         </span>
                       </div>
                       <div className="pre-visit-account__meta-item">
                         <span className="pre-visit-account__meta-label">{t.patientLang}</span>
                         <span className="pre-visit-account__meta-value">
-                          {langLabel(row.patientLanguage, language)}
+                          {langLabel(item.patientLanguage, language)}
                         </span>
                       </div>
                       <div className="pre-visit-account__meta-item">
                         <span className="pre-visit-account__meta-label">{t.doctorLang}</span>
                         <span className="pre-visit-account__meta-value">
-                          {row.doctorLanguage
-                            ? langLabel(row.doctorLanguage, language)
-                            : "—"}
-                        </span>
-                      </div>
-                      <div className="pre-visit-account__meta-item">
-                        <span className="pre-visit-account__meta-label">{t.statusLabel}</span>
-                        <span className="pre-visit-account__meta-value">
-                          {statusText(row.status, t)}
+                          {langLabel(item.doctorLanguage, language)}
                         </span>
                       </div>
                     </div>
                     <p className="pre-visit-account__preview">
-                      {previewFromAnswers(row.answers)}
+                      {previewFromAnswers(item.answers)}
                     </p>
                     <div className="pre-visit-account__actions">
                       <button
                         type="button"
                         className="pre-visit-account__btn pre-visit-account__btn--primary"
-                        onClick={() => handleOpen(row)}
-                        aria-label={`${t.open}: ${cardTitle(row)}`}
+                        onClick={() => handleOpenDevice(item)}
                       >
                         {t.open}
                       </button>
                       <button
                         type="button"
                         className="pre-visit-account__btn pre-visit-account__btn--danger"
-                        disabled={deleteBusyId === row.id || deleteAllBusy}
-                        onClick={() => handleDeleteOne(row.id)}
-                        aria-label={`${t.deleteOne}: ${cardTitle(row)}`}
+                        onClick={() => handleDeleteDevice(item.id)}
                       >
                         {t.deleteOne}
                       </button>
@@ -377,18 +563,24 @@ export default function PreVisitAccountHistoryPage() {
                 </li>
               ))}
             </ul>
-
             <div className="pre-visit-account__danger-zone">
               <button
                 type="button"
                 className="pre-visit-account__btn pre-visit-account__btn--danger-secondary"
-                disabled={deleteAllBusy || !!deleteBusyId || sessions.length === 0}
-                onClick={handleDeleteAll}
+                onClick={handleClearDeviceAll}
               >
-                {t.deleteAll}
+                {t.clearDeviceAll}
               </button>
             </div>
-          </>
+          </section>
+        ) : null}
+
+        {!showGlobalEmpty ? (
+          <div className="pre-visit-account__footer-cta">
+            <Link className="pre-visit-account__btn pre-visit-account__btn--secondary" to="/pre-visit">
+              {t.startNewPrep}
+            </Link>
+          </div>
         ) : null}
 
         <p className="pre-visit-account__privacy">{t.privacyNote}</p>

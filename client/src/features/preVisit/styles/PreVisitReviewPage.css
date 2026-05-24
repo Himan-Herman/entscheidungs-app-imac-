@@ -40,6 +40,17 @@
   letter-spacing: -0.02em;
 }
 
+.pre-visit-review__resume-note {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #334155;
+  background: rgba(51, 65, 85, 0.08);
+  border: 1px solid rgba(51, 65, 85, 0.14);
+  border-radius: 10px;
+}
+
 .pre-visit-review__intro {
   margin: 0 0 22px;
   font-size: clamp(1rem, 3.5vw, 1.05rem);

@@ -21,6 +21,7 @@ export default function PreVisitReviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { language } = useLanguage();
+  const fromArchive = Boolean(location.state?.fromArchive);
   const t = useMemo(() => getMessages(language).preVisit.review, [language]);
 
   const [session, setSession] = useState(() => loadPreVisitSession());
@@ -89,6 +90,12 @@ export default function PreVisitReviewPage() {
         <PreVisitModuleChrome />
         <article className="pre-visit-review__card">
           <h1 className="pre-visit-review__title">{t.title}</h1>
+
+          {fromArchive ? (
+            <p className="pre-visit-review__resume-note" role="status">
+              {t.resumeFromArchive}
+            </p>
+          ) : null}
 
           <div className="pre-visit-review__prepare-wrap">
             <Link

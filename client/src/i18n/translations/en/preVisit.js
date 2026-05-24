@@ -25,8 +25,11 @@ export default {
     backHome: "Back to MedScoutX home",
     backPatientHub: "Back to patient workspace",
     moduleLabel: "Prepare doctor visit",
+    libraryModuleLabel: "My preparations",
     safety:
       "This module is only for preparing and documenting your information. It does not replace medical advice.",
+    librarySafety:
+      "Manage saved preparations here. Nothing is synced automatically — only items you explicitly saved appear in this library.",
     navAria: "Pre-Visit navigation",
   },
   chat: {
@@ -85,6 +88,8 @@ export default {
     newSession: "Start new session",
     wipeSession: "Delete session completely",
     prepareDocument: "Prepare document",
+    resumeFromArchive:
+      "You are resuming a saved preparation. Review your entries and continue when everything looks correct.",
   },
   document: {
     pageTitle: "MedScoutX — Document preview",
@@ -466,35 +471,62 @@ export default {
   },
   accountHistory: {
     pageTitle: "MedScoutX — My preparations",
+    workspaceBadge: "Library",
     title: "My preparations",
-    subtitle:
-      "Here you can see the preparations you explicitly saved to your MedScoutX account.",
-    loginHint: "Sign in to view saved preparations.",
+    subtitle: "Saved drafts, PDFs, and previous doctor visit preparations",
+    loginHint: "Sign in to view preparations saved to your account.",
     loginCta: "Sign in",
     loading: "Loading…",
     loadError:
       "The list could not be loaded right now. Please try again later.",
-    empty: "No preparations have been saved to your account yet.",
+    empty: "Preparations you explicitly saved will appear here.",
+    emptyHint:
+      "Items only appear here after you save them to your account at the end of the workflow.",
     startNewPrep: "Start new preparation",
     retryLoad: "Try again",
+    searchLabel: "Search",
+    searchPlaceholder: "Search title or preview…",
+    filterLabel: "Status",
+    filterAll: "All",
     listAriaLabel: "Saved preparations",
+    sectionAccount: "Saved to account",
+    sectionAccountHint:
+      "These preparations are linked to your MedScoutX account and visible on any device where you are signed in.",
+    sectionDevice: "On this device only",
+    sectionDeviceHint:
+      "Local copies stay in this browser only. They are not automatically added to your account.",
+    storageAccount: "Account",
+    storageDevice: "This device only",
     patientLang: "Patient language",
     doctorLang: "Doctor language",
     created: "Created",
+    savedAt: "Saved",
     statusLabel: "Status",
     open: "Open",
+    resume: "Resume",
+    downloadPdf: "Download PDF",
     deleteOne: "Delete",
-    deleteAll: "Delete all preparations",
+    confirmDeleteOne:
+      "Delete this preparation? This cannot be undone.",
+    confirmDeleteDevice: "Remove this local copy from this device?",
+    deleteAll: "Delete all account preparations",
     confirmDeleteAll:
       "Delete all preparations saved to your account? This cannot be undone.",
     privacyNote:
-      "Saved preparations can be deleted at any time. This feature does not replace a medical record.",
+      "Preparations appear here only when you save them. Account and device storage are separate — deleting on this device does not delete your account copy and vice versa.",
     defaultTitle: "Doctor visit preparation",
     deleteError: "The preparation could not be deleted right now.",
     deleteAllError: "Preparations could not be deleted right now.",
     statusDraft: "Draft",
     statusPdfCreated: "PDF created",
     statusCompleted: "Completed",
-    linkCases: "Open my cases",
+    statusLocalSaved: "Saved locally",
+    linkCases: "My cases",
+    linkDocuments: "Documents & PDFs",
+    linkDocumentsHint: "Secure links and PDF metadata in your documents area",
+    linkedCase: "Linked case",
+    noAccountResults: "No matches in your account.",
+    clearDeviceAll: "Delete all local copies",
+    confirmClearDevice: "Permanently delete all locally saved copies on this device?",
   },
 };

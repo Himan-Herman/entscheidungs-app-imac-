@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
@@ -80,6 +80,7 @@ export default function PreVisitDocumentPage() {
   );
 
   const [session, setSession] = useState(() => loadPreVisitSession());
+  const autoDownloadPdfRef = useRef(false);
   const [consentLocalSave, setConsentLocalSave] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [consentAccountSave, setConsentAccountSave] = useState(false);
@@ -523,6 +524,13 @@ export default function PreVisitDocumentPage() {
       /* PDF generation failed — do not set pdfDownloaded */
     }
   }
+
+  useEffect(() => {
+    if (!location.state?.autoDownloadPdf || autoDownloadPdfRef.current) return;
+    if (!session?.answers || aiLoading) return;
+    autoDownloadPdfRef.current = true;
+    handleDownloadPdf();
+  }, [location.state?.autoDownloadPdf, session?.answers, aiLoading]);
 
   async function handleOpenQrShare() {
     setQrBusy(true);
@@ -1539,7 +1547,7 @@ export default function PreVisitDocumentPage() {
           ) : null}
 
           <p className="pre-visit-doc__archive-note">{t.archiveNote}</p>
-          <Link className="pre-visit-doc__history-link" to="/pre-visit/history">
+          <Link className="pre-visit-doc__history-link" to="/pre-visit/my-preparations#device-storage">
             {t.historyLink}
           </Link>
         </section>

@@ -26,8 +26,11 @@ export default {
     backHome: "Zurück zur MedScoutX-Startseite",
     backPatientHub: "Zurück zum Patientenbereich",
     moduleLabel: "Arztgespräch vorbereiten",
+    libraryModuleLabel: "Meine Vorbereitungen",
     safety:
       "Dieses Modul dient nur der Vorbereitung und Dokumentation Ihrer Angaben. Es ersetzt keine ärztliche Beratung.",
+    librarySafety:
+      "Ihre gespeicherten Vorbereitungen können Sie hier verwalten. Es erfolgt keine automatische Synchronisation — nur was Sie bewusst gespeichert haben, erscheint hier.",
     navAria: "Pre-Visit-Navigation",
   },
   chat: {
@@ -87,6 +90,8 @@ export default {
     newSession: "Neue Sitzung starten",
     wipeSession: "Sitzung vollständig löschen",
     prepareDocument: "Dokument vorbereiten",
+    resumeFromArchive:
+      "Sie setzen eine gespeicherte Vorbereitung fort. Prüfen Sie Ihre Angaben und fahren Sie fort, wenn alles stimmt.",
   },
   document: {
     pageTitle: "MedScoutX — Dokument",
@@ -467,31 +472,53 @@ export default {
   },
   accountHistory: {
     pageTitle: "MedScoutX — Meine Vorbereitungen",
+    workspaceBadge: "Bibliothek",
     title: "Meine Vorbereitungen",
     subtitle:
-      "Hier sehen Sie die Vorbereitungen, die Sie ausdrücklich in Ihrem MedScoutX-Konto gespeichert haben.",
+      "Gespeicherte Entwürfe, PDFs und frühere Arztgespräch-Vorbereitungen",
     loginHint:
-      "Melden Sie sich an, um gespeicherte Vorbereitungen zu sehen.",
+      "Melden Sie sich an, um Vorbereitungen in Ihrem Konto zu sehen.",
     loginCta: "Zum Login",
     loading: "Wird geladen …",
     loadError:
       "Die Liste konnte gerade nicht geladen werden. Bitte versuchen Sie es später erneut.",
     empty:
-      "Es sind noch keine Vorbereitungen in Ihrem Konto gespeichert.",
+      "Hier erscheinen Vorbereitungen, die Sie bewusst gespeichert haben.",
+    emptyHint:
+      "Vorbereitungen erscheinen hier nur, wenn Sie sie am Ende des Ablaufs in Ihrem Konto speichern.",
     startNewPrep: "Neue Vorbereitung starten",
     retryLoad: "Erneut laden",
+    searchLabel: "Suchen",
+    searchPlaceholder: "Titel oder Vorschau durchsuchen …",
+    filterLabel: "Status",
+    filterAll: "Alle",
     listAriaLabel: "Gespeicherte Vorbereitungen",
+    sectionAccount: "Im Konto gespeichert",
+    sectionAccountHint:
+      "Diese Vorbereitungen sind mit Ihrem MedScoutX-Konto verknüpft und auf allen Geräten sichtbar, auf denen Sie angemeldet sind.",
+    sectionDevice: "Nur auf diesem Gerät",
+    sectionDeviceHint:
+      "Lokal gespeicherte Kopien bleiben nur in diesem Browser. Sie werden nicht automatisch in Ihr Konto übernommen.",
+    storageAccount: "Konto",
+    storageDevice: "Nur auf diesem Gerät",
     patientLang: "Patientensprache",
     doctorLang: "Arztsprache",
     created: "Erstellt",
+    savedAt: "Gespeichert",
     statusLabel: "Status",
     open: "Öffnen",
+    resume: "Fortsetzen",
+    downloadPdf: "PDF herunterladen",
     deleteOne: "Löschen",
-    deleteAll: "Alle Vorbereitungen löschen",
+    confirmDeleteOne:
+      "Diese Vorbereitung wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+    confirmDeleteDevice:
+      "Diese lokale Kopie wirklich von diesem Gerät entfernen?",
+    deleteAll: "Alle Konto-Vorbereitungen löschen",
     confirmDeleteAll:
       "Möchten Sie wirklich alle in Ihrem Konto gespeicherten Vorbereitungen löschen? Dies kann nicht rückgängig gemacht werden.",
     privacyNote:
-      "Gespeicherte Vorbereitungen können jederzeit gelöscht werden. Diese Funktion ersetzt keine Patientenakte.",
+      "Vorbereitungen erscheinen hier nur, wenn Sie sie gespeichert haben. Konto- und Gerätespeicher sind getrennt — Löschen auf dem Gerät betrifft nicht Ihr Konto und umgekehrt.",
     defaultTitle: "Arztgespräch-Vorbereitung",
     deleteError:
       "Die Vorbereitung konnte gerade nicht gelöscht werden.",
@@ -500,6 +527,14 @@ export default {
     statusDraft: "Entwurf",
     statusPdfCreated: "PDF erstellt",
     statusCompleted: "Abgeschlossen",
-    linkCases: "Meine Verläufe öffnen",
+    statusLocalSaved: "Lokal gespeichert",
+    linkCases: "Meine Verläufe",
+    linkDocuments: "Dokumente & PDFs",
+    linkDocumentsHint: "Sichere Links und PDF-Metadaten in Ihrem Dokumentenbereich",
+    linkedCase: "Verknüpfter Verlauf",
+    noAccountResults: "Keine Treffer in Ihrem Konto.",
+    clearDeviceAll: "Alle lokalen Kopien löschen",
+    confirmClearDevice:
+      "Alle lokal gespeicherten Kopien auf diesem Gerät unwiderrlich löschen?",
   },
 };

@@ -1,6 +1,6 @@
 export default {
-  navPrepare: "Prepare visit",
-  navPreparations: "My preparations",
+  navPrepare: "New",
+  navPreparations: "Saved",
   navTimelines: "Timelines",
   navDoctors: "Doctors",
   navSettings: "Settings",

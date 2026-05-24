@@ -17,21 +17,27 @@ function resolveChromeBack(t) {
   return { to: "/startseite", label: t.backHome };
 }
 
-export default function PreVisitModuleChrome() {
+/**
+ * @param {{ variant?: "workflow" | "library" }} props
+ */
+export default function PreVisitModuleChrome({ variant = "workflow" }) {
   const { language } = useLanguage();
   const t = getMessages(language).preVisit.chrome;
   const back = useMemo(() => resolveChromeBack(t), [t]);
+  const isLibrary = variant === "library";
+  const moduleLabel = isLibrary ? t.libraryModuleLabel : t.moduleLabel;
+  const safety = isLibrary ? t.librarySafety : t.safety;
 
   return (
-    <div className="pre-visit-chrome">
+    <div className={`pre-visit-chrome${isLibrary ? " pre-visit-chrome--library" : ""}`}>
       <nav className="pre-visit-chrome__nav" aria-label={t.navAria}>
         <Link className="pre-visit-chrome__back" to={back.to}>
           {back.label}
         </Link>
-        <span className="pre-visit-chrome__module">{t.moduleLabel}</span>
+        <span className="pre-visit-chrome__module">{moduleLabel}</span>
       </nav>
       <p className="pre-visit-chrome__safety" role="note">
-        {t.safety}
+        {safety}
       </p>
     </div>
   );
