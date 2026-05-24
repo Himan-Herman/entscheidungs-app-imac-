@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createLiveTranslationRealtimeSession } from "../api/liveTranslationApi.js";
-import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL } from "../constants.js";
+import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL, resolveOpenAiTranscriptionLanguage } from "../constants.js";
 import { buildLanguageRouting } from "../utils/routing.js";
 import {
   extractOriginalText,
@@ -17,6 +17,9 @@ function resolveSessionApiErrorKey(res, data) {
   if (data?.error === "feature_disabled") return "featureDisabled";
   if (data?.error === "openai_not_configured") return "openaiNotConfigured";
   if (data?.error === "realtime_session_failed" || data?.error === "realtime_session_invalid") {
+    if (data?.openaiErrorParam === "session.audio.input.transcription.language") {
+      return "openaiSessionRejected";
+    }
     return "openaiSessionRejected";
   }
   if (res.status >= 500) return "sessionStartFailed";
@@ -305,6 +308,7 @@ export function useLiveTranslationSession({
 
     suppressErrorsUntilRef.current = Date.now() + 2000;
     dc.send(JSON.stringify({ type: "response.cancel" }));
+    const txLanguage = resolveOpenAiTranscriptionLanguage(routing.sourceLanguage);
     dc.send(
       JSON.stringify({
         type: "session.update",
@@ -314,7 +318,7 @@ export function useLiveTranslationSession({
             input: {
               transcription: {
                 model: transcriptionModelRef.current,
-                language: routing.sourceLanguage,
+                ...(txLanguage ? { language: txLanguage } : {}),
               },
             },
           },

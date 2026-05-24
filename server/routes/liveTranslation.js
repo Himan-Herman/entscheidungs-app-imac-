@@ -11,6 +11,11 @@ import {
 } from "../config/liveTranslationEnv.js";
 import { buildLiveTranslationInstructions } from "../services/liveTranslation/liveTranslationPrompt.js";
 import { buildLanguageRouting } from "../services/liveTranslation/liveTranslationRouting.js";
+import {
+  resolveOpenAiRealtimeVoice,
+  resolveOpenAiTranscriptionLanguage,
+  resolveOpenAiTranscriptionModel,
+} from "../services/liveTranslation/openAiRealtimePayload.js";
 
 const router = express.Router();
 const OPENAI_CLIENT_SECRETS_URL = "https://api.openai.com/v1/realtime/client_secrets";
@@ -31,11 +36,26 @@ function logLiveTranslation(req, event, fields = {}) {
 function sanitizeOpenAiError(data) {
   const err = data?.error;
   if (!err || typeof err !== "object") {
-    return { openaiErrorType: null, openaiErrorCode: null };
+    return {
+      openaiErrorType: null,
+      openaiErrorCode: null,
+      openaiErrorParam: null,
+      openaiErrorMessage: null,
+      openaiErrorBody: null,
+    };
   }
+  const sanitized = {
+    type: typeof err.type === "string" ? err.type : null,
+    code: typeof err.code === "string" ? err.code : null,
+    param: typeof err.param === "string" ? err.param : null,
+    message: typeof err.message === "string" ? err.message : null,
+  };
   return {
-    openaiErrorType: typeof err.type === "string" ? err.type : null,
-    openaiErrorCode: typeof err.code === "string" ? err.code : null,
+    openaiErrorType: sanitized.type,
+    openaiErrorCode: sanitized.code,
+    openaiErrorParam: sanitized.param,
+    openaiErrorMessage: sanitized.message,
+    openaiErrorBody: sanitized,
   };
 }
 
@@ -108,6 +128,21 @@ router.post("/realtime-session", async (req, res) => {
     activeSpeaker,
   });
 
+  const voice = resolveOpenAiRealtimeVoice(LIVE_TRANSLATION_VOICE);
+  const transcriptionModel = resolveOpenAiTranscriptionModel(LIVE_TRANSLATION_TRANSCRIPTION_MODEL);
+  const transcriptionLanguage = resolveOpenAiTranscriptionLanguage(routing.sourceLanguage);
+
+  logLiveTranslation(req, "realtime_session_payload", {
+    model: LIVE_TRANSLATION_REALTIME_MODEL,
+    voice,
+    transcriptionModel,
+    transcriptionLanguage: transcriptionLanguage || "auto",
+    sourceLanguage: routing.sourceLanguage,
+    vadSilenceMs: LIVE_TRANSLATION_VAD_SILENCE_MS,
+    outputSpeed: LIVE_TRANSLATION_OUTPUT_SPEED,
+    hasInstructions: Boolean(instructions),
+  });
+
   const payload = {
     expires_after: {
       anchor: "created_at",
@@ -127,12 +162,12 @@ router.post("/realtime-session", async (req, res) => {
             silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
           },
           transcription: {
-            model: LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
-            language: routing.sourceLanguage,
+            model: transcriptionModel,
+            ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
           },
         },
         output: {
-          voice: LIVE_TRANSLATION_VOICE,
+          voice,
           speed: LIVE_TRANSLATION_OUTPUT_SPEED,
         },
       },
@@ -166,6 +201,8 @@ router.post("/realtime-session", async (req, res) => {
         ok: false,
         error: "realtime_session_failed",
         openaiStatus: openaiRes.status,
+        openaiErrorParam: openAiErrorMeta.openaiErrorParam,
+        openaiErrorMessage: openAiErrorMeta.openaiErrorMessage,
         ...openAiErrorMeta,
       });
     }
@@ -198,10 +235,10 @@ router.post("/realtime-session", async (req, res) => {
       clientSecret,
       expiresAt,
       model: LIVE_TRANSLATION_REALTIME_MODEL,
-      voice: LIVE_TRANSLATION_VOICE,
+      voice,
       voiceProfile: LIVE_TRANSLATION_VOICE_PROFILE,
       outputSpeed: LIVE_TRANSLATION_OUTPUT_SPEED,
-      transcriptionModel: LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
+      transcriptionModel,
       ...routing,
     });
   } catch (err) {

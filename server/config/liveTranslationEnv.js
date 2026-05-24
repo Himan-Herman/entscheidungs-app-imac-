@@ -27,6 +27,12 @@ function clampOutputSpeed(raw) {
   return Math.min(1.5, Math.max(0.25, value));
 }
 
+function safeIntegerEnv(raw, fallback) {
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return fallback;
+  return Math.round(value);
+}
+
 /**
  * Output speech speed (0.25–1.5). Slightly below 1.0 for moderate medical-conversation pacing.
  */
@@ -35,11 +41,13 @@ export const LIVE_TRANSLATION_OUTPUT_SPEED = clampOutputSpeed(
 );
 
 /** Client secret TTL (seconds). OpenAI allows 10–7200; default 10 minutes. */
-export const LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS = Number(
-  process.env.LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS || 600,
+export const LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS = safeIntegerEnv(
+  process.env.LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS,
+  600,
 );
 
 /** Server VAD silence before end-of-turn (ms). Lower = snappier responses; default 550. */
-export const LIVE_TRANSLATION_VAD_SILENCE_MS = Number(
-  process.env.LIVE_TRANSLATION_VAD_SILENCE_MS || 550,
+export const LIVE_TRANSLATION_VAD_SILENCE_MS = safeIntegerEnv(
+  process.env.LIVE_TRANSLATION_VAD_SILENCE_MS,
+  550,
 );
