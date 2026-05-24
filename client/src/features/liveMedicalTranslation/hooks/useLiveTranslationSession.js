@@ -11,6 +11,27 @@ import {
 
 const REALTIME_CALLS_URL = "https://api.openai.com/v1/realtime/calls";
 
+/** @param {Response} res @param {Record<string, unknown>} data */
+function resolveSessionApiErrorKey(res, data) {
+  if (res.status === 401 || res.status === 403) return "sessionUnauthorized";
+  if (data?.error === "feature_disabled") return "featureDisabled";
+  if (data?.error === "openai_not_configured") return "openaiNotConfigured";
+  if (data?.error === "realtime_session_failed" || data?.error === "realtime_session_invalid") {
+    return "openaiSessionRejected";
+  }
+  if (res.status >= 500) return "sessionStartFailed";
+  return "sessionStartFailed";
+}
+
+/** @param {unknown} err */
+function resolveConnectExceptionErrorKey(err) {
+  const name = err && typeof err === "object" && "name" in err ? String(err.name) : "";
+  if (name === "NotAllowedError" || name === "PermissionDeniedError") return "microphoneDenied";
+  if (name === "NotFoundError" || name === "DevicesNotFoundError") return "microphoneUnavailable";
+  if (err instanceof TypeError) return "sessionNetworkFailed";
+  return "webrtcConnectionFailed";
+}
+
 /** @typedef {"idle" | "connecting" | "connected" | "listening" | "translating" | "speaking" | "error" | "ended"} LiveTranslationConnectionStatus */
 
 /**
@@ -262,7 +283,7 @@ export function useLiveTranslationSession({
         if (Date.now() < suppressErrorsUntilRef.current) return;
         safeSetState(() => {
           setConnectionStatus("error");
-          setErrorKey("connectionError");
+          setErrorKey("realtimeChannelError");
         });
       }
     },
@@ -335,7 +356,7 @@ export function useLiveTranslationSession({
 
       if (!res.ok) {
         safeSetState(() => {
-          setErrorKey(data?.error === "feature_disabled" ? "featureDisabled" : "sessionStartFailed");
+          setErrorKey(resolveSessionApiErrorKey(res, data));
           setConnectionStatus("error");
         });
         return;
@@ -409,7 +430,7 @@ export function useLiveTranslationSession({
       if (!localSdp) {
         teardown();
         safeSetState(() => {
-          setErrorKey("connectionError");
+          setErrorKey("sdpOfferMissing");
           setConnectionStatus("error");
         });
         return;
@@ -432,13 +453,22 @@ export function useLiveTranslationSession({
       if (!sdpResponse.ok) {
         teardown();
         safeSetState(() => {
-          setErrorKey("connectionError");
+          setErrorKey("sdpExchangeFailed");
           setConnectionStatus("error");
         });
         return;
       }
 
       const answerSdp = await sdpResponse.text();
+      if (!answerSdp.trim()) {
+        teardown();
+        safeSetState(() => {
+          setErrorKey("sdpExchangeFailed");
+          setConnectionStatus("error");
+        });
+        return;
+      }
+
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
       connectedRef.current = true;
       prevSpeakerRef.current = sessionConfigRef.current.activeSpeaker;
@@ -446,9 +476,8 @@ export function useLiveTranslationSession({
     } catch (err) {
       teardown();
       if (!mountedRef.current) return;
-      const name = err && typeof err === "object" && "name" in err ? String(err.name) : "";
       safeSetState(() => {
-        setErrorKey(name === "NotAllowedError" ? "microphoneDenied" : "connectionError");
+        setErrorKey(resolveConnectExceptionErrorKey(err));
         setConnectionStatus("error");
       });
     }

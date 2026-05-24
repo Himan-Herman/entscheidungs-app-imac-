@@ -15,6 +15,30 @@ import { buildLanguageRouting } from "../services/liveTranslation/liveTranslatio
 const router = express.Router();
 const OPENAI_CLIENT_SECRETS_URL = "https://api.openai.com/v1/realtime/client_secrets";
 
+/** Structured debug logs — no transcripts, audio, tokens, or user content. */
+function logLiveTranslation(req, event, fields = {}) {
+  console.log(
+    JSON.stringify({
+      level: "info",
+      component: "live-translation",
+      event,
+      requestId: req.requestId || null,
+      ...fields,
+    }),
+  );
+}
+
+function sanitizeOpenAiError(data) {
+  const err = data?.error;
+  if (!err || typeof err !== "object") {
+    return { openaiErrorType: null, openaiErrorCode: null };
+  }
+  return {
+    openaiErrorType: typeof err.type === "string" ? err.type : null,
+    openaiErrorCode: typeof err.code === "string" ? err.code : null,
+  };
+}
+
 const SUPPORTED_LANGUAGE_CODES = new Set([
   "de", "en", "fr", "es", "it", "ru", "uk", "tr", "pt", "ar", "fa", "pl", "ro", "nl",
   "ckb", "ku", "el", "sq", "hr", "bs", "sr", "he", "ur",
@@ -59,15 +83,24 @@ router.use(requireLiveTranslationFeature);
 router.post("/realtime-session", async (req, res) => {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
+    logLiveTranslation(req, "realtime_session_start", { ok: false, reason: "openai_not_configured" });
     return res.status(503).json({ ok: false, error: "openai_not_configured" });
   }
 
   const validated = validateSessionInput(req.body || {});
   if (validated.error) {
+    logLiveTranslation(req, "realtime_session_start", { ok: false, reason: validated.error });
     return res.status(400).json({ ok: false, error: validated.error });
   }
 
   const { patientLanguage, doctorLanguage, activeSpeaker } = validated;
+  logLiveTranslation(req, "realtime_session_start", {
+    patientLanguage,
+    doctorLanguage,
+    activeSpeaker,
+    model: LIVE_TRANSLATION_REALTIME_MODEL,
+    voice: LIVE_TRANSLATION_VOICE,
+  });
   const routing = buildLanguageRouting({ patientLanguage, doctorLanguage, activeSpeaker });
   const instructions = buildLiveTranslationInstructions({
     patientLanguage,
@@ -120,10 +153,20 @@ router.post("/realtime-session", async (req, res) => {
     });
 
     const data = await openaiRes.json().catch(() => ({}));
+    const openAiErrorMeta = sanitizeOpenAiError(data);
+
     if (!openaiRes.ok) {
+      logLiveTranslation(req, "openai_client_secrets_response", {
+        ok: false,
+        openaiStatus: openaiRes.status,
+        ...openAiErrorMeta,
+        hasEphemeralSecret: false,
+      });
       return res.status(502).json({
         ok: false,
         error: "realtime_session_failed",
+        openaiStatus: openaiRes.status,
+        ...openAiErrorMeta,
       });
     }
 
@@ -133,9 +176,21 @@ router.post("/realtime-session", async (req, res) => {
       data?.client_secret ||
       null;
     const expiresAt = data?.expires_at || data?.client_secret?.expires_at || null;
+    const hasEphemeralSecret = typeof clientSecret === "string" && clientSecret.length > 0;
 
-    if (!clientSecret || typeof clientSecret !== "string") {
-      return res.status(502).json({ ok: false, error: "realtime_session_invalid" });
+    logLiveTranslation(req, "openai_client_secrets_response", {
+      ok: hasEphemeralSecret,
+      openaiStatus: openaiRes.status,
+      hasEphemeralSecret,
+      expiresAt: expiresAt || null,
+    });
+
+    if (!hasEphemeralSecret) {
+      return res.status(502).json({
+        ok: false,
+        error: "realtime_session_invalid",
+        openaiStatus: openaiRes.status,
+      });
     }
 
     return res.json({
@@ -149,7 +204,11 @@ router.post("/realtime-session", async (req, res) => {
       transcriptionModel: LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
       ...routing,
     });
-  } catch {
+  } catch (err) {
+    logLiveTranslation(req, "realtime_session_exception", {
+      ok: false,
+      errorName: err && typeof err === "object" && "name" in err ? String(err.name) : "Error",
+    });
     return res.status(502).json({ ok: false, error: "realtime_session_failed" });
   }
 });
