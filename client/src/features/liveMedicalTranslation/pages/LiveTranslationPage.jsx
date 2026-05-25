@@ -57,9 +57,7 @@ function formatBirthDateDisplay(isoDate, lang) {
 export default function LiveTranslationPage() {
   const { language } = useLanguage();
   const t = useMemo(
-    () =>
-      getMessages(language).liveMedicalTranslation ||
-      getMessages("en").liveMedicalTranslation,
+    () => resolveLiveTranslationMessages(getMessages(language)),
     [language],
   );
 
@@ -275,9 +273,13 @@ export default function LiveTranslationPage() {
   }, []);
 
   const handleScopeTranslationPaused = useCallback(() => {
-    setScopeTranslationPausedBanner(t.warnings.scopeTranslationPaused);
+    setScopeTranslationPausedBanner(
+      t.warnings?.scopeTranslationPaused ||
+        t.warnings?.unrelatedHealthcare ||
+        "",
+    );
     setScopeWarningVisible(false);
-  }, [t.warnings.scopeTranslationPaused]);
+  }, [t.warnings?.scopeTranslationPaused, t.warnings?.unrelatedHealthcare]);
 
   const handleManualSpeakerSelect = useCallback((speaker) => {
     skipLanguageRoutingRef.current = true;
@@ -399,7 +401,13 @@ export default function LiveTranslationPage() {
     [patientLanguage, doctorLanguage, activeSpeaker],
   );
 
-  const connectionLabel = t.status[connectionStatus] || connectionStatus;
+  const safeTurns = useMemo(
+    () => (Array.isArray(turns) ? turns : []).filter((turn) => turn && typeof turn === "object"),
+    [turns],
+  );
+
+  const connectionLabel =
+    (t.status && t.status[connectionStatus]) || connectionStatus || "";
   const micLabel = microphoneStatus === "on" ? t.status.micOn : t.status.micOff;
   const isSessionLive =
     connectionStatus === "introducing" ||
@@ -1403,7 +1411,7 @@ export default function LiveTranslationPage() {
           />
 
           <LiveTranslationTurnHistory
-            turns={turns}
+            turns={safeTurns}
             t={t}
             uiLanguage={language}
             disabled={planBDisabled}

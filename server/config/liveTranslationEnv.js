@@ -52,12 +52,12 @@ export const LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS = safeIntegerEnv(
 /** Server VAD silence before end-of-turn (ms). 700–900 ms helps short medical phrases. */
 export const LIVE_TRANSLATION_VAD_SILENCE_MS = safeIntegerEnv(
   process.env.LIVE_TRANSLATION_VAD_SILENCE_MS,
-  1000,
+  1100,
 );
 
 /** Server VAD activation threshold (0–1). Higher = less sensitive to background noise. */
 export const LIVE_TRANSLATION_VAD_THRESHOLD = (() => {
   const value = Number(process.env.LIVE_TRANSLATION_VAD_THRESHOLD);
-  if (!Number.isFinite(value)) return 0.62;
+  if (!Number.isFinite(value)) return 0.64;
   return Math.min(1, Math.max(0, value));
 })();

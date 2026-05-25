@@ -3,30 +3,54 @@ import { PencilLine, RotateCcw } from "lucide-react";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { LIVE_TRANSLATION_LANGUAGE_OPTIONS } from "../languages.js";
 
-function turnStatusLabel(status, t) {
+function turnStatusLabel(status, turnT) {
+  const labels = turnT || {};
   switch (status) {
     case "unclear":
-      return t.turn.statusUnclear;
+      return labels.statusUnclear || "—";
     case "wrongLanguage":
-      return t.turn.statusWrongLanguage;
+      return labels.statusWrongLanguage || "—";
     case "corrected":
-      return t.turn.statusCorrected;
+      return labels.statusCorrected || "—";
     case "replayed":
-      return t.turn.statusReplayed;
+      return labels.statusReplayed || "—";
     default:
-      return t.turn.statusTranslated;
+      return labels.statusTranslated || "—";
   }
 }
 
 function formatTurnTime(iso, lang) {
   try {
-    return new Date(iso).toLocaleTimeString(getPrimaryIntlLocale(lang), {
+    if (!iso) return "";
+    const time = new Date(iso).getTime();
+    if (!Number.isFinite(time)) return "";
+    return new Date(time).toLocaleTimeString(getPrimaryIntlLocale(lang), {
       hour: "2-digit",
       minute: "2-digit",
     });
   } catch {
     return "";
   }
+}
+
+/** @param {unknown} turn */
+function normalizeTurnForDisplay(turn) {
+  if (!turn || typeof turn !== "object") return null;
+  const t = /** @type {Record<string, unknown>} */ (turn);
+  return {
+    id: typeof t.id === "string" ? t.id : `turn-${Date.now()}`,
+    speaker: t.speaker === "doctor" ? "doctor" : "patient",
+    sourceLanguage: typeof t.sourceLanguage === "string" ? t.sourceLanguage : "",
+    targetLanguage: typeof t.targetLanguage === "string" ? t.targetLanguage : "",
+    originalText: typeof t.originalText === "string" ? t.originalText : "",
+    originalMissing: Boolean(t.originalMissing),
+    translatedText: typeof t.translatedText === "string" ? t.translatedText : "",
+    timestamp: typeof t.timestamp === "string" ? t.timestamp : "",
+    status: typeof t.status === "string" ? t.status : "translated",
+    correctsTurnId: typeof t.correctsTurnId === "string" ? t.correctsTurnId : undefined,
+    wrongOriginalText: typeof t.wrongOriginalText === "string" ? t.wrongOriginalText : undefined,
+    wrongTranslatedText: typeof t.wrongTranslatedText === "string" ? t.wrongTranslatedText : undefined,
+  };
 }
 
 function resolveLanguageLabel(code) {
@@ -216,13 +240,18 @@ export default function LiveTranslationTurnHistory({
   const turnT = /** @type {Record<string, string>} */ (t.turn || {});
   const [correctionTurnId, setCorrectionTurnId] = useState(/** @type {string | null} */ (null));
 
-  const displayTurns = useMemo(
-    () =>
-      [...turns].sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      ),
-    [turns],
-  );
+  const displayTurns = useMemo(() => {
+    const list = (Array.isArray(turns) ? turns : [])
+      .map(normalizeTurnForDisplay)
+      .filter(Boolean);
+    return list.sort((a, b) => {
+      const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      const sa = Number.isFinite(ta) ? ta : 0;
+      const sb = Number.isFinite(tb) ? tb : 0;
+      return sb - sa;
+    });
+  }, [turns]);
 
   return (
     <section className="live-translation__turns-panel" aria-label={liveT.turnHistory}>
@@ -275,7 +304,7 @@ export default function LiveTranslationTurnHistory({
                           `live-translation__turn-status--${turn.status || "translated"}`,
                         ].join(" ")}
                       >
-                        {turnStatusLabel(turn.status, t)}
+                        {turnStatusLabel(turn.status, turnT)}
                       </span>
                     </div>
                     <div className="live-translation__turn-header-meta">

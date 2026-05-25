@@ -1,7 +1,10 @@
 import { isLikelyEmptyOrNoiseTranscript } from "./asrQuality.js";
 
 /** Minimum characters for a stable transcript before translation (conservative). */
-export const MIN_STABLE_TRANSCRIPT_CHARS = 2;
+export const MIN_STABLE_TRANSCRIPT_CHARS = 3;
+
+/** Minimum word count (avoids ultra-short noise packets). */
+export const MIN_STABLE_TRANSCRIPT_WORDS = 1;
 
 /** Max wait for ASR after translation audio completes (ms). */
 export const MAX_TRANSCRIPT_WAIT_MS = 2200;
@@ -20,6 +23,8 @@ export function canProceedToTranslation(input) {
   const text = String(input.transcript || "").trim();
   if (!text || isLikelyEmptyOrNoiseTranscript(text)) return false;
   if (text.length < MIN_STABLE_TRANSCRIPT_CHARS) return false;
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length < MIN_STABLE_TRANSCRIPT_WORDS) return false;
   return true;
 }
 

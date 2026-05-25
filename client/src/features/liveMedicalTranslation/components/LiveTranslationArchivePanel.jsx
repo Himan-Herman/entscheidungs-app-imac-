@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { liveTranslationLanguageLabel } from "../languages.js";
 import { downloadLiveTranslationPdf } from "../pdf/generateLiveTranslationPdf.js";
+import { formatMessageTemplate } from "../utils/safeLiveTranslationMessages.js";
 import {
   clearLiveTranslationArchive,
   deleteLiveTranslationArchiveItem,
@@ -256,7 +257,9 @@ export default function LiveTranslationArchivePanel({ t, uiLanguage, onClose, re
                         <ArchiveField label={archiveT.languagePairLabel} value={languagePair} />
                         <ArchiveField
                           label={archiveT.turnCountLabel}
-                          value={archiveT.turnCount.replace("{count}", String(turnCount))}
+                          value={formatMessageTemplate(archiveT.turnCount, {
+                            count: String(turnCount),
+                          })}
                         />
                       </dl>
                     </div>

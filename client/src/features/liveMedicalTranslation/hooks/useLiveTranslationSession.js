@@ -102,7 +102,7 @@ function resolveConnectExceptionErrorKey(err) {
  * }} LiveTranslationTurn
  */
 
-/** @typedef {{ type: "correction"; sourceText: string; correctsTurnId: string; routing: ReturnType<typeof buildLanguageRouting>; wrongOriginalText?: string; wrongTranslatedText?: string } | { type: "replay" } | { type: "repeat"; phrase: string } | { type: "unclearRepeat"; phrase: string; routing: ReturnType<typeof buildLanguageRouting>; overlapDetected?: boolean } | { type: "wrongLanguageRepeat"; phrase: string; routing: ReturnType<typeof buildLanguageRouting>; detectedLanguage?: string | null } | { type: "scopeRetry"; sourceText: string; routing: ReturnType<typeof buildLanguageRouting> } | null} PendingPlanB */
+/** @typedef {{ type: "correction"; sourceText: string; correctsTurnId: string; routing: ReturnType<typeof buildLanguageRouting>; wrongOriginalText?: string; wrongTranslatedText?: string } | { type: "replay" } | { type: "repeat"; phrase: string } | { type: "spokenNotice"; phrase: string } | { type: "unclearRepeat"; phrase: string; routing: ReturnType<typeof buildLanguageRouting>; overlapDetected?: boolean; recordHistory?: boolean } | { type: "wrongLanguageRepeat"; phrase: string; routing: ReturnType<typeof buildLanguageRouting>; detectedLanguage?: string | null; recordHistory?: boolean } | { type: "scopeRetry"; sourceText: string; routing: ReturnType<typeof buildLanguageRouting> } | null} PendingPlanB */
 
 /**
  * @param {{
@@ -842,46 +842,58 @@ export function useLiveTranslationSession({
   }, []);
 
   const triggerUnclearRepeat = useCallback(
-    (routing, overlapDetected = false, reason = "unclear") => {
+    (routing, overlapDetected = false, reason = "unclear", options = {}) => {
       if (pausedRef.current || !connectedRef.current) return false;
       const phrase = getMedaUnclearRepeatPhrase(routing.targetLanguage);
+      const recordHistory = options.recordHistory !== false;
       pendingOriginalRef.current = "";
       pendingPlanBRef.current = {
         type: "unclearRepeat",
         phrase,
         routing,
         overlapDetected,
+        recordHistory,
       };
       notifyTurnIssue(reason, { overlapDetected, missingOriginal: reason === "asr_failed" });
       cancelActiveResponse();
+      if (!recordHistory) {
+        return speakExactText(phrase, { type: "spokenNotice", phrase });
+      }
       return speakExactText(phrase, {
         type: "unclearRepeat",
         phrase,
         routing,
         overlapDetected,
+        recordHistory,
       });
     },
     [cancelActiveResponse, notifyTurnIssue, speakExactText],
   );
 
   const triggerWrongLanguageRepeat = useCallback(
-    (routing, detectedLanguage = null) => {
+    (routing, detectedLanguage = null, options = {}) => {
       if (pausedRef.current || !connectedRef.current) return false;
       const phrase = getWrongLanguagePhrase(routing.targetLanguage);
+      const recordHistory = options.recordHistory !== false;
       pendingOriginalRef.current = "";
       pendingPlanBRef.current = {
         type: "wrongLanguageRepeat",
         phrase,
         routing,
         detectedLanguage,
+        recordHistory,
       };
       onWrongLanguagePairRef.current?.({ detectedLanguage });
       cancelActiveResponse();
+      if (!recordHistory) {
+        return speakExactText(phrase, { type: "spokenNotice", phrase });
+      }
       return speakExactText(phrase, {
         type: "wrongLanguageRepeat",
         phrase,
         routing,
         detectedLanguage,
+        recordHistory,
       });
     },
     [cancelActiveResponse, speakExactText],
@@ -909,18 +921,18 @@ export function useLiveTranslationSession({
       inputTranscriptStateRef.current = "pending";
 
       if (inputState === "failed") {
-        triggerUnclearRepeat(routing, overlap, "asr_failed");
+        triggerUnclearRepeat(routing, overlap, "asr_failed", { recordHistory: false });
         return;
       }
 
       if (!translatedTrimmed || isMedaUnclearPhrase(translatedTrimmed)) {
-        triggerUnclearRepeat(routing, overlap, "translation_failed");
+        triggerUnclearRepeat(routing, overlap, "translation_failed", { recordHistory: false });
         return;
       }
 
       if (!original || isLikelyEmptyOrNoiseTranscript(original)) {
         const reason = overlap ? "overlap" : "asr_failed";
-        triggerUnclearRepeat(routing, overlap, reason);
+        triggerUnclearRepeat(routing, overlap, reason, { recordHistory: false });
         return;
       }
 
@@ -979,7 +991,7 @@ export function useLiveTranslationSession({
           requestFaithfulTranslationRetry(original, routing);
           return;
         }
-        triggerUnclearRepeat(routing, overlap, "translation_failed");
+        triggerUnclearRepeat(routing, overlap, "translation_failed", { recordHistory: false });
         return;
       }
 
@@ -1041,7 +1053,9 @@ export function useLiveTranslationSession({
         }
         pendingTranslatedForTurnRef.current = "";
         const routing = turnContextRef.current;
-        triggerUnclearRepeat(routing, overlapDetectedRef.current, "asr_failed");
+        triggerUnclearRepeat(routing, overlapDetectedRef.current, "asr_failed", {
+          recordHistory: false,
+        });
       }, MAX_TRANSCRIPT_WAIT_MS);
     },
     [clearPendingFinalizeTimer, executeBufferedFinalize, triggerUnclearRepeat],
@@ -1274,28 +1288,46 @@ export function useLiveTranslationSession({
         return;
       }
 
+      if (planB?.type === "spokenNotice") {
+        currentTranslatedRef.current = translated;
+        safeSetState(() => setCurrentTranslatedText(translated));
+        pendingPlanBRef.current = null;
+        pendingOriginalRef.current = "";
+        return;
+      }
+
       if (planB?.type === "unclearRepeat") {
-        appendTurn("", translated, {
-          status: "unclear",
-          overlapDetected: Boolean(planB.overlapDetected),
-          allowDuplicate: true,
-          speaker: planB.routing.activeSpeaker,
-          sourceLanguage: planB.routing.sourceLanguage,
-          targetLanguage: planB.routing.targetLanguage,
-        });
+        if (planB.recordHistory !== false) {
+          appendTurn("", translated, {
+            status: "unclear",
+            overlapDetected: Boolean(planB.overlapDetected),
+            allowDuplicate: true,
+            speaker: planB.routing.activeSpeaker,
+            sourceLanguage: planB.routing.sourceLanguage,
+            targetLanguage: planB.routing.targetLanguage,
+          });
+        } else {
+          currentTranslatedRef.current = translated;
+          safeSetState(() => setCurrentTranslatedText(translated));
+        }
         pendingPlanBRef.current = null;
         return;
       }
 
       if (planB?.type === "wrongLanguageRepeat") {
-        appendTurn("", translated, {
-          status: "wrongLanguage",
-          detectedLanguage: planB.detectedLanguage ?? lastDetectedLanguageRef.current,
-          allowDuplicate: true,
-          speaker: planB.routing.activeSpeaker,
-          sourceLanguage: planB.routing.sourceLanguage,
-          targetLanguage: planB.routing.targetLanguage,
-        });
+        if (planB.recordHistory !== false) {
+          appendTurn("", translated, {
+            status: "wrongLanguage",
+            detectedLanguage: planB.detectedLanguage ?? lastDetectedLanguageRef.current,
+            allowDuplicate: true,
+            speaker: planB.routing.activeSpeaker,
+            sourceLanguage: planB.routing.sourceLanguage,
+            targetLanguage: planB.routing.targetLanguage,
+          });
+        } else {
+          currentTranslatedRef.current = translated;
+          safeSetState(() => setCurrentTranslatedText(translated));
+        }
         pendingPlanBRef.current = null;
         return;
       }
@@ -1454,7 +1486,9 @@ export function useLiveTranslationSession({
 
         inputTranscriptStateRef.current = "empty";
         if (pendingTranslatedForTurnRef.current) {
-          triggerUnclearRepeat(routing, overlapDetectedRef.current, "asr_failed");
+          triggerUnclearRepeat(routing, overlapDetectedRef.current, "asr_failed", {
+            recordHistory: false,
+          });
         }
         maybeFlushPendingTurn();
         return;
