@@ -130,4 +130,6 @@ export default {
   hubLinkProfilesTeam: "Team/Roles",
   hubLinkIntegrations: "Integrations",
   hubLinkAnalytics: "Analytics",
+  hubLinkVaccinations: "Vaccination pass",
+  hubLinkVaccinationsSub: "Track and document your vaccinations",
 };

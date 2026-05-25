@@ -182,6 +182,9 @@ const PatientTelemedicinePage = lazy(() =>
 const PatientTelemedicineDetailPage = lazy(() =>
   import("./features/telemedicine/pages/PatientTelemedicineDetailPage.jsx"),
 );
+const VaccinationPassPage = lazy(() =>
+  import("./features/vaccinations/pages/VaccinationPassPage.jsx"),
+);
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
 );
@@ -494,6 +497,14 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <PatientAppointmentsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/vaccinations"
+                  element={
+                    <ProtectedRoute>
+                      <VaccinationPassPage />
                     </ProtectedRoute>
                   }
                 />

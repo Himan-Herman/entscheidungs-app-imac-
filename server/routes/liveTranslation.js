@@ -160,6 +160,8 @@ router.post("/realtime-session", async (req, res) => {
             create_response: true,
             interrupt_response: true,
             silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
+            prefix_padding_ms: 400,
+            threshold: 0.5,
           },
           transcription: {
             model: transcriptionModel,

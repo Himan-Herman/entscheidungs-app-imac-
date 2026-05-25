@@ -46,8 +46,8 @@ export const LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS = safeIntegerEnv(
   600,
 );
 
-/** Server VAD silence before end-of-turn (ms). Lower = snappier responses; default 550. */
+/** Server VAD silence before end-of-turn (ms). 700–900 ms helps short medical phrases. */
 export const LIVE_TRANSLATION_VAD_SILENCE_MS = safeIntegerEnv(
   process.env.LIVE_TRANSLATION_VAD_SILENCE_MS,
-  550,
+  800,
 );

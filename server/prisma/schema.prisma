@@ -72,6 +72,7 @@ model User {
   interpreterInvitesRevoked     PracticeInterpreterInvite[] @relation("InterpreterInviteRevokedBy")
   interpreterSessionLinksAsPatient PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkPatient")
   interpreterSessionLinksRevoked PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
+  vaccinationEntries             VaccinationEntry[]
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -1673,6 +1674,32 @@ model PracticeInterpreterSharePayload {
   updatedAt       DateTime @updatedAt
 
   link PracticeInterpreterSessionLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+}
+
+/// Patient-owned vaccination record — self-reported, not an official proof.
+/// No medical interpretation; stores what the patient manually enters.
+model VaccinationEntry {
+  id              String    @id @default(cuid())
+  userId          String
+  vaccineName     String    @db.VarChar(200)
+  disease         String    @db.VarChar(200)
+  vaccinationDate DateTime  @db.Date
+  doseLabel       String?   @db.VarChar(80)
+  lotNumber       String?   @db.VarChar(80)
+  location        String?   @db.VarChar(200)
+  nextDueDate     DateTime? @db.Date
+  notes           String?   @db.Text
+  documentKey     String?   @db.VarChar(500)
+  documentName    String?   @db.VarChar(200)
+  documentMime    String?   @db.VarChar(80)
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, vaccinationDate])
+  @@index([userId, deletedAt])
 }
 
 datasource db {

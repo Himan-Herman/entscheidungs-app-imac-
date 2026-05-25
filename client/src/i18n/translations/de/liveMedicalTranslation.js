@@ -90,6 +90,8 @@ export default {
     languageUncertain:
       "Sprache nicht sicher erkannt. Bitte wählen Sie Patient oder Arzt/Praxis manuell.",
     unclearRecognition: "Nicht sicher erkannt — bitte wiederholen.",
+    asrFailed: "Sprache nicht verstanden — bitte wiederholen.",
+    translationFailed: "Übersetzung fehlgeschlagen — bitte wiederholen.",
     wrongLanguagePair:
       "Die erkannte Sprache passt nicht zu den ausgewählten Gesprächssprachen. Bitte wählen Sie die richtige Sprache oder wiederholen Sie den Satz.",
     overlapDetected:

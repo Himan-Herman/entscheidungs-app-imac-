@@ -73,6 +73,16 @@ assert(
   "faithful short translation is not hallucination",
 );
 
+assert(
+  !isLikelyHallucinatedTranslation("Ich habe Kopfschmerzen.", "I have a headache."),
+  "DE medical phrase to EN is not hallucination",
+);
+
+assert(
+  !isLikelyHallucinatedTranslation("How can I help you?", "Wie kann ich Ihnen helfen?"),
+  "EN doctor phrase to DE is not hallucination",
+);
+
 const sanitized = sanitizeUnclearTurn({
   originalText: "",
   translatedText: "I have cough and phlegm.",

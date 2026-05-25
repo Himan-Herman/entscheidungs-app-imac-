@@ -64,15 +64,11 @@ export function isLikelyHallucinatedTranslation(originalText, translatedText) {
   const translatedWords = translated.split(/\s+/).filter(Boolean);
 
   if (originalUnreliable) {
-    if (translatedWords.length >= 3) return true;
     for (const pattern of HALLUCINATION_CONTENT_PATTERNS) {
       if (pattern.test(translated)) return true;
     }
-    return false;
+    return translatedWords.length >= 8;
   }
-
-  if (originalWords.length <= 1 && translatedWords.length >= 6) return true;
-  if (originalWords.length <= 2 && translatedWords.length >= 8) return true;
 
   return false;
 }

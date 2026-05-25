@@ -136,6 +136,11 @@ export function isLabPatientExplanationEnabled() {
   return envFlag("ENABLE_LAB_PATIENT_EXPLANATION", false);
 }
 
+/** Patient-owned vaccination pass — self-reported entries, document upload, reminders. */
+export function isVaccinationPassEnabled() {
+  return envFlag("ENABLE_VACCINATION_PASS", false);
+}
+
 export function isDocumentOcrUiEnabled() {
   if (isLabInterpretationEnabled()) return false;
   return (

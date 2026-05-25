@@ -75,14 +75,28 @@ export function extractOriginalText(event) {
     if (typeof nested === "string" && nested.trim()) return nested.trim();
   }
 
+  if (typeof event.delta === "string" && event.delta.trim()) {
+    return event.delta.trim();
+  }
+
   const item = event.item;
   if (item && typeof item === "object") {
+    const itemTranscript = item.transcript ?? item.text;
+    if (typeof itemTranscript === "string" && itemTranscript.trim()) {
+      return itemTranscript.trim();
+    }
+
     const content = item.content;
     if (Array.isArray(content)) {
       for (const part of content) {
         if (!part || typeof part !== "object") continue;
         const text =
-          part.transcript ?? part.text ?? part.input_audio_transcription?.transcript;
+          part.transcript ??
+          part.text ??
+          part.input_audio_transcription?.transcript ??
+          (part.type === "input_audio" && typeof part.input_audio === "string"
+            ? part.input_audio
+            : null);
         if (typeof text === "string" && text.trim()) return text.trim();
       }
     }

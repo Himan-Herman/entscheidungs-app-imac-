@@ -12,6 +12,7 @@ import {
   MessageSquare,
   MapPinned,
   Pill,
+  ShieldCheck,
   Stethoscope,
   UserRound,
   Users,
@@ -158,6 +159,12 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkDocuments",
     subtitleKey: "hubLinkDocumentsSub",
     icon: FileText,
+  },
+  {
+    to: "/patient/vaccinations",
+    key: "hubLinkVaccinations",
+    subtitleKey: "hubLinkVaccinationsSub",
+    icon: ShieldCheck,
   },
 ]);
 

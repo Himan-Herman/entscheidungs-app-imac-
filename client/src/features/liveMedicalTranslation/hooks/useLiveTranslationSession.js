@@ -8,11 +8,18 @@ import { classifyRealtimeError, isCancelledOrFailedResponseDone } from "../utils
 import { logRealtimeDiag, summarizeRealtimeEvent } from "../utils/realtimeDiagnostics.js";
 import { isLikelyEmptyOrNoiseTranscript, sanitizeUnclearTurn } from "../utils/asrQuality.js";
 import {
+  LIVE_TRANSLATION_ORIGINAL_BUFFER_MS,
+  isInputTranscriptionCompletedEvent,
+  isInputTranscriptionFailedEvent,
+  logTranscriptionEventMeta,
+} from "../utils/asrTranscription.js";
+import {
   isLanguageInSelectedPair,
   sanitizeWrongLanguageTurn,
 } from "../utils/languageContainment.js";
 import {
   getMedaUnclearRepeatPhrase,
+  isMedaUnclearPhrase,
 } from "../utils/repeatPhrase.js";
 import { getWrongLanguagePhrase } from "../utils/wrongLanguagePhrase.js";
 import { resolveSpeakerFromDetectedLanguage, isLanguageRoutingEnabled } from "../utils/languageBasedRouting.js";
@@ -189,6 +196,9 @@ export function useLiveTranslationSession({
     /** @type {{ phrase: string; type: "unclearRepeat" | "wrongLanguageRepeat" } | null} */ (null),
   );
   const lastDetectedLanguageRef = useRef(/** @type {string | null} */ (null));
+  const inputTranscriptStateRef = useRef(/** @type {"pending" | "ready" | "empty" | "failed"} */ ("pending"));
+  const pendingTranslatedForTurnRef = useRef("");
+  const pendingFinalizeTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
   const onUnclearTurnRef = useRef(onUnclearTurn);
   const onWrongLanguagePairRef = useRef(onWrongLanguagePair);
   const onSessionTimeWarningRef = useRef(onSessionTimeWarning);
@@ -336,6 +346,11 @@ export function useLiveTranslationSession({
       clearTimeout(speakerUpdateTimerRef.current);
       speakerUpdateTimerRef.current = null;
     }
+    if (pendingFinalizeTimerRef.current) {
+      clearTimeout(pendingFinalizeTimerRef.current);
+      pendingFinalizeTimerRef.current = null;
+    }
+    pendingTranslatedForTurnRef.current = "";
     clearSessionTimer();
     dcRef.current?.close();
     dcRef.current = null;
@@ -762,8 +777,31 @@ export function useLiveTranslationSession({
     [appendTurn, buildRoutingForTurn, requestFaithfulTranslation, speakExactText],
   );
 
+  const clearPendingFinalizeTimer = useCallback(() => {
+    if (pendingFinalizeTimerRef.current) {
+      clearTimeout(pendingFinalizeTimerRef.current);
+      pendingFinalizeTimerRef.current = null;
+    }
+  }, []);
+
+  const resetTurnCaptureState = useCallback(() => {
+    clearPendingFinalizeTimer();
+    pendingTranslatedForTurnRef.current = "";
+    inputTranscriptStateRef.current = "pending";
+    pendingOriginalRef.current = "";
+    lastDetectedLanguageRef.current = null;
+  }, [clearPendingFinalizeTimer]);
+
+  const notifyTurnIssue = useCallback((reason, options = {}) => {
+    onUnclearTurnRef.current?.({
+      reason,
+      overlapDetected: Boolean(options.overlapDetected),
+      missingOriginal: Boolean(options.missingOriginal),
+    });
+  }, []);
+
   const triggerUnclearRepeat = useCallback(
-    (routing, overlapDetected = false) => {
+    (routing, overlapDetected = false, reason = "unclear") => {
       if (pausedRef.current || !connectedRef.current) return false;
       const phrase = getMedaUnclearRepeatPhrase(routing.targetLanguage);
       pendingOriginalRef.current = "";
@@ -773,6 +811,7 @@ export function useLiveTranslationSession({
         routing,
         overlapDetected,
       };
+      notifyTurnIssue(reason, { overlapDetected, missingOriginal: reason === "asr_failed" });
       cancelActiveResponse();
       return speakExactText(phrase, {
         type: "unclearRepeat",
@@ -781,7 +820,7 @@ export function useLiveTranslationSession({
         overlapDetected,
       });
     },
-    [cancelActiveResponse, speakExactText],
+    [cancelActiveResponse, notifyTurnIssue, speakExactText],
   );
 
   const triggerWrongLanguageRepeat = useCallback(
@@ -805,6 +844,133 @@ export function useLiveTranslationSession({
       });
     },
     [cancelActiveResponse, speakExactText],
+  );
+
+  const executeBufferedFinalize = useCallback(
+    (translated) => {
+      if (pausedRef.current) return;
+
+      clearPendingFinalizeTimer();
+      pendingTranslatedForTurnRef.current = "";
+
+      const routing = turnContextRef.current;
+      const overlap = overlapDetectedRef.current;
+      overlapDetectedRef.current = false;
+      const original = String(pendingOriginalRef.current || "").trim();
+      const translatedTrimmed = String(translated || "").trim();
+      const inputState = inputTranscriptStateRef.current;
+
+      pendingOriginalRef.current = "";
+      inputTranscriptStateRef.current = "pending";
+
+      if (inputState === "failed") {
+        triggerUnclearRepeat(routing, overlap, "asr_failed");
+        return;
+      }
+
+      if (!translatedTrimmed || isMedaUnclearPhrase(translatedTrimmed)) {
+        triggerUnclearRepeat(routing, overlap, "translation_failed");
+        return;
+      }
+
+      if (!original || isLikelyEmptyOrNoiseTranscript(original)) {
+        const reason = overlap ? "overlap" : "asr_failed";
+        triggerUnclearRepeat(routing, overlap, reason);
+        return;
+      }
+
+      const cfg = sessionConfigRef.current;
+      if (
+        languageBasedRoutingRef.current &&
+        isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage) &&
+        lastDetectedLanguageRef.current &&
+        !isLanguageInSelectedPair(
+          lastDetectedLanguageRef.current,
+          cfg.patientLanguage,
+          cfg.doctorLanguage,
+        )
+      ) {
+        triggerWrongLanguageRepeat(routing, lastDetectedLanguageRef.current);
+        return;
+      }
+
+      const completedTurns = turnsRef.current.filter(
+        (t) => t.status === "translated" || t.status === "corrected",
+      ).length;
+      const elapsed = getSessionActiveElapsedMs();
+
+      if (
+        shouldRetryScopeRefusal(
+          completedTurns,
+          elapsed,
+          scopeContinueRef.current,
+          original,
+          translatedTrimmed,
+        )
+      ) {
+        currentTranslatedRef.current = "";
+        safeSetState(() => setCurrentTranslatedText(""));
+        requestFaithfulTranslationRetry(original, routing);
+        return;
+      }
+
+      if (isModelScopeRefusal(translatedTrimmed, instructionOptionsRef.current)) {
+        if (!scopeWarningShownRef.current) {
+          scopeWarningShownRef.current = true;
+          onScopeWarningRef.current?.();
+        }
+        stopVoiceOutput();
+        currentTranslatedRef.current = "";
+        safeSetState(() => setCurrentTranslatedText(""));
+        return;
+      }
+
+      appendTurn(original, translatedTrimmed, { overlapDetected: overlap });
+    },
+    [
+      appendTurn,
+      clearPendingFinalizeTimer,
+      getSessionActiveElapsedMs,
+      requestFaithfulTranslationRetry,
+      safeSetState,
+      stopVoiceOutput,
+      triggerUnclearRepeat,
+      triggerWrongLanguageRepeat,
+    ],
+  );
+
+  const maybeFlushPendingTurn = useCallback(() => {
+    const pending = pendingTranslatedForTurnRef.current;
+    if (!pending) return;
+    if (
+      inputTranscriptStateRef.current === "ready" &&
+      String(pendingOriginalRef.current || "").trim() &&
+      !isLikelyEmptyOrNoiseTranscript(pendingOriginalRef.current)
+    ) {
+      executeBufferedFinalize(pending);
+    }
+  }, [executeBufferedFinalize]);
+
+  const scheduleFinalizeTranslation = useCallback(
+    (translated) => {
+      pendingTranslatedForTurnRef.current = translated;
+
+      if (
+        inputTranscriptStateRef.current === "ready" &&
+        String(pendingOriginalRef.current || "").trim() &&
+        !isLikelyEmptyOrNoiseTranscript(pendingOriginalRef.current)
+      ) {
+        executeBufferedFinalize(translated);
+        return;
+      }
+
+      clearPendingFinalizeTimer();
+      pendingFinalizeTimerRef.current = setTimeout(() => {
+        pendingFinalizeTimerRef.current = null;
+        executeBufferedFinalize(pendingTranslatedForTurnRef.current || translated);
+      }, LIVE_TRANSLATION_ORIGINAL_BUFFER_MS);
+    },
+    [clearPendingFinalizeTimer, executeBufferedFinalize],
   );
 
   const trySendMedaActivation = useCallback(() => {
@@ -956,50 +1122,9 @@ export function useLiveTranslationSession({
         return;
       }
 
-      const original = pendingOriginalRef.current;
-      const routing = turnContextRef.current;
-      const completedTurns = turnsRef.current.filter(
-        (t) => t.status === "translated" || t.status === "corrected",
-      ).length;
-      const elapsed = getSessionActiveElapsedMs();
-
-      if (
-        shouldRetryScopeRefusal(
-          completedTurns,
-          elapsed,
-          scopeContinueRef.current,
-          original,
-          translated,
-        )
-      ) {
-        currentTranslatedRef.current = "";
-        safeSetState(() => setCurrentTranslatedText(""));
-        requestFaithfulTranslationRetry(original, routing);
-        return;
-      }
-
-      if (isModelScopeRefusal(translated, instructionOptionsRef.current)) {
-        if (!scopeWarningShownRef.current) {
-          scopeWarningShownRef.current = true;
-          onScopeWarningRef.current?.();
-        }
-        stopVoiceOutput();
-        currentTranslatedRef.current = "";
-        safeSetState(() => setCurrentTranslatedText(""));
-        return;
-      }
-
-      const overlap = overlapDetectedRef.current;
-      overlapDetectedRef.current = false;
-      appendTurn(original, translated, { overlapDetected: overlap });
+      scheduleFinalizeTranslation(translated);
     },
-    [
-      appendTurn,
-      getSessionActiveElapsedMs,
-      requestFaithfulTranslationRetry,
-      safeSetState,
-      stopVoiceOutput,
-    ],
+    [scheduleFinalizeTranslation],
   );
 
   const setActivityStatus = useCallback(
@@ -1020,7 +1145,9 @@ export function useLiveTranslationSession({
           "input_audio_buffer.speech_started",
           "input_audio_buffer.speech_stopped",
           "conversation.item.input_audio_transcription.completed",
+          "conversation.item.input_audio_transcription.failed",
           "input_audio_buffer.transcription.completed",
+          "input_audio_buffer.transcription.failed",
           "conversation.item.input_audio_transcription.delta",
           "input_audio_buffer.transcription.delta",
           "response.created",
@@ -1055,8 +1182,7 @@ export function useLiveTranslationSession({
           overlapDetectedRef.current = true;
         }
         turnContextRef.current = buildLanguageRouting(sessionConfigRef.current);
-        pendingOriginalRef.current = "";
-        lastDetectedLanguageRef.current = null;
+        resetTurnCaptureState();
         currentTranslatedRef.current = "";
         safeSetState(() => setCurrentTranslatedText(""));
         setActivityStatus("listening");
@@ -1068,10 +1194,17 @@ export function useLiveTranslationSession({
         return;
       }
 
-      if (
-        type === "conversation.item.input_audio_transcription.completed" ||
-        type === "input_audio_buffer.transcription.completed"
-      ) {
+      if (isInputTranscriptionFailedEvent(event)) {
+        logTranscriptionEventMeta(event);
+        inputTranscriptStateRef.current = "failed";
+        if (pendingTranslatedForTurnRef.current) {
+          executeBufferedFinalize(pendingTranslatedForTurnRef.current);
+        }
+        return;
+      }
+
+      if (isInputTranscriptionCompletedEvent(event)) {
+        logTranscriptionEventMeta(event);
         const transcript = extractOriginalText(event);
         const routing = buildLanguageRouting(sessionConfigRef.current);
         const cfg = sessionConfigRef.current;
@@ -1080,6 +1213,7 @@ export function useLiveTranslationSession({
 
         if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
           pendingOriginalRef.current = transcript;
+          inputTranscriptStateRef.current = "ready";
           if (
             languageBasedRoutingRef.current &&
             isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage) &&
@@ -1090,11 +1224,12 @@ export function useLiveTranslationSession({
             return;
           }
           applyLanguageRouting(event);
+          maybeFlushPendingTurn();
           return;
         }
-        pendingOriginalRef.current = "";
-        triggerUnclearRepeat(routing, overlapDetectedRef.current);
-        overlapDetectedRef.current = false;
+
+        inputTranscriptStateRef.current = "empty";
+        maybeFlushPendingTurn();
         return;
       }
 
@@ -1152,10 +1287,10 @@ export function useLiveTranslationSession({
         }
         responseActiveRef.current = false;
         if (pendingRepeatSpeechRef.current) {
-          const { phrase, type } = pendingRepeatSpeechRef.current;
+          const { phrase, type: repeatType } = pendingRepeatSpeechRef.current;
           pendingRepeatSpeechRef.current = null;
           const routing = turnContextRef.current;
-          speakExactText(phrase, { type, phrase, routing });
+          speakExactText(phrase, { type: repeatType, phrase, routing });
         }
         safeSetState(() => {
           if (pausedRef.current) {
@@ -1179,7 +1314,11 @@ export function useLiveTranslationSession({
       ) {
         const translated =
           extractTranslatedText(event) || currentTranslatedRef.current;
-        if (translated && !pausedRef.current) {
+        if (translated && !pausedRef.current && !awaitingIntroResponseRef.current) {
+          currentTranslatedRef.current = translated;
+          safeSetState(() => setCurrentTranslatedText(translated));
+          finalizeTranslationOutput(translated);
+        } else if (translated && !pausedRef.current) {
           currentTranslatedRef.current = translated;
           safeSetState(() => setCurrentTranslatedText(translated));
         }
@@ -1235,14 +1374,16 @@ export function useLiveTranslationSession({
     },
     [
       applyLanguageRouting,
+      executeBufferedFinalize,
       finalizeTranslationOutput,
+      maybeFlushPendingTurn,
+      resetTurnCaptureState,
       safeSetState,
       trySendMedaActivation,
       setActivityStatus,
       skipLanguageRoutingRef,
       speakExactText,
       startSessionTimer,
-      triggerUnclearRepeat,
       triggerWrongLanguageRepeat,
     ],
   );

@@ -90,6 +90,8 @@ export default {
     languageUncertain:
       "Language could not be detected reliably. Please select patient or doctor/practice manually.",
     unclearRecognition: "Not reliably recognized — please repeat.",
+    asrFailed: "Speech not understood — please repeat.",
+    translationFailed: "Translation failed — please repeat.",
     wrongLanguagePair:
       "The detected language does not match the selected conversation languages. Please choose the correct language or repeat the sentence.",
     overlapDetected:

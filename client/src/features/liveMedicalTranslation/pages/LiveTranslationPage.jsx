@@ -225,13 +225,22 @@ export default function LiveTranslationPage() {
 
   const handleUnclearTurn = useCallback(
     (info) => {
-      if (info?.overlapDetected) {
+      if (info?.overlapDetected || info?.reason === "overlap") {
         setUnclearBanner(t.warnings.overlapDetected);
+      } else if (info?.reason === "asr_failed") {
+        setUnclearBanner(t.warnings.asrFailed);
+      } else if (info?.reason === "translation_failed") {
+        setUnclearBanner(t.warnings.translationFailed);
       } else {
         setUnclearBanner(t.warnings.unclearRecognition);
       }
     },
-    [t.warnings.overlapDetected, t.warnings.unclearRecognition],
+    [
+      t.warnings.asrFailed,
+      t.warnings.overlapDetected,
+      t.warnings.translationFailed,
+      t.warnings.unclearRecognition,
+    ],
   );
 
   const handleWrongLanguagePair = useCallback(() => {
