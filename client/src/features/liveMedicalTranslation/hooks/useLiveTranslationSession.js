@@ -7,6 +7,7 @@ import { buildRuntimeSessionUpdatePayload } from "../utils/realtimeSessionUpdate
 import { classifyRealtimeError, isCancelledOrFailedResponseDone } from "../utils/realtimeErrorPolicy.js";
 import { logRealtimeDiag, summarizeRealtimeEvent } from "../utils/realtimeDiagnostics.js";
 import { isLikelyEmptyOrNoiseTranscript, sanitizeUnclearTurn } from "../utils/asrQuality.js";
+import { isSemanticTranslationDrift } from "../utils/translationSemanticCheck.js";
 import {
   LIVE_TRANSLATION_ORIGINAL_BUFFER_MS,
   isInputTranscriptionCompletedEvent,
@@ -209,6 +210,7 @@ export function useLiveTranslationSession({
   const lastSessionUpdateSigRef = useRef("");
   const pausedRef = useRef(false);
   const scopeContinueRef = useRef(false);
+  const translationDriftRetryAttemptedRef = useRef(false);
   const scopeWarningShownRef = useRef(false);
   const onScopeWarningRef = useRef(onScopeWarning);
 
@@ -790,6 +792,7 @@ export function useLiveTranslationSession({
     inputTranscriptStateRef.current = "pending";
     pendingOriginalRef.current = "";
     lastDetectedLanguageRef.current = null;
+    translationDriftRetryAttemptedRef.current = false;
   }, [clearPendingFinalizeTimer]);
 
   const notifyTurnIssue = useCallback((reason, options = {}) => {
@@ -922,6 +925,19 @@ export function useLiveTranslationSession({
         stopVoiceOutput();
         currentTranslatedRef.current = "";
         safeSetState(() => setCurrentTranslatedText(""));
+        return;
+      }
+
+      if (isSemanticTranslationDrift(original, translatedTrimmed)) {
+        if (!translationDriftRetryAttemptedRef.current) {
+          translationDriftRetryAttemptedRef.current = true;
+          stopVoiceOutput();
+          currentTranslatedRef.current = "";
+          safeSetState(() => setCurrentTranslatedText(""));
+          requestFaithfulTranslationRetry(original, routing);
+          return;
+        }
+        triggerUnclearRepeat(routing, overlap, "translation_failed");
         return;
       }
 

@@ -15,6 +15,15 @@ export const OPENAI_REALTIME_VOICES = new Set([
   "alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse", "marin", "cedar",
 ]);
 
+export const OPENAI_REALTIME_MODELS = new Set([
+  "gpt-realtime",
+  "gpt-realtime-2",
+  "gpt-4o-realtime-preview",
+  "gpt-4o-realtime-preview-2024-12-17",
+  "gpt-5.4",
+  "gpt-5.4-2026-03-05",
+]);
+
 export const OPENAI_TRANSCRIPTION_MODELS = new Set([
   "whisper-1",
   "gpt-realtime-whisper",
@@ -38,7 +47,13 @@ export function resolveOpenAiRealtimeVoice(voice, fallback = "marin") {
 }
 
 /** @param {string | undefined | null} model */
-export function resolveOpenAiTranscriptionModel(model, fallback = "gpt-4o-mini-transcribe") {
+export function resolveOpenAiRealtimeModel(model, fallback = "gpt-realtime-2") {
+  if (typeof model === "string" && OPENAI_REALTIME_MODELS.has(model)) return model;
+  return fallback;
+}
+
+/** @param {string | undefined | null} model */
+export function resolveOpenAiTranscriptionModel(model, fallback = "gpt-4o-transcribe") {
   if (typeof model === "string" && OPENAI_TRANSCRIPTION_MODELS.has(model)) return model;
   return fallback;
 }

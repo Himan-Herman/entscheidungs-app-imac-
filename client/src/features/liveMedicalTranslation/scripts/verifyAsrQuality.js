@@ -8,6 +8,7 @@ import {
   resolveTurnStatus,
   sanitizeUnclearTurn,
 } from "../utils/asrQuality.js";
+import { isSemanticTranslationDrift } from "../utils/translationSemanticCheck.js";
 import { getMedaUnclearRepeatPhrase } from "../utils/repeatPhrase.js";
 
 function assert(condition, message) {
@@ -81,6 +82,28 @@ assert(
 assert(
   !isLikelyHallucinatedTranslation("How can I help you?", "Wie kann ich Ihnen helfen?"),
   "EN doctor phrase to DE is not hallucination",
+);
+
+assert(
+  isSemanticTranslationDrift(
+    "How can I help you?",
+    "Wie lange haben Sie diese Beschwerden schon?",
+  ),
+  "help greeting vs invented duration/symptoms is semantic drift",
+);
+
+assert(
+  !isSemanticTranslationDrift("How can I help you?", "Wie kann ich Ihnen helfen?"),
+  "faithful help translation is not drift",
+);
+
+assert(
+  resolveTurnStatus({
+    originalText: "How can I help you?",
+    translatedText: "Wie lange haben Sie diese Beschwerden schon?",
+    targetLanguage: "de",
+  }) === "unclear",
+  "semantic drift marks turn unclear",
 );
 
 const sanitized = sanitizeUnclearTurn({

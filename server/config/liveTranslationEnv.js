@@ -4,9 +4,13 @@
  */
 export const LIVE_TRANSLATION_VOICE_PROFILE = "neutral_medical";
 
-/** OpenAI Realtime model for live medical conversation translation. */
+/**
+ * OpenAI Realtime model for live medical conversation translation.
+ * Default gpt-realtime-2: frontier speech-to-speech (stronger than gpt-realtime).
+ * Override with LIVE_TRANSLATION_REALTIME_MODEL=gpt-5.4 if your API key supports it on /v1/realtime.
+ */
 export const LIVE_TRANSLATION_REALTIME_MODEL =
-  process.env.LIVE_TRANSLATION_REALTIME_MODEL || "gpt-realtime";
+  process.env.LIVE_TRANSLATION_REALTIME_MODEL || "gpt-realtime-2";
 
 /**
  * Voice mapped from neutral_medical profile.
@@ -19,7 +23,7 @@ export const LIVE_TRANSLATION_VOICE = process.env.LIVE_TRANSLATION_VOICE || "mar
  * Input transcription model (required by Realtime API when transcription is enabled).
  */
 export const LIVE_TRANSLATION_TRANSCRIPTION_MODEL =
-  process.env.LIVE_TRANSLATION_TRANSCRIPTION_MODEL || "gpt-4o-mini-transcribe";
+  process.env.LIVE_TRANSLATION_TRANSCRIPTION_MODEL || "gpt-4o-transcribe";
 
 function clampOutputSpeed(raw) {
   const value = Number(raw);
@@ -49,5 +53,12 @@ export const LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS = safeIntegerEnv(
 /** Server VAD silence before end-of-turn (ms). 700–900 ms helps short medical phrases. */
 export const LIVE_TRANSLATION_VAD_SILENCE_MS = safeIntegerEnv(
   process.env.LIVE_TRANSLATION_VAD_SILENCE_MS,
-  800,
+  850,
 );
+
+/** Server VAD activation threshold (0–1). Higher = less sensitive to background noise. */
+export const LIVE_TRANSLATION_VAD_THRESHOLD = (() => {
+  const value = Number(process.env.LIVE_TRANSLATION_VAD_THRESHOLD);
+  if (!Number.isFinite(value)) return 0.58;
+  return Math.min(1, Math.max(0, value));
+})();

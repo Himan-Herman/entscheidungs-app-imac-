@@ -1,4 +1,5 @@
 import { isMedaUnclearPhrase } from "./repeatPhrase.js";
+import { isSemanticTranslationDrift } from "./translationSemanticCheck.js";
 
 const HALLUCINATION_CONTENT_PATTERNS = [
   /\b(cough|phlegm|headache|fever|pain|nausea|allerg|symptom|medication|diagnos)/i,
@@ -45,6 +46,10 @@ export function resolveTurnStatus(input) {
     return "unclear";
   }
 
+  if (isSemanticTranslationDrift(original, translated)) {
+    return "unclear";
+  }
+
   return "translated";
 }
 
@@ -68,6 +73,10 @@ export function isLikelyHallucinatedTranslation(originalText, translatedText) {
       if (pattern.test(translated)) return true;
     }
     return translatedWords.length >= 8;
+  }
+
+  if (isSemanticTranslationDrift(original, translated)) {
+    return true;
   }
 
   return false;

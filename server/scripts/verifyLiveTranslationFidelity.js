@@ -13,6 +13,9 @@ const REQUIRED_SNIPPETS = [
   "Since yesterday.",
   "Do you have a fever?",
   "Haben Sie Fieber?",
+  "How can I help you?",
+  "Wie kann ich Ihnen helfen?",
+  "Wie lange haben Sie diese Beschwerden schon?",
 ];
 
 const deBlock = buildFidelityRulesBlock("de");

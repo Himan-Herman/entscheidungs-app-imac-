@@ -6,12 +6,14 @@ import {
   LIVE_TRANSLATION_REALTIME_MODEL,
   LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
   LIVE_TRANSLATION_VAD_SILENCE_MS,
+  LIVE_TRANSLATION_VAD_THRESHOLD,
   LIVE_TRANSLATION_VOICE,
   LIVE_TRANSLATION_VOICE_PROFILE,
 } from "../config/liveTranslationEnv.js";
 import { buildLiveTranslationInstructions } from "../services/liveTranslation/liveTranslationPrompt.js";
 import { buildLanguageRouting } from "../services/liveTranslation/liveTranslationRouting.js";
 import {
+  resolveOpenAiRealtimeModel,
   resolveOpenAiRealtimeVoice,
   resolveOpenAiTranscriptionLanguage,
   resolveOpenAiTranscriptionModel,
@@ -128,17 +130,19 @@ router.post("/realtime-session", async (req, res) => {
     activeSpeaker,
   });
 
+  const realtimeModel = resolveOpenAiRealtimeModel(LIVE_TRANSLATION_REALTIME_MODEL);
   const voice = resolveOpenAiRealtimeVoice(LIVE_TRANSLATION_VOICE);
   const transcriptionModel = resolveOpenAiTranscriptionModel(LIVE_TRANSLATION_TRANSCRIPTION_MODEL);
   const transcriptionLanguage = resolveOpenAiTranscriptionLanguage(routing.sourceLanguage);
 
   logLiveTranslation(req, "realtime_session_payload", {
-    model: LIVE_TRANSLATION_REALTIME_MODEL,
+    model: realtimeModel,
     voice,
     transcriptionModel,
     transcriptionLanguage: transcriptionLanguage || "auto",
     sourceLanguage: routing.sourceLanguage,
     vadSilenceMs: LIVE_TRANSLATION_VAD_SILENCE_MS,
+    vadThreshold: LIVE_TRANSLATION_VAD_THRESHOLD,
     outputSpeed: LIVE_TRANSLATION_OUTPUT_SPEED,
     hasInstructions: Boolean(instructions),
   });
@@ -150,7 +154,7 @@ router.post("/realtime-session", async (req, res) => {
     },
     session: {
       type: "realtime",
-      model: LIVE_TRANSLATION_REALTIME_MODEL,
+      model: realtimeModel,
       instructions,
       output_modalities: ["audio"],
       audio: {
@@ -160,8 +164,8 @@ router.post("/realtime-session", async (req, res) => {
             create_response: true,
             interrupt_response: true,
             silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
-            prefix_padding_ms: 400,
-            threshold: 0.5,
+            prefix_padding_ms: 450,
+            threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
           },
           transcription: {
             model: transcriptionModel,
@@ -236,7 +240,7 @@ router.post("/realtime-session", async (req, res) => {
       ok: true,
       clientSecret,
       expiresAt,
-      model: LIVE_TRANSLATION_REALTIME_MODEL,
+      model: realtimeModel,
       voice,
       voiceProfile: LIVE_TRANSLATION_VOICE_PROFILE,
       outputSpeed: LIVE_TRANSLATION_OUTPUT_SPEED,

@@ -1,5 +1,5 @@
 /** Must match server LIVE_TRANSLATION_TRANSCRIPTION_MODEL default. */
-export const LIVE_TRANSLATION_TRANSCRIPTION_MODEL = "gpt-4o-mini-transcribe";
+export const LIVE_TRANSLATION_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
 
 /** ISO codes accepted by OpenAI Realtime input transcription. */
 export const OPENAI_TRANSCRIPTION_LANGUAGE_CODES = new Set([
