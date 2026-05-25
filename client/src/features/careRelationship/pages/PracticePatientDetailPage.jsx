@@ -13,6 +13,7 @@ import PracticePatientPreVisitsTab from "../components/PracticePatientPreVisitsT
 import PracticePatientMessagesSection from "../../communication/components/PracticePatientMessagesSection.jsx";
 import PracticePatientMedicationPlanSection from "../../medicationPlan/components/PracticePatientMedicationPlanSection.jsx";
 import PracticePatientDocumentsSection from "../../practiceDocuments/components/PracticePatientDocumentsSection.jsx";
+import PracticePatientVitalsSection from "../../vitals/components/PracticePatientVitalsSection.jsx";
 import PracticePatientProfileSection from "../components/PracticePatientProfileSection.jsx";
 import PracticePatientAssignmentSection from "../components/PracticePatientAssignmentSection.jsx";
 import "../../../styles/PracticeDashboardPage.css";
@@ -34,6 +35,7 @@ const VALID_TABS = new Set([
   "previsits",
   "medication",
   "documents",
+  "vitals",
   "messages",
   "activity",
 ]);
@@ -234,6 +236,13 @@ export default function PracticePatientDetailPage() {
               linkId={linkId}
               practiceId={practiceId}
               readOnly={readOnly}
+            />
+          ) : null}
+
+          {activeTab === "vitals" && practiceId && linkId ? (
+            <PracticePatientVitalsSection
+              linkId={linkId}
+              practiceId={practiceId}
             />
           ) : null}
 

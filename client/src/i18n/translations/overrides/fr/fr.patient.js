@@ -638,6 +638,7 @@ export default {
       ai_organizational_assistance: "Assistance IA (organisationnelle)",
       optional_email_notifications: "Notifications e-mail",
       optional_secure_links: "Liens sécurisés",
+      vitals_access: "Mesures",
     },
     purposes: {
       profile_access: "Données de profil organisationnelles pour l’administration du cabinet",
@@ -648,6 +649,7 @@ export default {
       ai_organizational_assistance: "Aide IA pour la formulation organisationnelle uniquement",
       optional_email_notifications: "Avis e-mail facultatifs sur l’activité",
       optional_secure_links: "Liens de téléchargement sécurisés à durée limitée",
+      vitals_access: "Le cabinet peut consulter vos mesures saisies manuellement (tension artérielle, pouls, etc.)",
     },
   },
 

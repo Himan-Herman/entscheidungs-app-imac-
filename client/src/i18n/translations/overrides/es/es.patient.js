@@ -638,6 +638,7 @@ export default {
       ai_organizational_assistance: "Asistencia IA (organizativa)",
       optional_email_notifications: "Notificaciones por correo",
       optional_secure_links: "Enlaces seguros",
+      vitals_access: "Mediciones",
     },
     purposes: {
       profile_access: "Datos de perfil organizativos para la administración del consultorio",
@@ -648,6 +649,7 @@ export default {
       ai_organizational_assistance: "Ayuda IA solo para la redacción organizativa",
       optional_email_notifications: "Avisos por correo opcionales sobre la actividad",
       optional_secure_links: "Enlaces de descarga seguros de duración limitada",
+      vitals_access: "El consultorio puede ver sus mediciones registradas manualmente (tensión, pulso, etc.)",
     },
   },
 

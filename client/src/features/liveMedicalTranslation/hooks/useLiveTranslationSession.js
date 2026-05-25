@@ -384,6 +384,44 @@ export function useLiveTranslationSession({
     stopMic();
   }, [clearSessionTimer, stopMic]);
 
+  const cancelActiveResponse = useCallback(() => {
+    if (!responseActiveRef.current) return;
+    const dc = dcRef.current;
+    if (dc?.readyState === "open") {
+      suppressErrorsUntilRef.current = Date.now() + 3500;
+      dc.send(JSON.stringify({ type: "response.cancel" }));
+    }
+    responseActiveRef.current = false;
+  }, []);
+
+  const maybeTriggerScopeWarning = useCallback(() => {
+    if (scopeContinueRef.current) return;
+    const elapsed = getSessionActiveElapsedMs();
+    const ctx = evaluateConversationContext(
+      turnsRef.current,
+      elapsed,
+      scopeContinueRef.current,
+    );
+
+    if (ctx.pauseTranslation && !scopeTranslationPausedRef.current) {
+      scopeTranslationPausedRef.current = true;
+      cancelActiveResponse();
+      onScopeTranslationPausedRef.current?.();
+      return;
+    }
+
+    if (ctx.softWarning && !scopeSoftWarningShownRef.current && !scopeWarningShownRef.current) {
+      scopeSoftWarningShownRef.current = true;
+      onScopeWarningRef.current?.();
+      return;
+    }
+
+    if (ctx.softWarning && !scopeWarningShownRef.current) {
+      scopeWarningShownRef.current = true;
+      onScopeWarningRef.current?.();
+    }
+  }, [cancelActiveResponse, getSessionActiveElapsedMs]);
+
   const appendTurn = useCallback(
     (originalText, translatedText, meta = {}) => {
       if (pausedRef.current) return;
@@ -496,44 +534,6 @@ export function useLiveTranslationSession({
     },
     [maybeTriggerScopeWarning, safeSetState],
   );
-
-  const cancelActiveResponse = useCallback(() => {
-    if (!responseActiveRef.current) return;
-    const dc = dcRef.current;
-    if (dc?.readyState === "open") {
-      suppressErrorsUntilRef.current = Date.now() + 3500;
-      dc.send(JSON.stringify({ type: "response.cancel" }));
-    }
-    responseActiveRef.current = false;
-  }, []);
-
-  const maybeTriggerScopeWarning = useCallback(() => {
-    if (scopeContinueRef.current) return;
-    const elapsed = getSessionActiveElapsedMs();
-    const ctx = evaluateConversationContext(
-      turnsRef.current,
-      elapsed,
-      scopeContinueRef.current,
-    );
-
-    if (ctx.pauseTranslation && !scopeTranslationPausedRef.current) {
-      scopeTranslationPausedRef.current = true;
-      cancelActiveResponse();
-      onScopeTranslationPausedRef.current?.();
-      return;
-    }
-
-    if (ctx.softWarning && !scopeSoftWarningShownRef.current && !scopeWarningShownRef.current) {
-      scopeSoftWarningShownRef.current = true;
-      onScopeWarningRef.current?.();
-      return;
-    }
-
-    if (ctx.softWarning && !scopeWarningShownRef.current) {
-      scopeWarningShownRef.current = true;
-      onScopeWarningRef.current?.();
-    }
-  }, [cancelActiveResponse, getSessionActiveElapsedMs]);
 
   const endSession = useCallback(() => {
     cancelActiveResponse();

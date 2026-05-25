@@ -27,7 +27,9 @@ export default function PatientHubPage() {
   const loadInboxCount = useCallback(async () => {
     try {
       const { res, data } = await fetchPatientInboxCount();
-      if (res.ok && data.ok) setInboxUnread(Number(data.unreadCount) || 0);
+      if (res.status === 204 || (res.ok && data.ok)) {
+        setInboxUnread(Number(data.unreadCount) || 0);
+      }
     } catch {
       /* optional feature */
     }

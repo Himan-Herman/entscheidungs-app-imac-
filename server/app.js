@@ -47,6 +47,7 @@ import patientMedicationPlansRouter from "./routes/patientMedicationPlans.js";
 import patientPracticeDocumentsRouter from "./routes/patientPracticeDocuments.js";
 import patientVaccinationsRouter from "./routes/patientVaccinations.js";
 import patientVitalsRouter from "./routes/patientVitals.js";
+import practicePatientVitalsRouter from "./routes/practicePatientVitals.js";
 import patientDataControlRouter from "./routes/patientDataControl.js";
 import patientProfileSharingRouter from "./routes/patientProfileSharing.js";
 import patientActivityRouter from "./routes/patientActivity.js";
@@ -160,6 +161,7 @@ app.use("/api/patient/medication-plans", requireAuth, patientMedicationPlansRout
 app.use("/api/patient/practice-documents", requireAuth, patientPracticeDocumentsRouter);
 app.use("/api/patient/vaccinations", requireAuth, patientVaccinationsRouter);
 app.use("/api/patient/vitals", requireAuth, patientVitalsRouter);
+app.use("/api/practice/patients/:linkId/vitals", requireAuth, practicePatientVitalsRouter);
 app.use("/api/practice/documents", requireAuth, practiceSecureDocumentLinksRouter);
 app.use("/api/patient/data-control", requireAuth, patientDataControlRouter);
 app.use("/api/patient/consents", requireAuth, patientConsentsRouter);

@@ -58,6 +58,7 @@ export default {
     ai_organizational_assistance: "KI-Unterstützung (organisatorisch)",
     optional_email_notifications: "E-Mail-Benachrichtigungen",
     optional_secure_links: "Sichere Links",
+    vitals_access: "Messwerte",
   },
   purposes: {
     profile_access: "Organisatorische Profildaten für die Praxisverwaltung",
@@ -68,5 +69,6 @@ export default {
     ai_organizational_assistance: "KI-Hilfen nur für organisatorische Texte",
     optional_email_notifications: "Optionale E-Mail-Hinweise zu Aktivitäten",
     optional_secure_links: "Zeitlich begrenzte sichere Download-Links",
+    vitals_access: "Praxis kann Ihre selbst eingetragenen Messwerte (Blutdruck, Puls usw.) einsehen",
   },
 };

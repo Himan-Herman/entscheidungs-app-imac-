@@ -14,7 +14,9 @@
       "Bash(ENABLE_VITALS=true node scripts/verifyVitals.js)",
       "Bash(npx prisma *)",
       "Bash(grep -E \"\\\\.\\(js|ts\\)$\")",
-      "Bash(grep -E \"\\\\.jsx$|\\\\.tsx$\")"
+      "Bash(grep -E \"\\\\.jsx$|\\\\.tsx$\")",
+      "Bash(node scripts/verifyVitalsPhase2.js)",
+      "Bash(node scripts/verifyVitals.js)"
     ]
   }
 }

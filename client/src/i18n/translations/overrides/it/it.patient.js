@@ -638,6 +638,7 @@ export default {
       ai_organizational_assistance: "Assistenza IA (organizzativa)",
       optional_email_notifications: "Notifiche email",
       optional_secure_links: "Link sicuri",
+      vitals_access: "Misurazioni",
     },
     purposes: {
       profile_access: "Dati profilo organizzativi per l’amministrazione dello studio",
@@ -648,6 +649,7 @@ export default {
       ai_organizational_assistance: "Aiuto IA solo per redazione organizzativa",
       optional_email_notifications: "Avvisi email facoltativi sull’attività",
       optional_secure_links: "Link di download sicuri a durata limitata",
+      vitals_access: "Lo studio può consultare le misurazioni inserite manualmente (pressione, polso, ecc.)",
     },
   },
 

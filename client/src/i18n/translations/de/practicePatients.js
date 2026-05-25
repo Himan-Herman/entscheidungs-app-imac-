@@ -110,6 +110,7 @@ export default {
   tabPreVisits: "Pre-Visits",
   tabMedication: "Medikationsplan",
   tabDocuments: "Dokumente & Befunde",
+  tabVitals: "Messwerte",
   tabMessages: "Nachrichten",
   tabActivity: "Aktivität",
   patientProvidedHint:

@@ -108,4 +108,9 @@ export default {
     oxygen: "Normalbereich: 95–100 %",
     temperature: "Normalbereich: 36,1–37,2 °C",
   },
+
+  practice: {
+    noEntries: "Dieser Patient hat noch keine Messwerte eingetragen.",
+    noConsent: "Der Patient hat den Zugriff auf Messwerte noch nicht freigegeben.",
+  },
 };

@@ -100,6 +100,11 @@ export default {
     temperature: "Temperature",
   },
 
+  practice: {
+    noEntries: "This patient has not recorded any measurements yet.",
+    noConsent: "The patient has not yet granted access to measurements.",
+  },
+
   refRanges: {
     blood_pressure: "Normal: < 120/80 mmHg",
     heart_rate: "Normal: 60–100 bpm",

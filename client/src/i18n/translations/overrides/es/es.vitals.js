@@ -98,4 +98,9 @@ export default {
     oxygen: "Normal: 95–100 %",
     temperature: "Normal: 36,1–37,2 °C",
   },
+
+  practice: {
+    noEntries: "Este paciente aún no ha registrado ninguna medición.",
+    noConsent: "El paciente aún no ha autorizado el acceso a sus mediciones.",
+  },
 };

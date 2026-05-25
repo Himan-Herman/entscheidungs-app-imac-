@@ -58,6 +58,7 @@ export default {
     ai_organizational_assistance: "AI assistance (organizational)",
     optional_email_notifications: "Email notifications",
     optional_secure_links: "Secure links",
+    vitals_access: "Measurements",
   },
   purposes: {
     profile_access: "Organizational profile data for practice administration",
@@ -68,5 +69,6 @@ export default {
     ai_organizational_assistance: "AI help for organizational wording only",
     optional_email_notifications: "Optional email notices about activity",
     optional_secure_links: "Time-limited secure download links",
+    vitals_access: "Practice can view your self-entered measurements (blood pressure, pulse, etc.)",
   },
 };

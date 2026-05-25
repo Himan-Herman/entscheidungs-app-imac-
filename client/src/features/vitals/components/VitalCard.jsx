@@ -55,7 +55,7 @@ function formatValue(entry) {
   return String(val);
 }
 
-export default function VitalCard({ entry, t, lang, onEdit, onDelete }) {
+export default function VitalCard({ entry, t, lang, onEdit, onDelete, readOnly = false }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -94,26 +94,28 @@ export default function VitalCard({ entry, t, lang, onEdit, onDelete }) {
         )}
       </div>
 
-      <div className="vital-card__right">
-        <button
-          type="button"
-          className="vital-card__btn"
-          onClick={() => onEdit(entry)}
-          aria-label={t.card.editAria}
-          title={t.card.edit}
-        >
-          <Pencil size={15} aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          className="vital-card__btn vital-card__btn--danger"
-          onClick={() => setConfirmDelete(true)}
-          aria-label={t.card.deleteAria}
-          title={t.card.delete}
-        >
-          <Trash2 size={15} aria-hidden="true" />
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="vital-card__right">
+          <button
+            type="button"
+            className="vital-card__btn"
+            onClick={() => onEdit(entry)}
+            aria-label={t.card.editAria}
+            title={t.card.edit}
+          >
+            <Pencil size={15} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="vital-card__btn vital-card__btn--danger"
+            onClick={() => setConfirmDelete(true)}
+            aria-label={t.card.deleteAria}
+            title={t.card.delete}
+          >
+            <Trash2 size={15} aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       {confirmDelete && (
         <div
