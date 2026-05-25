@@ -4,7 +4,9 @@
       "Read(//Users/himankhorshidi/Desktop/entscheidungs-app-imac/**)",
       "Read(//Users/himankhorshidi/Desktop/entscheidungs-app-imac/.claude/**)",
       "Bash(node scripts/verifyLabPatientExplanation.js)",
-      "Bash(node --input-type=module)"
+      "Bash(node --input-type=module)",
+      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac diff --stat HEAD)",
+      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac status --short)"
     ]
   }
 }
