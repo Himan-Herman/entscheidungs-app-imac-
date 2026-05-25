@@ -3,7 +3,11 @@
  * node client/src/features/liveMedicalTranslation/scripts/verifyLiveTranslationPdfHeader.js
  */
 import { buildLiveTranslationPdfDocument } from "../pdf/generateLiveTranslationPdf.js";
-import { computePdfLogoSizeMm, getMedScoutxPdfLogoCandidateUrls } from "../pdf/medScoutxPdfBranding.js";
+import {
+  computePdfLogoSizeMm,
+  getMedScoutxPdfLogoCandidateUrls,
+  MEDSCOUT_PDF_LOGO_FILENAME,
+} from "../pdf/medScoutxPdfBranding.js";
 
 function assert(condition, message) {
   if (!condition) {
@@ -48,16 +52,19 @@ assert(pageCount >= 2, "multi-page transcript produces multiple pages");
 const pdfString = built.doc.output("arraybuffer");
 assert(pdfString.byteLength > 5000, "pdf has substantial content");
 
-assert(getMedScoutxPdfLogoCandidateUrls().includes("/medscoutx-logo.png"), "logo candidate path configured");
+assert(
+  getMedScoutxPdfLogoCandidateUrls().some((url) => String(url).includes(MEDSCOUT_PDF_LOGO_FILENAME)),
+  "medscout-logo6 configured as primary logo",
+);
 
-const logoSize = computePdfLogoSizeMm({ naturalWidth: 400, naturalHeight: 120 });
-assert(logoSize.widthMm > logoSize.heightMm, "wide logo preserves landscape aspect");
-assert(logoSize.heightMm <= 11, "logo height capped for header");
+const logoSize = computePdfLogoSizeMm({ naturalWidth: 1024, naturalHeight: 1024 });
+assert(logoSize.widthMm === logoSize.heightMm, "square logo preserves aspect ratio");
+assert(logoSize.heightMm <= 18, "logo height capped for header");
 
 const builtEn = buildLiveTranslationPdfDocument(mockExport, "en", { logo: null });
 assert(builtEn?.doc, "english pdf builds");
 
 console.log("verifyLiveTranslationPdfHeader: OK");
 console.log(`  pages: ${pageCount}`);
-console.log(`  brand: ${built.brandSource} (no dedicated logo file in public/)`);
+console.log(`  brand: ${built.brandSource} (logo asset: ${MEDSCOUT_PDF_LOGO_FILENAME})`);
 console.log(`  safety core (DE): ${SAFETY_CORE_DE.slice(0, 48)}…`);

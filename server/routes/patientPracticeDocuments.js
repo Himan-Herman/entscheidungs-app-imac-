@@ -14,7 +14,9 @@ import { createPatientDocumentDownloadLink } from "../services/practiceDocument/
 import { generateDocumentDownloadAiNote } from "../services/practiceDocument/practiceDocumentDownloadAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { requireDocumentOcrFeature } from "../middleware/requireDocumentOcr.js";
+import { requireLabPatientExplanationFeature } from "../middleware/requireLabPatientExplanation.js";
 import { getPatientStructuredDocument } from "../services/practiceDocument/documentOcrService.js";
+import { getLabPatientExplanation } from "../services/practiceDocument/labPatientExplanationService.js";
 
 const router = express.Router();
 
@@ -250,5 +252,38 @@ router.get("/:documentId/download", async (req, res) => {
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
 });
+
+/**
+ * GET /api/patient/practice-documents/:documentId/lab-explanation
+ *
+ * Returns patient-friendly plain-language explanations for each structured lab entry.
+ * Requires the document to be in "shared" OCR status (practice reviewed + released).
+ * No diagnosis, urgency, or treatment content — explanation layer only.
+ */
+router.get(
+  "/:documentId/lab-explanation",
+  requireLabPatientExplanationFeature,
+  async (req, res) => {
+    const userId = userIdFromReq(req);
+    if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+    const locale = String(req.query.locale || req.headers["accept-language"] || "de").slice(0, 8);
+
+    try {
+      const result = await getLabPatientExplanation(req.params.documentId, userId, {
+        locale,
+        req,
+      });
+      return res.json({ ok: true, ...result });
+    } catch (err) {
+      console.error("[patient/practice-documents/lab-explanation]", err?.message ?? err);
+      if (err?.message === "lab_data_not_shared") {
+        return res.status(409).json({ ok: false, error: "lab_data_not_shared" });
+      }
+      const mapped = mapError(err);
+      return res.status(mapped.status).json({ ok: false, error: mapped.error });
+    }
+  },
+);
 
 export default router;

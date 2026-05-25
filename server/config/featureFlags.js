@@ -128,6 +128,14 @@ export function isLabInterpretationEnabled() {
   return envFlag("ENABLE_LAB_INTERPRETATION", false);
 }
 
+/**
+ * Patient-facing plain-language explanation of lab values (reference range + what the parameter
+ * measures). No diagnosis, no urgency, no treatment advice — explanation layer only.
+ */
+export function isLabPatientExplanationEnabled() {
+  return envFlag("ENABLE_LAB_PATIENT_EXPLANATION", false);
+}
+
 export function isDocumentOcrUiEnabled() {
   if (isLabInterpretationEnabled()) return false;
   return (

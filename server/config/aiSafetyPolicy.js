@@ -3,7 +3,7 @@
  * No diagnosis, triage, treatment, specialist routing, urgency scoring, or certainty claims.
  */
 
-/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'meda'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'previsit_followup_format'|'medical_interpreter'|'generic'} AiSafetyModule */
+/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'meda'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'previsit_followup_format'|'medical_interpreter'|'lab_patient_explanation'|'generic'} AiSafetyModule */
 
 export const AI_MODULES = {
   SYMPTOM_CHECK: "symptom_check",
@@ -24,6 +24,12 @@ export const AI_MODULES = {
    * Not a diagnostic assistant. See MEDICAL_INTERPRETER_SAFETY_SCOPE.
    */
   MEDICAL_INTERPRETER: "medical_interpreter",
+  /**
+   * Patient-facing plain-language explanation of individual lab values.
+   * Allowed: what the parameter measures, whether value is within/outside reference range.
+   * Forbidden: diagnosis, urgency, treatment/medication advice, disease probability.
+   */
+  LAB_PATIENT_EXPLANATION: "lab_patient_explanation",
   GENERIC: "generic",
 };
 
@@ -85,6 +91,7 @@ export const PHRASE_REPLACEMENTS = [
   { re: /\bseek (a )?specialist\b/gi, replacement: "discuss with a clinician if you choose" },
   { re: /\bconsult (a )?(cardiologist|neurologist|specialist)\b/gi, replacement: "discuss with a clinician if you choose" },
   { re: /\bDas (klingt|deutet) (nach|auf)\b/gi, replacement: "[Beschreibung ohne Bewertung]" },
+  { re: /\bkönnte auf .{0,100}hinweis\w*/gi, replacement: "[Einschätzung entfernt]" },
   { re: /\b(könnte|kann) (auf|hinweisen)\b/gi, replacement: "[ohne Einordnung]" },
   { re: /\bgo immediately\b/gi, replacement: "seek care as you normally would" },
   { re: /\bsofort (zu )?(Notfall|Notaufnahme)\b/gi, replacement: "[keine Dringlichkeitseinschätzung]" },
@@ -190,6 +197,46 @@ const MEDICAL_INTERPRETER_EXTRA = [
   /\bsofortige Behandlung\b/i,
 ];
 
+/**
+ * Lab patient explanation — blocks diagnostic and urgency leakage while allowing
+ * reference-range comparison language ("liegt unterhalb/oberhalb des Referenzbereichs").
+ */
+const LAB_EXPLANATION_FORBIDDEN = [
+  /\bdiagnos(e|is|es|ed|ing)\b/i,
+  /\bDIAGNOSE\b/,
+  /\btriage\b/i,
+  /\burgent(ly)?\b/i,
+  /\burgency\b/i,
+  /\bemergency\s*(room|care|services)?\b/i,
+  /\bNotfall\b/i,
+  /\bNotaufnahme\b/i,
+  /\bimmediately (see|consult|go)\b/i,
+  /\bsofort (zu|einen|einer|zum|zur)\b/i,
+  /\byou (likely|probably|definitely) have\b/i,
+  /\bSie haben (wahrscheinlich|vermutlich|sicher)\b/i,
+  /\b(could indicate|may indicate|suggests) (a |an )?\w+ (disease|disorder|condition|syndrome)\b/i,
+  /\b(deutet auf|spricht für|weist auf) .{0,60}(hin\b|erkrankung|störung|krankheit)/i,
+  /\b(könnte|kann|dürfte) (auf|eine?).{0,60}hinweis/i,
+  /\b(could|may|might) (indicate|suggest|point to) .{0,40}(disease|disorder|condition|illness)\b/i,
+  /\b(prescribe|recommend taking|start taking)\b/i,
+  /\b(empfehle zu nehmen|sollten Sie einnehmen)\b/i,
+  /\b(see a|consult a|visit a) (specialist|cardiologist|neurologist|endocrinologist)\b/i,
+  /\b(gehen Sie zu|wenden Sie sich an) .{0,30}(spezialisten|facharzt)\b/i,
+  /\bhigh risk\b/i,
+  /\bRisikogruppe\b/i,
+  /\blife-?threatening\b/i,
+  /\blebensbedrohlich\b/i,
+  /\blebensgefährlich\b/i,
+  /\bgefährlich\b/i,
+  /\bdangerous\b/i,
+  /\bclinical certainty\b/i,
+  /\bKrebs\b/i,
+  /\bcancer\b/i,
+  /\btumor\b/i,
+  /\bInfarkt\b/i,
+  /\bSchlaganfall\b/i,
+];
+
 /** Multilingual cues (Arabic / Persian / Kurdish Latin / Turkish / Russian). False positives possible — kept to high-risk clinical verbs. */
 const MULTILINGUAL_EXTRA = [
   /\bتشخيص\b/,
@@ -231,6 +278,8 @@ export function getOutputSafetyPatterns(module) {
         ...MULTILINGUAL_EXTRA,
         ...MEDICAL_INTERPRETER_EXTRA,
       ];
+    case AI_MODULES.LAB_PATIENT_EXPLANATION:
+      return [...LAB_EXPLANATION_FORBIDDEN, ...MULTILINGUAL_EXTRA];
     default:
       return [...base, ...SYMPTOM_EXTRA];
   }
@@ -287,6 +336,10 @@ export const SAFE_FALLBACKS = {
   [AI_MODULES.PREVISIT_FOLLOWUP_FORMAT]: {
     de: "Der Text konnte nicht in einer sicheren Form ausgegeben werden. Bitte formulieren Sie neutral und klären Sie medizinische Fragen mit medizinischem Fachpersonal.",
     en: "This text could not be returned in a safe form. Please phrase neutrally and discuss medical questions with healthcare professionals.",
+  },
+  [AI_MODULES.LAB_PATIENT_EXPLANATION]: {
+    de: "Die Erklärung für diesen Wert konnte nicht sicher ausgegeben werden. Bitte besprechen Sie Ihre Laborwerte direkt mit Ihrem Arzt oder Ihrer Ärztin.",
+    en: "The explanation for this value could not be safely generated. Please discuss your lab results directly with your doctor.",
   },
   [AI_MODULES.MEDICAL_INTERPRETER]: {
     de: "Diese Ausgabe konnte nicht sicher als Kommunikationshilfe angezeigt werden. Bitte formulieren Sie den Inhalt neutral und klären Sie medizinische Fragen direkt mit Ihrem Behandlungsteam. Dieses Modul bietet keine Diagnose, keine Dringlichkeitseinschätzung und keine Behandlungsempfehlung.",

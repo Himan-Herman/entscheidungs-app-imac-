@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/himankhorshidi/Desktop/entscheidungs-app-imac/**)",
+      "Read(//Users/himankhorshidi/Desktop/entscheidungs-app-imac/.claude/**)",
+      "Bash(node scripts/verifyLabPatientExplanation.js)",
+      "Bash(node --input-type=module)"
+    ]
+  }
+}

@@ -1,6 +1,12 @@
 /** MedScoutX PDF branding — logo load with text wordmark fallback. */
 
+import medscoutLogo6Url from "../../../assets/img/medscout-logo6.png";
+
+export const MEDSCOUT_PDF_LOGO_FILENAME = "medscout-logo6.png";
+
 const LOGO_CANDIDATE_URLS = [
+  medscoutLogo6Url,
+  "/medscout-logo6.png",
   "/medscoutx-logo.png",
   "/medscoutx-logo.webp",
   "/medscoutx-logo.jpg",
@@ -74,8 +80,8 @@ export function getMedScoutxPdfLogoCandidateUrls() {
  * @param {{ maxWidthMm?: number; maxHeightMm?: number }} limits
  */
 export function computePdfLogoSizeMm(logo, limits = {}) {
-  const maxWidthMm = limits.maxWidthMm ?? 36;
-  const maxHeightMm = limits.maxHeightMm ?? 11;
+  const maxWidthMm = limits.maxWidthMm ?? 18;
+  const maxHeightMm = limits.maxHeightMm ?? 18;
   const aspect = logo.naturalWidth / logo.naturalHeight;
 
   let widthMm = maxWidthMm;
@@ -99,7 +105,10 @@ export function drawMedScoutxPdfBrandMark(doc, opts) {
   const rightX = pageWidth - margin;
 
   if (logo?.dataUrl) {
-    const { widthMm, heightMm } = computePdfLogoSizeMm(logo);
+    const { widthMm, heightMm } = computePdfLogoSizeMm(logo, {
+      maxWidthMm: 18,
+      maxHeightMm: 18,
+    });
     doc.addImage(
       logo.dataUrl,
       "PNG",
