@@ -216,7 +216,6 @@ export function useLiveTranslationSession({
   const pausedRef = useRef(false);
   const scopeContinueRef = useRef(false);
   const translationDriftRetryAttemptedRef = useRef(false);
-  const languageRoutingAwaitingTranslationRef = useRef(false);
   const scopeWarningShownRef = useRef(false);
   const onScopeWarningRef = useRef(onScopeWarning);
 
@@ -1051,7 +1050,9 @@ export function useLiveTranslationSession({
     }
     lastSessionUpdateSigRef.current = updateSig;
 
-    cancelActiveResponse();
+    if (responseActiveRef.current) {
+      cancelActiveResponse();
+    }
 
     const payload = buildRuntimeSessionUpdatePayload(routing);
     logRealtimeDiag("session_update_send", {
@@ -1076,7 +1077,6 @@ export function useLiveTranslationSession({
         setConnectionStatus("listening");
       }
     });
-    pendingOriginalRef.current = "";
   }, [cancelActiveResponse, safeSetState]);
 
   const requestTurnTranslation = useCallback(
@@ -1136,7 +1136,9 @@ export function useLiveTranslationSession({
       }
 
       if (result.uncertain) {
-        onLanguageUncertainRef.current?.();
+        if (String(transcript || "").trim().length >= 8) {
+          onLanguageUncertainRef.current?.();
+        }
         return false;
       }
 
@@ -1147,7 +1149,9 @@ export function useLiveTranslationSession({
           ...cfg,
           activeSpeaker: result.speaker,
         };
-        cancelActiveResponse();
+        if (responseActiveRef.current) {
+          cancelActiveResponse();
+        }
         onSpeakerFromLanguageRef.current?.(result.speaker);
         sendSpeakerUpdateNow();
         return true;
@@ -1155,7 +1159,7 @@ export function useLiveTranslationSession({
 
       return false;
     },
-    [cancelActiveResponse, safeSetState, sendSpeakerUpdateNow, skipLanguageRoutingRef],
+    [cancelActiveResponse, sendSpeakerUpdateNow, skipLanguageRoutingRef],
   );
 
   const applyLanguageRouting = useCallback(
@@ -1306,14 +1310,6 @@ export function useLiveTranslationSession({
       }
 
       if (type === "input_audio_buffer.speech_stopped") {
-        const cfg = sessionConfigRef.current;
-        if (
-          languageBasedRoutingRef.current &&
-          isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage)
-        ) {
-          cancelActiveResponse();
-          languageRoutingAwaitingTranslationRef.current = true;
-        }
         setActivityStatus("translating");
         return;
       }
@@ -1353,17 +1349,18 @@ export function useLiveTranslationSession({
             return;
           }
 
-          switchSpeakerFromDetectedLanguage(resolvedLang, transcript);
+          const didSwitchSide = switchSpeakerFromDetectedLanguage(resolvedLang, transcript);
           const routingAfterSwitch = buildLanguageRouting(sessionConfigRef.current);
 
-          if (languageRoutingAwaitingTranslationRef.current) {
-            languageRoutingAwaitingTranslationRef.current = false;
-            requestTurnTranslation(transcript, routingAfterSwitch);
+          if (didSwitchSide) {
+            window.setTimeout(() => {
+              requestTurnTranslation(transcript, buildLanguageRouting(sessionConfigRef.current));
+            }, 280);
           } else if (
-            languageBasedRoutingRef.current &&
-            isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage) &&
             !responseActiveRef.current &&
-            !pendingTranslatedForTurnRef.current
+            !pendingTranslatedForTurnRef.current &&
+            languageBasedRoutingRef.current &&
+            isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage)
           ) {
             requestTurnTranslation(transcript, routingAfterSwitch);
           }
@@ -1388,10 +1385,13 @@ export function useLiveTranslationSession({
           if (detected) {
             lastDetectedLanguageRef.current = detected;
           }
-          switchSpeakerFromDetectedLanguage(
-            detected || lastDetectedLanguageRef.current,
-            pendingOriginalRef.current,
-          );
+          const accumulated = pendingOriginalRef.current;
+          if (detected || accumulated.length >= 10) {
+            switchSpeakerFromDetectedLanguage(
+              detected || lastDetectedLanguageRef.current,
+              accumulated,
+            );
+          }
         }
         return;
       }
