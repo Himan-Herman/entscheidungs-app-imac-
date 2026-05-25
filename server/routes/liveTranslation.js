@@ -1,26 +1,13 @@
 import express from "express";
 import { isLiveMedicalTranslationEnabled } from "../config/featureFlags.js";
+import { LIVE_TRANSLATION_VOICE_PROFILE } from "../config/liveTranslationEnv.js";
 import {
-  LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS,
-  LIVE_TRANSLATION_OUTPUT_SPEED,
-  LIVE_TRANSLATION_REALTIME_MODEL,
-  LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
-  LIVE_TRANSLATION_VAD_SILENCE_MS,
-  LIVE_TRANSLATION_VAD_THRESHOLD,
-  LIVE_TRANSLATION_VOICE,
-  LIVE_TRANSLATION_VOICE_PROFILE,
-} from "../config/liveTranslationEnv.js";
-import { buildLiveTranslationInstructions } from "../services/liveTranslation/liveTranslationPrompt.js";
-import { buildLanguageRouting } from "../services/liveTranslation/liveTranslationRouting.js";
-import {
-  resolveOpenAiRealtimeModel,
-  resolveOpenAiRealtimeVoice,
-  resolveOpenAiTranscriptionLanguage,
-  resolveOpenAiTranscriptionModel,
-} from "../services/liveTranslation/openAiRealtimePayload.js";
+  buildRealtimeClientSecretsPayload,
+  exchangeRealtimeSdp,
+  mintRealtimeClientSecret,
+} from "../services/liveTranslation/liveTranslationRealtimeService.js";
 
 const router = express.Router();
-const OPENAI_CLIENT_SECRETS_URL = "https://api.openai.com/v1/realtime/client_secrets";
 
 /** Structured debug logs — no transcripts, audio, tokens, or user content. */
 function logLiveTranslation(req, event, fields = {}) {
@@ -33,32 +20,6 @@ function logLiveTranslation(req, event, fields = {}) {
       ...fields,
     }),
   );
-}
-
-function sanitizeOpenAiError(data) {
-  const err = data?.error;
-  if (!err || typeof err !== "object") {
-    return {
-      openaiErrorType: null,
-      openaiErrorCode: null,
-      openaiErrorParam: null,
-      openaiErrorMessage: null,
-      openaiErrorBody: null,
-    };
-  }
-  const sanitized = {
-    type: typeof err.type === "string" ? err.type : null,
-    code: typeof err.code === "string" ? err.code : null,
-    param: typeof err.param === "string" ? err.param : null,
-    message: typeof err.message === "string" ? err.message : null,
-  };
-  return {
-    openaiErrorType: sanitized.type,
-    openaiErrorCode: sanitized.code,
-    openaiErrorParam: sanitized.param,
-    openaiErrorMessage: sanitized.message,
-    openaiErrorBody: sanitized,
-  };
 }
 
 const SUPPORTED_LANGUAGE_CODES = new Set([
@@ -100,7 +61,7 @@ router.use(requireLiveTranslationFeature);
 
 /**
  * POST /api/live-translation/realtime-session
- * Mint ephemeral OpenAI Realtime client secret for WebRTC (never expose OPENAI_API_KEY).
+ * Session metadata + optional ephemeral secret (legacy). Prefer realtime-call for SDP.
  */
 router.post("/realtime-session", async (req, res) => {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -116,136 +77,59 @@ router.post("/realtime-session", async (req, res) => {
   }
 
   const { patientLanguage, doctorLanguage, activeSpeaker } = validated;
+  const built = buildRealtimeClientSecretsPayload(validated);
+
   logLiveTranslation(req, "realtime_session_start", {
     patientLanguage,
     doctorLanguage,
     activeSpeaker,
-    model: LIVE_TRANSLATION_REALTIME_MODEL,
-    voice: LIVE_TRANSLATION_VOICE,
+    model: built.realtimeModel,
+    voice: built.voice,
   });
-  const routing = buildLanguageRouting({ patientLanguage, doctorLanguage, activeSpeaker });
-  const instructions = buildLiveTranslationInstructions({
-    patientLanguage,
-    doctorLanguage,
-    activeSpeaker,
-  });
-
-  const realtimeModel = resolveOpenAiRealtimeModel(LIVE_TRANSLATION_REALTIME_MODEL);
-  const voice = resolveOpenAiRealtimeVoice(LIVE_TRANSLATION_VOICE);
-  const transcriptionModel = resolveOpenAiTranscriptionModel(LIVE_TRANSLATION_TRANSCRIPTION_MODEL);
-  const transcriptionLanguage = resolveOpenAiTranscriptionLanguage(routing.sourceLanguage);
 
   logLiveTranslation(req, "realtime_session_payload", {
-    model: realtimeModel,
-    voice,
-    transcriptionModel,
-    transcriptionLanguage: transcriptionLanguage || "auto",
-    sourceLanguage: routing.sourceLanguage,
-    vadSilenceMs: LIVE_TRANSLATION_VAD_SILENCE_MS,
-    vadThreshold: LIVE_TRANSLATION_VAD_THRESHOLD,
-    outputSpeed: LIVE_TRANSLATION_OUTPUT_SPEED,
-    hasInstructions: Boolean(instructions),
+    model: built.realtimeModel,
+    voice: built.voice,
+    transcriptionModel: built.transcriptionModel,
+    transcriptionLanguage: built.transcriptionLanguage || "auto",
+    sourceLanguage: built.routing.sourceLanguage,
+    hasInstructions: Boolean(built.payload.session.instructions),
   });
 
-  const payload = {
-    expires_after: {
-      anchor: "created_at",
-      seconds: LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS,
-    },
-    session: {
-      type: "realtime",
-      model: realtimeModel,
-      instructions,
-      output_modalities: ["audio"],
-      audio: {
-        input: {
-          turn_detection: {
-            type: "server_vad",
-            create_response: true,
-            interrupt_response: true,
-            silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
-            prefix_padding_ms: 450,
-            threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
-          },
-          transcription: {
-            model: transcriptionModel,
-            ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
-          },
-        },
-        output: {
-          voice,
-          speed: LIVE_TRANSLATION_OUTPUT_SPEED,
-        },
-      },
-    },
-  };
-
   try {
-    const openaiRes = await fetch(OPENAI_CLIENT_SECRETS_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        ...(req.user?.userId
-          ? { "OpenAI-Safety-Identifier": String(req.user.userId) }
-          : {}),
-      },
-      body: JSON.stringify(payload),
+    const minted = await mintRealtimeClientSecret(apiKey, built.payload, {
+      userId: req.user?.userId,
     });
 
-    const data = await openaiRes.json().catch(() => ({}));
-    const openAiErrorMeta = sanitizeOpenAiError(data);
+    logLiveTranslation(req, "openai_client_secrets_response", {
+      ok: minted.ok,
+      openaiStatus: minted.openaiStatus,
+      hasEphemeralSecret: minted.ok,
+      expiresAt: minted.expiresAt || null,
+      openaiErrorParam: minted.openaiErrorParam,
+      openaiErrorCode: minted.openaiErrorCode,
+    });
 
-    if (!openaiRes.ok) {
-      logLiveTranslation(req, "openai_client_secrets_response", {
-        ok: false,
-        openaiStatus: openaiRes.status,
-        ...openAiErrorMeta,
-        hasEphemeralSecret: false,
-      });
+    if (!minted.ok) {
       return res.status(502).json({
         ok: false,
         error: "realtime_session_failed",
-        openaiStatus: openaiRes.status,
-        openaiErrorParam: openAiErrorMeta.openaiErrorParam,
-        openaiErrorMessage: openAiErrorMeta.openaiErrorMessage,
-        ...openAiErrorMeta,
-      });
-    }
-
-    const clientSecret =
-      data?.value ||
-      data?.client_secret?.value ||
-      data?.client_secret ||
-      null;
-    const expiresAt = data?.expires_at || data?.client_secret?.expires_at || null;
-    const hasEphemeralSecret = typeof clientSecret === "string" && clientSecret.length > 0;
-
-    logLiveTranslation(req, "openai_client_secrets_response", {
-      ok: hasEphemeralSecret,
-      openaiStatus: openaiRes.status,
-      hasEphemeralSecret,
-      expiresAt: expiresAt || null,
-    });
-
-    if (!hasEphemeralSecret) {
-      return res.status(502).json({
-        ok: false,
-        error: "realtime_session_invalid",
-        openaiStatus: openaiRes.status,
+        openaiStatus: minted.openaiStatus,
+        openaiErrorParam: minted.openaiErrorParam,
+        openaiErrorMessage: minted.openaiErrorMessage,
       });
     }
 
     return res.json({
       ok: true,
-      clientSecret,
-      expiresAt,
-      model: realtimeModel,
-      voice,
+      clientSecret: minted.clientSecret,
+      expiresAt: minted.expiresAt,
+      model: built.realtimeModel,
+      voice: built.voice,
       voiceProfile: LIVE_TRANSLATION_VOICE_PROFILE,
-      outputSpeed: LIVE_TRANSLATION_OUTPUT_SPEED,
-      transcriptionModel,
-      ...routing,
+      outputSpeed: built.payload.session.audio.output.speed,
+      transcriptionModel: built.transcriptionModel,
+      ...built.routing,
     });
   } catch (err) {
     logLiveTranslation(req, "realtime_session_exception", {
@@ -255,5 +139,90 @@ router.post("/realtime-session", async (req, res) => {
     return res.status(502).json({ ok: false, error: "realtime_session_failed" });
   }
 });
+
+/**
+ * POST /api/live-translation/realtime-call
+ * Server-side WebRTC SDP exchange (same-origin; avoids browser CORS to api.openai.com).
+ * Query: patientLanguage, doctorLanguage, activeSpeaker
+ * Body: raw SDP offer (application/sdp)
+ */
+router.post(
+  "/realtime-call",
+  express.raw({ type: ["application/sdp", "text/plain"], limit: "512kb" }),
+  async (req, res) => {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ ok: false, error: "openai_not_configured" });
+    }
+
+    const validated = validateSessionInput({
+      patientLanguage: req.query?.patientLanguage,
+      doctorLanguage: req.query?.doctorLanguage,
+      activeSpeaker: req.query?.activeSpeaker,
+    });
+
+    if (validated.error) {
+      return res.status(400).json({ ok: false, error: validated.error });
+    }
+
+    const offerSdp =
+      typeof req.body === "string"
+        ? req.body
+        : Buffer.isBuffer(req.body)
+          ? req.body.toString("utf8")
+          : "";
+
+    if (!offerSdp.trim()) {
+      return res.status(400).json({ ok: false, error: "sdp_offer_required" });
+    }
+
+    const built = buildRealtimeClientSecretsPayload(validated);
+
+    logLiveTranslation(req, "realtime_call_start", {
+      patientLanguage: validated.patientLanguage,
+      doctorLanguage: validated.doctorLanguage,
+      activeSpeaker: validated.activeSpeaker,
+      model: built.realtimeModel,
+      offerBytes: offerSdp.length,
+    });
+
+    try {
+      const result = await exchangeRealtimeSdp(apiKey, offerSdp, built.payload, {
+        userId: req.user?.userId,
+      });
+
+      if (!result.ok) {
+        logLiveTranslation(req, "realtime_call_failed", {
+          phase: result.phase,
+          openaiStatus: result.openaiStatus,
+          openaiErrorParam: result.openaiErrorParam,
+          openaiErrorCode: result.openaiErrorCode,
+          openaiErrorMessage: result.openaiErrorMessage,
+        });
+        return res.status(502).json({
+          ok: false,
+          error: "sdp_exchange_failed",
+          phase: result.phase,
+          openaiStatus: result.openaiStatus,
+          openaiErrorParam: result.openaiErrorParam,
+          openaiErrorMessage: result.openaiErrorMessage,
+        });
+      }
+
+      logLiveTranslation(req, "realtime_call_ok", {
+        openaiStatus: result.openaiStatus,
+        answerBytes: result.answerSdp.length,
+      });
+
+      res.setHeader("Content-Type", "application/sdp");
+      return res.status(200).send(result.answerSdp);
+    } catch (err) {
+      logLiveTranslation(req, "realtime_call_exception", {
+        errorName: err && typeof err === "object" && "name" in err ? String(err.name) : "Error",
+      });
+      return res.status(502).json({ ok: false, error: "sdp_exchange_failed" });
+    }
+  },
+);
 
 export default router;

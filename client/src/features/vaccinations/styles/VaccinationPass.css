@@ -1,0 +1,710 @@
+/* ── Vaccination Pass — light + dark, WCAG AA ─────────────────────────── */
+
+.vacc-pass {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+/* Page header */
+.vacc-pass__header {
+  margin-bottom: 1.5rem;
+}
+
+.vacc-pass__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  line-height: 1.25;
+}
+
+.vacc-pass__intro {
+  font-size: 1rem;
+  color: var(--ms-text-secondary, #4b5563);
+  margin: 0 0 0.5rem;
+}
+
+.vacc-pass__disclaimer {
+  font-size: 0.875rem;
+  color: var(--ms-text-secondary, #6b7280);
+  background: var(--ms-surface-muted, #f0fdf4);
+  border: 1px solid #86efac;
+  border-radius: 10px;
+  padding: 0.65rem 0.875rem;
+  margin: 0.5rem 0 0;
+}
+
+/* Add button */
+.vacc-pass__add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 48px;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.15s;
+}
+
+.vacc-pass__add-btn:hover {
+  background: #0f766e;
+}
+
+.vacc-pass__add-btn:focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 3px;
+}
+
+/* Loading / error / empty */
+.vacc-pass__loading,
+.vacc-pass__empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.vacc-pass__loading-spinner {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--ms-border, #e2e8f0);
+  border-top-color: var(--ms-accent, #0d9488);
+  border-radius: 50%;
+  animation: vacc-spin 0.7s linear infinite;
+  margin-bottom: 0.75rem;
+}
+
+@keyframes vacc-spin {
+  to { transform: rotate(360deg); }
+}
+
+.vacc-pass__error {
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  color: #b91c1c;
+  margin-bottom: 1rem;
+}
+
+.vacc-pass__empty-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.vacc-pass__empty-hint {
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+/* Disease group */
+.vacc-pass__group {
+  margin-bottom: 1.75rem;
+}
+
+.vacc-pass__group-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ms-text-secondary, #374151);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--ms-border, #e2e8f0);
+  padding-bottom: 0.35rem;
+  margin: 0 0 0.75rem;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────── */
+
+.vacc-card {
+  background: var(--ms-surface, #fff);
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 1rem 1.125rem;
+  margin-bottom: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.vacc-card__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.vacc-card__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.vacc-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.vacc-card__status--up-to-date {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.vacc-card__status--due-soon {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.vacc-card__status--overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.vacc-card__status--no-reminder {
+  background: var(--ms-surface-muted, #f1f5f9);
+  color: var(--ms-text-secondary, #475569);
+}
+
+.vacc-card__date {
+  font-size: 0.9rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0.3rem 0 0;
+}
+
+.vacc-card__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.4rem 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.vacc-card__meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.vacc-card__meta-label {
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.vacc-card__meta-value {
+  color: var(--ms-text, #111827);
+}
+
+.vacc-card__notes {
+  margin-top: 0.65rem;
+  font-size: 0.875rem;
+  color: var(--ms-text-secondary, #374151);
+  white-space: pre-wrap;
+}
+
+.vacc-card__doc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ms-accent, #0d9488);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.vacc-card__doc-link:hover {
+  text-decoration: underline;
+}
+
+.vacc-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.vacc-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 40px;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.vacc-card__btn:hover {
+  background: var(--ms-surface-muted, #f1f5f9);
+}
+
+.vacc-card__btn:focus-visible {
+  outline: 3px solid var(--ms-accent, #0d9488);
+  outline-offset: 2px;
+}
+
+.vacc-card__btn--danger {
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.vacc-card__btn--danger:hover {
+  background: #fef2f2;
+}
+
+/* ── Form ───────────────────────────────────────────────────────────────── */
+
+.vacc-form {
+  background: var(--ms-surface, #fff);
+  border: 1px solid var(--ms-border, #d0d5dd);
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.vacc-form__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 1rem;
+}
+
+.vacc-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.875rem 1rem;
+}
+
+.vacc-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.vacc-form__field--full {
+  grid-column: 1 / -1;
+}
+
+.vacc-form__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.vacc-form__input,
+.vacc-form__textarea {
+  min-height: 44px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--ms-border, #d0d5dd);
+  border-radius: 8px;
+  background: var(--ms-surface, #fff);
+  color: var(--ms-text, #111827);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.vacc-form__input:focus,
+.vacc-form__textarea:focus {
+  outline: none;
+  border-color: var(--ms-accent, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.vacc-form__input--error,
+.vacc-form__textarea--error {
+  border-color: #f87171;
+}
+
+.vacc-form__textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.vacc-form__error-msg {
+  font-size: 0.82rem;
+  color: #b91c1c;
+  margin-top: 0.1rem;
+}
+
+.vacc-form__hint {
+  font-size: 0.82rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+/* Upload zone */
+.vacc-form__upload {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.vacc-form__upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1.5px dashed var(--ms-border, #d0d5dd);
+  border-radius: 8px;
+  background: var(--ms-surface-muted, #f8fafc);
+  cursor: pointer;
+  color: var(--ms-text-secondary, #374151);
+}
+
+.vacc-form__upload-selected {
+  font-size: 0.875rem;
+  color: var(--ms-text-secondary, #374151);
+}
+
+.vacc-form__upload-remove {
+  font-size: 0.82rem;
+  color: #b91c1c;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Consent */
+.vacc-form__consent {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--ms-border, #d0d5dd);
+  border-radius: 10px;
+  background: var(--ms-surface-muted, #f8fafc);
+  margin-top: 0.5rem;
+}
+
+.vacc-form__consent input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  margin-top: 0.15rem;
+  accent-color: var(--ms-accent, #0d9488);
+  cursor: pointer;
+}
+
+.vacc-form__consent-label {
+  font-size: 0.9rem;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.vacc-form__consent--error {
+  border-color: #f87171;
+}
+
+/* Required note */
+.vacc-form__required-note {
+  font-size: 0.82rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin-top: 0.25rem;
+}
+
+/* Form actions */
+.vacc-form__actions {
+  display: flex;
+  gap: 0.625rem;
+  margin-top: 1.125rem;
+  flex-wrap: wrap;
+}
+
+.vacc-form__save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 48px;
+  padding: 0.65rem 1.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.vacc-form__save-btn:hover {
+  background: #0f766e;
+}
+
+.vacc-form__save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vacc-form__save-btn:focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 3px;
+}
+
+.vacc-form__cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d0d5dd);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.vacc-form__cancel-btn:hover {
+  background: var(--ms-surface-muted, #f1f5f9);
+}
+
+.vacc-form__save-error {
+  font-size: 0.875rem;
+  color: #b91c1c;
+  margin-top: 0.25rem;
+}
+
+/* Delete dialog */
+.vacc-delete-dialog {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.vacc-delete-dialog__box {
+  background: var(--ms-surface, #fff);
+  border-radius: 14px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.vacc-delete-dialog__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.vacc-delete-dialog__body {
+  font-size: 0.925rem;
+  color: var(--ms-text-secondary, #374151);
+  margin: 0 0 1.25rem;
+}
+
+.vacc-delete-dialog__actions {
+  display: flex;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.vacc-delete-dialog__confirm-btn {
+  min-height: 44px;
+  padding: 0.55rem 1.125rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #fff;
+  cursor: pointer;
+}
+
+.vacc-delete-dialog__confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vacc-delete-dialog__cancel-btn {
+  min-height: 44px;
+  padding: 0.55rem 1.125rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d0d5dd);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+
+.vacc-delete-dialog__error {
+  font-size: 0.875rem;
+  color: #b91c1c;
+  margin-top: 0.5rem;
+}
+
+/* ── Dark mode ──────────────────────────────────────────────────────────── */
+
+:root[data-theme="dark"] .vacc-pass__intro {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .vacc-pass__disclaimer {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #6ee7b7;
+}
+
+:root[data-theme="dark"] .vacc-card,
+:root[data-theme="dark"] .vacc-form,
+:root[data-theme="dark"] .vacc-delete-dialog__box {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.28);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .vacc-card__meta-label,
+:root[data-theme="dark"] .vacc-card__date,
+:root[data-theme="dark"] .vacc-card__notes,
+:root[data-theme="dark"] .vacc-pass__intro,
+:root[data-theme="dark"] .vacc-form__hint,
+:root[data-theme="dark"] .vacc-delete-dialog__body {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .vacc-card__meta-value,
+:root[data-theme="dark"] .vacc-card__name {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .vacc-card__status--up-to-date {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+}
+
+:root[data-theme="dark"] .vacc-card__status--due-soon {
+  background: rgba(234, 179, 8, 0.2);
+  color: #fde68a;
+}
+
+:root[data-theme="dark"] .vacc-card__status--overdue {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .vacc-card__status--no-reminder {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .vacc-card__btn {
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.7);
+}
+
+:root[data-theme="dark"] .vacc-card__btn:hover {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+:root[data-theme="dark"] .vacc-card__btn--danger {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+:root[data-theme="dark"] .vacc-card__btn--danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+:root[data-theme="dark"] .vacc-form__input,
+:root[data-theme="dark"] .vacc-form__textarea {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .vacc-form__input::placeholder,
+:root[data-theme="dark"] .vacc-form__textarea::placeholder {
+  color: #64748b;
+}
+
+:root[data-theme="dark"] .vacc-form__consent {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+:root[data-theme="dark"] .vacc-form__upload-btn {
+  background: rgba(15, 23, 42, 0.7);
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .vacc-form__cancel-btn,
+:root[data-theme="dark"] .vacc-delete-dialog__cancel-btn {
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .vacc-form__cancel-btn:hover,
+:root[data-theme="dark"] .vacc-delete-dialog__cancel-btn:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+:root[data-theme="dark"] .vacc-pass__group-title {
+  color: #94a3b8;
+  border-bottom-color: rgba(148, 163, 184, 0.25);
+}
+
+:root[data-theme="dark"] .vacc-pass__error {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .vacc-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vacc-card__meta {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .vacc-form__actions,
+  .vacc-card__actions {
+    flex-direction: column;
+  }
+
+  .vacc-form__save-btn,
+  .vacc-form__cancel-btn,
+  .vacc-card__btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

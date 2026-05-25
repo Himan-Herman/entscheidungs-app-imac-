@@ -14,3 +14,27 @@ export async function createLiveTranslationRealtimeSession(body) {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+/**
+ * Server-proxied WebRTC SDP answer (same-origin; no direct browser call to api.openai.com).
+ * @param {string} offerSdp
+ * @param {{ patientLanguage: string; doctorLanguage: string; activeSpeaker: "patient" | "doctor" }} params
+ */
+export async function exchangeLiveTranslationSdp(offerSdp, params) {
+  const q = new URLSearchParams({
+    patientLanguage: params.patientLanguage,
+    doctorLanguage: params.doctorLanguage,
+    activeSpeaker: params.activeSpeaker,
+  });
+  const res = await authFetch(`/api/live-translation/realtime-call?${q}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/sdp" },
+    body: offerSdp,
+  });
+  if (res.ok) {
+    const answerSdp = await res.text();
+    return { res, answerSdp, data: {} };
+  }
+  const data = await res.json().catch(() => ({}));
+  return { res, answerSdp: "", data };
+}

@@ -13,11 +13,14 @@ export function getOpenAiChatModel() {
   return typeof env === "string" && env.trim() ? env.trim() : DEFAULT_CHAT_MODEL;
 }
 
-/** Realtime speech-to-speech (Meda live translation) */
+/**
+ * Realtime speech-to-speech (Meda live translation).
+ * Default gpt-realtime-2 — proven WebRTC voice; override with LIVE_TRANSLATION_REALTIME_MODEL.
+ */
 export function getOpenAiRealtimeModel() {
   const env =
     process.env.LIVE_TRANSLATION_REALTIME_MODEL || process.env.OPENAI_REALTIME_MODEL;
-  return typeof env === "string" && env.trim() ? env.trim() : DEFAULT_CHAT_MODEL;
+  return typeof env === "string" && env.trim() ? env.trim() : "gpt-realtime-2";
 }
 
 /** Realtime input ASR (no gpt-5.4 transcribe SKU yet) */

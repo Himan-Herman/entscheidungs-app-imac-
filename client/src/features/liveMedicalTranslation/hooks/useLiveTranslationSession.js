@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createLiveTranslationRealtimeSession } from "../api/liveTranslationApi.js";
+import {
+  createLiveTranslationRealtimeSession,
+  exchangeLiveTranslationSdp,
+} from "../api/liveTranslationApi.js";
 import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL } from "../constants.js";
 import { buildLanguageRouting } from "../utils/routing.js";
 import { buildCompactClientInstructions, buildFaithfulRetryInstructions } from "../utils/translationInstructions.js";
@@ -43,8 +46,6 @@ import {
   REALTIME_PEER_CONNECTION_CONFIG,
   waitForIceGatheringComplete,
 } from "../utils/webrtc.js";
-
-const REALTIME_CALLS_URL = "https://api.openai.com/v1/realtime/calls";
 
 /** @param {Response} res @param {Record<string, unknown>} data */
 function resolveSessionApiErrorKey(res, data) {
@@ -1606,34 +1607,32 @@ export function useLiveTranslationSession({
         return;
       }
 
-      const sdpResponse = await fetch(REALTIME_CALLS_URL, {
-        method: "POST",
-        body: localSdp,
-        headers: {
-          Authorization: `Bearer ${data.clientSecret}`,
-          "Content-Type": "application/sdp",
-        },
-      });
+      const { res: sdpResponse, answerSdp, data: sdpErrorData } =
+        await exchangeLiveTranslationSdp(localSdp, {
+          patientLanguage: routing.patientLanguage,
+          doctorLanguage: routing.doctorLanguage,
+          activeSpeaker: routing.activeSpeaker,
+        });
 
       if (!mountedRef.current) {
         teardown();
         return;
       }
 
-      if (!sdpResponse.ok) {
-        teardown();
-        safeSetState(() => {
-          setErrorKey("sdpExchangeFailed");
-          setConnectionStatus("error");
+      if (!sdpResponse.ok || !answerSdp.trim()) {
+        logRealtimeDiag("sdp_exchange_failed", {
+          status: sdpResponse.status,
+          phase: sdpErrorData?.phase,
+          openaiErrorParam: sdpErrorData?.openaiErrorParam,
+          openaiErrorCode: sdpErrorData?.openaiErrorMessage ? "message" : null,
         });
-        return;
-      }
-
-      const answerSdp = await sdpResponse.text();
-      if (!answerSdp.trim()) {
         teardown();
         safeSetState(() => {
-          setErrorKey("sdpExchangeFailed");
+          setErrorKey(
+            sdpErrorData?.openaiErrorParam === "session.audio.input.transcription.language"
+              ? "openaiSessionRejected"
+              : "sdpExchangeFailed",
+          );
           setConnectionStatus("error");
         });
         return;
