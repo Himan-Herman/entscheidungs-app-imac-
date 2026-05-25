@@ -116,11 +116,14 @@ export default function LiveTranslationPage() {
   const handleTurnComplete = useCallback(
     (completedSpeaker) => {
       if (!autoSwitchSpeaker) return;
+      if (isLanguageRoutingEnabled(patientLanguage, doctorLanguage) && !manualSpeakerOverride) {
+        return;
+      }
       setActiveSpeaker(completedSpeaker === "patient" ? "doctor" : "patient");
       setSpeakerSwitchAnim(true);
       playSpeakerSwitchSound();
     },
-    [autoSwitchSpeaker],
+    [autoSwitchSpeaker, doctorLanguage, manualSpeakerOverride, patientLanguage],
   );
 
   useEffect(() => {

@@ -65,10 +65,14 @@ SESSION CONTEXT (authoritative — provided by the UI, never guess):
 - sourceLanguage: ${routing.sourceLanguage} (${routing.sourceLanguageName})
 - targetLanguage: ${routing.targetLanguage} (${routing.targetLanguageName})
 
-LANGUAGE ROUTING (use only activeSpeaker from the UI):
+LANGUAGE ROUTING (spoken language selects the side — configured in the setup form):
+- Patient side language: ${routing.patientLanguageName} (${routing.patientLanguage})
+- Doctor/practice side language: ${routing.doctorLanguageName} (${routing.doctorLanguage})
+- When ${routing.patientLanguageName} is spoken → activeSpeaker is patient (translate into ${routing.doctorLanguageName}).
+- When ${routing.doctorLanguageName} is spoken → activeSpeaker is doctor (translate into ${routing.patientLanguageName}).
+- Do NOT use turn order or voice/accent to guess the side — only the spoken language vs the two configured languages.
 - When activeSpeaker is patient: listen/transcribe ${routing.patientLanguageName}, translate into ${routing.doctorLanguageName}, speak output in ${routing.doctorLanguageName}.
 - When activeSpeaker is doctor: listen/transcribe ${routing.doctorLanguageName}, translate into ${routing.patientLanguageName}, speak output in ${routing.patientLanguageName}.
-- Do NOT infer speaker identity from voice, accent, or content. Use ONLY the activeSpeaker value above.
 
 CURRENT MODE:
 - activeSpeaker: ${speakerLabel}

@@ -26,7 +26,11 @@ import {
   isMedaUnclearPhrase,
 } from "../utils/repeatPhrase.js";
 import { getWrongLanguagePhrase } from "../utils/wrongLanguagePhrase.js";
-import { resolveSpeakerFromDetectedLanguage, isLanguageRoutingEnabled } from "../utils/languageBasedRouting.js";
+import {
+  inferLanguageFromTranscript,
+  isLanguageRoutingEnabled,
+  resolveSpeakerFromDetectedLanguage,
+} from "../utils/languageBasedRouting.js";
 import {
   formatSessionTimer,
   resolveLiveSessionMaxMs,
@@ -212,6 +216,7 @@ export function useLiveTranslationSession({
   const pausedRef = useRef(false);
   const scopeContinueRef = useRef(false);
   const translationDriftRetryAttemptedRef = useRef(false);
+  const languageRoutingAwaitingTranslationRef = useRef(false);
   const scopeWarningShownRef = useRef(false);
   const onScopeWarningRef = useRef(onScopeWarning);
 
@@ -1027,45 +1032,139 @@ export function useLiveTranslationSession({
     );
   }, [safeSetState]);
 
-  const applyLanguageRouting = useCallback(
-    (event) => {
-      if (!languageBasedRoutingRef.current) return;
-      if (skipLanguageRoutingRef?.current) return;
+  const sendSpeakerUpdateNow = useCallback(() => {
+    if (!connectedRef.current || pausedRef.current) return;
+
+    const dc = dcRef.current;
+    if (!dc || dc.readyState !== "open") {
+      pendingSpeakerUpdateRef.current = true;
+      return;
+    }
+
+    pendingSpeakerUpdateRef.current = false;
+    const routing = buildLanguageRouting(sessionConfigRef.current);
+    turnContextRef.current = routing;
+
+    const updateSig = `${routing.activeSpeaker}|${routing.sourceLanguage}|${routing.targetLanguage}`;
+    if (updateSig === lastSessionUpdateSigRef.current) {
+      return;
+    }
+    lastSessionUpdateSigRef.current = updateSig;
+
+    cancelActiveResponse();
+
+    const payload = buildRuntimeSessionUpdatePayload(routing);
+    logRealtimeDiag("session_update_send", {
+      activeSpeaker: routing.activeSpeaker,
+      sourceLanguage: routing.sourceLanguage,
+      targetLanguage: routing.targetLanguage,
+      reason: "language_routing",
+      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
+    });
+    dc.send(JSON.stringify(payload));
+
+    currentTranslatedRef.current = "";
+    lastTurnSignatureRef.current = "";
+    safeSetState(() => {
+      setCurrentTranslatedText("");
+      if (
+        connectionStatusRef.current !== "introducing" &&
+        connectionStatusRef.current !== "speaking" &&
+        connectionStatusRef.current !== "translating" &&
+        connectionStatusRef.current !== "paused"
+      ) {
+        setConnectionStatus("listening");
+      }
+    });
+    pendingOriginalRef.current = "";
+  }, [cancelActiveResponse, safeSetState]);
+
+  const requestTurnTranslation = useCallback(
+    (sourceText, routing) => {
+      const dc = dcRef.current;
+      const trimmed = sourceText?.trim();
+      if (!dc || dc.readyState !== "open" || !trimmed || pausedRef.current) return false;
+
+      turnContextRef.current = routing;
+      cancelActiveResponse();
+      responseActiveRef.current = true;
+      safeSetState(() => setConnectionStatus("translating"));
+
+      const hint = buildCompactClientInstructions(routing);
+      dc.send(
+        JSON.stringify({
+          type: "response.create",
+          response: {
+            modalities: ["audio"],
+            instructions: `${hint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
+          },
+        }),
+      );
+      return true;
+    },
+    [cancelActiveResponse, safeSetState],
+  );
+
+  const switchSpeakerFromDetectedLanguage = useCallback(
+    (detected, transcript = "") => {
+      if (!languageBasedRoutingRef.current || skipLanguageRoutingRef?.current) {
+        return false;
+      }
 
       const cfg = sessionConfigRef.current;
       if (!isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage)) {
-        return;
+        return false;
       }
 
-      const detected = extractDetectedLanguage(event);
+      let lang = detected;
+      if (!lang || !String(lang).trim()) {
+        lang = inferLanguageFromTranscript(transcript, cfg.patientLanguage, cfg.doctorLanguage);
+      }
+
       const result = resolveSpeakerFromDetectedLanguage(
-        detected,
+        lang,
         cfg.patientLanguage,
         cfg.doctorLanguage,
         cfg.activeSpeaker,
       );
 
-      if (!result.routingEnabled) {
-        return;
-      }
+      if (!result.routingEnabled) return false;
 
       if (result.reason === "outside_pair") {
-        onWrongLanguagePairRef.current?.({ detectedLanguage: detected });
-        return;
+        onWrongLanguagePairRef.current?.({ detectedLanguage: lang });
+        return false;
       }
 
       if (result.uncertain) {
         onLanguageUncertainRef.current?.();
-        return;
+        return false;
       }
 
       onLanguageUncertainRef.current?.(false);
 
       if (result.speaker !== cfg.activeSpeaker) {
+        sessionConfigRef.current = {
+          ...cfg,
+          activeSpeaker: result.speaker,
+        };
+        cancelActiveResponse();
         onSpeakerFromLanguageRef.current?.(result.speaker);
+        sendSpeakerUpdateNow();
+        return true;
       }
+
+      return false;
     },
-    [skipLanguageRoutingRef],
+    [cancelActiveResponse, safeSetState, sendSpeakerUpdateNow, skipLanguageRoutingRef],
+  );
+
+  const applyLanguageRouting = useCallback(
+    (event) => {
+      const transcript = extractOriginalText(event);
+      const detected = extractDetectedLanguage(event);
+      switchSpeakerFromDetectedLanguage(detected, transcript);
+    },
+    [switchSpeakerFromDetectedLanguage],
   );
 
   const finalizeTranslationOutput = useCallback(
@@ -1207,6 +1306,14 @@ export function useLiveTranslationSession({
       }
 
       if (type === "input_audio_buffer.speech_stopped") {
+        const cfg = sessionConfigRef.current;
+        if (
+          languageBasedRoutingRef.current &&
+          isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage)
+        ) {
+          cancelActiveResponse();
+          languageRoutingAwaitingTranslationRef.current = true;
+        }
         setActivityStatus("translating");
         return;
       }
@@ -1231,16 +1338,36 @@ export function useLiveTranslationSession({
         if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
           pendingOriginalRef.current = transcript;
           inputTranscriptStateRef.current = "ready";
+          const resolvedLang =
+            detected ||
+            inferLanguageFromTranscript(transcript, cfg.patientLanguage, cfg.doctorLanguage);
+          lastDetectedLanguageRef.current = resolvedLang || null;
+
           if (
             languageBasedRoutingRef.current &&
             isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage) &&
-            detected &&
-            !isLanguageInSelectedPair(detected, cfg.patientLanguage, cfg.doctorLanguage)
+            resolvedLang &&
+            !isLanguageInSelectedPair(resolvedLang, cfg.patientLanguage, cfg.doctorLanguage)
           ) {
-            triggerWrongLanguageRepeat(routing, detected);
+            triggerWrongLanguageRepeat(routing, resolvedLang);
             return;
           }
-          applyLanguageRouting(event);
+
+          switchSpeakerFromDetectedLanguage(resolvedLang, transcript);
+          const routingAfterSwitch = buildLanguageRouting(sessionConfigRef.current);
+
+          if (languageRoutingAwaitingTranslationRef.current) {
+            languageRoutingAwaitingTranslationRef.current = false;
+            requestTurnTranslation(transcript, routingAfterSwitch);
+          } else if (
+            languageBasedRoutingRef.current &&
+            isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage) &&
+            !responseActiveRef.current &&
+            !pendingTranslatedForTurnRef.current
+          ) {
+            requestTurnTranslation(transcript, routingAfterSwitch);
+          }
+
           maybeFlushPendingTurn();
           return;
         }
@@ -1257,6 +1384,14 @@ export function useLiveTranslationSession({
         const transcript = extractOriginalText(event);
         if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
           pendingOriginalRef.current = `${pendingOriginalRef.current}${transcript}`;
+          const detected = extractDetectedLanguage(event);
+          if (detected) {
+            lastDetectedLanguageRef.current = detected;
+          }
+          switchSpeakerFromDetectedLanguage(
+            detected || lastDetectedLanguageRef.current,
+            pendingOriginalRef.current,
+          );
         }
         return;
       }
@@ -1390,12 +1525,14 @@ export function useLiveTranslationSession({
       }
     },
     [
-      applyLanguageRouting,
+      cancelActiveResponse,
       executeBufferedFinalize,
       finalizeTranslationOutput,
       maybeFlushPendingTurn,
+      requestTurnTranslation,
       resetTurnCaptureState,
       safeSetState,
+      switchSpeakerFromDetectedLanguage,
       trySendMedaActivation,
       setActivityStatus,
       skipLanguageRoutingRef,

@@ -5,6 +5,7 @@
 import {
   buildDirectionLabel,
   detectedLanguageMatches,
+  inferLanguageFromTranscript,
   isLanguageRoutingEnabled,
   resolveSpeakerFromDetectedLanguage,
 } from "../utils/languageBasedRouting.js";
@@ -29,6 +30,27 @@ assert(faPatient.speaker === "patient" && !faPatient.uncertain, "fa -> patient")
 
 const deDoctor = resolveSpeakerFromDetectedLanguage("de", "fa", "de", "patient");
 assert(deDoctor.speaker === "doctor" && !deDoctor.uncertain, "de -> doctor");
+
+const enDoctorDePatient = resolveSpeakerFromDetectedLanguage("en", "de", "en", "patient");
+assert(
+  enDoctorDePatient.speaker === "doctor" && !enDoctorDePatient.uncertain,
+  "english -> doctor when patient=de doctor=en",
+);
+
+const dePatientEnDoctor = resolveSpeakerFromDetectedLanguage("de", "de", "en", "doctor");
+assert(
+  dePatientEnDoctor.speaker === "patient" && !dePatientEnDoctor.uncertain,
+  "german -> patient when patient=de doctor=en",
+);
+
+assert(
+  inferLanguageFromTranscript("How can I help you?", "de", "en") === "en",
+  "infer english doctor phrase",
+);
+assert(
+  inferLanguageFromTranscript("Ich habe Kopfschmerzen.", "de", "en") === "de",
+  "infer german patient phrase",
+);
 
 const uncertain = resolveSpeakerFromDetectedLanguage(null, "fa", "de", "patient");
 assert(uncertain.uncertain && uncertain.speaker === "patient", "missing language keeps current side");

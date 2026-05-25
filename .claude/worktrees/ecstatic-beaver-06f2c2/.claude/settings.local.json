@@ -6,7 +6,9 @@
       "Bash(node scripts/verifyLabPatientExplanation.js)",
       "Bash(node --input-type=module)",
       "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac diff --stat HEAD)",
-      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac status --short)"
+      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac status --short)",
+      "Bash(node --input-type=module --eval ' *)",
+      "Bash(node -e ' *)"
     ]
   }
 }

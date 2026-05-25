@@ -145,6 +145,56 @@ export function resolveSpeakerFromDetectedLanguage(
  *   doctorRoleLabel: string;
  * }} params
  */
+/**
+ * Fallback when Realtime ASR omits language metadata — lightweight DE/EN heuristics only.
+ * @param {string} text
+ * @param {string} patientLanguage
+ * @param {string} doctorLanguage
+ * @returns {string | null} ISO 639-1 code or null
+ */
+export function inferLanguageFromTranscript(text, patientLanguage, doctorLanguage) {
+  const sample = String(text || "").trim().slice(0, 280);
+  if (sample.length < 2) return null;
+
+  const patient = normalizeLanguageCode(patientLanguage);
+  const doctor = normalizeLanguageCode(doctorLanguage);
+  if (!patient || !doctor || patient === doctor) return null;
+
+  const lower = sample.toLowerCase();
+  const germanHint =
+    /[äöüß]/.test(sample) ||
+    /\b(ich|sie|habe|keine|kopf|fieber|schmerz|allerg|seit|wie kann ich|haben sie|bitte|danke)\b/i.test(
+      lower,
+    );
+  const englishHint =
+    /\b(i |i'|you |your |have |help |fever|headache|pain|allergy|since |how can|do you|please|thank)\b/i.test(
+      lower,
+    );
+
+  if (patient === "de" && doctor === "en") {
+    if (germanHint && !englishHint) return "de";
+    if (englishHint && !germanHint) return "en";
+    return null;
+  }
+
+  if (patient === "en" && doctor === "de") {
+    if (englishHint && !germanHint) return "en";
+    if (germanHint && !englishHint) return "de";
+    return null;
+  }
+
+  if (germanHint && !englishHint) {
+    if (detectedLanguageMatches("de", patientLanguage)) return patient;
+    if (detectedLanguageMatches("de", doctorLanguage)) return doctor;
+  }
+  if (englishHint && !germanHint) {
+    if (detectedLanguageMatches("en", patientLanguage)) return patient;
+    if (detectedLanguageMatches("en", doctorLanguage)) return doctor;
+  }
+
+  return null;
+}
+
 export function buildDirectionLabel({
   activeSpeaker,
   patientLanguageLabel,

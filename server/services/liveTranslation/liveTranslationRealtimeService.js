@@ -9,6 +9,13 @@ import {
 } from "../../config/liveTranslationEnv.js";
 import { buildLiveTranslationInstructions } from "./liveTranslationPrompt.js";
 import { buildLanguageRouting } from "./liveTranslationRouting.js";
+
+/** When patient and doctor languages differ, ASR must auto-detect (not lock to one side). */
+function shouldLockTranscriptionLanguage(patientLanguage, doctorLanguage) {
+  const patient = String(patientLanguage || "").trim().toLowerCase();
+  const doctor = String(doctorLanguage || "").trim().toLowerCase();
+  return Boolean(patient && doctor && patient === doctor);
+}
 import {
   resolveOpenAiRealtimeModel,
   resolveOpenAiRealtimeVoice,
@@ -34,7 +41,9 @@ export function buildRealtimeClientSecretsPayload(validated) {
   const realtimeModel = resolveOpenAiRealtimeModel(LIVE_TRANSLATION_REALTIME_MODEL);
   const voice = resolveOpenAiRealtimeVoice(LIVE_TRANSLATION_VOICE);
   const transcriptionModel = resolveOpenAiTranscriptionModel(LIVE_TRANSLATION_TRANSCRIPTION_MODEL);
-  const transcriptionLanguage = resolveOpenAiTranscriptionLanguage(routing.sourceLanguage);
+  const transcriptionLanguage = shouldLockTranscriptionLanguage(patientLanguage, doctorLanguage)
+    ? resolveOpenAiTranscriptionLanguage(routing.sourceLanguage)
+    : null;
 
   const payload = {
     expires_after: {
