@@ -93,11 +93,13 @@ export default {
     asrFailed: "Sprache nicht verstanden — bitte wiederholen.",
     translationFailed: "Übersetzung fehlgeschlagen — bitte wiederholen.",
     wrongLanguagePair:
-      "Die erkannte Sprache passt nicht zu den ausgewählten Gesprächssprachen. Bitte wählen Sie die richtige Sprache oder wiederholen Sie den Satz.",
+      "Nur die ausgewählten Gesprächssprachen werden unterstützt. Bitte wiederholen Sie den Satz in einer der gewählten Sprachen.",
+    scopeTranslationPaused:
+      "Meda ist für medizinische und gesundheitsbezogene Gespräche vorgesehen. Die Übersetzung wurde vorübergehend angehalten.",
     overlapDetected:
       "Gleichzeitiges Sprechen erkannt — bitte nacheinander sprechen und den Satz wiederholen.",
     unrelatedHealthcare:
-      "Dieses Gespräch wirkt nicht wie ein medizinischer Kontext. Meda ist für Arzt-, Praxis-, Klinik-, Apotheken- und Gesundheitskommunikation gedacht. Möchten Sie trotzdem fortfahren?",
+      "Meda ist für medizinische und gesundheitsbezogene Gespräche vorgesehen. Möchten Sie trotzdem fortfahren?",
   },
   live: {
     heading: "Live-Gespräch",

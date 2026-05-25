@@ -121,4 +121,18 @@ assert(
 );
 assert(sanitized.needsRepeatSpeech, "sanitize requests corrective speech");
 
+assert(
+  isSemanticTranslationDrift("No allergies.", "You have allergies."),
+  "EN no allergies must not flip to allergies",
+);
+
+assert(
+  resolveTurnStatus({
+    originalText: "I think maybe",
+    translatedText: "I definitely have severe pain.",
+    targetLanguage: "en",
+  }) === "unclear",
+  "uncertainty inflation marks unclear",
+);
+
 console.log("verifyAsrQuality: OK");

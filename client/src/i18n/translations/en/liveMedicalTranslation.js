@@ -93,11 +93,13 @@ export default {
     asrFailed: "Speech not understood — please repeat.",
     translationFailed: "Translation failed — please repeat.",
     wrongLanguagePair:
-      "The detected language does not match the selected conversation languages. Please choose the correct language or repeat the sentence.",
+      "Only the selected conversation languages are supported. Please repeat the sentence in one of the chosen languages.",
+    scopeTranslationPaused:
+      "Meda is intended for medical and healthcare-related conversations. Translation has been paused temporarily.",
     overlapDetected:
       "Simultaneous speech detected — please speak one after another and repeat the phrase.",
     unrelatedHealthcare:
-      "This conversation does not appear to be a healthcare context. Meda is intended for doctor, practice, clinic, pharmacy, and health communication. Would you like to continue anyway?",
+      "Meda is intended for medical and healthcare-related conversations. Would you like to continue anyway?",
   },
   live: {
     heading: "Live conversation",

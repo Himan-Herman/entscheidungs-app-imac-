@@ -19,7 +19,8 @@
     "seed:inbox": "node scripts/seedPatientInboxItem.js",
     "start": "node app.js",
     "verify:live-translation-fidelity": "node scripts/verifyLiveTranslationFidelity.js",
-    "verify:lab-explanation": "node scripts/verifyLabPatientExplanation.js"
+    "verify:lab-explanation": "node scripts/verifyLabPatientExplanation.js",
+    "verify:ai-safety": "node scripts/verifyAiSafetyRegression.js"
   },
   "keywords": [],
   "author": "",

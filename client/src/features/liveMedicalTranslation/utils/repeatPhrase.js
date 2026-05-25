@@ -1,10 +1,10 @@
 /** Meda repeat-request phrase spoken in the listener's target language. */
 const MEDA_UNCLEAR_PHRASES = {
-  de: "Meda hat die vorherige Aussage nicht sicher verstanden. Bitte wiederholen Sie den Satz.",
-  en: "Meda did not clearly understand the previous statement. Please repeat the sentence.",
-  fr: "Meda n'a pas clairement compris la phrase précédente. Veuillez répéter la phrase.",
-  es: "Meda no entendió claramente la frase anterior. Por favor, repita la frase.",
-  it: "Meda non ha capito chiaramente l'affermazione precedente. Per favore, ripeta la frase.",
+  de: "Meda hat die Aussage akustisch nicht sicher verstanden. Bitte wiederholen Sie den Satz langsam.",
+  en: "Meda could not clearly understand the statement acoustically. Please repeat the sentence slowly.",
+  fr: "Meda n'a pas clairement compris la phrase. Veuillez répéter lentement.",
+  es: "Meda no entendió claramente la frase. Por favor repítala lentamente.",
+  it: "Meda non ha capito chiaramente la frase. Per favore ripetila lentamente.",
   ru: "Meda не смогла чётко понять предыдущее высказывание. Пожалуйста, повторите фразу.",
   uk: "Meda не змогла чітко зрозуміти попереднє висловлювання. Будь ласка, повторіть речення.",
   tr: "Meda önceki ifadeyi net anlayamadı. Lütfen cümleyi tekrarlayın.",

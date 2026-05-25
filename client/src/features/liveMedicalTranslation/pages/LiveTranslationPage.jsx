@@ -105,6 +105,7 @@ export default function LiveTranslationPage() {
   const [autoEnded, setAutoEnded] = useState(false);
   const [localSaveState, setLocalSaveState] = useState(/** @type {"idle" | "saved" | "declined"} */ ("idle"));
   const [scopeWarningVisible, setScopeWarningVisible] = useState(false);
+  const [scopeTranslationPausedBanner, setScopeTranslationPausedBanner] = useState("");
   const [manualSpeakerOverride, setManualSpeakerOverride] = useState(false);
   const skipLanguageRoutingRef = useRef(false);
   const profilePrefillSnapshotRef = useRef(
@@ -272,6 +273,11 @@ export default function LiveTranslationPage() {
     setScopeWarningVisible(true);
   }, []);
 
+  const handleScopeTranslationPaused = useCallback(() => {
+    setScopeTranslationPausedBanner(t.warnings.scopeTranslationPaused);
+    setScopeWarningVisible(false);
+  }, [t.warnings.scopeTranslationPaused]);
+
   const handleManualSpeakerSelect = useCallback((speaker) => {
     skipLanguageRoutingRef.current = true;
     setManualSpeakerOverride(true);
@@ -320,6 +326,7 @@ export default function LiveTranslationPage() {
     onSessionTimeWarning: handleSessionTimeWarning,
     onSessionAutoEnd: handleSessionAutoEnd,
     onScopeWarning: handleScopeWarning,
+    onScopeTranslationPaused: handleScopeTranslationPaused,
   });
 
   turnsRef.current = turns;
@@ -346,6 +353,7 @@ export default function LiveTranslationPage() {
       setWrongLanguageBanner("");
       setSessionWarning("");
       setScopeWarningVisible(false);
+      setScopeTranslationPausedBanner("");
       setManualSpeakerOverride(false);
       skipLanguageRoutingRef.current = false;
       setAutoEnded(autoEnd);
@@ -439,6 +447,7 @@ export default function LiveTranslationPage() {
 
   const handleScopeContinue = useCallback(() => {
     setScopeWarningVisible(false);
+    setScopeTranslationPausedBanner("");
     confirmScopeContinue();
   }, [confirmScopeContinue]);
 
@@ -1213,6 +1222,12 @@ export default function LiveTranslationPage() {
           {unclearBanner ? (
             <p className="live-translation__warning live-translation__warning--unclear" role="alert">
               {unclearBanner}
+            </p>
+          ) : null}
+
+          {scopeTranslationPausedBanner ? (
+            <p className="live-translation__warning live-translation__warning--scope-paused" role="alert">
+              {scopeTranslationPausedBanner}
             </p>
           ) : null}
 

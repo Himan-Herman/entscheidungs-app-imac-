@@ -7,6 +7,19 @@ import { isMedaUnclearPhrase } from "./repeatPhrase.js";
  * @param {string} patientLanguage
  * @param {string} doctorLanguage
  */
+/**
+ * @param {string} targetLanguage
+ * @param {string} patientLanguage
+ * @param {string} doctorLanguage
+ */
+export function isTargetLanguageInPair(targetLanguage, patientLanguage, doctorLanguage) {
+  const target = normalizeLanguageCode(targetLanguage);
+  return (
+    target === normalizeLanguageCode(patientLanguage) ||
+    target === normalizeLanguageCode(doctorLanguage)
+  );
+}
+
 export function isLanguageInSelectedPair(detected, patientLanguage, doctorLanguage) {
   if (!detected || !String(detected).trim()) return false;
   return (

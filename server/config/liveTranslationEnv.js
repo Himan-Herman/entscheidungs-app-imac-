@@ -9,7 +9,7 @@ import {
  */
 export const LIVE_TRANSLATION_VOICE_PROFILE = "neutral_medical";
 
-/** OpenAI Realtime model for live medical conversation translation (default gpt-5.4). */
+/** OpenAI Realtime model for live medical conversation translation (default gpt-realtime-2). */
 export const LIVE_TRANSLATION_REALTIME_MODEL = getOpenAiRealtimeModel();
 
 /**
@@ -52,12 +52,12 @@ export const LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS = safeIntegerEnv(
 /** Server VAD silence before end-of-turn (ms). 700–900 ms helps short medical phrases. */
 export const LIVE_TRANSLATION_VAD_SILENCE_MS = safeIntegerEnv(
   process.env.LIVE_TRANSLATION_VAD_SILENCE_MS,
-  850,
+  1000,
 );
 
 /** Server VAD activation threshold (0–1). Higher = less sensitive to background noise. */
 export const LIVE_TRANSLATION_VAD_THRESHOLD = (() => {
   const value = Number(process.env.LIVE_TRANSLATION_VAD_THRESHOLD);
-  if (!Number.isFinite(value)) return 0.58;
+  if (!Number.isFinite(value)) return 0.62;
   return Math.min(1, Math.max(0, value));
 })();

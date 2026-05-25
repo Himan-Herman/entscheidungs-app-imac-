@@ -135,6 +135,9 @@ function defaultPdfLabels(uiLanguage) {
         originalMissing: "Original nicht sicher erkannt",
         statusTranslated: "Übersetzt",
         statusUnclear: "Unklar",
+        statusAcousticUncertain: "Akustisch unsicher erkannt",
+        statusVerifiedOriginal: "Original bestätigt",
+        statusManuallyCorrected: "Manuell korrigiert",
         statusWrongLanguage: "Falsche Sprache",
         statusCorrected: "Korrigiert",
         statusReplayed: "Erneut vorgelesen",
@@ -177,6 +180,9 @@ function defaultPdfLabels(uiLanguage) {
         originalMissing: "Original not reliably recognized",
         statusTranslated: "Translated",
         statusUnclear: "Unclear",
+        statusAcousticUncertain: "Acoustically uncertain",
+        statusVerifiedOriginal: "Original verified",
+        statusManuallyCorrected: "Manually corrected",
         statusWrongLanguage: "Wrong language",
         statusCorrected: "Corrected",
         statusReplayed: "Replayed",
@@ -226,6 +232,24 @@ function statusLabel(L, status) {
     default:
       return L.statusTranslated;
   }
+}
+
+/**
+ * PDF integrity labels for transcript trust level.
+ * @param {ReturnType<typeof defaultPdfLabels>} L
+ * @param {{ status?: string; originalMissing?: boolean; originalText?: string }} turn
+ */
+function transcriptIntegrityLabel(L, turn) {
+  if (turn.status === "corrected") {
+    return L.statusManuallyCorrected || L.statusCorrected;
+  }
+  if (turn.status === "unclear" || turn.originalMissing || !String(turn.originalText || "").trim()) {
+    return L.statusAcousticUncertain || L.statusUnclear;
+  }
+  if (turn.status === "translated") {
+    return L.statusVerifiedOriginal || L.statusTranslated;
+  }
+  return statusLabel(L, turn.status);
 }
 
 function applyFooters(doc, L, pageWidth, pageHeight, margin, generatedAt) {
@@ -421,7 +445,7 @@ export function buildLiveTranslationPdfDocument(exportData, uiLanguage, options 
     doc.setFontSize(8.5);
     doc.setTextColor(...COL.slateMuted);
     drawWrapped(
-      `${timeStr} · ${srcLang} → ${tgtLang} · ${statusLabel(L, turn.status)}`,
+      `${timeStr} · ${srcLang} → ${tgtLang} · ${transcriptIntegrityLabel(L, turn)}`,
       contentW,
       8.5,
     );

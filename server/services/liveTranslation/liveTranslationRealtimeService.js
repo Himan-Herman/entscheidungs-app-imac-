@@ -59,10 +59,10 @@ export function buildRealtimeClientSecretsPayload(validated) {
         input: {
           turn_detection: {
             type: "server_vad",
-            create_response: true,
+            create_response: false,
             interrupt_response: true,
             silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
-            prefix_padding_ms: 450,
+            prefix_padding_ms: 500,
             threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
           },
           transcription: {

@@ -73,6 +73,7 @@ model User {
   interpreterSessionLinksAsPatient PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkPatient")
   interpreterSessionLinksRevoked PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
   vaccinationEntries             VaccinationEntry[]
+  vitalEntries                   VitalEntry[]
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -1699,6 +1700,32 @@ model VaccinationEntry {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, vaccinationDate])
+  @@index([userId, deletedAt])
+}
+
+/// Patient-recorded vital measurements — manual entry, not an official medical record.
+model VitalEntry {
+  id             String    @id @default(cuid())
+  userId         String
+  /// blood_pressure | heart_rate | glucose | weight | oxygen | temperature
+  type           String    @db.VarChar(40)
+  /// Primary value (systolic for BP, bpm, mg/dL, kg, %, °C)
+  valuePrimary   Float
+  /// Secondary value — diastolic mmHg for blood_pressure only
+  valueSecondary Float?
+  /// mmHg | bpm | mg/dL | mmol/L | kg | % | °C
+  unit           String    @db.VarChar(20)
+  measuredAt     DateTime
+  notes          String?   @db.Text
+  /// manual | import
+  source         String    @default("manual") @db.VarChar(40)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type, measuredAt])
   @@index([userId, deletedAt])
 }
 

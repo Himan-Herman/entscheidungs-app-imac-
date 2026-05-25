@@ -114,6 +114,14 @@ export function isSemanticTranslationDrift(originalText, translatedText) {
     }
   }
 
+  if (isNegationLost(original, translated, origConcepts, transConcepts)) {
+    return true;
+  }
+
+  if (isUncertaintyInflated(original, translated)) {
+    return true;
+  }
+
   const origWords = original.split(/\s+/).filter(Boolean).length;
   const transWords = translated.split(/\s+/).filter(Boolean).length;
   if (origWords > 0 && origWords <= 7 && transWords >= origWords + 5) {
@@ -122,6 +130,69 @@ export function isSemanticTranslationDrift(originalText, translatedText) {
         return true;
       }
     }
+  }
+
+  return false;
+}
+
+const UNCERTAINTY_MARKERS = [
+  /\bmaybe\b/i,
+  /\bperhaps\b/i,
+  /\bi think\b/i,
+  /\bnot sure\b/i,
+  /\bvielleicht\b/i,
+  /\bich glaube\b/i,
+  /\bunsicher\b/i,
+  /\bmöglicherweise\b/i,
+];
+
+const DEFINITE_MARKERS = [
+  /\bdefinitely\b/i,
+  /\bcertainly\b/i,
+  /\bi (know|have)\b/i,
+  /\bauf jeden fall\b/i,
+  /\bganz sicher\b/i,
+  /\bich habe sicher\b/i,
+];
+
+/**
+ * @param {string} original
+ * @param {string} translated
+ */
+function isUncertaintyInflated(original, translated) {
+  const origUncertain = UNCERTAINTY_MARKERS.some((p) => p.test(original));
+  const transDefinite = DEFINITE_MARKERS.some((p) => p.test(translated));
+  return origUncertain && transDefinite;
+}
+
+/**
+ * @param {string} original
+ * @param {string} translated
+ * @param {Set<ConceptId>} origConcepts
+ * @param {Set<ConceptId>} transConcepts
+ */
+function isNegationLost(original, translated, origConcepts, transConcepts) {
+  const origNeg =
+    origConcepts.has("negation") ||
+    /\b(no|not|keine|kein|nicht)\b/i.test(original);
+  if (!origNeg) return false;
+
+  if (origConcepts.has("allergy") && !transConcepts.has("allergy")) {
+    return false;
+  }
+
+  if (transConcepts.has("allergy") && !origConcepts.has("allergy")) {
+    return true;
+  }
+
+  const origDeniesAllergy =
+    /\b(no allergies|no allergy)\b/i.test(original) || /\bkeine allerg/i.test(original);
+  const transAffirmsAllergy =
+    /\ballerg/i.test(translated) &&
+    !/\b(no allergies|no allergy|keine allerg)/i.test(translated);
+
+  if (origDeniesAllergy && transAffirmsAllergy) {
+    return true;
   }
 
   return false;

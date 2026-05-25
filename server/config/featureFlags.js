@@ -249,3 +249,8 @@ export function isInterpreterStreamingTtsEnabled() {
   if (!isInterpreterTtsEnabled()) return false;
   return envFlag("MEDICAL_INTERPRETER_STREAMING_TTS_ENABLED", false);
 }
+
+/** Patient vital measurements — manual entry, Phase 1. */
+export function isVitalsEnabled() {
+  return envFlag("ENABLE_VITALS", false);
+}

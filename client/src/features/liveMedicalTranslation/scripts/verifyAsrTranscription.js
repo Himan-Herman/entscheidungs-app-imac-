@@ -50,8 +50,8 @@ assert(meta.type === "conversation.item.input_audio_transcription.completed", "m
 assert(!("transcript" in meta), "meta does not include transcript text");
 
 assert(
-  LIVE_TRANSLATION_ORIGINAL_BUFFER_MS >= 300 && LIVE_TRANSLATION_ORIGINAL_BUFFER_MS <= 800,
-  "buffer window in expected range",
+  LIVE_TRANSLATION_ORIGINAL_BUFFER_MS >= 1000 && LIVE_TRANSLATION_ORIGINAL_BUFFER_MS <= 2500,
+  "buffer window in expected conservative range",
 );
 
 console.log("verifyAsrTranscription: OK");

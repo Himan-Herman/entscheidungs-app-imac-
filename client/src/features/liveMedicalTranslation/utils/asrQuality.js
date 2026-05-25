@@ -1,5 +1,7 @@
 import { isMedaUnclearPhrase } from "./repeatPhrase.js";
 import { isSemanticTranslationDrift } from "./translationSemanticCheck.js";
+import { isUnsafeTranslationOutput } from "./translationOutputSafety.js";
+import { MIN_STABLE_TRANSCRIPT_CHARS } from "./transcriptionFirst.js";
 
 const HALLUCINATION_CONTENT_PATTERNS = [
   /\b(cough|phlegm|headache|fever|pain|nausea|allerg|symptom|medication|diagnos)/i,
@@ -38,7 +40,11 @@ export function resolveTurnStatus(input) {
   }
 
   const original = String(input.originalText || "").trim();
-  if (!original || isLikelyEmptyOrNoiseTranscript(original)) {
+  if (
+    !original ||
+    isLikelyEmptyOrNoiseTranscript(original) ||
+    original.length < MIN_STABLE_TRANSCRIPT_CHARS
+  ) {
     return "unclear";
   }
 
@@ -47,6 +53,10 @@ export function resolveTurnStatus(input) {
   }
 
   if (isSemanticTranslationDrift(original, translated)) {
+    return "unclear";
+  }
+
+  if (isUnsafeTranslationOutput(translated)) {
     return "unclear";
   }
 
@@ -76,6 +86,10 @@ export function isLikelyHallucinatedTranslation(originalText, translatedText) {
   }
 
   if (isSemanticTranslationDrift(original, translated)) {
+    return true;
+  }
+
+  if (isUnsafeTranslationOutput(translated)) {
     return true;
   }
 

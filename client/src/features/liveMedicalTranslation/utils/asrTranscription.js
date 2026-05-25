@@ -2,8 +2,8 @@ import { extractDetectedLanguage, extractOriginalText } from "./webrtc.js";
 import { isLikelyEmptyOrNoiseTranscript } from "./asrQuality.js";
 import { logRealtimeDiag } from "./realtimeDiagnostics.js";
 
-/** Wait for input ASR after translation before finalizing a turn (ms). */
-export const LIVE_TRANSLATION_ORIGINAL_BUFFER_MS = 800;
+/** Wait for stable input ASR after translation before finalizing a turn (ms). */
+export const LIVE_TRANSLATION_ORIGINAL_BUFFER_MS = 1400;
 
 const INPUT_TRANSCRIPTION_EVENT_TYPES = new Set([
   "conversation.item.input_audio_transcription.completed",
