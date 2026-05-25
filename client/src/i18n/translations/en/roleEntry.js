@@ -132,4 +132,6 @@ export default {
   hubLinkAnalytics: "Analytics",
   hubLinkVaccinations: "Vaccination pass",
   hubLinkVaccinationsSub: "Track and document your vaccinations",
+  hubLinkVitals: "My measurements",
+  hubLinkVitalsSub: "Blood pressure, pulse, glucose & weight over time",
 };

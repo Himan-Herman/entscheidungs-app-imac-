@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { resolveLiveTranslationMessages } from "../utils/safeLiveTranslationMessages.js";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { isLiveMedicalTranslationEnabled } from "../featureFlag.js";
 import { LIVE_TRANSLATION_LANGUAGE_OPTIONS } from "../languages.js";

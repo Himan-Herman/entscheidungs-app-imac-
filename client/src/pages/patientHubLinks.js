@@ -14,6 +14,7 @@ import {
   Pill,
   ShieldCheck,
   Stethoscope,
+  TrendingUp,
   UserRound,
   Users,
   Video,
@@ -165,6 +166,12 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkVaccinations",
     subtitleKey: "hubLinkVaccinationsSub",
     icon: ShieldCheck,
+  },
+  {
+    to: "/patient/vitals",
+    key: "hubLinkVitals",
+    subtitleKey: "hubLinkVitalsSub",
+    icon: TrendingUp,
   },
 ]);
 

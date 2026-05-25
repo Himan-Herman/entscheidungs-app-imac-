@@ -96,7 +96,7 @@ const PatientOrientationHubPage = lazy(() =>
   import("./pages/PatientOrientationHubPage.jsx"),
 );
 const LiveTranslationPage = lazy(() =>
-  import("./features/liveMedicalTranslation/pages/LiveTranslationPage.jsx"),
+  import("./features/liveMedicalTranslation/pages/LiveTranslationRoute.jsx"),
 );
 const PatientInboxPage = lazy(() =>
   import("./features/patientInbox/pages/PatientInboxPage.jsx"),
@@ -184,6 +184,9 @@ const PatientTelemedicineDetailPage = lazy(() =>
 );
 const VaccinationPassPage = lazy(() =>
   import("./features/vaccinations/pages/VaccinationPassPage.jsx"),
+);
+const VitalsPage = lazy(() =>
+  import("./features/vitals/pages/VitalsPage.jsx"),
 );
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
@@ -505,6 +508,14 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <VaccinationPassPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/vitals"
+                  element={
+                    <ProtectedRoute>
+                      <VitalsPage />
                     </ProtectedRoute>
                   }
                 />

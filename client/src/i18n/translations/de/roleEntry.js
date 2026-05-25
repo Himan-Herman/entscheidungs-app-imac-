@@ -132,4 +132,6 @@ export default {
   hubLinkAnalytics: "Analytics",
   hubLinkVaccinations: "Impfpass",
   hubLinkVaccinationsSub: "Impfungen dokumentieren und im Blick behalten",
+  hubLinkVitals: "Meine Messwerte",
+  hubLinkVitalsSub: "Blutdruck, Puls, Blutzucker & Gewicht im Verlauf",
 };

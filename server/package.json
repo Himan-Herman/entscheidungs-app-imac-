@@ -20,6 +20,7 @@
     "start": "node app.js",
     "verify:live-translation-fidelity": "node scripts/verifyLiveTranslationFidelity.js",
     "verify:lab-explanation": "node scripts/verifyLabPatientExplanation.js",
+    "verify:vitals": "node scripts/verifyVitals.js",
     "verify:ai-safety": "node scripts/verifyAiSafetyRegression.js"
   },
   "keywords": [],

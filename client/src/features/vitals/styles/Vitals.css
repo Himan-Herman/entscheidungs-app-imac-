@@ -1,0 +1,545 @@
+/* ── Vitals Page — modern, WCAG AA, dark/light, responsive ──────────────── */
+
+.vitals-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.vitals-page__header {
+  margin-bottom: 1.5rem;
+}
+
+.vitals-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  line-height: 1.25;
+}
+
+.vitals-page__intro {
+  font-size: 1rem;
+  color: var(--ms-text-secondary, #4b5563);
+  margin: 0 0 0.5rem;
+}
+
+.vitals-page__disclaimer {
+  font-size: 0.875rem;
+  color: var(--ms-text-secondary, #6b7280);
+  background: var(--ms-surface-muted, #eff6ff);
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  padding: 0.65rem 0.875rem;
+  margin: 0.5rem 0 0;
+}
+
+/* ── Add button ──────────────────────────────────────────────────────────── */
+.vitals-page__add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 48px;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  transition: background 0.15s;
+}
+.vitals-page__add-btn:hover { background: #0f766e; }
+.vitals-page__add-btn:focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 3px;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────────────── */
+.vitals-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 1.25rem;
+}
+
+.vitals-tabs__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 36px;
+  padding: 0.35rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ms-text-secondary, #4b5563);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.vitals-tabs__btn:hover {
+  background: var(--ms-surface-muted, #f1f5f9);
+  color: var(--ms-text, #111827);
+}
+.vitals-tabs__btn--active {
+  background: var(--ms-accent, #0d9488);
+  border-color: var(--ms-accent, #0d9488);
+  color: #fff;
+}
+.vitals-tabs__btn--active:hover { background: #0f766e; }
+.vitals-tabs__btn:focus-visible {
+  outline: 3px solid var(--ms-accent, #0d9488);
+  outline-offset: 2px;
+}
+
+/* ── Chart panel ─────────────────────────────────────────────────────────── */
+.vitals-chart-panel {
+  background: var(--ms-surface, #fff);
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 1.125rem 1.25rem 0.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.vitals-chart-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.vitals-chart-panel__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.vitals-chart-panel__ref {
+  font-size: 0.78rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.vitals-chart-panel__no-data {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  font-size: 0.9rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+/* ── Entries list ────────────────────────────────────────────────────────── */
+.vitals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Entry card ──────────────────────────────────────────────────────────── */
+.vital-card {
+  background: var(--ms-surface, #fff);
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 1rem 1.125rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 1rem;
+  align-items: start;
+}
+
+.vital-card__left { grid-column: 1; }
+.vital-card__right {
+  grid-column: 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding-top: 0.1rem;
+}
+
+.vital-card__type {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0 0 0.2rem;
+}
+
+.vital-card__value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--ms-text, #111827);
+  letter-spacing: -0.02em;
+}
+
+.vital-card__unit {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ms-text-secondary, #6b7280);
+  margin-left: 0.2rem;
+}
+
+.vital-card__date {
+  font-size: 0.85rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0.3rem 0 0;
+}
+
+.vital-card__notes {
+  font-size: 0.85rem;
+  color: var(--ms-text-secondary, #4b5563);
+  margin: 0.4rem 0 0;
+  white-space: pre-wrap;
+}
+
+.vital-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  margin-top: 0.35rem;
+  white-space: nowrap;
+}
+.vital-card__status--normal  { background: #dcfce7; color: #166534; }
+.vital-card__status--elevated { background: #fef3c7; color: #92400e; }
+.vital-card__status--low     { background: #dbeafe; color: #1e40af; }
+.vital-card__status--unknown { background: var(--ms-surface-muted,#f1f5f9); color: var(--ms-text-secondary,#475569); }
+
+/* action buttons on card */
+.vital-card__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ms-text-secondary, #6b7280);
+  transition: background 0.12s;
+}
+.vital-card__btn:hover { background: var(--ms-surface-muted, #f1f5f9); }
+.vital-card__btn:focus-visible {
+  outline: 3px solid var(--ms-accent, #0d9488);
+  outline-offset: 2px;
+}
+.vital-card__btn--danger { color: #b91c1c; border-color: #fca5a5; }
+.vital-card__btn--danger:hover { background: #fef2f2; }
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+.vitals-form {
+  background: var(--ms-surface, #fff);
+  border: 1px solid var(--ms-border, #d0d5dd);
+  border-radius: 14px;
+  padding: 1.375rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.vitals-form__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 1.125rem;
+}
+
+.vitals-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.875rem 1rem;
+}
+
+.vitals-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.vitals-form__field--full { grid-column: 1 / -1; }
+
+.vitals-form__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.vitals-form__input,
+.vitals-form__select,
+.vitals-form__textarea {
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--ms-border, #d0d5dd);
+  border-radius: 8px;
+  background: var(--ms-surface, #fff);
+  color: var(--ms-text, #111827);
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.vitals-form__input:focus,
+.vitals-form__select:focus,
+.vitals-form__textarea:focus {
+  outline: none;
+  border-color: var(--ms-accent, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+}
+.vitals-form__input--error,
+.vitals-form__select--error { border-color: #f87171; }
+
+.vitals-form__error-msg {
+  font-size: 0.82rem;
+  color: #b91c1c;
+}
+
+.vitals-form__hint {
+  font-size: 0.82rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.vitals-form__required-note {
+  font-size: 0.82rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0.5rem 0 0;
+}
+
+.vitals-form__actions {
+  display: flex;
+  gap: 0.625rem;
+  margin-top: 1.125rem;
+  flex-wrap: wrap;
+}
+
+.vitals-form__save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 48px;
+  padding: 0.65rem 1.375rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.vitals-form__save-btn:hover { background: #0f766e; }
+.vitals-form__save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.vitals-form__save-btn:focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 3px;
+}
+
+.vitals-form__cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d0d5dd);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+}
+.vitals-form__cancel-btn:hover { background: var(--ms-surface-muted, #f1f5f9); }
+
+.vitals-form__save-error {
+  font-size: 0.875rem;
+  color: #b91c1c;
+  margin-top: 0.25rem;
+}
+
+/* ── States ──────────────────────────────────────────────────────────────── */
+.vitals-page__loading {
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
+.vitals-page__spinner {
+  display: inline-block;
+  width: 2rem; height: 2rem;
+  border: 3px solid var(--ms-border, #e2e8f0);
+  border-top-color: var(--ms-accent, #0d9488);
+  border-radius: 50%;
+  animation: vitals-spin 0.7s linear infinite;
+}
+@keyframes vitals-spin { to { transform: rotate(360deg); } }
+
+.vitals-page__error {
+  padding: 0.75rem 1rem;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  color: #b91c1c;
+  margin-bottom: 1rem;
+}
+
+.vitals-page__empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+.vitals-page__empty-hint {
+  font-size: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+/* ── Delete dialog ───────────────────────────────────────────────────────── */
+.vitals-delete-dialog {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+.vitals-delete-dialog__box {
+  background: var(--ms-surface, #fff);
+  border-radius: 14px;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.vitals-delete-dialog__title { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem; }
+.vitals-delete-dialog__body  { font-size: 0.925rem; color: var(--ms-text-secondary,#374151); margin: 0 0 1.25rem; }
+.vitals-delete-dialog__actions { display: flex; gap: 0.625rem; flex-wrap: wrap; }
+.vitals-delete-dialog__confirm-btn {
+  min-height: 44px;
+  padding: 0.55rem 1.125rem;
+  font-size: 0.95rem; font-weight: 600;
+  border: none; border-radius: 8px;
+  background: #dc2626; color: #fff; cursor: pointer;
+}
+.vitals-delete-dialog__confirm-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.vitals-delete-dialog__cancel-btn {
+  min-height: 44px;
+  padding: 0.55rem 1.125rem;
+  font-size: 0.95rem; font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d0d5dd); border-radius: 8px;
+  background: transparent; cursor: pointer; color: inherit;
+}
+.vitals-delete-dialog__error { font-size: 0.875rem; color: #b91c1c; margin-top: 0.5rem; }
+
+/* ── Dark mode ───────────────────────────────────────────────────────────── */
+
+:root[data-theme="dark"] .vitals-page__intro { color: #94a3b8; }
+
+:root[data-theme="dark"] .vitals-page__disclaimer {
+  background: rgba(59,130,246,0.1);
+  border-color: rgba(96,165,250,0.35);
+  color: #93c5fd;
+}
+
+:root[data-theme="dark"] .vitals-chart-panel,
+:root[data-theme="dark"] .vital-card,
+:root[data-theme="dark"] .vitals-form,
+:root[data-theme="dark"] .vitals-delete-dialog__box {
+  background: rgba(15,23,42,0.9);
+  border-color: rgba(148,163,184,0.28);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .vital-card__type,
+:root[data-theme="dark"] .vital-card__date,
+:root[data-theme="dark"] .vital-card__notes,
+:root[data-theme="dark"] .vitals-chart-panel__ref,
+:root[data-theme="dark"] .vitals-page__intro,
+:root[data-theme="dark"] .vitals-form__hint,
+:root[data-theme="dark"] .vitals-delete-dialog__body {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .vital-card__value { color: #e2e8f0; }
+:root[data-theme="dark"] .vital-card__unit  { color: #94a3b8; }
+
+:root[data-theme="dark"] .vital-card__status--normal   { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+:root[data-theme="dark"] .vital-card__status--elevated { background: rgba(234,179,8,0.2);  color: #fde68a; }
+:root[data-theme="dark"] .vital-card__status--low      { background: rgba(59,130,246,0.2); color: #93c5fd; }
+:root[data-theme="dark"] .vital-card__status--unknown  { background: rgba(100,116,139,0.2); color: #94a3b8; }
+
+:root[data-theme="dark"] .vital-card__btn {
+  border-color: rgba(148,163,184,0.35);
+  color: #94a3b8;
+  background: transparent;
+}
+:root[data-theme="dark"] .vital-card__btn:hover { background: rgba(148,163,184,0.1); }
+:root[data-theme="dark"] .vital-card__btn--danger { color: #fca5a5; border-color: rgba(239,68,68,0.5); }
+:root[data-theme="dark"] .vital-card__btn--danger:hover { background: rgba(239,68,68,0.1); }
+
+:root[data-theme="dark"] .vitals-tabs__btn {
+  border-color: rgba(148,163,184,0.35);
+  color: #94a3b8;
+}
+:root[data-theme="dark"] .vitals-tabs__btn:hover {
+  background: rgba(148,163,184,0.1);
+  color: #e2e8f0;
+}
+:root[data-theme="dark"] .vitals-tabs__btn--active {
+  background: var(--ms-accent, #0d9488);
+  border-color: var(--ms-accent, #0d9488);
+  color: #fff;
+}
+
+:root[data-theme="dark"] .vitals-form__input,
+:root[data-theme="dark"] .vitals-form__select,
+:root[data-theme="dark"] .vitals-form__textarea {
+  background: rgba(15,23,42,0.9);
+  border-color: rgba(148,163,184,0.35);
+  color: #e2e8f0;
+}
+:root[data-theme="dark"] .vitals-form__input::placeholder,
+:root[data-theme="dark"] .vitals-form__textarea::placeholder { color: #64748b; }
+
+:root[data-theme="dark"] .vitals-form__cancel-btn,
+:root[data-theme="dark"] .vitals-delete-dialog__cancel-btn {
+  border-color: rgba(148,163,184,0.35);
+  color: #e2e8f0;
+}
+:root[data-theme="dark"] .vitals-form__cancel-btn:hover,
+:root[data-theme="dark"] .vitals-delete-dialog__cancel-btn:hover {
+  background: rgba(148,163,184,0.1);
+}
+
+:root[data-theme="dark"] .vitals-page__error {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.35);
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .vitals-delete-dialog {
+  background: rgba(0,0,0,0.6);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .vitals-form__grid { grid-template-columns: 1fr; }
+  .vitals-form__actions { flex-direction: column; }
+  .vitals-form__save-btn,
+  .vitals-form__cancel-btn { width: 100%; justify-content: center; }
+
+  .vital-card {
+    grid-template-columns: 1fr;
+  }
+  .vital-card__right {
+    grid-column: 1;
+    padding-top: 0;
+  }
+
+  .vitals-tabs { gap: 0.3rem; }
+  .vitals-tabs__btn { font-size: 0.8rem; padding: 0.3rem 0.65rem; }
+}

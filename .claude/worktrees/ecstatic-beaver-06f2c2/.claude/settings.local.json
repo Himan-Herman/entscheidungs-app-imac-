@@ -11,7 +11,8 @@
       "Bash(node -e ' *)",
       "Bash(npm install *)",
       "Bash(grep -n \"vaccinationEntries\\\\|VaccinationEntry\\\\|}\\\\s*$\" /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/prisma/schema.prisma)",
-      "Bash(ENABLE_VITALS=true node scripts/verifyVitals.js)"
+      "Bash(ENABLE_VITALS=true node scripts/verifyVitals.js)",
+      "Bash(npx prisma *)"
     ]
   }
 }

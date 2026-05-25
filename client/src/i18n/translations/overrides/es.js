@@ -11,6 +11,7 @@ import esPatient from "./es/es.patient.js";
 import esMedicalInterpreter from "./es/es.medicalInterpreter.js";
 import esPracticeModules from "./es/es.practice.modules.js";
 import esVaccinations from "./es/es.vaccinations.js";
+import esVitals from "./es/es.vitals.js";
 
 /** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
 const esBase = {
@@ -219,6 +220,6 @@ export default deepMerge(
   ),
   deepMerge(
     deepMerge(deepMerge(esPatient, esMedicalInterpreter), esPracticeModules),
-    { vaccinations: esVaccinations },
+    deepMerge({ vaccinations: esVaccinations }, { vitals: esVitals }),
   ),
 );
