@@ -10,6 +10,7 @@ export const CONSENT_TYPES = Object.freeze([
   "optional_secure_links",
   "interpreter_cloud_storage",
   "interpreter_practice_share",
+  "vitals_access",
 ]);
 
 export const CONSENT_STATUSES = new Set(["granted", "revoked", "expired"]);
@@ -26,6 +27,7 @@ export const CONSENT_TYPE_TO_LEGACY_SCOPE = Object.freeze({
   ai_organizational_assistance: "ai_organizational",
   optional_email_notifications: "email_notifications",
   optional_secure_links: "secure_links",
+  vitals_access: "vitals",
 });
 
 /** Legacy scope → consent type (Phase-1 scopes) */
@@ -34,6 +36,7 @@ export const LEGACY_SCOPE_TO_CONSENT_TYPE = Object.freeze({
   medication: "medication_plan_access",
   messages: "secure_messaging",
   documents: "document_sharing",
+  vitals: "vitals_access",
 });
 
 /**

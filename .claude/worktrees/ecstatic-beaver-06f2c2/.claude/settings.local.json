@@ -13,7 +13,8 @@
       "Bash(grep -n \"vaccinationEntries\\\\|VaccinationEntry\\\\|}\\\\s*$\" /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/prisma/schema.prisma)",
       "Bash(ENABLE_VITALS=true node scripts/verifyVitals.js)",
       "Bash(npx prisma *)",
-      "Bash(grep -E \"\\\\.\\(js|ts\\)$\")"
+      "Bash(grep -E \"\\\\.\\(js|ts\\)$\")",
+      "Bash(grep -E \"\\\\.jsx$|\\\\.tsx$\")"
     ]
   }
 }

@@ -1833,6 +1833,65 @@
   line-height: 1.5;
 }
 
+.live-translation__error-fallback-dev {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  font-family: ui-monospace, monospace;
+  color: #7f1d1d;
+  background: #fef2f2;
+  border-radius: 6px;
+  word-break: break-word;
+}
+
+.live-translation__error-fallback-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.live-translation__error-fallback-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.live-translation__error-fallback-btn--primary {
+  border: 1px solid #145a4f;
+  background: #1a6b5c;
+  color: #ffffff;
+}
+
+.live-translation__error-fallback-btn--primary:hover,
+.live-translation__error-fallback-btn--primary:focus-visible {
+  background: #145a4f;
+  color: #ffffff;
+  outline: 2px solid #1a6b5c;
+  outline-offset: 2px;
+}
+
+.live-translation__error-fallback-btn--secondary {
+  border: 1px solid var(--border, #d8dee6);
+  background: #ffffff;
+  color: var(--text, #1b2430);
+}
+
+.live-translation__error-fallback-btn--secondary:hover,
+.live-translation__error-fallback-btn--secondary:focus-visible {
+  background: var(--surface-muted, #f3f6f8);
+  outline: 2px solid #1a6b5c;
+  outline-offset: 2px;
+}
+
 @media (min-width: 640px) {
   .live-translation__speakers {
     grid-template-columns: 1fr 1fr;

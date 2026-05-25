@@ -11,6 +11,7 @@ export const CONSENT_SCOPES = Object.freeze([
   "ai_organizational",
   "email_notifications",
   "secure_links",
+  "vitals",
 ]);
 
 const SCOPE_SET = new Set(CONSENT_SCOPES);

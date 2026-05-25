@@ -1,15 +1,18 @@
 import { Component } from "react";
 import { Link } from "react-router-dom";
+import "../styles/LiveTranslationPage.css";
 
 const FALLBACK_COPY = {
   de: {
     title: "Meda konnte die Sitzung nicht korrekt laden",
-    body: "Bitte schließen Sie diese Seite und öffnen Sie die Live-Übersetzung erneut. Wenn das Problem bleibt, starten Sie den Browser neu.",
+    body: "Bitte laden Sie die Seite neu. Wenn das Problem bleibt, kehren Sie zum Patientenbereich zurück.",
+    retry: "Seite neu laden",
     back: "Zurück zum Patientenbereich",
   },
   en: {
     title: "Meda could not load the session correctly",
-    body: "Please close this page and open live translation again. If the problem persists, restart your browser.",
+    body: "Please reload the page. If the problem persists, return to the patient area.",
+    retry: "Reload page",
     back: "Back to patient area",
   },
 };
@@ -20,18 +23,26 @@ const FALLBACK_COPY = {
 export default class LiveTranslationErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorMessage: "" };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return {
+      hasError: true,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    };
   }
 
   componentDidCatch(error, info) {
     if (import.meta.env.DEV) {
-      console.error("[live-translation] render error", error?.message, info?.componentStack);
+      console.error("[live-translation] render error", error, info?.componentStack);
     }
   }
+
+  handleRetry = () => {
+    this.setState({ hasError: false, errorMessage: "" });
+    window.location.reload();
+  };
 
   render() {
     if (this.state.hasError) {
@@ -44,9 +55,24 @@ export default class LiveTranslationErrorBoundary extends Component {
           <div className="live-translation__error-fallback-inner">
             <h1 className="live-translation__error-fallback-title">{copy.title}</h1>
             <p className="live-translation__error-fallback-body">{copy.body}</p>
-            <Link className="live-translation__primary" to="/patient">
-              {copy.back}
-            </Link>
+            {import.meta.env.DEV && this.state.errorMessage ? (
+              <p className="live-translation__error-fallback-dev">{this.state.errorMessage}</p>
+            ) : null}
+            <div className="live-translation__error-fallback-actions">
+              <button
+                type="button"
+                className="live-translation__error-fallback-btn live-translation__error-fallback-btn--primary"
+                onClick={this.handleRetry}
+              >
+                {copy.retry}
+              </button>
+              <Link
+                className="live-translation__error-fallback-btn live-translation__error-fallback-btn--secondary"
+                to="/patient"
+              >
+                {copy.back}
+              </Link>
+            </div>
           </div>
         </div>
       );
