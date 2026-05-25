@@ -3,6 +3,7 @@
  * No diagnosis, urgency, treatment, specialist recommendation, or inferred medical facts.
  */
 import { openai } from '../openaiClient.js';
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 import {
   AI_MODULES,
   ALLOWED_COMMUNICATION_STYLE,
@@ -10,7 +11,6 @@ import {
 } from '../config/aiSafetyPolicy.js';
 import { sanitizeAiOutput, shouldRegenerateUnsafeOutput } from './aiSafetySanitizer.js';
 
-const MODEL = 'gpt-4o-mini';
 const SERVER_MAX_FOLLOWUPS = 6;
 const DEFAULT_MAX_FOLLOWUPS = 4;
 const ALLOWED_CATEGORIES = new Set([
@@ -151,7 +151,7 @@ export async function runAdaptiveIntakeTurn(params) {
   let completion;
   try {
     completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: getOpenAiChatModel(),
       temperature: 0.15,
       max_tokens: 320,
       response_format: { type: 'json_object' },
@@ -212,7 +212,7 @@ export async function runAdaptiveIntakeTurn(params) {
   ) {
     try {
       const completion2 = await openai.chat.completions.create({
-        model: MODEL,
+        model: getOpenAiChatModel(),
         temperature: 0.1,
         max_tokens: 320,
         response_format: { type: 'json_object' },

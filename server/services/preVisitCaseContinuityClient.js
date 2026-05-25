@@ -1,8 +1,8 @@
 import { openai } from '../openaiClient.js';
 import { AI_MODULES } from '../config/aiSafetyPolicy.js';
 import { sanitizeStructuredPlainText } from './aiSafetySanitizer.js';
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 
-const MODEL = 'gpt-4o-mini';
 const TITLE_MAX = 140;
 
 const SYSTEM = `You summarize continuity across multiple patient-written pre-visit preparations for the same case.
@@ -103,7 +103,7 @@ export async function summarizeCaseContinuity(params) {
   let completion;
   try {
     completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: getOpenAiChatModel(),
       temperature: 0.1,
       max_tokens: 900,
       response_format: { type: 'json_object' },

@@ -1,7 +1,8 @@
 /**
  * Medical Interpreter — server configuration (Phase 1).
- * Model default matches Meda low-cost pattern; override via INTERPRETER_OPENAI_MODEL.
+ * Model default: gpt-5.4 via openAiModels (override INTERPRETER_OPENAI_MODEL).
  */
+import { getOpenAiChatModel } from "./openAiModels.js";
 
 /** @type {Set<string>} */
 export const INTERPRETER_SUPPORTED_LANGUAGE_CODES = new Set([
@@ -31,7 +32,7 @@ export const INTERPRETER_SUPPORTED_LANGUAGE_CODES = new Set([
 export function getInterpreterOpenAiModel() {
   const model =
     process.env.INTERPRETER_OPENAI_MODEL || process.env.OPENAI_INTERPRETER_MODEL;
-  return typeof model === "string" && model.trim() ? model.trim() : "gpt-4o-mini";
+  return typeof model === "string" && model.trim() ? model.trim() : getOpenAiChatModel();
 }
 
 export function isInterpreterAiConfigured() {

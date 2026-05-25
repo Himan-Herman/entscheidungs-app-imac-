@@ -6,8 +6,8 @@ import { openai } from '../openaiClient.js';
 import { ALLOWED_COMMUNICATION_STYLE, AI_MODULES } from '../config/aiSafetyPolicy.js';
 import { sanitizeAiOutput, shouldRegenerateUnsafeOutput } from './aiSafetySanitizer.js';
 import { PREVISIT_ANSWER_KEYS, normalizeAnswers } from './preVisitOpenAiClient.js';
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 
-const MODEL = 'gpt-4o-mini';
 const MIN_QUESTIONS = 2;
 const MAX_QUESTIONS = 7;
 
@@ -171,7 +171,7 @@ export async function generatePreVisitAssistantQuestions(params) {
   let completion;
   try {
     completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: getOpenAiChatModel(),
       temperature: 0.25,
       max_tokens: 1400,
       response_format: { type: 'json_object' },

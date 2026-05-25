@@ -6,6 +6,7 @@
  */
 
 import { openai } from "../../openaiClient.js";
+import { getOpenAiChatModel } from '../../config/openAiModels.js';
 import {
   AI_MODULES,
   ALLOWED_COMMUNICATION_STYLE,
@@ -91,7 +92,7 @@ async function callOpenAi(prompt) {
   let raw = "";
   for (let attempt = 0; attempt < 2; attempt++) {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: getOpenAiChatModel(),
       temperature: 0.2,
       response_format: { type: "json_object" },
       messages: [

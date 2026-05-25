@@ -2,6 +2,7 @@
 
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 dotenv.config();
 
 const openai = new OpenAI({
@@ -32,7 +33,7 @@ const systemMessage = {
     ];
   
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: getOpenAiChatModel(),
       messages,
       temperature: 0.2,
     });

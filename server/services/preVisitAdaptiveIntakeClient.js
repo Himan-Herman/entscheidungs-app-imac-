@@ -1,5 +1,6 @@
 import { openai } from "../openaiClient.js";
 import { CATEGORY_MICRO_RULES } from "./adaptive/adaptiveCategoryMeta.js";
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 import {
   ADAPTIVE_SYSTEM_PROMPT,
   ADAPTIVE_INSTR_BLOCK,
@@ -18,7 +19,6 @@ import {
 } from "./adaptive/adaptiveIntakeCompactContext.js";
 import { sanitizeAdaptiveModelOutput } from "./adaptive/adaptiveIntakeOutputGuard.js";
 
-const MODEL = "gpt-4o-mini";
 const MAX_FOLLOWUPS_SERVER = 6;
 const ALLOWED_FLAGS = new Set([
   "missing_information",
@@ -71,7 +71,7 @@ function violationScore(parsed) {
 async function callOpenAI(system, userJson) {
   const t0 = Date.now();
   const completion = await openai.chat.completions.create({
-    model: MODEL,
+    model: getOpenAiChatModel(),
     temperature: 0.12,
     max_tokens: 520,
     response_format: { type: "json_object" },

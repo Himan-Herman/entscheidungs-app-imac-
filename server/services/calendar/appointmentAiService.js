@@ -4,6 +4,7 @@ import { sanitizeAiOutput } from "../aiSafetySanitizer.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManageCalendar, canReadCalendar } from "../../utils/practicePermissions.js";
+import { getOpenAiChatModel } from '../../config/openAiModels.js';
 
 const CALENDAR_AI_SYSTEM = `You assist with ORGANIZATIONAL scheduling only.
 
@@ -34,7 +35,7 @@ export async function practiceScheduleSummary(actorUserId, practiceId, input, ct
 
   const locale = langCode(input.locale);
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: getOpenAiChatModel(),
     temperature: 0.2,
     messages: [
       { role: "system", content: CALENDAR_AI_SYSTEM },
@@ -69,7 +70,7 @@ export async function practiceReplyDraft(actorUserId, practiceId, input, ctx = {
 
   const locale = langCode(input.locale);
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: getOpenAiChatModel(),
     temperature: 0.3,
     messages: [
       { role: "system", content: CALENDAR_AI_SYSTEM },
@@ -101,7 +102,7 @@ export async function patientRequestDraft(patientUserId, input, ctx = {}) {
   if (!process.env.OPENAI_API_KEY) throw new Error("ai_not_configured");
   const locale = langCode(input.locale);
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: getOpenAiChatModel(),
     temperature: 0.3,
     messages: [
       { role: "system", content: CALENDAR_AI_SYSTEM },

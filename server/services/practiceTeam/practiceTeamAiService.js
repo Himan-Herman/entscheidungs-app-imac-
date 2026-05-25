@@ -1,4 +1,5 @@
 import { openai } from "../../openaiClient.js";
+import { getOpenAiChatModel } from '../../config/openAiModels.js';
 import {
   ALLOWED_COMMUNICATION_STYLE,
   STRICT_RETRY_SUFFIX_COMPLETION,
@@ -42,7 +43,7 @@ async function runTeamAi(prompt, locale) {
   let raw = "";
   for (let attempt = 0; attempt < 2; attempt++) {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: getOpenAiChatModel(),
       temperature: 0.25,
       messages: [
         { role: "system", content: TEAM_AI_SYSTEM },

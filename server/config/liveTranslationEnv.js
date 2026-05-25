@@ -1,16 +1,16 @@
+import {
+  getOpenAiRealtimeModel,
+  getOpenAiTranscriptionModel,
+} from "./openAiModels.js";
+
 /**
  * neutral_medical voice profile — calm, clear, balanced Realtime output for doctor–patient translation.
  * OpenAI built-in voices: marin is GA-recommended for quality; sage is the fallback calm/neutral option.
  */
 export const LIVE_TRANSLATION_VOICE_PROFILE = "neutral_medical";
 
-/**
- * OpenAI Realtime model for live medical conversation translation.
- * Default gpt-realtime-2: frontier speech-to-speech (stronger than gpt-realtime).
- * Override with LIVE_TRANSLATION_REALTIME_MODEL=gpt-5.4 if your API key supports it on /v1/realtime.
- */
-export const LIVE_TRANSLATION_REALTIME_MODEL =
-  process.env.LIVE_TRANSLATION_REALTIME_MODEL || "gpt-realtime-2";
+/** OpenAI Realtime model for live medical conversation translation (default gpt-5.4). */
+export const LIVE_TRANSLATION_REALTIME_MODEL = getOpenAiRealtimeModel();
 
 /**
  * Voice mapped from neutral_medical profile.
@@ -22,8 +22,7 @@ export const LIVE_TRANSLATION_VOICE = process.env.LIVE_TRANSLATION_VOICE || "mar
 /**
  * Input transcription model (required by Realtime API when transcription is enabled).
  */
-export const LIVE_TRANSLATION_TRANSCRIPTION_MODEL =
-  process.env.LIVE_TRANSLATION_TRANSCRIPTION_MODEL || "gpt-4o-transcribe";
+export const LIVE_TRANSLATION_TRANSCRIPTION_MODEL = getOpenAiTranscriptionModel();
 
 function clampOutputSpeed(raw) {
   const value = Number(raw);

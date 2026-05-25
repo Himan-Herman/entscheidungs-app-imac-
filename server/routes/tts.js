@@ -1,5 +1,6 @@
 import express from "express";
 import OpenAI from "openai";
+import { getOpenAiTtsModel } from "../config/openAiModels.js";
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.post("/", async (req, res) => {
 
     // Anfrage an OpenAI TTS
     const audioResponse = await client.audio.speech.create({
-      model: "gpt-4o-mini-tts",     // OpenAI TTS Modell
+      model: getOpenAiTtsModel(),
       voice: "alloy",               // Stimme (kannst ändern)
       input: text,
       format: "mp3",

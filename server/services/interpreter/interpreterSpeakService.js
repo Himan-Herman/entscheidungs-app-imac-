@@ -1,7 +1,7 @@
 import { openai } from "../../openaiClient.js";
 import { isInterpreterAiConfigured } from "../../config/interpreterEnv.js";
 
-const DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
+import { getOpenAiTtsModel } from "../../config/openAiModels.js";
 
 /** Legacy fallback voice that works across older OpenAI TTS models. */
 const VOICE_NEUTRAL = "alloy";
@@ -68,7 +68,7 @@ function resolveSpeechInstructions(preference, language, voiceSpeed, model) {
 
 export function getInterpreterTtsModel() {
   const model = process.env.INTERPRETER_TTS_MODEL || process.env.OPENAI_TTS_MODEL;
-  return typeof model === "string" && model.trim() ? model.trim() : DEFAULT_TTS_MODEL;
+  return typeof model === "string" && model.trim() ? model.trim() : getOpenAiTtsModel();
 }
 
 /**

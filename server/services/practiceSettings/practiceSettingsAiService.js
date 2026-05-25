@@ -1,4 +1,5 @@
 import { openai } from "../../openaiClient.js";
+import { getOpenAiChatModel } from '../../config/openAiModels.js';
 import {
   ALLOWED_COMMUNICATION_STYLE,
   STRICT_RETRY_SUFFIX_COMPLETION,
@@ -71,7 +72,7 @@ export async function generatePracticeDescriptionDraft(
   let raw = "";
   for (let attempt = 0; attempt < 2; attempt++) {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: getOpenAiChatModel(),
       temperature: 0.3,
       messages: [
         { role: "system", content: SETTINGS_AI_SYSTEM },

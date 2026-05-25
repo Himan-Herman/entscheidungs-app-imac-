@@ -1,8 +1,8 @@
 import { openai } from '../openaiClient.js';
 import { AI_MODULES } from '../config/aiSafetyPolicy.js';
 import { sanitizeStructuredPlainText } from './aiSafetySanitizer.js';
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 
-const MODEL = 'gpt-4o-mini';
 
 const SYSTEM = `You compare two patient-reported pre-visit documents over time.
 Strict rules:
@@ -90,7 +90,7 @@ export async function summarizePreVisitHistoryDiff(params) {
   let completion;
   try {
     completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: getOpenAiChatModel(),
       temperature: 0.1,
       max_tokens: 850,
       response_format: { type: 'json_object' },

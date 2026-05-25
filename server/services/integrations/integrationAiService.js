@@ -4,6 +4,7 @@ import { sanitizeAiOutput } from "../aiSafetySanitizer.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManageIntegrations } from "../../utils/practicePermissions.js";
+import { getOpenAiChatModel } from '../../config/openAiModels.js';
 
 const INTEGRATION_AI_SYSTEM = `You assist practice IT staff with TECHNICAL and ORGANIZATIONAL integration explanations only.
 
@@ -33,7 +34,7 @@ async function runIntegrationAi(actorUserId, practiceId, userPrompt, action, ctx
   if (!process.env.OPENAI_API_KEY) throw new Error("ai_not_configured");
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: getOpenAiChatModel(),
     temperature: 0.2,
     messages: [
       { role: "system", content: INTEGRATION_AI_SYSTEM },

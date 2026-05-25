@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import OpenAI from 'openai';
+import { getOpenAiChatModel } from './config/openAiModels.js';
 
 /** Shared client — reuse across modules (do not instantiate duplicate OpenAI clients). */
 export const openai = new OpenAI({
@@ -14,7 +15,7 @@ export async function frageOpenAI(verlauf) {
   };
 
   const response = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: getOpenAiChatModel(),
     messages: [systemMessage, ...verlauf],
     temperature: 0.4
   });

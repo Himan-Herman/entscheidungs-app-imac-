@@ -1,10 +1,11 @@
 /**
  * Meda — lightweight knowledge assistant configuration.
  */
+import { getOpenAiChatModel } from "./openAiModels.js";
 
 export function getMedaOpenAiModel() {
   const model = process.env.MEDA_OPENAI_MODEL || process.env.OPENAI_MEDA_MODEL;
-  return typeof model === "string" && model.trim() ? model.trim() : "gpt-4o-mini";
+  return typeof model === "string" && model.trim() ? model.trim() : getOpenAiChatModel();
 }
 
 export function isMedaEnabled() {

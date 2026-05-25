@@ -7,6 +7,7 @@ import { kiOpenAiRouteLimiter } from '../middleware/ipRateLimit.js';
 import { logServerError } from '../utils/safeApiError.js';
 import { sanitizeAiOutput } from '../services/aiSafetySanitizer.js';
 import { AI_MODULES } from '../config/aiSafetyPolicy.js';
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 
 const router = express.Router();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -47,7 +48,7 @@ End structured answers with a reminder that this is not a diagnosis and does not
     }
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: getOpenAiChatModel(),
       messages
     });
 

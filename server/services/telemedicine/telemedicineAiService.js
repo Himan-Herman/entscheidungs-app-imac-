@@ -4,6 +4,7 @@ import { sanitizeAiOutput } from "../aiSafetySanitizer.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManageTelemedicine, canReadTelemedicine } from "../../utils/practicePermissions.js";
+import { getOpenAiChatModel } from '../../config/openAiModels.js';
 
 const TELE_AI_SYSTEM = `You help with ORGANIZATIONAL video consultation instructions only.
 
@@ -29,7 +30,7 @@ export async function telemedicineInstructions(actorUserId, practiceId, input, c
 
   const locale = String(input.locale || "de").toLowerCase().startsWith("en") ? "en" : "de";
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: getOpenAiChatModel(),
     temperature: 0.2,
     messages: [
       { role: "system", content: TELE_AI_SYSTEM },
@@ -60,7 +61,7 @@ export async function telemedicineFollowupDraft(actorUserId, practiceId, session
 
   const notes = String(input.notes || "").slice(0, 1500);
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: getOpenAiChatModel(),
     temperature: 0.2,
     messages: [
       { role: "system", content: TELE_AI_SYSTEM },

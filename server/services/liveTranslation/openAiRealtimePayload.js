@@ -47,7 +47,7 @@ export function resolveOpenAiRealtimeVoice(voice, fallback = "marin") {
 }
 
 /** @param {string | undefined | null} model */
-export function resolveOpenAiRealtimeModel(model, fallback = "gpt-realtime-2") {
+export function resolveOpenAiRealtimeModel(model, fallback = "gpt-5.4") {
   if (typeof model === "string" && OPENAI_REALTIME_MODELS.has(model)) return model;
   return fallback;
 }

@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { openai } from "../../openaiClient.js";
+import { getOpenAiChatModel } from '../../config/openAiModels.js';
 import {
   AI_MODULES,
   ALLOWED_COMMUNICATION_STYLE,
@@ -90,7 +91,7 @@ export async function generatePracticeInboxAiAssist(
   let raw = "";
   for (let attempt = 0; attempt < 2; attempt++) {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: getOpenAiChatModel(),
       temperature: 0.3,
       messages: [
         { role: "system", content: ORG_SYSTEM },

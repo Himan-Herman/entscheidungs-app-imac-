@@ -5,8 +5,8 @@
 import { openai } from '../openaiClient.js';
 import { ALLOWED_COMMUNICATION_STYLE, AI_MODULES } from '../config/aiSafetyPolicy.js';
 import { sanitizeStructuredPlainText } from './aiSafetySanitizer.js';
+import { getOpenAiChatModel } from '../config/openAiModels.js';
 
-const MODEL = 'gpt-4o-mini';
 
 export const PREVISIT_ANSWER_KEYS = [
   'appointmentReason',
@@ -136,7 +136,7 @@ export async function generatePreVisitDoctorVersion(params) {
   let completion;
   try {
     completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: getOpenAiChatModel(),
       temperature: 0.2,
       max_tokens: 1200,
       response_format: { type: 'json_object' },
