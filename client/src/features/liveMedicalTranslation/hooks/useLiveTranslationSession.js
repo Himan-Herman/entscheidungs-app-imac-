@@ -393,6 +393,10 @@ export function useLiveTranslationSession({
     if (!responseActiveRef.current) return;
     const dc = dcRef.current;
     if (dc?.readyState === "open") {
+      console.debug("[MedaPipelineDebug] cancelActiveResponse fired", {
+        step: "step7_cancel",
+        dcState: dc.readyState,
+      });
       suppressErrorsUntilRef.current = Date.now() + 3500;
       dc.send(JSON.stringify({ type: "response.cancel" }));
     }
@@ -1135,7 +1139,7 @@ export function useLiveTranslationSession({
       sourceLanguage: routing.sourceLanguage,
       targetLanguage: routing.targetLanguage,
       reason: "language_routing",
-      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
+      hasTranscriptionLanguage: Boolean(payload.session?.input_audio_transcription?.language),
     });
     dc.send(JSON.stringify(payload));
 
@@ -1160,10 +1164,31 @@ export function useLiveTranslationSession({
     (sourceText, routing) => {
       const dc = dcRef.current;
       const trimmed = sourceText?.trim();
-      if (!dc || dc.readyState !== "open" || !trimmed || pausedRef.current) return false;
+      const dcState = dc?.readyState ?? "none";
+
+      if (!dc || dcState !== "open" || !trimmed || pausedRef.current) {
+        console.debug("[MedaPipelineDebug] requestTurnTranslation blocked", {
+          step: "step6_response_create",
+          reason: !dc ? "no_dc" : dcState !== "open" ? "dc_not_open" : !trimmed ? "empty_transcript" : "paused",
+          dcState,
+          hasTranscript: Boolean(trimmed),
+          transcriptLength: trimmed?.length ?? 0,
+          paused: pausedRef.current,
+          activeSpeaker: routing?.activeSpeaker,
+          sourceLanguage: routing?.sourceLanguage,
+          targetLanguage: routing?.targetLanguage,
+        });
+        return false;
+      }
 
       const cfg = sessionConfigRef.current;
-      if (scopeTranslationPausedRef.current) return false;
+      if (scopeTranslationPausedRef.current) {
+        console.debug("[MedaPipelineDebug] requestTurnTranslation blocked — scopeTranslationPaused", {
+          step: "step6_response_create",
+          reason: "scope_paused",
+        });
+        return false;
+      }
       if (
         !canProceedToTranslation({
           transcript: trimmed,
@@ -1171,9 +1196,23 @@ export function useLiveTranslationSession({
           scopeTranslationPaused: scopeTranslationPausedRef.current,
         })
       ) {
+        console.debug("[MedaPipelineDebug] requestTurnTranslation blocked — canProceedToTranslation=false", {
+          step: "step6_response_create",
+          reason: "cannot_proceed",
+          inputState: inputTranscriptStateRef.current,
+          transcriptLength: trimmed.length,
+        });
         return false;
       }
       if (!isTargetLanguageInPair(routing.targetLanguage, cfg.patientLanguage, cfg.doctorLanguage)) {
+        console.debug("[MedaPipelineDebug] requestTurnTranslation blocked — targetLanguage not in pair", {
+          step: "step6_response_create",
+          reason: "target_language_not_in_pair",
+          activeSpeaker: routing.activeSpeaker,
+          targetLanguage: routing.targetLanguage,
+          patientLanguage: cfg.patientLanguage,
+          doctorLanguage: cfg.doctorLanguage,
+        });
         triggerWrongLanguageRepeat(routing, lastDetectedLanguageRef.current);
         return false;
       }
@@ -1182,6 +1221,16 @@ export function useLiveTranslationSession({
       cancelActiveResponse();
       responseActiveRef.current = true;
       safeSetState(() => setConnectionStatus("translating"));
+
+      console.debug("[MedaPipelineDebug] response.create sent", {
+        step: "step6_response_create",
+        activeSpeaker: routing.activeSpeaker,
+        sourceLanguage: routing.sourceLanguage,
+        targetLanguage: routing.targetLanguage,
+        hasTranscript: true,
+        transcriptLength: trimmed.length,
+        dcState,
+      });
 
       const hint = buildCompactClientInstructions(routing);
       dc.send(
@@ -1451,6 +1500,20 @@ export function useLiveTranslationSession({
         const detected = extractDetectedLanguage(event);
         lastDetectedLanguageRef.current = detected || null;
 
+        console.debug("[MedaPipelineDebug] input transcription completed", {
+          step: "step3_transcription_completed",
+          eventType: event.type,
+          hasTranscript: Boolean(transcript && transcript.length > 0),
+          transcriptLength: transcript?.length ?? 0,
+          detectedLanguage: detected || null,
+          activeSpeaker: cfg.activeSpeaker,
+          sourceLanguage: routing.sourceLanguage,
+          targetLanguage: routing.targetLanguage,
+          responseActiveAtArrival: responseActiveRef.current,
+          pendingTranslated: Boolean(pendingTranslatedForTurnRef.current),
+          inputStateBeforeUpdate: inputTranscriptStateRef.current,
+        });
+
         if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
           pendingOriginalRef.current = transcript;
           inputTranscriptStateRef.current = "ready";
@@ -1520,6 +1583,12 @@ export function useLiveTranslationSession({
           typeof event.delta === "string"
             ? event.delta
             : extractTranslatedText(event);
+        console.debug("[MedaPipelineDebug] audio transcript delta", {
+          step: "step7_transcript_delta",
+          eventType: type,
+          hasDelta: Boolean(delta),
+          accumulatedLength: currentTranslatedRef.current.length + (delta?.length ?? 0),
+        });
         if (delta) {
           currentTranslatedRef.current += delta;
           safeSetState(() => {
@@ -1533,6 +1602,11 @@ export function useLiveTranslationSession({
       }
 
       if (type === "response.created" || type === "response.output_item.added") {
+        console.debug("[MedaPipelineDebug] response lifecycle event", {
+          step: "step7_response_created",
+          eventType: type,
+          responseActiveBefore: responseActiveRef.current,
+        });
         responseActiveRef.current = true;
         setActivityStatus("translating");
         return;
@@ -1549,6 +1623,14 @@ export function useLiveTranslationSession({
       ) {
         const translated =
           extractTranslatedText(event) || currentTranslatedRef.current;
+        console.debug("[MedaPipelineDebug] audio transcript done", {
+          step: "step8_transcript_done",
+          eventType: type,
+          hasTranslation: Boolean(translated),
+          translationLength: translated?.length ?? 0,
+          inputState: inputTranscriptStateRef.current,
+          pendingOriginalLength: String(pendingOriginalRef.current || "").length,
+        });
         if (translated) {
           currentTranslatedRef.current = translated;
           finalizeTranslationOutput(translated);
@@ -1597,8 +1679,17 @@ export function useLiveTranslationSession({
       }
 
       if (type === "response.done") {
+        const isCancelledOrFailed = isCancelledOrFailedResponseDone(event);
+        const fromResponseText = extractTranslatedTextFromResponse(event);
+        console.debug("[MedaPipelineDebug] response.done", {
+          step: "step8_response_done",
+          isCancelledOrFailed,
+          hasTranslation: Boolean(fromResponseText),
+          translationLength: fromResponseText?.length ?? 0,
+          inputState: inputTranscriptStateRef.current,
+        });
         responseActiveRef.current = false;
-        if (isCancelledOrFailedResponseDone(event)) {
+        if (isCancelledOrFailed) {
           logRealtimeDiag("response_done_non_success", summarizeRealtimeEvent(event));
           safeSetState(() => {
             setConnectionStatus(pausedRef.current ? "paused" : "listening");
@@ -1606,16 +1697,15 @@ export function useLiveTranslationSession({
           return;
         }
 
-        const fromResponse = extractTranslatedTextFromResponse(event);
         if (
-          fromResponse &&
+          fromResponseText &&
           !pausedRef.current &&
           !awaitingIntroResponseRef.current &&
           !pendingPlanBRef.current
         ) {
-          currentTranslatedRef.current = fromResponse;
-          safeSetState(() => setCurrentTranslatedText(fromResponse));
-          finalizeTranslationOutput(fromResponse);
+          currentTranslatedRef.current = fromResponseText;
+          safeSetState(() => setCurrentTranslatedText(fromResponseText));
+          finalizeTranslationOutput(fromResponseText);
         }
 
         safeSetState(() => {
@@ -1630,6 +1720,14 @@ export function useLiveTranslationSession({
       if (type === "error") {
         const summary = summarizeRealtimeEvent(event);
         const classified = classifyRealtimeError(event);
+        console.debug("[MedaPipelineDebug] error event received", {
+          step: "step9_error",
+          errorCode: event?.error?.code ?? null,
+          errorType: event?.error?.type ?? null,
+          fatal: classified.fatal,
+          ignorable: classified.ignorable,
+          dcState: dcRef.current?.readyState ?? "none",
+        });
         logRealtimeDiag("realtime_error", { ...summary, ...classified });
 
         if (Date.now() < suppressErrorsUntilRef.current) return;
@@ -1700,7 +1798,7 @@ export function useLiveTranslationSession({
       activeSpeaker: routing.activeSpeaker,
       sourceLanguage: routing.sourceLanguage,
       targetLanguage: routing.targetLanguage,
-      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
+      hasTranscriptionLanguage: Boolean(payload.session?.input_audio_transcription?.language),
     });
     dc.send(JSON.stringify(payload));
 

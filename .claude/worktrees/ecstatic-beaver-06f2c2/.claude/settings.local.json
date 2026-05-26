@@ -19,7 +19,8 @@
       "Bash(node scripts/verifyVitals.js)",
       "Bash(sed -n '10,20p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/i18n/translations/overrides/fr.js)",
       "Bash(sed -n '218,230p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/i18n/translations/overrides/fr.js)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(node server/scripts/verifyAiSafetyRegression.js)"
     ]
   }
 }

@@ -1,6 +1,12 @@
 /**
  * OpenAI Realtime client_secrets payload helpers.
  * Keeps transcription language / voice / model within API-supported values.
+ *
+ * Model separation:
+ *  - Realtime (WebRTC/audio): gpt-realtime-2 — official low-latency audio model.
+ *    GPT-5.4 is a chat/text model and is NOT valid here; using it causes invalid_value errors.
+ *  - Transcription (ASR): gpt-4o-transcribe — best accuracy for medical speech.
+ *  - TTS/voice: marin — calm, neutral, professional; suitable for healthcare.
  */
 
 /** ISO codes accepted by Realtime input transcription (from OpenAI API error list). */
@@ -15,19 +21,29 @@ export const OPENAI_REALTIME_VOICES = new Set([
   "alloy", "ash", "ballad", "coral", "echo", "sage", "shimmer", "verse", "marin", "cedar",
 ]);
 
+/**
+ * Valid OpenAI Realtime audio/WebRTC models.
+ * GPT-5.4 is intentionally excluded — it is a chat/text model, not a Realtime audio model.
+ * Using a chat model here causes invalid_value errors from the client_secrets endpoint.
+ */
 export const OPENAI_REALTIME_MODELS = new Set([
   "gpt-realtime",
   "gpt-realtime-2",
   "gpt-4o-realtime-preview",
   "gpt-4o-realtime-preview-2024-12-17",
-  "gpt-5.4",
-  "gpt-5.4-2026-03-05",
+  "gpt-4o-mini-realtime-preview",
 ]);
 
+/**
+ * Valid OpenAI ASR/transcription models.
+ * gpt-4o-transcribe is preferred for medical use (highest accuracy).
+ * gpt-4o-mini-transcribe is the lighter fallback.
+ */
 export const OPENAI_TRANSCRIPTION_MODELS = new Set([
   "whisper-1",
   "gpt-realtime-whisper",
   "gpt-4o-transcribe",
+  "gpt-4o-transcribe-2025-03-20",
   "gpt-4o-mini-transcribe",
   "gpt-4o-mini-transcribe-2025-03-20",
   "gpt-4o-mini-transcribe-2025-12-15",
@@ -47,7 +63,7 @@ export function resolveOpenAiRealtimeVoice(voice, fallback = "marin") {
 }
 
 /** @param {string | undefined | null} model */
-export function resolveOpenAiRealtimeModel(model, fallback = "gpt-5.4") {
+export function resolveOpenAiRealtimeModel(model, fallback = "gpt-realtime-2") {
   if (typeof model === "string" && OPENAI_REALTIME_MODELS.has(model)) return model;
   return fallback;
 }

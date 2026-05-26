@@ -45,35 +45,34 @@ export function buildRealtimeClientSecretsPayload(validated) {
     ? resolveOpenAiTranscriptionLanguage(routing.sourceLanguage)
     : null;
 
+  // Session fields must be at the top level of `session` — OpenAI ignores nested audio.input.*
+  // structure for turn_detection, input_audio_transcription, and voice.
+  // Sending create_response:false at the correct level prevents the race condition where
+  // an auto-response is cancelled by the client's explicit response.create after transcription.
   const payload = {
     expires_after: {
       anchor: "created_at",
       seconds: LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS,
     },
     session: {
-      type: "realtime",
       model: realtimeModel,
+      modalities: ["audio"],
       instructions,
-      output_modalities: ["audio"],
-      audio: {
-        input: {
-          turn_detection: {
-            type: "server_vad",
-            create_response: false,
-            interrupt_response: true,
-            silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
-            prefix_padding_ms: 500,
-            threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
-          },
-          transcription: {
-            model: transcriptionModel,
-            ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
-          },
-        },
-        output: {
-          voice,
-          speed: LIVE_TRANSLATION_OUTPUT_SPEED,
-        },
+      voice,
+      ...(LIVE_TRANSLATION_OUTPUT_SPEED !== 1
+        ? { output_audio_speed: LIVE_TRANSLATION_OUTPUT_SPEED }
+        : {}),
+      input_audio_transcription: {
+        model: transcriptionModel,
+        ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
+      },
+      turn_detection: {
+        type: "server_vad",
+        create_response: false,
+        interrupt_response: true,
+        silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
+        prefix_padding_ms: 500,
+        threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
       },
     },
   };

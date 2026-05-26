@@ -24,13 +24,10 @@ export function buildRuntimeSessionUpdatePayload(routing, transcriptionModel) {
     : null;
 
   if (txLanguage) {
-    session.audio = {
-      input: {
-        transcription: {
-          model: transcriptionModel || LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
-          language: txLanguage,
-        },
-      },
+    // input_audio_transcription must be at the session root, not nested under audio.input
+    session.input_audio_transcription = {
+      model: transcriptionModel || LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
+      language: txLanguage,
     };
   }
 

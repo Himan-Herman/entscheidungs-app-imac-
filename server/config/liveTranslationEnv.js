@@ -1,6 +1,7 @@
 import {
   getOpenAiRealtimeModel,
   getOpenAiTranscriptionModel,
+  getOpenAiTtsModel,
 } from "./openAiModels.js";
 
 /**
@@ -9,20 +10,32 @@ import {
  */
 export const LIVE_TRANSLATION_VOICE_PROFILE = "neutral_medical";
 
-/** OpenAI Realtime model for live medical conversation translation (default gpt-realtime-2). */
+/**
+ * OpenAI Realtime model for live medical conversation (WebRTC audio layer).
+ * Default: gpt-realtime-2 — official low-latency audio/WebRTC model.
+ * GPT-5.4 is a chat/text model and must NOT be used here.
+ */
 export const LIVE_TRANSLATION_REALTIME_MODEL = getOpenAiRealtimeModel();
 
 /**
- * Voice mapped from neutral_medical profile.
- * marin: calm, clear, professional; not playful or strongly gendered (OpenAI GA recommendation).
- * Override with LIVE_TRANSLATION_VOICE if needed.
+ * Voice for Realtime output — calm, neutral, professional for healthcare.
+ * marin: clear and balanced; not hectic or strongly gendered.
+ * Override with LIVE_TRANSLATION_VOICE env var.
  */
 export const LIVE_TRANSLATION_VOICE = process.env.LIVE_TRANSLATION_VOICE || "marin";
 
 /**
- * Input transcription model (required by Realtime API when transcription is enabled).
+ * Input transcription model (Realtime ASR layer).
+ * gpt-4o-transcribe: highest medical speech accuracy.
+ * Override with LIVE_TRANSLATION_TRANSCRIPTION_MODEL env var.
  */
 export const LIVE_TRANSLATION_TRANSCRIPTION_MODEL = getOpenAiTranscriptionModel();
+
+/**
+ * TTS model for any non-Realtime speech synthesis in the Meda pipeline.
+ * Override with OPENAI_TTS_MODEL env var.
+ */
+export const LIVE_TRANSLATION_TTS_MODEL = getOpenAiTtsModel();
 
 function clampOutputSpeed(raw) {
   const value = Number(raw);
