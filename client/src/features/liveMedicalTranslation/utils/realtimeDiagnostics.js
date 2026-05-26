@@ -20,7 +20,6 @@ export function summarizeRealtimeEvent(event) {
   const err = e.error && typeof e.error === "object" ? /** @type {Record<string, unknown>} */ (e.error) : null;
   return {
     type: typeof e.type === "string" ? e.type : null,
-    hasResponse: Boolean(e.response && typeof e.response === "object"),
     errorType: err && typeof err.type === "string" ? err.type : null,
     errorCode: err && typeof err.code === "string" ? err.code : null,
     errorMessage: err && typeof err.message === "string" ? err.message.slice(0, 120) : null,

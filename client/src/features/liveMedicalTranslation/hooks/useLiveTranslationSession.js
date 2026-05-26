@@ -217,7 +217,6 @@ export function useLiveTranslationSession({
   const onSessionAutoEndRef = useRef(onSessionAutoEnd);
   const sessionMaxMsRef = useRef(resolveLiveSessionMaxMs());
   const responseActiveRef = useRef(false);
-  const responseFinalizedRef = useRef(false);
   const speakerUpdateTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null));
   const lastSessionUpdateSigRef = useRef("");
   const pausedRef = useRef(false);
@@ -226,9 +225,6 @@ export function useLiveTranslationSession({
   const scopeWarningShownRef = useRef(false);
   const scopeSoftWarningShownRef = useRef(false);
   const scopeTranslationPausedRef = useRef(false);
-  const pendingAutoSwitchSpeakerRef = useRef(
-    /** @type {"patient" | "doctor" | null} */ (null),
-  );
   const onScopeWarningRef = useRef(onScopeWarning);
   const onScopeTranslationPausedRef = useRef(onScopeTranslationPaused);
 
@@ -358,7 +354,6 @@ export function useLiveTranslationSession({
     overlapDetectedRef.current = false;
     resetSessionTimerState();
     responseActiveRef.current = false;
-    responseFinalizedRef.current = false;
     awaitingIntroResponseRef.current = false;
     lastSessionUpdateSigRef.current = "";
     pausedRef.current = false;
@@ -366,7 +361,6 @@ export function useLiveTranslationSession({
     scopeWarningShownRef.current = false;
     scopeSoftWarningShownRef.current = false;
     scopeTranslationPausedRef.current = false;
-    pendingAutoSwitchSpeakerRef.current = null;
     if (speakerUpdateTimerRef.current) {
       clearTimeout(speakerUpdateTimerRef.current);
       speakerUpdateTimerRef.current = null;
@@ -398,8 +392,6 @@ export function useLiveTranslationSession({
       dc.send(JSON.stringify({ type: "response.cancel" }));
     }
     responseActiveRef.current = false;
-    responseFinalizedRef.current = false;
-    pendingAutoSwitchSpeakerRef.current = null;
   }, []);
 
   const maybeTriggerScopeWarning = useCallback(() => {
@@ -524,8 +516,6 @@ export function useLiveTranslationSession({
 
       currentTranslatedRef.current = sanitized.translatedText;
       latestReplayTextRef.current = sanitized.translatedText;
-      pendingAutoSwitchSpeakerRef.current =
-        sanitized.status === "translated" ? turn.speaker : null;
       safeSetState(() => {
         setTurns((prev) => {
           const next = [...prev, turn];
@@ -537,6 +527,10 @@ export function useLiveTranslationSession({
       pendingOriginalRef.current = "";
 
       maybeTriggerScopeWarning();
+
+      if (sanitized.status === "translated" && autoSwitchSpeakerRef.current && onTurnCompleteRef.current) {
+        onTurnCompleteRef.current(turn.speaker);
+      }
     },
     [maybeTriggerScopeWarning, safeSetState],
   );
@@ -566,7 +560,6 @@ export function useLiveTranslationSession({
     pendingPlanBRef.current = null;
     pendingOriginalRef.current = "";
     responseActiveRef.current = false;
-    responseFinalizedRef.current = false;
     awaitingIntroResponseRef.current = false;
     pauseSessionTimer();
     const finalElapsed = getSessionActiveElapsedMs();
@@ -662,15 +655,7 @@ export function useLiveTranslationSession({
       pendingPlanBRef.current = planB;
       cancelActiveResponse();
       responseActiveRef.current = true;
-      responseFinalizedRef.current = false;
       safeSetState(() => setConnectionStatus("speaking"));
-      logRealtimeDiag("response_create_send", {
-        reason: planB?.type || "speak_exact",
-        speakerState: sessionConfigRef.current.activeSpeaker,
-        autoSwitchState: autoSwitchSpeakerRef.current,
-        transcriptLength: trimmed.length,
-        hasResponse: true,
-      });
       dc.send(
         JSON.stringify({
           type: "response.create",
@@ -695,17 +680,9 @@ export function useLiveTranslationSession({
       pendingPlanBRef.current = { type: "scopeRetry", sourceText: trimmed, routing };
       cancelActiveResponse();
       responseActiveRef.current = true;
-      responseFinalizedRef.current = false;
       safeSetState(() => setConnectionStatus("translating"));
 
       const hint = buildFaithfulRetryInstructions(routing);
-      logRealtimeDiag("response_create_send", {
-        reason: "scope_retry",
-        speakerState: routing.activeSpeaker,
-        autoSwitchState: autoSwitchSpeakerRef.current,
-        transcriptLength: trimmed.length,
-        hasResponse: true,
-      });
       dc.send(
         JSON.stringify({
           type: "response.create",
@@ -730,17 +707,9 @@ export function useLiveTranslationSession({
       pendingPlanBRef.current = planB;
       cancelActiveResponse();
       responseActiveRef.current = true;
-      responseFinalizedRef.current = false;
       safeSetState(() => setConnectionStatus("translating"));
 
       const compactHint = buildCompactClientInstructions(routing);
-      logRealtimeDiag("response_create_send", {
-        reason: planB?.type || "faithful_translation",
-        speakerState: routing.activeSpeaker,
-        autoSwitchState: autoSwitchSpeakerRef.current,
-        transcriptLength: trimmed.length,
-        hasResponse: true,
-      });
       dc.send(
         JSON.stringify({
           type: "response.create",
@@ -863,29 +832,6 @@ export function useLiveTranslationSession({
     lastDetectedLanguageRef.current = null;
     translationDriftRetryAttemptedRef.current = false;
   }, [clearPendingFinalizeTimer]);
-
-  const finalizeCurrentResponseIfNeeded = useCallback(
-    (event) => {
-      if (responseFinalizedRef.current || pausedRef.current) return false;
-      const translated = extractTranslatedText(event) || currentTranslatedRef.current;
-      if (!translated) return false;
-
-      currentTranslatedRef.current = translated;
-      safeSetState(() => setCurrentTranslatedText(translated));
-      finalizeTranslationOutput(translated);
-      responseFinalizedRef.current = true;
-      return true;
-    },
-    [finalizeTranslationOutput, safeSetState],
-  );
-
-  const flushPendingAutoSwitch = useCallback(() => {
-    const completedSpeaker = pendingAutoSwitchSpeakerRef.current;
-    pendingAutoSwitchSpeakerRef.current = null;
-    if (!completedSpeaker) return;
-    if (!autoSwitchSpeakerRef.current || !onTurnCompleteRef.current) return;
-    onTurnCompleteRef.current(completedSpeaker);
-  }, []);
 
   const notifyTurnIssue = useCallback((reason, options = {}) => {
     onUnclearTurnRef.current?.({
@@ -1225,17 +1171,9 @@ export function useLiveTranslationSession({
       turnContextRef.current = routing;
       cancelActiveResponse();
       responseActiveRef.current = true;
-      responseFinalizedRef.current = false;
       safeSetState(() => setConnectionStatus("translating"));
 
       const hint = buildCompactClientInstructions(routing);
-      logRealtimeDiag("response_create_send", {
-        reason: "turn_translation",
-        speakerState: routing.activeSpeaker,
-        autoSwitchState: autoSwitchSpeakerRef.current,
-        transcriptLength: trimmed.length,
-        hasResponse: true,
-      });
       dc.send(
         JSON.stringify({
           type: "response.create",
@@ -1422,28 +1360,11 @@ export function useLiveTranslationSession({
     (event) => {
       if (!event || typeof event !== "object") return;
       const type = event.type;
-      const transcript = extractOriginalText(event);
-      const translated = extractTranslatedText(event);
-      const summary = summarizeRealtimeEvent(event);
-
-      logRealtimeDiag("event", {
-        type,
-        hasTranscript: Boolean(transcript),
-        transcriptLength: transcript.length,
-        hasResponse: summary.hasResponse,
-        responseStatus: summary.responseStatus,
-        hasTranslation: Boolean(translated),
-        speakerState: sessionConfigRef.current.activeSpeaker,
-        autoSwitchState: autoSwitchSpeakerRef.current,
-      });
 
       if (pausedRef.current) {
         const blockedWhilePaused = [
-          "input_audio_buffer.committed",
           "input_audio_buffer.speech_started",
           "input_audio_buffer.speech_stopped",
-          "conversation.item.created",
-          "conversation.item.done",
           "conversation.item.input_audio_transcription.completed",
           "conversation.item.input_audio_transcription.failed",
           "input_audio_buffer.transcription.completed",
@@ -1452,10 +1373,7 @@ export function useLiveTranslationSession({
           "input_audio_buffer.transcription.delta",
           "response.created",
           "response.output_item.added",
-          "response.output_item.done",
           "response.audio.delta",
-          "response.text.delta",
-          "response.output_text.delta",
           "response.audio_transcript.delta",
           "response.output_audio_transcript.delta",
           "response.output_audio_transcript.done",
@@ -1476,11 +1394,6 @@ export function useLiveTranslationSession({
         });
         startSessionTimer();
         trySendMedaActivation();
-        return;
-      }
-
-      if (type === "input_audio_buffer.committed") {
-        setActivityStatus("listening");
         return;
       }
 
@@ -1582,33 +1495,10 @@ export function useLiveTranslationSession({
       }
 
       if (
-        (type === "conversation.item.created" || type === "conversation.item.done") &&
-        event.item &&
-        typeof event.item === "object"
-      ) {
-        const item = /** @type {Record<string, unknown>} */ (event.item);
-        const itemRole = typeof item.role === "string" ? item.role : null;
-        if (
-          itemRole === "user" &&
-          transcript &&
-          !pendingOriginalRef.current &&
-          !isLikelyEmptyOrNoiseTranscript(transcript)
-        ) {
-          pendingOriginalRef.current = transcript;
-          inputTranscriptStateRef.current = "ready";
-          maybeFlushPendingTurn();
-        }
-        if (itemRole === "assistant" && translated && !responseFinalizedRef.current) {
-          currentTranslatedRef.current = translated;
-          safeSetState(() => setCurrentTranslatedText(translated));
-        }
-        return;
-      }
-
-      if (
         type === "conversation.item.input_audio_transcription.delta" ||
         type === "input_audio_buffer.transcription.delta"
       ) {
+        const transcript = extractOriginalText(event);
         if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
           pendingOriginalRef.current = `${pendingOriginalRef.current}${transcript}`;
           const detected = extractDetectedLanguage(event);
@@ -1627,55 +1517,28 @@ export function useLiveTranslationSession({
       }
 
       if (
-        type === "response.text.delta" ||
-        type === "response.output_text.delta" ||
         type === "response.audio_transcript.delta" ||
         type === "response.output_audio_transcript.delta"
       ) {
         const delta =
           typeof event.delta === "string"
             ? event.delta
-            : translated;
+            : extractTranslatedText(event);
         if (delta) {
           currentTranslatedRef.current += delta;
           safeSetState(() => {
             setCurrentTranslatedText(currentTranslatedRef.current);
-            setActivityStatus(
-              type === "response.audio_transcript.delta" ||
-                type === "response.output_audio_transcript.delta"
-                ? "speaking"
-                : "translating",
-            );
+            setActivityStatus("speaking");
           });
         } else {
-          setActivityStatus(
-            type === "response.audio_transcript.delta" ||
-              type === "response.output_audio_transcript.delta"
-              ? "speaking"
-              : "translating",
-          );
+          setActivityStatus("speaking");
         }
         return;
       }
 
-      if (type === "response.created") {
-        responseActiveRef.current = true;
-        responseFinalizedRef.current = false;
-        setActivityStatus("translating");
-        return;
-      }
-
-      if (type === "response.output_item.added") {
+      if (type === "response.created" || type === "response.output_item.added") {
         responseActiveRef.current = true;
         setActivityStatus("translating");
-        return;
-      }
-
-      if (type === "response.output_item.done") {
-        if (translated) {
-          currentTranslatedRef.current = translated;
-          safeSetState(() => setCurrentTranslatedText(translated));
-        }
         return;
       }
 
@@ -1688,10 +1551,31 @@ export function useLiveTranslationSession({
         type === "response.output_audio_transcript.done" ||
         type === "response.audio_transcript.done"
       ) {
+        const translated =
+          extractTranslatedText(event) || currentTranslatedRef.current;
         if (translated) {
           currentTranslatedRef.current = translated;
-          safeSetState(() => setCurrentTranslatedText(translated));
+          finalizeTranslationOutput(translated);
         }
+        responseActiveRef.current = false;
+        if (pendingRepeatSpeechRef.current) {
+          const { phrase, type: repeatType } = pendingRepeatSpeechRef.current;
+          pendingRepeatSpeechRef.current = null;
+          const routing = turnContextRef.current;
+          speakExactText(phrase, { type: repeatType, phrase, routing });
+        }
+        safeSetState(() => {
+          if (pausedRef.current) {
+            setConnectionStatus("paused");
+            return;
+          }
+          if (awaitingIntroResponseRef.current) {
+            awaitingIntroResponseRef.current = false;
+            setConnectionStatus("listening");
+            return;
+          }
+          setConnectionStatus("listening");
+        });
         return;
       }
 
@@ -1700,37 +1584,31 @@ export function useLiveTranslationSession({
         type === "response.output_text.done" ||
         type === "response.content_part.done"
       ) {
-        if (translated && !pausedRef.current) {
+        const translated =
+          extractTranslatedText(event) || currentTranslatedRef.current;
+        if (translated && !pausedRef.current && !awaitingIntroResponseRef.current) {
+          currentTranslatedRef.current = translated;
+          safeSetState(() => setCurrentTranslatedText(translated));
+          finalizeTranslationOutput(translated);
+        } else if (translated && !pausedRef.current) {
           currentTranslatedRef.current = translated;
           safeSetState(() => setCurrentTranslatedText(translated));
         }
+        safeSetState(() => {
+          setConnectionStatus(pausedRef.current ? "paused" : "listening");
+        });
         return;
       }
 
       if (type === "response.done") {
         responseActiveRef.current = false;
         if (isCancelledOrFailedResponseDone(event)) {
-          responseFinalizedRef.current = false;
-          pendingAutoSwitchSpeakerRef.current = null;
-          logRealtimeDiag("response_done_non_success", summary);
+          logRealtimeDiag("response_done_non_success", summarizeRealtimeEvent(event));
           safeSetState(() => {
             setConnectionStatus(pausedRef.current ? "paused" : "listening");
           });
           return;
         }
-
-        finalizeCurrentResponseIfNeeded(event);
-
-        if (pendingRepeatSpeechRef.current) {
-          const { phrase, type: repeatType } = pendingRepeatSpeechRef.current;
-          pendingRepeatSpeechRef.current = null;
-          const routing = turnContextRef.current;
-          speakExactText(phrase, { type: repeatType, phrase, routing });
-          return;
-        }
-
-        flushPendingAutoSwitch();
-        responseFinalizedRef.current = false;
         safeSetState(() => {
           if (awaitingIntroResponseRef.current) {
             awaitingIntroResponseRef.current = false;
@@ -1741,6 +1619,7 @@ export function useLiveTranslationSession({
       }
 
       if (type === "error") {
+        const summary = summarizeRealtimeEvent(event);
         const classified = classifyRealtimeError(event);
         logRealtimeDiag("realtime_error", { ...summary, ...classified });
 
@@ -1766,9 +1645,9 @@ export function useLiveTranslationSession({
       }
     },
     [
+      cancelActiveResponse,
       executeBufferedFinalize,
-      finalizeCurrentResponseIfNeeded,
-      flushPendingAutoSwitch,
+      finalizeTranslationOutput,
       maybeFlushPendingTurn,
       requestTurnTranslation,
       resetTurnCaptureState,
@@ -1776,6 +1655,7 @@ export function useLiveTranslationSession({
       switchSpeakerFromDetectedLanguage,
       trySendMedaActivation,
       setActivityStatus,
+      skipLanguageRoutingRef,
       speakExactText,
       startSessionTimer,
       triggerWrongLanguageRepeat,
@@ -1933,14 +1813,7 @@ export function useLiveTranslationSession({
       const micTrack = stream.getAudioTracks()[0] || null;
       micTrackRef.current = micTrack;
       if (micTrack) {
-        const sender = pc.addTrack(micTrack, stream);
-        logRealtimeDiag("mic_sender_added", {
-          trackKind: micTrack.kind,
-          trackEnabled: micTrack.enabled,
-          trackReadyState: micTrack.readyState,
-          senderTrackKind: sender.track?.kind || null,
-          senderHasTransport: Boolean(sender.transport),
-        });
+        pc.addTrack(micTrack, stream);
         safeSetState(() => setMicrophoneStatus("on"));
       }
 
