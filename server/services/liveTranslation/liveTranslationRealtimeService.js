@@ -55,6 +55,7 @@ export function buildRealtimeClientSecretsPayload(validated) {
       seconds: LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS,
     },
     session: {
+      type: "realtime",
       model: realtimeModel,
       modalities: ["audio"],
       instructions,

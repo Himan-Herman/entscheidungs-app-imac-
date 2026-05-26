@@ -101,16 +101,22 @@ router.post("/realtime-session", async (req, res) => {
       userId: req.user?.userId,
     });
 
+    const _s = built.payload?.session ?? {};
     console.log(
       JSON.stringify({
-        tag: "[MedaRealtimeModel]",
-        resolvedModel: built.realtimeModel,
-        payloadModel: built.payload?.session?.model ?? null,
+        tag: "[MedaRealtimePayload]",
+        model: built.realtimeModel,
+        sessionType: _s.type ?? null,
+        modalities: _s.modalities ?? null,
+        voice: _s.voice ?? null,
+        hasTurnDetection: Boolean(_s.turn_detection),
+        transcriptionModel: _s.input_audio_transcription?.model ?? null,
         openaiStatus: minted.openaiStatus,
         openaiErrorCode: minted.openaiErrorCode ?? null,
         openaiErrorMessage: minted.openaiErrorMessage ?? null,
         openaiErrorParam: minted.openaiErrorParam ?? null,
         ok: minted.ok,
+        ephemeralSecretReturned: minted.ok && typeof minted.clientSecret === "string",
       }),
     );
 

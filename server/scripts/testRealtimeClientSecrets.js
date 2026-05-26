@@ -44,6 +44,7 @@ const langs = [
 for (const lang of langs) {
   await test(`lang_${lang}`, {
     session: {
+      type: "realtime",
       model: REALTIME_MODEL,
       modalities: ["audio"],
       voice: "marin",
@@ -64,6 +65,7 @@ const instructions = buildLiveTranslationInstructions({
 await test("full_production_payload", {
   expires_after: { anchor: "created_at", seconds: 600 },
   session: {
+    type: "realtime",
     model: REALTIME_MODEL,
     modalities: ["audio"],
     instructions,
@@ -87,6 +89,7 @@ await test("full_production_payload", {
 await test("no_transcription_language_multi_speaker", {
   expires_after: { anchor: "created_at", seconds: 600 },
   session: {
+    type: "realtime",
     model: REALTIME_MODEL,
     modalities: ["audio"],
     voice: "marin",
@@ -105,6 +108,7 @@ await test("no_transcription_language_multi_speaker", {
 
 await test("vad_silence_string_should_reject", {
   session: {
+    type: "realtime",
     model: REALTIME_MODEL,
     modalities: ["audio"],
     turn_detection: { type: "server_vad", silence_duration_ms: "1100" },
@@ -113,6 +117,7 @@ await test("vad_silence_string_should_reject", {
 
 await test("speed_string_should_reject", {
   session: {
+    type: "realtime",
     model: REALTIME_MODEL,
     modalities: ["audio"],
     voice: "marin",
@@ -122,11 +127,12 @@ await test("speed_string_should_reject", {
 
 await test("expires_bad_string_should_reject", {
   expires_after: { anchor: "created_at", seconds: "600" },
-  session: { model: REALTIME_MODEL, modalities: ["audio"] },
+  session: { type: "realtime", model: REALTIME_MODEL, modalities: ["audio"] },
 });
 
 await test("bad_transcription_model_should_reject", {
   session: {
+    type: "realtime",
     model: REALTIME_MODEL,
     modalities: ["audio"],
     input_audio_transcription: { model: "whisper-2", language: "de" },
@@ -135,6 +141,7 @@ await test("bad_transcription_model_should_reject", {
 
 await test("chat_model_as_realtime_should_reject", {
   session: {
+    type: "realtime",
     model: "gpt-5.4",
     modalities: ["audio"],
     voice: "marin",
