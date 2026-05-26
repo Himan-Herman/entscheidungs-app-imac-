@@ -1,3 +1,5 @@
+import { extractOriginalText, extractTranslatedText, extractTranslatedTextFromResponse } from "./webrtc.js";
+
 /**
  * Dev-only Realtime lifecycle diagnostics. Never logs transcript, audio, tokens, or patient data.
  * @param {string} scope
@@ -27,5 +29,24 @@ export function summarizeRealtimeEvent(event) {
       e.response && typeof e.response === "object" && "status" in e.response
         ? String(/** @type {{ status?: unknown }} */ (e.response).status)
         : null,
+  };
+}
+
+/** Safe pipeline summary — event type + lengths only, no transcript text. */
+export function summarizePipelineEvent(event) {
+  const base = summarizeRealtimeEvent(event);
+  if (!event || typeof event !== "object") return base;
+  const e = /** @type {Record<string, unknown>} */ (event);
+  const original = extractOriginalText(e);
+  const translated =
+    extractTranslatedText(e) || extractTranslatedTextFromResponse(e);
+  const hasResponse = Boolean(e.response && typeof e.response === "object");
+  return {
+    ...base,
+    hasTranscript: original.length > 0,
+    transcriptLength: original.length,
+    hasTranslation: translated.length > 0,
+    translationLength: translated.length,
+    hasResponse,
   };
 }

@@ -106,6 +106,38 @@ export function extractOriginalText(event) {
 }
 
 /**
+ * Extract assistant translation text from response.done output items.
+ * @param {Record<string, unknown>} event
+ */
+export function extractTranslatedTextFromResponse(event) {
+  if (!event || typeof event !== "object") return "";
+  const response =
+    event.response && typeof event.response === "object"
+      ? /** @type {Record<string, unknown>} */ (event.response)
+      : null;
+  if (!response) return "";
+
+  const output = response.output;
+  if (!Array.isArray(output)) return "";
+
+  const parts = [];
+  for (const item of output) {
+    if (!item || typeof item !== "object") continue;
+    const content = /** @type {{ content?: unknown }} */ (item).content;
+    if (!Array.isArray(content)) continue;
+    for (const part of content) {
+      if (!part || typeof part !== "object") continue;
+      const p = /** @type {Record<string, unknown>} */ (part);
+      const text = p.transcript ?? p.text;
+      if (typeof text === "string" && text.trim()) {
+        parts.push(text.trim());
+      }
+    }
+  }
+  return parts.join(" ").trim();
+}
+
+/**
  * Extract detected language code from Realtime transcription events (language-based routing).
  * @param {Record<string, unknown>} event
  */

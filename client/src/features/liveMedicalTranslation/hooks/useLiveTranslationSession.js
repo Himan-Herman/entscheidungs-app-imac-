@@ -8,7 +8,11 @@ import { buildLanguageRouting } from "../utils/routing.js";
 import { buildCompactClientInstructions, buildFaithfulRetryInstructions } from "../utils/translationInstructions.js";
 import { buildRuntimeSessionUpdatePayload } from "../utils/realtimeSessionUpdate.js";
 import { classifyRealtimeError, isCancelledOrFailedResponseDone } from "../utils/realtimeErrorPolicy.js";
-import { logRealtimeDiag, summarizeRealtimeEvent } from "../utils/realtimeDiagnostics.js";
+import {
+  logRealtimeDiag,
+  summarizePipelineEvent,
+  summarizeRealtimeEvent,
+} from "../utils/realtimeDiagnostics.js";
 import { isLikelyEmptyOrNoiseTranscript, sanitizeUnclearTurn } from "../utils/asrQuality.js";
 import { isSemanticTranslationDrift } from "../utils/translationSemanticCheck.js";
 import {
@@ -51,6 +55,7 @@ import {
   extractDetectedLanguage,
   extractOriginalText,
   extractTranslatedText,
+  extractTranslatedTextFromResponse,
   REALTIME_PEER_CONNECTION_CONFIG,
   waitForIceGatheringComplete,
 } from "../utils/webrtc.js";
@@ -1121,7 +1126,10 @@ export function useLiveTranslationSession({
       cancelActiveResponse();
     }
 
-    const payload = buildRuntimeSessionUpdatePayload(routing);
+    const payload = buildRuntimeSessionUpdatePayload(
+      routing,
+      transcriptionModelRef.current,
+    );
     logRealtimeDiag("session_update_send", {
       activeSpeaker: routing.activeSpeaker,
       sourceLanguage: routing.sourceLanguage,
@@ -1131,19 +1139,21 @@ export function useLiveTranslationSession({
     });
     dc.send(JSON.stringify(payload));
 
-    currentTranslatedRef.current = "";
-    lastTurnSignatureRef.current = "";
-    safeSetState(() => {
-      setCurrentTranslatedText("");
-      if (
-        connectionStatusRef.current !== "introducing" &&
-        connectionStatusRef.current !== "speaking" &&
-        connectionStatusRef.current !== "translating" &&
-        connectionStatusRef.current !== "paused"
-      ) {
-        setConnectionStatus("listening");
-      }
-    });
+    if (!responseActiveRef.current && !pendingTranslatedForTurnRef.current) {
+      currentTranslatedRef.current = "";
+      lastTurnSignatureRef.current = "";
+      safeSetState(() => {
+        setCurrentTranslatedText("");
+        if (
+          connectionStatusRef.current !== "introducing" &&
+          connectionStatusRef.current !== "speaking" &&
+          connectionStatusRef.current !== "translating" &&
+          connectionStatusRef.current !== "paused"
+        ) {
+          setConnectionStatus("listening");
+        }
+      });
+    }
   }, [cancelActiveResponse, safeSetState]);
 
   const requestTurnTranslation = useCallback(
@@ -1374,6 +1384,7 @@ export function useLiveTranslationSession({
           "response.created",
           "response.output_item.added",
           "response.audio.delta",
+          "response.output_audio.delta",
           "response.audio_transcript.delta",
           "response.output_audio_transcript.delta",
           "response.output_audio_transcript.done",
@@ -1382,6 +1393,7 @@ export function useLiveTranslationSession({
           "response.output_text.done",
           "response.content_part.done",
           "response.done",
+          "conversation.item.created",
         ];
         if (blockedWhilePaused.includes(type)) return;
       }
@@ -1403,9 +1415,16 @@ export function useLiveTranslationSession({
           overlapDetectedRef.current = true;
         }
         turnContextRef.current = buildLanguageRouting(sessionConfigRef.current);
-        resetTurnCaptureState();
-        currentTranslatedRef.current = "";
-        safeSetState(() => setCurrentTranslatedText(""));
+        const inFlightTurn =
+          responseActiveRef.current ||
+          Boolean(pendingTranslatedForTurnRef.current) ||
+          (inputTranscriptStateRef.current === "ready" &&
+            String(pendingOriginalRef.current || "").trim().length > 0);
+        if (!inFlightTurn) {
+          resetTurnCaptureState();
+          currentTranslatedRef.current = "";
+          safeSetState(() => setCurrentTranslatedText(""));
+        }
         setActivityStatus("listening");
         return;
       }
@@ -1450,32 +1469,16 @@ export function useLiveTranslationSession({
             return;
           }
 
-          const didSwitchSide = switchSpeakerFromDetectedLanguage(resolvedLang, transcript);
+          switchSpeakerFromDetectedLanguage(resolvedLang, transcript);
           const routingAfterSwitch = buildLanguageRouting(sessionConfigRef.current);
 
-          if (didSwitchSide) {
-            window.setTimeout(() => {
-              if (
-                canProceedToTranslation({
-                  transcript,
-                  inputState: "ready",
-                  scopeTranslationPaused: scopeTranslationPausedRef.current,
-                })
-              ) {
-                requestTurnTranslation(
-                  transcript,
-                  buildLanguageRouting(sessionConfigRef.current),
-                );
-              }
-            }, 320);
-          } else if (
-            !responseActiveRef.current &&
-            !pendingTranslatedForTurnRef.current &&
+          if (
             canProceedToTranslation({
               transcript,
               inputState: "ready",
               scopeTranslationPaused: scopeTranslationPausedRef.current,
-            })
+            }) &&
+            !pendingTranslatedForTurnRef.current
           ) {
             requestTurnTranslation(transcript, routingAfterSwitch);
           }
@@ -1504,13 +1507,6 @@ export function useLiveTranslationSession({
           const detected = extractDetectedLanguage(event);
           if (detected) {
             lastDetectedLanguageRef.current = detected;
-          }
-          const accumulated = pendingOriginalRef.current;
-          if (detected || accumulated.length >= 10) {
-            switchSpeakerFromDetectedLanguage(
-              detected || lastDetectedLanguageRef.current,
-              accumulated,
-            );
           }
         }
         return;
@@ -1542,7 +1538,7 @@ export function useLiveTranslationSession({
         return;
       }
 
-      if (type === "response.audio.delta") {
+      if (type === "response.audio.delta" || type === "response.output_audio.delta") {
         setActivityStatus("speaking");
         return;
       }
@@ -1609,6 +1605,19 @@ export function useLiveTranslationSession({
           });
           return;
         }
+
+        const fromResponse = extractTranslatedTextFromResponse(event);
+        if (
+          fromResponse &&
+          !pausedRef.current &&
+          !awaitingIntroResponseRef.current &&
+          !pendingPlanBRef.current
+        ) {
+          currentTranslatedRef.current = fromResponse;
+          safeSetState(() => setCurrentTranslatedText(fromResponse));
+          finalizeTranslationOutput(fromResponse);
+        }
+
         safeSetState(() => {
           if (awaitingIntroResponseRef.current) {
             awaitingIntroResponseRef.current = false;
@@ -1683,7 +1692,10 @@ export function useLiveTranslationSession({
 
     cancelActiveResponse();
 
-    const payload = buildRuntimeSessionUpdatePayload(routing);
+    const payload = buildRuntimeSessionUpdatePayload(
+      routing,
+      transcriptionModelRef.current,
+    );
     logRealtimeDiag("session_update_send", {
       activeSpeaker: routing.activeSpeaker,
       sourceLanguage: routing.sourceLanguage,
@@ -1692,20 +1704,21 @@ export function useLiveTranslationSession({
     });
     dc.send(JSON.stringify(payload));
 
-    currentTranslatedRef.current = "";
-    lastTurnSignatureRef.current = "";
-    safeSetState(() => {
-      setCurrentTranslatedText("");
-      if (
-        connectionStatusRef.current !== "introducing" &&
-        connectionStatusRef.current !== "speaking" &&
-        connectionStatusRef.current !== "translating" &&
-        connectionStatusRef.current !== "paused"
-      ) {
-        setConnectionStatus("listening");
-      }
-    });
-    pendingOriginalRef.current = "";
+    if (!responseActiveRef.current && !pendingTranslatedForTurnRef.current) {
+      currentTranslatedRef.current = "";
+      lastTurnSignatureRef.current = "";
+      safeSetState(() => {
+        setCurrentTranslatedText("");
+        if (
+          connectionStatusRef.current !== "introducing" &&
+          connectionStatusRef.current !== "speaking" &&
+          connectionStatusRef.current !== "translating" &&
+          connectionStatusRef.current !== "paused"
+        ) {
+          setConnectionStatus("listening");
+        }
+      });
+    }
   }, [cancelActiveResponse, safeSetState]);
 
   const scheduleSpeakerUpdate = useCallback(() => {
@@ -1813,7 +1826,13 @@ export function useLiveTranslationSession({
       const micTrack = stream.getAudioTracks()[0] || null;
       micTrackRef.current = micTrack;
       if (micTrack) {
+        micTrack.enabled = true;
         pc.addTrack(micTrack, stream);
+        logRealtimeDiag("mic_track_added", {
+          enabled: micTrack.enabled,
+          readyState: micTrack.readyState,
+          muted: micTrack.muted,
+        });
         safeSetState(() => setMicrophoneStatus("on"));
       }
 
@@ -1840,9 +1859,18 @@ export function useLiveTranslationSession({
       dc.addEventListener("message", (e) => {
         try {
           const parsed = JSON.parse(String(e.data));
-          const summary = summarizeRealtimeEvent(parsed);
+          const summary = summarizePipelineEvent(parsed);
           if (summary.type === "error" || summary.errorCode) {
             logRealtimeDiag("dc_message_error_event", summary);
+          } else if (
+            summary.type &&
+            (summary.hasTranscript ||
+              summary.hasTranslation ||
+              summary.type.includes("speech") ||
+              summary.type.includes("response") ||
+              summary.type.includes("transcription"))
+          ) {
+            logRealtimeDiag("dc_event", summary);
           }
           handleServerEvent(parsed);
         } catch {
