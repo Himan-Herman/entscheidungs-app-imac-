@@ -191,6 +191,9 @@ const VitalsPage = lazy(() =>
 const HealthHistoryPage = lazy(() =>
   import("./features/healthHistory/pages/HealthHistoryPage.jsx"),
 );
+const ErezeptPage = lazy(() =>
+  import("./features/erezept/pages/ErezeptPage.jsx"),
+);
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
 );
@@ -527,6 +530,14 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <HealthHistoryPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/erezept"
+                  element={
+                    <ProtectedRoute>
+                      <ErezeptPage />
                     </ProtectedRoute>
                   }
                 />

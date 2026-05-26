@@ -14,6 +14,7 @@ export const CONSENT_SCOPES = Object.freeze([
   "vitals",
   "vaccinations",
   "health_history",
+  "prescriptions",
 ]);
 
 const SCOPE_SET = new Set(CONSENT_SCOPES);

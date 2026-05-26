@@ -259,3 +259,11 @@ export function isInterpreterStreamingTtsEnabled() {
 export function isVitalsEnabled() {
   return envFlag("ENABLE_VITALS", false);
 }
+
+/**
+ * Simulated e-Rezept — practice issues prescriptions, patient views + redeems at pharmacy.
+ * No real Telematikinfrastruktur connectivity. Upgrade path via FHIR adapter when TI is live.
+ */
+export function isErezeptEnabled() {
+  return envFlag("ENABLE_E_REZEPT", false);
+}

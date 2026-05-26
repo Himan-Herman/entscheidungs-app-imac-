@@ -180,6 +180,12 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     subtitleKey: "hubLinkHealthHistorySub",
     icon: BookHeart,
   },
+  {
+    to: "/patient/erezept",
+    key: "hubLinkErezept",
+    subtitleKey: "hubLinkErezeptSub",
+    icon: FileText,
+  },
 ]);
 
 export const PATIENT_MY_PRACTICE_HUB_LINK = /** @type {PatientHubLink} */ ({

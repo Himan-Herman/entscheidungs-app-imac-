@@ -209,6 +209,7 @@ export default {
     tabVitals: "Mesures",
     tabVaccinations: "Carnet de vaccination",
     tabHealthHistory: "Dossier santé",
+    tabErezept: "Ordonnances électroniques",
     tabMessages: "Messages",
     tabActivity: "Activité",
     patientProvidedHint: "Certaines informations ont été fournies par le patient.",

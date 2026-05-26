@@ -61,6 +61,7 @@ export default {
     vitals_access: "Measurements",
     vaccinations_access: "Vaccination record",
     health_history_access: "Health record",
+    prescriptions_access: "e-Prescriptions",
   },
   purposes: {
     profile_access: "Organizational profile data for practice administration",
@@ -74,5 +75,6 @@ export default {
     vitals_access: "Practice can view your self-entered measurements (blood pressure, pulse, etc.)",
     vaccinations_access: "Practice can view your digital vaccination record (self-reported)",
     health_history_access: "Practice can view your self-entered allergies and diagnoses",
+    prescriptions_access: "Practice can issue e-prescriptions to you and redemption status is synced",
   },
 };

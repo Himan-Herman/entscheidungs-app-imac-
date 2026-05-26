@@ -13,6 +13,7 @@ export const CONSENT_TYPES = Object.freeze([
   "vitals_access",
   "vaccinations_access",
   "health_history_access",
+  "prescriptions_access",
 ]);
 
 export const CONSENT_STATUSES = new Set(["granted", "revoked", "expired"]);
@@ -32,6 +33,7 @@ export const CONSENT_TYPE_TO_LEGACY_SCOPE = Object.freeze({
   vitals_access: "vitals",
   vaccinations_access: "vaccinations",
   health_history_access: "health_history",
+  prescriptions_access: "prescriptions",
 });
 
 /** Legacy scope → consent type (Phase-1 scopes) */
@@ -43,6 +45,7 @@ export const LEGACY_SCOPE_TO_CONSENT_TYPE = Object.freeze({
   vitals: "vitals_access",
   vaccinations: "vaccinations_access",
   health_history: "health_history_access",
+  prescriptions: "prescriptions_access",
 });
 
 /**

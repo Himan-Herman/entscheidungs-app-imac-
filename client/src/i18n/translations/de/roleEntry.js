@@ -136,4 +136,6 @@ export default {
   hubLinkVitalsSub: "Blutdruck, Puls, Blutzucker & Gewicht im Verlauf",
   hubLinkHealthHistory: "Gesundheitsakte",
   hubLinkHealthHistorySub: "Allergien und Diagnosen strukturiert dokumentieren",
+  hubLinkErezept: "Meine Rezepte",
+  hubLinkErezeptSub: "e-Rezepte von deiner Praxis — QR-Code für die Apotheke",
 };

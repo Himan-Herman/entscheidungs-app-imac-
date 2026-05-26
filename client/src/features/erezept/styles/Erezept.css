@@ -1,0 +1,484 @@
+/* ── e-Rezept — modern, WCAG AA, dark/light, responsive ─────────────────── */
+
+.erx-page {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.erx-page__header { margin-bottom: 1.5rem; }
+
+.erx-page__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.erx-page__intro {
+  font-size: 1rem;
+  color: var(--ms-text-secondary, #4b5563);
+  margin: 0 0 0.5rem;
+}
+
+.erx-page__disclaimer {
+  font-size: 0.875rem;
+  color: var(--ms-text-secondary, #6b7280);
+  background: var(--ms-surface-muted, #eff6ff);
+  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  padding: 0.65rem 0.875rem;
+  margin: 0.5rem 0 0;
+}
+
+/* ── Filter tabs ─────────────────────────────────────────────────────────── */
+.erx-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 1.25rem;
+}
+
+.erx-tabs__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 36px;
+  padding: 0.35rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ms-text-secondary, #4b5563);
+  cursor: pointer;
+  transition: all 0.13s;
+}
+.erx-tabs__btn:hover {
+  background: var(--ms-surface-hover, #f3f4f6);
+  border-color: var(--ms-text-secondary, #9ca3af);
+}
+.erx-tabs__btn--active {
+  background: var(--ms-accent, #0d9488);
+  border-color: var(--ms-accent, #0d9488);
+  color: #fff;
+}
+.erx-tabs__btn:focus-visible {
+  outline: 3px solid var(--ms-accent, #0d9488);
+  outline-offset: 2px;
+}
+
+/* ── Cards grid ──────────────────────────────────────────────────────────── */
+.erx-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.875rem;
+}
+
+/* ── Single card ─────────────────────────────────────────────────────────── */
+.erx-card {
+  background: var(--ms-surface, #fff);
+  border: 1.5px solid var(--ms-border, #e5e7eb);
+  border-radius: 14px;
+  padding: 1.125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+}
+.erx-card:hover {
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+}
+.erx-card--issued   { border-left: 4px solid #3b82f6; }
+.erx-card--at_pharmacy { border-left: 4px solid #f59e0b; }
+.erx-card--redeemed { border-left: 4px solid #10b981; }
+.erx-card--expired  { border-left: 4px solid #9ca3af; opacity: 0.75; }
+.erx-card--cancelled { border-left: 4px solid #ef4444; opacity: 0.65; }
+
+.erx-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.erx-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+}
+
+/* ── Status badge ────────────────────────────────────────────────────────── */
+.erx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.erx-badge--issued      { background: #dbeafe; color: #1d4ed8; }
+.erx-badge--at_pharmacy { background: #fef3c7; color: #92400e; }
+.erx-badge--redeemed    { background: #d1fae5; color: #065f46; }
+.erx-badge--expired     { background: #f1f5f9; color: #475569; }
+.erx-badge--cancelled   { background: #fee2e2; color: #991b1b; }
+
+/* ── Token display ───────────────────────────────────────────────────────── */
+.erx-token {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ms-surface-muted, #f8fafc);
+  border: 1px solid var(--ms-border, #e5e7eb);
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
+}
+
+.erx-token__code {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ms-text, #111827);
+  flex: 1;
+}
+
+.erx-token__copy {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--ms-border, #d1d5db);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--ms-text-secondary, #6b7280);
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+.erx-token__copy:hover { background: var(--ms-surface-hover, #f3f4f6); }
+
+/* ── QR panel ────────────────────────────────────────────────────────────── */
+.erx-qr-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--ms-surface-muted, #f8fafc);
+  border: 1px solid var(--ms-border, #e5e7eb);
+  border-radius: 12px;
+}
+
+.erx-qr-panel canvas,
+.erx-qr-panel img {
+  border-radius: 8px;
+  width: 140px;
+  height: 140px;
+}
+
+.erx-qr-panel__label {
+  font-size: 0.75rem;
+  color: var(--ms-text-secondary, #6b7280);
+  text-align: center;
+  margin: 0;
+}
+
+.erx-qr-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ms-accent, #0d9488);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  align-self: flex-start;
+}
+.erx-qr-toggle:focus-visible {
+  outline: 3px solid var(--ms-accent, #0d9488);
+  outline-offset: 2px;
+}
+
+/* ── Card details ────────────────────────────────────────────────────────── */
+.erx-card__detail {
+  font-size: 0.875rem;
+  color: var(--ms-text-secondary, #4b5563);
+  margin: 0;
+  display: flex;
+  gap: 0.375rem;
+}
+.erx-card__detail strong {
+  color: var(--ms-text, #111827);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.erx-card__notes {
+  font-size: 0.8125rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0;
+  border-top: 1px solid var(--ms-border, #f3f4f6);
+  padding-top: 0.5rem;
+}
+
+/* ── Validity bar ────────────────────────────────────────────────────────── */
+.erx-validity {
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.erx-validity--warn { color: #d97706; }
+.erx-validity--ok   { color: var(--ms-text-secondary, #6b7280); }
+.erx-validity--expired { color: #9ca3af; }
+
+/* ── Card actions ────────────────────────────────────────────────────────── */
+.erx-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ms-border, #f3f4f6);
+}
+
+.erx-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 36px;
+  padding: 0.35rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  background: transparent;
+  color: var(--ms-text-secondary, #374151);
+  cursor: pointer;
+  transition: background 0.13s, border-color 0.13s;
+}
+.erx-card__btn:hover { background: var(--ms-surface-hover, #f3f4f6); }
+.erx-card__btn--primary {
+  background: var(--ms-accent, #0d9488);
+  border-color: var(--ms-accent, #0d9488);
+  color: #fff;
+}
+.erx-card__btn--primary:hover { background: #0f766e; border-color: #0f766e; }
+.erx-card__btn--warn { color: #d97706; border-color: #fcd34d; }
+.erx-card__btn--warn:hover { background: #fffbeb; }
+.erx-card__btn--danger { color: #dc2626; border-color: #fca5a5; }
+.erx-card__btn--danger:hover { background: #fef2f2; border-color: #dc2626; }
+.erx-card__btn:focus-visible {
+  outline: 3px solid var(--ms-accent, #0d9488);
+  outline-offset: 2px;
+}
+.erx-card__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Issue button ────────────────────────────────────────────────────────── */
+.erx-issue-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 48px;
+  padding: 0.65rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  transition: background 0.15s;
+}
+.erx-issue-btn:hover { background: #0f766e; }
+.erx-issue-btn:focus-visible { outline: 3px solid #0d9488; outline-offset: 3px; }
+
+/* ── Form overlay ────────────────────────────────────────────────────────── */
+.erx-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem 1rem 2rem;
+  overflow-y: auto;
+}
+
+.erx-form-panel {
+  background: var(--ms-surface, #fff);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.erx-form-panel__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.erx-form__group { display: flex; flex-direction: column; gap: 0.375rem; }
+
+.erx-form__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ms-text, #111827);
+}
+
+.erx-form__input,
+.erx-form__select,
+.erx-form__textarea {
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: var(--ms-surface, #fff);
+  color: var(--ms-text, #111827);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.erx-form__input:focus,
+.erx-form__select:focus,
+.erx-form__textarea:focus {
+  outline: none;
+  border-color: var(--ms-accent, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13,148,136,0.15);
+}
+.erx-form__textarea { min-height: 72px; resize: vertical; }
+
+.erx-form__error { font-size: 0.8125rem; color: #dc2626; margin: 0; }
+
+.erx-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.erx-form__actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ms-border, #e5e7eb);
+}
+
+.erx-form__submit {
+  min-height: 44px;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.erx-form__submit:hover { background: #0f766e; }
+.erx-form__submit:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.erx-form__cancel {
+  min-height: 44px;
+  padding: 0.6rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ms-text-secondary, #374151);
+  cursor: pointer;
+}
+.erx-form__cancel:hover { background: var(--ms-surface-hover, #f3f4f6); }
+
+/* ── Empty / loading ─────────────────────────────────────────────────────── */
+.erx-page__loading {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 0;
+}
+.erx-page__spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--ms-border, #e5e7eb);
+  border-top-color: var(--ms-accent, #0d9488);
+  border-radius: 50%;
+  animation: erx-spin 0.7s linear infinite;
+}
+@keyframes erx-spin { to { transform: rotate(360deg); } }
+
+.erx-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--ms-text-secondary, #6b7280);
+}
+.erx-page__empty p { margin: 0; font-size: 0.9375rem; }
+
+.erx-page__error {
+  color: #dc2626;
+  font-size: 0.9375rem;
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+/* ── Practice section heading ────────────────────────────────────────────── */
+.erx-section__heading {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.erx-section__disclaimer {
+  font-size: 0.8125rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0 0 1.25rem;
+}
+
+/* ── Dark mode ───────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .erx-badge--issued      { background: #1e3a5f; color: #93c5fd; }
+  .erx-badge--at_pharmacy { background: #78350f; color: #fde68a; }
+  .erx-badge--redeemed    { background: #064e3b; color: #6ee7b7; }
+  .erx-badge--expired     { background: #1e293b; color: #94a3b8; }
+  .erx-badge--cancelled   { background: #7f1d1d; color: #fca5a5; }
+  .erx-token { background: #1e293b; border-color: #334155; }
+  .erx-qr-panel { background: #1e293b; border-color: #334155; }
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .erx-cards { grid-template-columns: 1fr; }
+  .erx-form__row { grid-template-columns: 1fr; }
+  .erx-form-overlay { padding: 0.75rem 0.5rem 1.5rem; }
+}

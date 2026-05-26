@@ -641,6 +641,7 @@ export default {
       vitals_access: "Misurazioni",
       vaccinations_access: "Libretto vaccinazioni",
       health_history_access: "Fascicolo sanitario",
+      prescriptions_access: "Ricette elettroniche",
     },
     purposes: {
       profile_access: "Dati profilo organizzativi per l’amministrazione dello studio",
@@ -654,6 +655,7 @@ export default {
       vitals_access: "Lo studio può consultare le misurazioni inserite manualmente (pressione, polso, ecc.)",
       vaccinations_access: "Lo studio può consultare il libretto vaccinazioni digitale (inserito dall’utente)",
       health_history_access: "Lo studio può consultare le allergie e diagnosi inserite dall’utente",
+      prescriptions_access: "Lo studio può emettere ricette elettroniche e lo stato di ritiro viene sincronizzato",
     },
   },
 

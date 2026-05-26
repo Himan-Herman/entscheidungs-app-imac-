@@ -76,6 +76,8 @@ model User {
   vitalEntries                   VitalEntry[]
   allergyEntries                 AllergyEntry[]
   diagnosisEntries               DiagnosisEntry[]
+  erezeptEntries                 ErezeptEntry[]   @relation("PatientErezept")
+  issuedErezeptEntries           ErezeptEntry[]   @relation("PracticeErezept")
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -1779,6 +1781,41 @@ model DiagnosisEntry {
 
   @@index([userId, status])
   @@index([userId, deletedAt])
+}
+
+/** Simulated e-Rezept entry — practice issues, patient redeems at pharmacy. No real TI crypto. */
+model ErezeptEntry {
+  id               String    @id @default(cuid())
+  /// Patient user (receiver)
+  patientUserId    String
+  /// Practice user who issued (actor)
+  issuedByUserId   String
+  /// PracticePatientLink for consent + scope
+  linkId           String
+
+  medicationName   String    @db.VarChar(300)
+  icdCode          String?   @db.VarChar(20)
+  dosage           String?   @db.VarChar(200)
+  instructions     String?   @db.Text
+  /// Simulated token code — e.g. "ERZ-A1B2-C3D4-E5F6"
+  tokenCode        String    @db.VarChar(40)
+  /// issued | at_pharmacy | redeemed | expired | cancelled
+  status           String    @default("issued") @db.VarChar(40)
+  issuedAt         DateTime  @default(now())
+  /// Default 28 days validity per §16 AMVV
+  validUntil       DateTime
+  redeemedAt       DateTime?
+  notes            String?   @db.Text
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  patient  User @relation("PatientErezept",  fields: [patientUserId],  references: [id], onDelete: Cascade)
+  issuedBy User @relation("PracticeErezept", fields: [issuedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([patientUserId, status])
+  @@index([patientUserId, deletedAt])
+  @@index([linkId])
 }
 
 datasource db {

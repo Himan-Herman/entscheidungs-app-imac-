@@ -113,6 +113,7 @@ export default {
   tabVitals: "Messwerte",
   tabVaccinations: "Impfpass",
   tabHealthHistory: "Gesundheitsakte",
+  tabErezept: "e-Rezepte",
   tabMessages: "Nachrichten",
   tabActivity: "Aktivität",
   patientProvidedHint:

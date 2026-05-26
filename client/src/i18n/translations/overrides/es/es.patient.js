@@ -641,6 +641,7 @@ export default {
       vitals_access: "Mediciones",
       vaccinations_access: "Cartilla de vacunación",
       health_history_access: "Historial de salud",
+      prescriptions_access: "Recetas electrónicas",
     },
     purposes: {
       profile_access: "Datos de perfil organizativos para la administración del consultorio",
@@ -654,6 +655,7 @@ export default {
       vitals_access: "El consultorio puede ver sus mediciones registradas manualmente (tensión, pulso, etc.)",
       vaccinations_access: "El consultorio puede ver su cartilla de vacunación digital (registrada por usted)",
       health_history_access: "El consultorio puede ver sus alergias y diagnósticos registrados por usted",
+      prescriptions_access: "El consultorio puede emitir recetas electrónicas y el estado de dispensación se sincroniza",
     },
   },
 

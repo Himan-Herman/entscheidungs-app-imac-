@@ -9,6 +9,7 @@ const TABS = [
   { id: "vitals", labelKey: "tabVitals" },
   { id: "vaccinations", labelKey: "tabVaccinations" },
   { id: "healthHistory", labelKey: "tabHealthHistory" },
+  { id: "erezept", labelKey: "tabErezept" },
   { id: "messages", labelKey: "tabMessages" },
   { id: "activity", labelKey: "tabActivity" },
 ];

@@ -113,6 +113,7 @@ export default {
   tabVitals: "Measurements",
   tabVaccinations: "Vaccination record",
   tabHealthHistory: "Health record",
+  tabErezept: "e-Prescriptions",
   tabMessages: "Messages",
   tabActivity: "Activity",
   patientProvidedHint: "Some information was provided by the patient.",

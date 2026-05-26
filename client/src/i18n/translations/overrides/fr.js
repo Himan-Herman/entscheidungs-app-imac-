@@ -12,6 +12,7 @@ import frMedicalInterpreter from "./fr/fr.medicalInterpreter.js";
 import frPracticeModules from "./fr/fr.practice.modules.js";
 import frVitals from "./fr/fr.vitals.js";
 import frHealthHistory from "./fr/fr.healthHistory.js";
+import frErezept from "./fr/fr.erezept.js";
 
 const frBase = {
   legal: legalFr,
@@ -220,6 +221,6 @@ export default deepMerge(
   ),
   deepMerge(
     deepMerge(deepMerge(frPatient, frMedicalInterpreter), frPracticeModules),
-    deepMerge({ vitals: frVitals }, { healthHistory: frHealthHistory }),
+    deepMerge(deepMerge({ vitals: frVitals }, { healthHistory: frHealthHistory }), { erezept: frErezept }),
   ),
 );

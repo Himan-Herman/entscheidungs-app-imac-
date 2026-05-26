@@ -192,6 +192,7 @@ export default {
     tabVitals: "Misurazioni",
     tabVaccinations: "Libretto vaccinazioni",
     tabHealthHistory: "Fascicolo sanitario",
+    tabErezept: "Ricette elettroniche",
     tabMessages: "Meseesaggi",
     tabActivity: "Actividad",
     patientProvidedHint: "Parte de la información la ha facilitado el paziente.",

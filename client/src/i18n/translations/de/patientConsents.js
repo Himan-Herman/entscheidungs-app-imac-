@@ -61,6 +61,7 @@ export default {
     vitals_access: "Messwerte",
     vaccinations_access: "Impfpass",
     health_history_access: "Gesundheitsakte",
+    prescriptions_access: "e-Rezepte",
   },
   purposes: {
     profile_access: "Organisatorische Profildaten für die Praxisverwaltung",
@@ -74,5 +75,6 @@ export default {
     vitals_access: "Praxis kann Ihre selbst eingetragenen Messwerte (Blutdruck, Puls usw.) einsehen",
     vaccinations_access: "Praxis kann Ihren digitalen Impfpass (selbst eingetragen) einsehen",
     health_history_access: "Praxis kann Ihre selbst eingetragenen Allergien und Diagnosen einsehen",
+    prescriptions_access: "Praxis kann Ihnen e-Rezepte ausstellen und der Einlösungsstatus wird synchronisiert",
   },
 };
