@@ -141,6 +141,11 @@ export function isVaccinationPassEnabled() {
   return envFlag("ENABLE_VACCINATION_PASS", false);
 }
 
+/** Structured health history — patient-owned allergy entries + diagnosis/condition entries. */
+export function isHealthHistoryEnabled() {
+  return envFlag("ENABLE_HEALTH_HISTORY", false);
+}
+
 export function isDocumentOcrUiEnabled() {
   if (isLabInterpretationEnabled()) return false;
   return (

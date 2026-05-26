@@ -16,7 +16,10 @@
       "Bash(grep -E \"\\\\.\\(js|ts\\)$\")",
       "Bash(grep -E \"\\\\.jsx$|\\\\.tsx$\")",
       "Bash(node scripts/verifyVitalsPhase2.js)",
-      "Bash(node scripts/verifyVitals.js)"
+      "Bash(node scripts/verifyVitals.js)",
+      "Bash(sed -n '10,20p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/i18n/translations/overrides/fr.js)",
+      "Bash(sed -n '218,230p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/i18n/translations/overrides/fr.js)",
+      "Bash(xargs ls -la)"
     ]
   }
 }

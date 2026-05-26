@@ -111,6 +111,8 @@ export default {
   tabMedication: "Medikationsplan",
   tabDocuments: "Dokumente & Befunde",
   tabVitals: "Messwerte",
+  tabVaccinations: "Impfpass",
+  tabHealthHistory: "Gesundheitsakte",
   tabMessages: "Nachrichten",
   tabActivity: "Aktivität",
   patientProvidedHint:

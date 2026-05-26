@@ -79,6 +79,13 @@ export default {
     error: "Failed to delete. Please try again.",
   },
 
+  practice: {
+    heading: "Patient's vaccination record",
+    disclaimer: "Self-reported by the patient – not an official vaccination certificate.",
+    noEntries: "This patient has not recorded any vaccinations yet.",
+    noConsent: "The patient has not yet granted access to their vaccination record.",
+  },
+
   commonVaccines: [
     "COVID-19",
     "Tetanus",

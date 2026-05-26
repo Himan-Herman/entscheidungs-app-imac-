@@ -134,4 +134,6 @@ export default {
   hubLinkVaccinationsSub: "Impfungen dokumentieren und im Blick behalten",
   hubLinkVitals: "Meine Messwerte",
   hubLinkVitalsSub: "Blutdruck, Puls, Blutzucker & Gewicht im Verlauf",
+  hubLinkHealthHistory: "Gesundheitsakte",
+  hubLinkHealthHistorySub: "Allergien und Diagnosen strukturiert dokumentieren",
 };

@@ -13,6 +13,7 @@ import itMedicalInterpreter from "./it/it.medicalInterpreter.js";
 import itPracticeModules from "./it/it.practice.modules.js";
 import itVaccinations from "./it/it.vaccinations.js";
 import itVitals from "./it/it.vitals.js";
+import itHealthHistory from "./it/it.healthHistory.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
@@ -182,6 +183,6 @@ export default deepMerge(
   ),
   deepMerge(
     deepMerge(deepMerge(itPatient, itMedicalInterpreter), itPracticeModules),
-    deepMerge({ vaccinations: itVaccinations }, { vitals: itVitals }),
+    deepMerge(deepMerge({ vaccinations: itVaccinations }, { vitals: itVitals }), { healthHistory: itHealthHistory }),
   ),
 );

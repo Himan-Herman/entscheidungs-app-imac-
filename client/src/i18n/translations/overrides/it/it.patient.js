@@ -639,6 +639,8 @@ export default {
       optional_email_notifications: "Notifiche email",
       optional_secure_links: "Link sicuri",
       vitals_access: "Misurazioni",
+      vaccinations_access: "Libretto vaccinazioni",
+      health_history_access: "Fascicolo sanitario",
     },
     purposes: {
       profile_access: "Dati profilo organizzativi per l’amministrazione dello studio",
@@ -650,6 +652,8 @@ export default {
       optional_email_notifications: "Avvisi email facoltativi sull’attività",
       optional_secure_links: "Link di download sicuri a durata limitata",
       vitals_access: "Lo studio può consultare le misurazioni inserite manualmente (pressione, polso, ecc.)",
+      vaccinations_access: "Lo studio può consultare il libretto vaccinazioni digitale (inserito dall’utente)",
+      health_history_access: "Lo studio può consultare le allergie e diagnosi inserite dall’utente",
     },
   },
 

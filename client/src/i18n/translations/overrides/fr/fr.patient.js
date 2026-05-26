@@ -639,6 +639,8 @@ export default {
       optional_email_notifications: "Notifications e-mail",
       optional_secure_links: "Liens sécurisés",
       vitals_access: "Mesures",
+      vaccinations_access: "Carnet de vaccination",
+      health_history_access: "Dossier santé",
     },
     purposes: {
       profile_access: "Données de profil organisationnelles pour l’administration du cabinet",
@@ -650,6 +652,8 @@ export default {
       optional_email_notifications: "Avis e-mail facultatifs sur l’activité",
       optional_secure_links: "Liens de téléchargement sécurisés à durée limitée",
       vitals_access: "Le cabinet peut consulter vos mesures saisies manuellement (tension artérielle, pouls, etc.)",
+      vaccinations_access: "Le cabinet peut consulter votre carnet de vaccination numérique (saisie personnelle)",
+      health_history_access: "Le cabinet peut consulter vos allergies et diagnostics (saisie personnelle)",
     },
   },
 

@@ -36,26 +36,104 @@ export const REALTIME_PEER_CONNECTION_CONFIG = {
 };
 
 /**
+ * @param {unknown} value
+ * @returns {string}
+ */
+function pickText(value) {
+  return typeof value === "string" && value.trim() ? value.trim() : "";
+}
+
+/**
+ * @param {Record<string, unknown> | null | undefined} part
+ * @returns {string}
+ */
+function extractTextFromPart(part) {
+  if (!part || typeof part !== "object") return "";
+
+  const direct = [
+    pickText(part.transcript),
+    pickText(part.text),
+    pickText(part.delta),
+  ].find(Boolean);
+  if (direct) return direct;
+
+  const nestedTranscription =
+    part.input_audio_transcription && typeof part.input_audio_transcription === "object"
+      ? part.input_audio_transcription
+      : null;
+
+  return (
+    pickText(nestedTranscription?.transcript) ||
+    pickText(nestedTranscription?.text) ||
+    (part.type === "input_audio" ? pickText(part.input_audio) : "")
+  );
+}
+
+/**
+ * @param {unknown} content
+ * @returns {string}
+ */
+function extractTextFromContent(content) {
+  if (!Array.isArray(content)) return "";
+  for (const rawPart of content) {
+    if (!rawPart || typeof rawPart !== "object") continue;
+    const text = extractTextFromPart(/** @type {Record<string, unknown>} */ (rawPart));
+    if (text) return text;
+  }
+  return "";
+}
+
+/**
+ * @param {unknown} output
+ * @returns {string}
+ */
+function extractTextFromResponseOutput(output) {
+  if (!Array.isArray(output)) return "";
+  for (const rawItem of output) {
+    if (!rawItem || typeof rawItem !== "object") continue;
+    const item = /** @type {Record<string, unknown>} */ (rawItem);
+    const direct = pickText(item.transcript) || pickText(item.text);
+    if (direct) return direct;
+    const fromContent = extractTextFromContent(item.content);
+    if (fromContent) return fromContent;
+  }
+  return "";
+}
+
+/**
  * Extract translated text from assorted Realtime server event shapes.
  * @param {Record<string, unknown>} event
  */
 export function extractTranslatedText(event) {
   if (!event || typeof event !== "object") return "";
 
-  const direct = event.transcript || event.text;
-  if (typeof direct === "string" && direct.trim()) return direct.trim();
+  const direct =
+    pickText(event.transcript) ||
+    pickText(event.text) ||
+    pickText(event.delta);
+  if (direct) return direct;
+
+  if (event.part && typeof event.part === "object") {
+    const fromPart = extractTextFromPart(/** @type {Record<string, unknown>} */ (event.part));
+    if (fromPart) return fromPart;
+  }
 
   const item = event.item;
   if (item && typeof item === "object") {
-    const content = item.content;
-    if (Array.isArray(content)) {
-      for (const part of content) {
-        if (part && typeof part === "object") {
-          const text = part.transcript || part.text;
-          if (typeof text === "string" && text.trim()) return text.trim();
-        }
-      }
-    }
+    const itemText =
+      pickText(item.transcript) ||
+      pickText(item.text) ||
+      extractTextFromContent(item.content);
+    if (itemText) return itemText;
+  }
+
+  if (event.response && typeof event.response === "object") {
+    const response = /** @type {Record<string, unknown>} */ (event.response);
+    const responseText =
+      pickText(response.transcript) ||
+      pickText(response.text) ||
+      extractTextFromResponseOutput(response.output);
+    if (responseText) return responseText;
   }
 
   return "";
@@ -68,38 +146,39 @@ export function extractTranslatedText(event) {
 export function extractOriginalText(event) {
   if (!event || typeof event !== "object") return "";
 
-  const direct = event.transcript ?? event.text ?? event.transcription;
-  if (typeof direct === "string" && direct.trim()) return direct.trim();
-  if (direct && typeof direct === "object") {
-    const nested = direct.text ?? direct.transcript;
-    if (typeof nested === "string" && nested.trim()) return nested.trim();
+  const direct =
+    pickText(event.transcript) ||
+    pickText(event.text) ||
+    pickText(event.delta);
+  if (direct) return direct;
+
+  const transcription =
+    event.transcription && typeof event.transcription === "object"
+      ? /** @type {Record<string, unknown>} */ (event.transcription)
+      : null;
+  if (transcription) {
+    const nested = pickText(transcription.text) || pickText(transcription.transcript);
+    if (nested) return nested;
   }
 
-  if (typeof event.delta === "string" && event.delta.trim()) {
-    return event.delta.trim();
+  if (event.part && typeof event.part === "object") {
+    const fromPart = extractTextFromPart(/** @type {Record<string, unknown>} */ (event.part));
+    if (fromPart) return fromPart;
   }
 
   const item = event.item;
   if (item && typeof item === "object") {
-    const itemTranscript = item.transcript ?? item.text;
-    if (typeof itemTranscript === "string" && itemTranscript.trim()) {
-      return itemTranscript.trim();
-    }
+    const itemTranscript =
+      pickText(item.transcript) ||
+      pickText(item.text) ||
+      extractTextFromContent(item.content);
+    if (itemTranscript) return itemTranscript;
+  }
 
-    const content = item.content;
-    if (Array.isArray(content)) {
-      for (const part of content) {
-        if (!part || typeof part !== "object") continue;
-        const text =
-          part.transcript ??
-          part.text ??
-          part.input_audio_transcription?.transcript ??
-          (part.type === "input_audio" && typeof part.input_audio === "string"
-            ? part.input_audio
-            : null);
-        if (typeof text === "string" && text.trim()) return text.trim();
-      }
-    }
+  if (event.response && typeof event.response === "object") {
+    const response = /** @type {Record<string, unknown>} */ (event.response);
+    const responseText = extractTextFromResponseOutput(response.output);
+    if (responseText) return responseText;
   }
 
   return "";

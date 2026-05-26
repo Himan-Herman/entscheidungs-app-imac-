@@ -79,6 +79,13 @@ export default {
     error: "Löschen fehlgeschlagen. Bitte erneut versuchen.",
   },
 
+  practice: {
+    heading: "Impfpass des Patienten",
+    disclaimer: "Vom Patienten selbst eingetragen – kein offizieller Impfnachweis.",
+    noEntries: "Dieser Patient hat noch keine Impfungen eingetragen.",
+    noConsent: "Der Patient hat den Zugriff auf seinen Impfpass noch nicht freigegeben.",
+  },
+
   commonVaccines: [
     "COVID-19",
     "Tetanus",

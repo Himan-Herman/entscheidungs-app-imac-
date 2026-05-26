@@ -111,6 +111,8 @@ export default {
   tabMedication: "Medication plan",
   tabDocuments: "Documents & findings",
   tabVitals: "Measurements",
+  tabVaccinations: "Vaccination record",
+  tabHealthHistory: "Health record",
   tabMessages: "Messages",
   tabActivity: "Activity",
   patientProvidedHint: "Some information was provided by the patient.",

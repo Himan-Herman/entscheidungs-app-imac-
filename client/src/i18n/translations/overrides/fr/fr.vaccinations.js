@@ -77,4 +77,11 @@ export default {
     deleting: "Suppression …",
     error: "Échec de la suppression. Veuillez réessayer.",
   },
+
+  practice: {
+    heading: "Carnet de vaccination du patient",
+    disclaimer: "Saisi par le patient — pas un certificat de vaccination officiel.",
+    noEntries: "Ce patient n'a encore enregistré aucune vaccination.",
+    noConsent: "Le patient n'a pas encore autorisé l'accès à son carnet de vaccination.",
+  },
 };

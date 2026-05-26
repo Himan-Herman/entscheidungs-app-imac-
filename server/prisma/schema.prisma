@@ -74,6 +74,8 @@ model User {
   interpreterSessionLinksRevoked PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
   vaccinationEntries             VaccinationEntry[]
   vitalEntries                   VitalEntry[]
+  allergyEntries                 AllergyEntry[]
+  diagnosisEntries               DiagnosisEntry[]
 }
 
 /** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
@@ -1726,6 +1728,56 @@ model VitalEntry {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, type, measuredAt])
+  @@index([userId, deletedAt])
+}
+
+/// Patient-recorded allergy — structured entry, not an official medical record.
+model AllergyEntry {
+  id             String    @id @default(cuid())
+  userId         String
+  /// Name of allergen — e.g. "Penicillin", "Peanuts", "Latex"
+  allergen       String    @db.VarChar(200)
+  /// medication | food | environmental | insect | contact | other
+  allergyType    String    @db.VarChar(40)
+  /// mild | moderate | severe | life_threatening
+  severity       String    @db.VarChar(40)
+  /// Free-text description of the reaction — e.g. "Anaphylaxis, throat swelling"
+  reaction       String?   @db.Text
+  diagnosedDate  DateTime?
+  /// active | inactive | uncertain
+  status         String    @default("active") @db.VarChar(40)
+  notes          String?   @db.Text
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, deletedAt])
+}
+
+/// Patient-recorded diagnosis / medical history — structured entry, not an official medical record.
+model DiagnosisEntry {
+  id              String    @id @default(cuid())
+  userId          String
+  /// Condition name — e.g. "Diabetes mellitus Typ 2", "Hypertension"
+  conditionName   String    @db.VarChar(300)
+  /// ICD-10 code — optional, e.g. "E11", "I10"
+  icdCode         String?   @db.VarChar(20)
+  diagnosedDate   DateTime?
+  /// active | chronic | resolved | managed | uncertain
+  status          String    @default("active") @db.VarChar(40)
+  /// Treating doctor or clinic name — organizational only
+  treatingDoctor  String?   @db.VarChar(200)
+  notes           String?   @db.Text
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
   @@index([userId, deletedAt])
 }
 

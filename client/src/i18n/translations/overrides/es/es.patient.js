@@ -639,6 +639,8 @@ export default {
       optional_email_notifications: "Notificaciones por correo",
       optional_secure_links: "Enlaces seguros",
       vitals_access: "Mediciones",
+      vaccinations_access: "Cartilla de vacunación",
+      health_history_access: "Historial de salud",
     },
     purposes: {
       profile_access: "Datos de perfil organizativos para la administración del consultorio",
@@ -650,6 +652,8 @@ export default {
       optional_email_notifications: "Avisos por correo opcionales sobre la actividad",
       optional_secure_links: "Enlaces de descarga seguros de duración limitada",
       vitals_access: "El consultorio puede ver sus mediciones registradas manualmente (tensión, pulso, etc.)",
+      vaccinations_access: "El consultorio puede ver su cartilla de vacunación digital (registrada por usted)",
+      health_history_access: "El consultorio puede ver sus alergias y diagnósticos registrados por usted",
     },
   },
 

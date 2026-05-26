@@ -21,7 +21,7 @@ function statusKey(entry) {
   return "upToDate";
 }
 
-export default function VaccinationEntryCard({ entry, t, lang, onEdit, onDelete }) {
+export default function VaccinationEntryCard({ entry, t, lang, onEdit, onDelete, readOnly = false }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -110,26 +110,28 @@ export default function VaccinationEntryCard({ entry, t, lang, onEdit, onDelete 
         </a>
       )}
 
-      <div className="vacc-card__actions">
-        <button
-          type="button"
-          className="vacc-card__btn"
-          onClick={() => onEdit(entry)}
-          aria-label={t.card.editAria}
-        >
-          <Pencil size={14} />
-          {t.card.edit}
-        </button>
-        <button
-          type="button"
-          className="vacc-card__btn vacc-card__btn--danger"
-          onClick={() => setConfirmDelete(true)}
-          aria-label={t.card.deleteAria}
-        >
-          <Trash2 size={14} />
-          {t.card.delete}
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="vacc-card__actions">
+          <button
+            type="button"
+            className="vacc-card__btn"
+            onClick={() => onEdit(entry)}
+            aria-label={t.card.editAria}
+          >
+            <Pencil size={14} />
+            {t.card.edit}
+          </button>
+          <button
+            type="button"
+            className="vacc-card__btn vacc-card__btn--danger"
+            onClick={() => setConfirmDelete(true)}
+            aria-label={t.card.deleteAria}
+          >
+            <Trash2 size={14} />
+            {t.card.delete}
+          </button>
+        </div>
+      )}
 
       {confirmDelete && (
         <div className="vacc-delete-dialog" role="dialog" aria-modal="true" aria-labelledby="vacc-del-title">

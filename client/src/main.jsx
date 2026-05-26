@@ -188,6 +188,9 @@ const VaccinationPassPage = lazy(() =>
 const VitalsPage = lazy(() =>
   import("./features/vitals/pages/VitalsPage.jsx"),
 );
+const HealthHistoryPage = lazy(() =>
+  import("./features/healthHistory/pages/HealthHistoryPage.jsx"),
+);
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
 );
@@ -516,6 +519,14 @@ createRoot(document.getElementById("root")).render(
                   element={
                     <ProtectedRoute>
                       <VitalsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/health-history"
+                  element={
+                    <ProtectedRoute>
+                      <HealthHistoryPage />
                     </ProtectedRoute>
                   }
                 />

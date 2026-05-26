@@ -190,6 +190,8 @@ export default {
     tabMedication: "Piano terapeutico",
     tabDocuments: "Documenti ed esiti",
     tabVitals: "Misurazioni",
+    tabVaccinations: "Libretto vaccinazioni",
+    tabHealthHistory: "Fascicolo sanitario",
     tabMessages: "Meseesaggi",
     tabActivity: "Actividad",
     patientProvidedHint: "Parte de la información la ha facilitado el paziente.",

@@ -77,4 +77,11 @@ export default {
     deleting: "Eliminando …",
     error: "Error al eliminar. Inténtalo de nuevo.",
   },
+
+  practice: {
+    heading: "Cartilla de vacunación del paciente",
+    disclaimer: "Registrado por el paciente — no es un certificado oficial de vacunación.",
+    noEntries: "Este paciente aún no ha registrado ninguna vacuna.",
+    noConsent: "El paciente aún no ha autorizado el acceso a su cartilla de vacunación.",
+  },
 };

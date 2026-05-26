@@ -65,6 +65,7 @@ import liveMedicalTranslation from "./liveMedicalTranslation.js";
 import patientChatHistory from "./patientChatHistory.js";
 import vaccinations from "./vaccinations.js";
 import vitals from "./vitals.js";
+import healthHistory from "./healthHistory.js";
 
 export default {
   header,
@@ -134,4 +135,5 @@ export default {
   patientChatHistory,
   vaccinations,
   vitals,
+  healthHistory,
 };

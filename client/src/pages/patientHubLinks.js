@@ -21,6 +21,7 @@ import {
   Building2,
   ListChecks,
   Languages,
+  BookHeart,
 } from "lucide-react";
 
 /** @typedef {{ to: string; key: string; subtitleKey?: string; ariaKey?: string; icon: import('react').ComponentType<{ size?: number; strokeWidth?: number }>; tileClass?: string }} PatientHubLink */
@@ -172,6 +173,12 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkVitals",
     subtitleKey: "hubLinkVitalsSub",
     icon: TrendingUp,
+  },
+  {
+    to: "/patient/health-history",
+    key: "hubLinkHealthHistory",
+    subtitleKey: "hubLinkHealthHistorySub",
+    icon: BookHeart,
   },
 ]);
 

@@ -59,6 +59,8 @@ export default {
     optional_email_notifications: "Email notifications",
     optional_secure_links: "Secure links",
     vitals_access: "Measurements",
+    vaccinations_access: "Vaccination record",
+    health_history_access: "Health record",
   },
   purposes: {
     profile_access: "Organizational profile data for practice administration",
@@ -70,5 +72,7 @@ export default {
     optional_email_notifications: "Optional email notices about activity",
     optional_secure_links: "Time-limited secure download links",
     vitals_access: "Practice can view your self-entered measurements (blood pressure, pulse, etc.)",
+    vaccinations_access: "Practice can view your digital vaccination record (self-reported)",
+    health_history_access: "Practice can view your self-entered allergies and diagnoses",
   },
 };

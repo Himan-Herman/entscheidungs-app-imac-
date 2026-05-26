@@ -77,4 +77,11 @@ export default {
     deleting: "Eliminazione …",
     error: "Eliminazione fallita. Riprova.",
   },
+
+  practice: {
+    heading: "Libretto vaccinale del paziente",
+    disclaimer: "Inserito dal paziente — non è un certificato vaccinale ufficiale.",
+    noEntries: "Questo paziente non ha ancora registrato alcuna vaccinazione.",
+    noConsent: "Il paziente non ha ancora autorizzato l'accesso al suo libretto vaccinale.",
+  },
 };

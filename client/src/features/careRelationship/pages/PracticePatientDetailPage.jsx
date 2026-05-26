@@ -14,6 +14,8 @@ import PracticePatientMessagesSection from "../../communication/components/Pract
 import PracticePatientMedicationPlanSection from "../../medicationPlan/components/PracticePatientMedicationPlanSection.jsx";
 import PracticePatientDocumentsSection from "../../practiceDocuments/components/PracticePatientDocumentsSection.jsx";
 import PracticePatientVitalsSection from "../../vitals/components/PracticePatientVitalsSection.jsx";
+import PracticePatientVaccinationsSection from "../../vaccinations/components/PracticePatientVaccinationsSection.jsx";
+import PracticePatientHealthHistorySection from "../../healthHistory/components/PracticePatientHealthHistorySection.jsx";
 import PracticePatientProfileSection from "../components/PracticePatientProfileSection.jsx";
 import PracticePatientAssignmentSection from "../components/PracticePatientAssignmentSection.jsx";
 import "../../../styles/PracticeDashboardPage.css";
@@ -36,6 +38,8 @@ const VALID_TABS = new Set([
   "medication",
   "documents",
   "vitals",
+  "vaccinations",
+  "healthHistory",
   "messages",
   "activity",
 ]);
@@ -241,6 +245,20 @@ export default function PracticePatientDetailPage() {
 
           {activeTab === "vitals" && practiceId && linkId ? (
             <PracticePatientVitalsSection
+              linkId={linkId}
+              practiceId={practiceId}
+            />
+          ) : null}
+
+          {activeTab === "vaccinations" && practiceId && linkId ? (
+            <PracticePatientVaccinationsSection
+              linkId={linkId}
+              practiceId={practiceId}
+            />
+          ) : null}
+
+          {activeTab === "healthHistory" && practiceId && linkId ? (
+            <PracticePatientHealthHistorySection
               linkId={linkId}
               practiceId={practiceId}
             />

@@ -48,6 +48,11 @@ import patientPracticeDocumentsRouter from "./routes/patientPracticeDocuments.js
 import patientVaccinationsRouter from "./routes/patientVaccinations.js";
 import patientVitalsRouter from "./routes/patientVitals.js";
 import practicePatientVitalsRouter from "./routes/practicePatientVitals.js";
+import practicePatientVaccinationsRouter from "./routes/practicePatientVaccinations.js";
+import patientAllergiesRouter from "./routes/patientAllergies.js";
+import patientDiagnosesRouter from "./routes/patientDiagnoses.js";
+import healthHistoryAiRouter from "./routes/healthHistoryAi.js";
+import practicePatientHealthHistoryRouter from "./routes/practicePatientHealthHistory.js";
 import patientDataControlRouter from "./routes/patientDataControl.js";
 import patientProfileSharingRouter from "./routes/patientProfileSharing.js";
 import patientActivityRouter from "./routes/patientActivity.js";
@@ -162,6 +167,11 @@ app.use("/api/patient/practice-documents", requireAuth, patientPracticeDocuments
 app.use("/api/patient/vaccinations", requireAuth, patientVaccinationsRouter);
 app.use("/api/patient/vitals", requireAuth, patientVitalsRouter);
 app.use("/api/practice/patients/:linkId/vitals", requireAuth, practicePatientVitalsRouter);
+app.use("/api/practice/patients/:linkId/vaccinations", requireAuth, practicePatientVaccinationsRouter);
+app.use("/api/patient/allergies", requireAuth, patientAllergiesRouter);
+app.use("/api/patient/diagnoses", requireAuth, patientDiagnosesRouter);
+app.use("/api/patient/health-history/ai", requireAuth, healthHistoryAiRouter);
+app.use("/api/practice/patients/:linkId/health-history", requireAuth, practicePatientHealthHistoryRouter);
 app.use("/api/practice/documents", requireAuth, practiceSecureDocumentLinksRouter);
 app.use("/api/patient/data-control", requireAuth, patientDataControlRouter);
 app.use("/api/patient/consents", requireAuth, patientConsentsRouter);

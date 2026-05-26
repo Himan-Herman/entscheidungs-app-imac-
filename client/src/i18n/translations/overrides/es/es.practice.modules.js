@@ -190,6 +190,8 @@ export default {
     tabMedication: "Plan de medicación",
     tabDocuments: "Documentos y resultados",
     tabVitals: "Mediciones",
+    tabVaccinations: "Cartilla de vacunación",
+    tabHealthHistory: "Historial de salud",
     tabMessages: "Mensajes",
     tabActivity: "Actividad",
     patientProvidedHint: "Parte de la información la ha facilitado el paciente.",
