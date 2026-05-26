@@ -3,7 +3,7 @@
  *
  * Layered model strategy:
  *  - Chat / text / medical translation / PDF:  gpt-5.4        (OPENAI_CHAT_MODEL)
- *  - Realtime audio / WebRTC (Meda live):      gpt-realtime-2 (LIVE_TRANSLATION_REALTIME_MODEL)
+ *  - Realtime audio / WebRTC (Meda live):      gpt-4o-realtime-preview (LIVE_TRANSLATION_REALTIME_MODEL)
  *    ↳ GPT-5.4 is NOT valid for the Realtime API; using it causes invalid_value errors.
  *  - ASR / speech-to-text:                     gpt-4o-transcribe (LIVE_TRANSLATION_TRANSCRIPTION_MODEL)
  *  - TTS / speech synthesis:                   gpt-4o-mini-tts   (OPENAI_TTS_MODEL)
@@ -12,7 +12,7 @@
  */
 
 const DEFAULT_CHAT_MODEL = "gpt-5.4";
-const DEFAULT_REALTIME_MODEL = "gpt-realtime-2";
+const DEFAULT_REALTIME_MODEL = "gpt-4o-realtime-preview";
 const DEFAULT_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
 const DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
 const DEFAULT_TTS_VOICE = "marin";

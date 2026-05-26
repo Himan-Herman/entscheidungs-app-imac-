@@ -101,6 +101,19 @@ router.post("/realtime-session", async (req, res) => {
       userId: req.user?.userId,
     });
 
+    console.log(
+      JSON.stringify({
+        tag: "[MedaRealtimeModel]",
+        resolvedModel: built.realtimeModel,
+        payloadModel: built.payload?.session?.model ?? null,
+        openaiStatus: minted.openaiStatus,
+        openaiErrorCode: minted.openaiErrorCode ?? null,
+        openaiErrorMessage: minted.openaiErrorMessage ?? null,
+        openaiErrorParam: minted.openaiErrorParam ?? null,
+        ok: minted.ok,
+      }),
+    );
+
     logLiveTranslation(req, "openai_client_secrets_response", {
       ok: minted.ok,
       openaiStatus: minted.openaiStatus,
@@ -127,7 +140,7 @@ router.post("/realtime-session", async (req, res) => {
       model: built.realtimeModel,
       voice: built.voice,
       voiceProfile: LIVE_TRANSLATION_VOICE_PROFILE,
-      outputSpeed: built.payload.session.audio.output.speed,
+      outputSpeed: built.payload.session.output_audio_speed ?? 1,
       transcriptionModel: built.transcriptionModel,
       ...built.routing,
     });
@@ -135,6 +148,7 @@ router.post("/realtime-session", async (req, res) => {
     logLiveTranslation(req, "realtime_session_exception", {
       ok: false,
       errorName: err && typeof err === "object" && "name" in err ? String(err.name) : "Error",
+      errorMessage: err instanceof Error ? err.message : String(err),
     });
     return res.status(502).json({ ok: false, error: "realtime_session_failed" });
   }

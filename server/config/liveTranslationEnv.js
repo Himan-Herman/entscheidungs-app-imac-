@@ -12,7 +12,7 @@ export const LIVE_TRANSLATION_VOICE_PROFILE = "neutral_medical";
 
 /**
  * OpenAI Realtime model for live medical conversation (WebRTC audio layer).
- * Default: gpt-realtime-2 — official low-latency audio/WebRTC model.
+ * Default: gpt-4o-realtime-preview — officially documented OpenAI Realtime model.
  * GPT-5.4 is a chat/text model and must NOT be used here.
  */
 export const LIVE_TRANSLATION_REALTIME_MODEL = getOpenAiRealtimeModel();
