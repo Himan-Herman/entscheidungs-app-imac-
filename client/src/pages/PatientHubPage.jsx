@@ -5,7 +5,6 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
 import PatientHubTiles from "./PatientHubTiles.jsx";
-import { isLiveMedicalTranslationEnabled } from "../features/liveMedicalTranslation/featureFlag.js";
 import {
   PATIENT_MAIN_HUB_LINKS,
   PATIENT_MY_PRACTICE_HUB_LINK,
@@ -44,11 +43,10 @@ export default function PatientHubPage() {
     void loadInboxCount();
   }, [loadInboxCount]);
 
-  const hubLinks = useMemo(() => {
-    const links = [PATIENT_MY_PRACTICE_HUB_LINK, ...PATIENT_MAIN_HUB_LINKS];
-    if (isLiveMedicalTranslationEnabled()) return links;
-    return links.filter((link) => link.to !== "/patient/live-translation");
-  }, []);
+  const hubLinks = useMemo(
+    () => [PATIENT_MY_PRACTICE_HUB_LINK, ...PATIENT_MAIN_HUB_LINKS],
+    [],
+  );
 
   const tSos = useMemo(() => {
     const msgs = getMessages(language);

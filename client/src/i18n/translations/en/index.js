@@ -61,7 +61,6 @@ import voiceInput from "./voiceInput.js";
 import meda from "./meda.js";
 import medicalInterpreter from "./medicalInterpreter.js";
 import medicalInterpreterPractice from "./medicalInterpreterPractice.js";
-import liveMedicalTranslation from "./liveMedicalTranslation.js";
 import patientChatHistory from "./patientChatHistory.js";
 import vaccinations from "./vaccinations.js";
 import vitals from "./vitals.js";
@@ -133,7 +132,6 @@ export default {
   meda,
   medicalInterpreter,
   medicalInterpreterPractice,
-  liveMedicalTranslation,
   patientChatHistory,
   vaccinations,
   vitals,

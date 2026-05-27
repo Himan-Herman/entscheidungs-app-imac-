@@ -25,10 +25,6 @@ export const AI_MODULES = {
    */
   MEDICAL_INTERPRETER: "medical_interpreter",
   /**
-   * Meda live translation — faithful translation only; same output safety scan as interpreter.
-   */
-  LIVE_MEDICAL_TRANSLATION: "live_medical_translation",
-  /**
    * Patient-facing plain-language explanation of individual lab values.
    * Allowed: what the parameter measures, whether value is within/outside reference range.
    * Forbidden: diagnosis, urgency, treatment/medication advice, disease probability.
@@ -279,7 +275,6 @@ export function getOutputSafetyPatterns(module) {
     case AI_MODULES.PREVISIT_FOLLOWUP_FORMAT:
       return [...base, ...SYMPTOM_EXTRA];
     case AI_MODULES.MEDICAL_INTERPRETER:
-    case AI_MODULES.LIVE_MEDICAL_TRANSLATION:
       return [
         ...MEDICAL_INTERPRETER_OUTPUT_FORBIDDEN,
         ...MULTILINGUAL_EXTRA,
@@ -350,11 +345,7 @@ export const SAFE_FALLBACKS = {
   },
   [AI_MODULES.MEDICAL_INTERPRETER]: {
     de: "Diese Ausgabe konnte nicht sicher als Kommunikationshilfe angezeigt werden. Bitte formulieren Sie den Inhalt neutral und klären Sie medizinische Fragen direkt mit Ihrem Behandlungsteam. Dieses Modul bietet keine Diagnose, keine Dringlichkeitseinschätzung und keine Behandlungsempfehlung.",
-    en: "This output could not be safely shown as communication support. Please phrase the content neutrally and discuss medical questions directly with your care team. This module does not provide diagnosis, urgency assessment, or treatment recommendations.",
-  },
-  [AI_MODULES.LIVE_MEDICAL_TRANSLATION]: {
-    de: "Diese Übersetzung konnte nicht sicher angezeigt werden. Bitte wiederholen Sie den Satz. Meda übersetzt nur — ohne Diagnose, Dringlichkeit oder Behandlungsempfehlung.",
-    en: "This translation could not be safely shown. Please repeat the sentence. Meda translates only — no diagnosis, urgency, or treatment advice.",
+    en: "This output could not be safely shown as communication support. Please phrase the content neutrually and discuss medical questions directly with your care team. This module does not provide diagnosis, urgency assessment, or treatment recommendations.",
   },
   generic: {
     de: "Die Ausgabe konnte nicht sicher strukturiert werden. Bitte formulieren Sie neutral und besprechen Sie medizinische Fragen mit medizinischem Fachpersonal.",

@@ -27,6 +27,13 @@ CREATE UNIQUE INDEX IF NOT EXISTS "SosCard_publicToken_key" ON "SosCard"("public
 -- CreateIndex
 CREATE INDEX IF NOT EXISTS "SosCard_publicToken_idx" ON "SosCard"("publicToken");
 
--- AddForeignKey
-ALTER TABLE "SosCard" ADD CONSTRAINT "SosCard_patientUserId_fkey"
-    FOREIGN KEY ("patientUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- AddForeignKey (idempotent)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'SosCard_patientUserId_fkey'
+  ) THEN
+    ALTER TABLE "SosCard" ADD CONSTRAINT "SosCard_patientUserId_fkey"
+      FOREIGN KEY ("patientUserId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;

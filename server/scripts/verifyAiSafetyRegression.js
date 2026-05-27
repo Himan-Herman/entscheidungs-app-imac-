@@ -15,12 +15,7 @@ import {
   replaceUnsafePhrases,
   shouldRegenerateUnsafeOutput,
 } from "../services/aiSafetySanitizer.js";
-import {
-  getOpenAiChatModel,
-  getOpenAiRealtimeModel,
-  getOpenAiTranscriptionModel,
-  getOpenAiTtsModel,
-} from "../config/openAiModels.js";
+import { getOpenAiChatModel, getOpenAiTtsModel } from "../config/openAiModels.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..", "..");
@@ -41,14 +36,6 @@ function fileContains(rel, needle) {
 
 // --- Central model config ---
 assert("default chat model is gpt-5.4", getOpenAiChatModel() === "gpt-5.4");
-assert(
-  "realtime model is not chat model",
-  getOpenAiRealtimeModel() !== getOpenAiChatModel(),
-);
-assert(
-  "transcription model is ASR-specific",
-  /transcribe/i.test(getOpenAiTranscriptionModel()),
-);
 assert("TTS model is TTS-specific", /tts/i.test(getOpenAiTtsModel()));
 
 // --- Policy scope strings ---
@@ -92,12 +79,6 @@ const cases = [
     expectUnsafe: true,
   },
   {
-    name: "live translation module uses interpreter patterns",
-    text: "Sie haben wahrscheinlich eine Lungenentzündung.",
-    module: AI_MODULES.LIVE_MEDICAL_TRANSLATION,
-    expectUnsafe: true,
-  },
-  {
     name: "neutral translation allowed",
     text: "I have had pain in my chest since yesterday.",
     module: AI_MODULES.MEDICAL_INTERPRETER,
@@ -106,7 +87,7 @@ const cases = [
   {
     name: "lab explanation no diagnosis phrase",
     text: "This value may indicate kidney disease with high probability.",
-    module: AI_MODULES.LAB_EXPLANATION,
+    module: AI_MODULES.LAB_PATIENT_EXPLANATION,
     expectUnsafe: true,
   },
   {
@@ -139,18 +120,11 @@ const promptChecks = [
   ["server/services/meda/medaPrompt.js", "diagnos"],
   ["server/services/medicationPlan/medicationPlanAiService.js", "Forbidden:"],
   ["server/services/practiceDocument/labPatientExplanationService.js", "Strictly forbidden"],
-  ["server/services/liveTranslation/liveTranslationMedicalScope.js", "translate"],
   ["client/src/pages/prompt/bildanalysePrompt.js", "NO diagnosis"],
   ["client/src/pages/prompt/textsymptomPrompt.js", "Not medical advice"],
   ["client/src/pages/prompt/koerpersymptomPrompt.js", "FORBIDDEN: diagnosis"],
-  ["server/services/liveTranslation/liveTranslationUnclearPhrase.js", "wiederholen"],
   ["server/services/preVisitOpenAiClient.js", "nicht angegeben"],
 ];
-
-assert(
-  "client blocks unsafe translation output",
-  detectForbiddenMedicalClaims("You likely have acute bronchitis.", AI_MODULES.LIVE_MEDICAL_TRANSLATION).unsafe,
-);
 
 for (const [rel, needle] of promptChecks) {
   assert(`prompt file ${rel} contains ${needle}`, fileContains(rel, needle));
@@ -180,28 +154,6 @@ assert(
     fileContains("server/services/meda/medaChatService.js", "getMedaOpenAiModel"),
 );
 
-assert(
-  "live translation realtime uses central model via liveTranslationEnv",
-  fileContains("server/config/liveTranslationEnv.js", "getOpenAiRealtimeModel") &&
-    fileContains(
-      "server/services/liveTranslation/liveTranslationRealtimeService.js",
-      "LIVE_TRANSLATION_REALTIME_MODEL",
-    ),
-);
-
-assert(
-  "client translation output safety exists",
-  fileContains(
-    "client/src/features/liveMedicalTranslation/utils/translationOutputSafety.js",
-    "isUnsafeTranslationOutput",
-  ),
-);
-
-assert(
-  "asrQuality wires translation output safety",
-  fileContains("client/src/features/liveMedicalTranslation/utils/asrQuality.js", "isUnsafeTranslationOutput"),
-);
-
 // Meda safety script patterns
 assert(
   "meda prompt blocks diagnosis requests",
@@ -219,9 +171,6 @@ console.log("verifyAiSafetyRegression OK");
 console.log(
   JSON.stringify({
     chatModel: getOpenAiChatModel(),
-    realtimeModel: getOpenAiRealtimeModel(),
-    transcriptionModel: getOpenAiTranscriptionModel(),
     ttsModel: getOpenAiTtsModel(),
-    casesRun: cases.length,
   }),
 );

@@ -96,9 +96,6 @@ const PatientPracticeHubPage = lazy(() =>
 const PatientOrientationHubPage = lazy(() =>
   import("./pages/PatientOrientationHubPage.jsx"),
 );
-const LiveTranslationPage = lazy(() =>
-  import("./features/liveMedicalTranslation/pages/LiveTranslationRoute.jsx"),
-);
 const PatientInboxPage = lazy(() =>
   import("./features/patientInbox/pages/PatientInboxPage.jsx"),
 );
@@ -303,14 +300,6 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PatientOrientationHubPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/patient/live-translation"
-                  element={
-                    <ProtectedRoute>
-                      <LiveTranslationPage />
                     </ProtectedRoute>
                   }
                 />

@@ -21,7 +21,6 @@ import {
   Video,
   Building2,
   ListChecks,
-  Languages,
   BookHeart,
 } from "lucide-react";
 
@@ -125,13 +124,6 @@ export const PATIENT_ORIENTATION_MAIN_HUB_LINK = /** @type {PatientHubLink} */ (
 
 /** B2C / personal — remain on the main patient overview. */
 export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
-  {
-    to: "/patient/live-translation",
-    key: "hubLinkLiveTranslation",
-    subtitleKey: "hubLinkLiveTranslationSub",
-    ariaKey: "hubLinkLiveTranslationAria",
-    icon: Languages,
-  },
   {
     to: "/patient/medication-plans",
     key: "hubLinkMedicationPlans",

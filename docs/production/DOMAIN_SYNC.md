@@ -36,7 +36,6 @@ Apex-Domains (`medscoutx.com`, `medscoutx.app`, `medscout.app`) → 307/308 auf 
 3. **Environment Variables (Production)**  
    Gleiche Werte für alle Deployments:
    - `VITE_API_BASE_URL` (z. B. `https://api.medscout.app`)
-   - `VITE_LIVE_MEDICAL_TRANSLATION_ENABLED=true` (falls Meda live)
    - Kein separates Preview-ENV für .app/.com
 
 ## Render CORS

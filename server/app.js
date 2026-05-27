@@ -89,7 +89,6 @@ import internalWorkerRouter from "./routes/internalWorker.js";
 import medaRouter from "./routes/meda.js";
 import interpreterRouter from "./routes/interpreter.js";
 import interpreterPublicInviteRouter from "./routes/interpreterPublicInvite.js";
-import liveTranslationRouter from "./routes/liveTranslation.js";
 import { interpreterInviteValidateLimiter } from "./middleware/interpreterRateLimit.js";
 import patientSosCardRouter from "./routes/patientSosCard.js";
 import publicEmergencyRouter from "./routes/publicEmergency.js";
@@ -147,7 +146,6 @@ app.use(
 /** Medical Interpreter (B2C + B2B practice) — flag-gated; auth required. */
 app.use('/api/interpreter', requireAuth, interpreterRouter);
 /** B2C live conversation translation (OpenAI Realtime) — flag-gated; auth required. */
-app.use('/api/live-translation', requireAuth, liveTranslationRouter);
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/i18n', i18nRouter);
