@@ -7,7 +7,7 @@ import { isLanguageRoutingEnabled } from "./languageBasedRouting.js";
 
 /**
  * Runtime session.update for WebRTC (speaker/language change — no model/voice/VAD changes).
- * Uses RealtimeSessionCreateRequestGA schema: transcription lives at audio.input.transcription.
+ * Flat session structure: transcription at session.input_audio_transcription (not nested under audio).
  * @param {ReturnType<typeof import("./routing.js").buildLanguageRouting>} routing
  * @param {string} [transcriptionModel]
  */
@@ -26,13 +26,10 @@ export function buildRuntimeSessionUpdatePayload(routing, transcriptionModel) {
     : null;
 
   if (txLanguage) {
-    session.audio = {
-      input: {
-        transcription: {
-          model: transcriptionModel || LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
-          language: txLanguage,
-        },
-      },
+    // Flat structure — input_audio_transcription at session root, not nested under audio.input.
+    session.input_audio_transcription = {
+      model: transcriptionModel || LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
+      language: txLanguage,
     };
   }
 

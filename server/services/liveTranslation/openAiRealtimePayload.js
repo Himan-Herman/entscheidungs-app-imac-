@@ -2,8 +2,9 @@
  * OpenAI Realtime API payload helpers.
  *
  * Schema source: openai/openai-openapi (RealtimeSessionCreateRequestGA)
- * Both POST /v1/realtime/client_secrets and session.update WebSocket event
- * use RealtimeSessionCreateRequestGA — the nested audio.input / audio.output structure.
+ * Both POST /v1/realtime/client_secrets and session.update WebSocket event use flat session fields:
+ * voice, input_audio_transcription, turn_detection at session root — not nested under audio.input/output.
+ * The nested structure is in the spec but rejected by the current production endpoint.
  *
  * Model separation (all per official OpenAI API spec):
  *  - Realtime (WebRTC/audio): gpt-4o-realtime-preview — officially documented model.
@@ -13,7 +14,7 @@
  *  - Voice:                   marin or cedar (recommended by OpenAI for quality)
  */
 
-/** ISO-639-1 codes accepted by audio.input.transcription.language */
+/** ISO-639-1 codes accepted by input_audio_transcription.language */
 export const OPENAI_TRANSCRIPTION_LANGUAGE_CODES = new Set([
   "af", "ar", "az", "be", "bg", "bs", "ca", "cs", "cy", "da", "de", "el", "en", "es", "et", "fa",
   "fi", "fr", "gl", "he", "hi", "hr", "hu", "hy", "id", "is", "it", "iw", "ja", "kk", "kn", "ko",

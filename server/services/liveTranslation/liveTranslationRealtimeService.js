@@ -1,6 +1,5 @@
 import {
   LIVE_TRANSLATION_CLIENT_SECRET_TTL_SECONDS,
-  LIVE_TRANSLATION_OUTPUT_SPEED,
   LIVE_TRANSLATION_REALTIME_MODEL,
   LIVE_TRANSLATION_TRANSCRIPTION_MODEL,
   LIVE_TRANSLATION_VAD_SILENCE_MS,
@@ -45,9 +44,10 @@ export function buildRealtimeClientSecretsPayload(validated) {
     ? resolveOpenAiTranscriptionLanguage(routing.sourceLanguage)
     : null;
 
-  // RealtimeSessionCreateRequestGA schema (openai/openai-openapi):
-  // All session config is nested under audio.input / audio.output — NOT at session root.
-  // output_modalities replaces the legacy modalities field.
+  // Flat session structure — voice, input_audio_transcription, turn_detection at session root.
+  // The nested audio.input/output structure (GA spec) is rejected by the current production
+  // endpoint with a misleading "Missing required parameter: session.type" discriminator error.
+  // output_modalities (not modalities) is the correct field name.
   // create_response:false prevents auto-responses; the client drives response.create explicitly.
   const payload = {
     expires_after: {
@@ -59,27 +59,18 @@ export function buildRealtimeClientSecretsPayload(validated) {
       model: realtimeModel,
       output_modalities: ["audio"],
       instructions,
-      audio: {
-        input: {
-          transcription: {
-            model: transcriptionModel,
-            ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
-          },
-          turn_detection: {
-            type: "server_vad",
-            create_response: false,
-            interrupt_response: true,
-            silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
-            prefix_padding_ms: 500,
-            threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
-          },
-        },
-        output: {
-          voice,
-          ...(LIVE_TRANSLATION_OUTPUT_SPEED !== 1
-            ? { speed: LIVE_TRANSLATION_OUTPUT_SPEED }
-            : {}),
-        },
+      voice,
+      input_audio_transcription: {
+        model: transcriptionModel,
+        ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
+      },
+      turn_detection: {
+        type: "server_vad",
+        create_response: false,
+        interrupt_response: true,
+        silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
+        prefix_padding_ms: 500,
+        threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
       },
     },
   };
@@ -118,6 +109,15 @@ function sanitizeOpenAiError(data) {
  * @param {{ userId?: string }} [options]
  */
 export async function mintRealtimeClientSecret(apiKey, payload, options = {}) {
+  const bodyString = JSON.stringify(payload);
+  console.log(
+    JSON.stringify({
+      tag: "[MedaPayloadOutgoing]",
+      url: OPENAI_CLIENT_SECRETS_URL,
+      payloadJson: bodyString,
+    }),
+  );
+
   const openaiRes = await fetch(OPENAI_CLIENT_SECRETS_URL, {
     method: "POST",
     headers: {
@@ -125,10 +125,22 @@ export async function mintRealtimeClientSecret(apiKey, payload, options = {}) {
       "Content-Type": "application/json",
       ...(options.userId ? { "OpenAI-Safety-Identifier": String(options.userId) } : {}),
     },
-    body: JSON.stringify(payload),
+    body: bodyString,
   });
 
-  const data = await openaiRes.json().catch(() => ({}));
+  const rawText = await openaiRes.text().catch(() => "");
+  let data = {};
+  try { data = JSON.parse(rawText); } catch { /* non-JSON body */ }
+
+  if (!openaiRes.ok) {
+    console.log(
+      JSON.stringify({
+        tag: "[MedaOpenAIRawResponse]",
+        status: openaiRes.status,
+        body: rawText,
+      }),
+    );
+  }
   const clientSecret =
     data?.value || data?.client_secret?.value || data?.client_secret || null;
   const expiresAt = data?.expires_at || data?.client_secret?.expires_at || null;

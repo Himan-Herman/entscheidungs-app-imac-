@@ -1139,7 +1139,7 @@ export function useLiveTranslationSession({
       sourceLanguage: routing.sourceLanguage,
       targetLanguage: routing.targetLanguage,
       reason: "language_routing",
-      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
+      hasTranscriptionLanguage: Boolean(payload.session?.input_audio_transcription?.language),
     });
     dc.send(JSON.stringify(payload));
 
@@ -1798,7 +1798,7 @@ export function useLiveTranslationSession({
       activeSpeaker: routing.activeSpeaker,
       sourceLanguage: routing.sourceLanguage,
       targetLanguage: routing.targetLanguage,
-      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
+      hasTranscriptionLanguage: Boolean(payload.session?.input_audio_transcription?.language),
     });
     dc.send(JSON.stringify(payload));
 
