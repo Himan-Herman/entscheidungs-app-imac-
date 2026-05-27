@@ -49,9 +49,15 @@ router.post('/translate-text', async (req, res) => {
     const translation = response.choices[0]?.message?.content?.trim() ?? '';
     return res.json({ translation });
   } catch (err) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('[medaLiveTranslation] translate-text error:', err.message);
-    }
+    console.error(JSON.stringify({
+      level: 'error',
+      context: 'medaLiveTranslation/translate-text',
+      name: err?.name,
+      message: err?.message,
+      status: err?.status,
+      code: err?.code,
+      type: err?.type,
+    }));
     return res.status(500).json({ error: 'Übersetzung fehlgeschlagen.' });
   }
 });
