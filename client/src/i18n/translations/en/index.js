@@ -67,6 +67,7 @@ import vaccinations from "./vaccinations.js";
 import vitals from "./vitals.js";
 import healthHistory from "./healthHistory.js";
 import erezept from "./erezept.js";
+import sosCard from "./sosCard.js";
 
 export default {
   header,
@@ -138,4 +139,5 @@ export default {
   vitals,
   healthHistory,
   erezept,
+  sosCard,
 };

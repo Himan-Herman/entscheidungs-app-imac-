@@ -309,6 +309,7 @@ export default function LiveTranslationPage() {
     confirmScopeContinue,
     isPaused,
     sessionTimerLabel,
+    isRtcConnected,
   } = useLiveTranslationSession({
     patientLanguage,
     doctorLanguage,
@@ -406,15 +407,20 @@ export default function LiveTranslationPage() {
     [turns],
   );
 
-  const connectionLabel =
-    (t.status && t.status[connectionStatus]) || connectionStatus || "";
-  const micLabel = microphoneStatus === "on" ? t.status.micOn : t.status.micOff;
+  const connectionLabel = !isRtcConnected
+    ? connectionStatus === "reconnecting"
+      ? t.status.reconnecting
+      : t.status.connecting
+    : (t.status && t.status[connectionStatus]) || connectionStatus || "";
+  const micLabel = isRtcConnected && microphoneStatus === "on" ? t.status.micOn : t.status.micOff;
   const isSessionLive =
-    connectionStatus === "introducing" ||
-    connectionStatus === "listening" ||
-    connectionStatus === "translating" ||
-    connectionStatus === "speaking" ||
-    connectionStatus === "paused";
+    isRtcConnected &&
+    (connectionStatus === "introducing" ||
+      connectionStatus === "connected" ||
+      connectionStatus === "listening" ||
+      connectionStatus === "translating" ||
+      connectionStatus === "speaking" ||
+      connectionStatus === "paused");
   const activityClass =
     connectionStatus === "introducing"
       ? "live-translation__activity--introducing"
@@ -1286,13 +1292,7 @@ export default function LiveTranslationPage() {
                   "live-translation__status-value",
                   connectionStatus === "error"
                     ? "live-translation__status-value--error"
-                    : connectionStatus === "connected" ||
-                        connectionStatus === "reconnecting" ||
-                        connectionStatus === "introducing" ||
-                        connectionStatus === "listening" ||
-                        connectionStatus === "translating" ||
-                        connectionStatus === "speaking" ||
-                        connectionStatus === "paused"
+                    : isRtcConnected
                       ? "live-translation__status-value--ok"
                       : "",
                 ]
@@ -1307,7 +1307,9 @@ export default function LiveTranslationPage() {
               <span
                 className={[
                   "live-translation__status-value",
-                  microphoneStatus === "on" ? "live-translation__status-value--ok" : "",
+                  microphoneStatus === "on" && isRtcConnected
+                    ? "live-translation__status-value--ok"
+                    : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}

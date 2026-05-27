@@ -164,6 +164,7 @@ export function useLiveTranslationSession({
   const [turns, setTurns] = useState(/** @type {LiveTranslationTurn[]} */ ([]));
   const [errorKey, setErrorKey] = useState("");
   const [sessionElapsedMs, setSessionElapsedMs] = useState(0);
+  const [isRtcConnected, setIsRtcConnected] = useState(false);
   const turnsRef = useRef(/** @type {LiveTranslationTurn[]} */ ([]));
 
   const pcRef = useRef(/** @type {RTCPeerConnection | null} */ (null));
@@ -240,6 +241,8 @@ export function useLiveTranslationSession({
     /** @type {{ playing: () => void; ended: () => void } | null} */ (null),
   );
   const sessionEstablishedRef = useRef(false);
+  const connectInFlightRef = useRef(false);
+  const connectGenerationRef = useRef(0);
 
   sessionConfigRef.current = { patientLanguage, doctorLanguage, activeSpeaker };
   autoSwitchSpeakerRef.current = autoSwitchSpeaker;
@@ -405,6 +408,8 @@ export function useLiveTranslationSession({
   }, [safeSetState]);
 
   const teardown = useCallback(() => {
+    connectGenerationRef.current += 1;
+    connectInFlightRef.current = false;
     connectedRef.current = false;
     pendingSpeakerUpdateRef.current = false;
     outputStreamIdRef.current = null;
@@ -453,7 +458,11 @@ export function useLiveTranslationSession({
       audioElRef.current = null;
     }
     stopMic();
-  }, [clearSessionTimer, stopMic]);
+    safeSetState(() => {
+      setIsRtcConnected(false);
+      setMicrophoneStatus("off");
+    });
+  }, [clearSessionTimer, safeSetState, stopMic]);
 
   const cancelActiveResponse = useCallback(() => {
     if (!responseActiveRef.current) return;
@@ -1216,6 +1225,7 @@ export function useLiveTranslationSession({
     startSessionTimer();
     const activated = trySendMedaActivation();
     safeSetState(() => {
+      setIsRtcConnected(true);
       setMicrophoneStatus("on");
       setSessionElapsedMs(0);
       if (
@@ -1223,7 +1233,7 @@ export function useLiveTranslationSession({
         (connectionStatusRef.current === "connecting" ||
           connectionStatusRef.current === "reconnecting")
       ) {
-        setConnectionStatus("listening");
+        setConnectionStatus("connected");
       }
     });
   }, [safeSetState, startSessionTimer, trySendMedaActivation]);
@@ -1460,6 +1470,11 @@ export function useLiveTranslationSession({
   const finalizeTranslationOutput = useCallback(
     (translated) => {
       if (pausedRef.current) return;
+      if (translated?.trim()) {
+        logRealtimeConnect("translation_received", {
+          translationLength: translated.trim().length,
+        });
+      }
 
       if (awaitingIntroResponseRef.current) {
         awaitingIntroResponseRef.current = false;
@@ -2019,6 +2034,21 @@ export function useLiveTranslationSession({
   const connect = useCallback(async () => {
     if (!mountedRef.current) return;
 
+    if (connectInFlightRef.current) {
+      logRealtimeConnect("connect_skipped", { reason: "in_flight" });
+      return;
+    }
+    if (pcRef.current) {
+      logRealtimeConnect("connect_skipped", { reason: "existing_peer" });
+      return;
+    }
+
+    const generation = ++connectGenerationRef.current;
+    connectInFlightRef.current = true;
+
+    const isStale = () =>
+      !mountedRef.current || generation !== connectGenerationRef.current;
+
     const preserveTurns = connectPreserveTurnsRef.current;
     skipActivationFeedbackRef.current = preserveTurns;
     connectPreserveTurnsRef.current = false;
@@ -2026,10 +2056,12 @@ export function useLiveTranslationSession({
     safeSetState(() => {
       setErrorKey("");
       setCurrentTranslatedText("");
+      setIsRtcConnected(false);
       if (!preserveTurns) {
         setTurns([]);
       }
       setConnectionStatus("connecting");
+      setMicrophoneStatus("off");
     });
 
     const routing = buildLanguageRouting(sessionConfigRef.current);
@@ -2038,6 +2070,7 @@ export function useLiveTranslationSession({
 
     logRealtimeConnect("connect_start", {
       architecture: "sdp_realtime_call_only",
+      generation,
       patientLanguage: routing.patientLanguage,
       doctorLanguage: routing.doctorLanguage,
       activeSpeaker: routing.activeSpeaker,
@@ -2045,16 +2078,18 @@ export function useLiveTranslationSession({
 
     try {
       const pc = new RTCPeerConnection(REALTIME_PEER_CONNECTION_CONFIG);
+      if (isStale()) {
+        pc.close();
+        return;
+      }
       pcRef.current = pc;
-      logRealtimeConnect("peer_created", {
-        iceServers: REALTIME_PEER_CONNECTION_CONFIG.iceServers.length,
-      });
+      logRealtimeConnect("peer_created", { generation });
 
       pc.onconnectionstatechange = () => {
         logRealtimeConnect("rtc_connection_state_change", { state: pc.connectionState });
         logRealtimeDiag("pc_connection_state", { state: pc.connectionState });
         if (pc.connectionState === "connected") {
-          logRealtimeConnect("connection_connected", {
+          logRealtimeConnect("rtc_connected", {
             dcState: dcRef.current?.readyState ?? "none",
             sessionEstablished: sessionEstablishedRef.current,
           });
@@ -2090,7 +2125,7 @@ export function useLiveTranslationSession({
         if (!audioElRef.current || !stream) return;
         if (outputStreamIdRef.current === stream.id) return;
         outputStreamIdRef.current = stream.id;
-        logRealtimeConnect("remote_audio_track_received", {
+        logRealtimeConnect("remote_audio_track", {
           streamId: stream.id,
           trackCount: stream.getTracks().length,
           trackKind: e.track?.kind ?? null,
@@ -2102,9 +2137,10 @@ export function useLiveTranslationSession({
       };
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (!mountedRef.current) {
+      if (isStale()) {
         stream.getTracks().forEach((t) => t.stop());
-        teardown();
+        pc.close();
+        pcRef.current = null;
         return;
       }
 
@@ -2119,7 +2155,6 @@ export function useLiveTranslationSession({
           readyState: micTrack.readyState,
           muted: micTrack.muted,
         });
-        safeSetState(() => setMicrophoneStatus("on"));
       }
 
       const dc = pc.createDataChannel("oai-events");
@@ -2187,12 +2222,16 @@ export function useLiveTranslationSession({
       });
 
       const offer = await pc.createOffer();
+      if (isStale()) return;
+      logRealtimeConnect("offer_created", { signalingState: pc.signalingState });
       await pc.setLocalDescription(offer);
+      if (isStale()) return;
       logRealtimeConnect("local_description_set", {
         signalingState: pc.signalingState,
         sdpBytes: pc.localDescription?.sdp?.length ?? 0,
       });
       await waitForIceGatheringComplete(pc);
+      if (isStale()) return;
 
       const localSdp = pc.localDescription?.sdp;
       if (!localSdp) {
@@ -2216,10 +2255,7 @@ export function useLiveTranslationSession({
           activeSpeaker: routing.activeSpeaker,
         });
 
-      if (!mountedRef.current) {
-        teardown();
-        return;
-      }
+      if (isStale()) return;
 
       if (!sdpResponse.ok || !answerSdp.trim()) {
         logRealtimeConnect("sdp_exchange_failed", {
@@ -2251,6 +2287,7 @@ export function useLiveTranslationSession({
       }
 
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
+      if (isStale()) return;
       connectedRef.current = true;
       prevSpeakerRef.current = sessionConfigRef.current.activeSpeaker;
       logRealtimeConnect("remote_description_set", {
@@ -2260,16 +2297,21 @@ export function useLiveTranslationSession({
         answerBytes: answerSdp.length,
       });
     } catch (err) {
-      logRealtimeConnect("connect_exception", {
-        errorName: err && typeof err === "object" && "name" in err ? String(err.name) : "Error",
-        errorMessage: err instanceof Error ? err.message : String(err),
-      });
-      teardown();
-      if (!mountedRef.current) return;
-      safeSetState(() => {
-        setErrorKey(resolveConnectExceptionErrorKey(err));
-        setConnectionStatus("error");
-      });
+      if (!isStale()) {
+        logRealtimeConnect("connect_exception", {
+          errorName: err && typeof err === "object" && "name" in err ? String(err.name) : "Error",
+          errorMessage: err instanceof Error ? err.message : String(err),
+        });
+        teardown();
+        safeSetState(() => {
+          setErrorKey(resolveConnectExceptionErrorKey(err));
+          setConnectionStatus("error");
+        });
+      }
+    } finally {
+      if (generation === connectGenerationRef.current) {
+        connectInFlightRef.current = false;
+      }
     }
   }, [
     attachOutputAudio,
@@ -2335,7 +2377,6 @@ export function useLiveTranslationSession({
       mountedRef.current = false;
       window.removeEventListener("pagehide", onPageHide);
       document.removeEventListener("visibilitychange", onVisibility);
-      teardown();
     };
   }, [cancelActiveResponse, resumeAudioPlayback, teardown]);
 
@@ -2369,6 +2410,7 @@ export function useLiveTranslationSession({
     sessionElapsedMs,
     sessionMaxMs,
     sessionTimerLabel,
+    isRtcConnected,
     endSession,
     disconnectSession,
     reconnect,

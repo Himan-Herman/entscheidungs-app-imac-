@@ -1,37 +1,21 @@
 import { authFetch } from "../../../api/authFetch.js";
 
 /**
- * Legacy: mint ephemeral client secret only (no WebRTC).
- * Live connect uses exchangeLiveTranslationSdp → POST /realtime-call (single architecture).
- * @param {{ patientLanguage: string; doctorLanguage: string; activeSpeaker: "patient" | "doctor" }} body
+ * @deprecated Not used for WebRTC connect. Live sessions use exchangeLiveTranslationSdp only.
  */
-export async function createLiveTranslationRealtimeSession(body) {
-  console.info("[MedaRealtimeConnect]", { event: "realtime_session_requested" });
-  const res = await authFetch("/api/live-translation/realtime-session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json().catch(() => ({}));
-  console.info("[MedaRealtimeConnect]", {
-    event: "realtime_session_received",
-    ok: res.ok,
-    status: res.status,
-    hasClientSecret: typeof data?.clientSecret === "string" && data.clientSecret.length > 0,
-    clientSecretLength:
-      typeof data?.clientSecret === "string" ? data.clientSecret.length : 0,
-    model: data?.model ?? null,
-    expiresAt: data?.expiresAt ?? null,
-    error: data?.error ?? null,
-    openaiStatus: data?.openaiStatus ?? null,
-    openaiErrorCode: data?.openaiErrorCode ?? null,
-    openaiErrorMessage: data?.openaiErrorMessage ?? null,
-  });
-  return { res, data };
+export async function createLiveTranslationRealtimeSession(_body) {
+  console.warn(
+    "[MedaRealtimeConnect] createLiveTranslationRealtimeSession is deprecated — use exchangeLiveTranslationSdp (POST /realtime-call) only.",
+  );
+  return {
+    res: { ok: false, status: 410 },
+    data: { error: "deprecated_use_realtime_call" },
+  };
 }
 
 /**
  * Server-proxied WebRTC SDP answer (same-origin; no direct browser call to api.openai.com).
+ * Sole Realtime connect path: POST /realtime-call.
  * @param {string} offerSdp
  * @param {{ patientLanguage: string; doctorLanguage: string; activeSpeaker: "patient" | "doctor" }} params
  */

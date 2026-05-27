@@ -114,6 +114,7 @@ export default {
   tabVaccinations: "Impfpass",
   tabHealthHistory: "Gesundheitsakte",
   tabErezept: "e-Rezepte",
+  tabSosCard: "Notfallausweis",
   tabMessages: "Nachrichten",
   tabActivity: "Aktivität",
   patientProvidedHint:

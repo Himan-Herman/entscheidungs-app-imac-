@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { ShieldAlert } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { fetchPatientInboxCount } from "../features/patientInbox/api/patientInboxApi.js";
@@ -49,13 +50,28 @@ export default function PatientHubPage() {
     return links.filter((link) => link.to !== "/patient/live-translation");
   }, []);
 
+  const tSos = useMemo(() => {
+    const msgs = getMessages(language);
+    return msgs.sosCard || getMessages("en").sosCard;
+  }, [language]);
+
   return (
     <div className="workspace-hub">
-      <header className="workspace-hub__hero">
-        <h1 className="workspace-hub__title">{t.patientHub.heading}</h1>
-        <p className="workspace-hub__sub">{t.patientHub.sub}</p>
-        <Link className="workspace-hub__classic" to="/startseite">
-          {t.patientHub.classic}
+      <header className="workspace-hub__hero workspace-hub__hero--with-sos">
+        <div className="workspace-hub__hero-text">
+          <h1 className="workspace-hub__title">{t.patientHub.heading}</h1>
+          <p className="workspace-hub__sub">{t.patientHub.sub}</p>
+          <Link className="workspace-hub__classic" to="/startseite">
+            {t.patientHub.classic}
+          </Link>
+        </div>
+        <Link
+          to="/patient/sos-card"
+          className="workspace-hub__sos-btn"
+          aria-label={tSos.pageHeading}
+        >
+          <ShieldAlert size={18} strokeWidth={2} className="workspace-hub__sos-icon" />
+          <span className="workspace-hub__sos-label">SOS</span>
         </Link>
       </header>
 

@@ -114,6 +114,7 @@ export default {
   tabVaccinations: "Vaccination record",
   tabHealthHistory: "Health record",
   tabErezept: "e-Prescriptions",
+  tabSosCard: "Emergency card",
   tabMessages: "Messages",
   tabActivity: "Activity",
   patientProvidedHint: "Some information was provided by the patient.",

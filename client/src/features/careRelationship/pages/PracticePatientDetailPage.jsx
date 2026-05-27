@@ -17,6 +17,7 @@ import PracticePatientVitalsSection from "../../vitals/components/PracticePatien
 import PracticePatientVaccinationsSection from "../../vaccinations/components/PracticePatientVaccinationsSection.jsx";
 import PracticePatientHealthHistorySection from "../../healthHistory/components/PracticePatientHealthHistorySection.jsx";
 import PracticePatientErezeptSection from "../../erezept/components/PracticePatientErezeptSection.jsx";
+import PracticePatientSosCardSection from "../../sosCard/components/PracticePatientSosCardSection.jsx";
 import PracticePatientProfileSection from "../components/PracticePatientProfileSection.jsx";
 import PracticePatientAssignmentSection from "../components/PracticePatientAssignmentSection.jsx";
 import "../../../styles/PracticeDashboardPage.css";
@@ -42,6 +43,7 @@ const VALID_TABS = new Set([
   "vaccinations",
   "healthHistory",
   "erezept",
+  "sosCard",
   "messages",
   "activity",
 ]);
@@ -268,6 +270,13 @@ export default function PracticePatientDetailPage() {
 
           {activeTab === "erezept" && practiceId && linkId ? (
             <PracticePatientErezeptSection
+              linkId={linkId}
+              practiceId={practiceId}
+            />
+          ) : null}
+
+          {activeTab === "sosCard" && practiceId && linkId ? (
+            <PracticePatientSosCardSection
               linkId={linkId}
               practiceId={practiceId}
             />

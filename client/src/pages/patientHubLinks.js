@@ -13,7 +13,6 @@ import {
   MapPinned,
   Pill,
   Receipt,
-  ShieldAlert,
   ShieldCheck,
   Stethoscope,
   TrendingUp,
@@ -187,13 +186,6 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkHealthHistory",
     subtitleKey: "hubLinkHealthHistorySub",
     icon: BookHeart,
-  },
-  {
-    to: "/patient/sos-card",
-    key: "hubLinkSosCard",
-    subtitleKey: "hubLinkSosCardSub",
-    icon: ShieldAlert,
-    tileClass: "workspace-hub__tile--sos",
   },
 ]);
 
