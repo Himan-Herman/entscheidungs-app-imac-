@@ -1,6 +1,19 @@
 import { extractOriginalText, extractTranslatedText, extractTranslatedTextFromResponse } from "./webrtc.js";
 
 /**
+ * Realtime connection lifecycle logs (browser console). No transcripts, secrets, or SDP bodies.
+ * @param {string} event
+ * @param {Record<string, unknown>} [detail]
+ */
+export function logRealtimeConnect(event, detail = {}) {
+  const payload = { event, ...detail };
+  console.info("[MedaRealtimeConnect]", payload);
+  if (import.meta.env?.DEV) {
+    console.debug("[live-translation-rt]", event, detail);
+  }
+}
+
+/**
  * Dev-only Realtime lifecycle diagnostics. Never logs transcript, audio, tokens, or patient data.
  * @param {string} scope
  * @param {Record<string, unknown>} [detail]

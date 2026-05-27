@@ -195,6 +195,12 @@ const HealthHistoryPage = lazy(() =>
 const ErezeptPage = lazy(() =>
   import("./features/erezept/pages/ErezeptPage.jsx"),
 );
+const SosCardPage = lazy(() =>
+  import("./features/sosCard/pages/SosCardPage.jsx"),
+);
+const EmergencyPublicPage = lazy(() =>
+  import("./features/sosCard/pages/EmergencyPublicPage.jsx"),
+);
 const PracticeInboxListPage = lazy(() =>
   import("./features/practiceInbox/pages/PracticeInboxListPage.jsx"),
 );

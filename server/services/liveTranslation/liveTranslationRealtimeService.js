@@ -124,17 +124,38 @@ function isOpenAiQuotaExceeded(openaiStatus, openaiErrorCode, openaiErrorMessage
   return /quota|billing/.test(message);
 }
 
-/**
- * @param {string} apiKey
- * @param {ReturnType<typeof buildRealtimeClientSecretsPayload>["payload"]} payload
- * @param {{ userId?: string }} [options]
- */
-export async function mintRealtimeClientSecret(apiKey, payload, options = {}) {
+function isInvalidModelError(minted) {
+  const msg = String(minted.openaiErrorMessage || "").toLowerCase();
+  const param = String(minted.openaiErrorParam || "").toLowerCase();
+  const code = String(minted.openaiErrorCode || "").toLowerCase();
+  return (
+    param.includes("model") ||
+    code === "invalid_value" ||
+    code === "model_not_found" ||
+    /invalid.*model|model.*not found|does not exist|not available|not supported/.test(msg)
+  );
+}
+
+function classifyOpenAiConnectionError(minted) {
+  const status = minted.openaiStatus;
+  const code = minted.openaiErrorCode;
+  const msg = String(minted.openaiErrorMessage || "").toLowerCase();
+  if (status === 401 || code === "invalid_api_key") return "unauthorized";
+  if (isOpenAiQuotaExceeded(status, code, minted.openaiErrorMessage)) return "insufficient_credits";
+  if (isInvalidModelError(minted)) return "invalid_model";
+  if (status === 400 && (msg.includes("session") || msg.includes("parameter"))) return "invalid_session_payload";
+  if (status === 403 || (msg.includes("realtime") && msg.includes("disabled"))) return "realtime_disabled";
+  return "openai_error";
+}
+
+async function postClientSecrets(apiKey, payload, options = {}) {
   const bodyString = JSON.stringify(payload);
+  const mintStartedAt = Date.now();
   console.log(
     JSON.stringify({
       tag: "[MedaPayloadOutgoing]",
       url: OPENAI_CLIENT_SECRETS_URL,
+      model: payload?.session?.model ?? null,
       payloadJson: bodyString,
     }),
   );
@@ -158,6 +179,10 @@ export async function mintRealtimeClientSecret(apiKey, payload, options = {}) {
       JSON.stringify({
         tag: "[MedaOpenAIRawResponse]",
         status: openaiRes.status,
+        connectionErrorKind: classifyOpenAiConnectionError({
+          openaiStatus: openaiRes.status,
+          ...sanitizeOpenAiError(data),
+        }),
         body: rawText,
       }),
     );
@@ -171,8 +196,43 @@ export async function mintRealtimeClientSecret(apiKey, payload, options = {}) {
     openaiStatus: openaiRes.status,
     clientSecret: typeof clientSecret === "string" ? clientSecret : null,
     expiresAt,
+    mintStartedAt,
     ...sanitizeOpenAiError(data),
   };
+}
+
+/**
+ * @param {string} apiKey
+ * @param {ReturnType<typeof buildRealtimeClientSecretsPayload>["payload"]} payload
+ * @param {{ userId?: string }} [options]
+ */
+export async function mintRealtimeClientSecret(apiKey, payload, options = {}) {
+  let minted = await postClientSecrets(apiKey, payload, options);
+
+  if (!minted.ok && isInvalidModelError(minted)) {
+    const fallbackModel = resolveOpenAiRealtimeModel("gpt-4o-realtime-preview");
+    const currentModel = payload?.session?.model;
+    if (currentModel && currentModel !== fallbackModel) {
+      console.log(
+        JSON.stringify({
+          tag: "[MedaRealtimeModelFallback]",
+          fromModel: currentModel,
+          toModel: fallbackModel,
+          openaiStatus: minted.openaiStatus,
+          openaiErrorCode: minted.openaiErrorCode,
+          openaiErrorMessage: minted.openaiErrorMessage,
+        }),
+      );
+      minted = await postClientSecrets(
+        apiKey,
+        { ...payload, session: { ...payload.session, model: fallbackModel } },
+        options,
+      );
+      minted.usedFallbackModel = fallbackModel;
+    }
+  }
+
+  return minted;
 }
 
 /**
@@ -197,9 +257,23 @@ export async function exchangeRealtimeSdp(apiKey, offerSdp, sessionPayload, opti
       openaiErrorCode: minted.openaiErrorCode,
       openaiErrorParam: minted.openaiErrorParam,
       openaiErrorMessage: minted.openaiErrorMessage,
+      connectionErrorKind: classifyOpenAiConnectionError(minted),
       ...(quotaExceeded ? { error: OPENAI_QUOTA_EXCEEDED_ERROR } : {}),
     };
   }
+
+  const secretAgeMs =
+    typeof minted.mintStartedAt === "number" ? Date.now() - minted.mintStartedAt : null;
+  console.log(
+    JSON.stringify({
+      tag: "[MedaRealtimeCallsStart]",
+      secretAgeMs,
+      expiresAt: minted.expiresAt ?? null,
+      model: sessionPayload?.session?.model ?? null,
+      usedFallbackModel: minted.usedFallbackModel ?? null,
+      offerBytes: offerSdp.length,
+    }),
+  );
 
   const callsRes = await fetch(OPENAI_REALTIME_CALLS_URL, {
     method: "POST",
@@ -224,12 +298,28 @@ export async function exchangeRealtimeSdp(apiKey, offerSdp, sessionPayload, opti
       sanitized.openaiErrorCode,
       sanitized.openaiErrorMessage,
     );
+    console.log(
+      JSON.stringify({
+        tag: "[MedaOpenAIRawResponse]",
+        phase: "realtime_calls",
+        status: callsRes.status,
+        connectionErrorKind: classifyOpenAiConnectionError({
+          openaiStatus: callsRes.status,
+          ...sanitized,
+        }),
+        body: answerSdp,
+      }),
+    );
     return {
       ok: false,
       phase: "realtime_calls",
       openaiStatus: callsRes.status,
       openaiErrorCode: sanitized.openaiErrorCode,
       openaiErrorMessage: sanitized.openaiErrorMessage,
+      connectionErrorKind: classifyOpenAiConnectionError({
+        openaiStatus: callsRes.status,
+        ...sanitized,
+      }),
       answerSdp: "",
       ...(quotaExceeded ? { error: OPENAI_QUOTA_EXCEEDED_ERROR } : {}),
     };

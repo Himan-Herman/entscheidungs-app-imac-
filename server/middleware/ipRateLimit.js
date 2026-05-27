@@ -174,3 +174,9 @@ export const integrationParseLimiter = createIpRateLimiter({
   max: 40,
   keyPrefix: 'practice:integrations:parse',
 });
+
+/** GET /api/public/emergency/:token — unauthenticated SOS-Karte view */
+export const publicEmergencyLimiter = createIpRateLimiter({
+  max: 120,
+  keyPrefix: 'public:emergency',
+});

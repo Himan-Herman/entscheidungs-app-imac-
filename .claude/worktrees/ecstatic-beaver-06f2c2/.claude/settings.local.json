@@ -27,7 +27,9 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml\")",
       "WebFetch(domain:api.github.com)",
       "Bash(curl -s https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml)",
-      "Bash(curl -s https://raw.githubusercontent.com/openai/openapi-openapi/master/openapi.yaml)"
+      "Bash(curl -s https://raw.githubusercontent.com/openai/openapi-openapi/master/openapi.yaml)",
+      "Bash(cat >> *)",
+      "Bash(mkdir -p /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/services/sosCard)"
     ]
   }
 }

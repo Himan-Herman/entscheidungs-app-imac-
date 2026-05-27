@@ -62,7 +62,7 @@ router.use(requireLiveTranslationFeature);
 
 /**
  * POST /api/live-translation/realtime-session
- * Session metadata + optional ephemeral secret (legacy). Prefer realtime-call for SDP.
+ * Legacy metadata + ephemeral secret. WebRTC connect uses POST /realtime-call only.
  */
 router.post("/realtime-session", async (req, res) => {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -79,6 +79,13 @@ router.post("/realtime-session", async (req, res) => {
 
   const { patientLanguage, doctorLanguage, activeSpeaker } = validated;
   const built = buildRealtimeClientSecretsPayload(validated);
+
+  logLiveTranslation(req, "realtime_session_requested", {
+    patientLanguage,
+    doctorLanguage,
+    activeSpeaker,
+    model: built.realtimeModel,
+  });
 
   logLiveTranslation(req, "realtime_session_start", {
     patientLanguage,
@@ -125,6 +132,16 @@ router.post("/realtime-session", async (req, res) => {
         ephemeralSecretReturned: minted.ok && typeof minted.clientSecret === "string",
       }),
     );
+
+    logLiveTranslation(req, "realtime_session_received", {
+      ok: true,
+      openaiStatus: minted.openaiStatus,
+      hasEphemeralSecret: true,
+      expiresAt: minted.expiresAt || null,
+      model: built.realtimeModel,
+      usedFallbackModel: minted.usedFallbackModel ?? null,
+      secretLength: typeof minted.clientSecret === "string" ? minted.clientSecret.length : 0,
+    });
 
     logLiveTranslation(req, "openai_client_secrets_response", {
       ok: minted.ok,
@@ -232,6 +249,7 @@ router.post(
             ok: false,
             error: OPENAI_QUOTA_EXCEEDED_ERROR,
             phase: result.phase,
+            connectionErrorKind: result.connectionErrorKind ?? "insufficient_credits",
           });
         }
         return res.status(502).json({
@@ -241,6 +259,7 @@ router.post(
           openaiStatus: result.openaiStatus,
           openaiErrorParam: result.openaiErrorParam,
           openaiErrorMessage: result.openaiErrorMessage,
+          connectionErrorKind: result.connectionErrorKind ?? null,
         });
       }
 

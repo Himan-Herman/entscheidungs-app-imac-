@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  createLiveTranslationRealtimeSession,
-  exchangeLiveTranslationSdp,
-} from "../api/liveTranslationApi.js";
+import { exchangeLiveTranslationSdp } from "../api/liveTranslationApi.js";
 import { LIVE_TRANSLATION_TRANSCRIPTION_MODEL } from "../constants.js";
 import { buildLanguageRouting } from "../utils/routing.js";
 import { buildCompactClientInstructions, buildFaithfulRetryInstructions } from "../utils/translationInstructions.js";
 import { buildRuntimeSessionUpdatePayload } from "../utils/realtimeSessionUpdate.js";
 import { classifyRealtimeError, isCancelledOrFailedResponseDone } from "../utils/realtimeErrorPolicy.js";
 import {
+  logRealtimeConnect,
   logRealtimeDiag,
   summarizePipelineEvent,
   summarizeRealtimeEvent,
@@ -67,6 +65,7 @@ function resolveSessionApiErrorKey(res, data) {
   if (res.status === 401 || res.status === 403) return "sessionUnauthorized";
   if (data?.error === "feature_disabled") return "featureDisabled";
   if (data?.error === "openai_not_configured") return "openaiNotConfigured";
+  if (data?.error === "OPENAI_QUOTA_EXCEEDED") return "openaiQuotaExceeded";
   if (data?.error === "realtime_session_failed" || data?.error === "realtime_session_invalid") {
     if (data?.openaiErrorParam === "session.audio.input.transcription.language") {
       return "openaiSessionRejected";
@@ -240,6 +239,7 @@ export function useLiveTranslationSession({
   const audioPlaybackHandlersRef = useRef(
     /** @type {{ playing: () => void; ended: () => void } | null} */ (null),
   );
+  const sessionEstablishedRef = useRef(false);
 
   sessionConfigRef.current = { patientLanguage, doctorLanguage, activeSpeaker };
   autoSwitchSpeakerRef.current = autoSwitchSpeaker;
@@ -419,6 +419,7 @@ export function useLiveTranslationSession({
     lastResponseCreateTranscriptRef.current = "";
     inputSuppressedRef.current = false;
     outputPlaybackActiveRef.current = false;
+    sessionEstablishedRef.current = false;
     pausedRef.current = false;
     scopeContinueRef.current = false;
     scopeWarningShownRef.current = false;
@@ -1164,14 +1165,14 @@ export function useLiveTranslationSession({
   );
 
   const trySendMedaActivation = useCallback(() => {
-    if (sessionActivationPlayedRef.current || skipActivationFeedbackRef.current) return;
+    if (sessionActivationPlayedRef.current || skipActivationFeedbackRef.current) return false;
 
     const dc = dcRef.current;
-    if (!dc || dc.readyState !== "open") return;
-    if (!connectedRef.current) return;
+    if (!dc || dc.readyState !== "open") return false;
+    if (!connectedRef.current) return false;
 
     const micTrack = micTrackRef.current;
-    if (!micTrack || micTrack.readyState !== "live" || !micTrack.enabled) return;
+    if (!micTrack || micTrack.readyState !== "live" || !micTrack.enabled) return false;
 
     sessionActivationPlayedRef.current = true;
     introPlayedRef.current = true;
@@ -1183,7 +1184,7 @@ export function useLiveTranslationSession({
     const phrase = activationReadinessTextRef.current?.trim();
     if (!phrase) {
       safeSetState(() => setConnectionStatus("listening"));
-      return;
+      return true;
     }
 
     awaitingIntroResponseRef.current = true;
@@ -1200,7 +1201,32 @@ export function useLiveTranslationSession({
         },
       }),
     );
+    return true;
   }, [safeSetState, suppressMicForMedaOutput]);
+
+  const markRealtimeSessionConnected = useCallback(() => {
+    if (sessionEstablishedRef.current) return;
+    sessionEstablishedRef.current = true;
+    connectedRef.current = true;
+    logRealtimeConnect("session_connected", {
+      dcState: dcRef.current?.readyState ?? "none",
+      pcState: pcRef.current?.connectionState ?? "none",
+      iceState: pcRef.current?.iceConnectionState ?? "none",
+    });
+    startSessionTimer();
+    const activated = trySendMedaActivation();
+    safeSetState(() => {
+      setMicrophoneStatus("on");
+      setSessionElapsedMs(0);
+      if (
+        !activated &&
+        (connectionStatusRef.current === "connecting" ||
+          connectionStatusRef.current === "reconnecting")
+      ) {
+        setConnectionStatus("listening");
+      }
+    });
+  }, [safeSetState, startSessionTimer, trySendMedaActivation]);
 
   const sendSpeakerUpdateNow = useCallback(() => {
     if (!connectedRef.current || pausedRef.current) return;
@@ -1580,14 +1606,9 @@ export function useLiveTranslationSession({
         if (blockedWhilePaused.includes(type)) return;
       }
 
-      if (type === "session.created") {
-        connectedRef.current = true;
-        safeSetState(() => {
-          setMicrophoneStatus("on");
-          setSessionElapsedMs(0);
-        });
-        startSessionTimer();
-        trySendMedaActivation();
+      if (type === "session.created" || type === "session.updated") {
+        logRealtimeConnect("openai_session_event", { eventType: type });
+        markRealtimeSessionConnected();
         return;
       }
 
@@ -1919,15 +1940,14 @@ export function useLiveTranslationSession({
       cancelActiveResponse,
       executeBufferedFinalize,
       finalizeTranslationOutput,
+      markRealtimeSessionConnected,
       maybeFlushPendingTurn,
       requestTurnTranslation,
       resetTurnCaptureState,
       safeSetState,
-      switchSpeakerFromDetectedLanguage,
-      trySendMedaActivation,
       setActivityStatus,
-      skipLanguageRoutingRef,
       speakExactText,
+      switchSpeakerFromDetectedLanguage,
       startSessionTimer,
       triggerLocalUnclearRepeat,
       triggerWrongLanguageRepeat,
@@ -2014,43 +2034,36 @@ export function useLiveTranslationSession({
 
     const routing = buildLanguageRouting(sessionConfigRef.current);
     turnContextRef.current = routing;
+    sessionEstablishedRef.current = false;
+
+    logRealtimeConnect("connect_start", {
+      architecture: "sdp_realtime_call_only",
+      patientLanguage: routing.patientLanguage,
+      doctorLanguage: routing.doctorLanguage,
+      activeSpeaker: routing.activeSpeaker,
+    });
 
     try {
-      const { res, data } = await createLiveTranslationRealtimeSession({
-        patientLanguage: routing.patientLanguage,
-        doctorLanguage: routing.doctorLanguage,
-        activeSpeaker: routing.activeSpeaker,
-      });
-
-      if (!mountedRef.current) {
-        return;
-      }
-
-      if (!res.ok) {
-        safeSetState(() => {
-          setErrorKey(resolveSessionApiErrorKey(res, data));
-          setConnectionStatus("error");
-        });
-        return;
-      }
-
-      if (!data.clientSecret) {
-        safeSetState(() => {
-          setErrorKey("sessionStartFailed");
-          setConnectionStatus("error");
-        });
-        return;
-      }
-
-      if (typeof data.transcriptionModel === "string" && data.transcriptionModel) {
-        transcriptionModelRef.current = data.transcriptionModel;
-      }
-
       const pc = new RTCPeerConnection(REALTIME_PEER_CONNECTION_CONFIG);
       pcRef.current = pc;
+      logRealtimeConnect("peer_created", {
+        iceServers: REALTIME_PEER_CONNECTION_CONFIG.iceServers.length,
+      });
 
       pc.onconnectionstatechange = () => {
+        logRealtimeConnect("rtc_connection_state_change", { state: pc.connectionState });
         logRealtimeDiag("pc_connection_state", { state: pc.connectionState });
+        if (pc.connectionState === "connected") {
+          logRealtimeConnect("connection_connected", {
+            dcState: dcRef.current?.readyState ?? "none",
+            sessionEstablished: sessionEstablishedRef.current,
+          });
+        }
+        if (pc.connectionState === "connected" && connectedRef.current && !sessionEstablishedRef.current) {
+          logRealtimeConnect("webrtc_connected_awaiting_openai_session", {
+            dcState: dcRef.current?.readyState ?? "none",
+          });
+        }
         if (pc.connectionState === "failed" || pc.connectionState === "closed") {
           if (connectedRef.current) {
             safeSetState(() => {
@@ -2061,7 +2074,11 @@ export function useLiveTranslationSession({
         }
       };
       pc.oniceconnectionstatechange = () => {
+        logRealtimeConnect("ice_connection_state_change", { state: pc.iceConnectionState });
         logRealtimeDiag("pc_ice_state", { state: pc.iceConnectionState });
+      };
+      pc.onicegatheringstatechange = () => {
+        logRealtimeConnect("ice_gathering_state_change", { state: pc.iceGatheringState });
       };
 
       const audioEl = document.createElement("audio");
@@ -2073,6 +2090,11 @@ export function useLiveTranslationSession({
         if (!audioElRef.current || !stream) return;
         if (outputStreamIdRef.current === stream.id) return;
         outputStreamIdRef.current = stream.id;
+        logRealtimeConnect("remote_audio_track_received", {
+          streamId: stream.id,
+          trackCount: stream.getTracks().length,
+          trackKind: e.track?.kind ?? null,
+        });
         audioElRef.current.srcObject = stream;
         void audioElRef.current.play().catch(() => {
           /* autoplay may require user gesture on some browsers */
@@ -2103,12 +2125,24 @@ export function useLiveTranslationSession({
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
       dc.addEventListener("open", () => {
+        logRealtimeConnect("data_channel_open", { readyState: dc.readyState });
         logRealtimeDiag("dc_open", { readyState: dc.readyState });
+        if (sessionEstablishedRef.current) {
+          trySendMedaActivation();
+        } else if (connectedRef.current) {
+          logRealtimeConnect("data_channel_open_awaiting_openai_session", {
+            pcState: pcRef.current?.connectionState ?? "none",
+          });
+        }
         if (pendingSpeakerUpdateRef.current) {
           sendSpeakerUpdate();
         }
       });
-      dc.addEventListener("error", () => {
+      dc.addEventListener("error", (err) => {
+        logRealtimeConnect("data_channel_error", {
+          readyState: dc.readyState,
+          error: err && typeof err === "object" && "error" in err ? String(err.error) : null,
+        });
         logRealtimeDiag("dc_error", { readyState: dc.readyState });
       });
       dc.addEventListener("close", () => {
@@ -2123,6 +2157,16 @@ export function useLiveTranslationSession({
       dc.addEventListener("message", (e) => {
         try {
           const parsed = JSON.parse(String(e.data));
+          const eventType =
+            parsed && typeof parsed === "object" && "type" in parsed ? String(parsed.type) : null;
+          if (
+            eventType &&
+            (eventType.startsWith("session.") ||
+              eventType === "error" ||
+              !sessionEstablishedRef.current)
+          ) {
+            logRealtimeConnect("data_channel_message", { eventType });
+          }
           const summary = summarizePipelineEvent(parsed);
           if (summary.type === "error" || summary.errorCode) {
             logRealtimeDiag("dc_message_error_event", summary);
@@ -2144,6 +2188,10 @@ export function useLiveTranslationSession({
 
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
+      logRealtimeConnect("local_description_set", {
+        signalingState: pc.signalingState,
+        sdpBytes: pc.localDescription?.sdp?.length ?? 0,
+      });
       await waitForIceGatheringComplete(pc);
 
       const localSdp = pc.localDescription?.sdp;
@@ -2155,6 +2203,11 @@ export function useLiveTranslationSession({
         });
         return;
       }
+
+      logRealtimeConnect("sdp_exchange_start", {
+        architecture: "sdp_realtime_call_only",
+        offerBytes: localSdp.length,
+      });
 
       const { res: sdpResponse, answerSdp, data: sdpErrorData } =
         await exchangeLiveTranslationSdp(localSdp, {
@@ -2169,6 +2222,14 @@ export function useLiveTranslationSession({
       }
 
       if (!sdpResponse.ok || !answerSdp.trim()) {
+        logRealtimeConnect("sdp_exchange_failed", {
+          status: sdpResponse.status,
+          phase: sdpErrorData?.phase,
+          error: sdpErrorData?.error ?? null,
+          connectionErrorKind: sdpErrorData?.connectionErrorKind ?? null,
+          openaiErrorParam: sdpErrorData?.openaiErrorParam,
+          openaiErrorMessage: sdpErrorData?.openaiErrorMessage ?? null,
+        });
         logRealtimeDiag("sdp_exchange_failed", {
           status: sdpResponse.status,
           phase: sdpErrorData?.phase,
@@ -2178,9 +2239,11 @@ export function useLiveTranslationSession({
         teardown();
         safeSetState(() => {
           setErrorKey(
-            sdpErrorData?.openaiErrorParam === "session.audio.input.transcription.language"
-              ? "openaiSessionRejected"
-              : "sdpExchangeFailed",
+            sdpErrorData?.error === "OPENAI_QUOTA_EXCEEDED"
+              ? "openaiQuotaExceeded"
+              : sdpErrorData?.openaiErrorParam === "session.audio.input.transcription.language"
+                ? "openaiSessionRejected"
+                : "sdpExchangeFailed",
           );
           setConnectionStatus("error");
         });
@@ -2190,7 +2253,17 @@ export function useLiveTranslationSession({
       await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
       connectedRef.current = true;
       prevSpeakerRef.current = sessionConfigRef.current.activeSpeaker;
+      logRealtimeConnect("remote_description_set", {
+        signalingState: pc.signalingState,
+        connectionState: pc.connectionState,
+        iceConnectionState: pc.iceConnectionState,
+        answerBytes: answerSdp.length,
+      });
     } catch (err) {
+      logRealtimeConnect("connect_exception", {
+        errorName: err && typeof err === "object" && "name" in err ? String(err.name) : "Error",
+        errorMessage: err instanceof Error ? err.message : String(err),
+      });
       teardown();
       if (!mountedRef.current) return;
       safeSetState(() => {
@@ -2198,7 +2271,15 @@ export function useLiveTranslationSession({
         setConnectionStatus("error");
       });
     }
-  }, [attachOutputAudio, handleServerEvent, safeSetState, sendSpeakerUpdate, teardown]);
+  }, [
+    attachOutputAudio,
+    handleServerEvent,
+    markRealtimeSessionConnected,
+    safeSetState,
+    sendSpeakerUpdate,
+    teardown,
+    trySendMedaActivation,
+  ]);
 
   useEffect(() => {
     if (!enabled) {

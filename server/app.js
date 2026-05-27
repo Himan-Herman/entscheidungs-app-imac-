@@ -82,6 +82,7 @@ import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
 import {
   publicPrevisitQrLimiter,
   publicSecureDocumentsLimiter,
+  publicEmergencyLimiter,
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
@@ -90,6 +91,9 @@ import interpreterRouter from "./routes/interpreter.js";
 import interpreterPublicInviteRouter from "./routes/interpreterPublicInvite.js";
 import liveTranslationRouter from "./routes/liveTranslation.js";
 import { interpreterInviteValidateLimiter } from "./middleware/interpreterRateLimit.js";
+import patientSosCardRouter from "./routes/patientSosCard.js";
+import publicEmergencyRouter from "./routes/publicEmergency.js";
+import practiceSosCardRouter from "./routes/practiceSosCard.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -172,6 +176,8 @@ app.use("/api/practice/patients/:linkId/vitals", requireAuth, practicePatientVit
 app.use("/api/practice/patients/:linkId/vaccinations", requireAuth, practicePatientVaccinationsRouter);
 app.use("/api/patient/allergies", requireAuth, patientAllergiesRouter);
 app.use("/api/patient/diagnoses", requireAuth, patientDiagnosesRouter);
+app.use("/api/patient/sos-card", requireAuth, patientSosCardRouter);
+app.use("/api/practice/patients/:linkId/sos-card", requireAuth, practiceSosCardRouter);
 app.use("/api/patient/health-history/ai", requireAuth, healthHistoryAiRouter);
 app.use("/api/practice/patients/:linkId/health-history", requireAuth, practicePatientHealthHistoryRouter);
 app.use("/api/patient/erezept", requireAuth, patientErezeptRouter);
@@ -208,6 +214,7 @@ app.use("/api/previsit/cases", requireAuth, previsitCasesRouter);
 app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
 app.use("/api/previsit", previsitRouter);
 app.use("/api/public/previsit", publicPrevisitQrLimiter, publicPrevisitQrRouter);
+app.use("/api/public/emergency", publicEmergencyLimiter, publicEmergencyRouter);
 app.use("/api/public/documents", publicSecureDocumentsLimiter, publicDocumentsRouter);
 app.use(
   "/api/documents/secure-download",

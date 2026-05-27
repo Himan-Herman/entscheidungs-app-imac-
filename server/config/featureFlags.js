@@ -267,3 +267,11 @@ export function isVitalsEnabled() {
 export function isErezeptEnabled() {
   return envFlag("ENABLE_E_REZEPT", false);
 }
+
+/**
+ * Notfallausweis / SOS-Karte — patient-owned emergency card with offline QR.
+ * Blood type, allergies, emergency contacts, AI summary. Default off.
+ */
+export function isSosCardEnabled() {
+  return envFlag("ENABLE_SOS_CARD", false);
+}
