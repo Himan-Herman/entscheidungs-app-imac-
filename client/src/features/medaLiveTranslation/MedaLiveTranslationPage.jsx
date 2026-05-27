@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { useMicrophoneLevel } from "./useMicrophoneLevel";
 import { useLocalTranscription } from "./useLocalTranscription";
+import { useTextTranslation } from "./useTextTranslation";
 import { getMltMessages } from "./medaLiveTranslation.i18n";
 import "./MedaLiveTranslationPage.css";
 
@@ -37,6 +38,15 @@ export default function MedaLiveTranslationPage() {
     start: startTranscription,
     stop: stopTranscription,
   } = useLocalTranscription();
+  const {
+    translations,
+    isLoading: translationLoading,
+    error: translationError,
+    translate,
+    clear: clearTranslations,
+  } = useTextTranslation();
+
+  const translatedCountRef = useRef(0);
 
   const [secondsLeft, setSecondsLeft] = useState(DURATION_S);
   const timerRef = useRef(/** @type {ReturnType<typeof setInterval>|null} */ (null));
@@ -50,10 +60,12 @@ export default function MedaLiveTranslationPage() {
 
   const handleStart = useCallback(async () => {
     setSecondsLeft(DURATION_S);
+    translatedCountRef.current = 0;
+    clearTranslations();
     playStartTone();
     await start();
     startTranscription(language);
-  }, [start, startTranscription, language]);
+  }, [start, startTranscription, clearTranslations, language]);
 
   const handleStop = useCallback(() => {
     clearTimer();
@@ -81,12 +93,23 @@ export default function MedaLiveTranslationPage() {
     return clearTimer;
   }, [status, clearTimer, stop]);
 
+  // Auto-translate every newly finalized transcript line (de→en only for Phase 3)
+  useEffect(() => {
+    if (language !== "de") return;
+    const newLines = transcriptLines.slice(translatedCountRef.current);
+    if (newLines.length === 0) return;
+    translatedCountRef.current = transcriptLines.length;
+    newLines.forEach((line) => translate(line, "de", "en"));
+  }, [transcriptLines, language, translate]);
+
   useEffect(() => {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
 
   // Full cleanup on unmount
   useEffect(() => () => { stop(); stopTranscription(); }, [stop, stopTranscription]);
+
+  const showTranslationBox = language === "de";
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
@@ -160,6 +183,33 @@ export default function MedaLiveTranslationPage() {
             </>
           )}
         </div>
+
+        {/* Translation box — only shown when source language is DE (Phase 3: de→en) */}
+        {showTranslationBox && (
+          <div className="mlt-translation">
+            <span className="mlt-translation__label">{t.translationLabel}</span>
+            <div
+              className="mlt-translation__box"
+              role="log"
+              aria-live="polite"
+              aria-label={t.translationLabel}
+            >
+              {translations.length === 0 && !translationLoading ? (
+                <span className="mlt-translation__empty">{t.translationEmpty}</span>
+              ) : (
+                translations.map((line, i) => (
+                  <p key={i} className="mlt-translation__line">{line}</p>
+                ))
+              )}
+              {translationLoading && (
+                <p className="mlt-translation__loading">{t.translationLoading}</p>
+              )}
+            </div>
+            {translationError && (
+              <p className="mlt-translation__error">{t.translationError}</p>
+            )}
+          </div>
+        )}
 
         {/* Start / Stop */}
         <div className="mlt-actions">

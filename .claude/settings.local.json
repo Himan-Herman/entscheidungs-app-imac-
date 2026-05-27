@@ -5,7 +5,9 @@
       "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac log --oneline -5)",
       "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac show HEAD -- \"*.sql\")",
       "Bash(npm run *)",
-      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac log --oneline -3)"
+      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac log --oneline -3)",
+      "Bash(node --input-type=module)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }

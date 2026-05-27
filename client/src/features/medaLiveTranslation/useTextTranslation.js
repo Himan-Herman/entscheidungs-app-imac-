@@ -1,0 +1,56 @@
+import { useCallback, useRef, useState } from "react";
+import { authFetch } from "../../api/authFetch";
+
+/**
+ * Sends a single transcribed line to the backend for de→en translation.
+ * Maintains an in-flight lock so the same text is never sent twice concurrently.
+ */
+export function useTextTranslation() {
+  const [translations, setTranslations] = useState(/** @type {string[]} */ ([]));
+  const [loadingCount, setLoadingCount] = useState(0);
+  const [error, setError] = useState(/** @type {string|null} */ (null));
+
+  const inFlightRef = useRef(/** @type {Set<string>} */ (new Set()));
+
+  const translate = useCallback(async (text, sourceLanguage, targetLanguage) => {
+    const key = `${sourceLanguage}:${targetLanguage}:${text}`;
+    if (inFlightRef.current.has(key)) return;
+    inFlightRef.current.add(key);
+    setLoadingCount((n) => n + 1);
+    setError(null);
+
+    try {
+      const res = await authFetch("/api/meda-live-translation/translate-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, sourceLanguage, targetLanguage }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+
+      const { translation } = await res.json();
+      if (translation) {
+        setTranslations((prev) => [...prev, translation]);
+      }
+    } catch (err) {
+      if (err.message !== "SESSION_EXPIRED") {
+        setError(err.message);
+      }
+    } finally {
+      inFlightRef.current.delete(key);
+      setLoadingCount((n) => n - 1);
+    }
+  }, []);
+
+  const clear = useCallback(() => {
+    setTranslations([]);
+    setError(null);
+  }, []);
+
+  const isLoading = loadingCount > 0;
+
+  return { translations, isLoading, error, translate, clear };
+}
