@@ -17,10 +17,28 @@ import { requireDocumentOcrFeature } from "../middleware/requireDocumentOcr.js";
 import { requireLabPatientExplanationFeature } from "../middleware/requireLabPatientExplanation.js";
 import { getPatientStructuredDocument } from "../services/practiceDocument/documentOcrService.js";
 import { getLabPatientExplanation } from "../services/practiceDocument/labPatientExplanationService.js";
+import { labExplanationIpLimiter } from "../middleware/ipRateLimit.js";
 
 const router = express.Router();
 
 router.use(requirePracticeDocumentsV2Feature);
+
+/** Per-user daily cap for lab explanation (max 10 requests / calendar day / userId). */
+const LAB_EXPLAIN_DAILY_MAX = 10;
+/** @type {Map<string, { count: number; date: string }>} */
+const labExplainDailyStore = new Map();
+
+function checkLabExplainDailyLimit(userId) {
+  const today = new Date().toISOString().slice(0, 10);
+  const entry = labExplainDailyStore.get(userId);
+  if (!entry || entry.date !== today) {
+    labExplainDailyStore.set(userId, { count: 1, date: today });
+    return true;
+  }
+  entry.count += 1;
+  labExplainDailyStore.set(userId, entry);
+  return entry.count <= LAB_EXPLAIN_DAILY_MAX;
+}
 
 function userIdFromReq(req) {
   const id = req.user?.userId;
@@ -262,10 +280,15 @@ router.get("/:documentId/download", async (req, res) => {
  */
 router.get(
   "/:documentId/lab-explanation",
+  labExplanationIpLimiter,
   requireLabPatientExplanationFeature,
   async (req, res) => {
     const userId = userIdFromReq(req);
     if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+    if (!checkLabExplainDailyLimit(userId)) {
+      return res.status(429).json({ ok: false, error: "daily_limit_exceeded" });
+    }
 
     const locale = String(req.query.locale || req.headers["accept-language"] || "de").slice(0, 8);
 

@@ -29,7 +29,10 @@
       "Bash(curl -s https://raw.githubusercontent.com/openai/openai-openapi/master/openapi.yaml)",
       "Bash(curl -s https://raw.githubusercontent.com/openai/openapi-openapi/master/openapi.yaml)",
       "Bash(cat >> *)",
-      "Bash(mkdir -p /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/services/sosCard)"
+      "Bash(mkdir -p /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/services/sosCard)",
+      "Bash(xargs basename -a)",
+      "Bash(node -e \"require\\('/Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/node_modules/lucide-react/dist/cjs/lucide-react.js'\\)\")",
+      "Bash(node -e 'const { PrismaClient } = require\\('\\\\''@prisma/client'\\\\''\\); const p = new PrismaClient\\(\\); p.sosCard.count\\(\\).then\\(n => { console.log\\('\\\\''SosCard table OK, rows:'\\\\'', n\\); p.$disconnect\\(\\); }\\).catch\\(e => { console.error\\('\\\\''DB error:'\\\\'', e.message\\); p.$disconnect\\(\\); }\\);')"
     ]
   }
 }

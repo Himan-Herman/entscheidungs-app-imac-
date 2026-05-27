@@ -65,3 +65,12 @@ export async function fetchPatientStructuredDocument(documentId) {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+export async function fetchLabExplanation(documentId, locale) {
+  const params = locale ? `?locale=${encodeURIComponent(locale)}` : "";
+  const res = await authFetch(
+    `/api/patient/practice-documents/${encodeURIComponent(documentId)}/lab-explanation${params}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

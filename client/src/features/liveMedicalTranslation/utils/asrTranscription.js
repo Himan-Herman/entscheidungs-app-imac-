@@ -94,5 +94,12 @@ export function summarizeTranscriptionEvent(event) {
  */
 export function logTranscriptionEventMeta(event) {
   if (!isInputTranscriptionEvent(event)) return;
-  logRealtimeDiag("transcription_event", summarizeTranscriptionEvent(event));
+  const meta = summarizeTranscriptionEvent(event);
+  logRealtimeDiag("transcription_event", meta);
+  if (import.meta.env?.DEV) {
+    console.info("[MedaRealtimeConnect]", {
+      event: isInputTranscriptionCompletedEvent(event) ? "transcript_final" : "transcript_partial",
+      ...meta,
+    });
+  }
 }

@@ -310,7 +310,12 @@ export function useLiveTranslationSession({
 
     const onPlaying = () => {
       outputPlaybackActiveRef.current = true;
-      suppressMicForMedaOutput();
+      if (responseActiveRef.current) {
+        suppressMicForMedaOutput();
+        logRealtimeConnect("response_audio_started", {
+          micEnabled: micTrackRef.current?.enabled ?? null,
+        });
+      }
       logCostGuard("audio_playback_start");
     };
     const onEnded = () => {
@@ -1224,6 +1229,9 @@ export function useLiveTranslationSession({
     });
     startSessionTimer();
     const activated = trySendMedaActivation();
+    if (!responseActiveRef.current) {
+      resumeMicAfterMedaOutput();
+    }
     safeSetState(() => {
       setIsRtcConnected(true);
       setMicrophoneStatus("on");
@@ -1236,7 +1244,7 @@ export function useLiveTranslationSession({
         setConnectionStatus("connected");
       }
     });
-  }, [safeSetState, startSessionTimer, trySendMedaActivation]);
+  }, [safeSetState, startSessionTimer, trySendMedaActivation, resumeMicAfterMedaOutput]);
 
   const sendSpeakerUpdateNow = useCallback(() => {
     if (!connectedRef.current || pausedRef.current) return;
@@ -1582,15 +1590,13 @@ export function useLiveTranslationSession({
       const blockedDuringMedaOutput = [
         "input_audio_buffer.speech_started",
         "input_audio_buffer.speech_stopped",
-        "conversation.item.input_audio_transcription.completed",
-        "conversation.item.input_audio_transcription.failed",
-        "input_audio_buffer.transcription.completed",
-        "input_audio_buffer.transcription.failed",
-        "conversation.item.input_audio_transcription.delta",
-        "input_audio_buffer.transcription.delta",
       ];
-      if (inputSuppressedRef.current && blockedDuringMedaOutput.includes(type)) {
-        logCostGuard("input_ignored_during_output", { eventType: type });
+      if (responseActiveRef.current && blockedDuringMedaOutput.includes(type)) {
+        logRealtimeConnect("input_audio_detected", {
+          eventType: type,
+          ignored: true,
+          reason: "response_active",
+        });
         return;
       }
 
@@ -1628,6 +1634,12 @@ export function useLiveTranslationSession({
       }
 
       if (type === "input_audio_buffer.speech_started") {
+        logRealtimeConnect("input_audio_detected", {
+          eventType: type,
+          micEnabled: micTrackRef.current?.enabled ?? null,
+          inputSuppressed: inputSuppressedRef.current,
+          responseActive: responseActiveRef.current,
+        });
         const prevStatus = connectionStatusRef.current;
         if (prevStatus === "speaking" || prevStatus === "translating") {
           overlapDetectedRef.current = true;
@@ -1649,6 +1661,10 @@ export function useLiveTranslationSession({
       }
 
       if (type === "input_audio_buffer.speech_stopped") {
+        logRealtimeConnect("input_audio_detected", {
+          eventType: type,
+          phase: "speech_stopped",
+        });
         setActivityStatus("listening");
         return;
       }
@@ -1665,6 +1681,12 @@ export function useLiveTranslationSession({
       if (isInputTranscriptionCompletedEvent(event)) {
         logTranscriptionEventMeta(event);
         const transcript = extractOriginalText(event);
+        logRealtimeConnect("transcript_final", {
+          eventType: event.type,
+          transcriptLength: transcript?.length ?? 0,
+          transcriptPreview: import.meta.env.DEV ? transcript?.slice(0, 120) : undefined,
+          micEnabled: micTrackRef.current?.enabled ?? null,
+        });
         const routing = buildLanguageRouting(sessionConfigRef.current);
         const cfg = sessionConfigRef.current;
         const detected = extractDetectedLanguage(event);
@@ -1691,7 +1713,7 @@ export function useLiveTranslationSession({
           inputStateBeforeUpdate: inputTranscriptStateRef.current,
         });
 
-        if (responseActiveRef.current || inputSuppressedRef.current) {
+        if (responseActiveRef.current) {
           logCostGuard("response_create_skipped", {
             reason: "responding",
             finalTranscriptLength: transcript?.length ?? 0,
@@ -1750,6 +1772,10 @@ export function useLiveTranslationSession({
         type === "input_audio_buffer.transcription.delta"
       ) {
         const transcript = extractOriginalText(event);
+        logRealtimeConnect("transcript_partial", {
+          eventType: type,
+          deltaLength: transcript?.length ?? 0,
+        });
         if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
           pendingOriginalRef.current = `${pendingOriginalRef.current}${transcript}`;
           const detected = extractDetectedLanguage(event);
@@ -1787,6 +1813,7 @@ export function useLiveTranslationSession({
       }
 
       if (type === "response.created" || type === "response.output_item.added") {
+        logRealtimeConnect("response_audio_started", { eventType: type });
         console.debug("[MedaPipelineDebug] response lifecycle event", {
           step: "step7_response_created",
           eventType: type,
@@ -1798,6 +1825,7 @@ export function useLiveTranslationSession({
       }
 
       if (type === "response.audio.delta" || type === "response.output_audio.delta") {
+        logRealtimeConnect("response_audio_started", { eventType: type, phase: "delta" });
         setActivityStatus("speaking");
         return;
       }
@@ -2115,6 +2143,14 @@ export function useLiveTranslationSession({
       pc.onicegatheringstatechange = () => {
         logRealtimeConnect("ice_gathering_state_change", { state: pc.iceGatheringState });
       };
+      pc.onicecandidate = (ev) => {
+        if (ev.candidate) {
+          logRealtimeConnect("ice_candidate", {
+            type: ev.candidate.type ?? null,
+            protocol: ev.candidate.protocol ?? null,
+          });
+        }
+      };
 
       const audioEl = document.createElement("audio");
       attachOutputAudio(audioEl);
@@ -2145,16 +2181,44 @@ export function useLiveTranslationSession({
       }
 
       micStreamRef.current = stream;
+      logRealtimeConnect("mic_stream_created", {
+        trackCount: stream.getAudioTracks().length,
+        active: stream.active,
+      });
+
       const micTrack = stream.getAudioTracks()[0] || null;
       micTrackRef.current = micTrack;
       if (micTrack) {
         micTrack.enabled = true;
         pc.addTrack(micTrack, stream);
-        logRealtimeDiag("mic_track_added", {
+        logRealtimeConnect("audio_track_added", {
           enabled: micTrack.enabled,
           readyState: micTrack.readyState,
           muted: micTrack.muted,
+          label: micTrack.label || null,
         });
+
+        if (import.meta.env.DEV) {
+          try {
+            const audioCtx = new AudioContext();
+            const source = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+            window.setTimeout(() => {
+              const bins = new Uint8Array(analyser.frequencyBinCount);
+              analyser.getByteFrequencyData(bins);
+              const level = bins.reduce((sum, v) => sum + v, 0) / bins.length;
+              logRealtimeConnect("mic_level_sample", {
+                averageLevel: Math.round(level),
+                micEnabled: micTrack.enabled,
+              });
+              void audioCtx.close();
+            }, 2000);
+          } catch {
+            /* AudioContext unavailable */
+          }
+        }
       }
 
       const dc = pc.createDataChannel("oai-events");
@@ -2194,14 +2258,10 @@ export function useLiveTranslationSession({
           const parsed = JSON.parse(String(e.data));
           const eventType =
             parsed && typeof parsed === "object" && "type" in parsed ? String(parsed.type) : null;
-          if (
-            eventType &&
-            (eventType.startsWith("session.") ||
-              eventType === "error" ||
-              !sessionEstablishedRef.current)
-          ) {
-            logRealtimeConnect("data_channel_message", { eventType });
-          }
+          logRealtimeConnect("data_channel_message", {
+            eventType: eventType ?? "unknown",
+            parseOk: true,
+          });
           const summary = summarizePipelineEvent(parsed);
           if (summary.type === "error" || summary.errorCode) {
             logRealtimeDiag("dc_message_error_event", summary);
@@ -2216,8 +2276,15 @@ export function useLiveTranslationSession({
             logRealtimeDiag("dc_event", summary);
           }
           handleServerEvent(parsed);
-        } catch {
-          logRealtimeDiag("dc_message_parse_failed", {});
+        } catch (parseErr) {
+          logRealtimeConnect("data_channel_message", {
+            eventType: "parse_failed",
+            parseOk: false,
+            rawLength: String(e.data ?? "").length,
+          });
+          logRealtimeDiag("dc_message_parse_failed", {
+            error: parseErr instanceof Error ? parseErr.message : String(parseErr),
+          });
         }
       });
 

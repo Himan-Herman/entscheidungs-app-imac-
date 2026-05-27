@@ -38,4 +38,17 @@ export default {
   shared: "Für Patient:in freigegeben.",
   discarded: "Ergebnis verworfen.",
   sourcePractice: "Quelle: Praxisdokument",
+  labExplainBtn: "KI-Erklärung anfordern",
+  labExplainHeading: "KI-Erklärung – Patientensprache",
+  labExplainLoading: "Erklärung wird erstellt …",
+  labExplainError: "Erklärung konnte nicht geladen werden.",
+  labExplainRateLimit: "Zu viele Anfragen. Bitte versuchen Sie es später erneut.",
+  labExplainDailyLimit: "Tageslimit erreicht. Bitte morgen erneut versuchen.",
+  labExplainNotShared: "Dieses Dokument wurde noch nicht für Sie freigegeben.",
+  labExplainInRange: "Im Normalbereich",
+  labExplainOutOfRange: "Außerhalb des Normalbereichs",
+  labExplainUnknownRange: "Bereich nicht bekannt",
+  labExplainMdrNote:
+    "KI-Erklärung zur Orientierung — keine Diagnose, keine Behandlungsempfehlung. Sprechen Sie bitte mit Ihrer Ärztin oder Ihrem Arzt.",
+  labExplainRetry: "Erneut versuchen",
 };

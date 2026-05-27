@@ -180,3 +180,9 @@ export const publicEmergencyLimiter = createIpRateLimiter({
   max: 120,
   keyPrefix: 'public:emergency',
 });
+
+/** GET /api/patient/practice-documents/:id/lab-explanation — OpenAI-backed; 8 / 15 min / IP */
+export const labExplanationIpLimiter = createIpRateLimiter({
+  max: 8,
+  keyPrefix: 'patient:lab-explanation',
+});

@@ -38,4 +38,17 @@ export default {
   shared: "Shared with patient.",
   discarded: "Result discarded.",
   sourcePractice: "Source: practice document",
+  labExplainBtn: "Request AI Explanation",
+  labExplainHeading: "AI Explanation – Plain Language",
+  labExplainLoading: "Generating explanation…",
+  labExplainError: "Could not load explanation.",
+  labExplainRateLimit: "Too many requests. Please try again later.",
+  labExplainDailyLimit: "Daily limit reached. Please try again tomorrow.",
+  labExplainNotShared: "This document has not been shared with you yet.",
+  labExplainInRange: "Within normal range",
+  labExplainOutOfRange: "Outside normal range",
+  labExplainUnknownRange: "Range not known",
+  labExplainMdrNote:
+    "AI explanation for orientation only — no diagnosis, no treatment recommendation. Please consult your doctor.",
+  labExplainRetry: "Try again",
 };
