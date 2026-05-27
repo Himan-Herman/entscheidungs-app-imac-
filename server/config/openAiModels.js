@@ -16,6 +16,17 @@ export function getOpenAiChatModel() {
 }
 
 /**
+ * Medical live translation — isolated model slot.
+ * Override via MEDA_TRANSLATION_MODEL; falls back to the shared chat model so
+ * Render deployments that have not set the new var keep working unchanged.
+ */
+export function getMedaTranslationModel() {
+  const env = process.env.MEDA_TRANSLATION_MODEL;
+  if (typeof env === "string" && env.trim()) return env.trim();
+  return getOpenAiChatModel();
+}
+
+/**
  * TTS model for speech synthesis (routes/tts, interpreter).
  * Override via OPENAI_TTS_MODEL env var.
  */

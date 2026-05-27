@@ -59,6 +59,7 @@ export default function MedaLiveTranslationPage() {
     translations,
     isLoading: translationLoading,
     error: translationError,
+    needsClarification,
     translate,
     clear: clearTranslations,
   } = useTextTranslation();
@@ -276,6 +277,11 @@ export default function MedaLiveTranslationPage() {
                 <p className="mlt-translation__loading">{t.translationLoading}</p>
               )}
             </div>
+            {needsClarification && (
+              <p className="mlt-translation__clarification" role="status" aria-live="polite">
+                {t.translationNeedsClarification}
+              </p>
+            )}
             {translationError && (
               <p className="mlt-translation__error">{t.translationError}</p>
             )}

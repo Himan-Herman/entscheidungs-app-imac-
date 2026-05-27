@@ -2,13 +2,15 @@ import { useCallback, useRef, useState } from "react";
 import { authFetch } from "../../api/authFetch";
 
 /**
- * Sends a single transcribed line to the backend for de→en translation.
+ * Sends a single transcribed line to the backend for translation.
  * Maintains an in-flight lock so the same text is never sent twice concurrently.
+ * Handles the Phase 5.1 extended response: { translation, needsClarification, reason }.
  */
 export function useTextTranslation() {
   const [translations, setTranslations] = useState(/** @type {string[]} */ ([]));
   const [loadingCount, setLoadingCount] = useState(0);
   const [error, setError] = useState(/** @type {string|null} */ (null));
+  const [needsClarification, setNeedsClarification] = useState(false);
 
   const inFlightRef = useRef(/** @type {Set<string>} */ (new Set()));
 
@@ -31,9 +33,16 @@ export function useTextTranslation() {
         throw new Error(body.error ?? `HTTP ${res.status}`);
       }
 
-      const { translation } = await res.json();
-      if (translation) {
-        setTranslations((prev) => [...prev, translation]);
+      const body = await res.json();
+      const { translation, needsClarification: nc } = body;
+
+      if (nc === true) {
+        setNeedsClarification(true);
+      } else {
+        setNeedsClarification(false);
+        if (translation) {
+          setTranslations((prev) => [...prev, translation]);
+        }
       }
     } catch (err) {
       if (err.message !== "SESSION_EXPIRED") {
@@ -48,9 +57,10 @@ export function useTextTranslation() {
   const clear = useCallback(() => {
     setTranslations([]);
     setError(null);
+    setNeedsClarification(false);
   }, []);
 
   const isLoading = loadingCount > 0;
 
-  return { translations, isLoading, error, translate, clear };
+  return { translations, isLoading, error, needsClarification, translate, clear };
 }
