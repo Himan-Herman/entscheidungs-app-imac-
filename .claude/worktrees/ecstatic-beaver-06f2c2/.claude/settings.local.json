@@ -35,7 +35,8 @@
       "Bash(node -e 'const { PrismaClient } = require\\('\\\\''@prisma/client'\\\\''\\); const p = new PrismaClient\\(\\); p.sosCard.count\\(\\).then\\(n => { console.log\\('\\\\''SosCard table OK, rows:'\\\\'', n\\); p.$disconnect\\(\\); }\\).catch\\(e => { console.error\\('\\\\''DB error:'\\\\'', e.message\\); p.$disconnect\\(\\); }\\);')",
       "Bash(grep -v \"^#\\\\|^$\\\\| #\" /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/.env)",
       "Bash(sed -n '195,210p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/main.jsx)",
-      "Bash(sed -n '565,580p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/main.jsx)"
+      "Bash(sed -n '565,580p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/main.jsx)",
+      "Bash(xargs cat)"
     ]
   }
 }
