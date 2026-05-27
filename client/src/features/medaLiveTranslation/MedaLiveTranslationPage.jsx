@@ -4,6 +4,7 @@ import { useLanguage } from "../../i18n/LanguageContext";
 import { useMicrophoneLevel } from "./useMicrophoneLevel";
 import { useLocalTranscription } from "./useLocalTranscription";
 import { useTextTranslation } from "./useTextTranslation";
+import { useSpeechOutput } from "./useSpeechOutput";
 import { getMltMessages } from "./medaLiveTranslation.i18n";
 import "./MedaLiveTranslationPage.css";
 
@@ -46,7 +47,19 @@ export default function MedaLiveTranslationPage() {
     clear: clearTranslations,
   } = useTextTranslation();
 
+  const {
+    isSupported: speechSupported,
+    enabled: audioEnabled,
+    toggleEnabled: toggleAudio,
+    autoSpeak,
+    replay: replaySpeech,
+    stopSpeech,
+    resetSession: resetSpeechSession,
+    speechStatus,
+  } = useSpeechOutput();
+
   const translatedCountRef = useRef(0);
+  const spokenCountRef = useRef(0);
 
   const [secondsLeft, setSecondsLeft] = useState(DURATION_S);
   const timerRef = useRef(/** @type {ReturnType<typeof setInterval>|null} */ (null));
@@ -61,18 +74,21 @@ export default function MedaLiveTranslationPage() {
   const handleStart = useCallback(async () => {
     setSecondsLeft(DURATION_S);
     translatedCountRef.current = 0;
+    spokenCountRef.current = 0;
     clearTranslations();
+    resetSpeechSession();
     playStartTone();
     await start();
     startTranscription(language);
-  }, [start, startTranscription, clearTranslations, language]);
+  }, [start, startTranscription, clearTranslations, resetSpeechSession, language]);
 
   const handleStop = useCallback(() => {
     clearTimer();
     stop();
     stopTranscription();
+    stopSpeech();
     setSecondsLeft(DURATION_S);
-  }, [clearTimer, stop, stopTranscription]);
+  }, [clearTimer, stop, stopTranscription, stopSpeech]);
 
   // Countdown: starts when status becomes "active", stops otherwise
   useEffect(() => {
@@ -106,8 +122,17 @@ export default function MedaLiveTranslationPage() {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
 
+  // Auto-speak each new translated line (de→en; loop-safe via de-DE recognizer language)
+  useEffect(() => {
+    if (translations.length === 0) return;
+    const newOnes = translations.slice(spokenCountRef.current);
+    if (newOnes.length === 0) return;
+    spokenCountRef.current = translations.length;
+    autoSpeak(newOnes[newOnes.length - 1]);
+  }, [translations, autoSpeak]);
+
   // Full cleanup on unmount
-  useEffect(() => () => { stop(); stopTranscription(); }, [stop, stopTranscription]);
+  useEffect(() => () => { stop(); stopTranscription(); stopSpeech(); }, [stop, stopTranscription, stopSpeech]);
 
   const showTranslationBox = language === "de";
 
@@ -207,6 +232,64 @@ export default function MedaLiveTranslationPage() {
             </div>
             {translationError && (
               <p className="mlt-translation__error">{t.translationError}</p>
+            )}
+          </div>
+        )}
+
+        {/* Audio output controls — only shown when translation is active (DE source) */}
+        {showTranslationBox && (
+          <div className="mlt-audio">
+            {!speechSupported ? (
+              <p className="mlt-audio__unsupported">{t.audioNotSupported}</p>
+            ) : (
+              <>
+                <div className="mlt-audio__controls">
+                  <button
+                    type="button"
+                    className={`mlt-audio__toggle${audioEnabled ? " mlt-audio__toggle--on" : ""}`}
+                    onClick={toggleAudio}
+                    aria-pressed={audioEnabled}
+                  >
+                    {audioEnabled ? t.audioDisable : t.audioEnable}
+                  </button>
+                  {audioEnabled && (
+                    <>
+                      <button
+                        type="button"
+                        className="mlt-audio__btn"
+                        onClick={() => replaySpeech(translations[translations.length - 1])}
+                        disabled={translations.length === 0}
+                        aria-label={t.audioReplay}
+                      >
+                        {t.audioReplay}
+                      </button>
+                      <button
+                        type="button"
+                        className="mlt-audio__btn mlt-audio__btn--stop"
+                        onClick={stopSpeech}
+                        disabled={speechStatus !== "speaking"}
+                        aria-label={t.audioStopBtn}
+                      >
+                        {t.audioStopBtn}
+                      </button>
+                    </>
+                  )}
+                </div>
+                {audioEnabled && (
+                  <div
+                    className="mlt-audio__status"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                  >
+                    {speechStatus === "speaking"
+                      ? t.audioStatusSpeaking
+                      : speechStatus === "stopped"
+                      ? t.audioStatusStopped
+                      : t.audioStatusIdle}
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
