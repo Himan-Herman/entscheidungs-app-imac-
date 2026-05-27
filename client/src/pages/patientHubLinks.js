@@ -11,6 +11,7 @@ import {
   Inbox,
   MessageSquare,
   MapPinned,
+  Mic,
   Pill,
   Receipt,
   ShieldCheck,
@@ -178,6 +179,12 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkHealthHistory",
     subtitleKey: "hubLinkHealthHistorySub",
     icon: BookHeart,
+  },
+  {
+    to: "/patient/meda-live-translation",
+    key: "hubLinkMedaLive",
+    subtitleKey: "hubLinkMedaLiveSub",
+    icon: Mic,
   },
 ]);
 

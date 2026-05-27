@@ -138,4 +138,6 @@ export default {
   hubLinkPracticeErezeptSub: "Von der Praxis ausgestellte Rezepte — QR-Code & PDF für die Apotheke",
   hubLinkSosCard: "Notfallausweis",
   hubLinkSosCardSub: "Blutgruppe, Allergien und Notfallkontakte — offline per QR-Code",
+  hubLinkMedaLive: "Meda Live Translation",
+  hubLinkMedaLiveSub: "Gespräch per Mikrofon aufzeichnen",
 };

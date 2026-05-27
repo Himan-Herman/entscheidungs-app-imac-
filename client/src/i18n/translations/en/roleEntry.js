@@ -138,4 +138,6 @@ export default {
   hubLinkPracticeErezeptSub: "Prescriptions issued by your practice — QR code & PDF for the pharmacy",
   hubLinkSosCard: "Emergency card",
   hubLinkSosCardSub: "Blood type, allergies and emergency contacts — offline via QR code",
+  hubLinkMedaLive: "Meda Live Translation",
+  hubLinkMedaLiveSub: "Record your conversation via microphone",
 };

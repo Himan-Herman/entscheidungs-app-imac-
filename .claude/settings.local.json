@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac status)",
+      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac log --oneline -5)",
+      "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac show HEAD -- \"*.sql\")",
+      "Bash(npm run *)"
+    ]
+  }
+}

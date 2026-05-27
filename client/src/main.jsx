@@ -211,6 +211,9 @@ const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
 const PracticeTeamPage = lazy(() =>
   import("./features/practiceTeam/pages/PracticeTeamPage.jsx"),
 );
+const MedaLiveTranslationPage = lazy(() =>
+  import("./features/medaLiveTranslation/MedaLiveTranslationPage.jsx"),
+);
 
 function RouteFallback() {
   const { language } = useLanguage();
@@ -609,6 +612,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PracticeFinderPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/meda-live-translation"
+                  element={
+                    <ProtectedRoute>
+                      <MedaLiveTranslationPage />
                     </ProtectedRoute>
                   }
                 />
