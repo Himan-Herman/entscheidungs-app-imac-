@@ -102,16 +102,19 @@ router.post("/realtime-session", async (req, res) => {
     });
 
     const _s = built.payload?.session ?? {};
+    const _audioIn = _s.audio?.input ?? {};
+    const _audioOut = _s.audio?.output ?? {};
     console.log(
       JSON.stringify({
         tag: "[MedaRealtimePayloadClean]",
         model: built.realtimeModel,
         sessionType: _s.type ?? null,
         outputModalities: _s.output_modalities ?? null,
-        voice: _s.audio?.output?.voice ?? null,
-        hasTurnDetection: Boolean(_s.turn_detection),
-        transcriptionModel: _s.input_audio_transcription?.model ?? null,
-        transcriptionLanguage: _s.input_audio_transcription?.language ?? "auto",
+        transcriptionModel: _audioIn.transcription?.model ?? null,
+        transcriptionLanguage: _audioIn.transcription?.language ?? "auto",
+        turnDetectionType: _audioIn.turn_detection?.type ?? null,
+        turnDetectionCreateResponse: _audioIn.turn_detection?.create_response ?? null,
+        voice: _audioOut.voice ?? null,
         debugMinimal: process.env.REALTIME_DEBUG_MINIMAL === "true",
         openaiStatus: minted.openaiStatus,
         openaiErrorCode: minted.openaiErrorCode ?? null,

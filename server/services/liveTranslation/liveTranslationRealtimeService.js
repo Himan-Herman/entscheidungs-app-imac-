@@ -44,15 +44,8 @@ export function buildRealtimeClientSecretsPayload(validated) {
     ? resolveOpenAiTranscriptionLanguage(routing.sourceLanguage)
     : null;
 
-  // Production-confirmed field placement (POST /v1/realtime/client_secrets):
-  //   ACCEPTED flat: type, model, output_modalities, instructions,
-  //                  input_audio_transcription, turn_detection
-  //   REJECTED flat: voice  ("Unknown parameter: 'session.voice'")
-  //   REJECTED nested: audio.input.* (caused discriminator error "Missing required parameter: session.type")
-  //
-  // Hybrid: keep proven-flat fields at session root; put voice under audio.output.voice only.
-  // audio.input.* are NOT used — those fields work at session root and must stay there.
-  // create_response:false prevents auto-responses; the client drives response.create explicitly.
+  // POST /v1/realtime/client_secrets (GA): audio settings under session.audio.
+  // Legacy flat session.voice / input_audio_transcription / turn_detection are rejected.
 
   // REALTIME_DEBUG_MINIMAL=true  → send only type+model+output_modalities to isolate which
   // additional fields are accepted. Set in .env while debugging, remove for production.
@@ -66,21 +59,23 @@ export function buildRealtimeClientSecretsPayload(validated) {
 
   if (!isDebugMinimal) {
     sessionConfig.instructions = instructions;
-    sessionConfig.input_audio_transcription = {
-      model: transcriptionModel,
-      ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
+    sessionConfig.audio = {
+      input: {
+        transcription: {
+          model: transcriptionModel,
+          ...(transcriptionLanguage ? { language: transcriptionLanguage } : {}),
+        },
+        turn_detection: {
+          type: "server_vad",
+          create_response: true,
+          interrupt_response: true,
+          silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
+          prefix_padding_ms: 500,
+          threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
+        },
+      },
+      output: { voice },
     };
-    sessionConfig.turn_detection = {
-      type: "server_vad",
-      create_response: false,
-      interrupt_response: true,
-      silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
-      prefix_padding_ms: 500,
-      threshold: LIVE_TRANSLATION_VAD_THRESHOLD,
-    };
-    // voice at session root is rejected. Per spec it lives at audio.output.voice.
-    // Only audio.output is used here — audio.input.* stays flat at session root above.
-    sessionConfig.audio = { output: { voice } };
   }
 
   const payload = {
