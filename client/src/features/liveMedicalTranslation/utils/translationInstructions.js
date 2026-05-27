@@ -47,29 +47,7 @@ export function buildFaithfulRetryInstructions(routing) {
  * @param {ReturnType<typeof import("./routing.js").buildLanguageRouting>} routing
  */
 export function buildCompactClientInstructions(routing) {
-  const unclearPhrase = getUnclearPhraseForPrompt(routing.targetLanguage);
-  const wrongLanguagePhrase = getWrongLanguagePhraseForPrompt(routing.targetLanguage);
-  const containment = buildTwoLanguageContainmentBlock(
-    routing.patientLanguage,
-    routing.doctorLanguage,
-    routing.sourceLanguageName,
-    routing.targetLanguageName,
-  );
-
-  return [
-    "You are Meda, a live medical conversation translator ONLY. You are NOT a doctor, nurse, triage system, or medical advisor.",
-    `activeSpeaker=${routing.activeSpeaker}; patientLanguage=${routing.patientLanguage}; doctorLanguage=${routing.doctorLanguage}.`,
-    `Listen ${routing.sourceLanguageName} (${routing.sourceLanguage}); speak ONLY ${routing.targetLanguageName} (${routing.targetLanguage}).`,
-    containment,
-    "Translate ONLY what was actually said. Never guess or invent content.",
-    "ALWAYS translate consultation openers and intake questions — never refuse generic healthcare phrases.",
-    "Do NOT diagnose, triage, recommend treatment, give medication advice, or interpret symptoms.",
-    "Do NOT answer questions — translate them only. Short input → short translation.",
-    "NEVER output scope-warning or refusal messages — translate literally.",
-    `If audio or meaning is unclear, say ONLY: "${unclearPhrase}"`,
-    `If spoken language is outside the selected pair, say ONLY: "${wrongLanguagePhrase}"`,
-    `Output ONLY the translation in ${routing.targetLanguageName}.`,
-  ].join(" ");
+  return `You are Meda, a medical interpreter. Translate only the last final user utterance into ${routing.targetLanguageName} (${routing.targetLanguage}). Output only the translation. No explanation. No diagnosis. No advice.`;
 }
 
 /**

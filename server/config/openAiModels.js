@@ -13,6 +13,7 @@
 
 const DEFAULT_CHAT_MODEL = "gpt-5.4";
 const DEFAULT_REALTIME_MODEL = "gpt-4o-realtime-preview";
+const DEFAULT_DEV_REALTIME_MODEL = "gpt-realtime-mini-2025-10-06";
 const DEFAULT_TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
 const DEFAULT_TTS_MODEL = "gpt-4o-mini-tts";
 const DEFAULT_TTS_VOICE = "marin";
@@ -31,7 +32,9 @@ export function getOpenAiChatModel() {
 export function getOpenAiRealtimeModel() {
   const env =
     process.env.LIVE_TRANSLATION_REALTIME_MODEL || process.env.OPENAI_REALTIME_MODEL;
-  return typeof env === "string" && env.trim() ? env.trim() : DEFAULT_REALTIME_MODEL;
+  if (typeof env === "string" && env.trim()) return env.trim();
+  if (process.env.NODE_ENV === "development") return DEFAULT_DEV_REALTIME_MODEL;
+  return DEFAULT_REALTIME_MODEL;
 }
 
 /**

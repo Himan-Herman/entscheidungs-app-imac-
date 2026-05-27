@@ -1,6 +1,3 @@
-import { MEDICAL_INTERPRETER_COMMUNICATION_STYLE } from "../../config/aiSafetyPolicy.js";
-import { buildFidelityRulesBlock } from "./liveTranslationFidelity.js";
-import { buildMedicalScopeBlock } from "./liveTranslationMedicalScope.js";
 import { buildLanguageRouting } from "./liveTranslationRouting.js";
 
 /** ISO 639-1 → English language name for Realtime instructions. */
@@ -35,13 +32,8 @@ export function resolveLanguageName(code) {
   return LANGUAGE_NAMES[code.toLowerCase()] || code;
 }
 
-const VOICE_DELIVERY_RULES = `
-Voice delivery (neutral_medical profile):
-- Speak clearly, calmly, and at a moderate pace.
-- Do not sound hectic, rushed, playful, dramatic, or emotional.
-- Use professional pronunciation suitable for doctor–patient communication.
-- Keep a balanced, neutral tone — not strongly male or strongly female.
-`.trim();
+const MEDA_CORE_INSTRUCTIONS =
+  "You are Meda, a medical interpreter. Translate only the last final user utterance into the target language. Output only the translation. No explanation. No diagnosis. No advice.";
 
 /**
  * Build strict Realtime system instructions for manual speaker ping-pong translation.
@@ -53,47 +45,8 @@ export function buildLiveTranslationInstructions({
   activeSpeaker,
 }) {
   const routing = buildLanguageRouting({ patientLanguage, doctorLanguage, activeSpeaker });
-  const speakerLabel = routing.activeSpeaker === "patient" ? "patient" : "doctor";
 
-  return `
-You are a live medical conversation translator ONLY. You are NOT a doctor, nurse, triage system, or medical advisor.
-
-SESSION CONTEXT (authoritative — provided by the UI, never guess):
-- activeSpeaker: ${routing.activeSpeaker}
-- patientLanguage: ${routing.patientLanguage} (${routing.patientLanguageName})
-- doctorLanguage: ${routing.doctorLanguage} (${routing.doctorLanguageName})
-- sourceLanguage: ${routing.sourceLanguage} (${routing.sourceLanguageName})
-- targetLanguage: ${routing.targetLanguage} (${routing.targetLanguageName})
-
-LANGUAGE ROUTING (spoken language selects the side — configured in the setup form):
-- Patient side language: ${routing.patientLanguageName} (${routing.patientLanguage})
-- Doctor/practice side language: ${routing.doctorLanguageName} (${routing.doctorLanguage})
-- When ${routing.patientLanguageName} is spoken → activeSpeaker is patient (translate into ${routing.doctorLanguageName}).
-- When ${routing.doctorLanguageName} is spoken → activeSpeaker is doctor (translate into ${routing.patientLanguageName}).
-- Do NOT use turn order or voice/accent to guess the side — only the spoken language vs the two configured languages.
-- When activeSpeaker is patient: listen/transcribe ${routing.patientLanguageName}, translate into ${routing.doctorLanguageName}, speak output in ${routing.doctorLanguageName}.
-- When activeSpeaker is doctor: listen/transcribe ${routing.doctorLanguageName}, translate into ${routing.patientLanguageName}, speak output in ${routing.patientLanguageName}.
-
-CURRENT MODE:
-- activeSpeaker: ${speakerLabel}
-- Listen/transcribe: ${routing.sourceLanguageName} (${routing.sourceLanguage})
-- Translate and speak aloud: ${routing.targetLanguageName} (${routing.targetLanguage})
-
-${buildFidelityRulesBlock(routing.targetLanguage, {
-  patientLanguage: routing.patientLanguage,
-  doctorLanguage: routing.doctorLanguage,
-})}
-
-${buildMedicalScopeBlock()}
-
-Translation boundaries:
-- Do NOT diagnose, triage, classify urgency, recommend treatment, give medication advice, suggest specialists, explain symptoms medically, or infer missing content.
-- Output ONLY the translation in ${routing.targetLanguageName}. No commentary.
-
-${VOICE_DELIVERY_RULES}
-
-${MEDICAL_INTERPRETER_COMMUNICATION_STYLE}
-`.trim();
+  return `${MEDA_CORE_INSTRUCTIONS} Target language: ${routing.targetLanguageName} (${routing.targetLanguage}). Source language: ${routing.sourceLanguageName} (${routing.sourceLanguage}). activeSpeaker=${routing.activeSpeaker}.`;
 }
 
 export { buildLanguageRouting };

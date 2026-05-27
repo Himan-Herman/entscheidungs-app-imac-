@@ -24,7 +24,9 @@ import { evaluateConversationContext } from "../utils/conversationContextMonitor
 import {
   canProceedToTranslation,
   MAX_TRANSCRIPT_WAIT_MS,
+  MIN_STABLE_TRANSCRIPT_CHARS,
 } from "../utils/transcriptionFirst.js";
+import { logCostGuard, normalizeTranscriptKey } from "../utils/costGuard.js";
 import {
   isLanguageInSelectedPair,
   isTargetLanguageInPair,
@@ -232,6 +234,12 @@ export function useLiveTranslationSession({
   const scopeTranslationPausedRef = useRef(false);
   const onScopeWarningRef = useRef(onScopeWarning);
   const onScopeTranslationPausedRef = useRef(onScopeTranslationPaused);
+  const lastResponseCreateTranscriptRef = useRef("");
+  const inputSuppressedRef = useRef(false);
+  const outputPlaybackActiveRef = useRef(false);
+  const audioPlaybackHandlersRef = useRef(
+    /** @type {{ playing: () => void; ended: () => void } | null} */ (null),
+  );
 
   sessionConfigRef.current = { patientLanguage, doctorLanguage, activeSpeaker };
   autoSwitchSpeakerRef.current = autoSwitchSpeaker;
@@ -258,6 +266,28 @@ export function useLiveTranslationSession({
     if (mountedRef.current) setter();
   }, []);
 
+  const suppressMicForMedaOutput = useCallback(() => {
+    inputSuppressedRef.current = true;
+    if (micTrackRef.current) {
+      micTrackRef.current.enabled = false;
+    }
+    logCostGuard("mic_input_suppressed");
+  }, []);
+
+  const resumeMicAfterMedaOutput = useCallback(() => {
+    if (pausedRef.current || !connectedRef.current) return;
+    inputSuppressedRef.current = false;
+    if (micTrackRef.current) {
+      micTrackRef.current.enabled = true;
+    }
+    logCostGuard("mic_input_resumed");
+    safeSetState(() => {
+      if (connectionStatusRef.current !== "paused" && connectionStatusRef.current !== "ended") {
+        setMicrophoneStatus("on");
+      }
+    });
+  }, [safeSetState]);
+
   const attachOutputAudio = useCallback((audioEl) => {
     audioEl.autoplay = true;
     audioEl.playsInline = true;
@@ -267,7 +297,31 @@ export function useLiveTranslationSession({
     if (!audioEl.isConnected) {
       document.body.appendChild(audioEl);
     }
-  }, []);
+
+    const prev = audioPlaybackHandlersRef.current;
+    if (prev) {
+      audioEl.removeEventListener("playing", prev.playing);
+      audioEl.removeEventListener("ended", prev.ended);
+      audioEl.removeEventListener("pause", prev.ended);
+    }
+
+    const onPlaying = () => {
+      outputPlaybackActiveRef.current = true;
+      suppressMicForMedaOutput();
+      logCostGuard("audio_playback_start");
+    };
+    const onEnded = () => {
+      outputPlaybackActiveRef.current = false;
+      logCostGuard("audio_playback_end");
+      if (!responseActiveRef.current) {
+        resumeMicAfterMedaOutput();
+      }
+    };
+    audioEl.addEventListener("playing", onPlaying);
+    audioEl.addEventListener("ended", onEnded);
+    audioEl.addEventListener("pause", onEnded);
+    audioPlaybackHandlersRef.current = { playing: onPlaying, ended: onEnded };
+  }, [resumeMicAfterMedaOutput, suppressMicForMedaOutput]);
 
   const clearSessionTimer = useCallback(() => {
     if (sessionTimerIntervalRef.current) {
@@ -327,6 +381,7 @@ export function useLiveTranslationSession({
 
       if (elapsed >= maxMs) {
         clearSessionTimer();
+        logCostGuard("session_closed_by_cost_guard", { elapsedMs: elapsed, maxMs });
         onSessionAutoEndRef.current?.();
       }
     }, 1000);
@@ -361,6 +416,9 @@ export function useLiveTranslationSession({
     responseActiveRef.current = false;
     awaitingIntroResponseRef.current = false;
     lastSessionUpdateSigRef.current = "";
+    lastResponseCreateTranscriptRef.current = "";
+    inputSuppressedRef.current = false;
+    outputPlaybackActiveRef.current = false;
     pausedRef.current = false;
     scopeContinueRef.current = false;
     scopeWarningShownRef.current = false;
@@ -381,6 +439,13 @@ export function useLiveTranslationSession({
     pcRef.current?.close();
     pcRef.current = null;
     if (audioElRef.current) {
+      const handlers = audioPlaybackHandlersRef.current;
+      if (handlers) {
+        audioElRef.current.removeEventListener("playing", handlers.playing);
+        audioElRef.current.removeEventListener("ended", handlers.ended);
+        audioElRef.current.removeEventListener("pause", handlers.ended);
+        audioPlaybackHandlersRef.current = null;
+      }
       audioElRef.current.pause();
       audioElRef.current.srcObject = null;
       audioElRef.current.remove();
@@ -664,7 +729,9 @@ export function useLiveTranslationSession({
       pendingPlanBRef.current = planB;
       cancelActiveResponse();
       responseActiveRef.current = true;
+      suppressMicForMedaOutput();
       safeSetState(() => setConnectionStatus("speaking"));
+      logCostGuard("response_create_sent", { purpose: "speak_exact", textLength: trimmed.length });
       dc.send(
         JSON.stringify({
           type: "response.create",
@@ -676,7 +743,7 @@ export function useLiveTranslationSession({
       );
       return true;
     },
-    [cancelActiveResponse, safeSetState],
+    [cancelActiveResponse, safeSetState, suppressMicForMedaOutput],
   );
 
   const requestFaithfulTranslationRetry = useCallback(
@@ -689,9 +756,11 @@ export function useLiveTranslationSession({
       pendingPlanBRef.current = { type: "scopeRetry", sourceText: trimmed, routing };
       cancelActiveResponse();
       responseActiveRef.current = true;
+      suppressMicForMedaOutput();
       safeSetState(() => setConnectionStatus("translating"));
 
       const hint = buildFaithfulRetryInstructions(routing);
+      logCostGuard("response_create_sent", { purpose: "faithful_retry", finalTranscriptLength: trimmed.length });
       dc.send(
         JSON.stringify({
           type: "response.create",
@@ -703,7 +772,7 @@ export function useLiveTranslationSession({
       );
       return true;
     },
-    [cancelActiveResponse, safeSetState],
+    [cancelActiveResponse, safeSetState, suppressMicForMedaOutput],
   );
 
   const requestFaithfulTranslation = useCallback(
@@ -716,9 +785,11 @@ export function useLiveTranslationSession({
       pendingPlanBRef.current = planB;
       cancelActiveResponse();
       responseActiveRef.current = true;
+      suppressMicForMedaOutput();
       safeSetState(() => setConnectionStatus("translating"));
 
       const compactHint = buildCompactClientInstructions(routing);
+      logCostGuard("response_create_sent", { purpose: "faithful_translation", finalTranscriptLength: trimmed.length });
       dc.send(
         JSON.stringify({
           type: "response.create",
@@ -730,7 +801,7 @@ export function useLiveTranslationSession({
       );
       return true;
     },
-    [cancelActiveResponse, safeSetState],
+    [cancelActiveResponse, safeSetState, suppressMicForMedaOutput],
   );
 
   const replayLatestTranslation = useCallback(() => {
@@ -850,11 +921,38 @@ export function useLiveTranslationSession({
     });
   }, []);
 
+  const triggerLocalUnclearRepeat = useCallback(
+    (routing, reason, overlapDetected = false) => {
+      if (pausedRef.current || !connectedRef.current) return false;
+      const phrase = getMedaUnclearRepeatPhrase(routing.targetLanguage);
+      pendingOriginalRef.current = "";
+      pendingTranslatedForTurnRef.current = "";
+      pendingPlanBRef.current = null;
+      inputTranscriptStateRef.current = "empty";
+      notifyTurnIssue(reason, { overlapDetected, missingOriginal: true });
+      logCostGuard("response_create_skipped", {
+        reason,
+        skippedBecause: reason,
+      });
+      safeSetState(() => {
+        setCurrentTranslatedText(phrase);
+        if (connectionStatusRef.current !== "paused") {
+          setConnectionStatus("listening");
+        }
+      });
+      return true;
+    },
+    [notifyTurnIssue, safeSetState],
+  );
+
   const triggerUnclearRepeat = useCallback(
     (routing, overlapDetected = false, reason = "unclear", options = {}) => {
       if (pausedRef.current || !connectedRef.current) return false;
-      const phrase = getMedaUnclearRepeatPhrase(routing.targetLanguage);
       const recordHistory = options.recordHistory !== false;
+      if (!recordHistory) {
+        return triggerLocalUnclearRepeat(routing, reason, overlapDetected);
+      }
+      const phrase = getMedaUnclearRepeatPhrase(routing.targetLanguage);
       pendingOriginalRef.current = "";
       pendingPlanBRef.current = {
         type: "unclearRepeat",
@@ -865,9 +963,6 @@ export function useLiveTranslationSession({
       };
       notifyTurnIssue(reason, { overlapDetected, missingOriginal: reason === "asr_failed" });
       cancelActiveResponse();
-      if (!recordHistory) {
-        return speakExactText(phrase, { type: "spokenNotice", phrase });
-      }
       return speakExactText(phrase, {
         type: "unclearRepeat",
         phrase,
@@ -876,7 +971,7 @@ export function useLiveTranslationSession({
         recordHistory,
       });
     },
-    [cancelActiveResponse, notifyTurnIssue, speakExactText],
+    [cancelActiveResponse, notifyTurnIssue, speakExactText, triggerLocalUnclearRepeat],
   );
 
   const triggerWrongLanguageRepeat = useCallback(
@@ -1062,12 +1157,10 @@ export function useLiveTranslationSession({
         }
         pendingTranslatedForTurnRef.current = "";
         const routing = turnContextRef.current;
-        triggerUnclearRepeat(routing, overlapDetectedRef.current, "asr_failed", {
-          recordHistory: false,
-        });
+        triggerLocalUnclearRepeat(routing, "asr_failed", overlapDetectedRef.current);
       }, MAX_TRANSCRIPT_WAIT_MS);
     },
-    [clearPendingFinalizeTimer, executeBufferedFinalize, triggerUnclearRepeat],
+    [clearPendingFinalizeTimer, executeBufferedFinalize, triggerLocalUnclearRepeat],
   );
 
   const trySendMedaActivation = useCallback(() => {
@@ -1095,7 +1188,9 @@ export function useLiveTranslationSession({
 
     awaitingIntroResponseRef.current = true;
     responseActiveRef.current = true;
+    suppressMicForMedaOutput();
     safeSetState(() => setConnectionStatus("introducing"));
+    logCostGuard("response_create_sent", { purpose: "activation_intro", textLength: phrase.length });
     dc.send(
       JSON.stringify({
         type: "response.create",
@@ -1105,7 +1200,7 @@ export function useLiveTranslationSession({
         },
       }),
     );
-  }, [safeSetState]);
+  }, [safeSetState, suppressMicForMedaOutput]);
 
   const sendSpeakerUpdateNow = useCallback(() => {
     if (!connectedRef.current || pausedRef.current) return;
@@ -1165,28 +1260,48 @@ export function useLiveTranslationSession({
       const dc = dcRef.current;
       const trimmed = sourceText?.trim();
       const dcState = dc?.readyState ?? "none";
+      const transcriptKey = normalizeTranscriptKey(trimmed);
 
-      if (!dc || dcState !== "open" || !trimmed || pausedRef.current) {
+      const skip = (reason, extra = {}) => {
+        logCostGuard("response_create_skipped", { reason, ...extra });
         console.debug("[MedaPipelineDebug] requestTurnTranslation blocked", {
           step: "step6_response_create",
-          reason: !dc ? "no_dc" : dcState !== "open" ? "dc_not_open" : !trimmed ? "empty_transcript" : "paused",
-          dcState,
-          hasTranscript: Boolean(trimmed),
-          transcriptLength: trimmed?.length ?? 0,
-          paused: pausedRef.current,
-          activeSpeaker: routing?.activeSpeaker,
-          sourceLanguage: routing?.sourceLanguage,
-          targetLanguage: routing?.targetLanguage,
+          reason,
+          ...extra,
         });
+      };
+
+      if (!dc || dcState !== "open" || pausedRef.current) {
+        skip(!dc ? "no_dc" : dcState !== "open" ? "dc_not_open" : "paused", { dcState });
+        return false;
+      }
+
+      if (!trimmed || isLikelyEmptyOrNoiseTranscript(trimmed)) {
+        triggerLocalUnclearRepeat(routing, "empty");
+        return false;
+      }
+
+      if (trimmed.length < MIN_STABLE_TRANSCRIPT_CHARS) {
+        triggerLocalUnclearRepeat(routing, "tooShort");
+        return false;
+      }
+
+      if (responseActiveRef.current) {
+        skip("responding", { finalTranscriptLength: trimmed.length });
+        return false;
+      }
+
+      if (
+        transcriptKey &&
+        transcriptKey === lastResponseCreateTranscriptRef.current
+      ) {
+        skip("duplicate", { finalTranscriptLength: trimmed.length });
         return false;
       }
 
       const cfg = sessionConfigRef.current;
       if (scopeTranslationPausedRef.current) {
-        console.debug("[MedaPipelineDebug] requestTurnTranslation blocked — scopeTranslationPaused", {
-          step: "step6_response_create",
-          reason: "scope_paused",
-        });
+        skip("scope_paused");
         return false;
       }
       if (
@@ -1196,23 +1311,11 @@ export function useLiveTranslationSession({
           scopeTranslationPaused: scopeTranslationPausedRef.current,
         })
       ) {
-        console.debug("[MedaPipelineDebug] requestTurnTranslation blocked — canProceedToTranslation=false", {
-          step: "step6_response_create",
-          reason: "cannot_proceed",
-          inputState: inputTranscriptStateRef.current,
-          transcriptLength: trimmed.length,
-        });
+        triggerLocalUnclearRepeat(routing, "uncertain");
         return false;
       }
       if (!isTargetLanguageInPair(routing.targetLanguage, cfg.patientLanguage, cfg.doctorLanguage)) {
-        console.debug("[MedaPipelineDebug] requestTurnTranslation blocked — targetLanguage not in pair", {
-          step: "step6_response_create",
-          reason: "target_language_not_in_pair",
-          activeSpeaker: routing.activeSpeaker,
-          targetLanguage: routing.targetLanguage,
-          patientLanguage: cfg.patientLanguage,
-          doctorLanguage: cfg.doctorLanguage,
-        });
+        skip("target_language_not_in_pair");
         triggerWrongLanguageRepeat(routing, lastDetectedLanguageRef.current);
         return false;
       }
@@ -1220,14 +1323,23 @@ export function useLiveTranslationSession({
       turnContextRef.current = routing;
       cancelActiveResponse();
       responseActiveRef.current = true;
+      lastResponseCreateTranscriptRef.current = transcriptKey;
+      suppressMicForMedaOutput();
       safeSetState(() => setConnectionStatus("translating"));
+
+      logCostGuard("response_create_sent", {
+        finalTranscriptLength: trimmed.length,
+        finalTranscript: import.meta.env.DEV ? trimmed : undefined,
+        activeSpeaker: routing.activeSpeaker,
+        sourceLanguage: routing.sourceLanguage,
+        targetLanguage: routing.targetLanguage,
+      });
 
       console.debug("[MedaPipelineDebug] response.create sent", {
         step: "step6_response_create",
         activeSpeaker: routing.activeSpeaker,
         sourceLanguage: routing.sourceLanguage,
         targetLanguage: routing.targetLanguage,
-        hasTranscript: true,
         transcriptLength: trimmed.length,
         dcState,
       });
@@ -1238,13 +1350,19 @@ export function useLiveTranslationSession({
           type: "response.create",
           response: {
             output_modalities: ["audio"],
-            instructions: `${hint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
+            instructions: `${hint}\n\nSource (${routing.sourceLanguage}): "${trimmed}"`,
           },
         }),
       );
       return true;
     },
-    [cancelActiveResponse, safeSetState, triggerWrongLanguageRepeat],
+    [
+      cancelActiveResponse,
+      safeSetState,
+      suppressMicForMedaOutput,
+      triggerLocalUnclearRepeat,
+      triggerWrongLanguageRepeat,
+    ],
   );
 
   const switchSpeakerFromDetectedLanguage = useCallback(
@@ -1420,6 +1538,21 @@ export function useLiveTranslationSession({
       if (!event || typeof event !== "object") return;
       const type = event.type;
 
+      const blockedDuringMedaOutput = [
+        "input_audio_buffer.speech_started",
+        "input_audio_buffer.speech_stopped",
+        "conversation.item.input_audio_transcription.completed",
+        "conversation.item.input_audio_transcription.failed",
+        "input_audio_buffer.transcription.completed",
+        "input_audio_buffer.transcription.failed",
+        "conversation.item.input_audio_transcription.delta",
+        "input_audio_buffer.transcription.delta",
+      ];
+      if (inputSuppressedRef.current && blockedDuringMedaOutput.includes(type)) {
+        logCostGuard("input_ignored_during_output", { eventType: type });
+        return;
+      }
+
       if (pausedRef.current) {
         const blockedWhilePaused = [
           "input_audio_buffer.speech_started",
@@ -1471,6 +1604,7 @@ export function useLiveTranslationSession({
             String(pendingOriginalRef.current || "").trim().length > 0);
         if (!inFlightTurn) {
           resetTurnCaptureState();
+          lastResponseCreateTranscriptRef.current = "";
           currentTranslatedRef.current = "";
           safeSetState(() => setCurrentTranslatedText(""));
         }
@@ -1500,6 +1634,13 @@ export function useLiveTranslationSession({
         const detected = extractDetectedLanguage(event);
         lastDetectedLanguageRef.current = detected || null;
 
+        logCostGuard("final_transcript", {
+          eventType: event.type,
+          finalTranscriptLength: transcript?.length ?? 0,
+          finalTranscript: import.meta.env.DEV ? transcript : undefined,
+          responseActive: responseActiveRef.current,
+        });
+
         console.debug("[MedaPipelineDebug] input transcription completed", {
           step: "step3_transcription_completed",
           eventType: event.type,
@@ -1514,7 +1655,19 @@ export function useLiveTranslationSession({
           inputStateBeforeUpdate: inputTranscriptStateRef.current,
         });
 
+        if (responseActiveRef.current || inputSuppressedRef.current) {
+          logCostGuard("response_create_skipped", {
+            reason: "responding",
+            finalTranscriptLength: transcript?.length ?? 0,
+          });
+          return;
+        }
+
         if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
+          if (transcript.trim().length < MIN_STABLE_TRANSCRIPT_CHARS) {
+            triggerLocalUnclearRepeat(routing, "tooShort", overlapDetectedRef.current);
+            return;
+          }
           pendingOriginalRef.current = transcript;
           inputTranscriptStateRef.current = "ready";
           const resolvedLang =
@@ -1551,11 +1704,7 @@ export function useLiveTranslationSession({
         }
 
         inputTranscriptStateRef.current = "empty";
-        if (pendingTranslatedForTurnRef.current) {
-          triggerUnclearRepeat(routing, overlapDetectedRef.current, "asr_failed", {
-            recordHistory: false,
-          });
-        }
+        triggerLocalUnclearRepeat(routing, "empty", overlapDetectedRef.current);
         maybeFlushPendingTurn();
         return;
       }
@@ -1636,6 +1785,13 @@ export function useLiveTranslationSession({
           finalizeTranslationOutput(translated);
         }
         responseActiveRef.current = false;
+        logCostGuard("response_done", {
+          eventType: type,
+          outputPlaybackActive: outputPlaybackActiveRef.current,
+        });
+        if (!outputPlaybackActiveRef.current) {
+          resumeMicAfterMedaOutput();
+        }
         if (pendingRepeatSpeechRef.current) {
           const { phrase, type: repeatType } = pendingRepeatSpeechRef.current;
           pendingRepeatSpeechRef.current = null;
@@ -1689,6 +1845,14 @@ export function useLiveTranslationSession({
           inputState: inputTranscriptStateRef.current,
         });
         responseActiveRef.current = false;
+        logCostGuard("response_done", {
+          eventType: type,
+          isCancelledOrFailed,
+          outputPlaybackActive: outputPlaybackActiveRef.current,
+        });
+        if (!isCancelledOrFailed && !outputPlaybackActiveRef.current) {
+          resumeMicAfterMedaOutput();
+        }
         if (isCancelledOrFailed) {
           logRealtimeDiag("response_done_non_success", summarizeRealtimeEvent(event));
           safeSetState(() => {
@@ -1765,7 +1929,9 @@ export function useLiveTranslationSession({
       skipLanguageRoutingRef,
       speakExactText,
       startSessionTimer,
+      triggerLocalUnclearRepeat,
       triggerWrongLanguageRepeat,
+      resumeMicAfterMedaOutput,
     ],
   );
 

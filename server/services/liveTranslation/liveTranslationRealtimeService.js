@@ -67,7 +67,7 @@ export function buildRealtimeClientSecretsPayload(validated) {
         },
         turn_detection: {
           type: "server_vad",
-          create_response: true,
+          create_response: false,
           interrupt_response: true,
           silence_duration_ms: LIVE_TRANSLATION_VAD_SILENCE_MS,
           prefix_padding_ms: 500,
@@ -112,6 +112,16 @@ function sanitizeOpenAiError(data) {
     openaiErrorParam: typeof err.param === "string" ? err.param : null,
     openaiErrorMessage: typeof err.message === "string" ? err.message : null,
   };
+}
+
+/** Frontend-safe code when OpenAI rejects the call for billing/quota (HTTP 429). */
+export const OPENAI_QUOTA_EXCEEDED_ERROR = "OPENAI_QUOTA_EXCEEDED";
+
+function isOpenAiQuotaExceeded(openaiStatus, openaiErrorCode, openaiErrorMessage) {
+  if (openaiErrorCode === "insufficient_quota") return true;
+  if (openaiStatus !== 429) return false;
+  const message = String(openaiErrorMessage || "").toLowerCase();
+  return /quota|billing/.test(message);
 }
 
 /**
@@ -175,6 +185,11 @@ export async function mintRealtimeClientSecret(apiKey, payload, options = {}) {
 export async function exchangeRealtimeSdp(apiKey, offerSdp, sessionPayload, options = {}) {
   const minted = await mintRealtimeClientSecret(apiKey, sessionPayload, options);
   if (!minted.ok || !minted.clientSecret) {
+    const quotaExceeded = isOpenAiQuotaExceeded(
+      minted.openaiStatus,
+      minted.openaiErrorCode,
+      minted.openaiErrorMessage,
+    );
     return {
       ok: false,
       phase: "client_secrets",
@@ -182,6 +197,7 @@ export async function exchangeRealtimeSdp(apiKey, offerSdp, sessionPayload, opti
       openaiErrorCode: minted.openaiErrorCode,
       openaiErrorParam: minted.openaiErrorParam,
       openaiErrorMessage: minted.openaiErrorMessage,
+      ...(quotaExceeded ? { error: OPENAI_QUOTA_EXCEEDED_ERROR } : {}),
     };
   }
 
@@ -196,19 +212,26 @@ export async function exchangeRealtimeSdp(apiKey, offerSdp, sessionPayload, opti
 
   const answerSdp = await callsRes.text();
   if (!callsRes.ok) {
-    let parsedMessage = null;
+    let parsed = {};
     try {
-      const parsed = JSON.parse(answerSdp);
-      parsedMessage = parsed?.error?.message ?? null;
+      parsed = JSON.parse(answerSdp);
     } catch {
       /* not JSON */
     }
+    const sanitized = sanitizeOpenAiError(parsed);
+    const quotaExceeded = isOpenAiQuotaExceeded(
+      callsRes.status,
+      sanitized.openaiErrorCode,
+      sanitized.openaiErrorMessage,
+    );
     return {
       ok: false,
       phase: "realtime_calls",
       openaiStatus: callsRes.status,
-      openaiErrorMessage: parsedMessage,
+      openaiErrorCode: sanitized.openaiErrorCode,
+      openaiErrorMessage: sanitized.openaiErrorMessage,
       answerSdp: "",
+      ...(quotaExceeded ? { error: OPENAI_QUOTA_EXCEEDED_ERROR } : {}),
     };
   }
 

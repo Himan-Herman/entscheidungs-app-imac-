@@ -5,6 +5,7 @@ import {
   buildRealtimeClientSecretsPayload,
   exchangeRealtimeSdp,
   mintRealtimeClientSecret,
+  OPENAI_QUOTA_EXCEEDED_ERROR,
 } from "../services/liveTranslation/liveTranslationRealtimeService.js";
 
 const router = express.Router();
@@ -217,13 +218,22 @@ router.post(
       });
 
       if (!result.ok) {
+        const quotaExceeded = result.error === OPENAI_QUOTA_EXCEEDED_ERROR;
         logLiveTranslation(req, "realtime_call_failed", {
           phase: result.phase,
           openaiStatus: result.openaiStatus,
           openaiErrorParam: result.openaiErrorParam,
           openaiErrorCode: result.openaiErrorCode,
-          openaiErrorMessage: result.openaiErrorMessage,
+          openaiErrorMessage: quotaExceeded ? null : result.openaiErrorMessage,
+          quotaExceeded,
         });
+        if (quotaExceeded) {
+          return res.status(429).json({
+            ok: false,
+            error: OPENAI_QUOTA_EXCEEDED_ERROR,
+            phase: result.phase,
+          });
+        }
         return res.status(502).json({
           ok: false,
           error: "sdp_exchange_failed",
