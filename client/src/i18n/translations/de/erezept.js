@@ -1,10 +1,15 @@
 export default {
-  pageTitle: "Meine Rezepte — MedScoutX",
-  pageHeading: "Meine Rezepte",
+  pageTitle: "Rezepte & Verordnungen — MedScoutX",
+  pageHeading: "Rezepte & Verordnungen",
+  breadcrumb: "Meine Praxis",
   intro: "Von deiner Praxis ausgestellte Rezepte — immer griffbereit für die Apotheke.",
   disclaimer:
     "Simuliertes e-Rezept — kein offizieller TI-Nachweis. Zeige den QR-Code oder Token in der Apotheke vor.",
   loadingError: "Rezepte konnten nicht geladen werden.",
+  backToPractice: "Zur Praxis-Übersicht",
+  pdfDownload: "PDF herunterladen",
+  pdfGenerating: "PDF wird erstellt…",
+  issuedBy: "Ausgestellt von",
   filtersLabel: "Status-Filter",
   noEntries: "Noch keine Rezepte vorhanden.",
   noEntriesHint: "Rezepte erscheinen hier, sobald deine Praxis sie ausstellt.",

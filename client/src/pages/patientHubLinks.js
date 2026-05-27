@@ -12,6 +12,7 @@ import {
   MessageSquare,
   MapPinned,
   Pill,
+  Receipt,
   ShieldCheck,
   Stethoscope,
   TrendingUp,
@@ -52,6 +53,12 @@ export const PATIENT_PRACTICE_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkPracticeDocuments",
     subtitleKey: "hubLinkPracticeDocumentsSub",
     icon: FolderOpen,
+  },
+  {
+    to: "/patient/erezept",
+    key: "hubLinkPracticeErezept",
+    subtitleKey: "hubLinkPracticeErezeptSub",
+    icon: Receipt,
   },
   {
     to: "/pre-visit/medications",
@@ -179,12 +186,6 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkHealthHistory",
     subtitleKey: "hubLinkHealthHistorySub",
     icon: BookHeart,
-  },
-  {
-    to: "/patient/erezept",
-    key: "hubLinkErezept",
-    subtitleKey: "hubLinkErezeptSub",
-    icon: FileText,
   },
 ]);
 

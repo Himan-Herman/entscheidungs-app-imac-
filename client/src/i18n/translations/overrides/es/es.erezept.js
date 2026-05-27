@@ -1,10 +1,15 @@
 export default {
-  pageTitle: "Mis recetas — MedScoutX",
-  pageHeading: "Mis recetas",
+  pageTitle: "Recetas & Prescripciones — MedScoutX",
+  pageHeading: "Recetas & Prescripciones",
+  breadcrumb: "Mi consultorio",
   intro: "Recetas emitidas por su consultorio — siempre disponibles para la farmacia.",
   disclaimer:
     "Receta electrónica simulada — no es un documento TI oficial. Muestre el código QR o el token en la farmacia.",
   loadingError: "No se pudieron cargar las recetas.",
+  backToPractice: "Volver al resumen del consultorio",
+  pdfDownload: "Descargar PDF",
+  pdfGenerating: "Generando PDF…",
+  issuedBy: "Emitido por",
   filtersLabel: "Filtro de estado",
   noEntries: "Aún no hay recetas.",
   noEntriesHint: "Las recetas aparecerán aquí en cuanto su consultorio las emita.",

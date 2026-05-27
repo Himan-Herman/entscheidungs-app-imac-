@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, Clock, FileText, Pill, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Check, ChevronLeft, Clock, FileText, Pill, Receipt, X } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchErezept, updateErezeptStatus } from "../api/erezeptApi.js";
@@ -9,7 +10,7 @@ import "../styles/Erezept.css";
 const FILTERS = ["all", "issued", "at_pharmacy", "redeemed", "expired"];
 
 const FILTER_ICONS = {
-  all: <FileText size={14} aria-hidden="true" />,
+  all: <Receipt size={14} aria-hidden="true" />,
   issued: <Clock size={14} aria-hidden="true" />,
   at_pharmacy: <Pill size={14} aria-hidden="true" />,
   redeemed: <Check size={14} aria-hidden="true" />,
@@ -71,14 +72,22 @@ export default function ErezeptPage() {
   }, [entries]);
 
   return (
-    <main className="erx-page" aria-label={t?.pageHeading || "Meine Rezepte"}>
+    <main className="erx-page" aria-label={t?.pageHeading || "Rezepte & Verordnungen"}>
+      {/* Breadcrumb back to Meine Praxis */}
+      <nav className="erx-breadcrumb" aria-label="Breadcrumb">
+        <Link to="/patient/practice" className="erx-breadcrumb__back">
+          <ChevronLeft size={16} aria-hidden="true" />
+          {t?.breadcrumb || "Meine Praxis"}
+        </Link>
+      </nav>
+
       <header className="erx-page__header">
         <h1 className="erx-page__title">
-          <FileText size={24} aria-hidden="true" />
-          {t?.pageHeading || "Meine Rezepte"}
+          <Receipt size={22} aria-hidden="true" />
+          {t?.pageHeading || "Rezepte & Verordnungen"}
         </h1>
-        <p className="erx-page__intro">{t?.intro || "Von deiner Praxis ausgestellte Rezepte — immer griffbereit für die Apotheke."}</p>
-        <p className="erx-page__disclaimer">{t?.disclaimer || "Simuliertes e-Rezept — kein offizieller TI-Nachweis."}</p>
+        <p className="erx-page__intro">{t?.intro}</p>
+        <p className="erx-page__disclaimer">{t?.disclaimer}</p>
       </header>
 
       <nav className="erx-tabs" aria-label={t?.filtersLabel || "Status-Filter"}>
@@ -90,8 +99,10 @@ export default function ErezeptPage() {
             aria-pressed={activeFilter === f}
           >
             {FILTER_ICONS[f]}
-            {(t?.filters?.[f] || f)}
-            {counts[f] > 0 && <span style={{ fontSize: "0.75rem", opacity: 0.8 }}>({counts[f]})</span>}
+            {t?.filters?.[f] || f}
+            {counts[f] > 0 && (
+              <span className="erx-tabs__count">{counts[f]}</span>
+            )}
           </button>
         ))}
       </nav>
@@ -104,10 +115,13 @@ export default function ErezeptPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="erx-page__empty">
-          <FileText size={44} strokeWidth={1.5} aria-hidden="true" />
-          <p>{activeFilter === "all" ? (t?.noEntries || "Noch keine Rezepte vorhanden.") : (t?.noEntriesFilter || "Keine Rezepte mit diesem Status.")}</p>
+          <Receipt size={44} strokeWidth={1.2} aria-hidden="true" />
+          <p>{activeFilter === "all"
+            ? (t?.noEntries || "Noch keine Rezepte vorhanden.")
+            : (t?.noEntriesFilter || "Keine Rezepte mit diesem Status.")}
+          </p>
           {activeFilter === "all" && (
-            <p style={{ fontSize: "0.875rem" }}>{t?.noEntriesHint || "Rezepte erscheinen hier, sobald deine Praxis sie ausstellt."}</p>
+            <p className="erx-page__empty-hint">{t?.noEntriesHint || "Rezepte erscheinen hier, sobald deine Praxis sie ausstellt."}</p>
           )}
         </div>
       ) : (

@@ -1,10 +1,15 @@
 export default {
-  pageTitle: "Le mie ricette — MedScoutX",
-  pageHeading: "Le mie ricette",
+  pageTitle: "Ricette & Prescrizioni — MedScoutX",
+  pageHeading: "Ricette & Prescrizioni",
+  breadcrumb: "Il mio studio",
   intro: "Ricette emesse dal tuo studio — sempre a portata di mano per la farmacia.",
   disclaimer:
     "Ricetta elettronica simulata — non è un documento TI ufficiale. Mostra il QR code o il codice in farmacia.",
   loadingError: "Impossibile caricare le ricette.",
+  backToPractice: "Torna alla panoramica dello studio",
+  pdfDownload: "Scarica PDF",
+  pdfGenerating: "Generazione PDF…",
+  issuedBy: "Prescritto da",
   filtersLabel: "Filtro per stato",
   noEntries: "Nessuna ricetta per ora.",
   noEntriesHint: "Le ricette appariranno qui non appena il tuo studio le emette.",

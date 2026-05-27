@@ -413,6 +413,90 @@
 }
 .erx-form__cancel:hover { background: var(--ms-surface-hover, #f3f4f6); }
 
+/* ── Breadcrumb back nav ─────────────────────────────────────────────────── */
+.erx-breadcrumb {
+  margin-bottom: 1rem;
+}
+.erx-breadcrumb__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ms-text-secondary, #4b5563);
+  text-decoration: none;
+  padding: 0.3rem 0;
+  transition: color 0.13s;
+}
+.erx-breadcrumb__back:hover,
+.erx-breadcrumb__back:focus-visible {
+  color: var(--ms-accent, #0d9488);
+}
+.erx-breadcrumb__back:focus-visible {
+  outline: 2px solid var(--ms-accent, #0d9488);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Tab count badge ─────────────────────────────────────────────────────── */
+.erx-tabs__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.12);
+  color: inherit;
+  margin-left: 0.1rem;
+}
+.erx-tabs__btn--active .erx-tabs__count {
+  background: rgba(255,255,255,0.28);
+}
+
+/* ── ICD code monospace ──────────────────────────────────────────────────── */
+.erx-icd-code {
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+/* ── Card footer (PDF + extra actions) ──────────────────────────────────── */
+.erx-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ms-border, #f3f4f6);
+  margin-top: 0.125rem;
+}
+
+.erx-card__btn--pdf {
+  color: var(--ms-accent, #0d9488);
+  border-color: color-mix(in srgb, var(--ms-accent, #0d9488) 35%, var(--ms-border, #d1d5db));
+}
+.erx-card__btn--pdf:hover {
+  background: color-mix(in srgb, var(--ms-accent, #0d9488) 8%, transparent);
+}
+
+/* ── QR panel larger ─────────────────────────────────────────────────────── */
+.erx-qr-panel__img {
+  border-radius: 10px;
+  width: 180px !important;
+  height: 180px !important;
+  display: block;
+}
+
+/* ── Empty hint smaller text ─────────────────────────────────────────────── */
+.erx-page__empty-hint {
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin: 0;
+}
+
 /* ── Empty / loading ─────────────────────────────────────────────────────── */
 .erx-page__loading {
   display: flex;
@@ -465,16 +549,22 @@
   margin: 0 0 1.25rem;
 }
 
-/* ── Dark mode ───────────────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  .erx-badge--issued      { background: #1e3a5f; color: #93c5fd; }
-  .erx-badge--at_pharmacy { background: #78350f; color: #fde68a; }
-  .erx-badge--redeemed    { background: #064e3b; color: #6ee7b7; }
-  .erx-badge--expired     { background: #1e293b; color: #94a3b8; }
-  .erx-badge--cancelled   { background: #7f1d1d; color: #fca5a5; }
-  .erx-token { background: #1e293b; border-color: #334155; }
-  .erx-qr-panel { background: #1e293b; border-color: #334155; }
-}
+/* ── Dark mode (app theme only — no OS prefers-color-scheme) ─────────────── */
+:root[data-theme="dark"] .erx-badge--issued      { background: #1e3a5f; color: #93c5fd; }
+:root[data-theme="dark"] .erx-badge--at_pharmacy { background: #78350f; color: #fde68a; }
+:root[data-theme="dark"] .erx-badge--redeemed    { background: #064e3b; color: #6ee7b7; }
+:root[data-theme="dark"] .erx-badge--expired     { background: #1e293b; color: #94a3b8; }
+:root[data-theme="dark"] .erx-badge--cancelled   { background: #7f1d1d; color: #fca5a5; }
+:root[data-theme="dark"] .erx-token              { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .erx-token__code        { color: #f1f5f9; }
+:root[data-theme="dark"] .erx-qr-panel           { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .erx-card               { background: var(--ms-surface, #1e293b); border-color: #334155; }
+:root[data-theme="dark"] .erx-card__name         { color: #f1f5f9; }
+:root[data-theme="dark"] .erx-card__detail       { color: #94a3b8; }
+:root[data-theme="dark"] .erx-card__detail strong { color: #e2e8f0; }
+:root[data-theme="dark"] .erx-page__disclaimer   { background: #1e3a5f; border-color: #1d4ed8; color: #bfdbfe; }
+:root[data-theme="dark"] .erx-breadcrumb__back   { color: #94a3b8; }
+:root[data-theme="dark"] .erx-breadcrumb__back:hover { color: #5eead4; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {

@@ -1,10 +1,15 @@
 export default {
-  pageTitle: "My Prescriptions — MedScoutX",
-  pageHeading: "My Prescriptions",
+  pageTitle: "Prescriptions & Orders — MedScoutX",
+  pageHeading: "Prescriptions & Orders",
+  breadcrumb: "My Practice",
   intro: "Prescriptions issued by your practice — always ready for the pharmacy.",
   disclaimer:
     "Simulated e-prescription — not an official TI document. Show the QR code or token at the pharmacy.",
   loadingError: "Could not load prescriptions.",
+  backToPractice: "Back to practice overview",
+  pdfDownload: "Download PDF",
+  pdfGenerating: "Generating PDF…",
+  issuedBy: "Issued by",
   filtersLabel: "Status filter",
   noEntries: "No prescriptions yet.",
   noEntriesHint: "Prescriptions appear here as soon as your practice issues them.",

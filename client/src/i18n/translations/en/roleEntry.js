@@ -138,4 +138,6 @@ export default {
   hubLinkHealthHistorySub: "Document allergies and diagnoses in a structured way",
   hubLinkErezept: "My prescriptions",
   hubLinkErezeptSub: "e-Prescriptions from your practice — QR code for the pharmacy",
+  hubLinkPracticeErezept: "Prescriptions & orders",
+  hubLinkPracticeErezeptSub: "Prescriptions issued by your practice — QR code & PDF for the pharmacy",
 };

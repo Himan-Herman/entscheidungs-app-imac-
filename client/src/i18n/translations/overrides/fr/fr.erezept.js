@@ -1,10 +1,15 @@
 export default {
-  pageTitle: "Mes ordonnances — MedScoutX",
-  pageHeading: "Mes ordonnances",
+  pageTitle: "Ordonnances & Prescriptions — MedScoutX",
+  pageHeading: "Ordonnances & Prescriptions",
+  breadcrumb: "Mon cabinet",
   intro: "Ordonnances émises par votre cabinet — toujours disponibles pour la pharmacie.",
   disclaimer:
     "Ordonnance électronique simulée — pas un document TI officiel. Présentez le QR code ou le code à la pharmacie.",
   loadingError: "Impossible de charger les ordonnances.",
+  backToPractice: "Retour à l'aperçu du cabinet",
+  pdfDownload: "Télécharger le PDF",
+  pdfGenerating: "Génération du PDF…",
+  issuedBy: "Prescrit par",
   filtersLabel: "Filtre par statut",
   noEntries: "Aucune ordonnance pour l'instant.",
   noEntriesHint: "Les ordonnances apparaissent ici dès que votre cabinet en émet.",
