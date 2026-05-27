@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { useMicrophoneLevel } from "./useMicrophoneLevel";
+import { useLocalTranscription } from "./useLocalTranscription";
 import { getMltMessages } from "./medaLiveTranslation.i18n";
 import "./MedaLiveTranslationPage.css";
 
@@ -30,6 +31,12 @@ export default function MedaLiveTranslationPage() {
   const t = useMemo(() => getMltMessages(language), [language]);
 
   const { level, status, start, stop } = useMicrophoneLevel();
+  const {
+    isSupported: transcriptSupported,
+    lines: transcriptLines,
+    start: startTranscription,
+    stop: stopTranscription,
+  } = useLocalTranscription();
 
   const [secondsLeft, setSecondsLeft] = useState(DURATION_S);
   const timerRef = useRef(/** @type {ReturnType<typeof setInterval>|null} */ (null));
@@ -45,13 +52,15 @@ export default function MedaLiveTranslationPage() {
     setSecondsLeft(DURATION_S);
     playStartTone();
     await start();
-  }, [start]);
+    startTranscription(language);
+  }, [start, startTranscription, language]);
 
   const handleStop = useCallback(() => {
     clearTimer();
     stop();
+    stopTranscription();
     setSecondsLeft(DURATION_S);
-  }, [clearTimer, stop]);
+  }, [clearTimer, stop, stopTranscription]);
 
   // Countdown: starts when status becomes "active", stops otherwise
   useEffect(() => {
@@ -77,7 +86,7 @@ export default function MedaLiveTranslationPage() {
   }, [t.pageTitle]);
 
   // Full cleanup on unmount
-  useEffect(() => () => stop(), [stop]);
+  useEffect(() => () => { stop(); stopTranscription(); }, [stop, stopTranscription]);
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
@@ -124,6 +133,32 @@ export default function MedaLiveTranslationPage() {
           <span className="mlt-level__sr" aria-live="off" aria-atomic="true">
             {t.levelSrText(level)}
           </span>
+        </div>
+
+        {/* Transcription box */}
+        <div className="mlt-transcript">
+          <span className="mlt-transcript__label">{t.transcriptLabel}</span>
+          {!transcriptSupported ? (
+            <p className="mlt-transcript__unsupported">{t.transcriptNotSupported}</p>
+          ) : (
+            <>
+              <div
+                className="mlt-transcript__box"
+                role="log"
+                aria-live="polite"
+                aria-label={t.transcriptLabel}
+              >
+                {transcriptLines.length === 0 ? (
+                  <span className="mlt-transcript__empty">{t.transcriptEmpty}</span>
+                ) : (
+                  transcriptLines.map((line, i) => (
+                    <p key={i} className="mlt-transcript__line">{line}</p>
+                  ))
+                )}
+              </div>
+              <p className="mlt-transcript__disclaimer">{t.transcriptDisclaimer}</p>
+            </>
+          )}
         </div>
 
         {/* Start / Stop */}
