@@ -20,9 +20,14 @@ import {
 } from "../utils/asrTranscription.js";
 import { evaluateConversationContext } from "../utils/conversationContextMonitor.js";
 import {
+  evaluateTranscriptGate,
+  extractTranscriptionQualityHints,
+  logRealtimeTranscriptEvent,
+  resolveFinalInputTranscript,
+} from "../utils/transcriptGate.js";
+import {
   canProceedToTranslation,
   MAX_TRANSCRIPT_WAIT_MS,
-  MIN_STABLE_TRANSCRIPT_CHARS,
 } from "../utils/transcriptionFirst.js";
 import { logCostGuard, normalizeTranscriptKey } from "../utils/costGuard.js";
 import {
@@ -243,8 +248,12 @@ export function useLiveTranslationSession({
   const sessionEstablishedRef = useRef(false);
   const connectInFlightRef = useRef(false);
   const connectGenerationRef = useRef(0);
+  const transcriptionLanguageAutoRef = useRef(false);
 
   sessionConfigRef.current = { patientLanguage, doctorLanguage, activeSpeaker };
+  transcriptionLanguageAutoRef.current =
+    String(patientLanguage || "").trim().toLowerCase() !==
+    String(doctorLanguage || "").trim().toLowerCase();
   autoSwitchSpeakerRef.current = autoSwitchSpeaker;
   onTurnCompleteRef.current = onTurnComplete;
   onSpeakerFromLanguageRef.current = onSpeakerFromLanguage;
@@ -944,6 +953,15 @@ export function useLiveTranslationSession({
       pendingTranslatedForTurnRef.current = "";
       pendingPlanBRef.current = null;
       inputTranscriptStateRef.current = "empty";
+      if (import.meta.env?.DEV) {
+        console.info("[MedaTranscriptGate]", {
+          phase: "local_unclear",
+          skipReason: reason,
+          activeSpeaker: routing.activeSpeaker,
+          sourceLanguage: routing.sourceLanguage,
+          overlapDetected,
+        });
+      }
       notifyTurnIssue(reason, { overlapDetected, missingOriginal: true });
       logCostGuard("response_create_skipped", {
         reason,
@@ -1172,6 +1190,15 @@ export function useLiveTranslationSession({
         }
         pendingTranslatedForTurnRef.current = "";
         const routing = turnContextRef.current;
+        if (import.meta.env?.DEV) {
+          console.info("[MedaTranscriptGate]", {
+            phase: "finalize_timeout",
+            skipReason: "asr_failed",
+            pendingOriginalLength: String(pendingOriginalRef.current || "").length,
+            inputState: inputTranscriptStateRef.current,
+            waitMs: MAX_TRANSCRIPT_WAIT_MS,
+          });
+        }
         triggerLocalUnclearRepeat(routing, "asr_failed", overlapDetectedRef.current);
       }, MAX_TRANSCRIPT_WAIT_MS);
     },
@@ -1300,11 +1327,11 @@ export function useLiveTranslationSession({
   }, [cancelActiveResponse, safeSetState]);
 
   const requestTurnTranslation = useCallback(
-    (sourceText, routing) => {
+    (sourceText, routing, options = {}) => {
       const dc = dcRef.current;
-      const trimmed = sourceText?.trim();
       const dcState = dc?.readyState ?? "none";
-      const transcriptKey = normalizeTranscriptKey(trimmed);
+      const cfg = sessionConfigRef.current;
+      const { noSpeech = null, inputState = inputTranscriptStateRef.current } = options;
 
       const skip = (reason, extra = {}) => {
         logCostGuard("response_create_skipped", { reason, ...extra });
@@ -1320,44 +1347,52 @@ export function useLiveTranslationSession({
         return false;
       }
 
-      if (!trimmed || isLikelyEmptyOrNoiseTranscript(trimmed)) {
-        triggerLocalUnclearRepeat(routing, "empty");
+      const gate = evaluateTranscriptGate({
+        rawTranscript: sourceText,
+        inputState,
+        scopeTranslationPaused: scopeTranslationPausedRef.current,
+        responseActive: responseActiveRef.current,
+        lastResponseCreateKey: lastResponseCreateTranscriptRef.current,
+        detectedLanguage: lastDetectedLanguageRef.current,
+        activeSpeaker: routing.activeSpeaker,
+        sourceLanguage: routing.sourceLanguage,
+        transcriptionLanguageAuto: transcriptionLanguageAutoRef.current,
+        languageRoutingEnabled:
+          languageBasedRoutingRef.current &&
+          isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage),
+        patientLanguage: cfg.patientLanguage,
+        doctorLanguage: cfg.doctorLanguage,
+        noSpeech,
+        phase: "request_translation",
+      });
+
+      if (!gate.proceed) {
+        if (gate.skipReason === "languageMismatch") {
+          skip("languageMismatch", { finalTranscriptLength: gate.transcriptLength });
+          triggerWrongLanguageRepeat(routing, lastDetectedLanguageRef.current);
+          return false;
+        }
+        if (
+          gate.skipReason === "empty" ||
+          gate.skipReason === "tooShort" ||
+          gate.skipReason === "uncertain" ||
+          gate.skipReason === "noise"
+        ) {
+          triggerLocalUnclearRepeat(
+            routing,
+            gate.skipReason === "noise" ? "empty" : gate.skipReason,
+          );
+          return false;
+        }
+        skip(gate.skipReason ?? "suppressed", {
+          finalTranscriptLength: gate.transcriptLength,
+        });
         return false;
       }
 
-      if (trimmed.length < MIN_STABLE_TRANSCRIPT_CHARS) {
-        triggerLocalUnclearRepeat(routing, "tooShort");
-        return false;
-      }
+      const trimmed = gate.normalizedTranscript;
+      const transcriptKey = normalizeTranscriptKey(trimmed);
 
-      if (responseActiveRef.current) {
-        skip("responding", { finalTranscriptLength: trimmed.length });
-        return false;
-      }
-
-      if (
-        transcriptKey &&
-        transcriptKey === lastResponseCreateTranscriptRef.current
-      ) {
-        skip("duplicate", { finalTranscriptLength: trimmed.length });
-        return false;
-      }
-
-      const cfg = sessionConfigRef.current;
-      if (scopeTranslationPausedRef.current) {
-        skip("scope_paused");
-        return false;
-      }
-      if (
-        !canProceedToTranslation({
-          transcript: trimmed,
-          inputState: inputTranscriptStateRef.current,
-          scopeTranslationPaused: scopeTranslationPausedRef.current,
-        })
-      ) {
-        triggerLocalUnclearRepeat(routing, "uncertain");
-        return false;
-      }
       if (!isTargetLanguageInPair(routing.targetLanguage, cfg.patientLanguage, cfg.doctorLanguage)) {
         skip("target_language_not_in_pair");
         triggerWrongLanguageRepeat(routing, lastDetectedLanguageRef.current);
@@ -1377,6 +1412,12 @@ export function useLiveTranslationSession({
         activeSpeaker: routing.activeSpeaker,
         sourceLanguage: routing.sourceLanguage,
         targetLanguage: routing.targetLanguage,
+      });
+
+      logRealtimeConnect("response_create_sent", {
+        transcriptLength: trimmed.length,
+        activeSpeaker: routing.activeSpeaker,
+        sourceLanguage: routing.sourceLanguage,
       });
 
       console.debug("[MedaPipelineDebug] response.create sent", {
@@ -1587,6 +1628,10 @@ export function useLiveTranslationSession({
       if (!event || typeof event !== "object") return;
       const type = event.type;
 
+      if (import.meta.env?.DEV) {
+        logRealtimeTranscriptEvent(event);
+      }
+
       const blockedDuringMedaOutput = [
         "input_audio_buffer.speech_started",
         "input_audio_buffer.speech_stopped",
@@ -1606,6 +1651,8 @@ export function useLiveTranslationSession({
           "input_audio_buffer.speech_stopped",
           "conversation.item.input_audio_transcription.completed",
           "conversation.item.input_audio_transcription.failed",
+          "input_audio_transcription.completed",
+          "input_audio_transcription.failed",
           "input_audio_buffer.transcription.completed",
           "input_audio_buffer.transcription.failed",
           "conversation.item.input_audio_transcription.delta",
@@ -1680,16 +1727,26 @@ export function useLiveTranslationSession({
 
       if (isInputTranscriptionCompletedEvent(event)) {
         logTranscriptionEventMeta(event);
-        const transcript = extractOriginalText(event);
+        const { noSpeech, confidence, quality } = extractTranscriptionQualityHints(event);
+        const accumulatedFromDeltas = pendingOriginalRef.current;
+        const transcript = resolveFinalInputTranscript(event, accumulatedFromDeltas);
+        const routing = buildLanguageRouting(sessionConfigRef.current);
+        const cfg = sessionConfigRef.current;
+        const detected =
+          extractDetectedLanguage(event) ||
+          inferLanguageFromTranscript(transcript, cfg.patientLanguage, cfg.doctorLanguage);
+
         logRealtimeConnect("transcript_final", {
           eventType: event.type,
           transcriptLength: transcript?.length ?? 0,
           transcriptPreview: import.meta.env.DEV ? transcript?.slice(0, 120) : undefined,
+          accumulatedLength: accumulatedFromDeltas?.length ?? 0,
+          confidence,
+          noSpeech,
+          quality,
           micEnabled: micTrackRef.current?.enabled ?? null,
         });
-        const routing = buildLanguageRouting(sessionConfigRef.current);
-        const cfg = sessionConfigRef.current;
-        const detected = extractDetectedLanguage(event);
+
         lastDetectedLanguageRef.current = detected || null;
 
         logCostGuard("final_transcript", {
@@ -1699,11 +1756,32 @@ export function useLiveTranslationSession({
           responseActive: responseActiveRef.current,
         });
 
+        const gate = evaluateTranscriptGate({
+          rawTranscript: transcript,
+          inputState: "ready",
+          scopeTranslationPaused: scopeTranslationPausedRef.current,
+          responseActive: responseActiveRef.current,
+          lastResponseCreateKey: lastResponseCreateTranscriptRef.current,
+          detectedLanguage: detected,
+          activeSpeaker: cfg.activeSpeaker,
+          sourceLanguage: routing.sourceLanguage,
+          transcriptionLanguageAuto: transcriptionLanguageAutoRef.current,
+          languageRoutingEnabled:
+            languageBasedRoutingRef.current &&
+            isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage),
+          patientLanguage: cfg.patientLanguage,
+          doctorLanguage: cfg.doctorLanguage,
+          noSpeech,
+          phase: "completed",
+        });
+
         console.debug("[MedaPipelineDebug] input transcription completed", {
           step: "step3_transcription_completed",
           eventType: event.type,
-          hasTranscript: Boolean(transcript && transcript.length > 0),
-          transcriptLength: transcript?.length ?? 0,
+          rawTranscript: import.meta.env.DEV ? transcript : undefined,
+          normalizedTranscript: import.meta.env.DEV ? gate.normalizedTranscript : undefined,
+          transcriptLength: gate.transcriptLength,
+          skipReason: gate.skipReason,
           detectedLanguage: detected || null,
           activeSpeaker: cfg.activeSpeaker,
           sourceLanguage: routing.sourceLanguage,
@@ -1711,58 +1789,59 @@ export function useLiveTranslationSession({
           responseActiveAtArrival: responseActiveRef.current,
           pendingTranslated: Boolean(pendingTranslatedForTurnRef.current),
           inputStateBeforeUpdate: inputTranscriptStateRef.current,
+          confidence,
+          noSpeech,
+          quality,
         });
 
-        if (responseActiveRef.current) {
-          logCostGuard("response_create_skipped", {
-            reason: "responding",
-            finalTranscriptLength: transcript?.length ?? 0,
-          });
-          return;
-        }
-
-        if (transcript && !isLikelyEmptyOrNoiseTranscript(transcript)) {
-          if (transcript.trim().length < MIN_STABLE_TRANSCRIPT_CHARS) {
-            triggerLocalUnclearRepeat(routing, "tooShort", overlapDetectedRef.current);
+        if (!gate.proceed) {
+          if (gate.skipReason === "responding") {
+            logCostGuard("response_create_skipped", {
+              reason: "responding",
+              finalTranscriptLength: gate.transcriptLength,
+            });
             return;
           }
-          pendingOriginalRef.current = transcript;
-          inputTranscriptStateRef.current = "ready";
-          const resolvedLang =
-            detected ||
-            inferLanguageFromTranscript(transcript, cfg.patientLanguage, cfg.doctorLanguage);
-          lastDetectedLanguageRef.current = resolvedLang || null;
-
-          if (
-            languageBasedRoutingRef.current &&
-            isLanguageRoutingEnabled(cfg.patientLanguage, cfg.doctorLanguage) &&
-            resolvedLang &&
-            !isLanguageInSelectedPair(resolvedLang, cfg.patientLanguage, cfg.doctorLanguage)
-          ) {
-            triggerWrongLanguageRepeat(routing, resolvedLang);
+          if (gate.skipReason === "languageMismatch") {
+            triggerWrongLanguageRepeat(routing, detected);
             return;
           }
-
-          switchSpeakerFromDetectedLanguage(resolvedLang, transcript);
-          const routingAfterSwitch = buildLanguageRouting(sessionConfigRef.current);
-
           if (
-            canProceedToTranslation({
-              transcript,
-              inputState: "ready",
-              scopeTranslationPaused: scopeTranslationPausedRef.current,
-            }) &&
-            !pendingTranslatedForTurnRef.current
+            gate.skipReason === "empty" ||
+            gate.skipReason === "tooShort" ||
+            gate.skipReason === "uncertain" ||
+            gate.skipReason === "noise"
           ) {
-            requestTurnTranslation(transcript, routingAfterSwitch);
+            inputTranscriptStateRef.current = "empty";
+            triggerLocalUnclearRepeat(
+              routing,
+              gate.skipReason === "noise" ? "empty" : gate.skipReason,
+              overlapDetectedRef.current,
+            );
+          } else if (gate.skipReason === "duplicate") {
+            logCostGuard("response_create_skipped", {
+              reason: "duplicate",
+              finalTranscriptLength: gate.transcriptLength,
+            });
           }
-
           maybeFlushPendingTurn();
           return;
         }
 
-        inputTranscriptStateRef.current = "empty";
-        triggerLocalUnclearRepeat(routing, "empty", overlapDetectedRef.current);
+        pendingOriginalRef.current = gate.normalizedTranscript;
+        inputTranscriptStateRef.current = "ready";
+        lastDetectedLanguageRef.current = detected || null;
+
+        switchSpeakerFromDetectedLanguage(detected, gate.normalizedTranscript);
+        const routingAfterSwitch = buildLanguageRouting(sessionConfigRef.current);
+
+        if (!pendingTranslatedForTurnRef.current) {
+          requestTurnTranslation(gate.normalizedTranscript, routingAfterSwitch, {
+            inputState: "ready",
+            noSpeech,
+          });
+        }
+
         maybeFlushPendingTurn();
         return;
       }

@@ -8,6 +8,8 @@ export const LIVE_TRANSLATION_ORIGINAL_BUFFER_MS = 1400;
 const INPUT_TRANSCRIPTION_EVENT_TYPES = new Set([
   "conversation.item.input_audio_transcription.completed",
   "conversation.item.input_audio_transcription.failed",
+  "input_audio_transcription.completed",
+  "input_audio_transcription.failed",
   "input_audio_buffer.transcription.completed",
   "input_audio_buffer.transcription.failed",
   "conversation.item.input_audio_transcription.delta",
@@ -33,6 +35,7 @@ export function isInputTranscriptionCompletedEvent(event) {
   const type = /** @type {{ type?: string }} */ (event).type;
   return (
     type === "conversation.item.input_audio_transcription.completed" ||
+    type === "input_audio_transcription.completed" ||
     type === "input_audio_buffer.transcription.completed"
   );
 }
@@ -46,6 +49,7 @@ export function isInputTranscriptionFailedEvent(event) {
   const type = /** @type {{ type?: string }} */ (event).type;
   return (
     type === "conversation.item.input_audio_transcription.failed" ||
+    type === "input_audio_transcription.failed" ||
     type === "input_audio_buffer.transcription.failed"
   );
 }
