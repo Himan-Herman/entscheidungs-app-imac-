@@ -6,11 +6,12 @@ const SS =
     : null;
 
 /**
- * Web Speech Synthesis output for translated text (en-US).
+ * Web Speech Synthesis output for translated text.
+ * Caller passes the BCP-47 lang tag (e.g. "en-US", "de-DE") per utterance.
  *
- * Loop guard: SpeechRecognition is set to de-DE; English TTS output is not
- * recognised as German input, so no feedback loop can form regardless of
- * speaker/microphone setup.
+ * Loop guard: SpeechRecognition lang and TTS lang differ (e.g. de-DE mic /
+ * en-US speaker, or en-US mic / de-DE speaker). The recognizer does not
+ * process its own speaker language, so no feedback loop can form.
  *
  * Duplicate guard: autoSpeak() is a no-op when the text equals the last
  * auto-spoken text in the current session. Call resetSession() on session
@@ -26,12 +27,12 @@ export function useSpeechOutput() {
   const lastAutoSpokenRef = useRef("");
 
   const _doSpeak = useCallback(
-    (text) => {
+    (text, lang = "en-US") => {
       if (!isSupported || !text) return;
       SS.cancel();
       setSpeechStatus("speaking");
       const utt = new SpeechSynthesisUtterance(text);
-      utt.lang = "en-US";
+      utt.lang = lang;
       utt.rate = 0.95;
       utt.onend = () => setSpeechStatus("idle");
       utt.onerror = () => setSpeechStatus("idle");
@@ -41,19 +42,19 @@ export function useSpeechOutput() {
   );
 
   const autoSpeak = useCallback(
-    (text) => {
+    (text, lang = "en-US") => {
       if (!isSupported || !enabled || !text) return;
       if (text === lastAutoSpokenRef.current) return;
       lastAutoSpokenRef.current = text;
-      _doSpeak(text);
+      _doSpeak(text, lang);
     },
     [isSupported, enabled, _doSpeak],
   );
 
   const replay = useCallback(
-    (text) => {
+    (text, lang = "en-US") => {
       if (!isSupported || !text) return;
-      _doSpeak(text);
+      _doSpeak(text, lang);
     },
     [isSupported, _doSpeak],
   );

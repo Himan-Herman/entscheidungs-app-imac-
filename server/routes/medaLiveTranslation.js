@@ -4,7 +4,7 @@ import { getOpenAiChatModel } from '../config/openAiModels.js';
 
 const router = express.Router();
 
-const ALLOWED_PAIRS = new Set(['de-en']);
+const ALLOWED_PAIRS = new Set(['de-en', 'en-de']);
 
 const TRANSLATION_SYSTEM_PROMPT = `Du bist ein medizinischer Dolmetscher.
 Übersetze nur den gegebenen Text.
@@ -32,7 +32,7 @@ router.post('/translate-text', async (req, res) => {
     const pair = `${sourceLanguage}-${targetLanguage}`;
     if (!ALLOWED_PAIRS.has(pair)) {
       return res.status(400).json({
-        error: `Sprachpaar ${pair} wird in Phase 3 nicht unterstützt.`,
+        error: `Sprachpaar ${pair} wird nicht unterstützt.`,
       });
     }
 

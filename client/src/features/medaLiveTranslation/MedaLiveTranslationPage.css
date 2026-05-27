@@ -53,6 +53,74 @@
 
 :root[data-theme="dark"] .mlt-card__sub { color: #94a3b8; }
 
+/* ── Direction selector ───────────────────────────────────────────────────── */
+
+.mlt-direction {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.mlt-direction__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+:root[data-theme="dark"] .mlt-direction__label { color: #94a3b8; }
+
+.mlt-direction__btns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mlt-direction__btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 2px solid var(--ms-color-border, #d1d5db);
+  border-radius: var(--ms-radius-md, 12px);
+  background: transparent;
+  color: var(--ms-color-text, #374151);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  text-align: center;
+}
+
+.mlt-direction__btn:hover:not(:disabled) {
+  border-color: #0d9488;
+  color: #0d9488;
+}
+
+.mlt-direction__btn--active {
+  background: rgba(13, 148, 136, 0.1);
+  border-color: #0d9488;
+  color: #0d9488;
+}
+
+.mlt-direction__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mlt-direction__btn:focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 2px;
+}
+
+:root[data-theme="dark"] .mlt-direction__btn {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+:root[data-theme="dark"] .mlt-direction__btn--active {
+  background: rgba(13, 148, 136, 0.2);
+  border-color: #0d9488;
+  color: #2dd4bf;
+}
+
 /* ── Status ───────────────────────────────────────────────────────────────── */
 
 .mlt-status {

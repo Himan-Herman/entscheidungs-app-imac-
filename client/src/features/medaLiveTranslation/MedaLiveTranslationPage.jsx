@@ -10,6 +10,17 @@ import "./MedaLiveTranslationPage.css";
 
 const DURATION_S = 5 * 60;
 
+/**
+ * Available translation directions.
+ * To add a new pair: append an entry here, add the pair to
+ * server/routes/medaLiveTranslation.js ALLOWED_PAIRS, and add the human-
+ * readable label to directionLabels in medaLiveTranslation.i18n.js.
+ */
+const LANG_PAIRS = [
+  { id: "de-en", src: "de", tgt: "en", tts: "en-US" },
+  { id: "en-de", src: "en", tgt: "de", tts: "de-DE" },
+];
+
 function playStartTone() {
   try {
     const ctx = new AudioContext();
@@ -32,12 +43,17 @@ export default function MedaLiveTranslationPage() {
   const { language } = useLanguage();
   const t = useMemo(() => getMltMessages(language), [language]);
 
+  const [direction, setDirection] = useState(LANG_PAIRS[0].id);
+  const activePair = LANG_PAIRS.find((p) => p.id === direction) ?? LANG_PAIRS[0];
+  const { src: srcLang, tgt: tgtLang, tts: ttsLang } = activePair;
+
   const { level, status, start, stop } = useMicrophoneLevel();
   const {
     isSupported: transcriptSupported,
     lines: transcriptLines,
     start: startTranscription,
     stop: stopTranscription,
+    clear: clearTranscript,
   } = useLocalTranscription();
   const {
     translations,
@@ -71,6 +87,17 @@ export default function MedaLiveTranslationPage() {
     }
   }, []);
 
+  const handleDirectionChange = useCallback((newDir) => {
+    if (status === "active") return;
+    stopSpeech();
+    clearTranscript();
+    clearTranslations();
+    resetSpeechSession();
+    translatedCountRef.current = 0;
+    spokenCountRef.current = 0;
+    setDirection(newDir);
+  }, [status, stopSpeech, clearTranscript, clearTranslations, resetSpeechSession]);
+
   const handleStart = useCallback(async () => {
     setSecondsLeft(DURATION_S);
     translatedCountRef.current = 0;
@@ -79,8 +106,8 @@ export default function MedaLiveTranslationPage() {
     resetSpeechSession();
     playStartTone();
     await start();
-    startTranscription(language);
-  }, [start, startTranscription, clearTranslations, resetSpeechSession, language]);
+    startTranscription(srcLang);
+  }, [start, startTranscription, clearTranslations, resetSpeechSession, srcLang]);
 
   const handleStop = useCallback(() => {
     clearTimer();
@@ -109,32 +136,31 @@ export default function MedaLiveTranslationPage() {
     return clearTimer;
   }, [status, clearTimer, stop]);
 
-  // Auto-translate every newly finalized transcript line (de→en only for Phase 3)
+  // Auto-translate every newly finalized transcript line
   useEffect(() => {
-    if (language !== "de") return;
     const newLines = transcriptLines.slice(translatedCountRef.current);
     if (newLines.length === 0) return;
     translatedCountRef.current = transcriptLines.length;
-    newLines.forEach((line) => translate(line, "de", "en"));
-  }, [transcriptLines, language, translate]);
+    newLines.forEach((line) => translate(line, srcLang, tgtLang));
+  }, [transcriptLines, translate, srcLang, tgtLang]);
 
   useEffect(() => {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
 
-  // Auto-speak each new translated line (de→en; loop-safe via de-DE recognizer language)
+  // Auto-speak each new translated line — TTS lang matches translation target
   useEffect(() => {
     if (translations.length === 0) return;
     const newOnes = translations.slice(spokenCountRef.current);
     if (newOnes.length === 0) return;
     spokenCountRef.current = translations.length;
-    autoSpeak(newOnes[newOnes.length - 1]);
-  }, [translations, autoSpeak]);
+    autoSpeak(newOnes[newOnes.length - 1], ttsLang);
+  }, [translations, autoSpeak, ttsLang]);
 
   // Full cleanup on unmount
   useEffect(() => () => { stop(); stopTranscription(); stopSpeech(); }, [stop, stopTranscription, stopSpeech]);
 
-  const showTranslationBox = language === "de";
+  const showTranslationBox = true;
 
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
@@ -156,6 +182,26 @@ export default function MedaLiveTranslationPage() {
           <h1 className="mlt-card__title">{t.heading}</h1>
           <p className="mlt-card__sub">{t.sub}</p>
         </header>
+
+        {/* Direction selector */}
+        <div className="mlt-direction">
+          <span className="mlt-direction__label">{t.directionLabel}</span>
+          <div className="mlt-direction__btns" role="radiogroup" aria-label={t.directionLabel}>
+            {LANG_PAIRS.map((pair) => (
+              <button
+                key={pair.id}
+                type="button"
+                role="radio"
+                aria-checked={direction === pair.id}
+                className={`mlt-direction__btn${direction === pair.id ? " mlt-direction__btn--active" : ""}`}
+                onClick={() => handleDirectionChange(pair.id)}
+                disabled={isActive}
+              >
+                {t.directionLabels[pair.id]}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Status — aria-live announces changes to screen readers */}
         <div
@@ -212,12 +258,12 @@ export default function MedaLiveTranslationPage() {
         {/* Translation box — only shown when source language is DE (Phase 3: de→en) */}
         {showTranslationBox && (
           <div className="mlt-translation">
-            <span className="mlt-translation__label">{t.translationLabel}</span>
+            <span className="mlt-translation__label">{t.translationLabel(srcLang, tgtLang)}</span>
             <div
               className="mlt-translation__box"
               role="log"
               aria-live="polite"
-              aria-label={t.translationLabel}
+              aria-label={t.translationLabel(srcLang, tgtLang)}
             >
               {translations.length === 0 && !translationLoading ? (
                 <span className="mlt-translation__empty">{t.translationEmpty}</span>
@@ -257,7 +303,7 @@ export default function MedaLiveTranslationPage() {
                       <button
                         type="button"
                         className="mlt-audio__btn"
-                        onClick={() => replaySpeech(translations[translations.length - 1])}
+                        onClick={() => replaySpeech(translations[translations.length - 1], ttsLang)}
                         disabled={translations.length === 0}
                         aria-label={t.audioReplay}
                       >
