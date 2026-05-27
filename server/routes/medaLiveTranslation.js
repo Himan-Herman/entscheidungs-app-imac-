@@ -43,7 +43,7 @@ router.post('/translate-text', async (req, res) => {
         { role: 'user', content: trimmed },
       ],
       temperature: 0.1,
-      max_tokens: 500,
+      max_completion_tokens: 500,
     });
 
     const translation = response.choices[0]?.message?.content?.trim() ?? '';
