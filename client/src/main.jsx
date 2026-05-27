@@ -567,6 +567,15 @@ void runPwaBuildMigration().then(() => {
                   }
                 />
                 <Route
+                  path="/patient/sos-card"
+                  element={
+                    <ProtectedRoute>
+                      <SosCardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/emergency/:token" element={<EmergencyPublicPage />} />
+                <Route
                   path="/practice/security"
                   element={
                     <ProtectedRoute>
