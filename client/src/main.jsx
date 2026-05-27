@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
+import { APP_BUILD_ID, runPwaBuildMigration } from "./utils/pwaBuildMigration.js";
 import "./index.css";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -227,14 +228,32 @@ function Gate() {
   return hasUser ? <Navigate to="/intro" replace /> : <Navigate to="/register" replace />;
 }
 
-const updateSW = registerSW({
-  immediate: true,
-  onNeedRefresh() {
-    updateSW(true);
-  },
-});
+void runPwaBuildMigration().then(() => {
+  const updateSW = registerSW({
+    immediate: true,
+    onNeedRefresh() {
+      updateSW(true);
+    },
+    onRegisteredSW(_url, registration) {
+      if (registration) {
+        window.setInterval(() => {
+          void registration.update();
+        }, 60 * 60 * 1000);
+      }
+    },
+  });
 
-createRoot(document.getElementById("root")).render(
+  if (import.meta.env.PROD && typeof document !== "undefined") {
+    let meta = document.querySelector('meta[name="medscout-build-id"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "medscout-build-id");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", APP_BUILD_ID);
+  }
+
+  createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider>
       <LanguageProvider>
@@ -814,4 +833,5 @@ createRoot(document.getElementById("root")).render(
       </LanguageProvider>
     </ThemeProvider>
   </React.StrictMode>,
-);
+  );
+});

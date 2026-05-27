@@ -48,6 +48,7 @@ export default {
   prelive: {
     heading: "Ready for the conversation",
     subheading: "Review your settings. The microphone is enabled only after you press Start.",
+    notStartedNotice: "Meda is not active yet. The microphone is enabled only after you press Start.",
     quietEnvironmentNotice:
       "A quiet environment is recommended. Background noise and simultaneous speaking can reduce recognition quality.",
     startButton: "Start live conversation",

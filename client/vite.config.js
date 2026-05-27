@@ -2,11 +2,20 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const buildId =
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.VITE_BUILD_ID ||
+  String(Date.now())
+
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_BUILD_ID': JSON.stringify(buildId),
+  },
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false,
 
       workbox: {
         cleanupOutdatedCaches: true,

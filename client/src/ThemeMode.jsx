@@ -12,9 +12,7 @@ export function ThemeProvider({ children }) {
       return stored;
     }
 
-    // Fallback: System-Preference
-    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-    return prefersDark ? "dark" : "light";
+    return "light";
   });
 
   // Theme im <html>-Tag setzen + in localStorage speichern

@@ -669,7 +669,7 @@ export function useLiveTranslationSession({
         JSON.stringify({
           type: "response.create",
           response: {
-            modalities: ["audio"],
+            output_modalities: ["audio"],
             instructions: `Say exactly and only the following in a calm, professional tone. Do not translate, add, or change anything: "${trimmed}"`,
           },
         }),
@@ -696,7 +696,7 @@ export function useLiveTranslationSession({
         JSON.stringify({
           type: "response.create",
           response: {
-            modalities: ["audio"],
+            output_modalities: ["audio"],
             instructions: `${hint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
           },
         }),
@@ -723,7 +723,7 @@ export function useLiveTranslationSession({
         JSON.stringify({
           type: "response.create",
           response: {
-            modalities: ["audio"],
+            output_modalities: ["audio"],
             instructions: `${compactHint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
           },
         }),
@@ -1100,7 +1100,7 @@ export function useLiveTranslationSession({
       JSON.stringify({
         type: "response.create",
         response: {
-          modalities: ["audio"],
+          output_modalities: ["audio"],
           instructions: `Say exactly and only the following in a calm, professional tone at a moderate pace. Do not add anything else: "${phrase}"`,
         },
       }),
@@ -1139,7 +1139,7 @@ export function useLiveTranslationSession({
       sourceLanguage: routing.sourceLanguage,
       targetLanguage: routing.targetLanguage,
       reason: "language_routing",
-      hasTranscriptionLanguage: Boolean(payload.session?.input_audio_transcription?.language),
+      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
     });
     dc.send(JSON.stringify(payload));
 
@@ -1237,7 +1237,7 @@ export function useLiveTranslationSession({
         JSON.stringify({
           type: "response.create",
           response: {
-            modalities: ["audio"],
+            output_modalities: ["audio"],
             instructions: `${hint}\n\nTranslate ONLY this ${routing.sourceLanguageName} statement into ${routing.targetLanguageName}. Output ONLY the translation, spoken aloud:\n"${trimmed}"`,
           },
         }),
@@ -1798,7 +1798,7 @@ export function useLiveTranslationSession({
       activeSpeaker: routing.activeSpeaker,
       sourceLanguage: routing.sourceLanguage,
       targetLanguage: routing.targetLanguage,
-      hasTranscriptionLanguage: Boolean(payload.session?.input_audio_transcription?.language),
+      hasTranscriptionLanguage: Boolean(payload.session?.audio?.input?.transcription?.language),
     });
     dc.send(JSON.stringify(payload));
 

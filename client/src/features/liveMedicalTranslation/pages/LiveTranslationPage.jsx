@@ -977,6 +977,11 @@ export default function LiveTranslationPage() {
             </div>
           </div>
 
+          <p className="live-translation__not-started-notice" role="status">
+            <span className="live-translation__not-started-dot" aria-hidden />
+            {t.prelive.notStartedNotice}
+          </p>
+
           <p className="live-translation__prelive-notice" role="note">
             {t.prelive.quietEnvironmentNotice}
           </p>

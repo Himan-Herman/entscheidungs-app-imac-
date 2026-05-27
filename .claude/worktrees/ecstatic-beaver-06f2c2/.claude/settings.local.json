@@ -20,7 +20,11 @@
       "Bash(sed -n '10,20p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/i18n/translations/overrides/fr.js)",
       "Bash(sed -n '218,230p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/i18n/translations/overrides/fr.js)",
       "Bash(xargs ls -la)",
-      "Bash(node server/scripts/verifyAiSafetyRegression.js)"
+      "Bash(node server/scripts/verifyAiSafetyRegression.js)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s \"https://raw.githubusercontent.com/openai/openai-openapi/refs/heads/master/openapi.yaml\")"
     ]
   }
 }
