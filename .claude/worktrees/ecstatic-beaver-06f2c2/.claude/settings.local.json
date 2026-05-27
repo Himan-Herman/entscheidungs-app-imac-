@@ -32,7 +32,10 @@
       "Bash(mkdir -p /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/services/sosCard)",
       "Bash(xargs basename -a)",
       "Bash(node -e \"require\\('/Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/node_modules/lucide-react/dist/cjs/lucide-react.js'\\)\")",
-      "Bash(node -e 'const { PrismaClient } = require\\('\\\\''@prisma/client'\\\\''\\); const p = new PrismaClient\\(\\); p.sosCard.count\\(\\).then\\(n => { console.log\\('\\\\''SosCard table OK, rows:'\\\\'', n\\); p.$disconnect\\(\\); }\\).catch\\(e => { console.error\\('\\\\''DB error:'\\\\'', e.message\\); p.$disconnect\\(\\); }\\);')"
+      "Bash(node -e 'const { PrismaClient } = require\\('\\\\''@prisma/client'\\\\''\\); const p = new PrismaClient\\(\\); p.sosCard.count\\(\\).then\\(n => { console.log\\('\\\\''SosCard table OK, rows:'\\\\'', n\\); p.$disconnect\\(\\); }\\).catch\\(e => { console.error\\('\\\\''DB error:'\\\\'', e.message\\); p.$disconnect\\(\\); }\\);')",
+      "Bash(grep -v \"^#\\\\|^$\\\\| #\" /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/.env)",
+      "Bash(sed -n '195,210p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/main.jsx)",
+      "Bash(sed -n '565,580p' /Users/himankhorshidi/Desktop/entscheidungs-app-imac/client/src/main.jsx)"
     ]
   }
 }
