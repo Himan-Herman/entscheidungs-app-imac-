@@ -464,6 +464,15 @@
 
 :root[data-theme="dark"] .mlt-audio__status { color: #94a3b8; }
 
+.mlt-audio__voice {
+  font-size: 0.75rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0.25rem 0 0;
+  opacity: 0.75;
+}
+
+:root[data-theme="dark"] .mlt-audio__voice { color: #64748b; }
+
 .mlt-audio__unsupported {
   font-size: 0.8125rem;
   color: var(--ms-text-secondary, #6b7280);

@@ -33,6 +33,9 @@ const mltI18n = {
     audioStatusSpeaking:    "Spricht…",
     audioStatusStopped:     "Gestoppt",
     audioNotSupported:      "Audioausgabe in diesem Browser nicht unterstützt.",
+    voiceLabel:             "Stimme",
+    defaultVoiceLabel:      "Standardstimme des Browsers",
+    voiceNotLoadedLabel:    "Stimme wird geladen…",
   },
   en: {
     pageTitle:              "Meda Live Translation — MedScoutX",
@@ -68,6 +71,9 @@ const mltI18n = {
     audioStatusSpeaking:    "Speaking…",
     audioStatusStopped:     "Stopped",
     audioNotSupported:      "Audio output not supported in this browser.",
+    voiceLabel:             "Voice",
+    defaultVoiceLabel:      "Browser default voice",
+    voiceNotLoadedLabel:    "Loading voice…",
   },
   es: {
     pageTitle:              "Meda Live Translation — MedScoutX",
@@ -103,6 +109,9 @@ const mltI18n = {
     audioStatusSpeaking:    "Hablando…",
     audioStatusStopped:     "Detenido",
     audioNotSupported:      "La salida de audio no es compatible con este navegador.",
+    voiceLabel:             "Voz",
+    defaultVoiceLabel:      "Voz predeterminada del navegador",
+    voiceNotLoadedLabel:    "Cargando voz…",
   },
   it: {
     pageTitle:              "Meda Live Translation — MedScoutX",
@@ -138,6 +147,9 @@ const mltI18n = {
     audioStatusSpeaking:    "Parlando…",
     audioStatusStopped:     "Fermo",
     audioNotSupported:      "Output audio non supportato in questo browser.",
+    voiceLabel:             "Voce",
+    defaultVoiceLabel:      "Voce predefinita del browser",
+    voiceNotLoadedLabel:    "Caricamento voce…",
   },
   fr: {
     pageTitle:              "Meda Live Translation — MedScoutX",
@@ -173,6 +185,9 @@ const mltI18n = {
     audioStatusSpeaking:    "Lecture…",
     audioStatusStopped:     "Arrêté",
     audioNotSupported:      "La sortie audio n'est pas prise en charge dans ce navigateur.",
+    voiceLabel:             "Voix",
+    defaultVoiceLabel:      "Voix par défaut du navigateur",
+    voiceNotLoadedLabel:    "Chargement de la voix…",
   },
 };
 

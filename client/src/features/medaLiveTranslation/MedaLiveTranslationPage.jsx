@@ -73,6 +73,7 @@ export default function MedaLiveTranslationPage() {
     stopSpeech,
     resetSession: resetSpeechSession,
     speechStatus,
+    selectedVoiceName,
   } = useSpeechOutput();
 
   const translatedCountRef = useRef(0);
@@ -340,6 +341,16 @@ export default function MedaLiveTranslationPage() {
                       ? t.audioStatusStopped
                       : t.audioStatusIdle}
                   </div>
+                )}
+                {audioEnabled && (
+                  <p className="mlt-audio__voice">
+                    {t.voiceLabel}:{" "}
+                    {selectedVoiceName === null
+                      ? t.voiceNotLoadedLabel
+                      : selectedVoiceName === undefined || selectedVoiceName === ""
+                      ? t.defaultVoiceLabel
+                      : selectedVoiceName}
+                  </p>
                 )}
               </>
             )}
