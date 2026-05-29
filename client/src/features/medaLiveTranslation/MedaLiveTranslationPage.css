@@ -791,6 +791,27 @@
 
 :root[data-theme="dark"] .mlt-session-hint { color: #64748b; }
 
+/* ── Phase 6.6 – Export copy status ──────────────────────────────────────── */
+
+.mlt-copy-status {
+  font-size: 0.8125rem;
+  text-align: center;
+  min-height: 1.25rem;
+  color: transparent;
+  transition: color 0.15s ease;
+}
+
+.mlt-copy-status--success {
+  color: var(--ms-color-success, #16a34a);
+}
+
+.mlt-copy-status--error {
+  color: var(--ms-color-error, #dc2626);
+}
+
+:root[data-theme="dark"] .mlt-copy-status--success { color: #4ade80; }
+:root[data-theme="dark"] .mlt-copy-status--error   { color: #f87171; }
+
 /* ── Phase 6.3 – Setup card ───────────────────────────────────────────────── */
 
 .mlt-setup-card {

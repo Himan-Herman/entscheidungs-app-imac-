@@ -6,6 +6,7 @@ import { useLocalTranscription } from "./useLocalTranscription";
 import { useTextTranslation } from "./useTextTranslation";
 import { useSpeechOutput } from "./useSpeechOutput";
 import { getMltMessages } from "./medaLiveTranslation.i18n";
+import { formatConversationExport } from "./formatConversationExport";
 import "./MedaLiveTranslationPage.css";
 
 const DURATION_S = 5 * 60;
@@ -112,6 +113,9 @@ export default function MedaLiveTranslationPage() {
   const lastSpokenIdRef     = useRef(/** @type {string|null} */ (null));
   const conversationEndRef  = useRef(/** @type {HTMLDivElement|null} */ (null));
 
+  const [copyStatus, setCopyStatus] = useState(/** @type {"idle"|"success"|"error"} */ ("idle"));
+  const copyStatusTimerRef = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
+
   // ── Timer ──────────────────────────────────────────────────────────────────
   const [secondsLeft, setSecondsLeft] = useState(DURATION_S);
   const timerRef = useRef(/** @type {ReturnType<typeof setInterval>|null} */ (null));
@@ -180,6 +184,46 @@ export default function MedaLiveTranslationPage() {
     setConversation([]);
     lastSpokenIdRef.current = null;
   }, [status, conversation.length, t.clearConversationConfirm]);
+
+  const handleCopyConversation = useCallback(() => {
+    if (status === "active" || conversation.length === 0) return;
+    const text = formatConversationExport({
+      conversation,
+      patientLangName: getLangName(patientLanguage),
+      practiceLangName: getLangName(practiceLanguage),
+      t,
+    });
+    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
+    if (!navigator.clipboard) {
+      setCopyStatus("error");
+      copyStatusTimerRef.current = setTimeout(() => setCopyStatus("idle"), 2500);
+      return;
+    }
+    navigator.clipboard.writeText(text).then(
+      () => { setCopyStatus("success"); copyStatusTimerRef.current = setTimeout(() => setCopyStatus("idle"), 2500); },
+      () => { setCopyStatus("error");   copyStatusTimerRef.current = setTimeout(() => setCopyStatus("idle"), 2500); }
+    );
+  }, [status, conversation, patientLanguage, practiceLanguage, getLangName, t]);
+
+  const handleDownloadConversation = useCallback(() => {
+    if (status === "active" || conversation.length === 0) return;
+    const text = formatConversationExport({
+      conversation,
+      patientLangName: getLangName(patientLanguage),
+      practiceLangName: getLangName(practiceLanguage),
+      t,
+    });
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `meda-gespraech-${dateStr}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [status, conversation, patientLanguage, practiceLanguage, getLangName, t]);
 
   const handleStart = useCallback(async () => {
     setSecondsLeft(DURATION_S);
@@ -460,6 +504,32 @@ export default function MedaLiveTranslationPage() {
           >
             {t.clearConversationLabel}
           </button>
+          <button
+            type="button"
+            className="mlt-session-ctrl__btn"
+            onClick={handleCopyConversation}
+            disabled={isActive || conversation.length === 0}
+            aria-label={t.copyConversationLabel}
+          >
+            {t.copyConversationLabel}
+          </button>
+          <button
+            type="button"
+            className="mlt-session-ctrl__btn"
+            onClick={handleDownloadConversation}
+            disabled={isActive || conversation.length === 0}
+            aria-label={t.downloadConversationLabel}
+          >
+            {t.downloadConversationLabel}
+          </button>
+        </div>
+        <div
+          className={`mlt-copy-status${copyStatus !== "idle" ? ` mlt-copy-status--${copyStatus}` : ""}`}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {copyStatus === "success" ? t.copiedSuccessLabel : copyStatus === "error" ? t.copyFailedLabel : ""}
         </div>
 
         {/* Conversation log */}
