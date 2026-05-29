@@ -109,12 +109,13 @@ export default function MedaLiveTranslationPage() {
   // ── Conversation state ─────────────────────────────────────────────────────
   const [conversation, setConversation] = useState(/** @type {ConvEntry[]} */ ([]));
 
-  const translatedCountRef  = useRef(0);
-  const lastSpokenIdRef     = useRef(/** @type {string|null} */ (null));
-  const conversationEndRef  = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const translatedCountRef     = useRef(0);
+  const lastSpokenIdRef        = useRef(/** @type {string|null} */ (null));
+  const conversationEndRef     = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const lastNotifiedEntryRef   = useRef(/** @type {string|null} */ (null));
 
-  const [copyStatus, setCopyStatus] = useState(/** @type {"idle"|"success"|"error"} */ ("idle"));
-  const copyStatusTimerRef = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
+  const [message, setMessage] = useState(/** @type {{type:"info"|"warning"|"error"|"success", text:string}|null} */ (null));
+  const messageDismissTimerRef = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
 
   // ── Timer ──────────────────────────────────────────────────────────────────
   const [secondsLeft, setSecondsLeft] = useState(DURATION_S);
@@ -125,6 +126,19 @@ export default function MedaLiveTranslationPage() {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+  }, []);
+
+  const showMessage = useCallback((type, text, autoDismissMs = 0) => {
+    if (messageDismissTimerRef.current) clearTimeout(messageDismissTimerRef.current);
+    setMessage({ type, text });
+    if (autoDismissMs > 0) {
+      messageDismissTimerRef.current = setTimeout(() => setMessage(null), autoDismissMs);
+    }
+  }, []);
+
+  const dismissMessage = useCallback(() => {
+    if (messageDismissTimerRef.current) clearTimeout(messageDismissTimerRef.current);
+    setMessage(null);
   }, []);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -193,17 +207,15 @@ export default function MedaLiveTranslationPage() {
       practiceLangName: getLangName(practiceLanguage),
       t,
     });
-    if (copyStatusTimerRef.current) clearTimeout(copyStatusTimerRef.current);
     if (!navigator.clipboard) {
-      setCopyStatus("error");
-      copyStatusTimerRef.current = setTimeout(() => setCopyStatus("idle"), 2500);
+      showMessage("warning", t.messageExportUnavailable);
       return;
     }
     navigator.clipboard.writeText(text).then(
-      () => { setCopyStatus("success"); copyStatusTimerRef.current = setTimeout(() => setCopyStatus("idle"), 2500); },
-      () => { setCopyStatus("error");   copyStatusTimerRef.current = setTimeout(() => setCopyStatus("idle"), 2500); }
+      () => showMessage("success", t.messageCopySuccess, 2500),
+      () => showMessage("error",   t.messageCopyFailed,  3000)
     );
-  }, [status, conversation, patientLanguage, practiceLanguage, getLangName, t]);
+  }, [status, conversation, patientLanguage, practiceLanguage, getLangName, t, showMessage]);
 
   const handleDownloadConversation = useCallback(() => {
     if (status === "active" || conversation.length === 0) return;
@@ -307,8 +319,30 @@ export default function MedaLiveTranslationPage() {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
+  // Show a persistent error when microphone access is denied
+  useEffect(() => {
+    if (status === "error") showMessage("error", t.messageMicPermissionDenied);
+  }, [status, t.messageMicPermissionDenied, showMessage]);
+
+  // Show a brief notice when the last conversation entry becomes error or unclear
+  useEffect(() => {
+    const last = conversation.at(-1);
+    if (!last) return;
+    if (last.status !== "error" && last.status !== "unclear") return;
+    const key = `${last.id}:${last.status}`;
+    if (lastNotifiedEntryRef.current === key) return;
+    lastNotifiedEntryRef.current = key;
+    if (last.status === "error") showMessage("error", t.messageTranslationFailed, 4000);
+    else showMessage("info", t.messageUnclearInput, 4000);
+  }, [conversation, t.messageTranslationFailed, t.messageUnclearInput, showMessage]);
+
   // Full cleanup on unmount
-  useEffect(() => () => { stop(); stopTranscription(); stopSpeech(); }, [stop, stopTranscription, stopSpeech]);
+  useEffect(() => () => {
+    stop();
+    stopTranscription();
+    stopSpeech();
+    if (messageDismissTimerRef.current) clearTimeout(messageDismissTimerRef.current);
+  }, [stop, stopTranscription, stopSpeech]);
 
   // ── Derived display values ─────────────────────────────────────────────────
 
@@ -323,7 +357,6 @@ export default function MedaLiveTranslationPage() {
   };
   const statusText = statusTextMap[status] ?? t.statusIdle;
   const isActive = status === "active";
-  const isError  = status === "error";
 
   const lastTranslatedText = conversation
     .filter((e) => e.status === "translated" && e.translatedText).at(-1)?.translatedText ?? null;
@@ -523,14 +556,28 @@ export default function MedaLiveTranslationPage() {
             {t.downloadConversationLabel}
           </button>
         </div>
-        <div
-          className={`mlt-copy-status${copyStatus !== "idle" ? ` mlt-copy-status--${copyStatus}` : ""}`}
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {copyStatus === "success" ? t.copiedSuccessLabel : copyStatus === "error" ? t.copyFailedLabel : ""}
-        </div>
+
+        {/* Unified message box */}
+        {message && (
+          <div
+            className={`mlt-message mlt-message--${message.type}`}
+            role={message.type === "error" ? "alert" : "status"}
+            aria-live={message.type === "error" ? "assertive" : "polite"}
+            aria-atomic="true"
+          >
+            <span className="mlt-message__text">{message.text}</span>
+            {message.type !== "success" && (
+              <button
+                type="button"
+                className="mlt-message__dismiss"
+                onClick={dismissMessage}
+                aria-label={t.messageDismissLabel}
+              >
+                ×
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Conversation log */}
         {transcriptSupported ? (
@@ -593,13 +640,13 @@ export default function MedaLiveTranslationPage() {
             <p className="mlt-session-hint">{t.localSessionHint}</p>
           </div>
         ) : (
-          <p className="mlt-transcript__unsupported">{t.transcriptNotSupported}</p>
+          <p className="mlt-message mlt-message--warning">{t.messageTranscriptionUnsupported}</p>
         )}
 
         {/* Audio output controls */}
         <div className="mlt-audio">
           {!speechSupported ? (
-            <p className="mlt-audio__unsupported">{t.audioNotSupported}</p>
+            <p className="mlt-message mlt-message--info">{t.messageSpeechUnsupported}</p>
           ) : (
             <>
               <div className="mlt-audio__controls">
@@ -678,9 +725,6 @@ export default function MedaLiveTranslationPage() {
           )}
         </div>
 
-        {isError && (
-          <p className="mlt-error" role="alert">{t.statusError}</p>
-        )}
       </div>
 
       <Link to="/patient" className="mlt-back">← {t.back}</Link>

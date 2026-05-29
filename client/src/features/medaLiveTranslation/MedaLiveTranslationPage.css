@@ -791,26 +791,89 @@
 
 :root[data-theme="dark"] .mlt-session-hint { color: #64748b; }
 
-/* ── Phase 6.6 – Export copy status ──────────────────────────────────────── */
+/* ── Phase 6.7 – Unified message box ─────────────────────────────────────── */
 
-.mlt-copy-status {
-  font-size: 0.8125rem;
-  text-align: center;
-  min-height: 1.25rem;
-  color: transparent;
-  transition: color 0.15s ease;
+.mlt-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--ms-radius-sm, 8px);
+  border-left: 3px solid transparent;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: #f8fafc;
 }
 
-.mlt-copy-status--success {
-  color: var(--ms-color-success, #16a34a);
+.mlt-message--info {
+  border-left-color: #3b82f6;
+  color: #1e40af;
+  background: #eff6ff;
 }
 
-.mlt-copy-status--error {
-  color: var(--ms-color-error, #dc2626);
+.mlt-message--warning {
+  border-left-color: #f59e0b;
+  color: #92400e;
+  background: #fffbeb;
 }
 
-:root[data-theme="dark"] .mlt-copy-status--success { color: #4ade80; }
-:root[data-theme="dark"] .mlt-copy-status--error   { color: #f87171; }
+.mlt-message--error {
+  border-left-color: #ef4444;
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.mlt-message--success {
+  border-left-color: #22c55e;
+  color: #166534;
+  background: #f0fdf4;
+}
+
+.mlt-message__text { flex: 1; }
+
+.mlt-message__dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.125rem;
+  line-height: 1;
+  padding: 0 0 0 0.25rem;
+  color: inherit;
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
+.mlt-message__dismiss:hover { opacity: 1; }
+
+.mlt-message__dismiss:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+:root[data-theme="dark"] .mlt-message--info {
+  border-left-color: #60a5fa;
+  color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.12);
+}
+:root[data-theme="dark"] .mlt-message--warning {
+  border-left-color: #fbbf24;
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.12);
+}
+:root[data-theme="dark"] .mlt-message--error {
+  border-left-color: #f87171;
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.12);
+}
+:root[data-theme="dark"] .mlt-message--success {
+  border-left-color: #4ade80;
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+/* ── Phase 6.6 – Export copy status (kept for reference, superseded by .mlt-message) */
 
 /* ── Phase 6.3 – Setup card ───────────────────────────────────────────────── */
 
