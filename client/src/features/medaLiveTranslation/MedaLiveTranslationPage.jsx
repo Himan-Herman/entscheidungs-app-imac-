@@ -91,7 +91,7 @@ export default function MedaLiveTranslationPage() {
     stop: stopTranscription,
     clear: clearTranscript,
   } = useLocalTranscription();
-  const { isLoading: translationLoading, translate } = useTextTranslation();
+  const { translate } = useTextTranslation();
 
   const {
     isSupported: speechSupported,
@@ -276,38 +276,40 @@ export default function MedaLiveTranslationPage() {
             <p className="mlt-card__sub">{t.setupTitle}</p>
           </header>
 
-          {/* Patient language */}
-          <div className="mlt-setup__field">
-            <label className="mlt-setup__label" htmlFor="mlt-patient-lang">
-              {t.patientLanguageLabel}
-            </label>
-            <select
-              id="mlt-patient-lang"
-              className="mlt-setup__select"
-              value={patientLanguage}
-              onChange={(e) => setPatientLanguage(e.target.value)}
-            >
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang} value={lang}>{getLangName(lang)}</option>
-              ))}
-            </select>
-          </div>
+          <div className="mlt-setup__fields">
+            {/* Patient language */}
+            <div className="mlt-setup__field">
+              <label className="mlt-setup__label" htmlFor="mlt-patient-lang">
+                {t.patientLanguageLabel}
+              </label>
+              <select
+                id="mlt-patient-lang"
+                className="mlt-setup__select"
+                value={patientLanguage}
+                onChange={(e) => setPatientLanguage(e.target.value)}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>{getLangName(lang)}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Practice language */}
-          <div className="mlt-setup__field">
-            <label className="mlt-setup__label" htmlFor="mlt-practice-lang">
-              {t.practiceLanguageLabel}
-            </label>
-            <select
-              id="mlt-practice-lang"
-              className="mlt-setup__select"
-              value={practiceLanguage}
-              onChange={(e) => setPracticeLanguage(e.target.value)}
-            >
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <option key={lang} value={lang}>{getLangName(lang)}</option>
-              ))}
-            </select>
+            {/* Practice language */}
+            <div className="mlt-setup__field">
+              <label className="mlt-setup__label" htmlFor="mlt-practice-lang">
+                {t.practiceLanguageLabel}
+              </label>
+              <select
+                id="mlt-practice-lang"
+                className="mlt-setup__select"
+                value={practiceLanguage}
+                onChange={(e) => setPracticeLanguage(e.target.value)}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>{getLangName(lang)}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Validation warnings */}
@@ -378,7 +380,8 @@ export default function MedaLiveTranslationPage() {
               onClick={() => handleDirectionChange(patientDirection)}
               disabled={isActive}
             >
-              {t.patientToPracticeLabel}
+              <span className="mlt-direction__btn-lang">{t.patientToPracticeLabel}</span>
+              <span className="mlt-direction__btn-role">{getLangName(patientLanguage)} → {getLangName(practiceLanguage)}</span>
             </button>
             <button
               type="button"
@@ -388,7 +391,8 @@ export default function MedaLiveTranslationPage() {
               onClick={() => handleDirectionChange(practiceDirection)}
               disabled={isActive}
             >
-              {t.practiceToPatientLabel}
+              <span className="mlt-direction__btn-lang">{t.practiceToPatientLabel}</span>
+              <span className="mlt-direction__btn-role">{getLangName(practiceLanguage)} → {getLangName(patientLanguage)}</span>
             </button>
           </div>
         </div>
@@ -444,24 +448,18 @@ export default function MedaLiveTranslationPage() {
                         <span className="mlt-conv-entry__time">{entry.timestamp}</span>
                       </div>
                       <div className="mlt-conv-entry__row">
-                        <span className="mlt-conv-entry__row-label">
-                          {t.originalWithLanguageLabel(entry.srcLang)}
-                        </span>
+                        <span className="mlt-conv-entry__row-label">{t.originalTextLabel}</span>
                         <p className="mlt-conv-entry__text">{entry.sourceText}</p>
                       </div>
                       {entry.status === "pending" && (
                         <div className="mlt-conv-entry__row">
-                          <span className="mlt-conv-entry__row-label">
-                            {t.translationForRoleLabel(targetRoleLabel, entry.tgtLang)}
-                          </span>
+                          <span className="mlt-conv-entry__row-label">{t.translationTextLabel}</span>
                           <p className="mlt-conv-entry__loading">{t.translationLoading}</p>
                         </div>
                       )}
                       {entry.status === "translated" && (
                         <div className="mlt-conv-entry__row">
-                          <span className="mlt-conv-entry__row-label">
-                            {t.translationForRoleLabel(targetRoleLabel, entry.tgtLang)}
-                          </span>
+                          <span className="mlt-conv-entry__row-label">{t.translationTextLabel}</span>
                           <p className="mlt-conv-entry__text mlt-conv-entry__text--translated">
                             {entry.translatedText}
                           </p>
@@ -541,15 +539,8 @@ export default function MedaLiveTranslationPage() {
                     : t.audioStatusIdle}
                 </div>
               )}
-              {audioEnabled && (
-                <p className="mlt-audio__voice">
-                  {t.voiceLabel}:{" "}
-                  {selectedVoiceName === null
-                    ? t.voiceNotLoadedLabel
-                    : selectedVoiceName === undefined || selectedVoiceName === ""
-                    ? t.defaultVoiceLabel
-                    : selectedVoiceName}
-                </p>
+              {audioEnabled && selectedVoiceName && (
+                <p className="mlt-audio__voice">{selectedVoiceName}</p>
               )}
             </>
           )}
@@ -577,12 +568,6 @@ export default function MedaLiveTranslationPage() {
             </button>
           )}
         </div>
-
-        {translationLoading && conversation.some((e) => e.status === "pending") && (
-          <p className="mlt-translation__loading" aria-live="polite">
-            {t.translationLoading}
-          </p>
-        )}
 
         {isError && (
           <p className="mlt-error" role="alert">{t.statusError}</p>
