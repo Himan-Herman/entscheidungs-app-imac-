@@ -17,14 +17,15 @@ const DURATION_S = 5 * 60;
  * readable label to directionLabels in medaLiveTranslation.i18n.js.
  */
 const LANG_PAIRS = [
-  { id: "de-en", src: "de", tgt: "en", tts: "en-US" },
-  { id: "en-de", src: "en", tgt: "de", tts: "de-DE" },
+  { id: "de-en", src: "de", tgt: "en", tts: "en-US", speaker: "patient",  target: "practice" },
+  { id: "en-de", src: "en", tgt: "de", tts: "de-DE", speaker: "practice", target: "patient"  },
 ];
 
 /**
  * @typedef {{ id: string, srcLang: string, tgtLang: string, sourceText: string,
  *   translatedText: string|null, needsClarification: boolean, error: string|null,
- *   status: 'pending'|'translated'|'unclear'|'error', timestamp: string }} ConvEntry
+ *   status: 'pending'|'translated'|'unclear'|'error', timestamp: string,
+ *   speakerRole: 'patient'|'practice', targetRole: 'patient'|'practice' }} ConvEntry
  */
 
 function playStartTone() {
@@ -51,7 +52,7 @@ export default function MedaLiveTranslationPage() {
 
   const [direction, setDirection] = useState(LANG_PAIRS[0].id);
   const activePair = LANG_PAIRS.find((p) => p.id === direction) ?? LANG_PAIRS[0];
-  const { src: srcLang, tgt: tgtLang, tts: ttsLang } = activePair;
+  const { src: srcLang, tgt: tgtLang, tts: ttsLang, speaker: activeSpeaker, target: activeTarget } = activePair;
 
   const { level, status, start, stop } = useMicrophoneLevel();
   const {
@@ -154,7 +155,8 @@ export default function MedaLiveTranslationPage() {
       setConversation((prev) => [
         ...prev,
         { id, srcLang, tgtLang, sourceText: line, translatedText: null,
-          needsClarification: false, error: null, status: "pending", timestamp },
+          needsClarification: false, error: null, status: "pending", timestamp,
+          speakerRole: activeSpeaker, targetRole: activeTarget },
       ]);
 
       translate(line, srcLang, tgtLang, ({ translation, needsClarification: nc, error: err }) => {
@@ -171,7 +173,7 @@ export default function MedaLiveTranslationPage() {
         );
       });
     });
-  }, [transcriptLines, translate, srcLang, tgtLang]);
+  }, [transcriptLines, translate, srcLang, tgtLang, activeSpeaker, activeTarget]);
 
   useEffect(() => {
     document.title = t.pageTitle;
@@ -231,7 +233,10 @@ export default function MedaLiveTranslationPage() {
                 onClick={() => handleDirectionChange(pair.id)}
                 disabled={isActive}
               >
-                {t.directionLabels[pair.id]}
+                <span className="mlt-direction__btn-lang">{t.directionLabels[pair.id]}</span>
+                <span className="mlt-direction__btn-role">
+                  {pair.speaker === "patient" ? t.patientToPracticeLabel : t.practiceToPatientLabel}
+                </span>
               </button>
             ))}
           </div>
@@ -276,45 +281,53 @@ export default function MedaLiveTranslationPage() {
               {conversation.length === 0 ? (
                 <span className="mlt-conversation__empty">{t.emptyConversationLabel}</span>
               ) : (
-                conversation.map((entry) => (
-                  <div key={entry.id} className={`mlt-conv-entry mlt-conv-entry--${entry.status}`}>
-                    <div className="mlt-conv-entry__meta">
-                      <span className="mlt-conv-entry__direction">
-                        {t.directionLabels[`${entry.srcLang}-${entry.tgtLang}`] ??
-                          `${entry.srcLang.toUpperCase()} → ${entry.tgtLang.toUpperCase()}`}
-                      </span>
-                      <span className="mlt-conv-entry__time">{entry.timestamp}</span>
-                    </div>
-                    <div className="mlt-conv-entry__row">
-                      <span className="mlt-conv-entry__row-label">{t.originalLabel}</span>
-                      <p className="mlt-conv-entry__text">{entry.sourceText}</p>
-                    </div>
-                    {entry.status === "pending" && (
-                      <div className="mlt-conv-entry__row">
-                        <span className="mlt-conv-entry__row-label">{t.translationLabelShort}</span>
-                        <p className="mlt-conv-entry__loading">{t.translationLoading}</p>
+                conversation.map((entry) => {
+                  const speakerLabel = entry.speakerRole === "patient" ? t.patientRoleLabel : t.practiceRoleLabel;
+                  const targetLabel  = entry.targetRole  === "patient" ? t.patientRoleLabel : t.practiceRoleLabel;
+                  const roleFlow = entry.speakerRole === "patient" ? t.patientToPracticeLabel : t.practiceToPatientLabel;
+                  return (
+                    <div key={entry.id} className={`mlt-conv-entry mlt-conv-entry--${entry.status}`}>
+                      <div className="mlt-conv-entry__meta">
+                        <span className="mlt-conv-entry__direction">{roleFlow}</span>
+                        <span className="mlt-conv-entry__time">{entry.timestamp}</span>
                       </div>
-                    )}
-                    {entry.status === "translated" && (
                       <div className="mlt-conv-entry__row">
-                        <span className="mlt-conv-entry__row-label">{t.translationLabelShort}</span>
-                        <p className="mlt-conv-entry__text mlt-conv-entry__text--translated">
-                          {entry.translatedText}
+                        <span className="mlt-conv-entry__row-label">
+                          {t.originalWithLanguageLabel(entry.srcLang)}
+                        </span>
+                        <p className="mlt-conv-entry__text">{entry.sourceText}</p>
+                      </div>
+                      {entry.status === "pending" && (
+                        <div className="mlt-conv-entry__row">
+                          <span className="mlt-conv-entry__row-label">
+                            {t.translationForRoleLabel(targetLabel, entry.tgtLang)}
+                          </span>
+                          <p className="mlt-conv-entry__loading">{t.translationLoading}</p>
+                        </div>
+                      )}
+                      {entry.status === "translated" && (
+                        <div className="mlt-conv-entry__row">
+                          <span className="mlt-conv-entry__row-label">
+                            {t.translationForRoleLabel(targetLabel, entry.tgtLang)}
+                          </span>
+                          <p className="mlt-conv-entry__text mlt-conv-entry__text--translated">
+                            {entry.translatedText}
+                          </p>
+                        </div>
+                      )}
+                      {entry.status === "unclear" && (
+                        <p className="mlt-conv-entry__status-note mlt-conv-entry__status-note--unclear">
+                          {t.speakerLabel}: {speakerLabel} — {t.unclearEntryLabel}
                         </p>
-                      </div>
-                    )}
-                    {entry.status === "unclear" && (
-                      <p className="mlt-conv-entry__status-note mlt-conv-entry__status-note--unclear">
-                        {t.unclearEntryLabel}
-                      </p>
-                    )}
-                    {entry.status === "error" && (
-                      <p className="mlt-conv-entry__status-note mlt-conv-entry__status-note--error">
-                        {t.failedEntryLabel}
-                      </p>
-                    )}
-                  </div>
-                ))
+                      )}
+                      {entry.status === "error" && (
+                        <p className="mlt-conv-entry__status-note mlt-conv-entry__status-note--error">
+                          {t.failedEntryLabel}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })
               )}
               <div ref={conversationEndRef} />
             </div>
