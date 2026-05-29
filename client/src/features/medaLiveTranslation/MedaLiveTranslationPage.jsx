@@ -10,8 +10,11 @@ import "./MedaLiveTranslationPage.css";
 
 const DURATION_S = 5 * 60;
 
+/** Languages available for selection in setup. */
+const SUPPORTED_LANGUAGES = ["de", "en"];
+
 /**
- * Available translation directions.
+ * All translation directions backed by the server.
  * To add a new pair: append an entry here, add the pair to
  * server/routes/medaLiveTranslation.js ALLOWED_PAIRS, and add the human-
  * readable label to directionLabels in medaLiveTranslation.i18n.js.
@@ -50,10 +53,36 @@ export default function MedaLiveTranslationPage() {
   const { language } = useLanguage();
   const t = useMemo(() => getMltMessages(language), [language]);
 
+  // ── Setup state ────────────────────────────────────────────────────────────
+  const [setupComplete, setSetupComplete] = useState(false);
+  const [patientLanguage, setPatientLanguage] = useState("de");
+  const [practiceLanguage, setPracticeLanguage] = useState("en");
+
+  // Derived setup validation
+  const patientDirection  = `${patientLanguage}-${practiceLanguage}`;
+  const practiceDirection = `${practiceLanguage}-${patientLanguage}`;
+  const sameLanguage  = patientLanguage === practiceLanguage;
+  const pairSupported = LANG_PAIRS.some((p) => p.id === patientDirection);
+  const setupValid    = !sameLanguage && pairSupported;
+
+  // Helper: localized language name
+  const getLangName = useCallback((lang) => {
+    if (lang === "de") return t.languageDeutsch;
+    if (lang === "en") return t.languageEnglish;
+    return lang.toUpperCase();
+  }, [t]);
+
+  // ── Direction state (within active session) ────────────────────────────────
   const [direction, setDirection] = useState(LANG_PAIRS[0].id);
   const activePair = LANG_PAIRS.find((p) => p.id === direction) ?? LANG_PAIRS[0];
-  const { src: srcLang, tgt: tgtLang, tts: ttsLang, speaker: activeSpeaker, target: activeTarget } = activePair;
+  const { src: srcLang, tgt: tgtLang, tts: ttsLang } = activePair;
 
+  // Roles derived from setup context, not from LANG_PAIRS hardcoding
+  const isPatientSpeaking = direction === patientDirection;
+  const activeSpeaker = isPatientSpeaking ? "patient" : "practice";
+  const activeTarget  = isPatientSpeaking ? "practice" : "patient";
+
+  // ── Hooks ──────────────────────────────────────────────────────────────────
   const { level, status, start, stop } = useMicrophoneLevel();
   const {
     isSupported: transcriptSupported,
@@ -76,13 +105,14 @@ export default function MedaLiveTranslationPage() {
     selectedVoiceName,
   } = useSpeechOutput();
 
-  // Conversation state — each finalized transcript line becomes one entry
+  // ── Conversation state ─────────────────────────────────────────────────────
   const [conversation, setConversation] = useState(/** @type {ConvEntry[]} */ ([]));
 
-  const translatedCountRef = useRef(0);
-  const lastSpokenIdRef = useRef(/** @type {string|null} */ (null));
-  const conversationEndRef = useRef(/** @type {HTMLDivElement|null} */ (null));
+  const translatedCountRef  = useRef(0);
+  const lastSpokenIdRef     = useRef(/** @type {string|null} */ (null));
+  const conversationEndRef  = useRef(/** @type {HTMLDivElement|null} */ (null));
 
+  // ── Timer ──────────────────────────────────────────────────────────────────
   const [secondsLeft, setSecondsLeft] = useState(DURATION_S);
   const timerRef = useRef(/** @type {ReturnType<typeof setInterval>|null} */ (null));
 
@@ -93,6 +123,31 @@ export default function MedaLiveTranslationPage() {
     }
   }, []);
 
+  // ── Handlers ───────────────────────────────────────────────────────────────
+
+  /** Start the interpreter after setup is confirmed. */
+  const handleSetupStart = useCallback(() => {
+    if (!setupValid) return;
+    setDirection(patientDirection);
+    setConversation([]);
+    translatedCountRef.current = 0;
+    lastSpokenIdRef.current = null;
+    setSetupComplete(true);
+  }, [setupValid, patientDirection]);
+
+  /** Return to setup screen (only allowed when mic is not active). */
+  const handleChangeLanguages = useCallback(() => {
+    if (status === "active") return;
+    stopSpeech();
+    clearTranscript();
+    resetSpeechSession();
+    setConversation([]);
+    translatedCountRef.current = 0;
+    lastSpokenIdRef.current = null;
+    setSetupComplete(false);
+  }, [status, stopSpeech, clearTranscript, resetSpeechSession]);
+
+  /** Switch who speaks (patient ↔ practice) within an active session. */
   const handleDirectionChange = useCallback((newDir) => {
     if (status === "active") return;
     stopSpeech();
@@ -123,16 +178,13 @@ export default function MedaLiveTranslationPage() {
     setSecondsLeft(DURATION_S);
   }, [clearTimer, stop, stopTranscription, stopSpeech]);
 
-  // Countdown: starts when status becomes "active", stops otherwise
+  // ── Effects ────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     if (status === "active") {
       timerRef.current = setInterval(() => {
         setSecondsLeft((s) => {
-          if (s <= 1) {
-            clearTimer();
-            stop();
-            return 0;
-          }
+          if (s <= 1) { clearTimer(); stop(); return 0; }
           return s - 1;
         });
       }, 1000);
@@ -195,6 +247,8 @@ export default function MedaLiveTranslationPage() {
   // Full cleanup on unmount
   useEffect(() => () => { stop(); stopTranscription(); stopSpeech(); }, [stop, stopTranscription, stopSpeech]);
 
+  // ── Derived display values ─────────────────────────────────────────────────
+
   const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
   const ss = String(secondsLeft % 60).padStart(2, "0");
 
@@ -208,41 +262,138 @@ export default function MedaLiveTranslationPage() {
   const isActive = status === "active";
   const isError  = status === "error";
 
-  // Last successfully translated text for replay button
-  const lastTranslatedText = conversation.filter((e) => e.status === "translated" && e.translatedText).at(-1)?.translatedText ?? null;
+  const lastTranslatedText = conversation
+    .filter((e) => e.status === "translated" && e.translatedText).at(-1)?.translatedText ?? null;
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  if (!setupComplete) {
+    return (
+      <div className="mlt-page">
+        <div className="mlt-card mlt-setup-card">
+          <header className="mlt-card__header">
+            <h1 className="mlt-card__title">{t.heading}</h1>
+            <p className="mlt-card__sub">{t.setupTitle}</p>
+          </header>
+
+          {/* Patient language */}
+          <div className="mlt-setup__field">
+            <label className="mlt-setup__label" htmlFor="mlt-patient-lang">
+              {t.patientLanguageLabel}
+            </label>
+            <select
+              id="mlt-patient-lang"
+              className="mlt-setup__select"
+              value={patientLanguage}
+              onChange={(e) => setPatientLanguage(e.target.value)}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang} value={lang}>{getLangName(lang)}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Practice language */}
+          <div className="mlt-setup__field">
+            <label className="mlt-setup__label" htmlFor="mlt-practice-lang">
+              {t.practiceLanguageLabel}
+            </label>
+            <select
+              id="mlt-practice-lang"
+              className="mlt-setup__select"
+              value={practiceLanguage}
+              onChange={(e) => setPracticeLanguage(e.target.value)}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang} value={lang}>{getLangName(lang)}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Validation warnings */}
+          <div aria-live="polite" aria-atomic="true">
+            {sameLanguage && (
+              <p className="mlt-setup__warning">{t.sameLanguageWarning}</p>
+            )}
+            {!sameLanguage && !pairSupported && (
+              <p className="mlt-setup__warning">{t.unsupportedLanguagePairWarning}</p>
+            )}
+          </div>
+
+          {/* Hint */}
+          <p className="mlt-setup__hint">{t.setupHint}</p>
+
+          {/* Start button */}
+          <div className="mlt-actions">
+            <button
+              type="button"
+              className="mlt-btn mlt-btn--start"
+              onClick={handleSetupStart}
+              disabled={!setupValid}
+              aria-label={t.startInterpreterLabel}
+              aria-disabled={!setupValid}
+            >
+              {t.startInterpreterLabel}
+            </button>
+          </div>
+        </div>
+
+        <Link to="/patient" className="mlt-back">← {t.back}</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="mlt-page">
       <div className="mlt-card">
         <header className="mlt-card__header">
           <h1 className="mlt-card__title">{t.heading}</h1>
-          <p className="mlt-card__sub">{t.sub}</p>
         </header>
 
-        {/* Direction selector */}
+        {/* Session header — language summary + change button */}
+        <div className="mlt-session-header">
+          <span className="mlt-session-header__summary">
+            {t.selectedLanguagesSummary(getLangName(patientLanguage), getLangName(practiceLanguage))}
+          </span>
+          <button
+            type="button"
+            className="mlt-session-header__change-btn"
+            onClick={handleChangeLanguages}
+            disabled={isActive}
+            aria-label={t.changeLanguagesLabel}
+          >
+            {t.changeLanguagesLabel}
+          </button>
+        </div>
+
+        {/* Who speaks now (patient ↔ practice) */}
         <div className="mlt-direction">
           <span className="mlt-direction__label">{t.directionLabel}</span>
           <div className="mlt-direction__btns" role="radiogroup" aria-label={t.directionLabel}>
-            {LANG_PAIRS.map((pair) => (
-              <button
-                key={pair.id}
-                type="button"
-                role="radio"
-                aria-checked={direction === pair.id}
-                className={`mlt-direction__btn${direction === pair.id ? " mlt-direction__btn--active" : ""}`}
-                onClick={() => handleDirectionChange(pair.id)}
-                disabled={isActive}
-              >
-                <span className="mlt-direction__btn-lang">{t.directionLabels[pair.id]}</span>
-                <span className="mlt-direction__btn-role">
-                  {pair.speaker === "patient" ? t.patientToPracticeLabel : t.practiceToPatientLabel}
-                </span>
-              </button>
-            ))}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={direction === patientDirection}
+              className={`mlt-direction__btn${direction === patientDirection ? " mlt-direction__btn--active" : ""}`}
+              onClick={() => handleDirectionChange(patientDirection)}
+              disabled={isActive}
+            >
+              {t.patientToPracticeLabel}
+            </button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={direction === practiceDirection}
+              className={`mlt-direction__btn${direction === practiceDirection ? " mlt-direction__btn--active" : ""}`}
+              onClick={() => handleDirectionChange(practiceDirection)}
+              disabled={isActive}
+            >
+              {t.practiceToPatientLabel}
+            </button>
           </div>
         </div>
 
-        {/* Status — aria-live announces changes to screen readers */}
+        {/* Status */}
         <div
           className={`mlt-status mlt-status--${status}`}
           role="status"
@@ -258,7 +409,7 @@ export default function MedaLiveTranslationPage() {
           <span className="mlt-timer__display">{mm}:{ss}</span>
         </div>
 
-        {/* Audio level bar — visually animated; SR text hidden off-screen */}
+        {/* Audio level bar */}
         <div className="mlt-level" aria-label={t.levelLabel}>
           <div className="mlt-level__bar-track" aria-hidden="true">
             <div className="mlt-level__bar-fill" style={{ width: `${level}%` }} />
@@ -282,9 +433,10 @@ export default function MedaLiveTranslationPage() {
                 <span className="mlt-conversation__empty">{t.emptyConversationLabel}</span>
               ) : (
                 conversation.map((entry) => {
-                  const speakerLabel = entry.speakerRole === "patient" ? t.patientRoleLabel : t.practiceRoleLabel;
-                  const targetLabel  = entry.targetRole  === "patient" ? t.patientRoleLabel : t.practiceRoleLabel;
-                  const roleFlow = entry.speakerRole === "patient" ? t.patientToPracticeLabel : t.practiceToPatientLabel;
+                  const targetRoleLabel = entry.targetRole === "patient" ? t.patientRoleLabel : t.practiceRoleLabel;
+                  const roleFlow = entry.speakerRole === "patient"
+                    ? t.patientToPracticeLabel
+                    : t.practiceToPatientLabel;
                   return (
                     <div key={entry.id} className={`mlt-conv-entry mlt-conv-entry--${entry.status}`}>
                       <div className="mlt-conv-entry__meta">
@@ -300,7 +452,7 @@ export default function MedaLiveTranslationPage() {
                       {entry.status === "pending" && (
                         <div className="mlt-conv-entry__row">
                           <span className="mlt-conv-entry__row-label">
-                            {t.translationForRoleLabel(targetLabel, entry.tgtLang)}
+                            {t.translationForRoleLabel(targetRoleLabel, entry.tgtLang)}
                           </span>
                           <p className="mlt-conv-entry__loading">{t.translationLoading}</p>
                         </div>
@@ -308,7 +460,7 @@ export default function MedaLiveTranslationPage() {
                       {entry.status === "translated" && (
                         <div className="mlt-conv-entry__row">
                           <span className="mlt-conv-entry__row-label">
-                            {t.translationForRoleLabel(targetLabel, entry.tgtLang)}
+                            {t.translationForRoleLabel(targetRoleLabel, entry.tgtLang)}
                           </span>
                           <p className="mlt-conv-entry__text mlt-conv-entry__text--translated">
                             {entry.translatedText}
@@ -317,7 +469,7 @@ export default function MedaLiveTranslationPage() {
                       )}
                       {entry.status === "unclear" && (
                         <p className="mlt-conv-entry__status-note mlt-conv-entry__status-note--unclear">
-                          {t.speakerLabel}: {speakerLabel} — {t.unclearEntryLabel}
+                          {t.unclearEntryLabel}
                         </p>
                       )}
                       {entry.status === "error" && (
@@ -403,7 +555,7 @@ export default function MedaLiveTranslationPage() {
           )}
         </div>
 
-        {/* Start / Stop */}
+        {/* Start / Stop microphone */}
         <div className="mlt-actions">
           {!isActive ? (
             <button
@@ -433,15 +585,11 @@ export default function MedaLiveTranslationPage() {
         )}
 
         {isError && (
-          <p className="mlt-error" role="alert">
-            {t.statusError}
-          </p>
+          <p className="mlt-error" role="alert">{t.statusError}</p>
         )}
       </div>
 
-      <Link to="/patient" className="mlt-back">
-        ← {t.back}
-      </Link>
+      <Link to="/patient" className="mlt-back">← {t.back}</Link>
     </div>
   );
 }
