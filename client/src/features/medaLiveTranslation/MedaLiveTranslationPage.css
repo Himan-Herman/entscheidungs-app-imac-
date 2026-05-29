@@ -731,6 +731,66 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+/* ── Phase 6.5 – Session controls ────────────────────────────────────────── */
+
+.mlt-session-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mlt-session-ctrl__btn {
+  padding: 0.3125rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--ms-text-secondary, #6b7280);
+  background: transparent;
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.mlt-session-ctrl__btn:hover:not(:disabled) {
+  background: var(--ms-surface-muted, #f1f5f9);
+  color: var(--ms-color-text, #374151);
+  border-color: #94a3b8;
+}
+
+.mlt-session-ctrl__btn:focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 2px;
+}
+
+.mlt-session-ctrl__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+:root[data-theme="dark"] .mlt-session-ctrl__btn {
+  color: #94a3b8;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .mlt-session-ctrl__btn:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.08);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.mlt-session-hint {
+  font-size: 0.75rem;
+  color: var(--ms-text-secondary, #6b7280);
+  margin: 0;
+  text-align: center;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+:root[data-theme="dark"] .mlt-session-hint { color: #64748b; }
+
 /* ── Phase 6.3 – Setup card ───────────────────────────────────────────────── */
 
 .mlt-setup-card {

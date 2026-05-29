@@ -138,6 +138,7 @@ export default function MedaLiveTranslationPage() {
   /** Return to setup screen (only allowed when mic is not active). */
   const handleChangeLanguages = useCallback(() => {
     if (status === "active") return;
+    if (conversation.length > 0 && !window.confirm(t.changeLanguagesConfirm)) return;
     stopSpeech();
     clearTranscript();
     resetSpeechSession();
@@ -145,7 +146,7 @@ export default function MedaLiveTranslationPage() {
     translatedCountRef.current = 0;
     lastSpokenIdRef.current = null;
     setSetupComplete(false);
-  }, [status, stopSpeech, clearTranscript, resetSpeechSession]);
+  }, [status, conversation.length, t.changeLanguagesConfirm, stopSpeech, clearTranscript, resetSpeechSession]);
 
   /** Switch who speaks (patient ↔ practice) within an active session. */
   const handleDirectionChange = useCallback((newDir) => {
@@ -159,11 +160,29 @@ export default function MedaLiveTranslationPage() {
     setDirection(newDir);
   }, [status, stopSpeech, clearTranscript, resetSpeechSession]);
 
-  const handleStart = useCallback(async () => {
-    setSecondsLeft(DURATION_S);
+  /** Start a new session: keep languages, clear conversation and transcript. */
+  const handleNewSession = useCallback(() => {
+    if (status === "active") return;
+    stopSpeech();
+    clearTranscript();
+    resetSpeechSession();
+    setConversation([]);
     translatedCountRef.current = 0;
     lastSpokenIdRef.current = null;
+    setSecondsLeft(DURATION_S);
+  }, [status, stopSpeech, clearTranscript, resetSpeechSession]);
+
+  /** Clear only the visible conversation log after user confirmation. */
+  const handleClearConversation = useCallback(() => {
+    if (status === "active") return;
+    if (conversation.length === 0) return;
+    if (!window.confirm(t.clearConversationConfirm)) return;
     setConversation([]);
+    lastSpokenIdRef.current = null;
+  }, [status, conversation.length, t.clearConversationConfirm]);
+
+  const handleStart = useCallback(async () => {
+    setSecondsLeft(DURATION_S);
     resetSpeechSession();
     playStartTone();
     await start();
@@ -423,6 +442,26 @@ export default function MedaLiveTranslationPage() {
           </span>
         </div>
 
+        {/* Session controls */}
+        <div className="mlt-session-controls" role="group" aria-label={t.conversationControlsLabel}>
+          <button
+            type="button"
+            className="mlt-session-ctrl__btn"
+            onClick={handleNewSession}
+            disabled={isActive}
+          >
+            {t.newSessionLabel}
+          </button>
+          <button
+            type="button"
+            className="mlt-session-ctrl__btn"
+            onClick={handleClearConversation}
+            disabled={isActive || conversation.length === 0}
+          >
+            {t.clearConversationLabel}
+          </button>
+        </div>
+
         {/* Conversation log */}
         {transcriptSupported ? (
           <div className="mlt-conversation">
@@ -481,7 +520,7 @@ export default function MedaLiveTranslationPage() {
               )}
               <div ref={conversationEndRef} />
             </div>
-            <p className="mlt-conversation__disclaimer">{t.transcriptDisclaimer}</p>
+            <p className="mlt-session-hint">{t.localSessionHint}</p>
           </div>
         ) : (
           <p className="mlt-transcript__unsupported">{t.transcriptNotSupported}</p>
