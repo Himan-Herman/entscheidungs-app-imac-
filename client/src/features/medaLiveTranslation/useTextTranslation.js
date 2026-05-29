@@ -4,22 +4,27 @@ import { authFetch } from "../../api/authFetch";
 /**
  * Sends a single transcribed line to the backend for translation.
  * Maintains an in-flight lock so the same text is never sent twice concurrently.
- * Handles the Phase 5.1 extended response: { translation, needsClarification, reason }.
+ *
+ * Phase 6.1: Results are delivered via onResult callback instead of shared state,
+ * so the caller can correlate each result back to a specific conversation entry.
+ *
+ * @typedef {{ translation: string, needsClarification: boolean, reason: string|null, error: string|null }} TranslationResult
  */
 export function useTextTranslation() {
-  const [translations, setTranslations] = useState(/** @type {string[]} */ ([]));
   const [loadingCount, setLoadingCount] = useState(0);
-  const [error, setError] = useState(/** @type {string|null} */ (null));
-  const [needsClarification, setNeedsClarification] = useState(false);
-
   const inFlightRef = useRef(/** @type {Set<string>} */ (new Set()));
 
-  const translate = useCallback(async (text, sourceLanguage, targetLanguage) => {
+  /**
+   * @param {string} text
+   * @param {string} sourceLanguage
+   * @param {string} targetLanguage
+   * @param {(result: TranslationResult) => void} [onResult]
+   */
+  const translate = useCallback(async (text, sourceLanguage, targetLanguage, onResult) => {
     const key = `${sourceLanguage}:${targetLanguage}:${text}`;
     if (inFlightRef.current.has(key)) return;
     inFlightRef.current.add(key);
     setLoadingCount((n) => n + 1);
-    setError(null);
 
     try {
       const res = await authFetch("/api/meda-live-translation/translate-text", {
@@ -34,19 +39,20 @@ export function useTextTranslation() {
       }
 
       const body = await res.json();
-      const { translation, needsClarification: nc } = body;
-
-      if (nc === true) {
-        setNeedsClarification(true);
-      } else {
-        setNeedsClarification(false);
-        if (translation) {
-          setTranslations((prev) => [...prev, translation]);
-        }
-      }
+      onResult?.({
+        translation: body.translation ?? "",
+        needsClarification: body.needsClarification === true,
+        reason: body.reason ?? null,
+        error: null,
+      });
     } catch (err) {
       if (err.message !== "SESSION_EXPIRED") {
-        setError(err.message);
+        onResult?.({
+          translation: "",
+          needsClarification: false,
+          reason: null,
+          error: err.message,
+        });
       }
     } finally {
       inFlightRef.current.delete(key);
@@ -54,13 +60,7 @@ export function useTextTranslation() {
     }
   }, []);
 
-  const clear = useCallback(() => {
-    setTranslations([]);
-    setError(null);
-    setNeedsClarification(false);
-  }, []);
-
   const isLoading = loadingCount > 0;
 
-  return { translations, isLoading, error, needsClarification, translate, clear };
+  return { isLoading, translate };
 }
