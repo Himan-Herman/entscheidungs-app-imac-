@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRealtimeSession } from './useRealtimeSession.js';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
+import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
 import './MedaRealtimePage.css';
 
 const ROLE_LABEL = {
@@ -76,6 +77,12 @@ export default function MedaRealtimePage() {
   const [consentContext, setConsentContext] = useState(false);
   const [consentMedical, setConsentMedical] = useState(false);
 
+  // PDF export state — local only, never sent anywhere
+  const [pdfLoading,   setPdfLoading]  = useState(false);
+  const [patientInfo,  setPatientInfo] = useState({ name: '', dateOfBirth: '', gender: '', insuranceStatus: '' });
+  const [practiceInfo, setPracticeInfo] = useState({ practiceName: '', doctorName: '', department: '', location: '' });
+  const sessionStartedAtRef = useRef(/** @type {string|null} */ (null));
+
   const turnsEndRef      = useRef(null);
   const debugLogRef      = useRef(null);
   const timerIntervalRef = useRef(null);
@@ -112,7 +119,8 @@ export default function MedaRealtimePage() {
     const isConnected = connectionState === 'connected';
 
     if (isConnected) {
-      sessionStartRef.current = Date.now();
+      sessionStartRef.current     = Date.now();
+      sessionStartedAtRef.current = new Date().toISOString();
       setRemainingSeconds(SESSION_MAX_SECONDS);
       setSessionExpired(false);
 
@@ -159,6 +167,26 @@ export default function MedaRealtimePage() {
 
   const patientLangLabel  = REALTIME_LANGUAGE_MAP[patientLang]  ?? patientLang;
   const practiceLangLabel = REALTIME_LANGUAGE_MAP[practiceLang] ?? practiceLang;
+
+  const handlePatientInfo  = useCallback((field, value) => setPatientInfo(prev  => ({ ...prev, [field]: value })), []);
+  const handlePracticeInfo = useCallback((field, value) => setPracticeInfo(prev => ({ ...prev, [field]: value })), []);
+
+  const handleDownloadPdf = useCallback(async () => {
+    setPdfLoading(true);
+    try {
+      await exportRealtimeConversationPdf({
+        turns,
+        patientInfo,
+        practiceInfo,
+        languages: { patientLanguage: patientLang, practiceLanguage: practiceLang },
+        sessionStartedAt: sessionStartedAtRef.current,
+      });
+    } catch (err) {
+      console.error('[MedaRealtimePage] PDF export failed:', err);
+    } finally {
+      setPdfLoading(false);
+    }
+  }, [turns, patientInfo, practiceInfo, patientLang, practiceLang]);
 
   function handleStart() {
     setSessionExpired(false);
@@ -413,6 +441,135 @@ export default function MedaRealtimePage() {
         ))}
         <div ref={turnsEndRef} />
       </section>
+
+      {/* ── PDF Export — visible after session ends and turns exist ───────────── */}
+      {!isConnected && !isConnecting && turns.length > 0 && (
+        <section className="mrt-export-section" aria-label="PDF-Export">
+          <h2 className="mrt-export-heading">PDF-Gesprächsprotokoll</h2>
+          <p className="mrt-export-hint">
+            Der PDF-Export wird lokal auf Ihrem Gerät erstellt. Kein Upload, keine Serverübertragung.
+          </p>
+
+          {/* Patient fields */}
+          <fieldset className="mrt-export-fieldset">
+            <legend className="mrt-export-legend">Patientendaten <span className="mrt-export-optional">(optional)</span></legend>
+            <div className="mrt-export-grid">
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-name">Name</label>
+                <input
+                  id="pdf-patient-name"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={patientInfo.name}
+                  onChange={e => handlePatientInfo('name', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-dob">Geburtsdatum</label>
+                <input
+                  id="pdf-patient-dob"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="TT.MM.JJJJ"
+                  value={patientInfo.dateOfBirth}
+                  onChange={e => handlePatientInfo('dateOfBirth', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-gender">Geschlecht</label>
+                <select
+                  id="pdf-patient-gender"
+                  className="mrt-export-select"
+                  value={patientInfo.gender}
+                  onChange={e => handlePatientInfo('gender', e.target.value)}
+                >
+                  <option value="">nicht angegeben</option>
+                  <option value="männlich">männlich</option>
+                  <option value="weiblich">weiblich</option>
+                  <option value="divers">divers</option>
+                </select>
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-insurance">Versicherungsstatus</label>
+                <select
+                  id="pdf-patient-insurance"
+                  className="mrt-export-select"
+                  value={patientInfo.insuranceStatus}
+                  onChange={e => handlePatientInfo('insuranceStatus', e.target.value)}
+                >
+                  <option value="">nicht angegeben</option>
+                  <option value="gesetzlich">gesetzlich</option>
+                  <option value="privat">privat</option>
+                  <option value="Selbstzahler">Selbstzahler</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+
+          {/* Practice fields */}
+          <fieldset className="mrt-export-fieldset">
+            <legend className="mrt-export-legend">Praxisdaten <span className="mrt-export-optional">(optional)</span></legend>
+            <div className="mrt-export-grid">
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-practice-name">Praxis / Einrichtung</label>
+                <input
+                  id="pdf-practice-name"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.practiceName}
+                  onChange={e => handlePracticeInfo('practiceName', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-doctor-name">Ärztin / Arzt / Behandler</label>
+                <input
+                  id="pdf-doctor-name"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.doctorName}
+                  onChange={e => handlePracticeInfo('doctorName', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-department">Fachbereich</label>
+                <input
+                  id="pdf-department"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.department}
+                  onChange={e => handlePracticeInfo('department', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-location">Ort</label>
+                <input
+                  id="pdf-location"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.location}
+                  onChange={e => handlePracticeInfo('location', e.target.value)}
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <div className="mrt-export-actions">
+            <button
+              className="mrt-btn mrt-btn--pdf"
+              onClick={handleDownloadPdf}
+              disabled={pdfLoading}
+              aria-disabled={pdfLoading}
+            >
+              {pdfLoading ? 'Erstelle PDF …' : 'PDF herunterladen'}
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* ── Debug (collapsed by default) ────────────────────────────────────── */}
       <section className="mrt-debug">

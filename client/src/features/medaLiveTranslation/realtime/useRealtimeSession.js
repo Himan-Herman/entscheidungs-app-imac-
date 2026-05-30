@@ -18,6 +18,7 @@ const OPENAI_REALTIME_BASE = 'https://api.openai.com/v1/realtime';
  *   targetRole: SpeakerRole|null,
  *   sourceLanguage: string|null,
  *   targetLanguage: string|null,
+ *   timestamp: string,
  * }} Turn
  */
 
@@ -134,6 +135,7 @@ export function useRealtimeSession() {
           targetRole:     null,   // filled at transcription.completed
           sourceLanguage: null,
           targetLanguage: null,
+          timestamp:      new Date().toISOString(),
         }]);
         break;
 
