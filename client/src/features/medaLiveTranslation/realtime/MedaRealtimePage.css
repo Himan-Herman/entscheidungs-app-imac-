@@ -172,6 +172,80 @@
   flex-shrink: 0;
 }
 
+/* ── Consent checkboxes ────────────────────────────────────────────────────── */
+.mrt-consent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.125rem 0;
+}
+
+.mrt-consent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.mrt-consent-checkbox {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.175rem;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.mrt-consent-checkbox:disabled { cursor: not-allowed; opacity: 0.5; }
+
+.mrt-consent-label {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ms-text-primary, #374151);
+  cursor: pointer;
+}
+
+.mrt-consent-hint {
+  font-size: 0.8125rem;
+  color: #d97706;
+  margin: 0;
+  padding: 0.375rem 0.625rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+}
+
+/* ── Active session bar ─────────────────────────────────────────────────────── */
+.mrt-session-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--ms-surface, #f9fafb);
+  border: 1px solid var(--ms-border, #e5e7eb);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.mrt-session-langs {
+  font-size: 0.875rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.mrt-session-langs strong {
+  color: var(--ms-text-primary, #111827);
+  font-weight: 600;
+}
+
+.mrt-session-sep { margin: 0 0.125rem; }
+
+.mrt-btn--compact {
+  flex: 0;
+  white-space: nowrap;
+  padding: 0.4rem 1rem;
+  font-size: 0.875rem;
+}
+
 /* ── Buttons ───────────────────────────────────────────────────────────────── */
 .mrt-controls { display: flex; gap: 0.625rem; }
 
@@ -279,9 +353,10 @@
 
 .mrt-turn--done { border-color: #d1fae5; }
 
-/* Patient turns sit to the left with a blue left border; practice to the right */
-.mrt-turn--patient  { border-left: 3px solid #3b82f6; }
-.mrt-turn--practice { border-left: 3px solid #8b5cf6; }
+/* Patient turns: blue left border; Practice: purple; Detecting: gray (role not yet known) */
+.mrt-turn--patient   { border-left: 3px solid #3b82f6; }
+.mrt-turn--practice  { border-left: 3px solid #8b5cf6; }
+.mrt-turn--detecting { border-left: 3px solid #d1d5db; }
 
 /* Turn header */
 .mrt-turn-header {
@@ -434,6 +509,12 @@
 }
 
 /* ── Dark mode ─────────────────────────────────────────────────────────────── */
+:root[data-theme="dark"] .mrt-session-bar        { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .mrt-session-langs      { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-session-langs strong { color: #f1f5f9; }
+:root[data-theme="dark"] .mrt-consent-label      { color: #cbd5e1; }
+:root[data-theme="dark"] .mrt-consent-hint       { background: #1c1300; border-color: #78350f; color: #fbbf24; }
+
 :root[data-theme="dark"] .mrt-page { color: #f1f5f9; }
 :root[data-theme="dark"] .mrt-setup,
 :root[data-theme="dark"] .mrt-turn { background: #1e293b; border-color: #334155; }

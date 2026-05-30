@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { authFetch } from '../../../api/authFetch.js';
+import { detectLanguage } from './realtimeLanguages.js';
 
 const OPENAI_REALTIME_BASE = 'https://api.openai.com/v1/realtime';
-const TRANSCRIPTION_MODEL  = 'gpt-4o-transcribe';
 
 /**
  * @typedef {'idle'|'connecting'|'connected'|'disconnecting'|'error'} ConnectionState
@@ -14,30 +14,28 @@ const TRANSCRIPTION_MODEL  = 'gpt-4o-transcribe';
  *   originalText: string|null,
  *   translatedText: string,
  *   isDone: boolean,
- *   speakerRole: SpeakerRole,
- *   sourceLanguage: string,
- *   targetLanguage: string,
+ *   speakerRole: SpeakerRole|null,
+ *   sourceLanguage: string|null,
+ *   targetLanguage: string|null,
  * }} Turn
  */
 
 /**
- * Hook for the Meda Realtime Pingpong interpreter session (Phase 8.5).
+ * Hook for the Meda Realtime auto-detect interpreter session (Phase 8.9).
  *
- * Phase 8.5 additions over 8.4:
- *  - sessionActiveRef: guards all event handlers and every async step inside connect()
- *    so that a disconnect() during token-fetch or SDP exchange cannot leave dangling
- *    mic tracks, peer connections, or stale React state updates.
- *  - ICE failure now calls _cleanup() to stop the microphone immediately.
- *  - dc.onclose is guarded so a race-condition close after explicit cleanup is ignored.
- *
- * Timeout and unmount/tab-hidden logic live in MedaRealtimePage to keep the
- * hook focused on WebRTC concerns only.
+ * Architecture:
+ *  - No fixed input language is set; gpt-4o-transcribe auto-detects per utterance.
+ *  - Speaker role (patient / practice) is derived from the transcript text using
+ *    script and word-fingerprint detection against the two configured languages.
+ *  - No rigid pingpong alternation — either speaker may speak at any time.
+ *  - speakerLockRef still blocks mic processing during Meda audio playback (echo guard).
+ *  - audioWatchdogRef provides a fallback if output_audio_buffer.stopped is late/missing.
+ *  - sessionActiveRef guards all async steps and event handlers against stale updates.
  */
 export function useRealtimeSession() {
   const [connectionState,    setConnectionState]    = useState(/** @type {ConnectionState} */ ('idle'));
   const [sessionStatus,      setSessionStatus]      = useState(/** @type {SessionStatus} */ ('idle'));
-  const [currentSpeakerRole, setCurrentSpeakerRole] = useState(/** @type {SpeakerRole} */ ('patient'));
-  const [currentInputLang,   setCurrentInputLang]   = useState('');
+  const [currentSpeakerRole, setCurrentSpeakerRole] = useState(/** @type {SpeakerRole|null} */ (null));
   const [turns,  setTurns]  = useState(/** @type {Turn[]} */ ([]));
   const [events, setEvents] = useState(/** @type {object[]} */ ([]));
   const [error,  setError]  = useState(/** @type {string|null} */ (null));
@@ -50,16 +48,19 @@ export function useRealtimeSession() {
   const streamRef = useRef(/** @type {MediaStream|null} */ (null));
 
   // True only between connect() and _cleanup() — every handler checks this first
-  // so that no stale async operation can mutate state after disconnect.
   const sessionActiveRef = useRef(false);
 
-  // Session-lifetime language / speaker values — refs avoid stale closures in handlers
-  const patientLangRef      = useRef('');
-  const practiceLangRef     = useRef('');
-  const currentInputLangRef = useRef('');
-  const currentSpeakerRef   = useRef(/** @type {SpeakerRole} */ ('patient'));
-  const speakerLockRef      = useRef(false);
-  const turnCounterRef      = useRef(0);
+  // Configured languages — set at connect(), read in event handlers (stale-closure safe)
+  const patientLangRef  = useRef('');
+  const practiceLangRef = useRef('');
+
+  // Echo guard: true while Meda's audio is playing — blocks mic VAD false positives
+  const speakerLockRef = useRef(false);
+
+  const turnCounterRef    = useRef(0);
+  const audioWatchdogRef  = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
+  // Prevents double-handling of output_audio_buffer end (watchdog vs stopped event)
+  const turnSwitchedRef   = useRef(false);
 
   /** Send a Realtime client event over the DataChannel (safe to call anytime). */
   const _sendDc = useCallback((payload) => {
@@ -68,36 +69,13 @@ export function useRealtimeSession() {
     }
   }, []);
 
-  /** Switch input language after a completed turn; updates transcription hint via session.update. */
-  const _switchLanguage = useCallback(() => {
-    const nextLang = currentInputLangRef.current === patientLangRef.current
-      ? practiceLangRef.current
-      : patientLangRef.current;
-    const nextRole = nextLang === patientLangRef.current ? 'patient' : 'practice';
-
-    currentInputLangRef.current = nextLang;
-    currentSpeakerRef.current   = nextRole;
-    setCurrentInputLang(nextLang);
-    setCurrentSpeakerRole(nextRole);
-
-    _sendDc({
-      type: 'session.update',
-      session: {
-        input_audio_transcription: {
-          model:    TRANSCRIPTION_MODEL,
-          language: nextLang,
-        },
-      },
-    });
-  }, [_sendDc]);
-
   /**
    * Full teardown of all WebRTC resources.
-   * Safe to call multiple times — all operations are idempotent.
-   * Sets sessionActiveRef = false first so that any in-flight async steps abort.
+   * Sets sessionActiveRef = false first — stops all in-flight handlers.
+   * Safe to call multiple times (all operations are idempotent).
    */
   const _cleanup = useCallback(() => {
-    sessionActiveRef.current = false; // must be first — stops all in-flight handlers
+    sessionActiveRef.current = false; // must be first — aborts all in-flight handlers
 
     if (dcRef.current) {
       dcRef.current.onmessage = null;
@@ -112,6 +90,8 @@ export function useRealtimeSession() {
       try { pcRef.current.close(); } catch (_) {}
       pcRef.current = null;
     }
+    clearTimeout(audioWatchdogRef.current);
+    audioWatchdogRef.current = null;
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
@@ -124,9 +104,8 @@ export function useRealtimeSession() {
     setSessionStatus('idle');
   }, []);
 
-  /** Parse a Realtime server event → update turns, sessionStatus, pingpong state. */
+  /** Parse a Realtime server event → update turns, sessionStatus, speaker detection. */
   const _handleEvent = useCallback((ev) => {
-    // Drop all events after disconnect / timeout
     if (!sessionActiveRef.current) return;
 
     switch (ev.type) {
@@ -140,35 +119,57 @@ export function useRealtimeSession() {
         if (!speakerLockRef.current) setSessionStatus('processing');
         break;
 
+      // Create a turn slot; speaker role is unknown until transcription completes
       case 'input_audio_buffer.committed':
-        if (speakerLockRef.current) break; // likely echo — discard
+        if (speakerLockRef.current) break; // echo during Meda playback — discard
         turnCounterRef.current += 1;
-        {
-          const sourceLang = currentInputLangRef.current;
-          const targetLang = sourceLang === patientLangRef.current
-            ? practiceLangRef.current
-            : patientLangRef.current;
-          setTurns(prev => [...prev, {
-            key:            turnCounterRef.current,
-            inputItemId:    ev.item_id ?? null,
-            originalText:   null,
-            translatedText: '',
-            isDone:         false,
-            speakerRole:    currentSpeakerRef.current,
-            sourceLanguage: sourceLang,
-            targetLanguage: targetLang,
-          }]);
-        }
+        setTurns(prev => [...prev, {
+          key:            turnCounterRef.current,
+          inputItemId:    ev.item_id ?? null,
+          originalText:   null,
+          translatedText: '',
+          isDone:         false,
+          speakerRole:    null,   // filled at transcription.completed
+          sourceLanguage: null,
+          targetLanguage: null,
+        }]);
         break;
 
       // ── Transcription ────────────────────────────────────────────────────────
-      case 'conversation.item.input_audio_transcription.completed':
+      // Speaker role and language direction are determined here from the text.
+      case 'conversation.item.input_audio_transcription.completed': {
+        const transcript = ev.transcript ?? '';
+        const detected   = detectLanguage(transcript, patientLangRef.current, practiceLangRef.current);
+
+        let speakerRole    = null;
+        let sourceLanguage = null;
+        let targetLanguage = null;
+
+        if (detected === patientLangRef.current) {
+          speakerRole    = 'patient';
+          sourceLanguage = patientLangRef.current;
+          targetLanguage = practiceLangRef.current;
+        } else if (detected === practiceLangRef.current) {
+          speakerRole    = 'practice';
+          sourceLanguage = practiceLangRef.current;
+          targetLanguage = patientLangRef.current;
+        }
+
+        if (speakerRole !== null) {
+          setCurrentSpeakerRole(speakerRole);
+        }
+
         setTurns(prev => prev.map(t =>
           t.inputItemId === ev.item_id
-            ? { ...t, originalText: ev.transcript ?? '' }
+            ? {
+                ...t,
+                originalText: transcript,
+                ...(speakerRole !== null ? { speakerRole, sourceLanguage, targetLanguage } : {}),
+              }
             : t
         ));
         break;
+      }
 
       // ── Response ─────────────────────────────────────────────────────────────
       case 'response.created':
@@ -198,40 +199,48 @@ export function useRealtimeSession() {
         break;
 
       // ── Response done ────────────────────────────────────────────────────────
-      // response.status can be 'completed' | 'cancelled' | 'failed' | 'incomplete'.
-      // For 'completed': output_audio_buffer.stopped handles the language switch.
-      // For all other statuses: no audio is generated, so output_audio_buffer events
-      // never fire — we must recover here to prevent the session from freezing.
-      case 'response.done':
-        {
-          const respStatus = ev.response?.status;
-          if (respStatus === 'failed' || respStatus === 'cancelled' || respStatus === 'incomplete') {
-            speakerLockRef.current = false;
-            // Mark the pending turn as done (no translation available)
-            setTurns(prev => {
-              if (prev.length === 0) return prev;
-              return prev.map((t, i) =>
-                i === prev.length - 1 && !t.isDone
-                  ? { ...t, isDone: true }
-                  : t
-              );
-            });
-            _switchLanguage();
-            setSessionStatus('ready');
-          }
-          // 'completed' case: output_audio_buffer.stopped will fire and handle the switch
+      // For 'completed': output_audio_buffer.stopped handles cleanup.
+      // For failed/cancelled/incomplete: no audio fires — recover here.
+      case 'response.done': {
+        const respStatus = ev.response?.status;
+        if (respStatus === 'failed' || respStatus === 'cancelled' || respStatus === 'incomplete') {
+          speakerLockRef.current = false;
+          setTurns(prev => {
+            if (prev.length === 0) return prev;
+            return prev.map((t, i) =>
+              i === prev.length - 1 && !t.isDone
+                ? { ...t, isDone: true }
+                : t
+            );
+          });
+          setSessionStatus('ready');
         }
         break;
+      }
 
       // ── WebRTC audio buffer (WebRTC-only events) ──────────────────────────────
       case 'output_audio_buffer.started':
-        speakerLockRef.current = true;
+        speakerLockRef.current  = true;
+        turnSwitchedRef.current = false; // arm watchdog for this playback
         setSessionStatus('speaking');
+        clearTimeout(audioWatchdogRef.current);
+        // Fallback: if output_audio_buffer.stopped never arrives, release the lock
+        audioWatchdogRef.current = setTimeout(() => {
+          if (!sessionActiveRef.current) return;
+          if (turnSwitchedRef.current) return;
+          turnSwitchedRef.current = true;
+          speakerLockRef.current  = false;
+          setEvents(prev => [...prev, { type: 'audio_stopped_watchdog', ts: Date.now() }]);
+          setSessionStatus('ready');
+        }, 4000);
         break;
 
       case 'output_audio_buffer.stopped':
-        speakerLockRef.current = false;
-        _switchLanguage();
+        clearTimeout(audioWatchdogRef.current);
+        audioWatchdogRef.current = null;
+        if (turnSwitchedRef.current) break; // watchdog already handled it
+        turnSwitchedRef.current = true;
+        speakerLockRef.current  = false;
         setSessionStatus('ready');
         break;
 
@@ -244,7 +253,7 @@ export function useRealtimeSession() {
       default:
         break;
     }
-  }, [_switchLanguage]);
+  }, []); // all accessed values are refs or stable state setters
 
   const connect = useCallback(async ({ patientLanguage, practiceLanguage }) => {
     if (connectionState === 'connecting' || connectionState === 'connected') return;
@@ -253,15 +262,12 @@ export function useRealtimeSession() {
     setError(null);
     setEvents([]);
     setTurns([]);
-    turnCounterRef.current      = 0;
-    speakerLockRef.current      = false;
-    patientLangRef.current      = patientLanguage;
-    practiceLangRef.current     = practiceLanguage;
-    currentInputLangRef.current = patientLanguage;
-    currentSpeakerRef.current   = 'patient';
-    sessionActiveRef.current    = true; // arm the guard
-    setCurrentInputLang(patientLanguage);
-    setCurrentSpeakerRole('patient');
+    turnCounterRef.current   = 0;
+    speakerLockRef.current   = false;
+    patientLangRef.current   = patientLanguage;
+    practiceLangRef.current  = practiceLanguage;
+    sessionActiveRef.current = true; // arm the guard
+    setCurrentSpeakerRole(null);     // no speaker detected yet
 
     try {
       // ── 1. Ephemeral token ──────────────────────────────────────────────────
@@ -271,14 +277,13 @@ export function useRealtimeSession() {
         body: JSON.stringify({ patientLanguage, practiceLanguage }),
       });
 
-      // Guard: disconnect() may have been called while the token fetch was in flight
       if (!sessionActiveRef.current) return;
 
       if (!tokenRes.ok) {
         const body = await tokenRes.json().catch(() => ({}));
         throw new Error(body?.error ?? `Token-Fehler ${tokenRes.status}`);
       }
-      const { clientSecret } = await tokenRes.json();
+      const { clientSecret, model: sessionModel } = await tokenRes.json();
       if (!sessionActiveRef.current) return;
 
       // ── 2. Microphone ───────────────────────────────────────────────────────
@@ -291,7 +296,6 @@ export function useRealtimeSession() {
       });
 
       if (!sessionActiveRef.current) {
-        // disconnect() raced with getUserMedia — stop tracks before returning
         stream.getTracks().forEach(t => t.stop());
         return;
       }
@@ -312,7 +316,6 @@ export function useRealtimeSession() {
       pc.oniceconnectionstatechange = () => {
         if (!sessionActiveRef.current) return;
         if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
-          // Stop mic and all resources immediately — do not wait for the user
           _cleanup();
           setConnectionState('error');
           setError('Verbindungsfehler — bitte Gespräch neu starten.');
@@ -332,8 +335,6 @@ export function useRealtimeSession() {
       };
 
       dc.onclose = () => {
-        // Guard: if _cleanup() already ran, the handler was nulled out first,
-        // but some browsers fire onclose asynchronously — ignore stale closes.
         if (!sessionActiveRef.current) return;
         setConnectionState('idle');
         setSessionStatus('idle');
@@ -370,8 +371,8 @@ export function useRealtimeSession() {
       if (!sessionActiveRef.current) { _cleanup(); return; }
 
       // ── 6. SDP exchange with OpenAI ─────────────────────────────────────────
-      const model  = 'gpt-4o-realtime-preview';
-      const sdpRes = await fetch(`${OPENAI_REALTIME_BASE}?model=${encodeURIComponent(model)}`, {
+      // Use the model name returned by the server — must match the created session.
+      const sdpRes = await fetch(`${OPENAI_REALTIME_BASE}?model=${encodeURIComponent(sessionModel ?? 'gpt-realtime')}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${clientSecret}`,
@@ -403,8 +404,7 @@ export function useRealtimeSession() {
     setConnectionState('disconnecting');
     _cleanup();
     setConnectionState('idle');
-    setCurrentInputLang('');
-    setCurrentSpeakerRole('patient');
+    setCurrentSpeakerRole(null);
   }, [_cleanup]);
 
   const sendEvent = useCallback((event) => {
@@ -418,7 +418,6 @@ export function useRealtimeSession() {
     connectionState,
     sessionStatus,
     currentSpeakerRole,
-    currentInputLang,
     turns,
     events,
     error,

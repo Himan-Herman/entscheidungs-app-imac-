@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRealtimeSession } from './useRealtimeSession.js';
+import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import './MedaRealtimePage.css';
-
-const LANG_OPTIONS = [
-  { value: 'de', label: 'Deutsch' },
-  { value: 'en', label: 'Englisch' },
-];
 
 const ROLE_LABEL = {
   patient:  'Patient',
@@ -25,18 +21,17 @@ function formatTime(seconds) {
 }
 
 /** Human-readable status label from connection + session state. */
-function buildStatusLabel(connectionState, sessionStatus, speakerRole, sessionExpired) {
-  if (sessionExpired)                            return 'Sitzung beendet';
-  if (connectionState === 'connecting')          return 'Verbinde …';
-  if (connectionState === 'error')               return 'Verbindungsfehler';
-  if (connectionState !== 'connected')           return 'Nicht verbunden';
+function buildStatusLabel(connectionState, sessionStatus, sessionExpired) {
+  if (sessionExpired)                   return 'Sitzung beendet';
+  if (connectionState === 'connecting') return 'Verbinde …';
+  if (connectionState === 'error')      return 'Verbindungsfehler';
+  if (connectionState !== 'connected')  return 'Nicht verbunden';
 
-  const role = ROLE_LABEL[speakerRole] ?? speakerRole;
   switch (sessionStatus) {
-    case 'ready':         return `Wartet auf ${role}`;
-    case 'speech_active': return `${role} spricht`;
+    case 'ready':         return 'Wartet auf Sprecher';
+    case 'speech_active': return 'Jemand spricht …';
     case 'processing':    return 'Verarbeite …';
-    case 'translating':   return `Meda übersetzt für ${speakerRole === 'patient' ? 'Praxis' : 'Patient'}`;
+    case 'translating':   return 'Meda übersetzt …';
     case 'speaking':      return 'Meda spricht';
     default:              return 'Bereit';
   }
@@ -54,14 +49,8 @@ function statusCls(connectionState, sessionStatus, sessionExpired) {
 }
 
 /**
- * Phase 8.5 — Realtime session with hard timeout, countdown, and full cleanup.
- *
- * Safety mechanisms:
- *  - Hard 5-minute timeout: automatic disconnect() when SESSION_MAX_SECONDS expires
- *  - Countdown timer visible in the UI; warning banner at 60 s remaining
- *  - Unmount cleanup: disconnect() called when component unmounts (navigation away)
- *  - Tab-hidden cleanup: disconnect() when tab becomes invisible
- *  - No auto-reconnect anywhere
+ * Phase 8.8 — Setup panel with language selection + three consent checkboxes,
+ * followed by the Realtime session view once connected.
  */
 export default function MedaRealtimePage() {
   const {
@@ -69,7 +58,7 @@ export default function MedaRealtimePage() {
     disconnect,
     connectionState,
     sessionStatus,
-    currentSpeakerRole,
+    currentSpeakerRole, // null until first speaker detected; then 'patient'|'practice'
     turns,
     events,
     error,
@@ -82,6 +71,11 @@ export default function MedaRealtimePage() {
   const [remainingSeconds, setRemainingSeconds] = useState(SESSION_MAX_SECONDS);
   const [sessionExpired,   setSessionExpired]   = useState(false);
 
+  // Three consent checkboxes — stay checked across sessions for the page lifetime
+  const [consentAudio,   setConsentAudio]   = useState(false);
+  const [consentContext, setConsentContext] = useState(false);
+  const [consentMedical, setConsentMedical] = useState(false);
+
   const turnsEndRef      = useRef(null);
   const debugLogRef      = useRef(null);
   const timerIntervalRef = useRef(null);
@@ -92,7 +86,6 @@ export default function MedaRealtimePage() {
   useEffect(() => { disconnectRef.current = disconnect; });
 
   // ── Unmount cleanup ─────────────────────────────────────────────────────────
-  // Runs when the user navigates away from this page — stops mic and session.
   useEffect(() => {
     return () => {
       disconnectRef.current();
@@ -104,8 +97,6 @@ export default function MedaRealtimePage() {
   }, []); // intentionally empty — runs only on unmount
 
   // ── Tab-hidden protection ───────────────────────────────────────────────────
-  // If the user switches tabs while a session is running, stop it immediately
-  // to avoid incurring Realtime costs in the background.
   useEffect(() => {
     function onVisibilityChange() {
       if (document.visibilityState === 'hidden' && connectionState === 'connected') {
@@ -126,8 +117,8 @@ export default function MedaRealtimePage() {
       setSessionExpired(false);
 
       timerIntervalRef.current = setInterval(() => {
-        const elapsed    = Math.floor((Date.now() - sessionStartRef.current) / 1000);
-        const remaining  = Math.max(0, SESSION_MAX_SECONDS - elapsed);
+        const elapsed   = Math.floor((Date.now() - sessionStartRef.current) / 1000);
+        const remaining = Math.max(0, SESSION_MAX_SECONDS - elapsed);
         setRemainingSeconds(remaining);
 
         if (remaining <= 0) {
@@ -145,7 +136,7 @@ export default function MedaRealtimePage() {
         }
       };
     }
-  }, [connectionState]); // re-runs when connection is established or dropped
+  }, [connectionState]);
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -163,20 +154,26 @@ export default function MedaRealtimePage() {
   const isBusy       = isConnecting || connectionState === 'disconnecting';
   const langMismatch = patientLang === practiceLang;
   const showWarning  = isConnected && remainingSeconds <= SESSION_WARN_SECONDS && remainingSeconds > 0;
+  const allConsents  = consentAudio && consentContext && consentMedical;
+  const canStart     = !isBusy && !langMismatch && allConsents;
 
-  const patientLangLabel  = LANG_OPTIONS.find(o => o.value === patientLang)?.label  ?? patientLang;
-  const practiceLangLabel = LANG_OPTIONS.find(o => o.value === practiceLang)?.label ?? practiceLang;
-
-  function langLabel(code) {
-    return LANG_OPTIONS.find(o => o.value === code)?.label ?? code;
-  }
+  const patientLangLabel  = REALTIME_LANGUAGE_MAP[patientLang]  ?? patientLang;
+  const practiceLangLabel = REALTIME_LANGUAGE_MAP[practiceLang] ?? practiceLang;
 
   function handleStart() {
     setSessionExpired(false);
     connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
   }
 
-  const label    = buildStatusLabel(connectionState, sessionStatus, currentSpeakerRole, sessionExpired);
+  // Hint shown below the disabled start button
+  function getBlockHint() {
+    if (langMismatch) return 'Bitte zwei verschiedene Sprachen wählen.';
+    if (!allConsents) return 'Bitte alle drei Zustimmungen bestätigen.';
+    return null;
+  }
+  const blockHint = (!canStart && !isBusy) ? getBlockHint() : null;
+
+  const label    = buildStatusLabel(connectionState, sessionStatus, sessionExpired);
   const badgeCls = statusCls(connectionState, sessionStatus, sessionExpired);
   const showPulse = badgeCls === 'active' || badgeCls === 'speaking';
 
@@ -190,10 +187,11 @@ export default function MedaRealtimePage() {
       <header className="mrt-header">
         <h1 className="mrt-title">Meda Live-Dolmetscher</h1>
         <div className="mrt-header-right">
-          {/* Countdown — visible while connected */}
           {isConnected && (
-            <div className={`mrt-timer${remainingSeconds <= SESSION_WARN_SECONDS ? ' mrt-timer--warn' : ''}`}
-              aria-label={`Verbleibende Sitzungszeit: ${formatTime(remainingSeconds)}`}>
+            <div
+              className={`mrt-timer${remainingSeconds <= SESSION_WARN_SECONDS ? ' mrt-timer--warn' : ''}`}
+              aria-label={`Verbleibende Sitzungszeit: ${formatTime(remainingSeconds)}`}
+            >
               {formatTime(remainingSeconds)}
             </div>
           )}
@@ -204,87 +202,146 @@ export default function MedaRealtimePage() {
         </div>
       </header>
 
-      {/* ── Warning banner ──────────────────────────────────────────────────── */}
+      {/* ── Warning / expired banners ────────────────────────────────────────── */}
       {showWarning && (
         <div className="mrt-timeout-warning" role="alert">
           Die Sitzung endet in {formatTime(remainingSeconds)} — bitte Gespräch beenden oder fortsetzen.
         </div>
       )}
-
-      {/* ── Expired banner ──────────────────────────────────────────────────── */}
       {sessionExpired && (
         <div className="mrt-expired-banner" role="status">
           Sitzung beendet. Für eine neue Sitzung bitte „Live-Gespräch starten" klicken.
         </div>
       )}
 
-      {/* ── Setup ──────────────────────────────────────────────────────────── */}
-      <section className="mrt-setup" aria-label="Sprachauswahl und Steuerung">
-        <div className="mrt-lang-row">
-          <div className="mrt-field">
-            <label className="mrt-label" htmlFor="mrt-patient-lang">Patient spricht</label>
-            <select
-              id="mrt-patient-lang"
-              className="mrt-select"
-              value={patientLang}
-              onChange={e => setPatientLang(e.target.value)}
-              disabled={isConnected || isBusy}
-            >
-              {LANG_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+      {/* ── Setup panel — visible when not connected ─────────────────────────── */}
+      {!isConnected && (
+        <section className="mrt-setup" aria-label="Sprachauswahl und Zustimmung">
+
+          {/* Language selects */}
+          <div className="mrt-lang-row">
+            <div className="mrt-field">
+              <label className="mrt-label" htmlFor="mrt-patient-lang">Patient spricht</label>
+              <select
+                id="mrt-patient-lang"
+                className="mrt-select"
+                value={patientLang}
+                onChange={e => setPatientLang(e.target.value)}
+                disabled={isBusy}
+              >
+                {REALTIME_LANGUAGES.map(l => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <span className="mrt-arrow" aria-hidden="true">⇄</span>
+
+            <div className="mrt-field">
+              <label className="mrt-label" htmlFor="mrt-practice-lang">Praxis spricht</label>
+              <select
+                id="mrt-practice-lang"
+                className="mrt-select"
+                value={practiceLang}
+                onChange={e => setPracticeLang(e.target.value)}
+                disabled={isBusy}
+              >
+                {REALTIME_LANGUAGES.map(l => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <span className="mrt-arrow" aria-hidden="true">⇄</span>
+          {/* Consent checkboxes */}
+          <div className="mrt-consent-list" role="group" aria-label="Zustimmungen">
+            <div className="mrt-consent-item">
+              <input
+                type="checkbox"
+                id="mrt-consent-audio"
+                className="mrt-consent-checkbox"
+                checked={consentAudio}
+                onChange={e => setConsentAudio(e.target.checked)}
+                disabled={isBusy}
+              />
+              <label htmlFor="mrt-consent-audio" className="mrt-consent-label">
+                Ich bestätige, dass Audio und erkannter Text zur Live-Übersetzung verarbeitet werden.
+              </label>
+            </div>
 
-          <div className="mrt-field">
-            <label className="mrt-label" htmlFor="mrt-practice-lang">Praxis spricht</label>
-            <select
-              id="mrt-practice-lang"
-              className="mrt-select"
-              value={practiceLang}
-              onChange={e => setPracticeLang(e.target.value)}
-              disabled={isConnected || isBusy}
-            >
-              {LANG_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            <div className="mrt-consent-item">
+              <input
+                type="checkbox"
+                id="mrt-consent-context"
+                className="mrt-consent-checkbox"
+                checked={consentContext}
+                onChange={e => setConsentContext(e.target.checked)}
+                disabled={isBusy}
+              />
+              <label htmlFor="mrt-consent-context" className="mrt-consent-label">
+                Ich bestätige, dass Meda nur im medizinischen Arzt-Patient-Gespräch verwendet wird.
+              </label>
+            </div>
+
+            <div className="mrt-consent-item">
+              <input
+                type="checkbox"
+                id="mrt-consent-medical"
+                className="mrt-consent-checkbox"
+                checked={consentMedical}
+                onChange={e => setConsentMedical(e.target.checked)}
+                disabled={isBusy}
+              />
+              <label htmlFor="mrt-consent-medical" className="mrt-consent-label">
+                Ich verstehe, dass Meda nur dolmetscht und keine Diagnose, Therapieempfehlung oder
+                Dringlichkeitseinschätzung gibt.
+              </label>
+            </div>
           </div>
-        </div>
 
-        {langMismatch && (
-          <p className="mrt-warning" role="alert">Bitte zwei verschiedene Sprachen wählen.</p>
-        )}
+          {/* Validation hint */}
+          {blockHint && (
+            <p className="mrt-consent-hint" role="alert">{blockHint}</p>
+          )}
 
-        <div className="mrt-controls">
-          {!isConnected ? (
+          {/* Start button */}
+          <div className="mrt-controls">
             <button
               className="mrt-btn mrt-btn--start"
               onClick={handleStart}
-              disabled={isBusy || langMismatch}
+              disabled={!canStart}
+              aria-disabled={!canStart}
             >
               {isConnecting ? 'Verbinde …' : 'Live-Gespräch starten'}
             </button>
-          ) : (
-            <button
-              className="mrt-btn mrt-btn--stop"
-              onClick={disconnect}
-            >
-              Gespräch beenden
-            </button>
+          </div>
+
+          {error && !sessionExpired && (
+            <p className="mrt-error" role="alert">{error}</p>
           )}
-        </div>
+        </section>
+      )}
 
-        {error && !sessionExpired && (
-          <p className="mrt-error" role="alert">{error}</p>
-        )}
-      </section>
-
-      {/* ── Pingpong speaker bar ─────────────────────────────────────────────── */}
+      {/* ── Active session bar — compact summary + stop button ───────────────── */}
       {isConnected && (
-        <div className="mrt-pingpong-bar" aria-live="polite">
+        <div className="mrt-session-bar">
+          <span className="mrt-session-langs">
+            Patient: <strong>{patientLangLabel}</strong>
+            <span className="mrt-session-sep" aria-hidden="true"> · </span>
+            Praxis: <strong>{practiceLangLabel}</strong>
+          </span>
+          <button
+            className="mrt-btn mrt-btn--stop mrt-btn--compact"
+            onClick={disconnect}
+          >
+            Gespräch beenden
+          </button>
+        </div>
+      )}
+
+      {/* ── Speaker bar — highlights last detected speaker ──────────────────── */}
+      {isConnected && (
+        <div className="mrt-pingpong-bar" aria-live="polite" aria-label="Zuletzt erkannter Sprecher">
           <div className={`mrt-speaker-pill${currentSpeakerRole === 'patient' ? ' mrt-speaker-pill--active' : ''}`}>
             Patient · {patientLangLabel}
           </div>
@@ -299,9 +356,7 @@ export default function MedaRealtimePage() {
       <section className="mrt-conversation" aria-label="Gesprächsverlauf">
         {turns.length === 0 && isConnected && (
           <p className="mrt-conversation-empty">
-            {currentSpeakerRole === 'patient'
-              ? `Patient: Bitte auf ${patientLangLabel} sprechen.`
-              : `Praxis: Bitte auf ${practiceLangLabel} sprechen.`}
+            Bitte sprechen — Meda erkennt die Sprache automatisch.
           </p>
         )}
         {turns.length === 0 && !isConnected && !isConnecting && !sessionExpired && (
@@ -313,17 +368,23 @@ export default function MedaRealtimePage() {
         {turns.map(turn => (
           <div
             key={turn.key}
-            className={`mrt-turn mrt-turn--${turn.speakerRole}${turn.isDone ? ' mrt-turn--done' : ''}`}
+            className={`mrt-turn${turn.speakerRole ? ` mrt-turn--${turn.speakerRole}` : ' mrt-turn--detecting'}${turn.isDone ? ' mrt-turn--done' : ''}`}
           >
             <div className="mrt-turn-header">
-              <span className="mrt-turn-role">{ROLE_LABEL[turn.speakerRole]}</span>
+              <span className="mrt-turn-role">
+                {turn.speakerRole ? ROLE_LABEL[turn.speakerRole] : '…'}
+              </span>
               <span className="mrt-turn-direction">
-                {langLabel(turn.sourceLanguage)} → {langLabel(turn.targetLanguage)}
+                {turn.sourceLanguage
+                  ? `${REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage} → ${REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}`
+                  : 'Erkenne Sprache …'}
               </span>
             </div>
 
             <div className="mrt-turn-original">
-              <span className="mrt-turn-lang">{langLabel(turn.sourceLanguage)}</span>
+              <span className="mrt-turn-lang">
+                {REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage}
+              </span>
               <p className="mrt-turn-text">
                 {turn.originalText !== null
                   ? turn.originalText
@@ -334,7 +395,7 @@ export default function MedaRealtimePage() {
             {(turn.translatedText || !turn.isDone) && (
               <div className="mrt-turn-translation">
                 <span className="mrt-turn-lang mrt-turn-lang--translation">
-                  {langLabel(turn.targetLanguage)}
+                  {REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}
                 </span>
                 <p className="mrt-turn-text mrt-turn-text--translation">
                   {turn.translatedText
