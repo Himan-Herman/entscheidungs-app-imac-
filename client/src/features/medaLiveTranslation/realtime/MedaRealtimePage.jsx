@@ -30,8 +30,8 @@ function formatTime(seconds) {
 function buildStatusLabel(connectionState, sessionStatus, sessionExpired) {
   if (sessionExpired)                   return 'Sitzung beendet';
   if (connectionState === 'connecting') return 'Verbinde …';
-  if (connectionState === 'error')      return 'Verbindungsfehler';
-  if (connectionState !== 'connected')  return 'Nicht verbunden';
+  if (connectionState === 'error')      return 'Nicht verbunden';
+  if (connectionState !== 'connected')  return 'Bereit';
 
   switch (sessionStatus) {
     case 'ready':         return 'Wartet auf Sprecher';
