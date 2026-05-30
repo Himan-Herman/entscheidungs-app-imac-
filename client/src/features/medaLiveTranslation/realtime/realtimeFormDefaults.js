@@ -60,12 +60,9 @@ export function usePatientProfilePrefill() {
 
         const insuranceStatus = INSURANCE_MAP[p.insuranceType] || '';
 
-        // Build address from profile fields
-        const addrParts = [
-          String(p.addressLine || '').trim(),
-          [String(p.postalCode || '').trim()].filter(Boolean).join(' '),
-        ].filter(Boolean);
-        const address = addrParts.join(', ');
+        // Address — map separate API fields to separate form fields
+        const street     = String(p.addressLine || '').trim();
+        const postalCode = String(p.postalCode  || '').trim();
 
         // Language prefill — only use if the code is in SUPPORTED_LANGUAGES
         const patientLang  = SUPPORTED_LANG_CODES.has(p.preferredPatientLanguage)
@@ -80,7 +77,8 @@ export function usePatientProfilePrefill() {
           insuranceStatus,
           email:           String(u.email    || '').trim(),
           phone:           String(p.phone    || '').trim(),
-          address,
+          street,
+          postalCode,
           patientLang,
           practiceLang,
         });
