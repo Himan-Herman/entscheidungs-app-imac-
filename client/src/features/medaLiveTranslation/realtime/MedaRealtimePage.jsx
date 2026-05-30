@@ -386,7 +386,7 @@ export default function MedaRealtimePage() {
                   id="mrt-person-name"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Maria Müller"
+                  placeholder="z. B. Max Mustermann"
                   value={patientInfo.name}
                   onChange={e => handlePatientInfo('name', e.target.value)}
                   disabled={isBusy}

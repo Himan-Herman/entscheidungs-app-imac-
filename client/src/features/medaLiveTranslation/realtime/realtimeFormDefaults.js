@@ -25,7 +25,7 @@ const INSURANCE_MAP = {
 
 function formatDateDe(isoDate) {
   if (!isoDate) return '';
-  const parts = String(isoDate).split('-');
+  const parts = String(isoDate).slice(0, 10).split('-');
   if (parts.length !== 3) return '';
   return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
