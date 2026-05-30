@@ -47,7 +47,7 @@ function buildStatusLabel(connectionState, sessionStatus, sessionExpired) {
 function statusCls(connectionState, sessionStatus, sessionExpired) {
   if (sessionExpired)                              return 'expired';
   if (connectionState === 'connecting')            return 'active';
-  if (connectionState === 'error')                 return 'error';
+  if (connectionState === 'error')                 return 'idle';
   if (connectionState !== 'connected')             return 'idle';
   if (sessionStatus === 'ready')                   return 'ready';
   if (sessionStatus === 'speaking')                return 'speaking';
@@ -108,7 +108,8 @@ export default function MedaRealtimePage() {
       insuranceStatus: profileData.insuranceStatus || prev.insuranceStatus,
       email:           profileData.email           || prev.email,
       phone:           profileData.phone           || prev.phone,
-      address:         profileData.address         || prev.address,
+      street:          profileData.street          || prev.street,
+      postalCode:      profileData.postalCode      || prev.postalCode,
     }));
     if (profileData.patientLang)  setPatientLang(profileData.patientLang);
     if (profileData.practiceLang) setPracticeLang(profileData.practiceLang);
@@ -218,7 +219,10 @@ export default function MedaRealtimePage() {
         insuranceStatus: profileData.insuranceStatus || '',
         email:           profileData.email           || '',
         phone:           profileData.phone           || '',
-        address:         profileData.address         || '',
+        street:          profileData.street          || '',
+        postalCode:      profileData.postalCode      || '',
+        city:            '',
+        country:         '',
         relationship:    '',
       }));
     } else if (!isSelf) {
@@ -436,6 +440,22 @@ export default function MedaRealtimePage() {
               </div>
 
               <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-ins-name">
+                  Krankenkasse / Versicherung
+                  <span className="mrt-form-opt"> (optional)</span>
+                </label>
+                <input
+                  id="mrt-person-ins-name"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. AOK, TK, Barmer, Debeka"
+                  value={patientInfo.insuranceName}
+                  onChange={e => handlePatientInfo('insuranceName', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
                 <label className="mrt-form-label" htmlFor="mrt-person-ins-nr">
                   Versicherungsnummer
                   <span className="mrt-form-opt"> (optional)</span>
@@ -449,7 +469,6 @@ export default function MedaRealtimePage() {
                   onChange={e => handlePatientInfo('insuranceNumber', e.target.value)}
                   disabled={isBusy}
                 />
-                <span className="mrt-form-note">Nur eintragen, wenn für Dokumentation gewünscht.</span>
               </div>
 
               <div className="mrt-form-field">
@@ -479,14 +498,56 @@ export default function MedaRealtimePage() {
               </div>
 
               <div className="mrt-form-field mrt-form-field--full">
-                <label className="mrt-form-label" htmlFor="mrt-person-address">Adresse</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-street">Straße und Hausnummer</label>
                 <input
-                  id="mrt-person-address"
+                  id="mrt-person-street"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="Straße, PLZ, Ort"
-                  value={patientInfo.address}
-                  onChange={e => handlePatientInfo('address', e.target.value)}
+                  placeholder="z. B. Eisenstraße 64"
+                  value={patientInfo.street}
+                  onChange={e => handlePatientInfo('street', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-plz">PLZ</label>
+                <input
+                  id="mrt-person-plz"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. 40227"
+                  value={patientInfo.postalCode}
+                  onChange={e => handlePatientInfo('postalCode', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-city">Ort</label>
+                <input
+                  id="mrt-person-city"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. Düsseldorf"
+                  value={patientInfo.city}
+                  onChange={e => handlePatientInfo('city', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-country">
+                  Land
+                  <span className="mrt-form-opt"> (optional)</span>
+                </label>
+                <input
+                  id="mrt-person-country"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="Deutschland"
+                  value={patientInfo.country}
+                  onChange={e => handlePatientInfo('country', e.target.value)}
                   disabled={isBusy}
                 />
               </div>
@@ -583,14 +644,40 @@ export default function MedaRealtimePage() {
               </div>
 
               <div className="mrt-form-field mrt-form-field--full">
-                <label className="mrt-form-label" htmlFor="mrt-practice-address">Adresse der Praxis</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-street">Straße und Hausnummer</label>
                 <input
-                  id="mrt-practice-address"
+                  id="mrt-practice-street"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="Straße, PLZ, Ort"
-                  value={practiceInfo.address}
-                  onChange={e => handlePracticeInfo('address', e.target.value)}
+                  placeholder="z. B. Musterstraße 1"
+                  value={practiceInfo.street}
+                  onChange={e => handlePracticeInfo('street', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-practice-plz">PLZ</label>
+                <input
+                  id="mrt-practice-plz"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. 10115"
+                  value={practiceInfo.postalCode}
+                  onChange={e => handlePracticeInfo('postalCode', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-practice-city">Ort</label>
+                <input
+                  id="mrt-practice-city"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. Berlin"
+                  value={practiceInfo.city}
+                  onChange={e => handlePracticeInfo('city', e.target.value)}
                   disabled={isBusy}
                 />
               </div>
