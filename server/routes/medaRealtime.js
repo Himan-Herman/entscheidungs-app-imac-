@@ -190,7 +190,6 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
         type: 'realtime',
         model,
         instructions,
-        temperature: 0.8,
         max_output_tokens: 'inf',
         output_modalities: ['audio', 'text'],
         audio: {
