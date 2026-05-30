@@ -182,34 +182,42 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
     const silenceMs          = getLiveTranslationVadSilenceMs();
     const instructions       = buildInstructions(patientLanguage, practiceLanguage);
 
-    const sessionData = await openai.beta.realtime.sessions.create({
-      model,
-      modalities: ['audio', 'text'],
-      instructions,
-      voice,
-      input_audio_format: 'pcm16',
-      output_audio_format: 'pcm16',
-      input_audio_transcription: {
-        // Auto language detection (no fixed language) — model selects between
-        // the two configured languages via the system prompt.
-        model: transcriptionModel,
+    // GA endpoint: POST /v1/realtime/client_secrets
+    // Schema: audio.input.{transcription, turn_detection}, audio.output.{voice, format}
+    const sessionData = await openai.realtime.clientSecrets.create({
+      expires_after: { anchor: 'created_at', seconds: 600 },
+      session: {
+        type: 'realtime',
+        model,
+        instructions,
+        temperature: 0.8,
+        max_output_tokens: 'inf',
+        output_modalities: ['audio', 'text'],
+        audio: {
+          input: {
+            format: 'pcm16',
+            // Auto language detection — no fixed language; model selects via system prompt
+            transcription: { model: transcriptionModel },
+            turn_detection: {
+              type: 'server_vad',
+              threshold: 0.5,
+              prefix_padding_ms: 200,
+              silence_duration_ms: silenceMs,
+              create_response: true,
+              interrupt_response: true,
+            },
+          },
+          output: {
+            format: 'pcm16',
+            voice,
+          },
+        },
       },
-      turn_detection: {
-        type: 'server_vad',
-        threshold: 0.5,
-        prefix_padding_ms: 200,
-        silence_duration_ms: silenceMs,
-        create_response: true,
-        interrupt_response: true,
-      },
-      temperature: 0.8,
-      max_response_output_tokens: 'inf',
     });
 
-    const clientSecret = sessionData.client_secret?.value;
-    const expiresAt    = sessionData.client_secret?.expires_at;
-    // id not in the official TS type but present in the actual API response
-    const sessionId    = /** @type {any} */ (sessionData).id ?? null;
+    const clientSecret = sessionData.value;
+    const expiresAt    = sessionData.expires_at;
+    const sessionId    = sessionData.session?.id ?? null;
 
     if (!clientSecret) {
       throw new Error('OpenAI Realtime API returned no client_secret.');
@@ -219,7 +227,7 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
       clientSecret,
       sessionId,
       model,   // client uses this for the SDP fetch URL — must match the session
-      expiresAt: expiresAt != null ? new Date(expiresAt * 1000).toISOString() : null,
+      expiresAt: typeof expiresAt === 'number' ? new Date(expiresAt * 1000).toISOString() : null,
       initialInputLang: patientLanguage,
       patientLanguage,
       practiceLanguage,
