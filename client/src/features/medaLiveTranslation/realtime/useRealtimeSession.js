@@ -1,37 +1,39 @@
 import { useState, useRef, useCallback } from 'react';
 import { authFetch } from '../../../api/authFetch.js';
 
-// OpenAI Realtime WebRTC endpoint — browser posts SDP offer directly
 const OPENAI_REALTIME_BASE = 'https://api.openai.com/v1/realtime';
 
 /**
  * @typedef {'idle'|'connecting'|'connected'|'disconnecting'|'error'} ConnectionState
- * @typedef {'closed'|'connecting'|'open'} DataChannelState
+ * @typedef {'idle'|'ready'|'speech_active'|'processing'|'translating'|'speaking'} SessionStatus
+ * @typedef {{ key: number, inputItemId: string|null, originalText: string|null, translatedText: string, isDone: boolean }} Turn
  */
 
 /**
- * Hook for a single OpenAI Realtime WebRTC session.
+ * Hook for the Meda Realtime interpreter session (Phase 8.3).
  *
- * Responsibilities (Phase 8.2 scope only):
- *  - Fetch ephemeral token from /api/meda-realtime/session
- *  - Build RTCPeerConnection, attach microphone, create data channel
- *  - Perform SDP offer → OpenAI → SDP answer exchange
- *  - Expose raw incoming server events (no pingpong logic yet)
- *  - Expose connect / disconnect / sendEvent
- *
- * NOT in this hook: pingpong state machine, voice switching, UI logic.
+ * Manages:
+ *  - WebRTC connection lifecycle (token fetch → SDP exchange)
+ *  - Structured conversation turns parsed from Realtime server events
+ *  - Session status derived from VAD + response events
+ *  - audioElRef: assign to a DOM <audio> element for remote audio output
  */
 export function useRealtimeSession() {
   const [connectionState, setConnectionState] = useState(/** @type {ConnectionState} */ ('idle'));
-  const [dataChannelState, setDataChannelState] = useState(/** @type {DataChannelState} */ ('closed'));
-  const [lastEvent, setLastEvent] = useState(/** @type {object|null} */ (null));
+  const [sessionStatus, setSessionStatus] = useState(/** @type {SessionStatus} */ ('idle'));
+  const [turns, setTurns] = useState(/** @type {Turn[]} */ ([]));
   const [events, setEvents] = useState(/** @type {object[]} */ ([]));
   const [error, setError] = useState(/** @type {string|null} */ (null));
+
+  // Page attaches its <audio> DOM element here — avoids detached Audio() autoplay issues
+  const audioElRef = useRef(/** @type {HTMLAudioElement|null} */ (null));
 
   const pcRef = useRef(/** @type {RTCPeerConnection|null} */ (null));
   const dcRef = useRef(/** @type {RTCDataChannel|null} */ (null));
   const streamRef = useRef(/** @type {MediaStream|null} */ (null));
-  const audioElRef = useRef(/** @type {HTMLAudioElement|null} */ (null));
+
+  // Turn sequencing — commits arrive before response events, so this is safe
+  const turnCounterRef = useRef(0);
 
   const _cleanup = useCallback(() => {
     if (dcRef.current) {
@@ -53,9 +55,83 @@ export function useRealtimeSession() {
     }
     if (audioElRef.current) {
       audioElRef.current.srcObject = null;
-      audioElRef.current = null;
     }
-    setDataChannelState('closed');
+    setSessionStatus('idle');
+  }, []);
+
+  /** Parse a Realtime server event and update conversation state. */
+  const _handleEvent = useCallback((ev) => {
+    switch (ev.type) {
+      case 'input_audio_buffer.speech_started':
+        setSessionStatus('speech_active');
+        break;
+
+      case 'input_audio_buffer.speech_stopped':
+        setSessionStatus('processing');
+        break;
+
+      case 'input_audio_buffer.committed':
+        // Audio committed → create a new turn placeholder
+        turnCounterRef.current += 1;
+        setTurns(prev => [...prev, {
+          key: turnCounterRef.current,
+          inputItemId: ev.item_id ?? null,
+          originalText: null,
+          translatedText: '',
+          isDone: false,
+        }]);
+        break;
+
+      case 'conversation.item.input_audio_transcription.completed':
+        // Fill in original text for the matching turn
+        setTurns(prev => prev.map(t =>
+          t.inputItemId === ev.item_id
+            ? { ...t, originalText: ev.transcript ?? '' }
+            : t
+        ));
+        break;
+
+      case 'response.created':
+        setSessionStatus('translating');
+        break;
+
+      case 'response.audio_transcript.delta':
+        // Append streaming delta to the most recent (last) turn
+        setTurns(prev => {
+          if (prev.length === 0) return prev;
+          return prev.map((t, i) =>
+            i === prev.length - 1
+              ? { ...t, translatedText: t.translatedText + (ev.delta ?? '') }
+              : t
+          );
+        });
+        break;
+
+      case 'response.audio_transcript.done':
+        // Overwrite with final transcript (eliminates any streaming artifacts)
+        setTurns(prev => {
+          if (prev.length === 0) return prev;
+          return prev.map((t, i) =>
+            i === prev.length - 1
+              ? { ...t, translatedText: ev.transcript ?? t.translatedText, isDone: true }
+              : t
+          );
+        });
+        setSessionStatus('speaking');
+        break;
+
+      case 'response.done':
+        setSessionStatus('ready');
+        break;
+
+      case 'error':
+        setError(ev.error?.message ?? 'Realtime-Fehler');
+        setSessionStatus('idle');
+        break;
+
+      default:
+        break;
+    }
   }, []);
 
   const connect = useCallback(async ({ patientLanguage, practiceLanguage }) => {
@@ -64,10 +140,11 @@ export function useRealtimeSession() {
     setConnectionState('connecting');
     setError(null);
     setEvents([]);
-    setLastEvent(null);
+    setTurns([]);
+    turnCounterRef.current = 0;
 
     try {
-      // 1. Fetch ephemeral token from our server
+      // 1. Ephemeral token from our server (never expose the API key to the client)
       const tokenRes = await authFetch('/api/meda-realtime/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,9 +154,9 @@ export function useRealtimeSession() {
         const body = await tokenRes.json().catch(() => ({}));
         throw new Error(body?.error ?? `Token-Fehler ${tokenRes.status}`);
       }
-      const { clientSecret, sessionId } = await tokenRes.json();
+      const { clientSecret } = await tokenRes.json();
 
-      // 2. Microphone stream — hardware echo cancellation to prevent audio loop
+      // 2. Microphone — hardware echo cancellation prevents audio loop
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -93,14 +170,11 @@ export function useRealtimeSession() {
       const pc = new RTCPeerConnection();
       pcRef.current = pc;
 
-      // Receive OpenAI audio output
-      const audioEl = new Audio();
-      audioEl.autoplay = true;
-      audioElRef.current = audioEl;
-
-      pc.ontrack = (ev) => {
-        if (ev.streams?.[0]) {
-          audioEl.srcObject = ev.streams[0];
+      // Remote audio track → attach to the page's <audio> DOM element
+      pc.ontrack = (trackEv) => {
+        if (trackEv.streams?.[0] && audioElRef.current) {
+          audioElRef.current.srcObject = trackEv.streams[0];
+          audioElRef.current.play().catch(() => {});
         }
       };
 
@@ -111,40 +185,35 @@ export function useRealtimeSession() {
         }
       };
 
-      // Attach microphone track
       stream.getAudioTracks().forEach(t => pc.addTrack(t, stream));
 
-      // 4. Data channel for server events
+      // 4. Data channel for Realtime events
       const dc = pc.createDataChannel('oai-events');
       dcRef.current = dc;
 
       dc.onopen = () => {
-        setDataChannelState('open');
         setConnectionState('connected');
+        setSessionStatus('ready');
       };
 
       dc.onclose = () => {
-        setDataChannelState('closed');
-        if (connectionState !== 'disconnecting') {
-          setConnectionState('idle');
-        }
+        setConnectionState('idle');
+        setSessionStatus('idle');
       };
 
-      dc.onmessage = (ev) => {
+      dc.onmessage = (msg) => {
         try {
-          const parsed = JSON.parse(ev.data);
-          setLastEvent(parsed);
+          const parsed = JSON.parse(msg.data);
           setEvents(prev => [...prev, parsed]);
-        } catch (_) {
-          // Non-JSON frame — ignore
-        }
+          _handleEvent(parsed);
+        } catch (_) {}
       };
 
       // 5. SDP offer
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      // Wait for ICE gathering to complete (max 4s)
+      // Wait for ICE gathering (max 4s)
       await new Promise((resolve) => {
         if (pc.iceGatheringState === 'complete') { resolve(); return; }
         const onGather = () => {
@@ -157,7 +226,7 @@ export function useRealtimeSession() {
         setTimeout(resolve, 4000);
       });
 
-      // 6. Exchange SDP with OpenAI directly using the ephemeral token
+      // 6. SDP exchange with OpenAI using ephemeral client secret
       const model = 'gpt-4o-realtime-preview';
       const sdpRes = await fetch(`${OPENAI_REALTIME_BASE}?model=${encodeURIComponent(model)}`, {
         method: 'POST',
@@ -176,15 +245,13 @@ export function useRealtimeSession() {
       const answerSdp = await sdpRes.text();
       await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
 
-      // sessionId available for future session.update calls
-      void sessionId;
-
     } catch (err) {
       _cleanup();
       setConnectionState('error');
+      setSessionStatus('idle');
       setError(err?.message ?? 'Verbindung fehlgeschlagen');
     }
-  }, [connectionState, _cleanup]);
+  }, [connectionState, _cleanup, _handleEvent]);
 
   const disconnect = useCallback(() => {
     setConnectionState('disconnecting');
@@ -192,10 +259,6 @@ export function useRealtimeSession() {
     setConnectionState('idle');
   }, [_cleanup]);
 
-  /**
-   * Send a Realtime API client event over the data channel.
-   * @param {object} event - Must include `type` field.
-   */
   const sendEvent = useCallback((event) => {
     if (dcRef.current?.readyState !== 'open') return;
     dcRef.current.send(JSON.stringify(event));
@@ -206,9 +269,10 @@ export function useRealtimeSession() {
     disconnect,
     sendEvent,
     connectionState,
-    dataChannelState,
-    lastEvent,
+    sessionStatus,
+    turns,
     events,
     error,
+    audioElRef,
   };
 }

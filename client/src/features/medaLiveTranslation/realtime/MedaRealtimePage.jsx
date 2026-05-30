@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRealtimeSession } from './useRealtimeSession.js';
 import './MedaRealtimePage.css';
 
@@ -7,133 +7,220 @@ const LANG_OPTIONS = [
   { value: 'en', label: 'Englisch' },
 ];
 
+const STATUS_LABELS = {
+  idle:         'Nicht verbunden',
+  ready:        'Bereit · Sprechen Sie jetzt',
+  speech_active:'Ich höre …',
+  processing:   'Verarbeite …',
+  translating:  'Übersetze …',
+  speaking:     'Meda spricht …',
+};
+
+const STATUS_CLASS = {
+  idle:         'idle',
+  ready:        'ready',
+  speech_active:'active',
+  processing:   'active',
+  translating:  'active',
+  speaking:     'speaking',
+};
+
 /**
- * Phase 8.2 test page for OpenAI Realtime WebRTC connection.
- * Displays raw server events in a scrollable debug log.
- * No pingpong logic — connection scaffolding only.
+ * Phase 8.3 — First usable Realtime Interpreter.
+ * Transcribes patient speech, generates translation, plays it automatically.
  */
 export default function MedaRealtimePage() {
   const {
     connect,
     disconnect,
     connectionState,
-    dataChannelState,
-    lastEvent,
+    sessionStatus,
+    turns,
     events,
     error,
+    audioElRef,
   } = useRealtimeSession();
 
-  const [patientLang, setPatientLang] = React.useState('de');
-  const [practiceLang, setPracticeLang] = React.useState('en');
-  const logRef = useRef(null);
+  const [patientLang, setPatientLang] = useState('de');
+  const [practiceLang, setPracticeLang] = useState('en');
+  const [showDebug, setShowDebug] = useState(false);
+
+  const turnsEndRef = useRef(null);
+  const debugLogRef = useRef(null);
+
+  // Auto-scroll conversation to latest turn
+  useEffect(() => {
+    turnsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [turns]);
 
   // Auto-scroll debug log
   useEffect(() => {
-    if (logRef.current) {
-      logRef.current.scrollTop = logRef.current.scrollHeight;
+    if (debugLogRef.current) {
+      debugLogRef.current.scrollTop = debugLogRef.current.scrollHeight;
     }
   }, [events]);
 
   const isConnected = connectionState === 'connected';
-  const isBusy = connectionState === 'connecting' || connectionState === 'disconnecting';
+  const isConnecting = connectionState === 'connecting';
+  const isBusy = isConnecting || connectionState === 'disconnecting';
+  const langMismatch = patientLang === practiceLang;
 
-  function handleConnect() {
+  function handleStart() {
     connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
   }
 
+  const statusLabel = isConnecting
+    ? 'Verbinde …'
+    : STATUS_LABELS[sessionStatus] ?? sessionStatus;
+
+  const statusClass = isConnecting
+    ? 'active'
+    : STATUS_CLASS[sessionStatus] ?? 'idle';
+
+  const patientLangLabel = LANG_OPTIONS.find(o => o.value === patientLang)?.label ?? patientLang;
+  const practiceLangLabel = LANG_OPTIONS.find(o => o.value === practiceLang)?.label ?? practiceLang;
+
   return (
     <div className="mrt-page">
-      <h1 className="mrt-title">Meda Realtime — Phase 8.2 Verbindungstest</h1>
+      {/* Hidden audio element — receives remote WebRTC audio track */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio ref={audioElRef} autoPlay style={{ display: 'none' }} />
 
-      <section className="mrt-config">
-        <div className="mrt-field">
-          <label className="mrt-label" htmlFor="mrt-patient-lang">Patientensprache</label>
-          <select
-            id="mrt-patient-lang"
-            className="mrt-select"
-            value={patientLang}
-            onChange={e => setPatientLang(e.target.value)}
-            disabled={isConnected || isBusy}
-          >
-            {LANG_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+      {/* Header */}
+      <header className="mrt-header">
+        <h1 className="mrt-title">Meda Live-Dolmetscher</h1>
+        <div className={`mrt-status-badge mrt-status-badge--${statusClass}`} role="status" aria-live="polite">
+          {statusClass === 'active' && <span className="mrt-pulse" aria-hidden="true" />}
+          {statusLabel}
         </div>
-        <div className="mrt-field">
-          <label className="mrt-label" htmlFor="mrt-practice-lang">Praxissprache</label>
-          <select
-            id="mrt-practice-lang"
-            className="mrt-select"
-            value={practiceLang}
-            onChange={e => setPracticeLang(e.target.value)}
-            disabled={isConnected || isBusy}
-          >
-            {LANG_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-        </div>
-      </section>
+      </header>
 
-      <section className="mrt-controls">
-        <button
-          className="mrt-btn mrt-btn--connect"
-          onClick={handleConnect}
-          disabled={isConnected || isBusy || patientLang === practiceLang}
-        >
-          {connectionState === 'connecting' ? 'Verbinde …' : 'Verbinden'}
-        </button>
-        <button
-          className="mrt-btn mrt-btn--disconnect"
-          onClick={disconnect}
-          disabled={!isConnected && connectionState !== 'connecting'}
-        >
-          Trennen
-        </button>
-      </section>
+      {/* Config + Controls */}
+      <section className="mrt-setup" aria-label="Sprachauswahl und Steuerung">
+        <div className="mrt-lang-row">
+          <div className="mrt-field">
+            <label className="mrt-label" htmlFor="mrt-patient-lang">Patient spricht</label>
+            <select
+              id="mrt-patient-lang"
+              className="mrt-select"
+              value={patientLang}
+              onChange={e => setPatientLang(e.target.value)}
+              disabled={isConnected || isBusy}
+            >
+              {LANG_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
 
-      <section className="mrt-status">
-        <div className="mrt-status-row">
-          <span className="mrt-status-label">Verbindung:</span>
-          <span className={`mrt-status-value mrt-status-value--${connectionState}`}>
-            {connectionState}
-          </span>
+          <span className="mrt-arrow" aria-hidden="true">⇄</span>
+
+          <div className="mrt-field">
+            <label className="mrt-label" htmlFor="mrt-practice-lang">Praxis spricht</label>
+            <select
+              id="mrt-practice-lang"
+              className="mrt-select"
+              value={practiceLang}
+              onChange={e => setPracticeLang(e.target.value)}
+              disabled={isConnected || isBusy}
+            >
+              {LANG_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="mrt-status-row">
-          <span className="mrt-status-label">DataChannel:</span>
-          <span className={`mrt-status-value mrt-status-value--${dataChannelState}`}>
-            {dataChannelState}
-          </span>
-        </div>
-        {patientLang === practiceLang && (
-          <p className="mrt-warning">Patientensprache und Praxissprache müssen verschieden sein.</p>
+
+        {langMismatch && (
+          <p className="mrt-warning" role="alert">Bitte zwei verschiedene Sprachen wählen.</p>
         )}
+
+        <div className="mrt-controls">
+          {!isConnected ? (
+            <button
+              className="mrt-btn mrt-btn--start"
+              onClick={handleStart}
+              disabled={isBusy || langMismatch}
+            >
+              {isConnecting ? 'Verbinde …' : 'Live-Gespräch starten'}
+            </button>
+          ) : (
+            <button
+              className="mrt-btn mrt-btn--stop"
+              onClick={disconnect}
+            >
+              Gespräch beenden
+            </button>
+          )}
+        </div>
+
         {error && (
           <p className="mrt-error" role="alert">{error}</p>
         )}
       </section>
 
-      <section className="mrt-events">
-        <h2 className="mrt-events-title">
-          Server-Events ({events.length})
-          {lastEvent && (
-            <span className="mrt-last-event-type"> — zuletzt: {lastEvent.type}</span>
-          )}
-        </h2>
-        <div className="mrt-log" ref={logRef} aria-live="polite" aria-atomic="false">
-          {events.length === 0 && (
-            <p className="mrt-log-empty">Keine Events. Verbindung herstellen und sprechen.</p>
-          )}
-          {events.map((ev, i) => (
-            <div key={i} className="mrt-log-entry">
-              <span className="mrt-log-type">{ev.type}</span>
-              <pre className="mrt-log-body">
-                {JSON.stringify(ev, null, 2)}
-              </pre>
+      {/* Conversation turns */}
+      <section className="mrt-conversation" aria-label="Gesprächsverlauf">
+        {turns.length === 0 && isConnected && (
+          <p className="mrt-conversation-empty">
+            Gespräch läuft · Sprechen Sie auf {patientLangLabel}.
+            Meda übersetzt automatisch ins {practiceLangLabel}.
+          </p>
+        )}
+        {turns.length === 0 && !isConnected && !isConnecting && (
+          <p className="mrt-conversation-empty mrt-conversation-empty--idle">
+            Starten Sie ein Gespräch — der Gesprächsverlauf erscheint hier.
+          </p>
+        )}
+
+        {turns.map(turn => (
+          <div key={turn.key} className={`mrt-turn${turn.isDone ? ' mrt-turn--done' : ''}`}>
+            <div className="mrt-turn-original">
+              <span className="mrt-turn-lang">{patientLangLabel}</span>
+              <p className="mrt-turn-text">
+                {turn.originalText ?? <span className="mrt-turn-pending">Transkription …</span>}
+              </p>
             </div>
-          ))}
-        </div>
+            {(turn.translatedText || !turn.isDone) && (
+              <div className="mrt-turn-translation">
+                <span className="mrt-turn-lang mrt-turn-lang--translation">{practiceLangLabel}</span>
+                <p className="mrt-turn-text mrt-turn-text--translation">
+                  {turn.translatedText
+                    ? turn.translatedText
+                    : <span className="mrt-turn-pending">Übersetze …</span>}
+                  {!turn.isDone && turn.translatedText && (
+                    <span className="mrt-turn-cursor" aria-hidden="true"> ▌</span>
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+        ))}
+        <div ref={turnsEndRef} />
+      </section>
+
+      {/* Debug section — collapsed by default */}
+      <section className="mrt-debug">
+        <button
+          className="mrt-debug-toggle"
+          onClick={() => setShowDebug(v => !v)}
+          aria-expanded={showDebug}
+        >
+          Debug-Events ({events.length}) {showDebug ? '▲' : '▼'}
+        </button>
+        {showDebug && (
+          <div className="mrt-debug-log" ref={debugLogRef}>
+            {events.length === 0 && (
+              <p className="mrt-debug-empty">Keine Events.</p>
+            )}
+            {events.map((ev, i) => (
+              <div key={i} className="mrt-debug-entry">
+                <span className="mrt-debug-type">{ev.type}</span>
+                <pre className="mrt-debug-body">{JSON.stringify(ev, null, 2)}</pre>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
