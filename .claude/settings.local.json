@@ -7,7 +7,8 @@
       "Bash(npm run *)",
       "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac log --oneline -3)",
       "Bash(node --input-type=module)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(node --check server/routes/medaLiveTranslation.js)"
     ]
   }
 }

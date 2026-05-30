@@ -6,23 +6,35 @@ const router = express.Router();
 
 const ALLOWED_PAIRS = new Set(['de-en', 'en-de']);
 
-const TRANSLATION_SYSTEM_PROMPT = `Du bist ein medizinischer Dolmetscher. Deine einzige Aufgabe ist die präzise Übersetzung des gegebenen Textes.
+// Allowed values for the reason field — prevents raw model strings leaking to clients.
+const ALLOWED_REASONS = new Set(['unclear_input', 'invalid_model_response']);
 
-Regeln:
-- Übersetze ausschließlich den gegebenen Text. Nichts weiter.
-- Erfinde keine Symptome, Diagnosen, Medikationen, Körperstellen, Zeitangaben oder Schweregrade.
-- Füge nichts hinzu. Entferne nichts. Erkläre nichts.
-- Gib keine Empfehlungen und keine Dringlichkeitseinschätzung.
-- Bewahre Unsicherheiten, Umgangssprache und Negationen unverändert.
-- Übersetze medizinische Fachbegriffe neutral und präzise ohne eigene Bewertung.
+// Human-readable direction labels for the user message so the model never has to
+// guess the translation direction from the text alone.
+const DIRECTION_LABELS = {
+  'de-en': 'Translate from German to English',
+  'en-de': 'Translate from English to German',
+};
 
-Antworte ausschließlich mit einem JSON-Objekt ohne weiteren Text.
+const TRANSLATION_SYSTEM_PROMPT = `Du bist ein professioneller medizinischer Dolmetscher. Deine einzige Aufgabe ist die präzise, neutrale Übersetzung des gegebenen Textes. Du bist kein Arzt und gibst keinerlei medizinische Einschätzung, Diagnose oder Empfehlung.
 
-Wenn der Text klar und übersetzbar ist:
-{"translation":"<Übersetzung>","needsClarification":false,"reason":null}
+Strikte Übersetzungsregeln:
+1. Übersetze ausschließlich den gegebenen Text — nichts mehr, nichts weniger.
+2. FÜGE NICHTS HINZU: keine Diagnosen, Differentialdiagnosen, Therapievorschläge, Symptome, Körperstellen, Medikamente, Zeitangaben, Schweregrade oder Dringlichkeitsbewertungen.
+3. ENTFERNE NICHTS: alle Inhalte des Originals müssen vollständig in der Übersetzung vorhanden sein.
+4. Bewahre exakt und unverändert: Zahlen, Dosierungen, Medikamentennamen, Zeitangaben, anatomische Körperstellen und Unsicherheitsformulierungen.
+5. NEGATIONEN (nicht, kein, nie, no, not, never …) müssen zwingend erhalten bleiben — eine verlorene Negation ist ein kritischer medizinischer Fehler.
+6. Übersetze Umgangssprache bedeutungstreu ohne Medikalisierung oder Aufwertung.
+7. Interpretiere keine mehrdeutigen Aussagen — übersetze die wörtliche Bedeutung.
+8. Kommentiere nichts. Erkläre nichts. Ergänze keine Hintergrundinformationen.
 
-Wenn der Text zu fragmentiert, unverständlich oder sprachlich nicht eindeutig erkennbar ist:
-{"translation":"","needsClarification":true,"reason":"unclear_input"}`;
+Umgang mit unklarem Input:
+Ist der Text zu fragmentiert, zu kurz für eine sichere Übersetzung, sprachlich nicht eindeutig erkennbar, widersprüchlich oder nicht sicher übersetzbar, gib needsClarification:true zurück.
+Im Zweifel ist needsClarification:true sicherer als eine unsichere Übersetzung.
+
+Ausgabeformat — ausschließlich gültiges JSON ohne jeglichen weiteren Text:
+Klarer Text:   {"translation":"<Übersetzung>","needsClarification":false,"reason":null}
+Unklarer Text: {"translation":"","needsClarification":true,"reason":"unclear_input"}`;
 
 router.post('/translate-text', async (req, res) => {
   try {
@@ -43,11 +55,15 @@ router.post('/translate-text', async (req, res) => {
       });
     }
 
+    // Include explicit direction so the model never guesses the translation pair.
+    const directionLabel = DIRECTION_LABELS[pair];
+    const userContent = `${directionLabel}:\n\n${trimmed}`;
+
     const response = await openai.chat.completions.create({
       model: getMedaTranslationModel(),
       messages: [
         { role: 'system', content: TRANSLATION_SYSTEM_PROMPT },
-        { role: 'user', content: trimmed },
+        { role: 'user', content: userContent },
       ],
       temperature: 0.1,
       max_completion_tokens: 300,
@@ -63,17 +79,24 @@ router.post('/translate-text', async (req, res) => {
       const parsed = JSON.parse(raw);
       const rawTranslation = typeof parsed.translation === 'string' ? parsed.translation.trim() : null;
       const rawNc = parsed.needsClarification === true;
+      const rawReason = typeof parsed.reason === 'string' ? parsed.reason.trim() : null;
 
-      if (rawNc || rawTranslation === null || rawTranslation === '') {
+      if (rawNc) {
+        // Model explicitly flagged the input as unclear.
         needsClarification = true;
-        reason = rawNc
-          ? (typeof parsed.reason === 'string' ? parsed.reason : 'unclear_input')
-          : 'invalid_model_response';
+        reason = ALLOWED_REASONS.has(rawReason) ? rawReason : 'unclear_input';
+      } else if (rawTranslation === null || rawTranslation === '') {
+        // Model returned needsClarification:false but no usable translation — treat
+        // as an invalid response rather than showing an empty string to the user.
+        needsClarification = true;
+        reason = 'invalid_model_response';
       } else {
         translation = rawTranslation;
+        needsClarification = false;
         reason = null;
       }
     } catch {
+      // Non-JSON output from the model — reject cleanly.
       needsClarification = true;
       reason = 'invalid_model_response';
     }
