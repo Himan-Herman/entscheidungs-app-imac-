@@ -102,10 +102,14 @@ export const EMPTY_PATIENT_INFO = {
   dateOfBirth:     '',
   gender:          '',
   insuranceStatus: '',
+  insuranceName:   '',
   insuranceNumber: '',
   email:           '',
   phone:           '',
-  address:         '',
+  street:          '',
+  postalCode:      '',
+  city:            '',
+  country:         '',
   relationship:    '',
 };
 
@@ -116,5 +120,8 @@ export const EMPTY_PRACTICE_INFO = {
   department:   '',
   email:        '',
   phone:        '',
-  address:      '',
+  street:       '',
+  postalCode:   '',
+  city:         '',
+  country:      '',
 };
