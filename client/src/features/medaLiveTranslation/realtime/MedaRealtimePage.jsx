@@ -2,6 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRealtimeSession } from './useRealtimeSession.js';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
+import {
+  usePatientProfilePrefill,
+  EMPTY_PATIENT_INFO,
+  EMPTY_PRACTICE_INFO,
+} from './realtimeFormDefaults.js';
 import './MedaRealtimePage.css';
 
 const ROLE_LABEL = {
@@ -49,46 +54,72 @@ function statusCls(connectionState, sessionStatus, sessionExpired) {
   return 'active';
 }
 
-/**
- * Phase 8.8 — Setup panel with language selection + three consent checkboxes,
- * followed by the Realtime session view once connected.
- */
 export default function MedaRealtimePage() {
   const {
     connect,
     disconnect,
     connectionState,
     sessionStatus,
-    currentSpeakerRole, // null until first speaker detected; then 'patient'|'practice'
+    currentSpeakerRole,
     turns,
     events,
     error,
     audioElRef,
   } = useRealtimeSession();
 
+  // ── Language selection ─────────────────────────────────────────────────────
   const [patientLang,  setPatientLang]  = useState('de');
   const [practiceLang, setPracticeLang] = useState('en');
-  const [showDebug,    setShowDebug]    = useState(false);
+
+  // ── UI state ────────────────────────────────────────────────────────────────
+  const [showDebug,        setShowDebug]        = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(SESSION_MAX_SECONDS);
   const [sessionExpired,   setSessionExpired]   = useState(false);
 
-  // Three consent checkboxes — stay checked across sessions for the page lifetime
+  // ── Consent checkboxes — stay checked for the page lifetime ────────────────
   const [consentAudio,   setConsentAudio]   = useState(false);
   const [consentContext, setConsentContext] = useState(false);
   const [consentMedical, setConsentMedical] = useState(false);
 
-  // PDF export state — local only, never sent anywhere
-  const [pdfLoading,   setPdfLoading]  = useState(false);
-  const [patientInfo,  setPatientInfo] = useState({ name: '', dateOfBirth: '', gender: '', insuranceStatus: '' });
-  const [practiceInfo, setPracticeInfo] = useState({ practiceName: '', doctorName: '', department: '', location: '' });
+  // ── Person selector ─────────────────────────────────────────────────────────
+  // true = conversation is about the logged-in user themselves
+  // false = conversation is about another person (family member, etc.)
+  const [forSelf, setForSelf] = useState(true);
+
+  // ── Patient / person info — local state only, never sent to server ──────────
+  const [patientInfo,  setPatientInfo]  = useState(EMPTY_PATIENT_INFO);
+  const [practiceInfo, setPracticeInfo] = useState(EMPTY_PRACTICE_INFO);
+
+  // ── PDF state ───────────────────────────────────────────────────────────────
+  const [pdfLoading, setPdfLoading] = useState(false);
   const sessionStartedAtRef = useRef(/** @type {string|null} */ (null));
 
+  // ── Prefill from existing profile ───────────────────────────────────────────
+  const { profileData } = usePatientProfilePrefill();
+
+  // Apply prefill when profile data arrives (only when forSelf === true)
+  useEffect(() => {
+    if (!profileData || !forSelf) return;
+    setPatientInfo(prev => ({
+      ...prev,
+      name:            profileData.name            || prev.name,
+      dateOfBirth:     profileData.dateOfBirth     || prev.dateOfBirth,
+      gender:          profileData.gender          || prev.gender,
+      insuranceStatus: profileData.insuranceStatus || prev.insuranceStatus,
+      email:           profileData.email           || prev.email,
+      phone:           profileData.phone           || prev.phone,
+      address:         profileData.address         || prev.address,
+    }));
+    if (profileData.patientLang)  setPatientLang(profileData.patientLang);
+    if (profileData.practiceLang) setPracticeLang(profileData.practiceLang);
+  }, [profileData, forSelf]);
+
+  // ── Refs ────────────────────────────────────────────────────────────────────
   const turnsEndRef      = useRef(null);
   const debugLogRef      = useRef(null);
   const timerIntervalRef = useRef(null);
   const sessionStartRef  = useRef(null);
 
-  // Always-current ref to disconnect() — used in unmount effect without stale closure
   const disconnectRef = useRef(disconnect);
   useEffect(() => { disconnectRef.current = disconnect; });
 
@@ -101,7 +132,7 @@ export default function MedaRealtimePage() {
         timerIntervalRef.current = null;
       }
     };
-  }, []); // intentionally empty — runs only on unmount
+  }, []);
 
   // ── Tab-hidden protection ───────────────────────────────────────────────────
   useEffect(() => {
@@ -157,19 +188,48 @@ export default function MedaRealtimePage() {
     }
   }, [events]);
 
+  // ── Computed values ─────────────────────────────────────────────────────────
   const isConnected  = connectionState === 'connected';
   const isConnecting = connectionState === 'connecting';
   const isBusy       = isConnecting || connectionState === 'disconnecting';
   const langMismatch = patientLang === practiceLang;
   const showWarning  = isConnected && remainingSeconds <= SESSION_WARN_SECONDS && remainingSeconds > 0;
   const allConsents  = consentAudio && consentContext && consentMedical;
-  const canStart     = !isBusy && !langMismatch && allConsents;
+  const hasName      = patientInfo.name.trim() !== '';
+  const canStart     = !isBusy && !langMismatch && allConsents && hasName;
 
   const patientLangLabel  = REALTIME_LANGUAGE_MAP[patientLang]  ?? patientLang;
   const practiceLangLabel = REALTIME_LANGUAGE_MAP[practiceLang] ?? practiceLang;
 
+  // ── Handlers ────────────────────────────────────────────────────────────────
+
   const handlePatientInfo  = useCallback((field, value) => setPatientInfo(prev  => ({ ...prev, [field]: value })), []);
   const handlePracticeInfo = useCallback((field, value) => setPracticeInfo(prev => ({ ...prev, [field]: value })), []);
+
+  const handleForSelf = useCallback((isSelf) => {
+    setForSelf(isSelf);
+    if (isSelf && profileData) {
+      // Re-apply profile data
+      setPatientInfo(prev => ({
+        ...prev,
+        name:            profileData.name            || '',
+        dateOfBirth:     profileData.dateOfBirth     || '',
+        gender:          profileData.gender          || '',
+        insuranceStatus: profileData.insuranceStatus || '',
+        email:           profileData.email           || '',
+        phone:           profileData.phone           || '',
+        address:         profileData.address         || '',
+        relationship:    '',
+      }));
+    } else if (!isSelf) {
+      // Clear personal fields for another person; practice fields stay
+      setPatientInfo(prev => ({
+        ...EMPTY_PATIENT_INFO,
+        // keep insurance/practice-related fields blank
+        insuranceStatus: prev.insuranceStatus, // keep in case user already filled
+      }));
+    }
+  }, [profileData]);
 
   const handleDownloadPdf = useCallback(async () => {
     setPdfLoading(true);
@@ -178,24 +238,25 @@ export default function MedaRealtimePage() {
         turns,
         patientInfo,
         practiceInfo,
+        forSelf,
         languages: { patientLanguage: patientLang, practiceLanguage: practiceLang },
         sessionStartedAt: sessionStartedAtRef.current,
       });
     } catch (err) {
-      console.error('[MedaRealtimePage] PDF export failed:', err);
+      console.error('[MedaRealtimePage] PDF export failed:', err?.message);
     } finally {
       setPdfLoading(false);
     }
-  }, [turns, patientInfo, practiceInfo, patientLang, practiceLang]);
+  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang]);
 
   function handleStart() {
     setSessionExpired(false);
     connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
   }
 
-  // Hint shown below the disabled start button
   function getBlockHint() {
     if (langMismatch) return 'Bitte zwei verschiedene Sprachen wählen.';
+    if (!hasName)     return 'Bitte vollständigen Namen der Person eingeben.';
     if (!allConsents) return 'Bitte alle drei Zustimmungen bestätigen.';
     return null;
   }
@@ -205,6 +266,7 @@ export default function MedaRealtimePage() {
   const badgeCls = statusCls(connectionState, sessionStatus, sessionExpired);
   const showPulse = badgeCls === 'active' || badgeCls === 'speaking';
 
+  // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <div className="mrt-page">
       {/* Hidden audio element — receives remote WebRTC audio track */}
@@ -244,44 +306,298 @@ export default function MedaRealtimePage() {
 
       {/* ── Setup panel — visible when not connected ─────────────────────────── */}
       {!isConnected && (
-        <section className="mrt-setup" aria-label="Sprachauswahl und Zustimmung">
+        <section className="mrt-setup" aria-label="Live-Gespräch einrichten">
 
-          {/* Language selects */}
-          <div className="mrt-lang-row">
-            <div className="mrt-field">
-              <label className="mrt-label" htmlFor="mrt-patient-lang">Patient spricht</label>
-              <select
-                id="mrt-patient-lang"
-                className="mrt-select"
-                value={patientLang}
-                onChange={e => setPatientLang(e.target.value)}
-                disabled={isBusy}
-              >
-                {REALTIME_LANGUAGES.map(l => (
-                  <option key={l.code} value={l.code}>{l.label}</option>
-                ))}
-              </select>
-            </div>
+          {/* ── 1. Sprachauswahl ──────────────────────────────────────────────── */}
+          <div className="mrt-setup-section">
+            <h2 className="mrt-setup-section-title">Sprachen</h2>
+            <div className="mrt-lang-row">
+              <div className="mrt-field">
+                <label className="mrt-label" htmlFor="mrt-patient-lang">Patient spricht</label>
+                <select
+                  id="mrt-patient-lang"
+                  className="mrt-select"
+                  value={patientLang}
+                  onChange={e => setPatientLang(e.target.value)}
+                  disabled={isBusy}
+                >
+                  {REALTIME_LANGUAGES.map(l => (
+                    <option key={l.code} value={l.code}>{l.label}</option>
+                  ))}
+                </select>
+              </div>
 
-            <span className="mrt-arrow" aria-hidden="true">⇄</span>
+              <span className="mrt-arrow" aria-hidden="true">⇄</span>
 
-            <div className="mrt-field">
-              <label className="mrt-label" htmlFor="mrt-practice-lang">Praxis spricht</label>
-              <select
-                id="mrt-practice-lang"
-                className="mrt-select"
-                value={practiceLang}
-                onChange={e => setPracticeLang(e.target.value)}
-                disabled={isBusy}
-              >
-                {REALTIME_LANGUAGES.map(l => (
-                  <option key={l.code} value={l.code}>{l.label}</option>
-                ))}
-              </select>
+              <div className="mrt-field">
+                <label className="mrt-label" htmlFor="mrt-practice-lang">Praxis spricht</label>
+                <select
+                  id="mrt-practice-lang"
+                  className="mrt-select"
+                  value={practiceLang}
+                  onChange={e => setPracticeLang(e.target.value)}
+                  disabled={isBusy}
+                >
+                  {REALTIME_LANGUAGES.map(l => (
+                    <option key={l.code} value={l.code}>{l.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Consent checkboxes */}
+          {/* ── 2. Angaben zur Person ─────────────────────────────────────────── */}
+          <div className="mrt-setup-section">
+            <h2 className="mrt-setup-section-title">Angaben zur Person</h2>
+
+            <div
+              className="mrt-person-toggle"
+              role="group"
+              aria-label="Für wen ist das Gespräch?"
+            >
+              <button
+                type="button"
+                className={`mrt-toggle-btn${forSelf ? ' mrt-toggle-btn--active' : ''}`}
+                onClick={() => handleForSelf(true)}
+                disabled={isBusy}
+              >
+                Das Gespräch betrifft mich selbst
+              </button>
+              <button
+                type="button"
+                className={`mrt-toggle-btn${!forSelf ? ' mrt-toggle-btn--active' : ''}`}
+                onClick={() => handleForSelf(false)}
+                disabled={isBusy}
+              >
+                Das Gespräch betrifft eine andere Person
+              </button>
+            </div>
+
+            <div className="mrt-form-grid">
+              <div className="mrt-form-field mrt-form-field--full">
+                <label className="mrt-form-label" htmlFor="mrt-person-name">
+                  Vollständiger Name <span className="mrt-required-star" aria-label="Pflichtfeld">*</span>
+                </label>
+                <input
+                  id="mrt-person-name"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. Maria Müller"
+                  value={patientInfo.name}
+                  onChange={e => handlePatientInfo('name', e.target.value)}
+                  disabled={isBusy}
+                  aria-required="true"
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-dob">Geburtsdatum</label>
+                <input
+                  id="mrt-person-dob"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="TT.MM.JJJJ"
+                  value={patientInfo.dateOfBirth}
+                  onChange={e => handlePatientInfo('dateOfBirth', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-gender">Geschlecht</label>
+                <select
+                  id="mrt-person-gender"
+                  className="mrt-form-select"
+                  value={patientInfo.gender}
+                  onChange={e => handlePatientInfo('gender', e.target.value)}
+                  disabled={isBusy}
+                >
+                  <option value="">keine Angabe</option>
+                  <option value="weiblich">weiblich</option>
+                  <option value="männlich">männlich</option>
+                  <option value="divers">divers</option>
+                </select>
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-insurance">Versicherungsstatus</label>
+                <select
+                  id="mrt-person-insurance"
+                  className="mrt-form-select"
+                  value={patientInfo.insuranceStatus}
+                  onChange={e => handlePatientInfo('insuranceStatus', e.target.value)}
+                  disabled={isBusy}
+                >
+                  <option value="">unbekannt / nicht angegeben</option>
+                  <option value="gesetzlich">gesetzlich</option>
+                  <option value="privat">privat</option>
+                  <option value="Selbstzahler">Selbstzahler</option>
+                </select>
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-ins-nr">
+                  Versicherungsnummer
+                  <span className="mrt-form-opt"> (optional)</span>
+                </label>
+                <input
+                  id="mrt-person-ins-nr"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="optional"
+                  value={patientInfo.insuranceNumber}
+                  onChange={e => handlePatientInfo('insuranceNumber', e.target.value)}
+                  disabled={isBusy}
+                />
+                <span className="mrt-form-note">Nur eintragen, wenn für Dokumentation gewünscht.</span>
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-email">E-Mail</label>
+                <input
+                  id="mrt-person-email"
+                  className="mrt-form-input"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={patientInfo.email}
+                  onChange={e => handlePatientInfo('email', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-person-phone">Telefonnummer</label>
+                <input
+                  id="mrt-person-phone"
+                  className="mrt-form-input"
+                  type="tel"
+                  placeholder="+49 …"
+                  value={patientInfo.phone}
+                  onChange={e => handlePatientInfo('phone', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field mrt-form-field--full">
+                <label className="mrt-form-label" htmlFor="mrt-person-address">Adresse</label>
+                <input
+                  id="mrt-person-address"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="Straße, PLZ, Ort"
+                  value={patientInfo.address}
+                  onChange={e => handlePatientInfo('address', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              {!forSelf && (
+                <div className="mrt-form-field mrt-form-field--full">
+                  <label className="mrt-form-label" htmlFor="mrt-person-relation">
+                    Beziehung zur Person
+                    <span className="mrt-form-opt"> (optional)</span>
+                  </label>
+                  <input
+                    id="mrt-person-relation"
+                    className="mrt-form-input"
+                    type="text"
+                    placeholder="z. B. Mutter, Vater, Kind, Angehörige/r"
+                    value={patientInfo.relationship}
+                    onChange={e => handlePatientInfo('relationship', e.target.value)}
+                    disabled={isBusy}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── 3. Angaben zur Praxis ─────────────────────────────────────────── */}
+          <div className="mrt-setup-section">
+            <h2 className="mrt-setup-section-title">
+              Angaben zur Praxis <span className="mrt-optional-badge">optional</span>
+            </h2>
+            <div className="mrt-form-grid">
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-practice-name">Praxis / Einrichtung</label>
+                <input
+                  id="mrt-practice-name"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. Hausarztpraxis Müller"
+                  value={practiceInfo.practiceName}
+                  onChange={e => handlePracticeInfo('practiceName', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-doctor-name">Arzt / Ärztin / Behandler</label>
+                <input
+                  id="mrt-doctor-name"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. Dr. Anna Müller"
+                  value={practiceInfo.doctorName}
+                  onChange={e => handlePracticeInfo('doctorName', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-practice-dept">Fachrichtung</label>
+                <input
+                  id="mrt-practice-dept"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="z. B. Allgemeinmedizin, Orthopädie"
+                  value={practiceInfo.department}
+                  onChange={e => handlePracticeInfo('department', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-practice-email">E-Mail der Praxis</label>
+                <input
+                  id="mrt-practice-email"
+                  className="mrt-form-input"
+                  type="email"
+                  placeholder="praxis@example.de"
+                  value={practiceInfo.email}
+                  onChange={e => handlePracticeInfo('email', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field">
+                <label className="mrt-form-label" htmlFor="mrt-practice-phone">Telefon der Praxis</label>
+                <input
+                  id="mrt-practice-phone"
+                  className="mrt-form-input"
+                  type="tel"
+                  placeholder="+49 …"
+                  value={practiceInfo.phone}
+                  onChange={e => handlePracticeInfo('phone', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+
+              <div className="mrt-form-field mrt-form-field--full">
+                <label className="mrt-form-label" htmlFor="mrt-practice-address">Adresse der Praxis</label>
+                <input
+                  id="mrt-practice-address"
+                  className="mrt-form-input"
+                  type="text"
+                  placeholder="Straße, PLZ, Ort"
+                  value={practiceInfo.address}
+                  onChange={e => handlePracticeInfo('address', e.target.value)}
+                  disabled={isBusy}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ── 4. Zustimmungen ───────────────────────────────────────────────── */}
           <div className="mrt-consent-list" role="group" aria-label="Zustimmungen">
             <div className="mrt-consent-item">
               <input
@@ -327,12 +643,15 @@ export default function MedaRealtimePage() {
             </div>
           </div>
 
-          {/* Validation hint */}
           {blockHint && (
             <p className="mrt-consent-hint" role="alert">{blockHint}</p>
           )}
 
-          {/* Start button */}
+          <p className="mrt-privacy-note">
+            Diese Angaben werden in dieser Version nur lokal für die aktuelle Sitzung und den
+            PDF-Export verwendet. Es findet keine Speicherung statt.
+          </p>
+
           <div className="mrt-controls">
             <button
               className="mrt-btn mrt-btn--start"
@@ -445,16 +764,19 @@ export default function MedaRealtimePage() {
       {/* ── PDF Export — visible after session ends and turns exist ───────────── */}
       {!isConnected && !isConnecting && turns.length > 0 && (
         <section className="mrt-export-section" aria-label="PDF-Export">
-          <h2 className="mrt-export-heading">PDF-Gesprächsprotokoll</h2>
+          <h2 className="mrt-export-heading">PDF-Gesprächsprotokoll herunterladen</h2>
           <p className="mrt-export-hint">
             Der PDF-Export wird lokal auf Ihrem Gerät erstellt. Kein Upload, keine Serverübertragung.
+            Sie können die Daten unten noch anpassen, bevor Sie das PDF herunterladen.
           </p>
 
-          {/* Patient fields */}
+          {/* Patient data — pre-filled from setup form, editable */}
           <fieldset className="mrt-export-fieldset">
-            <legend className="mrt-export-legend">Patientendaten <span className="mrt-export-optional">(optional)</span></legend>
+            <legend className="mrt-export-legend">
+              {forSelf ? 'Ihre Angaben' : 'Angaben zur betroffenen Person'}
+            </legend>
             <div className="mrt-export-grid">
-              <div className="mrt-export-field">
+              <div className="mrt-export-field mrt-export-field--full">
                 <label className="mrt-export-label" htmlFor="pdf-patient-name">Name</label>
                 <input
                   id="pdf-patient-name"
@@ -484,9 +806,9 @@ export default function MedaRealtimePage() {
                   value={patientInfo.gender}
                   onChange={e => handlePatientInfo('gender', e.target.value)}
                 >
-                  <option value="">nicht angegeben</option>
-                  <option value="männlich">männlich</option>
+                  <option value="">keine Angabe</option>
                   <option value="weiblich">weiblich</option>
+                  <option value="männlich">männlich</option>
                   <option value="divers">divers</option>
                 </select>
               </div>
@@ -504,12 +826,69 @@ export default function MedaRealtimePage() {
                   <option value="Selbstzahler">Selbstzahler</option>
                 </select>
               </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-ins-nr">Versicherungsnummer</label>
+                <input
+                  id="pdf-patient-ins-nr"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="optional"
+                  value={patientInfo.insuranceNumber}
+                  onChange={e => handlePatientInfo('insuranceNumber', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-email">E-Mail</label>
+                <input
+                  id="pdf-patient-email"
+                  className="mrt-export-input"
+                  type="email"
+                  placeholder="nicht angegeben"
+                  value={patientInfo.email}
+                  onChange={e => handlePatientInfo('email', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-phone">Telefon</label>
+                <input
+                  id="pdf-patient-phone"
+                  className="mrt-export-input"
+                  type="tel"
+                  placeholder="nicht angegeben"
+                  value={patientInfo.phone}
+                  onChange={e => handlePatientInfo('phone', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field mrt-export-field--full">
+                <label className="mrt-export-label" htmlFor="pdf-patient-address">Adresse</label>
+                <input
+                  id="pdf-patient-address"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={patientInfo.address}
+                  onChange={e => handlePatientInfo('address', e.target.value)}
+                />
+              </div>
+              {!forSelf && (
+                <div className="mrt-export-field mrt-export-field--full">
+                  <label className="mrt-export-label" htmlFor="pdf-patient-relation">Beziehung zur Person</label>
+                  <input
+                    id="pdf-patient-relation"
+                    className="mrt-export-input"
+                    type="text"
+                    placeholder="z. B. Mutter, Vater, Kind"
+                    value={patientInfo.relationship}
+                    onChange={e => handlePatientInfo('relationship', e.target.value)}
+                  />
+                </div>
+              )}
             </div>
           </fieldset>
 
-          {/* Practice fields */}
+          {/* Practice data */}
           <fieldset className="mrt-export-fieldset">
-            <legend className="mrt-export-legend">Praxisdaten <span className="mrt-export-optional">(optional)</span></legend>
+            <legend className="mrt-export-legend">Praxisdaten</legend>
             <div className="mrt-export-grid">
               <div className="mrt-export-field">
                 <label className="mrt-export-label" htmlFor="pdf-practice-name">Praxis / Einrichtung</label>
@@ -523,7 +902,7 @@ export default function MedaRealtimePage() {
                 />
               </div>
               <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-doctor-name">Ärztin / Arzt / Behandler</label>
+                <label className="mrt-export-label" htmlFor="pdf-doctor-name">Ärztin / Arzt</label>
                 <input
                   id="pdf-doctor-name"
                   className="mrt-export-input"
@@ -534,7 +913,7 @@ export default function MedaRealtimePage() {
                 />
               </div>
               <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-department">Fachbereich</label>
+                <label className="mrt-export-label" htmlFor="pdf-department">Fachrichtung</label>
                 <input
                   id="pdf-department"
                   className="mrt-export-input"
@@ -545,14 +924,36 @@ export default function MedaRealtimePage() {
                 />
               </div>
               <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-location">Ort</label>
+                <label className="mrt-export-label" htmlFor="pdf-practice-email">E-Mail der Praxis</label>
                 <input
-                  id="pdf-location"
+                  id="pdf-practice-email"
+                  className="mrt-export-input"
+                  type="email"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.email}
+                  onChange={e => handlePracticeInfo('email', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-practice-phone">Telefon der Praxis</label>
+                <input
+                  id="pdf-practice-phone"
+                  className="mrt-export-input"
+                  type="tel"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.phone}
+                  onChange={e => handlePracticeInfo('phone', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field mrt-export-field--full">
+                <label className="mrt-export-label" htmlFor="pdf-practice-address">Adresse der Praxis</label>
+                <input
+                  id="pdf-practice-address"
                   className="mrt-export-input"
                   type="text"
                   placeholder="nicht angegeben"
-                  value={practiceInfo.location}
-                  onChange={e => handlePracticeInfo('location', e.target.value)}
+                  value={practiceInfo.address}
+                  onChange={e => handlePracticeInfo('address', e.target.value)}
                 />
               </div>
             </div>

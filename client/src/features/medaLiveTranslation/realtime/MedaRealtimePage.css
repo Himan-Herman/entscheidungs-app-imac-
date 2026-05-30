@@ -669,3 +669,191 @@
 :root[data-theme="dark"] .mrt-export-input::placeholder { color: #475569; }
 :root[data-theme="dark"] .mrt-btn--pdf        { background: #0e7490; }
 :root[data-theme="dark"] .mrt-btn--pdf:hover:not(:disabled) { background: #0c6880; }
+
+/* ── Export full-width field modifier ──────────────────────────────────────── */
+.mrt-export-field--full {
+  grid-column: 1 / -1;
+}
+
+/* ── Setup sub-sections ────────────────────────────────────────────────────── */
+.mrt-setup-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.875rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--ms-surface, #fff);
+}
+
+.mrt-setup-section-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #374151;
+  margin: 0;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Person toggle ─────────────────────────────────────────────────────────── */
+.mrt-person-toggle {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mrt-toggle-btn {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.5rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  text-align: center;
+}
+
+.mrt-toggle-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.mrt-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mrt-toggle-btn--active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.mrt-toggle-btn--active:hover:not(:disabled) {
+  background: #dbeafe;
+}
+
+/* ── Form grid + fields ─────────────────────────────────────────────────────── */
+.mrt-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem 0.875rem;
+}
+
+.mrt-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mrt-form-field--full {
+  grid-column: 1 / -1;
+}
+
+.mrt-form-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.mrt-form-input,
+.mrt-form-select {
+  font-size: 0.875rem;
+  padding: 0.4rem 0.625rem;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  background: #fff;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.mrt-form-input:focus,
+.mrt-form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+.mrt-form-input:disabled,
+.mrt-form-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
+
+.mrt-form-input::placeholder {
+  color: #9ca3af;
+}
+
+/* ── Helper text within form ───────────────────────────────────────────────── */
+.mrt-form-opt {
+  font-weight: 400;
+  color: #9ca3af;
+  font-size: 0.6875rem;
+}
+
+.mrt-form-note {
+  font-size: 0.6875rem;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.mrt-required-star {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.mrt-optional-badge {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  letter-spacing: 0.01em;
+}
+
+/* ── Privacy note ──────────────────────────────────────────────────────────── */
+.mrt-privacy-note {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Responsive: collapse to 1 column on narrow screens ───────────────────── */
+@media (max-width: 480px) {
+  .mrt-form-grid { grid-template-columns: 1fr; }
+  .mrt-form-field--full { grid-column: 1; }
+  .mrt-person-toggle { flex-direction: column; }
+}
+
+/* ── Dark mode — setup sub-sections ─────────────────────────────────────────── */
+:root[data-theme="dark"] .mrt-setup-section       { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .mrt-setup-section-title  { color: #cbd5e1; }
+:root[data-theme="dark"] .mrt-toggle-btn           { background: #0f172a; border-color: #475569; color: #cbd5e1; }
+:root[data-theme="dark"] .mrt-toggle-btn:hover:not(:disabled) { background: #1e293b; border-color: #64748b; }
+:root[data-theme="dark"] .mrt-toggle-btn--active   { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
+:root[data-theme="dark"] .mrt-toggle-btn--active:hover:not(:disabled) { background: #1e40af; }
+:root[data-theme="dark"] .mrt-form-label           { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-form-input,
+:root[data-theme="dark"] .mrt-form-select          { background: #0f172a; border-color: #475569; color: #f1f5f9; }
+:root[data-theme="dark"] .mrt-form-input:focus,
+:root[data-theme="dark"] .mrt-form-select:focus    { border-color: #60a5fa; box-shadow: 0 0 0 2px #1e3a5f; }
+:root[data-theme="dark"] .mrt-form-input:disabled,
+:root[data-theme="dark"] .mrt-form-select:disabled { background: #1e293b; }
+:root[data-theme="dark"] .mrt-form-input::placeholder { color: #475569; }
+:root[data-theme="dark"] .mrt-form-opt            { color: #64748b; }
+:root[data-theme="dark"] .mrt-form-note           { color: #64748b; }
+:root[data-theme="dark"] .mrt-optional-badge      { background: #1e293b; border-color: #334155; color: #64748b; }
+:root[data-theme="dark"] .mrt-privacy-note        { color: #64748b; }
