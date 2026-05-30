@@ -32,25 +32,6 @@ const LANG_PAIRS = [
  *   speakerRole: 'patient'|'practice', targetRole: 'patient'|'practice' }} ConvEntry
  */
 
-// German markers: umlauts are a strong signal; German-only function words
-const DE_PATTERN = /[äöüÄÖÜß]|\b(ich|habe|nicht|kein|keine|keiner|mit|und|ist|bin|mir|dir|ihr|Sie|Ihnen|dass|aber|wenn|auch|noch|für|nach|auf|aus|ein|eine|eines|einem|einen|des|dem|den|der|die|das|es|er|wir|man|mich|dich|uns)\b/gi;
-// English markers: function words not shared with German
-const EN_PATTERN = /\b(the|is|are|have|you|your|it|this|that|but|not|of|to|do|was|were|has|had|will|would|could|should|please|thank|feel|hurt|take|know|need|pain|don't|doesn't|it's|that's|what|when|where|how|why|who|get|got|can|cannot)\b/gi;
-
-/**
- * Local language heuristic — returns "de", "en", or null (uncertain).
- * Conservative: requires minimum text length and clear 2:1 signal dominance.
- * Only used in auto-direction test mode. Never influences translation.
- */
-function detectLang(text) {
-  if (!text || text.trim().length < 12) return null;
-  const deScore = (text.match(DE_PATTERN) ?? []).length;
-  const enScore = (text.match(EN_PATTERN) ?? []).length;
-  if (deScore + enScore < 2) return null;
-  if (deScore >= enScore * 2 + 1) return "de";
-  if (enScore >= deScore * 2 + 1) return "en";
-  return null;
-}
 
 function playStartTone() {
   try {
@@ -95,7 +76,6 @@ export default function MedaLiveTranslationPage() {
 
   // ── Direction state (within active session) ────────────────────────────────
   const [direction, setDirection] = useState(LANG_PAIRS[0].id);
-  const [directionMode, setDirectionMode] = useState(/** @type {"manual"|"auto"} */ ("manual"));
   const activePair = LANG_PAIRS.find((p) => p.id === direction) ?? LANG_PAIRS[0];
   const { src: srcLang, tgt: tgtLang, tts: ttsLang } = activePair;
 
@@ -117,9 +97,6 @@ export default function MedaLiveTranslationPage() {
 
   const {
     isSupported: speechSupported,
-    enabled: audioEnabled,
-    toggleEnabled: toggleAudio,
-    autoSpeak,
     replay: replaySpeech,
     stopSpeech,
     resetSession: resetSpeechSession,
@@ -131,7 +108,6 @@ export default function MedaLiveTranslationPage() {
   const [conversation, setConversation] = useState(/** @type {ConvEntry[]} */ ([]));
 
   const translatedCountRef     = useRef(0);
-  const lastSpokenIdRef        = useRef(/** @type {string|null} */ (null));
   const conversationEndRef     = useRef(/** @type {HTMLDivElement|null} */ (null));
   const lastNotifiedEntryRef   = useRef(/** @type {string|null} */ (null));
 
@@ -168,10 +144,8 @@ export default function MedaLiveTranslationPage() {
   const handleSetupStart = useCallback(() => {
     if (!setupValid) return;
     setDirection(patientDirection);
-    setDirectionMode("manual");
     setConversation([]);
     translatedCountRef.current = 0;
-    lastSpokenIdRef.current = null;
     setSetupComplete(true);
   }, [setupValid, patientDirection]);
 
@@ -183,9 +157,7 @@ export default function MedaLiveTranslationPage() {
     clearTranscript();
     resetSpeechSession();
     setConversation([]);
-    setDirectionMode("manual");
     translatedCountRef.current = 0;
-    lastSpokenIdRef.current = null;
     setSetupComplete(false);
   }, [status, conversation.length, t.changeLanguagesConfirm, stopSpeech, clearTranscript, resetSpeechSession]);
 
@@ -196,7 +168,6 @@ export default function MedaLiveTranslationPage() {
     clearTranscript();
     resetSpeechSession();
     translatedCountRef.current = 0;
-    lastSpokenIdRef.current = null;
     setConversation([]);
     setDirection(newDir);
   }, [status, stopSpeech, clearTranscript, resetSpeechSession]);
@@ -208,9 +179,7 @@ export default function MedaLiveTranslationPage() {
     clearTranscript();
     resetSpeechSession();
     setConversation([]);
-    setDirectionMode("manual");
     translatedCountRef.current = 0;
-    lastSpokenIdRef.current = null;
     setSecondsLeft(DURATION_S);
   }, [status, stopSpeech, clearTranscript, resetSpeechSession]);
 
@@ -220,7 +189,6 @@ export default function MedaLiveTranslationPage() {
     if (conversation.length === 0) return;
     if (!window.confirm(t.clearConversationConfirm)) return;
     setConversation([]);
-    lastSpokenIdRef.current = null;
   }, [status, conversation.length, t.clearConversationConfirm]);
 
   const handleCopyConversation = useCallback(() => {
@@ -330,14 +298,6 @@ export default function MedaLiveTranslationPage() {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
 
-  // Auto-speak each new successfully translated entry
-  useEffect(() => {
-    const lastTranslated = conversation.filter((e) => e.status === "translated" && e.translatedText).at(-1);
-    if (!lastTranslated || lastTranslated.id === lastSpokenIdRef.current) return;
-    lastSpokenIdRef.current = lastTranslated.id;
-    autoSpeak(lastTranslated.translatedText, ttsLang);
-  }, [conversation, autoSpeak, ttsLang]);
-
   // Auto-scroll conversation to bottom when new entries arrive
   useEffect(() => {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -359,18 +319,6 @@ export default function MedaLiveTranslationPage() {
     if (last.status === "error") showMessage("error", t.messageTranslationFailed, 4000);
     else showMessage("info", t.messageUnclearInput, 4000);
   }, [conversation, t.messageTranslationFailed, t.messageUnclearInput, showMessage]);
-
-  // Auto-direction test mode: suggest manual override when local heuristic detects
-  // a different language than the current recognition language. Never auto-switches.
-  useEffect(() => {
-    if (directionMode !== "auto") return;
-    const lastLine = transcriptLines.at(-1);
-    if (!lastLine) return;
-    const detected = detectLang(lastLine);
-    if (detected !== null && detected !== srcLang) {
-      showMessage("info", t.autoDirectionUncertain, 6000);
-    }
-  }, [transcriptLines, directionMode, srcLang, t.autoDirectionUncertain, showMessage]);
 
   // Full cleanup on unmount
   useEffect(() => () => {
@@ -502,27 +450,7 @@ export default function MedaLiveTranslationPage() {
 
         {/* Who speaks now (patient ↔ practice) */}
         <div className="mlt-direction">
-          <div className="mlt-direction__header">
-            <span className="mlt-direction__label">{t.directionLabel}</span>
-            <div className="mlt-direction-mode" role="group" aria-label={t.directionModeLabel}>
-              <button
-                type="button"
-                className={`mlt-direction-mode__btn${directionMode === "manual" ? " mlt-direction-mode__btn--active" : ""}`}
-                onClick={() => setDirectionMode("manual")}
-                aria-pressed={directionMode === "manual"}
-              >
-                {t.manualDirectionModeLabel}
-              </button>
-              <button
-                type="button"
-                className={`mlt-direction-mode__btn${directionMode === "auto" ? " mlt-direction-mode__btn--active" : ""}`}
-                onClick={() => setDirectionMode("auto")}
-                aria-pressed={directionMode === "auto"}
-              >
-                {t.autoDirectionModeLabel}
-              </button>
-            </div>
-          </div>
+          <span className="mlt-direction__label">{t.directionLabel}</span>
           <div className="mlt-direction__btns" role="radiogroup" aria-label={t.directionLabel}>
             <button
               type="button"
@@ -547,9 +475,6 @@ export default function MedaLiveTranslationPage() {
               <span className="mlt-direction__btn-role">{getLangName(practiceLanguage)} → {getLangName(patientLanguage)}</span>
             </button>
           </div>
-          {directionMode === "auto" && (
-            <p className="mlt-direction-mode__hint" role="note">{t.autoDirectionHint}</p>
-          )}
         </div>
 
         {/* Status */}
@@ -708,53 +633,40 @@ export default function MedaLiveTranslationPage() {
             <p className="mlt-message mlt-message--info">{t.messageSpeechUnsupported}</p>
           ) : (
             <>
+              <p className="mlt-audio__hint">{t.audioOnDemandHint}</p>
               <div className="mlt-audio__controls">
                 <button
                   type="button"
-                  className={`mlt-audio__toggle${audioEnabled ? " mlt-audio__toggle--on" : ""}`}
-                  onClick={toggleAudio}
-                  aria-pressed={audioEnabled}
+                  className="mlt-audio__btn"
+                  onClick={() => lastTranslatedText && replaySpeech(lastTranslatedText, ttsLang)}
+                  disabled={!lastTranslatedText}
+                  aria-label={t.audioReplay}
                 >
-                  {audioEnabled ? t.audioDisable : t.audioEnable}
+                  {t.audioReplay}
                 </button>
-                {audioEnabled && (
-                  <>
-                    <button
-                      type="button"
-                      className="mlt-audio__btn"
-                      onClick={() => lastTranslatedText && replaySpeech(lastTranslatedText, ttsLang)}
-                      disabled={!lastTranslatedText}
-                      aria-label={t.audioReplay}
-                    >
-                      {t.audioReplay}
-                    </button>
-                    <button
-                      type="button"
-                      className="mlt-audio__btn mlt-audio__btn--stop"
-                      onClick={stopSpeech}
-                      disabled={speechStatus !== "speaking"}
-                      aria-label={t.audioStopBtn}
-                    >
-                      {t.audioStopBtn}
-                    </button>
-                  </>
-                )}
-              </div>
-              {audioEnabled && (
-                <div
-                  className="mlt-audio__status"
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
+                <button
+                  type="button"
+                  className="mlt-audio__btn mlt-audio__btn--stop"
+                  onClick={stopSpeech}
+                  disabled={speechStatus !== "speaking"}
+                  aria-label={t.audioStopBtn}
                 >
-                  {speechStatus === "speaking"
-                    ? t.audioStatusSpeaking
-                    : speechStatus === "stopped"
-                    ? t.audioStatusStopped
-                    : t.audioStatusIdle}
-                </div>
-              )}
-              {audioEnabled && selectedVoiceName && (
+                  {t.audioStopBtn}
+                </button>
+              </div>
+              <div
+                className="mlt-audio__status"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {speechStatus === "speaking"
+                  ? t.audioStatusSpeaking
+                  : speechStatus === "stopped"
+                  ? t.audioStatusStopped
+                  : t.audioStatusIdle}
+              </div>
+              {selectedVoiceName && (
                 <p className="mlt-audio__voice">{selectedVoiceName}</p>
               )}
             </>
