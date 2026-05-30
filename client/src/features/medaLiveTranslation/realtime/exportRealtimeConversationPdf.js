@@ -277,16 +277,35 @@ export async function exportRealtimeConversationPdf({
 
   // ── Metadata box ────────────────────────────────────────────────────────────
 
+  const patientAddr = [
+    patientInfo.street,
+    patientInfo.postalCode && patientInfo.city
+      ? `${patientInfo.postalCode} ${patientInfo.city}`
+      : (patientInfo.postalCode || patientInfo.city || ''),
+    patientInfo.country,
+  ].map(s => String(s || '').trim()).filter(Boolean).join(', ');
+
+  const practiceAddr = [
+    practiceInfo.street,
+    practiceInfo.postalCode && practiceInfo.city
+      ? `${practiceInfo.postalCode} ${practiceInfo.city}`
+      : (practiceInfo.postalCode || practiceInfo.city || ''),
+    practiceInfo.country,
+  ].map(s => String(s || '').trim()).filter(Boolean).join(', ');
+
   metaBox([
     ['Patient',              orNA(patientInfo.name)],
     ['Geburtsdatum',         orNA(patientInfo.dateOfBirth)],
     ['Geschlecht',           orNA(patientInfo.gender)],
     ['Versicherungsstatus',  orNA(patientInfo.insuranceStatus)],
+    ['Krankenkasse',         orNA(patientInfo.insuranceName)],
+    ['Versicherungsnummer',  orNA(patientInfo.insuranceNumber)],
+    ['Adresse',              patientAddr || 'nicht angegeben'],
     null,
     ['Praxis / Einrichtung', orNA(practiceInfo.practiceName)],
     ['Ärztin / Arzt',        orNA(practiceInfo.doctorName)],
     ['Fachbereich',          orNA(practiceInfo.department)],
-    ['Ort',                  orNA(practiceInfo.location)],
+    ['Praxisadresse',        practiceAddr || 'nicht angegeben'],
     null,
     ['Patientensprache',     patientLangLabel],
     ['Praxissprache',        practiceLangLabel],

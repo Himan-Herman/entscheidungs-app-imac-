@@ -914,6 +914,17 @@ export default function MedaRealtimePage() {
                 </select>
               </div>
               <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-ins-name">Krankenkasse / Versicherung</label>
+                <input
+                  id="pdf-patient-ins-name"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={patientInfo.insuranceName}
+                  onChange={e => handlePatientInfo('insuranceName', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
                 <label className="mrt-export-label" htmlFor="pdf-patient-ins-nr">Versicherungsnummer</label>
                 <input
                   id="pdf-patient-ins-nr"
@@ -947,14 +958,36 @@ export default function MedaRealtimePage() {
                 />
               </div>
               <div className="mrt-export-field mrt-export-field--full">
-                <label className="mrt-export-label" htmlFor="pdf-patient-address">Adresse</label>
+                <label className="mrt-export-label" htmlFor="pdf-patient-street">Straße und Hausnummer</label>
                 <input
-                  id="pdf-patient-address"
+                  id="pdf-patient-street"
                   className="mrt-export-input"
                   type="text"
                   placeholder="nicht angegeben"
-                  value={patientInfo.address}
-                  onChange={e => handlePatientInfo('address', e.target.value)}
+                  value={patientInfo.street}
+                  onChange={e => handlePatientInfo('street', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-plz">PLZ</label>
+                <input
+                  id="pdf-patient-plz"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={patientInfo.postalCode}
+                  onChange={e => handlePatientInfo('postalCode', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-patient-city">Ort</label>
+                <input
+                  id="pdf-patient-city"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={patientInfo.city}
+                  onChange={e => handlePatientInfo('city', e.target.value)}
                 />
               </div>
               {!forSelf && (
@@ -1033,14 +1066,36 @@ export default function MedaRealtimePage() {
                 />
               </div>
               <div className="mrt-export-field mrt-export-field--full">
-                <label className="mrt-export-label" htmlFor="pdf-practice-address">Adresse der Praxis</label>
+                <label className="mrt-export-label" htmlFor="pdf-practice-street">Straße und Hausnummer</label>
                 <input
-                  id="pdf-practice-address"
+                  id="pdf-practice-street"
                   className="mrt-export-input"
                   type="text"
                   placeholder="nicht angegeben"
-                  value={practiceInfo.address}
-                  onChange={e => handlePracticeInfo('address', e.target.value)}
+                  value={practiceInfo.street}
+                  onChange={e => handlePracticeInfo('street', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-practice-plz">PLZ</label>
+                <input
+                  id="pdf-practice-plz"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.postalCode}
+                  onChange={e => handlePracticeInfo('postalCode', e.target.value)}
+                />
+              </div>
+              <div className="mrt-export-field">
+                <label className="mrt-export-label" htmlFor="pdf-practice-city">Ort</label>
+                <input
+                  id="pdf-practice-city"
+                  className="mrt-export-input"
+                  type="text"
+                  placeholder="nicht angegeben"
+                  value={practiceInfo.city}
+                  onChange={e => handlePracticeInfo('city', e.target.value)}
                 />
               </div>
             </div>
