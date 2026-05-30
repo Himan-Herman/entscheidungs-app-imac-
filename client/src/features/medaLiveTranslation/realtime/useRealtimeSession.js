@@ -197,6 +197,32 @@ export function useRealtimeSession() {
         });
         break;
 
+      // ── Response done ────────────────────────────────────────────────────────
+      // response.status can be 'completed' | 'cancelled' | 'failed' | 'incomplete'.
+      // For 'completed': output_audio_buffer.stopped handles the language switch.
+      // For all other statuses: no audio is generated, so output_audio_buffer events
+      // never fire — we must recover here to prevent the session from freezing.
+      case 'response.done':
+        {
+          const respStatus = ev.response?.status;
+          if (respStatus === 'failed' || respStatus === 'cancelled' || respStatus === 'incomplete') {
+            speakerLockRef.current = false;
+            // Mark the pending turn as done (no translation available)
+            setTurns(prev => {
+              if (prev.length === 0) return prev;
+              return prev.map((t, i) =>
+                i === prev.length - 1 && !t.isDone
+                  ? { ...t, isDone: true }
+                  : t
+              );
+            });
+            _switchLanguage();
+            setSessionStatus('ready');
+          }
+          // 'completed' case: output_audio_buffer.stopped will fire and handle the switch
+        }
+        break;
+
       // ── WebRTC audio buffer (WebRTC-only events) ──────────────────────────────
       case 'output_audio_buffer.started':
         speakerLockRef.current = true;
