@@ -372,7 +372,9 @@ export default function MedaRealtimePage() {
           >
             <div className="mrt-turn-header">
               <span className="mrt-turn-role">
-                {turn.speakerRole ? ROLE_LABEL[turn.speakerRole] : '…'}
+                {turn.speakerRole
+                  ? `${ROLE_LABEL[turn.speakerRole]} → ${ROLE_LABEL[turn.targetRole]}`
+                  : '…'}
               </span>
               <span className="mrt-turn-direction">
                 {turn.sourceLanguage

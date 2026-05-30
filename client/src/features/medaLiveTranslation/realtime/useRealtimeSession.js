@@ -15,6 +15,7 @@ const OPENAI_REALTIME_BASE = 'https://api.openai.com/v1/realtime';
  *   translatedText: string,
  *   isDone: boolean,
  *   speakerRole: SpeakerRole|null,
+ *   targetRole: SpeakerRole|null,
  *   sourceLanguage: string|null,
  *   targetLanguage: string|null,
  * }} Turn
@@ -130,6 +131,7 @@ export function useRealtimeSession() {
           translatedText: '',
           isDone:         false,
           speakerRole:    null,   // filled at transcription.completed
+          targetRole:     null,   // filled at transcription.completed
           sourceLanguage: null,
           targetLanguage: null,
         }]);
@@ -145,12 +147,16 @@ export function useRealtimeSession() {
         let sourceLanguage = null;
         let targetLanguage = null;
 
+        let targetRole = null;
+
         if (detected === patientLangRef.current) {
           speakerRole    = 'patient';
+          targetRole     = 'practice';
           sourceLanguage = patientLangRef.current;
           targetLanguage = practiceLangRef.current;
         } else if (detected === practiceLangRef.current) {
           speakerRole    = 'practice';
+          targetRole     = 'patient';
           sourceLanguage = practiceLangRef.current;
           targetLanguage = patientLangRef.current;
         }
@@ -164,7 +170,7 @@ export function useRealtimeSession() {
             ? {
                 ...t,
                 originalText: transcript,
-                ...(speakerRole !== null ? { speakerRole, sourceLanguage, targetLanguage } : {}),
+                ...(speakerRole !== null ? { speakerRole, targetRole, sourceLanguage, targetLanguage } : {}),
               }
             : t
         ));
