@@ -4,7 +4,7 @@
  * Layered model strategy:
  *  - Chat / text / medical translation / PDF:  gpt-5.4                  (OPENAI_CHAT_MODEL)
  *  - TTS / speech synthesis:                   gpt-4o-mini-tts           (OPENAI_TTS_MODEL)
- *  - Meda Realtime Live Interpreter:           gpt-realtime              (MEDA_REALTIME_MODEL → OPENAI_REALTIME_MODEL → "gpt-realtime")
+ *  - Meda Realtime Live Interpreter:           gpt-4o-realtime-preview   (MEDA_REALTIME_MODEL → OPENAI_REALTIME_MODEL → "gpt-4o-realtime-preview")
  *  - Meda Realtime transcription:              gpt-4o-transcribe         (MEDA_REALTIME_TRANSCRIPTION_MODEL)
  *  - Meda Realtime voice:                      marin                     (LIVE_TRANSLATION_VOICE)
  *  - Meda Realtime VAD silence:                1500 ms                   (LIVE_TRANSLATION_VAD_SILENCE_MS)
@@ -48,7 +48,7 @@ export function getMedaRealtimeModel() {
   const secondary = process.env.OPENAI_REALTIME_MODEL;
   if (typeof primary   === "string" && primary.trim())   return primary.trim();
   if (typeof secondary === "string" && secondary.trim()) return secondary.trim();
-  return "gpt-realtime";
+  return "gpt-4o-realtime-preview";
 }
 
 /**
