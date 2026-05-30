@@ -181,7 +181,7 @@ export const PATIENT_MAIN_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     icon: BookHeart,
   },
   {
-    to: "/patient/meda-live-translation",
+    to: "/patient/meda-realtime",
     key: "hubLinkMedaLive",
     subtitleKey: "hubLinkMedaLiveSub",
     icon: Mic,
