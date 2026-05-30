@@ -32,6 +32,26 @@ const LANG_PAIRS = [
  *   speakerRole: 'patient'|'practice', targetRole: 'patient'|'practice' }} ConvEntry
  */
 
+// German markers: umlauts are a strong signal; German-only function words
+const DE_PATTERN = /[äöüÄÖÜß]|\b(ich|habe|nicht|kein|keine|keiner|mit|und|ist|bin|mir|dir|ihr|Sie|Ihnen|dass|aber|wenn|auch|noch|für|nach|auf|aus|ein|eine|eines|einem|einen|des|dem|den|der|die|das|es|er|wir|man|mich|dich|uns)\b/gi;
+// English markers: function words not shared with German
+const EN_PATTERN = /\b(the|is|are|have|you|your|it|this|that|but|not|of|to|do|was|were|has|had|will|would|could|should|please|thank|feel|hurt|take|know|need|pain|don't|doesn't|it's|that's|what|when|where|how|why|who|get|got|can|cannot)\b/gi;
+
+/**
+ * Local language heuristic — returns "de", "en", or null (uncertain).
+ * Conservative: requires minimum text length and clear 2:1 signal dominance.
+ * Only used in auto-direction test mode. Never influences translation.
+ */
+function detectLang(text) {
+  if (!text || text.trim().length < 12) return null;
+  const deScore = (text.match(DE_PATTERN) ?? []).length;
+  const enScore = (text.match(EN_PATTERN) ?? []).length;
+  if (deScore + enScore < 2) return null;
+  if (deScore >= enScore * 2 + 1) return "de";
+  if (enScore >= deScore * 2 + 1) return "en";
+  return null;
+}
+
 function playStartTone() {
   try {
     const ctx = new AudioContext();
@@ -75,6 +95,7 @@ export default function MedaLiveTranslationPage() {
 
   // ── Direction state (within active session) ────────────────────────────────
   const [direction, setDirection] = useState(LANG_PAIRS[0].id);
+  const [directionMode, setDirectionMode] = useState(/** @type {"manual"|"auto"} */ ("manual"));
   const activePair = LANG_PAIRS.find((p) => p.id === direction) ?? LANG_PAIRS[0];
   const { src: srcLang, tgt: tgtLang, tts: ttsLang } = activePair;
 
@@ -147,6 +168,7 @@ export default function MedaLiveTranslationPage() {
   const handleSetupStart = useCallback(() => {
     if (!setupValid) return;
     setDirection(patientDirection);
+    setDirectionMode("manual");
     setConversation([]);
     translatedCountRef.current = 0;
     lastSpokenIdRef.current = null;
@@ -161,6 +183,7 @@ export default function MedaLiveTranslationPage() {
     clearTranscript();
     resetSpeechSession();
     setConversation([]);
+    setDirectionMode("manual");
     translatedCountRef.current = 0;
     lastSpokenIdRef.current = null;
     setSetupComplete(false);
@@ -185,6 +208,7 @@ export default function MedaLiveTranslationPage() {
     clearTranscript();
     resetSpeechSession();
     setConversation([]);
+    setDirectionMode("manual");
     translatedCountRef.current = 0;
     lastSpokenIdRef.current = null;
     setSecondsLeft(DURATION_S);
@@ -336,6 +360,18 @@ export default function MedaLiveTranslationPage() {
     else showMessage("info", t.messageUnclearInput, 4000);
   }, [conversation, t.messageTranslationFailed, t.messageUnclearInput, showMessage]);
 
+  // Auto-direction test mode: suggest manual override when local heuristic detects
+  // a different language than the current recognition language. Never auto-switches.
+  useEffect(() => {
+    if (directionMode !== "auto") return;
+    const lastLine = transcriptLines.at(-1);
+    if (!lastLine) return;
+    const detected = detectLang(lastLine);
+    if (detected !== null && detected !== srcLang) {
+      showMessage("info", t.autoDirectionUncertain, 6000);
+    }
+  }, [transcriptLines, directionMode, srcLang, t.autoDirectionUncertain, showMessage]);
+
   // Full cleanup on unmount
   useEffect(() => () => {
     stop();
@@ -466,7 +502,27 @@ export default function MedaLiveTranslationPage() {
 
         {/* Who speaks now (patient ↔ practice) */}
         <div className="mlt-direction">
-          <span className="mlt-direction__label">{t.directionLabel}</span>
+          <div className="mlt-direction__header">
+            <span className="mlt-direction__label">{t.directionLabel}</span>
+            <div className="mlt-direction-mode" role="group" aria-label={t.directionModeLabel}>
+              <button
+                type="button"
+                className={`mlt-direction-mode__btn${directionMode === "manual" ? " mlt-direction-mode__btn--active" : ""}`}
+                onClick={() => setDirectionMode("manual")}
+                aria-pressed={directionMode === "manual"}
+              >
+                {t.manualDirectionModeLabel}
+              </button>
+              <button
+                type="button"
+                className={`mlt-direction-mode__btn${directionMode === "auto" ? " mlt-direction-mode__btn--active" : ""}`}
+                onClick={() => setDirectionMode("auto")}
+                aria-pressed={directionMode === "auto"}
+              >
+                {t.autoDirectionModeLabel}
+              </button>
+            </div>
+          </div>
           <div className="mlt-direction__btns" role="radiogroup" aria-label={t.directionLabel}>
             <button
               type="button"
@@ -491,6 +547,9 @@ export default function MedaLiveTranslationPage() {
               <span className="mlt-direction__btn-role">{getLangName(practiceLanguage)} → {getLangName(patientLanguage)}</span>
             </button>
           </div>
+          {directionMode === "auto" && (
+            <p className="mlt-direction-mode__hint" role="note">{t.autoDirectionHint}</p>
+          )}
         </div>
 
         {/* Status */}
