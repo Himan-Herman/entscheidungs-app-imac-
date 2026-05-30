@@ -6,6 +6,24 @@ const SS =
     : null;
 
 /**
+ * Active TTS provider for Meda Live Translation.
+ *
+ * Providers:
+ *   "browser" — Web Speech Synthesis (free, built-in, current)
+ *
+ * To add Cloud-TTS later:
+ *   1. Add a new provider string here (e.g. "openai").
+ *   2. Implement _speakWithCloud(text, lang) inside useSpeechOutput.
+ *   3. Route to it in _doSpeak below.
+ *   4. The public API (autoSpeak, replay, stopSpeech) and MedaLiveTranslationPage
+ *      require NO changes — the abstraction boundary is already correct.
+ *
+ * IMPORTANT: never put API keys in this file. Cloud-TTS must route through
+ * a server-side proxy (POST /api/meda-live-translation/tts or similar).
+ */
+const SPEECH_PROVIDER = "browser";
+
+/**
  * Preferred voice names per locale prefix, ordered by priority.
  * Only local (non-network) voices are used to avoid silent failures with
  * remote voices that may not have finished loading.
@@ -46,6 +64,10 @@ function pickVoice(lang) {
  * Web Speech Synthesis output for translated text.
  * Caller passes the BCP-47 lang tag (e.g. "en-US", "de-DE") per utterance.
  *
+ * Provider structure: _speakWithBrowser handles the browser implementation.
+ * _doSpeak routes to the active SPEECH_PROVIDER. autoSpeak and replay call
+ * _doSpeak — they are unaware of which provider is active.
+ *
  * Loop guard: SpeechRecognition lang and TTS lang differ (e.g. de-DE mic /
  * en-US speaker, or en-US mic / de-DE speaker). The recognizer does not
  * process its own speaker language, so no feedback loop can form.
@@ -67,7 +89,7 @@ export function useSpeechOutput() {
   const lastLangRef = useRef("");
 
   // Updates voiceRef and schedules a state update for the display label.
-  // Kept separate from _doSpeak so that setState never blocks the speak call.
+  // Kept separate from _speakWithBrowser so that setState never blocks the speak call.
   const _refreshVoice = useCallback((lang) => {
     if (!isSupported) return;
     const v = pickVoice(lang);
@@ -86,7 +108,9 @@ export function useSpeechOutput() {
     return () => SS.removeEventListener("voiceschanged", handle);
   }, [isSupported, _refreshVoice]);
 
-  const _doSpeak = useCallback(
+  // Browser TTS provider implementation.
+  // To add Cloud-TTS: implement _speakWithCloud alongside this and route in _doSpeak.
+  const _speakWithBrowser = useCallback(
     (text, lang = "en-US") => {
       if (!isSupported || !text) return;
 
@@ -122,6 +146,16 @@ export function useSpeechOutput() {
       SS.speak(utt);
     },
     [isSupported, _refreshVoice],
+  );
+
+  // Provider router — currently only "browser" is active.
+  // Adding Cloud-TTS: add a branch here and implement _speakWithCloud above.
+  const _doSpeak = useCallback(
+    (text, lang = "en-US") => {
+      if (SPEECH_PROVIDER === "browser") _speakWithBrowser(text, lang);
+      // Future: if (SPEECH_PROVIDER === "cloud") _speakWithCloud(text, lang);
+    },
+    [_speakWithBrowser],
   );
 
   const autoSpeak = useCallback(
