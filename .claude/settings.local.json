@@ -8,7 +8,11 @@
       "Bash(git -C /Users/himankhorshidi/Desktop/entscheidungs-app-imac log --oneline -3)",
       "Bash(node --input-type=module)",
       "Bash(echo \"EXIT:$?\")",
-      "Bash(node --check server/routes/medaLiveTranslation.js)"
+      "Bash(node --check server/routes/medaLiveTranslation.js)",
+      "Bash(python3 -c \"import sys,json; p=json.load\\(sys.stdin\\); deps={**p.get\\('dependencies',{}\\),**p.get\\('devDependencies',{}\\)}; [print\\(k,v\\) for k,v in sorted\\(deps.items\\(\\)\\) if 'openai' in k.lower\\(\\) or 'express' in k.lower\\(\\) or 'rate' in k.lower\\(\\)]\")",
+      "Bash(node --check routes/medaRealtime.js)",
+      "Bash(node --check app.js)",
+      "Bash(node --check /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/config/openAiModels.js)"
     ]
   }
 }

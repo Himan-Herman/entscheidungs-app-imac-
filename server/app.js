@@ -88,6 +88,7 @@ import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
 import medaRouter from "./routes/meda.js";
 import medaLiveTranslationRouter from "./routes/medaLiveTranslation.js";
+import medaRealtimeRouter from "./routes/medaRealtime.js";
 import interpreterRouter from "./routes/interpreter.js";
 import interpreterPublicInviteRouter from "./routes/interpreterPublicInvite.js";
 import { interpreterInviteValidateLimiter } from "./middleware/interpreterRateLimit.js";
@@ -139,6 +140,7 @@ app.use('/api/textsymptom', requireAuth, symptomThreadRoute);
 app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
 app.use('/api/meda', medaRouter);
 app.use('/api/meda-live-translation', requireAuth, medaLiveTranslationRouter);
+app.use('/api/meda-realtime', requireAuth, medaRealtimeRouter);
 /** Medical Interpreter — public invite validation (Phase 4.6, no auth). */
 app.use(
   '/api/interpreter',
