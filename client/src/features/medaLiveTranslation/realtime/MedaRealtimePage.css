@@ -6,10 +6,10 @@
   color: var(--ms-text-primary, #111827);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.125rem;
 }
 
-/* Header */
+/* ── Header ────────────────────────────────────────────────────────────────── */
 .mrt-header {
   display: flex;
   align-items: center;
@@ -25,7 +25,7 @@
   letter-spacing: -0.01em;
 }
 
-/* Status badge */
+/* ── Status badge ──────────────────────────────────────────────────────────── */
 .mrt-status-badge {
   display: flex;
   align-items: center;
@@ -35,31 +35,14 @@
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
   border: 1px solid transparent;
+  transition: background 0.25s, color 0.25s;
 }
 
-.mrt-status-badge--idle {
-  background: #f3f4f6;
-  color: #6b7280;
-  border-color: #e5e7eb;
-}
-
-.mrt-status-badge--ready {
-  background: #dcfce7;
-  color: #16a34a;
-  border-color: #86efac;
-}
-
-.mrt-status-badge--active {
-  background: #fef3c7;
-  color: #d97706;
-  border-color: #fde68a;
-}
-
-.mrt-status-badge--speaking {
-  background: #ede9fe;
-  color: #7c3aed;
-  border-color: #c4b5fd;
-}
+.mrt-status-badge--idle    { background: #f3f4f6; color: #6b7280; border-color: #e5e7eb; }
+.mrt-status-badge--ready   { background: #dcfce7; color: #16a34a; border-color: #86efac; }
+.mrt-status-badge--active  { background: #fef3c7; color: #d97706; border-color: #fde68a; }
+.mrt-status-badge--speaking{ background: #ede9fe; color: #7c3aed; border-color: #c4b5fd; }
+.mrt-status-badge--error   { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
 
 .mrt-pulse {
   width: 8px;
@@ -75,7 +58,7 @@
   50%       { opacity: 0.4; transform: scale(0.75); }
 }
 
-/* Setup section */
+/* ── Setup section ─────────────────────────────────────────────────────────── */
 .mrt-setup {
   background: var(--ms-surface, #fff);
   border: 1px solid var(--ms-border, #e5e7eb);
@@ -119,10 +102,7 @@
   font-weight: 500;
 }
 
-.mrt-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+.mrt-select:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .mrt-arrow {
   font-size: 1.125rem;
@@ -131,11 +111,8 @@
   flex-shrink: 0;
 }
 
-/* Buttons */
-.mrt-controls {
-  display: flex;
-  gap: 0.625rem;
-}
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.mrt-controls { display: flex; gap: 0.625rem; }
 
 .mrt-btn {
   padding: 0.625rem 1.5rem;
@@ -145,32 +122,16 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
-}
-
-.mrt-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.mrt-btn--start {
-  background: #2563eb;
-  color: #fff;
   flex: 1;
 }
 
-.mrt-btn--start:not(:disabled):hover {
-  background: #1d4ed8;
-}
+.mrt-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.mrt-btn--stop {
-  background: #ef4444;
-  color: #fff;
-  flex: 1;
-}
+.mrt-btn--start { background: #2563eb; color: #fff; }
+.mrt-btn--start:not(:disabled):hover { background: #1d4ed8; }
 
-.mrt-btn--stop:not(:disabled):hover {
-  background: #dc2626;
-}
+.mrt-btn--stop { background: #ef4444; color: #fff; }
+.mrt-btn--stop:not(:disabled):hover { background: #dc2626; }
 
 .mrt-warning {
   font-size: 0.8125rem;
@@ -192,27 +153,62 @@
   border-radius: 6px;
 }
 
-/* Conversation */
+/* ── Pingpong speaker bar ──────────────────────────────────────────────────── */
+.mrt-pingpong-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--ms-surface, #f9fafb);
+  border: 1px solid var(--ms-border, #e5e7eb);
+  border-radius: 10px;
+}
+
+.mrt-speaker-pill {
+  flex: 1;
+  text-align: center;
+  padding: 0.375rem 0.5rem;
+  border-radius: 7px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #9ca3af;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.mrt-speaker-pill--active {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+  font-weight: 700;
+}
+
+.mrt-pingpong-arrow {
+  font-size: 1rem;
+  color: var(--ms-text-secondary, #d1d5db);
+  flex-shrink: 0;
+}
+
+/* ── Conversation ──────────────────────────────────────────────────────────── */
 .mrt-conversation {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
-  min-height: 200px;
+  gap: 0.75rem;
+  min-height: 180px;
 }
 
 .mrt-conversation-empty {
   font-size: 0.9rem;
   color: var(--ms-text-secondary, #9ca3af);
   text-align: center;
-  padding: 2.5rem 1rem;
+  padding: 2rem 1rem;
   margin: 0;
 }
 
-.mrt-conversation-empty--idle {
-  color: #c4c9d4;
-}
+.mrt-conversation-empty--idle { color: #c4c9d4; }
 
-/* Turn card */
+/* ── Turn card ─────────────────────────────────────────────────────────────── */
 .mrt-turn {
   background: var(--ms-surface, #fff);
   border: 1px solid var(--ms-border, #e5e7eb);
@@ -220,17 +216,48 @@
   overflow: hidden;
 }
 
-.mrt-turn--done {
-  border-color: #d1fae5;
+.mrt-turn--done { border-color: #d1fae5; }
+
+/* Patient turns sit to the left with a blue left border; practice to the right */
+.mrt-turn--patient  { border-left: 3px solid #3b82f6; }
+.mrt-turn--practice { border-left: 3px solid #8b5cf6; }
+
+/* Turn header */
+.mrt-turn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.375rem 0.875rem;
+  background: var(--ms-surface-alt, #f9fafb);
+  border-bottom: 1px solid var(--ms-border, #f3f4f6);
 }
 
+.mrt-turn--patient  .mrt-turn-header { background: #eff6ff; }
+.mrt-turn--practice .mrt-turn-header { background: #f5f3ff; }
+
+.mrt-turn-role {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mrt-turn--patient  .mrt-turn-role { color: #2563eb; }
+.mrt-turn--practice .mrt-turn-role { color: #7c3aed; }
+
+.mrt-turn-direction {
+  font-size: 0.6875rem;
+  color: #9ca3af;
+}
+
+/* Original + translation rows */
 .mrt-turn-original {
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.875rem;
   border-bottom: 1px solid var(--ms-border, #f3f4f6);
 }
 
 .mrt-turn-translation {
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.875rem;
   background: #f0fdf4;
 }
 
@@ -241,12 +268,10 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #6b7280;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
-.mrt-turn-lang--translation {
-  color: #16a34a;
-}
+.mrt-turn-lang--translation { color: #16a34a; }
 
 .mrt-turn-text {
   margin: 0;
@@ -276,7 +301,7 @@
   50%       { opacity: 0; }
 }
 
-/* Debug section */
+/* ── Debug section ─────────────────────────────────────────────────────────── */
 .mrt-debug {
   border: 1px solid var(--ms-border, #e5e7eb);
   border-radius: 8px;
@@ -285,33 +310,31 @@
 
 .mrt-debug-toggle {
   width: 100%;
-  padding: 0.5rem 0.875rem;
+  padding: 0.4rem 0.875rem;
   background: var(--ms-surface-alt, #f9fafb);
   border: none;
   text-align: left;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--ms-text-secondary, #6b7280);
+  color: var(--ms-text-secondary, #9ca3af);
   cursor: pointer;
   font-family: monospace;
 }
 
-.mrt-debug-toggle:hover {
-  background: var(--ms-surface, #f3f4f6);
-}
+.mrt-debug-toggle:hover { background: #f3f4f6; }
 
 .mrt-debug-log {
-  max-height: 280px;
+  max-height: 260px;
   overflow-y: auto;
   padding: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.3rem;
   background: var(--ms-surface-alt, #f9fafb);
 }
 
 .mrt-debug-empty {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   color: #9ca3af;
   text-align: center;
   padding: 0.75rem 0;
@@ -321,15 +344,15 @@
 .mrt-debug-entry {
   background: var(--ms-surface, #fff);
   border: 1px solid var(--ms-border, #e5e7eb);
-  border-radius: 5px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .mrt-debug-type {
   display: block;
-  padding: 0.2rem 0.5rem;
+  padding: 0.15rem 0.5rem;
   background: #f3f4f6;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 700;
   color: #374151;
   font-family: monospace;
@@ -338,26 +361,31 @@
 
 .mrt-debug-body {
   margin: 0;
-  padding: 0.375rem 0.5rem;
-  font-size: 0.625rem;
-  line-height: 1.5;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.5625rem;
+  line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-all;
   color: #374151;
   font-family: monospace;
-  max-height: 150px;
+  max-height: 120px;
   overflow-y: auto;
 }
 
-/* Dark mode */
+/* ── Dark mode ─────────────────────────────────────────────────────────────── */
 :root[data-theme="dark"] .mrt-page { color: #f1f5f9; }
 :root[data-theme="dark"] .mrt-setup,
 :root[data-theme="dark"] .mrt-turn { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .mrt-turn--done { border-color: #064e3b; }
 :root[data-theme="dark"] .mrt-select { background: #0f172a; color: #f1f5f9; border-color: #334155; }
-:root[data-theme="dark"] .mrt-status-badge--idle { background: #1e293b; color: #94a3b8; border-color: #334155; }
+:root[data-theme="dark"] .mrt-turn-header { background: #0f172a; border-color: #334155; }
+:root[data-theme="dark"] .mrt-turn--patient  .mrt-turn-header { background: #0c1a35; }
+:root[data-theme="dark"] .mrt-turn--practice .mrt-turn-header { background: #160c2a; }
 :root[data-theme="dark"] .mrt-turn-original { border-color: #334155; }
-:root[data-theme="dark"] .mrt-turn-translation { background: #0f2a1a; }
+:root[data-theme="dark"] .mrt-turn-translation { background: #0a1f0f; }
 :root[data-theme="dark"] .mrt-turn-text--translation { color: #4ade80; }
+:root[data-theme="dark"] .mrt-pingpong-bar { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .mrt-speaker-pill--active { background: #1e3a5f; color: #60a5fa; border-color: #3b82f6; }
 :root[data-theme="dark"] .mrt-debug-log,
 :root[data-theme="dark"] .mrt-debug-toggle { background: #1e293b; color: #94a3b8; }
 :root[data-theme="dark"] .mrt-debug-entry { background: #0f172a; border-color: #334155; }
@@ -365,3 +393,4 @@
 :root[data-theme="dark"] .mrt-debug-body { color: #cbd5e1; }
 :root[data-theme="dark"] .mrt-error { background: #450a0a; border-color: #7f1d1d; color: #fca5a5; }
 :root[data-theme="dark"] .mrt-warning { background: #1c1300; border-color: #78350f; color: #fbbf24; }
+:root[data-theme="dark"] .mrt-status-badge--idle { background: #1e293b; color: #64748b; border-color: #334155; }

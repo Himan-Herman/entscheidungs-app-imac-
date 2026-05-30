@@ -7,27 +7,41 @@ const LANG_OPTIONS = [
   { value: 'en', label: 'Englisch' },
 ];
 
-const STATUS_LABELS = {
-  idle:         'Nicht verbunden',
-  ready:        'Bereit · Sprechen Sie jetzt',
-  speech_active:'Ich höre …',
-  processing:   'Verarbeite …',
-  translating:  'Übersetze …',
-  speaking:     'Meda spricht …',
+const ROLE_LABEL = {
+  patient:  'Patient',
+  practice: 'Praxis',
 };
 
-const STATUS_CLASS = {
-  idle:         'idle',
-  ready:        'ready',
-  speech_active:'active',
-  processing:   'active',
-  translating:  'active',
-  speaking:     'speaking',
-};
+/** Build the human-readable status string from sessionStatus + speakerRole. */
+function buildStatusLabel(connectionState, sessionStatus, speakerRole) {
+  if (connectionState === 'connecting')  return 'Verbinde …';
+  if (connectionState === 'error')       return 'Fehler — bitte neu starten';
+  if (connectionState !== 'connected')   return 'Nicht verbunden';
+
+  const role = ROLE_LABEL[speakerRole] ?? speakerRole;
+  switch (sessionStatus) {
+    case 'ready':        return `Wartet auf ${role}`;
+    case 'speech_active': return `${role} spricht`;
+    case 'processing':   return 'Verarbeite …';
+    case 'translating':  return `Meda übersetzt für ${speakerRole === 'patient' ? 'Praxis' : 'Patient'}`;
+    case 'speaking':     return 'Meda spricht';
+    default:             return 'Bereit';
+  }
+}
+
+/** CSS modifier for the status badge based on what's happening. */
+function statusClass(connectionState, sessionStatus) {
+  if (connectionState === 'connecting')              return 'active';
+  if (connectionState === 'error')                   return 'error';
+  if (connectionState !== 'connected')               return 'idle';
+  if (sessionStatus === 'ready')                     return 'ready';
+  if (sessionStatus === 'speaking')                  return 'speaking';
+  return 'active'; // speech_active, processing, translating
+}
 
 /**
- * Phase 8.3 — First usable Realtime Interpreter.
- * Transcribes patient speech, generates translation, plays it automatically.
+ * Phase 8.4 — Realtime Pingpong Interpreter.
+ * Alternates automatically between patient and practice after each complete turn.
  */
 export default function MedaRealtimePage() {
   const {
@@ -35,6 +49,7 @@ export default function MedaRealtimePage() {
     disconnect,
     connectionState,
     sessionStatus,
+    currentSpeakerRole,
     turns,
     events,
     error,
@@ -48,12 +63,10 @@ export default function MedaRealtimePage() {
   const turnsEndRef = useRef(null);
   const debugLogRef = useRef(null);
 
-  // Auto-scroll conversation to latest turn
   useEffect(() => {
     turnsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [turns]);
 
-  // Auto-scroll debug log
   useEffect(() => {
     if (debugLogRef.current) {
       debugLogRef.current.scrollTop = debugLogRef.current.scrollHeight;
@@ -65,20 +78,20 @@ export default function MedaRealtimePage() {
   const isBusy = isConnecting || connectionState === 'disconnecting';
   const langMismatch = patientLang === practiceLang;
 
+  const patientLangLabel  = LANG_OPTIONS.find(o => o.value === patientLang)?.label  ?? patientLang;
+  const practiceLangLabel = LANG_OPTIONS.find(o => o.value === practiceLang)?.label ?? practiceLang;
+
+  function langLabel(langCode) {
+    return LANG_OPTIONS.find(o => o.value === langCode)?.label ?? langCode;
+  }
+
   function handleStart() {
     connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
   }
 
-  const statusLabel = isConnecting
-    ? 'Verbinde …'
-    : STATUS_LABELS[sessionStatus] ?? sessionStatus;
-
-  const statusClass = isConnecting
-    ? 'active'
-    : STATUS_CLASS[sessionStatus] ?? 'idle';
-
-  const patientLangLabel = LANG_OPTIONS.find(o => o.value === patientLang)?.label ?? patientLang;
-  const practiceLangLabel = LANG_OPTIONS.find(o => o.value === practiceLang)?.label ?? practiceLang;
+  const label = buildStatusLabel(connectionState, sessionStatus, currentSpeakerRole);
+  const cls   = statusClass(connectionState, sessionStatus);
+  const showPulse = cls === 'active' || cls === 'speaking';
 
   return (
     <div className="mrt-page">
@@ -89,13 +102,13 @@ export default function MedaRealtimePage() {
       {/* Header */}
       <header className="mrt-header">
         <h1 className="mrt-title">Meda Live-Dolmetscher</h1>
-        <div className={`mrt-status-badge mrt-status-badge--${statusClass}`} role="status" aria-live="polite">
-          {statusClass === 'active' && <span className="mrt-pulse" aria-hidden="true" />}
-          {statusLabel}
+        <div className={`mrt-status-badge mrt-status-badge--${cls}`} role="status" aria-live="polite">
+          {showPulse && <span className="mrt-pulse" aria-hidden="true" />}
+          {label}
         </div>
       </header>
 
-      {/* Config + Controls */}
+      {/* Language config + start/stop */}
       <section className="mrt-setup" aria-label="Sprachauswahl und Steuerung">
         <div className="mrt-lang-row">
           <div className="mrt-field">
@@ -159,12 +172,26 @@ export default function MedaRealtimePage() {
         )}
       </section>
 
+      {/* Pingpong speaker indicator — visible only while connected */}
+      {isConnected && (
+        <div className="mrt-pingpong-bar" aria-live="polite">
+          <div className={`mrt-speaker-pill ${currentSpeakerRole === 'patient' ? 'mrt-speaker-pill--active' : ''}`}>
+            Patient · {patientLangLabel}
+          </div>
+          <div className="mrt-pingpong-arrow" aria-hidden="true">⇄</div>
+          <div className={`mrt-speaker-pill ${currentSpeakerRole === 'practice' ? 'mrt-speaker-pill--active' : ''}`}>
+            Praxis · {practiceLangLabel}
+          </div>
+        </div>
+      )}
+
       {/* Conversation turns */}
       <section className="mrt-conversation" aria-label="Gesprächsverlauf">
         {turns.length === 0 && isConnected && (
           <p className="mrt-conversation-empty">
-            Gespräch läuft · Sprechen Sie auf {patientLangLabel}.
-            Meda übersetzt automatisch ins {practiceLangLabel}.
+            {currentSpeakerRole === 'patient'
+              ? `Patient: Bitte auf ${patientLangLabel} sprechen.`
+              : `Praxis: Bitte auf ${practiceLangLabel} sprechen.`}
           </p>
         )}
         {turns.length === 0 && !isConnected && !isConnecting && (
@@ -174,16 +201,36 @@ export default function MedaRealtimePage() {
         )}
 
         {turns.map(turn => (
-          <div key={turn.key} className={`mrt-turn${turn.isDone ? ' mrt-turn--done' : ''}`}>
+          <div
+            key={turn.key}
+            className={`mrt-turn mrt-turn--${turn.speakerRole}${turn.isDone ? ' mrt-turn--done' : ''}`}
+          >
+            {/* Turn header: role + language direction */}
+            <div className="mrt-turn-header">
+              <span className="mrt-turn-role">
+                {ROLE_LABEL[turn.speakerRole]}
+              </span>
+              <span className="mrt-turn-direction">
+                {langLabel(turn.sourceLanguage)} → {langLabel(turn.targetLanguage)}
+              </span>
+            </div>
+
+            {/* Original text */}
             <div className="mrt-turn-original">
-              <span className="mrt-turn-lang">{patientLangLabel}</span>
+              <span className="mrt-turn-lang">{langLabel(turn.sourceLanguage)}</span>
               <p className="mrt-turn-text">
-                {turn.originalText ?? <span className="mrt-turn-pending">Transkription …</span>}
+                {turn.originalText !== null
+                  ? turn.originalText
+                  : <span className="mrt-turn-pending">Transkription …</span>}
               </p>
             </div>
+
+            {/* Translation */}
             {(turn.translatedText || !turn.isDone) && (
               <div className="mrt-turn-translation">
-                <span className="mrt-turn-lang mrt-turn-lang--translation">{practiceLangLabel}</span>
+                <span className="mrt-turn-lang mrt-turn-lang--translation">
+                  {langLabel(turn.targetLanguage)}
+                </span>
                 <p className="mrt-turn-text mrt-turn-text--translation">
                   {turn.translatedText
                     ? turn.translatedText
