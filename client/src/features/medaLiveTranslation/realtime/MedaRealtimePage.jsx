@@ -26,6 +26,14 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
+function formatTurnTime(isoString) {
+  if (!isoString) return '';
+  return new Date(isoString).toLocaleString('de-DE', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
 /** Human-readable status label from connection + session state. */
 function buildStatusLabel(connectionState, sessionStatus, sessionExpired) {
   if (sessionExpired)                   return 'Sitzung beendet';
@@ -799,54 +807,72 @@ export default function MedaRealtimePage() {
           </p>
         )}
 
-        {turns.map(turn => (
-          <div
-            key={turn.key}
-            className={`mrt-turn${turn.speakerRole ? ` mrt-turn--${turn.speakerRole}` : ' mrt-turn--detecting'}${turn.isDone ? ' mrt-turn--done' : ''}`}
-          >
-            <div className="mrt-turn-header">
-              <span className="mrt-turn-role">
-                {turn.speakerRole
-                  ? `${ROLE_LABEL[turn.speakerRole]} → ${ROLE_LABEL[turn.targetRole]}`
-                  : '…'}
-              </span>
-              <span className="mrt-turn-direction">
-                {turn.sourceLanguage
-                  ? `${REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage} → ${REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}`
-                  : turn.isDone
-                    ? 'Sprache nicht erkannt'
-                    : 'Erkenne Sprache …'}
-              </span>
-            </div>
+        {turns.map(turn => {
+          const roleLabel =
+            turn.speakerRole === 'patient'  ? 'Patient' :
+            turn.speakerRole === 'practice' ? 'Praxis / Arzt' :
+            turn.isDone ? 'Sprache nicht erkannt' : 'Erkenne Sprache …';
 
-            <div className="mrt-turn-original">
-              <span className="mrt-turn-lang">
-                {REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage}
-              </span>
-              <p className="mrt-turn-text">
-                {turn.originalText !== null
-                  ? turn.originalText
-                  : <span className="mrt-turn-pending">Transkription …</span>}
-              </p>
-            </div>
+          return (
+            <div
+              key={turn.key}
+              className={`mrt-turn${turn.speakerRole ? ` mrt-turn--${turn.speakerRole}` : ' mrt-turn--detecting'}${turn.isDone ? ' mrt-turn--done' : ''}`}
+            >
+              {/* ── Header: Rolle + Zeitstempel ──────────────────────────────── */}
+              <div className="mrt-turn-header">
+                <span className="mrt-turn-role">{roleLabel}</span>
+                <span className="mrt-turn-timestamp">{formatTurnTime(turn.timestamp)}</span>
+              </div>
 
-            {(turn.translatedText || !turn.isDone) && (
-              <div className="mrt-turn-translation">
-                <span className="mrt-turn-lang mrt-turn-lang--translation">
-                  {REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}
-                </span>
-                <p className="mrt-turn-text mrt-turn-text--translation">
-                  {turn.translatedText
-                    ? turn.translatedText
-                    : <span className="mrt-turn-pending">Übersetze …</span>}
-                  {!turn.isDone && turn.translatedText && (
-                    <span className="mrt-turn-cursor" aria-hidden="true"> ▌</span>
-                  )}
+              {/* ── Originaltext ─────────────────────────────────────────────── */}
+              <div className="mrt-turn-original">
+                {turn.sourceLanguage ? (
+                  <span className="mrt-turn-section-label">
+                    Originalsprache: <strong>{REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage}</strong>
+                  </span>
+                ) : (
+                  <span className="mrt-turn-section-label mrt-turn-section-label--muted">
+                    {turn.isDone ? 'Unbekannte Sprache' : 'Erkenne Sprache …'}
+                  </span>
+                )}
+                <p className="mrt-turn-text">
+                  {turn.originalText !== null
+                    ? turn.originalText
+                    : <span className="mrt-turn-pending">Transkription …</span>}
                 </p>
               </div>
-            )}
-          </div>
-        ))}
+
+              {/* ── Übersetzung (oder Hinweis bei unclear) ────────────────────── */}
+              {(turn.translatedText || !turn.isDone) && (
+                <div className={`mrt-turn-translation${turn.isUnclear ? ' mrt-turn-translation--unclear' : ''}`}>
+                  <span className={`mrt-turn-section-label${
+                    turn.isUnclear ? ' mrt-turn-section-label--unclear' :
+                    turn.targetRole ? ' mrt-turn-section-label--for' : ''
+                  }`}>
+                    {turn.isUnclear
+                      ? 'Meda'
+                      : turn.targetRole
+                        ? `Übersetzung für ${turn.targetRole === 'patient' ? 'Patient' : 'Praxis'}`
+                        : 'Übersetzung'}
+                  </span>
+                  {!turn.isUnclear && turn.targetLanguage && (
+                    <span className="mrt-turn-lang mrt-turn-lang--translation">
+                      {REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}
+                    </span>
+                  )}
+                  <p className={`mrt-turn-text${turn.isUnclear ? ' mrt-turn-text--unclear' : ' mrt-turn-text--translation'}`}>
+                    {turn.translatedText
+                      ? turn.translatedText
+                      : <span className="mrt-turn-pending">Übersetze …</span>}
+                    {!turn.isDone && turn.translatedText && (
+                      <span className="mrt-turn-cursor" aria-hidden="true"> ▌</span>
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+          );
+        })}
         <div ref={turnsEndRef} />
       </section>
 
