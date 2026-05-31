@@ -191,7 +191,7 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
         model,
         instructions,
         max_output_tokens: 'inf',
-        output_modalities: ['audio', 'text'],
+        output_modalities: ['audio'],
         audio: {
           input: {
             // Auto language detection — no fixed language; model selects via system prompt
