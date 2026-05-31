@@ -48,12 +48,18 @@ function getLangScript(lang) {
   return LANG_SCRIPT[lang] ?? 'latin';
 }
 
-// Unicode ranges per script family (inclusive)
+// Unicode ranges per script family (inclusive).
+// Any script listed here is checked by hasForeignScript — text containing
+// characters from an unlisted-configured script is rejected as foreign.
 const SCRIPT_RANGES = {
-  arabic:   [[0x0600, 0x06FF], [0x0750, 0x077F], [0xFB50, 0xFDFF]],
-  cyrillic: [[0x0400, 0x04FF]],
-  cjk:      [[0x4E00, 0x9FFF], [0x3400, 0x4DBF]],
-  hangul:   [[0xAC00, 0xD7A3], [0x1100, 0x11FF]], // Korean syllables + Jamo
+  arabic:     [[0x0600, 0x06FF], [0x0750, 0x077F], [0xFB50, 0xFDFF]],
+  cyrillic:   [[0x0400, 0x04FF]],
+  cjk:        [[0x4E00, 0x9FFF], [0x3400, 0x4DBF]],
+  hangul:     [[0xAC00, 0xD7A3], [0x1100, 0x11FF]], // Korean
+  greek:      [[0x0370, 0x03FF]],                    // Greek and Coptic
+  hebrew:     [[0x0590, 0x05FF]],
+  thai:       [[0x0E00, 0x0E7F]],
+  devanagari: [[0x0900, 0x097F]],                    // Hindi, Sanskrit, etc.
 };
 
 function countCharsInRanges(text, ranges) {
