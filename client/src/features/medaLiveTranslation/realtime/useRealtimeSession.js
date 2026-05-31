@@ -261,12 +261,29 @@ export function useRealtimeSession() {
         });
         break;
 
+      // Fires when an output content part (audio or text) is fully generated.
+      // Contains part.transcript (audio mode) or part.text (text mode).
+      // Acts as a safety net if delta events did not arrive.
+      case 'response.content_part.done': {
+        const part = ev.part ?? {};
+        const text = part.transcript ?? part.text ?? '';
+        if (!text) break;
+        setTurns(prev => {
+          if (prev.length === 0) return prev;
+          return prev.map((t, i) =>
+            i === prev.length - 1 && !t.isUnclear
+              ? { ...t, translatedText: t.translatedText || text, isDone: true }
+              : t
+          );
+        });
+        break;
+      }
+
       // ── Response done ────────────────────────────────────────────────────────
-      // For 'completed': output_audio_buffer.stopped handles cleanup.
-      // For failed/cancelled/incomplete: no audio fires — recover here.
       case 'response.done': {
         const respStatus = ev.response?.status;
         if (respStatus === 'failed' || respStatus === 'cancelled' || respStatus === 'incomplete') {
+          // No audio will follow — unlock mic and close turn.
           speakerLockRef.current = false;
           setTurns(prev => {
             if (prev.length === 0) return prev;
@@ -277,6 +294,20 @@ export function useRealtimeSession() {
             );
           });
           setSessionStatus('ready');
+        } else if (respStatus === 'completed') {
+          // Extract translation from response output as final fallback.
+          // Covers the case where delta/done transcript events did not arrive
+          // (e.g. GA WebRTC session in audio mode without explicit transcript config).
+          const part = ev.response?.output?.[0]?.content?.[0];
+          const fallback = part?.transcript ?? part?.text ?? '';
+          setTurns(prev => {
+            if (prev.length === 0) return prev;
+            return prev.map((t, i) =>
+              i === prev.length - 1 && !t.isUnclear
+                ? { ...t, translatedText: t.translatedText || fallback, isDone: true }
+                : t
+            );
+          });
         }
         break;
       }
