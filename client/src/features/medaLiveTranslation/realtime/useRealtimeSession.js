@@ -504,10 +504,18 @@ export function useRealtimeSession() {
     _sendDc(event);
   }, [_sendDc]);
 
+  /** Locally correct the originalText of a completed turn (no re-translation). */
+  const updateTurnOriginalText = useCallback((turnKey, newText) => {
+    setTurns(prev => prev.map(t =>
+      t.key === turnKey ? { ...t, originalText: newText, originalEdited: true } : t
+    ));
+  }, []);
+
   return {
     connect,
     disconnect,
     sendEvent,
+    updateTurnOriginalText,
     connectionState,
     sessionStatus,
     currentSpeakerRole,

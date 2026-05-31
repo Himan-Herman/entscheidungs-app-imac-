@@ -73,6 +73,7 @@ export default function MedaRealtimePage() {
     events,
     error,
     audioElRef,
+    updateTurnOriginalText,
   } = useRealtimeSession();
 
   // ── Language selection ─────────────────────────────────────────────────────
@@ -97,6 +98,10 @@ export default function MedaRealtimePage() {
   // ── Patient / person info — local state only, never sent to server ──────────
   const [patientInfo,  setPatientInfo]  = useState(EMPTY_PATIENT_INFO);
   const [practiceInfo, setPracticeInfo] = useState(EMPTY_PRACTICE_INFO);
+
+  // ── Inline edit state — which turn is being edited and the current draft ────
+  const [editingKey, setEditingKey] = useState(/** @type {number|null} */ (null));
+  const [editDraft,  setEditDraft]  = useState('');
 
   // ── PDF state ───────────────────────────────────────────────────────────────
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -260,6 +265,24 @@ export default function MedaRealtimePage() {
       setPdfLoading(false);
     }
   }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang]);
+
+  function handleEditStart(turn) {
+    setEditingKey(turn.key);
+    setEditDraft(turn.originalText ?? '');
+  }
+
+  function handleEditSave(turnKey) {
+    const trimmed = editDraft.trim();
+    if (!trimmed) return;
+    updateTurnOriginalText(turnKey, trimmed);
+    setEditingKey(null);
+    setEditDraft('');
+  }
+
+  function handleEditCancel() {
+    setEditingKey(null);
+    setEditDraft('');
+  }
 
   function handleStart() {
     setSessionExpired(false);
@@ -826,20 +849,69 @@ export default function MedaRealtimePage() {
 
               {/* ── Originaltext ─────────────────────────────────────────────── */}
               <div className="mrt-turn-original">
-                {turn.sourceLanguage ? (
-                  <span className="mrt-turn-section-label">
-                    Originalsprache: <strong>{REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage}</strong>
-                  </span>
+                <div className="mrt-turn-original-header">
+                  {turn.sourceLanguage ? (
+                    <span className="mrt-turn-section-label">
+                      Originalsprache: <strong>{REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage}</strong>
+                    </span>
+                  ) : (
+                    <span className="mrt-turn-section-label mrt-turn-section-label--muted">
+                      {turn.isDone ? 'Unbekannte Sprache' : 'Erkenne Sprache …'}
+                    </span>
+                  )}
+                  {turn.isDone && editingKey !== turn.key && (
+                    <button
+                      className="mrt-turn-edit-trigger"
+                      onClick={() => handleEditStart(turn)}
+                      aria-label="Originaltext bearbeiten"
+                      title="Originaltext bearbeiten (Ctrl+Enter speichern, Esc abbrechen)"
+                    >
+                      ✎
+                    </button>
+                  )}
+                </div>
+
+                {editingKey === turn.key ? (
+                  <div className="mrt-turn-edit">
+                    <textarea
+                      className="mrt-turn-edit-area"
+                      value={editDraft}
+                      onChange={e => setEditDraft(e.target.value)}
+                      rows={3}
+                      // eslint-disable-next-line jsx-a11y/no-autofocus
+                      autoFocus
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && editDraft.trim()) handleEditSave(turn.key);
+                        if (e.key === 'Escape') handleEditCancel();
+                      }}
+                    />
+                    <div className="mrt-turn-edit-actions">
+                      <button
+                        className="mrt-turn-edit-btn mrt-turn-edit-btn--save"
+                        onClick={() => handleEditSave(turn.key)}
+                        disabled={!editDraft.trim()}
+                      >
+                        Speichern
+                      </button>
+                      <button
+                        className="mrt-turn-edit-btn mrt-turn-edit-btn--cancel"
+                        onClick={handleEditCancel}
+                      >
+                        Abbrechen
+                      </button>
+                    </div>
+                  </div>
                 ) : (
-                  <span className="mrt-turn-section-label mrt-turn-section-label--muted">
-                    {turn.isDone ? 'Unbekannte Sprache' : 'Erkenne Sprache …'}
-                  </span>
+                  <p className="mrt-turn-text">
+                    {turn.originalText !== null
+                      ? turn.originalText
+                      : <span className="mrt-turn-pending">Transkription …</span>}
+                  </p>
                 )}
-                <p className="mrt-turn-text">
-                  {turn.originalText !== null
-                    ? turn.originalText
-                    : <span className="mrt-turn-pending">Transkription …</span>}
-                </p>
+
+                {turn.originalEdited && editingKey !== turn.key && (
+                  <span className="mrt-turn-edited-badge">Originaltext manuell korrigiert</span>
+                )}
               </div>
 
               {/* ── Übersetzung (oder Hinweis bei unclear) ────────────────────── */}
