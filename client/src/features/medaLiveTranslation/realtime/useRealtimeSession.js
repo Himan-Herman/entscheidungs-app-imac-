@@ -379,7 +379,7 @@ export function useRealtimeSession() {
       if (!sessionActiveRef.current) { _cleanup(); return; }
 
       // ── 6. SDP exchange with OpenAI (GA WebRTC endpoint) ────────────────────
-      const sdpRes = await fetch(OPENAI_REALTIME_CALLS, {
+      const sdpRes = await fetch(`${OPENAI_REALTIME_CALLS}?model=${encodeURIComponent(sessionModel ?? 'gpt-realtime')}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${clientSecret}`,
