@@ -13,7 +13,9 @@
       "Bash(node --check routes/medaRealtime.js)",
       "Bash(node --check app.js)",
       "Bash(node --check /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server/config/openAiModels.js)",
-      "Bash(grep -E \"\\\\.\\(ts|tsx|js|jsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js|jsx\\)$\")",
+      "mcp__filesystem__read_text_file",
+      "Bash(grep -r \"cron\\\\|schedule\\\\|interval\\\\|setInterval\\\\|setTimeout.*=.*[0-9]\\\\{4,\\\\}\" /Users/himankhorshidi/Desktop/entscheidungs-app-imac/server --include=\"*.js\")"
     ]
   }
 }
