@@ -146,20 +146,33 @@ export function useRealtimeSession() {
         const transcript = ev.transcript ?? '';
         const detected   = detectLanguage(transcript, patientLangRef.current, practiceLangRef.current);
 
-        // Safety guard: empty, noise, or language not identifiable → unclear turn.
+        // Resolve which turn to update.
+        // Primary: match by item_id (set at input_audio_buffer.committed).
+        // Fallback: last turn still waiting for its transcript (originalText === null).
+        // This handles cases where the committed event had no item_id.
+        const _findTurn = (prev) => {
+          const byId = prev.findIndex(t => t.inputItemId === ev.item_id);
+          if (byId >= 0) return byId;
+          for (let i = prev.length - 1; i >= 0; i--) {
+            if (prev[i].originalText === null) return i;
+          }
+          return -1;
+        };
+
+        // Safety guard: empty, noise, foreign script, or language not identifiable → unclear.
         // Marks isDone immediately so delta/done events cannot overwrite with hallucinated text.
         if (!transcript.trim() || detected === null) {
-          setTurns(prev => prev.map(t =>
-            t.inputItemId === ev.item_id
-              ? {
-                  ...t,
-                  originalText:   transcript.trim() || '—',
-                  isUnclear:      true,
-                  isDone:         true,
-                  translatedText: 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.',
-                }
-              : t
-          ));
+          setTurns(prev => {
+            const idx = _findTurn(prev);
+            if (idx < 0) return prev;
+            return prev.map((t, i) => i === idx ? {
+              ...t,
+              originalText:   transcript.trim() || '—',
+              isUnclear:      true,
+              isDone:         true,
+              translatedText: 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.',
+            } : t);
+          });
           break;
         }
 
@@ -184,15 +197,15 @@ export function useRealtimeSession() {
           setCurrentSpeakerRole(speakerRole);
         }
 
-        setTurns(prev => prev.map(t =>
-          t.inputItemId === ev.item_id
-            ? {
-                ...t,
-                originalText: transcript,
-                ...(speakerRole !== null ? { speakerRole, targetRole, sourceLanguage, targetLanguage } : {}),
-              }
-            : t
-        ));
+        setTurns(prev => {
+          const idx = _findTurn(prev);
+          if (idx < 0) return prev;
+          return prev.map((t, i) => i === idx ? {
+            ...t,
+            originalText: transcript,
+            ...(speakerRole !== null ? { speakerRole, targetRole, sourceLanguage, targetLanguage } : {}),
+          } : t);
+        });
         break;
       }
 

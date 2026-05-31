@@ -53,6 +53,7 @@ const SCRIPT_RANGES = {
   arabic:   [[0x0600, 0x06FF], [0x0750, 0x077F], [0xFB50, 0xFDFF]],
   cyrillic: [[0x0400, 0x04FF]],
   cjk:      [[0x4E00, 0x9FFF], [0x3400, 0x4DBF]],
+  hangul:   [[0xAC00, 0xD7A3], [0x1100, 0x11FF]], // Korean syllables + Jamo
 };
 
 function countCharsInRanges(text, ranges) {
@@ -66,19 +67,33 @@ function countCharsInRanges(text, ranges) {
   return count;
 }
 
+/**
+ * Returns true when text contains characters from a script family not used by
+ * either of the two configured languages.  Blocks e.g. Korean/Arabic/Cyrillic
+ * content from appearing as a valid turn in a Latin-only (DE/EN) session.
+ */
+function hasForeignScript(text, scriptA, scriptB) {
+  const configured = new Set([scriptA, scriptB]);
+  for (const [script, ranges] of Object.entries(SCRIPT_RANGES)) {
+    if (!configured.has(script) && countCharsInRanges(text, ranges) > 0) return true;
+  }
+  return false;
+}
+
 // Distinctive common words per language — used for same-script pairs.
 // Words are lowercase; matched against tokenised transcript words.
 // Chosen for minimal cross-language overlap within the supported set.
 const FINGERPRINTS = {
   de: [
-    // already present
+    // core
     'ich', 'nicht', 'haben', 'sind', 'wird', 'wenn', 'aber', 'auch', 'eine', 'einem',
     'seit', 'schmerz', 'schmerzen', 'noch', 'gibt', 'wurde',
     // common German function words unambiguous in Latin-script pairs
-    'du', 'mir', 'wir', 'bitte', 'danke', 'nein', 'und', 'ist', 'bin',
+    'du', 'mir', 'wir', 'sie', 'bitte', 'danke', 'nein', 'und', 'ist', 'bin',
     'habe', 'hast', 'kein', 'keine', 'mein', 'meine', 'für', 'auf', 'bei',
-    'mit', 'wie', 'wann', 'wo', 'kannst', 'sehr', 'jetzt', 'hier', 'das',
-    'der', 'dieser', 'diese', 'dieses',
+    'mit', 'wie', 'wann', 'wo', 'kannst', 'können', 'sehr', 'jetzt', 'hier', 'das',
+    'der', 'dieser', 'diese', 'dieses', 'ihnen', 'alle', 'durch', 'nach', 'über',
+    'einen', 'diesem', 'werden', 'hatte', 'waren', 'haben',
   ],
   en: [
     // already present
@@ -133,6 +148,10 @@ export function detectLanguage(text, langA, langB) {
 
   const scriptA = getLangScript(langA);
   const scriptB = getLangScript(langB);
+
+  // Reject text that contains characters from scripts not used by either language.
+  // Blocks Korean/Arabic/Cyrillic hallucinations in a Latin-script (DE/EN) session.
+  if (hasForeignScript(clean, scriptA, scriptB)) return null;
 
   if (scriptA !== scriptB) {
     // Different scripts → count characters per script
