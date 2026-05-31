@@ -194,7 +194,6 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
         output_modalities: ['audio', 'text'],
         audio: {
           input: {
-            format: 'pcm16',
             // Auto language detection — no fixed language; model selects via system prompt
             transcription: { model: transcriptionModel },
             turn_detection: {
@@ -207,7 +206,6 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
             },
           },
           output: {
-            format: 'pcm16',
             voice,
           },
         },
