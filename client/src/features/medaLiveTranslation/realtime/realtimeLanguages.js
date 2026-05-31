@@ -70,8 +70,26 @@ function countCharsInRanges(text, ranges) {
 // Words are lowercase; matched against tokenised transcript words.
 // Chosen for minimal cross-language overlap within the supported set.
 const FINGERPRINTS = {
-  de: ['ich', 'nicht', 'haben', 'sind', 'wird', 'wenn', 'aber', 'auch', 'eine', 'einem', 'seit', 'schmerz', 'schmerzen', 'noch', 'gibt', 'wurde'],
-  en: ['the', 'have', 'been', 'from', 'they', 'with', 'this', 'that', 'does', 'pain', 'since', 'long', 'would', 'their', 'about'],
+  de: [
+    // already present
+    'ich', 'nicht', 'haben', 'sind', 'wird', 'wenn', 'aber', 'auch', 'eine', 'einem',
+    'seit', 'schmerz', 'schmerzen', 'noch', 'gibt', 'wurde',
+    // common German function words unambiguous in Latin-script pairs
+    'du', 'mir', 'wir', 'bitte', 'danke', 'nein', 'und', 'ist', 'bin',
+    'habe', 'hast', 'kein', 'keine', 'mein', 'meine', 'für', 'auf', 'bei',
+    'mit', 'wie', 'wann', 'wo', 'kannst', 'sehr', 'jetzt', 'hier', 'das',
+    'der', 'dieser', 'diese', 'dieses',
+  ],
+  en: [
+    // already present
+    'the', 'have', 'been', 'from', 'they', 'with', 'this', 'that', 'does',
+    'pain', 'since', 'long', 'would', 'their', 'about',
+    // common English function words unambiguous in Latin-script pairs
+    'you', 'can', 'are', 'not', 'your', 'has', 'for', 'help', 'yes', 'how',
+    'when', 'where', 'what', 'why', 'could', 'should', 'any', 'more', 'just',
+    'my', 'me', 'it', 'here', 'there', 'please', 'good', 'do', 'did', 'get',
+    'some', 'still', 'know', 'think', 'need', 'feel',
+  ],
   fr: ['dans', 'mais', 'avec', 'depuis', 'encore', 'toujours', 'douleur', 'jours', 'bien', 'très', 'plus', 'cette', 'aussi', 'vous', 'été'],
   es: ['porque', 'también', 'cuando', 'donde', 'dolor', 'días', 'pero', 'desde', 'siempre', 'tiene', 'muchos', 'mejor', 'usted', 'hace'],
   it: ['perché', 'anche', 'quando', 'dove', 'dolore', 'giorni', 'però', 'sempre', 'molto', 'questi', 'sono', 'aveva', 'fare', 'cosa'],

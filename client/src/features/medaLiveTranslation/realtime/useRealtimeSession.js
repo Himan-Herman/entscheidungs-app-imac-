@@ -131,6 +131,7 @@ export function useRealtimeSession() {
           originalText:   null,
           translatedText: '',
           isDone:         false,
+          isUnclear:      false,  // set true when language is unrecognisable
           speakerRole:    null,   // filled at transcription.completed
           targetRole:     null,   // filled at transcription.completed
           sourceLanguage: null,
@@ -145,11 +146,27 @@ export function useRealtimeSession() {
         const transcript = ev.transcript ?? '';
         const detected   = detectLanguage(transcript, patientLangRef.current, practiceLangRef.current);
 
+        // Safety guard: empty, noise, or language not identifiable → unclear turn.
+        // Marks isDone immediately so delta/done events cannot overwrite with hallucinated text.
+        if (!transcript.trim() || detected === null) {
+          setTurns(prev => prev.map(t =>
+            t.inputItemId === ev.item_id
+              ? {
+                  ...t,
+                  originalText:   transcript.trim() || '—',
+                  isUnclear:      true,
+                  isDone:         true,
+                  translatedText: 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.',
+                }
+              : t
+          ));
+          break;
+        }
+
         let speakerRole    = null;
         let sourceLanguage = null;
         let targetLanguage = null;
-
-        let targetRole = null;
+        let targetRole     = null;
 
         if (detected === patientLangRef.current) {
           speakerRole    = 'patient';
@@ -188,7 +205,7 @@ export function useRealtimeSession() {
         setTurns(prev => {
           if (prev.length === 0) return prev;
           return prev.map((t, i) =>
-            i === prev.length - 1
+            i === prev.length - 1 && !t.isUnclear
               ? { ...t, translatedText: t.translatedText + (ev.delta ?? '') }
               : t
           );
@@ -199,7 +216,7 @@ export function useRealtimeSession() {
         setTurns(prev => {
           if (prev.length === 0) return prev;
           return prev.map((t, i) =>
-            i === prev.length - 1
+            i === prev.length - 1 && !t.isUnclear
               ? { ...t, translatedText: ev.transcript ?? t.translatedText, isDone: true }
               : t
           );

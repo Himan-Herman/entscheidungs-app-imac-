@@ -813,7 +813,9 @@ export default function MedaRealtimePage() {
               <span className="mrt-turn-direction">
                 {turn.sourceLanguage
                   ? `${REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage} → ${REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}`
-                  : 'Erkenne Sprache …'}
+                  : turn.isDone
+                    ? 'Sprache nicht erkannt'
+                    : 'Erkenne Sprache …'}
               </span>
             </div>
 
