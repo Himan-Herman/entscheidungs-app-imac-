@@ -214,6 +214,7 @@ export function useRealtimeSession() {
         setSessionStatus('translating');
         break;
 
+      // Audio-output transcript (fires when session runs in audio mode)
       case 'response.audio_transcript.delta':
         setTurns(prev => {
           if (prev.length === 0) return prev;
@@ -231,6 +232,30 @@ export function useRealtimeSession() {
           return prev.map((t, i) =>
             i === prev.length - 1 && !t.isUnclear
               ? { ...t, translatedText: ev.transcript ?? t.translatedText, isDone: true }
+              : t
+          );
+        });
+        break;
+
+      // Text-output transcript (fires when session runs in text mode or combined mode).
+      // Identical logic — whichever event arrives first fills translatedText.
+      case 'response.text.delta':
+        setTurns(prev => {
+          if (prev.length === 0) return prev;
+          return prev.map((t, i) =>
+            i === prev.length - 1 && !t.isUnclear
+              ? { ...t, translatedText: t.translatedText + (ev.delta ?? '') }
+              : t
+          );
+        });
+        break;
+
+      case 'response.text.done':
+        setTurns(prev => {
+          if (prev.length === 0) return prev;
+          return prev.map((t, i) =>
+            i === prev.length - 1 && !t.isUnclear
+              ? { ...t, translatedText: ev.text ?? t.translatedText, isDone: true }
               : t
           );
         });
