@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { authFetch } from '../../../api/authFetch.js';
 import { detectLanguage } from './realtimeLanguages.js';
 
-const OPENAI_REALTIME_BASE = 'https://api.openai.com/v1/realtime';
+const OPENAI_REALTIME_CALLS = 'https://api.openai.com/v1/realtime/calls';
 
 /**
  * @typedef {'idle'|'connecting'|'connected'|'disconnecting'|'error'} ConnectionState
@@ -378,9 +378,8 @@ export function useRealtimeSession() {
       });
       if (!sessionActiveRef.current) { _cleanup(); return; }
 
-      // ── 6. SDP exchange with OpenAI ─────────────────────────────────────────
-      // Use the model name returned by the server — must match the created session.
-      const sdpRes = await fetch(`${OPENAI_REALTIME_BASE}?model=${encodeURIComponent(sessionModel ?? 'gpt-realtime')}`, {
+      // ── 6. SDP exchange with OpenAI (GA WebRTC endpoint) ────────────────────
+      const sdpRes = await fetch(OPENAI_REALTIME_CALLS, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${clientSecret}`,
