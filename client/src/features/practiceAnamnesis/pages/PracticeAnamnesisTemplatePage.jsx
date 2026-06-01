@@ -554,6 +554,22 @@ export default function PracticeAnamnesisTemplatePage() {
                 </button>
               ))}
             </div>
+            {!isNew && template?.status !== "archived" && (
+              <>
+                <Link
+                  className="anamnesis-hub__btn anamnesis-hub__btn--outline anamnesis-hub__btn--sm"
+                  to={`/practice/anamnesis/${templateId}/links${practiceId ? `?practiceId=${encodeURIComponent(practiceId)}` : ""}`}
+                >
+                  QR
+                </Link>
+                <Link
+                  className="anamnesis-hub__btn anamnesis-hub__btn--outline anamnesis-hub__btn--sm"
+                  to={`/practice/anamnesis/${templateId}/submissions${practiceId ? `?practiceId=${encodeURIComponent(practiceId)}` : ""}`}
+                >
+                  Eingang
+                </Link>
+              </>
+            )}
             <button type="button" className="anamnesis-hub__btn" onClick={enterEditMode}>
               ✏ {t.startEditing}
             </button>

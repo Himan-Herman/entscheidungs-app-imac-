@@ -84,6 +84,7 @@ import {
   publicPrevisitQrLimiter,
   publicSecureDocumentsLimiter,
   publicEmergencyLimiter,
+  publicAnamnesisLimiter,
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
@@ -96,6 +97,7 @@ import { interpreterInviteValidateLimiter } from "./middleware/interpreterRateLi
 import patientSosCardRouter from "./routes/patientSosCard.js";
 import publicEmergencyRouter from "./routes/publicEmergency.js";
 import practiceSosCardRouter from "./routes/practiceSosCard.js";
+import publicAnamnesisRouter from "./routes/publicAnamnesis.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -218,6 +220,7 @@ app.use("/api/previsit/cases", requireAuth, previsitCasesRouter);
 app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
 app.use("/api/previsit", previsitRouter);
 app.use("/api/public/previsit", publicPrevisitQrLimiter, publicPrevisitQrRouter);
+app.use("/api/public/anamnesis", publicAnamnesisLimiter, publicAnamnesisRouter);
 app.use("/api/public/emergency", publicEmergencyLimiter, publicEmergencyRouter);
 app.use("/api/public/documents", publicSecureDocumentsLimiter, publicDocumentsRouter);
 app.use(

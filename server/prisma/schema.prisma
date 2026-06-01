@@ -70,6 +70,7 @@ model User {
   interpreterCloudSessionPayloads  InterpreterCloudSessionPayload[]
   interpreterInvitesCreated        PracticeInterpreterInvite[]      @relation("InterpreterInviteCreatedBy")
   interpreterInvitesRevoked        PracticeInterpreterInvite[]      @relation("InterpreterInviteRevokedBy")
+  anamnesisLinksCreated            PracticeAnamnesisLink[]          @relation("AnamnesisLinkCreatedBy")
   interpreterSessionLinksAsPatient PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkPatient")
   interpreterSessionLinksRevoked   PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
   vaccinationEntries               VaccinationEntry[]
@@ -375,6 +376,8 @@ model PracticeProfile {
   interpreterSessionLinks    PracticeInterpreterSessionLink[]
   medaSessions               PracticeMedaSession[]
   anamnesisTemplates         PracticeAnamnesisTemplate[]
+  anamnesisLinks             PracticeAnamnesisLink[]
+  anamnesisSubmissions       PracticeAnamnesisSubmission[]
 
   @@index([userId])
 }
@@ -1942,6 +1945,8 @@ model PracticeAnamnesisTemplate {
   practiceProfile PracticeProfile              @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   sections        PracticeAnamnesisSection[]
   questions       PracticeAnamnesisQuestion[]
+  links           PracticeAnamnesisLink[]
+  submissions     PracticeAnamnesisSubmission[]
 
   @@index([practiceProfileId, status])
 }
@@ -1987,4 +1992,67 @@ model PracticeAnamnesisQuestion {
 
   @@index([templateId])
   @@index([sectionId])
+}
+
+/// Shareable QR / link token for a specific anamnesis template.
+/// Raw token (64 hex chars) never stored — only its SHA-256 hash.
+model PracticeAnamnesisLink {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  templateId        String
+  createdByUserId   String?
+  /// SHA-256 hex of raw 32-byte random token — plaintext never stored.
+  tokenHash         String    @unique @db.VarChar(64)
+  /// First 8 chars of raw token for staff list display only.
+  tokenPrefix       String?   @db.VarChar(12)
+  label             String?   @db.VarChar(120)
+  isActive          Boolean   @default(true)
+  expiresAt         DateTime?
+  disabledAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  practiceProfile PracticeProfile               @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  template        PracticeAnamnesisTemplate     @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  createdBy       User?                         @relation("AnamnesisLinkCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  submissions     PracticeAnamnesisSubmission[]
+
+  @@index([practiceProfileId, isActive])
+  @@index([practiceProfileId, createdAt])
+  @@index([templateId])
+}
+
+/// Patient-submitted anamnesis form — answers captured after explicit consent.
+/// answersJson is a snapshot: [{questionId, sectionId, sectionLabel, questionLabel, type, value}]
+model PracticeAnamnesisSubmission {
+  id                String    @id @default(cuid())
+  practiceProfileId String
+  templateId        String
+  /// Optional link that was used — null if submitted via a now-deleted link.
+  linkId            String?
+  /// BCP-47 language tag selected by patient (de, en, fr, it, es).
+  patientLanguage   String    @db.VarChar(12)
+  /// Snapshot of answers with label text in patient's language.
+  answersJson       Json
+  /// Timestamp when patient actively granted DSGVO consent.
+  consentGrantedAt  DateTime
+  consentVersion    String    @default("v1") @db.VarChar(20)
+  submittedAt       DateTime  @default(now())
+  /// new | viewed | archived | deleted
+  status            String    @default("new") @db.VarChar(20)
+  viewedAt          DateTime?
+  archivedAt        DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  practiceProfile PracticeProfile           @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  template        PracticeAnamnesisTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  link            PracticeAnamnesisLink?    @relation(fields: [linkId], references: [id], onDelete: SetNull)
+
+  @@index([practiceProfileId, status])
+  @@index([practiceProfileId, submittedAt])
+  @@index([templateId])
+  @@index([linkId])
+  @@index([deletedAt])
 }

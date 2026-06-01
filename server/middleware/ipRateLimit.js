@@ -186,3 +186,9 @@ export const labExplanationIpLimiter = createIpRateLimiter({
   max: 8,
   keyPrefix: 'patient:lab-explanation',
 });
+
+/** GET /api/public/anamnesis/qr/:token + POST …/submit — unauthenticated patient intake */
+export const publicAnamnesisLimiter = createIpRateLimiter({
+  max: 100,
+  keyPrefix: 'public:anamnesis',
+});

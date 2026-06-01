@@ -68,6 +68,9 @@ import healthHistory from "./healthHistory.js";
 import erezept from "./erezept.js";
 import sosCard from "./sosCard.js";
 import practiceAnamnesis from "./practiceAnamnesis.js";
+import anamnesisLinks from "./anamnesisLinks.js";
+import anamnesisSubmissions from "./anamnesisSubmissions.js";
+import anamnesisPublic from "./anamnesisPublic.js";
 
 export default {
   header,
@@ -140,4 +143,7 @@ export default {
   erezept,
   sosCard,
   practiceAnamnesis,
+  anamnesisLinks,
+  anamnesisSubmissions,
+  anamnesisPublic,
 };

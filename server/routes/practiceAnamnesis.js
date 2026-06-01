@@ -1,9 +1,9 @@
 /**
- * Practice Anamnesis — configurable questionnaire template management.
- * Patient-facing intake flow is out of scope for this phase.
+ * Practice Anamnesis — configurable questionnaire template management + link/submission management.
  */
 
 import express from "express";
+import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
 import { requirePracticeAnamnesisFeature } from "../middleware/requirePracticeAnamnesis.js";
 import { getPracticeAccess } from "../utils/practiceAccess.js";
@@ -88,12 +88,18 @@ function practiceIdFromReq(req) {
 function mapError(err) {
   const msg = err?.message || "request_failed";
   const forbidden = new Set(["forbidden", "anamnesis_disabled"]);
-  const notFound = new Set(["practice_not_found", "template_not_found", "section_not_found", "question_not_found"]);
+  const notFound = new Set(["practice_not_found", "template_not_found", "section_not_found", "question_not_found", "link_not_found", "submission_not_found"]);
   const bad = new Set(["practiceId_required", "title_required", "type_required", "label_required", "invalid_question_type", "options_required_for_choice"]);
   if (forbidden.has(msg)) return { status: 403, error: msg };
   if (notFound.has(msg)) return { status: 404, error: msg };
   if (bad.has(msg)) return { status: 400, error: msg };
   return { status: 500, error: "request_failed" };
+}
+
+function generateLinkToken() {
+  const raw = crypto.randomBytes(32).toString("hex");
+  const hash = crypto.createHash("sha256").update(raw).digest("hex");
+  return { raw, hash, prefix: raw.slice(0, 8) };
 }
 
 const TEMPLATE_INCLUDE = {
@@ -313,6 +319,226 @@ router.delete("/templates/:templateId", async (req, res) => {
     const existing = await prisma.practiceAnamnesisTemplate.findUnique({ where: { id: req.params.templateId } });
     if (!existing || existing.practiceProfileId !== pid) throw new Error("template_not_found");
     await prisma.practiceAnamnesisTemplate.delete({ where: { id: req.params.templateId } });
+    return res.json({ ok: true });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+// ── Links ─────────────────────────────────────────────────────────────────────
+
+router.get("/templates/:templateId/links", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, false);
+    const template = await prisma.practiceAnamnesisTemplate.findUnique({ where: { id: req.params.templateId } });
+    if (!template || template.practiceProfileId !== pid) throw new Error("template_not_found");
+    const links = await prisma.practiceAnamnesisLink.findMany({
+      where: { templateId: req.params.templateId, practiceProfileId: pid },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true, label: true, tokenPrefix: true, isActive: true,
+        expiresAt: true, disabledAt: true, createdAt: true, updatedAt: true,
+        _count: { select: { submissions: true } },
+      },
+    });
+    return res.json({ ok: true, links });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+router.post("/templates/:templateId/links", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, true);
+    const template = await prisma.practiceAnamnesisTemplate.findUnique({ where: { id: req.params.templateId } });
+    if (!template || template.practiceProfileId !== pid) throw new Error("template_not_found");
+    const { label, expiresAt } = req.body;
+    const { raw, hash, prefix } = generateLinkToken();
+    const link = await prisma.practiceAnamnesisLink.create({
+      data: {
+        practiceProfileId: pid,
+        templateId: req.params.templateId,
+        createdByUserId: uid,
+        tokenHash: hash,
+        tokenPrefix: prefix,
+        label: typeof label === "string" && label.trim() ? label.trim() : null,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+      },
+      select: {
+        id: true, label: true, tokenPrefix: true, isActive: true,
+        expiresAt: true, createdAt: true,
+      },
+    });
+    return res.status(201).json({ ok: true, link, rawToken: raw });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+router.patch("/templates/:templateId/links/:linkId", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, true);
+    const link = await prisma.practiceAnamnesisLink.findUnique({ where: { id: req.params.linkId } });
+    if (!link || link.practiceProfileId !== pid || link.templateId !== req.params.templateId) {
+      throw new Error("link_not_found");
+    }
+    const { isActive, label, expiresAt } = req.body;
+    const data = {};
+    if (typeof isActive === "boolean") {
+      data.isActive = isActive;
+      data.disabledAt = isActive ? null : new Date();
+    }
+    if (label !== undefined) data.label = typeof label === "string" && label.trim() ? label.trim() : null;
+    if (expiresAt !== undefined) data.expiresAt = expiresAt ? new Date(expiresAt) : null;
+    const updated = await prisma.practiceAnamnesisLink.update({
+      where: { id: req.params.linkId },
+      data,
+      select: {
+        id: true, label: true, tokenPrefix: true, isActive: true,
+        expiresAt: true, disabledAt: true, createdAt: true, updatedAt: true,
+      },
+    });
+    return res.json({ ok: true, link: updated });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+router.delete("/templates/:templateId/links/:linkId", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, true);
+    const link = await prisma.practiceAnamnesisLink.findUnique({ where: { id: req.params.linkId } });
+    if (!link || link.practiceProfileId !== pid || link.templateId !== req.params.templateId) {
+      throw new Error("link_not_found");
+    }
+    await prisma.practiceAnamnesisLink.delete({ where: { id: req.params.linkId } });
+    return res.json({ ok: true });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+// ── Submissions ───────────────────────────────────────────────────────────────
+
+router.get("/templates/:templateId/submissions", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, false);
+    const template = await prisma.practiceAnamnesisTemplate.findUnique({ where: { id: req.params.templateId } });
+    if (!template || template.practiceProfileId !== pid) throw new Error("template_not_found");
+    const submissions = await prisma.practiceAnamnesisSubmission.findMany({
+      where: { templateId: req.params.templateId, practiceProfileId: pid, deletedAt: null },
+      orderBy: { submittedAt: "desc" },
+      select: {
+        id: true, patientLanguage: true, status: true,
+        submittedAt: true, viewedAt: true, archivedAt: true,
+        consentGrantedAt: true, consentVersion: true,
+        link: { select: { id: true, label: true, tokenPrefix: true } },
+      },
+    });
+    return res.json({ ok: true, submissions });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+router.get("/submissions/:submissionId", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, false);
+    const submission = await prisma.practiceAnamnesisSubmission.findUnique({
+      where: { id: req.params.submissionId },
+      include: { link: { select: { id: true, label: true, tokenPrefix: true } } },
+    });
+    if (!submission || submission.practiceProfileId !== pid || submission.deletedAt) {
+      throw new Error("submission_not_found");
+    }
+    if (submission.status === "new") {
+      await prisma.practiceAnamnesisSubmission.update({
+        where: { id: submission.id },
+        data: { status: "viewed", viewedAt: new Date() },
+      });
+      submission.status = "viewed";
+      submission.viewedAt = new Date();
+    }
+    return res.json({ ok: true, submission });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+router.patch("/submissions/:submissionId", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, true);
+    const submission = await prisma.practiceAnamnesisSubmission.findUnique({ where: { id: req.params.submissionId } });
+    if (!submission || submission.practiceProfileId !== pid || submission.deletedAt) {
+      throw new Error("submission_not_found");
+    }
+    const { status } = req.body;
+    const data = {};
+    const VALID_STATUSES = new Set(["new", "viewed", "archived"]);
+    if (status !== undefined) {
+      if (!VALID_STATUSES.has(status)) return res.status(400).json({ ok: false, error: "invalid_status" });
+      data.status = status;
+      if (status === "archived" && !submission.archivedAt) data.archivedAt = new Date();
+      if (status !== "archived") data.archivedAt = null;
+    }
+    const updated = await prisma.practiceAnamnesisSubmission.update({ where: { id: req.params.submissionId }, data });
+    return res.json({ ok: true, submission: updated });
+  } catch (e) {
+    const { status, error } = mapError(e);
+    return res.status(status).json({ ok: false, error });
+  }
+});
+
+router.delete("/submissions/:submissionId", async (req, res) => {
+  const uid = uidFromReq(req);
+  const pid = practiceIdFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!pid) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    await requireAccess(uid, pid, true);
+    const submission = await prisma.practiceAnamnesisSubmission.findUnique({ where: { id: req.params.submissionId } });
+    if (!submission || submission.practiceProfileId !== pid || submission.deletedAt) {
+      throw new Error("submission_not_found");
+    }
+    await prisma.practiceAnamnesisSubmission.update({
+      where: { id: req.params.submissionId },
+      data: { status: "deleted", deletedAt: new Date() },
+    });
     return res.json({ ok: true });
   } catch (e) {
     const { status, error } = mapError(e);

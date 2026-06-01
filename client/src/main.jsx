@@ -165,6 +165,18 @@ const PracticeAnamnesisHubPage = lazy(() =>
 const PracticeAnamnesisTemplatePage = lazy(() =>
   import("./features/practiceAnamnesis/pages/PracticeAnamnesisTemplatePage.jsx"),
 );
+const AnamnesisLinksPage = lazy(() =>
+  import("./features/practiceAnamnesis/pages/AnamnesisLinksPage.jsx"),
+);
+const AnamnesisSubmissionsPage = lazy(() =>
+  import("./features/practiceAnamnesis/pages/AnamnesisSubmissionsPage.jsx"),
+);
+const AnamnesisSubmissionDetailPage = lazy(() =>
+  import("./features/practiceAnamnesis/pages/AnamnesisSubmissionDetailPage.jsx"),
+);
+const AnamnesisPublicPage = lazy(() =>
+  import("./features/practiceAnamnesis/pages/AnamnesisPublicPage.jsx"),
+);
 const PatientAppointmentsPage = lazy(() =>
   import("./features/patientAppointments/pages/PatientAppointmentsPage.jsx"),
 );
@@ -504,6 +516,30 @@ void runPwaBuildMigration().then(() => {
                   }
                 />
                 <Route
+                  path="/practice/anamnesis/:templateId/links"
+                  element={
+                    <ProtectedRoute>
+                      <AnamnesisLinksPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/anamnesis/:templateId/submissions"
+                  element={
+                    <ProtectedRoute>
+                      <AnamnesisSubmissionsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/anamnesis/:templateId/submissions/:submissionId"
+                  element={
+                    <ProtectedRoute>
+                      <AnamnesisSubmissionDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/practice/settings/video"
                   element={
                     <ProtectedRoute>
@@ -600,6 +636,7 @@ void runPwaBuildMigration().then(() => {
                   }
                 />
                 <Route path="/emergency/:token" element={<EmergencyPublicPage />} />
+                <Route path="/anamnesis/qr/:token" element={<AnamnesisPublicPage />} />
                 <Route
                   path="/practice/security"
                   element={
