@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRealtimeSession } from './useRealtimeSession.js';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
+import { speakTranslation, cancelSpeech } from './realtimeSpeechPlayback.js';
 import {
   usePatientProfilePrefill,
   EMPTY_PATIENT_INFO,
@@ -141,6 +142,7 @@ export default function MedaRealtimePage() {
   useEffect(() => {
     return () => {
       disconnectRef.current();
+      cancelSpeech();
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
@@ -178,6 +180,7 @@ export default function MedaRealtimePage() {
           clearInterval(timerIntervalRef.current);
           timerIntervalRef.current = null;
           setSessionExpired(true);
+          cancelSpeech();
           disconnectRef.current();
         }
       }, 1000);
@@ -797,7 +800,7 @@ export default function MedaRealtimePage() {
           </span>
           <button
             className="mrt-btn mrt-btn--stop mrt-btn--compact"
-            onClick={disconnect}
+            onClick={() => { cancelSpeech(); disconnect(); }}
           >
             Gespräch beenden
           </button>
@@ -917,21 +920,35 @@ export default function MedaRealtimePage() {
               {/* ── Übersetzung (oder Hinweis bei unclear) ────────────────────── */}
               {(turn.translatedText || !turn.isDone) && (
                 <div className={`mrt-turn-translation${turn.isUnclear ? ' mrt-turn-translation--unclear' : ''}`}>
-                  <span className={`mrt-turn-section-label${
-                    turn.isUnclear ? ' mrt-turn-section-label--unclear' :
-                    turn.targetRole ? ' mrt-turn-section-label--for' : ''
-                  }`}>
-                    {turn.isUnclear
-                      ? 'Meda'
-                      : turn.targetRole
-                        ? `Übersetzung für ${turn.targetRole === 'patient' ? 'Patient' : 'Praxis'}`
-                        : 'Übersetzung'}
-                  </span>
-                  {!turn.isUnclear && turn.targetLanguage && (
-                    <span className="mrt-turn-lang mrt-turn-lang--translation">
-                      {REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}
+                  <div className="mrt-turn-translation-header">
+                    <span className={`mrt-turn-section-label${
+                      turn.isUnclear ? ' mrt-turn-section-label--unclear' :
+                      turn.targetRole ? ' mrt-turn-section-label--for' : ''
+                    }`}>
+                      {turn.isUnclear
+                        ? 'Meda'
+                        : turn.targetRole
+                          ? `Übersetzung für ${turn.targetRole === 'patient' ? 'Patient' : 'Praxis'}`
+                          : 'Übersetzung'}
                     </span>
-                  )}
+                    {!turn.isUnclear && turn.targetLanguage && (
+                      <span className="mrt-turn-lang mrt-turn-lang--translation">
+                        {REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}
+                      </span>
+                    )}
+                    {turn.isDone && turn.translatedText && !turn.isUnclear && (
+                      <button
+                        className="mrt-turn-speak-btn"
+                        onClick={() => speakTranslation(turn.translatedText, turn.targetLanguage)}
+                        aria-label="Übersetzung vorlesen"
+                        title="Übersetzung vorlesen"
+                      >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                   <p className={`mrt-turn-text${turn.isUnclear ? ' mrt-turn-text--unclear' : ' mrt-turn-text--translation'}`}>
                     {turn.translatedText
                       ? turn.translatedText
