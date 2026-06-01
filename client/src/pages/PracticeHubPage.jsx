@@ -6,6 +6,7 @@ import {
   FileText,
   Inbox,
   MessageSquare,
+  Mic,
   Pill,
   Shield,
   UsersRound,
@@ -102,6 +103,12 @@ const CARD_DEFS = [
         ? `/practice/audit?practiceId=${encodeURIComponent(practiceId)}`
         : "#practice-overview-activity",
     Icon: Activity,
+  },
+  {
+    id: "medaLive",
+    labelKey: "cardMedaLive",
+    to: () => "/patient/meda-realtime",
+    Icon: Mic,
   },
 ];
 
