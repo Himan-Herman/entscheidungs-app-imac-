@@ -172,7 +172,6 @@ export default function AnamnesisPublicPage() {
   const [loadError, setLoadError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [consentGrantedAt, setConsentGrantedAt] = useState(null);
 
   const sections = useMemo(() => {
     if (!linkData?.template) return [];
@@ -220,7 +219,6 @@ export default function AnamnesisPublicPage() {
   };
 
   const handleConsentAccept = () => {
-    setConsentGrantedAt(new Date().toISOString());
     setStep("form");
     setSectionIndex(0);
     scrollTop();
@@ -298,7 +296,6 @@ export default function AnamnesisPublicPage() {
       const { res, data } = await submitPublicAnamnesis(token, {
         patientLanguage: lang,
         answersJson: buildAnswersJson(),
-        consentGrantedAt,
       });
       if (!res.ok) {
         setSubmitError(data?.error || "request_failed");
@@ -389,12 +386,13 @@ export default function AnamnesisPublicPage() {
         <div className="apub__card">
           {practice && (
             <div className="apub__practice-header">
-              {practice.logoUrl && <img src={practice.logoUrl} alt="" className="apub__practice-logo" />}
+              {practice.logoUrl && <img src={practice.logoUrl} alt={practice.displayNameForPatients || practice.practiceName || ""} className="apub__practice-logo" />}
               <p className="apub__practice-name">{practice.displayNameForPatients || practice.practiceName}</p>
             </div>
           )}
           <h1 className="apub__heading">{t.consentHeading}</h1>
           <p className="apub__consent-body">{t.consentBody}</p>
+          {t.consentNotice && <p className="apub__consent-notice">{t.consentNotice}</p>}
           <div className="apub__consent-actions">
             <button type="button" className="apub__btn apub__btn--primary" onClick={handleConsentAccept}>
               {t.consentAccept}
@@ -415,7 +413,14 @@ export default function AnamnesisPublicPage() {
     return (
       <div className="apub" ref={topRef}>
         <div className="apub__card">
-          <div className="apub__progress-bar">
+          <div
+            className="apub__progress-bar"
+            role="progressbar"
+            aria-valuenow={sectionIndex + 1}
+            aria-valuemin={1}
+            aria-valuemax={sections.length}
+            aria-label={t?.sectionOf?.replace("{{current}}", sectionIndex + 1).replace("{{total}}", sections.length)}
+          >
             <div
               className="apub__progress-fill"
               style={{ width: `${((sectionIndex + 1) / sections.length) * 100}%` }}

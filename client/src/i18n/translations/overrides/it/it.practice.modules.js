@@ -1471,6 +1471,7 @@ export default {
     languageContinue: "Continua",
     consentHeading: "Informativa sulla privacy",
     consentBody: "Le sue risposte verranno trasmesse in modo sicuro allo studio medico e conservate lì. I suoi dati saranno utilizzati esclusivamente per preparare il suo appuntamento. Può revocare il consenso in qualsiasi momento contattando lo studio. Nessun dato verrà trasmesso a terzi. La compilazione del modulo è facoltativa.",
+    consentNotice: "Questo modulo è destinato esclusivamente alla raccolta preliminare di informazioni. Non costituisce una diagnosi, una raccomandazione terapeutica o un consiglio medico, e non sostituisce la visita medica.",
     consentAccept: "Acconsento e continuo",
     consentDecline: "Rifiuta",
     consentRequired: "Si prega di accettare l'informativa sulla privacy per continuare.",

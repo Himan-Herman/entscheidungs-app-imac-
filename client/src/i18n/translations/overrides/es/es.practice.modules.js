@@ -1471,6 +1471,7 @@ export default {
     languageContinue: "Continuar",
     consentHeading: "Aviso de privacidad",
     consentBody: "Sus respuestas se transmitirán de forma segura a la consulta y se almacenarán allí. Sus datos solo se utilizarán para preparar su cita. Puede retirar su consentimiento en cualquier momento contactando con la consulta. No se transferirán datos a terceros. Completar este formulario es voluntario.",
+    consentNotice: "Este formulario está destinado exclusivamente a recopilar información con antelación. No constituye un diagnóstico, una recomendación terapéutica ni un consejo médico, y no reemplaza la consulta médica.",
     consentAccept: "Acepto y continúo",
     consentDecline: "Rechazar",
     consentRequired: "Acepte el aviso de privacidad para continuar.",

@@ -28,7 +28,7 @@ const TEMPLATE_INCLUDE = {
 
 router.get("/qr/:token", async (req, res) => {
   const { token } = req.params;
-  if (!token || token.length !== 64) {
+  if (!token || !/^[0-9a-f]{64}$/.test(token)) {
     return res.status(404).json({ ok: false, error: "link_not_found" });
   }
   try {
@@ -78,13 +78,15 @@ router.get("/qr/:token", async (req, res) => {
 
 // ── POST /qr/:token/submit ─────────────────────────────────────────────────────
 
+const MAX_ANSWERS_ITEMS = 500;
+
 router.post("/qr/:token/submit", async (req, res) => {
   const { token } = req.params;
-  if (!token || token.length !== 64) {
+  if (!token || !/^[0-9a-f]{64}$/.test(token)) {
     return res.status(404).json({ ok: false, error: "link_not_found" });
   }
 
-  const { patientLanguage, answersJson, consentGrantedAt } = req.body;
+  const { patientLanguage, answersJson } = req.body;
 
   if (!patientLanguage || !VALID_LANGUAGES.has(patientLanguage)) {
     return res.status(400).json({ ok: false, error: "invalid_language" });
@@ -92,14 +94,11 @@ router.post("/qr/:token/submit", async (req, res) => {
   if (!Array.isArray(answersJson)) {
     return res.status(400).json({ ok: false, error: "answers_required" });
   }
-  if (!consentGrantedAt) {
-    return res.status(400).json({ ok: false, error: "consent_required" });
+  if (answersJson.length > MAX_ANSWERS_ITEMS) {
+    return res.status(400).json({ ok: false, error: "answers_too_large" });
   }
 
-  const consentAt = new Date(consentGrantedAt);
-  if (isNaN(consentAt.getTime())) {
-    return res.status(400).json({ ok: false, error: "invalid_consent_timestamp" });
-  }
+  const consentAt = new Date();
 
   try {
     const tokenHash = hashToken(token);

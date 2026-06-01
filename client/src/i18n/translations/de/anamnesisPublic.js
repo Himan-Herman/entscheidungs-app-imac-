@@ -18,6 +18,7 @@ export default {
 
   consentHeading: "Datenschutzhinweis",
   consentBody: "Ihre Antworten werden verschlüsselt an die Praxis übermittelt und dort gespeichert. Ihre Daten werden ausschließlich zur Vorbereitung Ihres Termins verwendet. Sie können Ihre Einwilligung jederzeit durch Kontaktaufnahme mit der Praxis widerrufen. Es erfolgt keine Weitergabe an Dritte. Das Ausfüllen dieses Formulars ist freiwillig.",
+  consentNotice: "Dieses Formular dient ausschließlich der Vorab-Erfassung von Informationen. Es stellt keine Diagnose, Therapieempfehlung oder medizinische Beratung dar und ersetzt nicht das ärztliche Gespräch.",
   consentAccept: "Ich stimme zu und weiter",
   consentDecline: "Ablehnen",
   consentRequired: "Bitte stimmen Sie dem Datenschutzhinweis zu, um fortzufahren.",

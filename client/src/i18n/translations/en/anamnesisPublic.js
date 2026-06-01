@@ -18,6 +18,7 @@ export default {
 
   consentHeading: "Privacy notice",
   consentBody: "Your answers will be transmitted securely to the practice and stored there. Your data will only be used to prepare your appointment. You can withdraw your consent at any time by contacting the practice. No data will be transferred to third parties. Completing this form is voluntary.",
+  consentNotice: "This form is intended solely to collect information in advance. It does not constitute a diagnosis, treatment recommendation, or medical advice, and does not replace the physician consultation.",
   consentAccept: "I agree and continue",
   consentDecline: "Decline",
   consentRequired: "Please accept the privacy notice to continue.",

@@ -516,7 +516,13 @@ router.patch("/submissions/:submissionId", async (req, res) => {
       if (status === "archived" && !submission.archivedAt) data.archivedAt = new Date();
       if (status !== "archived") data.archivedAt = null;
     }
-    const updated = await prisma.practiceAnamnesisSubmission.update({ where: { id: req.params.submissionId }, data });
+    const updated = await prisma.practiceAnamnesisSubmission.update({
+      where: { id: req.params.submissionId },
+      data,
+      select: {
+        id: true, status: true, viewedAt: true, archivedAt: true, updatedAt: true,
+      },
+    });
     return res.json({ ok: true, submission: updated });
   } catch (e) {
     const { status, error } = mapError(e);

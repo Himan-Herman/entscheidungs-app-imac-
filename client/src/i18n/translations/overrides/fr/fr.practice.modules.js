@@ -1649,6 +1649,7 @@ export default {
     languageContinue: "Continuer",
     consentHeading: "Avis de confidentialité",
     consentBody: "Vos réponses seront transmises de manière sécurisée au cabinet et y seront conservées. Vos données ne seront utilisées que pour préparer votre rendez-vous. Vous pouvez retirer votre consentement à tout moment en contactant le cabinet. Aucune donnée ne sera transmise à des tiers. Remplir ce formulaire est facultatif.",
+    consentNotice: "Ce formulaire est uniquement destiné à collecter des informations en amont. Il ne constitue pas un diagnostic, une recommandation thérapeutique ou un avis médical, et ne remplace pas la consultation médicale.",
     consentAccept: "J'accepte et je continue",
     consentDecline: "Refuser",
     consentRequired: "Veuillez accepter l'avis de confidentialité pour continuer.",
