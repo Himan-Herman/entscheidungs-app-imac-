@@ -28,9 +28,13 @@ const COL = {
   cardTitle:      [14,  116, 144],
 };
 
-const MARGIN         = 18;
+const MARGIN        = 18;
 const FOOTER_RESERVE = 24;
-const LOGO_TARGET_H  = 14;   // mm — width calculated proportionally from image dimensions
+
+// Logo bounding box — image is scaled to fit inside this box while preserving aspect ratio.
+// scale = min(LOGO_BOX_W / natW, LOGO_BOX_H / natH)  →  no stretch, no squash.
+const LOGO_BOX_W = 42;   // mm — maximum logo width
+const LOGO_BOX_H = 18;   // mm — maximum logo height
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -59,29 +63,44 @@ function formatTime(isoOrNull) {
 }
 
 /**
- * Loads the logo and detects its natural pixel dimensions.
- * Returns { dataUrl, aspectRatio } or { dataUrl: null, aspectRatio: 1 } on failure.
+ * Loads the logo via a browser Image element (no fetch / no CORS dependency).
+ * Draws it to an off-screen canvas to obtain a dataURL and the true pixel dimensions.
+ * Returns { dataUrl, natW, natH } or { dataUrl: null, natW: 0, natH: 0 } on failure.
  */
-async function loadLogoWithDimensions(url) {
-  try {
-    const res    = await fetch(url);
-    const blob   = await res.blob();
-    const dataUrl = await new Promise((resolve, reject) => {
-      const reader     = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror   = reject;
-      reader.readAsDataURL(blob);
-    });
-    const aspectRatio = await new Promise((resolve) => {
-      const img   = new Image();
-      img.onload  = () => resolve(img.naturalHeight > 0 ? img.naturalWidth / img.naturalHeight : 1);
-      img.onerror = () => resolve(1);
-      img.src     = dataUrl;
-    });
-    return { dataUrl, aspectRatio };
-  } catch {
-    return { dataUrl: null, aspectRatio: 1 };
-  }
+async function loadLogoData(url) {
+  return new Promise((resolve) => {
+    const img        = new Image();
+    img.crossOrigin  = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas  = document.createElement('canvas');
+        canvas.width  = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve({ dataUrl: canvas.toDataURL('image/png'), natW: img.naturalWidth, natH: img.naturalHeight });
+      } catch {
+        // Canvas tainted or unavailable — fall back to src URL directly
+        resolve({ dataUrl: url, natW: img.naturalWidth, natH: img.naturalHeight });
+      }
+    };
+    img.onerror = () => resolve({ dataUrl: null, natW: 0, natH: 0 });
+    img.src = url;
+  });
+}
+
+/**
+ * Computes proportional logo dimensions that fit inside the bounding box.
+ * Preserves aspect ratio exactly — no stretching, no squashing.
+ * @param {number} natW   natural pixel width
+ * @param {number} natH   natural pixel height
+ * @param {number} maxW   max draw width in mm
+ * @param {number} maxH   max draw height in mm
+ * @returns {{ w: number, h: number }} draw dimensions in mm
+ */
+function fitLogoInBox(natW, natH, maxW, maxH) {
+  if (!natW || !natH) return { w: maxH, h: maxH };  // safe fallback for unknown dims
+  const scale = Math.min(maxW / natW, maxH / natH);
+  return { w: natW * scale, h: natH * scale };
 }
 
 // ── PDF builder ───────────────────────────────────────────────────────────────
@@ -105,9 +124,8 @@ export async function exportRealtimeConversationPdf({
   languages     = {},
   sessionStartedAt = null,
 }) {
-  const { dataUrl: logoDataUrl, aspectRatio: logoAspect } = await loadLogoWithDimensions(logo6Url);
-  const logoH = LOGO_TARGET_H;
-  const logoW = logoH * logoAspect;
+  const { dataUrl: logoDataUrl, natW: logoNatW, natH: logoNatH } = await loadLogoData(logo6Url);
+  const { w: logoW, h: logoH } = fitLogoInBox(logoNatW, logoNatH, LOGO_BOX_W, LOGO_BOX_H);
 
   const doc      = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
   const pageW    = doc.internal.pageSize.getWidth();
@@ -187,29 +205,18 @@ export async function exportRealtimeConversationPdf({
     needSpace(boxH + 7);
     const boxTop = y;
 
-    // Outer rounded rect
+    // Outer rounded rect — single pass, no overpainting corners
     doc.setFillColor(...COL.boxBg);
     doc.setDrawColor(...COL.boxBorder);
     doc.setLineWidth(0.25);
     doc.roundedRect(MARGIN, boxTop, contentW, boxH, 2, 2, 'FD');
 
-    // Title bar background (slightly darker than boxBg)
-    doc.setFillColor(236, 244, 248);
-    doc.setDrawColor(...COL.boxBorder);
-    doc.setLineWidth(0);
-    // Clip to top rounded corners by drawing a rect that covers only the top portion
-    doc.rect(MARGIN, boxTop, contentW, titleAreaH, 'F');
-    // Re-draw the outer border so it sits on top
+    // Title separator line (below title area, above content rows)
     doc.setDrawColor(...COL.boxBorder);
     doc.setLineWidth(0.25);
-    doc.roundedRect(MARGIN, boxTop, contentW, boxH, 2, 2, 'S');
+    doc.line(MARGIN + 1, boxTop + titleAreaH, MARGIN + contentW - 1, boxTop + titleAreaH);
 
-    // Title separator line
-    doc.setDrawColor(...COL.boxBorder);
-    doc.setLineWidth(0.25);
-    doc.line(MARGIN, boxTop + titleAreaH, MARGIN + contentW, boxTop + titleAreaH);
-
-    // Title text
+    // Title text — teal bold, no separate background (avoids corner artefacts)
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(titleFontSize);
     doc.setTextColor(...COL.cardTitle);
