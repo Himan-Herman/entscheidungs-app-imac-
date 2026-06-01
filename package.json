@@ -2,7 +2,9 @@
   "name": "medscout-server",
   "version": "1.0.0",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "npm ci --prefix server && npm run build --prefix server",
     "migrate:deploy": "npm run migrate:deploy --prefix server",
@@ -12,10 +14,14 @@
     "client:preview": "npm --prefix client run preview"
   },
   "dependencies": {
-    "express": "^4.19.2",
+    "@prisma/client": "^6.15.0",
     "cors": "^2.8.5",
+    "express": "^4.19.2",
     "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
     "openai": "^5.10.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.15.0"
   }
 }
