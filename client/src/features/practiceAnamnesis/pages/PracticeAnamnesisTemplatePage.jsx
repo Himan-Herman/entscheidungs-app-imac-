@@ -539,20 +539,25 @@ export default function PracticeAnamnesisTemplatePage() {
           </div>
 
           <div className="anamnesis-view__header-actions">
-            {/* Language tabs */}
-            <div className="anamnesis-editor__lang-tabs" role="tablist" aria-label={t.languageTab}>
-              {LANGS.map((lng) => (
-                <button
-                  key={lng}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeLang === lng}
-                  className={`anamnesis-editor__lang-tab${activeLang === lng ? " anamnesis-editor__lang-tab--active" : ""}`}
-                  onClick={() => setActiveLang(lng)}
-                >
-                  {lng.toUpperCase()}
-                </button>
-              ))}
+            {/* Language tabs — controls question content language, NOT app UI language */}
+            <div className="anamnesis-editor__lang-tabs-group">
+              <span className="anamnesis-editor__lang-tabs-label" title={t.languageTabHint}>
+                {t.languageTab}:
+              </span>
+              <div className="anamnesis-editor__lang-tabs" role="tablist" aria-label={t.languageTabHint || t.languageTab}>
+                {LANGS.map((lng) => (
+                  <button
+                    key={lng}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeLang === lng}
+                    className={`anamnesis-editor__lang-tab${activeLang === lng ? " anamnesis-editor__lang-tab--active" : ""}`}
+                    onClick={() => setActiveLang(lng)}
+                  >
+                    {lng.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
             {!isNew && template?.status !== "archived" && (
               <>
@@ -669,20 +674,25 @@ export default function PracticeAnamnesisTemplatePage() {
         </Link>
       </nav>
 
-      {/* Language tabs */}
-      <div className="anamnesis-editor__lang-tabs" role="tablist" aria-label={t.languageTab} style={{ marginTop: "1rem" }}>
-        {LANGS.map((lng) => (
-          <button
-            key={lng}
-            type="button"
-            role="tab"
-            aria-selected={activeLang === lng}
-            className={`anamnesis-editor__lang-tab${activeLang === lng ? " anamnesis-editor__lang-tab--active" : ""}`}
-            onClick={() => setActiveLang(lng)}
-          >
-            {t[`lang_${lng}`] || lng.toUpperCase()}
-          </button>
-        ))}
+      {/* Language tabs — controls question content language, NOT app UI language */}
+      <div className="anamnesis-editor__lang-tabs-group" style={{ marginTop: "1rem" }}>
+        <span className="anamnesis-editor__lang-tabs-label" title={t.languageTabHint}>
+          {t.languageTab}:
+        </span>
+        <div className="anamnesis-editor__lang-tabs" role="tablist" aria-label={t.languageTabHint || t.languageTab}>
+          {LANGS.map((lng) => (
+            <button
+              key={lng}
+              type="button"
+              role="tab"
+              aria-selected={activeLang === lng}
+              className={`anamnesis-editor__lang-tab${activeLang === lng ? " anamnesis-editor__lang-tab--active" : ""}`}
+              onClick={() => setActiveLang(lng)}
+            >
+              {t[`lang_${lng}`] || lng.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Template metadata */}

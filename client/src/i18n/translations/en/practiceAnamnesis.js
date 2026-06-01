@@ -11,6 +11,10 @@ export default {
 
   loading: "Loading …",
   loadError: "Could not load templates.",
+  loadErrorDisabled: "The anamnesis feature is not yet enabled for this practice. Please activate it in the practice settings or contact support.",
+  loadErrorUnauthorized: "Please sign in again.",
+  loadErrorServer: "Could not load templates due to a server error. Please try again.",
+  noTemplatesHint: "No anamnesis templates yet. Create a new template or use the standard template.",
   saveError: "Save failed.",
   deleteError: "Delete failed.",
   archiveError: "Archive failed.",
@@ -105,6 +109,7 @@ export default {
   lang_it: "Italian",
   lang_es: "Spanish",
   languageTab: "Language",
+  languageTabHint: "Edit question translations — these tabs control the language of the questions shown to the patient, not the app language.",
 
   readOnly: "Read-only — your role does not allow editing.",
 

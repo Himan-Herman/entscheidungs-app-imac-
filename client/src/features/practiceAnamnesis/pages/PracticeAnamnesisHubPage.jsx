@@ -56,15 +56,25 @@ export default function PracticeAnamnesisHubPage() {
     setError("");
     try {
       const { res, data } = await fetchAnamnesisTemplates(practiceId);
-      if (!res.ok || !data.ok) throw new Error(data?.error || "load_failed");
-      setTemplates(Array.isArray(data.templates) ? data.templates : []);
+      if (res.ok && data.ok) {
+        setTemplates(Array.isArray(data.templates) ? data.templates : []);
+        return;
+      }
+      const code = data?.error || "";
+      if (res.status === 401) { setError(t.loadErrorUnauthorized || t.loadError); return; }
+      if (res.status === 403 || res.status === 404 || code === "anamnesis_disabled" || code === "feature_disabled") {
+        setError(t.loadErrorDisabled || t.featureDisabled || t.loadError);
+        return;
+      }
+      if (res.status >= 500) { setError(t.loadErrorServer || t.loadError); return; }
+      setError(t.loadError);
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
       setError(t.loadError);
     } finally {
       setLoading(false);
     }
-  }, [practiceId, t.loadError]);
+  }, [practiceId, t]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -170,7 +180,7 @@ export default function PracticeAnamnesisHubPage() {
 
       {!loading && !error && practiceId && templates.length === 0 && (
         <div className="anamnesis-hub__empty">
-          <p>{t.noTemplates}</p>
+          <p>{t.noTemplatesHint || t.noTemplates}</p>
           <div className="anamnesis-hub__empty-actions">
             <Link
               className="anamnesis-hub__btn"

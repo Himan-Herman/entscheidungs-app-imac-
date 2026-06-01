@@ -11,6 +11,10 @@ export default {
 
   loading: "Wird geladen …",
   loadError: "Vorlagen konnten nicht geladen werden.",
+  loadErrorDisabled: "Die Anamnese-Funktion ist für diese Praxis noch nicht aktiviert. Bitte aktivieren Sie sie in den Praxiseinstellungen oder wenden Sie sich an den Support.",
+  loadErrorUnauthorized: "Bitte erneut anmelden.",
+  loadErrorServer: "Vorlagen konnten wegen eines Serverfehlers nicht geladen werden. Bitte versuchen Sie es erneut.",
+  noTemplatesHint: "Noch keine Anamnese-Vorlagen vorhanden. Erstellen Sie eine neue Vorlage oder nutzen Sie die Standardvorlage.",
   saveError: "Speichern fehlgeschlagen.",
   deleteError: "Löschen fehlgeschlagen.",
   archiveError: "Archivieren fehlgeschlagen.",
@@ -112,6 +116,7 @@ export default {
   lang_it: "Italienisch",
   lang_es: "Spanisch",
   languageTab: "Sprache",
+  languageTabHint: "Frageübersetzungen bearbeiten — diese Tabs steuern die Sprache der Fragen für den Patienten, nicht die App-Sprache.",
 
   // ── Roles / read-only ─────────────────────────────────────────────────────
   readOnly: "Nur Lesen — Ihre Rolle erlaubt keine Bearbeitung.",
