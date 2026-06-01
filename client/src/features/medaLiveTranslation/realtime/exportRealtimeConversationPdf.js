@@ -277,21 +277,9 @@ export async function exportRealtimeConversationPdf({
 
   // ── Metadata box ────────────────────────────────────────────────────────────
 
-  const patientAddr = [
-    patientInfo.street,
-    patientInfo.postalCode && patientInfo.city
-      ? `${patientInfo.postalCode} ${patientInfo.city}`
-      : (patientInfo.postalCode || patientInfo.city || ''),
-    patientInfo.country,
-  ].map(s => String(s || '').trim()).filter(Boolean).join(', ');
-
-  const practiceAddr = [
-    practiceInfo.street,
-    practiceInfo.postalCode && practiceInfo.city
-      ? `${practiceInfo.postalCode} ${practiceInfo.city}`
-      : (practiceInfo.postalCode || practiceInfo.city || ''),
-    practiceInfo.country,
-  ].map(s => String(s || '').trim()).filter(Boolean).join(', ');
+  const patientRelRow = sanitize(patientInfo.relationship)
+    ? [['Beziehung zur Person', sanitize(patientInfo.relationship)]]
+    : [];
 
   metaBox([
     ['Patient',              orNA(patientInfo.name)],
@@ -300,12 +288,23 @@ export async function exportRealtimeConversationPdf({
     ['Versicherungsstatus',  orNA(patientInfo.insuranceStatus)],
     ['Krankenkasse',         orNA(patientInfo.insuranceName)],
     ['Versicherungsnummer',  orNA(patientInfo.insuranceNumber)],
-    ['Adresse',              patientAddr || 'nicht angegeben'],
+    ['E-Mail',               orNA(patientInfo.email)],
+    ['Telefon',              orNA(patientInfo.phone)],
+    ['Strasse',              orNA(patientInfo.street)],
+    ['PLZ',                  orNA(patientInfo.postalCode)],
+    ['Ort',                  orNA(patientInfo.city)],
+    ['Land',                 orNA(patientInfo.country)],
+    ...patientRelRow,
     null,
     ['Praxis / Einrichtung', orNA(practiceInfo.practiceName)],
-    ['Ärztin / Arzt',        orNA(practiceInfo.doctorName)],
+    ['Aerztin / Arzt',       orNA(practiceInfo.doctorName)],
     ['Fachbereich',          orNA(practiceInfo.department)],
-    ['Praxisadresse',        practiceAddr || 'nicht angegeben'],
+    ['E-Mail Praxis',        orNA(practiceInfo.email)],
+    ['Telefon Praxis',       orNA(practiceInfo.phone)],
+    ['Strasse',              orNA(practiceInfo.street)],
+    ['PLZ',                  orNA(practiceInfo.postalCode)],
+    ['Ort',                  orNA(practiceInfo.city)],
+    ['Land',                 orNA(practiceInfo.country)],
     null,
     ['Patientensprache',     patientLangLabel],
     ['Praxissprache',        practiceLangLabel],
@@ -347,6 +346,21 @@ export async function exportRealtimeConversationPdf({
     y += 4;
     doc.setLineWidth(0.2);
 
+    // Unclear banner — shown before role label
+    if (turn.isUnclear) {
+      const unclearText = 'Aussage akustisch/sprachlich nicht sicher zugeordnet – Wiederholungsbitte wurde ausgegeben.';
+      const unclearLines = doc.splitTextToSize(unclearText, contentW);
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(146, 64, 14);
+      for (const ln of unclearLines) {
+        needSpace(lh(8));
+        doc.text(ln, MARGIN, y);
+        y += lh(8);
+      }
+      y += 2;
+    }
+
     // Role + Zeit
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
@@ -380,6 +394,16 @@ export async function exportRealtimeConversationPdf({
 
     // Original text (indented)
     textBlock(origText || '—', contentW - 6, 9.5, COL.slate, 'normal', 4);
+
+    // Edited badge
+    if (turn.originalEdited) {
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7.5);
+      doc.setTextColor(146, 64, 14);
+      needSpace(lh(7.5) + 1);
+      doc.text('[Originaltext manuell korrigiert]', MARGIN + 4, y);
+      y += lh(7.5) + 1.5;
+    }
 
     gap(3);
 
