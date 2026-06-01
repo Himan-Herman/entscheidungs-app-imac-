@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Activity,
   ClipboardList,
+  ClipboardPen,
   FileText,
   Inbox,
   MessageSquare,
@@ -109,6 +110,13 @@ const CARD_DEFS = [
     labelKey: "cardMedaLive",
     to: () => "/patient/meda-realtime",
     Icon: Mic,
+  },
+  {
+    id: "anamnesis",
+    visibilityKey: "anamnesis",
+    labelKey: "cardAnamnesis",
+    to: (practiceId) => `/practice/anamnesis?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: ClipboardPen,
   },
 ];
 

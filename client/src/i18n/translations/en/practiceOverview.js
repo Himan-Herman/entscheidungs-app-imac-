@@ -48,6 +48,7 @@ export default {
   cardSecurity: "Security & privacy",
   cardActivity: "Activity",
   cardMedaLive: "Meda Live Translation",
+  cardAnamnesis: "Anamnesis",
 
   metricUnreadInbox: "Unread inbox items",
   metricOpenMessages: "Open messages",

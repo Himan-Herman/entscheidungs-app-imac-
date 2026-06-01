@@ -337,6 +337,8 @@ model PracticeProfile {
   street                        String?
   /// Preferred interpreter/translation languages as JSON array string, e.g. ["tr","ar","ru"]
   preferredInterpreterLanguages String?
+  /// Enables the Praxis-Anamnese module for this practice (verified practices only).
+  anamnesisEnabled              Boolean  @default(false)
 
   user                       User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
   qrTargets                  PracticeQrTarget[]
@@ -372,6 +374,7 @@ model PracticeProfile {
   interpreterInvites         PracticeInterpreterInvite[]
   interpreterSessionLinks    PracticeInterpreterSessionLink[]
   medaSessions               PracticeMedaSession[]
+  anamnesisTemplates         PracticeAnamnesisTemplate[]
 
   @@index([userId])
 }
@@ -1919,4 +1922,69 @@ model PracticeMedaSession {
   @@index([patientUserId])
   @@index([practicePatientLinkId])
   @@index([deletedAt])
+}
+
+/// Anamnesis questionnaire template belonging to a verified practice.
+model PracticeAnamnesisTemplate {
+  id                String   @id @default(cuid())
+  practiceProfileId String
+  /// Multilingual title — JSON {de, en, fr, it, es}
+  titleJson         Json
+  /// Multilingual description — JSON {de, en, fr, it, es}
+  descriptionJson   Json?
+  /// active | archived
+  status            String   @default("active") @db.VarChar(20)
+  /// Display order among templates of the same practice
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  practiceProfile PracticeProfile              @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  sections        PracticeAnamnesisSection[]
+  questions       PracticeAnamnesisQuestion[]
+
+  @@index([practiceProfileId, status])
+}
+
+/// Section / step grouping questions inside one template.
+model PracticeAnamnesisSection {
+  id         String   @id @default(cuid())
+  templateId String
+  /// Multilingual section title — JSON {de, en, fr, it, es}
+  titleJson  Json
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  template  PracticeAnamnesisTemplate   @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  questions PracticeAnamnesisQuestion[]
+
+  @@index([templateId])
+}
+
+/// Single question inside an anamnesis template section.
+model PracticeAnamnesisQuestion {
+  id          String  @id @default(cuid())
+  templateId  String
+  /// Nullable — null means the question belongs directly to the template (legacy)
+  sectionId   String?
+  /// text | textarea | single_choice | multi_choice | date | number | yes_no
+  type        String  @db.VarChar(30)
+  /// Multilingual label — JSON {de, en, fr, it, es}
+  labelJson   Json
+  /// Multilingual hint / placeholder — JSON {de, en, fr, it, es}
+  hintJson    Json?
+  /// Multilingual options for choice types — JSON [{de, en, fr, it, es}, …]
+  optionsJson Json?
+  isRequired  Boolean  @default(false)
+  /// Display order within section
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  template PracticeAnamnesisTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  section  PracticeAnamnesisSection?  @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+
+  @@index([templateId])
+  @@index([sectionId])
 }

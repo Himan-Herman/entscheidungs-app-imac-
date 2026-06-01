@@ -300,3 +300,11 @@ export function isPracticeProfileExtendedEnabled() {
 export function isPracticeConsentRecordingEnabled() {
   return envFlag("PRACTICE_CONSENT_RECORDING_ENABLED", false);
 }
+
+/**
+ * Practice Anamnesis — configurable questionnaire templates for verified practices.
+ * Default off until PRACTICE_ANAMNESIS_ENABLED is set.
+ */
+export function isPracticeAnamnesisEnabled() {
+  return envFlag("PRACTICE_ANAMNESIS_ENABLED", false);
+}

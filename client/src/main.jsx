@@ -159,6 +159,12 @@ const PracticeCalendarPage = lazy(() =>
 const PracticeCalendarSettingsPage = lazy(() =>
   import("./features/practiceCalendar/pages/PracticeCalendarSettingsPage.jsx"),
 );
+const PracticeAnamnesisHubPage = lazy(() =>
+  import("./features/practiceAnamnesis/pages/PracticeAnamnesisHubPage.jsx"),
+);
+const PracticeAnamnesisTemplatePage = lazy(() =>
+  import("./features/practiceAnamnesis/pages/PracticeAnamnesisTemplatePage.jsx"),
+);
 const PatientAppointmentsPage = lazy(() =>
   import("./features/patientAppointments/pages/PatientAppointmentsPage.jsx"),
 );
@@ -470,6 +476,30 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PracticeCalendarPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/anamnesis"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeAnamnesisHubPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/anamnesis/new"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeAnamnesisTemplatePage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/anamnesis/:templateId"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeAnamnesisTemplatePage />
                     </ProtectedRoute>
                   }
                 />
