@@ -100,6 +100,10 @@ export default function MedaRealtimePage() {
   const [patientInfo,  setPatientInfo]  = useState(EMPTY_PATIENT_INFO);
   const [practiceInfo, setPracticeInfo] = useState(EMPTY_PRACTICE_INFO);
 
+  // ── Session lifecycle — true once a session has been started; never reset
+  //    automatically, so the setup form stays hidden after stop ────────────────
+  const [sessionHasStarted, setSessionHasStarted] = useState(false);
+
   // ── Inline edit state — which turn is being edited and the current draft ────
   const [editingKey, setEditingKey] = useState(/** @type {number|null} */ (null));
   const [editDraft,  setEditDraft]  = useState('');
@@ -289,7 +293,13 @@ export default function MedaRealtimePage() {
 
   function handleStart() {
     setSessionExpired(false);
+    setSessionHasStarted(true);
     connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
+  }
+
+  function handleNewSession() {
+    setSessionHasStarted(false);
+    setSessionExpired(false);
   }
 
   function getBlockHint() {
@@ -342,8 +352,8 @@ export default function MedaRealtimePage() {
         </div>
       )}
 
-      {/* ── Setup panel — visible when not connected ─────────────────────────── */}
-      {!isConnected && (
+      {/* ── Setup panel — visible only before the first session ─────────────── */}
+      {!isConnected && !sessionHasStarted && (
         <section className="mrt-setup" aria-label="Live-Gespräch einrichten">
 
           {/* ── 1. Sprachauswahl ──────────────────────────────────────────────── */}
@@ -965,267 +975,48 @@ export default function MedaRealtimePage() {
         <div ref={turnsEndRef} />
       </section>
 
-      {/* ── PDF Export — visible after session ends and turns exist ───────────── */}
-      {!isConnected && !isConnecting && turns.length > 0 && (
-        <section className="mrt-export-section" aria-label="PDF-Export">
-          <h2 className="mrt-export-heading">PDF-Gesprächsprotokoll herunterladen</h2>
-          <p className="mrt-export-hint">
-            Der PDF-Export wird lokal auf Ihrem Gerät erstellt. Kein Upload, keine Serverübertragung.
-            Sie können die Daten unten noch anpassen, bevor Sie das PDF herunterladen.
-          </p>
+      {/* ── End-of-session box — replaces the duplicate form after stop ────────── */}
+      {!isConnected && sessionHasStarted && (
+        <section className="mrt-end-box" aria-label="Gespräch beendet">
+          <h2 className="mrt-end-title">Gespräch beendet</h2>
 
-          {/* Patient data — pre-filled from setup form, editable */}
-          <fieldset className="mrt-export-fieldset">
-            <legend className="mrt-export-legend">
-              {forSelf ? 'Ihre Angaben' : 'Angaben zur betroffenen Person'}
-            </legend>
-            <div className="mrt-export-grid">
-              <div className="mrt-export-field mrt-export-field--full">
-                <label className="mrt-export-label" htmlFor="pdf-patient-name">Name</label>
-                <input
-                  id="pdf-patient-name"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={patientInfo.name}
-                  onChange={e => handlePatientInfo('name', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-dob">Geburtsdatum</label>
-                <input
-                  id="pdf-patient-dob"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="TT.MM.JJJJ"
-                  value={patientInfo.dateOfBirth}
-                  onChange={e => handlePatientInfo('dateOfBirth', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-gender">Geschlecht</label>
-                <select
-                  id="pdf-patient-gender"
-                  className="mrt-export-select"
-                  value={patientInfo.gender}
-                  onChange={e => handlePatientInfo('gender', e.target.value)}
-                >
-                  <option value="">keine Angabe</option>
-                  <option value="weiblich">weiblich</option>
-                  <option value="männlich">männlich</option>
-                  <option value="divers">divers</option>
-                </select>
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-insurance">Versicherungsstatus</label>
-                <select
-                  id="pdf-patient-insurance"
-                  className="mrt-export-select"
-                  value={patientInfo.insuranceStatus}
-                  onChange={e => handlePatientInfo('insuranceStatus', e.target.value)}
-                >
-                  <option value="">nicht angegeben</option>
-                  <option value="gesetzlich">gesetzlich</option>
-                  <option value="privat">privat</option>
-                  <option value="Selbstzahler">Selbstzahler</option>
-                </select>
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-ins-name">Krankenkasse / Versicherung</label>
-                <input
-                  id="pdf-patient-ins-name"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={patientInfo.insuranceName}
-                  onChange={e => handlePatientInfo('insuranceName', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-ins-nr">Versicherungsnummer</label>
-                <input
-                  id="pdf-patient-ins-nr"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="optional"
-                  value={patientInfo.insuranceNumber}
-                  onChange={e => handlePatientInfo('insuranceNumber', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-email">E-Mail</label>
-                <input
-                  id="pdf-patient-email"
-                  className="mrt-export-input"
-                  type="email"
-                  placeholder="nicht angegeben"
-                  value={patientInfo.email}
-                  onChange={e => handlePatientInfo('email', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-phone">Telefon</label>
-                <input
-                  id="pdf-patient-phone"
-                  className="mrt-export-input"
-                  type="tel"
-                  placeholder="nicht angegeben"
-                  value={patientInfo.phone}
-                  onChange={e => handlePatientInfo('phone', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field mrt-export-field--full">
-                <label className="mrt-export-label" htmlFor="pdf-patient-street">Straße und Hausnummer</label>
-                <input
-                  id="pdf-patient-street"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={patientInfo.street}
-                  onChange={e => handlePatientInfo('street', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-plz">PLZ</label>
-                <input
-                  id="pdf-patient-plz"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={patientInfo.postalCode}
-                  onChange={e => handlePatientInfo('postalCode', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-patient-city">Ort</label>
-                <input
-                  id="pdf-patient-city"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={patientInfo.city}
-                  onChange={e => handlePatientInfo('city', e.target.value)}
-                />
-              </div>
-              {!forSelf && (
-                <div className="mrt-export-field mrt-export-field--full">
-                  <label className="mrt-export-label" htmlFor="pdf-patient-relation">Beziehung zur Person</label>
-                  <input
-                    id="pdf-patient-relation"
-                    className="mrt-export-input"
-                    type="text"
-                    placeholder="z. B. Mutter, Vater, Kind"
-                    value={patientInfo.relationship}
-                    onChange={e => handlePatientInfo('relationship', e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-          </fieldset>
+          <div className="mrt-end-meta">
+            <span>
+              Dokumentation für:{' '}
+              <strong>{patientInfo.name.trim() || 'nicht angegeben'}</strong>
+            </span>
+            {practiceInfo.practiceName.trim() && (
+              <span>
+                Praxis: <strong>{practiceInfo.practiceName.trim()}</strong>
+              </span>
+            )}
+          </div>
 
-          {/* Practice data */}
-          <fieldset className="mrt-export-fieldset">
-            <legend className="mrt-export-legend">Praxisdaten</legend>
-            <div className="mrt-export-grid">
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-practice-name">Praxis / Einrichtung</label>
-                <input
-                  id="pdf-practice-name"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.practiceName}
-                  onChange={e => handlePracticeInfo('practiceName', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-doctor-name">Ärztin / Arzt</label>
-                <input
-                  id="pdf-doctor-name"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.doctorName}
-                  onChange={e => handlePracticeInfo('doctorName', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-department">Fachrichtung</label>
-                <input
-                  id="pdf-department"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.department}
-                  onChange={e => handlePracticeInfo('department', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-practice-email">E-Mail der Praxis</label>
-                <input
-                  id="pdf-practice-email"
-                  className="mrt-export-input"
-                  type="email"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.email}
-                  onChange={e => handlePracticeInfo('email', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-practice-phone">Telefon der Praxis</label>
-                <input
-                  id="pdf-practice-phone"
-                  className="mrt-export-input"
-                  type="tel"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.phone}
-                  onChange={e => handlePracticeInfo('phone', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field mrt-export-field--full">
-                <label className="mrt-export-label" htmlFor="pdf-practice-street">Straße und Hausnummer</label>
-                <input
-                  id="pdf-practice-street"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.street}
-                  onChange={e => handlePracticeInfo('street', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-practice-plz">PLZ</label>
-                <input
-                  id="pdf-practice-plz"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.postalCode}
-                  onChange={e => handlePracticeInfo('postalCode', e.target.value)}
-                />
-              </div>
-              <div className="mrt-export-field">
-                <label className="mrt-export-label" htmlFor="pdf-practice-city">Ort</label>
-                <input
-                  id="pdf-practice-city"
-                  className="mrt-export-input"
-                  type="text"
-                  placeholder="nicht angegeben"
-                  value={practiceInfo.city}
-                  onChange={e => handlePracticeInfo('city', e.target.value)}
-                />
-              </div>
-            </div>
-          </fieldset>
+          {turns.length > 0 ? (
+            <p className="mrt-end-hint">
+              Sie können das Gesprächsprotokoll jetzt lokal als PDF herunterladen.
+              Kein Upload, keine Serverübertragung.
+            </p>
+          ) : (
+            <p className="mrt-end-hint">Kein Gesprächsverlauf aufgezeichnet.</p>
+          )}
 
-          <div className="mrt-export-actions">
+          <div className="mrt-end-actions">
+            {turns.length > 0 && (
+              <button
+                className="mrt-btn mrt-btn--pdf"
+                onClick={handleDownloadPdf}
+                disabled={pdfLoading}
+                aria-disabled={pdfLoading}
+              >
+                {pdfLoading ? 'Erstelle PDF …' : 'PDF herunterladen'}
+              </button>
+            )}
             <button
-              className="mrt-btn mrt-btn--pdf"
-              onClick={handleDownloadPdf}
-              disabled={pdfLoading}
-              aria-disabled={pdfLoading}
+              className="mrt-btn mrt-btn--new-session"
+              onClick={handleNewSession}
             >
-              {pdfLoading ? 'Erstelle PDF …' : 'PDF herunterladen'}
+              Neues Gespräch starten
             </button>
           </div>
         </section>
