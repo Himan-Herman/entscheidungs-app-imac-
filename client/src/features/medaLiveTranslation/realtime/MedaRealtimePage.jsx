@@ -94,9 +94,10 @@ export default function MedaRealtimePage() {
   const [sessionExpired,   setSessionExpired]   = useState(false);
 
   // ── Consent checkboxes — stay checked for the page lifetime ────────────────
-  const [consentAudio,   setConsentAudio]   = useState(false);
-  const [consentContext, setConsentContext] = useState(false);
-  const [consentMedical, setConsentMedical] = useState(false);
+  const [consentAudio,            setConsentAudio]            = useState(false);
+  const [consentContext,          setConsentContext]          = useState(false);
+  const [consentMedical,          setConsentMedical]          = useState(false);
+  const [patientConsentConfirmed, setPatientConsentConfirmed] = useState(false);
 
   // ── Person selector ─────────────────────────────────────────────────────────
   // true = conversation is about the logged-in user themselves
@@ -114,6 +115,9 @@ export default function MedaRealtimePage() {
   // ── Inline edit state — which turn is being edited and the current draft ────
   const [editingKey, setEditingKey] = useState(/** @type {number|null} */ (null));
   const [editDraft,  setEditDraft]  = useState('');
+
+  // ── Practice section — collapsed by default; data is NOT cleared on collapse ─
+  const [showPracticeFields, setShowPracticeFields] = useState(false);
 
   // ── PDF state ───────────────────────────────────────────────────────────────
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -233,7 +237,7 @@ export default function MedaRealtimePage() {
   const isBusy       = isConnecting || connectionState === 'disconnecting';
   const langMismatch = patientLang === practiceLang;
   const showWarning  = isConnected && remainingSeconds <= SESSION_WARN_SECONDS && remainingSeconds > 0;
-  const allConsents  = consentAudio && consentContext && consentMedical;
+  const allConsents  = consentAudio && consentContext && consentMedical && patientConsentConfirmed;
   const hasName      = patientInfo.name.trim() !== '';
   const canStart     = !isBusy && !langMismatch && allConsents && hasName;
 
@@ -373,7 +377,7 @@ export default function MedaRealtimePage() {
   function getBlockHint() {
     if (langMismatch) return 'Bitte zwei verschiedene Sprachen wählen.';
     if (!hasName)     return 'Bitte vollständigen Namen der Person eingeben.';
-    if (!allConsents) return 'Bitte alle drei Zustimmungen bestätigen.';
+    if (!allConsents) return 'Bitte alle Zustimmungen bestätigen.';
     return null;
   }
   const blockHint = (!canStart && !isBusy) ? getBlockHint() : null;
@@ -686,10 +690,24 @@ export default function MedaRealtimePage() {
 
           {/* ── 3. Angaben zur Praxis ─────────────────────────────────────────── */}
           <div className="mrt-setup-section">
-            <h2 className="mrt-setup-section-title">
-              Angaben zur Praxis <span className="mrt-optional-badge">optional</span>
-            </h2>
-            <div className="mrt-form-grid">
+            <button
+              type="button"
+              className="mrt-practice-toggle"
+              aria-expanded={showPracticeFields}
+              aria-controls="mrt-practice-fields"
+              onClick={() => setShowPracticeFields(v => !v)}
+              disabled={isBusy}
+            >
+              <span className="mrt-practice-toggle-label">
+                {showPracticeFields ? 'Praxis-/Arztdaten ausblenden' : 'Praxis-/Arztdaten hinzufügen'}
+              </span>
+              <span className="mrt-practice-toggle-hint">Optional – hilfreich für das Gesprächsprotokoll</span>
+              <span className="mrt-practice-toggle-arrow" aria-hidden="true">
+                {showPracticeFields ? '▲' : '▼'}
+              </span>
+            </button>
+            {showPracticeFields && (
+            <div id="mrt-practice-fields" className="mrt-form-grid">
               <div className="mrt-form-field">
                 <label className="mrt-form-label" htmlFor="mrt-practice-name">Praxis / Einrichtung</label>
                 <input
@@ -794,6 +812,7 @@ export default function MedaRealtimePage() {
                 />
               </div>
             </div>
+            )}
           </div>
 
           {/* ── 4. Zustimmungen ───────────────────────────────────────────────── */}
@@ -840,7 +859,27 @@ export default function MedaRealtimePage() {
                 Dringlichkeitseinschätzung gibt.
               </label>
             </div>
+
+            <div className="mrt-consent-item">
+              <input
+                type="checkbox"
+                id="mrt-consent-patient"
+                className="mrt-consent-checkbox"
+                checked={patientConsentConfirmed}
+                onChange={e => setPatientConsentConfirmed(e.target.checked)}
+                disabled={isBusy}
+              />
+              <label htmlFor="mrt-consent-patient" className="mrt-consent-label">
+                Der Patient wurde über die KI-gestützte Live-Übersetzung informiert und stimmt der
+                Verarbeitung während dieser Sitzung zu.
+              </label>
+            </div>
           </div>
+
+          <p className="mrt-privacy-note mrt-privacy-note--data">
+            Audio wird nicht gespeichert. Das Gesprächsprotokoll wird in dieser Version nicht
+            automatisch in der Cloud gespeichert. PDF und Archiv werden lokal auf diesem Gerät erstellt.
+          </p>
 
           {blockHint && (
             <p className="mrt-consent-hint" role="alert">{blockHint}</p>
