@@ -14,6 +14,12 @@ export const CONSENT_TYPES = Object.freeze([
   "vaccinations_access",
   "health_history_access",
   "prescriptions_access",
+  // Meda Realtime — practice area consent types (not yet active, flag-gated)
+  "meda_live_translation_processing",
+  "meda_cloud_archive",
+  "meda_pdf_export",
+  "practice_access",
+  "data_sharing",
 ]);
 
 export const CONSENT_STATUSES = new Set(["granted", "revoked", "expired"]);

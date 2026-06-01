@@ -1,87 +1,89 @@
 model User {
-  id                   String   @id @default(cuid())
-  email                String   @unique
+  id                   String    @id @default(cuid())
+  email                String    @unique
   passwordHash         String
   firstName            String
   lastName             String
   dateOfBirth          DateTime
-  verified             Boolean  @default(false)
-  verifyToken          String?  @unique
+  verified             Boolean   @default(false)
+  verifyToken          String?   @unique
   verifyTokenExpires   DateTime?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
   passwordResetToken   String?
   passwordResetExpires DateTime?
 
-  profile  UserProfile?
-  consent  Consent?
-  doctors          Doctor[]
-  doctorContacts   DoctorContact[]
-  preVisitSessions PreVisitSession[]
-  preVisitCases    PreVisitCase[]
-  practiceProfiles PracticeProfile[]
-  practiceMemberships PracticeMember[]
-  practiceInvitesSent PracticeMember[] @relation("PracticeMemberInvitedBy")
-  followUpPatientThreads PreVisitFollowUpThread[] @relation("FollowUpPatientUser")
-  followUpCreatedThreads PreVisitFollowUpThread[] @relation("FollowUpCreatedByUser")
-  visitMedicationEntriesAuthored VisitMedicationEntry[] @relation("VisitMedicationCreatedBy")
-  practicePatientLinks           PracticePatientLink[]  @relation("PracticePatientLinks")
-  profileAccessGrants            PracticePatientLink[]  @relation("ProfileAccessGrantedBy")
-  practiceLinksAsAssignedDoctor  PracticePatientLink[]  @relation("PracticeLinkAssignedDoctor")
-  practiceLinksAsAssignedTeam    PracticePatientLink[]  @relation("PracticeLinkAssignedTeam")
-  practiceLinksAssignedBy        PracticePatientLink[]  @relation("PracticeLinkAssignedBy")
-  practiceLinksPatientDoctorPick PracticePatientLink[] @relation("PracticeLinkPatientSelectedDoctor")
-  practicePatientAssignmentsTo   PracticePatientAssignment[] @relation("PracticeAssignmentTo")
-  practicePatientAssignmentsBy   PracticePatientAssignment[] @relation("PracticeAssignmentBy")
-  patientInboxItems              PatientInboxItem[]
-  practicePatientThreads         PracticePatientThread[]
-  medicationPlans                MedicationPlan[] @relation("MedicationPlanPatient")
-  medicationPlansCreated         MedicationPlan[] @relation("MedicationPlanCreatedBy")
-  practiceDocuments              PracticeDocument[] @relation("PracticeDocumentPatient")
-  practiceDocumentsCreated       PracticeDocument[] @relation("PracticeDocumentCreatedBy")
-  practiceDocumentShares         PracticeDocumentShare[] @relation("PracticeDocumentSharePatient")
-  practiceDocumentSharesSharedBy PracticeDocumentShare[] @relation("PracticeDocumentShareBy")
-  practiceDocumentsDeleted       PracticeDocument[] @relation("PracticeDocumentDeletedBy")
-  practiceDocumentAuditEntries   PracticeDocumentAuditEntry[]
-  documentOcrJobsCreated         DocumentOcrJob[] @relation("DocumentOcrJobCreatedBy")
-  documentOcrJobsAsPatient       DocumentOcrJob[] @relation("DocumentOcrJobPatient")
-  practiceApiClientsCreated      PracticeApiClient[] @relation("PracticeApiClientCreatedBy")
-  practiceWebhookEndpointsCreated PracticeWebhookEndpoint[] @relation("PracticeWebhookEndpointCreatedBy")
-  patientDataRequests          PatientDataRequest[]
-  patientDataRequestsHandled     PatientDataRequest[] @relation("PatientDataRequestHandledBy")
-  practiceInboxItemsAsPatient    PracticeInboxItem[]  @relation("PracticeInboxPatient")
-  auditLogs        AuditLog[]
-  secureDocumentsCreated SecureDocumentDelivery[] @relation("SecureDocCreatedBy")
-  secureDocumentAccessTokens SecureDocumentAccessToken[]
-  secureDocumentAccessCreated SecureDocumentAccessToken[] @relation("SecureDocAccessCreatedBy")
-  patientProfiles      PatientProfile[]
-  exportJobs           ExportJob[]
-  consentRecords       ConsentRecord[]
-  integrationConnectionsCreated IntegrationConnection[] @relation("IntegrationConnectionCreatedBy")
-  practiceAppointmentsAsPatient PracticeAppointment[] @relation("PracticeAppointmentPatient")
-  practiceAppointmentsCreated   PracticeAppointment[] @relation("PracticeAppointmentCreatedBy")
-  practiceAppointmentsCancelled PracticeAppointment[] @relation("PracticeAppointmentCancelledBy")
-  telemedicineSessionsAsPatient TelemedicineSession[] @relation("TelemedicinePatient")
-  telemedicineSessionsCreated   TelemedicineSession[] @relation("TelemedicineCreatedBy")
-  telemedicineParticipants      TelemedicineParticipant[] @relation("TelemedicineParticipantUser")
-  telemedicineConsents          TelemedicineConsent[] @relation("TelemedicineConsentPatient")
-  interpreterCloudPreference    InterpreterCloudPreference?
-  interpreterCloudSessions      InterpreterCloudSession[]
-  interpreterCloudSessionPayloads InterpreterCloudSessionPayload[]
-  interpreterInvitesCreated     PracticeInterpreterInvite[] @relation("InterpreterInviteCreatedBy")
-  interpreterInvitesRevoked     PracticeInterpreterInvite[] @relation("InterpreterInviteRevokedBy")
+  profile                          UserProfile?
+  consent                          Consent?
+  doctors                          Doctor[]
+  doctorContacts                   DoctorContact[]
+  preVisitSessions                 PreVisitSession[]
+  preVisitCases                    PreVisitCase[]
+  practiceProfiles                 PracticeProfile[]
+  practiceMemberships              PracticeMember[]
+  practiceInvitesSent              PracticeMember[]                 @relation("PracticeMemberInvitedBy")
+  followUpPatientThreads           PreVisitFollowUpThread[]         @relation("FollowUpPatientUser")
+  followUpCreatedThreads           PreVisitFollowUpThread[]         @relation("FollowUpCreatedByUser")
+  visitMedicationEntriesAuthored   VisitMedicationEntry[]           @relation("VisitMedicationCreatedBy")
+  practicePatientLinks             PracticePatientLink[]            @relation("PracticePatientLinks")
+  profileAccessGrants              PracticePatientLink[]            @relation("ProfileAccessGrantedBy")
+  practiceLinksAsAssignedDoctor    PracticePatientLink[]            @relation("PracticeLinkAssignedDoctor")
+  practiceLinksAsAssignedTeam      PracticePatientLink[]            @relation("PracticeLinkAssignedTeam")
+  practiceLinksAssignedBy          PracticePatientLink[]            @relation("PracticeLinkAssignedBy")
+  practiceLinksPatientDoctorPick   PracticePatientLink[]            @relation("PracticeLinkPatientSelectedDoctor")
+  practicePatientAssignmentsTo     PracticePatientAssignment[]      @relation("PracticeAssignmentTo")
+  practicePatientAssignmentsBy     PracticePatientAssignment[]      @relation("PracticeAssignmentBy")
+  patientInboxItems                PatientInboxItem[]
+  practicePatientThreads           PracticePatientThread[]
+  medicationPlans                  MedicationPlan[]                 @relation("MedicationPlanPatient")
+  medicationPlansCreated           MedicationPlan[]                 @relation("MedicationPlanCreatedBy")
+  practiceDocuments                PracticeDocument[]               @relation("PracticeDocumentPatient")
+  practiceDocumentsCreated         PracticeDocument[]               @relation("PracticeDocumentCreatedBy")
+  practiceDocumentShares           PracticeDocumentShare[]          @relation("PracticeDocumentSharePatient")
+  practiceDocumentSharesSharedBy   PracticeDocumentShare[]          @relation("PracticeDocumentShareBy")
+  practiceDocumentsDeleted         PracticeDocument[]               @relation("PracticeDocumentDeletedBy")
+  practiceDocumentAuditEntries     PracticeDocumentAuditEntry[]
+  documentOcrJobsCreated           DocumentOcrJob[]                 @relation("DocumentOcrJobCreatedBy")
+  documentOcrJobsAsPatient         DocumentOcrJob[]                 @relation("DocumentOcrJobPatient")
+  practiceApiClientsCreated        PracticeApiClient[]              @relation("PracticeApiClientCreatedBy")
+  practiceWebhookEndpointsCreated  PracticeWebhookEndpoint[]        @relation("PracticeWebhookEndpointCreatedBy")
+  patientDataRequests              PatientDataRequest[]
+  patientDataRequestsHandled       PatientDataRequest[]             @relation("PatientDataRequestHandledBy")
+  practiceInboxItemsAsPatient      PracticeInboxItem[]              @relation("PracticeInboxPatient")
+  auditLogs                        AuditLog[]
+  secureDocumentsCreated           SecureDocumentDelivery[]         @relation("SecureDocCreatedBy")
+  secureDocumentAccessTokens       SecureDocumentAccessToken[]
+  secureDocumentAccessCreated      SecureDocumentAccessToken[]      @relation("SecureDocAccessCreatedBy")
+  patientProfiles                  PatientProfile[]
+  exportJobs                       ExportJob[]
+  consentRecords                   ConsentRecord[]
+  integrationConnectionsCreated    IntegrationConnection[]          @relation("IntegrationConnectionCreatedBy")
+  practiceAppointmentsAsPatient    PracticeAppointment[]            @relation("PracticeAppointmentPatient")
+  practiceAppointmentsCreated      PracticeAppointment[]            @relation("PracticeAppointmentCreatedBy")
+  practiceAppointmentsCancelled    PracticeAppointment[]            @relation("PracticeAppointmentCancelledBy")
+  telemedicineSessionsAsPatient    TelemedicineSession[]            @relation("TelemedicinePatient")
+  telemedicineSessionsCreated      TelemedicineSession[]            @relation("TelemedicineCreatedBy")
+  telemedicineParticipants         TelemedicineParticipant[]        @relation("TelemedicineParticipantUser")
+  telemedicineConsents             TelemedicineConsent[]            @relation("TelemedicineConsentPatient")
+  interpreterCloudPreference       InterpreterCloudPreference?
+  interpreterCloudSessions         InterpreterCloudSession[]
+  interpreterCloudSessionPayloads  InterpreterCloudSessionPayload[]
+  interpreterInvitesCreated        PracticeInterpreterInvite[]      @relation("InterpreterInviteCreatedBy")
+  interpreterInvitesRevoked        PracticeInterpreterInvite[]      @relation("InterpreterInviteRevokedBy")
   interpreterSessionLinksAsPatient PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkPatient")
-  interpreterSessionLinksRevoked PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
-  vaccinationEntries             VaccinationEntry[]
-  vitalEntries                   VitalEntry[]
-  allergyEntries                 AllergyEntry[]
-  diagnosisEntries               DiagnosisEntry[]
-  erezeptEntries                 ErezeptEntry[]   @relation("PatientErezept")
-  issuedErezeptEntries           ErezeptEntry[]   @relation("PracticeErezept")
-  sosCard                        SosCard?
+  interpreterSessionLinksRevoked   PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
+  vaccinationEntries               VaccinationEntry[]
+  vitalEntries                     VitalEntry[]
+  allergyEntries                   AllergyEntry[]
+  diagnosisEntries                 DiagnosisEntry[]
+  erezeptEntries                   ErezeptEntry[]                   @relation("PatientErezept")
+  issuedErezeptEntries             ErezeptEntry[]                   @relation("PracticeErezept")
+  sosCard                          SosCard?
 }
 
-/** Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text. */
+/**
+ * Non-medical operational events only — never store transcripts, PDF payloads, or diagnostic text.
+ */
 model AuditLog {
   id                    String   @id @default(cuid())
   userId                String?
@@ -128,7 +130,9 @@ model AnalyticsEvent {
   @@index([practiceHash, createdAt])
 }
 
-/** Groups multiple saved Pre-Visit sessions into a longitudinal / chronic case timeline. */
+/**
+ * Groups multiple saved Pre-Visit sessions into a longitudinal / chronic case timeline.
+ */
 model PreVisitCase {
   id          String   @id @default(cuid())
   userId      String
@@ -146,44 +150,44 @@ model PreVisitCase {
 }
 
 model PreVisitSession {
-  id             String         @id @default(cuid())
-  userId         String
-  preVisitCaseId String?
-  practiceProfileId String?
+  id                 String   @id @default(cuid())
+  userId             String
+  preVisitCaseId     String?
+  practiceProfileId  String?
   practiceQrTargetId String?
-  patientProfileId String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  patientProfileId   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   patientLanguage String
   doctorLanguage  String?
 
-  title           String?
-  status          String   @default("draft")
-  practiceStatus  String   @default("new")
-  pdfDownloaded   Boolean  @default(false)
-  openedAt        DateTime?
-  archivedAt      DateTime?
-  completedAt     DateTime?
+  title              String?
+  status             String    @default("draft")
+  practiceStatus     String    @default("new")
+  pdfDownloaded      Boolean   @default(false)
+  openedAt           DateTime?
+  archivedAt         DateTime?
+  completedAt        DateTime?
   lastStatusChangeAt DateTime?
 
   answers         Json
   aiDoctorVersion Json?
   aiSafetyNotice  String?
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  preVisitCase PreVisitCase? @relation(fields: [preVisitCaseId], references: [id], onDelete: SetNull)
-  practiceProfile PracticeProfile? @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
-  practiceQrTarget PracticeQrTarget? @relation(fields: [practiceQrTargetId], references: [id], onDelete: SetNull)
-  followUpThreads PreVisitFollowUpThread[]
+  user                     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preVisitCase             PreVisitCase?            @relation(fields: [preVisitCaseId], references: [id], onDelete: SetNull)
+  practiceProfile          PracticeProfile?         @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
+  practiceQrTarget         PracticeQrTarget?        @relation(fields: [practiceQrTargetId], references: [id], onDelete: SetNull)
+  followUpThreads          PreVisitFollowUpThread[]
   secureDocumentDeliveries SecureDocumentDelivery[]
-  visitMedicationEntries VisitMedicationEntry[]
-  patientProfile PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+  visitMedicationEntries   VisitMedicationEntry[]
+  patientProfile           PatientProfile?          @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
 
   /// Optional opaque appointment reference (manual text or future external id).
   appointmentReference String?
   /// When set, enables neutral calendar export (.ics) without clinical content.
-  appointmentAt DateTime?
+  appointmentAt        DateTime?
   calendarAppointments PracticeAppointment[]
 
   @@index([userId])
@@ -195,72 +199,70 @@ model PreVisitSession {
   @@index([createdAt])
 }
 
-
 model UserProfile {
-  id         String  @id @default(cuid())
-  userId     String  @unique
-  phone      String?
-  addressLine String?
-  postalCode  String?
-  city        String?
-  country     String?
-  insuranceType String?
-  gender      String?
+  id                       String  @id @default(cuid())
+  userId                   String  @unique
+  phone                    String?
+  addressLine              String?
+  postalCode               String?
+  city                     String?
+  country                  String?
+  insuranceType            String?
+  gender                   String?
   /// Optional salutation / gender label for forms (non-clinical)
-  genderOrSalutation String?
-  displayName String?
+  genderOrSalutation       String?
+  displayName              String?
   preferredPatientLanguage String?
-  preferredDoctorLanguage String?
+  preferredDoctorLanguage  String?
   /// App UI locale (de, en, …) — organizational preference only
-  preferredUiLanguage    String?
+  preferredUiLanguage      String?
   /// Free-text emergency contact note — operational only; not medical advice
-  emergencyNote String?
+  emergencyNote            String?
   /// Optional health context for Pre-Visit orientation — not a clinical record
-  heightCm             Int?
-  weightKg             Float?
-  allergies            String? @db.Text
-  chronicConditions    String? @db.Text
-  regularMedications   String? @db.Text
+  heightCm                 Int?
+  weightKg                 Float?
+  allergies                String? @db.Text
+  chronicConditions        String? @db.Text
+  regularMedications       String? @db.Text
   /// never | former | occasional | daily | prefer_not_say
-  smokingStatus        String?
+  smokingStatus            String?
   /// never | occasional | regular | prefer_not_say
-  alcoholUse           String?
+  alcoholUse               String?
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// Optional family / dependent profile (caregiver prepares for another person). User must explicitly select.
 model PatientProfile {
-  id                      String   @id @default(cuid())
-  userId                  String
-  displayName             String
-  relationLabel           String
-  dateOfBirth             DateTime?
-  genderOrSalutation      String?
+  id                       String    @id @default(cuid())
+  userId                   String
+  displayName              String
+  relationLabel            String
+  dateOfBirth              DateTime?
+  genderOrSalutation       String?
   preferredPatientLanguage String?
-  preferredDoctorLanguage String?
-  isArchived              Boolean  @default(false)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  preferredDoctorLanguage  String?
+  isArchived               Boolean   @default(false)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 
-  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sessions PreVisitSession[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions             PreVisitSession[]
   practicePatientLinks PracticePatientLink[]
 
   @@index([userId])
 }
 
 model Consent {
-  id                         String   @id @default(cuid())
-  userId                     String   @unique
-  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  termsAcceptedAt            DateTime
-  privacyAcceptedAt          DateTime
+  termsAcceptedAt             DateTime
+  privacyAcceptedAt           DateTime
   medicalDisclaimerAcceptedAt DateTime
-  doctorAlertConsent         Boolean  @default(false)
+  doctorAlertConsent          Boolean  @default(false)
 }
-
 
 model Doctor {
   id     String @id @default(cuid())
@@ -268,7 +270,9 @@ model Doctor {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-/** Address book for Pre-Visit — per authenticated user (managed in Settings). */
+/**
+ * Address book for Pre-Visit — per authenticated user (managed in Settings).
+ */
 model DoctorContact {
   id           String   @id @default(cuid())
   userId       String
@@ -288,79 +292,86 @@ model DoctorContact {
 }
 
 model PracticeProfile {
-  id                      String   @id @default(cuid())
-  userId                  String
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  practiceName            String
-  publicSlug              String   @unique
-  logoUrl                 String?
-  address                 String?
-  phone                   String?
-  email                   String?
-  website                 String?
-  specialty               String?
-  preferredDoctorLanguage String   @default("de")
-  patientIntroText        String?
-  description             String?
-  city                    String?
-  postalCode              String?
-  country                 String?
-  supportedLanguages      String?
-  openingHours            String?
-  displayNameForPatients  String?
-  accentColor             String?
-  logoStorageKey          String?
-  logoMimeType            String?
-  isActive                Boolean  @default(true)
+  id                            String   @id @default(cuid())
+  userId                        String
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
+  practiceName                  String
+  publicSlug                    String   @unique
+  logoUrl                       String?
+  address                       String?
+  phone                         String?
+  email                         String?
+  website                       String?
+  specialty                     String?
+  preferredDoctorLanguage       String   @default("de")
+  patientIntroText              String?
+  description                   String?
+  city                          String?
+  postalCode                    String?
+  country                       String?
+  supportedLanguages            String?
+  openingHours                  String?
+  displayNameForPatients        String?
+  accentColor                   String?
+  logoStorageKey                String?
+  logoMimeType                  String?
+  isActive                      Boolean  @default(true)
   /// single_practice | group_practice | mvz | clinic | outpatient | other
-  organizationType        String?
+  organizationType              String?
   /// JSON array of specialty labels
-  specialtiesJson         String?
-  stateRegion             String?
+  specialtiesJson               String?
+  stateRegion                   String?
   /// yes | no | unknown
-  acceptsPublicInsurance    String?
-  acceptsPrivateInsurance   String?
-  acceptsSelfPay            String?
-  emergencyCareAvailable    Boolean?
-  onlineAppointmentsAvailable Boolean?
-  videoConsultationAvailable  Boolean?
+  acceptsPublicInsurance        String?
+  acceptsPrivateInsurance       String?
+  acceptsSelfPay                String?
+  emergencyCareAvailable        Boolean?
+  onlineAppointmentsAvailable   Boolean?
+  videoConsultationAvailable    Boolean?
   /// JSON: wheelchair, elevator, accessibleEntrance, accessibleRestroom
-  accessibilityJson       String?
+  accessibilityJson             String?
+  /// Official registered legal name of the practice (if different from display name)
+  legalName                     String?
+  /// Street and house number — separate from combined address field
+  street                        String?
+  /// Preferred interpreter/translation languages as JSON array string, e.g. ["tr","ar","ru"]
+  preferredInterpreterLanguages String?
 
-  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  qrTargets PracticeQrTarget[]
-  members   PracticeMember[]
-  preVisitSessions PreVisitSession[]
-  followUpThreads PreVisitFollowUpThread[]
-  visitMedicationEntries VisitMedicationEntry[]
-  practicePatientLinks PracticePatientLink[]
-  patientInboxItems    PatientInboxItem[]
-  practicePatientThreads PracticePatientThread[]
-  medicationPlans        MedicationPlan[]
-  practiceDocuments      PracticeDocument[]
-  patientDataRequests  PatientDataRequest[]
-  practiceInboxItems   PracticeInboxItem[]
-  integrationSettings PracticeIntegrationSettings?
-  secureDocumentDeliveries SecureDocumentDelivery[]
+  user                       User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qrTargets                  PracticeQrTarget[]
+  members                    PracticeMember[]
+  preVisitSessions           PreVisitSession[]
+  followUpThreads            PreVisitFollowUpThread[]
+  visitMedicationEntries     VisitMedicationEntry[]
+  practicePatientLinks       PracticePatientLink[]
+  patientInboxItems          PatientInboxItem[]
+  practicePatientThreads     PracticePatientThread[]
+  medicationPlans            MedicationPlan[]
+  practiceDocuments          PracticeDocument[]
+  patientDataRequests        PatientDataRequest[]
+  practiceInboxItems         PracticeInboxItem[]
+  integrationSettings        PracticeIntegrationSettings?
+  secureDocumentDeliveries   SecureDocumentDelivery[]
   secureDocumentAccessTokens SecureDocumentAccessToken[]
-  webhookEvents PracticeWebhookEvent[]
-  integrationConnections   IntegrationConnection[]
-  integrationJobs          IntegrationJob[]
-  integrationMappings      IntegrationMapping[]
+  webhookEvents              PracticeWebhookEvent[]
+  integrationConnections     IntegrationConnection[]
+  integrationJobs            IntegrationJob[]
+  integrationMappings        IntegrationMapping[]
   externalResourceReferences ExternalResourceReference[]
-  appointmentTypes         AppointmentType[]
-  practiceAvailabilities   PracticeAvailability[]
-  practiceAppointments     PracticeAppointment[]
-  telemedicineSettings     PracticeTelemedicineSettings?
-  telemedicineSessions     TelemedicineSession[]
-  documentOcrJobs          DocumentOcrJob[]
-  apiClients               PracticeApiClient[]
-  webhookEndpoints         PracticeWebhookEndpoint[]
-  webhookDeliveries        PracticeWebhookDelivery[]
-  apiAuditEvents           PracticeApiAuditEvent[]
-  interpreterInvites       PracticeInterpreterInvite[]
+  appointmentTypes           AppointmentType[]
+  practiceAvailabilities     PracticeAvailability[]
+  practiceAppointments       PracticeAppointment[]
+  telemedicineSettings       PracticeTelemedicineSettings?
+  telemedicineSessions       TelemedicineSession[]
+  documentOcrJobs            DocumentOcrJob[]
+  apiClients                 PracticeApiClient[]
+  webhookEndpoints           PracticeWebhookEndpoint[]
+  webhookDeliveries          PracticeWebhookDelivery[]
+  apiAuditEvents             PracticeApiAuditEvent[]
+  interpreterInvites         PracticeInterpreterInvite[]
   interpreterSessionLinks    PracticeInterpreterSessionLink[]
+  medaSessions               PracticeMedaSession[]
 
   @@index([userId])
 }
@@ -406,11 +417,11 @@ model TelemedicineSession {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  appointment         PracticeAppointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
-  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
-  patientUser         User?                @relation("TelemedicinePatient", fields: [patientUserId], references: [id], onDelete: SetNull)
-  createdBy           User?                @relation("TelemedicineCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  practiceProfile     PracticeProfile           @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  appointment         PracticeAppointment?      @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  practicePatientLink PracticePatientLink?      @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  patientUser         User?                     @relation("TelemedicinePatient", fields: [patientUserId], references: [id], onDelete: SetNull)
+  createdBy           User?                     @relation("TelemedicineCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   participants        TelemedicineParticipant[]
   consents            TelemedicineConsent[]
 
@@ -440,16 +451,16 @@ model TelemedicineParticipant {
 }
 
 model TelemedicineConsent {
-  id              String    @id @default(cuid())
-  sessionId       String
-  patientUserId   String
-  consentVersion  String
+  id             String    @id @default(cuid())
+  sessionId      String
+  patientUserId  String
+  consentVersion String
   /// granted | revoked
-  status          String    @default("granted")
-  grantedAt       DateTime?
-  revokedAt       DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  status         String    @default("granted")
+  grantedAt      DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   session     TelemedicineSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   patientUser User                @relation("TelemedicineConsentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
@@ -469,7 +480,7 @@ model AppointmentType {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practiceProfile PracticeProfile        @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   appointments    PracticeAppointment[]
   availabilities  PracticeAvailability[]
 
@@ -524,13 +535,13 @@ model PracticeAppointment {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
-  patientUser         User?                @relation("PracticeAppointmentPatient", fields: [patientUserId], references: [id], onDelete: SetNull)
-  appointmentType     AppointmentType?     @relation(fields: [appointmentTypeId], references: [id], onDelete: SetNull)
-  preVisitSession     PreVisitSession?     @relation(fields: [preVisitSessionId], references: [id], onDelete: SetNull)
-  createdBy           User?                @relation("PracticeAppointmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  cancelledBy         User?                @relation("PracticeAppointmentCancelledBy", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
+  practiceProfile     PracticeProfile       @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink?  @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  patientUser         User?                 @relation("PracticeAppointmentPatient", fields: [patientUserId], references: [id], onDelete: SetNull)
+  appointmentType     AppointmentType?      @relation(fields: [appointmentTypeId], references: [id], onDelete: SetNull)
+  preVisitSession     PreVisitSession?      @relation(fields: [preVisitSessionId], references: [id], onDelete: SetNull)
+  createdBy           User?                 @relation("PracticeAppointmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  cancelledBy         User?                 @relation("PracticeAppointmentCancelledBy", fields: [cancelledByUserId], references: [id], onDelete: SetNull)
   reminders           AppointmentReminder[]
   telemedicineSession TelemedicineSession?
 
@@ -564,8 +575,8 @@ model AppointmentReminder {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  appointment      PracticeAppointment?     @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
-  followUpThread   PreVisitFollowUpThread?  @relation(fields: [followUpThreadId], references: [id], onDelete: Cascade)
+  appointment    PracticeAppointment?    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  followUpThread PreVisitFollowUpThread? @relation(fields: [followUpThreadId], references: [id], onDelete: Cascade)
 
   @@index([appointmentId, status])
   @@index([sendAt, status])
@@ -575,22 +586,22 @@ model AppointmentReminder {
 
 /// Practice integration preferences — secrets never returned to clients; signing material encrypted at rest.
 model PracticeIntegrationSettings {
-  id                   String   @id @default(cuid())
-  practiceProfileId    String   @unique
-  calendarEnabled      Boolean  @default(false)
+  id                    String   @id @default(cuid())
+  practiceProfileId     String   @unique
+  calendarEnabled       Boolean  @default(false)
   /// manual | ics | google_later | microsoft_later
-  calendarProvider     String?
-  webhookEnabled       Boolean  @default(false)
-  webhookUrl           String?
+  calendarProvider      String?
+  webhookEnabled        Boolean  @default(false)
+  webhookUrl            String?
   /// SHA-256 hex of secret (fingerprint only; not used for signing).
-  webhookSecretHash    String?
+  webhookSecretHash     String?
   /// AES-256-GCM encrypted signing secret (see integrationCrypto). Plaintext never stored.
-  webhookSecretEnc     String?
+  webhookSecretEnc      String?
   /// download_only | email | secure_portal | webhook
-  documentDeliveryMode String   @default("secure_portal")
-  secureDownloadEnabled Boolean @default(true)
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  documentDeliveryMode  String   @default("secure_portal")
+  secureDownloadEnabled Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
 }
@@ -661,8 +672,8 @@ model IntegrationConnection {
   updatedAt         DateTime  @updatedAt
   revokedAt         DateTime?
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  createdBy       User?           @relation("IntegrationConnectionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  practiceProfile PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User?                @relation("IntegrationConnectionCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   jobs            IntegrationJob[]
   mappings        IntegrationMapping[]
 
@@ -672,22 +683,22 @@ model IntegrationConnection {
 
 /// Import/export/sync/test jobs — metadata only, no clinical payloads.
 model IntegrationJob {
-  id                String    @id @default(cuid())
-  connectionId      String
-  practiceProfileId String
+  id                    String    @id @default(cuid())
+  connectionId          String
+  practiceProfileId     String
   /// import | export | sync | test
-  type              String
+  type                  String
   /// inbound | outbound
-  direction         String
+  direction             String
   /// pending | running | completed | failed | cancelled
-  status            String    @default("pending")
-  resourceType      String?
+  status                String    @default("pending")
+  resourceType          String?
   practicePatientLinkId String?
-  startedAt         DateTime?
-  completedAt       DateTime?
-  failedAt          DateTime?
-  errorCode         String?
-  createdAt         DateTime  @default(now())
+  startedAt             DateTime?
+  completedAt           DateTime?
+  failedAt              DateTime?
+  errorCode             String?
+  createdAt             DateTime  @default(now())
 
   connection      IntegrationConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
   practiceProfile PracticeProfile       @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
@@ -751,39 +762,39 @@ model PracticeQrTarget {
   qrToken                 String   @unique
   isActive                Boolean  @default(true)
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practiceProfile  PracticeProfile          @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   preVisitSessions PreVisitSession[]
-  followUpThreads PreVisitFollowUpThread[]
+  followUpThreads  PreVisitFollowUpThread[]
 
   @@index([practiceProfileId])
 }
 
 model PracticeMember {
-  id                String    @id @default(cuid())
-  practiceProfileId String
-  userId            String
-  role              String
+  id                          String    @id @default(cuid())
+  practiceProfileId           String
+  userId                      String
+  role                        String
   /// invited | active | revoked
-  status            String    @default("active")
-  invitedByUserId   String?
-  invitedAt         DateTime?
-  acceptedAt        DateTime?
-  revokedAt         DateTime?
-  displayName       String?
-  positionTitle     String?
-  specialty         String?
-  languagesJson     String?
-  visibleToPatients Boolean  @default(false)
-  acceptsPatientRequests Boolean @default(true)
-  doctorTitle       String?
-  focusArea         String?
-  officeHours       String?
-  internalContact   String?
+  status                      String    @default("active")
+  invitedByUserId             String?
+  invitedAt                   DateTime?
+  acceptedAt                  DateTime?
+  revokedAt                   DateTime?
+  displayName                 String?
+  positionTitle               String?
+  specialty                   String?
+  languagesJson               String?
+  visibleToPatients           Boolean   @default(false)
+  acceptsPatientRequests      Boolean   @default(true)
+  doctorTitle                 String?
+  focusArea                   String?
+  officeHours                 String?
+  internalContact             String?
   onlineAppointmentsAvailable Boolean?
-  videoConsultationAvailable Boolean?
-  lastActiveAt      DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  videoConsultationAvailable  Boolean?
+  lastActiveAt                DateTime?
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
 
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -796,26 +807,26 @@ model PracticeMember {
 }
 
 model PreVisitFollowUpThread {
-  id                     String   @id @default(cuid())
+  id                     String    @id @default(cuid())
   preVisitSessionId      String
   practiceProfileId      String?
   qrTargetId             String?
   patientUserId          String?
   createdByUserId        String?
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
-  status                 String   @default("open")
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  status                 String    @default("open")
   title                  String?
-  isArchived             Boolean  @default(false)
-  followUpAccessToken    String?  @unique
+  isArchived             Boolean   @default(false)
+  followUpAccessToken    String?   @unique
   followUpTokenExpiresAt DateTime?
 
-  session        PreVisitSession          @relation(fields: [preVisitSessionId], references: [id], onDelete: Cascade)
-  practiceProfile PracticeProfile?        @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
-  qrTarget       PracticeQrTarget?        @relation(fields: [qrTargetId], references: [id], onDelete: SetNull)
-  patientUser    User?                    @relation("FollowUpPatientUser", fields: [patientUserId], references: [id], onDelete: SetNull)
-  createdByUser  User?                    @relation("FollowUpCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  messages       PreVisitFollowUpMessage[]
+  session              PreVisitSession           @relation(fields: [preVisitSessionId], references: [id], onDelete: Cascade)
+  practiceProfile      PracticeProfile?          @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
+  qrTarget             PracticeQrTarget?         @relation(fields: [qrTargetId], references: [id], onDelete: SetNull)
+  patientUser          User?                     @relation("FollowUpPatientUser", fields: [patientUserId], references: [id], onDelete: SetNull)
+  createdByUser        User?                     @relation("FollowUpCreatedByUser", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  messages             PreVisitFollowUpMessage[]
   appointmentReminders AppointmentReminder[]
 
   @@index([preVisitSessionId])
@@ -825,15 +836,15 @@ model PreVisitFollowUpThread {
 }
 
 model PreVisitFollowUpMessage {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   threadId     String
   senderType   String
   senderUserId String?
   body         String
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
   readAt       DateTime?
 
-  thread      PreVisitFollowUpThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  thread PreVisitFollowUpThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
 
   @@index([threadId, createdAt])
 }
@@ -843,52 +854,53 @@ model PreVisitFollowUpMessage {
  * Central anchor for medication, messaging, and documents in later phases — not tied to a single PreVisitSession.
  */
 model PracticePatientLink {
-  id                String    @id @default(cuid())
-  practiceProfileId String
-  patientUserId     String
-  patientProfileId  String?
+  id                           String    @id @default(cuid())
+  practiceProfileId            String
+  patientUserId                String
+  patientProfileId             String?
   /// invited | active | revoked | archived
-  status            String    @default("invited")
-  linkedAt          DateTime  @default(now())
-  revokedAt         DateTime?
-  consentVersion    String?
-  consentAcceptedAt DateTime?
+  status                       String    @default("invited")
+  linkedAt                     DateTime  @default(now())
+  revokedAt                    DateTime?
+  consentVersion               String?
+  consentAcceptedAt            DateTime?
   /// Accepted scopes, e.g. ["medication","messages","profile"] — set by patient consent API.
-  consentScopes     Json?
-  profileAccessGrantedAt   DateTime?
-  profileAccessRevokedAt   DateTime?
+  consentScopes                Json?
+  profileAccessGrantedAt       DateTime?
+  profileAccessRevokedAt       DateTime?
   profileAccessGrantedByUserId String?
   /// unassigned | assigned | forwarded | closed
-  assignmentStatus          String    @default("unassigned")
-  assignedDoctorUserId      String?
-  assignedTeamMemberUserId  String?
-  assignedByUserId          String?
-  assignedAt                DateTime?
-  assignmentNote            String?
-  lastForwardedAt           DateTime?
-  patientSelectedDoctorUserId String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  assignmentStatus             String    @default("unassigned")
+  assignedDoctorUserId         String?
+  assignedTeamMemberUserId     String?
+  assignedByUserId             String?
+  assignedAt                   DateTime?
+  assignmentNote               String?
+  lastForwardedAt              DateTime?
+  patientSelectedDoctorUserId  String?
+  createdAt                    DateTime  @default(now())
+  updatedAt                    DateTime  @updatedAt
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser     User            @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
-  profileAccessGrantedBy User?    @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
-  assignedDoctor  User?           @relation("PracticeLinkAssignedDoctor", fields: [assignedDoctorUserId], references: [id], onDelete: SetNull)
-  assignedTeamMember User?        @relation("PracticeLinkAssignedTeam", fields: [assignedTeamMemberUserId], references: [id], onDelete: SetNull)
-  assignedBy      User?           @relation("PracticeLinkAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
-  patientSelectedDoctor User?     @relation("PracticeLinkPatientSelectedDoctor", fields: [patientSelectedDoctorUserId], references: [id], onDelete: SetNull)
-  patientProfile  PatientProfile? @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
-  assignments     PracticePatientAssignment[]
-  inboxItems      PatientInboxItem[]
-  threads         PracticePatientThread[]
-  medicationPlans MedicationPlan[]
-  practiceDocuments PracticeDocument[]
-  dataRequests      PatientDataRequest[]
-  practiceInboxItems PracticeInboxItem[]
+  practiceProfile            PracticeProfile             @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser                User                        @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
+  profileAccessGrantedBy     User?                       @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
+  assignedDoctor             User?                       @relation("PracticeLinkAssignedDoctor", fields: [assignedDoctorUserId], references: [id], onDelete: SetNull)
+  assignedTeamMember         User?                       @relation("PracticeLinkAssignedTeam", fields: [assignedTeamMemberUserId], references: [id], onDelete: SetNull)
+  assignedBy                 User?                       @relation("PracticeLinkAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+  patientSelectedDoctor      User?                       @relation("PracticeLinkPatientSelectedDoctor", fields: [patientSelectedDoctorUserId], references: [id], onDelete: SetNull)
+  patientProfile             PatientProfile?             @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+  assignments                PracticePatientAssignment[]
+  inboxItems                 PatientInboxItem[]
+  threads                    PracticePatientThread[]
+  medicationPlans            MedicationPlan[]
+  practiceDocuments          PracticeDocument[]
+  dataRequests               PatientDataRequest[]
+  practiceInboxItems         PracticeInboxItem[]
   secureDocumentAccessTokens SecureDocumentAccessToken[]
   appointments               PracticeAppointment[]
   telemedicineSessions       TelemedicineSession[]
   documentOcrJobs            DocumentOcrJob[]
+  medaSessions               PracticeMedaSession[]
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
@@ -999,7 +1011,9 @@ model PracticeInboxItem {
   @@index([practiceProfileId, sourceRefType, sourceRefId])
 }
 
-/** Secure messaging thread tied to a practice–patient link (no anonymous threads). */
+/**
+ * Secure messaging thread tied to a practice–patient link (no anonymous threads).
+ */
 model PracticePatientThread {
   id                    String    @id @default(cuid())
   practicePatientLinkId String
@@ -1013,9 +1027,9 @@ model PracticePatientThread {
   closedAt              DateTime?
   archivedAt            DateTime?
 
-  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
-  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser         User                @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink      @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile          @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser         User                     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
   messages            PracticePatientMessage[]
 
   @@index([practicePatientLinkId, status])
@@ -1059,10 +1073,10 @@ model MedicationPlan {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
-  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser         User                @relation("MedicationPlanPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
-  createdBy           User?               @relation("MedicationPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  practicePatientLink PracticePatientLink  @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser         User                 @relation("MedicationPlanPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  createdBy           User?                @relation("MedicationPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   items               MedicationPlanItem[]
 
   @@index([practicePatientLinkId, status])
@@ -1112,16 +1126,16 @@ model PracticeDocument {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
-  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser         User                @relation("PracticeDocumentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
-  createdBy           User?               @relation("PracticeDocumentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  deletedBy           User?               @relation("PracticeDocumentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
-  files               PracticeDocumentFile[]
-  shares              PracticeDocumentShare[]
-  secureAccessTokens  SecureDocumentAccessToken[]
-  ocrJobs             DocumentOcrJob[]
-  ocrResults          DocumentOcrResult[]
+  practicePatientLink  PracticePatientLink         @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile      PracticeProfile             @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser          User                        @relation("PracticeDocumentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  createdBy            User?                       @relation("PracticeDocumentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  deletedBy            User?                       @relation("PracticeDocumentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
+  files                PracticeDocumentFile[]
+  shares               PracticeDocumentShare[]
+  secureAccessTokens   SecureDocumentAccessToken[]
+  ocrJobs              DocumentOcrJob[]
+  ocrResults           DocumentOcrResult[]
   labStructuredEntries LabStructuredEntry[]
 
   @@index([practicePatientLinkId, status])
@@ -1139,7 +1153,7 @@ model PracticeDocumentFile {
   checksum         String?
   createdAt        DateTime @default(now())
 
-  document PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  document           PracticeDocument            @relation(fields: [documentId], references: [id], onDelete: Cascade)
   secureAccessTokens SecureDocumentAccessToken[]
   ocrJobs            DocumentOcrJob[]
 
@@ -1170,12 +1184,12 @@ model DocumentOcrJob {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  document            PracticeDocument      @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  file                PracticeDocumentFile  @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  practiceProfile     PracticeProfile       @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  practicePatientLink PracticePatientLink?  @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
-  patientUser         User?                 @relation("DocumentOcrJobPatient", fields: [patientUserId], references: [id], onDelete: SetNull)
-  createdBy           User?                 @relation("DocumentOcrJobCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  document            PracticeDocument     @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  file                PracticeDocumentFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  patientUser         User?                @relation("DocumentOcrJobPatient", fields: [patientUserId], references: [id], onDelete: SetNull)
+  createdBy           User?                @relation("DocumentOcrJobCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   result              DocumentOcrResult?
   labEntries          LabStructuredEntry[]
 
@@ -1240,8 +1254,8 @@ model PracticeApiClient {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  createdBy       User?           @relation("PracticeApiClientCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  practiceProfile PracticeProfile         @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User?                   @relation("PracticeApiClientCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   auditEvents     PracticeApiAuditEvent[]
 
   @@index([practiceProfileId, status])
@@ -1265,8 +1279,8 @@ model PracticeWebhookEndpoint {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  practiceProfile PracticeProfile         @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  createdBy       User?                   @relation("PracticeWebhookEndpointCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  practiceProfile PracticeProfile           @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User?                     @relation("PracticeWebhookEndpointCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   deliveries      PracticeWebhookDelivery[]
 
   @@index([practiceProfileId, status])
@@ -1313,7 +1327,7 @@ model PracticeApiAuditEvent {
   ipHash            String?
   createdAt         DateTime @default(now())
 
-  practiceProfile PracticeProfile  @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practiceProfile PracticeProfile    @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   apiClient       PracticeApiClient? @relation(fields: [apiClientId], references: [id], onDelete: SetNull)
 
   @@index([practiceProfileId, createdAt])
@@ -1362,9 +1376,9 @@ model PracticeDocumentShare {
   revokedAt      DateTime?
   expiresAt      DateTime?
 
-  document   PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  patientUser User            @relation("PracticeDocumentSharePatient", fields: [patientUserId], references: [id], onDelete: Cascade)
-  sharedBy    User?           @relation("PracticeDocumentShareBy", fields: [sharedByUserId], references: [id], onDelete: SetNull)
+  document    PracticeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  patientUser User             @relation("PracticeDocumentSharePatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  sharedBy    User?            @relation("PracticeDocumentShareBy", fields: [sharedByUserId], references: [id], onDelete: SetNull)
 
   @@index([documentId, status])
   @@index([patientUserId, status])
@@ -1426,7 +1440,9 @@ model PatientDataRequest {
   @@index([practicePatientLinkId])
 }
 
-/** Practice-entered medication / intake plan after a visit — not AI-generated. */
+/**
+ * Practice-entered medication / intake plan after a visit — not AI-generated.
+ */
 model VisitMedicationEntry {
   id                 String    @id @default(cuid())
   preVisitSessionId  String
@@ -1507,6 +1523,8 @@ model ConsentRecord {
   revokedByUserId       String?
   version               String?
   metadataJson          Json?
+  /// Consent capture channel — patient_app | practice_app | paper | imported
+  source                String?   @db.VarChar(40)
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -1550,8 +1568,8 @@ model InterpreterCloudSession {
   practiceName        String?   @db.VarChar(120)
   specialty           String?   @db.VarChar(120)
   appointmentDateTime DateTime?
-  profileConsentUsed    Boolean   @default(false)
-  cloudStorageConsent   Boolean   @default(false)
+  profileConsentUsed  Boolean   @default(false)
+  cloudStorageConsent Boolean   @default(false)
   schemaVersion       Int       @default(1)
   endedAt             DateTime?
   turnCount           Int       @default(0)
@@ -1560,7 +1578,7 @@ model InterpreterCloudSession {
   updatedAt           DateTime  @updatedAt
   deletedAt           DateTime?
 
-  user    User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User                            @relation(fields: [userId], references: [id], onDelete: Cascade)
   payload InterpreterCloudSessionPayload?
 
   @@unique([userId, clientSessionId])
@@ -1610,9 +1628,9 @@ model PracticeInterpreterInvite {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  createdBy       User            @relation("InterpreterInviteCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  revokedBy       User?           @relation("InterpreterInviteRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  practiceProfile PracticeProfile                  @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy       User                             @relation("InterpreterInviteCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  revokedBy       User?                            @relation("InterpreterInviteRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
   usages          PracticeInterpreterInviteUsage[]
   sessionLinks    PracticeInterpreterSessionLink[]
 
@@ -1623,10 +1641,10 @@ model PracticeInterpreterInvite {
 
 /// Optional usage audit — IP hash only; no patient linkage in Phase 4.6.
 model PracticeInterpreterInviteUsage {
-  id        String   @id @default(cuid())
-  inviteId  String
-  usedAt    DateTime @default(now())
-  ipHash    String?  @db.VarChar(64)
+  id       String   @id @default(cuid())
+  inviteId String
+  usedAt   DateTime @default(now())
+  ipHash   String?  @db.VarChar(64)
 
   invite PracticeInterpreterInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
 
@@ -1652,10 +1670,10 @@ model PracticeInterpreterSessionLink {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser     User            @relation("InterpreterSessionLinkPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
-  invite          PracticeInterpreterInvite? @relation(fields: [inviteId], references: [id], onDelete: SetNull)
-  revokedBy       User?           @relation("InterpreterSessionLinkRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  practiceProfile PracticeProfile                  @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser     User                             @relation("InterpreterSessionLinkPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  invite          PracticeInterpreterInvite?       @relation(fields: [inviteId], references: [id], onDelete: SetNull)
+  revokedBy       User?                            @relation("InterpreterSessionLinkRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
   payload         PracticeInterpreterSharePayload?
 
   @@unique([practiceProfileId, patientUserId, clientSessionId])
@@ -1736,19 +1754,43 @@ model VitalEntry {
 
 /// Patient-recorded allergy — structured entry, not an official medical record.
 model AllergyEntry {
+  id            String    @id @default(cuid())
+  userId        String
+  /// Name of allergen — e.g. "Penicillin", "Peanuts", "Latex"
+  allergen      String    @db.VarChar(200)
+  /// medication | food | environmental | insect | contact | other
+  allergyType   String    @db.VarChar(40)
+  /// mild | moderate | severe | life_threatening
+  severity      String    @db.VarChar(40)
+  /// Free-text description of the reaction — e.g. "Anaphylaxis, throat swelling"
+  reaction      String?   @db.Text
+  diagnosedDate DateTime?
+  /// active | inactive | uncertain
+  status        String    @default("active") @db.VarChar(40)
+  notes         String?   @db.Text
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, deletedAt])
+}
+
+/// Patient-recorded diagnosis / medical history — structured entry, not an official medical record.
+model DiagnosisEntry {
   id             String    @id @default(cuid())
   userId         String
-  /// Name of allergen — e.g. "Penicillin", "Peanuts", "Latex"
-  allergen       String    @db.VarChar(200)
-  /// medication | food | environmental | insect | contact | other
-  allergyType    String    @db.VarChar(40)
-  /// mild | moderate | severe | life_threatening
-  severity       String    @db.VarChar(40)
-  /// Free-text description of the reaction — e.g. "Anaphylaxis, throat swelling"
-  reaction       String?   @db.Text
+  /// Condition name — e.g. "Diabetes mellitus Typ 2", "Hypertension"
+  conditionName  String    @db.VarChar(300)
+  /// ICD-10 code — optional, e.g. "E11", "I10"
+  icdCode        String?   @db.VarChar(20)
   diagnosedDate  DateTime?
-  /// active | inactive | uncertain
+  /// active | chronic | resolved | managed | uncertain
   status         String    @default("active") @db.VarChar(40)
+  /// Treating doctor or clinic name — organizational only
+  treatingDoctor String?   @db.VarChar(200)
   notes          String?   @db.Text
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())
@@ -1760,58 +1802,36 @@ model AllergyEntry {
   @@index([userId, deletedAt])
 }
 
-/// Patient-recorded diagnosis / medical history — structured entry, not an official medical record.
-model DiagnosisEntry {
-  id              String    @id @default(cuid())
-  userId          String
-  /// Condition name — e.g. "Diabetes mellitus Typ 2", "Hypertension"
-  conditionName   String    @db.VarChar(300)
-  /// ICD-10 code — optional, e.g. "E11", "I10"
-  icdCode         String?   @db.VarChar(20)
-  diagnosedDate   DateTime?
-  /// active | chronic | resolved | managed | uncertain
-  status          String    @default("active") @db.VarChar(40)
-  /// Treating doctor or clinic name — organizational only
-  treatingDoctor  String?   @db.VarChar(200)
-  notes           String?   @db.Text
-  deletedAt       DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status])
-  @@index([userId, deletedAt])
-}
-
-/** Simulated e-Rezept entry — practice issues, patient redeems at pharmacy. No real TI crypto. */
+/**
+ * Simulated e-Rezept entry — practice issues, patient redeems at pharmacy. No real TI crypto.
+ */
 model ErezeptEntry {
-  id               String    @id @default(cuid())
+  id             String @id @default(cuid())
   /// Patient user (receiver)
-  patientUserId    String
+  patientUserId  String
   /// Practice user who issued (actor)
-  issuedByUserId   String
+  issuedByUserId String
   /// PracticePatientLink for consent + scope
-  linkId           String
+  linkId         String
 
-  medicationName   String    @db.VarChar(300)
-  icdCode          String?   @db.VarChar(20)
-  dosage           String?   @db.VarChar(200)
-  instructions     String?   @db.Text
+  medicationName String    @db.VarChar(300)
+  icdCode        String?   @db.VarChar(20)
+  dosage         String?   @db.VarChar(200)
+  instructions   String?   @db.Text
   /// Simulated token code — e.g. "ERZ-A1B2-C3D4-E5F6"
-  tokenCode        String    @db.VarChar(40)
+  tokenCode      String    @db.VarChar(40)
   /// issued | at_pharmacy | redeemed | expired | cancelled
-  status           String    @default("issued") @db.VarChar(40)
-  issuedAt         DateTime  @default(now())
+  status         String    @default("issued") @db.VarChar(40)
+  issuedAt       DateTime  @default(now())
   /// Default 28 days validity per §16 AMVV
-  validUntil       DateTime
-  redeemedAt       DateTime?
-  notes            String?   @db.Text
-  deletedAt        DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  validUntil     DateTime
+  redeemedAt     DateTime?
+  notes          String?   @db.Text
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  patient  User @relation("PatientErezept",  fields: [patientUserId],  references: [id], onDelete: Cascade)
+  patient  User @relation("PatientErezept", fields: [patientUserId], references: [id], onDelete: Cascade)
   issuedBy User @relation("PracticeErezept", fields: [issuedByUserId], references: [id], onDelete: Cascade)
 
   @@index([patientUserId, status])
@@ -1829,34 +1849,74 @@ generator client {
 }
 
 model SosCard {
-  id                     String    @id @default(cuid())
+  id            String @id @default(cuid())
   /// One card per patient — create-or-upsert pattern
-  patientUserId          String    @unique
+  patientUserId String @unique
 
   /// Blood type: A+, A-, B+, B-, AB+, AB-, 0+, 0-
-  bloodType              String?   @db.VarChar(10)
+  bloodType String? @db.VarChar(10)
 
   /// Emergency contacts
-  emergencyContact1Name  String?   @db.VarChar(120)
-  emergencyContact1Phone String?   @db.VarChar(40)
-  emergencyContact2Name  String?   @db.VarChar(120)
-  emergencyContact2Phone String?   @db.VarChar(40)
+  emergencyContact1Name  String? @db.VarChar(120)
+  emergencyContact1Phone String? @db.VarChar(40)
+  emergencyContact2Name  String? @db.VarChar(120)
+  emergencyContact2Phone String? @db.VarChar(40)
 
   /// Free-text note for first responders (max ~500 chars)
-  firstResponderNote     String?   @db.Text
+  firstResponderNote String? @db.Text
 
   /// AI-generated emergency summary (gpt-4o-mini, stored on save)
-  aiSummary              String?   @db.Text
-  aiSummaryUpdatedAt     DateTime?
+  aiSummary          String?   @db.Text
+  aiSummaryUpdatedAt DateTime?
 
   /// Public QR share token — nullable = not shared; UUID generated on demand
-  publicToken            String?   @unique @db.VarChar(80)
-  tokenGeneratedAt       DateTime?
+  publicToken      String?   @unique @db.VarChar(80)
+  tokenGeneratedAt DateTime?
 
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   patient User @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
 
   @@index([publicToken])
+}
+
+/**
+ * Meda Realtime session metadata for the B2B practice area — NOT YET ACTIVE.
+ * Enable only via MEDA_CLOUD_ARCHIVE_ENABLED flag.
+ * Stores organizational metadata only — no turn text, no audio, no API keys, no debug events.
+ */
+model PracticeMedaSession {
+  id                    String    @id @default(cuid())
+  practiceProfileId     String?
+  /// MedScoutX user ID of the patient — optional (session may be for unregistered patient)
+  patientUserId         String?
+  practicePatientLinkId String?
+  /// User ID of the practice staff member who started the session
+  createdByUserId       String?
+  /// Reference to ConsentRecord — must be set before any content is stored
+  consentRecordId       String?
+  startedAt             DateTime
+  endedAt               DateTime?
+  patientLanguage       String    @db.VarChar(12)
+  practiceLanguage      String    @db.VarChar(12)
+  durationSeconds       Int?
+  /// none | local | cloud
+  storageMode           String    @default("none") @db.VarChar(20)
+  /// started | completed | cancelled | deleted
+  status                String    @default("started") @db.VarChar(20)
+  /// Reference to future PracticeArchiveDocument row — storageKey points to Object Storage
+  pdfDocumentId         String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  deletedAt             DateTime?
+
+  practiceProfile     PracticeProfile?     @relation(fields: [practiceProfileId], references: [id], onDelete: SetNull)
+  practicePatientLink PracticePatientLink? @relation(fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+
+  @@index([practiceProfileId, status])
+  @@index([practiceProfileId, startedAt])
+  @@index([patientUserId])
+  @@index([practicePatientLinkId])
+  @@index([deletedAt])
 }

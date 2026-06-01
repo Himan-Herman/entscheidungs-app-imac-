@@ -266,3 +266,37 @@ export function isErezeptEnabled() {
 export function isSosCardEnabled() {
   return envFlag("ENABLE_SOS_CARD", false);
 }
+
+/**
+ * Meda Realtime cloud archive — session metadata only, no turn content.
+ * Requires explicit patient consent before any data is written.
+ * Default off until MEDA_CLOUD_ARCHIVE_ENABLED is set.
+ */
+export function isMedaCloudArchiveEnabled() {
+  return envFlag("MEDA_CLOUD_ARCHIVE_ENABLED", false);
+}
+
+/**
+ * Practice PDF storage — metadata + storageKey only; file bytes go to Object Storage, never PostgreSQL.
+ * Default off until PRACTICE_PDF_STORAGE_ENABLED is set.
+ */
+export function isPracticePdfStorageEnabled() {
+  return envFlag("PRACTICE_PDF_STORAGE_ENABLED", false);
+}
+
+/**
+ * Practice profile extended fields (legalName, street, preferredInterpreterLanguages).
+ * Enables prefill of these fields in Meda setup and practice settings.
+ * Default off until PRACTICE_PROFILE_EXTENDED_ENABLED is set.
+ */
+export function isPracticeProfileExtendedEnabled() {
+  return envFlag("PRACTICE_PROFILE_EXTENDED_ENABLED", false);
+}
+
+/**
+ * Practice consent recording — allows writing ConsentRecord rows for Meda Realtime sessions.
+ * Default off until PRACTICE_CONSENT_RECORDING_ENABLED is set.
+ */
+export function isPracticeConsentRecordingEnabled() {
+  return envFlag("PRACTICE_CONSENT_RECORDING_ENABLED", false);
+}
