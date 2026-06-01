@@ -8,6 +8,13 @@ import {
   EMPTY_PATIENT_INFO,
   EMPTY_PRACTICE_INFO,
 } from './realtimeFormDefaults.js';
+import {
+  getArchivedConversations,
+  buildArchiveEntry,
+  saveArchivedConversation,
+  deleteArchivedConversation,
+  clearArchivedConversations,
+} from './realtimeConversationArchive.js';
 import './MedaRealtimePage.css';
 
 const ROLE_LABEL = {
@@ -112,6 +119,12 @@ export default function MedaRealtimePage() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const sessionStartedAtRef = useRef(/** @type {string|null} */ (null));
 
+  // ── Local conversation archive ───────────────────────────────────────────────
+  const [archivedConversations, setArchivedConversations] = useState([]);
+  const [archiveSaved,          setArchiveSaved]          = useState(false);
+  const [archiveExpandedId,     setArchiveExpandedId]     = useState(/** @type {string|null} */ (null));
+  const [archivePdfLoadingId,   setArchivePdfLoadingId]   = useState(/** @type {string|null} */ (null));
+
   // ── Prefill from existing profile ───────────────────────────────────────────
   const { profileData } = usePatientProfilePrefill();
 
@@ -209,6 +222,11 @@ export default function MedaRealtimePage() {
     }
   }, [events]);
 
+  // Load archive from localStorage once on mount
+  useEffect(() => {
+    setArchivedConversations(getArchivedConversations());
+  }, []);
+
   // ── Computed values ─────────────────────────────────────────────────────────
   const isConnected  = connectionState === 'connected';
   const isConnecting = connectionState === 'connecting';
@@ -300,6 +318,56 @@ export default function MedaRealtimePage() {
   function handleNewSession() {
     setSessionHasStarted(false);
     setSessionExpired(false);
+    setArchiveSaved(false);
+  }
+
+  function handleSaveToArchive() {
+    const entry = buildArchiveEntry({
+      turns,
+      patientInfo,
+      practiceInfo,
+      patientLanguage:  patientLang,
+      practiceLanguage: practiceLang,
+      sessionStartedAt: sessionStartedAtRef.current,
+    });
+    saveArchivedConversation(entry);
+    setArchivedConversations(getArchivedConversations());
+    setArchiveSaved(true);
+  }
+
+  function handleDeleteArchiveEntry(id) {
+    if (!window.confirm('Dieses lokale Gesprächsprotokoll wirklich löschen?')) return;
+    deleteArchivedConversation(id);
+    setArchivedConversations(getArchivedConversations());
+    if (archiveExpandedId === id) setArchiveExpandedId(null);
+  }
+
+  function handleClearArchive() {
+    if (!window.confirm('Alle lokalen Gesprächsprotokolle wirklich löschen?')) return;
+    clearArchivedConversations();
+    setArchivedConversations([]);
+    setArchiveExpandedId(null);
+  }
+
+  async function handleArchivePdf(entry) {
+    setArchivePdfLoadingId(entry.id);
+    try {
+      await exportRealtimeConversationPdf({
+        turns:           entry.turns,
+        patientInfo:     entry.patientInfo,
+        practiceInfo:    entry.practiceInfo,
+        languages:       { patientLanguage: entry.patientLanguage, practiceLanguage: entry.practiceLanguage },
+        sessionStartedAt: entry.sessionStartedAt,
+      });
+    } catch (err) {
+      console.error('[MedaRealtimePage] Archiv-PDF-Export fehlgeschlagen:', err?.message);
+    } finally {
+      setArchivePdfLoadingId(null);
+    }
+  }
+
+  function handleToggleExpand(id) {
+    setArchiveExpandedId(prev => (prev === id ? null : id));
   }
 
   function getBlockHint() {
@@ -1012,6 +1080,14 @@ export default function MedaRealtimePage() {
                 {pdfLoading ? 'Erstelle PDF …' : 'PDF herunterladen'}
               </button>
             )}
+            {turns.length > 0 && !archiveSaved && (
+              <button
+                className="mrt-btn mrt-btn--archive-save"
+                onClick={handleSaveToArchive}
+              >
+                Im Gesprächsarchiv speichern
+              </button>
+            )}
             <button
               className="mrt-btn mrt-btn--new-session"
               onClick={handleNewSession}
@@ -1019,6 +1095,115 @@ export default function MedaRealtimePage() {
               Neues Gespräch starten
             </button>
           </div>
+          {archiveSaved && (
+            <p className="mrt-archive-saved-hint" role="status">
+              Gespräch lokal im Archiv gespeichert.
+            </p>
+          )}
+        </section>
+      )}
+
+      {/* ── Local conversation archive ──────────────────────────────────────── */}
+      {archivedConversations.length > 0 && (
+        <section className="mrt-archive" aria-label="Gesprächsarchiv">
+          <h2 className="mrt-archive-title">Gesprächsarchiv</h2>
+          <p className="mrt-archive-privacy">
+            Dieses Archiv wird nur lokal auf diesem Gerät gespeichert. Es wird nicht an MedScoutX oder eine Praxis übertragen.
+          </p>
+          <ul className="mrt-archive-list">
+            {archivedConversations.map(entry => (
+              <li key={entry.id} className="mrt-archive-entry">
+                <div className="mrt-archive-entry-header">
+                  <div className="mrt-archive-entry-meta">
+                    <span className="mrt-archive-entry-date">{formatTurnTime(entry.createdAt)}</span>
+                    <span>Patient: <strong>{entry.patientName || 'nicht angegeben'}</strong></span>
+                    {entry.practiceName && <span>Praxis: <strong>{entry.practiceName}</strong></span>}
+                    <span className="mrt-archive-entry-langs">
+                      {REALTIME_LANGUAGE_MAP[entry.patientLanguage] ?? entry.patientLanguage ?? '—'}
+                      {' ↔ '}
+                      {REALTIME_LANGUAGE_MAP[entry.practiceLanguage] ?? entry.practiceLanguage ?? '—'}
+                    </span>
+                    <span className="mrt-archive-entry-count">{entry.turns.length} Einträge</span>
+                  </div>
+                  <div className="mrt-archive-entry-actions">
+                    <button
+                      className="mrt-btn mrt-btn--archive-pdf"
+                      onClick={() => handleArchivePdf(entry)}
+                      disabled={archivePdfLoadingId === entry.id}
+                    >
+                      {archivePdfLoadingId === entry.id ? 'PDF …' : 'PDF'}
+                    </button>
+                    <button
+                      className="mrt-btn mrt-btn--archive-view"
+                      onClick={() => handleToggleExpand(entry.id)}
+                      aria-expanded={archiveExpandedId === entry.id}
+                    >
+                      {archiveExpandedId === entry.id ? 'Schließen' : 'Verlauf ansehen'}
+                    </button>
+                    <button
+                      className="mrt-btn mrt-btn--archive-delete"
+                      onClick={() => handleDeleteArchiveEntry(entry.id)}
+                    >
+                      Löschen
+                    </button>
+                  </div>
+                </div>
+
+                {archiveExpandedId === entry.id && (
+                  <div className="mrt-archive-turns">
+                    {entry.turns.length === 0 && (
+                      <p className="mrt-archive-turns-empty">Kein Gesprächsverlauf gespeichert.</p>
+                    )}
+                    {entry.turns.map((t, i) => {
+                      const isPatient  = t.speakerRole === 'patient';
+                      const roleLabel  = isPatient ? 'Patient' : 'Praxis / Arzt';
+                      const srcLabel   = REALTIME_LANGUAGE_MAP[t.sourceLanguage] ?? t.sourceLanguage ?? '—';
+                      const tgtLabel   = REALTIME_LANGUAGE_MAP[t.targetLanguage] ?? t.targetLanguage ?? '—';
+                      const transLabel = isPatient ? 'Übersetzung für Praxis' : 'Übersetzung für Patient';
+                      return (
+                        <div
+                          key={t.key ?? i}
+                          className={`mrt-archive-turn${isPatient ? ' mrt-archive-turn--patient' : ' mrt-archive-turn--practice'}`}
+                        >
+                          <div className="mrt-archive-turn-header">
+                            <span className="mrt-archive-turn-role">{roleLabel}</span>
+                            {t.timestamp && (
+                              <span className="mrt-archive-turn-time">{formatTurnTime(t.timestamp)}</span>
+                            )}
+                            {t.isUnclear && (
+                              <span className="mrt-archive-turn-unclear">Nicht sicher zugeordnet</span>
+                            )}
+                          </div>
+                          <div className="mrt-archive-turn-body">
+                            <div className="mrt-archive-turn-section">
+                              <span className="mrt-archive-turn-label">Original ({srcLabel})</span>
+                              <p className="mrt-archive-turn-text">{t.originalText || '—'}</p>
+                              {t.originalEdited && (
+                                <span className="mrt-archive-turn-edited">Originaltext manuell korrigiert</span>
+                              )}
+                            </div>
+                            <div className="mrt-archive-turn-section mrt-archive-turn-section--translation">
+                              <span className="mrt-archive-turn-label">{transLabel} ({tgtLabel})</span>
+                              <p className="mrt-archive-turn-text">{t.translatedText || '—'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {archivedConversations.length > 1 && (
+            <button
+              className="mrt-btn mrt-btn--archive-clear"
+              onClick={handleClearArchive}
+            >
+              Alle lokalen Protokolle löschen
+            </button>
+          )}
         </section>
       )}
 
