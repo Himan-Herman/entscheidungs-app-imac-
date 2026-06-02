@@ -1317,3 +1317,45 @@
   background: var(--color-bg, #0f1117);
   border-color: var(--color-border, #374151);
 }
+
+.anamnesis-submission__patient-box {
+  background: var(--color-bg, #f8f9fb);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.anamnesis-submission__patient-dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.4rem 1.25rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+}
+
+.anamnesis-submission__patient-dl dt {
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+  white-space: nowrap;
+}
+
+.anamnesis-submission__patient-dl dd {
+  margin: 0;
+  color: var(--color-text, #1a1d23);
+  word-break: break-word;
+}
+
+.anamnesis-submissions__patient-name {
+  font-weight: 600;
+  color: var(--color-text, #1a1d23);
+  font-size: 0.95rem;
+}
+
+[data-theme="dark"] .anamnesis-submission__patient-box {
+  background: var(--color-bg, #0f1117);
+  border-color: var(--color-border, #374151);
+}
+
+[data-theme="dark"] .anamnesis-submission__patient-dl dd {
+  color: var(--color-text, #e2e8f0);
+}

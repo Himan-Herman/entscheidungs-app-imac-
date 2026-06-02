@@ -1,7 +1,7 @@
 /**
  * Public anamnesis intake — no authentication required.
- * GET  /qr/:token  → validate link + return template structure
- * POST /qr/:token/submit → store submission (only after patient has granted consent)
+ * GET  /qr/:token        → validate link + return template structure
+ * POST /qr/:token/submit → store submission after patient consent
  */
 
 import express from "express";
@@ -12,6 +12,7 @@ const router = express.Router();
 const prisma = new PrismaClient();
 
 const VALID_LANGUAGES = new Set(["de", "en", "fr", "it", "es"]);
+const VALID_INSURANCE_TYPES = new Set(["gkv", "pkv", "self_pay", "other", ""]);
 
 function hashToken(raw) {
   return crypto.createHash("sha256").update(raw).digest("hex");
@@ -23,6 +24,38 @@ const TEMPLATE_INCLUDE = {
     include: { questions: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] } },
   },
 };
+
+function sanitizeString(v, maxLen = 200) {
+  if (typeof v !== "string") return null;
+  const s = v.trim().slice(0, maxLen);
+  return s || null;
+}
+
+function validatePatientInfo(info) {
+  if (!info || typeof info !== "object") return { ok: false, error: "patient_info_required" };
+  if (!sanitizeString(info.firstName)) return { ok: false, error: "patient_first_name_required" };
+  if (!sanitizeString(info.lastName)) return { ok: false, error: "patient_last_name_required" };
+  if (!sanitizeString(info.dateOfBirth)) return { ok: false, error: "patient_dob_required" };
+  // Validate dateOfBirth is a parseable date
+  if (isNaN(new Date(info.dateOfBirth).getTime())) return { ok: false, error: "patient_dob_invalid" };
+  if (info.insuranceType && !VALID_INSURANCE_TYPES.has(info.insuranceType)) {
+    return { ok: false, error: "patient_insurance_type_invalid" };
+  }
+  return { ok: true };
+}
+
+function sanitizePatientInfo(info) {
+  return {
+    firstName: sanitizeString(info.firstName, 100),
+    lastName: sanitizeString(info.lastName, 100),
+    dateOfBirth: sanitizeString(info.dateOfBirth, 20),
+    email: sanitizeString(info.email, 200) || null,
+    phone: sanitizeString(info.phone, 50) || null,
+    insuranceType: sanitizeString(info.insuranceType, 20) || null,
+    insuranceName: sanitizeString(info.insuranceName, 200) || null,
+    insuranceNumber: sanitizeString(info.insuranceNumber, 100) || null,
+  };
+}
 
 // ── GET /qr/:token ─────────────────────────────────────────────────────────────
 
@@ -63,11 +96,7 @@ router.get("/qr/:token", async (req, res) => {
 
     return res.json({
       ok: true,
-      link: {
-        id: link.id,
-        label: link.label,
-        expiresAt: link.expiresAt,
-      },
+      link: { id: link.id, label: link.label, expiresAt: link.expiresAt },
       template: link.template,
       practice: link.practiceProfile,
     });
@@ -86,7 +115,7 @@ router.post("/qr/:token/submit", async (req, res) => {
     return res.status(404).json({ ok: false, error: "link_not_found" });
   }
 
-  const { patientLanguage, answersJson } = req.body;
+  const { patientLanguage, answersJson, patientInfo, doctorLanguage, consentScopes } = req.body;
 
   if (!patientLanguage || !VALID_LANGUAGES.has(patientLanguage)) {
     return res.status(400).json({ ok: false, error: "invalid_language" });
@@ -97,6 +126,22 @@ router.post("/qr/:token/submit", async (req, res) => {
   if (answersJson.length > MAX_ANSWERS_ITEMS) {
     return res.status(400).json({ ok: false, error: "answers_too_large" });
   }
+
+  // Validate and sanitize patient personal data
+  const patientInfoValidation = validatePatientInfo(patientInfo);
+  if (!patientInfoValidation.ok) {
+    return res.status(400).json({ ok: false, error: patientInfoValidation.error });
+  }
+  const cleanPatientInfo = sanitizePatientInfo(patientInfo);
+
+  // doctorLanguage is optional, validate if provided
+  const cleanDoctorLanguage = (typeof doctorLanguage === "string" && VALID_LANGUAGES.has(doctorLanguage))
+    ? doctorLanguage : null;
+
+  // consentScopes is optional array of strings
+  const cleanConsentScopes = Array.isArray(consentScopes)
+    ? consentScopes.filter((s) => typeof s === "string").slice(0, 20)
+    : null;
 
   const consentAt = new Date();
 
@@ -124,9 +169,12 @@ router.post("/qr/:token/submit", async (req, res) => {
         templateId: link.templateId,
         linkId: link.id,
         patientLanguage,
+        doctorLanguage: cleanDoctorLanguage,
+        patientInfoJson: cleanPatientInfo,
         answersJson,
         consentGrantedAt: consentAt,
         consentVersion: "v1",
+        consentScopes: cleanConsentScopes,
         status: "new",
       },
     });

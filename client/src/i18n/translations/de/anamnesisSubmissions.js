@@ -40,4 +40,12 @@ export default {
   consentVersion: "Einwilligungsversion",
   patientLanguage: "Sprache des Patienten",
   submittedVia: "Eingereicht via",
+
+  patientDataHeading: "Patientendaten",
+  patientName: "Name",
+  patientDob: "Geburtsdatum",
+  patientEmail: "E-Mail",
+  patientPhone: "Telefon",
+  patientInsurance: "Versicherung",
+  patientInsuranceNumber: "Versicherungsnummer",
 };

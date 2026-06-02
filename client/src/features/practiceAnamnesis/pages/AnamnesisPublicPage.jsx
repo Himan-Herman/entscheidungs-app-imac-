@@ -11,7 +11,7 @@ const SUPPORTED_LANGS = [
   { code: "es", label: "Español" },
 ];
 
-const STEPS = ["language", "consent", "form", "review", "done"];
+const STEPS = ["patientdata", "form", "review", "done"];
 
 function getLabel(json, lang) {
   if (!json || typeof json !== "object") return "";
@@ -44,6 +44,17 @@ function answersReducer(state, action) {
       return state;
   }
 }
+
+const EMPTY_PATIENT_INFO = {
+  firstName: "",
+  lastName: "",
+  dateOfBirth: "",
+  email: "",
+  phone: "",
+  insuranceType: "",
+  insuranceName: "",
+  insuranceNumber: "",
+};
 
 function QuestionInput({ question, lang, value, onChange, t }) {
   const label = getLabel(question.labelJson, lang);
@@ -164,14 +175,17 @@ function QuestionInput({ question, lang, value, onChange, t }) {
 export default function AnamnesisPublicPage() {
   const { token } = useParams();
 
-  const [step, setStep] = useState("language");
+  const [step, setStep] = useState("patientdata");
   const [lang, setLang] = useState(detectBrowserLang);
   const t = useT(lang);
 
   const [linkData, setLinkData] = useState(null);
   const [loadError, setLoadError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  const [patientInfo, setPatientInfo] = useState(EMPTY_PATIENT_INFO);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [patientErrors, setPatientErrors] = useState({});
 
   const sections = useMemo(() => {
     if (!linkData?.template) return [];
@@ -210,22 +224,29 @@ export default function AnamnesisPublicPage() {
   }, [token]);
 
   useEffect(() => {
-    if (step === "consent" && !linkData) loadLink();
-  }, [step, linkData, loadLink]);
+    loadLink();
+  }, [loadLink]);
 
-  const handleLangContinue = () => {
-    setStep("consent");
-    scrollTop();
+  const validatePatientData = () => {
+    const errs = {};
+    if (!patientInfo.firstName.trim()) errs.firstName = true;
+    if (!patientInfo.lastName.trim()) errs.lastName = true;
+    if (!patientInfo.dateOfBirth.trim()) errs.dateOfBirth = true;
+    if (!consentChecked) errs.consent = true;
+    setPatientErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
-  const handleConsentAccept = () => {
+  const handlePatientDataContinue = () => {
+    if (!validatePatientData()) return;
     setStep("form");
     setSectionIndex(0);
     scrollTop();
   };
 
-  const handleConsentDecline = () => {
-    setStep("language");
+  const handlePatientInfoChange = (field, value) => {
+    setPatientInfo((prev) => ({ ...prev, [field]: value }));
+    if (patientErrors[field]) setPatientErrors((prev) => { const n = { ...prev }; delete n[field]; return n; });
   };
 
   const validateSection = (secIndex) => {
@@ -261,7 +282,7 @@ export default function AnamnesisPublicPage() {
         setSectionIndex((i) => i - 1);
         scrollTop();
       } else {
-        setStep("consent");
+        setStep("patientdata");
         scrollTop();
       }
     } else if (step === "review") {
@@ -289,6 +310,17 @@ export default function AnamnesisPublicPage() {
     return result;
   }, [sections, answers, lang]);
 
+  const buildCleanPatientInfo = () => ({
+    firstName: patientInfo.firstName.trim() || null,
+    lastName: patientInfo.lastName.trim() || null,
+    dateOfBirth: patientInfo.dateOfBirth.trim() || null,
+    email: patientInfo.email.trim() || null,
+    phone: patientInfo.phone.trim() || null,
+    insuranceType: patientInfo.insuranceType || null,
+    insuranceName: patientInfo.insuranceName.trim() || null,
+    insuranceNumber: patientInfo.insuranceNumber.trim() || null,
+  });
+
   const handleSubmit = async () => {
     setSubmitting(true);
     setSubmitError(null);
@@ -296,6 +328,8 @@ export default function AnamnesisPublicPage() {
       const { res, data } = await submitPublicAnamnesis(token, {
         patientLanguage: lang,
         answersJson: buildAnswersJson(),
+        patientInfo: buildCleanPatientInfo(),
+        consentScopes: ["anamnesis_data"],
       });
       if (!res.ok) {
         setSubmitError(data?.error || "request_failed");
@@ -323,10 +357,47 @@ export default function AnamnesisPublicPage() {
 
   if (!t) return <div className="apub__loading">…</div>;
 
-  if (step === "language") {
+  const errorMsgMap = {
+    link_not_found: t.errorInvalid,
+    link_disabled: t.errorDisabled,
+    link_expired: t.errorExpired,
+    template_unavailable: t.errorTemplateMissing,
+    network: t.errorNetwork,
+  };
+
+  if (loadError) {
+    return (
+      <div className="apub" ref={topRef}>
+        <div className="apub__card apub__card--center">
+          <p className="apub__error">{errorMsgMap[loadError] || t.errorInvalid}</p>
+          <button type="button" className="apub__btn" onClick={() => { setLoadError(null); loadLink(); }}>
+            {t.back}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "patientdata") {
+    const practice = linkData?.practice;
+    const insuranceOptions = [
+      { value: "gkv", label: t.insuranceTypeGkv || "GKV" },
+      { value: "pkv", label: t.insuranceTypePkv || "PKV" },
+      { value: "self_pay", label: t.insuranceTypeSelfPay || "Selbstzahler" },
+      { value: "other", label: t.insuranceTypeOther || "Sonstige" },
+    ];
+
     return (
       <div className="apub" ref={topRef}>
         <div className="apub__card">
+          {loading && <p className="apub__loading">{t.loading}</p>}
+          {!loading && practice && (
+            <div className="apub__practice-header">
+              {practice.logoUrl && <img src={practice.logoUrl} alt={practice.displayNameForPatients || practice.practiceName || ""} className="apub__practice-logo" />}
+              <p className="apub__practice-name">{practice.displayNameForPatients || practice.practiceName}</p>
+            </div>
+          )}
+
           <h1 className="apub__heading">{t.languageHeading}</h1>
           <p className="apub__subheading">{t.languageSubheading}</p>
           <div className="apub__lang-grid">
@@ -341,8 +412,159 @@ export default function AnamnesisPublicPage() {
               </button>
             ))}
           </div>
-          <button type="button" className="apub__btn apub__btn--primary" onClick={handleLangContinue}>
-            {t.languageContinue}
+
+          <h2 className="apub__section-title">{t.patientDataHeading}</h2>
+          {t.patientDataSubheading && <p className="apub__subheading">{t.patientDataSubheading}</p>}
+
+          <div className="apub__patient-form">
+            <div className="apub__patient-row apub__patient-row--2col">
+              <div className="apub__patient-field">
+                <label className="apub__question-label" htmlFor="pd_firstName">
+                  {t.firstName}<span className="apub__required">*</span>
+                </label>
+                <input
+                  id="pd_firstName"
+                  type="text"
+                  className={`apub__input${patientErrors.firstName ? " apub__input--error" : ""}`}
+                  value={patientInfo.firstName}
+                  onChange={(e) => handlePatientInfoChange("firstName", e.target.value)}
+                  autoComplete="given-name"
+                />
+                {patientErrors.firstName && <p className="apub__field-error">{t.fieldRequired}</p>}
+              </div>
+              <div className="apub__patient-field">
+                <label className="apub__question-label" htmlFor="pd_lastName">
+                  {t.lastName}<span className="apub__required">*</span>
+                </label>
+                <input
+                  id="pd_lastName"
+                  type="text"
+                  className={`apub__input${patientErrors.lastName ? " apub__input--error" : ""}`}
+                  value={patientInfo.lastName}
+                  onChange={(e) => handlePatientInfoChange("lastName", e.target.value)}
+                  autoComplete="family-name"
+                />
+                {patientErrors.lastName && <p className="apub__field-error">{t.fieldRequired}</p>}
+              </div>
+            </div>
+
+            <div className="apub__patient-field">
+              <label className="apub__question-label" htmlFor="pd_dob">
+                {t.dateOfBirth}<span className="apub__required">*</span>
+              </label>
+              <input
+                id="pd_dob"
+                type="date"
+                className={`apub__input${patientErrors.dateOfBirth ? " apub__input--error" : ""}`}
+                value={patientInfo.dateOfBirth}
+                onChange={(e) => handlePatientInfoChange("dateOfBirth", e.target.value)}
+                autoComplete="bday"
+              />
+              {patientErrors.dateOfBirth && <p className="apub__field-error">{t.fieldRequired}</p>}
+            </div>
+
+            <div className="apub__patient-row apub__patient-row--2col">
+              <div className="apub__patient-field">
+                <label className="apub__question-label" htmlFor="pd_email">
+                  {t.email} <span className="apub__optional">({t.optional})</span>
+                </label>
+                <input
+                  id="pd_email"
+                  type="email"
+                  className="apub__input"
+                  value={patientInfo.email}
+                  onChange={(e) => handlePatientInfoChange("email", e.target.value)}
+                  autoComplete="email"
+                />
+              </div>
+              <div className="apub__patient-field">
+                <label className="apub__question-label" htmlFor="pd_phone">
+                  {t.phone} <span className="apub__optional">({t.optional})</span>
+                </label>
+                <input
+                  id="pd_phone"
+                  type="tel"
+                  className="apub__input"
+                  value={patientInfo.phone}
+                  onChange={(e) => handlePatientInfoChange("phone", e.target.value)}
+                  autoComplete="tel"
+                />
+              </div>
+            </div>
+
+            <div className="apub__patient-field">
+              <label className="apub__question-label" htmlFor="pd_insuranceType">
+                {t.insuranceType} <span className="apub__optional">({t.optional})</span>
+              </label>
+              <select
+                id="pd_insuranceType"
+                className="apub__select"
+                value={patientInfo.insuranceType}
+                onChange={(e) => handlePatientInfoChange("insuranceType", e.target.value)}
+              >
+                <option value="">{t.insuranceTypePlaceholder || "—"}</option>
+                {insuranceOptions.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {patientInfo.insuranceType && patientInfo.insuranceType !== "self_pay" && (
+              <div className="apub__patient-row apub__patient-row--2col">
+                <div className="apub__patient-field">
+                  <label className="apub__question-label" htmlFor="pd_insuranceName">
+                    {t.insuranceName} <span className="apub__optional">({t.optional})</span>
+                  </label>
+                  <input
+                    id="pd_insuranceName"
+                    type="text"
+                    className="apub__input"
+                    value={patientInfo.insuranceName}
+                    onChange={(e) => handlePatientInfoChange("insuranceName", e.target.value)}
+                  />
+                </div>
+                <div className="apub__patient-field">
+                  <label className="apub__question-label" htmlFor="pd_insuranceNumber">
+                    {t.insuranceNumber} <span className="apub__optional">({t.optional})</span>
+                  </label>
+                  <input
+                    id="pd_insuranceNumber"
+                    type="text"
+                    className="apub__input"
+                    value={patientInfo.insuranceNumber}
+                    onChange={(e) => handlePatientInfoChange("insuranceNumber", e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="apub__consent-block">
+            <h3 className="apub__consent-heading">{t.consentHeading}</h3>
+            <p className="apub__consent-body">{t.consentBody}</p>
+            {t.consentNotice && <p className="apub__consent-notice">{t.consentNotice}</p>}
+            <label className={`apub__consent-checkbox-label${patientErrors.consent ? " apub__consent-checkbox-label--error" : ""}`}>
+              <input
+                type="checkbox"
+                className="apub__consent-checkbox"
+                checked={consentChecked}
+                onChange={(e) => {
+                  setConsentChecked(e.target.checked);
+                  if (patientErrors.consent) setPatientErrors((prev) => { const n = { ...prev }; delete n.consent; return n; });
+                }}
+              />
+              <span>{t.consentCheckboxLabel}</span>
+            </label>
+            {patientErrors.consent && <p className="apub__field-error">{t.consentRequired}</p>}
+          </div>
+
+          <button
+            type="button"
+            className="apub__btn apub__btn--primary"
+            onClick={handlePatientDataContinue}
+            disabled={loading}
+          >
+            {t.patientDataContinue || t.next}
           </button>
         </div>
       </div>
@@ -354,53 +576,6 @@ export default function AnamnesisPublicPage() {
       <div className="apub" ref={topRef}>
         <div className="apub__card apub__card--center">
           <p className="apub__loading">{t.loading}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loadError) {
-    const msgMap = {
-      link_not_found: t.errorInvalid,
-      link_disabled: t.errorDisabled,
-      link_expired: t.errorExpired,
-      template_unavailable: t.errorTemplateMissing,
-      network: t.errorNetwork,
-    };
-    return (
-      <div className="apub" ref={topRef}>
-        <div className="apub__card apub__card--center">
-          <p className="apub__error">{msgMap[loadError] || t.errorInvalid}</p>
-          <button type="button" className="apub__btn" onClick={() => { setLoadError(null); setStep("language"); }}>
-            ← {t.back}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === "consent") {
-    const practice = linkData?.practice;
-    return (
-      <div className="apub" ref={topRef}>
-        <div className="apub__card">
-          {practice && (
-            <div className="apub__practice-header">
-              {practice.logoUrl && <img src={practice.logoUrl} alt={practice.displayNameForPatients || practice.practiceName || ""} className="apub__practice-logo" />}
-              <p className="apub__practice-name">{practice.displayNameForPatients || practice.practiceName}</p>
-            </div>
-          )}
-          <h1 className="apub__heading">{t.consentHeading}</h1>
-          <p className="apub__consent-body">{t.consentBody}</p>
-          {t.consentNotice && <p className="apub__consent-notice">{t.consentNotice}</p>}
-          <div className="apub__consent-actions">
-            <button type="button" className="apub__btn apub__btn--primary" onClick={handleConsentAccept}>
-              {t.consentAccept}
-            </button>
-            <button type="button" className="apub__btn apub__btn--ghost" onClick={handleConsentDecline}>
-              {t.consentDecline}
-            </button>
-          </div>
         </div>
       </div>
     );

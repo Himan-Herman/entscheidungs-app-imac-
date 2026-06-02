@@ -126,6 +126,11 @@ export default function AnamnesisSubmissionsPage() {
                 <span className={`anamnesis-hub__badge${sub.status === "new" ? " anamnesis-hub__badge--new" : sub.status === "archived" ? " anamnesis-hub__badge--archived" : ""}`}>
                   {statusLabel(sub)}
                 </span>
+                {sub.patientInfoJson?.firstName && (
+                  <span className="anamnesis-submissions__patient-name">
+                    {sub.patientInfoJson.firstName} {sub.patientInfoJson.lastName}
+                  </span>
+                )}
                 <span className="anamnesis-submissions__date">
                   {t.submittedAt}: {new Date(sub.submittedAt).toLocaleString(language)}
                 </span>

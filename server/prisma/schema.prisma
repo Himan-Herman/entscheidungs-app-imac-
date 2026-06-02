@@ -2032,11 +2032,17 @@ model PracticeAnamnesisSubmission {
   linkId            String?
   /// BCP-47 language tag selected by patient (de, en, fr, it, es).
   patientLanguage   String    @db.VarChar(12)
+  /// BCP-47 language tag of the practice/doctor (for future translation prep).
+  doctorLanguage    String?   @db.VarChar(12)
+  /// Patient personal data: firstName, lastName, dateOfBirth, email, phone, insuranceType, insuranceName, insuranceNumber.
+  patientInfoJson   Json?
   /// Snapshot of answers with label text in patient's language.
   answersJson       Json
   /// Timestamp when patient actively granted DSGVO consent.
   consentGrantedAt  DateTime
   consentVersion    String    @default("v1") @db.VarChar(20)
+  /// JSON array of consent scope strings granted by patient.
+  consentScopes     Json?
   submittedAt       DateTime  @default(now())
   /// new | viewed | archived | deleted
   status            String    @default("new") @db.VarChar(20)

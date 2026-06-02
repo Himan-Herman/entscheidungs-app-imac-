@@ -462,6 +462,114 @@
   border-color: var(--color-primary, #3b82f6);
 }
 
+/* ── Patient data form ───────────────────────────────────────────────────────── */
+
+.apub__patient-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.apub__patient-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.apub__patient-row--2col > .apub__patient-field {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.apub__patient-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.apub__select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid var(--color-border, #e2e8f0);
+  border-radius: 0.5rem;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #1a1d23);
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.apub__select:focus {
+  outline: none;
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.apub__input--error {
+  border-color: var(--color-danger, #ef4444);
+}
+
+.apub__optional {
+  font-weight: 400;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.85em;
+}
+
+/* ── Consent block ───────────────────────────────────────────────────────────── */
+
+.apub__consent-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--color-bg, #f8f9fb);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.apub__consent-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-heading, #1a1d23);
+}
+
+.apub__consent-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--color-text, #1a1d23);
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.apub__consent-checkbox-label--error {
+  color: var(--color-danger, #ef4444);
+}
+
+.apub__consent-checkbox {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--color-primary, #3b82f6);
+  cursor: pointer;
+}
+
+@media (prefers-color-scheme: dark) {
+  .apub__consent-block {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .apub__select {
+    background: var(--color-surface, #1e2130);
+    color: var(--color-text, #e2e8f0);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
@@ -476,6 +584,10 @@
 
   .apub__lang-btn {
     flex: 1 1 100%;
+  }
+
+  .apub__patient-row--2col {
+    flex-direction: column;
   }
 
   .apub__review-row {

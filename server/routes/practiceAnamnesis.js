@@ -27,44 +27,177 @@ const VALID_QUESTION_TYPES = new Set([
 // ── Standard template structure (multilingual, DB-created on request) ─────────
 
 const STANDARD_TEMPLATE_STRUCTURE = {
-  titleJson: { de: "Standard-Anamnese", en: "Standard Anamnesis", fr: "Anamnèse standard", it: "Anamnesi standard", es: "Anamnesis estándar" },
+  titleJson:       { de: "Standard-Anamnese", en: "Standard Anamnesis", fr: "Anamnèse standard", it: "Anamnesi standard", es: "Anamnesis estándar" },
   descriptionJson: { de: "Allgemeine Gesprächsvorbereitung — bitte nach Bedarf kopieren und anpassen. Kein Ersatz für das ärztliche Gespräch.", en: "General pre-appointment questionnaire — copy and customise as needed. Not a substitute for the physician consultation.", fr: "Préparation générale au rendez-vous — à copier et personnaliser. Ne remplace pas la consultation médicale.", it: "Preparazione generale all'appuntamento — da copiare e personalizzare. Non sostituisce la visita medica.", es: "Preparación general para la cita — copiar y personalizar según sea necesario. No reemplaza la consulta médica." },
   sections: [
+    // ── 1. Aktuelles Anliegen ─────────────────────────────────────────────────
     {
-      titleJson: { de: "Aktuelles Anliegen", en: "Current Complaint", fr: "Motif de la visite", it: "Motivo della visita", es: "Motivo de la consulta" },
+      titleJson: { de: "Aktuelles Anliegen", en: "Reason for Visit", fr: "Motif de la consultation", it: "Motivo della visita", es: "Motivo de la consulta" },
       questions: [
-        { type: "textarea", isRequired: true,  labelJson: { de: "Was ist Ihr Hauptanliegen / Ihre Hauptbeschwerde?", en: "What is your main complaint / reason for the visit?", fr: "Quelle est votre plainte principale / raison de la visite ?", it: "Qual è il suo problema principale / motivo della visita?", es: "¿Cuál es su queja principal / motivo de la visita?" }, hintJson: { de: "Bitte so genau wie möglich beschreiben", en: "Please describe as precisely as possible", fr: "Décrivez aussi précisément que possible", it: "Descrivere il più precisamente possibile", es: "Describa lo más preciso posible" } },
-        { type: "text",     isRequired: true,  labelJson: { de: "Seit wann bestehen die Beschwerden?", en: "How long have you had these symptoms?", fr: "Depuis quand avez-vous ces symptômes ?", it: "Da quanto tempo ha questi sintomi?", es: "¿Desde cuándo tiene estos síntomas?" }, hintJson: { de: "z. B. seit 3 Tagen, seit 2 Wochen", en: "e.g. for 3 days, for 2 weeks", fr: "p. ex. depuis 3 jours", it: "es. da 3 giorni", es: "p. ej. desde hace 3 días" } },
-        { type: "text",     isRequired: false, labelJson: { de: "Wo treten die Beschwerden auf?", en: "Where are the symptoms located?", fr: "Où se situent les symptômes ?", it: "Dove si manifestano i sintomi?", es: "¿Dónde se localizan los síntomas?" } },
+        {
+          type: "textarea", isRequired: true,
+          labelJson: { de: "Was ist der Grund Ihres Besuchs?", en: "What is the reason for your visit?", fr: "Quelle est la raison de votre consultation ?", it: "Qual è il motivo della sua visita?", es: "¿Cuál es el motivo de su visita?" },
+          hintJson:  { de: "Bitte so genau wie möglich beschreiben", en: "Please describe as precisely as possible", fr: "Décrivez aussi précisément que possible", it: "Descrivere il più precisamente possibile", es: "Describa lo más preciso posible" },
+        },
+        {
+          type: "text", isRequired: true,
+          labelJson: { de: "Seit wann bestehen die Beschwerden?", en: "How long have you had these symptoms?", fr: "Depuis quand avez-vous ces symptômes ?", it: "Da quanto tempo ha questi sintomi?", es: "¿Desde cuándo tiene estos síntomas?" },
+          hintJson:  { de: "z. B. seit 3 Tagen, seit 2 Wochen", en: "e.g. for 3 days, for 2 weeks", fr: "p. ex. depuis 3 jours, depuis 2 semaines", it: "es. da 3 giorni, da 2 settimane", es: "p. ej. desde hace 3 días, desde hace 2 semanas" },
+        },
+        {
+          type: "text", isRequired: false,
+          labelJson: { de: "Wo treten die Beschwerden auf?", en: "Where are the symptoms located?", fr: "Où se situent les symptômes ?", it: "Dove si manifestano i sintomi?", es: "¿Dónde se localizan los síntomas?" },
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Was ist Ihnen heute besonders wichtig?", en: "What is most important to you today?", fr: "Qu'est-ce qui est le plus important pour vous aujourd'hui ?", it: "Cosa è più importante per lei oggi?", es: "¿Qué es más importante para usted hoy?" },
+        },
       ],
     },
+    // ── 2. Beschwerden und Verlauf ───────────────────────────────────────────
     {
       titleJson: { de: "Beschwerden und Verlauf", en: "Symptoms and Course", fr: "Symptômes et évolution", it: "Sintomi e decorso", es: "Síntomas y evolución" },
       questions: [
-        { type: "single_choice", isRequired: false, labelJson: { de: "Haben sich die Beschwerden verändert?", en: "Have your symptoms changed?", fr: "Vos symptômes ont-ils évolué ?", it: "I suoi sintomi sono cambiati?", es: "¿Han cambiado sus síntomas?" }, optionsJson: [{ de: "Besser", en: "Better", fr: "Mieux", it: "Meglio", es: "Mejor" }, { de: "Schlechter", en: "Worse", fr: "Pire", it: "Peggio", es: "Peor" }, { de: "Unverändert", en: "Unchanged", fr: "Inchangé", it: "Invariato", es: "Sin cambios" }, { de: "Wechselnd", en: "Fluctuating", fr: "Variable", it: "Variabile", es: "Variable" }] },
-        { type: "textarea",     isRequired: false, labelJson: { de: "Gibt es Begleitsymptome?", en: "Are there accompanying symptoms?", fr: "Y a-t-il des symptômes associés ?", it: "Ci sono sintomi associati?", es: "¿Hay síntomas acompañantes?" }, hintJson: { de: "z. B. Fieber, Übelkeit, Schwindel", en: "e.g. fever, nausea, dizziness", fr: "p. ex. fièvre, nausées, vertiges", it: "es. febbre, nausea, vertigini", es: "p. ej. fiebre, náuseas, mareos" } },
-        { type: "number",       isRequired: false, labelJson: { de: "Schmerzstärke (0 = kein Schmerz, 10 = unerträglicher Schmerz)", en: "Pain intensity (0 = no pain, 10 = unbearable)", fr: "Intensité de la douleur (0 = sans douleur, 10 = insupportable)", it: "Intensità del dolore (0 = nessun dolore, 10 = insopportabile)", es: "Intensidad del dolor (0 = sin dolor, 10 = insoportable)" } },
+        {
+          type: "single_choice", isRequired: false,
+          labelJson: { de: "Haben sich die Beschwerden verändert?", en: "Have your symptoms changed?", fr: "Vos symptômes ont-ils évolué ?", it: "I suoi sintomi sono cambiati?", es: "¿Han cambiado sus síntomas?" },
+          optionsJson: [
+            { de: "Besser",      en: "Better",      fr: "Mieux",         it: "Meglio",      es: "Mejor"         },
+            { de: "Schlechter",  en: "Worse",       fr: "Pire",          it: "Peggio",      es: "Peor"          },
+            { de: "Unverändert", en: "Unchanged",   fr: "Inchangé",      it: "Invariato",   es: "Sin cambios"   },
+            { de: "Wechselnd",   en: "Fluctuating", fr: "Variable",      it: "Variabile",   es: "Variable"      },
+          ],
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Gibt es Begleitsymptome?", en: "Are there accompanying symptoms?", fr: "Y a-t-il des symptômes associés ?", it: "Ci sono sintomi associati?", es: "¿Hay síntomas acompañantes?" },
+          hintJson:  { de: "z. B. Fieber, Übelkeit, Schwindel", en: "e.g. fever, nausea, dizziness", fr: "p. ex. fièvre, nausées, vertiges", it: "es. febbre, nausea, vertigini", es: "p. ej. fiebre, náuseas, mareos" },
+        },
+        {
+          type: "number", isRequired: false,
+          labelJson: { de: "Schmerzstärke (0 = kein Schmerz, 10 = unerträglicher Schmerz)", en: "Pain intensity (0 = no pain, 10 = unbearable)", fr: "Intensité de la douleur (0 = aucune, 10 = insupportable)", it: "Intensità del dolore (0 = nessun dolore, 10 = insopportabile)", es: "Intensidad del dolor (0 = sin dolor, 10 = insoportable)" },
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Was verbessert oder verschlechtert die Beschwerden?", en: "What improves or worsens the symptoms?", fr: "Qu'est-ce qui améliore ou aggrave les symptômes ?", it: "Cosa migliora o peggiora i sintomi?", es: "¿Qué mejora o empeora los síntomas?" },
+        },
       ],
     },
+    // ── 3. Medikamente und Allergien ─────────────────────────────────────────
     {
-      titleJson: { de: "Medikamente & Allergien", en: "Medications & Allergies", fr: "Médicaments & allergies", it: "Farmaci & allergie", es: "Medicamentos & alergias" },
+      titleJson: { de: "Medikamente und Allergien", en: "Medications and Allergies", fr: "Médicaments et allergies", it: "Farmaci e allergie", es: "Medicamentos y alergias" },
       questions: [
-        { type: "textarea", isRequired: false, labelJson: { de: "Nehmen Sie aktuell Medikamente? (Name, Dosierung, Häufigkeit)", en: "Do you currently take any medications? (name, dosage, frequency)", fr: "Prenez-vous actuellement des médicaments ? (nom, dosage, fréquence)", it: "Assume attualmente farmaci? (nome, dosaggio, frequenza)", es: "¿Toma actualmente medicamentos? (nombre, dosis, frecuencia)" } },
-        { type: "textarea", isRequired: false, labelJson: { de: "Sind Allergien oder Unverträglichkeiten bekannt?", en: "Are any allergies or intolerances known?", fr: "Des allergies ou intolérances sont-elles connues ?", it: "Sono note allergie o intolleranze?", es: "¿Se conocen alergias o intolerancias?" }, hintJson: { de: "z. B. Penicillin, Latex, Nüsse", en: "e.g. penicillin, latex, nuts", fr: "p. ex. pénicilline, latex", it: "es. penicillina, lattice", es: "p. ej. penicilina, látex" } },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Nehmen Sie aktuell Medikamente? (Name, Dosierung, Häufigkeit)", en: "Do you currently take any medications? (name, dosage, frequency)", fr: "Prenez-vous actuellement des médicaments ? (nom, dosage, fréquence)", it: "Assume attualmente farmaci? (nome, dosaggio, frequenza)", es: "¿Toma actualmente medicamentos? (nombre, dosis, frecuencia)" },
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Sind Allergien oder Unverträglichkeiten bekannt?", en: "Are any allergies or intolerances known?", fr: "Des allergies ou intolérances sont-elles connues ?", it: "Sono note allergie o intolleranze?", es: "¿Se conocen alergias o intolerancias?" },
+          hintJson:  { de: "z. B. Penicillin, Latex, Nüsse", en: "e.g. penicillin, latex, nuts", fr: "p. ex. pénicilline, latex", it: "es. penicillina, lattice", es: "p. ej. penicilina, látex" },
+        },
+        {
+          type: "yes_no", isRequired: false,
+          labelJson: { de: "Wurden Medikamente kürzlich verändert?", en: "Have any medications been recently changed?", fr: "Des médicaments ont-ils été récemment modifiés ?", it: "Sono stati modificati dei farmaci di recente?", es: "¿Se han modificado medicamentos recientemente?" },
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Falls ja — welche Änderung?", en: "If yes — what changed?", fr: "Si oui — quelle modification ?", it: "In caso affermativo — quale modifica?", es: "En caso afirmativo — ¿qué cambió?" },
+          hintJson:  { de: "Optional — nur wenn Medikamente verändert wurden", en: "Optional — only if medications were changed", fr: "Optionnel — seulement si des médicaments ont été modifiés", it: "Opzionale — solo se i farmaci sono stati modificati", es: "Opcional — solo si se han modificado medicamentos" },
+        },
       ],
     },
+    // ── 4. Vorerkrankungen und Operationen ───────────────────────────────────
     {
-      titleJson: { de: "Vorerkrankungen & Operationen", en: "Medical History & Surgeries", fr: "Antécédents médicaux & chirurgies", it: "Anamnesi & interventi", es: "Antecedentes & cirugías" },
+      titleJson: { de: "Vorerkrankungen und Operationen", en: "Medical History and Surgeries", fr: "Antécédents médicaux et chirurgies", it: "Anamnesi e interventi chirurgici", es: "Antecedentes y cirugías" },
       questions: [
-        { type: "textarea", isRequired: false, labelJson: { de: "Sind relevante Vorerkrankungen bekannt?", en: "Are there any relevant medical conditions?", fr: "Y a-t-il des antécédents médicaux pertinents ?", it: "Ci sono patologie rilevanti note?", es: "¿Existen enfermedades previas relevantes?" }, hintJson: { de: "z. B. Bluthochdruck, Diabetes, Herzerkrankung", en: "e.g. hypertension, diabetes, heart disease", fr: "p. ex. hypertension, diabète", it: "es. ipertensione, diabete", es: "p. ej. hipertensión, diabetes" } },
-        { type: "textarea", isRequired: false, labelJson: { de: "Gab es frühere Operationen?", en: "Have you had any previous surgeries?", fr: "Avez-vous déjà subi des opérations ?", it: "Ha avuto interventi chirurgici precedenti?", es: "¿Ha tenido cirugías previas?" } },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Sind relevante Vorerkrankungen bekannt?", en: "Are there any relevant medical conditions?", fr: "Y a-t-il des antécédents médicaux pertinents ?", it: "Ci sono patologie rilevanti note?", es: "¿Existen enfermedades previas relevantes?" },
+          hintJson:  { de: "z. B. Bluthochdruck, Diabetes, Herzerkrankung", en: "e.g. hypertension, diabetes, heart disease", fr: "p. ex. hypertension, diabète", it: "es. ipertensione, diabete", es: "p. ej. hipertensión, diabetes" },
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Gab es frühere Operationen?", en: "Have you had any previous surgeries?", fr: "Avez-vous déjà subi des opérations ?", it: "Ha avuto interventi chirurgici precedenti?", es: "¿Ha tenido cirugías previas?" },
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Gibt es relevante Erkrankungen in der Familie?", en: "Are there any relevant conditions in the family?", fr: "Y a-t-il des maladies familiales pertinentes ?", it: "Ci sono malattie rilevanti in famiglia?", es: "¿Hay enfermedades relevantes en la familia?" },
+          hintJson:  { de: "z. B. Herzerkrankungen, Diabetes, Krebs", en: "e.g. heart disease, diabetes, cancer", fr: "p. ex. maladies cardiaques, diabète, cancer", it: "es. malattie cardiache, diabete, cancro", es: "p. ej. enfermedades cardíacas, diabetes, cáncer" },
+        },
       ],
     },
+    // ── 5. Lebenssituation und Risikofaktoren ─────────────────────────────────
     {
-      titleJson: { de: "Wichtige Hinweise für die Praxis", en: "Important Notes for the Practice", fr: "Remarques importantes pour le cabinet", it: "Note importanti per lo studio", es: "Notas importantes para la consulta" },
+      titleJson: { de: "Lebenssituation und Risikofaktoren", en: "Lifestyle and Risk Factors", fr: "Mode de vie et facteurs de risque", it: "Stile di vita e fattori di rischio", es: "Estilo de vida y factores de riesgo" },
       questions: [
-        { type: "textarea", isRequired: false, labelJson: { de: "Gibt es etwas, das die Praxis vor dem Termin wissen sollte?", en: "Is there anything the practice should know before the appointment?", fr: "Y a-t-il quelque chose que le cabinet devrait savoir avant le rendez-vous ?", it: "C'è qualcosa che lo studio dovrebbe sapere prima dell'appuntamento?", es: "¿Hay algo que la consulta deba saber antes de la cita?" } },
-        { type: "textarea", isRequired: false, labelJson: { de: "Welche Fragen möchten Sie im Termin stellen?", en: "What questions would you like to ask during the appointment?", fr: "Quelles questions souhaitez-vous poser lors du rendez-vous ?", it: "Quali domande desidera porre durante la visita?", es: "¿Qué preguntas le gustaría hacer durante la cita?" } },
+        {
+          type: "single_choice", isRequired: false,
+          labelJson: { de: "Rauchen Sie?", en: "Do you smoke?", fr: "Fumez-vous ?", it: "Fuma?", es: "¿Fuma usted?" },
+          optionsJson: [
+            { de: "Nein",    en: "No",         fr: "Non",              it: "No",          es: "No"               },
+            { de: "Ja",      en: "Yes",        fr: "Oui",              it: "Sì",          es: "Sí"               },
+            { de: "Früher",  en: "Previously", fr: "Anciennement",     it: "In passato",  es: "Anteriormente"    },
+          ],
+        },
+        {
+          type: "single_choice", isRequired: false,
+          labelJson: { de: "Trinken Sie Alkohol?", en: "Do you drink alcohol?", fr: "Consommez-vous de l'alcool ?", it: "Consuma alcol?", es: "¿Consume alcohol?" },
+          optionsJson: [
+            { de: "Nein",          en: "No",                  fr: "Non",                    it: "No",              es: "No"                  },
+            { de: "Gelegentlich",  en: "Occasionally",        fr: "Occasionnellement",       it: "Occasionalmente", es: "Ocasionalmente"      },
+            { de: "Regelmäßig",   en: "Regularly",           fr: "Régulièrement",           it: "Regolarmente",    es: "Regularmente"        },
+            { de: "Keine Angabe", en: "Prefer not to say",   fr: "Ne souhaite pas répondre", it: "Non rispondo",   es: "Prefiero no decirlo" },
+          ],
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Gibt es berufliche oder private Belastungen, die relevant sein könnten?", en: "Are there occupational or personal stressors that might be relevant?", fr: "Y a-t-il des facteurs de stress professionnels ou personnels potentiellement pertinents ?", it: "Ci sono fattori di stress professionali o personali rilevanti?", es: "¿Hay factores estresantes laborales o personales que puedan ser relevantes?" },
+        },
+      ],
+    },
+    // ── 6. Für Frauen — Schwangerschaft ──────────────────────────────────────
+    {
+      titleJson: { de: "Für Frauen — Schwangerschaft und Stillzeit", en: "For Women — Pregnancy and Breastfeeding", fr: "Pour les femmes — grossesse et allaitement", it: "Per le donne — gravidanza e allattamento", es: "Para mujeres — embarazo y lactancia" },
+      questions: [
+        {
+          type: "single_choice", isRequired: false,
+          labelJson: { de: "Besteht eine Schwangerschaft oder könnte eine bestehen?", en: "Are you pregnant or could you be pregnant?", fr: "Êtes-vous enceinte ou pourriez-vous l'être ?", it: "È incinta o potrebbe esserlo?", es: "¿Está embarazada o podría estarlo?" },
+          optionsJson: [
+            { de: "Nein",                           en: "No",                     fr: "Non",                   it: "No",                     es: "No"                        },
+            { de: "Ja",                             en: "Yes",                    fr: "Oui",                   it: "Sì",                     es: "Sí"                        },
+            { de: "Unklar",                         en: "Unclear",                fr: "Incertain",             it: "Incerto",                es: "Incierto"                  },
+            { de: "Nicht relevant / keine Angabe", en: "Not applicable",          fr: "Non applicable",        it: "Non applicabile",        es: "No aplica"                 },
+          ],
+        },
+        {
+          type: "single_choice", isRequired: false,
+          labelJson: { de: "Stillen Sie aktuell?", en: "Are you currently breastfeeding?", fr: "Allaitez-vous actuellement ?", it: "Sta allattando al seno?", es: "¿Está amamantando actualmente?" },
+          optionsJson: [
+            { de: "Nein",                           en: "No",                     fr: "Non",          it: "No",                es: "No"       },
+            { de: "Ja",                             en: "Yes",                    fr: "Oui",          it: "Sì",                es: "Sí"       },
+            { de: "Nicht relevant / keine Angabe", en: "Not applicable",          fr: "Non applicable", it: "Non applicabile", es: "No aplica" },
+          ],
+        },
+      ],
+    },
+    // ── 7. Fragen an die Praxis ───────────────────────────────────────────────
+    {
+      titleJson: { de: "Fragen an die Praxis", en: "Questions for the Practice", fr: "Questions pour le cabinet", it: "Domande per lo studio", es: "Preguntas para la consulta" },
+      questions: [
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Welche Fragen möchten Sie im Termin stellen?", en: "What questions would you like to ask during the appointment?", fr: "Quelles questions souhaitez-vous poser lors du rendez-vous ?", it: "Quali domande desidera porre durante la visita?", es: "¿Qué preguntas le gustaría hacer durante la cita?" },
+        },
+        {
+          type: "yes_no", isRequired: false,
+          labelJson: { de: "Bringen Sie Befunde oder Dokumente mit?", en: "Are you bringing any test results or documents?", fr: "Apportez-vous des résultats ou des documents ?", it: "Porta con sé referti o documenti?", es: "¿Trae consigo resultados o documentos?" },
+        },
+        {
+          type: "textarea", isRequired: false,
+          labelJson: { de: "Falls ja — welche Dokumente?", en: "If yes — which documents?", fr: "Si oui — quels documents ?", it: "In caso affermativo — quali documenti?", es: "En caso afirmativo — ¿qué documentos?" },
+          hintJson:  { de: "Optional — z. B. Vorbefunde, Röntgenbilder, Laborwerte", en: "Optional — e.g. previous findings, X-rays, lab results", fr: "Optionnel — p. ex. anciens résultats, radiographies", it: "Opzionale — es. referti precedenti, radiografie, esami", es: "Opcional — p. ej. resultados previos, radiografías, análisis" },
+        },
       ],
     },
   ],
@@ -110,7 +243,9 @@ const TEMPLATE_INCLUDE = {
 async function requireAccess(uid, pid, needsManage = false) {
   const access = await getPracticeAccess(uid, pid);
   if (!access) throw new Error("practice_not_found");
-  if (!access.practice.anamnesisEnabled) throw new Error("anamnesis_disabled");
+  // All active practices may use anamnesis when PRACTICE_ANAMNESIS_ENABLED=true.
+  // isActive=false blocks access; anamnesisEnabled is kept in schema for future admin overrides.
+  if (!access.practice.isActive) throw new Error("anamnesis_disabled");
   if (needsManage && !canManageAnamnesis(access.role)) throw new Error("forbidden");
   if (!needsManage && !canReadAnamnesis(access.role)) throw new Error("forbidden");
   return access;
@@ -454,6 +589,7 @@ router.get("/templates/:templateId/submissions", async (req, res) => {
         id: true, patientLanguage: true, status: true,
         submittedAt: true, viewedAt: true, archivedAt: true,
         consentGrantedAt: true, consentVersion: true,
+        patientInfoJson: true,
         link: { select: { id: true, label: true, tokenPrefix: true } },
       },
     });

@@ -115,6 +115,50 @@ export default function AnamnesisSubmissionDetailPage() {
         <span>{t.consentVersion}: {submission.consentVersion}</span>
       </div>
 
+      {submission.patientInfoJson && (
+        <section className="anamnesis-submission__patient-box">
+          <h2 className="anamnesis-view__section-title">{t.patientDataHeading}</h2>
+          <dl className="anamnesis-submission__patient-dl">
+            {(submission.patientInfoJson.firstName || submission.patientInfoJson.lastName) && (
+              <>
+                <dt>{t.patientName}</dt>
+                <dd>{[submission.patientInfoJson.firstName, submission.patientInfoJson.lastName].filter(Boolean).join(" ")}</dd>
+              </>
+            )}
+            {submission.patientInfoJson.dateOfBirth && (
+              <>
+                <dt>{t.patientDob}</dt>
+                <dd>{submission.patientInfoJson.dateOfBirth}</dd>
+              </>
+            )}
+            {submission.patientInfoJson.email && (
+              <>
+                <dt>{t.patientEmail}</dt>
+                <dd>{submission.patientInfoJson.email}</dd>
+              </>
+            )}
+            {submission.patientInfoJson.phone && (
+              <>
+                <dt>{t.patientPhone}</dt>
+                <dd>{submission.patientInfoJson.phone}</dd>
+              </>
+            )}
+            {submission.patientInfoJson.insuranceName && (
+              <>
+                <dt>{t.patientInsurance}</dt>
+                <dd>{submission.patientInfoJson.insuranceName}{submission.patientInfoJson.insuranceType ? ` (${submission.patientInfoJson.insuranceType.toUpperCase()})` : ""}</dd>
+              </>
+            )}
+            {submission.patientInfoJson.insuranceNumber && (
+              <>
+                <dt>{t.patientInsuranceNumber}</dt>
+                <dd>{submission.patientInfoJson.insuranceNumber}</dd>
+              </>
+            )}
+          </dl>
+        </section>
+      )}
+
       <h2 className="anamnesis-view__section-title">{t.answersHeading}</h2>
 
       {Object.values(grouped).map((group) => (
