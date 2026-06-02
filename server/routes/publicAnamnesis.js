@@ -7,11 +7,17 @@
 import express from "express";
 import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
+import { translateAnamnesisSubmission } from "../services/practiceAnamnesis/anamnesisTranslationService.js";
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-const VALID_LANGUAGES = new Set(["de", "en", "fr", "it", "es"]);
+// All language codes supported by the locale system (localeConfig.SUPPORTED_LANGUAGE_CODES)
+const VALID_LANGUAGES = new Set([
+  "de", "en", "fr", "es", "it",
+  "ru", "uk", "tr", "pt", "ar", "fa", "pl", "ro", "nl",
+  "ckb", "ku", "el", "sq", "hr", "bs", "sr", "he", "ur",
+]);
 const VALID_INSURANCE_TYPES = new Set(["gkv", "pkv", "self_pay", "other", ""]);
 
 function hashToken(raw) {
@@ -177,6 +183,13 @@ router.post("/qr/:token/submit", async (req, res) => {
         consentScopes: cleanConsentScopes,
         status: "new",
       },
+    });
+
+    // Respond immediately — translation runs asynchronously and never blocks the patient
+    setImmediate(() => {
+      translateAnamnesisSubmission(submission.id).catch((err) => {
+        console.warn("[publicAnamnesis] async translation error:", err?.message);
+      });
     });
 
     return res.status(201).json({ ok: true, submissionId: submission.id });

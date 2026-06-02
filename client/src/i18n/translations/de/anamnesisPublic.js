@@ -31,7 +31,7 @@ export default {
   insuranceTypeOther: "Sonstige",
 
   consentHeading: "Datenschutzhinweis",
-  consentBody: "Ihre Antworten werden verschlüsselt an die Praxis übermittelt und dort gespeichert. Ihre Daten werden ausschließlich zur Vorbereitung Ihres Termins verwendet. Sie können Ihre Einwilligung jederzeit durch Kontaktaufnahme mit der Praxis widerrufen. Es erfolgt keine Weitergabe an Dritte. Das Ausfüllen dieses Formulars ist freiwillig.",
+  consentBody: "Ihre Antworten werden verschlüsselt an die Praxis übermittelt und dort gespeichert. Ihre Daten werden ausschließlich zur Vorbereitung Ihres Termins verwendet. Wenn Ihre Sprache von der Praxissprache abweicht, können Ihre Antworten mithilfe eines KI-Dienstes automatisch übersetzt werden — die Originalantworten bleiben dabei stets erhalten und sind für die Praxis maßgeblich. Sie können Ihre Einwilligung jederzeit durch Kontaktaufnahme mit der Praxis widerrufen. Es erfolgt keine Weitergabe an Dritte. Das Ausfüllen dieses Formulars ist freiwillig.",
   consentNotice: "Dieses Formular dient ausschließlich der Vorab-Erfassung von Informationen. Es stellt keine Diagnose, Therapieempfehlung oder medizinische Beratung dar und ersetzt nicht das ärztliche Gespräch.",
   consentCheckboxLabel: "Ich habe den Datenschutzhinweis gelesen und erkläre mich damit einverstanden, dass meine Angaben zur Vorbereitung meines Termins verwendet werden.",
   consentRequired: "Bitte stimmen Sie dem Datenschutzhinweis zu, um fortzufahren.",

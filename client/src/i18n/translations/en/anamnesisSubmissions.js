@@ -48,4 +48,15 @@ export default {
   patientPhone: "Phone",
   patientInsurance: "Insurance",
   patientInsuranceNumber: "Insurance number",
+
+  translationHeading: "Translation",
+  translationOriginal: "Original",
+  translationTranslated: "Translation",
+  translationDisclaimer: "Automatic translation — the original is authoritative if there is any discrepancy.",
+  translationUncertain: "Uncertain translation",
+  translationStatusCompleted: "Translated",
+  translationStatusSkipped: "No translation needed",
+  translationStatusFailed: "Translation failed",
+  translationStatusPending: "Translation pending",
+  translationStatusUnavailable: "AI translation not configured",
 };

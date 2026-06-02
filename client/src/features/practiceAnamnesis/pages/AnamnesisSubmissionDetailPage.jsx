@@ -52,6 +52,11 @@ export default function AnamnesisSubmissionDetailPage() {
   if (error || !submission) return <div className="anamnesis-hub__error">{t.loadError || error}</div>;
 
   const answers = Array.isArray(submission.answersJson) ? submission.answersJson : [];
+  const translatedAnswers = Array.isArray(submission.translatedAnswersJson) ? submission.translatedAnswersJson : [];
+  const translationMap = new Map(translatedAnswers.map((a) => [a.questionId, a]));
+
+  const hasTranslation = submission.translationStatus === "completed";
+  const showTranslationBanner = submission.translationStatus && submission.translationStatus !== "skipped";
 
   const grouped = answers.reduce((acc, a) => {
     const key = a.sectionId || "__top";
@@ -66,6 +71,15 @@ export default function AnamnesisSubmissionDetailPage() {
     if (type === "yes_no") return value ? "✓" : "✗";
     if (Array.isArray(value)) return value.join(", ");
     return String(value);
+  };
+
+  const translationStatusLabel = (status) => {
+    if (status === "completed") return t.translationStatusCompleted;
+    if (status === "skipped") return t.translationStatusSkipped;
+    if (status === "failed") return t.translationStatusFailed;
+    if (status === "pending") return t.translationStatusPending;
+    if (status === "unavailable") return t.translationStatusUnavailable;
+    return null;
   };
 
   return (
@@ -161,16 +175,50 @@ export default function AnamnesisSubmissionDetailPage() {
 
       <h2 className="anamnesis-view__section-title">{t.answersHeading}</h2>
 
+      {showTranslationBanner && (
+        <div className={`anamnesis-submission__translation-banner${submission.translationStatus === "failed" ? " anamnesis-submission__translation-banner--failed" : ""}`}>
+          <span className={`anamnesis-submission__translation-badge${submission.translationStatus === "failed" ? " anamnesis-submission__translation-badge--failed" : ""}`}>
+            {translationStatusLabel(submission.translationStatus)}
+          </span>
+          <span className="anamnesis-submission__translation-disclaimer">
+            {hasTranslation ? t.translationDisclaimer : translationStatusLabel(submission.translationStatus)}
+          </span>
+        </div>
+      )}
+
       {Object.values(grouped).map((group) => (
         <section key={group.label} className="anamnesis-view__section">
           <h3 className="anamnesis-view__section-title anamnesis-view__section-title--sub">{group.label}</h3>
           <ul className="anamnesis-submission__answers">
-            {group.items.map((a, i) => (
-              <li key={i} className="anamnesis-submission__answer-row">
-                <span className="anamnesis-submission__question-label">{a.questionLabel}</span>
-                <span className="anamnesis-submission__answer-value">{formatValue(a.type, a.value)}</span>
-              </li>
-            ))}
+            {group.items.map((a, i) => {
+              const tr = hasTranslation ? translationMap.get(a.questionId) : null;
+              const showTr = tr && tr.translatedText != null;
+              return (
+                <li key={i} className={`anamnesis-submission__answer-row${showTr ? " anamnesis-submission__answer-row--translated" : ""}`}>
+                  <span className={`anamnesis-submission__question-label${showTr ? " anamnesis-submission__question-label--translated" : ""}`}>
+                    {a.questionLabel}
+                  </span>
+                  {showTr ? (
+                    <>
+                      <div>
+                        <div className="anamnesis-submission__answer-col-label">{t.translationTranslated}</div>
+                        <span className={`anamnesis-submission__answer-value${tr.uncertain ? " anamnesis-submission__answer-value--uncertain" : ""}`}>
+                          {tr.translatedText}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="anamnesis-submission__answer-col-label">{t.translationOriginal}</div>
+                        <span className="anamnesis-submission__answer-value anamnesis-submission__answer-value--original">
+                          {formatValue(a.type, a.value)}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <span className="anamnesis-submission__answer-value">{formatValue(a.type, a.value)}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
       ))}

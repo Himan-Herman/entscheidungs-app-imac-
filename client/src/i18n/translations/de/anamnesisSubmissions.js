@@ -48,4 +48,15 @@ export default {
   patientPhone: "Telefon",
   patientInsurance: "Versicherung",
   patientInsuranceNumber: "Versicherungsnummer",
+
+  translationHeading: "Übersetzung",
+  translationOriginal: "Original",
+  translationTranslated: "Übersetzung",
+  translationDisclaimer: "Automatische Übersetzung — bei Unklarheiten ist das Original maßgeblich.",
+  translationUncertain: "Unsichere Übersetzung",
+  translationStatusCompleted: "Übersetzt",
+  translationStatusSkipped: "Keine Übersetzung nötig",
+  translationStatusFailed: "Übersetzung fehlgeschlagen",
+  translationStatusPending: "Übersetzung ausstehend",
+  translationStatusUnavailable: "KI-Übersetzung nicht konfiguriert",
 };

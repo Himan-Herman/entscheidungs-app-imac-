@@ -30,6 +30,13 @@ export const AI_MODULES = {
    * Forbidden: diagnosis, urgency, treatment/medication advice, disease probability.
    */
   LAB_PATIENT_EXPLANATION: "lab_patient_explanation",
+  /**
+   * Anamnesis submission translation — strict translation only.
+   * Allowed: verbatim translation of patient free-text answers between languages.
+   * Forbidden: diagnosis, triage, urgency, treatment advice, medical interpretation,
+   * hallucinated content, summarization that introduces new facts.
+   */
+  ANAMNESIS_TRANSLATION: "anamnesis_translation",
   GENERIC: "generic",
 };
 
@@ -282,6 +289,12 @@ export function getOutputSafetyPatterns(module) {
       ];
     case AI_MODULES.LAB_PATIENT_EXPLANATION:
       return [...LAB_EXPLANATION_FORBIDDEN, ...MULTILINGUAL_EXTRA];
+    case AI_MODULES.ANAMNESIS_TRANSLATION:
+      return [
+        ...MEDICAL_INTERPRETER_OUTPUT_FORBIDDEN,
+        ...MULTILINGUAL_EXTRA,
+        ...MEDICAL_INTERPRETER_EXTRA,
+      ];
     default:
       return [...base, ...SYMPTOM_EXTRA];
   }
@@ -346,6 +359,10 @@ export const SAFE_FALLBACKS = {
   [AI_MODULES.MEDICAL_INTERPRETER]: {
     de: "Diese Ausgabe konnte nicht sicher als Kommunikationshilfe angezeigt werden. Bitte formulieren Sie den Inhalt neutral und klären Sie medizinische Fragen direkt mit Ihrem Behandlungsteam. Dieses Modul bietet keine Diagnose, keine Dringlichkeitseinschätzung und keine Behandlungsempfehlung.",
     en: "This output could not be safely shown as communication support. Please phrase the content neutrually and discuss medical questions directly with your care team. This module does not provide diagnosis, urgency assessment, or treatment recommendations.",
+  },
+  [AI_MODULES.ANAMNESIS_TRANSLATION]: {
+    de: "(Übersetzung nicht verfügbar — Original maßgeblich.)",
+    en: "(Translation unavailable — original text is authoritative.)",
   },
   generic: {
     de: "Die Ausgabe konnte nicht sicher strukturiert werden. Bitte formulieren Sie neutral und besprechen Sie medizinische Fragen mit medizinischem Fachpersonal.",

@@ -325,8 +325,10 @@ export default function AnamnesisPublicPage() {
     setSubmitting(true);
     setSubmitError(null);
     try {
+      const doctorLang = linkData?.practice?.preferredDoctorLanguage || null;
       const { res, data } = await submitPublicAnamnesis(token, {
         patientLanguage: lang,
+        doctorLanguage: doctorLang,
         answersJson: buildAnswersJson(),
         patientInfo: buildCleanPatientInfo(),
         consentScopes: ["anamnesis_data"],

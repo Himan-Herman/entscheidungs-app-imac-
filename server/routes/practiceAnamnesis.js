@@ -590,6 +590,7 @@ router.get("/templates/:templateId/submissions", async (req, res) => {
         submittedAt: true, viewedAt: true, archivedAt: true,
         consentGrantedAt: true, consentVersion: true,
         patientInfoJson: true,
+        translationStatus: true, translationTargetLanguage: true,
         link: { select: { id: true, label: true, tokenPrefix: true } },
       },
     });

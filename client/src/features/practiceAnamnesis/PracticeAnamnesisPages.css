@@ -1359,3 +1359,89 @@
 [data-theme="dark"] .anamnesis-submission__patient-dl dd {
   color: var(--color-text, #e2e8f0);
 }
+
+/* ── Translation banner + answer overlay ────────────────────────────────────── */
+
+.anamnesis-submission__translation-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--color-info-bg, #eff6ff);
+  border: 1px solid var(--color-info-border, #bfdbfe);
+  border-radius: 0.625rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #374151);
+  margin-bottom: 1.25rem;
+}
+
+.anamnesis-submission__translation-banner--failed {
+  background: var(--color-warning-bg, #fffbeb);
+  border-color: var(--color-warning-border, #fde68a);
+}
+
+.anamnesis-submission__translation-badge {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: var(--color-info-badge-bg, #2563eb);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.anamnesis-submission__translation-badge--failed {
+  background: var(--color-warning-badge-bg, #d97706);
+}
+
+.anamnesis-submission__translation-disclaimer {
+  flex: 1;
+  line-height: 1.5;
+}
+
+.anamnesis-submission__answer-row--translated {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem 1.25rem;
+  align-items: baseline;
+}
+
+.anamnesis-submission__answer-col-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.1rem;
+}
+
+.anamnesis-submission__question-label--translated {
+  grid-column: 1 / -1;
+}
+
+.anamnesis-submission__answer-value--original {
+  color: var(--color-text-muted, #6b7280);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.anamnesis-submission__answer-value--uncertain::after {
+  content: " ⚠";
+  color: var(--color-warning, #d97706);
+}
+
+[data-theme="dark"] .anamnesis-submission__translation-banner {
+  background: var(--color-info-bg, #1e3a5f);
+  border-color: var(--color-info-border, #2563eb);
+  color: var(--color-text-muted, #9ca3af);
+}
+
+[data-theme="dark"] .anamnesis-submission__translation-banner--failed {
+  background: var(--color-warning-bg, #2d2008);
+  border-color: var(--color-warning-border, #92400e);
+}
+
+[data-theme="dark"] .anamnesis-submission__answer-value--original {
+  color: var(--color-text-muted, #9ca3af);
+}

@@ -31,7 +31,7 @@ export default {
   insuranceTypeOther: "Other",
 
   consentHeading: "Privacy notice",
-  consentBody: "Your answers will be transmitted securely to the practice and stored there. Your data will only be used to prepare your appointment. You can withdraw your consent at any time by contacting the practice. No data will be transferred to third parties. Completing this form is voluntary.",
+  consentBody: "Your answers will be transmitted securely to the practice and stored there. Your data will only be used to prepare your appointment. If your language differs from the practice language, your answers may be automatically translated using an AI service — your original answers are always retained and remain authoritative for the practice. You can withdraw your consent at any time by contacting the practice. No data will be transferred to third parties. Completing this form is voluntary.",
   consentNotice: "This form is intended solely to collect information in advance. It does not constitute a diagnosis, treatment recommendation, or medical advice, and does not replace the physician consultation.",
   consentCheckboxLabel: "I have read the privacy notice and consent to my details being used to prepare my appointment.",
   consentRequired: "Please accept the privacy notice to continue.",

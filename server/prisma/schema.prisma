@@ -2049,6 +2049,13 @@ model PracticeAnamnesisSubmission {
   viewedAt          DateTime?
   archivedAt        DateTime?
   deletedAt         DateTime?
+  /// AI-generated translations — same structure as answersJson with translatedText per item.
+  translatedAnswersJson     Json?
+  /// pending | completed | failed | unavailable | skipped
+  translationStatus         String?   @db.VarChar(20)
+  translatedAt              DateTime?
+  /// BCP-47 target language used for translation (doctor/practice language).
+  translationTargetLanguage String?   @db.VarChar(12)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
