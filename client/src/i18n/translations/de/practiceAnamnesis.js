@@ -37,6 +37,8 @@ export default {
   deleteTemplate: "Löschen",
   confirmDeleteTemplate: "Vorlage wirklich löschen? Alle Abschnitte und Fragen werden entfernt. Besser: Archivieren statt Löschen.",
   confirmArchiveTemplate: "Vorlage archivieren? Sie kann jederzeit reaktiviert werden.",
+  viewLinks: "QR / Links",
+  viewSubmissions: "Eingang",
 
   // ── Template editor: metadata ──────────────────────────────────────────────
   templateTitle: "Titel der Vorlage",

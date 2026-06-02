@@ -38,6 +38,7 @@ export default {
   loading: "Wird geladen …",
   loadError: "Links konnten nicht geladen werden.",
 
+  cancel: "Abbrechen",
   backToTemplate: "Zur Vorlage",
   viewSubmissions: "Einreichungen ansehen",
 };

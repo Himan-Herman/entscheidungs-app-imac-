@@ -565,13 +565,13 @@ export default function PracticeAnamnesisTemplatePage() {
                   className="anamnesis-hub__btn anamnesis-hub__btn--outline anamnesis-hub__btn--sm"
                   to={`/practice/anamnesis/${templateId}/links${practiceId ? `?practiceId=${encodeURIComponent(practiceId)}` : ""}`}
                 >
-                  QR
+                  {t.viewLinks}
                 </Link>
                 <Link
                   className="anamnesis-hub__btn anamnesis-hub__btn--outline anamnesis-hub__btn--sm"
                   to={`/practice/anamnesis/${templateId}/submissions${practiceId ? `?practiceId=${encodeURIComponent(practiceId)}` : ""}`}
                 >
-                  Eingang
+                  {t.viewSubmissions}
                 </Link>
               </>
             )}

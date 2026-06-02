@@ -27,6 +27,7 @@ export default {
   archive: "Archivieren",
   unarchive: "Als gesehen markieren",
   deleteSubmission: "Löschen",
+  cancel: "Abbrechen",
   confirmDeleteSubmission: "Diese Einreichung löschen? Dies kann nicht rückgängig gemacht werden.",
   confirmArchiveSubmission: "Diese Einreichung archivieren?",
 

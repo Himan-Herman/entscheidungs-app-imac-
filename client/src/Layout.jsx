@@ -17,14 +17,18 @@ export default function Layout() {
   const isLegal = pathname === "/impressum" || pathname === "/datenschutz";
   const forcePublic = params.get("public") === "1";
 
+  const isPublicAnamnesisPage = pathname.startsWith("/anamnesis/qr");
+
   const hideHeader =
     pathname === "/" ||
     pathname.startsWith("/check-email") ||
-    pathname.startsWith("/verified");
+    pathname.startsWith("/verified") ||
+    isPublicAnamnesisPage;
 
   const hideFooter =
     pathname === "/" ||
     pathname === "/register" ||
+    isPublicAnamnesisPage ||
     (isLegal && (!isLoggedIn || forcePublic));
 
   const showMobileShell = isLoggedIn && shouldShowMobileAppNav(pathname);

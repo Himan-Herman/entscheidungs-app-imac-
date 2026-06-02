@@ -37,6 +37,8 @@ export default {
   deleteTemplate: "Delete",
   confirmDeleteTemplate: "Really delete this template? All sections and questions will be removed. Consider archiving instead.",
   confirmArchiveTemplate: "Archive this template? It can be reactivated at any time.",
+  viewLinks: "QR / Links",
+  viewSubmissions: "Inbox",
 
   templateTitle: "Template title",
   templateDescription: "Description (optional)",

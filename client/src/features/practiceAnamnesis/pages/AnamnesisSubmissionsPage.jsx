@@ -61,19 +61,19 @@ export default function AnamnesisSubmissionsPage() {
   }, [submissions, filter]);
 
   const handleArchive = async (id) => {
+    setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, status: "archived" } : s)));
     await patchAnamnesisSubmission(practiceId, id, { status: "archived" });
-    load();
   };
 
   const handleUnarchive = async (id) => {
+    setSubmissions((prev) => prev.map((s) => (s.id === id ? { ...s, status: "viewed" } : s)));
     await patchAnamnesisSubmission(practiceId, id, { status: "viewed" });
-    load();
   };
 
   const handleDelete = async (id) => {
-    await deleteAnamnesisSubmission(practiceId, id);
+    setSubmissions((prev) => prev.filter((s) => s.id !== id));
     setConfirmDeleteId(null);
-    load();
+    await deleteAnamnesisSubmission(practiceId, id);
   };
 
   const statusLabel = (s) => {
@@ -166,12 +166,16 @@ export default function AnamnesisSubmissionsPage() {
                 )}
                 {confirmDeleteId === sub.id ? (
                   <>
-                    <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm" style={{ background: "var(--color-danger, #e53)" }} onClick={() => handleDelete(sub.id)}>✓</button>
-                    <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" onClick={() => setConfirmDeleteId(null)}>✕</button>
+                    <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm" style={{ background: "var(--color-danger, #e53)" }} onClick={() => handleDelete(sub.id)}>
+                      {t.deleteSubmission}
+                    </button>
+                    <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" onClick={() => setConfirmDeleteId(null)}>
+                      {t.cancel}
+                    </button>
                     <span className="anamnesis-submissions__confirm-text">{t.confirmDeleteSubmission}</span>
                   </>
                 ) : (
-                  <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" onClick={() => setConfirmDeleteId(sub.id)}>🗑</button>
+                  <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" aria-label={t.deleteSubmission} onClick={() => setConfirmDeleteId(sub.id)}>🗑</button>
                 )}
               </div>
             </li>

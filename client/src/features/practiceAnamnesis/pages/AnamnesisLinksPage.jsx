@@ -44,6 +44,7 @@ export default function AnamnesisLinksPage() {
   const [qrDataUrl, setQrDataUrl] = useState("");
 
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
 
   const backUrl = `/practice/anamnesis/${templateId}${practiceId ? `?practiceId=${encodeURIComponent(practiceId)}` : ""}`;
 
@@ -103,14 +104,23 @@ export default function AnamnesisLinksPage() {
   };
 
   const handleToggleActive = async (link) => {
-    await patchAnamnesisLink(practiceId, templateId, link.id, { isActive: !link.isActive });
-    load();
+    if (togglingId) return;
+    setTogglingId(link.id);
+    const next = !link.isActive;
+    setLinks((prev) => prev.map((l) => (l.id === link.id ? { ...l, isActive: next } : l)));
+    try {
+      await patchAnamnesisLink(practiceId, templateId, link.id, { isActive: next });
+    } catch {
+      setLinks((prev) => prev.map((l) => (l.id === link.id ? { ...l, isActive: link.isActive } : l)));
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const handleDelete = async (id) => {
-    await deleteAnamnesisLink(practiceId, templateId, id);
+    setLinks((prev) => prev.filter((l) => l.id !== id));
     setConfirmDeleteId(null);
-    load();
+    await deleteAnamnesisLink(practiceId, templateId, id);
   };
 
   const templateTitle = template ? getLabel(template.titleJson, language) : "";
@@ -231,18 +241,21 @@ export default function AnamnesisLinksPage() {
                   type="button"
                   className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--outline"
                   onClick={() => handleToggleActive(link)}
+                  disabled={togglingId === link.id}
                 >
-                  {link.isActive ? t.deactivate : t.reactivate}
+                  {togglingId === link.id ? "…" : (link.isActive ? t.deactivate : t.reactivate)}
                 </button>
                 {confirmDeleteId === link.id ? (
                   <>
                     <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm" style={{ background: "var(--color-danger, #e53)" }} onClick={() => handleDelete(link.id)}>
-                      ✓
+                      {t.deleteLink}
                     </button>
-                    <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" onClick={() => setConfirmDeleteId(null)}>✕</button>
+                    <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" onClick={() => setConfirmDeleteId(null)}>
+                      {t.cancel}
+                    </button>
                   </>
                 ) : (
-                  <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" onClick={() => setConfirmDeleteId(link.id)}>
+                  <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost" aria-label={t.deleteLink} onClick={() => setConfirmDeleteId(link.id)}>
                     🗑
                   </button>
                 )}

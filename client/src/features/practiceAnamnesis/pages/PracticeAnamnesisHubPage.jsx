@@ -36,6 +36,7 @@ export default function PracticeAnamnesisHubPage() {
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [creatingStandard, setCreatingStandard] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const displayLang = LANGS.includes(language) ? language : "de";
 
@@ -107,14 +108,15 @@ export default function PracticeAnamnesisHubPage() {
   }
 
   async function handleDelete(tpl) {
-    if (!window.confirm(t.confirmDeleteTemplate)) return;
     setActionError("");
     try {
       const { res, data } = await deleteAnamnesisTemplate(practiceId, tpl.id);
       if (!res.ok || !data.ok) throw new Error();
       setTemplates((prev) => prev.filter((x) => x.id !== tpl.id));
+      setConfirmDeleteId(null);
     } catch {
       setActionError(t.deleteError);
+      setConfirmDeleteId(null);
     }
   }
 
@@ -247,6 +249,34 @@ export default function PracticeAnamnesisHubPage() {
                   >
                     {tpl.status === "archived" ? t.unarchiveTemplate : t.archiveTemplate}
                   </button>
+                  {confirmDeleteId === tpl.id ? (
+                    <>
+                      <button
+                        type="button"
+                        className="anamnesis-hub__btn anamnesis-hub__btn--sm"
+                        style={{ background: "var(--color-danger, #e53)" }}
+                        onClick={() => void handleDelete(tpl)}
+                      >
+                        {t.deleteTemplate}
+                      </button>
+                      <button
+                        type="button"
+                        className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost"
+                        onClick={() => setConfirmDeleteId(null)}
+                      >
+                        {t.cancel}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="anamnesis-hub__btn anamnesis-hub__btn--sm anamnesis-hub__btn--ghost"
+                      aria-label={t.deleteTemplate}
+                      onClick={() => setConfirmDeleteId(tpl.id)}
+                    >
+                      🗑
+                    </button>
+                  )}
                 </div>
               </li>
             );

@@ -38,6 +38,7 @@ export default {
   loading: "Loading …",
   loadError: "Links could not be loaded.",
 
+  cancel: "Cancel",
   backToTemplate: "Back to template",
   viewSubmissions: "View submissions",
 };

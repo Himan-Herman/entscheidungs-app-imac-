@@ -27,6 +27,7 @@ export default {
   archive: "Archive",
   unarchive: "Mark as viewed",
   deleteSubmission: "Delete",
+  cancel: "Cancel",
   confirmDeleteSubmission: "Delete this submission? This cannot be undone.",
   confirmArchiveSubmission: "Archive this submission?",
 
