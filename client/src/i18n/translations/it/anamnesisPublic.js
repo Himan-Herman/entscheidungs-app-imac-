@@ -59,6 +59,8 @@ export default {
   yes: "Sì",
   no: "No",
 
+  charCount: "{{current}} / {{max}} caratteri",
+
   pdfDownload: "Scarica PDF",
   pdfSafetyHint: "Si prega di salvare questo PDF in un luogo sicuro.",
   pdfSharingHint: "Condividere questo PDF solo con personale medico o il proprio studio.",

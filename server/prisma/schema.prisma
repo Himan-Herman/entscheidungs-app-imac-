@@ -1981,7 +1981,9 @@ model PracticeAnamnesisQuestion {
   hintJson    Json?
   /// Multilingual options for choice types — JSON [{de, en, fr, it, es}, …]
   optionsJson Json?
-  isRequired  Boolean  @default(false)
+  isRequired       Boolean  @default(false)
+  /// Max character count for text/textarea answers — null means runtime default (500)
+  responseMaxLength Int?
   /// Display order within section
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())

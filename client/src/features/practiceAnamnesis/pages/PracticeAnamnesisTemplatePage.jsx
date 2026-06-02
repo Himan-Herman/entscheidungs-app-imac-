@@ -464,6 +464,37 @@ export default function PracticeAnamnesisTemplatePage() {
               </label>
             </div>
 
+            {/* Max length — only for text/textarea */}
+            {(q.type === "text" || q.type === "textarea") && (
+              <div className="anamnesis-edit__field">
+                <label className="anamnesis-edit__label" htmlFor={`maxlen-${q._clientId}`}>
+                  {t.questionMaxLength || "Maximale Zeichenanzahl"}
+                </label>
+                <input
+                  id={`maxlen-${q._clientId}`}
+                  className="anamnesis-edit__input anamnesis-edit__input--short"
+                  type="number"
+                  min="50"
+                  max="3000"
+                  step="50"
+                  placeholder="500"
+                  value={q.responseMaxLength ?? ""}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      updateQuestion(sec._clientId, q._clientId, { responseMaxLength: null });
+                    } else {
+                      const v = Math.min(3000, Math.max(50, parseInt(e.target.value, 10) || 50));
+                      updateQuestion(sec._clientId, q._clientId, { responseMaxLength: v });
+                    }
+                  }}
+                  aria-describedby={`maxlen-hint-${q._clientId}`}
+                />
+                <span id={`maxlen-hint-${q._clientId}`} className="anamnesis-edit__field-hint">
+                  {t.questionMaxLengthHint || "50–3000. Leer = Standard (500)."}
+                </span>
+              </div>
+            )}
+
             {/* Options */}
             {(q.type === "single_choice" || q.type === "multi_choice") && (
               <div className="anamnesis-edit__field">

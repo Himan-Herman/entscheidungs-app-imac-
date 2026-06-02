@@ -172,6 +172,25 @@ router.post("/qr/:token/submit", async (req, res) => {
       return res.status(410).json({ ok: false, error: "template_unavailable" });
     }
 
+    // Validate answer lengths against per-question responseMaxLength (default 500 for text/textarea)
+    if (answersJson.length > 0) {
+      const allQuestions = await prisma.practiceAnamnesisQuestion.findMany({
+        where: { templateId: link.templateId },
+        select: { id: true, type: true, responseMaxLength: true },
+      });
+      const qMap = new Map(allQuestions.map((q) => [q.id, q]));
+      for (const ans of answersJson) {
+        if (typeof ans.value !== "string" || !ans.value.length) continue;
+        if (typeof ans.questionId !== "string") continue;
+        const q = qMap.get(ans.questionId);
+        if (!q || (q.type !== "text" && q.type !== "textarea")) continue;
+        const limit = q.responseMaxLength ?? 500;
+        if (ans.value.length > limit) {
+          return res.status(400).json({ ok: false, error: "answer_too_long", questionId: ans.questionId, limit });
+        }
+      }
+    }
+
     const submission = await prisma.practiceAnamnesisSubmission.create({
       data: {
         practiceProfileId: link.practiceProfileId,

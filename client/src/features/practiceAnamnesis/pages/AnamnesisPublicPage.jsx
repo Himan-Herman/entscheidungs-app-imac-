@@ -123,11 +123,29 @@ function QuestionInput({ question, patientLang, labelTranslations, value, onChan
   }
 
   if (question.type === "textarea") {
+    const maxLen = question.responseMaxLength ?? 500;
+    const currentLen = (value || "").length;
+    const nearLimit = currentLen >= maxLen * 0.9;
+    const counterId = `counter-${question.id}`;
     return (
       <div className="apub__question">
         <label className="apub__question-label" htmlFor={id} dir={dir}>{label}{question.isRequired && <span className="apub__required">*</span>}</label>
         {hint && <p className="apub__hint" dir={dir}>{hint}</p>}
-        <textarea id={id} className="apub__textarea" rows={4} dir={dir} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+        <textarea
+          id={id}
+          className="apub__textarea"
+          rows={4}
+          dir={dir}
+          value={value || ""}
+          maxLength={maxLen}
+          onChange={(e) => onChange(e.target.value)}
+          aria-describedby={counterId}
+        />
+        <span id={counterId} className={`apub__char-counter${nearLimit ? " apub__char-counter--warn" : ""}`} aria-live="polite">
+          {t?.charCount
+            ? t.charCount.replace("{{current}}", currentLen).replace("{{max}}", maxLen)
+            : `${currentLen} / ${maxLen}`}
+        </span>
       </div>
     );
   }
@@ -152,11 +170,30 @@ function QuestionInput({ question, patientLang, labelTranslations, value, onChan
     );
   }
 
+  // Default: text
+  const maxLen = question.responseMaxLength ?? 500;
+  const currentLen = (value || "").length;
+  const nearLimit = currentLen >= maxLen * 0.9;
+  const counterId = `counter-${question.id}`;
   return (
     <div className="apub__question">
       <label className="apub__question-label" htmlFor={id} dir={dir}>{label}{question.isRequired && <span className="apub__required">*</span>}</label>
       {hint && <p className="apub__hint" dir={dir}>{hint}</p>}
-      <input id={id} type="text" className="apub__input" dir={dir} value={value || ""} onChange={(e) => onChange(e.target.value)} />
+      <input
+        id={id}
+        type="text"
+        className="apub__input"
+        dir={dir}
+        value={value || ""}
+        maxLength={maxLen}
+        onChange={(e) => onChange(e.target.value)}
+        aria-describedby={counterId}
+      />
+      <span id={counterId} className={`apub__char-counter${nearLimit ? " apub__char-counter--warn" : ""}`} aria-live="polite">
+        {t?.charCount
+          ? t.charCount.replace("{{current}}", currentLen).replace("{{max}}", maxLen)
+          : `${currentLen} / ${maxLen}`}
+      </span>
     </div>
   );
 }

@@ -676,3 +676,18 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.45; }
 }
+
+/* ── Character counter ────────────────────────────────────────────────────── */
+
+.apub__char-counter {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #9ca3af);
+  text-align: right;
+  margin-top: 0.2rem;
+}
+
+.apub__char-counter--warn {
+  color: var(--color-warning, #d97706);
+  font-weight: 600;
+}

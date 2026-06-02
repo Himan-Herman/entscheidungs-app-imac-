@@ -69,6 +69,8 @@ export default {
   questionHint: "Hint / placeholder (optional)",
   questionType: "Question type",
   questionRequired: "Required",
+  questionMaxLength: "Maximum character count",
+  questionMaxLengthHint: "50–3000 characters. Leave empty for the default (500 characters).",
   questionOptions: "Answer options",
   addOption: "Add option",
   removeOption: "Remove option",

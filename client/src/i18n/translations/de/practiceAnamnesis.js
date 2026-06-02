@@ -73,6 +73,8 @@ export default {
   questionHint: "Hinweis / Platzhalter (optional)",
   questionType: "Fragetyp",
   questionRequired: "Pflichtfeld",
+  questionMaxLength: "Maximale Zeichenanzahl",
+  questionMaxLengthHint: "50–3000 Zeichen. Leer lassen = Standard (500 Zeichen).",
   questionOptions: "Antwortoptionen",
   addOption: "Option hinzufügen",
   removeOption: "Option entfernen",

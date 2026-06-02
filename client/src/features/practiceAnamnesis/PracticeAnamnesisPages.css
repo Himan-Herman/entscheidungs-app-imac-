@@ -1445,3 +1445,16 @@
 [data-theme="dark"] .anamnesis-submission__answer-value--original {
   color: var(--color-text-muted, #9ca3af);
 }
+
+/* ── Question editor: max-length field ───────────────────────────────────── */
+
+.anamnesis-edit__input--short {
+  max-width: 10rem;
+}
+
+.anamnesis-edit__field-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted, #6b7280);
+  margin-top: 0.2rem;
+}
