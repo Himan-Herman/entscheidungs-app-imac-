@@ -153,7 +153,7 @@ export default function PracticeAnamnesisHubPage() {
             ))}
           </select>
         </div>
-        {practiceId && (
+        {practiceId && templates.length > 0 && (
           <div className="anamnesis-hub__toolbar-actions">
             <Link
               className="anamnesis-hub__btn"

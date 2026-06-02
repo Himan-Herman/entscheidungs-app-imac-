@@ -75,6 +75,7 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 .anamnesis-hub__select-label {
@@ -1019,7 +1020,31 @@
 
   .anamnesis-hub__toolbar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  .anamnesis-hub__toolbar-left {
+    width: 100%;
+  }
+
+  .anamnesis-hub__select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .anamnesis-hub__toolbar-actions {
+    width: 100%;
+    flex-shrink: 1;
+  }
+
+  .anamnesis-hub__toolbar-actions .anamnesis-hub__btn,
+  .anamnesis-hub__empty-actions .anamnesis-hub__btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+    min-width: 0;
   }
 
   .anamnesis-view__header {
