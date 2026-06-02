@@ -13,6 +13,8 @@ export default {
 
   languageHeading: "Bitte wählen Sie Ihre Sprache",
   languageSubheading: "Der Fragebogen wird in der gewählten Sprache angezeigt.",
+  practiceLanguageLabel: "Praxissprache",
+  translatingQuestions: "Fragen werden übersetzt …",
 
   patientDataHeading: "Persönliche Angaben",
   patientDataSubheading: "Bitte füllen Sie die folgenden Felder aus, bevor Sie mit dem Fragebogen beginnen.",

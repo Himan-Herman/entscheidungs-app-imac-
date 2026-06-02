@@ -13,6 +13,8 @@ export default {
 
   languageHeading: "Veuillez sélectionner votre langue",
   languageSubheading: "Le questionnaire sera affiché dans la langue sélectionnée.",
+  practiceLanguageLabel: "Langue du cabinet",
+  translatingQuestions: "Traduction des questions en cours …",
 
   patientDataHeading: "Données personnelles",
   patientDataSubheading: "Veuillez remplir les champs ci-dessous avant de commencer le questionnaire.",

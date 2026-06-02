@@ -8,15 +8,18 @@ import express from "express";
 import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
 import { translateAnamnesisSubmission } from "../services/practiceAnamnesis/anamnesisTranslationService.js";
+import { translateQuestionLabels } from "../services/practiceAnamnesis/questionLabelTranslationService.js";
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// All language codes supported by the locale system (localeConfig.SUPPORTED_LANGUAGE_CODES)
-const VALID_LANGUAGES = new Set([
+// Extended language set for anamnesis communication — superset of the global UI locales.
+// Includes ja/ko/zh which are not in LOCALE_OPTIONS but are valid for patient communication.
+const ANAMNESIS_VALID_LANGUAGES = new Set([
   "de", "en", "fr", "es", "it",
   "ru", "uk", "tr", "pt", "ar", "fa", "pl", "ro", "nl",
   "ckb", "ku", "el", "sq", "hr", "bs", "sr", "he", "ur",
+  "ja", "ko", "zh",
 ]);
 const VALID_INSURANCE_TYPES = new Set(["gkv", "pkv", "self_pay", "other", ""]);
 
@@ -123,7 +126,7 @@ router.post("/qr/:token/submit", async (req, res) => {
 
   const { patientLanguage, answersJson, patientInfo, doctorLanguage, consentScopes } = req.body;
 
-  if (!patientLanguage || !VALID_LANGUAGES.has(patientLanguage)) {
+  if (!patientLanguage || !ANAMNESIS_VALID_LANGUAGES.has(patientLanguage)) {
     return res.status(400).json({ ok: false, error: "invalid_language" });
   }
   if (!Array.isArray(answersJson)) {
@@ -141,7 +144,7 @@ router.post("/qr/:token/submit", async (req, res) => {
   const cleanPatientInfo = sanitizePatientInfo(patientInfo);
 
   // doctorLanguage is optional, validate if provided
-  const cleanDoctorLanguage = (typeof doctorLanguage === "string" && VALID_LANGUAGES.has(doctorLanguage))
+  const cleanDoctorLanguage = (typeof doctorLanguage === "string" && ANAMNESIS_VALID_LANGUAGES.has(doctorLanguage))
     ? doctorLanguage : null;
 
   // consentScopes is optional array of strings
@@ -196,6 +199,67 @@ router.post("/qr/:token/submit", async (req, res) => {
   } catch {
     return res.status(500).json({ ok: false, error: "request_failed" });
   }
+});
+
+// ── POST /qr/:token/translate-labels ──────────────────────────────────────────
+// Translates question labels into the patient's language before showing the form.
+// Data minimization: only question text + language codes are sent to the AI.
+// No patient personal data, no submission IDs, no practice IDs are forwarded.
+
+router.post("/qr/:token/translate-labels", async (req, res) => {
+  const { token } = req.params;
+  if (!token || !/^[0-9a-f]{64}$/.test(token)) {
+    return res.status(404).json({ ok: false, error: "link_not_found" });
+  }
+
+  const { targetLang, sourceLang, labels } = req.body;
+
+  if (!targetLang || !ANAMNESIS_VALID_LANGUAGES.has(targetLang)) {
+    return res.status(400).json({ ok: false, error: "invalid_language" });
+  }
+  if (!Array.isArray(labels) || labels.length === 0) {
+    return res.status(400).json({ ok: false, error: "labels_required" });
+  }
+  if (labels.length > 60) {
+    return res.status(400).json({ ok: false, error: "too_many_labels" });
+  }
+
+  // Verify token is valid
+  try {
+    const tokenHash = hashToken(token);
+    const link = await prisma.practiceAnamnesisLink.findUnique({
+      where: { tokenHash },
+      select: { id: true, isActive: true, expiresAt: true },
+    });
+    if (!link || !link.isActive) {
+      return res.status(404).json({ ok: false, error: "link_not_found" });
+    }
+    if (link.expiresAt && link.expiresAt < new Date()) {
+      return res.status(410).json({ ok: false, error: "link_expired" });
+    }
+  } catch {
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+
+  const cleanSourceLang = (typeof sourceLang === "string" && ANAMNESIS_VALID_LANGUAGES.has(sourceLang))
+    ? sourceLang : "de";
+
+  const safeLabels = labels
+    .slice(0, 60)
+    .filter((l) => l && typeof l.id === "string" && typeof l.text === "string" && l.text.trim())
+    .map((l) => ({ id: l.id.slice(0, 100), text: l.text.slice(0, 300) }));
+
+  if (!safeLabels.length) {
+    return res.json({ ok: true, translations: [], translationAvailable: false });
+  }
+
+  const translations = await translateQuestionLabels(safeLabels, targetLang, cleanSourceLang);
+
+  return res.json({
+    ok: true,
+    translations: translations || [],
+    translationAvailable: translations !== null,
+  });
 });
 
 export default router;

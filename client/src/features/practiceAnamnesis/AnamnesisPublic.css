@@ -623,3 +623,56 @@
     font-weight: 600;
   }
 }
+
+/* ── RTL support (Arabic, Farsi, Sorani, Hebrew, Urdu) ───────────────────── */
+
+.apub__input[dir="rtl"],
+.apub__textarea[dir="rtl"] {
+  text-align: right;
+}
+
+.apub__question-label[dir="rtl"],
+.apub__hint[dir="rtl"] {
+  display: block;
+  text-align: right;
+}
+
+.apub__review-value[dir="rtl"] {
+  text-align: right;
+  unicode-bidi: embed;
+}
+
+.apub__section-title[dir="rtl"] {
+  text-align: right;
+}
+
+/* ── Practice language info line ─────────────────────────────────────────── */
+
+.apub__practice-lang {
+  font-size: 0.85rem;
+  color: var(--color-text-muted, #6b7280);
+  margin: 0;
+  padding: 0.4rem 0.75rem;
+  background: var(--color-bg, #f8f9fb);
+  border-radius: 0.4rem;
+  border: 1px solid var(--color-border, #e2e8f0);
+}
+
+.apub__practice-lang-label {
+  font-weight: 600;
+}
+
+/* ── Translating indicator ────────────────────────────────────────────────── */
+
+.apub__translating {
+  font-size: 0.88rem;
+  color: var(--color-text-muted, #6b7280);
+  font-style: italic;
+  margin: 0;
+  animation: apub-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes apub-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
