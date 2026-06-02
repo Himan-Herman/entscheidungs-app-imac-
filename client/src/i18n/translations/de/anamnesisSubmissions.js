@@ -30,6 +30,7 @@ export default {
   confirmDeleteSubmission: "Diese Einreichung löschen? Dies kann nicht rückgängig gemacht werden.",
   confirmArchiveSubmission: "Diese Einreichung archivieren?",
 
+  loadError: "Einreichung konnte nicht geladen werden.",
   backToTemplate: "Zur Vorlage",
   backToSubmissions: "Zur Übersicht",
 

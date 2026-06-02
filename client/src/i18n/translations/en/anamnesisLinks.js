@@ -35,6 +35,9 @@ export default {
   noExpiry: "No expiry",
   prefix: "Token prefix",
 
+  loading: "Loading …",
+  loadError: "Links could not be loaded.",
+
   backToTemplate: "Back to template",
   viewSubmissions: "View submissions",
 };

@@ -30,6 +30,7 @@ export default {
   confirmDeleteSubmission: "Delete this submission? This cannot be undone.",
   confirmArchiveSubmission: "Archive this submission?",
 
+  loadError: "Submission could not be loaded.",
   backToTemplate: "Back to template",
   backToSubmissions: "Back to list",
 

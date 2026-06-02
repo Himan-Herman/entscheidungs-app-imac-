@@ -35,6 +35,9 @@ export default {
   noExpiry: "Kein Ablaufdatum",
   prefix: "Token-Präfix",
 
+  loading: "Wird geladen …",
+  loadError: "Links konnten nicht geladen werden.",
+
   backToTemplate: "Zur Vorlage",
   viewSubmissions: "Einreichungen ansehen",
 };
