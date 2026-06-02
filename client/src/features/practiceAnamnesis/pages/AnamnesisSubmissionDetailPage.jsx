@@ -7,6 +7,7 @@ import {
   fetchAnamnesisSubmission,
   patchAnamnesisSubmission,
 } from "../api/practiceAnamnesisSubmissionsApi.js";
+import { generateAnamnesisPdf, normalizePracticeSubmission } from "../pdf/anamnesisPdfBuilder.js";
 import "../PracticeAnamnesisPages.css";
 
 export default function AnamnesisSubmissionDetailPage() {
@@ -21,6 +22,7 @@ export default function AnamnesisSubmissionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
 
   const backUrl = `/practice/anamnesis/${templateId}/submissions${practiceId ? `?practiceId=${encodeURIComponent(practiceId)}` : ""}`;
 
@@ -46,6 +48,14 @@ export default function AnamnesisSubmissionDetailPage() {
   const handleDelete = async () => {
     await deleteAnamnesisSubmission(practiceId, submissionId);
     navigate(backUrl);
+  };
+
+  const handlePdfDownload = () => {
+    setPdfError(false);
+    const pdfData = normalizePracticeSubmission(submission, language);
+    const safeName = `anamnesis-${submission.id.slice(0, 8)}.pdf`;
+    const ok = generateAnamnesisPdf(pdfData, safeName);
+    if (!ok) setPdfError(true);
   };
 
   if (loading) return <div className="anamnesis-hub__loading">…</div>;
@@ -101,6 +111,14 @@ export default function AnamnesisSubmissionDetailPage() {
           <button
             type="button"
             className="anamnesis-hub__btn anamnesis-hub__btn--outline"
+            onClick={handlePdfDownload}
+            title={t.pdfDownload}
+          >
+            ↓ {t.pdfDownload || "PDF"}
+          </button>
+          <button
+            type="button"
+            className="anamnesis-hub__btn anamnesis-hub__btn--outline"
             onClick={handleArchive}
           >
             {submission.status === "archived" ? t.unarchive : t.archive}
@@ -117,6 +135,12 @@ export default function AnamnesisSubmissionDetailPage() {
           )}
         </div>
       </div>
+
+      {pdfError && (
+        <p className="anamnesis-submissions__confirm-text" style={{ color: "var(--color-danger, #e53)" }}>
+          {t.pdfError || "PDF konnte nicht erstellt werden."}
+        </p>
+      )}
 
       {confirmDelete && (
         <p className="anamnesis-submissions__confirm-text" style={{ color: "var(--color-danger, #e53)" }}>

@@ -59,4 +59,7 @@ export default {
   translationStatusFailed: "Translation failed",
   translationStatusPending: "Translation pending",
   translationStatusUnavailable: "AI translation not configured",
+
+  pdfDownload: "Download PDF",
+  pdfError: "PDF could not be generated.",
 };

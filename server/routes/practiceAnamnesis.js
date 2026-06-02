@@ -610,7 +610,20 @@ router.get("/submissions/:submissionId", async (req, res) => {
     await requireAccess(uid, pid, false);
     const submission = await prisma.practiceAnamnesisSubmission.findUnique({
       where: { id: req.params.submissionId },
-      include: { link: { select: { id: true, label: true, tokenPrefix: true } } },
+      include: {
+        link: { select: { id: true, label: true, tokenPrefix: true } },
+        practiceProfile: {
+          select: {
+            practiceName: true,
+            displayNameForPatients: true,
+            address: true,
+            city: true,
+            postalCode: true,
+            phone: true,
+            email: true,
+          },
+        },
+      },
     });
     if (!submission || submission.practiceProfileId !== pid || submission.deletedAt) {
       throw new Error("submission_not_found");

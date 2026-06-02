@@ -59,4 +59,7 @@ export default {
   translationStatusFailed: "Übersetzung fehlgeschlagen",
   translationStatusPending: "Übersetzung ausstehend",
   translationStatusUnavailable: "KI-Übersetzung nicht konfiguriert",
+
+  pdfDownload: "PDF herunterladen",
+  pdfError: "PDF konnte nicht erstellt werden.",
 };

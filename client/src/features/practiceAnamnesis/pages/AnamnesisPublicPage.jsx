@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { fetchPublicAnamnesisLink, submitPublicAnamnesis } from "../api/publicAnamnesisApi.js";
+import { generateAnamnesisPdf, normalizePatientSubmission } from "../pdf/anamnesisPdfBuilder.js";
 import "../../practiceAnamnesis/AnamnesisPublic.css";
 
 const SUPPORTED_LANGS = [
@@ -198,6 +199,8 @@ export default function AnamnesisPublicPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [submittedContext, setSubmittedContext] = useState(null);
+  const [pdfError, setPdfError] = useState(false);
 
   const topRef = useRef(null);
 
@@ -339,6 +342,15 @@ export default function AnamnesisPublicPage() {
         return;
       }
       sessionStorage.removeItem(`anamnesis_draft_${token}`);
+      // Capture context for patient PDF (no personal data stored beyond what patient just filled in)
+      setSubmittedContext({
+        submissionId: data?.submissionId || "",
+        patientInfo: buildCleanPatientInfo(),
+        answersJson: buildAnswersJson(),
+        practice: linkData?.practice || null,
+        templateTitle: getLabel(linkData?.template?.titleJson, lang) || null,
+        lang,
+      });
       setStep("done");
       scrollTop();
     } catch {
@@ -669,12 +681,34 @@ export default function AnamnesisPublicPage() {
   }
 
   if (step === "done") {
+    const handlePatientPdf = () => {
+      if (!submittedContext) return;
+      setPdfError(false);
+      const pdfData = normalizePatientSubmission(submittedContext);
+      const ok = generateAnamnesisPdf(pdfData, `anamnesis-${submittedContext.lang}-${Date.now()}.pdf`);
+      if (!ok) setPdfError(true);
+    };
+
     return (
       <div className="apub" ref={topRef}>
         <div className="apub__card apub__card--center">
           <div className="apub__done-icon" aria-hidden="true">✓</div>
           <h1 className="apub__heading">{t.doneHeading}</h1>
           <p className="apub__subheading">{t.doneCopy}</p>
+          {submittedContext && (
+            <div className="apub__pdf-section">
+              <button
+                type="button"
+                className="apub__btn apub__btn--primary apub__btn--pdf"
+                onClick={handlePatientPdf}
+              >
+                ↓ {t.pdfDownload || "PDF herunterladen"}
+              </button>
+              <p className="apub__pdf-hint">{t.pdfSafetyHint}</p>
+              <p className="apub__pdf-hint">{t.pdfSharingHint}</p>
+              {pdfError && <p className="apub__field-error">{t.pdfError}</p>}
+            </div>
+          )}
         </div>
       </div>
     );

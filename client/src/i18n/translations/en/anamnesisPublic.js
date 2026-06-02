@@ -56,4 +56,9 @@ export default {
 
   yes: "Yes",
   no: "No",
+
+  pdfDownload: "Download PDF",
+  pdfSafetyHint: "Please save this PDF in a secure location.",
+  pdfSharingHint: "Share this PDF only with medical professionals or your practice.",
+  pdfError: "PDF could not be generated. Your answers have been saved.",
 };
