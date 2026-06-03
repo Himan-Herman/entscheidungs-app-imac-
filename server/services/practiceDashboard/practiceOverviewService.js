@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { isMedicalInterpreterB2bEnabled, isPracticeAnamnesisEnabled } from "../../config/featureFlags.js";
+import { isMedicalInterpreterB2bEnabled, isPracticeAnamnesisEnabled, isPracticeBookingEnabled } from "../../config/featureFlags.js";
 import {
   hasPracticePermission,
   permissionsForRole,
@@ -52,6 +52,9 @@ function metricsVisibilityForRole(role) {
     anamnesis:
       isPracticeAnamnesisEnabled() &&
       hasPracticePermission(role, PERMISSIONS.ANAMNESIS_READ),
+    booking:
+      isPracticeBookingEnabled() &&
+      hasPracticePermission(role, PERMISSIONS.BOOKING_READ),
   };
 }
 

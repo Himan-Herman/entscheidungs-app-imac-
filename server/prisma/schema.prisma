@@ -378,6 +378,7 @@ model PracticeProfile {
   anamnesisTemplates         PracticeAnamnesisTemplate[]
   anamnesisLinks             PracticeAnamnesisLink[]
   anamnesisSubmissions       PracticeAnamnesisSubmission[]
+  bookingSettings            PracticeBookingSettings?
 
   @@index([userId])
 }
@@ -538,6 +539,12 @@ model PracticeAppointment {
   cancelledAt           DateTime?
   cancelledByUserId     String?
   cancellationReason    String?
+  /// Timestamp when patient actively granted consent for this request — server-set only.
+  requestConsentGrantedAt DateTime?
+  /// Consent document version accepted by patient (e.g. "booking-v1").
+  requestConsentVersion   String?   @db.VarChar(20)
+  /// Scope string identifying the consent purpose (e.g. "appointment_request").
+  requestConsentScope     String?   @db.VarChar(100)
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
@@ -2018,6 +2025,7 @@ model PracticeAnamnesisLink {
   template        PracticeAnamnesisTemplate     @relation(fields: [templateId], references: [id], onDelete: Cascade)
   createdBy       User?                         @relation("AnamnesisLinkCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   submissions     PracticeAnamnesisSubmission[]
+  bookingSettingsLinks PracticeBookingSettings[]
 
   @@index([practiceProfileId, isActive])
   @@index([practiceProfileId, createdAt])
@@ -2070,4 +2078,34 @@ model PracticeAnamnesisSubmission {
   @@index([templateId])
   @@index([linkId])
   @@index([deletedAt])
+}
+
+/// Practice booking configuration — internal appointment-request module only.
+/// No external links, no redirect logic. bookingMode: "disabled" | "medscoutx_request".
+model PracticeBookingSettings {
+  id                String   @id @default(cuid())
+  practiceProfileId String   @unique
+
+  /// Whether the practice has activated inbound appointment requests.
+  /// Only owner/admin may set this to true via the settings API.
+  bookingEnabled    Boolean  @default(false)
+
+  /// "disabled" = requests not accepted (default).
+  /// "medscoutx_request" = patients with an active PracticePatientLink may submit a request.
+  bookingMode       String   @default("disabled") @db.VarChar(30)
+
+  /// Optional guidance text shown to patients in the request form (no medical content).
+  requestFormNote   String?  @db.VarChar(300)
+
+  /// Optional reference to an existing anamnesis link shown after a request is accepted.
+  /// Set to null automatically when the referenced link is deleted (onDelete: SetNull).
+  linkedAnamnesisLinkId String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  practiceProfile      PracticeProfile        @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  linkedAnamnesisLink  PracticeAnamnesisLink? @relation(fields: [linkedAnamnesisLinkId], references: [id], onDelete: SetNull)
+
+  @@index([practiceProfileId])
 }

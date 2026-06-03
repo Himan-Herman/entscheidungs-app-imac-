@@ -49,6 +49,7 @@ export default {
   cardActivity: "Aktivität",
   cardMedaLive: "Meda Live Translation",
   cardAnamnesis: "Anamnese",
+  cardBooking: "Termine & Anfragen",
 
   metricUnreadInbox: "Ungelesene Postfach-Einträge",
   metricOpenMessages: "Offene Nachrichten",

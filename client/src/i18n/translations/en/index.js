@@ -71,6 +71,7 @@ import practiceAnamnesis from "./practiceAnamnesis.js";
 import anamnesisLinks from "./anamnesisLinks.js";
 import anamnesisSubmissions from "./anamnesisSubmissions.js";
 import anamnesisPublic from "./anamnesisPublic.js";
+import practiceBooking from "./practiceBooking.js";
 
 export default {
   header,
@@ -146,4 +147,5 @@ export default {
   anamnesisLinks,
   anamnesisSubmissions,
   anamnesisPublic,
+  practiceBooking,
 };

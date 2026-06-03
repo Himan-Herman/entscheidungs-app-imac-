@@ -162,6 +162,9 @@ const PracticeCalendarSettingsPage = lazy(() =>
 const PracticeAnamnesisHubPage = lazy(() =>
   import("./features/practiceAnamnesis/pages/PracticeAnamnesisHubPage.jsx"),
 );
+const PracticeBookingHubPage = lazy(() =>
+  import("./features/practiceBooking/pages/PracticeBookingHubPage.jsx"),
+);
 const PracticeAnamnesisTemplatePage = lazy(() =>
   import("./features/practiceAnamnesis/pages/PracticeAnamnesisTemplatePage.jsx"),
 );
@@ -536,6 +539,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <AnamnesisSubmissionDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/booking"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeBookingHubPage />
                     </ProtectedRoute>
                   }
                 />

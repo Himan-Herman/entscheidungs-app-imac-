@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Activity,
+  CalendarCheck,
   ClipboardList,
   ClipboardPen,
   FileText,
@@ -117,6 +118,13 @@ const CARD_DEFS = [
     labelKey: "cardAnamnesis",
     to: (practiceId) => `/practice/anamnesis?practiceId=${encodeURIComponent(practiceId)}`,
     Icon: ClipboardPen,
+  },
+  {
+    id: "booking",
+    visibilityKey: "booking",
+    labelKey: "cardBooking",
+    to: (practiceId) => `/practice/booking?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: CalendarCheck,
   },
 ];
 

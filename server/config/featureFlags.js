@@ -308,3 +308,11 @@ export function isPracticeConsentRecordingEnabled() {
 export function isPracticeAnamnesisEnabled() {
   return envFlag("PRACTICE_ANAMNESIS_ENABLED", false);
 }
+
+/**
+ * Practice Booking — internal appointment-request module (B2B2C).
+ * No external links or redirects. Default off until PRACTICE_BOOKING_ENABLED is set.
+ */
+export function isPracticeBookingEnabled() {
+  return envFlag("PRACTICE_BOOKING_ENABLED", false);
+}
