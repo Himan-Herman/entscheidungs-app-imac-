@@ -166,8 +166,8 @@ export default function AnamnesisLinksPage() {
               </button>
             </div>
           )}
-          <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--ghost" onClick={() => setNewToken(null)}>
-            ✕
+          <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--ghost" aria-label={t.dismiss || t.cancel} onClick={() => setNewToken(null)}>
+            ✕ <span className="visually-hidden">{t.dismiss || t.cancel}</span>
           </button>
         </div>
       )}
@@ -194,10 +194,10 @@ export default function AnamnesisLinksPage() {
           </div>
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <button type="submit" className="anamnesis-hub__btn" disabled={creating}>
-              {creating ? "…" : t.createLinkBtn}
+              {creating ? (t.creatingLink || "…") : t.createLinkBtn}
             </button>
-            <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--ghost" onClick={() => setShowCreateForm(false)}>
-              ✕
+            <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--ghost" aria-label={t.cancel} onClick={() => setShowCreateForm(false)}>
+              ✕ <span className="visually-hidden">{t.cancel}</span>
             </button>
           </div>
         </form>
@@ -243,7 +243,7 @@ export default function AnamnesisLinksPage() {
                   onClick={() => handleToggleActive(link)}
                   disabled={togglingId === link.id}
                 >
-                  {togglingId === link.id ? "…" : (link.isActive ? t.deactivate : t.reactivate)}
+                  {togglingId === link.id ? (t.toggling || "…") : (link.isActive ? t.deactivate : t.reactivate)}
                 </button>
                 {confirmDeleteId === link.id ? (
                   <>

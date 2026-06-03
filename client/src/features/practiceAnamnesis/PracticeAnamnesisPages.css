@@ -115,10 +115,24 @@
   line-height: 1.25;
 }
 
-.anamnesis-hub__btn:hover,
-.anamnesis-hub__btn:visited {
+.anamnesis-hub__btn:hover {
   background: #1d4ed8;
   color: #fff !important;
+}
+
+/* :visited must be separate so variant overrides below can win */
+.anamnesis-hub__btn:visited {
+  color: #fff !important;
+}
+
+/* --outline is transparent-bg with dark text — keep it readable after visit */
+.anamnesis-hub__btn--outline:visited {
+  color: #111827 !important;
+}
+
+/* --ghost is transparent-bg with muted text — same */
+.anamnesis-hub__btn--ghost:visited {
+  color: #6b7280 !important;
 }
 
 .anamnesis-hub__btn:focus-visible {
@@ -963,6 +977,28 @@
   background: var(--color-surface-dark, #1f2937);
   border-color: var(--color-border-dark, #374151);
   color: var(--color-text-dark, #f9fafb);
+}
+
+/* Dark-mode button color corrections */
+[data-theme="dark"] .anamnesis-hub__btn--outline,
+[data-theme="dark"] .anamnesis-hub__btn--outline:visited,
+[data-theme="dark"] .anamnesis-hub__btn--outline:hover {
+  color: var(--color-text, #f9fafb) !important;
+  border-color: var(--color-border-dark, #6b7280);
+}
+
+[data-theme="dark"] .anamnesis-hub__btn--outline:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .anamnesis-hub__btn--ghost,
+[data-theme="dark"] .anamnesis-hub__btn--ghost:visited {
+  color: var(--color-text-muted, #9ca3af) !important;
+}
+
+[data-theme="dark"] .anamnesis-hub__btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--color-text, #f9fafb) !important;
 }
 
 [data-theme="dark"] .anamnesis-hub__card,

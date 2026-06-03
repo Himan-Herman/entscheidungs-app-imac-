@@ -125,8 +125,12 @@ export default function AnamnesisSubmissionDetailPage() {
           </button>
           {confirmDelete ? (
             <>
-              <button type="button" className="anamnesis-hub__btn" style={{ background: "var(--color-danger, #e53)" }} onClick={handleDelete}>✓</button>
-              <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--ghost" onClick={() => setConfirmDelete(false)}>✕</button>
+              <button type="button" className="anamnesis-hub__btn" style={{ background: "var(--color-danger, #e53)" }} aria-label={t.deleteSubmission} onClick={handleDelete}>
+                ✓ <span className="visually-hidden">{t.deleteSubmission}</span>
+              </button>
+              <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--ghost" aria-label={t.cancel} onClick={() => setConfirmDelete(false)}>
+                ✕ <span className="visually-hidden">{t.cancel}</span>
+              </button>
             </>
           ) : (
             <button type="button" className="anamnesis-hub__btn anamnesis-hub__btn--ghost" onClick={() => setConfirmDelete(true)}>

@@ -25,6 +25,10 @@ export default {
   statusActive: "Active",
   statusInactive: "Inactive",
 
+  creatingLink: "Creating …",
+  toggling: "…",
+  dismiss: "Dismiss",
+
   deactivate: "Deactivate",
   reactivate: "Reactivate",
   deleteLink: "Delete link",
