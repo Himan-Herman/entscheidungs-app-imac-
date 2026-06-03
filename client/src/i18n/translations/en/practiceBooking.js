@@ -59,4 +59,57 @@ export default {
   errorAnamnesisLinkNotFound: "Anamnesis link not found.",
   errorAnamnesisLinkInactive: "Anamnesis link is inactive.",
   errorAnamnesisLinkExpired: "Anamnesis link has expired.",
+
+  // ── Tabs ─────────────────────────────────────────────────────────────────────
+  tabSettings: "Settings",
+  tabRequests: "New Requests",
+
+  // ── Requests list ─────────────────────────────────────────────────────────────
+  reqLoading: "Loading requests …",
+  reqLoadError: "Could not load requests.",
+  reqEmpty: "No new appointment requests.",
+  reqRefresh: "Refresh",
+
+  // ── Request card fields ───────────────────────────────────────────────────────
+  reqWishedTime: "Requested time",
+  reqType: "Appointment type",
+  reqNote: "Patient note",
+  reqCreated: "Received on",
+
+  // ── Status badges ─────────────────────────────────────────────────────────────
+  reqBadge_requested: "New request",
+  reqBadge_confirmed: "Confirmed",
+  reqBadge_cancelled: "Declined",
+  reqBadge_scheduled: "Scheduled",
+  reqBadge_completed: "Completed",
+  reqBadge_no_show: "No-show",
+  reqBadge_rescheduled: "Rescheduled",
+
+  // ── Actions ───────────────────────────────────────────────────────────────────
+  reqAccept: "Accept",
+  reqDecline: "Decline",
+
+  // ── Accept form ───────────────────────────────────────────────────────────────
+  reqAcceptHeading: "Confirm appointment",
+  reqAcceptStart: "Appointment from",
+  reqAcceptEnd: "Appointment until",
+  reqAcceptPracticeNote: "Internal note (optional)",
+  reqAcceptPracticeNotePlaceholder: "Visible to practice staff only.",
+  reqAcceptConfirm: "Confirm appointment",
+  reqAcceptInvalidTime: "Please enter a valid start and end time.",
+  reqAcceptError: "Could not confirm the request.",
+  reqAccepted: "Appointment confirmed.",
+
+  // ── Decline form ──────────────────────────────────────────────────────────────
+  reqDeclineHeading: "Decline request",
+  reqDeclineReason: "Reason for decline (optional)",
+  reqDeclineReasonPlaceholder: "Organisational notes only — no medical details.",
+  reqDeclineHint: "Please do not enter any medical details.",
+  reqDeclineConfirm: "Decline request",
+  reqDeclineError: "Could not decline the request.",
+  reqDeclined: "Request declined.",
+
+  // ── Request misc ──────────────────────────────────────────────────────────────
+  reqErrorNotARequest: "This request can no longer be processed.",
+  reqReadOnly: "Read only — actions not available.",
 };

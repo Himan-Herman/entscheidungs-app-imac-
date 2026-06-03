@@ -105,7 +105,10 @@ export async function listBookingRequests(actorUserId, practiceId, query = {}) {
   });
 
   const includeNotes = canManageCalendar(access.role);
-  return rows.map((r) => requestToJson(r, { includeNotes }));
+  return {
+    requests: rows.map((r) => requestToJson(r, { includeNotes })),
+    canManage: canManageCalendar(access.role),
+  };
 }
 
 /**

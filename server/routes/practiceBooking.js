@@ -75,13 +75,13 @@ router.patch("/settings", async (req, res) => {
 /** GET /api/practice/booking/requests?practiceId=...&status=...&from=...&to=... */
 router.get("/requests", async (req, res) => {
   try {
-    const requests = await listBookingRequests(uid(req), pid(req), {
+    const result = await listBookingRequests(uid(req), pid(req), {
       status: req.query.status,
       from: req.query.from,
       to: req.query.to,
       appointmentTypeId: req.query.appointmentTypeId,
     });
-    return res.json({ ok: true, requests });
+    return res.json({ ok: true, ...result });
   } catch (e) {
     const m = mapError(e);
     return res.status(m.status).json({ ok: false, error: m.error });
