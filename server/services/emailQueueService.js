@@ -13,6 +13,7 @@
  */
 
 import { sendEmailWithPdfAttachment, sendMail } from "../emailService.js";
+import { appointmentEventEmail } from "./calendar/appointmentEventCopy.js";
 
 const QUEUE_MODE = (process.env.EMAIL_QUEUE_MODE || "direct").toLowerCase();
 
@@ -31,6 +32,33 @@ export async function deliverPrevisitPdfEmail(args) {
     );
   }
   return sendEmailWithPdfAttachment(args);
+}
+
+/**
+ * Transactional appointment event email (no clinical content).
+ * Skips gracefully when feature flag or Resend is not configured.
+ *
+ * @param {{ to: string, emailEvent: string, locale: string, practiceName: string, formattedDate?: string|null }} args
+ */
+export async function deliverAppointmentEventEmail({ to, emailEvent, locale, practiceName, formattedDate }) {
+  if (process.env.ENABLE_APPOINTMENT_EVENT_EMAILS !== "true") {
+    return { ok: true, skipped: true, reason: "appointment_event_emails_disabled" };
+  }
+  if (!to) return { ok: true, skipped: true, reason: "no_recipient" };
+
+  const email = appointmentEventEmail(emailEvent, locale, { practiceName, formattedDate: formattedDate || null });
+  if (!email) return { ok: true, skipped: true, reason: "no_template_for_event" };
+
+  try {
+    await sendMail(to, email.subject, email.text, email.html);
+    return { ok: true, locale };
+  } catch (err) {
+    const msg = String(err?.message || "");
+    if (msg.includes("RESEND") || msg.includes("nicht initialisiert")) {
+      return { ok: true, skipped: true, reason: "resend_not_configured" };
+    }
+    throw err;
+  }
 }
 
 /**

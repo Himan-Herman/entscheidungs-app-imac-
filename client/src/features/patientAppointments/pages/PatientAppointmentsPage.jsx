@@ -225,6 +225,7 @@ export default function PatientAppointmentsPage() {
           : undefined,
         patientNote: requestForm.patientNote || undefined,
         title: t.requestAppointment,
+        locale: language,
         consentAccepted: true,
       });
       if (!res.ok) {

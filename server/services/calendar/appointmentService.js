@@ -19,6 +19,19 @@ function parseDate(v) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/** Locales for which organisational email templates exist. */
+const EMAIL_LOCALES = new Set(["de", "en", "fr", "it", "es"]);
+
+/**
+ * Normalise a raw locale string to a supported email locale.
+ * Falls back to "de" for any unrecognised or empty value.
+ */
+export function resolveEmailLocale(raw) {
+  if (!raw) return "de";
+  const code = String(raw).toLowerCase().split(/[-_]/)[0];
+  return EMAIL_LOCALES.has(code) ? code : "de";
+}
+
 function appointmentToJson(row, { includeNotes = true } = {}) {
   return {
     id: row.id,
@@ -34,6 +47,7 @@ function appointmentToJson(row, { includeNotes = true } = {}) {
     timezone: row.timezone,
     locationType: row.locationType,
     locationText: row.locationText,
+    communicationLocale: row.communicationLocale || null,
     patientNote: includeNotes ? row.patientNote : undefined,
     practiceNote: includeNotes ? row.practiceNote : undefined,
     requestedStartAt: row.requestedStartAt,
@@ -418,6 +432,7 @@ export async function requestPatientAppointment(patientUserId, body, ctx = {}) {
   const requestedStartAt = parseDate(body.requestedStartAt || body.startAt);
   const requestedEndAt = parseDate(body.requestedEndAt || body.endAt);
   const consentGrantedAt = new Date();
+  const communicationLocale = resolveEmailLocale(body.locale);
 
   const row = await prisma.practiceAppointment.create({
     data: {
@@ -434,6 +449,7 @@ export async function requestPatientAppointment(patientUserId, body, ctx = {}) {
       timezone: String(body.timezone || "Europe/Berlin").slice(0, 64),
       locationType: String(body.locationType || "practice"),
       patientNote: body.patientNote ? String(body.patientNote).slice(0, 2000) : null,
+      communicationLocale,
       requestConsentGrantedAt: consentGrantedAt,
       requestConsentVersion: "1.0",
       requestConsentScope: "appointment_request_v1",

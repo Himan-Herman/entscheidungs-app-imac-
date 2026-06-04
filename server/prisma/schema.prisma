@@ -539,6 +539,8 @@ model PracticeAppointment {
   cancelledAt           DateTime?
   cancelledByUserId     String?
   cancellationReason    String?
+  /// BCP-47 UI locale at request time — used for organisational email templates only (de|en|fr|it|es).
+  communicationLocale   String?   @db.VarChar(5)
   /// Timestamp when patient actively granted consent for this request — server-set only.
   requestConsentGrantedAt DateTime?
   /// Consent document version accepted by patient (e.g. "booking-v1").

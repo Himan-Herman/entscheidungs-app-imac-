@@ -1,6 +1,7 @@
 import { isPatientInboxEnabled, isPracticeInboxEnabled } from "../../config/featureFlags.js";
 import { notifyPatientInbox } from "../patientInbox/patientInboxNotify.js";
 import { upsertPracticeInboxItem } from "../practiceInbox/practiceInboxService.js";
+import { sendAppointmentEventEmail } from "./appointmentEventEmailService.js";
 
 /**
  * @param {import('@prisma/client').PracticeAppointment} appt
@@ -59,5 +60,10 @@ export async function notifyAppointmentEvent(appt, event) {
         targetUrl: apptUrlPractice,
       }).catch(() => {});
     }
+  }
+
+  // Organisational event email — fire-and-forget; never blocks appointment status.
+  if (patientUserId && (event === "request" || event === "confirmed" || event === "cancelled")) {
+    sendAppointmentEventEmail(appt, event).catch(() => {});
   }
 }
