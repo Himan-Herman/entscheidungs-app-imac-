@@ -408,6 +408,7 @@ export default {
     statusInvited: "Invitado",
     statusRevoked: "Revocado",
     statusArchived: "Archivado",
+    requestAppointment: "Solicitar cita",
   },
 
   patientDataControl: {
@@ -695,6 +696,20 @@ export default {
     aiDisclaimer:
       "La IA ayuda solo en la planificación organizativa. Sin evaluación de urgencia médica.",
     notProvided: "no indicado",
+    bookingDisabled:
+      "Este consultorio no acepta solicitudes de cita a través de MedScoutX en este momento.",
+    consentHeading: "Aviso importante",
+    consentDisclaimer:
+      "Esta solicitud es únicamente para la planificación organizativa. No envíe diagnósticos médicos, emergencias ni preguntas terapéuticas a través de este formulario. En caso de emergencia, llame a los servicios de emergencia.",
+    consentLabel:
+      "He leído el aviso y deseo enviar una solicitud de cita.",
+    consentRequired: "Por favor, confirme el aviso para continuar.",
+    bookingDisabledError:
+      "Este consultorio ha desactivado las solicitudes de cita a través de MedScoutX.",
+    consentMissingError: "Por favor, confirme el aviso.",
+    successHeading: "Solicitud enviada",
+    successText:
+      "Su solicitud de cita ha sido enviada al consultorio. El consultorio se pondrá en contacto con usted — aún no es una confirmación de cita.",
   },
 
   patientTelemedicine: {

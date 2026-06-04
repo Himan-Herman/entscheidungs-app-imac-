@@ -141,6 +141,15 @@ export default function PatientPracticeLinksPage() {
                     {granted ? t.disableProfile : t.enableProfile}
                   </button>
                 </fieldset>
+                {link.status === "active" && link.practice?.id ? (
+                  <Link
+                    to={`/patient/appointments?practiceId=${encodeURIComponent(link.practice.id)}`}
+                    className="patient-threads__btn patient-threads__btn--primary"
+                    style={{ display: "inline-block", marginTop: "0.5rem", textDecoration: "none" }}
+                  >
+                    {t.requestAppointment}
+                  </Link>
+                ) : null}
               </li>
             );
           })}

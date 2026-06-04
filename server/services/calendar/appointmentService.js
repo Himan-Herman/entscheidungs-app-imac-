@@ -395,6 +395,16 @@ export async function requestPatientAppointment(patientUserId, body, ctx = {}) {
   const practiceId = String(body.practiceProfileId || "").trim();
   if (!practiceId) throw new Error("practiceId_required");
 
+  const bookingSettings = await prisma.practiceBookingSettings.findUnique({
+    where: { practiceProfileId: practiceId },
+    select: { bookingEnabled: true, bookingMode: true },
+  });
+  if (!bookingSettings?.bookingEnabled || bookingSettings.bookingMode !== "medscoutx_request") {
+    throw new Error("practice_booking_disabled");
+  }
+
+  if (body.consentAccepted !== true) throw new Error("appointment_request_consent_required");
+
   const link = await prisma.practicePatientLink.findFirst({
     where: {
       practiceProfileId: practiceId,
@@ -406,6 +416,7 @@ export async function requestPatientAppointment(patientUserId, body, ctx = {}) {
 
   const requestedStartAt = parseDate(body.requestedStartAt || body.startAt);
   const requestedEndAt = parseDate(body.requestedEndAt || body.endAt);
+  const consentGrantedAt = new Date();
 
   const row = await prisma.practiceAppointment.create({
     data: {
@@ -422,6 +433,9 @@ export async function requestPatientAppointment(patientUserId, body, ctx = {}) {
       timezone: String(body.timezone || "Europe/Berlin").slice(0, 64),
       locationType: String(body.locationType || "practice"),
       patientNote: body.patientNote ? String(body.patientNote).slice(0, 2000) : null,
+      requestConsentGrantedAt: consentGrantedAt,
+      requestConsentVersion: "1.0",
+      requestConsentScope: "appointment_request_v1",
       createdByUserId: patientUserId,
     },
     include: { appointmentType: true },
@@ -470,6 +484,24 @@ export async function confirmPatientAppointment(patientUserId, appointmentId, ct
   }).catch(() => {});
 
   return appointmentToJson(row);
+}
+
+export async function getPatientPracticeBookingStatus(patientUserId, practiceId) {
+  const link = await prisma.practicePatientLink.findFirst({
+    where: { practiceProfileId: practiceId, patientUserId, status: "active" },
+    select: { id: true },
+  });
+  if (!link) throw new Error("link_not_found");
+
+  const settings = await prisma.practiceBookingSettings.findUnique({
+    where: { practiceProfileId: practiceId },
+    select: { bookingEnabled: true, bookingMode: true },
+  });
+
+  return {
+    bookingEnabled: settings?.bookingEnabled ?? false,
+    bookingMode: settings?.bookingMode ?? "disabled",
+  };
 }
 
 export async function patientCancelRequest(patientUserId, appointmentId, body, ctx = {}) {

@@ -16,6 +16,7 @@ import {
   cancelRequestPatientAppointment,
   confirmPatientAppointment,
   fetchPatientAppointments,
+  fetchPracticeBookingCheck,
   requestPatientAppointment,
 } from "../api/patientAppointmentsApi.js";
 import "../../../styles/PatientInboxPage.css";
@@ -72,6 +73,7 @@ export default function PatientAppointmentsPage() {
       getMessages("en").patientAppointments,
     [language],
   );
+
   const [appointments, setAppointments] = useState([]);
   const [links, setLinks] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -83,8 +85,12 @@ export default function PatientAppointmentsPage() {
     requestedStartAt: "",
     requestedEndAt: "",
     patientNote: "",
+    consentAccepted: false,
   });
   const [busy, setBusy] = useState(false);
+  const [bookingStatus, setBookingStatus] = useState(null);
+  const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
   const reload = useCallback(async () => {
     const { res, data } = await fetchPatientAppointments();
@@ -103,19 +109,23 @@ export default function PatientAppointmentsPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const urlPracticeId = searchParams.get("practiceId");
     (async () => {
       setLoading(true);
       setError("");
       try {
         const linksRes = await authFetch("/api/patient/links");
         const linksData = await linksRes.json().catch(() => ({}));
+        const allLinks = Array.isArray(linksData.links) ? linksData.links : [];
         if (!cancelled) {
-          setLinks(Array.isArray(linksData.links) ? linksData.links : []);
-          if (linksData.links?.[0]?.practiceProfileId) {
-            setRequestForm((f) => ({
-              ...f,
-              practiceProfileId: linksData.links[0].practiceProfileId,
-            }));
+          setLinks(allLinks);
+          const firstActiveId = allLinks.find((l) => l.status === "active")?.practice?.id || "";
+          const preselect = urlPracticeId || firstActiveId;
+          if (preselect) {
+            setRequestForm((f) => ({ ...f, practiceProfileId: preselect }));
+          }
+          if (urlPracticeId) {
+            setShowRequest(true);
           }
         }
         const list = await reload();
@@ -137,8 +147,52 @@ export default function PatientAppointmentsPage() {
     };
   }, [reload, searchParams, t.featureDisabled, t.loadError]);
 
+  useEffect(() => {
+    const practiceId = requestForm.practiceProfileId;
+    if (!practiceId) {
+      setBookingStatus(null);
+      return;
+    }
+    let cancelled = false;
+    setBookingCheckLoading(true);
+    setBookingStatus(null);
+    fetchPracticeBookingCheck(practiceId)
+      .then(({ res, data }) => {
+        if (cancelled) return;
+        if (res.ok && data.ok) {
+          setBookingStatus({ bookingEnabled: data.bookingEnabled, bookingMode: data.bookingMode });
+        } else {
+          setBookingStatus({ bookingEnabled: false, bookingMode: "disabled" });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setBookingStatus({ bookingEnabled: false, bookingMode: "disabled" });
+      })
+      .finally(() => {
+        if (!cancelled) setBookingCheckLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [requestForm.practiceProfileId]);
+
+  const bookingActive =
+    bookingStatus?.bookingEnabled === true &&
+    bookingStatus?.bookingMode === "medscoutx_request";
+
+  const openRequestForm = () => {
+    setRequestForm((f) => ({ ...f, consentAccepted: false }));
+    setSuccessMsg("");
+    setError("");
+    setShowRequest(true);
+  };
+
   const submitRequest = async (e) => {
     e.preventDefault();
+    if (!requestForm.consentAccepted) {
+      setError(t.consentRequired);
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -152,13 +206,21 @@ export default function PatientAppointmentsPage() {
           : undefined,
         patientNote: requestForm.patientNote || undefined,
         title: t.requestAppointment,
+        consentAccepted: true,
       });
-      if (!res.ok) throw new Error(data.error || "failed");
+      if (!res.ok) {
+        if (data.error === "practice_booking_disabled") throw new Error("booking_disabled");
+        if (data.error === "appointment_request_consent_required") throw new Error("consent_missing");
+        throw new Error(data.error || "failed");
+      }
       await reload();
       setShowRequest(false);
-      setSelected(data.appointment);
-    } catch {
-      setError(t.actionError);
+      setRequestForm((f) => ({ ...f, requestedStartAt: "", requestedEndAt: "", patientNote: "", consentAccepted: false }));
+      setSuccessMsg(t.successText);
+    } catch (e) {
+      if (e.message === "booking_disabled") setError(t.bookingDisabledError);
+      else if (e.message === "consent_missing") setError(t.consentMissingError);
+      else setError(t.actionError);
     } finally {
       setBusy(false);
     }
@@ -227,16 +289,6 @@ export default function PatientAppointmentsPage() {
         <p className="patient-inbox__intro">{t.intro}</p>
       </header>
 
-      <div className="patient-inbox__actions">
-        <button
-          type="button"
-          className="patient-inbox__btn patient-inbox__btn--primary"
-          onClick={() => setShowRequest(true)}
-        >
-          {t.requestAppointment}
-        </button>
-      </div>
-
       {loading ? (
         <p className="patient-inbox__muted" aria-live="polite">
           {t.loading}
@@ -248,24 +300,64 @@ export default function PatientAppointmentsPage() {
         </p>
       ) : null}
 
+      {successMsg && !showRequest ? (
+        <div className="patient-appt__success" role="status">
+          <p className="patient-appt__success-heading">{t.successHeading}</p>
+          <p>{successMsg}</p>
+        </div>
+      ) : null}
+
+      {!loading && !showRequest ? (
+        <div className="patient-inbox__actions">
+          {bookingCheckLoading ? (
+            <p className="patient-inbox__muted" aria-live="polite" style={{ fontSize: "0.88rem" }}>
+              {t.loading}
+            </p>
+          ) : bookingActive ? (
+            <button
+              type="button"
+              className="patient-inbox__btn patient-inbox__btn--primary"
+              onClick={openRequestForm}
+            >
+              {t.requestAppointment}
+            </button>
+          ) : bookingStatus && !bookingActive ? (
+            <p className="patient-appt__booking-disabled">{t.bookingDisabled}</p>
+          ) : null}
+        </div>
+      ) : null}
+
       {showRequest ? (
-        <form className="patient-appt__panel patient-appt__form" onSubmit={submitRequest}>
+        <form
+          className="patient-appt__panel patient-appt__form"
+          onSubmit={submitRequest}
+          aria-label={t.requestAppointment}
+          noValidate
+        >
           <h2 className="patient-inbox__item-title">{t.requestAppointment}</h2>
+
           <label htmlFor="req-practice">{t.selectPractice}</label>
           <select
             id="req-practice"
             required
             value={requestForm.practiceProfileId}
             onChange={(e) =>
-              setRequestForm((f) => ({ ...f, practiceProfileId: e.target.value }))
+              setRequestForm((f) => ({
+                ...f,
+                practiceProfileId: e.target.value,
+                consentAccepted: false,
+              }))
             }
           >
-            {links.map((l) => (
-              <option key={l.id} value={l.practiceProfileId}>
-                {l.practice?.practiceName || l.practiceProfileId}
-              </option>
-            ))}
+            {links
+              .filter((l) => l.status === "active")
+              .map((l) => (
+                <option key={l.id} value={l.practice?.id || ""}>
+                  {l.practice?.practiceName || l.practice?.id || "—"}
+                </option>
+              ))}
           </select>
+
           <label htmlFor="req-start">{t.preferredStart}</label>
           <input
             id="req-start"
@@ -275,6 +367,7 @@ export default function PatientAppointmentsPage() {
               setRequestForm((f) => ({ ...f, requestedStartAt: e.target.value }))
             }
           />
+
           <label htmlFor="req-end">{t.preferredEnd}</label>
           <input
             id="req-end"
@@ -284,18 +377,38 @@ export default function PatientAppointmentsPage() {
               setRequestForm((f) => ({ ...f, requestedEndAt: e.target.value }))
             }
           />
+
           <label htmlFor="req-note">{t.note}</label>
           <textarea
             id="req-note"
             rows={3}
             value={requestForm.patientNote}
+            maxLength={2000}
             onChange={(e) => setRequestForm((f) => ({ ...f, patientNote: e.target.value }))}
           />
+
+          <fieldset className="patient-appt__consent">
+            <legend className="patient-appt__consent-heading">{t.consentHeading}</legend>
+            <p className="patient-appt__consent-disclaimer">{t.consentDisclaimer}</p>
+            <label className="patient-appt__consent-label">
+              <input
+                type="checkbox"
+                checked={requestForm.consentAccepted}
+                required
+                aria-required="true"
+                onChange={(e) =>
+                  setRequestForm((f) => ({ ...f, consentAccepted: e.target.checked }))
+                }
+              />
+              {t.consentLabel}
+            </label>
+          </fieldset>
+
           <div className="patient-appt__form-actions">
             <button
               type="submit"
               className="patient-inbox__btn patient-inbox__btn--primary"
-              disabled={busy}
+              disabled={busy || !requestForm.consentAccepted}
             >
               {t.submitRequest}
             </button>
@@ -303,7 +416,10 @@ export default function PatientAppointmentsPage() {
               type="button"
               className="patient-inbox__btn patient-inbox__btn--secondary"
               disabled={busy}
-              onClick={() => setShowRequest(false)}
+              onClick={() => {
+                setShowRequest(false);
+                setError("");
+              }}
             >
               {t.cancelRequest}
             </button>

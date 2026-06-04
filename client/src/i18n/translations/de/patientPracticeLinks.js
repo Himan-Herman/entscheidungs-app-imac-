@@ -23,4 +23,5 @@ export default {
   statusInvited: "Eingeladen",
   statusRevoked: "Widerrufen",
   statusArchived: "Archiviert",
+  requestAppointment: "Termin anfragen",
 };

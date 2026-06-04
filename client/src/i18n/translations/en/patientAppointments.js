@@ -36,4 +36,19 @@ export default {
   aiDisclaimer:
     "AI only supports organizational scheduling. It does not assess medical urgency.",
   notProvided: "not provided",
+
+  bookingDisabled:
+    "This practice is not currently accepting appointment requests via MedScoutX.",
+  consentHeading: "Important notice",
+  consentDisclaimer:
+    "This request is for organisational scheduling only. Do not submit medical diagnoses, emergencies, or therapy questions via this form. In an emergency, call the emergency services.",
+  consentLabel:
+    "I have read the notice and wish to submit an appointment request.",
+  consentRequired: "Please confirm the notice to continue.",
+  bookingDisabledError:
+    "This practice has disabled appointment requests via MedScoutX.",
+  consentMissingError: "Please confirm the notice.",
+  successHeading: "Request sent",
+  successText:
+    "Your appointment request has been sent to the practice. The practice will get back to you — this is not yet a confirmed appointment.",
 };

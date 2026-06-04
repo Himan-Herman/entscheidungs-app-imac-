@@ -22,4 +22,5 @@ export default {
   statusInvited: "Invited",
   statusRevoked: "Revoked",
   statusArchived: "Archived",
+  requestAppointment: "Request appointment",
 };

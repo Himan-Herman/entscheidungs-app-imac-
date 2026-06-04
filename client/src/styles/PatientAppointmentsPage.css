@@ -72,3 +72,102 @@
   gap: 0.5rem;
   margin-top: 0.85rem;
 }
+
+.patient-appt__consent {
+  border: 1px solid rgba(234, 179, 8, 0.45);
+  border-radius: 8px;
+  background: rgba(254, 252, 232, 0.7);
+  padding: 0.75rem 1rem;
+  margin: 0.85rem 0 0;
+}
+
+:root[data-theme="dark"] .patient-appt__consent {
+  background: rgba(66, 52, 0, 0.35);
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.patient-appt__consent-heading {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+  color: #78350f;
+}
+
+:root[data-theme="dark"] .patient-appt__consent-heading {
+  color: #fde68a;
+}
+
+.patient-appt__consent-disclaimer {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #78350f;
+  margin: 0 0 0.6rem;
+}
+
+:root[data-theme="dark"] .patient-appt__consent-disclaimer {
+  color: #fde68a;
+}
+
+.patient-appt__consent-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #0f172a;
+}
+
+:root[data-theme="dark"] .patient-appt__consent-label {
+  color: #f1f5f9;
+}
+
+.patient-appt__consent-label input[type="checkbox"] {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: #0e7490;
+}
+
+.patient-appt__consent-label input[type="checkbox"]:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.patient-appt__booking-disabled {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(241, 245, 249, 0.8);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+:root[data-theme="dark"] .patient-appt__booking-disabled {
+  background: rgba(30, 41, 59, 0.5);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
+}
+
+.patient-appt__success {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  background: rgba(240, 253, 244, 0.9);
+  color: #166534;
+}
+
+:root[data-theme="dark"] .patient-appt__success {
+  background: rgba(20, 83, 45, 0.3);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #86efac;
+}
+
+.patient-appt__success-heading {
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+}

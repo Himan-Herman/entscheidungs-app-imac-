@@ -25,6 +25,14 @@ export async function confirmPatientAppointment(appointmentId) {
   return { res, data };
 }
 
+export async function fetchPracticeBookingCheck(practiceId) {
+  const res = await authFetch(
+    `/api/patient/appointments/booking-check?practiceId=${encodeURIComponent(practiceId)}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function cancelRequestPatientAppointment(appointmentId, body = {}) {
   const res = await authFetch(
     `/api/patient/appointments/${encodeURIComponent(appointmentId)}/cancel-request`,

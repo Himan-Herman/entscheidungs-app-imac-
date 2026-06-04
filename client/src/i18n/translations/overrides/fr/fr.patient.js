@@ -408,6 +408,7 @@ export default {
     statusInvited: "Invité",
     statusRevoked: "Révoqué",
     statusArchived: "Archivé",
+    requestAppointment: "Demander un rendez-vous",
   },
 
   patientDataControl: {
@@ -695,6 +696,20 @@ export default {
     aiDisclaimer:
       "L’IA aide uniquement à la planification organisationnelle. Pas d’évaluation de l’urgence médicale.",
     notProvided: "non renseigné",
+    bookingDisabled:
+      "Ce cabinet n’accepte pas de demandes de rendez-vous via MedScoutX pour le moment.",
+    consentHeading: "Avis important",
+    consentDisclaimer:
+      "Cette demande est uniquement à des fins organisationnelles. Ne soumettez pas de diagnostics médicaux, urgences ou questions thérapeutiques par ce formulaire. En cas d’urgence, appelez les secours.",
+    consentLabel:
+      "J’ai lu l’avis et souhaite envoyer une demande de rendez-vous.",
+    consentRequired: "Veuillez confirmer l’avis pour continuer.",
+    bookingDisabledError:
+      "Ce cabinet a désactivé les demandes de rendez-vous via MedScoutX.",
+    consentMissingError: "Veuillez confirmer l’avis.",
+    successHeading: "Demande envoyée",
+    successText:
+      "Votre demande de rendez-vous a été transmise au cabinet. Le cabinet vous recontactera — il ne s’agit pas encore d’une confirmation de rendez-vous.",
   },
 
   patientTelemedicine: {

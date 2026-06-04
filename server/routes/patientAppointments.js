@@ -7,6 +7,7 @@ import { requirePracticeCalendarFeature } from "../middleware/requirePracticeCal
 import {
   confirmPatientAppointment,
   getPatientAppointment,
+  getPatientPracticeBookingStatus,
   listPatientAppointments,
   patientCancelRequest,
   requestPatientAppointment,
@@ -36,6 +37,14 @@ function mapError(err) {
   ) {
     return { status: 400, error: msg };
   }
+  if (
+    [
+      "practice_booking_disabled",
+      "appointment_request_consent_required",
+    ].includes(msg)
+  ) {
+    return { status: 422, error: msg };
+  }
   return { status: 500, error: "request_failed" };
 }
 
@@ -57,6 +66,20 @@ router.post("/request", async (req, res) => {
   try {
     const appointment = await requestPatientAppointment(uid, req.body || {}, { req });
     return res.status(201).json({ ok: true, appointment });
+  } catch (e) {
+    const m = mapError(e);
+    return res.status(m.status).json({ ok: false, error: m.error });
+  }
+});
+
+router.get("/booking-check", async (req, res) => {
+  const uid = uidFromReq(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  try {
+    const status = await getPatientPracticeBookingStatus(uid, practiceId);
+    return res.json({ ok: true, ...status });
   } catch (e) {
     const m = mapError(e);
     return res.status(m.status).json({ ok: false, error: m.error });

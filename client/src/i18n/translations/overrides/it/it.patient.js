@@ -408,6 +408,7 @@ export default {
     statusInvited: "Invitato",
     statusRevoked: "Revocato",
     statusArchived: "Archiviato",
+    requestAppointment: "Richiedi appuntamento",
   },
 
   patientDataControl: {
@@ -695,6 +696,20 @@ export default {
     aiDisclaimer:
       "L’IA aiuta solo nella pianificazione organizzativa. Nessuna valutazione di urgenza medica.",
     notProvided: "non indicato",
+    bookingDisabled:
+      "Questo studio non accetta al momento richieste di appuntamento tramite MedScoutX.",
+    consentHeading: "Avviso importante",
+    consentDisclaimer:
+      "Questa richiesta è esclusivamente per la pianificazione organizzativa. Non inviare diagnosi mediche, emergenze o domande terapeutiche tramite questo modulo. In caso di emergenza, chiama il pronto soccorso.",
+    consentLabel:
+      "Ho letto l’avviso e desidero inviare una richiesta di appuntamento.",
+    consentRequired: "Conferma l’avviso per continuare.",
+    bookingDisabledError:
+      "Questo studio ha disattivato le richieste di appuntamento tramite MedScoutX.",
+    consentMissingError: "Conferma l’avviso.",
+    successHeading: "Richiesta inviata",
+    successText:
+      "La tua richiesta di appuntamento è stata inviata allo studio. Lo studio ti ricontatterà — non si tratta ancora di una conferma di appuntamento.",
   },
 
   patientTelemedicine: {
