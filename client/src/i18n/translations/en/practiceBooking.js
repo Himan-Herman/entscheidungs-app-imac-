@@ -59,4 +59,24 @@ export default {
   errorAnamnesisLinkNotFound: "Anamnesis link not found.",
   errorAnamnesisLinkInactive: "Anamnesis link is inactive.",
   errorAnamnesisLinkExpired: "Anamnesis link has expired.",
+
+  // ── Appointment types (read-only) ────────────────────────────────────────────
+  sectionTypes: "Appointment types",
+  typesHint: "Appointment types are configured in the calendar section.",
+  typesEmpty: "No appointment types found.",
+  typeDurationMin: "min.",
+
+  // ── Availability windows ─────────────────────────────────────────────────────
+  sectionAvailability: "Availability",
+  availabilityHint: "Defines the weekdays and times when appointment requests are possible.",
+  availabilityEmpty: "No availability windows configured.",
+  weekdays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  weekday: "Weekday",
+  startTime: "Start time",
+  endTime: "End time",
+  addAvailability: "Add availability",
+  removeAvailability: "Remove",
+  actionError: "Action failed.",
+  availabilityAdded: "Availability added.",
+  availabilityRemoved: "Availability removed.",
 };

@@ -51,4 +51,19 @@ export default {
   successHeading: "Anfrage gesendet",
   successText:
     "Ihre Terminanfrage wurde an die Praxis übermittelt. Die Praxis meldet sich bei Ihnen – es handelt sich noch nicht um eine verbindliche Terminbestätigung.",
+
+  // ── Appointment list sections ────────────────────────────────────────────────
+  sectionUpcoming: "Bevorstehende Termine",
+  sectionPast: "Vergangene & abgesagte Termine",
+  status_no_show: "Nicht erschienen",
+
+  // ── Cancellation flow ────────────────────────────────────────────────────────
+  cancelledSuccess: "Termin wurde abgesagt.",
+  cancellationReasonLabel: "Absagegrund",
+  cancelModalTitle: "Termin absagen",
+  cancelReasonLabel: "Grund (optional)",
+  cancelReasonPlaceholder: "z. B. Verhinderung, Terminkonflikt …",
+  cancelReasonHint: "Bitte keine medizinischen Details eingeben.",
+  cancelConfirmBtn: "Jetzt absagen",
+  cancelDismissBtn: "Zurück",
 };

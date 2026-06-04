@@ -171,3 +171,133 @@
   font-weight: 700;
   margin: 0 0 0.3rem;
 }
+
+/* ── Status badges ────────────────────────────────────────────────────────── */
+
+.patient-appt__badge {
+  display: inline-block;
+  font-size: 0.73rem;
+  font-weight: 600;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.patient-appt__badge--requested { background: rgba(234,179,8,0.15); color: #854d0e; }
+.patient-appt__badge--scheduled { background: rgba(59,130,246,0.12); color: #1e3a5f; }
+.patient-appt__badge--confirmed { background: rgba(34,197,94,0.15); color: #166534; }
+.patient-appt__badge--cancelled { background: rgba(107,114,128,0.12); color: #374151; }
+.patient-appt__badge--completed { background: rgba(99,102,241,0.12); color: #3730a3; }
+.patient-appt__badge--rescheduled { background: rgba(234,179,8,0.12); color: #92400e; }
+
+:root[data-theme="dark"] .patient-appt__badge--requested { background: rgba(234,179,8,0.2); color: #fde68a; }
+:root[data-theme="dark"] .patient-appt__badge--scheduled { background: rgba(59,130,246,0.2); color: #93c5fd; }
+:root[data-theme="dark"] .patient-appt__badge--confirmed { background: rgba(34,197,94,0.2); color: #86efac; }
+:root[data-theme="dark"] .patient-appt__badge--cancelled { background: rgba(107,114,128,0.2); color: #9ca3af; }
+:root[data-theme="dark"] .patient-appt__badge--completed { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+:root[data-theme="dark"] .patient-appt__badge--rescheduled { background: rgba(234,179,8,0.2); color: #fde68a; }
+
+/* ── Section headings (upcoming / past) ──────────────────────────────────── */
+
+.patient-appt__section-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin: 1.25rem 0 0.4rem;
+}
+
+:root[data-theme="dark"] .patient-appt__section-heading {
+  color: #9ca3af;
+}
+
+/* ── Cancel confirmation form ─────────────────────────────────────────────── */
+
+.patient-appt__cancel-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(220,38,38,0.25);
+  border-radius: 8px;
+  background: rgba(254,242,242,0.7);
+}
+
+:root[data-theme="dark"] .patient-appt__cancel-form {
+  background: rgba(69,10,10,0.3);
+  border-color: rgba(220,38,38,0.3);
+}
+
+.patient-appt__cancel-form-title {
+  font-weight: 700;
+  color: #dc2626;
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+
+:root[data-theme="dark"] .patient-appt__cancel-form-title {
+  color: #fca5a5;
+}
+
+.patient-appt__cancel-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #111827;
+}
+
+:root[data-theme="dark"] .patient-appt__cancel-form-label {
+  color: #f1f5f9;
+}
+
+.patient-appt__cancel-reason {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(15,23,42,0.15);
+  font: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  background: #fff;
+  color: #0f172a;
+}
+
+:root[data-theme="dark"] .patient-appt__cancel-reason {
+  background: #1e293b;
+  border-color: rgba(148,163,184,0.3);
+  color: #f1f5f9;
+}
+
+.patient-appt__cancel-reason:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.patient-appt__cancel-hint {
+  font-size: 0.8rem;
+  color: #78350f;
+  margin: 0.4rem 0 0.65rem;
+}
+
+:root[data-theme="dark"] .patient-appt__cancel-hint {
+  color: #fde68a;
+}
+
+/* ── Danger button ────────────────────────────────────────────────────────── */
+
+.patient-inbox__btn--danger {
+  background: #dc2626;
+  color: #fff;
+}
+
+.patient-inbox__btn--danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.patient-inbox__btn--danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

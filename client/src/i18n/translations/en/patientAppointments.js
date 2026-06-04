@@ -51,4 +51,19 @@ export default {
   successHeading: "Request sent",
   successText:
     "Your appointment request has been sent to the practice. The practice will get back to you — this is not yet a confirmed appointment.",
+
+  // ── Appointment list sections ────────────────────────────────────────────────
+  sectionUpcoming: "Upcoming appointments",
+  sectionPast: "Past & cancelled appointments",
+  status_no_show: "No-show",
+
+  // ── Cancellation flow ────────────────────────────────────────────────────────
+  cancelledSuccess: "Appointment has been cancelled.",
+  cancellationReasonLabel: "Cancellation reason",
+  cancelModalTitle: "Cancel appointment",
+  cancelReasonLabel: "Reason (optional)",
+  cancelReasonPlaceholder: "e.g. schedule conflict, rescheduling needed …",
+  cancelReasonHint: "Please do not enter any medical details.",
+  cancelConfirmBtn: "Confirm cancellation",
+  cancelDismissBtn: "Back",
 };

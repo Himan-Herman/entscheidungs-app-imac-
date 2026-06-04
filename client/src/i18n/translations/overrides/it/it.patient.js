@@ -710,6 +710,17 @@ export default {
     successHeading: "Richiesta inviata",
     successText:
       "La tua richiesta di appuntamento è stata inviata allo studio. Lo studio ti ricontatterà — non si tratta ancora di una conferma di appuntamento.",
+    sectionUpcoming: "Prossimi appuntamenti",
+    sectionPast: "Appuntamenti passati & annullati",
+    status_no_show: "Non presentato",
+    cancelledSuccess: "L'appuntamento è stato annullato.",
+    cancellationReasonLabel: "Motivo della cancellazione",
+    cancelModalTitle: "Annulla appuntamento",
+    cancelReasonLabel: "Motivo (opzionale)",
+    cancelReasonPlaceholder: "es. conflitto di orario, necessità di spostamento …",
+    cancelReasonHint: "Si prega di non inserire dettagli medici.",
+    cancelConfirmBtn: "Conferma cancellazione",
+    cancelDismissBtn: "Indietro",
   },
 
   patientTelemedicine: {

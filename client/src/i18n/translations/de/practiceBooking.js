@@ -59,4 +59,24 @@ export default {
   errorAnamnesisLinkNotFound: "Anamnese-Link nicht gefunden.",
   errorAnamnesisLinkInactive: "Anamnese-Link ist inaktiv.",
   errorAnamnesisLinkExpired: "Anamnese-Link ist abgelaufen.",
+
+  // ── Appointment types (read-only) ────────────────────────────────────────────
+  sectionTypes: "Terminarten",
+  typesHint: "Terminarten werden im Kalender-Bereich konfiguriert.",
+  typesEmpty: "Keine Terminarten vorhanden.",
+  typeDurationMin: "Min.",
+
+  // ── Availability windows ─────────────────────────────────────────────────────
+  sectionAvailability: "Verfügbarkeiten",
+  availabilityHint: "Legt fest, an welchen Wochentagen und Uhrzeiten Terminanfragen möglich sind.",
+  availabilityEmpty: "Keine Verfügbarkeiten eingetragen.",
+  weekdays: ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+  weekday: "Wochentag",
+  startTime: "Startzeit",
+  endTime: "Endzeit",
+  addAvailability: "Verfügbarkeit hinzufügen",
+  removeAvailability: "Entfernen",
+  actionError: "Aktion fehlgeschlagen.",
+  availabilityAdded: "Verfügbarkeit hinzugefügt.",
+  availabilityRemoved: "Verfügbarkeit entfernt.",
 };

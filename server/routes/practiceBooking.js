@@ -4,6 +4,11 @@ import {
   getBookingSettings,
   patchBookingSettings,
 } from "../services/booking/bookingSettingsService.js";
+import {
+  listBookingRequests,
+  acceptBookingRequest,
+  declineBookingRequest,
+} from "../services/booking/bookingRequestsService.js";
 
 const router = express.Router();
 router.use(requirePracticeBookingFeature);
@@ -23,12 +28,18 @@ function mapError(err) {
     case "forbidden":
       return { status: 403, error: "forbidden" };
     case "practice_not_found":
-      return { status: 404, error: "practice_not_found" };
+    case "appointment_not_found":
+      return { status: 404, error: msg };
     case "booking_mode_invalid":
     case "booking_mode_conflict":
     case "anamnesis_link_not_found":
     case "anamnesis_link_inactive":
     case "anamnesis_link_expired":
+    case "not_a_request":
+    case "invalid_status":
+    case "invalid_time_range":
+    case "invalid_location_type":
+    case "time_slot_conflict":
       return { status: 422, error: msg };
     default:
       return { status: 500, error: "request_failed" };
@@ -51,6 +62,51 @@ router.patch("/settings", async (req, res) => {
   try {
     const settings = await patchBookingSettings(uid(req), pid(req), req.body || {}, { req });
     return res.json({ ok: true, settings });
+  } catch (e) {
+    const m = mapError(e);
+    return res.status(m.status).json({ ok: false, error: m.error });
+  }
+});
+
+/** GET /api/practice/booking/requests?practiceId=...&status=...&from=...&to=... */
+router.get("/requests", async (req, res) => {
+  try {
+    const result = await listBookingRequests(uid(req), pid(req), req.query);
+    return res.json({ ok: true, ...result });
+  } catch (e) {
+    const m = mapError(e);
+    return res.status(m.status).json({ ok: false, error: m.error });
+  }
+});
+
+/** PATCH /api/practice/booking/requests/:appointmentId/accept?practiceId=... */
+router.patch("/requests/:appointmentId/accept", async (req, res) => {
+  try {
+    const appt = await acceptBookingRequest(
+      uid(req),
+      pid(req),
+      req.params.appointmentId,
+      req.body || {},
+      { req },
+    );
+    return res.json({ ok: true, appointment: appt });
+  } catch (e) {
+    const m = mapError(e);
+    return res.status(m.status).json({ ok: false, error: m.error });
+  }
+});
+
+/** PATCH /api/practice/booking/requests/:appointmentId/decline?practiceId=... */
+router.patch("/requests/:appointmentId/decline", async (req, res) => {
+  try {
+    const appt = await declineBookingRequest(
+      uid(req),
+      pid(req),
+      req.params.appointmentId,
+      req.body || {},
+      { req },
+    );
+    return res.json({ ok: true, appointment: appt });
   } catch (e) {
     const m = mapError(e);
     return res.status(m.status).json({ ok: false, error: m.error });

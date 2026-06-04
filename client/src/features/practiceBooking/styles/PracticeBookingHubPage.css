@@ -390,3 +390,95 @@
   background: var(--color-surface-alt, #111827);
   border-color: var(--color-border, #374151);
 }
+
+/* ── List items ──────────────────────────────────────────────────────────────── */
+
+.booking-hub__list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.booking-hub__list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  flex-wrap: wrap;
+}
+
+.booking-hub__list-item:last-child {
+  border-bottom: none;
+}
+
+.booking-hub__list-item-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--color-text, #111827);
+  min-width: 0;
+}
+
+.booking-hub__badge {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #6b7280);
+  background: var(--color-surface-alt, #f3f4f6);
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.booking-hub__color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.booking-hub__btn--remove {
+  padding: 0.2rem 0.5rem;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* ── Availability add form ───────────────────────────────────────────────────── */
+
+.booking-hub__av-form {
+  margin-top: 1rem;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  padding-top: 1rem;
+}
+
+.booking-hub__av-form-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.6rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.booking-hub__av-form .booking-hub__field {
+  margin-bottom: 0;
+}
+
+/* ── Dark mode — list & availability ─────────────────────────────────────────── */
+
+[data-theme="dark"] .booking-hub__list-item {
+  border-color: var(--color-border, #374151);
+}
+
+[data-theme="dark"] .booking-hub__list-item-name {
+  color: var(--color-text, #f9fafb);
+}
+
+[data-theme="dark"] .booking-hub__badge {
+  background: var(--color-surface-alt, #374151);
+  color: var(--color-text-muted, #9ca3af);
+}
+
+[data-theme="dark"] .booking-hub__av-form {
+  border-color: var(--color-border, #374151);
+}

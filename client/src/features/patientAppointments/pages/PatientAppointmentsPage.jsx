@@ -33,6 +33,19 @@ function fmt(iso, lang) {
   }
 }
 
+function statusBadgeClass(status) {
+  const map = {
+    requested: "patient-appt__badge--requested",
+    scheduled: "patient-appt__badge--scheduled",
+    confirmed: "patient-appt__badge--confirmed",
+    cancelled: "patient-appt__badge--cancelled",
+    completed: "patient-appt__badge--completed",
+    rescheduled: "patient-appt__badge--rescheduled",
+    no_show: "patient-appt__badge--cancelled",
+  };
+  return `patient-appt__badge ${map[status] || ""}`.trim();
+}
+
 function hydratePreVisitSession(record) {
   const answers =
     record.answers && typeof record.answers === "object" && !Array.isArray(record.answers)
@@ -63,6 +76,9 @@ function hydratePreVisitSession(record) {
   }
 }
 
+const ACTIVE_STATUSES = ["requested", "scheduled", "confirmed", "rescheduled"];
+const PAST_STATUSES = ["cancelled", "completed", "no_show"];
+
 export default function PatientAppointmentsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -91,6 +107,9 @@ export default function PatientAppointmentsPage() {
   const [bookingStatus, setBookingStatus] = useState(null);
   const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
 
   const reload = useCallback(async () => {
     const { res, data } = await fetchPatientAppointments();
@@ -215,7 +234,13 @@ export default function PatientAppointmentsPage() {
       }
       await reload();
       setShowRequest(false);
-      setRequestForm((f) => ({ ...f, requestedStartAt: "", requestedEndAt: "", patientNote: "", consentAccepted: false }));
+      setRequestForm((f) => ({
+        ...f,
+        requestedStartAt: "",
+        requestedEndAt: "",
+        patientNote: "",
+        consentAccepted: false,
+      }));
       setSuccessMsg(t.successText);
     } catch (e) {
       if (e.message === "booking_disabled") setError(t.bookingDisabledError);
@@ -242,15 +267,21 @@ export default function PatientAppointmentsPage() {
     }
   };
 
-  const cancelReq = async () => {
+  const cancelAppt = async () => {
     if (!selected) return;
     setBusy(true);
     setError("");
     try {
-      const { res, data } = await cancelRequestPatientAppointment(selected.id, {});
+      const { res, data } = await cancelRequestPatientAppointment(
+        selected.id,
+        { reason: cancelReason.trim() || undefined },
+      );
       if (!res.ok) throw new Error(data.error || "failed");
       await reload();
-      setSelected(data.appointment);
+      setSelected(null);
+      setShowCancelConfirm(false);
+      setCancelReason("");
+      setSuccessMsg(t.cancelledSuccess);
     } catch {
       setError(t.actionError);
     } finally {
@@ -276,6 +307,18 @@ export default function PatientAppointmentsPage() {
       setBusy(false);
     }
   };
+
+  function selectAppointment(a) {
+    setSelected(a);
+    setShowCancelConfirm(false);
+    setCancelReason("");
+    setError("");
+  }
+
+  const activeAppts = appointments.filter((a) => ACTIVE_STATUSES.includes(a.status));
+  const pastAppts = appointments.filter((a) => PAST_STATUSES.includes(a.status));
+  const hasBothGroups = activeAppts.length > 0 && pastAppts.length > 0;
+  const canCancel = selected != null && ACTIVE_STATUSES.includes(selected.status);
 
   return (
     <main className="patient-inbox" aria-labelledby="patient-appt-heading">
@@ -427,41 +470,91 @@ export default function PatientAppointmentsPage() {
         </form>
       ) : null}
 
-      <ul className="patient-inbox__list" aria-label={t.listCaption}>
-        {appointments.length === 0 && !loading ? (
-          <li className="patient-inbox__muted">{t.empty}</li>
-        ) : (
-          appointments.map((a) => (
-            <li key={a.id}>
-              <button
-                type="button"
-                className="patient-inbox__item patient-appt__row"
-                onClick={() => setSelected(a)}
-                aria-current={selected?.id === a.id ? "true" : undefined}
-                aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
-              >
-                <strong>{a.title}</strong>
-                <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
-                <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
-                <span className="patient-inbox__meta">
-                  {t[`status_${a.status}`] || a.status}
-                </span>
-              </button>
-            </li>
-          ))
-        )}
-      </ul>
+      {/* ── Appointments list ─────────────────────────────────────────── */}
+      {appointments.length === 0 && !loading ? (
+        <p className="patient-inbox__muted">{t.empty}</p>
+      ) : (
+        <>
+          {hasBothGroups && (
+            <h2 className="patient-appt__section-heading">{t.sectionUpcoming}</h2>
+          )}
+          {activeAppts.length > 0 && (
+            <ul
+              className="patient-inbox__list"
+              aria-label={hasBothGroups ? t.sectionUpcoming : t.listCaption}
+            >
+              {activeAppts.map((a) => (
+                <li key={a.id}>
+                  <button
+                    type="button"
+                    className="patient-inbox__item patient-appt__row"
+                    onClick={() => selectAppointment(a)}
+                    aria-current={selected?.id === a.id ? "true" : undefined}
+                    aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
+                  >
+                    <strong>{a.title}</strong>
+                    <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
+                    <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
+                    <span className={statusBadgeClass(a.status)}>
+                      {t[`status_${a.status}`] || a.status}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
 
+          {pastAppts.length > 0 && (
+            <>
+              <h2 className="patient-appt__section-heading">{t.sectionPast}</h2>
+              <ul className="patient-inbox__list" aria-label={t.sectionPast}>
+                {pastAppts.map((a) => (
+                  <li key={a.id}>
+                    <button
+                      type="button"
+                      className="patient-inbox__item patient-appt__row"
+                      onClick={() => selectAppointment(a)}
+                      aria-current={selected?.id === a.id ? "true" : undefined}
+                      aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
+                    >
+                      <strong>{a.title}</strong>
+                      <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
+                      <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
+                      <span className={statusBadgeClass(a.status)}>
+                        {t[`status_${a.status}`] || a.status}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </>
+      )}
+
+      {/* ── Appointment detail panel ──────────────────────────────────── */}
       {selected ? (
         <section className="patient-appt__panel" aria-label={t.detailHeading}>
           <h2 className="patient-inbox__item-title">{selected.title}</h2>
           <p className="patient-inbox__meta">
-            <strong>{t.status}:</strong> {t[`status_${selected.status}`] || selected.status}
+            <strong>{t.status}:</strong>{" "}
+            <span className={statusBadgeClass(selected.status)}>
+              {t[`status_${selected.status}`] || selected.status}
+            </span>
           </p>
+          {selected.practiceName && (
+            <p className="patient-inbox__meta">{selected.practiceName}</p>
+          )}
           <p className="patient-inbox__meta">{fmt(selected.startAt, language)}</p>
           {selected.patientNote ? (
             <p className="patient-inbox__summary">{selected.patientNote}</p>
           ) : null}
+          {selected.cancellationReason ? (
+            <p className="patient-inbox__summary">
+              <strong>{t.cancellationReasonLabel}:</strong> {selected.cancellationReason}
+            </p>
+          ) : null}
+
           <div className="patient-inbox__actions">
             {["scheduled", "requested", "rescheduled"].includes(selected.status) ? (
               <button
@@ -471,16 +564,6 @@ export default function PatientAppointmentsPage() {
                 onClick={confirm}
               >
                 {t.confirmAppointment}
-              </button>
-            ) : null}
-            {!["cancelled"].includes(selected.status) ? (
-              <button
-                type="button"
-                className="patient-inbox__btn patient-inbox__btn--secondary"
-                disabled={busy}
-                onClick={cancelReq}
-              >
-                {t.requestCancellation}
               </button>
             ) : null}
             {selected.preVisitSessionId ? (
@@ -494,6 +577,67 @@ export default function PatientAppointmentsPage() {
               </button>
             ) : null}
           </div>
+
+          {/* ── Cancel flow ─────────────────────────────────────────────── */}
+          {canCancel ? (
+            showCancelConfirm ? (
+              <div
+                className="patient-appt__cancel-form"
+                role="group"
+                aria-label={t.cancelModalTitle}
+              >
+                <p className="patient-appt__cancel-form-title">{t.cancelModalTitle}</p>
+                <label
+                  className="patient-appt__cancel-form-label"
+                  htmlFor="cancel-reason"
+                >
+                  {t.cancelReasonLabel}
+                </label>
+                <textarea
+                  id="cancel-reason"
+                  className="patient-appt__cancel-reason"
+                  value={cancelReason}
+                  rows={3}
+                  maxLength={500}
+                  placeholder={t.cancelReasonPlaceholder}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                />
+                <p className="patient-appt__cancel-hint">{t.cancelReasonHint}</p>
+                <div className="patient-appt__form-actions">
+                  <button
+                    type="button"
+                    className="patient-inbox__btn patient-inbox__btn--danger"
+                    disabled={busy}
+                    onClick={cancelAppt}
+                  >
+                    {t.cancelConfirmBtn}
+                  </button>
+                  <button
+                    type="button"
+                    className="patient-inbox__btn patient-inbox__btn--secondary"
+                    disabled={busy}
+                    onClick={() => {
+                      setShowCancelConfirm(false);
+                      setCancelReason("");
+                    }}
+                  >
+                    {t.cancelDismissBtn}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginTop: "0.5rem" }}>
+                <button
+                  type="button"
+                  className="patient-inbox__btn patient-inbox__btn--secondary"
+                  disabled={busy}
+                  onClick={() => setShowCancelConfirm(true)}
+                >
+                  {t.requestCancellation}
+                </button>
+              </div>
+            )
+          ) : null}
         </section>
       ) : null}
     </main>

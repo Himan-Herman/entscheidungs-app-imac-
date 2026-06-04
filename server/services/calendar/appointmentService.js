@@ -39,6 +39,7 @@ function appointmentToJson(row, { includeNotes = true } = {}) {
     requestedStartAt: row.requestedStartAt,
     requestedEndAt: row.requestedEndAt,
     cancelledAt: row.cancelledAt,
+    cancellationReason: row.cancellationReason || null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     appointmentType: row.appointmentType
@@ -509,17 +510,18 @@ export async function patientCancelRequest(patientUserId, appointmentId, body, c
     where: { id: appointmentId, patientUserId },
   });
   if (!existing) throw new Error("appointment_not_found");
-  if (existing.status === "cancelled") throw new Error("appointment_cancelled");
+  if (["cancelled", "completed", "no_show"].includes(existing.status)) {
+    throw new Error("appointment_cancelled");
+  }
 
-  const cancelNote = body.reason
-    ? String(body.reason).slice(0, 500)
-    : "";
+  const reason = body.reason ? String(body.reason).slice(0, 500) : null;
   const row = await prisma.practiceAppointment.update({
     where: { id: appointmentId },
     data: {
-      patientNote: cancelNote
-        ? `${existing.patientNote || ""}\n[Absage angefragt] ${cancelNote}`.trim().slice(0, 2000)
-        : existing.patientNote,
+      status: "cancelled",
+      cancelledAt: new Date(),
+      cancelledByUserId: patientUserId,
+      cancellationReason: reason,
     },
     include: { appointmentType: true },
   });
@@ -529,7 +531,7 @@ export async function patientCancelRequest(patientUserId, appointmentId, body, c
     req: ctx.req,
     userId: patientUserId,
     actorRole: "patient",
-    action: "appointment_cancel_requested",
+    action: "appointment_cancelled_by_patient",
     practiceProfileId: row.practiceProfileId,
     metadata: { appointmentId },
   }).catch(() => {});

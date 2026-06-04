@@ -710,6 +710,17 @@ export default {
     successHeading: "Solicitud enviada",
     successText:
       "Su solicitud de cita ha sido enviada al consultorio. El consultorio se pondrá en contacto con usted — aún no es una confirmación de cita.",
+    sectionUpcoming: "Próximas citas",
+    sectionPast: "Citas pasadas y canceladas",
+    status_no_show: "No presentado",
+    cancelledSuccess: "La cita ha sido cancelada.",
+    cancellationReasonLabel: "Motivo de cancelación",
+    cancelModalTitle: "Cancelar cita",
+    cancelReasonLabel: "Motivo (opcional)",
+    cancelReasonPlaceholder: "p. ej. conflicto de horario, necesidad de cambio …",
+    cancelReasonHint: "Por favor, no introduzca datos médicos.",
+    cancelConfirmBtn: "Confirmar cancelación",
+    cancelDismissBtn: "Volver",
   },
 
   patientTelemedicine: {

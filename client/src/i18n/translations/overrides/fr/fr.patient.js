@@ -710,6 +710,17 @@ export default {
     successHeading: "Demande envoyée",
     successText:
       "Votre demande de rendez-vous a été transmise au cabinet. Le cabinet vous recontactera — il ne s’agit pas encore d’une confirmation de rendez-vous.",
+    sectionUpcoming: "Prochains rendez-vous",
+    sectionPast: "Rendez-vous passés & annulés",
+    status_no_show: "Absent",
+    cancelledSuccess: "Le rendez-vous a été annulé.",
+    cancellationReasonLabel: "Motif d’annulation",
+    cancelModalTitle: "Annuler le rendez-vous",
+    cancelReasonLabel: "Motif (optionnel)",
+    cancelReasonPlaceholder: "ex. conflit d’horaire, report nécessaire …",
+    cancelReasonHint: "Veuillez ne pas saisir de détails médicaux.",
+    cancelConfirmBtn: "Confirmer l’annulation",
+    cancelDismissBtn: "Retour",
   },
 
   patientTelemedicine: {

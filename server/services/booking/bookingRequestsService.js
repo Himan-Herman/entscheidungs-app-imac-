@@ -140,6 +140,17 @@ export async function acceptBookingRequest(
   const endAt = parseDate(body.endAt);
   if (!startAt || !endAt || endAt <= startAt) throw new Error("invalid_time_range");
 
+  const conflict = await prisma.practiceAppointment.findFirst({
+    where: {
+      practiceProfileId: practiceId,
+      id: { not: appointmentId },
+      status: { notIn: ["cancelled", "no_show"] },
+      startAt: { lt: endAt },
+      endAt: { gt: startAt },
+    },
+  });
+  if (conflict) throw new Error("time_slot_conflict");
+
   const data = { status: "confirmed", startAt, endAt };
 
   if (body.practiceNote !== undefined) {
