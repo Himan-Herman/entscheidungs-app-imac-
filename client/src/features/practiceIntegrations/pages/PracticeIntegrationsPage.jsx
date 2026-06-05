@@ -374,6 +374,37 @@ export default function PracticeIntegrationsPage() {
             )}
           </section>
 
+          <section className="practice-integrations__section" aria-labelledby="pi-vendors-heading">
+            <h2 id="pi-vendors-heading">{t.sectionVendors}</h2>
+            <p className="practice-integrations__vendor-note">{t.vendorCatalogueNote}</p>
+            <ul className="practice-integrations__vendor-list" aria-label={t.sectionVendors}>
+              {[
+                { key: "tomedo", name: "tomedo" },
+                { key: "cgm_m1", name: "CGM M1" },
+                { key: "dampsoft", name: "Dampsoft" },
+                { key: "medistar", name: "Medistar" },
+                { key: "turbomed", name: "Turbomed" },
+              ].map((vendor) => (
+                <li key={vendor.key} className="practice-integrations__vendor-row">
+                  <span className="practice-integrations__vendor-name">{vendor.name}</span>
+                  <span className="practice-integrations__vendor-badge practice-integrations__vendor-badge--type">
+                    {t.vendorTypePvs}
+                  </span>
+                  <span className="practice-integrations__vendor-badge practice-integrations__vendor-badge--status">
+                    {t.vendorStatusComingSoon}
+                  </span>
+                  <a
+                    href={`mailto:support@medscoutx.de?subject=PVS-Interesse%3A%20${encodeURIComponent(vendor.name)}`}
+                    className="practice-integrations__vendor-interest"
+                    aria-label={`${t.btnExpressInterest}: ${vendor.name}`}
+                  >
+                    {t.btnExpressInterest}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           <section className="practice-integrations__section" aria-labelledby="pi-jobs-heading">
             <h2 id="pi-jobs-heading">{t.sectionJobs}</h2>
             {!overview.recentJobs?.length ? (

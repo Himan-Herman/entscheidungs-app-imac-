@@ -15,6 +15,7 @@ import esVitals from "./es/es.vitals.js";
 import esHealthHistory from "./es/es.healthHistory.js";
 import esErezept from "./es/es.erezept.js";
 import esSosCard from "./es/es.sosCard.js";
+import { esPracticeBillingPlausibility, esPracticeIntegrationsVendors } from "./es/es.practiceBillingPlausibility.js";
 
 /** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
 const esBase = {
@@ -223,6 +224,12 @@ export default deepMerge(
   ),
   deepMerge(
     deepMerge(deepMerge(esPatient, esMedicalInterpreter), esPracticeModules),
-    deepMerge(deepMerge(deepMerge(deepMerge({ vaccinations: esVaccinations }, { vitals: esVitals }), { healthHistory: esHealthHistory }), { erezept: esErezept }), { sosCard: esSosCard }),
+    deepMerge(
+      deepMerge(deepMerge(deepMerge(deepMerge({ vaccinations: esVaccinations }, { vitals: esVitals }), { healthHistory: esHealthHistory }), { erezept: esErezept }), { sosCard: esSosCard }),
+      deepMerge(
+        { practiceBillingPlausibility: esPracticeBillingPlausibility },
+        { practiceIntegrations: esPracticeIntegrationsVendors },
+      ),
+    ),
   ),
 );

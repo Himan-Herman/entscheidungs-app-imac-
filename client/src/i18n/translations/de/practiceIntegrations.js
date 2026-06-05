@@ -77,6 +77,15 @@ export default {
   jobDirection: "Richtung",
   jobCreated: "Erstellt",
 
+  sectionVendors: "Verfügbare PVS-Systeme",
+  vendorCatalogueNote:
+    "Die Aktivierung erfordert einen Vendor-Vertrag, ein Testsystem und eine Sicherheitsprüfung. Keine dieser Anbindungen ist derzeit produktiv verfügbar.",
+  vendorStatusComingSoon: "Geplant",
+  vendorStatusSandboxReady: "Sandbox bereit",
+  vendorStatusActive: "Aktiv",
+  vendorTypePvs: "PVS",
+  btnExpressInterest: "Interesse bekunden",
+
   errors: {
     integrations_disabled: "Integrationen sind deaktiviert.",
     integration_consent_missing:

@@ -1,0 +1,365 @@
+/*
+ * PracticeBillingPlausibilityPage — scoped BEM styles.
+ * Uses app CSS variables only. No OS/browser dark mode override — app data-theme controls theming.
+ */
+
+.billing-plausibility {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+/* Disclaimer — always first, always visible */
+.billing-plausibility__disclaimer {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid var(--warning-border, #f59e0b);
+  background: var(--surface-warning, #fffbeb);
+  color: var(--text-body, #111827);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  margin-bottom: 1.5rem;
+}
+
+.billing-plausibility__disclaimer-icon {
+  margin-right: 0.375rem;
+  font-style: normal;
+}
+
+/* Heading + intro */
+.billing-plausibility__intro {
+  margin: 0 0 1.25rem;
+  color: var(--text-muted, #4b5563);
+  line-height: 1.5;
+}
+
+/* Sections */
+.billing-plausibility__section {
+  margin-bottom: 2rem;
+}
+
+.billing-plausibility__section-heading {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: var(--text-body, #111827);
+}
+
+/* Form */
+.billing-plausibility__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.billing-plausibility__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.billing-plausibility__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: end;
+}
+
+@media (max-width: 36rem) {
+  .billing-plausibility__row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  .billing-plausibility__row-remove {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+.billing-plausibility__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.billing-plausibility__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted, #4b5563);
+}
+
+.billing-plausibility__input {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-body, #111827);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.billing-plausibility__input:focus {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 1px;
+  border-color: var(--focus-ring, #0f766e);
+}
+
+.billing-plausibility__row-remove {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--text-muted, #4b5563);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: end;
+}
+
+.billing-plausibility__row-remove:hover {
+  background: var(--surface-danger, #fef2f2);
+  border-color: var(--danger, #ef4444);
+  color: var(--danger, #ef4444);
+}
+
+.billing-plausibility__row-remove:focus-visible {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 2px;
+}
+
+.billing-plausibility__context-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.billing-plausibility__textarea {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-body, #111827);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 5rem;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.billing-plausibility__textarea:focus {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 1px;
+  border-color: var(--focus-ring, #0f766e);
+}
+
+/* Action buttons */
+.billing-plausibility__actions {
+  display: flex;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.billing-plausibility__btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border, #e5e7eb);
+  background: transparent;
+  color: var(--text-body, #111827);
+  transition: background 0.15s;
+}
+
+.billing-plausibility__btn:focus-visible {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 2px;
+}
+
+.billing-plausibility__btn--primary {
+  background: var(--accent, #0f766e);
+  color: var(--on-accent, #ffffff);
+  border-color: var(--accent, #0f766e);
+}
+
+.billing-plausibility__btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover, #115e59);
+  border-color: var(--accent-hover, #115e59);
+}
+
+.billing-plausibility__btn--secondary {
+  background: transparent;
+  color: var(--accent, #0f766e);
+  border-color: var(--accent, #0f766e);
+}
+
+.billing-plausibility__btn--secondary:hover:not(:disabled) {
+  background: var(--surface-muted, #f0fdfa);
+}
+
+.billing-plausibility__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Status messages */
+.billing-plausibility__status {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.billing-plausibility__status--error {
+  background: var(--surface-danger, #fef2f2);
+  color: var(--danger, #b91c1c);
+  border: 1px solid var(--danger-border, #fca5a5);
+}
+
+.billing-plausibility__status--ok {
+  background: var(--surface-success, #f0fdf4);
+  color: var(--success, #15803d);
+  border: 1px solid var(--success-border, #86efac);
+}
+
+/* Result stub */
+.billing-plausibility__result-stub {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: var(--surface-muted, #f0fdfa);
+  border: 1px solid var(--border, #e5e7eb);
+  font-size: 0.875rem;
+  color: var(--text-muted, #4b5563);
+}
+
+/* History table */
+.billing-plausibility__table-wrap {
+  overflow-x: auto;
+}
+
+.billing-plausibility__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.billing-plausibility__table th,
+.billing-plausibility__table td {
+  text-align: left;
+  padding: 0.5rem 0.625rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  color: var(--text-body, #111827);
+}
+
+.billing-plausibility__table th {
+  font-weight: 600;
+  color: var(--text-muted, #4b5563);
+  font-size: 0.8125rem;
+}
+
+.billing-plausibility__empty {
+  color: var(--text-muted, #4b5563);
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+/* Feature disabled banner */
+.billing-plausibility__disabled-banner {
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--surface-muted, #f9fafb);
+  border: 1px solid var(--border, #e5e7eb);
+  color: var(--text-muted, #4b5563);
+  font-size: 0.875rem;
+}
+
+/* Session result items — Phase D */
+.billing-plausibility__items {
+  margin-top: 1rem;
+}
+
+.billing-plausibility__items-heading {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-body, #111827);
+  margin: 0 0 0.625rem;
+}
+
+.billing-plausibility__item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.billing-plausibility__item {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  background: var(--surface, #fff);
+}
+
+.billing-plausibility__item-ziffer {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  margin-right: 0.625rem;
+  color: var(--text-body, #111827);
+}
+
+.billing-plausibility__item-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+.billing-plausibility__item-badge--found {
+  background: var(--surface-success, #f0fdf4);
+  color: var(--text-success, #15803d);
+  border: 1px solid var(--border-success, #bbf7d0);
+}
+
+.billing-plausibility__item-badge--notfound {
+  background: var(--surface-muted, #f9fafb);
+  color: var(--text-muted, #4b5563);
+  border: 1px solid var(--border, #e5e7eb);
+}
+
+.billing-plausibility__item-no-warnings {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted, #4b5563);
+}
+
+.billing-plausibility__item-warnings {
+  list-style: none;
+  margin: 0.375rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.billing-plausibility__item-warning {
+  font-size: 0.8125rem;
+  color: var(--text-warning, #92400e);
+  padding-left: 1rem;
+  position: relative;
+}
+
+.billing-plausibility__item-warning::before {
+  content: "⚠";
+  position: absolute;
+  left: 0;
+  font-size: 0.75rem;
+}

@@ -316,3 +316,12 @@ export function isPracticeAnamnesisEnabled() {
 export function isPracticeBookingEnabled() {
   return envFlag("PRACTICE_BOOKING_ENABLED", false);
 }
+
+/**
+ * GOÄ / PKV billing plausibility tool — automated hint only.
+ * Not legally binding. Not a diagnosis. Not a billing decision.
+ * Default off until ENABLE_BILLING_PLAUSIBILITY is set.
+ */
+export function isBillingPlausibilityEnabled() {
+  return envFlag("ENABLE_BILLING_PLAUSIBILITY", false);
+}

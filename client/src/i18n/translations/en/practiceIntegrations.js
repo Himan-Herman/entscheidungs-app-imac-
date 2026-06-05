@@ -74,6 +74,15 @@ export default {
   jobDirection: "Direction",
   jobCreated: "Created",
 
+  sectionVendors: "Available PVS systems",
+  vendorCatalogueNote:
+    "Activation requires a vendor contract, a test system, and a security review. None of these connectors are available in production yet.",
+  vendorStatusComingSoon: "Coming soon",
+  vendorStatusSandboxReady: "Sandbox ready",
+  vendorStatusActive: "Active",
+  vendorTypePvs: "PVS",
+  btnExpressInterest: "Express interest",
+
   errors: {
     integrations_disabled: "Integrations are disabled.",
     integration_consent_missing: "The required consent for this integration is missing.",

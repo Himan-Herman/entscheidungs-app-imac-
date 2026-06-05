@@ -2111,3 +2111,90 @@ model PracticeBookingSettings {
 
   @@index([practiceProfileId])
 }
+
+// ─── Billing Plausibility (Phase D) ──────────────────────────────────────────
+// Append-only plausibility review sessions for GOÄ/PKV billing hints.
+// NOT a certified billing system. NOT legally binding. No patient identifiers stored.
+// Scalar FKs (no Prisma-level relation to PracticeProfile) to keep this module
+// fully additive without touching existing model definitions.
+
+/**
+ * One review session = one submitted set of GOÄ rows.
+ * status: pending | reviewed | dismissed
+ * sourceType: manual (user entered) — upload/api reserved for future phases.
+ * disclaimerVersion: semver of the disclaimer text shown at submission time.
+ * inputSummaryJson: row count and ziffern list (no patient data).
+ * resultSummaryJson: deterministic warnings per row (no AI in Phase D).
+ */
+model BillingPlausibilitySession {
+  id                 String    @id @default(cuid())
+  /// Indexed scalar FK — no Prisma relation to avoid touching PracticeProfile model.
+  practiceProfileId  String
+  createdByUserId    String
+  /// pending | reviewed | dismissed
+  status             String    @default("pending") @db.VarChar(20)
+  /// manual | upload | api
+  sourceType         String    @default("manual") @db.VarChar(20)
+  /// { rowCount: number, ziffern: string[] } — no patient identifiers.
+  inputSummaryJson   Json
+  /// { warnings: WarningsByRow[] } from deterministic catalogue checks — no AI.
+  resultSummaryJson  Json?
+  /// Semver of the disclaimer text accepted at submission time.
+  disclaimerVersion  String    @db.VarChar(20)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  dismissedAt        DateTime?
+
+  items    BillingPlausibilityItem[]
+  auditLog BillingPlausibilityAuditLog[]
+
+  @@index([practiceProfileId, createdAt])
+  @@index([practiceProfileId, status])
+  @@index([createdByUserId])
+}
+
+/**
+ * One row per GOÄ ziffer submitted in a session.
+ * catalogueMatchJson: { found: bool, ziffer, title, points } — from static catalogue.
+ * warningsJson: string[] — deterministic warning codes for this row.
+ */
+model BillingPlausibilityItem {
+  id                  String   @id @default(cuid())
+  sessionId           String
+  ziffer              String   @db.VarChar(20)
+  /// Stored as string to preserve the original input format (e.g. "2,3").
+  factor              String   @db.VarChar(10)
+  count               Int
+  /// Free-text context entered by practitioner — no clinical/patient content enforced by route.
+  contextText         String?  @db.VarChar(600)
+  /// Result of catalogue lookup for this ziffer.
+  catalogueMatchJson  Json?
+  /// Array of warning code strings for this row.
+  warningsJson        Json?
+  createdAt           DateTime @default(now())
+
+  session BillingPlausibilitySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([ziffer])
+}
+
+/**
+ * Immutable audit trail for billing plausibility session lifecycle events.
+ * action: created | dismissed | reviewed
+ * metadataJson: { rowCount, ziffernList, ... } — no patient identifiers.
+ */
+model BillingPlausibilityAuditLog {
+  id           String   @id @default(cuid())
+  sessionId    String
+  actorUserId  String?
+  /// created | dismissed | reviewed
+  action       String   @db.VarChar(40)
+  metadataJson Json?
+  createdAt    DateTime @default(now())
+
+  session BillingPlausibilitySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([actorUserId])
+}

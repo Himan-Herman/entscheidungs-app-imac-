@@ -105,6 +105,62 @@ const CONNECTORS = {
       return { ok: false, error: "connector_not_configured" };
     },
   },
+
+  /** German PVS/KIS vendor connectors — coming soon. No outbound traffic. No credentials required. */
+  tomedo: {
+    name: "tomedo",
+    type: "pvs",
+    status: "coming_soon",
+    capabilities: [],
+    requiredConfig: [],
+    async testConnection() { return { ok: false, error: "connector_coming_soon" }; },
+    async import() { return { ok: false, error: "connector_coming_soon" }; },
+    async export() { return { ok: false, error: "connector_coming_soon" }; },
+  },
+
+  cgm_m1: {
+    name: "CGM M1",
+    type: "pvs",
+    status: "coming_soon",
+    capabilities: [],
+    requiredConfig: [],
+    async testConnection() { return { ok: false, error: "connector_coming_soon" }; },
+    async import() { return { ok: false, error: "connector_coming_soon" }; },
+    async export() { return { ok: false, error: "connector_coming_soon" }; },
+  },
+
+  dampsoft: {
+    name: "Dampsoft",
+    type: "pvs",
+    status: "coming_soon",
+    capabilities: [],
+    requiredConfig: [],
+    async testConnection() { return { ok: false, error: "connector_coming_soon" }; },
+    async import() { return { ok: false, error: "connector_coming_soon" }; },
+    async export() { return { ok: false, error: "connector_coming_soon" }; },
+  },
+
+  medistar: {
+    name: "Medistar",
+    type: "pvs",
+    status: "coming_soon",
+    capabilities: [],
+    requiredConfig: [],
+    async testConnection() { return { ok: false, error: "connector_coming_soon" }; },
+    async import() { return { ok: false, error: "connector_coming_soon" }; },
+    async export() { return { ok: false, error: "connector_coming_soon" }; },
+  },
+
+  turbomed: {
+    name: "Turbomed",
+    type: "pvs",
+    status: "coming_soon",
+    capabilities: [],
+    requiredConfig: [],
+    async testConnection() { return { ok: false, error: "connector_coming_soon" }; },
+    async import() { return { ok: false, error: "connector_coming_soon" }; },
+    async export() { return { ok: false, error: "connector_coming_soon" }; },
+  },
 };
 
 /**
