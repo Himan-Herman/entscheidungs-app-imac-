@@ -13,7 +13,7 @@
  */
 
 import { sendEmailWithPdfAttachment, sendMail } from "../emailService.js";
-import { appointmentEventEmail } from "./calendar/appointmentEventCopy.js";
+import { appointmentEventEmail, practicePatientCancelledEmail } from "./calendar/appointmentEventCopy.js";
 
 const QUEUE_MODE = (process.env.EMAIL_QUEUE_MODE || "direct").toLowerCase();
 
@@ -35,23 +35,60 @@ export async function deliverPrevisitPdfEmail(args) {
 }
 
 /**
- * Transactional appointment event email (no clinical content).
+ * Transactional appointment event email to patient (no clinical content).
  * Skips gracefully when feature flag or Resend is not configured.
  *
- * @param {{ to: string, emailEvent: string, locale: string, practiceName: string, formattedDate?: string|null }} args
+ * @param {{ to: string, emailEvent: string, locale: string, practiceName: string,
+ *           formattedDate?: string|null, cancellationReason?: string|null,
+ *           practiceContact?: {phone?:string|null,email?:string|null,address?:string|null}|null }} args
  */
-export async function deliverAppointmentEventEmail({ to, emailEvent, locale, practiceName, formattedDate }) {
+export async function deliverAppointmentEventEmail({ to, emailEvent, locale, practiceName, formattedDate, cancellationReason, practiceContact }) {
   if (process.env.ENABLE_APPOINTMENT_EVENT_EMAILS !== "true") {
     return { ok: true, skipped: true, reason: "appointment_event_emails_disabled" };
   }
   if (!to) return { ok: true, skipped: true, reason: "no_recipient" };
 
-  const email = appointmentEventEmail(emailEvent, locale, { practiceName, formattedDate: formattedDate || null });
+  const email = appointmentEventEmail(emailEvent, locale, {
+    practiceName,
+    formattedDate: formattedDate || null,
+    cancellationReason: cancellationReason || null,
+    practiceContact: practiceContact || null,
+  });
   if (!email) return { ok: true, skipped: true, reason: "no_template_for_event" };
 
   try {
     await sendMail(to, email.subject, email.text, email.html);
     return { ok: true, locale };
+  } catch (err) {
+    const msg = String(err?.message || "");
+    if (msg.includes("RESEND") || msg.includes("nicht initialisiert")) {
+      return { ok: true, skipped: true, reason: "resend_not_configured" };
+    }
+    throw err;
+  }
+}
+
+/**
+ * Practice-facing notification when a patient cancels their appointment.
+ * Always in German. Skips when feature flag or Resend is not configured.
+ *
+ * @param {{ to: string, practiceName: string, formattedDate?: string|null, cancellationReason?: string|null }} args
+ */
+export async function deliverPracticePatientCancelledEmail({ to, practiceName, formattedDate, cancellationReason }) {
+  if (process.env.ENABLE_APPOINTMENT_EVENT_EMAILS !== "true") {
+    return { ok: true, skipped: true, reason: "appointment_event_emails_disabled" };
+  }
+  if (!to) return { ok: true, skipped: true, reason: "no_recipient" };
+
+  const email = practicePatientCancelledEmail(
+    practiceName,
+    formattedDate || null,
+    cancellationReason || null,
+  );
+
+  try {
+    await sendMail(to, email.subject, email.text, email.html);
+    return { ok: true };
   } catch (err) {
     const msg = String(err?.message || "");
     if (msg.includes("RESEND") || msg.includes("nicht initialisiert")) {

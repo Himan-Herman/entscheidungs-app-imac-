@@ -228,7 +228,7 @@ export async function declineBookingRequest(
   });
 
   await cancelAppointmentReminders(appointmentId);
-  await notifyAppointmentEvent(row, "cancelled");
+  await notifyAppointmentEvent(row, "declined");
 
   writeAuditLog({
     req: ctx.req,

@@ -332,7 +332,7 @@ export async function cancelPracticeAppointment(
 
   await cancelAppointmentReminders(appointmentId);
 
-  await notifyAppointmentEvent(row, "cancelled");
+  await notifyAppointmentEvent(row, "cancelledByPractice");
   writeAuditLog({
     req: ctx.req,
     userId: actorUserId,
@@ -542,7 +542,7 @@ export async function patientCancelRequest(patientUserId, appointmentId, body, c
     include: { appointmentType: true },
   });
 
-  await notifyAppointmentEvent(row, "cancelled");
+  await notifyAppointmentEvent(row, "cancelledByPatient");
   writeAuditLog({
     req: ctx.req,
     userId: patientUserId,

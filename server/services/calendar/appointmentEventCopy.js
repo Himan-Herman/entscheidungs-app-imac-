@@ -1,9 +1,10 @@
 /**
  * Organisational appointment event email copy — DE/EN/FR/IT/ES.
  *
- * Allowed:  practiceName, formattedDate, status, organisational disclaimer.
- * Forbidden: symptoms, diagnosis, therapy, patientNote, cancellationReason,
- *            urgency, AI output, any clinical content.
+ * Allowed:  practiceName, formattedDate, status, organisational disclaimer,
+ *           practice contact details, organisational cancellation note.
+ * Forbidden: symptoms, diagnosis, therapy, patientNote, urgency, AI output,
+ *            any clinical content.
  */
 
 /** HTML-escape a plain-text value before embedding in HTML. */
@@ -79,6 +80,26 @@ const COPY = {
         body: (p) =>
           `Ihre Absage des Termins bei ${p} wurde registriert.`,
       },
+      cancelledByPractice: {
+        subject: (p) => `Ihr Termin bei ${p} wurde abgesagt`,
+        body: (p, d, opts) => {
+          const lines = [];
+          lines.push(`Ihr Termin${d ? ` am ${d}` : ""} bei ${p} wurde von der Praxis abgesagt.`);
+          if (opts?.cancellationReason) {
+            lines.push(`Hinweis: ${opts.cancellationReason}`);
+          }
+          const c = opts?.practiceContact;
+          if (c && (c.phone || c.email || c.address)) {
+            lines.push("Bei Fragen wenden Sie sich bitte direkt an die Praxis:");
+            if (c.phone) lines.push(`Telefon: ${c.phone}`);
+            if (c.email) lines.push(`E-Mail: ${c.email}`);
+            if (c.address) lines.push(`Adresse: ${c.address}`);
+          } else {
+            lines.push("Bitte kontaktieren Sie die Praxis über die bekannten Kontaktwege.");
+          }
+          return lines;
+        },
+      },
     },
   },
   en: {
@@ -105,6 +126,26 @@ const COPY = {
         subject: (p) => `Appointment cancellation confirmed – ${p}`,
         body: (p) =>
           `Your cancellation of the appointment at ${p} has been registered.`,
+      },
+      cancelledByPractice: {
+        subject: (p) => `Your appointment at ${p} has been cancelled`,
+        body: (p, d, opts) => {
+          const lines = [];
+          lines.push(`Your appointment${d ? ` on ${d}` : ""} at ${p} has been cancelled by the practice.`);
+          if (opts?.cancellationReason) {
+            lines.push(`Note: ${opts.cancellationReason}`);
+          }
+          const c = opts?.practiceContact;
+          if (c && (c.phone || c.email || c.address)) {
+            lines.push("Please contact the practice directly if you have any questions:");
+            if (c.phone) lines.push(`Phone: ${c.phone}`);
+            if (c.email) lines.push(`Email: ${c.email}`);
+            if (c.address) lines.push(`Address: ${c.address}`);
+          } else {
+            lines.push("Please contact the practice through your usual channels.");
+          }
+          return lines;
+        },
       },
     },
   },
@@ -133,6 +174,26 @@ const COPY = {
         body: (p) =>
           `Votre annulation du rendez-vous auprès de ${p} a bien été enregistrée.`,
       },
+      cancelledByPractice: {
+        subject: (p) => `Votre rendez-vous auprès de ${p} a été annulé`,
+        body: (p, d, opts) => {
+          const lines = [];
+          lines.push(`Votre rendez-vous${d ? ` du ${d}` : ""} auprès de ${p} a été annulé par le cabinet.`);
+          if (opts?.cancellationReason) {
+            lines.push(`Remarque : ${opts.cancellationReason}`);
+          }
+          const c = opts?.practiceContact;
+          if (c && (c.phone || c.email || c.address)) {
+            lines.push("Pour toute question, veuillez contacter directement le cabinet :");
+            if (c.phone) lines.push(`Téléphone : ${c.phone}`);
+            if (c.email) lines.push(`E-mail : ${c.email}`);
+            if (c.address) lines.push(`Adresse : ${c.address}`);
+          } else {
+            lines.push("Veuillez contacter le cabinet via vos coordonnées habituelles.");
+          }
+          return lines;
+        },
+      },
     },
   },
   it: {
@@ -159,6 +220,26 @@ const COPY = {
         subject: (p) => `Cancellazione appuntamento registrata – ${p}`,
         body: (p) =>
           `La sua cancellazione dell'appuntamento presso ${p} è stata registrata.`,
+      },
+      cancelledByPractice: {
+        subject: (p) => `Il suo appuntamento presso ${p} è stato annullato`,
+        body: (p, d, opts) => {
+          const lines = [];
+          lines.push(`Il suo appuntamento${d ? ` del ${d}` : ""} presso ${p} è stato annullato dallo studio.`);
+          if (opts?.cancellationReason) {
+            lines.push(`Nota: ${opts.cancellationReason}`);
+          }
+          const c = opts?.practiceContact;
+          if (c && (c.phone || c.email || c.address)) {
+            lines.push("Per domande, la preghiamo di contattare direttamente lo studio:");
+            if (c.phone) lines.push(`Telefono: ${c.phone}`);
+            if (c.email) lines.push(`E-mail: ${c.email}`);
+            if (c.address) lines.push(`Indirizzo: ${c.address}`);
+          } else {
+            lines.push("La preghiamo di contattare lo studio tramite i consueti canali.");
+          }
+          return lines;
+        },
       },
     },
   },
@@ -187,6 +268,26 @@ const COPY = {
         body: (p) =>
           `La cancelación de su cita en ${p} ha quedado registrada.`,
       },
+      cancelledByPractice: {
+        subject: (p) => `Su cita en ${p} ha sido cancelada`,
+        body: (p, d, opts) => {
+          const lines = [];
+          lines.push(`Su cita${d ? ` del ${d}` : ""} en ${p} ha sido cancelada por la consulta.`);
+          if (opts?.cancellationReason) {
+            lines.push(`Nota: ${opts.cancellationReason}`);
+          }
+          const c = opts?.practiceContact;
+          if (c && (c.phone || c.email || c.address)) {
+            lines.push("Si tiene alguna pregunta, póngase en contacto directamente con la consulta:");
+            if (c.phone) lines.push(`Teléfono: ${c.phone}`);
+            if (c.email) lines.push(`Correo: ${c.email}`);
+            if (c.address) lines.push(`Dirección: ${c.address}`);
+          } else {
+            lines.push("Por favor, contacte con la consulta a través de los canales habituales.");
+          }
+          return lines;
+        },
+      },
     },
   },
 };
@@ -194,26 +295,61 @@ const COPY = {
 /**
  * Build a transactional appointment event email.
  *
- * @param {'request'|'confirmed'|'declined'|'cancelledByPatient'} emailEvent
+ * @param {'request'|'confirmed'|'declined'|'cancelledByPatient'|'cancelledByPractice'} emailEvent
  * @param {'de'|'en'|'fr'|'it'|'es'} locale
- * @param {{ practiceName: string, formattedDate?: string | null }} data
+ * @param {{ practiceName: string, formattedDate?: string|null, cancellationReason?: string|null, practiceContact?: {phone?:string|null, email?:string|null, address?:string|null}|null }} data
  * @returns {{ subject: string, text: string, html: string } | null}
  */
-export function appointmentEventEmail(emailEvent, locale, { practiceName, formattedDate }) {
+export function appointmentEventEmail(emailEvent, locale, { practiceName, formattedDate, cancellationReason, practiceContact }) {
   const L = COPY[locale] || COPY.de;
   const tpl = L.events[emailEvent];
   if (!tpl) return null;
 
   const pn = practiceName || "MedScoutX";
   const subject = tpl.subject(pn);
-  const bodyLine = tpl.body(pn, formattedDate || null);
-  const text = `${bodyLine}\n\n${L.disclaimer}`;
+  const rawBody = tpl.body(pn, formattedDate || null, {
+    cancellationReason: cancellationReason || null,
+    practiceContact: practiceContact || null,
+  });
+  const bodyLines = Array.isArray(rawBody) ? rawBody : [rawBody];
+  const text = [...bodyLines, "", L.disclaimer].join("\n");
   const html = buildHtml({
     subject,
     locale,
-    paragraphs: [bodyLine],
+    paragraphs: bodyLines,
     footerLines: [L.disclaimer],
   });
 
+  return { subject, text, html };
+}
+
+/**
+ * Build a practice-facing notification email when a patient cancels.
+ * Always in German — practice staff language defaults to DE.
+ *
+ * @param {string} practiceName
+ * @param {string|null} formattedDate
+ * @param {string|null} cancellationReason  Organisational note only — no medical evaluation.
+ * @returns {{ subject: string, text: string, html: string }}
+ */
+export function practicePatientCancelledEmail(practiceName, formattedDate, cancellationReason) {
+  const pn = practiceName || "MedScoutX";
+  const disclaimer =
+    "Dies ist eine automatische organisatorische Mitteilung. Sie enthält keine medizinischen Informationen.";
+  const subject = `Termin-Stornierung durch Patienten – ${pn}`;
+  const lines = [];
+  lines.push(
+    `Ein Patient hat seinen Termin${formattedDate ? ` am ${formattedDate}` : ""} bei ${pn} storniert.`,
+  );
+  if (cancellationReason) {
+    lines.push(`Stornohinweis (organisatorisch): ${cancellationReason}`);
+  }
+  const text = [...lines, "", disclaimer].join("\n");
+  const html = buildHtml({
+    subject,
+    locale: "de",
+    paragraphs: lines,
+    footerLines: [disclaimer],
+  });
   return { subject, text, html };
 }

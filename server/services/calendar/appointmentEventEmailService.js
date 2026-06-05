@@ -8,12 +8,25 @@
 
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../auditLogService.js";
-import { deliverAppointmentEventEmail } from "../emailQueueService.js";
+import {
+  deliverAppointmentEventEmail,
+  deliverPracticePatientCancelledEmail,
+} from "../emailQueueService.js";
 import { resolveEmailLocale } from "./appointmentService.js";
 
 const prisma = new PrismaClient();
 
-const EMAILABLE_EVENTS = new Set(["request", "confirmed", "cancelled"]);
+/**
+ * Events that trigger a patient email.
+ * Callers now pass explicit event strings — no runtime disambiguation needed.
+ */
+const EMAILABLE_EVENTS = new Set([
+  "request",
+  "confirmed",
+  "declined",
+  "cancelledByPatient",
+  "cancelledByPractice",
+]);
 
 /** BCP-47 locale tags for Intl.DateTimeFormat — covers the 5 email locales. */
 const INTL_LOCALE = { de: "de-DE", en: "en-GB", fr: "fr-FR", it: "it-IT", es: "es-ES" };
@@ -30,25 +43,14 @@ function formatDateForLocale(date, locale) {
 }
 
 /**
- * Map the generic notify event + appointment data to a specific email event type.
- *
- * "cancelled" is sent both when the practice declines a request and when the patient
- * cancels their own appointment. Distinguish via cancelledByUserId.
- */
-function resolveEmailEvent(appt, event) {
-  if (event === "cancelled") {
-    return appt.cancelledByUserId === appt.patientUserId ? "cancelledByPatient" : "declined";
-  }
-  return event; // "request" | "confirmed"
-}
-
-/**
- * Send an organisational event email to the patient.
+ * Send an organisational event email.
  * Called fire-and-forget from appointmentNotify — errors are logged, never re-thrown.
  *
- * @param {object} appt  PracticeAppointment row (must include id, patientUserId, practiceProfileId,
- *                        communicationLocale, cancelledByUserId, startAt)
- * @param {'request'|'confirmed'|'cancelled'} event
+ * For cancelledByPatient: also sends a practice-facing notification if practice.email is set.
+ * For cancelledByPractice: includes organisational cancellation note and practice contact details.
+ *
+ * @param {object} appt  PracticeAppointment row
+ * @param {'request'|'confirmed'|'declined'|'cancelledByPatient'|'cancelledByPractice'} event
  */
 export async function sendAppointmentEventEmail(appt, event) {
   if (!EMAILABLE_EVENTS.has(event)) {
@@ -59,8 +61,6 @@ export async function sendAppointmentEventEmail(appt, event) {
     return { ok: true, skipped: true, reason: "no_patient" };
   }
 
-  const emailEvent = resolveEmailEvent(appt, event);
-
   try {
     const [user, practice] = await Promise.all([
       prisma.user.findUnique({
@@ -69,7 +69,15 @@ export async function sendAppointmentEventEmail(appt, event) {
       }),
       prisma.practiceProfile.findUnique({
         where: { id: appt.practiceProfileId },
-        select: { practiceName: true },
+        select: {
+          practiceName: true,
+          phone: true,
+          email: true,
+          address: true,
+          street: true,
+          city: true,
+          postalCode: true,
+        },
       }),
     ]);
 
@@ -87,12 +95,33 @@ export async function sendAppointmentEventEmail(appt, event) {
     const practiceName = practice?.practiceName || "MedScoutX";
     const formattedDate = appt.startAt ? formatDateForLocale(appt.startAt, locale) : null;
 
+    // Organisational cancellation note — only for cancel events, max 200 chars, no medical evaluation.
+    const cancellationReason =
+      (event === "cancelledByPractice" || event === "cancelledByPatient") &&
+      appt.cancellationReason
+        ? String(appt.cancellationReason).slice(0, 200)
+        : null;
+
+    // Practice contact block — only for cancelledByPractice patient email.
+    let practiceContact = null;
+    if (event === "cancelledByPractice" && practice) {
+      const addressParts = [practice.street, practice.city, practice.postalCode].filter(Boolean);
+      const combinedAddress = practice.address || (addressParts.length ? addressParts.join(", ") : null);
+      practiceContact = {
+        phone: practice.phone || null,
+        email: practice.email || null,
+        address: combinedAddress || null,
+      };
+    }
+
     const result = await deliverAppointmentEventEmail({
       to: user.email,
-      emailEvent,
+      emailEvent: event,
       locale,
       practiceName,
       formattedDate,
+      cancellationReason,
+      practiceContact,
     });
 
     writeAuditLog({
@@ -101,12 +130,38 @@ export async function sendAppointmentEventEmail(appt, event) {
       entityType: "PracticeAppointment",
       entityId: appt.id,
       metadata: {
-        emailEvent,
+        emailEvent: event,
         locale,
         skipped: result.skipped ?? false,
         reason: result.reason ?? null,
       },
     }).catch(() => {});
+
+    // Practice notification when patient cancels — fire-and-forget.
+    if (event === "cancelledByPatient" && practice?.email) {
+      const practiceFormattedDate = appt.startAt ? formatDateForLocale(appt.startAt, "de") : null;
+      deliverPracticePatientCancelledEmail({
+        to: practice.email,
+        practiceName,
+        formattedDate: practiceFormattedDate,
+        cancellationReason,
+      })
+        .then((r) => {
+          writeAuditLog({
+            actorRole: "system",
+            action: "appointment_event_email_sent",
+            entityType: "PracticeAppointment",
+            entityId: appt.id,
+            metadata: {
+              emailEvent: "cancelledByPatient_practice_notify",
+              locale: "de",
+              skipped: r.skipped ?? false,
+              reason: r.reason ?? null,
+            },
+          }).catch(() => {});
+        })
+        .catch(() => {});
+    }
 
     return result;
   } catch (err) {
@@ -116,14 +171,14 @@ export async function sendAppointmentEventEmail(appt, event) {
       action: "appointment_event_email_failed",
       entityType: "PracticeAppointment",
       entityId: appt.id,
-      metadata: { emailEvent, reason },
+      metadata: { emailEvent: event, reason },
     }).catch(() => {});
     console.error(
       JSON.stringify({
         level: "error",
         event: "appointment_event_email_failed",
         apptId: appt.id,
-        emailEvent,
+        emailEvent: event,
         reason,
       }),
     );

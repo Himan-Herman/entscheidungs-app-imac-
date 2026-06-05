@@ -5,7 +5,7 @@ import { sendAppointmentEventEmail } from "./appointmentEventEmailService.js";
 
 /**
  * @param {import('@prisma/client').PracticeAppointment} appt
- * @param {'created'|'updated'|'confirmed'|'cancelled'|'rescheduled'|'request'} event
+ * @param {'created'|'updated'|'confirmed'|'cancelled'|'rescheduled'|'request'|'declined'|'cancelledByPatient'|'cancelledByPractice'} event
  */
 export async function notifyAppointmentEvent(appt, event) {
   const practiceId = appt.practiceProfileId;
@@ -19,6 +19,9 @@ export async function notifyAppointmentEvent(appt, event) {
     updated: { de: "Ihr Termin wurde geändert", en: "Your appointment has been updated" },
     confirmed: { de: "Termin bestätigt", en: "Appointment confirmed" },
     cancelled: { de: "Termin abgesagt", en: "Appointment cancelled" },
+    declined: { de: "Terminanfrage nicht bestätigt", en: "Appointment request not confirmed" },
+    cancelledByPatient: { de: "Terminabsage registriert", en: "Appointment cancellation registered" },
+    cancelledByPractice: { de: "Termin abgesagt", en: "Appointment cancelled by practice" },
     rescheduled: { de: "Termin verschoben", en: "Appointment rescheduled" },
     request: { de: "Terminanfrage eingegangen", en: "Appointment request received" },
   };
@@ -27,6 +30,7 @@ export async function notifyAppointmentEvent(appt, event) {
     request: { de: "Neue Terminanfrage", en: "New appointment request" },
     confirmed: { de: "Patient bestätigt Termin", en: "Patient confirmed appointment" },
     cancelled: { de: "Absage angefragt", en: "Cancellation requested" },
+    cancelledByPatient: { de: "Patient hat Termin storniert", en: "Patient cancelled appointment" },
     updated: { de: "Termin aktualisiert", en: "Appointment updated" },
   };
 
@@ -63,7 +67,14 @@ export async function notifyAppointmentEvent(appt, event) {
   }
 
   // Organisational event email — fire-and-forget; never blocks appointment status.
-  if (patientUserId && (event === "request" || event === "confirmed" || event === "cancelled")) {
+  if (
+    patientUserId &&
+    (event === "request" ||
+      event === "confirmed" ||
+      event === "declined" ||
+      event === "cancelledByPatient" ||
+      event === "cancelledByPractice")
+  ) {
     sendAppointmentEventEmail(appt, event).catch(() => {});
   }
 }
