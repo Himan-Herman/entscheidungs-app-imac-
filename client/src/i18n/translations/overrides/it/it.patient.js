@@ -721,6 +721,17 @@ export default {
     cancelReasonHint: "Si prega di non inserire dettagli medici.",
     cancelConfirmBtn: "Conferma cancellazione",
     cancelDismissBtn: "Indietro",
+    sectionOpen: "Richieste in attesa",
+    sectionCancelled: "Appuntamenti annullati",
+    filterPractice: "Tutti gli studi",
+    contactHeading: "Contatto dello studio",
+    labelPhone: "Telefono",
+    labelEmail: "E-mail",
+    labelAddress: "Indirizzo",
+    labelSpecialty: "Specialità",
+    location_in_person: "In studio",
+    location_video: "Video",
+    location_phone: "Telefonico",
   },
 
   patientTelemedicine: {

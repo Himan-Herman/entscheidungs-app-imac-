@@ -721,6 +721,17 @@ export default {
     cancelReasonHint: "Veuillez ne pas saisir de détails médicaux.",
     cancelConfirmBtn: "Confirmer l’annulation",
     cancelDismissBtn: "Retour",
+    sectionOpen: "Demandes en attente",
+    sectionCancelled: "Rendez-vous annulés",
+    filterPractice: "Tous les cabinets",
+    contactHeading: "Contact du cabinet",
+    labelPhone: "Téléphone",
+    labelEmail: "E-mail",
+    labelAddress: "Adresse",
+    labelSpecialty: "Spécialité",
+    location_in_person: "En cabinet",
+    location_video: "Vidéo",
+    location_phone: "Par téléphone",
   },
 
   patientTelemedicine: {

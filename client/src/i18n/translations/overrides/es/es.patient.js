@@ -721,6 +721,17 @@ export default {
     cancelReasonHint: "Por favor, no introduzca datos médicos.",
     cancelConfirmBtn: "Confirmar cancelación",
     cancelDismissBtn: "Volver",
+    sectionOpen: "Solicitudes pendientes",
+    sectionCancelled: "Citas canceladas",
+    filterPractice: "Todos los consultorios",
+    contactHeading: "Contacto del consultorio",
+    labelPhone: "Teléfono",
+    labelEmail: "Correo electrónico",
+    labelAddress: "Dirección",
+    labelSpecialty: "Especialidad",
+    location_in_person: "Presencial",
+    location_video: "Vídeo",
+    location_phone: "Por teléfono",
   },
 
   patientTelemedicine: {

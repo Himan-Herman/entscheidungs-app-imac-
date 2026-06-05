@@ -66,4 +66,23 @@ export default {
   cancelReasonHint: "Please do not enter any medical details.",
   cancelConfirmBtn: "Confirm cancellation",
   cancelDismissBtn: "Back",
+
+  // ── 4-group sections ─────────────────────────────────────────────────────────
+  sectionOpen: "Open requests",
+  sectionCancelled: "Cancelled appointments",
+
+  // ── Practice filter ──────────────────────────────────────────────────────────
+  filterPractice: "All practices",
+
+  // ── Practice contact in detail panel ────────────────────────────────────────
+  contactHeading: "Practice contact",
+  labelPhone: "Phone",
+  labelEmail: "Email",
+  labelAddress: "Address",
+  labelSpecialty: "Specialty",
+
+  // ── Location type labels ─────────────────────────────────────────────────────
+  location_in_person: "In person",
+  location_video: "Video",
+  location_phone: "By phone",
 };

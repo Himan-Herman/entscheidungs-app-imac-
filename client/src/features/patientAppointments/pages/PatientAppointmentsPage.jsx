@@ -76,9 +76,6 @@ function hydratePreVisitSession(record) {
   }
 }
 
-const ACTIVE_STATUSES = ["requested", "scheduled", "confirmed", "rescheduled"];
-const PAST_STATUSES = ["cancelled", "completed", "no_show"];
-
 export default function PatientAppointmentsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -107,9 +104,9 @@ export default function PatientAppointmentsPage() {
   const [bookingStatus, setBookingStatus] = useState(null);
   const [bookingCheckLoading, setBookingCheckLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [practiceFilter, setPracticeFilter] = useState("");
 
   const reload = useCallback(async () => {
     const { res, data } = await fetchPatientAppointments();
@@ -259,8 +256,9 @@ export default function PatientAppointmentsPage() {
     try {
       const { res, data } = await confirmPatientAppointment(selected.id);
       if (!res.ok) throw new Error(data.error || "failed");
-      await reload();
-      setSelected(data.appointment);
+      const refreshed = await reload();
+      const updated = refreshed.find((a) => a.id === selected.id) ?? data.appointment;
+      setSelected(updated);
     } catch {
       setError(t.actionError);
     } finally {
@@ -316,10 +314,85 @@ export default function PatientAppointmentsPage() {
     setError("");
   }
 
-  const activeAppts = appointments.filter((a) => ACTIVE_STATUSES.includes(a.status));
-  const pastAppts = appointments.filter((a) => PAST_STATUSES.includes(a.status));
-  const hasBothGroups = activeAppts.length > 0 && pastAppts.length > 0;
-  const canCancel = selected != null && ACTIVE_STATUSES.includes(selected.status);
+  // Unique practices for filter dropdown
+  const practiceOptions = useMemo(() => {
+    const seen = new Map();
+    appointments.forEach((a) => {
+      if (a.practiceProfileId && a.practiceName && !seen.has(a.practiceProfileId)) {
+        seen.set(a.practiceProfileId, a.practiceName);
+      }
+    });
+    return [...seen.entries()];
+  }, [appointments]);
+
+  // 4-group appointment grouping with optional practice filter
+  const now = useMemo(() => new Date(), []);
+  const filtered = useMemo(
+    () => (practiceFilter ? appointments.filter((a) => a.practiceProfileId === practiceFilter) : appointments),
+    [appointments, practiceFilter],
+  );
+
+  const openAppts = useMemo(
+    () => filtered.filter((a) => a.status === "requested"),
+    [filtered],
+  );
+  const upcomingAppts = useMemo(
+    () =>
+      filtered.filter(
+        (a) =>
+          ["scheduled", "confirmed", "rescheduled"].includes(a.status) &&
+          (a.startAt ? new Date(a.startAt) >= now : true),
+      ),
+    [filtered, now],
+  );
+  const cancelledAppts = useMemo(
+    () => filtered.filter((a) => a.status === "cancelled"),
+    [filtered],
+  );
+  const pastAppts = useMemo(
+    () =>
+      filtered.filter(
+        (a) =>
+          a.status === "completed" ||
+          a.status === "no_show" ||
+          (["scheduled", "confirmed", "rescheduled"].includes(a.status) &&
+            a.startAt &&
+            new Date(a.startAt) < now),
+      ),
+    [filtered, now],
+  );
+
+  const canCancel = selected != null && ["requested", "scheduled", "confirmed", "rescheduled"].includes(selected.status);
+  const hasAnyFiltered = filtered.length > 0;
+
+  function renderGroup(appts, labelKey) {
+    if (appts.length === 0) return null;
+    return (
+      <>
+        <h2 className="patient-appt__section-heading">{t[labelKey]}</h2>
+        <ul className="patient-inbox__list" aria-label={t[labelKey]}>
+          {appts.map((a) => (
+            <li key={a.id}>
+              <button
+                type="button"
+                className="patient-inbox__item patient-appt__row"
+                onClick={() => selectAppointment(a)}
+                aria-current={selected?.id === a.id ? "true" : undefined}
+                aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
+              >
+                <strong>{a.title}</strong>
+                <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
+                <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
+                <span className={statusBadgeClass(a.status)}>
+                  {t[`status_${a.status}`] || a.status}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
 
   return (
     <main className="patient-inbox" aria-labelledby="patient-appt-heading">
@@ -471,65 +544,37 @@ export default function PatientAppointmentsPage() {
         </form>
       ) : null}
 
+      {/* ── Practice filter ───────────────────────────────────────────── */}
+      {!loading && !showRequest && practiceOptions.length > 1 ? (
+        <div className="patient-appt__filter-bar">
+          <label htmlFor="appt-practice-filter" className="patient-appt__filter-label">
+            {t.practice}
+          </label>
+          <select
+            id="appt-practice-filter"
+            className="patient-appt__filter-select"
+            value={practiceFilter}
+            onChange={(e) => setPracticeFilter(e.target.value)}
+          >
+            <option value="">{t.filterPractice}</option>
+            {practiceOptions.map(([id, name]) => (
+              <option key={id} value={id}>{name}</option>
+            ))}
+          </select>
+        </div>
+      ) : null}
+
       {/* ── Appointments list ─────────────────────────────────────────── */}
-      {appointments.length === 0 && !loading ? (
+      {!loading && appointments.length === 0 ? (
+        <p className="patient-inbox__muted">{t.empty}</p>
+      ) : !loading && !hasAnyFiltered ? (
         <p className="patient-inbox__muted">{t.empty}</p>
       ) : (
         <>
-          {hasBothGroups && (
-            <h2 className="patient-appt__section-heading">{t.sectionUpcoming}</h2>
-          )}
-          {activeAppts.length > 0 && (
-            <ul
-              className="patient-inbox__list"
-              aria-label={hasBothGroups ? t.sectionUpcoming : t.listCaption}
-            >
-              {activeAppts.map((a) => (
-                <li key={a.id}>
-                  <button
-                    type="button"
-                    className="patient-inbox__item patient-appt__row"
-                    onClick={() => selectAppointment(a)}
-                    aria-current={selected?.id === a.id ? "true" : undefined}
-                    aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
-                  >
-                    <strong>{a.title}</strong>
-                    <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
-                    <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
-                    <span className={statusBadgeClass(a.status)}>
-                      {t[`status_${a.status}`] || a.status}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {pastAppts.length > 0 && (
-            <>
-              <h2 className="patient-appt__section-heading">{t.sectionPast}</h2>
-              <ul className="patient-inbox__list" aria-label={t.sectionPast}>
-                {pastAppts.map((a) => (
-                  <li key={a.id}>
-                    <button
-                      type="button"
-                      className="patient-inbox__item patient-appt__row"
-                      onClick={() => selectAppointment(a)}
-                      aria-current={selected?.id === a.id ? "true" : undefined}
-                      aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
-                    >
-                      <strong>{a.title}</strong>
-                      <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
-                      <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
-                      <span className={statusBadgeClass(a.status)}>
-                        {t[`status_${a.status}`] || a.status}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+          {renderGroup(openAppts, "sectionOpen")}
+          {renderGroup(upcomingAppts, "sectionUpcoming")}
+          {renderGroup(cancelledAppts, "sectionCancelled")}
+          {renderGroup(pastAppts, "sectionPast")}
         </>
       )}
 
@@ -544,9 +589,20 @@ export default function PatientAppointmentsPage() {
             </span>
           </p>
           {selected.practiceName && (
-            <p className="patient-inbox__meta">{selected.practiceName}</p>
+            <p className="patient-inbox__meta">
+              <strong>{t.practice}:</strong> {selected.practiceName}
+            </p>
           )}
-          <p className="patient-inbox__meta">{fmt(selected.startAt, language)}</p>
+          {selected.startAt && (
+            <p className="patient-inbox__meta">{fmt(selected.startAt, language)}</p>
+          )}
+          {selected.locationType && (
+            <p className="patient-inbox__meta">
+              <strong>{t.location}:</strong>{" "}
+              {t[`location_${selected.locationType}`] || selected.locationType}
+              {selected.locationText ? ` — ${selected.locationText}` : ""}
+            </p>
+          )}
           {selected.patientNote ? (
             <p className="patient-inbox__summary">{selected.patientNote}</p>
           ) : null}
@@ -554,6 +610,41 @@ export default function PatientAppointmentsPage() {
             <p className="patient-inbox__summary">
               <strong>{t.cancellationReasonLabel}:</strong> {selected.cancellationReason}
             </p>
+          ) : null}
+
+          {/* ── Practice contact block ─────────────────────────────────── */}
+          {(selected.practicePhone || selected.practiceEmail || selected.practiceAddress || selected.practiceSpecialty) ? (
+            <div className="patient-appt__contact">
+              <p className="patient-appt__contact-heading">{t.contactHeading}</p>
+              {selected.practiceSpecialty && (
+                <p className="patient-appt__contact-row">
+                  <span className="patient-appt__contact-label">{t.labelSpecialty}:</span>
+                  {selected.practiceSpecialty}
+                </p>
+              )}
+              {selected.practicePhone && (
+                <p className="patient-appt__contact-row">
+                  <span className="patient-appt__contact-label">{t.labelPhone}:</span>
+                  <a href={`tel:${selected.practicePhone}`} className="patient-appt__contact-link">
+                    {selected.practicePhone}
+                  </a>
+                </p>
+              )}
+              {selected.practiceEmail && (
+                <p className="patient-appt__contact-row">
+                  <span className="patient-appt__contact-label">{t.labelEmail}:</span>
+                  <a href={`mailto:${selected.practiceEmail}`} className="patient-appt__contact-link">
+                    {selected.practiceEmail}
+                  </a>
+                </p>
+              )}
+              {selected.practiceAddress && (
+                <p className="patient-appt__contact-row">
+                  <span className="patient-appt__contact-label">{t.labelAddress}:</span>
+                  {selected.practiceAddress}
+                </p>
+              )}
+            </div>
           ) : null}
 
           <div className="patient-inbox__actions">

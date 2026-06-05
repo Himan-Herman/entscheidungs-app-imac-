@@ -301,3 +301,112 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* ── Practice filter bar ──────────────────────────────────────────────────── */
+
+.patient-appt__filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0.25rem;
+  flex-wrap: wrap;
+}
+
+.patient-appt__filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .patient-appt__filter-label {
+  color: #94a3b8;
+}
+
+.patient-appt__filter-select {
+  padding: 0.3rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  font: inherit;
+  font-size: 0.875rem;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+  min-width: 9rem;
+}
+
+:root[data-theme="dark"] .patient-appt__filter-select {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #f1f5f9;
+}
+
+.patient-appt__filter-select:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+/* ── Practice contact block in detail panel ───────────────────────────────── */
+
+.patient-appt__contact {
+  margin-top: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(248, 250, 252, 0.85);
+}
+
+:root[data-theme="dark"] .patient-appt__contact {
+  background: rgba(30, 41, 59, 0.45);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.patient-appt__contact-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  margin: 0 0 0.5rem;
+}
+
+:root[data-theme="dark"] .patient-appt__contact-heading {
+  color: #9ca3af;
+}
+
+.patient-appt__contact-row {
+  margin: 0.2rem 0;
+  font-size: 0.875rem;
+  color: #374151;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+:root[data-theme="dark"] .patient-appt__contact-row {
+  color: #cbd5e1;
+}
+
+.patient-appt__contact-label {
+  font-weight: 600;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+:root[data-theme="dark"] .patient-appt__contact-label {
+  color: #94a3b8;
+}
+
+.patient-appt__contact-link {
+  color: #0e7490;
+  text-decoration: none;
+}
+
+.patient-appt__contact-link:hover {
+  text-decoration: underline;
+}
+
+:root[data-theme="dark"] .patient-appt__contact-link {
+  color: #67e8f9;
+}
