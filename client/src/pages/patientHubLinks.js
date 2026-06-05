@@ -23,6 +23,7 @@ import {
   Building2,
   ListChecks,
   BookHeart,
+  Search,
 } from "lucide-react";
 
 /** @typedef {{ to: string; key: string; subtitleKey?: string; ariaKey?: string; icon: import('react').ComponentType<{ size?: number; strokeWidth?: number }>; tileClass?: string }} PatientHubLink */
@@ -89,6 +90,12 @@ export const PATIENT_PRACTICE_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     key: "hubLinkFindPractices",
     subtitleKey: "hubLinkFindPracticesSub",
     icon: MapPinned,
+  },
+  {
+    to: "/patient/medscoutx-practices",
+    key: "hubLinkMedScoutXDirectory",
+    subtitleKey: "hubLinkMedScoutXDirectorySub",
+    icon: Search,
   },
 ]);
 

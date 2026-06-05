@@ -1,0 +1,322 @@
+/* ============================================================
+   Practice Directory Page  (.pdir-*)
+   ============================================================ */
+
+.pdir-page {
+  min-height: 100vh;
+  background: var(--color-bg, #f8f9fa);
+  padding: 24px 16px 48px;
+}
+
+.pdir-page__inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.pdir-page__back {
+  display: inline-block;
+  font-size: 0.875rem;
+  color: var(--color-primary, #2563eb);
+  text-decoration: none;
+  margin-bottom: 20px;
+}
+
+.pdir-page__back:hover {
+  text-decoration: underline;
+}
+
+.pdir-page__heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0 0 6px;
+}
+
+.pdir-page__sub {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #6b7280);
+  margin: 0 0 24px;
+}
+
+/* ── Search form ── */
+
+.pdir-form {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pdir-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pdir-form__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+}
+
+.pdir-form__input {
+  height: 38px;
+  padding: 0 10px;
+  font-size: 0.9rem;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 6px;
+  background: var(--color-input-bg, #ffffff);
+  color: var(--color-text, #111827);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.pdir-form__input:focus {
+  border-color: var(--color-primary, #2563eb);
+}
+
+.pdir-form__row--checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.pdir-form__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--color-text, #111827);
+  cursor: pointer;
+}
+
+.pdir-form__checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary, #2563eb);
+  cursor: pointer;
+}
+
+.pdir-form__submit {
+  align-self: flex-start;
+  padding: 9px 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.pdir-form__submit:hover:not(:disabled) {
+  background: var(--color-primary-hover, #1d4ed8);
+}
+
+.pdir-form__submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Results ── */
+
+.pdir-results {
+  min-height: 60px;
+}
+
+.pdir-results__heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0 0 14px;
+}
+
+.pdir-results__count {
+  font-weight: 400;
+  color: var(--color-text-muted, #6b7280);
+  font-size: 0.9rem;
+}
+
+.pdir-results__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pdir-results__empty,
+.pdir-results__error {
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #6b7280);
+  text-align: center;
+  padding: 32px 0;
+}
+
+.pdir-results__error {
+  color: var(--color-danger, #dc2626);
+}
+
+/* ── Practice card ── */
+
+.pdir-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.pdir-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.pdir-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text, #111827);
+  margin: 0;
+}
+
+.pdir-card__badge {
+  flex-shrink: 0;
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--color-success-bg, #dcfce7);
+  color: var(--color-success-text, #15803d);
+  white-space: nowrap;
+}
+
+.pdir-card__row {
+  font-size: 0.85rem;
+  color: var(--color-text, #111827);
+  margin: 0 0 6px;
+}
+
+.pdir-card__label {
+  font-weight: 600;
+  color: var(--color-text-muted, #6b7280);
+}
+
+.pdir-card__link {
+  color: var(--color-primary, #2563eb);
+  text-decoration: none;
+}
+
+.pdir-card__link:hover {
+  text-decoration: underline;
+}
+
+.pdir-card__request-btn {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--color-primary, #2563eb);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pdir-card__request-btn:hover {
+  background: var(--color-primary-hover, #1d4ed8);
+}
+
+/* ── Dark mode ── */
+
+[data-theme="dark"] .pdir-page {
+  background: var(--color-bg, #0f172a);
+}
+
+[data-theme="dark"] .pdir-page__heading {
+  color: var(--color-text, #f1f5f9);
+}
+
+[data-theme="dark"] .pdir-page__sub {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .pdir-form {
+  background: var(--color-surface, #1e293b);
+  border-color: var(--color-border, #334155);
+}
+
+[data-theme="dark"] .pdir-form__label {
+  color: var(--color-text, #f1f5f9);
+}
+
+[data-theme="dark"] .pdir-form__input {
+  background: var(--color-input-bg, #0f172a);
+  border-color: var(--color-border, #475569);
+  color: var(--color-text, #f1f5f9);
+}
+
+[data-theme="dark"] .pdir-form__checkbox-label {
+  color: var(--color-text, #f1f5f9);
+}
+
+[data-theme="dark"] .pdir-results__heading {
+  color: var(--color-text, #f1f5f9);
+}
+
+[data-theme="dark"] .pdir-results__count {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .pdir-results__empty {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+[data-theme="dark"] .pdir-card {
+  background: var(--color-surface, #1e293b);
+  border-color: var(--color-border, #334155);
+}
+
+[data-theme="dark"] .pdir-card__name {
+  color: var(--color-text, #f1f5f9);
+}
+
+[data-theme="dark"] .pdir-card__badge {
+  background: var(--color-success-bg, #14532d);
+  color: var(--color-success-text, #86efac);
+}
+
+[data-theme="dark"] .pdir-card__row {
+  color: var(--color-text, #e2e8f0);
+}
+
+[data-theme="dark"] .pdir-card__label {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 480px) {
+  .pdir-page {
+    padding: 16px 12px 40px;
+  }
+
+  .pdir-card__header {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pdir-form__submit {
+    width: 100%;
+    text-align: center;
+  }
+}

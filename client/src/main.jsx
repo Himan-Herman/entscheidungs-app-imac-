@@ -228,6 +228,9 @@ const PracticeInboxDetailPage = lazy(() =>
 const PracticeFinderPage = lazy(() =>
   import("./features/practiceFinder/pages/PracticeFinderPage.jsx"),
 );
+const PracticeDirectoryPage = lazy(() =>
+  import("./features/practiceDirectory/pages/PracticeDirectoryPage.jsx"),
+);
 const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
 const PracticeTeamPage = lazy(() =>
   import("./features/practiceTeam/pages/PracticeTeamPage.jsx"),
@@ -693,6 +696,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PracticeFinderPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/medscoutx-practices"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeDirectoryPage />
                     </ProtectedRoute>
                   }
                 />

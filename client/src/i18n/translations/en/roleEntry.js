@@ -140,4 +140,6 @@ export default {
   hubLinkSosCardSub: "Blood type, allergies and emergency contacts — offline via QR code",
   hubLinkMedaLive: "Meda Live Translation",
   hubLinkMedaLiveSub: "Record your conversation via microphone",
+  hubLinkMedScoutXDirectory: "Find MedScoutX practices",
+  hubLinkMedScoutXDirectorySub: "Search active MedScoutX practices and request appointments",
 };

@@ -140,4 +140,6 @@ export default {
   hubLinkSosCardSub: "Blutgruppe, Allergien und Notfallkontakte — offline per QR-Code",
   hubLinkMedaLive: "Meda Live Translation",
   hubLinkMedaLiveSub: "Gespräch per Mikrofon aufzeichnen",
+  hubLinkMedScoutXDirectory: "MedScoutX-Praxen finden",
+  hubLinkMedScoutXDirectorySub: "Aktive MedScoutX-Praxen suchen und Termin anfragen",
 };

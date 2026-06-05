@@ -41,6 +41,7 @@ import practiceFinderRouter from "./routes/practiceFinder.js";
 import practicePatientsRouter from "./routes/practicePatients.js";
 import patientCareLinksRouter from "./routes/patientCareLinks.js";
 import patientPracticeOrganizationRouter from "./routes/patientPracticeOrganization.js";
+import patientPracticeDirectoryRouter from "./routes/patientPracticeDirectory.js";
 import patientInboxRouter from "./routes/patientInbox.js";
 import patientThreadsRouter from "./routes/patientThreads.js";
 import patientMedicationPlansRouter from "./routes/patientMedicationPlans.js";
@@ -170,6 +171,7 @@ app.use("/api/practice/patients", requireAuth, practicePatientsRouter);
 app.use("/api/patient/links", requireAuth, patientCareLinksRouter);
 /** Alias for PR-8 patient practice-link APIs */
 app.use("/api/patient/practice-links", requireAuth, patientCareLinksRouter);
+app.use("/api/patient/practices/directory", requireAuth, patientPracticeDirectoryRouter);
 app.use("/api/patient/practices", requireAuth, patientPracticeOrganizationRouter);
 app.use("/api/patient/inbox", requireAuth, patientInboxRouter);
 app.use("/api/patient/threads", requireAuth, patientThreadsRouter);
