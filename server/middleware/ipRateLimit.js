@@ -192,3 +192,9 @@ export const publicAnamnesisLimiter = createIpRateLimiter({
   max: 100,
   keyPrefix: 'public:anamnesis',
 });
+
+/** POST /api/practice/booking/appointments/:id/assist — OpenAI-backed B2B scheduling assistant; 10 / 15 min / IP */
+export const bookingAssistLimiter = createIpRateLimiter({
+  max: 10,
+  keyPrefix: 'practice:booking:assist',
+});

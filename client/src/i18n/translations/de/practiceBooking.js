@@ -79,4 +79,33 @@ export default {
   actionError: "Aktion fehlgeschlagen.",
   availabilityAdded: "Verfügbarkeit hinzugefügt.",
   availabilityRemoved: "Verfügbarkeit entfernt.",
+
+  // ── Incoming requests ────────────────────────────────────────────────────────
+  sectionRequests: "Offene Anfragen",
+  requestsHint: "Eingehende Terminanfragen mit Status „Ausstehend".",
+  requestsEmpty: "Keine offenen Anfragen vorhanden.",
+  requestsLoadError: "Anfragen konnten nicht geladen werden.",
+  requestsLoading: "Anfragen werden geladen …",
+  statusRequested: "Ausstehend",
+  statusConfirmed: "Bestätigt",
+  statusCancelled: "Storniert",
+  statusCompleted: "Abgeschlossen",
+  statusNoShow: "Nicht erschienen",
+  requestedTimeLabel: "Gewünschter Zeitpunkt",
+  locationTypeLabel: "Termin-Typ",
+  locationType_practice: "Praxis",
+  locationType_video: "Video",
+  locationType_phone: "Telefon",
+  patientNoteLabel: "Patientenhinweis",
+
+  // ── AI assistant panel ───────────────────────────────────────────────────────
+  aiSectionTitle: "KI-Assistent",
+  aiDisclaimer: "KI-gestützt, nur organisatorisch — keine Diagnose, keine Dringlichkeitsbewertung, keine Therapieempfehlung.",
+  aiSummarizeBtn: "Anfrage zusammenfassen",
+  aiReplyDraftBtn: "Antwortvorschlag erstellen",
+  aiLoading: "KI denkt …",
+  aiResultHeading: "KI-Ergebnis",
+  aiResultDismiss: "Verwerfen",
+  aiError: "KI-Assistent nicht verfügbar. Bitte Anfrage direkt prüfen.",
+  aiUsedFallback: "Kein sicheres KI-Ergebnis generiert. Bitte Anfrage direkt prüfen.",
 };

@@ -2,7 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
-import { fetchBookingSettings, patchBookingSettings } from "../api/practiceBookingApi.js";
+import {
+  fetchBookingSettings,
+  fetchBookingRequests,
+  patchBookingSettings,
+  runBookingAssistant,
+} from "../api/practiceBookingApi.js";
 import {
   createAvailability,
   deleteAvailability,
@@ -44,6 +49,14 @@ export default function PracticeBookingHubPage() {
   const [avBusy, setAvBusy] = useState(false);
   const [avMsg, setAvMsg] = useState("");
   const [avErr, setAvErr] = useState("");
+
+  const [requests, setRequests] = useState([]);
+  const [reqsLoading, setReqsLoading] = useState(false);
+  const [reqsError, setReqsError] = useState("");
+  const [selectedReq, setSelectedReq] = useState(null);
+  const [aiResult, setAiResult] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   const successTimerRef = useRef(null);
 
@@ -100,6 +113,25 @@ export default function PracticeBookingHubPage() {
   useEffect(() => {
     void loadSettings();
   }, [loadSettings]);
+
+  const loadRequests = useCallback(async () => {
+    if (!practiceId) return;
+    setReqsLoading(true);
+    setReqsError("");
+    try {
+      const { res, data } = await fetchBookingRequests(practiceId, { status: "requested" });
+      if (!res.ok) { setReqsError(t.requestsLoadError); return; }
+      setRequests(data.requests || []);
+    } catch {
+      setReqsError(t.requestsLoadError);
+    } finally {
+      setReqsLoading(false);
+    }
+  }, [practiceId, t]);
+
+  useEffect(() => {
+    void loadRequests();
+  }, [loadRequests]);
 
   useEffect(() => () => {
     clearTimeout(successTimerRef.current);
@@ -190,6 +222,43 @@ export default function PracticeBookingHubPage() {
       setAvErr(t.actionError);
     } finally {
       setAvBusy(false);
+    }
+  }
+
+  function fmtDateTime(iso) {
+    if (!iso) return "—";
+    try {
+      return new Intl.DateTimeFormat(language, { dateStyle: "medium", timeStyle: "short" }).format(
+        new Date(iso),
+      );
+    } catch {
+      return iso;
+    }
+  }
+
+  function selectRequest(req) {
+    if (selectedReq?.id === req.id) {
+      setSelectedReq(null);
+    } else {
+      setSelectedReq(req);
+      setAiResult(null);
+      setAiError("");
+    }
+  }
+
+  async function handleAiAction(appointmentId, action) {
+    setAiLoading(true);
+    setAiError("");
+    setAiResult(null);
+    try {
+      const { res, data } = await runBookingAssistant(appointmentId, action, practiceId);
+      if (!res.ok || !data.ok) { setAiError(t.aiError); return; }
+      setAiResult(data.result || "");
+      if (data.used_fallback) setAiError(t.aiUsedFallback);
+    } catch {
+      setAiError(t.aiError);
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -501,6 +570,154 @@ export default function PracticeBookingHubPage() {
                   {t.addAvailability}
                 </button>
               </form>
+            )}
+          </section>
+
+          {/* ── Open requests ─────────────────────────────────────────── */}
+          <section className="booking-hub__card" aria-labelledby="bh-reqs-heading">
+            <h2 id="bh-reqs-heading" className="booking-hub__section-title">
+              {t.sectionRequests}
+            </h2>
+            <p className="booking-hub__field-hint">{t.requestsHint}</p>
+
+            {reqsLoading && (
+              <p className="booking-hub__status">{t.requestsLoading}</p>
+            )}
+            {reqsError && (
+              <p className="booking-hub__status booking-hub__status--error" role="alert">
+                {reqsError}
+              </p>
+            )}
+
+            {!reqsLoading && !reqsError && requests.length === 0 && (
+              <p className="booking-hub__status">{t.requestsEmpty}</p>
+            )}
+
+            {!reqsLoading && requests.length > 0 && (
+              <ul className="booking-hub__req-list" aria-label={t.sectionRequests}>
+                {requests.map((req) => {
+                  const isOpen = selectedReq?.id === req.id;
+                  const displayName =
+                    req.appointmentType?.name || req.title || "—";
+                  return (
+                    <li key={req.id}>
+                      <button
+                        type="button"
+                        className={`booking-hub__req-item${isOpen ? " booking-hub__req-item--selected" : ""}`}
+                        aria-expanded={isOpen}
+                        onClick={() => selectRequest(req)}
+                      >
+                        <span className="booking-hub__req-item-name">{displayName}</span>
+                        <span className="booking-hub__badge">{t.statusRequested}</span>
+                        <span className="booking-hub__req-item-time">
+                          {fmtDateTime(req.requestedStartAt)}
+                        </span>
+                        <span className="booking-hub__req-item-chevron" aria-hidden="true">
+                          {isOpen ? "▲" : "▼"}
+                        </span>
+                      </button>
+
+                      {isOpen && (
+                        <div className="booking-hub__req-detail">
+                          <dl className="booking-hub__req-meta">
+                            {req.requestedStartAt && (
+                              <>
+                                <dt className="booking-hub__req-meta-label">
+                                  {t.requestedTimeLabel}
+                                </dt>
+                                <dd className="booking-hub__req-meta-value">
+                                  {fmtDateTime(req.requestedStartAt)}
+                                </dd>
+                              </>
+                            )}
+                            {req.locationType && (
+                              <>
+                                <dt className="booking-hub__req-meta-label">
+                                  {t.locationTypeLabel}
+                                </dt>
+                                <dd className="booking-hub__req-meta-value">
+                                  {t[`locationType_${req.locationType}`] || req.locationType}
+                                </dd>
+                              </>
+                            )}
+                          </dl>
+
+                          {req.patientNote && (
+                            <div className="booking-hub__req-patient-note">
+                              <span className="booking-hub__req-meta-label">
+                                {t.patientNoteLabel}
+                              </span>
+                              <p>{req.patientNote}</p>
+                            </div>
+                          )}
+
+                          {canManage && (
+                            <div className="booking-hub__ai-panel">
+                              <h3 className="booking-hub__ai-panel-title">
+                                {t.aiSectionTitle}
+                              </h3>
+                              <p className="booking-hub__ai-disclaimer">{t.aiDisclaimer}</p>
+
+                              {!aiLoading && (
+                                <div className="booking-hub__ai-actions">
+                                  <button
+                                    type="button"
+                                    className="booking-hub__btn booking-hub__btn--outline"
+                                    onClick={() => void handleAiAction(req.id, "summarize")}
+                                  >
+                                    {t.aiSummarizeBtn}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="booking-hub__btn booking-hub__btn--outline"
+                                    onClick={() => void handleAiAction(req.id, "reply_draft")}
+                                  >
+                                    {t.aiReplyDraftBtn}
+                                  </button>
+                                </div>
+                              )}
+
+                              {aiLoading && (
+                                <p className="booking-hub__status">{t.aiLoading}</p>
+                              )}
+
+                              {aiResult && !aiLoading && (
+                                <div className="booking-hub__ai-result">
+                                  <div className="booking-hub__ai-result-header">
+                                    <span className="booking-hub__ai-result-heading">
+                                      {t.aiResultHeading}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      className="booking-hub__btn--ghost"
+                                      onClick={() => {
+                                        setAiResult(null);
+                                        setAiError("");
+                                      }}
+                                    >
+                                      {t.aiResultDismiss}
+                                    </button>
+                                  </div>
+                                  <p className="booking-hub__ai-result-text">{aiResult}</p>
+                                </div>
+                              )}
+
+                              {aiError && (
+                                <p
+                                  className="booking-hub__status booking-hub__status--error"
+                                  role="alert"
+                                >
+                                  {aiError}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </section>
         </>

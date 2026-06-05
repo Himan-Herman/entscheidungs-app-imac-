@@ -79,4 +79,33 @@ export default {
   actionError: "Action failed.",
   availabilityAdded: "Availability added.",
   availabilityRemoved: "Availability removed.",
+
+  // ── Incoming requests ────────────────────────────────────────────────────────
+  sectionRequests: "Open requests",
+  requestsHint: "Incoming appointment requests with status \"Pending\".",
+  requestsEmpty: "No open requests.",
+  requestsLoadError: "Could not load requests.",
+  requestsLoading: "Loading requests …",
+  statusRequested: "Pending",
+  statusConfirmed: "Confirmed",
+  statusCancelled: "Cancelled",
+  statusCompleted: "Completed",
+  statusNoShow: "No show",
+  requestedTimeLabel: "Requested time",
+  locationTypeLabel: "Appointment type",
+  locationType_practice: "In person",
+  locationType_video: "Video",
+  locationType_phone: "Phone",
+  patientNoteLabel: "Patient note",
+
+  // ── AI assistant panel ───────────────────────────────────────────────────────
+  aiSectionTitle: "AI Assistant",
+  aiDisclaimer: "AI-assisted, organisational only — no diagnosis, no urgency assessment, no treatment recommendation.",
+  aiSummarizeBtn: "Summarise request",
+  aiReplyDraftBtn: "Create reply draft",
+  aiLoading: "AI thinking …",
+  aiResultHeading: "AI result",
+  aiResultDismiss: "Dismiss",
+  aiError: "AI assistant unavailable. Please review the request directly.",
+  aiUsedFallback: "No safe AI result generated. Please review the request directly.",
 };
