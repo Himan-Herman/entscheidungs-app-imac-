@@ -82,7 +82,7 @@ export default {
 
   // ── Incoming requests ────────────────────────────────────────────────────────
   sectionRequests: "Offene Anfragen",
-  requestsHint: "Eingehende Terminanfragen mit Status „Ausstehend".",
+  requestsHint: 'Eingehende Terminanfragen mit Status „Ausstehend".',
   requestsEmpty: "Keine offenen Anfragen vorhanden.",
   requestsLoadError: "Anfragen konnten nicht geladen werden.",
   requestsLoading: "Anfragen werden geladen …",
