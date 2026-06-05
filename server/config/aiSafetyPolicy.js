@@ -3,7 +3,7 @@
  * No diagnosis, triage, treatment, specialist routing, urgency scoring, or certainty claims.
  */
 
-/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'meda'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'previsit_followup_format'|'medical_interpreter'|'lab_patient_explanation'|'generic'} AiSafetyModule */
+/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'meda'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'previsit_followup_format'|'medical_interpreter'|'lab_patient_explanation'|'anamnesis_translation'|'appointment_assistant'|'generic'} AiSafetyModule */
 
 export const AI_MODULES = {
   SYMPTOM_CHECK: "symptom_check",
@@ -37,6 +37,15 @@ export const AI_MODULES = {
    * hallucinated content, summarization that introduces new facts.
    */
   ANAMNESIS_TRANSLATION: "anamnesis_translation",
+  /**
+   * Appointment request assistant — B2B practice tool, organisational layer only.
+   * Allowed: structured summary of booking request, language detection, neutral translation
+   * of patientNote, identification of missing organisational fields, neutral reply draft.
+   * Forbidden: diagnosis, triage, urgency classification, treatment/medication advice,
+   * specialist routing, medical interpretation of note content, risk scoring,
+   * use of anamnesis data, health profile, or any clinical patient record.
+   */
+  APPOINTMENT_ASSISTANT: "appointment_assistant",
   GENERIC: "generic",
 };
 
@@ -66,6 +75,44 @@ export const MEDICAL_INTERPRETER_SAFETY_SCOPE = {
     "risk_scoring",
   ],
 };
+
+/**
+ * Appointment Assistant safety scope (organisational scheduling layer only).
+ * No medical evaluation, no clinical content, no anamnesis or health-record access.
+ */
+export const APPOINTMENT_ASSISTANT_SAFETY_SCOPE = {
+  allowed: [
+    "organisational_summary",
+    "language_detection",
+    "neutral_translation",
+    "missing_field_detection",
+    "neutral_reply_draft",
+  ],
+  forbidden: [
+    "diagnosis",
+    "triage",
+    "urgency_classification",
+    "treatment_recommendation",
+    "medication_advice",
+    "specialist_recommendation",
+    "symptom_medical_interpretation",
+    "risk_scoring",
+    "anamnesis_data_use",
+    "health_profile_access",
+    "medical_record_access",
+  ],
+};
+
+/**
+ * System-prompt safety suffix for the Appointment Assistant.
+ * Prepended to every call; English meta-instruction, model responds in user locale.
+ */
+export const APPOINTMENT_ASSISTANT_SYSTEM_PROMPT_SAFETY = `
+Appointment Assistant safety (all languages): Summarise, translate, and draft responses for appointment booking requests at an organisational level only.
+Allowed: appointment type requested, preferred date/time, location type (in-person/video/phone), language of the patient note, neutral translation of organisational intent, list of missing booking fields, neutral confirmation or cancellation draft.
+Never: diagnosis or suspected disease; triage, urgency, or emergency directives; treatment or medication advice; specialist routing; medical interpretation of note content; risk assessment; clinical certainty; reference to anamnesis, health records, or medical history.
+If the patient note contains medical content, summarise only the organisational intent (e.g. "requests an appointment") without repeating or interpreting any clinical detail.
+`.trim();
 
 /** Prompt alignment for Medical Interpreter services (English meta; output in user languages). */
 export const MEDICAL_INTERPRETER_COMMUNICATION_STYLE = `
@@ -259,6 +306,32 @@ const MULTILINGUAL_EXTRA = [
 ];
 
 /**
+ * Appointment Assistant output scan — catches organisational-to-clinical drift.
+ * Blocks the model from reframing a scheduling note as a medical urgency signal,
+ * adding clinical interpretation, or issuing advisory language.
+ * Applied on top of MEDICAL_INTERPRETER_OUTPUT_FORBIDDEN + MEDICAL_INTERPRETER_EXTRA.
+ */
+const APPOINTMENT_ASSISTANT_EXTRA = [
+  // Urgency framing in German scheduling context (distinguish from legitimate "dringlich" availability)
+  /\bdringliche[rsnm]?\s+(Überweisung|Behandlung|Einweisung|Versorgung)\b/i,
+  /\bsofortige?\s+(Behandlung|Einweisung|Untersuchung|Versorgung)\b/i,
+  /\bmedizinisch\s+(notwendig|dringend|erforderlich|indiziert)\b/i,
+  // Advisory leakage directed at patient or note content
+  /\bPatient(?:in)?\s+(?:sollte|muss|braucht)\s+(?:sofort|dringend)\b/i,
+  /\bpatient\s+(?:should|must|needs to)\s+(?:immediately|urgently)\b/i,
+  // Clinical interpretation of the organisational note
+  /\bBeschwerden?\s+(?:deuten|hinweisen|sprechen für)\b/i,
+  /\bsymptom[se]?\s+(?:suggest|indicate|point to)\b/i,
+  /\bNach\s+(?:meiner\s+|dieser\s+)?(?:Einschätzung|Beurteilung|Ansicht)\b/i,
+  /\bin my\s+(?:assessment|opinion|view|clinical\s+judgment)\b/i,
+  // Specialist routing in scheduling context
+  /\b(?:zum|zur|an einen?)\s+(?:Kardiologen|Neurologen|Onkologen|Facharzt)\s+(?:überweisen|schicken|wechseln)\b/i,
+  // "recommend/suggest seeing/consulting a cardiologist/specialist" (bare form not caught by interpreter patterns)
+  /\brecommend\s+(?:seeing|visiting|consulting|going to)\s+(?:a\s+)?(?:specialist|cardiologist|neurologist|dermatologist|oncologist|doctor)\b/i,
+  /\bempfehle?\s+(?:einen?|den)\s+(?:Spezialisten|Kardiologen|Neurologen|Onkologen|Facharzt)\s+aufzusuchen\b/i,
+];
+
+/**
  * Combined patterns per module (output scanning).
  * @param {string} module
  * @returns {RegExp[]}
@@ -294,6 +367,13 @@ export function getOutputSafetyPatterns(module) {
         ...MEDICAL_INTERPRETER_OUTPUT_FORBIDDEN,
         ...MULTILINGUAL_EXTRA,
         ...MEDICAL_INTERPRETER_EXTRA,
+      ];
+    case AI_MODULES.APPOINTMENT_ASSISTANT:
+      return [
+        ...MEDICAL_INTERPRETER_OUTPUT_FORBIDDEN,
+        ...MULTILINGUAL_EXTRA,
+        ...MEDICAL_INTERPRETER_EXTRA,
+        ...APPOINTMENT_ASSISTANT_EXTRA,
       ];
     default:
       return [...base, ...SYMPTOM_EXTRA];
@@ -363,6 +443,10 @@ export const SAFE_FALLBACKS = {
   [AI_MODULES.ANAMNESIS_TRANSLATION]: {
     de: "(Übersetzung nicht verfügbar — Original maßgeblich.)",
     en: "(Translation unavailable — original text is authoritative.)",
+  },
+  [AI_MODULES.APPOINTMENT_ASSISTANT]: {
+    de: "Die Zusammenfassung konnte nicht in einer sicheren Form ausgegeben werden. Bitte prüfen Sie die Terminanfrage direkt. Dieses Modul bietet keine Diagnose, keine Dringlichkeitseinschätzung und keine medizinische Bewertung.",
+    en: "The summary could not be safely generated. Please review the appointment request directly. This module does not provide diagnosis, urgency assessment, or medical evaluation.",
   },
   generic: {
     de: "Die Ausgabe konnte nicht sicher strukturiert werden. Bitte formulieren Sie neutral und besprechen Sie medizinische Fragen mit medizinischem Fachpersonal.",
