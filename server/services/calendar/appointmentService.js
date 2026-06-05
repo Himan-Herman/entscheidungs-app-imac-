@@ -32,7 +32,15 @@ export function resolveEmailLocale(raw) {
   return EMAIL_LOCALES.has(code) ? code : "de";
 }
 
-function appointmentToJson(row, { includeNotes = true } = {}) {
+/**
+ * @param {object} row
+ * @param {{ includeNotes?: boolean, includePracticeNote?: boolean }} opts
+ *   includeNotes      — controls patientNote (default true)
+ *   includePracticeNote — controls practiceNote; defaults to includeNotes when not set.
+ *                         Set to false for all patient-facing endpoints.
+ */
+function appointmentToJson(row, { includeNotes = true, includePracticeNote } = {}) {
+  const showPracticeNote = includePracticeNote !== undefined ? includePracticeNote : includeNotes;
   return {
     id: row.id,
     practiceProfileId: row.practiceProfileId,
@@ -49,7 +57,7 @@ function appointmentToJson(row, { includeNotes = true } = {}) {
     locationText: row.locationText,
     communicationLocale: row.communicationLocale || null,
     patientNote: includeNotes ? row.patientNote : undefined,
-    practiceNote: includeNotes ? row.practiceNote : undefined,
+    practiceNote: showPracticeNote ? row.practiceNote : undefined,
     requestedStartAt: row.requestedStartAt,
     requestedEndAt: row.requestedEndAt,
     cancelledAt: row.cancelledAt,
@@ -384,25 +392,67 @@ export async function reschedulePracticeAppointment(
 export async function listPatientAppointments(patientUserId) {
   const rows = await prisma.practiceAppointment.findMany({
     where: { patientUserId },
-    include: { appointmentType: true, practiceProfile: { select: { practiceName: true } } },
+    include: {
+      appointmentType: true,
+      practiceProfile: {
+        select: {
+          practiceName: true,
+          phone: true,
+          email: true,
+          address: true,
+          street: true,
+          city: true,
+          postalCode: true,
+          specialty: true,
+        },
+      },
+    },
     orderBy: { startAt: "asc" },
     take: 200,
   });
-  return rows.map((r) => ({
-    ...appointmentToJson(r, { includeNotes: true }),
-    practiceName: r.practiceProfile?.practiceName,
-  }));
+  return rows.map((r) => {
+    const p = r.practiceProfile;
+    const addressParts = [p?.street, p?.city, p?.postalCode].filter(Boolean);
+    return {
+      ...appointmentToJson(r, { includeNotes: true, includePracticeNote: false }),
+      practiceName: p?.practiceName || null,
+      practicePhone: p?.phone || null,
+      practiceEmail: p?.email || null,
+      practiceAddress: p?.address || (addressParts.length ? addressParts.join(", ") : null),
+      practiceSpecialty: p?.specialty || null,
+    };
+  });
 }
 
 export async function getPatientAppointment(patientUserId, appointmentId) {
   const row = await prisma.practiceAppointment.findFirst({
     where: { id: appointmentId, patientUserId },
-    include: { appointmentType: true, practiceProfile: { select: { practiceName: true } } },
+    include: {
+      appointmentType: true,
+      practiceProfile: {
+        select: {
+          practiceName: true,
+          phone: true,
+          email: true,
+          address: true,
+          street: true,
+          city: true,
+          postalCode: true,
+          specialty: true,
+        },
+      },
+    },
   });
   if (!row) throw new Error("appointment_not_found");
+  const p = row.practiceProfile;
+  const addressParts = [p?.street, p?.city, p?.postalCode].filter(Boolean);
   return {
-    ...appointmentToJson(row, { includeNotes: true }),
-    practiceName: row.practiceProfile?.practiceName,
+    ...appointmentToJson(row, { includeNotes: true, includePracticeNote: false }),
+    practiceName: p?.practiceName || null,
+    practicePhone: p?.phone || null,
+    practiceEmail: p?.email || null,
+    practiceAddress: p?.address || (addressParts.length ? addressParts.join(", ") : null),
+    practiceSpecialty: p?.specialty || null,
   };
 }
 
