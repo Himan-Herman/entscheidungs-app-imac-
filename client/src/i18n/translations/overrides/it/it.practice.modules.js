@@ -75,6 +75,7 @@ export default {
     actionOpenCalendar: "Calendario",
     actionOpenTelemedicine: "Visitazioni video",
     actionOpenDeveloper: "Accesso sviluppatori",
+    actionOpenBillingPlausibility: "Verifica GOÄ/PKV",
     aiHeading: "Sintesi IA — da verificare",
     aiDisclaimer: "L'IA riassume solo informazioni organizzative della dashboard e non fornisce valutazione clinica.",
     aiLoad: "Generar panoramica organizzativa",

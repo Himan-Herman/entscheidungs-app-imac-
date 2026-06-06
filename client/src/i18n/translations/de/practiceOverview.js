@@ -77,6 +77,7 @@ export default {
   actionOpenCalendar: "Kalender",
   actionOpenTelemedicine: "Videosprechstunden",
   actionOpenDeveloper: "Entwicklerzugang",
+  actionOpenBillingPlausibility: "GOÄ/PKV-Prüfung",
 
   aiHeading: "KI-Zusammenfassung – bitte prüfen",
   aiDisclaimer:

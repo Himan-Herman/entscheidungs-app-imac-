@@ -84,6 +84,7 @@ export default {
     actionOpenCalendar: "Calendrier",
     actionOpenTelemedicine: "Consultations vidéo",
     actionOpenDeveloper: "Accès développeur",
+    actionOpenBillingPlausibility: "Contrôle GOÄ/PKV",
 
     aiHeading: "Synthèse IA – à vérifier",
     aiDisclaimer:

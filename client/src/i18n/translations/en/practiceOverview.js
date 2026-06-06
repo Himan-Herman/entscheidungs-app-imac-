@@ -77,6 +77,7 @@ export default {
   actionOpenCalendar: "Calendar",
   actionOpenTelemedicine: "Video consultations",
   actionOpenDeveloper: "Developer access",
+  actionOpenBillingPlausibility: "GOÄ/PKV review",
 
   aiHeading: "AI summary – please review",
   aiDisclaimer:

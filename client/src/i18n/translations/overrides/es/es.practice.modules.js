@@ -75,6 +75,7 @@ export default {
     actionOpenCalendar: "Calendario",
     actionOpenTelemedicine: "Consultas por vídeo",
     actionOpenDeveloper: "Acceso para desarrolladores",
+    actionOpenBillingPlausibility: "Revisión GOÄ/PKV",
     aiHeading: "Resumen IA — revisar",
     aiDisclaimer: "La IA solo resume información organizativa del tablero y no proporciona evaluación médica.",
     aiLoad: "Generar vista general organizativa",

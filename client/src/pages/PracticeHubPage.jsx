@@ -673,6 +673,14 @@ export default function PracticeHubPage() {
                   {t.actionOpenSecurity}
                 </Link>
               ) : null}
+              {quickActions.openBillingPlausibility ? (
+                <Link
+                  className="practice-overview__action"
+                  to={`/practice/settings/billing-plausibility?practiceId=${encodeURIComponent(practiceId)}`}
+                >
+                  {t.actionOpenBillingPlausibility}
+                </Link>
+              ) : null}
             </div>
           </section>
 

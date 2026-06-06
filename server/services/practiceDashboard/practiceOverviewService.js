@@ -227,6 +227,7 @@ function buildQuickActions(role) {
     openTelemedicine: hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_READ),
     openDeveloper: hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE),
     openSecurity: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
+    openBillingPlausibility: hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE),
   };
 }
 
