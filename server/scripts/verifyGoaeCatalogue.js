@@ -1,5 +1,5 @@
 /**
- * GOÄ catalogue structural validation — Phase G3a.
+ * GOÄ catalogue structural validation — Phase G3a / G3a-2.
  *
  * Validates that every entry in the local catalogue test subset meets the
  * required structural constraints before the catalogue can be safely expanded.
@@ -8,10 +8,14 @@
  *   - GOAE_ENTRIES is a non-empty array
  *   - GOAE_CATALOGUE_META has all required fields pointing to the official source
  *   - catalogueCompleteness clearly communicates subset status
- *   - Every entry has required fields (ziffer, title, section, notes, source)
+ *   - Every entry has required core fields (ziffer, title, section, notes, source)
+ *   - Every entry has required provenance fields (activeStatus, completenessStatus,
+ *     sourceName, sourceUrl, sourceLineOrReference, sourceVersionDate, verifiedAt)
  *   - Ziffer values are unique and match the expected format
  *   - points is a positive finite number or null
  *   - If points is null, notes must mention that verification is required
+ *   - If points is null, completenessStatus must not be "verified"
+ *   - If points is not null and completenessStatus is "verified", source metadata must be present
  *   - No entry carries forbidden decision-claim fields
  *   - No sentinel/test ziffern that would break the unknown-ziffer fallback
  *
@@ -31,6 +35,9 @@ function assert(name, condition) {
   if (!condition) failures.push(name);
 }
 
+// ISO date pattern: YYYY-MM or YYYY-MM-DD
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}(-\d{2})?$/;
+
 // ─── 1. Top-level exports ─────────────────────────────────────────────────────
 
 assert("GOAE_ENTRIES is exported and is an Array", Array.isArray(GOAE_ENTRIES));
@@ -40,7 +47,7 @@ assert(
 );
 assert("GOAE_ENTRIES is non-empty", Array.isArray(GOAE_ENTRIES) && GOAE_ENTRIES.length > 0);
 
-// ─── 2. Metadata fields ───────────────────────────────────────────────────────
+// ─── 2. Catalogue metadata fields ────────────────────────────────────────────
 
 const REQUIRED_META_FIELDS = [
   "sourceName",
@@ -110,10 +117,15 @@ const FORBIDDEN_ENTRY_FIELDS = [
   "billingOpinion",
   "approved",
   "certified",
-  "validated",
   "compliant",
   "legallyBinding",
 ];
+
+// Valid completenessStatus values
+const VALID_COMPLETENESS_STATUSES = new Set(["verified", "points-uncertain", "needs-review"]);
+
+// Valid activeStatus values
+const VALID_ACTIVE_STATUSES = new Set(["active", "deprecated"]);
 
 // Valid ziffer format: one or more digits, optionally followed by a single letter (e.g. "1", "1a", "100")
 const ZIFFER_FORMAT = /^\d+[a-zA-Z]?$/;
@@ -127,7 +139,8 @@ if (Array.isArray(GOAE_ENTRIES)) {
     const ziffer = String(entry?.ziffer ?? "").trim();
     const displayId = ziffer || `(index ${i})`;
 
-    // Required string fields
+    // ── Core required string fields ────────────────────────────────────────────
+
     assert(
       `${rowLabel} ziffer "${displayId}" — ziffer is a non-empty string`,
       typeof entry.ziffer === "string" && entry.ziffer.trim().length > 0,
@@ -149,20 +162,20 @@ if (Array.isArray(GOAE_ENTRIES)) {
       typeof entry.source === "string" && entry.source.trim().length > 0,
     );
 
-    // Ziffer format
+    // ── Ziffer format and uniqueness ───────────────────────────────────────────
+
     assert(
       `${rowLabel} ziffer "${displayId}" — format is valid (digits + optional letter suffix)`,
       ZIFFER_FORMAT.test(ziffer),
     );
-
-    // Ziffer uniqueness
     assert(
       `${rowLabel} ziffer "${displayId}" — not a duplicate`,
       !seenZiffern.has(ziffer),
     );
     seenZiffern.add(ziffer);
 
-    // points must be a positive finite number or explicitly null
+    // ── points ─────────────────────────────────────────────────────────────────
+
     assert(
       `${rowLabel} ziffer "${displayId}" — points is a positive finite number or null`,
       entry.points === null ||
@@ -182,7 +195,79 @@ if (Array.isArray(GOAE_ENTRIES)) {
       );
     }
 
-    // No forbidden decision-claim fields
+    // ── Provenance fields (G3a-2) ──────────────────────────────────────────────
+
+    // activeStatus
+    assert(
+      `${rowLabel} ziffer "${displayId}" — activeStatus is "active" or "deprecated"`,
+      VALID_ACTIVE_STATUSES.has(entry.activeStatus),
+    );
+
+    // completenessStatus
+    assert(
+      `${rowLabel} ziffer "${displayId}" — completenessStatus is "verified", "points-uncertain", or "needs-review"`,
+      VALID_COMPLETENESS_STATUSES.has(entry.completenessStatus),
+    );
+
+    // If points is null, completenessStatus must not be "verified"
+    if (entry.points === null) {
+      assert(
+        `${rowLabel} ziffer "${displayId}" — points is null so completenessStatus must not be "verified"`,
+        entry.completenessStatus !== "verified",
+      );
+    }
+
+    // If points is not null and completenessStatus is "verified", source metadata must be present
+    if (entry.points !== null && entry.completenessStatus === "verified") {
+      assert(
+        `${rowLabel} ziffer "${displayId}" — completenessStatus "verified" requires sourceName`,
+        typeof entry.sourceName === "string" && entry.sourceName.trim().length > 0,
+      );
+      assert(
+        `${rowLabel} ziffer "${displayId}" — completenessStatus "verified" requires sourceUrl`,
+        typeof entry.sourceUrl === "string" && entry.sourceUrl.trim().length > 0,
+      );
+    }
+
+    // sourceName — must be a non-empty string
+    assert(
+      `${rowLabel} ziffer "${displayId}" — sourceName is a non-empty string`,
+      typeof entry.sourceName === "string" && entry.sourceName.trim().length > 0,
+    );
+
+    // sourceUrl — must reference the official go__1982 GOÄ source
+    assert(
+      `${rowLabel} ziffer "${displayId}" — sourceUrl references official go__1982 GOÄ source`,
+      typeof entry.sourceUrl === "string" &&
+        entry.sourceUrl.includes("go__1982"),
+    );
+
+    // sourceLineOrReference — null or non-empty string
+    assert(
+      `${rowLabel} ziffer "${displayId}" — sourceLineOrReference is null or a non-empty string`,
+      entry.sourceLineOrReference === null ||
+        (typeof entry.sourceLineOrReference === "string" &&
+          entry.sourceLineOrReference.trim().length > 0),
+    );
+
+    // verifiedAt — null or ISO date string (YYYY-MM or YYYY-MM-DD)
+    assert(
+      `${rowLabel} ziffer "${displayId}" — verifiedAt is null or ISO date string (YYYY-MM or YYYY-MM-DD)`,
+      entry.verifiedAt === null ||
+        (typeof entry.verifiedAt === "string" &&
+          ISO_DATE_PATTERN.test(entry.verifiedAt)),
+    );
+
+    // sourceVersionDate — null or ISO date string (YYYY-MM or YYYY-MM-DD)
+    assert(
+      `${rowLabel} ziffer "${displayId}" — sourceVersionDate is null or ISO date string`,
+      entry.sourceVersionDate === null ||
+        (typeof entry.sourceVersionDate === "string" &&
+          ISO_DATE_PATTERN.test(entry.sourceVersionDate)),
+    );
+
+    // ── Forbidden decision-claim fields ───────────────────────────────────────
+
     for (const field of FORBIDDEN_ENTRY_FIELDS) {
       assert(
         `${rowLabel} ziffer "${displayId}" — does not contain forbidden field "${field}"`,
@@ -229,5 +314,12 @@ console.log(
       : [],
     withPointsValue: withPoints,
     withPointsNull: entryCount - withPoints,
+    completenessBreakdown: Array.isArray(GOAE_ENTRIES)
+      ? {
+          verified: GOAE_ENTRIES.filter((e) => e.completenessStatus === "verified").length,
+          pointsUncertain: GOAE_ENTRIES.filter((e) => e.completenessStatus === "points-uncertain").length,
+          needsReview: GOAE_ENTRIES.filter((e) => e.completenessStatus === "needs-review").length,
+        }
+      : {},
   }),
 );

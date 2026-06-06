@@ -54,12 +54,22 @@ export const GOAE_FACTOR_THRESHOLDS = {
  * Small curated test subset of well-known GOÄ entries.
  *
  * Fields:
- *   ziffer       — GOÄ number as string (may include letter suffix e.g. "1a")
- *   title        — Short German description from the official fee schedule (Anlage)
- *   points       — Punkte from official Anlage, or null if uncertain
- *   section      — GOÄ section / Abschnitt (A, B, C, ...) for reference
- *   notes        — Brief English annotation (not shown in UI)
- *   source       — "goae_official_subset" for all entries in this file
+ *   ziffer                — GOÄ number as string (may include letter suffix e.g. "1a")
+ *   title                 — Short German description from the official fee schedule (Anlage)
+ *   points                — Punkte from official Anlage, or null if uncertain
+ *   section               — GOÄ section / Abschnitt (A, B, C, ...) for reference
+ *   notes                 — Brief English annotation (not shown in UI)
+ *   source                — "goae_official_subset" for all entries in this file
+ *   activeStatus          — "active" or "deprecated"
+ *   completenessStatus    — "verified" | "points-uncertain" | "needs-review"
+ *                           "verified": points value and title confirmed from official source
+ *                           "points-uncertain": ziffer/title reasonable but points: null
+ *                           "needs-review": title, section, or ziffer needs human re-check
+ *   sourceName            — Name of the source document for this entry
+ *   sourceUrl             — URL of the official source used for this entry
+ *   sourceLineOrReference — Section/number reference within the source, or null
+ *   sourceVersionDate     — ISO date (YYYY-MM or YYYY-MM-DD) of the source version checked, or null
+ *   verifiedAt            — ISO date when a human last verified this entry against official text, or null
  *
  * @type {Array<{
  *   ziffer: string,
@@ -67,7 +77,14 @@ export const GOAE_FACTOR_THRESHOLDS = {
  *   points: number | null,
  *   section: string,
  *   notes: string,
- *   source: string
+ *   source: string,
+ *   activeStatus: "active" | "deprecated",
+ *   completenessStatus: "verified" | "points-uncertain" | "needs-review",
+ *   sourceName: string,
+ *   sourceUrl: string,
+ *   sourceLineOrReference: string | null,
+ *   sourceVersionDate: string | null,
+ *   verifiedAt: string | null
  * }>}
  */
 export const GOAE_ENTRIES = [
@@ -78,6 +95,13 @@ export const GOAE_ENTRIES = [
     section: "A",
     notes: "Oral or telephone consultation. Cannot be combined with Nr. 3 on the same day.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "verified",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt A, Nr. 1",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "3",
@@ -86,6 +110,13 @@ export const GOAE_ENTRIES = [
     section: "A",
     notes: "In-depth consultation, minimum 10 minutes. Cannot be combined with Nr. 1 on same day.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "verified",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt A, Nr. 3",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "5",
@@ -94,6 +125,13 @@ export const GOAE_ENTRIES = [
     section: "B",
     notes: "Symptom-related physical examination. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt B, Nr. 5",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "7",
@@ -102,14 +140,30 @@ export const GOAE_ENTRIES = [
     section: "B",
     notes: "Comprehensive full-body examination. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt B, Nr. 7",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "15",
     title: "Blutentnahme durch Venenpunktion",
     points: null,
     section: "C",
-    notes: "Blood draw by venipuncture. Points uncertain — verify against official Anlage.",
+    // Section and title assignment for Nr. 15 should be re-checked against the official Anlage.
+    // Nr. 15 in the GOÄ Abschnitt structure may differ from section C. Marked needs-review.
+    notes: "Blood draw by venipuncture. Points uncertain — verify against official Anlage. Section and title need re-check.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "needs-review",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt C, Nr. 15",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "17",
@@ -118,6 +172,13 @@ export const GOAE_ENTRIES = [
     section: "C",
     notes: "Intravenous infusion up to 30 minutes. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt C, Nr. 17",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "18",
@@ -126,6 +187,13 @@ export const GOAE_ENTRIES = [
     section: "C",
     notes: "Intravenous infusion more than 30 minutes. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt C, Nr. 18",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "34",
@@ -134,6 +202,13 @@ export const GOAE_ENTRIES = [
     section: "A",
     notes: "Discussion of findings and treatment options, minimum 20 minutes. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt A, Nr. 34",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "50",
@@ -142,6 +217,13 @@ export const GOAE_ENTRIES = [
     section: "D",
     notes: "Home visit including consultation and examination. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt D, Nr. 50",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "51",
@@ -150,14 +232,30 @@ export const GOAE_ENTRIES = [
     section: "D",
     notes: "Home visit outside regular hours. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt D, Nr. 51",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "100",
     title: "Untersuchung nach Nr. 6 oder 8 mit umfassender Befunddokumentation",
     points: null,
     section: "B",
-    notes: "Examination with comprehensive findings documentation. Points uncertain — verify against official Anlage.",
+    // Title references Nr. 6 and Nr. 8 which are not yet in the local catalogue.
+    // Section assignment and exact title text need human re-check against the Anlage.
+    notes: "Examination with comprehensive findings documentation. Points uncertain — verify against official Anlage. Title references Nr. 6 and Nr. 8 — needs re-check.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "needs-review",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt B, Nr. 100",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
   {
     ziffer: "250",
@@ -166,5 +264,12 @@ export const GOAE_ENTRIES = [
     section: "M",
     notes: "Blood collection by syringe, needle or catheter. Points uncertain — verify against official Anlage.",
     source: "goae_official_subset",
+    activeStatus: "active",
+    completenessStatus: "points-uncertain",
+    sourceName: "Gesetze im Internet — GOÄ Anlage",
+    sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
+    sourceLineOrReference: "Anlage Abschnitt M, Nr. 250",
+    sourceVersionDate: null,
+    verifiedAt: null,
   },
 ];
