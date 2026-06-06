@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>تحكم شروط الاستخدام هذه استخدام تطبيق الجوال والويب <strong>MedScoutX</strong> («التطبيق») من قبل مستخدمي النهاية الأفراد.</p>
-<p>مقدِّم التطبيق هو:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />ألمانيا<br />البريد الإلكتروني: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>مقدِّم التطبيق هو:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />ألمانيا<br />البريد الإلكتروني: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>يُسمَح باستخدام التطبيق حصرياً للبالغين الذين أكملوا <strong>العام الثامن عشر</strong> من العمر. لا يجوز للقاصرين استخدام التطبيق.</p>
 `.trim(),
       },

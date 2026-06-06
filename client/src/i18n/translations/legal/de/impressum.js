@@ -7,7 +7,7 @@ export default {
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Deutschland"],
   ddLegalForm: "Einzelunternehmer",
   emailDisplay: "himankhorshidy@gmail.com",
-  emailHref: "mailto:contact@medscout.app",
+  emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49\u00a0211\u00a015895272",
   phoneHref: "tel:+4921115895272",
   privacyHref: "/datenschutz",

@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Ці Умови використання регулюють використання мобільного та веб-застосунку <strong>MedScoutX</strong> («Застосунок») приватними кінцевими користувачами.</p>
-<p>Постачальник Застосунку:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Німеччина<br />Електронна пошта: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Постачальник Застосунку:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Німеччина<br />Електронна пошта: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Використання Застосунку дозволене виключно повнолітнім користувачам <strong>від 18 років</strong>. Неповнолітні не можуть користуватися Застосунком.</p>
 `.trim(),
       },

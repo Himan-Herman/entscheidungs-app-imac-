@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>این شرایط استفاده، استفادهٔ اپ موبایل و وب <strong>MedScoutX</strong> («اپ») را توسط کاربران نهایی خصوصی تنظیم می‌کند.</p>
-<p>ارائه‌دهندهٔ اپ:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />آلمان<br />ایمیل: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>ارائه‌دهندهٔ اپ:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />آلمان<br />ایمیل: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>استفاده از اپ صرفاً برای بزرگسالانی مجاز است که <strong>۱۸ سالگی</strong> خود را تکمیل کرده‌اند. خردسالان نباید از اپ استفاده کنند.</p>
 `.trim(),
       },

@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>These Terms of Use govern use of the mobile and web application <strong>MedScoutX</strong> (the “App”) by private end users.</p>
-<p>The provider of the App is:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Germany<br />Email: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>The provider of the App is:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Germany<br />Email: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Use of the App is permitted exclusively for adults aged <strong>18 or over</strong>. Minors may not use the App.</p>
 `.trim(),
       },

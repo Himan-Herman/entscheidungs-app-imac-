@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Niniejszy regulamin określa zasady korzystania z aplikacji mobilnej i internetowej <strong>MedScoutX</strong> («&nbsp;Aplikacja&nbsp;») przez prywatnych użytkowników końcowych.</p>
-<p>Dostawcą Aplikacji jest:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Niemcy<br />E-mail: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Dostawcą Aplikacji jest:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Niemcy<br />E-mail: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Z Aplikacji mogą korzystać wyłącznie osoby pełnoletnie (<strong>ukończone 18 lat</strong>). Osobom niepełnoletnim korzystanie nie przysługuje.</p>
 `.trim(),
       },

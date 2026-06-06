@@ -33,7 +33,7 @@ export default [
       {
         type: "html",
         html: `
-<p>Pyetje të përgjithshme: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Pyetje të përgjithshme: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Mbështetje teknike: <a href="mailto:support@medscout.app">support@medscout.app</a></p>
 <p>Faturim dhe fatura: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
 `.trim(),

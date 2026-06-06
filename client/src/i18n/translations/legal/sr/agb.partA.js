@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Ovi Uvjeti korištenja uređuju korištenje mobilne i web aplikacije <strong>MedScoutX</strong> („Aplikacija”) od strane krajnjih privatnih korisnika.</p>
-<p>Pružalac Aplikacije je:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Njemačka<br />E-pošta: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Pružalac Aplikacije je:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Njemačka<br />E-pošta: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Korištenje Aplikacije dozvoljeno je isključivo punoljetnim osobama starijim od <strong>18 godina</strong>. Maloljetnici ne smiju koristiti Aplikaciju.</p>
 `.trim(),
       },

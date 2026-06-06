@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Ev mercên bikaranînê bikaranîna serlêdana mobîl û malperê <strong>MedScoutX</strong> («&nbsp;Serlêdan&nbsp;») ji aliyê bikarhênerên taybet ve rêz digirin.</p>
-<p>Pêşkêkerê Serlêdanê ev e:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Almanya<br />E-name: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Pêşkêkerê Serlêdanê ev e:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Almanya<br />E-name: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Bikaranîna Serlêdanê tenê ji bo mezinên <strong>18 salî û mezintir</strong> destûr e. Bin temen nikarin Serlêdanê bikarbînin.</p>
 `.trim(),
       },

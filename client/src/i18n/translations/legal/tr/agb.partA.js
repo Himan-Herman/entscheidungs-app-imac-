@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Bu genel kullanım şartları, mobil ve web uygulaması <strong>MedScoutX</strong> («&nbsp;Uygulama&nbsp;») özel son kullanıcılar tarafından nasıl kullanılacağını düzenler.</p>
-<p>Uygulamanın sağlayıcısı:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Almanya<br />E-posta: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Uygulamanın sağlayıcısı:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Almanya<br />E-posta: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Uygulamanın kullanımına yalnızca <strong>18 yaş ve üzeri</strong> yetişkinlere izin verilir. Reşit olmayanlar Uygulamayı kullanamaz.</p>
 `.trim(),
       },

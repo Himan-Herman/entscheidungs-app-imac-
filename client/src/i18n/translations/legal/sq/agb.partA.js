@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Këto kushte përdorimi rregullojnë përdorimin e aplikacionit mobil dhe në internet <strong>MedScoutX</strong> («&nbsp;Aplikacioni&nbsp;») nga përdorues privatë fundorë.</p>
-<p>Ofruesi i Aplikacionit është:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Gjermani<br />Email: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Ofruesi i Aplikacionit është:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Gjermani<br />Email: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Përdorimi i Aplikacionit lejohet ekskluzivisht për të rritur <strong>18 vjeç e lart</strong>. Të miturve nuk u lejohet përdorimi.</p>
 `.trim(),
       },

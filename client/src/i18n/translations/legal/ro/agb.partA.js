@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Acești Termeni de utilizare reglementează utilizarea aplicației mobile și web <strong>MedScoutX</strong> („Aplicația”) de către utilizatorii finali privați.</p>
-<p>Furnizorul Aplicației este:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Germania<br />E-mail: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Furnizorul Aplicației este:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Germania<br />E-mail: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Utilizarea Aplicației este permisă exclusiv adulților cu vârsta de cel puțin <strong>18 ani</strong>. Minorii nu pot utiliza Aplicația.</p>
 `.trim(),
       },

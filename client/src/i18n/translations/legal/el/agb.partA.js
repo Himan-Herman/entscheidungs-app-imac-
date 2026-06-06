@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Οι παρόντες γενικοί όροι χρήσης διέπουν τη χρήση της εφαρμογής για κινητά και web <strong>MedScoutX</strong> (η «&nbsp;Εφαρμογή&nbsp;») από ιδιώτες τελικούς χρήστες.</p>
-<p>Ο πάροχος της Εφαρμογής είναι:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Γερμανία<br />Email: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Ο πάροχος της Εφαρμογής είναι:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Γερμανία<br />Email: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Η χρήση της Εφαρμογής επιτρέπεται αποκλειστικά σε ενήλικες ηλικίας <strong>18 ετών και άνω</strong>. Ανήλικοι δεν μπορούν να χρησιμοποιούν την Εφαρμογή.</p>
 `.trim(),
       },

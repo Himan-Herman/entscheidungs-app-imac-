@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Les présentes conditions générales régissent l’utilisation de l’application mobile et web <strong>MedScoutX</strong> (l’«&nbsp;App&nbsp;») par les utilisateurs finaux particuliers.</p>
-<p>Le prestataire de l’App est&nbsp;:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Allemagne<br />E-mail&nbsp;: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Le prestataire de l’App est&nbsp;:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Allemagne<br />E-mail&nbsp;: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>L’utilisation de l’App est réservée aux personnes majeures âgées d’au moins <strong>18 ans</strong>. Les mineurs ne peuvent pas utiliser l’App.</p>
 `.trim(),
       },

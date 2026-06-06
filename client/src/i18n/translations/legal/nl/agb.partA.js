@@ -8,7 +8,7 @@ export default [
         type: "html",
         html: `
 <p>Deze gebruiksvoorwaarden regelen het gebruik van de mobiele en webapplicatie <strong>MedScoutX</strong> (de „App”) door particuliere eindgebruikers.</p>
-<p>Aanbieder van de App is:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Duitsland<br />E-mail: <a href="mailto:contact@medscout.app">contact@medscout.app</a></p>
+<p>Aanbieder van de App is:<br /><strong>MedScoutX Health Solutions – Himan Khorshidi</strong><br />Eisenstraße 64<br />40227 Düsseldorf<br />Duitsland<br />E-mail: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Het gebruik van de App is uitsluitend toegestaan voor volwassenen van <strong>18 jaar en ouder</strong>. Minderjarigen mogen de App niet gebruiken.</p>
 `.trim(),
       },
