@@ -21,6 +21,10 @@ import {
   findGoaeEntry,
   buildDeterministicWarnings,
 } from "../services/billingPlausibility/goaeCatalogueService.js";
+import {
+  GOAE_ENTRIES,
+  GOAE_CATALOGUE_META,
+} from "../data/goaeCatalogue.js";
 import { AI_MODULES } from "../config/aiSafetyPolicy.js";
 import { detectForbiddenMedicalClaims } from "../services/aiSafetySanitizer.js";
 
@@ -390,6 +394,55 @@ assert(
   hardcodedMatches.length === 0,
 );
 
+// ─── 11. GOÄ catalogue structure ─────────────────────────────────────────────
+// High-level structural assertions. Detailed per-entry validation lives in
+// verifyGoaeCatalogue.js (npm run verify:goae-catalogue).
+
+assert("catalogue GOAE_ENTRIES is an Array", Array.isArray(GOAE_ENTRIES));
+assert("catalogue GOAE_ENTRIES is non-empty", Array.isArray(GOAE_ENTRIES) && GOAE_ENTRIES.length > 0);
+assert(
+  "catalogue GOAE_CATALOGUE_META is an object",
+  typeof GOAE_CATALOGUE_META === "object" && GOAE_CATALOGUE_META !== null,
+);
+assert(
+  "catalogue meta.catalogueCompleteness indicates subset status",
+  typeof GOAE_CATALOGUE_META.catalogueCompleteness === "string" &&
+    (GOAE_CATALOGUE_META.catalogueCompleteness.includes("subset") ||
+      GOAE_CATALOGUE_META.catalogueCompleteness.includes("test") ||
+      GOAE_CATALOGUE_META.catalogueCompleteness.includes("partial")),
+);
+assert(
+  "catalogue meta.sourceUrl points to official Gesetze im Internet GOÄ",
+  typeof GOAE_CATALOGUE_META.sourceUrl === "string" &&
+    GOAE_CATALOGUE_META.sourceUrl.startsWith("https://www.gesetze-im-internet.de/go__1982/"),
+);
+assert(
+  "catalogue has no duplicate ziffern",
+  Array.isArray(GOAE_ENTRIES) &&
+    new Set(GOAE_ENTRIES.map((e) => e.ziffer)).size === GOAE_ENTRIES.length,
+);
+assert(
+  "catalogue entries all have required fields (ziffer, title, section, source, notes)",
+  Array.isArray(GOAE_ENTRIES) &&
+    GOAE_ENTRIES.every(
+      (e) =>
+        typeof e.ziffer === "string" && e.ziffer.trim() &&
+        typeof e.title === "string" && e.title.trim() &&
+        typeof e.section === "string" && e.section.trim() &&
+        typeof e.source === "string" && e.source.trim() &&
+        typeof e.notes === "string" && e.notes.trim(),
+    ),
+);
+assert(
+  "catalogue entries all have valid points (positive number or null)",
+  Array.isArray(GOAE_ENTRIES) &&
+    GOAE_ENTRIES.every(
+      (e) =>
+        e.points === null ||
+        (typeof e.points === "number" && Number.isFinite(e.points) && e.points > 0),
+    ),
+);
+
 // ─── Result ───────────────────────────────────────────────────────────────────
 
 if (failures.length) {
@@ -412,6 +465,7 @@ console.log(
       "frontend-static",
       "i18n-completeness",
       "no-hardcoded-text",
+      "goae-catalogue-structure",
     ],
   }),
 );

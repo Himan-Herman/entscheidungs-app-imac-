@@ -22,7 +22,8 @@
     "verify:vitals": "node scripts/verifyVitals.js",
     "verify:ai-safety": "node scripts/verifyAiSafetyRegression.js",
     "verify:vitals-phase2": "node scripts/verifyVitalsPhase2.js",
-    "verify:billing-plausibility": "node scripts/verifyBillingPlausibility.js"
+    "verify:billing-plausibility": "node scripts/verifyBillingPlausibility.js",
+    "verify:goae-catalogue": "node scripts/verifyGoaeCatalogue.js"
   },
   "keywords": [],
   "author": "",
