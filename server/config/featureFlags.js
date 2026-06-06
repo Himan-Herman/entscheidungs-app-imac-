@@ -325,3 +325,14 @@ export function isPracticeBookingEnabled() {
 export function isBillingPlausibilityEnabled() {
   return envFlag("ENABLE_BILLING_PLAUSIBILITY", false);
 }
+
+/**
+ * Optional AI-assisted plausibility hints (Phase E).
+ * Requires both ENABLE_BILLING_PLAUSIBILITY=true AND ENABLE_BILLING_AI_REVIEW=true.
+ * Not a billing decision. Not medical advice. Not a reimbursement determination.
+ * Default off — must be explicitly enabled.
+ */
+export function isBillingAiReviewEnabled() {
+  if (!isBillingPlausibilityEnabled()) return false;
+  return envFlag("ENABLE_BILLING_AI_REVIEW", false);
+}

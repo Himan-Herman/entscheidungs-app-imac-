@@ -19,3 +19,21 @@ export async function createBillingPlausibilitySession(practiceId, payload) {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+/**
+ * Request AI-assisted plausibility hints for an existing session.
+ * Requires ENABLE_BILLING_AI_REVIEW=true on the backend.
+ * Returns 404 { error: "feature_disabled" } when AI review is off.
+ * Never triggers AI automatically — must be called explicitly by user action.
+ *
+ * @param {string} practiceId
+ * @param {string} sessionId
+ */
+export async function requestBillingPlausibilityAiReview(practiceId, sessionId) {
+  const res = await authFetch(
+    `/api/practice/billing-plausibility/${encodeURIComponent(sessionId)}/review?${qs(practiceId)}`,
+    { method: "POST", headers: { "Content-Type": "application/json" } },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

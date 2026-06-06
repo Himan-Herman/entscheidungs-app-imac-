@@ -7,6 +7,7 @@ import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import {
   createBillingPlausibilitySession,
   fetchBillingPlausibilitySessions,
+  requestBillingPlausibilityAiReview,
 } from "../api/practiceBillingPlausibilityApi.js";
 import "../styles/PracticeBillingPlausibilityPage.css";
 
@@ -52,6 +53,11 @@ export default function PracticeBillingPlausibilityPage() {
   const [featureDisabled, setFeatureDisabled] = useState(false);
   const [context, setContext] = useState("");
   const [rows, dispatchRows] = useReducer(rowsReducer, [emptyRow()]);
+
+  const [aiReviewPending, setAiReviewPending] = useState(false);
+  const [aiReviewResult, setAiReviewResult] = useState(null);
+  const [aiReviewError, setAiReviewError] = useState("");
+  const [aiReviewAvailable, setAiReviewAvailable] = useState(false);
 
   const loadPractices = useCallback(async () => {
     const res = await authFetch("/api/practices");
@@ -144,6 +150,9 @@ export default function PracticeBillingPlausibilityPage() {
       }
       setResultStub(data.session);
       setStatusMsg("");
+      setAiReviewResult(null);
+      setAiReviewError("");
+      setAiReviewAvailable(true);
       dispatchRows({ type: "reset" });
       setContext("");
       await loadSessions(practiceId);
@@ -151,6 +160,30 @@ export default function PracticeBillingPlausibilityPage() {
       setError(t.submitError);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleAiReview = async (sessionId) => {
+    if (!sessionId || aiReviewPending) return;
+    setAiReviewPending(true);
+    setAiReviewError("");
+    setAiReviewResult(null);
+    try {
+      const { res, data } = await requestBillingPlausibilityAiReview(practiceId, sessionId);
+      if (res.status === 404 && data?.error === "feature_disabled") {
+        setAiReviewAvailable(false);
+        return;
+      }
+      if (!res.ok) {
+        setAiReviewError(t.aiReviewError || data?.error || "error");
+        return;
+      }
+      setAiReviewAvailable(true);
+      setAiReviewResult(data.aiResult ?? data.session?.aiReview ?? null);
+    } catch {
+      setAiReviewError(t.aiReviewError);
+    } finally {
+      setAiReviewPending(false);
     }
   };
 
@@ -414,6 +447,80 @@ export default function PracticeBillingPlausibilityPage() {
                       );
                     })}
                   </ul>
+                </div>
+              )}
+
+              {/* AI review block — only shown when feature is available; never auto-called */}
+              {aiReviewAvailable && !aiReviewResult && (
+                <div className="billing-plausibility__ai-review-trigger" style={{ marginTop: "1rem" }}>
+                  {aiReviewError && (
+                    <p
+                      className="billing-plausibility__status billing-plausibility__status--error"
+                      role="alert"
+                    >
+                      {aiReviewError}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    className="billing-plausibility__btn billing-plausibility__btn--secondary"
+                    onClick={() => handleAiReview(resultStub.id)}
+                    disabled={aiReviewPending}
+                    aria-busy={aiReviewPending}
+                  >
+                    {aiReviewPending ? t.aiReviewPending : t.btnAiReview}
+                  </button>
+                </div>
+              )}
+
+              {/* AI result — always labelled as non-binding; deterministic warnings above remain visible */}
+              {aiReviewResult && (
+                <div
+                  className="billing-plausibility__ai-result"
+                  role="note"
+                  aria-label={t.aiReviewLabel}
+                  style={{ marginTop: "1.25rem" }}
+                >
+                  <h3 className="billing-plausibility__items-heading">
+                    {t.aiReviewLabel}
+                  </h3>
+                  <p className="billing-plausibility__ai-nonbinding" style={{ fontSize: "0.8125rem", opacity: 0.75 }}>
+                    {t.aiReviewNonBinding}
+                  </p>
+
+                  {aiReviewResult.fallback && (
+                    <p className="billing-plausibility__ai-fallback">
+                      {t.aiReviewFallback}
+                    </p>
+                  )}
+
+                  {Array.isArray(aiReviewResult.rowHints) && aiReviewResult.rowHints.length > 0 && (
+                    <>
+                      <h4 className="billing-plausibility__items-heading" style={{ fontSize: "0.875rem", marginTop: "0.75rem" }}>
+                        {t.aiReviewRowHints}
+                      </h4>
+                      <ul className="billing-plausibility__item-list" aria-label={t.aiReviewRowHints}>
+                        {aiReviewResult.rowHints.map((rh) => (
+                          <li key={rh.ziffer} className="billing-plausibility__item">
+                            <span className="billing-plausibility__item-ziffer">{rh.ziffer}</span>
+                            <span>{rh.hint}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+
+                  {aiReviewResult.generalNote && (
+                    <p style={{ marginTop: "0.5rem" }}>
+                      <strong>{t.aiReviewGeneralNote}:</strong> {aiReviewResult.generalNote}
+                    </p>
+                  )}
+
+                  {aiReviewResult.uncertaintyNote && (
+                    <p style={{ marginTop: "0.25rem", opacity: 0.8 }}>
+                      <strong>{t.aiReviewUncertaintyNote}:</strong> {aiReviewResult.uncertaintyNote}
+                    </p>
+                  )}
                 </div>
               )}
             </section>

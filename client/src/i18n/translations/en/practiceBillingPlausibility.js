@@ -63,6 +63,18 @@ export default {
     invalid_count: "Invalid count value.",
   },
 
+  btnAiReview: "Request AI plausibility hint",
+  aiReviewPending: "Requesting AI hint …",
+  aiReviewLabel: "AI-assisted note / non-binding",
+  aiReviewNonBinding: "This note is not legally binding, not a diagnosis, and not a reimbursement decision.",
+  aiReviewFallback: "AI hint currently unavailable. The deterministic review results above remain valid.",
+  aiReviewUnavailable: "AI plausibility review is not enabled.",
+  aiReviewError: "AI hint could not be requested.",
+  aiReviewSuccess: "AI plausibility hint received.",
+  aiReviewGeneralNote: "General note",
+  aiReviewUncertaintyNote: "Uncertainty note",
+  aiReviewRowHints: "Code-level hints",
+
   featureDisabled: "This module is not currently active.",
   forbidden: "Only owners and administrators have access.",
 

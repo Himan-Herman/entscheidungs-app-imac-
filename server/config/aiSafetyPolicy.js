@@ -3,7 +3,7 @@
  * No diagnosis, triage, treatment, specialist routing, urgency scoring, or certainty claims.
  */
 
-/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'meda'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'previsit_followup_format'|'medical_interpreter'|'lab_patient_explanation'|'anamnesis_translation'|'appointment_assistant'|'generic'} AiSafetyModule */
+/** @typedef {'symptom_check'|'image_analysis'|'body_map'|'meda'|'previsit_intake'|'previsit_adaptive'|'previsit_history_diff'|'previsit_case_continuity'|'previsit_doctor_transform'|'previsit_followup_format'|'medical_interpreter'|'lab_patient_explanation'|'anamnesis_translation'|'appointment_assistant'|'billing_plausibility'|'generic'} AiSafetyModule */
 
 export const AI_MODULES = {
   SYMPTOM_CHECK: "symptom_check",
@@ -46,6 +46,15 @@ export const AI_MODULES = {
    * use of anamnesis data, health profile, or any clinical patient record.
    */
   APPOINTMENT_ASSISTANT: "appointment_assistant",
+  /**
+   * Billing plausibility AI hints (Phase E) — organisational/billing layer only.
+   * Allowed: neutral observations about code combinations, factor thresholds, catalogue
+   *          match status, documentation gap hints.
+   * Forbidden: diagnosis, therapy recommendation, urgency/triage, reimbursement decision,
+   *            invented GOÄ rules, invented point values, statements about invoice
+   *            correctness/incorrectness, medical interpretation of any kind.
+   */
+  BILLING_PLAUSIBILITY: "billing_plausibility",
   GENERIC: "generic",
 };
 
@@ -73,6 +82,33 @@ export const MEDICAL_INTERPRETER_SAFETY_SCOPE = {
     "specialist_recommendation",
     "symptom_medical_interpretation",
     "risk_scoring",
+  ],
+};
+
+/**
+ * Billing Plausibility AI safety scope (billing hint layer only).
+ * No diagnosis, no therapy, no urgency, no reimbursement decision,
+ * no invented GOÄ rules, no final invoice correctness statements.
+ */
+export const BILLING_PLAUSIBILITY_SAFETY_SCOPE = {
+  allowed: [
+    "neutral_code_combination_observation",
+    "factor_threshold_note",
+    "catalogue_match_status_note",
+    "documentation_gap_hint",
+    "uncertainty_note",
+  ],
+  forbidden: [
+    "diagnosis",
+    "therapy_recommendation",
+    "urgency_classification",
+    "triage",
+    "reimbursement_decision",
+    "invoice_correctness_verdict",
+    "invented_goae_rules",
+    "invented_point_values",
+    "medical_interpretation",
+    "final_legal_billing_decision",
   ],
 };
 
@@ -332,6 +368,52 @@ const APPOINTMENT_ASSISTANT_EXTRA = [
 ];
 
 /**
+ * System-prompt safety suffix for the Billing Plausibility AI reviewer.
+ * Billing context only — never medical, never legal, never reimbursement.
+ */
+export const BILLING_PLAUSIBILITY_SYSTEM_PROMPT_SAFETY = `
+Billing Plausibility AI safety (all languages): You observe GOÄ code combinations, factor values, and catalogue match status at an organisational/billing-hint level only.
+Allowed: neutral observations about code combinations, factor values relative to § 5 GOÄ thresholds, documentation gap hints, uncertainty notes.
+Never: diagnosis or suspected disease; triage or urgency assessment; treatment or medication advice; reimbursement predictions; statements that an invoice is correct or incorrect; invented GOÄ rules or invented point values; any medical interpretation of clinical content; final legal billing decisions.
+Always include nonBinding: true in your JSON response. Keep hints short and plain.
+`.trim();
+
+/**
+ * Billing plausibility output scan — blocks medical/legal/reimbursement leakage.
+ * Applied to every string field in the AI JSON response.
+ */
+const BILLING_PLAUSIBILITY_FORBIDDEN = [
+  /\bdiagnos(e|is|es|ed|ing)\b/i,
+  /\bDIAGNOSE\b/,
+  /\btriage\b/i,
+  /\burgent(ly)?\b/i,
+  /\burgency\b/i,
+  /\bemergency\s*(room|care|services)?\b/i,
+  /\bNotfall\b/i,
+  /\bimmediately (see|consult|call)\b/i,
+  /\byou (likely|probably|definitely) have\b/i,
+  /\bSie haben (wahrscheinlich|vermutlich|sicher)\b/i,
+  /\b(could indicate|may indicate|suggests?) (a |an )?\w+ (disease|disorder|condition|syndrome)\b/i,
+  /\b(prescribe|recommend taking|start taking)\b/i,
+  /\b(therapy|treatment) (is |for |required)\b/i,
+  /\bTherapie\b/i,
+  /\bBehandlung ist (notwendig|erforderlich|angezeigt)\b/i,
+  // reimbursement / invoice verdict
+  /\b(will|must|shall) (be )?(reimbursed|paid|covered|rejected)\b/i,
+  /\b(wird|muss|soll) (erstattet|abgelehnt|bezahlt|übernommen)\b/i,
+  /\binvoice is (correct|incorrect|valid|invalid)\b/i,
+  /\brechnung (ist|ist nicht) (korrekt|richtig|zulässig)\b/i,
+  /\b(correct|incorrect) billing\b/i,
+  /\breimbursement (decision|prediction|determination)\b/i,
+  /\bErstattungsentscheidung\b/i,
+  /\b(final|binding) (billing|legal) (decision|opinion|ruling)\b/i,
+  /\brechtsverbindlich(e?s?)?\b/i,
+  // invented rules
+  /\baccording to (GOÄ )?§\s*\d+[^,\s]*\s+(which states|requiring|mandating)\b/i,
+  /\bgemäß GOÄ .{0,40}(ist|sind) (verboten|unzulässig|nicht erlaubt)\b/i,
+];
+
+/**
  * Combined patterns per module (output scanning).
  * @param {string} module
  * @returns {RegExp[]}
@@ -375,6 +457,8 @@ export function getOutputSafetyPatterns(module) {
         ...MEDICAL_INTERPRETER_EXTRA,
         ...APPOINTMENT_ASSISTANT_EXTRA,
       ];
+    case AI_MODULES.BILLING_PLAUSIBILITY:
+      return [...BILLING_PLAUSIBILITY_FORBIDDEN, ...MULTILINGUAL_EXTRA];
     default:
       return [...base, ...SYMPTOM_EXTRA];
   }
@@ -447,6 +531,10 @@ export const SAFE_FALLBACKS = {
   [AI_MODULES.APPOINTMENT_ASSISTANT]: {
     de: "Die Zusammenfassung konnte nicht in einer sicheren Form ausgegeben werden. Bitte prüfen Sie die Terminanfrage direkt. Dieses Modul bietet keine Diagnose, keine Dringlichkeitseinschätzung und keine medizinische Bewertung.",
     en: "The summary could not be safely generated. Please review the appointment request directly. This module does not provide diagnosis, urgency assessment, or medical evaluation.",
+  },
+  [AI_MODULES.BILLING_PLAUSIBILITY]: {
+    de: "Der KI-Plausibilitätshinweis konnte nicht sicher ausgegeben werden. Die deterministischen Warnhinweise oben sind weiterhin gültig. Dieses Modul liefert keine rechtsverbindliche Abrechnungsentscheidung, keine Diagnose und keine Erstattungsvorhersage.",
+    en: "The AI plausibility hint could not be safely generated. The deterministic warnings above remain valid. This module does not provide a legally binding billing decision, diagnosis, or reimbursement prediction.",
   },
   generic: {
     de: "Die Ausgabe konnte nicht sicher strukturiert werden. Bitte formulieren Sie neutral und besprechen Sie medizinische Fragen mit medizinischem Fachpersonal.",

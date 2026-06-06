@@ -68,6 +68,18 @@ export const esPracticeBillingPlausibility = {
     invalid_count: "Valor de cantidad inválido.",
   },
 
+  btnAiReview: "Solicitar indicación de plausibilidad IA",
+  aiReviewPending: "Solicitando indicación IA …",
+  aiReviewLabel: "Nota asistida por IA / no vinculante",
+  aiReviewNonBinding: "Esta nota no es jurídicamente vinculante, no constituye un diagnóstico ni una decisión de reembolso.",
+  aiReviewFallback: "Indicación IA temporalmente no disponible. Los resultados de verificación deterministas anteriores siguen siendo válidos.",
+  aiReviewUnavailable: "La verificación de plausibilidad IA no está activada.",
+  aiReviewError: "No se pudo solicitar la indicación IA.",
+  aiReviewSuccess: "Indicación de plausibilidad IA recibida.",
+  aiReviewGeneralNote: "Nota general",
+  aiReviewUncertaintyNote: "Nota de incertidumbre",
+  aiReviewRowHints: "Indicaciones por código",
+
   featureDisabled: "Este módulo no está activo aún.",
   forbidden: "Solo los propietarios y administradores tienen acceso.",
 

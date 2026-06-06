@@ -68,6 +68,18 @@ export const frPracticeBillingPlausibility = {
     invalid_count: "Valeur de nombre invalide.",
   },
 
+  btnAiReview: "Demander une indication de plausibilité IA",
+  aiReviewPending: "Demande d'indication IA en cours …",
+  aiReviewLabel: "Note assistée par IA / non contraignante",
+  aiReviewNonBinding: "Cette note n'est pas juridiquement contraignante, ni un diagnostic, ni une décision de remboursement.",
+  aiReviewFallback: "Indication IA temporairement indisponible. Les résultats de vérification déterministes ci-dessus restent valides.",
+  aiReviewUnavailable: "La vérification de plausibilité IA n'est pas activée.",
+  aiReviewError: "L'indication IA n'a pas pu être demandée.",
+  aiReviewSuccess: "Indication de plausibilité IA reçue.",
+  aiReviewGeneralNote: "Note générale",
+  aiReviewUncertaintyNote: "Note d'incertitude",
+  aiReviewRowHints: "Indications par code",
+
   featureDisabled: "Ce module n'est pas encore activé.",
   forbidden: "Seuls les propriétaires et les administrateurs ont accès.",
 

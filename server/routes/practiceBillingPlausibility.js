@@ -11,13 +11,14 @@
  */
 
 import express from "express";
-import { isBillingPlausibilityEnabled } from "../config/featureFlags.js";
+import { isBillingPlausibilityEnabled, isBillingAiReviewEnabled } from "../config/featureFlags.js";
 import {
   listSessionsForPractice,
   createSessionForPractice,
   getSessionForPractice,
   dismissSessionForPractice,
 } from "../services/billingPlausibility/billingPlausibilityService.js";
+import { requestAiReviewForSession } from "../services/billingPlausibility/billingPlausibilityAiReviewService.js";
 
 const router = express.Router();
 
@@ -58,6 +59,7 @@ function mapServiceError(result) {
     rows_required: 400,
     too_many_rows: 400,
     already_dismissed: 409,
+    session_dismissed: 409,
   };
   return { status: map[result.error] ?? 500, error: result.error };
 }
@@ -152,6 +154,50 @@ router.post("/", async (req, res) => {
     return res.status(201).json({ ok: true, session: result.session });
   } catch (err) {
     console.error("[billing-plausibility] POST /", err);
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/**
+ * POST /:sessionId/review — request AI-assisted plausibility hints.
+ *
+ * Requires ENABLE_BILLING_AI_REVIEW=true (separate from main billing flag).
+ * Returns deterministic fallback if AI is unavailable — never blocks the request.
+ * Patient-identifying fields in the request body are rejected (400).
+ * Dismissed sessions are rejected (409).
+ * Raw prompt and raw AI output are never returned.
+ */
+router.post("/:sessionId/review", async (req, res) => {
+  if (!isBillingAiReviewEnabled()) {
+    return res.status(404).json({ ok: false, error: "feature_disabled" });
+  }
+
+  const uid = userId(req);
+  const practiceId = practiceIdFromQuery(req);
+  const { sessionId } = req.params;
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  if (!sessionId) return res.status(400).json({ ok: false, error: "sessionId_required" });
+
+  const body = req.body || {};
+  for (const field of FORBIDDEN_PATIENT_FIELDS) {
+    if (body[field] !== undefined && body[field] !== null && body[field] !== "") {
+      return res.status(400).json({ ok: false, error: "patient_data_not_accepted" });
+    }
+  }
+
+  try {
+    const result = await requestAiReviewForSession(practiceId, sessionId, { userId: uid });
+    const mapped = mapServiceError(result);
+    if (mapped) return res.status(mapped.status).json({ ok: false, error: mapped.error });
+    return res.json({
+      ok: true,
+      session: result.session,
+      aiResult: result.aiResult,
+      used_fallback: result.used_fallback,
+    });
+  } catch (err) {
+    console.error("[billing-plausibility] POST /:sessionId/review", err);
     return res.status(500).json({ ok: false, error: "request_failed" });
   }
 });
