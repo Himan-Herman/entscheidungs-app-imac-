@@ -85,6 +85,15 @@ export const esPracticeBillingPlausibility = {
   featureDisabled: "Este módulo no está activo aún.",
   forbidden: "Solo los propietarios y administradores tienen acceso.",
 
+  backToBillingOverview: "Volver al resumen de facturación",
+  sessionCreatedAt: "Creada:",
+  btnOpenSession: "Abrir",
+  btnDismissSession: "Archivar revisión",
+  dismissSuccess: "Revisión archivada.",
+  dismissError: "No se pudo archivar. Por favor, inténtelo de nuevo.",
+  detailLoadError: "No se pudo cargar la revisión.",
+  detailNotFound: "Revisión no encontrada o no disponible.",
+
   errors: {
     rows_required: "Se requiere al menos un código GOÄ.",
     ziffer_required: "Código faltante en la fila {{rowIndex}}.",

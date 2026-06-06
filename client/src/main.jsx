@@ -153,6 +153,9 @@ const PracticeIntegrationsPage = lazy(() =>
 const PracticeBillingPlausibilityPage = lazy(() =>
   import("./features/practiceBillingPlausibility/pages/PracticeBillingPlausibilityPage.jsx"),
 );
+const PracticeBillingPlausibilityDetailPage = lazy(() =>
+  import("./features/practiceBillingPlausibility/pages/PracticeBillingPlausibilityDetailPage.jsx"),
+);
 const PracticeIntegrationsSandboxPage = lazy(() =>
   import("./features/practiceIntegrations/pages/PracticeIntegrationsSandboxPage.jsx"),
 );
@@ -569,6 +572,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PracticeBillingPlausibilityPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/settings/billing-plausibility/:sessionId"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeBillingPlausibilityDetailPage />
                     </ProtectedRoute>
                   }
                 />

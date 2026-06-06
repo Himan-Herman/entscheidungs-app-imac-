@@ -545,20 +545,35 @@ export default function PracticeBillingPlausibilityPage() {
                       <th scope="col">{t.colDate}</th>
                       <th scope="col">{t.colZiffernCount}</th>
                       <th scope="col">{t.colStatus}</th>
+                      <th scope="col">
+                        <span className="billing-plausibility__sr-only">{t.btnOpenSession}</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sessions.map((s) => (
-                      <tr key={s.id}>
-                        <td>
-                          {s.createdAt
-                            ? new Date(s.createdAt).toLocaleDateString(locale)
-                            : "—"}
-                        </td>
-                        <td>{s.rowCount ?? "—"}</td>
-                        <td>{t[`status${s.status?.charAt(0).toUpperCase()}${s.status?.slice(1)}`] || s.status}</td>
-                      </tr>
-                    ))}
+                    {sessions.map((s) => {
+                      const dateStr = s.createdAt
+                        ? new Date(s.createdAt).toLocaleDateString(locale)
+                        : "—";
+                      const statusKey = `status${s.status?.charAt(0).toUpperCase()}${s.status?.slice(1)}`;
+                      const detailHref = `/practice/settings/billing-plausibility/${encodeURIComponent(s.id)}?practiceId=${encodeURIComponent(practiceId)}`;
+                      return (
+                        <tr key={s.id}>
+                          <td>{dateStr}</td>
+                          <td>{s.rowCount ?? "—"}</td>
+                          <td>{t[statusKey] || s.status}</td>
+                          <td>
+                            <Link
+                              className="billing-plausibility__table-link"
+                              to={detailHref}
+                              aria-label={`${t.btnOpenSession}: ${dateStr}`}
+                            >
+                              {t.btnOpenSession}
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

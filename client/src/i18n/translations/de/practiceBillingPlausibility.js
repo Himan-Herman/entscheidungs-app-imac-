@@ -80,6 +80,15 @@ export default {
   featureDisabled: "Dieses Modul ist derzeit nicht aktiviert.",
   forbidden: "Nur Inhaber:innen und Administrator:innen haben Zugriff.",
 
+  backToBillingOverview: "Zur Abrechnungsübersicht",
+  sessionCreatedAt: "Erstellt:",
+  btnOpenSession: "Öffnen",
+  btnDismissSession: "Prüfung archivieren",
+  dismissSuccess: "Prüfung wurde archiviert.",
+  dismissError: "Archivierung fehlgeschlagen. Bitte erneut versuchen.",
+  detailLoadError: "Prüfung konnte nicht geladen werden.",
+  detailNotFound: "Prüfung nicht gefunden oder nicht verfügbar.",
+
   errors: {
     rows_required: "Mindestens eine GOÄ-Ziffer ist erforderlich.",
     ziffer_required: "Ziffer fehlt in Zeile {{rowIndex}}.",

@@ -85,6 +85,15 @@ export const itPracticeBillingPlausibility = {
   featureDisabled: "Questo modulo non è ancora attivo.",
   forbidden: "Solo i titolari e gli amministratori hanno accesso.",
 
+  backToBillingOverview: "Torna alla panoramica fatturazione",
+  sessionCreatedAt: "Creato:",
+  btnOpenSession: "Apri",
+  btnDismissSession: "Archivia verifica",
+  dismissSuccess: "Verifica archiviata.",
+  dismissError: "Archiviazione non riuscita. Riprova.",
+  detailLoadError: "Impossibile caricare la verifica.",
+  detailNotFound: "Verifica non trovata o non disponibile.",
+
   errors: {
     rows_required: "È richiesto almeno un codice GOÄ.",
     ziffer_required: "Codice mancante nella riga {{rowIndex}}.",

@@ -85,6 +85,15 @@ export const frPracticeBillingPlausibility = {
   featureDisabled: "Ce module n'est pas encore activé.",
   forbidden: "Seuls les propriétaires et les administrateurs ont accès.",
 
+  backToBillingOverview: "Retour à l'aperçu de facturation",
+  sessionCreatedAt: "Créé :",
+  btnOpenSession: "Ouvrir",
+  btnDismissSession: "Archiver le contrôle",
+  dismissSuccess: "Contrôle archivé.",
+  dismissError: "Archivage impossible. Veuillez réessayer.",
+  detailLoadError: "Impossible de charger le contrôle.",
+  detailNotFound: "Contrôle introuvable ou indisponible.",
+
   errors: {
     rows_required: "Au moins un code GOÄ est requis.",
     ziffer_required: "Code manquant à la ligne {{rowIndex}}.",

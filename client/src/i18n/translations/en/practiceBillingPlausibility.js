@@ -80,6 +80,15 @@ export default {
   featureDisabled: "This module is not currently active.",
   forbidden: "Only owners and administrators have access.",
 
+  backToBillingOverview: "Back to billing overview",
+  sessionCreatedAt: "Created:",
+  btnOpenSession: "Open",
+  btnDismissSession: "Archive review",
+  dismissSuccess: "Review archived.",
+  dismissError: "Could not archive review. Please try again.",
+  detailLoadError: "Could not load review.",
+  detailNotFound: "Review not found or unavailable.",
+
   errors: {
     rows_required: "At least one GOÄ code is required.",
     ziffer_required: "Code missing in row {{rowIndex}}.",
