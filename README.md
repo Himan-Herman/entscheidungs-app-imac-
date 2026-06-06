@@ -1,6 +1,6 @@
 # MedScout 
 
-*MedScout* ist eine webbasierte Entscheidungs-App im Rahmen des Praxissemesters an der HRW.  
+*MedScout* — "Better prepared. Better care." — eine webbasierte Anwendung im Rahmen des Praxissemesters an der HRW.  
 Ziel ist eine KI-gestützte, barrierefreie Anwendung zur Symptomerfassung und ärztlichen Entscheidungshilfe.
 
 ---

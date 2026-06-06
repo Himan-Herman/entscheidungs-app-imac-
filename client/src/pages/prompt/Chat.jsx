@@ -65,7 +65,7 @@ export default function Chat() {
 
   return (
     <div className="app" style={{ textAlign: 'center', padding: '2rem' }}>
-      <h1><b>Entscheidungs-App</b></h1>
+      <h1><b>Better prepared. Better care.</b></h1>
 
       <div className="eingabe-box" style={{ marginBottom: '20px' }}>
         <input
