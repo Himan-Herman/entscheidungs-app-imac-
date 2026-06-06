@@ -14,7 +14,7 @@ export async function developerAiWebhookExplanation(body, { locale } = {}) {
     disclaimer:
       lang === "en"
         ? "AI note – please review. AI only supports technical and organizational explanations of API/webhooks."
-        : "KI-Hinweis – bitte prüfen. Die KI unterstützt nur bei technischer und organisatorischer Erklärung von API/Webhooks.",
+        : "Smart-Hinweis – bitte prüfen. Unterstützt nur bei technischer und organisatorischer Erklärung von API/Webhooks.",
   };
 }
 

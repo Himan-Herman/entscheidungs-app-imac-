@@ -46,10 +46,10 @@ export default {
   proText:
     "Für Vielnutzerinnen, Vielnutzer und Power-User: höhere Limits, erweiterte Analysefunktionen und priorisierte Antworten.",
   pro1: "Mehr Anfragen pro Monat",
-  pro2: "Detailliertere KI-Antworten",
+  pro2: "Detailliertere Antworten",
   pro3: "Schnellere Antworten (Priorisierung)",
   proButton: "Tarife ansehen",
-  demoTitle: "Meda - deine KI, visualisiert",
+  demoTitle: "Meda - dein Assistent, visualisiert",
   demoText:
     "Das Video zeigt symbolisch, wie Meda medizinische Muster erkennt und dir bei Beschwerden Orientierung bietet.",
   videoAria: "Kurzer Einblick in die MedScoutX-App",

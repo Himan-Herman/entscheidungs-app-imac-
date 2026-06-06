@@ -7,7 +7,7 @@ export default {
   shareWithPatient: "Für Patient:in freigeben",
   labTableHeading: "Laborwerte als Tabelle anzeigen",
   autoDetectedHint: "Automatisch erkannter Text – bitte prüfen",
-  aiOcrHint: "KI-/OCR-Ergebnis – bitte prüfen",
+  aiOcrHint: "Automatisches Ergebnis – bitte prüfen",
   patientDisclaimer:
     "Diese Ansicht zeigt automatisch strukturierte Angaben aus dem Dokument. MedScoutX interpretiert keine Laborwerte und erstellt keine Diagnose.",
   unavailable: "Die Dokumentstrukturierung ist momentan nicht verfügbar.",
@@ -38,8 +38,8 @@ export default {
   shared: "Für Patient:in freigegeben.",
   discarded: "Ergebnis verworfen.",
   sourcePractice: "Quelle: Praxisdokument",
-  labExplainBtn: "KI-Erklärung anfordern",
-  labExplainHeading: "KI-Erklärung – Patientensprache",
+  labExplainBtn: "Erklärung anfordern",
+  labExplainHeading: "Erklärung – Patientensprache",
   labExplainLoading: "Erklärung wird erstellt …",
   labExplainError: "Erklärung konnte nicht geladen werden.",
   labExplainRateLimit: "Zu viele Anfragen. Bitte versuchen Sie es später erneut.",
@@ -49,6 +49,6 @@ export default {
   labExplainOutOfRange: "Außerhalb des Normalbereichs",
   labExplainUnknownRange: "Bereich nicht bekannt",
   labExplainMdrNote:
-    "KI-Erklärung zur Orientierung — keine Diagnose, keine Behandlungsempfehlung. Sprechen Sie bitte mit Ihrer Ärztin oder Ihrem Arzt.",
+    "Erklärung zur Orientierung — keine Diagnose, keine Behandlungsempfehlung. Sprechen Sie bitte mit Ihrer Ärztin oder Ihrem Arzt.",
   labExplainRetry: "Erneut versuchen",
 };

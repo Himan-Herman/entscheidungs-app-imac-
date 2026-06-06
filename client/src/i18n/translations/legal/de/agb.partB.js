@@ -22,7 +22,7 @@ export default [
       {
         type: "html",
         html: `
-<p>(1) Je nach gewähltem Abonnement stehen dem Nutzer pro Abrechnungszeitraum bestimmte Nutzungskontingente (z.&nbsp;B. Anzahl an KI-Nachrichten, Bildanalysen) zur Verfügung.</p>
+<p>(1) Je nach gewähltem Abonnement stehen dem Nutzer pro Abrechnungszeitraum bestimmte Nutzungskontingente (z.&nbsp;B. Anzahl an Nachrichten, Bildanalysen) zur Verfügung.</p>
 <p>(2) Sind diese Kontingente ausgeschöpft, können die entsprechenden Funktionen erst im nächsten Abrechnungszeitraum wieder vollumfänglich genutzt werden, sofern kein Upgrade erfolgt.</p>
 <p>(3) MedScoutX behält sich vor, bei außergewöhnlich hoher oder missbräuchlicher Nutzung die Funktionen im Rahmen einer Fair-Use-Regelung vorübergehend zu begrenzen, um die Stabilität des Dienstes für alle Nutzer sicherzustellen.</p>
 `.trim(),

@@ -9,7 +9,7 @@ export default {
     "MedScoutX stellt keine Diagnose, ersetzt keine ärztliche Beratung und ist nicht für Notfälle geeignet. Bei akuten oder lebensbedrohlichen Beschwerden wenden Sie sich bitte sofort an den Notruf oder medizinisches Fachpersonal.",
   consentTitle: "Bevor Sie fortfahren",
   consentCheckbox:
-    "Ich verstehe: Dieses Werkzeug ist nicht für Notfälle, liefert keine Diagnose und keine Therapieempfehlung und bewertet keine Dringlichkeit. Der Gesprächsverlauf kann auf diesem Gerät gespeichert bleiben, bis ich ihn lösche. Beim Senden werden meine Texte über MedScoutX-Server und KI-Anbieter verarbeitet (siehe Datenschutzerklärung). Spracheingabe: Aufnahme nur nach Tippen auf das Mikrofon.",
+    "Ich verstehe: Dieses Werkzeug ist nicht für Notfälle, liefert keine Diagnose und keine Therapieempfehlung und bewertet keine Dringlichkeit. Der Gesprächsverlauf kann auf diesem Gerät gespeichert bleiben, bis ich ihn lösche. Beim Senden werden meine Texte über MedScoutX-Server und Verarbeitungsdienstleister verarbeitet (siehe Datenschutzerklärung). Spracheingabe: Aufnahme nur nach Tippen auf das Mikrofon.",
   consentContinue: "Weiter",
   consentPrivacyLink: "Datenschutzerklärung",
   hintsTitle: "Hinweise zur Beschreibung",

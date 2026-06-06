@@ -81,9 +81,9 @@ export async function generateOrganizationalAssignmentSuggestion(
   };
 
   return {
-    aiSuggestionLabel: isDe ? "KI-Vorschlag – bitte prüfen" : "AI suggestion – please review",
+    aiSuggestionLabel: isDe ? "Automatischer Vorschlag – bitte prüfen" : "AI suggestion – please review",
     aiDisclaimer: isDe
-      ? "Die KI unterstützt nur organisatorisch, z. B. bei Sprache, Terminart oder Zuständigkeit. Sie trifft keine medizinische Entscheidung."
+      ? "Unterstützt nur organisatorisch, z. B. bei Sprache, Terminart oder Zuständigkeit. Keine medizinische Entscheidung."
       : "AI only supports organizational tasks, such as language, appointment type, or responsibility. It does not make medical decisions.",
     suggestedAssigneeUserId: suggestedUserId,
     suggestedAssignmentType: suggestedUserId ? "doctor" : "secretary",

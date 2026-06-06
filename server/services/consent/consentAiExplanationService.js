@@ -16,7 +16,7 @@ const TYPE_LABELS = {
     medication_plan_access: "Medikationsplan (organisatorische Übersicht)",
     secure_messaging: "Sichere Nachrichten",
     data_export: "Datenexport",
-    ai_organizational_assistance: "KI-Unterstützung (nur organisatorisch)",
+    ai_organizational_assistance: "Assistierte Unterstützung (nur organisatorisch)",
     optional_email_notifications: "E-Mail-Benachrichtigungen (optional)",
     optional_secure_links: "Sichere Download-Links (optional)",
   },
@@ -112,7 +112,7 @@ export async function generateConsentAiExplanation(input) {
   });
 
   return {
-    label: de ? "KI-Hinweis – bitte prüfen" : "AI note – please review",
+    label: de ? "Assistierter Hinweis – bitte prüfen" : "AI note – please review",
     disclaimer: de ? DISCLAIMER_DE : DISCLAIMER_EN,
     text: lines.join("\n"),
     aiGenerated: true,

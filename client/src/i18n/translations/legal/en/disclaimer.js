@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX is an AI-supported information and orientation tool in the healthcare field. The app is solely intended to give users an initial structured overview of possible reasons for their complaints and potentially relevant medical specialties.",
+            "MedScoutX is an automated information and orientation tool in the healthcare field. The app is solely intended to give users an initial structured overview of possible reasons for their complaints and potentially relevant medical specialties.",
         },
         {
           type: "p",

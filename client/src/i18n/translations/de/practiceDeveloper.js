@@ -27,8 +27,8 @@ export default {
   securityNote:
     "Webhooks enthalten nur Metadaten. MedScoutX sendet keine Diagnosen, Laborwerte oder Nachrichtentexte.",
   aiDisclaimer:
-    "KI-Hinweis – bitte prüfen. Die KI unterstützt nur bei technischer und organisatorischer Erklärung von API/Webhooks.",
-  aiExplain: "Webhook-Dokumentation (KI)",
+    "Smart-Hinweis – bitte prüfen. Unterstützt nur bei technischer und organisatorischer Erklärung von API/Webhooks.",
+  aiExplain: "Webhook-Dokumentation (Smart)",
   saved: "Gespeichert.",
   encryptionRequired: "Verschlüsselung nicht konfiguriert (PRACTICE_INTEGRATION_MASTER_KEY).",
 };

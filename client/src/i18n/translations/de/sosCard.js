@@ -30,13 +30,13 @@ export default {
   saveSuccess: "Gespeichert.",
   saveError: "Speichern fehlgeschlagen.",
 
-  aiSection: "KI-Notfallzusammenfassung",
+  aiSection: "Automatische Notfallzusammenfassung",
   aiHint:
     "Erstellt eine kurze englischsprachige Zusammenfassung für Ersthelfer basierend auf Allergien, Diagnosen und Ihren Angaben. Einmalig auf Knopfdruck — kein automatischer Abruf.",
   aiGenerate: "Zusammenfassung erstellen",
   aiGenerating: "Wird erstellt…",
-  aiError: "KI-Zusammenfassung fehlgeschlagen. Bitte später erneut versuchen.",
-  aiSummaryLabel: "KI-Zusammenfassung",
+  aiError: "Zusammenfassung fehlgeschlagen. Bitte später erneut versuchen.",
+  aiSummaryLabel: "Automatische Zusammenfassung",
   aiSummaryUpdated: "Aktualisiert am",
 
   qrSection: "Offline-QR-Code",

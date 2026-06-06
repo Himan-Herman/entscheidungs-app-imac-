@@ -86,9 +86,9 @@ export async function generateDocumentDownloadAiNote(input, ctx = {}) {
 
   return {
     note: safe.text,
-    aiSuggestionLabel: isEn ? "AI note – please review" : "KI-Hinweis – bitte prüfen",
+    aiSuggestionLabel: isEn ? "AI note – please review" : "Automatischer Hinweis – bitte prüfen",
     aiDisclaimer: isEn
       ? "AI only supports organizational download and security notes. It does not interpret documents."
-      : "Die KI unterstützt nur bei organisatorischen Download- und Sicherheitshinweisen. Sie interpretiert keine Dokumente.",
+      : "Unterstützt nur bei organisatorischen Download- und Sicherheitshinweisen. Dokumente werden nicht interpretiert.",
   };
 }

@@ -156,7 +156,7 @@ export async function generatePracticePatientSearchAiSuggestion(input = {}) {
   const { suggested, notes } = suggestFiltersFromQuery(q, locale);
 
   const disclaimer = locale === "en" ? DISCLAIMER_EN : DISCLAIMER_DE;
-  const label = locale === "en" ? "AI suggestion – please review" : "KI-Vorschlag – bitte prüfen";
+  const label = locale === "en" ? "AI suggestion – please review" : "Automatischer Vorschlag – bitte prüfen";
 
   if (!q && !notes.length) {
     return {

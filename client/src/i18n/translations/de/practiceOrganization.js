@@ -65,9 +65,9 @@ export default {
   inboxStatusArchived: "Archiviert",
   patientSendToPractice: "An Praxis allgemein senden",
   patientSelectDoctor: "Bestimmte Ärztin / bestimmten Arzt auswählen",
-  aiSuggestionLabel: "KI-Vorschlag – bitte prüfen",
+  aiSuggestionLabel: "Assistierter Vorschlag – bitte prüfen",
   aiOrgDisclaimer:
-    "Die KI unterstützt nur organisatorisch, z. B. bei Sprache, Terminart oder Zuständigkeit. Sie trifft keine medizinische Entscheidung.",
+    "Unterstützt nur organisatorisch, z. B. bei Sprache, Terminart oder Zuständigkeit. Keine medizinische Entscheidung.",
   assignmentHistory: "Verlauf der Zuständigkeit",
   saveAssignment: "Zuordnung speichern",
   assignmentSaved: "Zuordnung gespeichert.",

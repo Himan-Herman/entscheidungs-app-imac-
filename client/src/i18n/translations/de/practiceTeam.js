@@ -47,14 +47,14 @@ export default {
   pendingInvitesHeading: "Offene Einladungen für Sie",
   acceptInvite: "Einladung annehmen",
   acceptSuccess: "Einladung angenommen.",
-  aiHeading: "KI-Rechteübersicht (organisatorisch)",
+  aiHeading: "Automatische Rechteübersicht (organisatorisch)",
   aiFocusRole: "Rolle für Hinweise",
   aiRun: "Zusammenfassung erstellen",
-  aiLoading: "KI erstellt Zusammenfassung…",
-  aiError: "KI-Zusammenfassung nicht verfügbar.",
-  aiSuggestionLabel: "KI-Vorschlag – bitte prüfen",
+  aiLoading: "Zusammenfassung wird erstellt…",
+  aiError: "Automatische Zusammenfassung nicht verfügbar.",
+  aiSuggestionLabel: "Automatischer Vorschlag – bitte prüfen",
   aiDisclaimer:
-    "Die KI unterstützt nur organisatorisch bei Rollen- und Rechteübersichten.",
+    "Unterstützt nur organisatorisch bei Rollen- und Rechteübersichten.",
   notProvided: "nicht angegeben",
   membersEmpty: "Noch keine weiteren Teammitglieder.",
   errors: {
@@ -68,6 +68,6 @@ export default {
     cannot_revoke_self: "Eigenen Zugriff hier nicht widerrufbar.",
     cannot_change_practice_owner: "Inhaber:in-Rolle kann hier nicht geändert werden.",
     member_not_found: "Mitglied nicht gefunden.",
-    ai_not_configured: "KI ist nicht konfiguriert.",
+    ai_not_configured: "Funktion nicht konfiguriert.",
   },
 };

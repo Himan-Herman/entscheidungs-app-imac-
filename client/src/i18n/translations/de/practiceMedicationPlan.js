@@ -55,11 +55,11 @@ export default {
   deleteCancel: "Abbrechen",
   deleted: "Plan wurde entfernt.",
   deleteError: "Löschen fehlgeschlagen.",
-  aiFormat: "Strukturieren (KI-Entwurf)",
-  aiBusy: "KI-Entwurf wird erstellt …",
-  aiError: "KI-Entwurf konnte nicht erstellt werden.",
-  aiNotConfigured: "KI ist in dieser Umgebung nicht verfügbar.",
-  aiDraftLabel: "KI-Entwurf – bitte prüfen",
+  aiFormat: "Strukturieren (assistierter Entwurf)",
+  aiBusy: "Entwurf wird erstellt …",
+  aiError: "Entwurf konnte nicht erstellt werden.",
+  aiNotConfigured: "Diese Funktion ist in dieser Umgebung nicht verfügbar.",
+  aiDraftLabel: "Assistierter Entwurf – bitte prüfen",
   aiDisclaimer:
-    "Die KI strukturiert nur vorhandene Angaben. Sie erstellt keine Dosierungs- oder Therapieempfehlung.",
+    "Strukturiert nur vorhandene Angaben. Keine Dosierungs- oder Therapieempfehlung.",
 };

@@ -97,7 +97,7 @@ export default function SosCardPage() {
         aiSummaryUpdatedAt: data.aiSummaryUpdatedAt,
       }));
     } catch {
-      setAiError(t?.aiError || "KI-Zusammenfassung fehlgeschlagen.");
+      setAiError(t?.aiError || "Zusammenfassung fehlgeschlagen.");
     } finally {
       setAiLoading(false);
     }

@@ -29,7 +29,7 @@ export default {
   restoreError: "Wiederherstellung fehlgeschlagen.",
   deleteError: "Löschen fehlgeschlagen.",
   forbidden: "Sie haben keine Berechtigung für diese Aktion.",
-  aiSuggestionLabel: "KI-Vorschlag – bitte prüfen",
+  aiSuggestionLabel: "Automatischer Vorschlag – bitte prüfen",
   aiDisclaimer:
-    "Die KI unterstützt nur organisatorisch. Sie entscheidet nicht über medizinische oder rechtliche Löschungspflichten.",
+    "Unterstützt nur organisatorisch. Entscheidet nicht über medizinische oder rechtliche Löschungspflichten.",
 };

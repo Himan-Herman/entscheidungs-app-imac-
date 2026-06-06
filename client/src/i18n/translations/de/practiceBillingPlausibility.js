@@ -41,7 +41,7 @@ export default {
 
   loadError: "Prüfungen konnten nicht geladen werden.",
   submitError: "Anfrage konnte nicht gesendet werden.",
-  aiMarked: "KI-Plausibilitätshinweis (nicht rechtsverbindlich)",
+  aiMarked: "Smart-Plausibilitätshinweis (nicht rechtsverbindlich)",
 
   resultStub:
     "Prüfungsanfrage gespeichert. Die Plausibilitätshinweise sind unten aufgeführt.",
@@ -63,14 +63,14 @@ export default {
     invalid_count: "Ungültige Anzahl.",
   },
 
-  btnAiReview: "KI-Plausibilitätshinweis anfordern",
-  aiReviewPending: "KI-Hinweis wird angefordert …",
-  aiReviewLabel: "KI-Plausibilitätshinweis / nicht rechtsverbindlich",
+  btnAiReview: "Smart-Plausibilitätshinweis anfordern",
+  aiReviewPending: "Smart-Hinweis wird angefordert …",
+  aiReviewLabel: "Smart-Plausibilitätshinweis / nicht rechtsverbindlich",
   aiReviewNonBinding: "Dieser Hinweis ist nicht rechtsverbindlich, keine Diagnose und keine Erstattungsentscheidung.",
-  aiReviewFallback: "KI-Hinweis derzeit nicht verfügbar. Die deterministischen Prüfergebnisse oben sind weiterhin gültig.",
-  aiReviewUnavailable: "KI-Plausibilitätsprüfung ist nicht aktiviert.",
-  aiReviewError: "KI-Hinweis konnte nicht angefordert werden.",
-  aiReviewSuccess: "KI-Plausibilitätshinweis erhalten.",
+  aiReviewFallback: "Smart-Hinweis derzeit nicht verfügbar. Die deterministischen Prüfergebnisse oben sind weiterhin gültig.",
+  aiReviewUnavailable: "Smart-Plausibilitätsprüfung ist nicht aktiviert.",
+  aiReviewError: "Smart-Hinweis konnte nicht angefordert werden.",
+  aiReviewSuccess: "Smart-Plausibilitätshinweis erhalten.",
   aiReviewGeneralNote: "Allgemeiner Hinweis",
   aiReviewUncertaintyNote: "Unsicherheitshinweis",
   aiReviewRowHints: "Zifferhinweise",

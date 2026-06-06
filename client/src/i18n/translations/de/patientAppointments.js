@@ -32,9 +32,9 @@ export default {
   status_completed: "Abgeschlossen",
   status_rescheduled: "Verschoben",
 
-  aiMarked: "KI-Vorschlag – bitte prüfen",
+  aiMarked: "Smart-Vorschlag – bitte prüfen",
   aiDisclaimer:
-    "Die KI unterstützt nur bei organisatorischer Terminplanung. Sie bewertet keine medizinische Dringlichkeit.",
+    "Unterstützt nur bei organisatorischer Terminplanung. Keine medizinische Dringlichkeit wird bewertet.",
   notProvided: "nicht angegeben",
 
   bookingDisabled:

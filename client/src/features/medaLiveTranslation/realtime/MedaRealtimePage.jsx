@@ -870,7 +870,7 @@ export default function MedaRealtimePage() {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-patient" className="mrt-consent-label">
-                Der Patient wurde über die KI-gestützte Live-Übersetzung informiert und stimmt der
+                Der Patient wurde über die automatisierte Live-Übersetzung informiert und stimmt der
                 Verarbeitung während dieser Sitzung zu.
               </label>
             </div>

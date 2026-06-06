@@ -21,14 +21,14 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX ist ein KI-gestütztes Informations- und Orientierungssystem im Gesundheitsbereich. Die App dient dazu, Nutzern eine erste strukturierte Einschätzung möglicher Ursachen ihrer Beschwerden sowie potenziell geeigneter medizinischer Fachrichtungen bereitzustellen.</p>
+<p>MedScoutX ist ein automatisiertes Informations- und Orientierungssystem im Gesundheitsbereich. Die App dient dazu, Nutzern eine erste strukturierte Einschätzung möglicher Ursachen ihrer Beschwerden sowie potenziell geeigneter medizinischer Fachrichtungen bereitzustellen.</p>
 <p>MedScoutX ist <strong>kein Medizinprodukt</strong> im Sinne der EU-Medizinprodukteverordnung (MDR). Insbesondere:</p>
 <ul>
 <li>stellt die App <strong>keine Diagnosen</strong>,</li>
 <li>empfiehlt sie <strong>keine konkreten Therapien</strong> oder Medikamente,</li>
 <li>ersetzt sie <strong>nicht die ärztliche Entscheidung</strong> oder Behandlung.</li>
 </ul>
-<p>Die Nutzung der App ersetzt in keinem Fall die persönliche Untersuchung, Beratung oder Behandlung durch Ärztinnen, Ärzte oder anderes medizinisches Fachpersonal. Entscheidungen über Diagnostik, Therapien oder Medikationen dürfen nicht allein auf Grundlage der KI-Ausgaben getroffen werden.</p>
+<p>Die Nutzung der App ersetzt in keinem Fall die persönliche Untersuchung, Beratung oder Behandlung durch Ärztinnen, Ärzte oder anderes medizinisches Fachpersonal. Entscheidungen über Diagnostik, Therapien oder Medikationen dürfen nicht allein auf Grundlage der automatisierten Ausgaben getroffen werden.</p>
 <p>In akuten oder lebensbedrohlichen Situationen ist unverzüglich der jeweilige Notruf (z.&nbsp;B. EU: <strong>112</strong>, USA: <strong>911</strong>) oder der ärztliche Notdienst zu wählen.</p>
 `.trim(),
       },
@@ -59,8 +59,8 @@ export default [
         html: `
 <p>(1) MedScoutX stellt insbesondere folgende Funktionen bereit:</p>
 <ul>
-<li>KI-gestützte Symptomanalyse über einen Chatbereich,</li>
-<li>KI-gestützte Analyse von Bilddaten,</li>
+<li>Automatische Symptomanalyse über einen Chatbereich,</li>
+<li>Automatische Analyse von Bilddaten,</li>
 <li>Auswahl von Körperregionen über eine Körperkarte,</li>
 <li>Verwaltung eines Nutzerkontos und Verlaufsfunktionen,</li>
 <li>ggf. zusätzliche Funktionen im Rahmen kostenpflichtiger Abonnements.</li>

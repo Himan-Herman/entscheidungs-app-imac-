@@ -59,13 +59,13 @@ export default {
   productionWarning:
     "Produktive Synchronisation ist standardmäßig deaktiviert (ENABLE_PVS_PRODUCTION=false).",
 
-  aiMarkedDe: "KI-Hinweis – bitte prüfen",
+  aiMarkedDe: "Smart-Hinweis – bitte prüfen",
   aiMarkedEn: "AI note – please review",
   aiDisclaimer:
-    "Die KI unterstützt nur bei technischer und organisatorischer Erklärung der Integration. Sie interpretiert keine medizinischen Inhalte.",
-  btnAiMapping: "Mapping erklären (KI)",
-  btnAiError: "Fehler erklären (KI)",
-  aiLoading: "KI-Antwort wird erstellt …",
+    "Unterstützt nur bei technischer und organisatorischer Erklärung der Integration. Keine medizinischen Inhalte werden interpretiert.",
+  btnAiMapping: "Mapping erklären",
+  btnAiError: "Fehler erklären",
+  aiLoading: "Antwort wird erstellt …",
 
   mappingPreview: "Mapping-Vorschau",
   sandboxSamples: "Beispieldaten",
@@ -95,6 +95,6 @@ export default {
     feature_disabled: "Funktion deaktiviert.",
     production_sync_disabled: "Produktive Synchronisation ist nicht freigeschaltet.",
     auto_sync_disabled: "Automatische Synchronisation ist im MVP deaktiviert.",
-    ai_not_configured: "KI ist nicht konfiguriert.",
+    ai_not_configured: "Funktion nicht konfiguriert.",
   },
 };
