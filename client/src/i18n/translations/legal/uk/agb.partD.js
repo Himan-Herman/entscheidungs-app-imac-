@@ -34,7 +34,7 @@ export default [
         type: "html",
         html: `
 <p>Загальні запитання: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
-<p>Технічна підтримка: <a href="mailto:support@medscout.app">support@medscout.app</a></p>
+<p>Технічна підтримка: <a href="mailto:support@medscoutx.app">support@medscoutx.app</a></p>
 <p>Біллінг та рахунки: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
 `.trim(),
       },

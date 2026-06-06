@@ -71,7 +71,7 @@ export default function LegalBlocks({ blocks }) {
           <p>{b.intro}</p>
           <p>
             <strong>{b.emailLabel}</strong>{" "}
-            <a href="mailto:support@medscout.app">support@medscout.app</a>
+            <a href="mailto:support@medscoutx.app">support@medscoutx.app</a>
             <br />
             <strong>{b.phoneLabel}</strong>{" "}
             <a href="tel:+4921115895272">+49 211 15895272</a>
