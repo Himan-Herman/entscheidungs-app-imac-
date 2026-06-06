@@ -16,8 +16,8 @@ Internal engineering and product checklist. **Not legal advice.** Verify all cla
 Use consistent language in store listings and in-app where appropriate:
 
 - **Safety note (EN):** “MedScoutX does not provide diagnosis, treatment recommendations or emergency assessment.”
-- **Short description (EN):** “Prepare doctor visits in multiple languages and create structured documents for your medical appointment.”
-- **Short description (DE):** “Bereiten Sie Arztgespräche mehrsprachig vor und erstellen Sie strukturierte Dokumente für Ihren Termin.”
+- **Short description (EN):** “Better prepared. Better care.”
+- **Short description (DE):** “Better prepared. Better care.”
 
 Avoid in visible UX and metadata: “AI doctor”, “medical decision”, unqualified “clinical validation”, emergency triage positioning, treatment/diagnosis promises.
 

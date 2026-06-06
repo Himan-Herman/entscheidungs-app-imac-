@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Prepare for your doctor visit",
   skip: "Skip to content",
-  badge: "Structured preparation for your appointment",
+  badge: "Better prepared. Better care.",
   headline: "Prepare medical appointments better — in any language.",
   description:
     "MedScoutX helps patients structure symptoms, medication, documents and questions before a doctor’s appointment. The information can be prepared as a clear PDF in the language of the medical practice.",

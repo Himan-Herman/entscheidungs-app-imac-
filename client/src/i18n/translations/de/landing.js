@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Arztgespräch vorbereiten",
   skip: "Zum Inhalt springen",
-  badge: "Arztgespräch strukturiert vorbereiten",
+  badge: "Better prepared. Better care.",
   headline: "Arztgespräche besser vorbereiten – in jeder Sprache.",
   description:
     "MedScoutX hilft Patientinnen und Patienten, Beschwerden, Medikamente, Dokumente und Fragen strukturiert für den Arzttermin vorzubereiten. Die Angaben können als übersichtliches PDF in der Sprache der Praxis erstellt werden.",
