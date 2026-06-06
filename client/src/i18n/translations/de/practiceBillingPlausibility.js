@@ -89,6 +89,10 @@ export default {
   detailLoadError: "Prüfung konnte nicht geladen werden.",
   detailNotFound: "Prüfung nicht gefunden oder nicht verfügbar.",
 
+  btnDownloadReport: "Bericht herunterladen",
+  reportDownloadPending: "Bericht wird erstellt …",
+  reportDownloadError: "Bericht konnte nicht heruntergeladen werden.",
+
   errors: {
     rows_required: "Mindestens eine GOÄ-Ziffer ist erforderlich.",
     ziffer_required: "Ziffer fehlt in Zeile {{rowIndex}}.",

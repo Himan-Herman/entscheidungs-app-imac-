@@ -457,7 +457,8 @@
   font-weight: 500;
 }
 
-.billing-plausibility__detail-dismiss-wrap {
+.billing-plausibility__detail-dismiss-wrap,
+.billing-plausibility__detail-export-wrap {
   display: flex;
   flex-direction: column;
   align-items: flex-start;

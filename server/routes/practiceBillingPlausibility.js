@@ -18,6 +18,7 @@ import {
   getSessionForPractice,
   dismissSessionForPractice,
 } from "../services/billingPlausibility/billingPlausibilityService.js";
+import { generateBillingPlausibilityReport } from "../services/billingPlausibility/billingPlausibilityReportService.js";
 import { requestAiReviewForSession } from "../services/billingPlausibility/billingPlausibilityAiReviewService.js";
 
 const router = express.Router();
@@ -159,6 +160,53 @@ router.post("/", async (req, res) => {
   } catch (err) {
     console.error("[billing-plausibility] POST /", err);
     return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/**
+ * GET /:sessionId/export — download a non-binding plausibility report PDF.
+ *
+ * Query params:
+ *   practiceId — required
+ *   format     — "pdf" only for now; 400 for unsupported values
+ *   locale     — de|en|fr|it|es (default: de)
+ *
+ * No AI is called. No patient identifiers in output.
+ * The downloaded document is a plausibility hint report only — not a legal billing opinion.
+ */
+router.get("/:sessionId/export", async (req, res) => {
+  const uid = userId(req);
+  const practiceId = practiceIdFromQuery(req);
+  const { sessionId } = req.params;
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+  if (!sessionId) return res.status(400).json({ ok: false, error: "sessionId_required" });
+
+  const format = String(req.query.format || "pdf").toLowerCase();
+  if (format !== "pdf") {
+    return res.status(400).json({ ok: false, error: "unsupported_format" });
+  }
+
+  const locale = String(req.query.locale || "de").slice(0, 8);
+
+  try {
+    const result = await generateBillingPlausibilityReport(practiceId, sessionId, {
+      userId: uid,
+      locale,
+    });
+    const mapped = mapServiceError(result);
+    if (mapped) return res.status(mapped.status).json({ ok: false, error: mapped.error });
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${result.filename}"`,
+    );
+    res.setHeader("Cache-Control", "no-store");
+    return res.send(result.buffer);
+  } catch (err) {
+    console.error("[billing-plausibility] GET /:sessionId/export", err);
+    return res.status(500).json({ ok: false, error: "export_failed" });
   }
 });
 

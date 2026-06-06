@@ -5,6 +5,7 @@ import { getMessages } from "../../../i18n/translations";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import {
   dismissBillingPlausibilitySession,
+  downloadBillingPlausibilityReport,
   fetchBillingPlausibilitySession,
 } from "../api/practiceBillingPlausibilityApi.js";
 import "../styles/PracticeBillingPlausibilityPage.css";
@@ -31,6 +32,9 @@ export default function PracticeBillingPlausibilityDetailPage() {
   const [dismissing, setDismissing] = useState(false);
   const [dismissSuccess, setDismissSuccess] = useState("");
   const [dismissError, setDismissError] = useState("");
+
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
 
   const overviewHref = practiceId
     ? `/practice/settings/billing-plausibility?practiceId=${encodeURIComponent(practiceId)}`
@@ -92,6 +96,25 @@ export default function PracticeBillingPlausibilityDetailPage() {
       setDismissError(t.dismissError);
     } finally {
       setDismissing(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!session || downloading) return;
+    setDownloading(true);
+    setDownloadError("");
+    try {
+      const result = await downloadBillingPlausibilityReport(practiceId, sessionId, {
+        format: "pdf",
+        locale: language,
+      });
+      if (!result.ok) {
+        setDownloadError(t.reportDownloadError);
+      }
+    } catch {
+      setDownloadError(t.reportDownloadError);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -233,6 +256,27 @@ export default function PracticeBillingPlausibilityDetailPage() {
           {t.statusDismissed}
         </p>
       )}
+
+      {/* Download report */}
+      <div className="billing-plausibility__detail-export-wrap">
+        {downloadError && (
+          <p
+            className="billing-plausibility__status billing-plausibility__status--error"
+            role="alert"
+          >
+            {downloadError}
+          </p>
+        )}
+        <button
+          type="button"
+          className="billing-plausibility__btn billing-plausibility__btn--secondary"
+          onClick={handleDownload}
+          disabled={downloading}
+          aria-busy={downloading}
+        >
+          {downloading ? t.reportDownloadPending : t.btnDownloadReport}
+        </button>
+      </div>
 
       {/* Items */}
       {items.length > 0 && (

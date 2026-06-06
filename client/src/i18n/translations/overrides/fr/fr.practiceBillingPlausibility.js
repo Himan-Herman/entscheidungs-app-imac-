@@ -94,6 +94,10 @@ export const frPracticeBillingPlausibility = {
   detailLoadError: "Impossible de charger le contrôle.",
   detailNotFound: "Contrôle introuvable ou indisponible.",
 
+  btnDownloadReport: "Télécharger le rapport",
+  reportDownloadPending: "Génération du rapport …",
+  reportDownloadError: "Le rapport n'a pas pu être téléchargé.",
+
   errors: {
     rows_required: "Au moins un code GOÄ est requis.",
     ziffer_required: "Code manquant à la ligne {{rowIndex}}.",

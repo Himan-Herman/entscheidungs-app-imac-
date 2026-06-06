@@ -94,6 +94,10 @@ export const itPracticeBillingPlausibility = {
   detailLoadError: "Impossibile caricare la verifica.",
   detailNotFound: "Verifica non trovata o non disponibile.",
 
+  btnDownloadReport: "Scarica il rapporto",
+  reportDownloadPending: "Generazione rapporto …",
+  reportDownloadError: "Impossibile scaricare il rapporto.",
+
   errors: {
     rows_required: "È richiesto almeno un codice GOÄ.",
     ziffer_required: "Codice mancante nella riga {{rowIndex}}.",

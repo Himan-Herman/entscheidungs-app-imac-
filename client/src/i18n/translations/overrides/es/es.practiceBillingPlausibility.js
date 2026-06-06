@@ -94,6 +94,10 @@ export const esPracticeBillingPlausibility = {
   detailLoadError: "No se pudo cargar la revisión.",
   detailNotFound: "Revisión no encontrada o no disponible.",
 
+  btnDownloadReport: "Descargar informe",
+  reportDownloadPending: "Generando informe …",
+  reportDownloadError: "No se pudo descargar el informe.",
+
   errors: {
     rows_required: "Se requiere al menos un código GOÄ.",
     ziffer_required: "Código faltante en la fila {{rowIndex}}.",

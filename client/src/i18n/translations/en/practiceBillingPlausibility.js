@@ -89,6 +89,10 @@ export default {
   detailLoadError: "Could not load review.",
   detailNotFound: "Review not found or unavailable.",
 
+  btnDownloadReport: "Download report",
+  reportDownloadPending: "Generating report …",
+  reportDownloadError: "Could not download report.",
+
   errors: {
     rows_required: "At least one GOÄ code is required.",
     ziffer_required: "Code missing in row {{rowIndex}}.",

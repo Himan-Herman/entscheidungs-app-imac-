@@ -48,6 +48,38 @@ export async function dismissBillingPlausibilitySession(practiceId, sessionId) {
 }
 
 /**
+ * Download a plausibility report PDF for a saved session.
+ * Triggers browser file download via a temporary object URL.
+ * No report generation happens on the frontend — PDF is built by the server.
+ *
+ * @param {string} practiceId
+ * @param {string} sessionId
+ * @param {{ format?: string, locale?: string }} opts
+ * @returns {Promise<{ ok: boolean, error?: string }>}
+ */
+export async function downloadBillingPlausibilityReport(practiceId, sessionId, opts = {}) {
+  const format = opts.format || "pdf";
+  const locale = opts.locale || "de";
+  const res = await authFetch(
+    `/api/practice/billing-plausibility/${encodeURIComponent(sessionId)}/export?${qs(practiceId)}&format=${encodeURIComponent(format)}&locale=${encodeURIComponent(locale)}`,
+  );
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    return { ok: false, error: data.error || "export_failed" };
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `plausibilitaetsbericht-${encodeURIComponent(sessionId).slice(0, 32)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  return { ok: true };
+}
+
+/**
  * Request AI-assisted plausibility hints for an existing session.
  * Requires ENABLE_BILLING_AI_REVIEW=true on the backend.
  * Returns 404 { error: "feature_disabled" } when AI review is off.
