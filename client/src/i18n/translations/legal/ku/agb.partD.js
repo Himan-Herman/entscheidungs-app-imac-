@@ -34,7 +34,7 @@ export default [
         type: "html",
         html: `
 <p>Pirsên giştî: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
-<p>Piştgiriya teknîkî: <a href="mailto:support@medscoutx.app">support@medscoutx.app</a></p>
+<p>Piştgiriya teknîkî: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Fatûre û fatûreyên bidestxistî: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
 `.trim(),
       },

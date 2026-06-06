@@ -21,7 +21,7 @@ export default [
       {
         type: "dl",
         items: [
-          { dt: "E-pošta", dd: "himankhorshidy@gmail.com", href: "mailto:privacy@medscout.app" },
+          { dt: "E-pošta", dd: "himankhorshidy@gmail.com", href: "mailto:contact@medscoutx.com" },
           { dt: "Telefon", dd: "+49 211 15895272", href: "tel:+4921115895272" },
         ],
       },

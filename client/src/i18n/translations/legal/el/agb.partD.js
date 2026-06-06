@@ -34,7 +34,7 @@ export default [
         type: "html",
         html: `
 <p>Γενικά αιτήματα: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
-<p>Τεχνική υποστήριξη: <a href="mailto:support@medscoutx.app">support@medscoutx.app</a></p>
+<p>Τεχνική υποστήριξη: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Τιμολόγηση και τιμολόγια: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
 `.trim(),
       },

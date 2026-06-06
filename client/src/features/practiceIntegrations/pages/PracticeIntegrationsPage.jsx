@@ -394,7 +394,7 @@ export default function PracticeIntegrationsPage() {
                     {t.vendorStatusComingSoon}
                   </span>
                   <a
-                    href={`mailto:support@medscoutx.de?subject=PVS-Interesse%3A%20${encodeURIComponent(vendor.name)}`}
+                    href={`mailto:contact@medscoutx.com?subject=PVS-Interesse%3A%20${encodeURIComponent(vendor.name)}`}
                     className="practice-integrations__vendor-interest"
                     aria-label={`${t.btnExpressInterest}: ${vendor.name}`}
                   >
