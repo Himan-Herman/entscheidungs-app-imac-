@@ -12,7 +12,7 @@ export default {
       "Bei akuten oder lebensbedrohlichen Beschwerden wenden Sie sich bitte sofort an den Notruf oder medizinisches Fachpersonal.",
     consentTitle: "Bevor Sie die Körperkarte nutzen",
     consentCheckbox:
-      "Ich verstehe: Die Körperkarte bewertet keine Dringlichkeit und stellt keine Diagnose. Der Chat kann auf diesem Gerät gespeichert bleiben, bis ich ihn lösche. Beim Senden werden meine Texte über MedScoutX-Server und KI-Anbieter verarbeitet (siehe Datenschutzerklärung).",
+      "Ich verstehe: Die Körperkarte bewertet keine Dringlichkeit und stellt keine Diagnose. Der Chat kann auf diesem Gerät gespeichert bleiben, bis ich ihn lösche. Beim Senden werden meine Texte über MedScoutX-Server und Verarbeitungsdienstleister verarbeitet (siehe Datenschutzerklärung).",
     consentContinue: "Weiter",
     consentPrivacyLink: "Datenschutzerklärung",
     panelTitle: "Ansicht wählen",

@@ -39,7 +39,7 @@ export default {
   practiceSectionIntro:
     "Tragen Sie hier ein, welche Medikamente die Patientin oder der Patient wie und wie oft einnehmen soll. Die Angaben sind reine Praxis-Dokumentation.",
   practiceSafety:
-    "Keine KI-Empfehlung. Nur von der Praxis bestätigte Angaben. Keine Diagnose oder Dringlichkeitsbewertung.",
+    "Keine automatische Empfehlung. Nur von der Praxis bestätigte Angaben. Keine Diagnose oder Dringlichkeitsbewertung.",
   rowLabel: "Eintrag {n}",
   validationDrug: "Bitte mindestens ein Medikament mit Häufigkeit angeben.",
 };

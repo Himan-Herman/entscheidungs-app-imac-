@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "Die Anwendung MedScoutX ist ein KI-gestütztes Informations- und Orientierungssystem im Gesundheitsbereich. Die App dient ausschließlich dazu, Nutzern eine erste strukturierte Einschätzung möglicher Ursachen ihrer Beschwerden sowie potenziell geeigneter medizinischer Fachrichtungen bereitzustellen.",
+            "Die Anwendung MedScoutX ist ein automatisiertes Informations- und Orientierungssystem im Gesundheitsbereich. Die App dient ausschließlich dazu, Nutzern eine erste strukturierte Einschätzung möglicher Ursachen ihrer Beschwerden sowie potenziell geeigneter medizinischer Fachrichtungen bereitzustellen.",
         },
         {
           type: "p",
@@ -33,7 +33,7 @@ export default {
         {
           type: "p",
           text:
-            "Entscheidungen über Diagnostik, Behandlung oder Medikation dürfen nicht auf Grundlage der KI-Ausgaben allein getroffen werden.",
+            "Entscheidungen über Diagnostik, Behandlung oder Medikation dürfen nicht auf Grundlage der automatisierten Ausgaben allein getroffen werden.",
         },
       ],
     },
@@ -50,12 +50,12 @@ export default {
     },
     {
       id: "disc-4-grenzen",
-      heading: "4. Grenzen der KI-Verarbeitung",
+      heading: "4. Grenzen der automatisierten Verarbeitung",
       blocks: [
         {
           type: "p",
           text:
-            "Die KI-Modelle können inhaltliche Fehler aufweisen, unvollständige Informationen liefern oder Symptome falsch einordnen. Die Genauigkeit der Ergebnisse hängt von der Qualität der Nutzereingaben ab (z. B. Beschreibung, gewählte Körperregion, Qualität der Bild-Uploads).",
+            "Die automatisierten Modelle können inhaltliche Fehler aufweisen, unvollständige Informationen liefern oder Symptome falsch einordnen. Die Genauigkeit der Ergebnisse hängt von der Qualität der Nutzereingaben ab (z. B. Beschreibung, gewählte Körperregion, Qualität der Bild-Uploads).",
         },
         {
           type: "p",
@@ -71,7 +71,7 @@ export default {
         {
           type: "p",
           text:
-            "Durch die Nutzung von MedScoutX entsteht ausdrücklich kein Arzt-Patienten-Verhältnis. Die KI-Ausgaben stellen keine ärztliche Beratung dar.",
+            "Durch die Nutzung von MedScoutX entsteht ausdrücklich kein Arzt-Patienten-Verhältnis. Die automatisierten Ausgaben stellen keine ärztliche Beratung dar.",
         },
       ],
     },
@@ -109,7 +109,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX trifft keine Entscheidungen im Sinne von Art. 22 DSGVO, die rechtliche oder erhebliche Auswirkungen auf den Nutzer haben. Alle KI-Ausgaben dienen ausschließlich der orientierenden Einschätzung.",
+            "MedScoutX trifft keine Entscheidungen im Sinne von Art. 22 DSGVO, die rechtliche oder erhebliche Auswirkungen auf den Nutzer haben. Alle automatisierten Ausgaben dienen ausschließlich der orientierenden Einschätzung.",
         },
       ],
     },
@@ -131,7 +131,7 @@ export default {
         {
           type: "richContact",
           intro:
-            "Bei technischen Problemen, Fragen zur Nutzung oder Unsicherheiten bezüglich der KI-Ausgaben kannst du dich jederzeit an unseren Support wenden:",
+            "Bei technischen Problemen, Fragen zur Nutzung oder Unsicherheiten bezüglich der Ausgaben kannst du dich jederzeit an unseren Support wenden:",
           emailLabel: "E-Mail:",
           phoneLabel: "Telefon:",
           noteBefore: "Bitte beachte, dass über diesen Kontakt ",

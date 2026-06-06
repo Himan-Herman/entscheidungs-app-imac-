@@ -51,14 +51,14 @@ export default {
   teamLink: "Team & Rechte verwalten",
   teamLinkDesc: "Rollen, Einladungen und Berechtigungen",
 
-  aiDescription: "Beschreibung mit KI entwerfen",
-  aiDescriptionLoading: "KI erstellt Entwurf …",
+  aiDescription: "Beschreibung assistiert entwerfen",
+  aiDescriptionLoading: "Entwurf wird erstellt …",
   aiDescriptionNotes: "Stichworte für den Entwurf (optional)",
   aiApply: "Entwurf übernehmen",
-  aiSuggestionLabel: "KI-Vorschlag – bitte prüfen",
+  aiSuggestionLabel: "Assistierter Vorschlag – bitte prüfen",
   aiHint:
-    "Die KI unterstützt nur bei neutraler Formulierung. Medizinische Werbeaussagen oder Heilversprechen sind nicht erlaubt.",
-  aiError: "KI-Entwurf konnte nicht erstellt werden.",
+    "Unterstützt nur bei neutraler Formulierung. Medizinische Werbeaussagen oder Heilversprechen sind nicht erlaubt.",
+  aiError: "Entwurf konnte nicht erstellt werden.",
 
   medscoutBrandNote: "MedScoutX — organisatorische Patientenplattform",
 

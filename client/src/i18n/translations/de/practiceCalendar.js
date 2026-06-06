@@ -68,9 +68,9 @@ export default {
 
   weekdays: ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
 
-  aiMarked: "KI-Vorschlag – bitte prüfen",
+  aiMarked: "Smart-Vorschlag – bitte prüfen",
   aiDisclaimer:
-    "Die KI unterstützt nur bei organisatorischer Terminplanung. Sie bewertet keine medizinische Dringlichkeit.",
+    "Unterstützt nur bei organisatorischer Terminplanung. Keine medizinische Dringlichkeit wird bewertet.",
 
   errors: {
     forbidden: "Keine Berechtigung.",

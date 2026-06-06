@@ -2,14 +2,14 @@
 export default [
   {
     id: "agb-9-nutzereingaben",
-    heading: "§9 Nutzereingaben und KI-Ausgaben",
+    heading: "§9 Nutzereingaben und automatisierte Ausgaben",
     blocks: [
       {
         type: "html",
         html: `
 <p>(1) Der Nutzer bleibt Inhaber etwaiger Rechte an seinen Eingaben (z.&nbsp;B. Texte, Bilder), soweit diese urheberrechtlich schutzfähig sind.</p>
-<p>(2) Der Nutzer räumt dem Anbieter ein einfaches, räumlich unbeschränktes Nutzungsrecht ein, seine Eingaben zur Erbringung der vertraglichen Leistungen, zur Verarbeitung durch KI-Dienste sowie in anonymisierter oder aggregierter Form zur Verbesserung und Analyse des Dienstes zu verwenden.</p>
-<p>(3) Die von der KI erzeugten Ausgaben dienen ausschließlich der ersten Orientierung. Sie können fehlerhaft, unvollständig oder sachlich unzutreffend sein und sind nicht als medizinische Diagnose oder verbindliche Empfehlung zu verstehen.</p>
+<p>(2) Der Nutzer räumt dem Anbieter ein einfaches, räumlich unbeschränktes Nutzungsrecht ein, seine Eingaben zur Erbringung der vertraglichen Leistungen, zur automatisierten Verarbeitung sowie in anonymisierter oder aggregierter Form zur Verbesserung und Analyse des Dienstes zu verwenden.</p>
+<p>(3) Die automatisierten Ausgaben dienen ausschließlich der ersten Orientierung. Sie können fehlerhaft, unvollständig oder sachlich unzutreffend sein und sind nicht als medizinische Diagnose oder verbindliche Empfehlung zu verstehen.</p>
 `.trim(),
       },
     ],

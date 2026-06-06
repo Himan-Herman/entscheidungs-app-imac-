@@ -8,7 +8,7 @@ const AUTO_NOTICE_DE =
   "Automatisch übersetzte organisatorische Information – bitte prüfen.";
 const AUTO_NOTICE_EN =
   "Automatically translated organizational information – please review.";
-const AI_LABEL_DE = "KI-unterstützte organisatorische Übersetzung – bitte prüfen";
+const AI_LABEL_DE = "Automatische organisatorische Übersetzung – bitte prüfen";
 const AI_LABEL_EN = "AI-assisted organizational translation – please review";
 
 const BLOCKED_PATTERNS =

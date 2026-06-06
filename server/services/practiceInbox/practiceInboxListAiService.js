@@ -98,9 +98,9 @@ export async function generatePracticeInboxListAiSummary(practiceProfileId, inpu
 
   return {
     summary,
-    aiSuggestionLabel: isEn ? "AI summary – please review" : "KI-Zusammenfassung – bitte prüfen",
+    aiSuggestionLabel: isEn ? "AI summary – please review" : "Automatische Zusammenfassung – bitte prüfen",
     aiDisclaimer: isEn
       ? "AI only summarizes organizational inbox information and does not provide medical assessment."
-      : "Die KI fasst nur organisatorische Postfachinformationen zusammen und gibt keine medizinische Bewertung.",
+      : "Fasst nur organisatorische Postfachinformationen zusammen und gibt keine medizinische Bewertung.",
   };
 }

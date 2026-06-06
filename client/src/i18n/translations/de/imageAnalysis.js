@@ -13,7 +13,7 @@ export default {
     "Die Bildvorschau bleibt auf diesem Gerät für die aktuelle Nutzung. Der Chat kann lokal gespeichert werden, bis Sie ihn löschen. Das Bild wird nicht dauerhaft gespeichert, sofern Sie es nicht ausdrücklich anderweitig speichern.",
   consentTitle: "Vor dem Hochladen",
   consentCheckbox:
-    "Ich bestätige, dass das Bild zur Erstellung einer strukturierten Beschreibung verarbeitet werden darf (einschließlich Übermittlung an MedScoutX-Server und KI-Anbieter gemäß Datenschutzerklärung).",
+    "Ich bestätige, dass das Bild zur Erstellung einer strukturierten Beschreibung verarbeitet werden darf (einschließlich Übermittlung an MedScoutX-Server und Verarbeitungsdienstleister gemäß Datenschutzerklärung).",
   consentContinue: "Weiter",
   consentPrivacyLink: "Datenschutzerklärung",
   panelUploadTitle: "Bild auswählen",

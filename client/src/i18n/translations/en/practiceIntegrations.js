@@ -56,7 +56,7 @@ export default {
   consentNote: "Exports without matching consent are blocked and logged.",
   productionWarning: "Production sync is off by default (ENABLE_PVS_PRODUCTION=false).",
 
-  aiMarkedDe: "KI-Hinweis – bitte prüfen",
+  aiMarkedDe: "Smart-Hinweis – bitte prüfen",
   aiMarkedEn: "AI note – please review",
   aiDisclaimer:
     "AI only supports technical and organizational explanations of the integration. It does not interpret medical content.",

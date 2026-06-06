@@ -106,12 +106,12 @@ export default {
   statusCompleted: "Abgeschlossen",
   statusRejected: "Abgelehnt",
   aiHint:
-    "Die KI unterstützt nur organisatorisch und ersetzt keine rechtliche oder medizinische Prüfung.",
-  aiDraftButton: "KI-Formulierungshilfe",
+    "Unterstützt nur organisatorisch und ersetzt keine rechtliche oder medizinische Prüfung.",
+  aiDraftButton: "Assistierte Formulierungshilfe",
   aiDraftLoading: "Entwurf wird erstellt …",
   aiDraftError: "Formulierungshilfe nicht verfügbar.",
-  aiSummaryButton: "Status erklären (KI)",
-  aiSummaryHeading: "KI-Vorschlag – bitte prüfen",
+  aiSummaryButton: "Status erklären",
+  aiSummaryHeading: "Assistierter Vorschlag – bitte prüfen",
   aiSummaryLoading: "Wird erstellt …",
   aiSummaryError: "Erklärung konnte nicht erstellt werden.",
 };

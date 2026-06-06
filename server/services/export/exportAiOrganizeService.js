@@ -37,7 +37,7 @@ export async function generateExportAiOrganize(input = {}) {
         ];
 
   return {
-    label: de ? "KI-Vorschlag – bitte prüfen" : "AI suggestion – please review",
+    label: de ? "Automatischer Vorschlag – bitte prüfen" : "AI suggestion – please review",
     disclaimer: de ? DISCLAIMER_DE : DISCLAIMER_EN,
     text: sections.join("\n"),
     aiGenerated: true,

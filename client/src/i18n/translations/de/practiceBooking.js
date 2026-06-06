@@ -99,13 +99,13 @@ export default {
   patientNoteLabel: "Patientenhinweis",
 
   // ── AI assistant panel ───────────────────────────────────────────────────────
-  aiSectionTitle: "KI-Assistent",
-  aiDisclaimer: "KI-gestützt, nur organisatorisch — keine Diagnose, keine Dringlichkeitsbewertung, keine Therapieempfehlung.",
+  aiSectionTitle: "Smart-Assistent",
+  aiDisclaimer: "Smart-gestützt, nur organisatorisch — keine Diagnose, keine Dringlichkeitsbewertung, keine Therapieempfehlung.",
   aiSummarizeBtn: "Anfrage zusammenfassen",
   aiReplyDraftBtn: "Antwortvorschlag erstellen",
-  aiLoading: "KI denkt …",
-  aiResultHeading: "KI-Ergebnis",
+  aiLoading: "Wird erstellt …",
+  aiResultHeading: "Smart-Ergebnis",
   aiResultDismiss: "Verwerfen",
-  aiError: "KI-Assistent nicht verfügbar. Bitte Anfrage direkt prüfen.",
-  aiUsedFallback: "Kein sicheres KI-Ergebnis generiert. Bitte Anfrage direkt prüfen.",
+  aiError: "Smart-Assistent nicht verfügbar. Bitte Anfrage direkt prüfen.",
+  aiUsedFallback: "Kein sicheres Ergebnis generiert. Bitte Anfrage direkt prüfen.",
 };

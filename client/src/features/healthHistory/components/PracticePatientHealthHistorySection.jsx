@@ -68,7 +68,7 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
         setAiSummary(data.summary || "");
       }
     } catch {
-      setAiError(t?.practice?.aiError || "KI-Zusammenfassung nicht verfügbar.");
+      setAiError(t?.practice?.aiError || "Zusammenfassung nicht verfügbar.");
     } finally {
       setAiLoading(false);
     }
@@ -109,12 +109,12 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
             className="hh-practice__ai-btn"
             onClick={handleAiSummary}
             disabled={aiLoading}
-            aria-label={t?.practice?.aiSummaryBtn || "KI-Risikozusammenfassung erstellen"}
+            aria-label={t?.practice?.aiSummaryBtn || "Risikozusammenfassung erstellen"}
           >
             <Sparkles size={15} aria-hidden="true" />
             {aiLoading
               ? (t?.aiLoading || "Analysiere…")
-              : (t?.practice?.aiSummaryBtn || "KI-Risikozusammenfassung")}
+              : (t?.practice?.aiSummaryBtn || "Risikozusammenfassung")}
           </button>
           {aiError && <span style={{ color: "#dc2626", fontSize: "0.875rem" }}>{aiError}</span>}
         </div>

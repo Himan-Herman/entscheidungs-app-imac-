@@ -58,7 +58,7 @@ export default {
     audioHint:
       "Sie können die Frage vorlesen lassen oder Ihre Antwort diktieren.",
     audioPrivacy:
-      "Für Vorlesen und Spracheingabe werden Text bzw. Audio zur Verarbeitung an den KI-Dienst übertragen. Es wird hierbei nichts dauerhaft gespeichert.",
+      "Für Vorlesen und Spracheingabe werden Text bzw. Audio zur Verarbeitung übertragen. Es wird hierbei nichts dauerhaft gespeichert.",
     audioMicUnsupported:
       "Audioaufnahme wird von diesem Browser nicht unterstützt.",
     audioListenAria: "Frage vorlesen lassen",
@@ -244,7 +244,7 @@ export default {
     assistantQuestions: {
       sectionTitle: "Orientierungsfragen für das Gespräch",
       intro:
-        "Auf Basis Ihrer Angaben zu Beschwerden, Verlauf und Vorbereitung schlägt die KI einige strukturierende Fragen vor — formuliert wie eine medizinische Assistenz, ohne medizinische Bewertung.",
+        "Auf Basis Ihrer Angaben zu Beschwerden, Verlauf und Vorbereitung werden einige strukturierende Fragen automatisch vorgeschlagen — formuliert wie eine medizinische Assistenz, ohne medizinische Bewertung.",
       noAiAnswersNote:
         "Es werden nur Fragen vorgeschlagen. Antworten geben Sie selbst in eigenen Worten; der Arzt liest diese im PDF.",
       generateButton: "Orientierungsfragen erstellen",
@@ -261,7 +261,7 @@ export default {
       doctorVersionLabel: "Formulierung für den Arzt",
       answerLabel: "Ihre Antwort (für den Arzt)",
       answerPlaceholder:
-        "Ihre Antwort in eigenen Worten — nur von Ihnen, nicht von der KI …",
+        "Ihre Antwort in eigenen Worten …",
       previewSectionTitle: "Orientierungsfragen mit Ihren Antworten",
       pdfSectionHeading: "Orientierungsfragen (Patientenantworten)",
       pdfPatientQuestionLabel: "Frage (Patient)",

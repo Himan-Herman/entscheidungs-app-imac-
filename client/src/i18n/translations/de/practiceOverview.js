@@ -80,13 +80,13 @@ export default {
   actionOpenDeveloper: "Entwicklerzugang",
   actionOpenBillingPlausibility: "GOÄ/PKV-Prüfung",
 
-  aiHeading: "KI-Zusammenfassung – bitte prüfen",
+  aiHeading: "Automatische Zusammenfassung – bitte prüfen",
   aiDisclaimer:
-    "Die KI fasst nur organisatorische Dashboard-Informationen zusammen und gibt keine medizinische Bewertung.",
+    "Fasst nur organisatorische Dashboard-Informationen zusammen. Keine medizinische Bewertung.",
   aiLoad: "Organisatorische Übersicht erstellen",
   aiLoading: "Wird erstellt …",
-  aiError: "KI-Zusammenfassung konnte nicht erstellt werden.",
-  aiEmpty: "Noch keine KI-Zusammenfassung.",
+  aiError: "Automatische Zusammenfassung konnte nicht erstellt werden.",
+  aiEmpty: "Noch keine Zusammenfassung.",
 
   recentPatientLink: "Patient:innenakte öffnen",
   recentPatientAria: "Zuletzt aktive Patient:innenverbindung",

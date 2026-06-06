@@ -61,7 +61,7 @@ export async function generateSecurityAiSummary(input) {
   });
 
   return {
-    label: de ? "KI-Hinweis – bitte prüfen" : "AI note – please review",
+    label: de ? "Smart-Hinweis – bitte prüfen" : "AI note – please review",
     disclaimer: de ? DISCLAIMER_DE : DISCLAIMER_EN,
     text: lines.join("\n"),
     aiGenerated: true,

@@ -14,7 +14,7 @@ export default [
         items: [
           "Kontodaten: E-Mail-Adresse, Passwort-Hash und Spracheinstellung werden für die Dauer deines Nutzerkontos gespeichert. Nach Löschung des Kontos werden diese Daten gelöscht oder anonymisiert, sofern keine gesetzlichen Pflichten bestehen.",
           "Chat- und Symptomdaten: werden nicht auf dem Server gespeichert. Sie verbleiben ausschließlich auf deinem Gerät und werden vollständig gelöscht, sobald du „Neue Unterhaltung“ oder „Verlauf löschen“ verwendest.",
-          "Bild-Uploads: werden nur kurzzeitig verarbeitet, um sie an den KI-Dienst weiterzuleiten. Danach werden sie verworfen. Eine dauerhafte Speicherung erfolgt nicht.",
+          "Bild-Uploads: werden nur kurzzeitig verarbeitet, um sie zur Verarbeitung weiterzuleiten. Danach werden sie verworfen. Eine dauerhafte Speicherung erfolgt nicht.",
           "Technische Protokolle / Server-Logs: Für Betrieb, Sicherheit und Fehleranalyse speichern Hosting-Dienste automatisch technische Protokolle (z. B. Zeitpunkt, IP-Adresse in gekürzter Form, Fehlerdetails) für gewöhnlich 14–30 Tage. Diese Daten werden nicht mit deinem Profil oder deinen Inhalten verknüpft und nicht zu Werbezwecken genutzt.",
           "Lokale Daten (LocalStorage, App-Speicher): Chatverläufe, Einstellungen (z. B. Sprache, Barrierefreiheit) und Verlaufseinträge werden ausschließlich auf deinem Gerät gespeichert und können jederzeit über „Verlauf löschen“ oder Geräteeinstellungen entfernt werden.",
         ],
@@ -135,13 +135,13 @@ export default [
   },
   {
     id: "ds-14-ki",
-    heading: "14. Hinweise zur KI-Verarbeitung",
+    heading: "14. Hinweise zur automatisierten Verarbeitung",
     blocks: [
       {
         type: "ul",
         items: [
           "Deine Texte und gegebenenfalls Bilder werden automatisiert verarbeitet, um Vorschläge und Hinweise zu generieren.",
-          "Die KI kann Fehler machen oder Situationen falsch einschätzen. Bitte überprüfe die Inhalte kritisch und nutze sie nur zur Orientierung.",
+          "Das System kann Fehler machen oder Situationen falsch einschätzen. Bitte überprüfe die Inhalte kritisch und nutze sie nur zur Orientierung.",
           "Übermittle keine Namen oder identifizierende Angaben Dritter und vermeide unnötig umfangreiche personenbezogene Daten.",
           "Die Nutzung der App ersetzt keine persönliche medizinische Beratung, Diagnose oder Behandlung durch Ärztinnen und Ärzte oder anderes medizinisches Fachpersonal.",
         ],
@@ -155,7 +155,7 @@ export default [
       {
         type: "p",
         text:
-          "MedScoutX trifft keine Diagnosen und keine automatisierten Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung. Die KI-generierten Inhalte dienen ausschließlich der orientierenden Einschätzung und ersetzen keine ärztliche Beratung. Du wirst in medizinisch relevanten Fällen aufgefordert, eine Ärztin oder einen Arzt zu kontaktieren.",
+          "MedScoutX trifft keine Diagnosen und keine automatisierten Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung. Die automatisierten Inhalte dienen ausschließlich der orientierenden Einschätzung und ersetzen keine ärztliche Beratung. Du wirst in medizinisch relevanten Fällen aufgefordert, eine Ärztin oder einen Arzt zu kontaktieren.",
       },
     ],
   },

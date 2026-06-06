@@ -139,7 +139,7 @@ Wenn du dich nicht bei MedScoutX registriert hast, kannst du diese Nachricht ign
             <tr>
               <td style="padding:20px 28px 12px 28px;border-bottom:1px solid #f0f0f0;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#ffffff;">
                 <div style="font-size:18px;font-weight:600;letter-spacing:0.03em;">MedScoutX</div>
-                <div style="font-size:12px;opacity:0.9;margin-top:4px;">KI-gestützte medizinische Entscheidungsunterstützung</div>
+                <div style="font-size:12px;opacity:0.9;margin-top:4px;">Strukturierte medizinische Entscheidungsunterstützung</div>
               </td>
             </tr>
             <tr>
@@ -235,7 +235,7 @@ Wenn du das nicht warst, kannst du diese E-Mail ignorieren. Dein aktuelles Passw
             <tr>
               <td style="padding:20px 28px 12px 28px;border-bottom:1px solid #f1f5f9;background:linear-gradient(135deg,#0f766e,#22c55e);color:#ffffff;">
                 <div style="font-size:18px;font-weight:600;letter-spacing:0.03em;">MedScoutX</div>
-                <div style="font-size:12px;opacity:0.9;margin-top:4px;">KI-gestützte medizinische Entscheidungsunterstützung</div>
+                <div style="font-size:12px;opacity:0.9;margin-top:4px;">Strukturierte medizinische Entscheidungsunterstützung</div>
               </td>
             </tr>
 

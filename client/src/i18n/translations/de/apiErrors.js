@@ -28,7 +28,7 @@ export default {
   validation_invalid_format: "Ungültiges Dateiformat.",
   validation_invalid_date: "Ungültiges Datum.",
   feature_disabled: "Diese Funktion ist derzeit nicht verfügbar.",
-  ai_not_configured: "KI-Funktion ist nicht konfiguriert.",
+  ai_not_configured: "Funktion ist nicht konfiguriert.",
   SESSION_EXPIRED: "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
   TOKEN_EXPIRED: "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
   TOKEN_INVALID: "Ungültige Anmeldung. Bitte melden Sie sich erneut an.",

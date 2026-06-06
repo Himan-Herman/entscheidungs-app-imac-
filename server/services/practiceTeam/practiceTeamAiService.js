@@ -123,9 +123,9 @@ export async function generatePracticeTeamPermissionSummary(
 
   return {
     summary,
-    aiSuggestionLabel: isEn ? "AI suggestion – please review" : "KI-Vorschlag – bitte prüfen",
+    aiSuggestionLabel: isEn ? "AI suggestion – please review" : "Automatischer Vorschlag – bitte prüfen",
     aiDisclaimer: isEn
       ? "AI only provides organizational support for role and permission overviews."
-      : "Die KI unterstützt nur organisatorisch bei Rollen- und Rechteübersichten.",
+      : "Unterstützt nur organisatorisch bei Rollen- und Rechteübersichten.",
   };
 }

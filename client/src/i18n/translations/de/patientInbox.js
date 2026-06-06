@@ -41,13 +41,13 @@ export default {
   typeDataRequest: "Datenanfrage",
   typeSystem: "System",
   badgeAria: "{count} ungelesen",
-  aiHeading: "KI-Postfachübersicht (organisatorisch)",
+  aiHeading: "Automatische Postfachübersicht (organisatorisch)",
   aiDisclaimer:
-    "Die KI fasst nur organisatorische Postfachinformationen zusammen und gibt keine medizinische Bewertung.",
-  aiSuggestionLabel: "KI-Zusammenfassung – bitte prüfen",
+    "Fasst nur organisatorische Postfachinformationen zusammen. Keine medizinische Bewertung.",
+  aiSuggestionLabel: "Automatische Zusammenfassung – bitte prüfen",
   aiRun: "Tagesübersicht erstellen",
-  aiLoading: "KI erstellt Zusammenfassung …",
-  aiError: "KI-Zusammenfassung nicht verfügbar.",
+  aiLoading: "Zusammenfassung wird erstellt …",
+  aiError: "Automatische Zusammenfassung nicht verfügbar.",
   titles: {
     message: "Neue Nachricht von Ihrer Praxis",
     document: "Neues Dokument von Ihrer Praxis",

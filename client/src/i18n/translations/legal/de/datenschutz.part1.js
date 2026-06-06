@@ -83,8 +83,8 @@ export default [
         type: "ul",
         items: [
           "Bereitstellung der App-Funktionen: Login, Registrierung, Kontoverwaltung und Grundfunktionen von MedScoutX.",
-          "Symptomchat & KI-gestützte Rückfragen: Verarbeitung deiner Texteingaben, um dir Fragen und Hinweise zur weiteren Abklärung zu geben.",
-          "Body-Map: Zuordnung deiner ausgewählten Körperregionen zu geeigneten KI-Rückfragen und Hinweisen.",
+          "Symptomchat & automatisierte Rückfragen: Verarbeitung deiner Texteingaben, um dir Fragen und Hinweise zur weiteren Abklärung zu geben.",
+          "Body-Map: Zuordnung deiner ausgewählten Körperregionen zu geeigneten Rückfragen und Hinweisen.",
           "Bildanalyse: Verarbeitung deiner hochgeladenen Bilder, um Auffälligkeiten zu beschreiben und mögliche Handlungsoptionen vorzuschlagen (z. B. ärztlich abklären lassen). Es erfolgt keine automatische Diagnose im medizinisch-rechtlichen Sinne.",
           "Stabilität & Sicherheit: Fehleranalyse, Missbrauchserkennung, Schutz der Systeme und Daten.",
           "Rechtliche Anforderungen: Erfüllung gesetzlicher Pflichten (z. B. Nachweis von IT-Sicherheitsmaßnahmen, Speicherfristen).",
@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Hosting-Anbieter (EU): Ein europäischer Cloud-Anbieter stellt die Infrastruktur für Server und Datenbank bereit (z. B. Render.com mit EU-Standort).",
-          "KI-Dienstleister – OpenAI (USA): Für die KI-basierte Verarbeitung deiner Texteingaben, Bilddaten und Body-Map-Angaben nutzt MedScoutX Dienste der OpenAI LLC (San Francisco, USA). Dabei werden die Inhalte verschlüsselt an OpenAI übermittelt, dort maschinell verarbeitet und nach der Verarbeitung gelöscht.",
+          "Verarbeitungsdienstleister – OpenAI (USA): Für die automatisierte Verarbeitung deiner Texteingaben, Bilddaten und Body-Map-Angaben nutzt MedScoutX Dienste der OpenAI LLC (San Francisco, USA). Dabei werden die Inhalte verschlüsselt an OpenAI übermittelt, dort maschinell verarbeitet und nach der Verarbeitung gelöscht.",
           "E-Mail-Dienstleister: Für die Zustellung von System-E-Mails (z. B. Verifizierungs-E-Mails) wird ein technischer Dienstleister eingesetzt.",
         ],
       },
@@ -143,12 +143,12 @@ export default [
       {
         type: "p",
         text:
-          "Bei der Nutzung der KI-Funktionen von MedScoutX werden Inhalte (z. B. Texte, Symptome, Bilddaten) an den KI-Dienstleister OpenAI LLC in den USA übertragen. Ein solcher Transfer stellt ein Drittlandtransfer im Sinne der DSGVO dar.",
+          "Bei der Nutzung der Funktionen von MedScoutX werden Inhalte (z. B. Texte, Symptome, Bilddaten) an den Verarbeitungsdienstleister OpenAI LLC in den USA übertragen. Ein solcher Transfer stellt ein Drittlandtransfer im Sinne der DSGVO dar.",
       },
       {
         type: "p",
         text:
-          "Um ein angemessenes Datenschutzniveau sicherzustellen, erfolgt die Übermittlung auf Grundlage der EU-Standardvertragsklauseln (Art. 46 DSGVO) sowie zusätzlicher technischer und organisatorischer Maßnahmen (Verschlüsselung während der Übermittlung, kurze Verarbeitungsdauer, Löschung der Daten nach der Beantwortung durch den KI-Dienst).",
+          "Um ein angemessenes Datenschutzniveau sicherzustellen, erfolgt die Übermittlung auf Grundlage der EU-Standardvertragsklauseln (Art. 46 DSGVO) sowie zusätzlicher technischer und organisatorischer Maßnahmen (Verschlüsselung während der Übermittlung, kurze Verarbeitungsdauer, Löschung der Daten nach der Verarbeitung).",
       },
       {
         type: "p_link",

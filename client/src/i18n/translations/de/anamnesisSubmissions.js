@@ -60,7 +60,7 @@ export default {
   translationStatusSkipped: "Keine Übersetzung nötig",
   translationStatusFailed: "Übersetzung fehlgeschlagen",
   translationStatusPending: "Übersetzung ausstehend",
-  translationStatusUnavailable: "KI-Übersetzung nicht konfiguriert",
+  translationStatusUnavailable: "Automatische Übersetzung nicht konfiguriert",
 
   pdfDownload: "PDF herunterladen",
   pdfError: "PDF konnte nicht erstellt werden.",
