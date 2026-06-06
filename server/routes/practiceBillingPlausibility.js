@@ -77,7 +77,11 @@ router.get("/", async (req, res) => {
     const result = await listSessionsForPractice(practiceId, { userId: uid });
     const mapped = mapServiceError(result);
     if (mapped) return res.status(mapped.status).json({ ok: false, error: mapped.error });
-    return res.json({ ok: true, sessions: result.sessions });
+    return res.json({
+      ok: true,
+      sessions: result.sessions,
+      capabilities: { aiReview: isBillingAiReviewEnabled() },
+    });
   } catch (err) {
     console.error("[billing-plausibility] GET /", err);
     return res.status(500).json({ ok: false, error: "request_failed" });

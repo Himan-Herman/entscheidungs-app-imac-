@@ -78,6 +78,7 @@ export default function PracticeBillingPlausibilityPage() {
     }
     if (!res.ok) throw new Error(data.error || "load_failed");
     setSessions(Array.isArray(data.sessions) ? data.sessions : []);
+    setAiReviewAvailable(data.capabilities?.aiReview === true);
     setFeatureDisabled(false);
   }, [t.forbidden]);
 
@@ -152,7 +153,6 @@ export default function PracticeBillingPlausibilityPage() {
       setStatusMsg("");
       setAiReviewResult(null);
       setAiReviewError("");
-      setAiReviewAvailable(true);
       dispatchRows({ type: "reset" });
       setContext("");
       await loadSessions(practiceId);
@@ -178,7 +178,6 @@ export default function PracticeBillingPlausibilityPage() {
         setAiReviewError(t.aiReviewError || data?.error || "error");
         return;
       }
-      setAiReviewAvailable(true);
       setAiReviewResult(data.aiResult ?? data.session?.aiReview ?? null);
     } catch {
       setAiReviewError(t.aiReviewError);
@@ -408,10 +407,7 @@ export default function PracticeBillingPlausibilityPage() {
               <h2 id="bp-result-heading" className="billing-plausibility__section-heading">
                 {t.sectionResult}
               </h2>
-              <div className="billing-plausibility__result-stub" role="note">
-                <strong>{t.aiMarked}</strong>
-                <p style={{ margin: "0.5rem 0 0" }}>{t.resultStub}</p>
-              </div>
+              <p className="billing-plausibility__result-stub">{t.resultStub}</p>
               {Array.isArray(resultStub.items) && resultStub.items.length > 0 && (
                 <div className="billing-plausibility__items">
                   <h3 className="billing-plausibility__items-heading">{t.sectionItems}</h3>
@@ -449,77 +445,82 @@ export default function PracticeBillingPlausibilityPage() {
                   </ul>
                 </div>
               )}
+              <p className="billing-plausibility__manual-review-note" role="note">
+                {t.manualReviewRecommended}
+              </p>
 
-              {/* AI review block — only shown when feature is available; never auto-called */}
-              {aiReviewAvailable && !aiReviewResult && (
-                <div className="billing-plausibility__ai-review-trigger" style={{ marginTop: "1rem" }}>
-                  {aiReviewError && (
-                    <p
-                      className="billing-plausibility__status billing-plausibility__status--error"
-                      role="alert"
+              {/* AI section — separated from deterministic results; never auto-called */}
+              {(aiReviewAvailable || aiReviewResult) && (
+                <div className="billing-plausibility__ai-section">
+                  {aiReviewAvailable && !aiReviewResult && (
+                    <div className="billing-plausibility__ai-review-trigger">
+                      {aiReviewError && (
+                        <p
+                          className="billing-plausibility__status billing-plausibility__status--error"
+                          role="alert"
+                        >
+                          {aiReviewError}
+                        </p>
+                      )}
+                      <button
+                        type="button"
+                        className="billing-plausibility__btn billing-plausibility__btn--secondary"
+                        onClick={() => handleAiReview(resultStub.id)}
+                        disabled={aiReviewPending}
+                        aria-busy={aiReviewPending}
+                      >
+                        {aiReviewPending ? t.aiReviewPending : t.btnAiReview}
+                      </button>
+                    </div>
+                  )}
+
+                  {aiReviewResult && (
+                    <div
+                      className="billing-plausibility__ai-result"
+                      role="note"
+                      aria-label={t.aiReviewLabel}
                     >
-                      {aiReviewError}
-                    </p>
-                  )}
-                  <button
-                    type="button"
-                    className="billing-plausibility__btn billing-plausibility__btn--secondary"
-                    onClick={() => handleAiReview(resultStub.id)}
-                    disabled={aiReviewPending}
-                    aria-busy={aiReviewPending}
-                  >
-                    {aiReviewPending ? t.aiReviewPending : t.btnAiReview}
-                  </button>
-                </div>
-              )}
+                      <h3 className="billing-plausibility__items-heading">
+                        {t.aiReviewLabel}
+                      </h3>
+                      <p className="billing-plausibility__ai-nonbinding">
+                        {t.aiReviewNonBinding}
+                      </p>
 
-              {/* AI result — always labelled as non-binding; deterministic warnings above remain visible */}
-              {aiReviewResult && (
-                <div
-                  className="billing-plausibility__ai-result"
-                  role="note"
-                  aria-label={t.aiReviewLabel}
-                  style={{ marginTop: "1.25rem" }}
-                >
-                  <h3 className="billing-plausibility__items-heading">
-                    {t.aiReviewLabel}
-                  </h3>
-                  <p className="billing-plausibility__ai-nonbinding" style={{ fontSize: "0.8125rem", opacity: 0.75 }}>
-                    {t.aiReviewNonBinding}
-                  </p>
+                      {aiReviewResult.fallback && (
+                        <p className="billing-plausibility__ai-fallback">
+                          {t.aiReviewFallback}
+                        </p>
+                      )}
 
-                  {aiReviewResult.fallback && (
-                    <p className="billing-plausibility__ai-fallback">
-                      {t.aiReviewFallback}
-                    </p>
-                  )}
+                      {Array.isArray(aiReviewResult.rowHints) && aiReviewResult.rowHints.length > 0 && (
+                        <>
+                          <h4 className="billing-plausibility__items-heading billing-plausibility__items-heading--sub">
+                            {t.aiReviewRowHints}
+                          </h4>
+                          <ul className="billing-plausibility__item-list" aria-label={t.aiReviewRowHints}>
+                            {aiReviewResult.rowHints.map((rh) => (
+                              <li key={rh.ziffer} className="billing-plausibility__item">
+                                <span className="billing-plausibility__item-ziffer">{rh.ziffer}</span>
+                                <span>{rh.hint}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      )}
 
-                  {Array.isArray(aiReviewResult.rowHints) && aiReviewResult.rowHints.length > 0 && (
-                    <>
-                      <h4 className="billing-plausibility__items-heading" style={{ fontSize: "0.875rem", marginTop: "0.75rem" }}>
-                        {t.aiReviewRowHints}
-                      </h4>
-                      <ul className="billing-plausibility__item-list" aria-label={t.aiReviewRowHints}>
-                        {aiReviewResult.rowHints.map((rh) => (
-                          <li key={rh.ziffer} className="billing-plausibility__item">
-                            <span className="billing-plausibility__item-ziffer">{rh.ziffer}</span>
-                            <span>{rh.hint}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
+                      {aiReviewResult.generalNote && (
+                        <p className="billing-plausibility__ai-general-note">
+                          <strong>{t.aiReviewGeneralNote}:</strong> {aiReviewResult.generalNote}
+                        </p>
+                      )}
 
-                  {aiReviewResult.generalNote && (
-                    <p style={{ marginTop: "0.5rem" }}>
-                      <strong>{t.aiReviewGeneralNote}:</strong> {aiReviewResult.generalNote}
-                    </p>
-                  )}
-
-                  {aiReviewResult.uncertaintyNote && (
-                    <p style={{ marginTop: "0.25rem", opacity: 0.8 }}>
-                      <strong>{t.aiReviewUncertaintyNote}:</strong> {aiReviewResult.uncertaintyNote}
-                    </p>
+                      {aiReviewResult.uncertaintyNote && (
+                        <p className="billing-plausibility__ai-uncertainty-note">
+                          <strong>{t.aiReviewUncertaintyNote}:</strong> {aiReviewResult.uncertaintyNote}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               )}

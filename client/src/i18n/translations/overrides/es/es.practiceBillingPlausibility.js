@@ -80,6 +80,8 @@ export const esPracticeBillingPlausibility = {
   aiReviewUncertaintyNote: "Nota de incertidumbre",
   aiReviewRowHints: "Indicaciones por código",
 
+  manualReviewRecommended: "Se recomienda la revisión manual por parte de personal de facturación cualificado.",
+
   featureDisabled: "Este módulo no está activo aún.",
   forbidden: "Solo los propietarios y administradores tienen acceso.",
 

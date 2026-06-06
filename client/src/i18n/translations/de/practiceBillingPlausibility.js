@@ -75,6 +75,8 @@ export default {
   aiReviewUncertaintyNote: "Unsicherheitshinweis",
   aiReviewRowHints: "Zifferhinweise",
 
+  manualReviewRecommended: "Manuelle Prüfung durch qualifiziertes Abrechnungspersonal wird empfohlen.",
+
   featureDisabled: "Dieses Modul ist derzeit nicht aktiviert.",
   forbidden: "Nur Inhaber:innen und Administrator:innen haben Zugriff.",
 

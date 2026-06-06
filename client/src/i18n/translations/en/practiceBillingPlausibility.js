@@ -75,6 +75,8 @@ export default {
   aiReviewUncertaintyNote: "Uncertainty note",
   aiReviewRowHints: "Code-level hints",
 
+  manualReviewRecommended: "Manual review by qualified billing staff is recommended.",
+
   featureDisabled: "This module is not currently active.",
   forbidden: "Only owners and administrators have access.",
 
