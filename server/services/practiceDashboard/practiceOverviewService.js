@@ -46,6 +46,7 @@ function metricsVisibilityForRole(role) {
     team: hasPracticePermission(role, PERMISSIONS.TEAM_VIEW),
     audit: hasPracticePermission(role, PERMISSIONS.AUDIT_VIEW),
     security: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
+    billing: hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE),
     interpreter:
       isMedicalInterpreterB2bEnabled() &&
       hasPracticePermission(role, PERMISSIONS.INTERPRETER_VIEW),

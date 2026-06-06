@@ -10,6 +10,7 @@ import {
   MessageSquare,
   Mic,
   Pill,
+  Receipt,
   Shield,
   UsersRound,
 } from "lucide-react";
@@ -81,6 +82,14 @@ const CARD_DEFS = [
     labelKey: "cardDataRequests",
     to: (practiceId) => `/practice/data-requests?practiceId=${encodeURIComponent(practiceId)}`,
     Icon: ClipboardList,
+  },
+  {
+    id: "billingPlausibility",
+    visibilityKey: "billing",
+    labelKey: "cardBillingPlausibility",
+    to: (practiceId) =>
+      `/practice/settings/billing-plausibility?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: Receipt,
   },
   {
     id: "team",

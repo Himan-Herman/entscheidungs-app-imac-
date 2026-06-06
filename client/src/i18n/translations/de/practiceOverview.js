@@ -44,6 +44,7 @@ export default {
   cardDocuments: "Dokumente & Befunde",
   cardMedication: "Medikationspläne",
   cardDataRequests: "Datenanfragen",
+  cardBillingPlausibility: "GOÄ/PKV-Prüfung",
   cardTeam: "Team & Rechte",
   cardSecurity: "Sicherheit & Datenschutz",
   cardActivity: "Aktivität",

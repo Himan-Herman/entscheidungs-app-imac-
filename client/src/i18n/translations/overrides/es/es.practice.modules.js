@@ -45,6 +45,7 @@ export default {
     cardDocuments: "Documentos y resultados",
     cardMedication: "Planes de medicación",
     cardDataRequests: "Solicitudes de datos",
+    cardBillingPlausibility: "Revisión GOÄ/PKV",
     cardTeam: "Equipo y permisos",
     cardSecurity: "Seguridad y privacidad",
     cardActivity: "Actividad",
