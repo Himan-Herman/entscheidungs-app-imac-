@@ -13,6 +13,9 @@ CREATE TABLE "ConsentRecord" (
     "revokedByUserId" TEXT,
     "version" TEXT,
     "metadataJson" JSONB,
+    -- source added here to match 20260601000000_prepare_practice_meda_metadata which adds this
+    -- column on existing databases; on fresh DB this CREATE TABLE is the source of truth.
+    "source" VARCHAR(40),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

@@ -1,5 +1,16 @@
 -- AlterTable: add source audit field to ConsentRecord
-ALTER TABLE "public"."ConsentRecord" ADD COLUMN "source" VARCHAR(40);
+-- Conditional: ConsentRecord is created in 20260602120000_consent_record (June 2),
+-- which runs AFTER this migration on a fresh CI database. Skip silently on fresh DB;
+-- the CREATE TABLE in the later migration includes "source" directly for fresh installs.
+-- On an existing database the table already exists and the column is added normally.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'ConsentRecord'
+  ) THEN
+    ALTER TABLE "public"."ConsentRecord" ADD COLUMN IF NOT EXISTS "source" VARCHAR(40);
+  END IF;
+END $$;
 
 -- AlterTable: add extended profile fields to PracticeProfile
 ALTER TABLE "public"."PracticeProfile"
