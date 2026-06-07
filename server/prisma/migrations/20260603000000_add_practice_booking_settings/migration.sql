@@ -1,8 +1,19 @@
 -- Phase 1A: Add consent tracking fields to PracticeAppointment (all nullable, no data loss)
-ALTER TABLE "public"."PracticeAppointment"
-  ADD COLUMN "requestConsentGrantedAt" TIMESTAMP(3),
-  ADD COLUMN "requestConsentVersion"   VARCHAR(20),
-  ADD COLUMN "requestConsentScope"     VARCHAR(100);
+-- Conditional: PracticeAppointment is created in 20260616120000_practice_calendar_appointments
+-- (June 16), which runs AFTER this migration on a fresh CI database. Skip silently on fresh DB;
+-- the June 16 CREATE TABLE includes these three columns directly for fresh installs.
+-- On an existing database the table already exists and the columns are added normally.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'PracticeAppointment'
+  ) THEN
+    ALTER TABLE "public"."PracticeAppointment"
+      ADD COLUMN IF NOT EXISTS "requestConsentGrantedAt" TIMESTAMP(3),
+      ADD COLUMN IF NOT EXISTS "requestConsentVersion"   VARCHAR(20),
+      ADD COLUMN IF NOT EXISTS "requestConsentScope"     VARCHAR(100);
+  END IF;
+END $$;
 
 -- Phase 1A: Create PracticeBookingSettings table
 CREATE TABLE "public"."PracticeBookingSettings" (

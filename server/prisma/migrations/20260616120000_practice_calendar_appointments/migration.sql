@@ -50,6 +50,11 @@ CREATE TABLE "PracticeAppointment" (
     "cancelledAt" TIMESTAMP(3),
     "cancelledByUserId" TEXT,
     "cancellationReason" TEXT,
+    -- Added here to match 20260603000000_add_practice_booking_settings which adds these columns
+    -- on existing databases; on fresh DB this CREATE TABLE is the source of truth.
+    "requestConsentGrantedAt" TIMESTAMP(3),
+    "requestConsentVersion"   VARCHAR(20),
+    "requestConsentScope"     VARCHAR(100),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
