@@ -98,6 +98,13 @@ export const esPracticeBillingPlausibility = {
   reportDownloadPending: "Generando informe …",
   reportDownloadError: "No se pudo descargar el informe.",
 
+  catalogueStatus: "Estado del catálogo",
+  catalogueStatusVerified: "Verificado",
+  catalogueStatusPointsUncertain: "Puntos no verificados",
+  catalogueStatusNeedsReview: "Requiere revisión",
+  catalogueStatusUnknown: "Estado del catálogo no especificado",
+  catalogueSourceReference: "Referencia fuente",
+
   errors: {
     rows_required: "Se requiere al menos un código GOÄ.",
     ziffer_required: "Código faltante en la fila {{rowIndex}}.",

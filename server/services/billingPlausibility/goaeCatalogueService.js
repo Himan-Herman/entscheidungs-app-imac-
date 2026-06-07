@@ -41,8 +41,28 @@ function parseCount(raw) {
 
 /**
  * Look up a single GOÄ ziffer in the local catalogue subset.
+ *
+ * G3b-2: returned object now includes provenance/verification fields so callers
+ * and stored catalogueMatchJson capture catalogue quality transparently.
+ * Unknown-ziffer path is unchanged — provenance fields are absent when not found.
+ *
  * @param {string} ziffer
- * @returns {{ found: boolean, ziffer: string, title?: string, points?: number | null, section?: string, source?: string, catalogueMeta: typeof GOAE_CATALOGUE_META }}
+ * @returns {{
+ *   found: boolean,
+ *   ziffer: string,
+ *   title?: string,
+ *   points?: number | null,
+ *   section?: string,
+ *   source?: string,
+ *   completenessStatus?: string | null,
+ *   activeStatus?: string | null,
+ *   sourceName?: string | null,
+ *   sourceUrl?: string | null,
+ *   sourceLineOrReference?: string | null,
+ *   sourceVersionDate?: string | null,
+ *   verifiedAt?: string | null,
+ *   catalogueMeta: typeof GOAE_CATALOGUE_META
+ * }}
  */
 export function findGoaeEntry(ziffer) {
   const z = String(ziffer ?? "").trim();
@@ -57,6 +77,14 @@ export function findGoaeEntry(ziffer) {
     points: entry.points,
     section: entry.section,
     source: entry.source,
+    // G3b-2: provenance and verification metadata
+    completenessStatus: entry.completenessStatus ?? null,
+    activeStatus: entry.activeStatus ?? null,
+    sourceName: entry.sourceName ?? null,
+    sourceUrl: entry.sourceUrl ?? null,
+    sourceLineOrReference: entry.sourceLineOrReference ?? null,
+    sourceVersionDate: entry.sourceVersionDate ?? null,
+    verifiedAt: entry.verifiedAt ?? null,
     catalogueMeta: GOAE_CATALOGUE_META,
   };
 }

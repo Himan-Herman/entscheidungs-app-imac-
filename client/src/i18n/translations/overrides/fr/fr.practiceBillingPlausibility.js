@@ -98,6 +98,13 @@ export const frPracticeBillingPlausibility = {
   reportDownloadPending: "Génération du rapport …",
   reportDownloadError: "Le rapport n'a pas pu être téléchargé.",
 
+  catalogueStatus: "Statut du catalogue",
+  catalogueStatusVerified: "Vérifié",
+  catalogueStatusPointsUncertain: "Points non vérifiés",
+  catalogueStatusNeedsReview: "Vérification nécessaire",
+  catalogueStatusUnknown: "Statut du catalogue non précisé",
+  catalogueSourceReference: "Référence source",
+
   errors: {
     rows_required: "Au moins un code GOÄ est requis.",
     ziffer_required: "Code manquant à la ligne {{rowIndex}}.",

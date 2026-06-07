@@ -1,8 +1,10 @@
 /**
- * Billing plausibility smoke checks — Phase F6.
+ * Billing plausibility offline verification — Phase G4a.
  *
  * Covers: feature flags, deterministic warnings, AI safety patterns,
- * frontend static checks, route patient-data rejection, i18n completeness.
+ * frontend static checks, route patient-data rejection, i18n completeness,
+ * route structure (export/review/dismiss), report service safety,
+ * service-unit permission matrix, and G3b-2 catalogue provenance fields.
  *
  * Deterministic and offline — no database, no live OpenAI required.
  *
@@ -20,6 +22,7 @@ import {
 import {
   findGoaeEntry,
   buildDeterministicWarnings,
+  validateGoaeRows,
 } from "../services/billingPlausibility/goaeCatalogueService.js";
 import {
   GOAE_ENTRIES,
@@ -27,6 +30,7 @@ import {
 } from "../data/goaeCatalogue.js";
 import { AI_MODULES } from "../config/aiSafetyPolicy.js";
 import { detectForbiddenMedicalClaims } from "../services/aiSafetySanitizer.js";
+import { hasPracticePermission, PERMISSIONS } from "../utils/practicePermissions.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, "..", "..");
@@ -346,6 +350,59 @@ assert("CSS: no prefers-color-scheme", !CSS.includes("prefers-color-scheme"));
   }
 }
 
+// 8b. Frontend API — all required client-side functions present and using safe patterns
+assert("API: fetchBillingPlausibilitySession exported", API_FILE.includes("export async function fetchBillingPlausibilitySession"));
+assert("API: dismissBillingPlausibilitySession exported", API_FILE.includes("export async function dismissBillingPlausibilitySession"));
+assert("API: downloadBillingPlausibilityReport exported", API_FILE.includes("export async function downloadBillingPlausibilityReport"));
+assert("API: report download uses blob/URL.createObjectURL pattern", API_FILE.includes("URL.createObjectURL"));
+assert("API: export URL includes /export path segment", API_FILE.includes("/export?"));
+assert("API: sessionId URL-encoded in API calls", API_FILE.includes("encodeURIComponent(sessionId)"));
+
+// 8c. Detail page — session route, dismiss/download, disclaimer, no auto-AI, G3b-2 backward-compat
+const DETAIL_JSX = read("client/src/features/practiceBillingPlausibility/pages/PracticeBillingPlausibilityDetailPage.jsx");
+
+assert("detail page: useParams imported and used for sessionId", DETAIL_JSX.includes("useParams"));
+assert("detail page: sessionId destructured from useParams()", DETAIL_JSX.includes("const { sessionId } = useParams()"));
+assert("detail page: dismissBillingPlausibilitySession imported", DETAIL_JSX.includes("dismissBillingPlausibilitySession"));
+assert("detail page: downloadBillingPlausibilityReport imported", DETAIL_JSX.includes("downloadBillingPlausibilityReport"));
+assert("detail page: t.btnDismissSession key used (no hardcoded text)", DETAIL_JSX.includes("t.btnDismissSession"));
+assert("detail page: t.btnDownloadReport or t.reportDownloadPending key used", DETAIL_JSX.includes("t.btnDownloadReport") || DETAIL_JSX.includes("t.reportDownloadPending"));
+// Disclaimer must be present and appear after the page heading
+{
+  const detailDisclaimerPos = DETAIL_JSX.indexOf("billing-plausibility__disclaimer");
+  const detailHeadingPos = DETAIL_JSX.indexOf("bp-detail-heading");
+  assert("detail page: disclaimer class present", detailDisclaimerPos > 0);
+  assert("detail page: detail heading id present", detailHeadingPos > 0);
+  assert("detail page: disclaimer rendered after heading element in source order", detailDisclaimerPos > detailHeadingPos);
+}
+// No AI auto-trigger in detail page
+assert(
+  "detail page: no requestBillingPlausibilityAiReview in useEffect",
+  !/useEffect\s*\(\s*\(\s*\)\s*=>[\s\S]{0,2000}requestBillingPlausibilityAiReview/.test(DETAIL_JSX),
+);
+// G3b-2: completenessStatus and sourceLineOrReference read with optional chaining (backward-compatible)
+assert("detail page (G3b-2): completenessStatus via optional chaining", DETAIL_JSX.includes("catalogueMatchJson?.completenessStatus"));
+assert("detail page (G3b-2): sourceLineOrReference via optional chaining", DETAIL_JSX.includes("catalogueMatchJson?.sourceLineOrReference"));
+assert("detail page (G3b-2): item-completeness class rendered", DETAIL_JSX.includes("billing-plausibility__item-completeness"));
+assert("detail page (G3b-2): t.catalogueSourceReference key used (not hardcoded)", DETAIL_JSX.includes("t.catalogueSourceReference"));
+// No hardcoded multi-word UI text in detail page
+{
+  const HARDCODED_MULTIWORD_PATTERN = /"[A-Za-z][A-Za-z]+ [A-Za-z][A-Za-z ]+"/g;
+  const detailHardcoded = DETAIL_JSX.match(HARDCODED_MULTIWORD_PATTERN) ?? [];
+  assert(
+    `no hardcoded multi-word UI text in detail page JSX (found: ${detailHardcoded.join(", ") || "none"})`,
+    detailHardcoded.length === 0,
+  );
+}
+
+// 8d. CSS — G3b-2 completeness and source-ref classes defined
+assert("CSS: .billing-plausibility__item-completeness class defined", CSS.includes(".billing-plausibility__item-completeness"));
+assert("CSS: .billing-plausibility__item-source-ref class defined", CSS.includes(".billing-plausibility__item-source-ref"));
+
+// 8e. Overview page — G3b-2 completeness block present in result items
+assert("overview page (G3b-2): item-completeness class used in result items", JSX.includes("billing-plausibility__item-completeness"));
+assert("overview page (G3b-2): completenessStatus via optional chaining", JSX.includes("catalogueMatchJson?.completenessStatus"));
+
 // ─── 9. i18n completeness ─────────────────────────────────────────────────────
 
 // Canonical required top-level keys (derived from de file)
@@ -364,6 +421,15 @@ const REQUIRED_KEYS = [
   "aiReviewUncertaintyNote", "aiReviewRowHints",
   "manualReviewRecommended",
   "featureDisabled", "forbidden",
+  // Detail page navigation and actions (G1)
+  "backToBillingOverview", "sessionCreatedAt", "btnOpenSession",
+  "btnDismissSession", "dismissSuccess", "dismissError",
+  "detailLoadError", "detailNotFound",
+  // PDF report export (G2)
+  "btnDownloadReport", "reportDownloadPending", "reportDownloadError",
+  // Catalogue verification status (G3b-2)
+  "catalogueStatus", "catalogueStatusVerified", "catalogueStatusPointsUncertain",
+  "catalogueStatusNeedsReview", "catalogueStatusUnknown", "catalogueSourceReference",
 ];
 
 const I18N_FILES = [
@@ -443,6 +509,140 @@ assert(
     ),
 );
 
+// ─── 12. Route structure — export, review, dismiss ────────────────────────────
+
+// Export endpoint: GET /:sessionId/export
+assert("route: GET /:sessionId/export handler defined", ROUTE.includes('router.get("/:sessionId/export"'));
+assert("route: export rejects non-PDF format with unsupported_format error", ROUTE.includes('"unsupported_format"'));
+assert("route: export format guard — only pdf accepted", ROUTE.includes('format !== "pdf"'));
+assert("route: export calls generateBillingPlausibilityReport", ROUTE.includes("generateBillingPlausibilityReport"));
+assert("route: export sets Content-Type application/pdf", ROUTE.includes('"application/pdf"'));
+assert("route: export sets Content-Disposition attachment", ROUTE.includes("attachment; filename="));
+assert("route: export reads locale from query params", ROUTE.includes("req.query.locale"));
+
+// All routes share requireBillingFlag via router.use
+assert("route: requireBillingFlag applied via router.use (covers all routes)", ROUTE.includes("router.use(requireBillingFlag)"));
+assert("route: feature_disabled returns 404 when flag is off", ROUTE.includes('"feature_disabled"') && ROUTE.includes("res.status(404)"));
+
+// Review endpoint: POST with its own AI flag guard — separate from export
+assert("route: review endpoint is POST /:sessionId/review", ROUTE.includes('router.post("/:sessionId/review"'));
+assert("route: review guarded by separate isBillingAiReviewEnabled() check", ROUTE.includes("isBillingAiReviewEnabled()"));
+assert("route: review and export are distinct routes (not merged)", ROUTE.includes("/:sessionId/review") && ROUTE.includes("/:sessionId/export"));
+
+// Dismiss endpoint: POST (non-destructive — status update, not delete)
+assert("route: dismiss endpoint is POST /:sessionId/dismiss", ROUTE.includes('router.post("/:sessionId/dismiss"'));
+assert("route: dismiss calls dismissSessionForPractice service function", ROUTE.includes("dismissSessionForPractice("));
+assert("route: no router.delete in billing route (non-destructive)", !ROUTE.includes("router.delete"));
+
+// Non-destructive at service level: verify update, not delete
+{
+  const BILLING_SERVICE = read("server/services/billingPlausibility/billingPlausibilityService.js");
+  assert("billing service: dismissSessionForPractice does not call .delete() on session", !/billingPlausibilitySession\.delete\b/.test(BILLING_SERVICE));
+  assert("billing service: dismiss updates status to 'dismissed'", BILLING_SERVICE.includes('"dismissed"'));
+  assert("billing service: dismiss records dismissedAt timestamp", BILLING_SERVICE.includes("dismissedAt"));
+}
+
+// ─── 13. Report service — pdf-lib, no AI, no patient fields, locale completeness ────
+
+const REPORT_SERVICE = read("server/services/billingPlausibility/billingPlausibilityReportService.js");
+
+// Dependencies: pdf-lib yes, openai never
+assert("report service: imports pdf-lib", REPORT_SERVICE.includes('from "pdf-lib"'));
+assert("report service: no openai import", !REPORT_SERVICE.includes('from "openai"') && !REPORT_SERVICE.includes("from 'openai'"));
+assert("report service: no OPENAI_API_KEY reference", !REPORT_SERVICE.includes("OPENAI_API_KEY"));
+assert("report service: header documents no AI is called", REPORT_SERVICE.includes("No AI is called"));
+
+// No patient identifier fields in any report string or code path
+for (const field of ["patientName", "patientId", "dateOfBirth", "diagnosisText", "clinicalNotes"]) {
+  assert(`report service: no patient field "${field}"`, !REPORT_SERVICE.includes(field));
+}
+
+// No ⚠ emoji/glyph — WinAnsiEncoding (cp1252) does not support U+26A0
+assert("report service: no ⚠ glyph (WinAnsiEncoding unsupported — would corrupt PDF)", !REPORT_SERVICE.includes("⚠"));
+
+// Required content keys present in STRINGS object (each locale has these keys)
+const REPORT_DISCLAIMER_COUNT = (REPORT_SERVICE.match(/disclaimerText:/g) || []).length;
+assert("report service: disclaimerText in all 5 locale STRINGS blocks", REPORT_DISCLAIMER_COUNT >= 5);
+const REPORT_MANUAL_REVIEW_COUNT = (REPORT_SERVICE.match(/manualReviewText:/g) || []).length;
+assert("report service: manualReviewText in all 5 locale STRINGS blocks", REPORT_MANUAL_REVIEW_COUNT >= 5);
+assert("report service: catalogueHeading key defined (catalogue metadata in PDF)", REPORT_SERVICE.includes("catalogueHeading:"));
+assert("report service: catalogueCompleteness key defined", REPORT_SERVICE.includes("catalogueCompleteness:"));
+assert("report service: manualReviewHeading key defined", REPORT_SERVICE.includes("manualReviewHeading:"));
+
+// G3b-2: catalogue verification status keys in all 5 locale STRINGS blocks
+const CATALOGUE_STATUS_COUNT = (REPORT_SERVICE.match(/catalogueStatus:/g) || []).length;
+assert("report service (G3b-2): catalogueStatus in all 5 locale STRINGS", CATALOGUE_STATUS_COUNT >= 5);
+assert("report service (G3b-2): catalogueStatusVerified key defined", REPORT_SERVICE.includes("catalogueStatusVerified:"));
+assert("report service (G3b-2): catalogueStatusPointsUncertain key defined", REPORT_SERVICE.includes("catalogueStatusPointsUncertain:"));
+assert("report service (G3b-2): catalogueStatusNeedsReview key defined", REPORT_SERVICE.includes("catalogueStatusNeedsReview:"));
+assert("report service (G3b-2): catalogueSourceRef key defined", REPORT_SERVICE.includes("catalogueSourceRef:"));
+assert("report service (G3b-2): completenessStatus optional chaining in PDF render (backward-compatible)", REPORT_SERVICE.includes("completenessStatus ?? null"));
+
+// Supported locales: all 5 STRINGS locale blocks present
+for (const loc of ["de", "en", "fr", "it", "es"]) {
+  assert(`report service: STRINGS["${loc}"] locale block defined`, REPORT_SERVICE.includes(`  ${loc}: {`));
+}
+assert("report service: SUPPORTED_LOCALES constant defined", REPORT_SERVICE.includes("SUPPORTED_LOCALES"));
+assert("report service: locale fallback to 'de' on unknown locale", REPORT_SERVICE.includes('return "de"'));
+
+// ─── 14. Service unit — permission matrix and G3b-2 catalogue fields ──────────
+
+// Permission matrix: owner and admin can access billing; staff and below cannot
+assert("permissions: owner has INTEGRATIONS_MANAGE", hasPracticePermission("owner", PERMISSIONS.INTEGRATIONS_MANAGE));
+assert("permissions: admin has INTEGRATIONS_MANAGE", hasPracticePermission("admin", PERMISSIONS.INTEGRATIONS_MANAGE));
+assert("permissions: staff lacks INTEGRATIONS_MANAGE", !hasPracticePermission("staff", PERMISSIONS.INTEGRATIONS_MANAGE));
+assert("permissions: null role lacks INTEGRATIONS_MANAGE", !hasPracticePermission(null, PERMISSIONS.INTEGRATIONS_MANAGE));
+assert("permissions: empty string role lacks INTEGRATIONS_MANAGE", !hasPracticePermission("", PERMISSIONS.INTEGRATIONS_MANAGE));
+assert("permissions: unknown_role lacks INTEGRATIONS_MANAGE", !hasPracticePermission("unknown_role", PERMISSIONS.INTEGRATIONS_MANAGE));
+
+// G3b-2: findGoaeEntry returns provenance fields for known entries
+{
+  const knownEntry = findGoaeEntry("1");
+  assert("catalogue service (G3b-2): known entry found", knownEntry.found);
+  assert("catalogue service (G3b-2): known entry has completenessStatus field", "completenessStatus" in knownEntry);
+  assert("catalogue service (G3b-2): known entry completenessStatus is a non-empty string", typeof knownEntry.completenessStatus === "string" && knownEntry.completenessStatus.length > 0);
+  assert("catalogue service (G3b-2): known entry has sourceLineOrReference field", "sourceLineOrReference" in knownEntry);
+  assert("catalogue service (G3b-2): known entry has activeStatus field", "activeStatus" in knownEntry);
+  assert("catalogue service (G3b-2): known entry has catalogueMeta", !!knownEntry.catalogueMeta);
+}
+
+// G3b-2: unknown ziffer path does NOT include provenance fields (no undefined field leakage)
+{
+  const unknownEntry = findGoaeEntry("99999");
+  assert("catalogue service: unknown ziffer entry not found", !unknownEntry.found);
+  assert("catalogue service (G3b-2): unknown entry has NO completenessStatus key", !("completenessStatus" in unknownEntry));
+  assert("catalogue service (G3b-2): unknown entry has NO sourceLineOrReference key", !("sourceLineOrReference" in unknownEntry));
+  assert("catalogue service: unknown entry still carries catalogueMeta", !!unknownEntry.catalogueMeta);
+}
+
+// G3b-2: completenessStatus invariant — no null-points entry is "verified"
+{
+  const verifiedEntries = GOAE_ENTRIES.filter((e) => e.completenessStatus === "verified");
+  assert("catalogue: at least one verified entry exists", verifiedEntries.length > 0);
+  assert(
+    "catalogue invariant: all verified entries have confirmed non-null points",
+    verifiedEntries.every((e) => e.points !== null && typeof e.points === "number" && e.points > 0),
+  );
+  const nullPointsVerified = GOAE_ENTRIES.filter((e) => e.points === null && e.completenessStatus === "verified");
+  assert("catalogue invariant: no null-points entry is marked verified", nullPointsVerified.length === 0);
+}
+
+// validateGoaeRows multi-row: correct per-row results including G3b-2 match fields
+{
+  const multiRowResult = validateGoaeRows([
+    { ziffer: "1",     factor: "1,0", count: "1" },                          // known, clean
+    { ziffer: "99999", factor: "1,0", count: "1" },                          // unknown
+    { ziffer: "1",     factor: "3,5", count: "1", contextText: "" },         // high factor, no context
+  ]);
+  assert("service unit: clean known row → no warnings", multiRowResult.rowResults[0].warnings.length === 0);
+  assert("service unit: unknown ziffer → unknown_goae_ziffer warning", multiRowResult.rowResults[1].warnings.includes("unknown_goae_ziffer"));
+  assert("service unit: high factor + no context → factor_requires_justification", multiRowResult.rowResults[2].warnings.includes("factor_requires_justification"));
+  assert("service unit: high factor + no context → justification_missing", multiRowResult.rowResults[2].warnings.includes("justification_missing"));
+  assert("service unit: hasWarnings true when any row has warnings", multiRowResult.hasWarnings === true);
+  assert("service unit (G3b-2): known row match has completenessStatus", typeof multiRowResult.rowResults[0].match.completenessStatus === "string");
+  assert("service unit (G3b-2): unknown row match has no completenessStatus key", !("completenessStatus" in multiRowResult.rowResults[1].match));
+}
+
 // ─── Result ───────────────────────────────────────────────────────────────────
 
 if (failures.length) {
@@ -466,6 +666,9 @@ console.log(
       "i18n-completeness",
       "no-hardcoded-text",
       "goae-catalogue-structure",
+      "route-structure",
+      "report-service-safety",
+      "service-unit-permissions-and-catalogue",
     ],
   }),
 );

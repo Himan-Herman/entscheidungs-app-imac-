@@ -92,6 +92,12 @@ const STRINGS = {
     statusDismissed: "Abgelegt",
     statusDraft: "Entwurf",
     sourceManual: "Manuelle Eingabe",
+    // G3b-2: catalogue verification status labels
+    catalogueStatus: "Katalogstatus",
+    catalogueStatusVerified: "Verifiziert (Punktzahl bestätigt)",
+    catalogueStatusPointsUncertain: "Punkte nicht verifiziert — manuelle Prüfung",
+    catalogueStatusNeedsReview: "Benötigt Prüfung — manuelle Verifikation",
+    catalogueSourceRef: "Quellenangabe",
   },
   en: {
     title: "MedScoutX — Plausibility Report",
@@ -140,6 +146,12 @@ const STRINGS = {
     statusDismissed: "Dismissed",
     statusDraft: "Draft",
     sourceManual: "Manual input",
+    // G3b-2: catalogue verification status labels
+    catalogueStatus: "Catalogue status",
+    catalogueStatusVerified: "Verified (points confirmed)",
+    catalogueStatusPointsUncertain: "Points not verified — manual check",
+    catalogueStatusNeedsReview: "Needs review — manual verification",
+    catalogueSourceRef: "Source reference",
   },
   fr: {
     title: "MedScoutX — Rapport de plausibilité",
@@ -189,6 +201,12 @@ const STRINGS = {
     statusDismissed: "Classé",
     statusDraft: "Brouillon",
     sourceManual: "Saisie manuelle",
+    // G3b-2: catalogue verification status labels
+    catalogueStatus: "Statut du catalogue",
+    catalogueStatusVerified: "Vérifié (points confirmés)",
+    catalogueStatusPointsUncertain: "Points non vérifiés — vérification manuelle",
+    catalogueStatusNeedsReview: "Vérification nécessaire — contrôle manuel",
+    catalogueSourceRef: "Référence source",
   },
   it: {
     title: "MedScoutX — Rapporto di plausibilità",
@@ -239,6 +257,12 @@ const STRINGS = {
     statusDismissed: "Archiviato",
     statusDraft: "Bozza",
     sourceManual: "Inserimento manuale",
+    // G3b-2: catalogue verification status labels
+    catalogueStatus: "Stato del catalogo",
+    catalogueStatusVerified: "Verificato (punti confermati)",
+    catalogueStatusPointsUncertain: "Punti non verificati — verifica manuale",
+    catalogueStatusNeedsReview: "Revisione necessaria — verifica manuale",
+    catalogueSourceRef: "Riferimento fonte",
   },
   es: {
     title: "MedScoutX — Informe de plausibilidad",
@@ -289,6 +313,12 @@ const STRINGS = {
     statusDismissed: "Archivado",
     statusDraft: "Borrador",
     sourceManual: "Entrada manual",
+    // G3b-2: catalogue verification status labels
+    catalogueStatus: "Estado del catálogo",
+    catalogueStatusVerified: "Verificado (puntos confirmados)",
+    catalogueStatusPointsUncertain: "Puntos no verificados — revisión manual",
+    catalogueStatusNeedsReview: "Requiere revisión — verificación manual",
+    catalogueSourceRef: "Referencia fuente",
   },
 };
 
@@ -547,6 +577,35 @@ async function buildReportPdf({ session, items, locale }) {
       ensureSpace(10);
       page.drawText(`[${ctx}]`, { x: MARGIN, y, size: 7, font, color: MUTED });
       y -= 7 * 1.35;
+    }
+
+    // G3b-2: catalogue verification status (only for found entries; skipped for old sessions)
+    if (catalogueFound) {
+      const cs = item.catalogueMatchJson?.completenessStatus ?? null;
+      if (cs) {
+        const csLabelMap = {
+          "verified": L.catalogueStatusVerified,
+          "points-uncertain": L.catalogueStatusPointsUncertain,
+          "needs-review": L.catalogueStatusNeedsReview,
+        };
+        const csLabel = csLabelMap[cs] || safe(cs);
+        const csLine = `${L.catalogueStatus}: ${csLabel}`;
+        const wrapped = wrapText(csLine, font, 7, MAX_W);
+        for (const wLine of wrapped) {
+          ensureSpace(10);
+          page.drawText(wLine, { x: MARGIN, y, size: 7, font, color: MUTED });
+          y -= 7 * 1.35;
+        }
+      }
+      // Source reference if available
+      const srcRef = item.catalogueMatchJson?.sourceLineOrReference ?? null;
+      if (srcRef) {
+        ensureSpace(10);
+        page.drawText(`${L.catalogueSourceRef}: ${safe(srcRef)}`, {
+          x: MARGIN, y, size: 7, font, color: MUTED,
+        });
+        y -= 7 * 1.35;
+      }
     }
 
     y -= 2;

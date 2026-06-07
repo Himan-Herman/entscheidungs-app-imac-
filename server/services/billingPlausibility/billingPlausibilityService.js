@@ -119,6 +119,9 @@ export async function createSessionForPractice(practiceId, actor, payload) {
       warnings: r.warnings,
       catalogueFound: r.match.found,
       catalogueTitle: r.match.title ?? null,
+      // G3b-2: expose catalogue verification quality in summary
+      completenessStatus: r.match.completenessStatus ?? null,
+      sourceLineOrReference: r.match.sourceLineOrReference ?? null,
     })),
     hasWarnings: rowResults.some((r) => r.warnings.length > 0),
     generatedAt: new Date().toISOString(),

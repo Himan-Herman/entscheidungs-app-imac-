@@ -93,6 +93,13 @@ export default {
   reportDownloadPending: "Bericht wird erstellt …",
   reportDownloadError: "Bericht konnte nicht heruntergeladen werden.",
 
+  catalogueStatus: "Katalogstatus",
+  catalogueStatusVerified: "Verifiziert",
+  catalogueStatusPointsUncertain: "Punkte nicht verifiziert",
+  catalogueStatusNeedsReview: "Benötigt Prüfung",
+  catalogueStatusUnknown: "Katalogstatus nicht angegeben",
+  catalogueSourceReference: "Quellenangabe",
+
   errors: {
     rows_required: "Mindestens eine GOÄ-Ziffer ist erforderlich.",
     ziffer_required: "Ziffer fehlt in Zeile {{rowIndex}}.",

@@ -93,6 +93,13 @@ export default {
   reportDownloadPending: "Generating report …",
   reportDownloadError: "Could not download report.",
 
+  catalogueStatus: "Catalogue status",
+  catalogueStatusVerified: "Verified",
+  catalogueStatusPointsUncertain: "Points not verified",
+  catalogueStatusNeedsReview: "Needs review",
+  catalogueStatusUnknown: "Catalogue status not specified",
+  catalogueSourceReference: "Source reference",
+
   errors: {
     rows_required: "At least one GOÄ code is required.",
     ziffer_required: "Code missing in row {{rowIndex}}.",

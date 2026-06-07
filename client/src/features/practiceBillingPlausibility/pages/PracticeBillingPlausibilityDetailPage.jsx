@@ -309,6 +309,26 @@ export default function PracticeBillingPlausibilityDetailPage() {
                       {catalogueFound ? t.catalogueFound : t.catalogueNotFound}
                     </span>
                   </div>
+                  {catalogueFound && (() => {
+                    const cs = item.catalogueMatchJson?.completenessStatus;
+                    if (!cs) return null;
+                    const csLabelMap = {
+                      "verified": t.catalogueStatusVerified,
+                      "points-uncertain": t.catalogueStatusPointsUncertain,
+                      "needs-review": t.catalogueStatusNeedsReview,
+                    };
+                    const csLabel = csLabelMap[cs] ?? t.catalogueStatusUnknown;
+                    return (
+                      <p className="billing-plausibility__item-completeness">
+                        {t.catalogueStatus}: {csLabel}
+                      </p>
+                    );
+                  })()}
+                  {catalogueFound && item.catalogueMatchJson?.sourceLineOrReference && (
+                    <p className="billing-plausibility__item-source-ref">
+                      {t.catalogueSourceReference}: {item.catalogueMatchJson.sourceLineOrReference}
+                    </p>
+                  )}
                   {warnings.length === 0 ? (
                     <p className="billing-plausibility__item-no-warnings">{t.noWarnings}</p>
                   ) : (

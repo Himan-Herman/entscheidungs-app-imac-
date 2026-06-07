@@ -499,6 +499,25 @@
   border: 0;
 }
 
+/* Catalogue completeness status + source reference — G3b-2 */
+.billing-plausibility__item-completeness {
+  display: block;
+  margin: 0.3rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted, #4b5563);
+  line-height: 1.4;
+}
+
+.billing-plausibility__item-source-ref {
+  display: block;
+  margin: 0.2rem 0 0;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--text-muted, #4b5563);
+  opacity: 0.8;
+  line-height: 1.4;
+}
+
 /* Clickable history table link */
 .billing-plausibility__table-link {
   color: var(--accent, #0f766e);
