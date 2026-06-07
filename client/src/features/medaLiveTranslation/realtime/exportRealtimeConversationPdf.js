@@ -8,7 +8,7 @@
  * the rest of the project's PDF layer (see generatePreVisitPdf.js).
  */
 import { jsPDF } from 'jspdf';
-import logo6Url from '../../../assets/img/medscout-logo6.png';
+import logo6Url from '../../../assets/img/medscout-logo.png';
 import { REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 
 // Clinical palette — matches generatePreVisitPdf.js

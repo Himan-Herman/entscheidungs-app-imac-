@@ -180,11 +180,20 @@ export const GOAE_ENTRIES = [
   },
   {
     ziffer: "8",
-    title: "Untersuchung zur Erhebung des Ganzkörperstatus mit schriftlicher Befunddokumentation",
+    // P1b audit: the previous title borrowed "Ganzkörperstatus" from Nr. 7, implying the two
+    // codes describe the same service. Since Nr. 7 and Nr. 8 must be distinct entries in the
+    // GOÄ Anlage, using "Ganzkörperstatus" for Nr. 8 is misleading. Title changed to a
+    // conservative working description that does not overlap with Nr. 7. Exact Anlage wording
+    // must be verified from the official primary source before any billing use.
+    title: "Körperliche Untersuchung mit schriftlicher Befunddokumentation",
     points: null,
     section: "B",
     notes:
-      "Physical examination with written findings documentation. Referenced alongside Nr. 6 in existing Nr. 100 of this subset. Exact title, scope and section assignment need verification — verify against official Anlage.",
+      "Conservative working title only — the actual service designation for GOÄ Nr. 8 in the " +
+      "official Anlage has not been verified from the primary source. Nr. 8 is referenced " +
+      "alongside Nr. 6 in Nr. 100 of this catalogue subset, indicating it is an examination " +
+      "service, but its exact scope is distinct from Nr. 7 (Ganzkörperstatus). Title, exact " +
+      "scope and section all need verification — verify against official Anlage.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "needs-review",
@@ -370,7 +379,11 @@ export const GOAE_ENTRIES = [
     points: null,
     section: "D",
     notes:
-      "Supplement for home visits outside regular hours (nights, weekends, public holidays) or in difficult-access locations. Points uncertain and exact title needs verification — verify against official Anlage.",
+      "Visit supplement for after-hours or difficult-access locations. P1b audit note: the " +
+      "title combines 'außerhalb der üblichen Sprechzeit' and 'beschwerliches Gelände' — the " +
+      "GOÄ Anlage may handle these two situations under separate ziffer numbers rather than a " +
+      "single code. Exact title and scope of Nr. 56 need verification to confirm whether it " +
+      "covers one or both situations — verify against official Anlage.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "needs-review",
@@ -557,7 +570,11 @@ export const GOAE_ENTRIES = [
     points: null,
     section: "C",
     notes:
-      "Pulmonary function test by spirometry. Common outpatient diagnostic procedure for respiratory assessment. Points uncertain and section assignment needs verification — verify against official Anlage.",
+      "Pulmonary function test by spirometry. Common outpatient diagnostic procedure. P1b audit " +
+      "note: the internal section label 'C' is a catalogue-internal grouping for procedures and " +
+      "does not necessarily correspond to the GOÄ Anlage Abschnitt letter in which Nr. 605 " +
+      "appears — pulmonary diagnostics may be listed under a different official Abschnitt. " +
+      "Title, points and section assignment all need verification — verify against official Anlage.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "needs-review",
@@ -573,7 +590,12 @@ export const GOAE_ENTRIES = [
     points: null,
     section: "C",
     notes:
-      "Ambulatory 24-hour blood pressure monitoring for at least 18 hours. Common outpatient procedure. Points uncertain and exact title and section need verification — verify against official Anlage.",
+      "Ambulatory long-term blood pressure monitoring. P1b audit note: the parenthetical " +
+      "'(mindestens 18 Stunden)' is the commonly cited minimum-duration condition in billing " +
+      "practice, but may represent a billing prerequisite rather than part of the official " +
+      "Anlage title text. The exact official title may simply be 'Langzeitblutdruckmessung' " +
+      "without the minimum-duration qualifier. Exact title and section need verification — " +
+      "verify against official Anlage.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "needs-review",
@@ -589,7 +611,11 @@ export const GOAE_ENTRIES = [
     points: null,
     section: "C",
     notes:
-      "Resting electrocardiogram (ECG) recording and interpretation. Very common outpatient diagnostic procedure. Points uncertain — verify against official Anlage.",
+      "Resting electrocardiogram (ECG) recording and interpretation. P1b audit note: " +
+      "'(Ruhe-EKG)' and 'mit Auswertung' are the commonly cited qualifiers for Nr. 650 in " +
+      "billing practice, but the exact official Anlage title may differ — for example, the " +
+      "'mit Auswertung' qualifier may be stated separately or implicit. Points uncertain — " +
+      "verify title wording and points against official Anlage.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "points-uncertain",
@@ -621,7 +647,11 @@ export const GOAE_ENTRIES = [
     points: null,
     section: "C",
     notes:
-      "Stress/exercise ECG with ergometry and electrocardiographic monitoring. Common outpatient cardiovascular diagnostic procedure. Points uncertain and exact title and section need verification — verify against official Anlage.",
+      "Stress/exercise ECG with ergometry. P1b audit note: the parenthetical " +
+      "'(Ergometrie mit elektrokardiographischer Überwachung)' is a working description " +
+      "assembled from common billing practice references and has not been verified against " +
+      "the official Anlage title. The exact GOÄ Anlage wording for Nr. 652 may differ " +
+      "significantly. Exact title and section need verification — verify against official Anlage.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "needs-review",

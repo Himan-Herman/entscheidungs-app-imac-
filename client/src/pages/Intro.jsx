@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/img/medscout-logo6.png";
+import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { readUserMode, USER_MODES } from "../utils/userMode.js";

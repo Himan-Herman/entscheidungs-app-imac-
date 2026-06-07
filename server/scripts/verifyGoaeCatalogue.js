@@ -217,6 +217,28 @@ if (Array.isArray(GOAE_ENTRIES)) {
       );
     }
 
+    // P1b hardening: "needs-review" notes must name what needs review
+    // (title, section, scope, or ziffer) so future entries cannot be vague.
+    if (entry.completenessStatus === "needs-review") {
+      const notesForReview = (entry.notes ?? "").toLowerCase();
+      assert(
+        `${rowLabel} ziffer "${displayId}" — needs-review entry notes must mention what needs review ("title", "section", "scope", or "ziffer")`,
+        notesForReview.includes("title") ||
+          notesForReview.includes("section") ||
+          notesForReview.includes("scope") ||
+          notesForReview.includes("ziffer"),
+      );
+    }
+
+    // P1b hardening: "points-uncertain" notes must mention that points need verification.
+    if (entry.completenessStatus === "points-uncertain") {
+      const notesForPoints = (entry.notes ?? "").toLowerCase();
+      assert(
+        `${rowLabel} ziffer "${displayId}" — points-uncertain entry notes must mention "uncertain" (re: points)`,
+        notesForPoints.includes("uncertain"),
+      );
+    }
+
     // If points is not null and completenessStatus is "verified", source metadata must be present
     if (entry.points !== null && entry.completenessStatus === "verified") {
       assert(
