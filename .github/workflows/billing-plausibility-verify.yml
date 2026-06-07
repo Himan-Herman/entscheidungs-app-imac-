@@ -1,0 +1,83 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# billing-plausibility-verify.yml
+#
+# Runs the three deterministic, offline billing plausibility verification
+# checks on every push to main and on every pull request.
+#
+# These checks are:
+#   - 100% offline (no database, no network, no AI calls)
+#   - Deterministic (same result every run)
+#   - Self-contained (all inputs are static catalogue data + source files)
+#
+# What this workflow intentionally does NOT run:
+#   - verify:billing-plausibility-service  — DB-touching; requires a live
+#     PostgreSQL database with migrations applied. Excluded until a safe CI
+#     test database is provisioned.
+#   - prisma migrate deploy                — Requires DATABASE_URL.
+#   - Any OpenAI / AI calls               — Not needed; no OPENAI_API_KEY set.
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Billing Plausibility — Offline Verification
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  verify-offline:
+    name: Offline billing checks (no DB, no AI)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Use Node 22 — matches the project's engines requirement (>=22).
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      # Install server dependencies only.
+      # --ignore-scripts is intentionally NOT used here because
+      # @prisma/client has a postinstall that may assist with generate.
+      - name: Install server dependencies
+        run: npm ci
+
+      # Generate the Prisma client from schema.prisma.
+      # This is required because billingPlausibilityReportService.js imports
+      # PrismaClient at module load time. prisma generate reads the schema
+      # and emits JS/TS types into node_modules/.prisma/client —
+      # it does NOT connect to any database and does NOT need DATABASE_URL.
+      - name: Generate Prisma client (schema → JS types, no DB connection)
+        run: npx prisma generate
+
+      # ── Offline check 1: GOÄ catalogue structural validation ───────────────
+      # Validates every entry in the local catalogue test subset:
+      # required fields, uniqueness, provenance fields, points/null invariants.
+      - name: verify:goae-catalogue
+        run: npm run verify:goae-catalogue
+
+      # ── Offline check 2: Billing plausibility static checks ────────────────
+      # Covers: feature flags, deterministic warning logic, AI safety patterns,
+      # frontend i18n completeness, route patient-data rejection, route
+      # structure, report service safety, permission matrix, G3b-2 catalogue
+      # provenance contract. No database. No AI.
+      - name: verify:billing-plausibility
+        run: npm run verify:billing-plausibility
+
+      # ── Offline check 3: PDF report buffer verification ────────────────────
+      # Confirms buildReportPdf produces a valid %PDF buffer for all 5 locales,
+      # unknown/null locale fallback, all completenessStatus variants,
+      # old-session backward compatibility, AI note/fallback, multi-page, etc.
+      # Uses mock session/item objects — no database, no OpenAI.
+      - name: verify:billing-report-pdf
+        run: npm run verify:billing-report-pdf
