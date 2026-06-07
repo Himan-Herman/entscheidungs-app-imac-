@@ -416,15 +416,18 @@ function wrapText(text, font, size, maxWidth) {
 /**
  * Build a PDF plausibility report buffer.
  *
+ * @internal — exported for offline verification scripts only; not part of the public API.
+ *
  * @param {object} opts
  * @param {object} opts.session — full session row from Prisma (incl. items)
  * @param {object[]} opts.items — full item rows from Prisma (incl. contextText)
  * @param {string} opts.locale — normalised locale key
  * @returns {Promise<Buffer>}
  */
-async function buildReportPdf({ session, items, locale }) {
-  const L = STRINGS[locale];
-  const W = WARNING_LABELS[locale] || WARNING_LABELS.de;
+export async function buildReportPdf({ session, items, locale }) {
+  const normLocale = normaliseLocale(locale);
+  const L = STRINGS[normLocale];
+  const W = WARNING_LABELS[normLocale] || WARNING_LABELS.de;
 
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -482,9 +485,9 @@ async function buildReportPdf({ session, items, locale }) {
   y -= 6;
   drawSmall(L.generatedAt, now);
   drawSmall(L.sessionDate, sessionDate);
-  drawSmall(L.sessionStatus, localeStatusLabel(session.status, locale));
+  drawSmall(L.sessionStatus, localeStatusLabel(session.status, normLocale));
   if (session.sourceType) {
-    drawSmall(L.sourceType, localeSourceLabel(session.sourceType, locale));
+    drawSmall(L.sourceType, localeSourceLabel(session.sourceType, normLocale));
   }
   if (session.disclaimerVersion) {
     drawSmall(L.disclaimerVersion, safe(session.disclaimerVersion));
@@ -538,7 +541,7 @@ async function buildReportPdf({ session, items, locale }) {
     const warnText =
       warnings.length === 0
         ? L.noWarnings
-        : warnings.map((c) => warningLabel(c, locale)).join("; ");
+        : warnings.map((c) => warningLabel(c, normLocale)).join("; ");
 
     totalWarnings += warnings.length;
     if (warnings.length > 0) zifferWithWarnings += 1;
@@ -561,7 +564,7 @@ async function buildReportPdf({ session, items, locale }) {
     // Warning lines (each on its own row, indented under the warnings column)
     if (warnings.length > 0) {
       for (const code of warnings) {
-        const label = warningLabel(code, locale);
+        const label = warningLabel(code, normLocale);
         const wrapped = wrapText(label, font, 7.5, MAX_W - (COL.warnings - MARGIN));
         for (const wLine of wrapped) {
           ensureSpace(10);
