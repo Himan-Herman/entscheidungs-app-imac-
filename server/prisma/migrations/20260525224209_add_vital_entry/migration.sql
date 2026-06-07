@@ -15,7 +15,16 @@ ALTER TABLE "public"."MedicationPlan" DROP CONSTRAINT "MedicationPlan_deletedByU
 DROP INDEX IF EXISTS "public"."DocumentOcrResult_documentId_reviewStatus_idx";
 
 -- AlterTable
-ALTER TABLE "public"."AppointmentReminder" ALTER COLUMN "templateKey" SET NOT NULL;
+-- Conditional: AppointmentReminder is created in 20260616120000_practice_calendar_appointments
+-- (June 16), which runs AFTER this migration on a fresh CI database. Skip silently on fresh DB.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'AppointmentReminder'
+  ) THEN
+    ALTER TABLE "public"."AppointmentReminder" ALTER COLUMN "templateKey" SET NOT NULL;
+  END IF;
+END $$;
 
 -- AlterTable
 ALTER TABLE "public"."DoctorContact" DROP COLUMN "isFavorite",
@@ -105,7 +114,23 @@ DO $$ BEGIN
 END $$;
 
 -- AddForeignKey
-ALTER TABLE "public"."ConsentRecord" ADD CONSTRAINT "ConsentRecord_patientUserId_fkey" FOREIGN KEY ("patientUserId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- Conditional: ConsentRecord is created in 20260602120000_consent_record (June 2), which runs
+-- AFTER this migration on a fresh CI database. Skip silently; the FK is re-added by that migration.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'ConsentRecord'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.table_constraints
+      WHERE table_schema = 'public'
+        AND table_name = 'ConsentRecord'
+        AND constraint_name = 'ConsentRecord_patientUserId_fkey'
+    ) THEN
+      ALTER TABLE "public"."ConsentRecord" ADD CONSTRAINT "ConsentRecord_patientUserId_fkey" FOREIGN KEY ("patientUserId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    END IF;
+  END IF;
+END $$;
 
 -- AddForeignKey
 ALTER TABLE "public"."VaccinationEntry" ADD CONSTRAINT "VaccinationEntry_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -114,28 +139,80 @@ ALTER TABLE "public"."VaccinationEntry" ADD CONSTRAINT "VaccinationEntry_userId_
 ALTER TABLE "public"."VitalEntry" ADD CONSTRAINT "VitalEntry_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- RenameIndex
-ALTER INDEX "public"."ExternalResourceReference_externalSystemType_externalResourceId" RENAME TO "ExternalResourceReference_externalSystemType_externalResour_idx";
+-- Conditional: ExternalResourceReference is created in 20260615120000_pvs_fhir_hl7_integrations
+-- (June 15) with the new short name already. On fresh DB this source index never existed; skip.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public'
+      AND indexname = 'ExternalResourceReference_externalSystemType_externalResourceId'
+  ) THEN
+    ALTER INDEX "public"."ExternalResourceReference_externalSystemType_externalResourceId" RENAME TO "ExternalResourceReference_externalSystemType_externalResour_idx";
+  END IF;
+END $$;
 
 -- RenameIndex
-ALTER INDEX "public"."ExternalResourceReference_practiceProfileId_localResourceType_l" RENAME TO "ExternalResourceReference_practiceProfileId_localResourceTy_idx";
+-- Conditional: same table; on fresh DB the source index never existed.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public'
+      AND indexname = 'ExternalResourceReference_practiceProfileId_localResourceType_l'
+  ) THEN
+    ALTER INDEX "public"."ExternalResourceReference_practiceProfileId_localResourceType_l" RENAME TO "ExternalResourceReference_practiceProfileId_localResourceTy_idx";
+  END IF;
+END $$;
 
 -- RenameIndex
-ALTER INDEX "public"."PatientInboxItem_patientUserId_sourceRef_idx" RENAME TO "PatientInboxItem_patientUserId_sourceRefType_sourceRefId_idx";
+-- Conditional: PatientInboxItem_patientUserId_sourceRef_idx is first created in
+-- 20260621170000_patient_inbox_dedupe (June 21). On fresh DB this source index doesn't exist yet.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public'
+      AND indexname = 'PatientInboxItem_patientUserId_sourceRef_idx'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes
+      WHERE schemaname = 'public'
+        AND indexname = 'PatientInboxItem_patientUserId_sourceRefType_sourceRefId_idx'
+    ) THEN
+      ALTER INDEX "public"."PatientInboxItem_patientUserId_sourceRef_idx" RENAME TO "PatientInboxItem_patientUserId_sourceRefType_sourceRefId_idx";
+    END IF;
+  END IF;
+END $$;
 
 -- RenameIndex
+-- Safe: PracticeInboxItem_practiceProfileId_sourceRefType_sourceRefId_idx (65 chars, stored as
+-- 63-char truncated name _i) was created in 20260524120000_practice_inbox (May 24). Exists on fresh DB.
 ALTER INDEX "public"."PracticeInboxItem_practiceProfileId_sourceRefType_sourceRefId_i" RENAME TO "PracticeInboxItem_practiceProfileId_sourceRefType_sourceRef_idx";
 
 -- RenameIndex
+-- Safe: created in 20260520180000_interpreter_practice_sharing (May 20). Exists on fresh DB.
 ALTER INDEX "public"."PracticeInterpreterSessionLink_practiceProfileId_consentGranted" RENAME TO "PracticeInterpreterSessionLink_practiceProfileId_consentGra_idx";
 
 -- RenameIndex
+-- Safe: created in 20260520180000_interpreter_practice_sharing (May 20). Exists on fresh DB.
 ALTER INDEX "public"."PracticeInterpreterSessionLink_practiceProfileId_consentStatus_" RENAME TO "PracticeInterpreterSessionLink_practiceProfileId_consentSta_idx";
 
 -- RenameIndex
+-- Safe: created in 20260520180000_interpreter_practice_sharing (May 20). Exists on fresh DB.
 ALTER INDEX "public"."PracticeInterpreterSessionLink_practiceProfileId_patientUser_ke" RENAME TO "PracticeInterpreterSessionLink_practiceProfileId_patientUse_key";
 
 -- RenameIndex
-ALTER INDEX "public"."PracticePatientLink_practiceProfileId_assignedTeamMemberUserId_" RENAME TO "PracticePatientLink_practiceProfileId_assignedTeamMemberUse_idx";
+-- Conditional: assignedTeamMemberUserId column (and its index) is added in
+-- 20260620120000_practice_organization_account (June 20). On fresh DB this source index never existed.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_indexes
+    WHERE schemaname = 'public'
+      AND indexname = 'PracticePatientLink_practiceProfileId_assignedTeamMemberUserId_'
+  ) THEN
+    ALTER INDEX "public"."PracticePatientLink_practiceProfileId_assignedTeamMemberUserId_" RENAME TO "PracticePatientLink_practiceProfileId_assignedTeamMemberUse_idx";
+  END IF;
+END $$;
 
 -- RenameIndex
+-- Safe: created in 20260518120000_practice_patient_link (May 18) as the 72-char name, stored by
+-- PostgreSQL as the 63-char truncated form. Exists on fresh DB.
 ALTER INDEX "public"."PracticePatientLink_practiceProfileId_patientUserId_patientProf" RENAME TO "PracticePatientLink_practiceProfileId_patientUserId_patient_key";
