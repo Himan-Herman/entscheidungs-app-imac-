@@ -34,7 +34,19 @@ DROP COLUMN "lastUsedAt";
 ALTER TABLE "public"."PracticeIntegrationSettings" ALTER COLUMN "updatedAt" DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE "public"."PracticeMember" ALTER COLUMN "updatedAt" DROP DEFAULT;
+-- Conditional: PracticeMember.updatedAt is added in 20260529120000_practice_member_team_fields
+-- (May 29), which runs AFTER this migration on a fresh CI database. Skip silently on fresh DB;
+-- the column-existence check implies table existence.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'PracticeMember'
+      AND column_name = 'updatedAt'
+  ) THEN
+    ALTER TABLE "public"."PracticeMember" ALTER COLUMN "updatedAt" DROP DEFAULT;
+  END IF;
+END $$;
 
 -- AlterTable
 ALTER TABLE "public"."PracticeWebhookEvent" ALTER COLUMN "updatedAt" DROP DEFAULT;
