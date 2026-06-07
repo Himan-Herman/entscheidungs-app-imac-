@@ -41,7 +41,7 @@ export default {
 
   loadError: "Prüfungen konnten nicht geladen werden.",
   submitError: "Anfrage konnte nicht gesendet werden.",
-  aiMarked: "Smart-Plausibilitätshinweis (nicht rechtsverbindlich)",
+  aiMarked: "KI-gestützter Plausibilitätshinweis (nicht rechtsverbindlich)",
 
   resultStub:
     "Prüfungsanfrage gespeichert. Die Plausibilitätshinweise sind unten aufgeführt.",
@@ -63,19 +63,25 @@ export default {
     invalid_count: "Ungültige Anzahl.",
   },
 
-  btnAiReview: "Smart-Plausibilitätshinweis anfordern",
-  aiReviewPending: "Smart-Hinweis wird angefordert …",
-  aiReviewLabel: "Smart-Plausibilitätshinweis / nicht rechtsverbindlich",
+  btnAiReview: "KI-gestützten Plausibilitätshinweis anfordern",
+  aiReviewPending: "KI-Hinweis wird angefordert …",
+  aiReviewLabel: "KI-gestützter Plausibilitätshinweis / nicht rechtsverbindlich",
   aiReviewNonBinding: "Dieser Hinweis ist nicht rechtsverbindlich, keine Diagnose und keine Erstattungsentscheidung.",
-  aiReviewFallback: "Smart-Hinweis derzeit nicht verfügbar. Die deterministischen Prüfergebnisse oben sind weiterhin gültig.",
-  aiReviewUnavailable: "Smart-Plausibilitätsprüfung ist nicht aktiviert.",
-  aiReviewError: "Smart-Hinweis konnte nicht angefordert werden.",
-  aiReviewSuccess: "Smart-Plausibilitätshinweis erhalten.",
+  aiReviewFallback: "KI-Hinweis derzeit nicht verfügbar. Die deterministischen Prüfergebnisse oben sind weiterhin gültig.",
+  aiReviewUnavailable: "KI-gestützter Plausibilitätsabgleich ist nicht aktiviert.",
+  aiReviewError: "KI-Hinweis konnte nicht angefordert werden.",
+  aiReviewSuccess: "KI-Plausibilitätshinweis erhalten.",
   aiReviewGeneralNote: "Allgemeiner Hinweis",
   aiReviewUncertaintyNote: "Unsicherheitshinweis",
   aiReviewRowHints: "Zifferhinweise",
 
   manualReviewRecommended: "Manuelle Prüfung durch qualifiziertes Abrechnungspersonal wird empfohlen.",
+
+  // P5 — compliance/transparency notes
+  catalogueSubsetNote:
+    "Der verwendete GOÄ-Katalog ist eine lokale Teilmenge (Testkatalog). Ziffern, die hier nicht gefunden werden, erfordern eine Verifikation anhand des aktuellen amtlichen GOÄ-Textes.",
+  dataProcessingNote:
+    "Gespeicherte Daten: GOÄ-Ziffern, Faktoren und optionale Kontextnotizen. Keine Patientendaten werden akzeptiert oder gespeichert.",
 
   featureDisabled: "Dieses Modul ist derzeit nicht aktiviert.",
   forbidden: "Nur Inhaber:innen und Administrator:innen haben Zugriff.",

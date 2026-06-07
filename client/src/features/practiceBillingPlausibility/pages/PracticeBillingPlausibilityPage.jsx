@@ -222,6 +222,13 @@ export default function PracticeBillingPlausibilityPage() {
         {t.disclaimer}
       </div>
 
+      {/* P5 — data processing transparency note */}
+      {t.dataProcessingNote && (
+        <p className="billing-plausibility__data-note" role="note">
+          {t.dataProcessingNote}
+        </p>
+      )}
+
       {/* Practice selector */}
       {practices.length > 1 && (
         <div style={{ marginBottom: "1rem" }}>
@@ -386,6 +393,13 @@ export default function PracticeBillingPlausibilityPage() {
                   rows={3}
                 />
               </div>
+
+              {/* P5 — catalogue scope note */}
+              {t.catalogueSubsetNote && (
+                <p className="billing-plausibility__subset-note" role="note">
+                  {t.catalogueSubsetNote}
+                </p>
+              )}
 
               <div className="billing-plausibility__actions">
                 <button

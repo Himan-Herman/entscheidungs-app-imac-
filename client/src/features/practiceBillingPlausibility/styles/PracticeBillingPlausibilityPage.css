@@ -33,6 +33,22 @@
   line-height: 1.5;
 }
 
+/* P5: Data processing transparency note — rendered below disclaimer */
+.billing-plausibility__data-note {
+  margin: -0.75rem 0 1.25rem;
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+  line-height: 1.5;
+}
+
+/* P5: Catalogue subset scope note — rendered above submit button */
+.billing-plausibility__subset-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+  line-height: 1.5;
+}
+
 /* Sections */
 .billing-plausibility__section {
   margin-bottom: 2rem;

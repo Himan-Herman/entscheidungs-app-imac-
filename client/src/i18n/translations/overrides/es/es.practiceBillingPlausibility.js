@@ -82,6 +82,12 @@ export const esPracticeBillingPlausibility = {
 
   manualReviewRecommended: "Se recomienda la revisión manual por parte de personal de facturación cualificado.",
 
+  // P5 — compliance/transparency notes
+  catalogueSubsetNote:
+    "El catálogo GOÄ utilizado es un subconjunto de prueba local. Los códigos no encontrados aquí requieren verificación con el texto oficial GOÄ vigente.",
+  dataProcessingNote:
+    "Datos almacenados: códigos GOÄ, factores y notas de contexto opcionales únicamente. No se aceptan ni almacenan datos del paciente.",
+
   featureDisabled: "Este módulo no está activo aún.",
   forbidden: "Solo los propietarios y administradores tienen acceso.",
 

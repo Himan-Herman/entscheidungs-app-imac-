@@ -430,6 +430,9 @@ const REQUIRED_KEYS = [
   // Catalogue verification status (G3b-2)
   "catalogueStatus", "catalogueStatusVerified", "catalogueStatusPointsUncertain",
   "catalogueStatusNeedsReview", "catalogueStatusUnknown", "catalogueSourceReference",
+  // P5 — compliance/transparency notes
+  "catalogueSubsetNote",
+  "dataProcessingNote",
 ];
 
 const I18N_FILES = [
@@ -446,6 +449,42 @@ for (const { lang, rel } of I18N_FILES) {
     assert(`i18n[${lang}]: key present — ${key}`, content.includes(`${key}:`));
   }
 }
+
+// P5: DE AI keys must use KI/AI terminology — not opaque "Smart-" marketing label.
+// Transparency requirement: users must know they are interacting with AI/KI-based hints.
+{
+  const deBilling = read("client/src/i18n/translations/de/practiceBillingPlausibility.js");
+  assert(
+    "DE billing i18n (P5): AI keys use KI terminology, not 'Smart-' marketing label",
+    !deBilling.includes("Smart-Plausibilitätshinweis") && !deBilling.includes("Smart-Hinweis"),
+  );
+}
+
+// P5: catalogueSubsetNote and dataProcessingNote rendered in overview page JSX
+assert(
+  "overview JSX (P5): catalogueSubsetNote rendered with conditional guard",
+  fileContains(JSX_PATH, "t.catalogueSubsetNote"),
+);
+assert(
+  "overview JSX (P5): dataProcessingNote rendered with conditional guard",
+  fileContains(JSX_PATH, "t.dataProcessingNote"),
+);
+
+// P5: CSS classes for new notes are defined
+assert(
+  "CSS (P5): .billing-plausibility__data-note class defined",
+  fileContains(CSS_PATH, ".billing-plausibility__data-note"),
+);
+assert(
+  "CSS (P5): .billing-plausibility__subset-note class defined",
+  fileContains(CSS_PATH, ".billing-plausibility__subset-note"),
+);
+
+// P5: Compliance checklist doc exists
+assert(
+  "docs (P5): billing-plausibility-compliance-checklist.md exists",
+  fs.existsSync(path.join(ROOT, "docs/billing-plausibility-compliance-checklist.md")),
+);
 
 // ─── 10. No hardcoded visible text in JSX page ────────────────────────────────
 
@@ -780,6 +819,7 @@ console.log(
       "report-service-safety",
       "service-unit-permissions-and-catalogue",
       "ai-staging-pilot-readiness",
+      "compliance-disclaimer-wording",
     ],
   }),
 );

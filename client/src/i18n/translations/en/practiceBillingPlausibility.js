@@ -77,6 +77,12 @@ export default {
 
   manualReviewRecommended: "Manual review by qualified billing staff is recommended.",
 
+  // P5 — compliance/transparency notes
+  catalogueSubsetNote:
+    "The GOÄ catalogue used is a local test subset. Codes not found here require verification against the current official GOÄ text.",
+  dataProcessingNote:
+    "Stored data: GOÄ codes, factors, and optional context notes only. No patient identifiers are accepted or stored.",
+
   featureDisabled: "This module is not currently active.",
   forbidden: "Only owners and administrators have access.",
 
