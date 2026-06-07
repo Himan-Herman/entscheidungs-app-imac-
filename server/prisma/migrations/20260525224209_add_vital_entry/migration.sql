@@ -10,7 +10,9 @@
 ALTER TABLE "public"."MedicationPlan" DROP CONSTRAINT "MedicationPlan_deletedByUserId_fkey";
 
 -- DropIndex
-DROP INDEX "public"."DocumentOcrResult_documentId_reviewStatus_idx";
+-- IF EXISTS: safe on a fresh database where DocumentOcrResult is created in a later migration
+-- (20260618120000_document_ocr_lab). On an existing database the index exists and is dropped normally.
+DROP INDEX IF EXISTS "public"."DocumentOcrResult_documentId_reviewStatus_idx";
 
 -- AlterTable
 ALTER TABLE "public"."AppointmentReminder" ALTER COLUMN "templateKey" SET NOT NULL;
@@ -81,7 +83,26 @@ CREATE INDEX "VitalEntry_userId_type_measuredAt_idx" ON "public"."VitalEntry"("u
 CREATE INDEX "VitalEntry_userId_deletedAt_idx" ON "public"."VitalEntry"("userId", "deletedAt");
 
 -- CreateIndex
-CREATE INDEX "DocumentOcrResult_documentId_reviewStatus_idx" ON "public"."DocumentOcrResult"("documentId", "reviewStatus");
+-- Conditional block: on a fresh database DocumentOcrResult does not yet exist at this point
+-- (the table is created in 20260618120000_document_ocr_lab, which runs later).
+-- On an existing database the DROP above removed the old single-column index, so the
+-- IF NOT EXISTS guard prevents a duplicate-index error on any intermediate state.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'DocumentOcrResult'
+  ) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes
+      WHERE schemaname = 'public'
+        AND tablename = 'DocumentOcrResult'
+        AND indexname = 'DocumentOcrResult_documentId_reviewStatus_idx'
+    ) THEN
+      CREATE INDEX "DocumentOcrResult_documentId_reviewStatus_idx"
+        ON "public"."DocumentOcrResult"("documentId", "reviewStatus");
+    END IF;
+  END IF;
+END $$;
 
 -- AddForeignKey
 ALTER TABLE "public"."ConsentRecord" ADD CONSTRAINT "ConsentRecord_patientUserId_fkey" FOREIGN KEY ("patientUserId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
