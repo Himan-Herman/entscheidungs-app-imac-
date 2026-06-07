@@ -55,7 +55,10 @@ CREATE TABLE "LabStructuredEntry" (
 CREATE UNIQUE INDEX "DocumentOcrResult_ocrJobId_key" ON "DocumentOcrResult"("ocrJobId");
 CREATE INDEX "DocumentOcrJob_documentId_status_idx" ON "DocumentOcrJob"("documentId", "status");
 CREATE INDEX "DocumentOcrJob_practiceProfileId_createdAt_idx" ON "DocumentOcrJob"("practiceProfileId", "createdAt");
-CREATE INDEX "DocumentOcrResult_documentId_reviewStatus_idx" ON "DocumentOcrResult"("reviewStatus");
+-- IF NOT EXISTS: on an existing database 20260525224209_add_vital_entry may have already
+-- created this index with the correct two-column definition; skip silently in that case.
+-- Columns corrected to ("documentId", "reviewStatus") to match schema.prisma @@index([documentId, reviewStatus]).
+CREATE INDEX IF NOT EXISTS "DocumentOcrResult_documentId_reviewStatus_idx" ON "DocumentOcrResult"("documentId", "reviewStatus");
 CREATE INDEX "LabStructuredEntry_documentId_idx" ON "LabStructuredEntry"("documentId");
 CREATE INDEX "LabStructuredEntry_ocrJobId_idx" ON "LabStructuredEntry"("ocrJobId");
 
