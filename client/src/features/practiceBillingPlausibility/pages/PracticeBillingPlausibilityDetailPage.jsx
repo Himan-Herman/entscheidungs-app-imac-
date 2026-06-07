@@ -187,7 +187,7 @@ export default function PracticeBillingPlausibilityDetailPage() {
     : "—";
 
   return (
-    <main className="billing-plausibility" aria-labelledby="bp-detail-heading">
+    <main className="billing-plausibility" aria-labelledby="bp-detail-heading" data-testid="bp-detail-page">
       <header>
         <p>
           <Link to={overviewHref}>{t.backToBillingOverview}</Link>
@@ -215,7 +215,7 @@ export default function PracticeBillingPlausibilityDetailPage() {
         </div>
         <div className="billing-plausibility__detail-meta-item">
           <dt className="billing-plausibility__label">{t.colStatus}</dt>
-          <dd>{statusLabel}</dd>
+          <dd data-testid="bp-detail-status">{statusLabel}</dd>
         </div>
       </dl>
 
@@ -236,6 +236,7 @@ export default function PracticeBillingPlausibilityDetailPage() {
             onClick={handleDismiss}
             disabled={dismissing}
             aria-busy={dismissing}
+            data-testid="bp-dismiss-btn"
           >
             {t.btnDismissSession}
           </button>
@@ -246,6 +247,7 @@ export default function PracticeBillingPlausibilityDetailPage() {
         <p
           className="billing-plausibility__status billing-plausibility__status--ok"
           aria-live="polite"
+          data-testid="bp-dismiss-success"
         >
           {dismissSuccess}
         </p>
@@ -273,6 +275,7 @@ export default function PracticeBillingPlausibilityDetailPage() {
           onClick={handleDownload}
           disabled={downloading}
           aria-busy={downloading}
+          data-testid="bp-download-report-btn"
         >
           {downloading ? t.reportDownloadPending : t.btnDownloadReport}
         </button>
@@ -295,7 +298,7 @@ export default function PracticeBillingPlausibilityDetailPage() {
               const catalogueFound = item.catalogueMatchJson?.found;
               const warnings = Array.isArray(item.warningsJson) ? item.warningsJson : [];
               return (
-                <li key={item.id} className="billing-plausibility__item">
+                <li key={item.id} className="billing-plausibility__item" data-testid="bp-detail-item">
                   <div className="billing-plausibility__item-header">
                     <span className="billing-plausibility__item-ziffer">
                       {item.ziffer}
@@ -319,7 +322,7 @@ export default function PracticeBillingPlausibilityDetailPage() {
                     };
                     const csLabel = csLabelMap[cs] ?? t.catalogueStatusUnknown;
                     return (
-                      <p className="billing-plausibility__item-completeness">
+                      <p className="billing-plausibility__item-completeness" data-testid="bp-detail-catalogue-status">
                         {t.catalogueStatus}: {csLabel}
                       </p>
                     );

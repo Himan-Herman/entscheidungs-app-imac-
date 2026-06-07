@@ -120,10 +120,14 @@ export const frPracticeBillingPlausibility = {
 
 /** Vendor catalogue keys for practiceIntegrations namespace (French). */
 export const frPracticeIntegrationsVendors = {
+  enterprisePathwayNote:
+    "Les intégrations PVS/FHIR/KIS sont préparées comme voie enterprise. L'activation nécessite un pilote validé, un accord fournisseur/API et une révision du traitement des données. Aucun connecteur n'est actif en production pour l'instant.",
+
   sectionVendors: "Systèmes PVS disponibles",
   vendorCatalogueNote:
-    "L'activation nécessite un contrat fournisseur, un système de test et une validation de sécurité. Aucun de ces connecteurs n'est disponible en production pour l'instant.",
+    "L'activation nécessite un accord fournisseur/API, un système de test validé et une revue technique. Aucun de ces connecteurs n'est disponible en production pour l'instant.",
   vendorStatusComingSoon: "Bientôt disponible",
+  vendorStatusPilotRequired: "Pilote requis",
   vendorStatusSandboxReady: "Sandbox prêt",
   vendorStatusActive: "Actif",
   vendorTypePvs: "PVS",

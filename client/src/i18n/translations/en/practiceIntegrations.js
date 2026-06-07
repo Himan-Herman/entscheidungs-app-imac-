@@ -74,10 +74,14 @@ export default {
   jobDirection: "Direction",
   jobCreated: "Created",
 
+  enterprisePathwayNote:
+    "PVS/FHIR/KIS integrations are prepared as an enterprise pathway. Live activation requires a validated pilot, vendor/API agreement and data-processing review. No connector is active in production yet.",
+
   sectionVendors: "Available PVS systems",
   vendorCatalogueNote:
-    "Activation requires a vendor contract, a test system, and a security review. None of these connectors are available in production yet.",
+    "Activation requires a vendor/API agreement, validated test system and technical review. None of these connectors are available in production yet.",
   vendorStatusComingSoon: "Coming soon",
+  vendorStatusPilotRequired: "Pilot required",
   vendorStatusSandboxReady: "Sandbox ready",
   vendorStatusActive: "Active",
   vendorTypePvs: "PVS",

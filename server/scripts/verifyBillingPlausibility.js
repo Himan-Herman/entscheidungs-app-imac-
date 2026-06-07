@@ -643,6 +643,116 @@ assert("permissions: unknown_role lacks INTEGRATIONS_MANAGE", !hasPracticePermis
   assert("service unit (G3b-2): unknown row match has no completenessStatus key", !("completenessStatus" in multiRowResult.rowResults[1].match));
 }
 
+// ─── 15. AI staging pilot readiness ──────────────────────────────────────────
+
+// 15a. Service constants — token/temperature/context bounds must be present and correct.
+// These values are the agreed safety envelope for the staging pilot.
+assert(
+  "AI service: BILLING_AI_MAX_TOKENS = 400 (staging envelope)",
+  AI_SERVICE.includes("const BILLING_AI_MAX_TOKENS = 400"),
+);
+assert(
+  "AI service: BILLING_AI_TEMPERATURE = 0.15 (conservative, staging envelope)",
+  AI_SERVICE.includes("const BILLING_AI_TEMPERATURE = 0.15"),
+);
+assert(
+  "AI service: MAX_CONTEXT_CHARS = 500 (context forwarded to OpenAI is bounded)",
+  AI_SERVICE.includes("const MAX_CONTEXT_CHARS = 500"),
+);
+
+// 15b. Context builder applies the truncation at MAX_CONTEXT_CHARS
+assert(
+  "AI service: contextText sliced to MAX_CONTEXT_CHARS in buildBillingContextBlock",
+  AI_SERVICE.includes(".slice(0, MAX_CONTEXT_CHARS)"),
+);
+
+// 15c. Field-length truncation constants defined (limits what is persisted from AI output)
+assert(
+  "AI service: MAX_HINT_CHARS constant defined for row-hint truncation",
+  AI_SERVICE.includes("const MAX_HINT_CHARS"),
+);
+assert(
+  "AI service: MAX_NOTE_CHARS constant defined for general/uncertainty note truncation",
+  AI_SERVICE.includes("const MAX_NOTE_CHARS"),
+);
+
+// 15d. Route never exposes raw prompt or raw AI response in the HTTP response body.
+// Clients must never see the system prompt or the unfiltered OpenAI payload.
+assert(
+  "route: no rawPrompt field in any response body",
+  !ROUTE.includes('"rawPrompt"') && !ROUTE.includes("rawPrompt:"),
+);
+assert(
+  "route: no rawResponse field in any response body",
+  !ROUTE.includes('"rawResponse"') && !ROUTE.includes("rawResponse:"),
+);
+
+// 15e. Review route: AI flag guard comes before auth/body processing.
+// This ensures unauthenticated callers also receive 404 (not 401) when flag is off,
+// which avoids leaking whether the AI feature exists at all.
+assert(
+  "route: isBillingAiReviewEnabled() guard appears before auth checks in review handler",
+  (() => {
+    const reviewHandlerStart = ROUTE.indexOf('router.post("/:sessionId/review"');
+    if (reviewHandlerStart < 0) return false;
+    const handlerSlice = ROUTE.slice(reviewHandlerStart, reviewHandlerStart + 300);
+    const flagPos = handlerSlice.indexOf("isBillingAiReviewEnabled()");
+    const authPos = handlerSlice.indexOf("userId(req)");
+    return flagPos > 0 && (authPos < 0 || flagPos < authPos);
+  })(),
+);
+
+// 15f. Route returns used_fallback field — lets client-side telemetry / observability
+// detect how often the AI path falls back to deterministic hints.
+assert(
+  "route: used_fallback forwarded from service result in review response",
+  ROUTE.includes("used_fallback: result.used_fallback"),
+);
+
+// 15g. AI service has no console.log / console.info of raw OpenAI responses.
+// (console.error on failure is acceptable; plain log/info is not — avoids secrets in logs.)
+{
+  const aiLines = AI_SERVICE.split("\n");
+  const consoleLogs = aiLines.filter(
+    (line) => /console\.(log|info)\s*\(/.test(line) && !line.trim().startsWith("//"),
+  );
+  assert(
+    `AI service: no console.log/info (raw AI output must not appear in server logs) — found ${consoleLogs.length} line(s)`,
+    consoleLogs.length === 0,
+  );
+}
+
+// 15h. AI output must never include monetary/amount fields.
+// These would constitute a reimbursement prediction, which is explicitly forbidden.
+for (const field of ["invoice_total", "totalAmount", "feeAmount", "reimbursementAmount", "invoiceAmount"]) {
+  assert(
+    `AI service: no monetary field "${field}" in service code`,
+    !AI_SERVICE.includes(field),
+  );
+}
+
+// 15i. Safe fallback is registered in aiSafetyPolicy and carries nonBinding marker.
+assert(
+  "aiSafetyPolicy: SAFE_FALLBACKS entry for BILLING_PLAUSIBILITY is registered",
+  fileContains("server/config/aiSafetyPolicy.js", "BILLING_PLAUSIBILITY") &&
+    fileContains("server/config/aiSafetyPolicy.js", "nonBinding"),
+);
+
+// 15j. isBillingAiReviewEnabled() has a hard dependency on isBillingPlausibilityEnabled().
+// The AI flag can NEVER be on when the base billing flag is off.
+assert(
+  "featureFlags: isBillingAiReviewEnabled() calls isBillingPlausibilityEnabled() as prerequisite",
+  fileContains("server/config/featureFlags.js", "isBillingPlausibilityEnabled()"),
+);
+
+// 15k. .env.example documents both billing flags with staging guidance
+{
+  const ENV_EXAMPLE = read("server/.env.example");
+  assert("env.example: ENABLE_BILLING_PLAUSIBILITY flag documented", ENV_EXAMPLE.includes("ENABLE_BILLING_PLAUSIBILITY"));
+  assert("env.example: ENABLE_BILLING_AI_REVIEW flag documented", ENV_EXAMPLE.includes("ENABLE_BILLING_AI_REVIEW"));
+  assert("env.example: AI review section references staging checklist", ENV_EXAMPLE.includes("billing-ai-staging-checklist"));
+}
+
 // ─── Result ───────────────────────────────────────────────────────────────────
 
 if (failures.length) {
@@ -669,6 +779,7 @@ console.log(
       "route-structure",
       "report-service-safety",
       "service-unit-permissions-and-catalogue",
+      "ai-staging-pilot-readiness",
     ],
   }),
 );

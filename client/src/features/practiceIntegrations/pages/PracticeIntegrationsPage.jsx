@@ -224,6 +224,9 @@ export default function PracticeIntegrationsPage() {
         </p>
         <h1 id="practice-integrations-heading">{t.heading}</h1>
         <p className="practice-integrations__intro">{t.intro}</p>
+        <p className="practice-integrations__enterprise-note" role="note">
+          {t.enterprisePathwayNote}
+        </p>
       </header>
 
       <div className="practice-dashboard__toolbar">
@@ -391,7 +394,7 @@ export default function PracticeIntegrationsPage() {
                     {t.vendorTypePvs}
                   </span>
                   <span className="practice-integrations__vendor-badge practice-integrations__vendor-badge--status">
-                    {t.vendorStatusComingSoon}
+                    {t.vendorStatusPilotRequired}
                   </span>
                   <a
                     href={`mailto:contact@medscoutx.com?subject=PVS-Interesse%3A%20${encodeURIComponent(vendor.name)}`}

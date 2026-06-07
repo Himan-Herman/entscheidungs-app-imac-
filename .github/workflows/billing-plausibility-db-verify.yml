@@ -1,0 +1,106 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# billing-plausibility-db-verify.yml
+#
+# DB-touching billing plausibility service smoke test.
+# Runs verifyBillingPlausibilityService.js against a temporary PostgreSQL
+# service container — no production database, no Render URL, no OpenAI.
+#
+# Separated from billing-plausibility-verify.yml (offline checks) because
+# this job requires a live PostgreSQL database.
+#
+# What this workflow does:
+#   1. Spin up a PostgreSQL 16 service container (localhost:5432)
+#   2. Install server dependencies
+#   3. Generate Prisma client (schema → JS types)
+#   4. Apply all migrations (prisma migrate deploy)
+#   5. Run verify:billing-plausibility-service
+#      → CI fixture mode (CI=true) auto-creates User + PracticeProfile,
+#        runs all 12 §§ smoke tests, and removes fixture records in cleanup.
+#
+# Safety guarantees:
+#   - DATABASE_URL is CI-only; points to localhost service container only.
+#   - PRODUCTION_INDICATORS guard in the script refuses Render/prod hosts.
+#   - Fixture creation requires host = localhost/127.0.0.1 (enforced in script).
+#   - No OPENAI_API_KEY set — AI calls cannot happen.
+#   - No app server started — pure service-layer test.
+#   - No production secrets used or required.
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Billing Plausibility — DB Service Smoke Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  verify-service-db:
+    name: DB service smoke test (PostgreSQL, no AI, no prod)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_billing
+          POSTGRES_PASSWORD: ci_billing_pw
+          POSTGRES_DB: ci_billing_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: server
+
+    env:
+      # CI-only local service container URL — never a Render or production host.
+      DATABASE_URL: postgresql://ci_billing:ci_billing_pw@localhost:5432/ci_billing_test
+      # NODE_ENV=test activates CI fixture mode in verifyBillingPlausibilityService.js
+      NODE_ENV: test
+      # CI=true is set automatically by GitHub Actions; listed here for clarity.
+      CI: true
+      # Enable billing plausibility service (normally gated by feature flag).
+      ENABLE_BILLING_PLAUSIBILITY: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Use Node 22 — matches the project's engines requirement (>=22).
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      # Install server dependencies only.
+      - name: Install server dependencies
+        run: npm ci
+
+      # Generate Prisma client from schema.prisma.
+      # Reads schema, emits JS types — does NOT connect to the database.
+      - name: Generate Prisma client (schema → JS types, no DB connection)
+        run: npx prisma generate
+
+      # Apply all migrations to the CI PostgreSQL container.
+      # Creates all tables including BillingPlausibilitySession/Item/AuditLog.
+      - name: Apply database migrations
+        run: npx prisma migrate deploy
+
+      # Print the DB host as a pre-flight safety check.
+      # The script's own PRODUCTION_INDICATORS guard will also run.
+      - name: Print DB host (safety pre-flight)
+        run: node -e "const u = new URL(process.env.DATABASE_URL); console.log('[ci] DB host:', u.hostname, '| DB name:', u.pathname.slice(1));"
+
+      # Run the DB-touching service smoke test.
+      # CI=true triggers CI fixture mode: creates User + PracticeProfile,
+      # runs §1–§12, then deletes all created records in cleanup.
+      - name: verify:billing-plausibility-service
+        run: npm run verify:billing-plausibility-service

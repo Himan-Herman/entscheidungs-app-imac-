@@ -686,6 +686,7 @@ export default function PracticeHubPage() {
                 <Link
                   className="practice-overview__action"
                   to={`/practice/settings/billing-plausibility?practiceId=${encodeURIComponent(practiceId)}`}
+                  data-testid="hub-billing-plausibility-action"
                 >
                   {t.actionOpenBillingPlausibility}
                 </Link>

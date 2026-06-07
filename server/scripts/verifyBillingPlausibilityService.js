@@ -94,9 +94,64 @@ if (detectedIndicator) {
 }
 
 if (urlHostname !== "localhost" && urlHostname !== "127.0.0.1" && !urlHostname.endsWith(".local")) {
-  // Non-localhost but no known prod indicator — warn but allow
+  // Non-localhost but no known prod indicator — warn but allow.
+  // GitHub Actions PostgreSQL service containers always bind to localhost — safe.
   console.warn("[verify] WARNING: DATABASE_URL host is not localhost:", urlHostname);
   console.warn("[verify] Proceeding — ensure this is a dev/test database.");
+}
+
+// ─── CI fixture mode ──────────────────────────────────────────────────────────
+//
+// When CI=true or NODE_ENV=test and no PracticeProfile exists in the DB,
+// a minimal User + PracticeProfile is created so service flows can run.
+// All fixture records are removed in the finally block.
+//
+// Fixture creation is only permitted when the DB host is localhost/127.0.0.1
+// (GitHub Actions PostgreSQL service containers always use localhost).
+// This prevents accidental fixture creation on any non-local database.
+
+const CI_MODE = process.env.CI === "true" || process.env.NODE_ENV === "test";
+
+/** Fixture IDs to delete in cleanup (null = not created this run). */
+const createdFixture = { userId: null, practiceId: null };
+
+async function createCiFixture(prismaClient) {
+  if (urlHostname !== "localhost" && urlHostname !== "127.0.0.1") {
+    console.error("[verify] FATAL: CI fixture mode requested but DB host is not localhost.");
+    console.error("[verify] DB host:", urlHostname);
+    console.error("[verify] Fixture creation is only allowed against a local test database.");
+    process.exit(1);
+  }
+
+  console.log("[verify] CI mode: creating minimal test fixture (User + PracticeProfile) …");
+
+  // Use timestamp to guarantee uniqueness across parallel runs.
+  const stamp = Date.now();
+  const ciEmail = `billing-ci-verify-${stamp}@test.invalid`;
+  const ciSlug = `billing-ci-verify-${stamp}`;
+
+  const user = await prismaClient.user.create({
+    data: {
+      email: ciEmail,
+      passwordHash: "ci-placeholder-not-a-real-hash",
+      firstName: "CI",
+      lastName: "Verify",
+      dateOfBirth: new Date("1990-01-01"),
+      verified: false,
+    },
+  });
+  createdFixture.userId = user.id;
+  console.log(`[verify] CI fixture: created User id=${user.id} email=${ciEmail}`);
+
+  const practice = await prismaClient.practiceProfile.create({
+    data: {
+      userId: user.id,
+      practiceName: "CI Billing Verify Practice",
+      publicSlug: ciSlug,
+    },
+  });
+  createdFixture.practiceId = practice.id;
+  console.log(`[verify] CI fixture: created PracticeProfile id=${practice.id} slug=${ciSlug}`);
 }
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
@@ -156,15 +211,28 @@ async function main() {
     process.exit(1);
   }
 
-  // ── Practice fixture discovery ────────────────────────────────────────────
+  // ── Practice fixture discovery (or CI fixture creation) ──────────────────
 
-  const practice = await prisma.practiceProfile.findFirst({
+  let practice = await prisma.practiceProfile.findFirst({
     select: { id: true, userId: true, practiceName: true },
   });
 
   if (!practice) {
-    console.log("[verify] skip — no PracticeProfile in DB");
-    return;
+    if (CI_MODE) {
+      await createCiFixture(prisma);
+      practice = await prisma.practiceProfile.findFirst({
+        select: { id: true, userId: true, practiceName: true },
+      });
+    } else {
+      console.log("[verify] skip — no PracticeProfile in DB");
+      console.log("[verify] Tip: set CI=true or NODE_ENV=test to auto-create a CI fixture.");
+      return;
+    }
+  }
+
+  if (!practice) {
+    console.error("[verify] FATAL: CI fixture creation succeeded but practice not found on re-query.");
+    process.exit(1);
   }
 
   const practiceId = practice.id;
@@ -448,6 +516,20 @@ async function cleanup() {
   } catch (err) {
     console.error("[verify] cleanup error:", err?.message ?? String(err));
     console.error("[verify] Some test records may remain. IDs:", createdSessionIds);
+  }
+
+  // ── CI fixture teardown ────────────────────────────────────────────────────
+  // Delete User (onDelete: Cascade propagates to PracticeProfile automatically).
+  // BillingPlausibilitySession uses a scalar practiceProfileId with no Prisma
+  // relation, so no DB-level cascade is triggered — billing records are already
+  // cleaned above before this block runs.
+  if (createdFixture.userId) {
+    try {
+      await prisma.user.delete({ where: { id: createdFixture.userId } });
+      console.log(`  ok    CI fixture: deleted User id=${createdFixture.userId} (cascades PracticeProfile)`);
+    } catch (err) {
+      console.error("[verify] CI fixture teardown error (User):", err?.message ?? String(err));
+    }
   }
 }
 

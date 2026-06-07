@@ -199,7 +199,7 @@ export default function PracticeBillingPlausibilityPage() {
   }
 
   return (
-    <main className="billing-plausibility" aria-labelledby="bp-heading">
+    <main className="billing-plausibility" aria-labelledby="bp-heading" data-testid="bp-overview-page">
       <header>
         <p>
           <Link to={`/practice/hub?practiceId=${encodeURIComponent(practiceId)}`}>
@@ -271,7 +271,7 @@ export default function PracticeBillingPlausibilityPage() {
             <h2 id="bp-form-heading" className="billing-plausibility__section-heading">
               {t.btnNewReview}
             </h2>
-            <form className="billing-plausibility__form" onSubmit={handleSubmit}>
+            <form className="billing-plausibility__form" onSubmit={handleSubmit} data-testid="bp-form">
               <div className="billing-plausibility__rows" role="list" aria-label={t.labelZiffer}>
                 {rows.map((row, idx) => (
                   <div
@@ -292,6 +292,7 @@ export default function PracticeBillingPlausibilityPage() {
                         type="text"
                         inputMode="numeric"
                         value={row.ziffer}
+                        data-testid={`bp-ziffer-input-${idx}`}
                         onChange={(e) =>
                           dispatchRows({ type: "update", id: row.id, field: "ziffer", value: e.target.value })
                         }
@@ -312,6 +313,7 @@ export default function PracticeBillingPlausibilityPage() {
                         id={`bp-factor-${row.id}`}
                         className="billing-plausibility__input"
                         value={row.factor}
+                        data-testid={`bp-factor-select-${idx}`}
                         onChange={(e) =>
                           dispatchRows({ type: "update", id: row.id, field: "factor", value: e.target.value })
                         }
@@ -338,6 +340,7 @@ export default function PracticeBillingPlausibilityPage() {
                         min="1"
                         max="99"
                         value={row.count}
+                        data-testid={`bp-count-input-${idx}`}
                         onChange={(e) =>
                           dispatchRows({ type: "update", id: row.id, field: "count", value: e.target.value })
                         }
@@ -390,6 +393,7 @@ export default function PracticeBillingPlausibilityPage() {
                   className="billing-plausibility__btn billing-plausibility__btn--primary"
                   disabled={submitting}
                   aria-busy={submitting}
+                  data-testid="bp-submit-btn"
                 >
                   {submitting ? t.submitting : t.btnSubmit}
                 </button>
@@ -403,6 +407,7 @@ export default function PracticeBillingPlausibilityPage() {
               className="billing-plausibility__section"
               aria-labelledby="bp-result-heading"
               aria-live="polite"
+              data-testid="bp-result-section"
             >
               <h2 id="bp-result-heading" className="billing-plausibility__section-heading">
                 {t.sectionResult}
@@ -446,9 +451,10 @@ export default function PracticeBillingPlausibilityPage() {
                             <ul
                               className="billing-plausibility__item-warnings"
                               aria-label={`${t.itemWarningsLabel}: ${item.ziffer}`}
+                              data-testid="bp-warnings"
                             >
                               {warnings.map((code) => (
-                                <li key={code} className="billing-plausibility__item-warning">
+                                <li key={code} className="billing-plausibility__item-warning" data-testid="bp-warning-item">
                                   {t.warnings?.[code] || code}
                                 </li>
                               ))}
@@ -546,6 +552,7 @@ export default function PracticeBillingPlausibilityPage() {
           <section
             className="billing-plausibility__section"
             aria-labelledby="bp-history-heading"
+            data-testid="bp-history-section"
           >
             <h2 id="bp-history-heading" className="billing-plausibility__section-heading">
               {t.sectionHistory}
@@ -554,7 +561,7 @@ export default function PracticeBillingPlausibilityPage() {
               <p className="billing-plausibility__empty">{t.noReviews}</p>
             ) : (
               <div className="billing-plausibility__table-wrap">
-                <table className="billing-plausibility__table">
+                <table className="billing-plausibility__table" data-testid="bp-history-table">
                   <thead>
                     <tr>
                       <th scope="col">{t.colDate}</th>
@@ -573,7 +580,7 @@ export default function PracticeBillingPlausibilityPage() {
                       const statusKey = `status${s.status?.charAt(0).toUpperCase()}${s.status?.slice(1)}`;
                       const detailHref = `/practice/settings/billing-plausibility/${encodeURIComponent(s.id)}?practiceId=${encodeURIComponent(practiceId)}`;
                       return (
-                        <tr key={s.id}>
+                        <tr key={s.id} data-testid="bp-history-row">
                           <td>{dateStr}</td>
                           <td>{s.rowCount ?? "—"}</td>
                           <td>{t[statusKey] || s.status}</td>
@@ -582,6 +589,7 @@ export default function PracticeBillingPlausibilityPage() {
                               className="billing-plausibility__table-link"
                               to={detailHref}
                               aria-label={`${t.btnOpenSession}: ${dateStr}`}
+                              data-testid="bp-open-session-link"
                             >
                               {t.btnOpenSession}
                             </Link>
