@@ -11,7 +11,11 @@
     "start": "npm run start --prefix server",
     "client:dev": "npm --prefix client run dev",
     "client:build": "npm --prefix client run build",
-    "client:preview": "npm --prefix client run preview"
+    "client:preview": "npm --prefix client run preview",
+    "test:e2e": "npx playwright test",
+    "test:e2e:install": "npx playwright install chromium",
+    "e2e:fixture:create": "node e2e/helpers/createE2eTestUser.js",
+    "e2e:fixture:cleanup": "node e2e/helpers/createE2eTestUser.js --cleanup"
   },
   "dependencies": {
     "@prisma/client": "^6.15.0",
@@ -22,6 +26,7 @@
     "openai": "^5.10.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.45.0",
     "prisma": "^6.15.0"
   }
 }

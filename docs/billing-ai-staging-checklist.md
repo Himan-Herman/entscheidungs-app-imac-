@@ -32,7 +32,7 @@ cd server
 node scripts/verifyBillingPlausibility.js
 ```
 
-All 15 sections must pass (exit 0). Pay specific attention to:
+All 16 sections must pass (exit 0). Pay specific attention to:
 
 | Section | Key assertion |
 |---------|--------------|
@@ -133,6 +133,8 @@ Before enabling in production, these monitoring items must be in place:
 - [ ] `used_fallback: true` responses are tracked (alert if fallback rate exceeds 20% sustained)
 - [ ] OpenAI API error rate alerted (5xx from OpenAI should trigger a Slack/PagerDuty notice)
 - [ ] Spend monitoring: OpenAI key spend cap set ≤ €10/month for staging, ≤ €50/month initial production
+- [ ] OpenAI model in use is **`gpt-5.4`** by default (overridable via `OPENAI_CHAT_MODEL` env var) — confirm spend projections and token-limit assumptions are based on this model's pricing tier
+- [ ] `contextText` (max 120 chars) is rendered in downloaded PDF reports — ensure staff training policy covers that any free-text context entered by the user appears in exports before enabling AI review with external practices (see `docs/billing-plausibility-data-protection.md` §3 for the full `contextText` exposure map)
 - [ ] No patient field names appear in any log line (grep staging logs after smoke test):
   ```bash
   grep -E "(patientName|dateOfBirth|diagnosisText|clinicalNotes)" <log-file>
@@ -182,7 +184,8 @@ Do not activate in production until all of the following are signed off:
 | All verify scripts pass on production-equivalent DB schema | Engineering | ☐ |
 | Staging smoke tests (sections 4a–4d) completed | Engineering | ☐ |
 | Observability requirements confirmed (section 5) | Engineering | ☐ |
-| Privacy/DPA review: no patient data path to OpenAI | Legal/DPO | ☐ |
+| Privacy/DPA review: no patient data path to OpenAI; AVV/DPA with OpenAI in place before external use | Legal/DPO | ☐ |
+| Data protection doc reviewed (`docs/billing-plausibility-data-protection.md`); account-deletion cascade gap (Phase D2) scheduled; subprocessor disclosure confirmed | Legal/DPO | ☐ |
 | Non-binding disclaimer visible in UI before any AI text | Product | ☐ |
 | OpenAI spend cap set and confirmed | Engineering | ☐ |
 | Rollback runbook reviewed by on-call engineer | Engineering | ☐ |

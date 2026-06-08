@@ -86,29 +86,69 @@
 ## 4. Data retention and deletion
 
 > ⚠ The following reflects the current implementation state. A formal data retention policy and documented deletion procedure are required before use with external practices.
+>
+> Full technical detail: see **[`docs/billing-plausibility-data-protection.md`](billing-plausibility-data-protection.md)**.
+
+### 4.1 Data stored
+
+| Table | Key fields | Patient data? | Notes |
+|-------|-----------|--------------|-------|
+| `BillingPlausibilitySession` | practiceProfileId, createdByUserId, inputSummaryJson (GOÄ codes), resultSummaryJson | No patient identifiers | identifies practice + staff user |
+| `BillingPlausibilityItem` | ziffer, factor, count, **contextText** (max 600 chars free-text), catalogueMatchJson | ⚠ contextText may contain patient data if staff enters it | contextText excluded from GET API responses; appears in PDF export |
+| `BillingPlausibilityAuditLog` | sessionId, actorUserId, action, metadataJson | No patient identifiers | identifies staff user |
+
+### 4.2 Deletion gaps — confirmed
+
+| Gap | Severity | Engineering phase |
+|-----|---------|-----------------|
+| `billingPlausibilitySession.deleteMany` **missing** from `DELETE /api/account/delete` transaction | High | D2 |
+| No DB-level cascade from `PracticeProfile` → `BillingPlausibilitySession` (scalar FK, no `@relation`) | High | D2 (app-level fix; no migration needed) |
+| No DB-level cascade from `User` → `BillingPlausibilitySession` (scalar FK, no `@relation`) | High | D2 |
+| Billing sessions absent from `GET /api/account/export` (DSGVO Art. 15/20 gap) | Medium | D3 |
+| No operator erasure script for practice-level deletion requests (DSGVO Art. 17) | High | D4 |
+
+### 4.3 Retention gaps — confirmed
 
 | Item | Current State | Required Action |
 |------|--------------|-----------------|
-| `BillingPlausibilitySession` rows | Stored in PostgreSQL; status can be set to `dismissed` | Establish retention period and automated deletion schedule |
-| `BillingPlausibilityItem` rows | Stored with session; contain GOÄ codes + factors only | Include in session deletion scope |
-| `BillingPlausibilityAuditLog` rows | Stored for access/change audit trail | Define separate retention period for audit logs |
-| Session deletion via API | No DELETE endpoint (by design — audit integrity) | Requires admin/operator procedure for data erasure requests |
-| User account deletion cascade | `User.delete` cascades to `PracticeProfile` but **not** to `BillingPlausibilitySession` | Add cascaded deletion or documented operator procedure |
-| GDPR/DSGVO Article 17 (right to erasure) | Not implemented as user-facing feature | Required before real external practice use |
+| `BillingPlausibilitySession` rows | Stored indefinitely; no purge job | Retention period decision (Legal/DPO) + automated purge job (Phase D5) |
+| `BillingPlausibilityItem` rows | Cascade-delete with session | Included in session retention policy |
+| `BillingPlausibilityAuditLog` rows | Cascade-delete with session | May require longer audit-log retention — legal to confirm |
+| `contextText` in items | Retained as long as item/session | Included in session retention + Phase D4 erasure scope |
+| OpenAI-processed contextText | Governed by OpenAI API data retention policy | Confirm with OpenAI; required before AI pilot with external practices |
+| Automated purge schedule | None | Phase D5: cron/script with configurable `BILLING_SESSION_RETENTION_DAYS` |
 
 ---
 
 ## 5. AVV / DPA requirements
 
 > ⚠ Not legal advice. An independent assessment by a data protection officer or legal counsel is required.
+>
+> Full technical detail: see **[`docs/billing-plausibility-data-protection.md §4–6`](billing-plausibility-data-protection.md)**.
 
 Before this module is used with real external practices (not just internal/sandbox testing), the following must be addressed:
 
-- [ ] **AVV (Auftragsverarbeitungsvertrag)**: A data processing agreement must be in place between MedScoutX and any practice that submits billing data. This applies even when `contextText` contains no patient data — the practice's billing code patterns may be commercially sensitive.
-- [ ] **Subprocessor disclosure**: If `ENABLE_BILLING_AI_REVIEW=true`, OpenAI acts as a subprocessor. OpenAI must be listed in the AVV's subprocessor annex. The practice must acknowledge this.
-- [ ] **Privacy notice update**: The application's privacy notice (Datenschutzerklärung) must be updated to describe billing plausibility session storage and any AI subprocessor relationship.
-- [ ] **Data location / transfer**: OpenAI API data processing location must be confirmed and disclosed if outside the EU/EEA.
+- [ ] **AVV (Auftragsverarbeitungsvertrag)** — Phase D6: A data processing agreement must be in place between MedScoutX and any practice that submits billing data. This applies even when `contextText` contains no patient data — the practice's billing code patterns may be commercially sensitive.
+- [ ] **Subprocessor disclosure** — Phase D6: If `ENABLE_BILLING_AI_REVIEW=true`, OpenAI acts as a subprocessor. OpenAI must be listed in the AVV's subprocessor annex. The practice must acknowledge this **before** AI review is enabled in their environment.
+- [ ] **Privacy notice update** — Phase D7: The application's Datenschutzerklärung must be updated to describe billing plausibility session storage and any AI subprocessor relationship.
+- [ ] **Data location / transfer**: OpenAI API data processing location must be confirmed and disclosed if outside the EU/EEA. A Transfer Impact Assessment (TIA) may be required.
 - [ ] **Legitimate processing basis**: Identify the DSGVO/GDPR legal basis for processing billing code data (likely Art. 6(1)(b) — contract performance, or Art. 6(1)(f) — legitimate interest). Document it.
+- [ ] **OpenAI data retention policy**: Confirm OpenAI's API data retention and deletion policy for prompt content (contextText). Required before AI pilot with any external practice.
+
+### 5.1 Pilot policy — AI review blocked externally until DPA conditions are met
+
+> **MANDATORY**: `ENABLE_BILLING_AI_REVIEW` must remain `false` in any environment accessible to
+> external practices until the following are ALL confirmed:
+> 1. AVV covering OpenAI as subprocessor is signed with the practice
+> 2. Practice informed that contextText may be forwarded to OpenAI
+> 3. DSGVO legal basis for AI processing documented
+> 4. Data transfer assessment for OpenAI (non-EU processing) completed
+> 5. OpenAI API data retention/deletion policy confirmed
+>
+> The deterministic-only path (`ENABLE_BILLING_AI_REVIEW=false`) has a lower AVV threshold but
+> still requires an AVV for MedScoutX's own storage of practice billing patterns.
+>
+> See `docs/billing-ai-staging-checklist.md` for the full AI activation checklist.
 
 ---
 
@@ -150,7 +190,9 @@ Before this module is used with real external practices (not just internal/sandb
 
 ## 8. Pilot-readiness sign-off checklist
 
-Items to complete before deploying this module to any external practice (even a closed pilot):
+Items to complete before deploying this module to any external practice (even a closed pilot).
+
+For full data-protection engineering phases, see **[`docs/billing-plausibility-data-protection.md §6`](billing-plausibility-data-protection.md)**.
 
 ### Engineering
 - [ ] All three verify scripts pass on the deployment-target database schema:
@@ -158,23 +200,29 @@ Items to complete before deploying this module to any external practice (even a 
   - `node scripts/verifyGoaeCatalogue.js`
   - `node scripts/verifyBillingReportPdf.js`
 - [ ] Feature flags confirmed: `ENABLE_BILLING_PLAUSIBILITY=true`, `ENABLE_BILLING_AI_REVIEW=false` for initial pilot
-- [ ] Session cascade-deletion procedure documented and tested
+- [ ] **Phase D2**: `billingPlausibilitySession.deleteMany` added to `DELETE /api/account/delete` (ordered before `practiceProfile.deleteMany`)
+- [ ] **Phase D3**: Billing session summary included in `GET /api/account/export`
+- [ ] **Phase D4**: Operator erasure script `server/scripts/eraseBillingDataForPractice.js` implemented and tested with `--dryRun`
+- [ ] **Phase D5**: Retention purge script/cron implemented with configurable `BILLING_SESSION_RETENTION_DAYS`; retention period confirmed by legal
 - [ ] Rate-limiting configuration reviewed for pilot load
 - [ ] Error monitoring configured (Render logs or equivalent)
+- [ ] CI migration replay (`prisma migrate deploy` on fresh DB) passes with zero errors
 
 ### Legal / Data Protection
-- [ ] AVV signed with each pilot practice
-- [ ] Privacy notice updated to include billing session storage
-- [ ] Data retention period defined and documented
-- [ ] If AI review will be enabled: OpenAI added as AVV subprocessor, data transfer assessment completed
-- [ ] Legitimate processing basis documented under DSGVO/GDPR
+- [ ] **Phase D6**: AVV signed with each pilot practice
+- [ ] **Phase D7**: Privacy notice (Datenschutzerklärung, all languages) updated to include billing session storage
+- [ ] Data retention period defined and documented (required for Phase D5 configuration)
+- [ ] DSGVO legal basis for processing billing code data documented
+- [ ] If AI review will be enabled: OpenAI added as AVV subprocessor, practice notified, data transfer assessment completed, OpenAI data retention policy confirmed
+- [ ] Legitimate processing basis documented under DSGVO/GDPR Art. 6
 
 ### Product / Compliance
 - [ ] Pilot usage policy prepared and provided to each practice, explicitly stating:
-  - No patient identifiers to be entered in the context field
+  - **No patient identifiers to be entered in the context field** (UI also warns, but staff training required)
   - Results are plausibility hints only — not billing decisions
   - Manual review by a qualified Abrechnungsfachkraft required before use
   - GOÄ catalogue is a local subset — all results require verification against the current official GOÄ
+  - AI review (if enabled) is non-binding — see `docs/billing-ai-staging-checklist.md` for full conditions
 - [ ] Pilot participants confirmed: all users are qualified billing staff, not end patients
 - [ ] Feedback/incident reporting path established for the pilot
 
@@ -182,18 +230,22 @@ Items to complete before deploying this module to any external practice (even a 
 
 ## 9. Open items (blockers for production use)
 
-| # | Item | Severity | Owner |
-|---|------|----------|-------|
-| 1 | `contextText` data-hygiene: free-form field forwarded to OpenAI when AI enabled; cannot technically prevent patient data entry | High | Product + Legal + Staff training |
-| 2 | No user-facing data deletion (GDPR Art. 17) for billing sessions | High | Engineering |
-| 3 | Session cascade deletion not implemented (User delete does not cascade to BillingPlausibilitySession) | High | Engineering |
-| 4 | AVV template not created | High | Legal |
-| 5 | Privacy notice not updated for billing module | High | Legal |
-| 6 | GOÄ catalogue is 35-entry test subset — not suitable as authoritative source | Medium | Product (catalogue expansion plan needed) |
-| 7 | OpenAI subprocessor disclosure if AI review enabled in production | High | Legal (required before AI pilot) |
-| 8 | No automated data retention / purge schedule | Medium | Engineering |
+| # | Phase | Item | Severity | Owner |
+|---|-------|------|----------|-------|
+| 1 | C-1 | `contextText` data-hygiene: free-form field forwarded to OpenAI when AI enabled; cannot technically prevent patient data entry; also appears in PDF export (first 120 chars) | High | Product + Legal + Staff training |
+| 2 | D2 | `billingPlausibilitySession.deleteMany` missing from `DELETE /api/account/delete` transaction | High | Engineering |
+| 3 | D2 | No DB-level cascade from `PracticeProfile` or `User` → `BillingPlausibilitySession` (scalar FKs, no `@relation`) | High | Engineering (app-level fix, no migration) |
+| 4 | D3 | Billing sessions absent from `GET /api/account/export` (DSGVO Art. 15/20) | Medium | Engineering |
+| 5 | D4 | No operator erasure script for practice-level deletion (DSGVO Art. 17) | High | Engineering |
+| 6 | D5 | No automated data retention / purge schedule | Medium | Engineering |
+| 7 | D6 | AVV template not created; no AVV signed with any practice | High | Legal |
+| 8 | D7 | Privacy notice not updated for billing module | High | Legal |
+| 9 | C-2 | OpenAI subprocessor disclosure required if AI review enabled with external practices | High | Legal (required before any AI pilot with external practices) |
+| 10 | C-3 | DSGVO legal basis for processing billing code data not documented | High | Legal |
+| 11 | C-4 | OpenAI API data retention/deletion policy for API prompts not confirmed | High | Legal (required before AI pilot) |
+| 12 | — | GOÄ catalogue is 35-entry test subset — not suitable as authoritative source | Medium | Product (catalogue expansion plan needed) |
 
 ---
 
-*Last updated: 2026-06-07 — MedScoutX GOÄ/PKV Billing Plausibility Phase P5 (Legal/Compliance/Disclaimer Readiness)*
+*Last updated: 2026-06-07 — MedScoutX GOÄ/PKV Billing Plausibility Phase D1 (Data Protection, Deletion & Retention)*
 *This document is an internal engineering reference. It does not constitute legal advice or a compliance certificate.*

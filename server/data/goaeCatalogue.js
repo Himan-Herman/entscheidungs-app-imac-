@@ -93,14 +93,17 @@ export const GOAE_ENTRIES = [
     title: "Beratung, auch mittels Fernsprecher",
     points: 80,
     section: "A",
-    notes: "Oral or telephone consultation. Cannot be combined with Nr. 3 on the same day.",
+    notes:
+      "Oral or telephone consultation. Cannot be combined with Nr. 3 on the same day. " +
+      "Points value 80 confirmed from official Anlage (Gesetze im Internet, accessed 2026-01). " +
+      "verifiedAt is null — a human reviewer should confirm and record the exact verification date.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "verified",
     sourceName: "Gesetze im Internet — GOÄ Anlage",
     sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
     sourceLineOrReference: "Anlage Abschnitt A, Nr. 1",
-    sourceVersionDate: null,
+    sourceVersionDate: "2026-01",
     verifiedAt: null,
   },
   {
@@ -123,14 +126,17 @@ export const GOAE_ENTRIES = [
     title: "Eingehende Beratung, mindestens 10 Minuten",
     points: 150,
     section: "A",
-    notes: "In-depth consultation, minimum 10 minutes. Cannot be combined with Nr. 1 on same day.",
+    notes:
+      "In-depth consultation, minimum 10 minutes. Cannot be combined with Nr. 1 on same day. " +
+      "Points value 150 confirmed from official Anlage (Gesetze im Internet, accessed 2026-01). " +
+      "verifiedAt is null — a human reviewer should confirm and record the exact verification date.",
     source: "goae_official_subset",
     activeStatus: "active",
     completenessStatus: "verified",
     sourceName: "Gesetze im Internet — GOÄ Anlage",
     sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
     sourceLineOrReference: "Anlage Abschnitt A, Nr. 3",
-    sourceVersionDate: null,
+    sourceVersionDate: "2026-01",
     verifiedAt: null,
   },
   {
@@ -618,7 +624,7 @@ export const GOAE_ENTRIES = [
       "verify title wording and points against official Anlage.",
     source: "goae_official_subset",
     activeStatus: "active",
-    completenessStatus: "points-uncertain",
+    completenessStatus: "needs-review",
     sourceName: "Gesetze im Internet — GOÄ Anlage",
     sourceUrl: "https://www.gesetze-im-internet.de/go__1982/anlage.html",
     sourceLineOrReference: "Anlage Nr. 650",

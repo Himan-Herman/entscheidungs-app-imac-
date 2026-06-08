@@ -1,7 +1,11 @@
 node_modules
 dist
 .env
+.env.e2e
 .DS_Store
+# Playwright artifacts
+playwright-report/
+test-results/
 server/storage/
 .cursor/
 .claude/
