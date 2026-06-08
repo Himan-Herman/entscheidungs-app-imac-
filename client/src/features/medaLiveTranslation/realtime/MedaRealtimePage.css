@@ -1408,4 +1408,96 @@
 :root[data-theme="dark"] .mrt-btn--archive-view      { background: #0c2340; border-color: #0369a1; color: #7dd3fc; }
 :root[data-theme="dark"] .mrt-btn--archive-delete    { background: #450a0a; border-color: #991b1b; color: #fca5a5; }
 :root[data-theme="dark"] .mrt-btn--archive-clear     { border-color: #991b1b; color: #fca5a5; }
+
+/* ── Mode bar (auto / manual speaker detection toggle) ─────────────────────── */
+.mrt-mode-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--ms-surface, #f9fafb);
+  border: 1px solid var(--ms-border, #e5e7eb);
+  border-radius: 10px;
+}
+
+/* Shared segmented-control container */
+.mrt-mode-seg,
+.mrt-mode-speaker {
+  display: inline-flex;
+  gap: 0;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Shared button base */
+.mrt-mode-btn,
+.mrt-mode-speaker-btn {
+  padding: 0.3125rem 0.875rem;
+  background: #ffffff;
+  border: none;
+  border-right: 1.5px solid #d1d5db;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1.5;
+}
+
+.mrt-mode-btn:last-child,
+.mrt-mode-speaker-btn:last-child {
+  border-right: none;
+}
+
+/* Mode toggle active state */
+.mrt-mode-btn--active {
+  background: #0d9488;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.mrt-mode-btn:not(.mrt-mode-btn--active):not(:disabled):hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* Speaker buttons: patient active = teal, practice active = indigo */
+.mrt-mode-speaker-btn--patient.mrt-mode-speaker-btn--active {
+  background: #0d9488;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.mrt-mode-speaker-btn--practice.mrt-mode-speaker-btn--active {
+  background: #4f46e5;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.mrt-mode-speaker-btn:not(.mrt-mode-speaker-btn--active):not(:disabled):hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* Disabled state — e.g. while Meda is speaking/translating */
+.mrt-mode-btn:disabled,
+.mrt-mode-speaker-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Dark mode */
+:root[data-theme="dark"] .mrt-mode-bar          { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .mrt-mode-seg,
+:root[data-theme="dark"] .mrt-mode-speaker       { border-color: #475569; }
+:root[data-theme="dark"] .mrt-mode-btn,
+:root[data-theme="dark"] .mrt-mode-speaker-btn   { background: #0f172a; color: #cbd5e1; border-right-color: #475569; }
+:root[data-theme="dark"] .mrt-mode-btn:not(.mrt-mode-btn--active):not(:disabled):hover,
+:root[data-theme="dark"] .mrt-mode-speaker-btn:not(.mrt-mode-speaker-btn--active):not(:disabled):hover { background: #1e293b; color: #f1f5f9; }
+:root[data-theme="dark"] .mrt-mode-btn--active   { background: #0f766e; color: #ccfbf1; }
+:root[data-theme="dark"] .mrt-mode-speaker-btn--patient.mrt-mode-speaker-btn--active   { background: #0f766e; color: #ccfbf1; }
+:root[data-theme="dark"] .mrt-mode-speaker-btn--practice.mrt-mode-speaker-btn--active  { background: #4338ca; color: #e0e7ff; }
 :root[data-theme="dark"] .mrt-btn--archive-clear:hover { background: #450a0a; }

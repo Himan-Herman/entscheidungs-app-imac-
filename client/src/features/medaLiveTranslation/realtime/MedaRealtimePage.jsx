@@ -82,6 +82,7 @@ export default function MedaRealtimePage() {
     error,
     audioElRef,
     updateTurnOriginalText,
+    setManualMode,
   } = useRealtimeSession();
 
   // ── Language selection ─────────────────────────────────────────────────────
@@ -118,6 +119,12 @@ export default function MedaRealtimePage() {
 
   // ── Practice section — collapsed by default; data is NOT cleared on collapse ─
   const [showPracticeFields, setShowPracticeFields] = useState(false);
+
+  // ── Speaker detection mode ───────────────────────────────────────────────────
+  // 'auto'   = detectLanguage() decides who is speaking (default)
+  // 'manual' = user explicitly selects the active speaker
+  const [mode,          setMode]          = useState(/** @type {'auto'|'manual'} */ ('auto'));
+  const [manualSpeaker, setManualSpeaker] = useState(/** @type {'patient'|'practice'} */ ('patient'));
 
   // ── PDF state ───────────────────────────────────────────────────────────────
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -158,6 +165,11 @@ export default function MedaRealtimePage() {
 
   const disconnectRef = useRef(disconnect);
   useEffect(() => { disconnectRef.current = disconnect; });
+
+  // ── Sync mode/manualSpeaker into useRealtimeSession refs (live, no reconnect) ─
+  useEffect(() => {
+    setManualMode(mode === 'manual', manualSpeaker);
+  }, [mode, manualSpeaker, setManualMode]);
 
   // ── Unmount cleanup ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -323,6 +335,8 @@ export default function MedaRealtimePage() {
     setSessionHasStarted(false);
     setSessionExpired(false);
     setArchiveSaved(false);
+    setMode('auto');
+    setManualSpeaker('patient');
   }
 
   function handleSaveToArchive() {
@@ -924,6 +938,67 @@ export default function MedaRealtimePage() {
         </div>
       )}
 
+      {/* ── Mode bar — auto / manual speaker detection toggle ───────────────── */}
+      {isConnected && (
+        <div className="mrt-mode-bar">
+          {/* Segmented control: Automatisch / Manuell */}
+          <div
+            className="mrt-mode-seg"
+            role="group"
+            aria-label="Sprechererkennung Modus"
+          >
+            <button
+              type="button"
+              className={`mrt-mode-btn${mode === 'auto' ? ' mrt-mode-btn--active' : ''}`}
+              onClick={() => setMode('auto')}
+              aria-pressed={mode === 'auto'}
+              disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
+              title="Meda erkennt die Sprache automatisch"
+            >
+              Automatisch
+            </button>
+            <button
+              type="button"
+              className={`mrt-mode-btn${mode === 'manual' ? ' mrt-mode-btn--active' : ''}`}
+              onClick={() => setMode('manual')}
+              aria-pressed={mode === 'manual'}
+              disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
+              title="Sie wählen, wer gerade spricht"
+            >
+              Manuell
+            </button>
+          </div>
+
+          {/* Speaker selection — only visible in manual mode */}
+          {mode === 'manual' && (
+            <div
+              className="mrt-mode-speaker"
+              role="group"
+              aria-label="Aktiver Sprecher"
+            >
+              <button
+                type="button"
+                className={`mrt-mode-speaker-btn mrt-mode-speaker-btn--patient${manualSpeaker === 'patient' ? ' mrt-mode-speaker-btn--active' : ''}`}
+                onClick={() => setManualSpeaker('patient')}
+                aria-pressed={manualSpeaker === 'patient'}
+                disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
+              >
+                Patient spricht
+              </button>
+              <button
+                type="button"
+                className={`mrt-mode-speaker-btn mrt-mode-speaker-btn--practice${manualSpeaker === 'practice' ? ' mrt-mode-speaker-btn--active' : ''}`}
+                onClick={() => setManualSpeaker('practice')}
+                aria-pressed={manualSpeaker === 'practice'}
+                disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
+              >
+                Praxis spricht
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Speaker bar — highlights last detected speaker ──────────────────── */}
       {isConnected && (
         <div className="mrt-pingpong-bar" aria-live="polite" aria-label="Zuletzt erkannter Sprecher">
@@ -941,7 +1016,9 @@ export default function MedaRealtimePage() {
       <section className="mrt-conversation" aria-label="Gesprächsverlauf">
         {turns.length === 0 && isConnected && (
           <p className="mrt-conversation-empty">
-            Bitte sprechen — Meda erkennt die Sprache automatisch.
+            {mode === 'manual'
+              ? `${manualSpeaker === 'patient' ? 'Patient' : 'Praxis'} ist aktiv — bitte sprechen.`
+              : 'Bitte sprechen — Meda erkennt die Sprache automatisch.'}
           </p>
         )}
         {turns.length === 0 && !isConnected && !isConnecting && !sessionExpired && (

@@ -70,6 +70,11 @@ export function useRealtimeSession() {
   // correct turn even when a new turn is created before the previous response finishes.
   const responseTurnMapRef = useRef(/** @type {Map<string, number>} */ (new Map()));
 
+  // Manual mode: when true, skip detectLanguage and use manualSpeakerRef instead.
+  // Both are refs so the page can update them live without triggering a re-connect.
+  const manualModeRef    = useRef(false);
+  const manualSpeakerRef = useRef(/** @type {'patient'|'practice'} */ ('patient'));
+
   /** Send a Realtime client event over the DataChannel (safe to call anytime). */
   const _sendDc = useCallback((payload) => {
     if (dcRef.current?.readyState === 'open') {
@@ -185,15 +190,15 @@ export function useRealtimeSession() {
         break;
 
       // ── Transcription ────────────────────────────────────────────────────────
-      // Speaker role and language direction are determined here from the text.
+      // Speaker role and language direction are determined here.
+      // Auto mode:   detectLanguage() on the transcript text.
+      // Manual mode: use manualSpeakerRef directly — no language detection.
       case 'conversation.item.input_audio_transcription.completed': {
         const transcript = ev.transcript ?? '';
-        const detected   = detectLanguage(transcript, patientLangRef.current, practiceLangRef.current);
 
         // Resolve which turn to update.
         // Primary: match by item_id (set at input_audio_buffer.committed).
         // Fallback: last turn still waiting for its transcript (originalText === null).
-        // This handles cases where the committed event had no item_id.
         const _findTurn = (prev) => {
           const byId = prev.findIndex(t => t.inputItemId === ev.item_id);
           if (byId >= 0) return byId;
@@ -203,15 +208,14 @@ export function useRealtimeSession() {
           return -1;
         };
 
-        // Safety guard: empty, noise, foreign script, or language not identifiable → unclear.
-        // Marks isDone immediately so delta/done events cannot overwrite with hallucinated text.
-        if (!transcript.trim() || detected === null) {
+        // Empty transcript → always unclear (nothing to translate).
+        if (!transcript.trim()) {
           setTurns(prev => {
             const idx = _findTurn(prev);
             if (idx < 0) return prev;
             return prev.map((t, i) => i === idx ? {
               ...t,
-              originalText:   transcript.trim() || '—',
+              originalText:   '—',
               isUnclear:      true,
               isDone:         true,
               translatedText: 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.',
@@ -224,17 +228,49 @@ export function useRealtimeSession() {
         let sourceLanguage = null;
         let targetLanguage = null;
         let targetRole     = null;
+        let markUnclear    = false;
 
-        if (detected === patientLangRef.current) {
-          speakerRole    = 'patient';
-          targetRole     = 'practice';
-          sourceLanguage = patientLangRef.current;
-          targetLanguage = practiceLangRef.current;
-        } else if (detected === practiceLangRef.current) {
-          speakerRole    = 'practice';
-          targetRole     = 'patient';
-          sourceLanguage = practiceLangRef.current;
-          targetLanguage = patientLangRef.current;
+        if (manualModeRef.current) {
+          // ── Manual mode: trust the page-selected speaker, skip language detection ──
+          const role     = manualSpeakerRef.current; // 'patient' | 'practice'
+          speakerRole    = role;
+          targetRole     = role === 'patient' ? 'practice' : 'patient';
+          sourceLanguage = role === 'patient' ? patientLangRef.current : practiceLangRef.current;
+          targetLanguage = role === 'patient' ? practiceLangRef.current : patientLangRef.current;
+        } else {
+          // ── Auto mode: detect language from transcript text ──────────────────────
+          const detected = detectLanguage(transcript, patientLangRef.current, practiceLangRef.current);
+
+          if (detected === null) {
+            // Noise, foreign script, or inconclusive → mark unclear
+            markUnclear = true;
+          } else if (detected === patientLangRef.current) {
+            speakerRole    = 'patient';
+            targetRole     = 'practice';
+            sourceLanguage = patientLangRef.current;
+            targetLanguage = practiceLangRef.current;
+          } else if (detected === practiceLangRef.current) {
+            speakerRole    = 'practice';
+            targetRole     = 'patient';
+            sourceLanguage = practiceLangRef.current;
+            targetLanguage = patientLangRef.current;
+          }
+        }
+
+        // Marks isDone immediately so delta/done events cannot overwrite with hallucinated text.
+        if (markUnclear) {
+          setTurns(prev => {
+            const idx = _findTurn(prev);
+            if (idx < 0) return prev;
+            return prev.map((t, i) => i === idx ? {
+              ...t,
+              originalText:   transcript.trim(),
+              isUnclear:      true,
+              isDone:         true,
+              translatedText: 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.',
+            } : t);
+          });
+          break;
         }
 
         if (speakerRole !== null) {
@@ -457,6 +493,8 @@ export function useRealtimeSession() {
     sessionActiveRef.current = true; // arm the guard
     setCurrentSpeakerRole(null);     // no speaker detected yet
     responseTurnMapRef.current.clear();
+    manualModeRef.current    = false;    // always start in auto mode
+    manualSpeakerRef.current = 'patient';
 
     try {
       // ── 1. Ephemeral token ──────────────────────────────────────────────────
@@ -606,11 +644,25 @@ export function useRealtimeSession() {
     ));
   }, []);
 
+  /**
+   * Switch between auto and manual speaker detection without disconnecting.
+   * Safe to call at any time — updates refs only, no React state change.
+   * @param {boolean} isManual  true = manual, false = auto (default)
+   * @param {'patient'|'practice'} speaker  active speaker in manual mode
+   */
+  const setManualMode = useCallback((isManual, speaker) => {
+    manualModeRef.current = Boolean(isManual);
+    if (speaker === 'patient' || speaker === 'practice') {
+      manualSpeakerRef.current = speaker;
+    }
+  }, []);
+
   return {
     connect,
     disconnect,
     sendEvent,
     updateTurnOriginalText,
+    setManualMode,
     connectionState,
     sessionStatus,
     currentSpeakerRole,
