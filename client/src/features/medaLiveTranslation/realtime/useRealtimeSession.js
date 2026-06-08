@@ -14,6 +14,8 @@ const OPENAI_REALTIME_CALLS = 'https://api.openai.com/v1/realtime/calls';
  *   originalText: string|null,
  *   translatedText: string,
  *   isDone: boolean,
+ *   isUnclear: boolean,
+ *   languageMismatch: boolean,
  *   speakerRole: SpeakerRole|null,
  *   targetRole: SpeakerRole|null,
  *   sourceLanguage: string|null,
@@ -64,6 +66,10 @@ export function useRealtimeSession() {
   // Prevents double-handling of output_audio_buffer end (watchdog vs stopped event)
   const turnSwitchedRef   = useRef(false);
 
+  // Maps OpenAI response_id → turn.key so that delta/done events always target the
+  // correct turn even when a new turn is created before the previous response finishes.
+  const responseTurnMapRef = useRef(/** @type {Map<string, number>} */ (new Map()));
+
   /** Send a Realtime client event over the DataChannel (safe to call anytime). */
   const _sendDc = useCallback((payload) => {
     if (dcRef.current?.readyState === 'open') {
@@ -110,6 +116,43 @@ export function useRealtimeSession() {
   const _handleEvent = useCallback((ev) => {
     if (!sessionActiveRef.current) return;
 
+    // ── Per-event helpers (defined here to access refs without stale closures) ──
+
+    /**
+     * Find the turn index to write response output to.
+     * Primary: look up the response_id in responseTurnMapRef.
+     * Fallback: last turn that is not yet done and not unclear (pre-fix behaviour).
+     * This ensures delta/done events always target the correct turn even when a
+     * new turn is created before the previous response finishes.
+     */
+    const _targetIdx = (prev, responseId) => {
+      if (responseId) {
+        const key = responseTurnMapRef.current.get(responseId);
+        if (key !== undefined) {
+          const i = prev.findIndex(t => t.key === key);
+          if (i >= 0) return i;
+        }
+      }
+      // Fallback: rightmost non-done, non-unclear turn
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (!prev[i].isDone && !prev[i].isUnclear) return i;
+      }
+      return prev.length > 0 ? prev.length - 1 : -1;
+    };
+
+    /**
+     * Output language guard: returns true when the final translatedText is
+     * detectably in the wrong language (not targetLanguage).
+     * Short texts / inconclusive detection → allowed (returns false).
+     */
+    const _isOutputMismatch = (turn, text) => {
+      if (!text || text.length < 10) return false;
+      if (!turn.targetLanguage || !turn.sourceLanguage) return false;
+      const detected = detectLanguage(text, turn.targetLanguage, turn.sourceLanguage);
+      // Only block when detection is confident AND it points to the source language
+      return detected !== null && detected !== turn.targetLanguage;
+    };
+
     switch (ev.type) {
 
       // ── VAD ─────────────────────────────────────────────────────────────────
@@ -126,17 +169,18 @@ export function useRealtimeSession() {
         if (speakerLockRef.current) break; // echo during Meda playback — discard
         turnCounterRef.current += 1;
         setTurns(prev => [...prev, {
-          key:            turnCounterRef.current,
-          inputItemId:    ev.item_id ?? null,
-          originalText:   null,
-          translatedText: '',
-          isDone:         false,
-          isUnclear:      false,  // set true when language is unrecognisable
-          speakerRole:    null,   // filled at transcription.completed
-          targetRole:     null,   // filled at transcription.completed
-          sourceLanguage: null,
-          targetLanguage: null,
-          timestamp:      new Date().toISOString(),
+          key:             turnCounterRef.current,
+          inputItemId:     ev.item_id ?? null,
+          originalText:    null,
+          translatedText:  '',
+          isDone:          false,
+          isUnclear:       false,       // set true when language is unrecognisable
+          languageMismatch: false,      // set true when output language guard fires
+          speakerRole:     null,        // filled at transcription.completed
+          targetRole:      null,        // filled at transcription.completed
+          sourceLanguage:  null,
+          targetLanguage:  null,
+          timestamp:       new Date().toISOString(),
         }]);
         break;
 
@@ -210,56 +254,86 @@ export function useRealtimeSession() {
       }
 
       // ── Response ─────────────────────────────────────────────────────────────
-      case 'response.created':
+      case 'response.created': {
+        const rId = ev.response?.id;
         setSessionStatus('translating');
+        if (rId) {
+          // Latch: map this response_id → the turn it belongs to.
+          // Find the last turn that has been transcribed but not yet completed.
+          // This ensures all subsequent delta/done events for this response_id
+          // target the correct turn even if new turns are created concurrently.
+          setTurns(prev => {
+            for (let i = prev.length - 1; i >= 0; i--) {
+              const t = prev[i];
+              if (!t.isDone && !t.isUnclear && t.originalText !== null) {
+                responseTurnMapRef.current.set(rId, t.key);
+                break;
+              }
+            }
+            return prev; // no turn state change — only updates the ref
+          });
+        }
         break;
+      }
 
       // Audio-output transcript (fires when session runs in audio mode)
       case 'response.audio_transcript.delta':
         setTurns(prev => {
-          if (prev.length === 0) return prev;
+          const idx = _targetIdx(prev, ev.response_id);
+          if (idx < 0 || prev[idx].isUnclear) return prev;
           return prev.map((t, i) =>
-            i === prev.length - 1 && !t.isUnclear
-              ? { ...t, translatedText: t.translatedText + (ev.delta ?? '') }
-              : t
+            i === idx ? { ...t, translatedText: t.translatedText + (ev.delta ?? '') } : t
           );
         });
         break;
 
-      case 'response.audio_transcript.done':
+      case 'response.audio_transcript.done': {
         setTurns(prev => {
-          if (prev.length === 0) return prev;
-          return prev.map((t, i) =>
-            i === prev.length - 1 && !t.isUnclear
-              ? { ...t, translatedText: ev.transcript ?? t.translatedText, isDone: true }
-              : t
-          );
+          const idx = _targetIdx(prev, ev.response_id);
+          if (idx < 0 || prev[idx].isUnclear) return prev;
+          const txt      = ev.transcript ?? prev[idx].translatedText;
+          const mismatch = _isOutputMismatch(prev[idx], txt);
+          return prev.map((t, i) => i === idx ? {
+            ...t,
+            translatedText: mismatch
+              ? 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.'
+              : txt,
+            isDone: true,
+            ...(mismatch ? { isUnclear: true, languageMismatch: true } : {}),
+          } : t);
         });
         break;
+      }
 
       // Text-output transcript (fires when session runs in text mode or combined mode).
       // Identical logic — whichever event arrives first fills translatedText.
       case 'response.text.delta':
         setTurns(prev => {
-          if (prev.length === 0) return prev;
+          const idx = _targetIdx(prev, ev.response_id);
+          if (idx < 0 || prev[idx].isUnclear) return prev;
           return prev.map((t, i) =>
-            i === prev.length - 1 && !t.isUnclear
-              ? { ...t, translatedText: t.translatedText + (ev.delta ?? '') }
-              : t
+            i === idx ? { ...t, translatedText: t.translatedText + (ev.delta ?? '') } : t
           );
         });
         break;
 
-      case 'response.text.done':
+      case 'response.text.done': {
         setTurns(prev => {
-          if (prev.length === 0) return prev;
-          return prev.map((t, i) =>
-            i === prev.length - 1 && !t.isUnclear
-              ? { ...t, translatedText: ev.text ?? t.translatedText, isDone: true }
-              : t
-          );
+          const idx = _targetIdx(prev, ev.response_id);
+          if (idx < 0 || prev[idx].isUnclear) return prev;
+          const txt      = ev.text ?? prev[idx].translatedText;
+          const mismatch = _isOutputMismatch(prev[idx], txt);
+          return prev.map((t, i) => i === idx ? {
+            ...t,
+            translatedText: mismatch
+              ? 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.'
+              : txt,
+            isDone: true,
+            ...(mismatch ? { isUnclear: true, languageMismatch: true } : {}),
+          } : t);
         });
         break;
+      }
 
       // Fires when an output content part (audio or text) is fully generated.
       // Contains part.transcript (audio mode) or part.text (text mode).
@@ -269,46 +343,66 @@ export function useRealtimeSession() {
         const text = part.transcript ?? part.text ?? '';
         if (!text) break;
         setTurns(prev => {
-          if (prev.length === 0) return prev;
-          return prev.map((t, i) =>
-            i === prev.length - 1 && !t.isUnclear
-              ? { ...t, translatedText: t.translatedText || text, isDone: true }
-              : t
-          );
+          const idx = _targetIdx(prev, ev.response_id);
+          if (idx < 0 || prev[idx].isUnclear) return prev;
+          const mismatch = _isOutputMismatch(prev[idx], text);
+          return prev.map((t, i) => i === idx ? {
+            ...t,
+            translatedText: mismatch
+              ? 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.'
+              : (t.translatedText || text),
+            isDone: true,
+            ...(mismatch ? { isUnclear: true, languageMismatch: true } : {}),
+          } : t);
         });
         break;
       }
 
       // ── Response done ────────────────────────────────────────────────────────
       case 'response.done': {
+        const responseId = ev.response?.id;
         const respStatus = ev.response?.status;
+
         if (respStatus === 'failed' || respStatus === 'cancelled' || respStatus === 'incomplete') {
-          // No audio will follow — unlock mic and close turn.
+          // No audio will follow — unlock mic and close the affected turn.
           speakerLockRef.current = false;
           setTurns(prev => {
-            if (prev.length === 0) return prev;
+            const idx = _targetIdx(prev, responseId);
+            if (idx < 0) return prev;
             return prev.map((t, i) =>
-              i === prev.length - 1 && !t.isDone
-                ? { ...t, isDone: true }
-                : t
+              i === idx && !t.isDone ? { ...t, isDone: true } : t
             );
           });
           setSessionStatus('ready');
+
         } else if (respStatus === 'completed') {
           // Extract translation from response output as final fallback.
-          // Covers the case where delta/done transcript events did not arrive
-          // (e.g. GA WebRTC session in audio mode without explicit transcript config).
-          const part = ev.response?.output?.[0]?.content?.[0];
+          // Covers the case where delta/done transcript events did not arrive.
+          const part     = ev.response?.output?.[0]?.content?.[0];
           const fallback = part?.transcript ?? part?.text ?? '';
           setTurns(prev => {
-            if (prev.length === 0) return prev;
-            return prev.map((t, i) =>
-              i === prev.length - 1 && !t.isUnclear
-                ? { ...t, translatedText: t.translatedText || fallback, isDone: true }
-                : t
-            );
+            const idx = _targetIdx(prev, responseId);
+            if (idx < 0 || prev[idx].isUnclear) return prev;
+            const txt      = prev[idx].translatedText || fallback;
+            const mismatch = txt ? _isOutputMismatch(prev[idx], txt) : false;
+            return prev.map((t, i) => i === idx ? {
+              ...t,
+              translatedText: mismatch
+                ? 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.'
+                : txt,
+              isDone: true,
+              ...(mismatch ? { isUnclear: true, languageMismatch: true } : {}),
+            } : t);
           });
+          // Safety: if audio already stopped but status is still translating/processing,
+          // reset to ready so the next turn can start.
+          if (!speakerLockRef.current) {
+            setSessionStatus(s => (s === 'translating' || s === 'processing') ? 'ready' : s);
+          }
         }
+
+        // Always clean up the response→turn mapping entry.
+        if (responseId) responseTurnMapRef.current.delete(responseId);
         break;
       }
 
@@ -362,6 +456,7 @@ export function useRealtimeSession() {
     practiceLangRef.current  = practiceLanguage;
     sessionActiveRef.current = true; // arm the guard
     setCurrentSpeakerRole(null);     // no speaker detected yet
+    responseTurnMapRef.current.clear();
 
     try {
       // ── 1. Ephemeral token ──────────────────────────────────────────────────
