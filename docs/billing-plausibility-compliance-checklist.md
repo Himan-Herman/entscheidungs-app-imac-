@@ -205,7 +205,8 @@ For full data-protection engineering phases, see **[`docs/billing-plausibility-d
 - [ ] **Phase D4**: Operator erasure script `server/scripts/eraseBillingDataForPractice.js` implemented and tested with `--dryRun`
 - [ ] **Phase D5**: Retention purge script/cron implemented with configurable `BILLING_SESSION_RETENTION_DAYS`; retention period confirmed by legal
 - [ ] Rate-limiting configuration reviewed for pilot load
-- [ ] Error monitoring configured (Render logs or equivalent)
+- [ ] Error monitoring configured (Render logs or equivalent); see **[`docs/billing-plausibility-runbook.md §3`](billing-plausibility-runbook.md)** for log signal reference and grep commands
+- [ ] Operations runbook reviewed by on-call engineer: **[`docs/billing-plausibility-runbook.md`](billing-plausibility-runbook.md)** (rollback procedures §4, incident checklists §5, escalation paths §6)
 - [ ] CI migration replay (`prisma migrate deploy` on fresh DB) passes with zero errors
 
 ### Legal / Data Protection
@@ -247,5 +248,6 @@ For full data-protection engineering phases, see **[`docs/billing-plausibility-d
 
 ---
 
-*Last updated: 2026-06-07 — MedScoutX GOÄ/PKV Billing Plausibility Phase D1 (Data Protection, Deletion & Retention)*
+*Last updated: 2026-06-11 — MedScoutX GOÄ/PKV Billing Plausibility Phase P6 (Release Hardening)*
+*(Previously updated 2026-06-07 — Phase D1 Data Protection, Deletion & Retention)*
 *This document is an internal engineering reference. It does not constitute legal advice or a compliance certificate.*

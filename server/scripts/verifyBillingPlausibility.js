@@ -433,6 +433,9 @@ const REQUIRED_KEYS = [
   // P5 — compliance/transparency notes
   "catalogueSubsetNote",
   "dataProcessingNote",
+  // P6 — status/fallback messages present in all 5 locales
+  "aiUnavailable", "aiMarked", "flagLabel",
+  "aiReviewSuccess", "aiReviewUnavailable",
 ];
 
 const I18N_FILES = [
