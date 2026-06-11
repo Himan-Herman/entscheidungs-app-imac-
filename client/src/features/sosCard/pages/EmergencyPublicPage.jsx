@@ -39,6 +39,18 @@ export default function EmergencyPublicPage() {
       .finally(() => setLoading(false));
   }, [token]);
 
+  // Defense-in-depth: keep this public page out of search indexes (in addition to the
+  // X-Robots-Tag header the API already sends). Injected at mount, removed on unmount.
+  useEffect(() => {
+    const meta = document.createElement("meta");
+    meta.name = "robots";
+    meta.content = "noindex, nofollow, noarchive";
+    document.head.appendChild(meta);
+    return () => {
+      document.head.removeChild(meta);
+    };
+  }, []);
+
   if (loading) {
     return (
       <main className="emergency-card">

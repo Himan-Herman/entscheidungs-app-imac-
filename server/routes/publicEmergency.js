@@ -23,6 +23,18 @@ function requireFeature(_req, res, next) {
   return next();
 }
 
+/**
+ * Defense-in-depth: keep the public emergency endpoint out of search indexes and out of
+ * shared/proxy caches. Applies to every response (200/400/404/500) since it runs first.
+ * The token is already unguessable and unlinked; these headers add belt-and-suspenders.
+ */
+function noIndexNoStore(_req, res, next) {
+  res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  return next();
+}
+
+router.use(noIndexNoStore);
 router.use(requireFeature);
 
 /** GET /api/public/emergency/:token */
