@@ -26,7 +26,8 @@
     "verify:goae-catalogue": "node scripts/verifyGoaeCatalogue.js",
     "verify:billing-report-pdf": "node scripts/verifyBillingReportPdf.js",
     "verify:billing-plausibility-service": "node scripts/verifyBillingPlausibilityService.js",
-    "billing:erase": "node scripts/eraseBillingPlausibilityData.js"
+    "billing:erase": "node scripts/eraseBillingPlausibilityData.js",
+    "billing:purge": "node scripts/purgeBillingPlausibilitySessions.js"
   },
   "keywords": [],
   "author": "",

@@ -195,13 +195,20 @@ approves (see Phase D3 roadmap note).
 
 | Item | Current retention | Required |
 |------|------------------|---------|
-| `BillingPlausibilitySession` | Indefinite — no purge | Define retention period; implement automated delete |
-| `BillingPlausibilityItem` | Same as session (cascade delete on session delete) | Included in session retention |
-| `BillingPlausibilityAuditLog` | Same as session (cascade delete) | May require separate (longer) retention for audit purposes |
+| `BillingPlausibilitySession` | No automatic expiry; manual purge available (D5) | Legal-approved retention period; optional future automation |
+| `BillingPlausibilityItem` | Same as session (cascade + explicit purge) | Included in session retention |
+| `BillingPlausibilityAuditLog` | Same as session (cascade + explicit purge) | May require separate (longer) retention for audit purposes |
 | `contextText` within items | Same as item | Included |
 | OpenAI-forwarded contextText | Governed by OpenAI data retention policy | Confirm with OpenAI API data processing terms |
 
-**No retention/purge job exists.** There is no cron, scheduled task, or database-level TTL for any billing table.
+**Manual retention purge available (D5); no automatic job yet.** A manual,
+operator-run purge script (`server/scripts/purgeBillingPlausibilitySessions.js`,
+`npm run billing:purge`) can delete sessions older than a chosen retention period.
+There is **no** cron, scheduled task, or database-level TTL — purge happens only when
+an operator runs the script with `--confirmPurge`. Recommended retention period:
+**180 days** (`BILLING_SESSION_RETENTION_DAYS=180`, policy guidance only) — subject to
+legal/DPO confirmation. A scheduled job (Render cron) may be added later, **only after**
+legal approves the retention period.
 
 ---
 
@@ -209,14 +216,18 @@ approves (see Phase D3 roadmap note).
 
 | Requirement | Current State |
 |-------------|--------------|
-| AVV template exists in codebase | ❌ No document |
-| AVV signed with any practice | ❌ None (module not in external use) |
-| DSGVO legal basis documented | ❌ Not documented |
-| Privacy notice updated for billing module | ❌ Not updated |
-| OpenAI listed as subprocessor | ❌ Not documented (AI disabled by default) |
-| Data transfer assessment (OpenAI EU/non-EU) | ❌ Not completed |
+| AVV template exists in codebase | ✅ **Draft prepared** — [`docs/legal/avv-dpa-medscoutx-pilot.de.md`](legal/avv-dpa-medscoutx-pilot.de.md) (D6, legal review required) |
+| AVV signed with any practice | ❌ None (draft only; signature pending legal review) |
+| DSGVO legal basis documented | ❌ Not documented (C-3) |
+| Privacy notice updated for billing module | ❌ Not updated (D7) |
+| OpenAI listed as subprocessor | ✅ **Drafted** — [`subprocessors-medscoutx-pilot.de.md`](legal/subprocessors-medscoutx-pilot.de.md); disabled by default, disclosure required before any AI activation |
+| TOM appendix exists | ✅ **Draft prepared** — [`tom-medscoutx-pilot.de.md`](legal/tom-medscoutx-pilot.de.md) (some items "to be confirmed") |
+| Pilot practice data sheet | ✅ **Draft prepared** — [`pilot-practice-data-sheet.de.md`](legal/pilot-practice-data-sheet.de.md) |
+| Data transfer assessment (OpenAI EU/non-EU) | ❌ Not completed (C-4) |
 
-**These items are pre-conditions for any external practice use of this module.**
+**The signed AVV, DSGVO legal basis, privacy notice and (for AI) transfer assessment
+remain pre-conditions for any external practice use of this module. The D6 drafts are
+templates only — not legally final.**
 
 ---
 
@@ -374,41 +385,100 @@ replace `createdByUserId`/`actorUserId` with a tombstone) could retain statistic
 rows while removing identifiers — only needed if legal requires retention of
 de-identified billing analytics. Hard delete is the current closed-pilot default.
 
-### Phase D5 — Retention purge job (Engineering: ~1–2 days)
+### Phase D5 — Retention purge ✅ IMPLEMENTED as manual readiness (2026-06-11)
 
-Automated deletion of dismissed sessions older than a defined retention period:
+Implemented as a **manual, dry-run-by-default** operator script
+`server/scripts/purgeBillingPlausibilitySessions.js` (`npm run billing:purge`).
+**No automatic cron** is active — purge happens only when an operator runs the
+script with `--confirmPurge` against an approved database.
 
-```javascript
-// Proposed: server/scripts/purgeBillingSessionsOlderThan.js
-// Config: BILLING_SESSION_RETENTION_DAYS (env var, default e.g. 365)
-// Target: BillingPlausibilitySession WHERE status = 'dismissed' AND dismissedAt < now() - retention
-// Cascade: BillingPlausibilityItem and BillingPlausibilityAuditLog cascade-delete via DB FK
-// Schedule: run via Render cron or equivalent, e.g. weekly
-// Audit: log count of deleted sessions before each purge run
+**Retention anchor**: `createdAt < (now − days)`. `createdAt` is immutable and always
+present, so it is the safest age anchor (`updatedAt` drifts; `dismissedAt` is null for
+active sessions). `--onlyDismissed` additionally requires `status = "dismissed"`.
+
+**CLI options**:
+- `--days=N` — **required**; retention period in days; must be > 0
+- `--dryRun` — force dry-run (default when `--confirmPurge` absent)
+- `--confirmPurge` — perform the deletion (ignored if `--dryRun` present)
+- `--onlyDismissed` — restrict to dismissed sessions
+- `--practiceProfileId=<id>` — restrict to one practice
+- `--allowLargeBatch` — permit purging > 500 sessions
+
+**Production guard**: refuses missing/production/Render `DATABASE_URL` (same indicator
+list as D4), prints the DB host, large-batch guard at 500 sessions, exits cleanly when
+nothing matches. Deletion is a single transaction in dependency order
+(AuditLog → Item → Session). `contextText` is never read or printed.
+
+**Recommended retention period**: **180 days** (`BILLING_SESSION_RETENTION_DAYS=180`,
+documented in `server/.env.example` as policy guidance only — the script never reads it
+and always requires an explicit `--days`). The final period **must be set by legal/DPO**,
+not engineering.
+
+**Command examples**:
+
+```bash
+cd server
+npm run billing:purge -- --days=180 --dryRun                       # all sessions, dry-run
+npm run billing:purge -- --days=180 --onlyDismissed --dryRun       # dismissed only, dry-run
+npm run billing:purge -- --days=180 --practiceProfileId=<id> --dryRun
+npm run billing:purge -- --days=180 --onlyDismissed --confirmPurge  # PERMANENT
 ```
 
-**Retention period decision**: must be set by legal/DPO, not engineering. Suggested starting point: 12 months from creation (or 6 months from dismissal), but this requires legal input.
+**Verified** end-to-end against throwaway local test data: a 200-day-old dismissed
+session was matched and purged (1/1/1) while a recent session was correctly left intact;
+post-check confirmed no orphans. Covered statically by `verifyBillingPlausibility.js §19`.
 
-### Phase D6 — AVV template (Legal / Product)
+**Production execution requires operator + legal approval.** No data is deleted
+automatically.
 
-An AVV template for practices using the billing plausibility module, covering:
-- Controller: the practice (Verantwortlicher)
-- Processor: MedScoutX (Auftragsverarbeiter)
-- Subject matter: GOÄ billing code plausibility analysis
-- Data categories: billing codes, factors, context notes (no patient identifiers)
-- Subprocessors: OpenAI (only if `ENABLE_BILLING_AI_REVIEW=true` is agreed)
-- Retention period: as defined in Phase D5
-- Deletion/erasure procedure: operator erasure as per Phase D4
-- Technical/organisational measures: encryption at rest, access control, audit logging
+**Future automation (not implemented)**: a Render cron could run the purge weekly —
+**only after** legal approves the retention period. That would reuse this same script
+with `--confirmPurge` and a fixed `--days` value.
 
-### Phase D7 — Privacy notice update (Legal / Product)
+### Phase D6 — AVV template ✅ DRAFT PREPARED (2026-06-11) — legal review pending
 
-Add a "Billing plausibility module" section to the Datenschutzerklärung (all languages), covering:
-- What data is stored (billing codes, factors, context notes, staff userId)
-- Why (contract performance / legitimate interest — legal to confirm)
-- Retention period
-- Subprocessors (OpenAI if AI enabled)
-- User's right of access (Art. 15), deletion (Art. 17), portability (Art. 20)
+An AVV/DPA **draft package** now exists under [`docs/legal/`](legal/README.md)
+(German-first, all marked "legal review required before signature"):
+
+- [`avv-dpa-medscoutx-pilot.de.md`](legal/avv-dpa-medscoutx-pilot.de.md) — main AVV/DPA
+  draft (Art. 28 DSGVO): parties + placeholders, subject matter/duration, nature &
+  purpose, data categories, data subjects, instructions, confidentiality, TOM
+  reference, subprocessor rules, data-subject-rights support, deletion/return after
+  pilot (D2–D5), audit cooperation, incident notification, the explicit "no independent
+  medical/billing-legal decision" and "non-binding plausibility only" statements, the
+  "AI disabled for external use unless separately agreed" clause, and signature blocks.
+- [`tom-medscoutx-pilot.de.md`](legal/tom-medscoutx-pilot.de.md) — TOM appendix
+  (Art. 32): access control, authentication, least privilege, transport encryption,
+  DB protection, backups (to-confirm), logging/audit, incident response,
+  deletion/export/retention (D2–D5), env separation, feature flags, AI-off-by-default,
+  operator-script guards, no production PVS/FHIR/KIS.
+- [`subprocessors-medscoutx-pilot.de.md`](legal/subprocessors-medscoutx-pilot.de.md) —
+  cautious subprocessor table; OpenAI disabled by default; unknowns marked
+  "to be confirmed", not invented.
+- [`pilot-practice-data-sheet.de.md`](legal/pilot-practice-data-sheet.de.md) —
+  fill-in data sheet for the practice.
+
+**A *template* now exists; a *signed* AVV does NOT.** Legal/DPO review and signature
+remain mandatory. The retention period (D5), DSGVO legal basis (C-3), and OpenAI
+disclosure/transfer assessment (C-2/C-4) must be finalised by legal.
+
+### Phase D7 — Privacy notice ✅ DRAFT PREPARED (2026-06-11) — legal review pending
+
+A pilot privacy notice **draft package** now exists under [`docs/legal/`](legal/README.md),
+covering all required points (controller/processor roles, purposes, data categories,
+data-that-must-not-be-entered, AI status, legal-basis placeholders, recipients/
+subprocessors, retention/deletion/export per D2–D5, data-subject rights, security, and
+the non-binding scope limitations):
+
+- `privacy-notice-billing-pilot.de.md` — **German master**
+- `privacy-notice-billing-pilot.en.md` / `.fr.md` / `.it.md` / `.es.md` — translation
+  drafts (each marked "translation draft — legal review required")
+
+**Docs-only.** The live `Datenschutzerklärung` (frontend `Datenschutz.jsx`, 21-locale
+i18n) was **not** modified — un-reviewed pilot text must not be published live. After
+legal review, the approved German text can be transferred into the legal i18n structure
+(all locales). The DSGVO legal basis (C-3) and retention period (D5) referenced in the
+draft must be finalised by legal.
 
 ---
 
@@ -437,9 +507,9 @@ Add a "Billing plausibility module" section to the Datenschutzerklärung (all la
 | D2-2 | No DB-level cascade from `PracticeProfile` or `User` to `BillingPlausibilitySession` | High | D2 ✅ Mitigated (app-level fix) |
 | D3-1 | Billing sessions not included in account data export | Medium — DSGVO Art. 15/20 | D3 ✅ Done |
 | D4-1 | No operator erasure script for practice/user/session-level deletion | High — DSGVO Art. 17 | D4 ✅ Done (`eraseBillingPlausibilityData.js`) |
-| D5-1 | No automated retention purge job | Medium — policy gap | D5 |
-| D6-1 | No AVV template exists | High — required before external use | D6 (Legal) |
-| D7-1 | Privacy notice not updated for billing module | High — required before external use | D7 (Legal) |
+| D5-1 | Manual retention purge implemented (`purgeBillingPlausibilitySessions.js`); no automatic cron yet | Medium — policy gap | D5 ✅ Manual done; automation pending legal retention period |
+| D6-1 | AVV/DPA **draft** package prepared (`docs/legal/`); no **signed** AVV yet | High — signed AVV required before external use | D6 ✅ Draft done; ⬜ legal review + signature pending |
+| D7-1 | Privacy notice **draft** prepared (`docs/legal/`, de+en/fr/it/es); live Datenschutzerklärung not yet updated | High — published notice required before external use | D7 ✅ Draft done; ⬜ legal review + publication pending |
 | C-1  | `contextText` can technically contain patient data if staff enters it | High — data hygiene | Usage policy + future D5 content scan |
 | C-2  | OpenAI subprocessor not disclosed if AI enabled | High — required before AI pilot with external practices | D6 + AI staging checklist |
 | C-3  | DSGVO legal basis for processing billing code data not documented | High | D6 (Legal) |

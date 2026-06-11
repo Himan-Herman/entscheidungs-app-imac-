@@ -995,6 +995,101 @@ assert(
   }
 }
 
+// ─── 19. Retention purge readiness (Phase D5) ─────────────────────────────────
+// Manual, dry-run-by-default purge script for billing session retention.
+// No automatic cron. Strong production guard. Static-only checks (no DB).
+{
+  const PURGE_PATH = "server/scripts/purgeBillingPlausibilitySessions.js";
+  assert(
+    "D5: purge script exists",
+    fs.existsSync(path.join(ROOT, PURGE_PATH)),
+  );
+  const PURGE = read(PURGE_PATH);
+  const PKG = read("server/package.json");
+  const ENV_EXAMPLE = read("server/.env.example");
+
+  // Package script registered
+  assert(
+    "D5: package.json defines billing:purge script",
+    PKG.includes('"billing:purge"') && PKG.includes("purgeBillingPlausibilitySessions.js"),
+  );
+
+  // Production guard reused
+  assert("D5: purge script has production indicator guard", PURGE.includes("PRODUCTION_INDICATORS"));
+  assert("D5: purge script checks render.com indicator", PURGE.includes("render.com"));
+  assert("D5: purge script refuses missing DATABASE_URL", PURGE.includes("DATABASE_URL is not set"));
+  assert("D5: purge script prints DB host", PURGE.includes("DATABASE_URL host:"));
+
+  // Dry-run default + confirmation flag
+  assert(
+    "D5: purge defaults to dry-run (purge only when confirmPurge && !dryRun)",
+    PURGE.includes("confirmPurge && !forceDryRun"),
+  );
+  assert("D5: purge supports --confirmPurge flag", PURGE.includes('hasFlag("confirmPurge")'));
+  assert("D5: purge supports --dryRun flag", PURGE.includes('hasFlag("dryRun")'));
+
+  // --days mandatory and validated
+  assert("D5: purge requires --days", PURGE.includes("--days=N is required"));
+  assert("D5: purge rejects non-positive days", PURGE.includes("days <= 0"));
+
+  // Filters
+  assert("D5: purge supports --onlyDismissed", PURGE.includes('hasFlag("onlyDismissed")'));
+  assert("D5: purge supports --practiceProfileId", PURGE.includes('getArg("practiceProfileId")'));
+  assert("D5: purge filters by createdAt < cutoff", PURGE.includes("createdAt: { lt: cutoff }"));
+  assert(
+    "D5: --onlyDismissed adds status = dismissed filter",
+    PURGE.includes('where.status = "dismissed"'),
+  );
+
+  // Large-batch guard
+  assert("D5: purge has large-batch guard", PURGE.includes("allowLargeBatch") && PURGE.includes("SAFE_SESSION_THRESHOLD"));
+
+  // Deletion order: auditlog → item → session
+  {
+    const auditPos = PURGE.indexOf("billingPlausibilityAuditLog.deleteMany");
+    const itemPos = PURGE.indexOf("billingPlausibilityItem.deleteMany");
+    const sessionPos = PURGE.indexOf("billingPlausibilitySession.deleteMany");
+    assert(
+      "D5: purge deletes auditlog before item (dependency order)",
+      auditPos > 0 && itemPos > 0 && auditPos < itemPos,
+    );
+    assert(
+      "D5: purge deletes item before session (dependency order)",
+      itemPos > 0 && sessionPos > 0 && itemPos < sessionPos,
+    );
+  }
+
+  // Uses a transaction for the confirmed deletion
+  assert("D5: purge wraps deletion in a prisma transaction", PURGE.includes("prisma.$transaction"));
+
+  // Never prints or selects contextText (no sensitive free text read or logged).
+  // The word may appear only in explanatory comments, never in a console.* call
+  // or a prisma `select`/`include`.
+  {
+    const purgeLines = PURGE.split("\n");
+    const printsContext = purgeLines.some(
+      (line) => /console\.(log|error|warn|info)/.test(line) && line.includes("contextText"),
+    );
+    const selectsContext = /contextText\s*:\s*true/.test(PURGE);
+    assert(
+      "D5: purge never prints or selects contextText",
+      !printsContext && !selectsContext,
+    );
+  }
+
+  // No automatic cron/scheduler is wired in by this phase
+  assert(
+    "D5: purge script contains no cron/scheduler wiring",
+    !PURGE.includes("node-cron") && !PURGE.includes("setInterval") && !PURGE.includes("cron.schedule"),
+  );
+
+  // .env.example documents the retention variable as policy-only
+  assert(
+    "D5: .env.example documents BILLING_SESSION_RETENTION_DAYS",
+    ENV_EXAMPLE.includes("BILLING_SESSION_RETENTION_DAYS"),
+  );
+}
+
 // ─── Result ───────────────────────────────────────────────────────────────────
 
 if (failures.length) {
@@ -1025,6 +1120,7 @@ console.log(
       "compliance-disclaimer-wording",
       "account-deletion-billing-cleanup",
       "account-export-billing-portability",
+      "retention-purge-readiness",
     ],
   }),
 );

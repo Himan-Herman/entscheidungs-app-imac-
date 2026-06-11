@@ -59,7 +59,7 @@ router.get("/", async (req, res) => {
   }
 
   try {
-    const [card, allergies, diagnoses] = await Promise.all([
+    const [cardRow, allergies, diagnoses] = await Promise.all([
       prisma.sosCard.findUnique({ where: { patientUserId: link.patientUserId } }),
       prisma.allergyEntry.findMany({
         where: { userId: link.patientUserId, deletedAt: null, status: { not: "inactive" } },
@@ -72,9 +72,15 @@ router.get("/", async (req, res) => {
           deletedAt: null,
           status: { in: ["active", "chronic"] },
         },
-        select: { condition: true, status: true, icdCode: true },
+        select: { conditionName: true, status: true, icdCode: true },
       }),
     ]);
+
+    // Soft-deleted card behaves as absent. The public field-level visibility flags (show*) are
+    // intentionally NOT applied here: practice access is already gated by an explicit, separate
+    // patient consent ("sos_card_access") and a treatment relationship, which is a different trust
+    // context from the anonymous public QR page. Consent stays the single gate for practices.
+    const card = cardRow && !cardRow.deletedAt ? cardRow : null;
 
     return res.json({
       ok: true,
@@ -86,12 +92,19 @@ router.get("/", async (req, res) => {
             emergencyContact2Name: card.emergencyContact2Name,
             emergencyContact2Phone: card.emergencyContact2Phone,
             firstResponderNote: card.firstResponderNote,
+            medications: Array.isArray(card.medicationsJson) ? card.medicationsJson : [],
+            implants: Array.isArray(card.implantsJson) ? card.implantsJson : [],
+            preferredEmergencyLanguage: card.preferredEmergencyLanguage || null,
             aiSummary: card.aiSummary,
             aiSummaryUpdatedAt: card.aiSummaryUpdatedAt,
           }
         : null,
       allergies,
-      diagnoses,
+      diagnoses: diagnoses.map((d) => ({
+        condition: d.conditionName,
+        status: d.status,
+        icdCode: d.icdCode,
+      })),
     });
   } catch (err) {
     console.error("[practice-sos-card] error", err?.message);

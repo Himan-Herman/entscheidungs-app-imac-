@@ -26,6 +26,19 @@ Two independent flags in `server/.env` (Render → Environment Variables):
 until the blocking items in `docs/billing-plausibility-data-protection.md` §7 (Phases D1–D5)
 are resolved and signed off in `docs/billing-ai-staging-checklist.md` §7.
 
+**Pre-external-pilot gate (D6/D7 — legal):** Before enabling `ENABLE_BILLING_PLAUSIBILITY`
+for **any external practice**, **both** of the following must be in place with that
+practice:
+1. a **signed AVV/DPA** (the [draft package](legal/README.md) is *not* a signed contract);
+2. a **reviewed and published privacy notice** — the pilot privacy notice drafts
+   (`docs/legal/privacy-notice-billing-pilot.*.md`) must be legally reviewed and
+   transferred into the live `Datenschutzerklärung` before onboarding. Un-reviewed draft
+   text must not be relied upon.
+
+No external practice may be onboarded on drafts alone. If AI review is to be enabled for
+that practice, the additional OpenAI subprocessor disclosure and AI pre-conditions
+(data-protection §4, AVV §15) must also be met first.
+
 Flag changes take effect only after a server restart (Render: redeploy or manual restart
 of the web service).
 
@@ -39,7 +52,7 @@ Follow this order exactly. Never skip steps.
 
 ```bash
 cd server
-npm run verify:billing-plausibility   # 18 sections — all must pass, exit 0
+npm run verify:billing-plausibility   # 19 sections — all must pass, exit 0
 npm run verify:goae-catalogue         # 35 entries — all must pass, exit 0
 npm run verify:billing-report-pdf     # 66 assertions — all must pass, exit 0
 ```
@@ -456,7 +469,7 @@ Run from `server/` directory. All offline scripts require no live services.
 ```bash
 # ── Offline checks (no DB, no AI, no network) ──────────────────────────────
 
-# 1. Billing plausibility static checks (18 sections)
+# 1. Billing plausibility static checks (19 sections)
 npm run verify:billing-plausibility
 
 # 2. GOÄ catalogue structural validation (35 entries)
@@ -509,6 +522,28 @@ SELECT * FROM "BillingPlausibilityAuditLog"
 WHERE "metadataJson"->>'error' = 'unsafe_output_detected';
 ```
 
+### 6.1 Data retention purge (Phase D5 — manual)
+
+Retention is enforced **manually** by an operator — there is **no automatic cron**.
+Recommended retention period: **180 days** (`BILLING_SESSION_RETENTION_DAYS=180`, policy
+guidance only). The final period must be confirmed by legal/DPO before any confirmed run.
+
+```bash
+cd server
+# Always dry-run first and review the match summary:
+npm run billing:purge -- --days=180 --dryRun
+npm run billing:purge -- --days=180 --onlyDismissed --dryRun
+npm run billing:purge -- --days=180 --practiceProfileId=<id> --dryRun
+
+# Confirmed purge (PERMANENT — only after operator + legal approval):
+npm run billing:purge -- --days=180 --onlyDismissed --confirmPurge
+```
+
+The script matches `createdAt < (now − days)`, refuses production/Render databases,
+defaults to dry-run, requires an explicit `--days`, deletes auditlog → item → session
+in a transaction, and refuses > 500 sessions without `--allowLargeBatch`. A future
+Render-cron schedule may be added **only after** legal approves the retention period.
+
 ---
 
 ## 7. Escalation paths
@@ -537,6 +572,7 @@ but must be resolved before external-practice activation.
 | No `used_fallback` rate metric or alert | O1-improvement | Sustained AI failures are not alertable without log parsing |
 | ~~Account deletion does not cascade to `BillingPlausibilitySession`~~ | D2 ✅ Done | Resolved — billing rows deleted in the account-delete transaction |
 | ~~No DSGVO Art. 17 erasure mechanism for billing sessions~~ | D4 ✅ Done | Resolved — operator script `eraseBillingPlausibilityData.js` (`npm run billing:erase`) |
+| Retention enforcement is manual only (no scheduled purge) | D5 ⚠ Partial | Manual `npm run billing:purge` available (§6.1); automatic cron pending legal-approved retention period |
 | No AVV/DPA with OpenAI | D1 → Legal | Blocks any external-practice AI enablement |
 | `contextText` free-text field has no PII scanning | D3 | Users can enter patient data; enforcement is training-only until D3 |
 

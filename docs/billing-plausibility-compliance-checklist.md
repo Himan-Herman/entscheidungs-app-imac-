@@ -117,12 +117,12 @@
 
 | Item | Current State | Required Action |
 |------|--------------|-----------------|
-| `BillingPlausibilitySession` rows | Stored indefinitely; no purge job | Retention period decision (Legal/DPO) + automated purge job (Phase D5) |
+| `BillingPlausibilitySession` rows | No auto-expiry; **manual purge available (D5)** | Legal/DPO sets retention period; optional future automation |
 | `BillingPlausibilityItem` rows | Cascade-delete with session | Included in session retention policy |
 | `BillingPlausibilityAuditLog` rows | Cascade-delete with session | May require longer audit-log retention — legal to confirm |
-| `contextText` in items | Retained as long as item/session | Included in session retention + Phase D4 erasure scope |
+| `contextText` in items | Retained as long as item/session | Included in session retention + Phase D4 erasure + D5 purge scope |
 | OpenAI-processed contextText | Governed by OpenAI API data retention policy | Confirm with OpenAI; required before AI pilot with external practices |
-| Automated purge schedule | None | Phase D5: cron/script with configurable `BILLING_SESSION_RETENTION_DAYS` |
+| Automated purge schedule | None (manual `npm run billing:purge` only) | ✅ Manual purge done (D5); cron pending legal-approved retention period |
 
 ---
 
@@ -132,11 +132,20 @@
 >
 > Full technical detail: see **[`docs/billing-plausibility-data-protection.md §4–6`](billing-plausibility-data-protection.md)**.
 
+> **D6 status (2026-06-11): DRAFT PREPARED — NOT legally complete.** An AVV/DPA draft
+> package now exists under [`docs/legal/`](legal/README.md): AVV/DPA main draft, TOM
+> appendix, subprocessor list, and a pilot-practice data sheet (German-first, all marked
+> "legal review required before signature"). **A *template* now exists; a *signed* AVV
+> with any practice does NOT.** Legal/DPO review and signature remain mandatory before
+> any external pilot.
+
 Before this module is used with real external practices (not just internal/sandbox testing), the following must be addressed:
 
-- [ ] **AVV (Auftragsverarbeitungsvertrag)** — Phase D6: A data processing agreement must be in place between MedScoutX and any practice that submits billing data. This applies even when `contextText` contains no patient data — the practice's billing code patterns may be commercially sensitive.
-- [ ] **Subprocessor disclosure** — Phase D6: If `ENABLE_BILLING_AI_REVIEW=true`, OpenAI acts as a subprocessor. OpenAI must be listed in the AVV's subprocessor annex. The practice must acknowledge this **before** AI review is enabled in their environment.
-- [ ] **Privacy notice update** — Phase D7: The application's Datenschutzerklärung must be updated to describe billing plausibility session storage and any AI subprocessor relationship.
+- [x] **AVV draft prepared** — Phase D6: AVV/DPA draft package created in [`docs/legal/`](legal/README.md) (template only). ⬜ Legal review + signature with each practice still pending.
+- [ ] **AVV signed** — Phase D6: A *signed* data processing agreement must be in place between MedScoutX and any practice that submits billing data. This applies even when `contextText` contains no patient data — the practice's billing code patterns may be commercially sensitive.
+- [x] **Subprocessor list drafted** — Phase D6: [`docs/legal/subprocessors-medscoutx-pilot.de.md`](legal/subprocessors-medscoutx-pilot.de.md) lists possible subprocessors with OpenAI **disabled by default**. ⬜ Concrete providers/regions still "to be confirmed"; OpenAI disclosure + acknowledgement required **before** any AI activation.
+- [x] **Privacy notice draft** — Phase D7: A pilot privacy notice draft package now exists in [`docs/legal/`](legal/README.md) — German master + en/fr/it/es translation drafts (`privacy-notice-billing-pilot.*.md`), all marked "legal review required before publication". ⬜ Legal review + transfer into the live `Datenschutzerklärung` still pending.
+- [ ] **Privacy notice published** — Phase D7: After legal review, the application's Datenschutzerklärung must be updated to describe billing plausibility session storage and any AI subprocessor relationship. (The live page was intentionally NOT modified with un-reviewed text.)
 - [ ] **Data location / transfer**: OpenAI API data processing location must be confirmed and disclosed if outside the EU/EEA. A Transfer Impact Assessment (TIA) may be required.
 - [ ] **Legitimate processing basis**: Identify the DSGVO/GDPR legal basis for processing billing code data (likely Art. 6(1)(b) — contract performance, or Art. 6(1)(f) — legitimate interest). Document it.
 - [ ] **OpenAI data retention policy**: Confirm OpenAI's API data retention and deletion policy for prompt content (contextText). Required before AI pilot with any external practice.
@@ -202,22 +211,24 @@ For full data-protection engineering phases, see **[`docs/billing-plausibility-d
 
 ### Engineering
 - [ ] All three verify scripts pass on the deployment-target database schema:
-  - `node scripts/verifyBillingPlausibility.js` — 18 sections
+  - `node scripts/verifyBillingPlausibility.js` — 19 sections
   - `node scripts/verifyGoaeCatalogue.js`
   - `node scripts/verifyBillingReportPdf.js`
 - [ ] Feature flags confirmed: `ENABLE_BILLING_PLAUSIBILITY=true`, `ENABLE_BILLING_AI_REVIEW=false` for initial pilot
 - [x] **Phase D2**: `billingPlausibilitySession.deleteMany` added to `DELETE /api/account/delete` (ordered before `practiceProfile.deleteMany`) — sessions, items and audit logs deleted in dependency order inside the existing transaction; covered by `verifyBillingPlausibility.js §16`
 - [x] **Phase D3**: Billing sessions included in `GET /api/account/export` via `getBillingPlausibilityExportForUser` (items, deterministic warnings, safe AI review, audit metadata; raw `contextText` excluded — `contextTextPresent` flag only); covered by `verifyBillingPlausibility.js §17`
 - [x] **Phase D4**: Operator erasure script `server/scripts/eraseBillingPlausibilityData.js` implemented (`npm run billing:erase`), dry-run default, production guard, scopes by session/practice/user; verified end-to-end against throwaway local test data
-- [ ] **Phase D5**: Retention purge script/cron implemented with configurable `BILLING_SESSION_RETENTION_DAYS`; retention period confirmed by legal
+- [x] **Phase D5**: Manual retention purge script `server/scripts/purgeBillingPlausibilitySessions.js` (`npm run billing:purge`) implemented — dry-run default, production guard, `--days`/`--onlyDismissed`/`--practiceProfileId`; covered by `verifyBillingPlausibility.js §19`. ⬜ Legal still to confirm the retention period; ⬜ automatic cron not yet scheduled
 - [ ] Rate-limiting configuration reviewed for pilot load
 - [ ] Error monitoring configured (Render logs or equivalent); see **[`docs/billing-plausibility-runbook.md §3`](billing-plausibility-runbook.md)** for log signal reference and grep commands
 - [ ] Operations runbook reviewed by on-call engineer: **[`docs/billing-plausibility-runbook.md`](billing-plausibility-runbook.md)** (rollback procedures §4, incident checklists §5, escalation paths §6)
 - [ ] CI migration replay (`prisma migrate deploy` on fresh DB) passes with zero errors
 
 ### Legal / Data Protection
-- [ ] **Phase D6**: AVV signed with each pilot practice
-- [ ] **Phase D7**: Privacy notice (Datenschutzerklärung, all languages) updated to include billing session storage
+- [x] **Phase D6 (draft)**: AVV/DPA draft package prepared in [`docs/legal/`](legal/README.md) — AVV main draft, TOM appendix, subprocessor list, pilot data sheet (all marked "legal review required")
+- [ ] **Phase D6 (signature)**: AVV reviewed by legal/DPO and **signed** with each pilot practice
+- [x] **Phase D7 (draft)**: Privacy notice draft prepared in [`docs/legal/`](legal/README.md) — de master + en/fr/it/es translation drafts (all marked "legal review required before publication")
+- [ ] **Phase D7 (publication)**: Privacy notice reviewed by legal and published in the live Datenschutzerklärung (all locales)
 - [ ] Data retention period defined and documented (required for Phase D5 configuration)
 - [ ] DSGVO legal basis for processing billing code data documented
 - [ ] If AI review will be enabled: OpenAI added as AVV subprocessor, practice notified, data transfer assessment completed, OpenAI data retention policy confirmed
@@ -255,6 +266,13 @@ For full data-protection engineering phases, see **[`docs/billing-plausibility-d
 > `--practiceProfileId` / `--createdByUserId` scope. Dry-run by default; refuses
 > production/Render databases and missing/zero scopes; large-batch guard at 100
 > sessions. Verified end-to-end against throwaway local test data (no orphans).
+>
+> **Partially resolved:** D5 (retention purge) shipped 2026-06-11 as a **manual**
+> script `server/scripts/purgeBillingPlausibilitySessions.js` (`npm run billing:purge`) —
+> dry-run default, production guard, `createdAt`-based cutoff via required `--days`,
+> `--onlyDismissed` / `--practiceProfileId` filters, large-batch guard at 500.
+> Recommended retention 180 days (policy guidance only). **Still pending**: legal/DPO
+> retention-period decision and (optional) automatic Render-cron scheduling.
 
 | # | Phase | Item | Severity | Owner |
 |---|-------|------|----------|-------|
@@ -263,9 +281,9 @@ For full data-protection engineering phases, see **[`docs/billing-plausibility-d
 | 3 | D2 | ✅ **Mitigated** — no DB-level cascade from `PracticeProfile`/`User` (scalar FKs unchanged), but account deletion now removes billing rows at the app layer; practice-level erasure still pending (D4) | High | Engineering (app-level fix, no migration) |
 | 4 | D3 | ✅ **Done** — billing sessions included in `GET /api/account/export` (raw contextText excluded; conservative portability) | Medium | Engineering |
 | 5 | D4 | ✅ **Done** — operator erasure script `eraseBillingPlausibilityData.js` (dry-run default, production guard) | High | Engineering |
-| 6 | D5 | No automated data retention / purge schedule | Medium | Engineering |
-| 7 | D6 | AVV template not created; no AVV signed with any practice | High | Legal |
-| 8 | D7 | Privacy notice not updated for billing module | High | Legal |
+| 6 | D5 | ⚠ **Partial** — manual purge script done (`billing:purge`); automatic schedule + legal-approved retention period still pending | Medium | Engineering + Legal |
+| 7 | D6 | ⚠ **Partial** — AVV/DPA **draft** package prepared (`docs/legal/`); no AVV reviewed or **signed** with any practice yet | High | Legal |
+| 8 | D7 | ⚠ **Partial** — privacy notice **draft** prepared (`docs/legal/`, de+en/fr/it/es); legal review + publication in live Datenschutzerklärung pending | High | Legal |
 | 9 | C-2 | OpenAI subprocessor disclosure required if AI review enabled with external practices | High | Legal (required before any AI pilot with external practices) |
 | 10 | C-3 | DSGVO legal basis for processing billing code data not documented | High | Legal |
 | 11 | C-4 | OpenAI API data retention/deletion policy for API prompts not confirmed | High | Legal (required before AI pilot) |

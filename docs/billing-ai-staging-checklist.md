@@ -32,7 +32,7 @@ cd server
 node scripts/verifyBillingPlausibility.js
 ```
 
-All 18 sections must pass (exit 0). Pay specific attention to:
+All 19 sections must pass (exit 0). Pay specific attention to:
 
 | Section | Key assertion |
 |---------|--------------|
