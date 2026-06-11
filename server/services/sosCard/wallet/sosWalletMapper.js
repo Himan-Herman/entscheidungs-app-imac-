@@ -33,6 +33,8 @@ export function initialsFrom(firstName, lastName) {
  */
 export function mapSosCardToWalletPayload({ card, firstName, lastName, emergencyUrl, includeFullName = false }) {
   const payload = {
+    // Internal, non-sensitive identifier used to build a stable wallet object id. Not health data.
+    subjectId: card?.id ?? null,
     titleKey: "MedScoutX SOS",
     organizationName: "MedScoutX",
     holder: includeFullName

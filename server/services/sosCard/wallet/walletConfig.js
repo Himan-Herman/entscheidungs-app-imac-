@@ -36,9 +36,33 @@ export function appleWalletConfig() {
   return { configured: missing.length === 0, missing };
 }
 
+/**
+ * Parse GOOGLE_WALLET_SERVICE_ACCOUNT_JSON into an object, or null when absent/invalid.
+ * NEVER logs or returns the raw content — parse errors are swallowed to avoid leaking secrets.
+ * A valid service account must contain a client_email and a private_key.
+ */
+export function parseGoogleServiceAccount() {
+  const raw = process.env.GOOGLE_WALLET_SERVICE_ACCOUNT_JSON;
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  try {
+    const obj = JSON.parse(raw);
+    if (obj && typeof obj.client_email === "string" && typeof obj.private_key === "string") {
+      return obj;
+    }
+    return null;
+  } catch {
+    return null; // never log the content
+  }
+}
+
 export function googleWalletConfig() {
   const missing = GOOGLE_WALLET_ENV.filter((n) => !present(n));
-  return { configured: missing.length === 0, missing };
+  // The service account JSON must additionally parse and contain client_email + private_key.
+  const serviceAccountValid = parseGoogleServiceAccount() !== null;
+  if (present("GOOGLE_WALLET_SERVICE_ACCOUNT_JSON") && !serviceAccountValid) {
+    missing.push("GOOGLE_WALLET_SERVICE_ACCOUNT_JSON:invalid");
+  }
+  return { configured: missing.length === 0 && serviceAccountValid, missing };
 }
 
 /**
