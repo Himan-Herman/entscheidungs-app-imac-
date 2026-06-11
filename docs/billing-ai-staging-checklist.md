@@ -123,6 +123,31 @@ containing forbidden text (e.g. `"The diagnosis is bronchitis"`) and confirm:
 
 Revert after confirming.
 
+### 4f. No AI call on page load (observability)
+
+1. Open the browser dev-tools **Network** tab.
+2. Navigate to the billing plausibility page and open an existing session.
+3. Confirm **no** request to `/review` (and no OpenAI traffic) fires until the
+   "AI review" button is explicitly clicked.
+4. This proves the AI path is click-gated, never automatic.
+
+### 4g. Safety edge cases (deterministic + AI)
+
+| Case | Input | Expected |
+|------|-------|----------|
+| Unknown ziffer | `ziffer=9999, factor=1.0, count=1` | Deterministic `unknown_goae_ziffer` warning shown; AI hint (if any) stays non-binding, invents no GOÄ rule, no fabricated catalogue entry |
+| High factor, no context | `ziffer=1, factor=2.5, count=1`, contextText empty | Deterministic `factor_requires_justification` + `justification_missing`; AI note remains a neutral observation, no reimbursement verdict |
+| Unsafe contextText attempt | `contextText="diagnosis: bronchitis, urgent"` | If the AI echoes forbidden language, `used_fallback: true` and nothing forbidden is persisted (see 4e); contextText itself is staff-entered free text and is not a route-rejected field |
+| Confirm output is **non-binding** | any AI review | `aiReview.nonBinding === true`; UI shows the non-binding disclaimer before any AI text; PDF AI section headed "[!] … NON-BINDING" |
+| Confirm no forbidden categories | any AI review | No diagnosis, therapy, triage, reimbursement prediction, or legal billing verdict in the output |
+
+### 4h. PDF AI note only after a saved review
+
+1. Before any AI review, download the PDF — confirm **no** AI section appears.
+2. Run an AI review (4c), then download the PDF again.
+3. Confirm the AI section now appears, headed with the non-binding legal notice,
+   and that deterministic warnings are still present above it.
+
 ---
 
 ## 5. Observability requirements
