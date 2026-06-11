@@ -7,10 +7,11 @@ import { useEffect, useRef } from "react";
  *
  * We use dynamic import so the chunk is only loaded when QR is shown.
  */
-export default function SosCardQr({ token, baseUrl }) {
+export default function SosCardQr({ token, baseUrl, t }) {
   const canvasRef = useRef(null);
 
   const url = `${baseUrl || window.location.origin}/emergency/${token}`;
+  const altText = t?.qrAlt || "QR code linking to the public emergency page.";
 
   useEffect(() => {
     if (!token || !canvasRef.current) return;
@@ -32,8 +33,9 @@ export default function SosCardQr({ token, baseUrl }) {
 
   return (
     <div className="sos-card__qr-panel">
-      <canvas ref={canvasRef} className="sos-card__qr-canvas" />
+      <canvas ref={canvasRef} className="sos-card__qr-canvas" role="img" aria-label={altText} />
       <p className="sos-card__qr-url">{url}</p>
+      {t?.qrNoHealthData && <p className="sos-card__hint">{t.qrNoHealthData}</p>}
     </div>
   );
 }

@@ -8,14 +8,15 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { isSosCardEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import {
+  computeAge,
+  plausibleHeightCm,
+  plausibleWeightKg,
+  asEmergencyList,
+} from "../services/sosCard/sosCardEmergencyData.js";
 
 const router = express.Router();
 const prisma = new PrismaClient();
-
-/** Coerce stored JSON (array of objects) into a safe array, or [] on anything unexpected. */
-function asList(value) {
-  return Array.isArray(value) ? value : [];
-}
 
 function requireFeature(_req, res, next) {
   if (!isSosCardEnabled()) return res.status(404).json({ ok: false, error: "feature_disabled" });
@@ -39,6 +40,8 @@ router.get("/:token", async (req, res) => {
           select: {
             firstName: true,
             lastName: true,
+            dateOfBirth: true,
+            profile: { select: { heightCm: true, weightKg: true } },
           },
         },
       },
@@ -91,13 +94,26 @@ router.get("/:token", async (req, res) => {
       /* logging must never break emergency access */
     }
 
+    // Referenced read-only profile data (not stored on the card).
+    const age = computeAge(card.patient.dateOfBirth);
+    const heightCm = plausibleHeightCm(card.patient.profile?.heightCm);
+    const weightKg = plausibleWeightKg(card.patient.profile?.weightKg);
+
     return res.json({
       ok: true,
+      // All values are patient self-reported; no medical verification exists.
+      selfReported: true,
       patient: {
         firstName: card.patient.firstName,
         lastName: card.patient.lastName,
       },
+      age: card.showAge ? age : null,
+      dateOfBirth: card.showDateOfBirth ? card.patient.dateOfBirth : null,
+      biologicalSex: card.showBiologicalSex ? card.emergencyBiologicalSex || null : null,
       bloodType: card.showBloodType ? card.bloodType : null,
+      heightCm: card.showHeight ? heightCm : null,
+      weightKg: card.showWeight ? weightKg : null,
+      pregnancyStatus: card.showPregnancyStatus ? card.pregnancyStatus || null : null,
       emergencyContacts: card.showEmergencyContacts
         ? [
             card.emergencyContact1Name && card.emergencyContact1Phone
@@ -110,9 +126,11 @@ router.get("/:token", async (req, res) => {
         : [],
       firstResponderNote: card.showFirstResponderNote ? card.firstResponderNote : null,
       aiSummary: card.showAiSummary ? card.aiSummary : null,
-      medications: card.showMedications ? asList(card.medicationsJson) : [],
-      implants: card.showImplants ? asList(card.implantsJson) : [],
-      preferredEmergencyLanguage: card.preferredEmergencyLanguage || null,
+      medications: card.showMedications ? asEmergencyList(card.medicationsJson) : [],
+      implants: card.showImplants ? asEmergencyList(card.implantsJson) : [],
+      preferredEmergencyLanguage: card.showPreferredLanguage
+        ? card.preferredEmergencyLanguage || null
+        : null,
       // Response key stays "condition" for the frontend; DB column is conditionName.
       allergies,
       diagnoses: diagnoses.map((d) => ({

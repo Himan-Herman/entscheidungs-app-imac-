@@ -11,6 +11,11 @@ import { PrismaClient } from "@prisma/client";
 import { isSosCardEnabled } from "../config/featureFlags.js";
 import { resolvePatientLinkForPractice } from "../services/careRelationship/resolvePatientLink.js";
 import { assertConsentForLink } from "../services/consent/consentRecordService.js";
+import {
+  computeAge,
+  plausibleHeightCm,
+  plausibleWeightKg,
+} from "../services/sosCard/sosCardEmergencyData.js";
 
 const router = express.Router({ mergeParams: true });
 const prisma = new PrismaClient();
@@ -59,8 +64,12 @@ router.get("/", async (req, res) => {
   }
 
   try {
-    const [cardRow, allergies, diagnoses] = await Promise.all([
+    const [cardRow, patientUser, allergies, diagnoses] = await Promise.all([
       prisma.sosCard.findUnique({ where: { patientUserId: link.patientUserId } }),
+      prisma.user.findUnique({
+        where: { id: link.patientUserId },
+        select: { dateOfBirth: true, profile: { select: { heightCm: true, weightKg: true } } },
+      }),
       prisma.allergyEntry.findMany({
         where: { userId: link.patientUserId, deletedAt: null, status: { not: "inactive" } },
         select: { allergen: true, severity: true, reaction: true, allergyType: true },
@@ -84,6 +93,13 @@ router.get("/", async (req, res) => {
 
     return res.json({
       ok: true,
+      // Patient self-reported; no medical verification exists.
+      selfReported: true,
+      // Age / height / weight referenced read-only from the profile, never stored on the card.
+      age: computeAge(patientUser?.dateOfBirth),
+      dateOfBirth: patientUser?.dateOfBirth ?? null,
+      heightCm: plausibleHeightCm(patientUser?.profile?.heightCm),
+      weightKg: plausibleWeightKg(patientUser?.profile?.weightKg),
       card: card
         ? {
             bloodType: card.bloodType,
@@ -94,6 +110,8 @@ router.get("/", async (req, res) => {
             firstResponderNote: card.firstResponderNote,
             medications: Array.isArray(card.medicationsJson) ? card.medicationsJson : [],
             implants: Array.isArray(card.implantsJson) ? card.implantsJson : [],
+            emergencyBiologicalSex: card.emergencyBiologicalSex || null,
+            pregnancyStatus: card.pregnancyStatus || null,
             preferredEmergencyLanguage: card.preferredEmergencyLanguage || null,
             aiSummary: card.aiSummary,
             aiSummaryUpdatedAt: card.aiSummaryUpdatedAt,

@@ -1,23 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { AlertTriangle, Phone, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Phone, Pill, ShieldAlert, Stethoscope } from "lucide-react";
+import { useLanguage } from "../../../i18n/LanguageContext";
+import { getMessages } from "../../../i18n/translations";
 import { fetchPublicEmergency } from "../api/sosCardApi.js";
 import "../styles/SosCard.css";
 
 const SEVERITY_ORDER = { life_threatening: 0, severe: 1, moderate: 2, mild: 3 };
 
-const SEVERITY_LABELS = {
-  life_threatening: "Life-threatening",
-  severe: "Severe",
-  moderate: "Moderate",
-  mild: "Mild",
-};
-
 export default function EmergencyPublicPage() {
   const { token } = useParams();
+  const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+
+  // Page locale: prefer the patient's chosen emergency language, else the site language.
+  const t = useMemo(() => {
+    const locale = data?.preferredEmergencyLanguage || language;
+    const msgs = getMessages(locale);
+    return (msgs.sosCard && msgs.sosCard.emergency)
+      ? { ...msgs.sosCard.emergency, severities: msgs.sosCard.severities, languageNames: msgs.sosCard.languageNames, biologicalSexValues: msgs.sosCard.biologicalSexValues, pregnancyValues: msgs.sosCard.pregnancyValues }
+      : getMessages("en").sosCard.emergency;
+  }, [data, language]);
 
   useEffect(() => {
     document.title = "Emergency Medical Card";
@@ -36,32 +41,35 @@ export default function EmergencyPublicPage() {
 
   if (loading) {
     return (
-      <div className="emergency-card">
-        <p style={{ color: "#9ca3af" }}>Loading emergency card…</p>
-      </div>
+      <main className="emergency-card">
+        <p className="emergency-card__status" role="status">{t.loading}</p>
+      </main>
     );
   }
 
   if (error === "not_found") {
     return (
-      <div className="emergency-card">
+      <main className="emergency-card">
         <div className="emergency-card__sos-badge">
-          <ShieldAlert size={20} /> SOS
+          <ShieldAlert size={20} aria-hidden="true" /> {t.sosBadge}
         </div>
-        <p>This emergency card is no longer active or the link is invalid.</p>
-      </div>
+        <p className="emergency-card__status">{t.notFound}</p>
+      </main>
     );
   }
 
   if (error) {
     return (
-      <div className="emergency-card">
-        <p style={{ color: "#dc2626" }}>Unable to load emergency card. Please try again.</p>
-      </div>
+      <main className="emergency-card">
+        <p className="emergency-card__status emergency-card__status--error" role="alert">
+          {t.loadFailed}
+        </p>
+      </main>
     );
   }
 
-  const sortedAllergies = [...(data.allergies || [])].sort(
+  const allergies = Array.isArray(data.allergies) ? data.allergies : [];
+  const sortedAllergies = [...allergies].sort(
     (a, b) => (SEVERITY_ORDER[a.severity] ?? 9) - (SEVERITY_ORDER[b.severity] ?? 9),
   );
   const criticalAllergies = sortedAllergies.filter(
@@ -71,34 +79,76 @@ export default function EmergencyPublicPage() {
     (a) => a.severity !== "life_threatening" && a.severity !== "severe",
   );
 
+  const medications = Array.isArray(data.medications) ? data.medications : [];
+  const implants = Array.isArray(data.implants) ? data.implants : [];
+  const diagnoses = Array.isArray(data.diagnoses) ? data.diagnoses : [];
+  const contacts = Array.isArray(data.emergencyContacts) ? data.emergencyContacts : [];
+
+  // Identity scalars released by the patient (the API already nulls hidden fields).
+  const identity = [
+    typeof data.age === "number" && { label: t.age, value: `${data.age}` },
+    data.dateOfBirth && {
+      label: t.dateOfBirth,
+      value: new Date(data.dateOfBirth).toLocaleDateString(),
+    },
+    data.biologicalSex && {
+      label: t.biologicalSex,
+      value: t.biologicalSexValues?.[data.biologicalSex] || data.biologicalSex,
+    },
+    typeof data.heightCm === "number" && { label: t.height, value: `${data.heightCm} cm` },
+    typeof data.weightKg === "number" && { label: t.weight, value: `${data.weightKg} kg` },
+    data.pregnancyStatus && {
+      label: t.pregnancy,
+      value: t.pregnancyValues?.[data.pregnancyStatus] || data.pregnancyStatus,
+    },
+  ].filter(Boolean);
+
   return (
-    <div className="emergency-card">
+    <main className="emergency-card" lang={data.preferredEmergencyLanguage || undefined}>
+      {/* 1. SOS header */}
       <div className="emergency-card__sos-badge">
-        <ShieldAlert size={20} />
-        NOTFALL · EMERGENCY · URGENCE
+        <ShieldAlert size={22} aria-hidden="true" />
+        {t.sosBadge}
       </div>
 
-      <div className="emergency-card__name">
-        {data.patient.firstName} {data.patient.lastName}
-      </div>
+      {/* 2. Name / identification */}
+      <h1 className="emergency-card__name">
+        {data.patient?.firstName} {data.patient?.lastName}
+      </h1>
 
-      {data.bloodType && (
-        <div className="emergency-card__block emergency-card__block--critical">
-          <p className="emergency-card__block-title">Blood Type / Blutgruppe</p>
-          <div className="emergency-card__blood-type">{data.bloodType}</div>
-        </div>
+      {identity.length > 0 && (
+        <section className="emergency-card__block" aria-label={t.identification}>
+          <h2 className="emergency-card__block-title">{t.identification}</h2>
+          <dl className="emergency-card__meta-grid">
+            {identity.map((item, i) => (
+              <div key={i} className="emergency-card__meta-item">
+                <dt>{item.label}</dt>
+                <dd>{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
       )}
 
+      {/* 3. Blood type */}
+      {data.bloodType && (
+        <section className="emergency-card__block emergency-card__block--critical" aria-label={t.bloodType}>
+          <h2 className="emergency-card__block-title">{t.bloodType}</h2>
+          <div className="emergency-card__blood-type">{data.bloodType}</div>
+        </section>
+      )}
+
+      {/* 4. Allergies — critical first */}
       {criticalAllergies.length > 0 && (
-        <div className="emergency-card__block emergency-card__block--critical">
-          <p className="emergency-card__block-title">
-            <AlertTriangle size={14} style={{ display: "inline", marginRight: "0.35rem" }} />
-            Critical Allergies / Kritische Allergien
-          </p>
+        <section className="emergency-card__block emergency-card__block--critical" aria-label={t.criticalAllergies}>
+          <h2 className="emergency-card__block-title">
+            <AlertTriangle size={16} aria-hidden="true" style={{ display: "inline", marginRight: "0.35rem" }} />
+            {t.criticalAllergies}
+          </h2>
           {criticalAllergies.map((a, i) => (
             <div key={i} className="emergency-card__allergy-item">
               <span className={`emergency-card__severity-badge emergency-card__severity-badge--${a.severity}`}>
-                {SEVERITY_LABELS[a.severity] || a.severity}
+                {t.severities?.[a.severity] || a.severity}
               </span>
               <span>
                 {a.allergen}
@@ -106,16 +156,16 @@ export default function EmergencyPublicPage() {
               </span>
             </div>
           ))}
-        </div>
+        </section>
       )}
 
       {otherAllergies.length > 0 && (
-        <div className="emergency-card__block">
-          <p className="emergency-card__block-title">Other Allergies</p>
+        <section className="emergency-card__block" aria-label={t.otherAllergies}>
+          <h2 className="emergency-card__block-title">{t.otherAllergies}</h2>
           {otherAllergies.map((a, i) => (
             <div key={i} className="emergency-card__allergy-item">
               <span className={`emergency-card__severity-badge emergency-card__severity-badge--${a.severity}`}>
-                {SEVERITY_LABELS[a.severity] || a.severity}
+                {t.severities?.[a.severity] || a.severity}
               </span>
               <span>
                 {a.allergen}
@@ -123,54 +173,104 @@ export default function EmergencyPublicPage() {
               </span>
             </div>
           ))}
-        </div>
+        </section>
       )}
 
-      {data.diagnoses?.length > 0 && (
-        <div className="emergency-card__block">
-          <p className="emergency-card__block-title">Medical Conditions / Diagnosen</p>
-          {data.diagnoses.map((d, i) => (
-            <div key={i} style={{ marginBottom: "0.35rem" }}>
-              {d.condition}
-              {d.icdCode ? ` (${d.icdCode})` : ""}
-            </div>
-          ))}
-        </div>
+      {/* 5. Medications */}
+      {medications.length > 0 && (
+        <section className="emergency-card__block" aria-label={t.medications}>
+          <h2 className="emergency-card__block-title">
+            <Pill size={16} aria-hidden="true" style={{ display: "inline", marginRight: "0.35rem" }} />
+            {t.medications}
+          </h2>
+          <ul className="emergency-card__list">
+            {medications.map((m, i) => (
+              <li key={i}>
+                <strong>{m.name}</strong>
+                {m.dose ? ` · ${m.dose}` : ""}
+                {m.frequency ? ` · ${m.frequency}` : ""}
+                {m.instruction ? ` — ${m.instruction}` : ""}
+                {m.note ? ` (${m.note})` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
-      {data.emergencyContacts?.length > 0 && (
-        <div className="emergency-card__block">
-          <p className="emergency-card__block-title">
-            <Phone size={14} style={{ display: "inline", marginRight: "0.35rem" }} />
-            Emergency Contacts / Notfallkontakte
-          </p>
-          {data.emergencyContacts.map((c, i) => (
+      {/* 6. Diagnoses / conditions */}
+      {diagnoses.length > 0 && (
+        <section className="emergency-card__block" aria-label={t.diagnoses}>
+          <h2 className="emergency-card__block-title">
+            <Stethoscope size={16} aria-hidden="true" style={{ display: "inline", marginRight: "0.35rem" }} />
+            {t.diagnoses}
+          </h2>
+          <ul className="emergency-card__list">
+            {diagnoses.map((d, i) => (
+              <li key={i}>
+                {d.condition}
+                {d.icdCode ? ` (${d.icdCode})` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* 7. Implants / devices */}
+      {implants.length > 0 && (
+        <section className="emergency-card__block" aria-label={t.implants}>
+          <h2 className="emergency-card__block-title">{t.implants}</h2>
+          <ul className="emergency-card__list">
+            {implants.map((m, i) => (
+              <li key={i}>
+                <strong>{m.name}</strong>
+                {m.bodyRegion ? ` · ${m.bodyRegion}` : ""}
+                {m.manufacturer ? ` · ${m.manufacturer}` : ""}
+                {m.note ? ` (${m.note})` : ""}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* 8. Emergency contacts */}
+      {contacts.length > 0 && (
+        <section className="emergency-card__block" aria-label={t.contacts}>
+          <h2 className="emergency-card__block-title">
+            <Phone size={16} aria-hidden="true" style={{ display: "inline", marginRight: "0.35rem" }} />
+            {t.contacts}
+          </h2>
+          {contacts.map((c, i) => (
             <div key={i} className="emergency-card__contact">
               <strong>{c.name}</strong>{" "}
-              <a href={`tel:${c.phone}`}>{c.phone}</a>
+              <a href={`tel:${c.phone}`} aria-label={`${c.name}: ${c.phone}`}>{c.phone}</a>
             </div>
           ))}
-        </div>
+        </section>
+      )}
+
+      {/* 9. Language & notes */}
+      {data.preferredEmergencyLanguage && (
+        <section className="emergency-card__block" aria-label={t.language}>
+          <h2 className="emergency-card__block-title">{t.language}</h2>
+          <p>{t.languageNames?.[data.preferredEmergencyLanguage] || data.preferredEmergencyLanguage}</p>
+        </section>
       )}
 
       {data.firstResponderNote && (
-        <div className="emergency-card__block">
-          <p className="emergency-card__block-title">First Responder Note</p>
-          <p className="emergency-card__ai-summary">{data.firstResponderNote}</p>
-        </div>
+        <section className="emergency-card__block" aria-label={t.note}>
+          <h2 className="emergency-card__block-title">{t.note}</h2>
+          <p className="emergency-card__pre">{data.firstResponderNote}</p>
+        </section>
       )}
 
       {data.aiSummary && (
-        <div className="emergency-card__block">
-          <p className="emergency-card__block-title">AI Medical Summary</p>
-          <p className="emergency-card__ai-summary">{data.aiSummary}</p>
-        </div>
+        <section className="emergency-card__block" aria-label={t.aiSummary}>
+          <h2 className="emergency-card__block-title">{t.aiSummary}</h2>
+          <p className="emergency-card__pre">{data.aiSummary}</p>
+        </section>
       )}
 
-      <div className="emergency-card__footer">
-        This emergency card was created by the patient via MedScoutX. Information is self-reported
-        and may not reflect the complete medical history. Consult medical records where possible.
-      </div>
-    </div>
+      <p className="emergency-card__footer">{t.notValidated}</p>
+    </main>
   );
 }

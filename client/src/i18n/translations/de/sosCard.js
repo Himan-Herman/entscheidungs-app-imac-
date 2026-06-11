@@ -5,6 +5,7 @@ export default {
   disclaimer:
     "Persönliche Selbstangaben — kein offizieller Arztbrief oder Krankenbericht. Angaben können unvollständig sein. Im Notfall medizinische Unterlagen hinzuziehen.",
   loadError: "Notfallausweis konnte nicht geladen werden.",
+  loading: "Laden…",
   tab_edit: "Bearbeiten",
   tab_preview: "Vorschau",
   tab_qr: "QR-Code",
@@ -29,6 +30,7 @@ export default {
   saving: "Speichern…",
   saveSuccess: "Gespeichert.",
   saveError: "Speichern fehlgeschlagen.",
+  statusSaved: "Notfallausweis gespeichert.",
 
   aiSection: "Automatische Notfallzusammenfassung",
   aiHint:
@@ -45,13 +47,116 @@ export default {
   qrGenerate: "QR-Code erstellen",
   qrRegenerate: "Neuen QR-Code erstellen",
   qrRevoke: "QR-Code deaktivieren",
+  qrAlt: "QR-Code, der ohne Anmeldung zu Ihrer öffentlichen Notfallseite führt.",
+  qrNoHealthData: "Der QR-Code enthält keine Gesundheitsdaten, sondern nur einen sicheren Link.",
   revokeConfirm: "QR-Code dauerhaft deaktivieren? Der bestehende Link wird ungültig.",
   generating: "Wird erstellt…",
 
   noData: "Noch keine Angaben hinterlegt.",
+  notSpecified: "nicht angegeben",
+  selfReported: "vom Nutzer selbst angegeben",
+  notValidated:
+    "Diese Angaben ersetzen keine ärztliche Prüfung. MedScoutX nimmt keine medizinische Bewertung vor.",
+  voluntaryHint: "Alle Angaben sind freiwillig.",
+  profileField: "Aus Ihrem Profil übernommen — dort bearbeitbar.",
+  years: "Jahre",
 
   allergiesHeading: "Allergien",
   diagnosesHeading: "Diagnosen",
+
+  medicalDataLegend: "Notfalldaten",
+  visibilityLegend: "Sichtbarkeit im Notfall",
+  visibilityHint:
+    "Nur freigegebene Daten werden auf der öffentlichen Notfallseite angezeigt. Nicht freigegebene Daten bleiben verborgen.",
+
+  ageLabel: "Alter",
+  dateOfBirthLabel: "Geburtsdatum",
+
+  biologicalSexSection: "Biologisches Geschlecht (medizinisch)",
+  biologicalSexLabel: "Biologisches Geschlecht",
+  biologicalSexHint:
+    "Freiwillige, medizinisch relevante Angabe für Notfälle — vom Nutzer selbst angegeben. Keine Identitätsangabe.",
+  biologicalSexValues: {
+    MALE: "Männlich",
+    FEMALE: "Weiblich",
+    DIVERSE_INTERSEX: "Divers / intersexuell",
+    UNKNOWN: "Unbekannt",
+    PREFER_NOT_TO_SAY: "Keine Angabe",
+  },
+
+  heightLabel: "Körpergröße",
+  weightLabel: "Gewicht",
+  heightUnit: "cm",
+  weightUnit: "kg",
+
+  pregnancySection: "Schwangerschaft",
+  pregnancyLabel: "Schwangerschaftsstatus",
+  pregnancyHint: "Freiwillige Angabe — vom Nutzer selbst angegeben.",
+  pregnancyValues: {
+    UNKNOWN: "Unbekannt",
+    NO: "Nein",
+    YES: "Ja",
+    NOT_APPLICABLE: "Nicht zutreffend",
+    PREFER_NOT_TO_SAY: "Keine Angabe",
+  },
+
+  preferredLanguageSection: "Bevorzugte Notfallsprache",
+  preferredLanguageLabel: "Bevorzugte Sprache",
+  preferredLanguageNone: "Keine Angabe",
+  languageNames: {
+    de: "Deutsch",
+    en: "Englisch",
+    fr: "Französisch",
+    es: "Spanisch",
+    it: "Italienisch",
+  },
+
+  medications: {
+    section: "Medikamente",
+    hint: "Freiwillige Angaben — vom Nutzer selbst angegeben.",
+    add: "Medikament hinzufügen",
+    remove: "Entfernen",
+    name: "Name",
+    namePlaceholder: "z. B. Metformin",
+    dose: "Dosierung",
+    dosePlaceholder: "z. B. 500 mg",
+    frequency: "Häufigkeit",
+    frequencyPlaceholder: "z. B. 2× täglich",
+    instruction: "Einnahmehinweis",
+    note: "Notiz",
+    empty: "Keine Medikamente angegeben.",
+  },
+  implants: {
+    section: "Implantate / medizinische Geräte",
+    hint: "Freiwillige Angaben — vom Nutzer selbst angegeben.",
+    add: "Implantat / Gerät hinzufügen",
+    remove: "Entfernen",
+    name: "Implantat / Gerät",
+    namePlaceholder: "z. B. Herzschrittmacher, Insulinpumpe",
+    bodyRegion: "Körperregion",
+    bodyRegionPlaceholder: "z. B. linke Schulter",
+    manufacturer: "Hersteller / Modell",
+    note: "Hinweis",
+    empty: "Keine Implantate oder Geräte angegeben.",
+  },
+
+  visibility: {
+    showBloodType: "Blutgruppe anzeigen",
+    showAge: "Alter anzeigen",
+    showDateOfBirth: "Geburtsdatum anzeigen",
+    showBiologicalSex: "Biologisches Geschlecht anzeigen",
+    showHeight: "Körpergröße anzeigen",
+    showWeight: "Gewicht anzeigen",
+    showAllergies: "Allergien anzeigen",
+    showDiagnoses: "Diagnosen / Vorerkrankungen anzeigen",
+    showMedications: "Medikamente anzeigen",
+    showImplants: "Implantate anzeigen",
+    showPregnancyStatus: "Schwangerschaftsstatus anzeigen",
+    showEmergencyContacts: "Notfallkontakte anzeigen",
+    showFirstResponderNote: "Hinweis für Ersthelfer anzeigen",
+    showAiSummary: "Automatische Zusammenfassung anzeigen",
+    showPreferredLanguage: "Bevorzugte Sprache anzeigen",
+  },
 
   severities: {
     life_threatening: "Lebensbedrohlich",
@@ -65,6 +170,33 @@ export default {
     resolved: "Abgeklungen",
     managed: "Kontrolliert",
     uncertain: "Unklar",
+  },
+
+  emergency: {
+    sosBadge: "NOTFALL",
+    identification: "Identifikation",
+    age: "Alter",
+    dateOfBirth: "Geburtsdatum",
+    biologicalSex: "Biologisches Geschlecht",
+    bloodType: "Blutgruppe",
+    height: "Körpergröße",
+    weight: "Gewicht",
+    pregnancy: "Schwangerschaft",
+    allergies: "Allergien",
+    criticalAllergies: "Kritische Allergien",
+    otherAllergies: "Weitere Allergien",
+    medications: "Medikamente",
+    diagnoses: "Diagnosen / Vorerkrankungen",
+    implants: "Implantate / Geräte",
+    contacts: "Notfallkontakte",
+    language: "Bevorzugte Sprache",
+    note: "Hinweis für Ersthelfer",
+    aiSummary: "Notfallzusammenfassung",
+    notValidated:
+      "Die Angaben wurden vom Nutzer selbst bereitgestellt. MedScoutX validiert diese Angaben nicht medizinisch.",
+    loading: "Notfallausweis wird geladen…",
+    notFound: "Dieser Notfallausweis ist nicht mehr aktiv oder der Link ist ungültig.",
+    loadFailed: "Notfallausweis konnte nicht geladen werden. Bitte erneut versuchen.",
   },
 
   practice: {

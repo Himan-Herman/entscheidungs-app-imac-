@@ -5,6 +5,7 @@ export default {
   disclaimer:
     "Self-reported personal information — not an official medical record. May be incomplete. Consult medical records where possible in an emergency.",
   loadError: "Could not load emergency card.",
+  loading: "Loading…",
   tab_edit: "Edit",
   tab_preview: "Preview",
   tab_qr: "QR Code",
@@ -29,6 +30,7 @@ export default {
   saving: "Saving…",
   saveSuccess: "Saved.",
   saveError: "Failed to save.",
+  statusSaved: "Emergency card saved.",
 
   aiSection: "AI Emergency Summary",
   aiHint:
@@ -45,13 +47,116 @@ export default {
   qrGenerate: "Generate QR code",
   qrRegenerate: "Generate new QR code",
   qrRevoke: "Deactivate QR code",
+  qrAlt: "QR code linking to your public emergency page without requiring a login.",
+  qrNoHealthData: "The QR code contains no health data — only a secure link.",
   revokeConfirm: "Permanently deactivate QR code? The existing link will become invalid.",
   generating: "Generating…",
 
   noData: "No information added yet.",
+  notSpecified: "not specified",
+  selfReported: "self-reported by the user",
+  notValidated:
+    "This information does not replace a medical assessment. MedScoutX does not medically evaluate it.",
+  voluntaryHint: "All entries are voluntary.",
+  profileField: "Taken from your profile — editable there.",
+  years: "years",
 
   allergiesHeading: "Allergies",
   diagnosesHeading: "Diagnoses",
+
+  medicalDataLegend: "Emergency data",
+  visibilityLegend: "Emergency visibility",
+  visibilityHint:
+    "Only released data is shown on the public emergency page. Data you do not release stays hidden.",
+
+  ageLabel: "Age",
+  dateOfBirthLabel: "Date of birth",
+
+  biologicalSexSection: "Biological sex (medical)",
+  biologicalSexLabel: "Biological sex",
+  biologicalSexHint:
+    "Voluntary, medically relevant emergency information — self-reported by the user. Not an identity statement.",
+  biologicalSexValues: {
+    MALE: "Male",
+    FEMALE: "Female",
+    DIVERSE_INTERSEX: "Diverse / intersex",
+    UNKNOWN: "Unknown",
+    PREFER_NOT_TO_SAY: "Prefer not to say",
+  },
+
+  heightLabel: "Height",
+  weightLabel: "Weight",
+  heightUnit: "cm",
+  weightUnit: "kg",
+
+  pregnancySection: "Pregnancy",
+  pregnancyLabel: "Pregnancy status",
+  pregnancyHint: "Voluntary information — self-reported by the user.",
+  pregnancyValues: {
+    UNKNOWN: "Unknown",
+    NO: "No",
+    YES: "Yes",
+    NOT_APPLICABLE: "Not applicable",
+    PREFER_NOT_TO_SAY: "Prefer not to say",
+  },
+
+  preferredLanguageSection: "Preferred emergency language",
+  preferredLanguageLabel: "Preferred language",
+  preferredLanguageNone: "Not specified",
+  languageNames: {
+    de: "German",
+    en: "English",
+    fr: "French",
+    es: "Spanish",
+    it: "Italian",
+  },
+
+  medications: {
+    section: "Medications",
+    hint: "Voluntary information — self-reported by the user.",
+    add: "Add medication",
+    remove: "Remove",
+    name: "Name",
+    namePlaceholder: "e.g. Metformin",
+    dose: "Dose",
+    dosePlaceholder: "e.g. 500 mg",
+    frequency: "Frequency",
+    frequencyPlaceholder: "e.g. twice daily",
+    instruction: "Intake note",
+    note: "Note",
+    empty: "No medications specified.",
+  },
+  implants: {
+    section: "Implants / medical devices",
+    hint: "Voluntary information — self-reported by the user.",
+    add: "Add implant / device",
+    remove: "Remove",
+    name: "Implant / device",
+    namePlaceholder: "e.g. Pacemaker, insulin pump",
+    bodyRegion: "Body region",
+    bodyRegionPlaceholder: "e.g. left shoulder",
+    manufacturer: "Manufacturer / model",
+    note: "Note",
+    empty: "No implants or devices specified.",
+  },
+
+  visibility: {
+    showBloodType: "Show blood type",
+    showAge: "Show age",
+    showDateOfBirth: "Show date of birth",
+    showBiologicalSex: "Show biological sex",
+    showHeight: "Show height",
+    showWeight: "Show weight",
+    showAllergies: "Show allergies",
+    showDiagnoses: "Show diagnoses / conditions",
+    showMedications: "Show medications",
+    showImplants: "Show implants",
+    showPregnancyStatus: "Show pregnancy status",
+    showEmergencyContacts: "Show emergency contacts",
+    showFirstResponderNote: "Show first responder note",
+    showAiSummary: "Show AI summary",
+    showPreferredLanguage: "Show preferred language",
+  },
 
   severities: {
     life_threatening: "Life-threatening",
@@ -65,6 +170,33 @@ export default {
     resolved: "Resolved",
     managed: "Managed",
     uncertain: "Uncertain",
+  },
+
+  emergency: {
+    sosBadge: "EMERGENCY",
+    identification: "Identification",
+    age: "Age",
+    dateOfBirth: "Date of birth",
+    biologicalSex: "Biological sex",
+    bloodType: "Blood type",
+    height: "Height",
+    weight: "Weight",
+    pregnancy: "Pregnancy",
+    allergies: "Allergies",
+    criticalAllergies: "Critical allergies",
+    otherAllergies: "Other allergies",
+    medications: "Medications",
+    diagnoses: "Diagnoses / conditions",
+    implants: "Implants / devices",
+    contacts: "Emergency contacts",
+    language: "Preferred language",
+    note: "First responder note",
+    aiSummary: "Emergency summary",
+    notValidated:
+      "This information was provided by the user. MedScoutX does not medically validate it.",
+    loading: "Loading emergency card…",
+    notFound: "This emergency card is no longer active or the link is invalid.",
+    loadFailed: "Unable to load emergency card. Please try again.",
   },
 
   practice: {

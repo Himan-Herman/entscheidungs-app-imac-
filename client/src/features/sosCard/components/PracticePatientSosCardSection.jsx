@@ -19,6 +19,7 @@ export default function PracticePatientSosCardSection({ linkId, practiceId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [card, setCard] = useState(null);
+  const [referenced, setReferenced] = useState(null);
   const [allergies, setAllergies] = useState([]);
   const [diagnoses, setDiagnoses] = useState([]);
 
@@ -41,6 +42,12 @@ export default function PracticePatientSosCardSection({ linkId, practiceId }) {
       }
       if (!res.ok || !data.ok) throw new Error("load_failed");
       setCard(data.card || null);
+      setReferenced({
+        age: data.age ?? null,
+        dateOfBirth: data.dateOfBirth ?? null,
+        heightCm: data.heightCm ?? null,
+        weightKg: data.weightKg ?? null,
+      });
       setAllergies(Array.isArray(data.allergies) ? data.allergies : []);
       setDiagnoses(Array.isArray(data.diagnoses) ? data.diagnoses : []);
     } catch (err) {
@@ -73,7 +80,14 @@ export default function PracticePatientSosCardSection({ linkId, practiceId }) {
       {!card && !allergies.length ? (
         <p style={{ color: "#9ca3af", fontStyle: "italic" }}>{t?.practice?.noCard}</p>
       ) : (
-        <SosCardPreview card={card} allergies={allergies} diagnoses={diagnoses} t={t} />
+        <SosCardPreview
+          card={card}
+          referenced={referenced}
+          allergies={allergies}
+          diagnoses={diagnoses}
+          respectVisibility={false}
+          t={t}
+        />
       )}
     </div>
   );

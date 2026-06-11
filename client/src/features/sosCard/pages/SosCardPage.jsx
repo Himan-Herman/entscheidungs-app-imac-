@@ -22,6 +22,7 @@ export default function SosCardPage() {
   }, [language]);
 
   const [card, setCard] = useState(null);
+  const [referenced, setReferenced] = useState(null);
   const [allergies, setAllergies] = useState([]);
   const [diagnoses, setDiagnoses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +55,7 @@ export default function SosCardPage() {
       ]);
       if (!cardRes.res.ok) throw new Error("load_failed");
       setCard(cardRes.data.card || null);
+      setReferenced(cardRes.data.referenced || null);
       if (cardRes.data.card?.hasPublicToken) {
         setPublicToken("hidden");
       }
@@ -177,10 +179,14 @@ export default function SosCardPage() {
 
       {tab === "edit" && (
         <>
-          <SosCardForm card={card} saving={saving} onSave={handleSave} t={t} />
-          {saveMsg && (
-            <p className={saving ? "sos-card__error" : "sos-card__success"}>{saveMsg}</p>
-          )}
+          <SosCardForm card={card} referenced={referenced} saving={saving} onSave={handleSave} t={t} />
+          <p
+            className={saveMsg && saving ? "sos-card__error" : "sos-card__success"}
+            role="status"
+            aria-live="polite"
+          >
+            {saveMsg}
+          </p>
 
           <div className="sos-card__section" style={{ marginTop: "1.5rem" }}>
             <p className="sos-card__section-title">{t?.aiSection}</p>
@@ -206,7 +212,13 @@ export default function SosCardPage() {
       )}
 
       {tab === "preview" && (
-        <SosCardPreview card={card} allergies={allergies} diagnoses={diagnoses} t={t} />
+        <SosCardPreview
+          card={card}
+          referenced={referenced}
+          allergies={allergies}
+          diagnoses={diagnoses}
+          t={t}
+        />
       )}
 
       {tab === "qr" && (
@@ -215,8 +227,11 @@ export default function SosCardPage() {
             <QrCode size={14} style={{ display: "inline", marginRight: "0.35rem" }} />
             {t?.qrSection}
           </p>
-          <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "1rem" }}>
+          <p className="sos-card__hint" style={{ marginBottom: "0.5rem" }}>
             {t?.qrHint}
+          </p>
+          <p className="sos-card__hint" style={{ marginBottom: "1rem" }}>
+            {t?.qrNoHealthData}
           </p>
 
           {!publicToken ? (
@@ -230,7 +245,7 @@ export default function SosCardPage() {
           ) : (
             <>
               {showQr && publicToken !== "hidden" && (
-                <SosCardQr token={publicToken} />
+                <SosCardQr token={publicToken} t={t} />
               )}
               {publicToken === "hidden" && (
                 <button

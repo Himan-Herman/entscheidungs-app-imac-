@@ -1,8 +1,33 @@
-/* SOS-Karte / Notfallausweis */
+/* SOS-Karte / Notfallausweis
+ * Uses the app design-system tokens (--ms-color-*) so it follows the site's
+ * light/dark theme (toggled via :root[data-theme="dark"]). No OS-driven override.
+ */
+
+.sos-card,
+.emergency-card {
+  /* SOS-scoped accent tokens — light defaults; overridden in dark theme below. */
+  --sos-danger: #dc2626;
+  --sos-critical-bg: #fff5f5;
+  --sos-critical-border: #dc2626;
+  --sos-badge-bg: #dc2626;
+  --sos-badge-text: #ffffff;
+}
+
+:root[data-theme="dark"] .sos-card,
+:root[data-theme="dark"] .emergency-card {
+  /* Lighter red for sufficient contrast on dark surfaces; never red-on-dark text. */
+  --sos-danger: #fca5a5;
+  --sos-critical-bg: rgba(220, 38, 38, 0.16);
+  --sos-critical-border: #f87171;
+  --sos-badge-bg: #b91c1c;
+  --sos-badge-text: #ffffff;
+}
+
 .sos-card {
   max-width: 720px;
   margin: 0 auto;
   padding: 1.5rem 1rem;
+  color: var(--ms-color-text, #0f172a);
 }
 
 .sos-card__header {
@@ -16,27 +41,44 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+  color: var(--ms-color-text, #0f172a);
 }
 
 .sos-card__subtitle {
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--ms-color-text-secondary, #334155);
   font-size: 0.875rem;
   margin-top: 0.25rem;
 }
 
 .sos-card__disclaimer {
-  background: var(--color-surface-warning, #fef9c3);
-  border: 1px solid var(--color-border-warning, #fde68a);
+  background: var(--ms-color-danger-bg, #fef9c3);
+  border: 1px solid var(--ms-color-border-strong, #fde68a);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 0.8125rem;
-  color: var(--color-text-warning, #92400e);
+  color: var(--ms-color-text, #92400e);
   margin-bottom: 1.5rem;
 }
 
+/* Groups: "Notfalldaten" and "Sichtbarkeit im Notfall" */
+.sos-card__fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  min-width: 0;
+}
+
+.sos-card__legend {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ms-color-text, #0f172a);
+  padding: 0;
+  margin-bottom: 0.75rem;
+}
+
 .sos-card__section {
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-border, #e5e7eb);
+  background: var(--ms-color-surface, #fff);
+  border: 1px solid var(--ms-color-border, #e5e7eb);
   border-radius: 10px;
   padding: 1.25rem;
   margin-bottom: 1rem;
@@ -47,8 +89,22 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--ms-color-text-secondary, #334155);
   margin: 0 0 1rem;
+}
+
+.sos-card__hint {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ms-color-text-muted, #475569);
+  margin: 0 0 0.75rem;
+}
+
+.sos-card__empty {
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--ms-color-text-muted, #475569);
+  margin: 0 0 0.75rem;
 }
 
 .sos-card__field {
@@ -63,7 +119,7 @@
   display: block;
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--ms-color-text-secondary, #334155);
   margin-bottom: 0.35rem;
 }
 
@@ -72,12 +128,18 @@
 .sos-card__textarea {
   width: 100%;
   padding: 0.55rem 0.75rem;
-  border: 1px solid var(--color-border, #d1d5db);
+  border: 1px solid var(--ms-color-border-strong, #d1d5db);
   border-radius: 6px;
   font-size: 0.9375rem;
-  background: var(--color-bg, #fff);
-  color: var(--color-text, #111827);
+  background: var(--ms-color-surface, #fff);
+  color: var(--ms-color-text, #111827);
   box-sizing: border-box;
+}
+
+.sos-card__input::placeholder,
+.sos-card__textarea::placeholder {
+  color: var(--ms-color-text-placeholder, #64748b);
+  opacity: 1;
 }
 
 .sos-card__textarea {
@@ -85,10 +147,11 @@
   resize: vertical;
 }
 
-.sos-card__input:focus,
-.sos-card__select:focus,
-.sos-card__textarea:focus {
-  outline: 2px solid var(--color-primary, #2563eb);
+.sos-card__input:focus-visible,
+.sos-card__select:focus-visible,
+.sos-card__textarea:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring, #2563eb);
+  outline-offset: 1px;
   border-color: transparent;
 }
 
@@ -98,10 +161,115 @@
   gap: 0.75rem;
 }
 
-@media (max-width: 520px) {
-  .sos-card__row {
-    grid-template-columns: 1fr;
-  }
+/* Structured medication / implant entry */
+.sos-card__entry {
+  border: 1px solid var(--ms-color-border, #e5e7eb);
+  border-radius: 8px;
+  padding: 0.875rem;
+  margin-bottom: 0.75rem;
+  background: var(--ms-color-bg-subtle, #f8fafc);
+}
+
+.sos-card__entry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Read-only metadata grid (age / DOB / height / weight, identity preview) */
+.sos-card__meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem 1rem;
+  margin: 0;
+}
+
+.sos-card__meta-item {
+  margin: 0;
+}
+
+.sos-card__meta-value {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.sos-card__meta-value--blood {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--sos-danger);
+  line-height: 1.1;
+}
+
+.sos-card__na {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--ms-color-text-muted, #475569);
+}
+
+.sos-card__data-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sos-card__data-item {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  margin-bottom: 0.4rem;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.sos-card__pre {
+  font-size: 0.9375rem;
+  white-space: pre-wrap;
+  margin: 0;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.sos-card__preview-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: var(--ms-color-text, #0f172a);
+}
+
+/* Visibility toggle list */
+.sos-card__toggle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.sos-card__toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sos-card__checkbox {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  accent-color: var(--ms-color-accent, #2563eb);
+  cursor: pointer;
+}
+
+.sos-card__checkbox:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring, #2563eb);
+  outline-offset: 2px;
+}
+
+.sos-card__toggle-label {
+  font-size: 0.9375rem;
+  color: var(--ms-color-text, #0f172a);
+  cursor: pointer;
 }
 
 .sos-card__actions {
@@ -112,6 +280,9 @@
 }
 
 .sos-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0.55rem 1.25rem;
   border-radius: 7px;
   font-size: 0.9375rem;
@@ -121,26 +292,36 @@
   transition: opacity 0.15s;
 }
 
+.sos-card__btn--small {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8125rem;
+}
+
 .sos-card__btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
+.sos-card__btn:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring, #2563eb);
+  outline-offset: 2px;
+}
+
 .sos-card__btn--primary {
-  background: var(--color-primary, #2563eb);
-  color: #fff;
+  background: var(--ms-color-accent, #2563eb);
+  color: var(--ms-color-on-accent, #fff);
 }
 
 .sos-card__btn--secondary {
-  background: var(--color-surface, #f3f4f6);
-  color: var(--color-text, #111827);
-  border: 1px solid var(--color-border, #d1d5db);
+  background: var(--ms-color-bg-subtle, #f3f4f6);
+  color: var(--ms-color-text, #111827);
+  border: 1px solid var(--ms-color-border-strong, #d1d5db);
 }
 
 .sos-card__btn--danger {
-  background: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fca5a5;
+  background: var(--ms-color-danger-bg, #fee2e2);
+  color: var(--ms-color-danger, #b91c1c);
+  border: 1px solid var(--sos-danger);
 }
 
 .sos-card__btn--ai {
@@ -149,27 +330,34 @@
   border: 1px solid #c4b5fd;
 }
 
+:root[data-theme="dark"] .sos-card__btn--ai {
+  background: rgba(139, 92, 246, 0.18);
+  color: #ddd6fe;
+  border-color: rgba(196, 181, 253, 0.5);
+}
+
 .sos-card__error {
-  color: #dc2626;
+  color: var(--ms-color-danger, #dc2626);
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }
 
 .sos-card__success {
-  color: #16a34a;
+  color: var(--ms-color-success, #16a34a);
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }
 
 /* AI Summary box */
 .sos-card__ai-summary {
-  background: #f5f3ff;
-  border: 1px solid #ddd6fe;
+  background: var(--ms-color-bg-subtle, #f5f3ff);
+  border: 1px solid var(--ms-color-border, #ddd6fe);
   border-radius: 8px;
   padding: 1rem;
   font-size: 0.9375rem;
   line-height: 1.6;
   white-space: pre-wrap;
+  color: var(--ms-color-text, #0f172a);
 }
 
 /* QR panel */
@@ -184,70 +372,131 @@
 .sos-card__qr-canvas {
   border: 4px solid #fff;
   border-radius: 6px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
 }
 
 .sos-card__qr-url {
   font-size: 0.8125rem;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--ms-color-text-secondary, #6b7280);
   word-break: break-all;
   text-align: center;
 }
 
-/* Emergency public view */
+@media (max-width: 520px) {
+  .sos-card__row,
+  .sos-card__entry-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================================================
+ * Emergency public view — mobile-first, high contrast.
+ * Theme-aware via tokens; red accents kept legible in both modes.
+ * =========================================================== */
 .emergency-card {
   max-width: 640px;
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem 2.5rem;
   font-family: system-ui, sans-serif;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.emergency-card__status {
+  font-size: 1rem;
+  color: var(--ms-color-text-secondary, #334155);
+}
+
+.emergency-card__status--error {
+  color: var(--sos-danger);
+  font-weight: 600;
 }
 
 .emergency-card__sos-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #dc2626;
-  color: #fff;
-  font-size: 1.125rem;
-  font-weight: 700;
-  padding: 0.5rem 1rem;
+  background: var(--sos-badge-bg);
+  color: var(--sos-badge-text);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 1.1rem;
   border-radius: 8px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .emergency-card__name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+  color: var(--ms-color-text, #0f172a);
 }
 
 .emergency-card__block {
-  background: #fff;
-  border: 2px solid #e5e7eb;
+  background: var(--ms-color-surface, #fff);
+  border: 2px solid var(--ms-color-border-strong, #e5e7eb);
   border-radius: 10px;
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
 }
 
 .emergency-card__block--critical {
-  border-color: #dc2626;
-  background: #fff5f5;
+  border-color: var(--sos-critical-border);
+  background: var(--sos-critical-bg);
 }
 
 .emergency-card__block-title {
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: 0.9375rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #6b7280;
+  color: var(--ms-color-text-secondary, #334155);
   margin: 0 0 0.75rem;
 }
 
 .emergency-card__blood-type {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   font-weight: 800;
-  color: #dc2626;
+  color: var(--sos-danger);
   line-height: 1;
+}
+
+.emergency-card__meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.6rem 1rem;
+  margin: 0;
+}
+
+.emergency-card__meta-grid > div {
+  margin: 0;
+}
+
+.emergency-card__meta-grid dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ms-color-text-muted, #475569);
+}
+
+.emergency-card__meta-grid dd {
+  margin: 0.15rem 0 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.emergency-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.emergency-card__list li {
+  margin-bottom: 0.5rem;
 }
 
 .emergency-card__allergy-item {
@@ -255,13 +504,13 @@
   align-items: flex-start;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
-  font-size: 0.9375rem;
+  font-size: 1rem;
 }
 
 .emergency-card__severity-badge {
   font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.15rem 0.5rem;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
   border-radius: 999px;
   white-space: nowrap;
 }
@@ -269,7 +518,7 @@
 .emergency-card__severity-badge--life_threatening,
 .emergency-card__severity-badge--severe {
   background: #fee2e2;
-  color: #b91c1c;
+  color: #991b1b;
 }
 
 .emergency-card__severity-badge--moderate {
@@ -278,30 +527,33 @@
 }
 
 .emergency-card__severity-badge--mild {
-  background: #f0fdf4;
+  background: #dcfce7;
   color: #166534;
 }
 
 .emergency-card__contact {
   margin-bottom: 0.5rem;
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
 }
 
 .emergency-card__contact a {
-  color: #2563eb;
-  text-decoration: none;
-  font-weight: 600;
+  color: var(--ms-color-link, #2563eb);
+  text-decoration: underline;
+  font-weight: 700;
 }
 
-.emergency-card__ai-summary {
-  font-size: 0.9375rem;
-  line-height: 1.7;
+.emergency-card__pre {
+  font-size: 1rem;
+  line-height: 1.6;
   white-space: pre-wrap;
+  margin: 0;
+  color: var(--ms-color-text, #0f172a);
 }
 
 .emergency-card__footer {
-  margin-top: 2rem;
-  font-size: 0.75rem;
-  color: #9ca3af;
+  margin-top: 1.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ms-color-text-muted, #475569);
   text-align: center;
 }

@@ -1890,24 +1890,38 @@ model SosCard {
   /// Optional expiry for the public token — when set and in the past, public access is denied
   publicTokenExpiresAt DateTime?
 
-  /// Patient-entered medication list — JSON array [{ name, dose?, note? }]. Self-reported, not an official record.
+  /// Patient-entered medication list — JSON array [{ name, dose?, frequency?, instruction?, note? }]. Self-reported.
   medicationsJson Json?
-  /// Patient-entered implant/device list — JSON array [{ name, note?, since? }]. Self-reported.
+  /// Patient-entered implant/device list — JSON array [{ name, bodyRegion?, manufacturer?, note? }]. Self-reported.
   implantsJson    Json?
+
+  /// Medically-relevant biological sex — self-reported, voluntary emergency datum (NOT a gender/identity field;
+  /// distinct from the non-clinical UserProfile.gender). MALE | FEMALE | DIVERSE_INTERSEX | UNKNOWN | PREFER_NOT_TO_SAY
+  emergencyBiologicalSex String? @db.VarChar(20)
+
+  /// Pregnancy status — sensitive, voluntary, opt-in visibility. UNKNOWN | NO | YES | NOT_APPLICABLE | PREFER_NOT_TO_SAY
+  pregnancyStatus String? @db.VarChar(20)
 
   /// Preferred language for the public emergency view: de | en | fr | es | it
   preferredEmergencyLanguage String? @db.VarChar(5)
 
   /// Field-level visibility flags for the PUBLIC emergency page.
-  /// Default true = current behaviour (everything visible). Existing rows keep full visibility.
+  /// Defaults preserve current behaviour; sensitive/identifying fields default to opt-in (false).
   showBloodType          Boolean @default(true)
+  showAge                Boolean @default(true)
+  showDateOfBirth        Boolean @default(false)
+  showBiologicalSex      Boolean @default(true)
+  showHeight             Boolean @default(true)
+  showWeight             Boolean @default(true)
   showAllergies          Boolean @default(true)
   showDiagnoses          Boolean @default(true)
   showMedications        Boolean @default(true)
   showImplants           Boolean @default(true)
+  showPregnancyStatus    Boolean @default(false)
   showEmergencyContacts  Boolean @default(true)
   showFirstResponderNote Boolean @default(true)
   showAiSummary          Boolean @default(true)
+  showPreferredLanguage  Boolean @default(true)
 
   /// Soft delete — when set, the card is treated as absent everywhere (patient, practice, public).
   deletedAt DateTime?
