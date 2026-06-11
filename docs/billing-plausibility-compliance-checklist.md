@@ -97,15 +97,21 @@
 | `BillingPlausibilityItem` | ziffer, factor, count, **contextText** (max 600 chars free-text), catalogueMatchJson | ⚠ contextText may contain patient data if staff enters it | contextText excluded from GET API responses; appears in PDF export |
 | `BillingPlausibilityAuditLog` | sessionId, actorUserId, action, metadataJson | No patient identifiers | identifies staff user |
 
-### 4.2 Deletion gaps — confirmed
+### 4.2 Deletion gaps
 
-| Gap | Severity | Engineering phase |
-|-----|---------|-----------------|
-| `billingPlausibilitySession.deleteMany` **missing** from `DELETE /api/account/delete` transaction | High | D2 |
-| No DB-level cascade from `PracticeProfile` → `BillingPlausibilitySession` (scalar FK, no `@relation`) | High | D2 (app-level fix; no migration needed) |
-| No DB-level cascade from `User` → `BillingPlausibilitySession` (scalar FK, no `@relation`) | High | D2 |
-| Billing sessions absent from `GET /api/account/export` (DSGVO Art. 15/20 gap) | Medium | D3 |
-| No operator erasure script for practice-level deletion requests (DSGVO Art. 17) | High | D4 |
+| Gap | Severity | Engineering phase | Status |
+|-----|---------|-----------------|--------|
+| `billingPlausibilitySession.deleteMany` missing from `DELETE /api/account/delete` transaction | High | D2 | ✅ **Implemented** — billing sessions, items and audit logs are now deleted in dependency order inside the existing transaction, before `practiceProfile.deleteMany` |
+| No DB-level cascade from `PracticeProfile` → `BillingPlausibilitySession` (scalar FK, no `@relation`) | High | D2 (app-level fix; no migration needed) | ✅ **Mitigated** — explicit app-level deletion in account-delete transaction (no schema change) |
+| No DB-level cascade from `User` → `BillingPlausibilitySession` (scalar FK, no `@relation`) | High | D2 | ✅ **Mitigated** — sessions scoped by `createdByUserId` and owned `practiceProfileId` are deleted explicitly |
+| Billing sessions absent from `GET /api/account/export` (DSGVO Art. 15/20 gap) | Medium | D3 | ✅ **Implemented** — `billingPlausibilitySessions` added to account export via privacy-safe helper; raw `contextText` and raw AI prompts/responses excluded |
+| No operator erasure script for practice-level deletion requests (DSGVO Art. 17) | High | D4 | ✅ **Implemented** — `server/scripts/eraseBillingPlausibilityData.js` (dry-run default, production guard, scopes by session/practice/user) |
+
+> **D2 note (account deletion only).** The cascade fix above covers full-account
+> erasure (`DELETE /api/account/delete`). It does **not** cover practice-level
+> erasure of a single practice while the owning account survives — that remains
+> **D4** (operator erasure script). The scalar-FK design is unchanged; deletion is
+> enforced at the application layer, not the database layer.
 
 ### 4.3 Retention gaps — confirmed
 
@@ -196,13 +202,13 @@ For full data-protection engineering phases, see **[`docs/billing-plausibility-d
 
 ### Engineering
 - [ ] All three verify scripts pass on the deployment-target database schema:
-  - `node scripts/verifyBillingPlausibility.js` — 16 sections
+  - `node scripts/verifyBillingPlausibility.js` — 18 sections
   - `node scripts/verifyGoaeCatalogue.js`
   - `node scripts/verifyBillingReportPdf.js`
 - [ ] Feature flags confirmed: `ENABLE_BILLING_PLAUSIBILITY=true`, `ENABLE_BILLING_AI_REVIEW=false` for initial pilot
-- [ ] **Phase D2**: `billingPlausibilitySession.deleteMany` added to `DELETE /api/account/delete` (ordered before `practiceProfile.deleteMany`)
-- [ ] **Phase D3**: Billing session summary included in `GET /api/account/export`
-- [ ] **Phase D4**: Operator erasure script `server/scripts/eraseBillingDataForPractice.js` implemented and tested with `--dryRun`
+- [x] **Phase D2**: `billingPlausibilitySession.deleteMany` added to `DELETE /api/account/delete` (ordered before `practiceProfile.deleteMany`) — sessions, items and audit logs deleted in dependency order inside the existing transaction; covered by `verifyBillingPlausibility.js §16`
+- [x] **Phase D3**: Billing sessions included in `GET /api/account/export` via `getBillingPlausibilityExportForUser` (items, deterministic warnings, safe AI review, audit metadata; raw `contextText` excluded — `contextTextPresent` flag only); covered by `verifyBillingPlausibility.js §17`
+- [x] **Phase D4**: Operator erasure script `server/scripts/eraseBillingPlausibilityData.js` implemented (`npm run billing:erase`), dry-run default, production guard, scopes by session/practice/user; verified end-to-end against throwaway local test data
 - [ ] **Phase D5**: Retention purge script/cron implemented with configurable `BILLING_SESSION_RETENTION_DAYS`; retention period confirmed by legal
 - [ ] Rate-limiting configuration reviewed for pilot load
 - [ ] Error monitoring configured (Render logs or equivalent); see **[`docs/billing-plausibility-runbook.md §3`](billing-plausibility-runbook.md)** for log signal reference and grep commands
@@ -231,13 +237,32 @@ For full data-protection engineering phases, see **[`docs/billing-plausibility-d
 
 ## 9. Open items (blockers for production use)
 
+> **Resolved:** D2 (account-deletion cascade for billing sessions) was implemented
+> 2026-06-11 — billing sessions, items and audit logs are deleted in dependency
+> order inside the `DELETE /api/account/delete` transaction, before
+> `practiceProfile.deleteMany`. Verified statically by `verifyBillingPlausibility.js §16`.
+> Practice-level erasure (single practice, account survives) remains open as **D4**.
+>
+> **Resolved:** D3 (billing data portability) was implemented 2026-06-11 — billing
+> sessions are included in `GET /api/account/export` via a privacy-safe helper
+> (`getBillingPlausibilityExportForUser`). Raw `contextText` and raw AI
+> prompts/responses are excluded; a `contextTextPresent` flag is emitted instead.
+> Verified statically by `verifyBillingPlausibility.js §17`.
+>
+> **Resolved:** D4 (operator erasure) was implemented 2026-06-11 —
+> `server/scripts/eraseBillingPlausibilityData.js` (`npm run billing:erase`) hard-deletes
+> the billing session tree (auditlog → item → session) for a `--sessionId` /
+> `--practiceProfileId` / `--createdByUserId` scope. Dry-run by default; refuses
+> production/Render databases and missing/zero scopes; large-batch guard at 100
+> sessions. Verified end-to-end against throwaway local test data (no orphans).
+
 | # | Phase | Item | Severity | Owner |
 |---|-------|------|----------|-------|
 | 1 | C-1 | `contextText` data-hygiene: free-form field forwarded to OpenAI when AI enabled; cannot technically prevent patient data entry; also appears in PDF export (first 120 chars) | High | Product + Legal + Staff training |
-| 2 | D2 | `billingPlausibilitySession.deleteMany` missing from `DELETE /api/account/delete` transaction | High | Engineering |
-| 3 | D2 | No DB-level cascade from `PracticeProfile` or `User` → `BillingPlausibilitySession` (scalar FKs, no `@relation`) | High | Engineering (app-level fix, no migration) |
-| 4 | D3 | Billing sessions absent from `GET /api/account/export` (DSGVO Art. 15/20) | Medium | Engineering |
-| 5 | D4 | No operator erasure script for practice-level deletion (DSGVO Art. 17) | High | Engineering |
+| 2 | D2 | ✅ **Done** — `billingPlausibilitySession.deleteMany` (with items + audit logs) added to `DELETE /api/account/delete` transaction | High | Engineering |
+| 3 | D2 | ✅ **Mitigated** — no DB-level cascade from `PracticeProfile`/`User` (scalar FKs unchanged), but account deletion now removes billing rows at the app layer; practice-level erasure still pending (D4) | High | Engineering (app-level fix, no migration) |
+| 4 | D3 | ✅ **Done** — billing sessions included in `GET /api/account/export` (raw contextText excluded; conservative portability) | Medium | Engineering |
+| 5 | D4 | ✅ **Done** — operator erasure script `eraseBillingPlausibilityData.js` (dry-run default, production guard) | High | Engineering |
 | 6 | D5 | No automated data retention / purge schedule | Medium | Engineering |
 | 7 | D6 | AVV template not created; no AVV signed with any practice | High | Legal |
 | 8 | D7 | Privacy notice not updated for billing module | High | Legal |

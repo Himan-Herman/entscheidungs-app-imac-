@@ -243,3 +243,101 @@ export async function getSessionForPractice(practiceId, sessionId, actor) {
 
   return { ok: true, session: serializeSession(session, items) };
 }
+
+/**
+ * Serialize a billing plausibility session for GDPR account/data export (Phase D3).
+ *
+ * Privacy-safe whitelist serializer — distinct from serializeSession():
+ *  - includes items + audit log (export needs the full record, not the API view)
+ *  - EXCLUDES the raw `contextText` value (conservative D3 policy — see below);
+ *    a boolean `contextTextPresent` flag is emitted instead for Art. 15 transparency
+ *  - includes resultSummaryJson as-is: the billing AI service only ever persists the
+ *    validated, truncated, non-binding review there — raw OpenAI prompts/responses
+ *    are NEVER stored in the database, so they cannot leak into this export
+ *
+ * contextText policy: the data-protection doc classifies `contextText` as HIGH RISK
+ * (free-text that may, despite UI warnings, contain accidental patient data) and
+ * already excludes it from all standard GET API responses. To avoid propagating
+ * potentially-accidental personal data into a portable, downloadable JSON file
+ * before legal sign-off, the raw value is omitted here. Flipping to full inclusion
+ * (for stronger Art. 20 portability) is a one-line change once legal approves.
+ *
+ * @param {object} s — Prisma BillingPlausibilitySession row with items + auditLog included
+ * @returns {object}
+ */
+function serializeSessionForExport(s) {
+  return {
+    id: s.id,
+    practiceProfileId: s.practiceProfileId,
+    createdByUserId: s.createdByUserId,
+    status: s.status,
+    sourceType: s.sourceType,
+    disclaimerVersion: s.disclaimerVersion,
+    createdAt: s.createdAt,
+    updatedAt: s.updatedAt,
+    dismissedAt: s.dismissedAt ?? null,
+    inputSummaryJson: s.inputSummaryJson ?? null,
+    resultSummaryJson: s.resultSummaryJson ?? null,
+    items: (s.items || []).map((item) => ({
+      id: item.id,
+      ziffer: item.ziffer,
+      factor: item.factor,
+      count: item.count,
+      // Raw contextText intentionally omitted (D3 conservative policy). Presence
+      // flag only — see serializeSessionForExport docblock.
+      contextTextPresent:
+        typeof item.contextText === "string" && item.contextText.trim().length > 0,
+      catalogueMatchJson: item.catalogueMatchJson ?? null,
+      warningsJson: item.warningsJson ?? null,
+      createdAt: item.createdAt,
+    })),
+    auditLog: (s.auditLog || []).map((a) => ({
+      id: a.id,
+      action: a.action,
+      // actorUserId is in scope: sessions are limited to the exporting user's own
+      // records or records owned by practices the user owns.
+      actorUserId: a.actorUserId ?? null,
+      metadataJson: a.metadataJson ?? null,
+      createdAt: a.createdAt,
+    })),
+  };
+}
+
+/**
+ * Collect all billing plausibility data belonging to a user for account export (Phase D3).
+ *
+ * Scope (mirrors the D2 account-deletion scope for symmetry): sessions the user
+ * created OR sessions owned by any practice profile the user owns. Practice IDs are
+ * resolved here so the helper is self-contained and unit-testable.
+ *
+ * @param {string} userId
+ * @returns {Promise<object[]>} array of export-safe session objects (may be empty)
+ */
+export async function getBillingPlausibilityExportForUser(userId) {
+  if (typeof userId !== "string" || !userId) return [];
+
+  const ownedPractices = await prisma.practiceProfile.findMany({
+    where: { userId },
+    select: { id: true },
+  });
+  const ownedPracticeIds = ownedPractices.map((p) => p.id);
+
+  const sessions = await prisma.billingPlausibilitySession.findMany({
+    where: {
+      OR: [
+        { createdByUserId: userId },
+        ...(ownedPracticeIds.length
+          ? [{ practiceProfileId: { in: ownedPracticeIds } }]
+          : []),
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 500,
+    include: {
+      items: { orderBy: { createdAt: "asc" } },
+      auditLog: { orderBy: { createdAt: "asc" } },
+    },
+  });
+
+  return sessions.map(serializeSessionForExport);
+}

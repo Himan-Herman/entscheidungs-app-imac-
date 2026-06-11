@@ -39,7 +39,7 @@ Follow this order exactly. Never skip steps.
 
 ```bash
 cd server
-npm run verify:billing-plausibility   # 16 sections — all must pass, exit 0
+npm run verify:billing-plausibility   # 18 sections — all must pass, exit 0
 npm run verify:goae-catalogue         # 35 entries — all must pass, exit 0
 npm run verify:billing-report-pdf     # 66 assertions — all must pass, exit 0
 ```
@@ -101,8 +101,10 @@ curl https://<env>/api/health/openai
 # Expected: { ok: true, openai: { configured: true } }
 ```
 
-Then run the five manual smoke tests in `docs/billing-ai-staging-checklist.md` §4
-(TC-1 through TC-5) before any internal demo.
+Then run the manual smoke tests in `docs/billing-ai-staging-checklist.md` §4
+(4a–4h: flag-disabled baseline, patient-data rejection, happy path, no-API-key
+fallback, unsafe-content fallback, no-AI-on-page-load, safety edge cases, and
+PDF-AI-note-only-after-save) before any internal demo.
 
 ---
 
@@ -454,7 +456,7 @@ Run from `server/` directory. All offline scripts require no live services.
 ```bash
 # ── Offline checks (no DB, no AI, no network) ──────────────────────────────
 
-# 1. Billing plausibility static checks (16 sections)
+# 1. Billing plausibility static checks (18 sections)
 npm run verify:billing-plausibility
 
 # 2. GOÄ catalogue structural validation (35 entries)
@@ -519,7 +521,7 @@ WHERE "metadataJson"->>'error' = 'unsafe_output_detected';
 | Missing DB table / migration failure | **Engineering** | Do not run `migrate deploy` against production without maintenance window |
 | Audit log silently failing (no entries written) | **Engineering** | Check `BillingPlausibilityAuditLog` table exists and DB write permissions |
 | GOÄ catalogue correctness concern | **Engineering** + **Medical/Billing expert** | Do not modify `goaeCatalogue.js` without running all three verify scripts |
-| DSGVO Art. 17 erasure request for billing sessions | **Legal/DPO** + **Engineering** | No erasure endpoint exists yet (Phase D2 gap) — manual DB operation required; document in DPO log |
+| DSGVO Art. 17 erasure request for billing sessions | **Legal/DPO** + **Engineering** | Use the operator erasure script `server/scripts/eraseBillingPlausibilityData.js` (`npm run billing:erase`) — dry-run first, then `--confirmErase`. Scope by `--sessionId` / `--practiceProfileId` / `--createdByUserId`. Document the run in the DPO log. |
 
 ---
 
@@ -533,8 +535,8 @@ but must be resolved before external-practice activation.
 | `writeAiAuditLog` silently swallows DB errors — audit trail can fail invisibly | D6 | Forensic gaps if DB is degraded during AI review |
 | `/api/health/config` does not expose `ENABLE_BILLING_PLAUSIBILITY` or `ENABLE_BILLING_AI_REVIEW` | O1-improvement | Cannot confirm flag state via health endpoint |
 | No `used_fallback` rate metric or alert | O1-improvement | Sustained AI failures are not alertable without log parsing |
-| Account deletion does not cascade to `BillingPlausibilitySession` | D2 | DSGVO Art. 17 gap; must be resolved before external use |
-| No DSGVO Art. 17 erasure endpoint for billing sessions | D2 | Manual DB operation required for erasure requests |
+| ~~Account deletion does not cascade to `BillingPlausibilitySession`~~ | D2 ✅ Done | Resolved — billing rows deleted in the account-delete transaction |
+| ~~No DSGVO Art. 17 erasure mechanism for billing sessions~~ | D4 ✅ Done | Resolved — operator script `eraseBillingPlausibilityData.js` (`npm run billing:erase`) |
 | No AVV/DPA with OpenAI | D1 → Legal | Blocks any external-practice AI enablement |
 | `contextText` free-text field has no PII scanning | D3 | Users can enter patient data; enforcement is training-only until D3 |
 

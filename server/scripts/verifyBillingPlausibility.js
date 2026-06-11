@@ -793,6 +793,206 @@ assert(
   assert("env.example: ENABLE_BILLING_PLAUSIBILITY flag documented", ENV_EXAMPLE.includes("ENABLE_BILLING_PLAUSIBILITY"));
   assert("env.example: ENABLE_BILLING_AI_REVIEW flag documented", ENV_EXAMPLE.includes("ENABLE_BILLING_AI_REVIEW"));
   assert("env.example: AI review section references staging checklist", ENV_EXAMPLE.includes("billing-ai-staging-checklist"));
+  // AI disabled by default — the line must literally set the flag to false.
+  assert("env.example: ENABLE_BILLING_AI_REVIEW defaults to false", ENV_EXAMPLE.includes("ENABLE_BILLING_AI_REVIEW=false"));
+}
+
+// 15l. Three distinct safe fallback paths exist in the AI service — every failure
+// mode (transient OpenAI error, non-JSON output, schema-invalid output, unsafe
+// output) must degrade to the deterministic result, never surface a raw payload.
+assert(
+  "AI service: json_parse_failed fallback path present",
+  AI_SERVICE.includes("billing_ai_review_json_parse_failed"),
+);
+assert(
+  "AI service: invalid_response_shape fallback path present",
+  AI_SERVICE.includes("invalid_response_shape"),
+);
+assert(
+  "AI service: unsafe_output_detected fallback path present",
+  AI_SERVICE.includes("unsafe_output_detected"),
+);
+{
+  // Every persistFallback caller returns used_fallback: true (no fallback path
+  // can silently return a "success" shape).
+  const fallbackCallCount = (AI_SERVICE.match(/persistFallback\(/g) || []).length;
+  // 1 definition + ≥4 call sites (no key, openai error, parse fail, invalid shape, unsafe)
+  assert(
+    `AI service: persistFallback used by multiple failure paths (found ${fallbackCallCount} references)`,
+    fallbackCallCount >= 5,
+  );
+}
+
+// 15m. Raw OpenAI content is parsed into a local variable and never written to the
+// database. The persisted shape must be the validated/truncated result only.
+{
+  // rawContent must not appear inside any prisma update `data: { ... }` block.
+  // Heuristic: rawContent is only assigned/parsed, never referenced after the
+  // safety scan (no `rawContent` inside the merge/persist region).
+  const mergeStart = AI_SERVICE.indexOf("const mergedResult");
+  const afterMerge = mergeStart > 0 ? AI_SERVICE.slice(mergeStart) : "";
+  assert(
+    "AI service: rawContent not referenced in the persisted/merged result region",
+    afterMerge.length > 0 && !afterMerge.includes("rawContent"),
+  );
+  assert(
+    "AI service: no rawPrompt/rawResponse field stored or returned by the service",
+    !AI_SERVICE.includes("rawPrompt") && !AI_SERVICE.includes("rawResponse"),
+  );
+}
+
+// 15n. AI review is refused on a dismissed session (no AI spend on archived work).
+assert(
+  "AI service: dismissed session rejected before any OpenAI call",
+  (() => {
+    const dismissPos = AI_SERVICE.indexOf('session.status === "dismissed"');
+    const openaiPos = AI_SERVICE.indexOf("openai.chat.completions.create");
+    return dismissPos > 0 && openaiPos > 0 && dismissPos < openaiPos;
+  })(),
+);
+
+// 15o. The OpenAI call sets response_format json_object and bounded max_tokens —
+// the request itself is constrained to the staging envelope.
+assert(
+  "AI service: OpenAI request uses json_object response_format",
+  AI_SERVICE.includes('response_format: { type: "json_object" }'),
+);
+assert(
+  "AI service: OpenAI request caps max_tokens at the staging envelope constant",
+  AI_SERVICE.includes("max_tokens: BILLING_AI_MAX_TOKENS"),
+);
+
+// 15p. PDF report renders the AI note ONLY when a saved aiReview exists on the
+// session — it never triggers an AI call and never invents a note.
+assert(
+  "report service: AI note guarded by session.resultSummaryJson?.aiReview presence",
+  REPORT_SERVICE.includes("session.resultSummaryJson?.aiReview") &&
+    REPORT_SERVICE.includes("if (aiReview)"),
+);
+assert(
+  "report service: no OpenAI client import (PDF never calls AI)",
+  !REPORT_SERVICE.includes('from "openai"') && !REPORT_SERVICE.includes("openai.chat"),
+);
+
+// ─── 16. Account deletion — billing plausibility cleanup (Phase D2) ───────────
+// BillingPlausibilitySession uses scalar FKs (no @relation to User/PracticeProfile)
+// so there is no DB cascade. The account-deletion transaction MUST delete billing
+// sessions (and their items/audit logs) explicitly, ordered before practiceProfile
+// deletion, or rows are orphaned (GDPR Art. 17 erasure gap).
+{
+  const ACCOUNT_ROUTE = read("server/routes/account.js");
+
+  assert(
+    "account delete: references billingPlausibilitySession cleanup",
+    ACCOUNT_ROUTE.includes("billingPlausibilitySession"),
+  );
+  assert(
+    "account delete: deletes billingPlausibilityItem rows",
+    ACCOUNT_ROUTE.includes("billingPlausibilityItem.deleteMany"),
+  );
+  assert(
+    "account delete: deletes billingPlausibilityAuditLog rows",
+    ACCOUNT_ROUTE.includes("billingPlausibilityAuditLog.deleteMany"),
+  );
+  assert(
+    "account delete: scopes sessions by createdByUserId",
+    ACCOUNT_ROUTE.includes("createdByUserId"),
+  );
+  assert(
+    "account delete: scopes sessions by owned practiceProfileId",
+    ACCOUNT_ROUTE.includes("practiceProfileId"),
+  );
+  assert(
+    "account delete: billing cleanup runs inside the prisma transaction",
+    ACCOUNT_ROUTE.includes("tx.billingPlausibilitySession.deleteMany"),
+  );
+
+  // Ordering: audit log + item + session deletions must all precede the
+  // practiceProfile.deleteMany call so practice IDs are still resolvable and
+  // no orphan remains.
+  const sessionDelPos = ACCOUNT_ROUTE.indexOf("tx.billingPlausibilitySession.deleteMany");
+  const auditDelPos = ACCOUNT_ROUTE.indexOf("tx.billingPlausibilityAuditLog.deleteMany");
+  const itemDelPos = ACCOUNT_ROUTE.indexOf("tx.billingPlausibilityItem.deleteMany");
+  const practiceDelPos = ACCOUNT_ROUTE.indexOf("tx.practiceProfile.deleteMany");
+  assert(
+    "account delete: audit-log deletion precedes item deletion (dependency order)",
+    auditDelPos !== -1 && itemDelPos !== -1 && auditDelPos < itemDelPos,
+  );
+  assert(
+    "account delete: item deletion precedes session deletion (dependency order)",
+    itemDelPos !== -1 && sessionDelPos !== -1 && itemDelPos < sessionDelPos,
+  );
+  assert(
+    "account delete: billing session deletion precedes practiceProfile deletion",
+    sessionDelPos !== -1 && practiceDelPos !== -1 && sessionDelPos < practiceDelPos,
+  );
+}
+
+// ─── 17. Account export — billing plausibility data portability (Phase D3) ─────
+// GET /api/account/export must include billing plausibility data (GDPR Art. 15/20)
+// via the privacy-safe export helper. Raw contextText, raw OpenAI prompts and raw
+// AI responses must NOT appear; forbidden patient fields must NOT appear.
+{
+  const ACCOUNT_ROUTE = read("server/routes/account.js");
+  const BILLING_SERVICE = read("server/services/billingPlausibility/billingPlausibilityService.js");
+
+  // Route wiring
+  assert(
+    "account export: imports getBillingPlausibilityExportForUser helper",
+    ACCOUNT_ROUTE.includes("getBillingPlausibilityExportForUser"),
+  );
+  assert(
+    "account export: billingPlausibilitySessions key added to export payload",
+    ACCOUNT_ROUTE.includes("billingPlausibilitySessions"),
+  );
+
+  // Helper exists and is exported
+  assert(
+    "billing service: getBillingPlausibilityExportForUser is exported",
+    /export\s+async\s+function\s+getBillingPlausibilityExportForUser/.test(BILLING_SERVICE),
+  );
+  assert(
+    "billing service: export helper scopes by createdByUserId",
+    BILLING_SERVICE.includes("createdByUserId"),
+  );
+  assert(
+    "billing service: export helper scopes by owned practiceProfileId",
+    BILLING_SERVICE.includes("practiceProfileId: { in: ownedPracticeIds }"),
+  );
+
+  // contextText raw value must NOT be exported — only a presence flag
+  assert(
+    "billing service: export emits contextTextPresent boolean flag",
+    BILLING_SERVICE.includes("contextTextPresent"),
+  );
+  {
+    // The export serializer block must not read item.contextText except to compute
+    // the boolean presence flag (no raw value assignment).
+    const exportFnStart = BILLING_SERVICE.indexOf("function serializeSessionForExport");
+    const exportFnEnd = BILLING_SERVICE.indexOf("export async function getBillingPlausibilityExportForUser");
+    const exportFnBody = BILLING_SERVICE.slice(exportFnStart, exportFnEnd);
+    assert(
+      "billing service: export serializer does not emit a raw contextText field",
+      !/contextText:\s*item\.contextText/.test(exportFnBody) &&
+        !/\bcontextText:\s/.test(exportFnBody),
+    );
+  }
+
+  // No raw AI prompt/response fields anywhere in the export helper or route payload
+  for (const forbidden of ["rawPrompt", "rawResponse", "raw_prompt", "raw_response"]) {
+    assert(
+      `account export: no "${forbidden}" in billing export helper`,
+      !BILLING_SERVICE.includes(forbidden),
+    );
+  }
+
+  // No patient-identifier fields introduced by the export helper
+  for (const field of ["patientName", "dateOfBirth", "diagnosisText", "clinicalNotes", "insuranceNumber", "icd10"]) {
+    assert(
+      `account export: billing helper does not reference patient field "${field}"`,
+      !BILLING_SERVICE.includes(field),
+    );
+  }
 }
 
 // ─── Result ───────────────────────────────────────────────────────────────────
@@ -823,6 +1023,8 @@ console.log(
       "service-unit-permissions-and-catalogue",
       "ai-staging-pilot-readiness",
       "compliance-disclaimer-wording",
+      "account-deletion-billing-cleanup",
+      "account-export-billing-portability",
     ],
   }),
 );

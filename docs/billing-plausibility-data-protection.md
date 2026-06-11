@@ -96,7 +96,7 @@ This is verified by `verifyBillingPlausibility.js §6 (route-patient-rejection)`
 
 ### 2.1 Account delete (`DELETE /api/account/delete`)
 
-The account delete endpoint (`server/routes/account.js`) performs the following deletions in a transaction:
+The account delete endpoint (`server/routes/account.js`) performs the following deletions in a single transaction:
 
 ```
 preVisitSession.deleteMany     ✅ included
@@ -104,20 +104,38 @@ preVisitCase.deleteMany        ✅ included
 doctorContact.deleteMany       ✅ included
 doctor.deleteMany              ✅ included
 auditLog.deleteMany            ✅ included
+
+# Billing plausibility cleanup (Phase D2) — runs BEFORE practiceProfile.deleteMany:
+billingPlausibilityAuditLog.deleteMany  ✅ included (by session id)
+billingPlausibilityItem.deleteMany      ✅ included (by session id)
+billingPlausibilitySession.deleteMany   ✅ included (by id; scope below)
+
 practiceProfile.deleteMany     ✅ included
 practiceMember.deleteMany      ✅ included
 interpreterCloudSession.deleteMany   ✅ included
 interpreterCloudPreference.deleteMany ✅ included
-
-billingPlausibilitySession.deleteMany  ❌ MISSING
 ```
 
-**Gap**: `BillingPlausibilitySession` rows are **not deleted** when a user invokes the account delete endpoint. This is because:
-1. `BillingPlausibilitySession.practiceProfileId` is a scalar FK with **no Prisma `@relation`** to `PracticeProfile`, so deleting the practice profile does not cascade.
-2. `BillingPlausibilitySession.createdByUserId` is a scalar FK with **no Prisma `@relation`** to `User`, so deleting the user does not cascade.
-3. The transaction does not include an explicit `billingPlausibilitySession.deleteMany`.
+**Status (D2 — implemented 2026-06-11)**: `BillingPlausibilitySession` rows are now
+deleted as part of account deletion. Because the FKs are scalar (no DB cascade), the
+transaction resolves the sessions explicitly and removes them in dependency order.
 
-**Impact**: After a user deletes their account, their billing sessions remain in the database, linked to a userId that no longer exists in the `User` table.
+**Session scope** — a billing session is deleted if **either**:
+- `createdByUserId === userId` (the deleted user created it), **or**
+- `practiceProfileId` is one of the practice profiles owned by the deleted user
+  (resolved via `practiceProfile.findMany({ where: { userId } })` before the
+  practice profiles themselves are deleted).
+
+This avoids deleting sessions belonging to practices the account does not own.
+
+**Why explicit deletion is required**:
+1. `BillingPlausibilitySession.practiceProfileId` is a scalar FK with **no Prisma `@relation`** to `PracticeProfile` — deleting the practice profile does not cascade.
+2. `BillingPlausibilitySession.createdByUserId` is a scalar FK with **no Prisma `@relation`** to `User` — deleting the user does not cascade.
+3. `BillingPlausibilityItem` and `BillingPlausibilityAuditLog` **do** cascade from their parent session (`onDelete: Cascade`), but are deleted explicitly first for defense-in-depth and clarity of erasure intent.
+
+**Remaining (D4)**: This fix covers full-account erasure only. Erasing a **single
+practice** while the owning account survives still requires the operator erasure
+script (Phase D4).
 
 ---
 
@@ -134,9 +152,42 @@ Sessions are intentionally not deleted by practice staff. Dismissed sessions rem
 
 ### 2.3 Account data export (`GET /api/account/export`)
 
-The account export endpoint does **not** include billing plausibility sessions. A staff user invoking their data export will receive practiceProfiles, preVisitSessions, auditLogs etc., but **no billing session data**.
+**Status (D3 — implemented 2026-06-11)**: The account export now includes a
+`billingPlausibilitySessions` array via the `getBillingPlausibilityExportForUser`
+helper (`server/services/billingPlausibility/billingPlausibilityService.js`).
 
-**Gap**: Billing session data is not included in the account export (DSGVO Art. 15 / GDPR Art. 20 data portability gap).
+**Scope** (mirrors the D2 deletion scope): sessions the user created OR sessions
+owned by any practice profile the user owns (max 500, newest first).
+
+**Exported per session**: `id`, `practiceProfileId`, `createdByUserId`, `status`,
+`sourceType`, `disclaimerVersion`, `createdAt`, `updatedAt`, `dismissedAt`,
+`inputSummaryJson`, `resultSummaryJson` (deterministic warnings + the validated,
+non-binding AI review if present), `items[]` and `auditLog[]`.
+
+**Exported per item**: `ziffer`, `factor`, `count`, `contextTextPresent` (boolean),
+`catalogueMatchJson`, `warningsJson`, `createdAt`.
+
+**Exported per audit-log row**: `action`, `actorUserId`, `metadataJson`, `createdAt`.
+
+**Excluded / redacted**:
+- **Raw `contextText` value** — only the `contextTextPresent` boolean is exported.
+  See the contextText policy decision below.
+- **Raw OpenAI prompts and raw AI responses** — these are never persisted by the
+  module, so they cannot appear in the export. Only the validated, truncated,
+  non-binding `aiReview` (rowHints, generalNote, uncertaintyNote, nonBinding) is
+  present inside `resultSummaryJson`.
+- No patient-identifier fields (`patientName`, `dateOfBirth`, `diagnosisText`,
+  `clinicalNotes`, insurance number, ICD-10) — the module never stores them.
+
+**contextText policy decision (D3)**: **conservative redaction — raw value excluded.**
+The data classifies `contextText` as HIGH RISK (§1.2) and already excludes it from
+all standard GET API responses. Emitting the raw value into a portable, downloadable
+JSON file would risk propagating accidental personal data before legal sign-off.
+The export therefore emits a `contextTextPresent` boolean only — enough for Art. 15
+transparency (the data subject is told context data exists) without exposing
+potentially-accidental personal data. Switching to full inclusion for stronger
+Art. 20 portability is a one-line change in `serializeSessionForExport` once legal
+approves (see Phase D3 roadmap note).
 
 ---
 
@@ -196,67 +247,132 @@ The following phases are listed in priority order. This section is an engineerin
 - [x] Pilot AI policy stated
 - [x] Compliance checklist updated
 
-### Phase D2 — Account deletion cascade (Engineering: ~1–2 days)
+### Phase D2 — Account deletion cascade ✅ IMPLEMENTED (2026-06-11)
 
-**Add billing session deletion to `DELETE /api/account/delete`**:
-
-```javascript
-// In the existing transaction in server/routes/account.js:
-
-// Step 1: delete sessions where the user created them (as practice owner/admin)
-await tx.billingPlausibilitySession.deleteMany({ where: { createdByUserId: userId } });
-
-// Step 2: delete sessions belonging to practices owned by this user
-// (practiceProfile.deleteMany already runs — but sessions must be deleted FIRST
-//  because there is no DB-level cascade from PracticeProfile to BillingPlausibilitySession)
-// Order matters: billing sessions must be deleted before practiceProfiles.
-```
-
-**Order of operations**: `billingPlausibilitySession.deleteMany` must run **before** `practiceProfile.deleteMany` to avoid orphan records.
-
-**Schema change not required**: no new migration needed; uses existing scalar FK columns.
-
-**Verification**: add a test assertion that after account delete, `billingPlausibilitySession.count({ where: { createdByUserId: deletedUserId } })` returns 0.
-
-### Phase D3 — Account data export (Engineering: ~0.5 days)
-
-Add billing session summary to `GET /api/account/export`:
+Billing session deletion is now part of the `DELETE /api/account/delete` transaction
+in `server/routes/account.js`. The implemented logic:
 
 ```javascript
-const billingSessions = await prisma.billingPlausibilitySession.findMany({
-  where: { createdByUserId: userId },
-  select: {
-    id: true,
-    practiceProfileId: true,
-    status: true,
-    sourceType: true,
-    inputSummaryJson: true,
-    disclaimerVersion: true,
-    createdAt: true,
-    dismissedAt: true,
-    // NOTE: items (including contextText) may be included for full Art. 15 portability
-  },
-  orderBy: { createdAt: 'desc' },
-  take: 500,
+// Inside the existing prisma.$transaction, BEFORE practiceProfile.deleteMany:
+
+// Resolve the practice profiles this user owns (still present at this point).
+const ownedPractices = await tx.practiceProfile.findMany({
+  where: { userId },
+  select: { id: true },
 });
+const ownedPracticeIds = ownedPractices.map((p) => p.id);
+
+// Sessions in scope: created by this user OR owned by one of their practices.
+const billingSessions = await tx.billingPlausibilitySession.findMany({
+  where: {
+    OR: [
+      { createdByUserId: userId },
+      ...(ownedPracticeIds.length ? [{ practiceProfileId: { in: ownedPracticeIds } }] : []),
+    ],
+  },
+  select: { id: true },
+});
+const billingSessionIds = billingSessions.map((s) => s.id);
+
+if (billingSessionIds.length > 0) {
+  await tx.billingPlausibilityAuditLog.deleteMany({ where: { sessionId: { in: billingSessionIds } } });
+  await tx.billingPlausibilityItem.deleteMany({ where: { sessionId: { in: billingSessionIds } } });
+  await tx.billingPlausibilitySession.deleteMany({ where: { id: { in: billingSessionIds } } });
+}
 ```
 
-**contextText in export**: because `contextText` may contain practice-internal billing notes (and potentially, despite the UI warning, patient data), including it in export should be reviewed by legal before shipping.
+**Order of operations**: audit logs → items → sessions, all **before**
+`practiceProfile.deleteMany` (so practice IDs remain resolvable and no orphan remains).
 
-### Phase D4 — Operator erasure script (Engineering: ~1 day)
+**Deletion strategy**: hard delete — consistent with the rest of the account-delete
+transaction (which hard-deletes pre-visit data, practice profiles and audit logs).
+Anonymisation was not chosen because the surrounding flow is a full erasure and the
+data is no longer needed once the account is gone (GDPR Art. 17).
 
-An internal operator script (not a user-facing endpoint) for DSGVO Art. 17 erasure requests:
+**Schema change**: none. No new migration. Uses existing scalar FK columns.
+
+**Verification**: static assertions in `verifyBillingPlausibility.js §16`
+(`account-deletion-billing-cleanup`) confirm the route references the billing
+deletions, scopes by `createdByUserId` and owned `practiceProfileId`, runs inside
+the transaction, and orders audit-log → item → session → practiceProfile correctly.
+
+**Remaining (D4)**: practice-level erasure (deleting one practice while the owning
+account survives) is still pending — see Phase D4.
+
+### Phase D3 — Account data export ✅ IMPLEMENTED (2026-06-11)
+
+Billing data is now included in `GET /api/account/export` via the exported helper
+`getBillingPlausibilityExportForUser(userId)`
+(`server/services/billingPlausibility/billingPlausibilityService.js`), surfaced under
+the `billingPlausibilitySessions` key of the export payload.
+
+The helper resolves the user's owned practice IDs and selects sessions where
+`createdByUserId === userId` OR `practiceProfileId ∈ owned IDs` (max 500), including
+`items` and `auditLog`, then maps each through a privacy-safe whitelist serializer
+(`serializeSessionForExport`).
+
+**Field set, exclusions, and the contextText decision** are documented in §2.3 above.
+
+**contextText decision — conservative redaction (raw value excluded).** Rather than
+ship the raw free-text (which may contain accidental patient data) into a portable
+JSON file, the export emits a `contextTextPresent` boolean. This is consistent with
+the existing GET-API exclusion policy. To switch to full inclusion once legal
+approves, change the single `contextTextPresent` line in `serializeSessionForExport`
+to emit the raw `item.contextText` value.
+
+**Verification**: `verifyBillingPlausibility.js §17` (`account-export-billing-portability`)
+asserts the helper is exported and wired into the route, scopes by user + owned
+practice, emits `contextTextPresent` (not raw contextText), and contains no
+`rawPrompt`/`rawResponse` or patient-identifier fields.
+
+### Phase D4 — Operator erasure script ✅ IMPLEMENTED (2026-06-11)
+
+Implemented as `server/scripts/eraseBillingPlausibilityData.js`
+(npm script: `npm run billing:erase`). Operator/admin command-line tool only —
+**no user-facing DELETE endpoint**.
+
+**Supported scopes** (at least one required; combined with AND semantics, which only
+narrows the match):
+- `--sessionId=<id>` — a single session
+- `--practiceProfileId=<id>` — all sessions owned by a practice
+- `--createdByUserId=<id>` — all sessions created by a user
+
+**Default mode is dry-run.** Erasure happens only when `--confirmErase` is present
+and `--dryRun` is absent.
+
+**Production guard**: refuses to run if `DATABASE_URL` is missing or contains
+production/Render indicators (`render.com`, `dpg-`, `prod`, `production`,
+`postgres.render`, known Render region hosts). Prints the DB host before any action.
+Mirrors the guard in `verifyBillingPlausibilityService.js`.
+
+**Safety limits**: refuses with no scope; refuses to erase > 100 sessions unless
+`--allowLargeBatch`; in erase mode, refuses when zero sessions match.
+
+**Deletion strategy**: hard delete of the session tree in dependency order
+(AuditLog → Item → Session) inside a single transaction. `contextText` is never
+printed. Anonymisation mode is documented as a future option but not implemented.
+
+**Command examples**:
 
 ```bash
-# Proposed: server/scripts/eraseBillingDataForPractice.js
-# Usage: node scripts/eraseBillingDataForPractice.js --practiceId=<id> [--dryRun]
-# Effect: deletes all BillingPlausibilitySession (+ cascaded Items + AuditLogs) for a practice
-# Requires: operator-level auth (env var or interactive confirmation)
-# Audit: writes an erasure record before deletion
-# Dry-run mode: reports what would be deleted, no mutations
+# Dry-run (default — reports counts/IDs/date range, changes nothing):
+npm run billing:erase -- --practiceProfileId=<id>
+node scripts/eraseBillingPlausibilityData.js --sessionId=<id> --dryRun
+
+# Confirmed erase (PERMANENT — only after reviewing the dry-run output):
+node scripts/eraseBillingPlausibilityData.js --practiceProfileId=<id> --confirmErase
+
+# Large batch (> 100 sessions):
+node scripts/eraseBillingPlausibilityData.js --createdByUserId=<id> --confirmErase --allowLargeBatch
 ```
 
-**No user-facing DELETE endpoint** in this phase. Erasure is operator-initiated only, matching the pattern for other sensitive data in the system.
+**Verified** end-to-end against throwaway local test data: dry-run reported 1/1/1,
+confirmed erase deleted 1/1/1, post-check confirmed zero orphans.
+
+**Future option (not implemented)**: an anonymisation mode (null out `contextText`,
+replace `createdByUserId`/`actorUserId` with a tombstone) could retain statistical
+rows while removing identifiers — only needed if legal requires retention of
+de-identified billing analytics. Hard delete is the current closed-pilot default.
 
 ### Phase D5 — Retention purge job (Engineering: ~1–2 days)
 
@@ -308,7 +424,8 @@ Add a "Billing plausibility module" section to the Datenschutzerklärung (all la
 | contextText appears in downloaded PDF (first 120 chars) | ⚠ Present — documented |
 | Pilot usage policy requires staff training re: no patient data | ⬜ Policy document required |
 | Server-side content scan for patient-like patterns in contextText | ❌ Not implemented — proposed future enhancement |
-| `contextText` deletion on account/practice deletion | ❌ Not implemented (Phase D2 / D4) |
+| `contextText` deletion on account deletion | ✅ Implemented (Phase D2 — full-account erasure) |
+| `contextText` deletion via operator erasure (per practice/user/session) | ✅ Implemented (Phase D4 — `eraseBillingPlausibilityData.js`) |
 
 ---
 
@@ -316,10 +433,10 @@ Add a "Billing plausibility module" section to the Datenschutzerklärung (all la
 
 | # | Gap | Risk | Phase |
 |---|-----|------|-------|
-| D2-1 | `billingPlausibilitySession.deleteMany` missing from account delete transaction | High — DSGVO Art. 17 | D2 |
-| D2-2 | No DB-level cascade from `PracticeProfile` or `User` to `BillingPlausibilitySession` | High | D2 (app-level fix) |
-| D3-1 | Billing sessions not included in account data export | Medium — DSGVO Art. 15/20 | D3 |
-| D4-1 | No operator erasure script for practice-level deletion | High — DSGVO Art. 17 | D4 |
+| D2-1 | `billingPlausibilitySession.deleteMany` missing from account delete transaction | High — DSGVO Art. 17 | D2 ✅ Done |
+| D2-2 | No DB-level cascade from `PracticeProfile` or `User` to `BillingPlausibilitySession` | High | D2 ✅ Mitigated (app-level fix) |
+| D3-1 | Billing sessions not included in account data export | Medium — DSGVO Art. 15/20 | D3 ✅ Done |
+| D4-1 | No operator erasure script for practice/user/session-level deletion | High — DSGVO Art. 17 | D4 ✅ Done (`eraseBillingPlausibilityData.js`) |
 | D5-1 | No automated retention purge job | Medium — policy gap | D5 |
 | D6-1 | No AVV template exists | High — required before external use | D6 (Legal) |
 | D7-1 | Privacy notice not updated for billing module | High — required before external use | D7 (Legal) |

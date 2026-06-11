@@ -19,6 +19,7 @@ import {
   accountDeleteLimiter,
   accountExportLimiter,
 } from "../middleware/ipRateLimit.js";
+import { getBillingPlausibilityExportForUser } from "../services/billingPlausibility/billingPlausibilityService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -177,6 +178,12 @@ router.get("/export", accountExportLimiter, async (req, res) => {
       metadata: a.metadata,
     }));
 
+    // Phase D3 — billing plausibility data portability (GDPR Art. 15/20).
+    // Privacy-safe whitelist serialization; raw contextText and raw AI
+    // prompts/responses are never included (see service helper docblock).
+    const billingPlausibilitySessions =
+      await getBillingPlausibilityExportForUser(userId);
+
     const practiceProfilesExport = (user.practiceProfiles || []).map((p) => ({
       id: p.id,
       createdAt: p.createdAt,
@@ -214,6 +221,7 @@ router.get("/export", accountExportLimiter, async (req, res) => {
       preVisitCases: user.preVisitCases,
       followUpThreadsPatient: redactThreads,
       auditLog: auditForExport,
+      billingPlausibilitySessions,
       medicalInterpreterCloud: {
         sessionCount: interpreterCloudSessionCount,
         preference: interpreterCloudPreference
@@ -282,6 +290,53 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       await tx.doctorContact.deleteMany({ where: { userId } });
       await tx.doctor.deleteMany({ where: { userId } });
       await tx.auditLog.deleteMany({ where: { userId } });
+
+      // ── Billing plausibility cleanup (Phase D2 — GDPR Art. 17 erasure) ──────
+      // BillingPlausibilitySession.practiceProfileId and .createdByUserId are
+      // SCALAR foreign keys (no Prisma @relation to User/PracticeProfile), so
+      // there is NO database-level cascade when the user or their practice
+      // profiles are deleted below. Without this explicit step, billing
+      // sessions (which may contain contextText, resultSummaryJson and staff
+      // user IDs) would be orphaned after account deletion.
+      //
+      // Sessions in scope = those created by this user OR owned by any practice
+      // profile this user owns. We resolve the practice IDs BEFORE deleting the
+      // practice profiles further down, so ordering matters.
+      //
+      // Item and AuditLog rows DO cascade from their session
+      // (onDelete: Cascade), but we delete them explicitly in dependency order
+      // for defense-in-depth and to keep the erasure intent self-evident.
+      const ownedPractices = await tx.practiceProfile.findMany({
+        where: { userId },
+        select: { id: true },
+      });
+      const ownedPracticeIds = ownedPractices.map((p) => p.id);
+
+      const billingSessions = await tx.billingPlausibilitySession.findMany({
+        where: {
+          OR: [
+            { createdByUserId: userId },
+            ...(ownedPracticeIds.length
+              ? [{ practiceProfileId: { in: ownedPracticeIds } }]
+              : []),
+          ],
+        },
+        select: { id: true },
+      });
+      const billingSessionIds = billingSessions.map((s) => s.id);
+
+      if (billingSessionIds.length > 0) {
+        await tx.billingPlausibilityAuditLog.deleteMany({
+          where: { sessionId: { in: billingSessionIds } },
+        });
+        await tx.billingPlausibilityItem.deleteMany({
+          where: { sessionId: { in: billingSessionIds } },
+        });
+        await tx.billingPlausibilitySession.deleteMany({
+          where: { id: { in: billingSessionIds } },
+        });
+      }
+
       await tx.practiceProfile.deleteMany({ where: { userId } });
       await tx.practiceMember.deleteMany({ where: { userId } });
       await tx.interpreterCloudSession.deleteMany({ where: { userId } });
