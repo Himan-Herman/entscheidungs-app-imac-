@@ -199,6 +199,16 @@ export default {
     loadFailed: "Notfallausweis konnte nicht geladen werden. Bitte erneut versuchen.",
   },
 
+  wallet: {
+    section: "Wallet",
+    hint: "Speichern Sie einen Notfall-Schnellzugriff in Ihrer Wallet. Der Pass enthält keine Gesundheitsdaten — nur einen QR-Code zur Notfallseite.",
+    minimalNote: "Der Wallet-Pass enthält nur minimale Angaben (Initialen, optional Blutgruppe) und einen QR-Code. Angaben vom Nutzer selbst bereitgestellt.",
+    appleAdd: "In Apple Wallet speichern",
+    googleAdd: "Zu Google Wallet hinzufügen",
+    preparing: "Wallet-Integration wird vorbereitet.",
+    needsToken: "Erstellen Sie zuerst einen QR-Code, um einen Wallet-Pass zu erzeugen.",
+  },
+
   practice: {
     heading: "Notfallausweis",
     disclaimer: "Selbstangaben des Patienten — kein offizieller Krankenbericht.",

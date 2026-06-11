@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, QrCode, ShieldAlert, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, QrCode, ShieldAlert, Sparkles, Trash2, Wallet } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import {
   fetchSosCard,
+  fetchWalletStatus,
   generateAiSummary,
   generateToken,
+  requestGoogleWalletLink,
   revokeToken,
   saveSosCard,
 } from "../api/sosCardApi.js";
@@ -35,6 +37,8 @@ export default function SosCardPage() {
   const [publicToken, setPublicToken] = useState(null);
   const [showQr, setShowQr] = useState(false);
   const [tab, setTab] = useState("edit");
+  const [walletStatus, setWalletStatus] = useState(null);
+  const [walletMsg, setWalletMsg] = useState("");
 
   useEffect(() => {
     if (t?.pageTitle) document.title = t.pageTitle;
@@ -61,6 +65,12 @@ export default function SosCardPage() {
       }
       setAllergies(Array.isArray(allergyRes.entries) ? allergyRes.entries : []);
       setDiagnoses(Array.isArray(diagRes.entries) ? diagRes.entries : []);
+      // Wallet availability is optional and must never block the page.
+      fetchWalletStatus()
+        .then(({ res, data }) => {
+          if (res.ok && data.ok) setWalletStatus(data);
+        })
+        .catch(() => {});
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
       setLoadError(t?.loadError || "Fehler beim Laden.");
@@ -131,6 +141,20 @@ export default function SosCardPage() {
       // silent
     } finally {
       setTokenLoading(false);
+    }
+  }
+
+  async function handleGoogleWallet() {
+    setWalletMsg("");
+    try {
+      const { res, data } = await requestGoogleWalletLink();
+      if (res.ok && data.ok && data.saveUrl) {
+        window.open(data.saveUrl, "_blank", "noopener,noreferrer");
+      } else {
+        setWalletMsg(t?.wallet?.preparing || "");
+      }
+    } catch {
+      setWalletMsg(t?.wallet?.preparing || "");
     }
   }
 
@@ -268,6 +292,57 @@ export default function SosCardPage() {
                 </button>
               </div>
             </>
+          )}
+        </div>
+      )}
+
+      {tab === "qr" && (
+        <div className="sos-card__section">
+          <p className="sos-card__section-title">
+            <Wallet size={14} style={{ display: "inline", marginRight: "0.35rem" }} />
+            {t?.wallet?.section}
+          </p>
+          <p className="sos-card__hint" style={{ marginBottom: "0.5rem" }}>
+            {t?.wallet?.hint}
+          </p>
+          <p className="sos-card__hint" style={{ marginBottom: "1rem" }}>
+            {t?.wallet?.minimalNote}
+          </p>
+
+          {!publicToken && (
+            <p className="sos-card__hint" role="note">
+              {t?.wallet?.needsToken}
+            </p>
+          )}
+
+          <div className="sos-card__actions" style={{ marginTop: 0 }}>
+            <button
+              type="button"
+              className="sos-card__btn sos-card__btn--secondary"
+              disabled={!(walletStatus?.appleWalletAvailable && publicToken)}
+              onClick={() => setWalletMsg(t?.wallet?.preparing || "")}
+            >
+              <Wallet size={14} aria-hidden="true" /> {t?.wallet?.appleAdd}
+            </button>
+            <button
+              type="button"
+              className="sos-card__btn sos-card__btn--secondary"
+              disabled={!(walletStatus?.googleWalletAvailable && publicToken)}
+              onClick={handleGoogleWallet}
+            >
+              <Wallet size={14} aria-hidden="true" /> {t?.wallet?.googleAdd}
+            </button>
+          </div>
+
+          {!walletStatus?.appleWalletAvailable && !walletStatus?.googleWalletAvailable && (
+            <p className="sos-card__hint" role="status" style={{ marginTop: "0.75rem" }}>
+              {t?.wallet?.preparing}
+            </p>
+          )}
+          {walletMsg && (
+            <p className="sos-card__hint" role="status" aria-live="polite" style={{ marginTop: "0.5rem" }}>
+              {walletMsg}
+            </p>
           )}
         </div>
       )}

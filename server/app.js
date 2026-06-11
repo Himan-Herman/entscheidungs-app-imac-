@@ -87,6 +87,7 @@ import {
   publicSecureDocumentsLimiter,
   publicEmergencyLimiter,
   publicAnamnesisLimiter,
+  sosWalletLimiter,
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
@@ -99,6 +100,7 @@ import { interpreterInviteValidateLimiter } from "./middleware/interpreterRateLi
 import patientSosCardRouter from "./routes/patientSosCard.js";
 import publicEmergencyRouter from "./routes/publicEmergency.js";
 import practiceSosCardRouter from "./routes/practiceSosCard.js";
+import sosWalletRouter from "./routes/sosWallet.js";
 import publicAnamnesisRouter from "./routes/publicAnamnesis.js";
 import practiceBillingPlausibilityRouter from "./routes/practiceBillingPlausibility.js";
 
@@ -187,6 +189,7 @@ app.use("/api/patient/allergies", requireAuth, patientAllergiesRouter);
 app.use("/api/patient/diagnoses", requireAuth, patientDiagnosesRouter);
 app.use("/api/patient/sos-card", requireAuth, patientSosCardRouter);
 app.use("/api/practice/patients/:linkId/sos-card", requireAuth, practiceSosCardRouter);
+app.use("/api/sos/wallet", requireAuth, sosWalletLimiter, sosWalletRouter);
 app.use("/api/patient/health-history/ai", requireAuth, healthHistoryAiRouter);
 app.use("/api/practice/patients/:linkId/health-history", requireAuth, practicePatientHealthHistoryRouter);
 app.use("/api/patient/erezept", requireAuth, patientErezeptRouter);

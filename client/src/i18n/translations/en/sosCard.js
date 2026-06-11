@@ -199,6 +199,16 @@ export default {
     loadFailed: "Unable to load emergency card. Please try again.",
   },
 
+  wallet: {
+    section: "Wallet",
+    hint: "Save a quick emergency shortcut in your wallet. The pass contains no health data — only a QR code to the emergency page.",
+    minimalNote: "The wallet pass contains only minimal information (initials, optionally blood type) and a QR code. Self-reported by the user.",
+    appleAdd: "Add to Apple Wallet",
+    googleAdd: "Add to Google Wallet",
+    preparing: "Wallet integration is being prepared.",
+    needsToken: "Generate a QR code first to create a wallet pass.",
+  },
+
   practice: {
     heading: "Emergency Card",
     disclaimer: "Patient self-reported data — not an official medical record.",

@@ -178,6 +178,16 @@ export default {
     notFound: "Cette carte d'urgence n'est plus active ou le lien est invalide.",
     loadFailed: "Impossible de charger la carte d'urgence. Veuillez réessayer.",
   },
+  wallet: {
+    section: "Wallet",
+    hint: "Enregistrez un accès d'urgence rapide dans votre wallet. Le pass ne contient aucune donnée de santé — uniquement un QR code vers la page d'urgence.",
+    minimalNote: "Le pass wallet ne contient que des informations minimales (initiales, éventuellement groupe sanguin) et un QR code. Déclaré par l'utilisateur.",
+    appleAdd: "Ajouter à Apple Wallet",
+    googleAdd: "Ajouter à Google Wallet",
+    preparing: "L'intégration wallet est en préparation.",
+    needsToken: "Créez d'abord un QR code pour générer un pass wallet.",
+  },
+
   practice: {
     heading: "Carte d'urgence",
     disclaimer: "Données saisies par le patient — pas un dossier médical officiel.",

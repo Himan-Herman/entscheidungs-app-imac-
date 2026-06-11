@@ -41,3 +41,19 @@ export async function fetchPublicEmergency(token) {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+const WALLET_BASE = "/api/sos/wallet";
+
+/** Which wallet integrations are configured server-side. */
+export async function fetchWalletStatus() {
+  const res = await authFetch(`${WALLET_BASE}/status`);
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+/** Request the Add-to-Google-Wallet link (available once configured server-side). */
+export async function requestGoogleWalletLink() {
+  const res = await authFetch(`${WALLET_BASE}/google-link`, { method: "POST" });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

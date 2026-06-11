@@ -178,6 +178,16 @@ export default {
     notFound: "Esta tarjeta de emergencia ya no está activa o el enlace no es válido.",
     loadFailed: "No se pudo cargar la tarjeta de emergencia. Inténtalo de nuevo.",
   },
+  wallet: {
+    section: "Wallet",
+    hint: "Guarda un acceso rápido de emergencia en tu wallet. El pase no contiene datos de salud — solo un código QR a la página de emergencia.",
+    minimalNote: "El pase de wallet contiene solo información mínima (iniciales, opcionalmente grupo sanguíneo) y un código QR. Declarado por el usuario.",
+    appleAdd: "Añadir a Apple Wallet",
+    googleAdd: "Añadir a Google Wallet",
+    preparing: "La integración con wallet está en preparación.",
+    needsToken: "Crea primero un código QR para generar un pase de wallet.",
+  },
+
   practice: {
     heading: "Tarjeta de emergencia",
     disclaimer: "Datos declarados por el paciente — no es un documento médico oficial.",

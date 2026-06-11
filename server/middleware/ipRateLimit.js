@@ -181,6 +181,12 @@ export const publicEmergencyLimiter = createIpRateLimiter({
   keyPrefix: 'public:emergency',
 });
 
+/** /api/sos/wallet/* — authenticated SOS wallet status + pass generation; 30 / 15 min / IP */
+export const sosWalletLimiter = createIpRateLimiter({
+  max: 30,
+  keyPrefix: 'sos:wallet',
+});
+
 /** GET /api/patient/practice-documents/:id/lab-explanation — OpenAI-backed; 8 / 15 min / IP */
 export const labExplanationIpLimiter = createIpRateLimiter({
   max: 8,

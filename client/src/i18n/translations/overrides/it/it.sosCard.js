@@ -178,6 +178,16 @@ export default {
     notFound: "Questa tessera d'emergenza non è più attiva o il link non è valido.",
     loadFailed: "Impossibile caricare la tessera d'emergenza. Riprova.",
   },
+  wallet: {
+    section: "Wallet",
+    hint: "Salva un accesso rapido d'emergenza nel tuo wallet. Il pass non contiene dati sanitari — solo un QR code verso la pagina d'emergenza.",
+    minimalNote: "Il pass wallet contiene solo informazioni minime (iniziali, eventualmente gruppo sanguigno) e un QR code. Dichiarato dall'utente.",
+    appleAdd: "Aggiungi ad Apple Wallet",
+    googleAdd: "Aggiungi a Google Wallet",
+    preparing: "L'integrazione wallet è in preparazione.",
+    needsToken: "Crea prima un QR code per generare un pass wallet.",
+  },
+
   practice: {
     heading: "Tessera d'emergenza",
     disclaimer: "Dati inseriti dal paziente — non un documento medico ufficiale.",
