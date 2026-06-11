@@ -7,6 +7,7 @@ import {
   fetchWalletStatus,
   generateAiSummary,
   generateToken,
+  requestApplePass,
   requestGoogleWalletLink,
   revokeToken,
   saveSosCard,
@@ -150,6 +151,29 @@ export default function SosCardPage() {
       const { res, data } = await requestGoogleWalletLink();
       if (res.ok && data.ok && data.saveUrl) {
         window.open(data.saveUrl, "_blank", "noopener,noreferrer");
+      } else {
+        setWalletMsg(t?.wallet?.preparing || "");
+      }
+    } catch {
+      setWalletMsg(t?.wallet?.preparing || "");
+    }
+  }
+
+  async function handleAppleWallet() {
+    setWalletMsg("");
+    try {
+      const res = await requestApplePass();
+      const contentType = res.headers.get("content-type") || "";
+      if (res.ok && contentType.includes("vnd.apple.pkpass")) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "medscoutx-sos.pkpass";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
       } else {
         setWalletMsg(t?.wallet?.preparing || "");
       }
@@ -320,7 +344,7 @@ export default function SosCardPage() {
               type="button"
               className="sos-card__btn sos-card__btn--secondary"
               disabled={!(walletStatus?.appleWalletAvailable && publicToken)}
-              onClick={() => setWalletMsg(t?.wallet?.preparing || "")}
+              onClick={handleAppleWallet}
             >
               <Wallet size={14} aria-hidden="true" /> {t?.wallet?.appleAdd}
             </button>

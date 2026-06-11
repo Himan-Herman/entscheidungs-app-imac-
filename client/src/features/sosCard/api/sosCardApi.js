@@ -57,3 +57,12 @@ export async function requestGoogleWalletLink() {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+/**
+ * Request the signed .pkpass file (available once configured server-side).
+ * Returns the raw Response so the caller can read the binary blob on success
+ * or a JSON error on failure.
+ */
+export async function requestApplePass() {
+  return authFetch(`${WALLET_BASE}/apple-pass`, { method: "POST" });
+}
