@@ -138,8 +138,13 @@ function fitLogoInBox(natW, natH, maxW, maxH) {
 // ── PDF builder ───────────────────────────────────────────────────────────────
 
 /**
- * Build and trigger download of the conversation PDF.
+ * Build the conversation PDF.
  * All processing is local — no data is sent anywhere.
+ *
+ * By default the PDF is downloaded via doc.save(). When `options.returnBlob` is
+ * true, the PDF is NOT downloaded and the function returns the PDF Blob instead
+ * (used by the secure PDF-QR flow). The existing single-argument call is
+ * unchanged and keeps downloading exactly as before.
  *
  * @param {{
  *   turns:            import('./useRealtimeSession.js').Turn[],
@@ -148,6 +153,8 @@ function fitLogoInBox(natW, natH, maxW, maxH) {
  *   languages:        { patientLanguage: string, practiceLanguage: string },
  *   sessionStartedAt: string|null,
  * }} params
+ * @param {{ returnBlob?: boolean }} [options]
+ * @returns {Promise<Blob|void>} a Blob when options.returnBlob is true, otherwise void
  */
 export async function exportRealtimeConversationPdf({
   turns,
@@ -155,7 +162,7 @@ export async function exportRealtimeConversationPdf({
   practiceInfo  = {},
   languages     = {},
   sessionStartedAt = null,
-}) {
+}, options = {}) {
   const { dataUrl: logoDataUrl, natW: logoNatW, natH: logoNatH } = await loadLogoData(logo6Url);
   const { w: logoW, h: logoH } = fitLogoInBox(logoNatW, logoNatH, LOGO_BOX_W, LOGO_BOX_H);
 
@@ -580,7 +587,13 @@ export async function exportRealtimeConversationPdf({
     doc.text('Nur zur Gesprächsdokumentation der Sprachvermittlung. Kein medizinischer Befund.', MARGIN, fy2);
   }
 
-  // ── Save ────────────────────────────────────────────────────────────────────
+  // ── Save / return ─────────────────────────────────────────────────────────────
 
+  // Secure PDF-QR flow: return the Blob without triggering a local download.
+  if (options.returnBlob === true) {
+    return doc.output('blob');
+  }
+
+  // Default behaviour (unchanged): trigger the local browser download.
   doc.save(buildPdfFileName(sessionStartedAt, practiceInfo));
 }
