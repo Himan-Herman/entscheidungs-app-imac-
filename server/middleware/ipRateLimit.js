@@ -101,6 +101,12 @@ export const authRegisterLimiter = createIpRateLimiter({
   keyPrefix: 'auth:register',
 });
 
+/** POST /api/practice/meda/pdf-link — authenticated PDF upload for the QR link */
+export const medaPdfLinkLimiter = createIpRateLimiter({
+  max: 30,
+  keyPrefix: 'practice:meda-pdf-link',
+});
+
 /** POST /api/auth/request-password-reset */
 export const authPasswordResetLimiter = createIpRateLimiter({
   max: 10,
