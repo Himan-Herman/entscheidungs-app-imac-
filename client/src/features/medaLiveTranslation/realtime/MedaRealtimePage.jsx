@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRealtimeSession } from './useRealtimeSession.js';
+import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+import { getPracticeChromeMessages } from './medaRealtimePractice.i18n.js';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
 import { speakTranslation, cancelSpeech } from './realtimeSpeechPlayback.js';
@@ -140,7 +142,14 @@ function statusCls(connectionState, sessionStatus, sessionExpired, isPaused) {
   return 'active';
 }
 
-export default function MedaRealtimePage() {
+export default function MedaRealtimePage({ variant = 'patient' }) {
+  // Practice variant: professional B2B chrome (header + status chips) and a
+  // dedicated root CSS class. The Realtime engine and all logic are identical to
+  // the patient page — only the surrounding presentation differs.
+  const isPractice = variant === 'practice';
+  const { language } = useLanguage();
+  const practiceTx = useMemo(() => getPracticeChromeMessages(language), [language]);
+
   const {
     connect,
     disconnect,
@@ -512,14 +521,21 @@ export default function MedaRealtimePage() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="mrt-page">
+    <div className={`mrt-page${isPractice ? ' mrt-page--practice' : ''}`}>
       {/* Hidden audio element — receives remote WebRTC audio track */}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioElRef} autoPlay style={{ display: 'none' }} />
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="mrt-header">
-        <h1 className="mrt-title">Meda Live-Dolmetscher</h1>
+      <header className={`mrt-header${isPractice ? ' mrt-header--practice' : ''}`}>
+        <div className="mrt-header-titles">
+          <h1 className="mrt-title">
+            {isPractice ? practiceTx.title : 'Meda Live-Dolmetscher'}
+          </h1>
+          {isPractice && (
+            <p className="mrt-subtitle">{practiceTx.subtitle}</p>
+          )}
+        </div>
         <div className="mrt-header-right">
           {isConnected && (
             <div
@@ -535,6 +551,24 @@ export default function MedaRealtimePage() {
           </div>
         </div>
       </header>
+
+      {/* ── Practice status chips — local-only / no-audio / two-language ────── */}
+      {isPractice && (
+        <div className="mrt-practice-chips" role="list" aria-label={practiceTx.subtitle}>
+          <span className="mrt-practice-chip" role="listitem">
+            <span className="mrt-practice-chip-dot" aria-hidden="true" />
+            {practiceTx.chipLocalOnly}
+          </span>
+          <span className="mrt-practice-chip" role="listitem">
+            <span className="mrt-practice-chip-dot" aria-hidden="true" />
+            {practiceTx.chipNoAudio}
+          </span>
+          <span className="mrt-practice-chip" role="listitem">
+            <span className="mrt-practice-chip-dot" aria-hidden="true" />
+            {practiceTx.chipTwoLang}
+          </span>
+        </div>
+      )}
 
       {/* ── Warning / expired banners ────────────────────────────────────────── */}
       {showWarning && (

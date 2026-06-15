@@ -118,7 +118,7 @@ const CARD_DEFS = [
   {
     id: "medaLive",
     labelKey: "cardMedaLive",
-    to: () => "/patient/meda-realtime",
+    to: () => "/practice/meda-realtime",
     Icon: Mic,
   },
   {

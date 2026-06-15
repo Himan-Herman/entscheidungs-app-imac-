@@ -746,6 +746,14 @@ void runPwaBuildMigration().then(() => {
                   }
                 />
                 <Route
+                  path="/practice/meda-realtime"
+                  element={
+                    <ProtectedRoute>
+                      <MedaRealtimePage variant="practice" />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/practice"
                   element={
                     <ProtectedRoute>
