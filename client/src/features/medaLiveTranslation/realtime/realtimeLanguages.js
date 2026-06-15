@@ -186,3 +186,52 @@ export function detectLanguage(text, langA, langB) {
   if (scoreB > scoreA) return langB;
   return null; // inconclusive
 }
+
+/**
+ * Returns true when text is clearly in a third language — definitively NOT in langA or langB.
+ * Used as a secondary output guard after detectLanguage() returns null.
+ *
+ * Conservative rules (to avoid false-positives on short/ambiguous text):
+ *  1. Text contains characters from a non-configured script (e.g. Arabic, Korean) → true.
+ *  2. No fingerprint hits for langA or langB, AND ≥2 fingerprint hits for a third language → true.
+ *  3. Text shorter than 10 chars or fewer than 3 words → false (not enough signal).
+ *
+ * @param {string} text
+ * @param {string} langA  First allowed language (e.g. 'de')
+ * @param {string} langB  Second allowed language (e.g. 'en')
+ * @returns {boolean}
+ */
+export function isDefinitelyThirdLanguage(text, langA, langB) {
+  if (!text || !langA || !langB || langA === langB) return false;
+  const clean = text.trim();
+  if (clean.length < 10) return false;
+
+  const scriptA = getLangScript(langA);
+  const scriptB = getLangScript(langB);
+
+  // Non-configured script characters → definitively foreign
+  if (hasForeignScript(clean, scriptA, scriptB)) return true;
+
+  // Same-script (Latin, etc.) — use fingerprints
+  const words  = clean.toLowerCase()
+    .split(/[\s.,!?;:()\-"'«»„""‚'​ ]+/)
+    .filter(w => w.length > 1);
+  if (words.length < 3) return false; // too short for reliable cross-language detection
+
+  const fpA    = FINGERPRINTS[langA] ?? [];
+  const fpB    = FINGERPRINTS[langB] ?? [];
+  const scoreA = words.filter(w => fpA.includes(w)).length;
+  const scoreB = words.filter(w => fpB.includes(w)).length;
+
+  // If either configured language has any fingerprint hits → not definitively a third language
+  if (scoreA > 0 || scoreB > 0) return false;
+
+  // No hits for either configured language — check if a third language clearly dominates
+  for (const [lang, fp] of Object.entries(FINGERPRINTS)) {
+    if (lang === langA || lang === langB) continue;
+    const score = words.filter(w => fp.includes(w)).length;
+    if (score >= 2) return true;
+  }
+
+  return false;
+}

@@ -43,11 +43,12 @@ function formatTurnTime(isoString) {
 }
 
 /** Human-readable status label from connection + session state. */
-function buildStatusLabel(connectionState, sessionStatus, sessionExpired) {
+function buildStatusLabel(connectionState, sessionStatus, sessionExpired, isPaused) {
   if (sessionExpired)                   return 'Sitzung beendet';
   if (connectionState === 'connecting') return 'Verbinde …';
   if (connectionState === 'error')      return 'Nicht verbunden';
   if (connectionState !== 'connected')  return 'Bereit';
+  if (isPaused)                         return 'Pausiert';
 
   switch (sessionStatus) {
     case 'ready':         return 'Wartet auf Sprecher';
@@ -60,11 +61,12 @@ function buildStatusLabel(connectionState, sessionStatus, sessionExpired) {
 }
 
 /** CSS modifier for the status badge. */
-function statusCls(connectionState, sessionStatus, sessionExpired) {
+function statusCls(connectionState, sessionStatus, sessionExpired, isPaused) {
   if (sessionExpired)                              return 'expired';
   if (connectionState === 'connecting')            return 'active';
   if (connectionState === 'error')                 return 'idle';
   if (connectionState !== 'connected')             return 'idle';
+  if (isPaused)                                    return 'paused';
   if (sessionStatus === 'ready')                   return 'ready';
   if (sessionStatus === 'speaking')                return 'speaking';
   return 'active';
@@ -74,6 +76,8 @@ export default function MedaRealtimePage() {
   const {
     connect,
     disconnect,
+    pause:  pauseSession,
+    resume: resumeSession,
     connectionState,
     sessionStatus,
     currentSpeakerRole,
@@ -125,6 +129,10 @@ export default function MedaRealtimePage() {
   // 'manual' = user explicitly selects the active speaker
   const [mode,          setMode]          = useState(/** @type {'auto'|'manual'} */ ('auto'));
   const [manualSpeaker, setManualSpeaker] = useState(/** @type {'patient'|'practice'} */ ('patient'));
+
+  // ── Pause state ──────────────────────────────────────────────────────────────
+  const [isPaused,   setIsPaused]   = useState(false);
+  const pausedAtRef = useRef(/** @type {number|null} */ (null)); // Date.now() when paused
 
   // ── PDF state ───────────────────────────────────────────────────────────────
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -195,37 +203,49 @@ export default function MedaRealtimePage() {
   }, [connectionState, disconnect]);
 
   // ── Hard timeout + countdown ────────────────────────────────────────────────
+  // Effect A: Initialise timer values on connect; reset pause state on disconnect.
   useEffect(() => {
-    const isConnected = connectionState === 'connected';
-
-    if (isConnected) {
+    if (connectionState === 'connected') {
       sessionStartRef.current     = Date.now();
       sessionStartedAtRef.current = new Date().toISOString();
       setRemainingSeconds(SESSION_MAX_SECONDS);
       setSessionExpired(false);
-
-      timerIntervalRef.current = setInterval(() => {
-        const elapsed   = Math.floor((Date.now() - sessionStartRef.current) / 1000);
-        const remaining = Math.max(0, SESSION_MAX_SECONDS - elapsed);
-        setRemainingSeconds(remaining);
-
-        if (remaining <= 0) {
-          clearInterval(timerIntervalRef.current);
-          timerIntervalRef.current = null;
-          setSessionExpired(true);
-          cancelSpeech();
-          disconnectRef.current();
-        }
-      }, 1000);
-
-      return () => {
-        if (timerIntervalRef.current) {
-          clearInterval(timerIntervalRef.current);
-          timerIntervalRef.current = null;
-        }
-      };
+      setIsPaused(false);
+      pausedAtRef.current = null;
+    } else {
+      // Clear leftover pause on disconnect/error
+      setIsPaused(false);
+      pausedAtRef.current = null;
     }
   }, [connectionState]);
+
+  // Effect B: Manage the countdown interval.  Stops when paused; restarts on resume.
+  // handleResume() shifts sessionStartRef forward by pause duration before setIsPaused(false),
+  // so the remaining-seconds calculation is correct when the interval restarts.
+  useEffect(() => {
+    if (connectionState !== 'connected' || isPaused) return;
+
+    timerIntervalRef.current = setInterval(() => {
+      const elapsed   = Math.floor((Date.now() - sessionStartRef.current) / 1000);
+      const remaining = Math.max(0, SESSION_MAX_SECONDS - elapsed);
+      setRemainingSeconds(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+        setSessionExpired(true);
+        cancelSpeech();
+        disconnectRef.current();
+      }
+    }, 1000);
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    };
+  }, [connectionState, isPaused]);
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -328,13 +348,35 @@ export default function MedaRealtimePage() {
   function handleStart() {
     setSessionExpired(false);
     setSessionHasStarted(true);
+    setIsPaused(false);
+    pausedAtRef.current = null;
     connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
+  }
+
+  function handlePause() {
+    pauseSession();           // disables mic track in hook
+    pausedAtRef.current = Date.now();
+    setIsPaused(true);        // triggers Effect B to clear interval
+  }
+
+  function handleResume() {
+    // Shift the session start forward by however long we were paused.
+    // Effect B restarts the interval after setIsPaused(false), so by then
+    // sessionStartRef already reflects the correct elapsed time.
+    if (pausedAtRef.current !== null) {
+      sessionStartRef.current += Date.now() - pausedAtRef.current;
+      pausedAtRef.current = null;
+    }
+    resumeSession();          // re-enables mic track in hook
+    setIsPaused(false);       // triggers Effect B to restart interval
   }
 
   function handleNewSession() {
     setSessionHasStarted(false);
     setSessionExpired(false);
     setArchiveSaved(false);
+    setIsPaused(false);
+    pausedAtRef.current = null;
     setMode('auto');
     setManualSpeaker('patient');
   }
@@ -396,8 +438,8 @@ export default function MedaRealtimePage() {
   }
   const blockHint = (!canStart && !isBusy) ? getBlockHint() : null;
 
-  const label    = buildStatusLabel(connectionState, sessionStatus, sessionExpired);
-  const badgeCls = statusCls(connectionState, sessionStatus, sessionExpired);
+  const label    = buildStatusLabel(connectionState, sessionStatus, sessionExpired, isPaused);
+  const badgeCls = statusCls(connectionState, sessionStatus, sessionExpired, isPaused);
   const showPulse = badgeCls === 'active' || badgeCls === 'speaking';
 
   // ── Render ──────────────────────────────────────────────────────────────────
@@ -921,7 +963,7 @@ export default function MedaRealtimePage() {
         </section>
       )}
 
-      {/* ── Active session bar — compact summary + stop button ───────────────── */}
+      {/* ── Active session bar — compact summary + pause + stop button ─────── */}
       {isConnected && (
         <div className="mrt-session-bar">
           <span className="mrt-session-langs">
@@ -929,12 +971,23 @@ export default function MedaRealtimePage() {
             <span className="mrt-session-sep" aria-hidden="true"> · </span>
             Praxis: <strong>{practiceLangLabel}</strong>
           </span>
-          <button
-            className="mrt-btn mrt-btn--stop mrt-btn--compact"
-            onClick={() => { cancelSpeech(); disconnect(); }}
-          >
-            Gespräch beenden
-          </button>
+          <div className="mrt-session-controls">
+            <button
+              className={`mrt-btn mrt-btn--pause mrt-btn--compact${isPaused ? ' mrt-btn--pause-active' : ''}`}
+              onClick={isPaused ? handleResume : handlePause}
+              aria-pressed={isPaused}
+              aria-label={isPaused ? 'Gespräch fortsetzen' : 'Gespräch pausieren'}
+              title={isPaused ? 'Gespräch fortsetzen' : 'Gespräch pausieren'}
+            >
+              {isPaused ? '▶ Fortsetzen' : '⏸ Pause'}
+            </button>
+            <button
+              className="mrt-btn mrt-btn--stop mrt-btn--compact"
+              onClick={() => { cancelSpeech(); disconnect(); }}
+            >
+              Gespräch beenden
+            </button>
+          </div>
         </div>
       )}
 

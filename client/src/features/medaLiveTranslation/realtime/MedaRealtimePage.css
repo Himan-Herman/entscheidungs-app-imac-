@@ -1500,4 +1500,50 @@
 :root[data-theme="dark"] .mrt-mode-btn--active   { background: #0f766e; color: #ccfbf1; }
 :root[data-theme="dark"] .mrt-mode-speaker-btn--patient.mrt-mode-speaker-btn--active   { background: #0f766e; color: #ccfbf1; }
 :root[data-theme="dark"] .mrt-mode-speaker-btn--practice.mrt-mode-speaker-btn--active  { background: #4338ca; color: #e0e7ff; }
+
+/* ── Session controls wrapper (pause + stop) ───────────────────────────────── */
+.mrt-session-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+/* ── Pause / Resume button ──────────────────────────────────────────────────── */
+.mrt-btn--pause {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+}
+
+.mrt-btn--pause:not(:disabled):hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* Active state = session is currently paused → button shows "Fortsetzen" */
+.mrt-btn--pause-active {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.mrt-btn--pause-active:not(:disabled):hover {
+  background: #fde68a;
+  border-color: #f59e0b;
+}
+
+/* Paused status badge */
+.mrt-status-badge--paused {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+/* Dark mode — pause button */
+:root[data-theme="dark"] .mrt-btn--pause        { background: #1e293b; color: #cbd5e1; border-color: #475569; }
+:root[data-theme="dark"] .mrt-btn--pause:not(:disabled):hover { background: #334155; }
+:root[data-theme="dark"] .mrt-btn--pause-active { background: #451a03; color: #fbbf24; border-color: #92400e; }
+:root[data-theme="dark"] .mrt-btn--pause-active:not(:disabled):hover { background: #78350f; }
+:root[data-theme="dark"] .mrt-status-badge--paused { background: #451a03; color: #fbbf24; border-color: #92400e; }
 :root[data-theme="dark"] .mrt-btn--archive-clear:hover { background: #450a0a; }

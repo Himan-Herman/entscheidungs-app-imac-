@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { authFetch } from '../../../api/authFetch.js';
-import { detectLanguage } from './realtimeLanguages.js';
+import { detectLanguage, isDefinitelyThirdLanguage } from './realtimeLanguages.js';
 
 const OPENAI_REALTIME_CALLS = 'https://api.openai.com/v1/realtime/calls';
 
@@ -75,6 +75,10 @@ export function useRealtimeSession() {
   const manualModeRef    = useRef(false);
   const manualSpeakerRef = useRef(/** @type {'patient'|'practice'} */ ('patient'));
 
+  // Pause guard: when true, new audio input/transcription events are discarded.
+  // Track.enabled is also set to false so OpenAI receives only silence.
+  const isPausedRef = useRef(false);
+
   /** Send a Realtime client event over the DataChannel (safe to call anytime). */
   const _sendDc = useCallback((payload) => {
     if (dcRef.current?.readyState === 'open') {
@@ -105,7 +109,10 @@ export function useRealtimeSession() {
     }
     clearTimeout(audioWatchdogRef.current);
     audioWatchdogRef.current = null;
+    isPausedRef.current = false;
     if (streamRef.current) {
+      // Re-enable tracks before stopping (idempotent if already enabled)
+      streamRef.current.getAudioTracks().forEach(t => { t.enabled = true; });
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
     }
@@ -148,30 +155,38 @@ export function useRealtimeSession() {
     /**
      * Output language guard: returns true when the final translatedText is
      * detectably in the wrong language (not targetLanguage).
-     * Short texts / inconclusive detection → allowed (returns false).
+     * Two-tier check:
+     *  1. detectLanguage: confident wrong direction → block.
+     *  2. isDefinitelyThirdLanguage: not target, not source, clearly third → block.
+     * Short texts / inconclusive → allowed (returns false).
      */
     const _isOutputMismatch = (turn, text) => {
       if (!text || text.length < 10) return false;
       if (!turn.targetLanguage || !turn.sourceLanguage) return false;
       const detected = detectLanguage(text, turn.targetLanguage, turn.sourceLanguage);
-      // Only block when detection is confident AND it points to the source language
-      return detected !== null && detected !== turn.targetLanguage;
+      // Tier 1: confident wrong direction (e.g. source instead of target)
+      if (detected !== null && detected !== turn.targetLanguage) return true;
+      // Tier 2: detectLanguage inconclusive but clearly a third language
+      // (catches e.g. Turkish translation in a DE/EN session)
+      if (detected === null && isDefinitelyThirdLanguage(text, turn.targetLanguage, turn.sourceLanguage)) return true;
+      return false;
     };
 
     switch (ev.type) {
 
       // ── VAD ─────────────────────────────────────────────────────────────────
       case 'input_audio_buffer.speech_started':
-        if (!speakerLockRef.current) setSessionStatus('speech_active');
+        if (!speakerLockRef.current && !isPausedRef.current) setSessionStatus('speech_active');
         break;
 
       case 'input_audio_buffer.speech_stopped':
-        if (!speakerLockRef.current) setSessionStatus('processing');
+        if (!speakerLockRef.current && !isPausedRef.current) setSessionStatus('processing');
         break;
 
       // Create a turn slot; speaker role is unknown until transcription completes
       case 'input_audio_buffer.committed':
         if (speakerLockRef.current) break; // echo during Meda playback — discard
+        if (isPausedRef.current) break;    // paused — discard any buffered input
         turnCounterRef.current += 1;
         setTurns(prev => [...prev, {
           key:             turnCounterRef.current,
@@ -194,6 +209,9 @@ export function useRealtimeSession() {
       // Auto mode:   detectLanguage() on the transcript text.
       // Manual mode: use manualSpeakerRef directly — no language detection.
       case 'conversation.item.input_audio_transcription.completed': {
+        // Paused — discard any transcription that arrived after pause was set
+        if (isPausedRef.current) break;
+
         const transcript = ev.transcript ?? '';
 
         // Resolve which turn to update.
@@ -495,6 +513,7 @@ export function useRealtimeSession() {
     responseTurnMapRef.current.clear();
     manualModeRef.current    = false;    // always start in auto mode
     manualSpeakerRef.current = 'patient';
+    isPausedRef.current      = false;
 
     try {
       // ── 1. Ephemeral token ──────────────────────────────────────────────────
@@ -657,9 +676,33 @@ export function useRealtimeSession() {
     }
   }, []);
 
+  /**
+   * Pause the active session: mute the microphone track so OpenAI receives only
+   * silence, and block new turn creation.  The WebRTC/DataChannel connection stays
+   * open — no reconnect is needed to resume.
+   * Call only when connectionState === 'connected'.
+   */
+  const pause = useCallback(() => {
+    if (!streamRef.current) return;
+    streamRef.current.getAudioTracks().forEach(t => { t.enabled = false; });
+    isPausedRef.current = true;
+  }, []);
+
+  /**
+   * Resume a paused session: re-enable the microphone track.
+   * The caller is responsible for adjusting the timer (sessionStartRef offset).
+   */
+  const resume = useCallback(() => {
+    if (!streamRef.current) return;
+    streamRef.current.getAudioTracks().forEach(t => { t.enabled = true; });
+    isPausedRef.current = false;
+  }, []);
+
   return {
     connect,
     disconnect,
+    pause,
+    resume,
     sendEvent,
     updateTurnOriginalText,
     setManualMode,
