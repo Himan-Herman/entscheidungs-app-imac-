@@ -42,6 +42,74 @@ function formatTurnTime(isoString) {
   });
 }
 
+/** Date only, e.g. "10.06.2026". */
+function formatSessionDate(isoString) {
+  if (!isoString) return '';
+  return new Date(isoString).toLocaleDateString('de-DE', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+  });
+}
+
+/** Time only, e.g. "17:44". */
+function formatSessionTime(isoString) {
+  if (!isoString) return '';
+  return new Date(isoString).toLocaleTimeString('de-DE', {
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+/**
+ * Centralised German UI strings for the post-conversation area + local history.
+ * i18n-ready: this block is the single place to lift these texts into the
+ * `medicalInterpreter` namespace (de/en + fr/it/es overrides) once the whole
+ * Realtime page is localised. Kept German-only for now so the page stays in a
+ * single language (no mixed UI).
+ */
+const RT_TEXT = {
+  endTitle:         'Gesprächsprotokoll bereit',
+  endHint:          'Sie können das PDF jetzt herunterladen oder den lokalen Verlauf auf diesem Gerät nutzen.',
+  endHintEmpty:     'Kein Gesprächsverlauf aufgezeichnet.',
+  downloadPdf:      'PDF herunterladen',
+  creatingPdf:      'Erstelle PDF …',
+  saveToHistory:    'Im lokalen Verlauf speichern',
+  savedLocally:     'Dieses Protokoll wurde lokal auf diesem Gerät gespeichert.',
+  newSession:       'Neues Gespräch starten',
+  documentationFor: 'Dokumentation für',
+  practice:         'Praxis',
+  notProvided:      'nicht angegeben',
+  medaConversation: 'Meda-Gespräch',
+  historyTitle:     'Lokaler Verlauf',
+  historyPrivacy:   'Der Verlauf wird nur lokal auf diesem Gerät gespeichert. Es erfolgt keine Übertragung an MedScoutX oder eine Praxis.',
+  historyEmpty:     'Noch keine gespeicherten Gespräche auf diesem Gerät.',
+  pdf:              'PDF',
+  pdfShortLoading:  'PDF …',
+  viewDetails:      'Verlauf ansehen',
+  closeDetails:     'Schließen',
+  deleteEntry:      'Löschen',
+  deleteAll:        'Alle lokalen Verläufe löschen',
+  patientLanguage:  'Patientensprache',
+  practiceLanguage: 'Praxissprache',
+  turnsCount:       (n) => `${n} ${n === 1 ? 'Eintrag' : 'Einträge'}`,
+  ariaDownloadPdf:  'Gesprächsprotokoll als PDF herunterladen',
+  ariaArchivePdf:   (label) => `PDF für „${label}" herunterladen`,
+  ariaDelete:       (label) => `Verlaufseintrag „${label}" löschen`,
+};
+
+/**
+ * Compact, human-readable label for a history entry.
+ * Prefers specialty + doctor (e.g. "Hautarzt Dr. Heinrich"); falls back to the
+ * practice name, then to a neutral "Meda-Gespräch". Never invents data.
+ */
+function archivePartyLabel(entry) {
+  const dept   = String(entry?.practiceDepartment ?? entry?.practiceInfo?.department  ?? '').trim();
+  const doctor = String(entry?.doctorName         ?? entry?.practiceInfo?.doctorName  ?? '').trim();
+  const parts  = [dept, doctor].filter(Boolean);
+  if (parts.length) return parts.join(' ');
+  const practice = String(entry?.practiceName ?? '').trim();
+  if (practice) return practice;
+  return RT_TEXT.medaConversation;
+}
+
 /** Human-readable status label from connection + session state. */
 function buildStatusLabel(connectionState, sessionStatus, sessionExpired, isPaused) {
   if (sessionExpired)                   return 'Sitzung beendet';
@@ -1214,28 +1282,25 @@ export default function MedaRealtimePage() {
 
       {/* ── End-of-session box — replaces the duplicate form after stop ────────── */}
       {!isConnected && sessionHasStarted && (
-        <section className="mrt-end-box" aria-label="Gespräch beendet">
-          <h2 className="mrt-end-title">Gespräch beendet</h2>
+        <section className="mrt-end-box" aria-label={RT_TEXT.endTitle}>
+          <h2 className="mrt-end-title">{RT_TEXT.endTitle}</h2>
 
           <div className="mrt-end-meta">
             <span>
-              Dokumentation für:{' '}
-              <strong>{patientInfo.name.trim() || 'nicht angegeben'}</strong>
+              {RT_TEXT.documentationFor}:{' '}
+              <strong>{patientInfo.name.trim() || RT_TEXT.notProvided}</strong>
             </span>
             {practiceInfo.practiceName.trim() && (
               <span>
-                Praxis: <strong>{practiceInfo.practiceName.trim()}</strong>
+                {RT_TEXT.practice}: <strong>{practiceInfo.practiceName.trim()}</strong>
               </span>
             )}
           </div>
 
           {turns.length > 0 ? (
-            <p className="mrt-end-hint">
-              Sie können das Gesprächsprotokoll jetzt lokal als PDF herunterladen.
-              Kein Upload, keine Serverübertragung.
-            </p>
+            <p className="mrt-end-hint">{RT_TEXT.endHint}</p>
           ) : (
-            <p className="mrt-end-hint">Kein Gesprächsverlauf aufgezeichnet.</p>
+            <p className="mrt-end-hint">{RT_TEXT.endHintEmpty}</p>
           )}
 
           <div className="mrt-end-actions">
@@ -1245,8 +1310,9 @@ export default function MedaRealtimePage() {
                 onClick={handleDownloadPdf}
                 disabled={pdfLoading}
                 aria-disabled={pdfLoading}
+                aria-label={RT_TEXT.ariaDownloadPdf}
               >
-                {pdfLoading ? 'Erstelle PDF …' : 'PDF herunterladen'}
+                {pdfLoading ? RT_TEXT.creatingPdf : RT_TEXT.downloadPdf}
               </button>
             )}
             {turns.length > 0 && !archiveSaved && (
@@ -1254,66 +1320,79 @@ export default function MedaRealtimePage() {
                 className="mrt-btn mrt-btn--archive-save"
                 onClick={handleSaveToArchive}
               >
-                Im Gesprächsarchiv speichern
+                {RT_TEXT.saveToHistory}
               </button>
             )}
             <button
               className="mrt-btn mrt-btn--new-session"
               onClick={handleNewSession}
             >
-              Neues Gespräch starten
+              {RT_TEXT.newSession}
             </button>
           </div>
           {archiveSaved && (
-            <p className="mrt-archive-saved-hint" role="status">
-              Gespräch lokal im Archiv gespeichert.
+            <p className="mrt-archive-saved-hint" role="status" aria-live="polite">
+              {RT_TEXT.savedLocally}
             </p>
           )}
         </section>
       )}
 
-      {/* ── Local conversation archive ──────────────────────────────────────── */}
-      {archivedConversations.length > 0 && (
-        <section className="mrt-archive" aria-label="Gesprächsarchiv">
-          <h2 className="mrt-archive-title">Gesprächsarchiv</h2>
-          <p className="mrt-archive-privacy">
-            Dieses Archiv wird nur lokal auf diesem Gerät gespeichert. Es wird nicht an MedScoutX oder eine Praxis übertragen.
-          </p>
+      {/* ── Local conversation history ──────────────────────────────────────── */}
+      {(archivedConversations.length > 0 || (!isConnected && sessionHasStarted)) && (
+        <section className="mrt-archive" aria-label={RT_TEXT.historyTitle}>
+          <h2 className="mrt-archive-title">{RT_TEXT.historyTitle}</h2>
+          <p className="mrt-archive-privacy">{RT_TEXT.historyPrivacy}</p>
+
+          {archivedConversations.length === 0 ? (
+            <p className="mrt-archive-empty">{RT_TEXT.historyEmpty}</p>
+          ) : (
           <ul className="mrt-archive-list">
-            {archivedConversations.map(entry => (
+            {archivedConversations.map(entry => {
+              const partyLabel = archivePartyLabel(entry);
+              const sessionIso = entry.sessionStartedAt || entry.createdAt;
+              const dateStr    = formatSessionDate(sessionIso);
+              const timeStr    = formatSessionTime(sessionIso);
+              return (
               <li key={entry.id} className="mrt-archive-entry">
                 <div className="mrt-archive-entry-header">
                   <div className="mrt-archive-entry-meta">
-                    <span className="mrt-archive-entry-date">{formatTurnTime(entry.createdAt)}</span>
-                    <span>Patient: <strong>{entry.patientName || 'nicht angegeben'}</strong></span>
-                    {entry.practiceName && <span>Praxis: <strong>{entry.practiceName}</strong></span>}
-                    <span className="mrt-archive-entry-langs">
-                      {REALTIME_LANGUAGE_MAP[entry.patientLanguage] ?? entry.patientLanguage ?? '—'}
-                      {' ↔ '}
-                      {REALTIME_LANGUAGE_MAP[entry.practiceLanguage] ?? entry.practiceLanguage ?? '—'}
+                    <span className="mrt-archive-entry-summary">
+                      <span className="mrt-archive-entry-date">{dateStr}</span>
+                      <span className="mrt-archive-entry-sep" aria-hidden="true"> · </span>
+                      <span className="mrt-archive-entry-party">{partyLabel}</span>
+                      <span className="mrt-archive-entry-sep" aria-hidden="true"> · </span>
+                      <span className="mrt-archive-entry-time">{timeStr}</span>
                     </span>
-                    <span className="mrt-archive-entry-count">{entry.turns.length} Einträge</span>
+                    <span className="mrt-archive-entry-langs">
+                      {RT_TEXT.patientLanguage}: {REALTIME_LANGUAGE_MAP[entry.patientLanguage] ?? entry.patientLanguage ?? '—'}
+                      <span className="mrt-archive-entry-sep" aria-hidden="true"> · </span>
+                      {RT_TEXT.practiceLanguage}: {REALTIME_LANGUAGE_MAP[entry.practiceLanguage] ?? entry.practiceLanguage ?? '—'}
+                    </span>
+                    <span className="mrt-archive-entry-count">{RT_TEXT.turnsCount(entry.turns.length)}</span>
                   </div>
                   <div className="mrt-archive-entry-actions">
                     <button
                       className="mrt-btn mrt-btn--archive-pdf"
                       onClick={() => handleArchivePdf(entry)}
                       disabled={archivePdfLoadingId === entry.id}
+                      aria-label={RT_TEXT.ariaArchivePdf(`${dateStr} ${partyLabel}`)}
                     >
-                      {archivePdfLoadingId === entry.id ? 'PDF …' : 'PDF'}
+                      {archivePdfLoadingId === entry.id ? RT_TEXT.pdfShortLoading : RT_TEXT.pdf}
                     </button>
                     <button
                       className="mrt-btn mrt-btn--archive-view"
                       onClick={() => handleToggleExpand(entry.id)}
                       aria-expanded={archiveExpandedId === entry.id}
                     >
-                      {archiveExpandedId === entry.id ? 'Schließen' : 'Verlauf ansehen'}
+                      {archiveExpandedId === entry.id ? RT_TEXT.closeDetails : RT_TEXT.viewDetails}
                     </button>
                     <button
                       className="mrt-btn mrt-btn--archive-delete"
                       onClick={() => handleDeleteArchiveEntry(entry.id)}
+                      aria-label={RT_TEXT.ariaDelete(`${dateStr} ${partyLabel}`)}
                     >
-                      Löschen
+                      {RT_TEXT.deleteEntry}
                     </button>
                   </div>
                 </div>
@@ -1362,15 +1441,17 @@ export default function MedaRealtimePage() {
                   </div>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ul>
+          )}
 
           {archivedConversations.length > 1 && (
             <button
               className="mrt-btn mrt-btn--archive-clear"
               onClick={handleClearArchive}
             >
-              Alle lokalen Protokolle löschen
+              {RT_TEXT.deleteAll}
             </button>
           )}
         </section>

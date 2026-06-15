@@ -63,6 +63,38 @@ function formatTime(isoOrNull) {
 }
 
 /**
+ * Filesystem-safe slug. Lowercases, expands German umlauts, strips remaining
+ * diacritics, then collapses everything non-alphanumeric to single hyphens.
+ * Returns '' for empty/blank input so it can be dropped from the filename.
+ */
+function slugifyForFile(value) {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')   // strip remaining diacritics
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/g, '');
+}
+
+/**
+ * Builds the PDF filename, e.g.
+ *   medscoutx-meda-2026-06-10-1744-hautarzt-dr-heinrich.pdf
+ * Falls back to medscoutx-meda-<date>-<time>.pdf when practice/doctor are missing.
+ */
+function buildPdfFileName(isoOrNull, practiceInfo) {
+  const d   = isoOrNull ? new Date(isoOrNull) : new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const time = `${pad(d.getHours())}${pad(d.getMinutes())}`;
+  const partySlug = slugifyForFile(
+    [practiceInfo?.department, practiceInfo?.doctorName].filter(Boolean).join(' '),
+  );
+  return ['medscoutx', 'meda', date, time, partySlug].filter(Boolean).join('-') + '.pdf';
+}
+
+/**
  * Loads the logo via a browser Image element (no fetch / no CORS dependency).
  * Draws it to an off-screen canvas to obtain a dataURL and the true pixel dimensions.
  * Returns { dataUrl, natW, natH } or { dataUrl: null, natW: 0, natH: 0 } on failure.
@@ -550,6 +582,5 @@ export async function exportRealtimeConversationPdf({
 
   // ── Save ────────────────────────────────────────────────────────────────────
 
-  const dateStr = new Date().toISOString().slice(0, 10);
-  doc.save(`meda-gespraechsprotokoll-${dateStr}.pdf`);
+  doc.save(buildPdfFileName(sessionStartedAt, practiceInfo));
 }

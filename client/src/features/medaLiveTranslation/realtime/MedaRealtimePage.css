@@ -1243,6 +1243,41 @@
   color: #6b7280;
 }
 
+/* Compact one-line summary: date · specialty doctor · time */
+.mrt-archive-entry-summary {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  font-size: 0.875rem;
+  color: #0f172a;
+  width: 100%;
+}
+
+.mrt-archive-entry-party {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mrt-archive-entry-time {
+  color: #374151;
+  font-variant-numeric: tabular-nums;
+}
+
+.mrt-archive-entry-sep {
+  color: #94a3b8;
+}
+
+/* Empty-state for the local history */
+.mrt-archive-empty {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  padding: 0.75rem 0.875rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+}
+
 .mrt-archive-entry-actions {
   display: flex;
   gap: 0.375rem;
@@ -1393,6 +1428,11 @@
 :root[data-theme="dark"] .mrt-archive-entry-date     { color: #f1f5f9; }
 :root[data-theme="dark"] .mrt-archive-entry-langs    { color: #22d3ee; }
 :root[data-theme="dark"] .mrt-archive-entry-count    { color: #64748b; }
+:root[data-theme="dark"] .mrt-archive-entry-summary  { color: #f1f5f9; }
+:root[data-theme="dark"] .mrt-archive-entry-party    { color: #f1f5f9; }
+:root[data-theme="dark"] .mrt-archive-entry-time     { color: #cbd5e1; }
+:root[data-theme="dark"] .mrt-archive-entry-sep      { color: #475569; }
+:root[data-theme="dark"] .mrt-archive-empty          { background: #1e293b; border-color: #334155; color: #94a3b8; }
 :root[data-theme="dark"] .mrt-archive-turn           { border-bottom-color: #1e293b; }
 :root[data-theme="dark"] .mrt-archive-turn--patient  { border-left-color: #22d3ee; }
 :root[data-theme="dark"] .mrt-archive-turn--practice { border-left-color: #64748b; }
