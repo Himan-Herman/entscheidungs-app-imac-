@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useRealtimeSession } from './useRealtimeSession.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { getPracticeChromeMessages } from './medaRealtimePractice.i18n.js';
+import { usePracticeProfilePrefill } from './usePracticeProfilePrefill.js';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
 import { speakTranslation, cancelSpeech } from './realtimeSpeechPlayback.js';
@@ -150,6 +152,11 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   const { language } = useLanguage();
   const practiceTx = useMemo(() => getPracticeChromeMessages(language), [language]);
 
+  // Practice variant only: read practiceId from the URL (?practiceId=...).
+  // Patient variant always resolves to '' so it never triggers a practice fetch.
+  const [searchParams] = useSearchParams();
+  const practiceId = isPractice ? (searchParams.get('practiceId') || '') : '';
+
   const {
     connect,
     disconnect,
@@ -241,6 +248,31 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     if (profileData.patientLang)  setPatientLang(profileData.patientLang);
     if (profileData.practiceLang) setPracticeLang(profileData.practiceLang);
   }, [profileData, forSelf]);
+
+  // ── Practice variant: prefill practice master data from the practice profile ─
+  // Only runs in the practice variant (practiceId is '' otherwise). Manual input
+  // wins: per field `prev.field || practiceData.field` keeps anything the user
+  // has already typed even if the fetch resolves afterwards. doctorName stays
+  // manual on purpose (no team endpoint in this phase).
+  const { practiceData } = usePracticeProfilePrefill(practiceId);
+  const practicePrefilled = isPractice && !!practiceData &&
+    Object.values(practiceData).some(v => String(v || '').trim() !== '');
+
+  useEffect(() => {
+    if (!practiceData) return;
+    setPracticeInfo(prev => ({
+      ...prev,
+      practiceName: prev.practiceName || practiceData.practiceName || '',
+      department:   prev.department   || practiceData.department   || '',
+      street:       prev.street       || practiceData.street       || '',
+      postalCode:   prev.postalCode   || practiceData.postalCode   || '',
+      city:         prev.city         || practiceData.city         || '',
+      country:      prev.country      || practiceData.country      || '',
+      phone:        prev.phone        || practiceData.phone        || '',
+      email:        prev.email        || practiceData.email        || '',
+      // doctorName intentionally not prefilled — stays manual
+    }));
+  }, [practiceData]);
 
   // ── Refs ────────────────────────────────────────────────────────────────────
   const turnsEndRef      = useRef(null);
@@ -866,6 +898,11 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             </button>
             {showPracticeFields && (
             <div id="mrt-practice-fields" className="mrt-form-grid">
+              {practicePrefilled && (
+                <p className="mrt-privacy-note mrt-form-field--full" role="status">
+                  Praxisdaten wurden aus dem Praxisprofil übernommen und können angepasst werden.
+                </p>
+              )}
               <div className="mrt-form-field">
                 <label className="mrt-form-label" htmlFor="mrt-practice-name">Praxis / Einrichtung</label>
                 <input

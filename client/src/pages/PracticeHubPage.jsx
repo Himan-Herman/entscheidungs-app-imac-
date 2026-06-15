@@ -118,7 +118,10 @@ const CARD_DEFS = [
   {
     id: "medaLive",
     labelKey: "cardMedaLive",
-    to: () => "/practice/meda-realtime",
+    to: (practiceId) =>
+      practiceId
+        ? `/practice/meda-realtime?practiceId=${encodeURIComponent(practiceId)}`
+        : "/practice/meda-realtime",
     Icon: Mic,
   },
   {
