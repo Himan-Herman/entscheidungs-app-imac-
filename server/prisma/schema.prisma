@@ -1124,9 +1124,12 @@ model MedicationPlanItem {
  */
 model PracticeDocument {
   id                    String    @id @default(cuid())
-  practicePatientLinkId String
+  // Nullable since the Meda PDF-QR flow stores practice-owned PDFs for sessions
+  // that may involve an unregistered, unlinked patient. Patient-linked documents
+  // continue to set both fields; onDelete: Cascade is preserved for those.
+  practicePatientLinkId String?
   practiceProfileId     String
-  patientUserId         String
+  patientUserId         String?
   /// report | lab | imaging | referral | discharge | prescription_info | other
   type                  String    @default("other")
   title                 String
@@ -1141,9 +1144,9 @@ model PracticeDocument {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  practicePatientLink  PracticePatientLink         @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practicePatientLink  PracticePatientLink?        @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
   practiceProfile      PracticeProfile             @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser          User                        @relation("PracticeDocumentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  patientUser          User?                       @relation("PracticeDocumentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
   createdBy            User?                       @relation("PracticeDocumentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   deletedBy            User?                       @relation("PracticeDocumentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
   files                PracticeDocumentFile[]
