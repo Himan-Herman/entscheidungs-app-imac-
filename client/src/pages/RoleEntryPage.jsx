@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Building2, Moon, SunMedium, UserRound } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
@@ -132,12 +132,6 @@ export default function RoleEntryPage() {
             </button>
           </article>
         </div>
-
-        <p className="role-entry__footer-note">
-          <Link className="role-entry__inline-link" to="/landing">
-            {t.marketingLink}
-          </Link>
-        </p>
       </div>
     </div>
   );
