@@ -5,6 +5,8 @@ import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { getPracticeChromeMessages } from './medaRealtimePractice.i18n.js';
 import { usePracticeProfilePrefill } from './usePracticeProfilePrefill.js';
 import PracticeMedaQrModal from './PracticeMedaQrModal.jsx';
+import PracticeMedaPdfQrCard from './PracticeMedaPdfQrCard.jsx';
+import { createMedaPdfLink } from './medaPdfQrApi.js';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
 import { speakTranslation, cancelSpeech } from './realtimeSpeechPlayback.js';
@@ -439,6 +441,30 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       setPdfLoading(false);
     }
   }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang]);
+
+  // Practice PDF-QR: build the PDF blob and upload it for a secure token link.
+  // Runs ONLY on explicit user action inside the practice variant — never on the
+  // normal local download or when saving to local history.
+  const handleProvidePdfQr = useCallback(async () => {
+    const blob = await exportRealtimeConversationPdf({
+      turns,
+      patientInfo,
+      practiceInfo,
+      forSelf,
+      languages: { patientLanguage: patientLang, practiceLanguage: practiceLang },
+      sessionStartedAt: sessionStartedAtRef.current,
+    }, { returnBlob: true });
+
+    const datePart = (sessionStartedAtRef.current || '').slice(0, 10) || 'protokoll';
+    return createMedaPdfLink({
+      practiceId,
+      blob,
+      fileName: `medscoutx-meda-${datePart}.pdf`,
+      sessionStartedAt: sessionStartedAtRef.current,
+      patientLanguage:  patientLang,
+      practiceLanguage: practiceLang,
+    });
+  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, practiceId]);
 
   function handleEditStart(turn) {
     setEditingKey(turn.key);
@@ -1435,6 +1461,16 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             <p className="mrt-archive-saved-hint" role="status" aria-live="polite">
               {RT_TEXT.savedLocally}
             </p>
+          )}
+
+          {/* Practice-only: optionally provide the PDF via a secure, time-limited QR link.
+              The QR encodes only the backend token URL — no patient data, no transcript. */}
+          {isPractice && turns.length > 0 && (
+            <PracticeMedaPdfQrCard
+              tx={practiceTx}
+              practiceId={practiceId}
+              onProvide={handleProvidePdfQr}
+            />
           )}
         </section>
       )}

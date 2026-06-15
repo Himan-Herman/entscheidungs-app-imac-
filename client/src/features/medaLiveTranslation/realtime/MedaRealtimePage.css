@@ -1895,3 +1895,101 @@
 :root[data-theme="dark"] .mrt-qr-notes { border-top-color: #334155; }
 :root[data-theme="dark"] .mrt-qr-note { color: #94a3b8; }
 :root[data-theme="dark"] .mrt-qr-no-practice { color: #94a3b8; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRACTICE PDF-QR CARD — provide the session PDF via a secure token link
+   (practice variant only, inside the end-of-session box)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mrt-pdfqr-card {
+  margin-top: 1rem;
+  padding: 1rem 1.125rem 1.125rem;
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.mrt-pdfqr-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.mrt-pdfqr-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #115e59;
+}
+
+.mrt-pdfqr-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ms-text-primary, #134e4a);
+  cursor: pointer;
+}
+
+.mrt-pdfqr-btn {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  padding: 0.5rem 1.125rem;
+  font-size: 0.875rem;
+  background: #0d9488;
+  color: #ffffff;
+}
+.mrt-pdfqr-btn:not(:disabled):hover { background: #0f766e; }
+.mrt-pdfqr-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.mrt-pdfqr-status {
+  margin: 0;
+  min-height: 1.05rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f766e;
+}
+.mrt-pdfqr-status--error { color: #dc2626; }
+
+.mrt-pdfqr-msg {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #115e59;
+}
+
+.mrt-pdfqr-result {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.625rem;
+}
+
+.mrt-pdfqr-expires {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0f766e;
+  text-align: center;
+}
+
+.mrt-pdfqr-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* Dark mode */
+:root[data-theme="dark"] .mrt-pdfqr-card    { background: #0f2926; border-color: #134e4a; }
+:root[data-theme="dark"] .mrt-pdfqr-title,
+:root[data-theme="dark"] .mrt-pdfqr-expires,
+:root[data-theme="dark"] .mrt-pdfqr-status  { color: #5eead4; }
+:root[data-theme="dark"] .mrt-pdfqr-hint,
+:root[data-theme="dark"] .mrt-pdfqr-msg     { color: #99f6e4; }
+:root[data-theme="dark"] .mrt-pdfqr-consent { color: #e2e8f0; }
+:root[data-theme="dark"] .mrt-pdfqr-btn     { background: #0f766e; color: #ccfbf1; }
+:root[data-theme="dark"] .mrt-pdfqr-btn:not(:disabled):hover { background: #115e59; }
+:root[data-theme="dark"] .mrt-pdfqr-status--error { color: #fca5a5; }
