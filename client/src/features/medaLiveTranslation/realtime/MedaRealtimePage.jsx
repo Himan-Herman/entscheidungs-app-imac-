@@ -1173,7 +1173,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 className={`mrt-mode-speaker-btn mrt-mode-speaker-btn--patient${manualSpeaker === 'patient' ? ' mrt-mode-speaker-btn--active' : ''}`}
                 onClick={() => setManualSpeaker('patient')}
                 aria-pressed={manualSpeaker === 'patient'}
-                disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
+                disabled={sessionStatus === 'speaking' || sessionStatus === 'translating' || sessionStatus === 'processing' || sessionStatus === 'speech_active'}
               >
                 Patient spricht
               </button>
@@ -1182,7 +1182,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 className={`mrt-mode-speaker-btn mrt-mode-speaker-btn--practice${manualSpeaker === 'practice' ? ' mrt-mode-speaker-btn--active' : ''}`}
                 onClick={() => setManualSpeaker('practice')}
                 aria-pressed={manualSpeaker === 'practice'}
-                disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
+                disabled={sessionStatus === 'speaking' || sessionStatus === 'translating' || sessionStatus === 'processing' || sessionStatus === 'speech_active'}
               >
                 Praxis spricht
               </button>

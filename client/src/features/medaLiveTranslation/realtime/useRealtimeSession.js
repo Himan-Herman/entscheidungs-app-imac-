@@ -249,12 +249,21 @@ export function useRealtimeSession() {
         let markUnclear    = false;
 
         if (manualModeRef.current) {
-          // ── Manual mode: trust the page-selected speaker, skip language detection ──
-          const role     = manualSpeakerRef.current; // 'patient' | 'practice'
-          speakerRole    = role;
-          targetRole     = role === 'patient' ? 'practice' : 'patient';
-          sourceLanguage = role === 'patient' ? patientLangRef.current : practiceLangRef.current;
-          targetLanguage = role === 'patient' ? practiceLangRef.current : patientLangRef.current;
+          // ── Manual mode: trust the page-selected speaker, skip auto role detection ──
+          // Safety: detectLanguage() stays OFF (no de/en disambiguation — that is the
+          // whole point of manual mode), but a clearly foreign / third language must
+          // still NOT be accepted as a normal turn. isDefinitelyThirdLanguage() blocks
+          // e.g. Turkish/Arabic/Spanish in a DE/EN session; short allowed words such as
+          // "Ja"/"Nein"/"Yes"/"No" stay below its threshold and pass through.
+          if (isDefinitelyThirdLanguage(transcript, patientLangRef.current, practiceLangRef.current)) {
+            markUnclear = true;
+          } else {
+            const role     = manualSpeakerRef.current; // 'patient' | 'practice'
+            speakerRole    = role;
+            targetRole     = role === 'patient' ? 'practice' : 'patient';
+            sourceLanguage = role === 'patient' ? patientLangRef.current : practiceLangRef.current;
+            targetLanguage = role === 'patient' ? practiceLangRef.current : patientLangRef.current;
+          }
         } else {
           // ── Auto mode: detect language from transcript text ──────────────────────
           const detected = detectLanguage(transcript, patientLangRef.current, practiceLangRef.current);
