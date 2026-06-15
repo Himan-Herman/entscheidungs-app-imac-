@@ -4,6 +4,7 @@ import { useRealtimeSession } from './useRealtimeSession.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
 import { getPracticeChromeMessages } from './medaRealtimePractice.i18n.js';
 import { usePracticeProfilePrefill } from './usePracticeProfilePrefill.js';
+import PracticeMedaQrModal from './PracticeMedaQrModal.jsx';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
 import { speakTranslation, cancelSpeech } from './realtimeSpeechPlayback.js';
@@ -213,6 +214,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   // 'manual' = user explicitly selects the active speaker
   const [mode,          setMode]          = useState(/** @type {'auto'|'manual'} */ ('auto'));
   const [manualSpeaker, setManualSpeaker] = useState(/** @type {'patient'|'practice'} */ ('patient'));
+
+  // ── Practice QR modal (practice variant only) ────────────────────────────────
+  const [qrOpen, setQrOpen] = useState(false);
 
   // ── Pause state ──────────────────────────────────────────────────────────────
   const [isPaused,   setIsPaused]   = useState(false);
@@ -600,6 +604,32 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             {practiceTx.chipTwoLang}
           </span>
         </div>
+      )}
+
+      {/* ── Practice QR action — opens a modal with the start-page QR code ───── */}
+      {isPractice && (
+        <div className="mrt-qr-bar">
+          <button
+            type="button"
+            className="mrt-btn mrt-qr-trigger"
+            onClick={() => setQrOpen(true)}
+            aria-haspopup="dialog"
+          >
+            <span aria-hidden="true" className="mrt-qr-trigger-icon">▦</span>
+            {practiceTx.qrShow}
+          </button>
+        </div>
+      )}
+
+      {/* QR modal — practice variant only. Encodes only the protected start-page URL,
+          never patient data, transcript, PDF or medical content. */}
+      {isPractice && qrOpen && (
+        <PracticeMedaQrModal
+          practiceId={practiceId}
+          practiceName={practiceInfo.practiceName}
+          tx={practiceTx}
+          onClose={() => setQrOpen(false)}
+        />
       )}
 
       {/* ── Warning / expired banners ────────────────────────────────────────── */}
