@@ -506,22 +506,30 @@ export function useRealtimeSession() {
     }
   }, []); // all accessed values are refs or stable state setters
 
-  const connect = useCallback(async ({ patientLanguage, practiceLanguage }) => {
+  const connect = useCallback(async ({ patientLanguage, practiceLanguage }, opts = {}) => {
     if (connectionState === 'connecting' || connectionState === 'connected') return;
+
+    // keepHistory = true → "continue conversation" after a technical stop: a fresh
+    // Realtime connection is built, but existing turns / counter / speaker mode are
+    // preserved so the conversation visually continues. Default (false) is a clean
+    // new session that wipes the previous history.
+    const keepHistory = opts.keepHistory === true;
 
     setConnectionState('connecting');
     setError(null);
-    setEvents([]);
-    setTurns([]);
-    turnCounterRef.current   = 0;
+    if (!keepHistory) {
+      setEvents([]);
+      setTurns([]);
+      turnCounterRef.current    = 0;
+      setCurrentSpeakerRole(null);     // no speaker detected yet
+      manualModeRef.current     = false;    // always start in auto mode
+      manualSpeakerRef.current  = 'patient';
+    }
     speakerLockRef.current   = false;
     patientLangRef.current   = patientLanguage;
     practiceLangRef.current  = practiceLanguage;
     sessionActiveRef.current = true; // arm the guard
-    setCurrentSpeakerRole(null);     // no speaker detected yet
-    responseTurnMapRef.current.clear();
-    manualModeRef.current    = false;    // always start in auto mode
-    manualSpeakerRef.current = 'patient';
+    responseTurnMapRef.current.clear(); // stale response_ids from the old connection
     isPausedRef.current      = false;
 
     try {

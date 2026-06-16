@@ -1993,3 +1993,122 @@
 :root[data-theme="dark"] .mrt-pdfqr-btn     { background: #0f766e; color: #ccfbf1; }
 :root[data-theme="dark"] .mrt-pdfqr-btn:not(:disabled):hover { background: #115e59; }
 :root[data-theme="dark"] .mrt-pdfqr-status--error { color: #fca5a5; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LOCAL PDF CARD — separated from the PDF-QR card (practice variant only)
+   Sky/neutral look to clearly distinguish "download locally" (no server storage)
+   from the teal "provide via QR" card (server-stored token link after consent).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mrt-localpdf-card {
+  margin-top: 1rem;
+  padding: 1rem 1.125rem 1.125rem;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.mrt-localpdf-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0c4a6e;
+}
+
+.mrt-localpdf-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #075985;
+}
+
+.mrt-localpdf-btn {
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+/* Dark mode */
+:root[data-theme="dark"] .mrt-localpdf-card  { background: #0c2236; border-color: #075985; }
+:root[data-theme="dark"] .mrt-localpdf-title { color: #7dd3fc; }
+:root[data-theme="dark"] .mrt-localpdf-hint  { color: #bae6fd; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTINUE-AFTER-STOP CARD — rebuild the live connection, keep the conversation
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mrt-continue-card {
+  padding: 0.875rem 1.125rem 1rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mrt-continue-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.mrt-continue-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: #1d4ed8;
+}
+
+.mrt-continue-btn {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  background: #2563eb;
+  color: #fff;
+  padding: 0.5rem 1.25rem;
+}
+.mrt-continue-btn:not(:disabled):hover { background: #1d4ed8; }
+.mrt-continue-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Dark mode */
+:root[data-theme="dark"] .mrt-continue-card  { background: #0c1e3a; border-color: #1e3a8a; }
+:root[data-theme="dark"] .mrt-continue-title { color: #93c5fd; }
+:root[data-theme="dark"] .mrt-continue-hint  { color: #bfdbfe; }
+:root[data-theme="dark"] .mrt-continue-btn   { background: #2563eb; }
+:root[data-theme="dark"] .mrt-continue-btn:not(:disabled):hover { background: #1d4ed8; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   END REASON BANNER — why the live session stopped (manual / time / inactivity / error)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mrt-end-reason {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.mrt-end-reason--manual {
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+.mrt-end-reason--time_limit,
+.mrt-end-reason--inactivity {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+.mrt-end-reason--connection_error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+/* Dark mode */
+:root[data-theme="dark"] .mrt-end-reason--manual            { background: #1e293b; color: #cbd5e1; border-color: #334155; }
+:root[data-theme="dark"] .mrt-end-reason--time_limit,
+:root[data-theme="dark"] .mrt-end-reason--inactivity        { background: #451a03; color: #fbbf24; border-color: #92400e; }
+:root[data-theme="dark"] .mrt-end-reason--connection_error  { background: #450a0a; color: #fca5a5; border-color: #991b1b; }

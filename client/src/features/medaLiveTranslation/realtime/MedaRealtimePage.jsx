@@ -29,11 +29,17 @@ const ROLE_LABEL = {
   practice: 'Praxis',
 };
 
-/** Maximum session duration in seconds. Hard cutoff to limit Realtime cost exposure. */
+/**
+ * Maximum session duration in seconds — the single source for the time limit.
+ * Bump this one constant to allow 15/20/30-minute sessions later (e.g. 20 * 60).
+ */
 const SESSION_MAX_SECONDS = 5 * 60; // 300 s
 
 /** Warning threshold — show banner when this many seconds remain. */
 const SESSION_WARN_SECONDS = 60;
+
+/** Inactivity cutoff: stop the live link after this many seconds with no speech. */
+const INACTIVITY_TIMEOUT_SECONDS = 30;
 
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
@@ -76,6 +82,14 @@ const RT_TEXT = {
   endTitle:         'Gesprächsprotokoll bereit',
   endHint:          'Sie können das PDF jetzt herunterladen oder den lokalen Verlauf auf diesem Gerät nutzen.',
   endHintEmpty:     'Kein Gesprächsverlauf aufgezeichnet.',
+  continueTitle:    'Gespräch fortsetzen',
+  continueHint:     'Die bisherige Gesprächshistorie bleibt erhalten. Es wird nur die Live-Verbindung neu aufgebaut.',
+  continueButton:   'Gespräch fortsetzen',
+  continuing:       'Verbinde erneut …',
+  endReasonManual:      'Gespräch beendet.',
+  endReasonTimeLimit:   'Die vorgesehene Gesprächszeit ist abgelaufen.',
+  endReasonInactivity:  'Das Gespräch wurde wegen Inaktivität angehalten.',
+  endReasonConnection:  'Die Live-Verbindung wurde unterbrochen.',
   downloadPdf:      'PDF herunterladen',
   creatingPdf:      'Erstelle PDF …',
   saveToHistory:    'Im lokalen Verlauf speichern',
@@ -101,6 +115,18 @@ const RT_TEXT = {
   ariaArchivePdf:   (label) => `PDF für „${label}" herunterladen`,
   ariaDelete:       (label) => `Verlaufseintrag „${label}" löschen`,
 };
+
+/** Maps an endReason to its end-box message (null → no banner). */
+function endReasonText(reason) {
+  switch (reason) {
+    case 'time_limit':       return RT_TEXT.endReasonTimeLimit;
+    case 'inactivity':       return RT_TEXT.endReasonInactivity;
+    case 'connection_error': return RT_TEXT.endReasonConnection;
+    case 'manual':
+    case 'completed':        return RT_TEXT.endReasonManual;
+    default:                 return null;
+  }
+}
 
 /**
  * Compact, human-readable label for a history entry.
@@ -228,6 +254,15 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   const [pdfLoading, setPdfLoading] = useState(false);
   const sessionStartedAtRef = useRef(/** @type {string|null} */ (null));
 
+  // ── Continue-after-interruption — true during a reconnect that keeps history,
+  //    so the original session start time (used by the PDF) is not overwritten ──
+  const isContinuingRef = useRef(false);
+
+  // ── How the live session last ended — drives the end-box message ────────────
+  // null | 'manual' | 'time_limit' | 'inactivity' | 'connection_error' | 'completed'
+  const [endReason, setEndReason] = useState(/** @type {string|null} */ (null));
+  const inactivityTimerRef = useRef(/** @type {ReturnType<typeof setTimeout>|null} */ (null));
+
   // ── Local conversation archive ───────────────────────────────────────────────
   const [archivedConversations, setArchivedConversations] = useState([]);
   const [archiveSaved,          setArchiveSaved]          = useState(false);
@@ -322,7 +357,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   useEffect(() => {
     if (connectionState === 'connected') {
       sessionStartRef.current     = Date.now();
-      sessionStartedAtRef.current = new Date().toISOString();
+      // On a "continue" reconnect keep the ORIGINAL session start so the PDF /
+      // history still reflect the whole conversation; otherwise stamp a new start.
+      if (!isContinuingRef.current || !sessionStartedAtRef.current) {
+        sessionStartedAtRef.current = new Date().toISOString();
+      }
+      isContinuingRef.current = false;
       setRemainingSeconds(SESSION_MAX_SECONDS);
       setSessionExpired(false);
       setIsPaused(false);
@@ -349,6 +389,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
         setSessionExpired(true);
+        setEndReason('time_limit');
         cancelSpeech();
         disconnectRef.current();
       }
@@ -361,6 +402,36 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       }
     };
   }, [connectionState, isPaused]);
+
+  // Effect C: Inactivity watchdog. Armed only while the session is connected and
+  // genuinely idle ('ready' = waiting for a speaker), and never while paused.
+  // sessionStatus changes (speech_active/processing/translating/speaking) re-run
+  // this effect and reset the window, so it counts only continuous silence and can
+  // never fire while Meda is speaking/translating.
+  useEffect(() => {
+    if (connectionState !== 'connected' || isPaused || sessionStatus !== 'ready') return;
+
+    inactivityTimerRef.current = setTimeout(() => {
+      setEndReason('inactivity');
+      cancelSpeech();
+      disconnectRef.current();
+    }, INACTIVITY_TIMEOUT_SECONDS * 1000);
+
+    return () => {
+      if (inactivityTimerRef.current) {
+        clearTimeout(inactivityTimerRef.current);
+        inactivityTimerRef.current = null;
+      }
+    };
+  }, [connectionState, sessionStatus, isPaused]);
+
+  // Effect D: Surface a real connection drop as the end reason (only when it was
+  // not already ended for a more specific reason that produces an 'idle' state).
+  useEffect(() => {
+    if (connectionState === 'error' && sessionHasStarted) {
+      setEndReason(prev => prev ?? 'connection_error');
+    }
+  }, [connectionState, sessionHasStarted]);
 
   // ── Auto-scroll ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -489,7 +560,30 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     setSessionHasStarted(true);
     setIsPaused(false);
     pausedAtRef.current = null;
+    setEndReason(null);
     connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
+  }
+
+  // Manual end — clearly distinguished from time-limit / inactivity / error stops.
+  function handleStopSession() {
+    setEndReason('manual');
+    cancelSpeech();
+    disconnect();
+  }
+
+  // Continue after a technical stop / connection drop: rebuild the Realtime
+  // connection while keeping existing turns + form data. No new form, no PDF,
+  // no history entry — purely a fresh live link onto the same conversation.
+  function handleContinueSession() {
+    setSessionExpired(false);
+    setIsPaused(false);
+    pausedAtRef.current = null;
+    setEndReason(null);
+    isContinuingRef.current = true; // keep original sessionStartedAt for the PDF
+    connect(
+      { patientLanguage: patientLang, practiceLanguage: practiceLang },
+      { keepHistory: true },
+    );
   }
 
   function handlePause() {
@@ -516,6 +610,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     setArchiveSaved(false);
     setIsPaused(false);
     pausedAtRef.current = null;
+    setEndReason(null);
     setMode('auto');
     setManualSpeaker('patient');
   }
@@ -1178,7 +1273,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             </button>
             <button
               className="mrt-btn mrt-btn--stop mrt-btn--compact"
-              onClick={() => { cancelSpeech(); disconnect(); }}
+              onClick={handleStopSession}
             >
               Gespräch beenden
             </button>
@@ -1412,6 +1507,16 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         <section className="mrt-end-box" aria-label={RT_TEXT.endTitle}>
           <h2 className="mrt-end-title">{RT_TEXT.endTitle}</h2>
 
+          {endReasonText(endReason) && (
+            <p
+              className={`mrt-end-reason mrt-end-reason--${endReason}`}
+              role="status"
+              aria-live="polite"
+            >
+              {endReasonText(endReason)}
+            </p>
+          )}
+
           <div className="mrt-end-meta">
             <span>
               {RT_TEXT.documentationFor}:{' '}
@@ -1424,53 +1529,117 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             )}
           </div>
 
+          {/* Continue after a technical stop — keeps existing turns, only rebuilds
+              the live connection. Shown only while session data is still in memory
+              (a page refresh clears it, so no stale live session is resumed). */}
+          {turns.length > 0 && (
+            <div className="mrt-continue-card">
+              <h3 className="mrt-continue-title">{RT_TEXT.continueTitle}</h3>
+              <p className="mrt-continue-hint">{RT_TEXT.continueHint}</p>
+              <button
+                className="mrt-btn mrt-continue-btn"
+                onClick={handleContinueSession}
+                disabled={isBusy}
+                aria-disabled={isBusy}
+              >
+                {isConnecting ? RT_TEXT.continuing : RT_TEXT.continueButton}
+              </button>
+            </div>
+          )}
+
           {turns.length > 0 ? (
             <p className="mrt-end-hint">{RT_TEXT.endHint}</p>
           ) : (
             <p className="mrt-end-hint">{RT_TEXT.endHintEmpty}</p>
           )}
 
-          <div className="mrt-end-actions">
-            {turns.length > 0 && (
-              <button
-                className="mrt-btn mrt-btn--pdf"
-                onClick={handleDownloadPdf}
-                disabled={pdfLoading}
-                aria-disabled={pdfLoading}
-                aria-label={RT_TEXT.ariaDownloadPdf}
-              >
-                {pdfLoading ? RT_TEXT.creatingPdf : RT_TEXT.downloadPdf}
-              </button>
-            )}
-            {turns.length > 0 && !archiveSaved && (
-              <button
-                className="mrt-btn mrt-btn--archive-save"
-                onClick={handleSaveToArchive}
-              >
-                {RT_TEXT.saveToHistory}
-              </button>
-            )}
-            <button
-              className="mrt-btn mrt-btn--new-session"
-              onClick={handleNewSession}
-            >
-              {RT_TEXT.newSession}
-            </button>
-          </div>
-          {archiveSaved && (
-            <p className="mrt-archive-saved-hint" role="status" aria-live="polite">
-              {RT_TEXT.savedLocally}
-            </p>
-          )}
+          {isPractice ? (
+            <>
+              {/* A) Local PDF — created and downloaded on this device, no server storage. */}
+              {turns.length > 0 && (
+                <div className="mrt-localpdf-card">
+                  <h3 className="mrt-localpdf-title">{practiceTx.localPdfTitle}</h3>
+                  <p className="mrt-localpdf-hint">{practiceTx.localPdfHint}</p>
+                  <button
+                    className="mrt-btn mrt-btn--pdf mrt-localpdf-btn"
+                    onClick={handleDownloadPdf}
+                    disabled={pdfLoading}
+                    aria-disabled={pdfLoading}
+                    aria-label={RT_TEXT.ariaDownloadPdf}
+                  >
+                    {pdfLoading ? RT_TEXT.creatingPdf : RT_TEXT.downloadPdf}
+                  </button>
+                </div>
+              )}
 
-          {/* Practice-only: optionally provide the PDF via a secure, time-limited QR link.
-              The QR encodes only the backend token URL — no patient data, no transcript. */}
-          {isPractice && turns.length > 0 && (
-            <PracticeMedaPdfQrCard
-              tx={practiceTx}
-              practiceId={practiceId}
-              onProvide={handleProvidePdfQr}
-            />
+              {/* B) PDF via QR — server-stored only after consent, time-limited token link.
+                  The QR encodes only the backend token URL — no patient data, no transcript. */}
+              {turns.length > 0 && (
+                <PracticeMedaPdfQrCard
+                  tx={practiceTx}
+                  practiceId={practiceId}
+                  onProvide={handleProvidePdfQr}
+                />
+              )}
+
+              {/* General actions — keep history + new session separate from the PDF cards. */}
+              <div className="mrt-end-actions">
+                {turns.length > 0 && !archiveSaved && (
+                  <button
+                    className="mrt-btn mrt-btn--archive-save"
+                    onClick={handleSaveToArchive}
+                  >
+                    {RT_TEXT.saveToHistory}
+                  </button>
+                )}
+                <button
+                  className="mrt-btn mrt-btn--new-session"
+                  onClick={handleNewSession}
+                >
+                  {RT_TEXT.newSession}
+                </button>
+              </div>
+              {archiveSaved && (
+                <p className="mrt-archive-saved-hint" role="status" aria-live="polite">
+                  {RT_TEXT.savedLocally}
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="mrt-end-actions">
+                {turns.length > 0 && (
+                  <button
+                    className="mrt-btn mrt-btn--pdf"
+                    onClick={handleDownloadPdf}
+                    disabled={pdfLoading}
+                    aria-disabled={pdfLoading}
+                    aria-label={RT_TEXT.ariaDownloadPdf}
+                  >
+                    {pdfLoading ? RT_TEXT.creatingPdf : RT_TEXT.downloadPdf}
+                  </button>
+                )}
+                {turns.length > 0 && !archiveSaved && (
+                  <button
+                    className="mrt-btn mrt-btn--archive-save"
+                    onClick={handleSaveToArchive}
+                  >
+                    {RT_TEXT.saveToHistory}
+                  </button>
+                )}
+                <button
+                  className="mrt-btn mrt-btn--new-session"
+                  onClick={handleNewSession}
+                >
+                  {RT_TEXT.newSession}
+                </button>
+              </div>
+              {archiveSaved && (
+                <p className="mrt-archive-saved-hint" role="status" aria-live="polite">
+                  {RT_TEXT.savedLocally}
+                </p>
+              )}
+            </>
           )}
         </section>
       )}
