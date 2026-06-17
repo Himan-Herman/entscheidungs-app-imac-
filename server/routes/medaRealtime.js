@@ -40,10 +40,13 @@ const LANGUAGE_NAMES = {
   sk: 'Slowakisch',
 };
 
-// Max 5 ephemeral token requests per IP per rate-limit window.
-// Each token starts a Realtime session — abuse ceiling to limit cost exposure.
+// Ephemeral token requests per IP per 15-minute window. Each token starts a
+// Realtime session, so this is an abuse / cost ceiling — but it must still allow
+// normal use: a single conversation can reconnect several times (continue after a
+// stop, inactivity, time limit), and a whole practice team often shares one office
+// IP. The previous value of 5 blocked legitimate users after a few starts.
 const realtimeSessionLimiter = createInterpreterIpRateLimiter({
-  max: 5,
+  max: 30,
   keyPrefix: 'meda:realtime:session',
 });
 
