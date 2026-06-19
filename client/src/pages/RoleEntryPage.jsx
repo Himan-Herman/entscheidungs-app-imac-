@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Building2, Moon, SunMedium, UserRound } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
@@ -65,8 +65,13 @@ export default function RoleEntryPage() {
   return (
     <div className="role-entry" data-theme={theme}>
       <header className="role-entry__top" dir="ltr">
-        <span className="role-entry__brand">MedScoutX</span>
+        <Link className="role-entry__brand" to="/">
+          MedScoutX
+        </Link>
         <div className="role-entry__top-actions">
+          <Link className="role-entry__marketing-link" to="/">
+            {t.marketingLink}
+          </Link>
           <button
             type="button"
             className="role-entry__icon-btn"

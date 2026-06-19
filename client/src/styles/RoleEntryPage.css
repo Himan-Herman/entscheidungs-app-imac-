@@ -28,6 +28,7 @@
 }
 
 .role-entry__brand {
+  text-decoration: none;
   font-weight: 700;
   letter-spacing: 0.04em;
   font-size: 1rem;
@@ -42,6 +43,26 @@
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
+}
+
+.role-entry__marketing-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  color: #0e7490;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.role-entry[data-theme="dark"] .role-entry__marketing-link {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.18);
+  color: #99f6e4;
 }
 
 @media (max-width: 860px) {
@@ -74,6 +95,11 @@
 }
 
 .role-entry__icon-btn:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 2px;
+}
+
+.role-entry__marketing-link:focus-visible {
   outline: 2px solid #0ea5e9;
   outline-offset: 2px;
 }

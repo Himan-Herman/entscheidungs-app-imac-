@@ -1,40 +1,93 @@
 export default {
-  pageTitle: "MedScoutX — Arztgespräch vorbereiten",
+  pageTitle: "MedScoutX — Medizinische Kommunikation besser vorbereiten",
   skip: "Zum Inhalt springen",
-  badge: "Better prepared. Better care.",
-  headline: "Arztgespräche besser vorbereiten – in jeder Sprache.",
+  brandLine: "Strukturierte Vorbereitung vor dem Arztkontakt",
+  badge: "Ruhig. Klar. Medizinisch sinnvoll vorbereitet.",
+  headline: "MedScoutX erklärt Beschwerden, Unterlagen und Sprache vor dem Termin besser.",
   description:
-    "MedScoutX hilft Patientinnen und Patienten, Beschwerden, Medikamente, Dokumente und Fragen strukturiert für den Arzttermin vorzubereiten. Die Angaben können als übersichtliches PDF in der Sprache der Praxis erstellt werden.",
-  primaryCta: "Arztgespräch vorbereiten",
-  secondaryCta: "Mehr erfahren",
-  trustLine:
-    "Keine Diagnose. Keine Therapieempfehlung. Keine Dringlichkeitseinschätzung. Nur strukturierte Vorbereitung Ihrer Angaben.",
-  metricA: "Mehrsprachige Kommunikation",
-  metricB: "PDF für den Arzttermin",
-  metricC: "Sie behalten die Kontrolle",
-  forWhomTitle: "Für wen",
-  forWhom: [
-    "Für Patientinnen und Patienten mit Sprachbarrieren",
-    "Für Praxen mit internationalem Patientenaufkommen",
-    "Für Kliniken und Ambulanzen zur besseren Vorbereitung von Gesprächen",
-  ],
-  howTitle: "So funktioniert's",
-  howSteps: [
-    "Sprache wählen",
-    "Angaben strukturiert erfassen",
-    "Arzt-Sprache auswählen",
-    "PDF für den Termin erstellen",
-  ],
-  safetyTitle: "Sicherheitsgrenze",
-  safetyBody:
-    "MedScoutX erstellt keine Diagnose, keine Behandlungsempfehlung und keine Notfallbewertung. Die Anwendung unterstützt ausschließlich bei der strukturierten Vorbereitung und Dokumentation von Patientenaussagen.",
-  mediaEyebrow: "Einblick",
-  mediaTitle: "Klare Oberfläche — auch auf dem Smartphone",
-  mediaText:
-    "Die Darstellung ist bewusst ruhig gehalten: Fokus auf Ihre eigenen Angaben und eine übersichtliche Zusammenstellung für das Gespräch in der Praxis.",
-  footerDisclaimer:
-    "MedScoutX ist keine Diagnose-App und kein Notfalldienst. Bei akuten Beschwerden wenden Sie sich an den ärztlichen Notdienst oder die Notaufnahme.",
-  imprint: "Impressum",
-  privacy: "Datenschutz",
+    "MedScoutX unterstützt Patientinnen, Patienten, Praxen und Kliniken dabei, medizinische Informationen strukturiert vorzubereiten, verständlicher zu übergeben und ruhiger in das eigentliche Arztgespräch zu gehen.",
+  primaryCta: "Zu Patient oder Praxis",
+  secondaryCta: "So unterstützt MedScoutX",
+  enterCta: "Weiter zu Patient oder Praxis",
   login: "Login",
+  trustLine:
+    "Keine Diagnose. Keine Therapieempfehlung. Kein Ersatz für ärztliche Versorgung. MedScoutX unterstützt nur die strukturierte Vorbereitung und Kommunikation.",
+  metricsAria: "Kernbereiche von MedScoutX",
+  metricA: "Mehrsprachige Verständigung",
+  metricB: "Strukturierte Vorbereitung",
+  metricC: "Klare Übergabe an die Praxis",
+  mediaEyebrow: "Produktansicht",
+  mediaTitle: "Eine Oberfläche, die professionell wirkt und nicht überlädt",
+  mediaText:
+    "Die öffentliche Startseite erklärt zuerst Nutzen, Grenzen und Einsatzbereiche. Danach geht es gezielt weiter in den Patienten- oder Praxisbereich.",
+  mediaSignalsAria: "Wesentliche Produktmerkmale",
+  mediaSignalOne: "Patientenangaben klar erfassen",
+  mediaSignalTwo: "Sprachbarrieren gezielter reduzieren",
+  mediaSignalThree: "Datensensibel und ruhig gestaltet",
+  purposeEyebrow: "Wofür MedScoutX gedacht ist",
+  purposeTitle: "Nicht mehr Medizin simulieren, sondern medizinische Kommunikation besser vorbereiten",
+  purposeBody:
+    "MedScoutX soll vor allem dort helfen, wo Gespräche unübersichtlich werden: bei vielen Informationen, mehreren Dokumenten, Sprachbarrieren oder organisatorischem Abstimmungsbedarf zwischen Patient und Praxis.",
+  pillarOneTitle: "Vor dem Termin strukturieren",
+  pillarOneBody:
+    "Symptome, Fragen, Medikamente und Unterlagen werden in eine verständliche Reihenfolge gebracht, bevor das Gespräch startet.",
+  pillarTwoTitle: "Sprachen besser überbrücken",
+  pillarTwoBody:
+    "Wenn Patient und Praxis nicht dieselbe Sprache sicher sprechen, hilft MedScoutX bei einer klareren Vorbereitung der Inhalte.",
+  pillarThreeTitle: "Professionell bleiben",
+  pillarThreeBody:
+    "Das Produkt bleibt bewusst zurückhaltend, erklärt seine Grenzen klar und vermeidet einen überladenen oder alarmistischen Eindruck.",
+  forWhomTitle: "Einsatz im Alltag",
+  workspaceTitle: "Zwei Wege, ein gemeinsames Ziel",
+  workspaceBody:
+    "Die Plattform trennt sauber zwischen Patienten- und Praxisfluss, damit jede Seite die richtige Tiefe, Sprache und Orientierung bekommt.",
+  patientCardTitle: "Für Patientinnen und Patienten",
+  patientCardBody:
+    "Menschen können sich besser auf Arzttermine vorbereiten, Unterlagen sammeln und ihre Situation strukturierter beschreiben.",
+  patientPoints: [
+    "Beschwerden und Fragen vor dem Termin sammeln",
+    "Dokumente, Nachrichten und Praxisbezug an einem Ort behalten",
+    "Mit weniger Unsicherheit in das Arztgespräch gehen",
+  ],
+  practiceCardTitle: "Für Praxen und Kliniken",
+  practiceCardBody:
+    "Behandler erhalten strukturiertere Vorinformationen, geordnetere Dokumente und klarere Kommunikationswege.",
+  practicePoints: [
+    "Vorbereitung vor dem Kontakt besser einordnen",
+    "Mehrsprachige Abläufe ruhiger organisieren",
+    "Kommunikation, Dokumente und Nachfragen zentral bündeln",
+  ],
+  howTitle: "So läuft es ab",
+  howSteps: [
+    "Passenden Bereich wählen",
+    "Angaben oder Praxisinformationen strukturiert erfassen",
+    "Relevante Inhalte sprachlich und organisatorisch aufbereiten",
+    "Gezielt in den eigentlichen Arbeitsbereich weitergehen",
+  ],
+  howOutcome:
+    "Das Ergebnis ist kein medizinisches Urteil, sondern eine bessere Grundlage für echte medizinische Gespräche.",
+  bridgeEyebrow: "Kommunikationsfluss",
+  bridgeTitle: "Von eigener Eingabe zu besserer Gesprächsbasis",
+  bridgeBody:
+    "MedScoutX unterstützt einen geordneten Übergang zwischen Patientenerfassung, Dokumentenstruktur und klinischem Gesprächskontext.",
+  bridgeStepOne: "Patient beschreibt Anliegen",
+  bridgeStepTwo: "Informationen werden geordnet",
+  bridgeStepThree: "Sprachlich verständlicher vorbereitet",
+  bridgeStepFour: "Praxisgespräch startet klarer",
+  bridgeCaption:
+    "Der Fokus liegt auf Verständlichkeit, Struktur und Vorbereitung, nicht auf automatischer Diagnostik.",
+  safetyTitle: "Medizinische Grenze",
+  safetyBody:
+    "MedScoutX ist keine Notfallanwendung und keine Diagnose-App. Bei akuten Beschwerden, Atemnot, starken Schmerzen oder anderen ernsten Symptomen muss direkt medizinische Hilfe kontaktiert werden.",
+  privacyTitle: "Datenschutz und Professionalität",
+  privacyBody:
+    "Die Produktkommunikation soll Vertrauen schaffen: klare Sprache, ruhiges Design, nachvollziehbare Bereiche und rechtliche Informationen jederzeit im Footer.",
+  finalEyebrow: "Nächster Schritt",
+  finalTitle: "Jetzt in den passenden Bereich weitergehen",
+  finalBody:
+    "Nach dem Überblick gelangen Besucherinnen und Besucher direkt zur bestehenden Auswahlseite für Patienten oder Praxen.",
+  finalPrimary: "Patient oder Praxis auswählen",
+  finalSecondary: "Zum Login",
+  footerDisclaimer:
+    "MedScoutX ersetzt keine ärztliche Untersuchung, keine Diagnose und keinen Notfalldienst.",
 };

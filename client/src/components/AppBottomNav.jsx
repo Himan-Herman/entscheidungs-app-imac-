@@ -23,6 +23,7 @@ export function shouldShowMobileAppNav(pathname) {
   const exactHide = new Set([
     "/",
     "/landing",
+    "/choose",
     "/login",
     "/register",
     "/forgot-password",

@@ -300,8 +300,9 @@ void runPwaBuildMigration().then(() => {
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route element={<Layout />}>
-                <Route path="/" element={<RoleEntryPage />} />
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/landing" element={<LandingPage />} />
+                <Route path="/choose" element={<RoleEntryPage />} />
                 <Route path="/gate" element={<Gate />} />
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/register" element={<Register />} />
