@@ -218,6 +218,20 @@ export default {
   ],
   howOutcome:
     "Il risultato non è un giudizio medico, ma una base migliore per veri colloqui medici, passaggi di consegne e follow-up.",
+  summaryJourneyStages: [
+    "Preparazione",
+    "Contatto",
+    "Follow-up",
+    "Referti",
+    "Farmaci",
+  ],
+  summaryJourneySignals: [
+    "La preparazione resta guidata in modo individuale",
+    "Il contatto riceve il contesto giusto",
+    "Il follow-up resta collegato nel tempo",
+    "I referti vengono ordinati con più chiarezza",
+    "I farmaci restano tracciabili nel percorso",
+  ],
   bridgeEyebrow: "Flusso di comunicazione",
   bridgeTitle: "Dall’inserimento personale a un contesto clinico più chiaro",
   bridgeBody:

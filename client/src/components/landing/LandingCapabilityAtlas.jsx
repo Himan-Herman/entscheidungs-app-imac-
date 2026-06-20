@@ -147,9 +147,13 @@ export default function LandingCapabilityAtlas({ copy, theme }) {
   const bands = copy.ecosystemBands || [];
   const signals = copy.ecosystemSignals || [];
   const bottomPreviewItems = (copy.moduleMapItems || []).slice(0, 4);
-  const summarySignals = (copy.moduleMapSignals || []).slice(0, 3);
-  const summaryStages = (copy.journeyStageLabels || []).slice(0, 3);
-  const summaryStageWidths = [72, 104, 84];
+  const summarySignals =
+    copy.summaryJourneySignals ||
+    (copy.moduleMapSignals || []).slice(0, 3);
+  const summaryStages =
+    copy.summaryJourneyStages ||
+    (copy.journeyStageLabels || []).slice(0, 3);
+  const summaryStageWidths = [78, 102, 84, 72, 88];
 
   const cards = [
     {
@@ -451,7 +455,11 @@ export default function LandingCapabilityAtlas({ copy, theme }) {
               <div className="landing-page__atlas-summary-nodes">
                 {summaryStages.map((item, index) => (
                   <div key={item} className="landing-page__atlas-summary-node">
-                    <span className="landing-page__atlas-summary-index">0{index + 1}</span>
+                    <span
+                      className={`landing-page__atlas-summary-index${index === summaryStages.length - 1 ? " is-closed" : ""}`}
+                    >
+                      0{index + 1}
+                    </span>
                     <strong>{item}</strong>
                     <i style={{ width: `${summaryStageWidths[index] || 80}px` }} />
                   </div>

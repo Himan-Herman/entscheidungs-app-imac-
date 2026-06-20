@@ -218,6 +218,20 @@ export default {
   ],
   howOutcome:
     "The outcome is not a medical judgment, but a better basis for real medical conversations, handoffs, and follow-up.",
+  summaryJourneyStages: [
+    "Preparation",
+    "Encounter",
+    "Follow-up",
+    "Findings",
+    "Medication",
+  ],
+  summaryJourneySignals: [
+    "Preparation stays individually guided",
+    "The encounter gets the right context",
+    "Follow-up remains connected afterward",
+    "Findings are organized more clearly",
+    "Medication stays traceable across the journey",
+  ],
   bridgeEyebrow: "Communication flow",
   bridgeTitle: "From personal input to a clearer consultation context",
   bridgeBody:

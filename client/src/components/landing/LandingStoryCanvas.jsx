@@ -28,6 +28,41 @@ function paletteFor(theme) {
   };
 }
 
+function wrapSvgText(text, maxCharsPerLine = 24, maxLines = 2) {
+  if (!text) {
+    return [];
+  }
+
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const nextLine = currentLine ? `${currentLine} ${word}` : word;
+    if (nextLine.length <= maxCharsPerLine) {
+      currentLine = nextLine;
+      return;
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+    currentLine = word;
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  if (lines.length <= maxLines) {
+    return lines;
+  }
+
+  const visibleLines = lines.slice(0, maxLines - 1);
+  visibleLines.push(lines.slice(maxLines - 1).join(" "));
+  return visibleLines;
+}
+
 export default function LandingStoryCanvas({ copy, theme }) {
   const p = paletteFor(theme);
   const storyParagraphs = copy.spotlightParagraphs || [];
@@ -42,6 +77,7 @@ export default function LandingStoryCanvas({ copy, theme }) {
   const visualModules = moduleItems
     .filter((item) => !normalizedStageLabels.has(item.toLocaleLowerCase()))
     .slice(0, 3);
+  const bridgeLines = wrapSvgText(copy.brandLine, 24, 2);
 
   return (
     <section className="landing-page__section landing-page__story">
@@ -155,15 +191,19 @@ export default function LandingStoryCanvas({ copy, theme }) {
               <circle cx="426" cy="160" r="9" fill={p.accentTwo} />
             </g>
 
-            <rect x="156" y="116" width="208" height="118" rx="30" fill={p.surface} stroke={p.border} />
+            <rect x="146" y="114" width="228" height="132" rx="30" fill={p.surface} stroke={p.border} />
             <text x="260" y="164" textAnchor="middle" fill={p.text} fontSize="22" fontWeight="700">
               {copy.visualBridge}
             </text>
-            <text x="260" y="192" textAnchor="middle" fill={p.muted} fontSize="12">
-              {copy.brandLine}
+            <text x="260" y="190" textAnchor="middle" fill={p.muted} fontSize="12">
+              {bridgeLines.map((line, index) => (
+                <tspan key={line} x="260" dy={index === 0 ? 0 : 16}>
+                  {line}
+                </tspan>
+              ))}
             </text>
-            <rect x="202" y="206" width="116" height="12" rx="6" fill={p.lineSoft} />
-            <rect x="202" y="206" width="70" height="12" rx="6" fill="url(#story-bar)" />
+            <rect x="202" y="218" width="116" height="12" rx="6" fill={p.lineSoft} />
+            <rect x="202" y="218" width="70" height="12" rx="6" fill="url(#story-bar)" />
 
             {visualModules.map((item, index) => {
               const positions = [

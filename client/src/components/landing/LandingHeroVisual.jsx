@@ -36,6 +36,8 @@ function paletteFor(theme) {
 
 export default function LandingHeroVisual({ copy, theme }) {
   const p = paletteFor(theme);
+  const bridgeItems = (copy.journeyChartBars || []).slice(0, 3);
+  const practiceItems = (copy.journeyChartTags || []).slice(0, 3);
 
   return (
     <>
@@ -117,10 +119,29 @@ export default function LandingHeroVisual({ copy, theme }) {
           <text x="323" y="170" textAnchor="middle" fill={p.text} fontSize="15" fontWeight="700">
             {copy.visualBridge}
           </text>
-          <rect x="290" y="188" width="68" height="10" rx="5" fill={p.line} fillOpacity="0.18" />
-          <rect x="290" y="208" width="54" height="10" rx="5" fill={p.line} fillOpacity="0.18" />
-          <rect x="290" y="228" width="76" height="10" rx="5" fill={p.line} fillOpacity="0.18" />
-          <rect x="290" y="250" width="60" height="10" rx="5" fill={p.line} fillOpacity="0.18" />
+          {bridgeItems.map((item, index) => (
+            <g key={item}>
+              <rect
+                x="286"
+                y={188 + index * 24}
+                width="74"
+                height="18"
+                rx="9"
+                fill={p.chip}
+                stroke={p.chipStroke}
+              />
+              <text
+                x="323"
+                y={200 + index * 24}
+                textAnchor="middle"
+                fill={p.text}
+                fontSize="9.5"
+                fontWeight="700"
+              >
+                {item}
+              </text>
+            </g>
+          ))}
 
           <rect x="292" y="98" width="62" height="28" rx="14" fill={p.panel} stroke={p.chipStroke} />
           <text x="323" y="116" textAnchor="middle" fill={p.text} fontSize="11" fontWeight="700">
@@ -148,10 +169,33 @@ export default function LandingHeroVisual({ copy, theme }) {
             {copy.visualPractice}
           </text>
 
-          <rect x="424" y="190" width="134" height="12" rx="6" fill={p.line} fillOpacity="0.18" />
-          <rect x="424" y="214" width="122" height="12" rx="6" fill={p.line} fillOpacity="0.18" />
-          <rect x="424" y="238" width="140" height="12" rx="6" fill={p.line} fillOpacity="0.18" />
-          <rect x="424" y="262" width="108" height="12" rx="6" fill={p.line} fillOpacity="0.18" />
+          {practiceItems.map((item, index) => {
+            const widths = [104, 92, 98];
+            const width = widths[index] || 96;
+            return (
+              <g key={item}>
+                <rect
+                  x="424"
+                  y={188 + index * 28}
+                  width={width}
+                  height="20"
+                  rx="10"
+                  fill={p.chip}
+                  stroke={p.chipStroke}
+                />
+                <text
+                  x={424 + width / 2}
+                  y={201 + index * 28}
+                  textAnchor="middle"
+                  fill={p.text}
+                  fontSize="10"
+                  fontWeight="700"
+                >
+                  {item}
+                </text>
+              </g>
+            );
+          })}
 
           <path
             d="M242 198C266 198 274 190 286 178"

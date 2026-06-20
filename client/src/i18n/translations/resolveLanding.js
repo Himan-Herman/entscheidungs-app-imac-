@@ -11,6 +11,7 @@ const ARRAY_KEYS = new Set([
   "spotlightParagraphs",
   "moduleMapItems",
   "moduleMapSignals",
+  "summaryJourneySignals",
   "journeyChartBars",
   "journeyChartDonut",
   "journeyChartTags",

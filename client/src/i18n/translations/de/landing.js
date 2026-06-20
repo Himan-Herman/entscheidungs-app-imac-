@@ -216,6 +216,20 @@ export default {
   ],
   howOutcome:
     "Das Ergebnis ist kein medizinisches Urteil, sondern eine bessere Grundlage für echte medizinische Gespräche, Übergaben und Nachverfolgung.",
+  summaryJourneyStages: [
+    "Vorbereitung",
+    "Kontakt",
+    "Begleitung",
+    "Befunde",
+    "Medikation",
+  ],
+  summaryJourneySignals: [
+    "Vorbereitung bleibt individuell fuehrbar",
+    "Kontakt bekommt den passenden Kontext",
+    "Begleitung bleibt anschlussfaehig",
+    "Befunde werden klarer eingeordnet",
+    "Medikation bleibt nachvollziehbar im Verlauf",
+  ],
   bridgeEyebrow: "Kommunikationsfluss",
   bridgeTitle: "Von eigener Eingabe zu besserer Gesprächsbasis",
   bridgeBody:

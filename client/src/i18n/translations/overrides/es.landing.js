@@ -218,6 +218,20 @@ export default {
   ],
   howOutcome:
     "El resultado no es un juicio médico, sino una mejor base para conversaciones médicas reales, transferencias y seguimiento.",
+  summaryJourneyStages: [
+    "Preparación",
+    "Contacto",
+    "Seguimiento",
+    "Resultados",
+    "Medicación",
+  ],
+  summaryJourneySignals: [
+    "La preparación sigue guiada de forma individual",
+    "El contacto recibe el contexto adecuado",
+    "El seguimiento permanece conectado",
+    "Los resultados se ordenan con más claridad",
+    "La medicación sigue siendo trazable en el recorrido",
+  ],
   bridgeEyebrow: "Flujo de comunicación",
   bridgeTitle: "De la información personal a un contexto clínico más claro",
   bridgeBody:
