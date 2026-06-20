@@ -35,7 +35,13 @@ export default function LandingStoryCanvas({ copy, theme }) {
   const stageLabels = copy.journeyStageLabels || [];
   const moduleItems = copy.moduleMapItems || [];
   const moduleSignals = copy.moduleMapSignals || [];
-  const cloudItems = (copy.journeyFeatureCloud || []).slice(0, 6);
+  const cloudItems = (copy.journeyFeatureCloud || []).slice(0, 4);
+  const normalizedStageLabels = new Set(
+    stageLabels.map((item) => item.toLocaleLowerCase()),
+  );
+  const visualModules = moduleItems
+    .filter((item) => !normalizedStageLabels.has(item.toLocaleLowerCase()))
+    .slice(0, 3);
 
   return (
     <section className="landing-page__section landing-page__story">
@@ -78,7 +84,7 @@ export default function LandingStoryCanvas({ copy, theme }) {
 
           <svg
             className="landing-page__story-svg"
-            viewBox="0 0 520 360"
+            viewBox="0 0 520 332"
             aria-hidden="true"
           >
             <defs>
@@ -93,18 +99,17 @@ export default function LandingStoryCanvas({ copy, theme }) {
               </linearGradient>
             </defs>
 
-            <rect x="0" y="0" width="520" height="360" rx="32" fill={p.surfaceSoft} />
-            <path d="M72 84H448" stroke={p.lineSoft} strokeDasharray="5 9" />
-            <path d="M72 286H448" stroke={p.lineSoft} strokeDasharray="5 9" />
+            <rect x="0" y="0" width="520" height="332" rx="32" fill={p.surfaceSoft} />
+            <path d="M72 70H448" stroke={p.lineSoft} strokeDasharray="5 9" />
+            <path d="M72 254H448" stroke={p.lineSoft} strokeDasharray="5 9" />
 
-            {cloudItems.slice(0, 6).map((item, index) => {
-              const x = 120 + (index % 3) * 110;
-              const y = 38 + Math.floor(index / 3) * 26;
+            {cloudItems.map((item, index) => {
+              const x = 116 + index * 96;
               return (
                 <text
                   key={item}
                   x={x}
-                  y={y}
+                  y="40"
                   textAnchor="middle"
                   fill={p.muted}
                   fontSize="11"
@@ -119,8 +124,8 @@ export default function LandingStoryCanvas({ copy, theme }) {
               const x = 96 + index * 154;
               return (
                 <g key={label}>
-                  <rect x={x - 48} y="102" width="96" height="30" rx="15" fill={p.surface} stroke={p.border} />
-                  <text x={x} y="121" textAnchor="middle" fill={p.text} fontSize="11" fontWeight="700">
+                  <rect x={x - 48} y="86" width="96" height="30" rx="15" fill={p.surface} stroke={p.border} />
+                  <text x={x} y="105" textAnchor="middle" fill={p.text} fontSize="11" fontWeight="700">
                     {label}
                   </text>
                 </g>
@@ -128,44 +133,43 @@ export default function LandingStoryCanvas({ copy, theme }) {
             })}
 
             <path
-              d="M88 210C144 162 194 162 246 190C304 222 360 224 432 170"
+              d="M96 198C146 154 194 156 244 180C298 206 358 206 426 160"
               fill="none"
               stroke="url(#story-line)"
-              strokeWidth="10"
+              strokeWidth="9"
               strokeLinecap="round"
             />
 
             <g>
-              <circle cx="92" cy="210" r="24" fill={p.surface} stroke={p.accent} strokeWidth="4" />
-              <circle cx="92" cy="210" r="9" fill={p.accentTwo} />
+              <circle cx="96" cy="198" r="22" fill={p.surface} stroke={p.accent} strokeWidth="4" />
+              <circle cx="96" cy="198" r="8" fill={p.accentTwo} />
             </g>
 
             <g>
-              <circle cx="260" cy="186" r="18" fill={p.surface} stroke={p.accent} strokeWidth="3" />
-              <circle cx="260" cy="186" r="7" fill={p.accentTwo} />
+              <circle cx="260" cy="182" r="18" fill={p.surface} stroke={p.accent} strokeWidth="3" />
+              <circle cx="260" cy="182" r="7" fill={p.accentTwo} />
             </g>
 
             <g>
-              <circle cx="432" cy="170" r="28" fill={p.surface} stroke={p.accent} strokeWidth="4" />
-              <circle cx="432" cy="170" r="10" fill={p.accentTwo} />
+              <circle cx="426" cy="160" r="26" fill={p.surface} stroke={p.accent} strokeWidth="4" />
+              <circle cx="426" cy="160" r="9" fill={p.accentTwo} />
             </g>
 
-            <rect x="162" y="126" width="196" height="112" rx="28" fill={p.surface} stroke={p.border} />
-            <text x="260" y="170" textAnchor="middle" fill={p.text} fontSize="22" fontWeight="700">
+            <rect x="156" y="116" width="208" height="118" rx="30" fill={p.surface} stroke={p.border} />
+            <text x="260" y="164" textAnchor="middle" fill={p.text} fontSize="22" fontWeight="700">
               {copy.visualBridge}
             </text>
-            <text x="260" y="198" textAnchor="middle" fill={p.muted} fontSize="12">
+            <text x="260" y="192" textAnchor="middle" fill={p.muted} fontSize="12">
               {copy.brandLine}
             </text>
-            <rect x="206" y="214" width="108" height="12" rx="6" fill={p.lineSoft} />
-            <rect x="206" y="214" width="64" height="12" rx="6" fill="url(#story-bar)" />
+            <rect x="202" y="206" width="116" height="12" rx="6" fill={p.lineSoft} />
+            <rect x="202" y="206" width="70" height="12" rx="6" fill="url(#story-bar)" />
 
-            {moduleItems.slice(0, 4).map((item, index) => {
+            {visualModules.map((item, index) => {
               const positions = [
-                { x: 40, y: 144, width: 126 },
-                { x: 340, y: 136, width: 134 },
-                { x: 52, y: 266, width: 126 },
-                { x: 348, y: 266, width: 124 },
+                { x: 52, y: 270, width: 136 },
+                { x: 194, y: 270, width: 152 },
+                { x: 354, y: 270, width: 126 },
               ];
               const pos = positions[index];
               return (
@@ -178,9 +182,9 @@ export default function LandingStoryCanvas({ copy, theme }) {
               );
             })}
 
-            {[44, 72, 58, 92].map((height, index) => {
-              const x = 202 + index * 22;
-              const y = 306 - height;
+            {[52, 84, 64].map((height, index) => {
+              const x = 216 + index * 26;
+              const y = 272 - height;
               return (
                 <rect
                   key={x}
