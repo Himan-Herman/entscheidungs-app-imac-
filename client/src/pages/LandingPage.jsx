@@ -18,8 +18,7 @@ import { resolveLanding } from "../i18n/translations/resolveLanding.js";
 import { HEADER_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
-import heroPoster from "../assets/media/hero-medscoutx.png";
-import demoVideo from "../assets/media/medscoutx-demo.mp4";
+import LandingHeroVisual from "../components/landing/LandingHeroVisual.jsx";
 import "../styles/LandingPage.css";
 
 export default function LandingPage() {
@@ -163,17 +162,7 @@ export default function LandingPage() {
               <p className="landing-page__media-text">{copy.mediaText}</p>
             </div>
 
-            <div className="landing-page__video-shell">
-              <video
-                className="landing-page__video"
-                src={demoVideo}
-                poster={heroPoster}
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-            </div>
+            <LandingHeroVisual copy={copy} theme={theme} />
 
             <div className="landing-page__signal-row" aria-label={copy.mediaSignalsAria}>
               <div className="landing-page__signal-pill">

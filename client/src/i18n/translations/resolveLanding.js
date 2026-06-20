@@ -2,7 +2,14 @@ import enLanding from "./en/landing.js";
 import deLanding from "./de/landing.js";
 import { getMessages } from "./index.js";
 
-const ARRAY_KEYS = new Set(["forWhom", "howSteps", "patientPoints", "practicePoints"]);
+const ARRAY_KEYS = new Set([
+  "forWhom",
+  "howSteps",
+  "patientPoints",
+  "practicePoints",
+  "spotlightList",
+  "moduleMapItems",
+]);
 
 /**
  * Landing copy with fallback: selected locale → English → German.
