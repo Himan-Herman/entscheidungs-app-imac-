@@ -75,12 +75,30 @@ function AtlasVisual({ kind, p }) {
     return (
       <svg className="landing-page__atlas-mini-svg" viewBox="0 0 240 136" aria-hidden="true">
         <rect x="0" y="0" width="240" height="136" rx="24" fill={p.surfaceSoft} />
-        <rect x="26" y="28" width="78" height="34" rx="17" fill={p.surface} stroke={p.border} />
-        <rect x="136" y="74" width="78" height="34" rx="17" fill={p.surface} stroke={p.border} />
-        <path d="M58 76C78 54 92 54 112 68C128 80 146 84 176 84" fill="none" stroke={p.accent} strokeWidth="6" strokeLinecap="round" />
-        <path d="M48 98C58 90 66 90 76 98C86 106 94 106 104 98C114 90 122 90 132 98" fill="none" stroke={p.accentTwo} strokeWidth="4" strokeLinecap="round" />
-        <path d="M146 50C156 42 164 42 174 50C184 58 192 58 202 50" fill="none" stroke={p.line} strokeWidth="4" strokeLinecap="round" />
-        <circle cx="120" cy="68" r="8" fill={p.surface} stroke={p.accent} strokeWidth="3" />
+        <rect x="24" y="28" width="60" height="38" rx="16" fill={p.surface} stroke={p.border} />
+        <circle cx="48" cy="47" r="8" fill={p.accent} opacity="0.92" />
+        <path d="M62 42H76" stroke={p.lineSoft} strokeWidth="6" strokeLinecap="round" />
+        <path d="M62 54H72" stroke={p.lineSoft} strokeWidth="6" strokeLinecap="round" />
+
+        <rect x="156" y="28" width="60" height="38" rx="16" fill={p.surface} stroke={p.border} />
+        <circle cx="180" cy="47" r="8" fill={p.accentTwo} opacity="0.92" />
+        <path d="M194 42H208" stroke={p.lineSoft} strokeWidth="6" strokeLinecap="round" />
+        <path d="M194 54H204" stroke={p.lineSoft} strokeWidth="6" strokeLinecap="round" />
+
+        <circle cx="120" cy="48" r="12" fill={p.surface} stroke={p.accent} strokeWidth="3" />
+        <path d="M114 48H126" stroke={p.accent} strokeWidth="3.5" strokeLinecap="round" />
+        <path d="M120 42V54" stroke={p.accentTwo} strokeWidth="3.5" strokeLinecap="round" />
+
+        <path d="M84 47H108" stroke={p.accent} strokeWidth="5" strokeLinecap="round" />
+        <path d="M132 47H156" stroke={p.accentTwo} strokeWidth="5" strokeLinecap="round" />
+
+        <rect x="44" y="84" width="152" height="28" rx="14" fill={p.surface} stroke={p.border} />
+        <path d="M60 98H92" stroke={p.accent} strokeWidth="6" strokeLinecap="round" />
+        <path d="M104 98H138" stroke={p.accentTwo} strokeWidth="6" strokeLinecap="round" />
+        <path d="M150 98H180" stroke={p.lineSoft} strokeWidth="6" strokeLinecap="round" />
+
+        <path d="M46 70C56 62 64 62 74 70C84 78 92 78 102 70" fill="none" stroke={p.accentTwo} strokeWidth="4" strokeLinecap="round" />
+        <path d="M138 70C148 62 156 62 166 70C176 78 184 78 194 70" fill="none" stroke={p.accent} strokeWidth="4" strokeLinecap="round" />
       </svg>
     );
   }
@@ -88,24 +106,38 @@ function AtlasVisual({ kind, p }) {
   return (
     <svg className="landing-page__atlas-mini-svg" viewBox="0 0 240 136" aria-hidden="true">
       <rect x="0" y="0" width="240" height="136" rx="24" fill={p.surfaceSoft} />
-      <rect x="28" y="28" width="184" height="80" rx="18" fill={p.surface} stroke={p.border} />
-      <path d="M52 54H188" stroke={p.lineSoft} strokeWidth="2" strokeDasharray="4 6" />
-      <path d="M52 78H188" stroke={p.lineSoft} strokeWidth="2" strokeDasharray="4 6" />
-      <path d="M52 102H188" stroke={p.lineSoft} strokeWidth="2" strokeDasharray="4 6" />
-      {[0, 1, 2, 3].map((index) => (
+      <rect x="22" y="26" width="196" height="84" rx="20" fill={p.surface} stroke={p.border} />
+      <rect x="34" y="38" width="74" height="22" rx="11" fill={p.lineSoft} />
+      <rect x="42" y="44" width="18" height="10" rx="5" fill={p.accent} />
+      <rect x="66" y="44" width="18" height="10" rx="5" fill={p.accentTwo} />
+      <rect x="90" y="44" width="10" height="10" rx="5" fill={p.accent} opacity="0.82" />
+
+      <rect x="34" y="72" width="44" height="26" rx="10" fill={p.surfaceSoft} stroke={p.border} />
+      <path d="M44 84H68" stroke={p.accent} strokeWidth="5" strokeLinecap="round" />
+      <path d="M44 92H60" stroke={p.lineSoft} strokeWidth="5" strokeLinecap="round" />
+
+      <circle cx="108" cy="85" r="13" fill={p.surfaceSoft} stroke={p.border} />
+      <circle cx="104" cy="83" r="4" fill={p.accent} />
+      <circle cx="112" cy="89" r="4" fill={p.accentTwo} />
+
+      <path d="M136 46H198" stroke={p.lineSoft} strokeWidth="2" strokeDasharray="4 6" />
+      <path d="M136 70H198" stroke={p.lineSoft} strokeWidth="2" strokeDasharray="4 6" />
+      <path d="M136 94H198" stroke={p.lineSoft} strokeWidth="2" strokeDasharray="4 6" />
+
+      {[0, 1, 2].map((index) => (
         <rect
           key={index}
-          x={54 + index * 34}
-          y={62 - (index % 2) * 10}
-          width="22"
-          height={index % 2 === 0 ? 14 : 24}
-          rx="7"
-          fill={index < 2 ? p.accent : p.accentTwo}
+          x={144 + index * 18}
+          y={92 - [18, 30, 22][index]}
+          width="12"
+          height={[18, 30, 22][index]}
+          rx="6"
+          fill={index === 1 ? p.accentTwo : p.accent}
+          opacity={0.9 - index * 0.08}
         />
       ))}
-      <rect x="152" y="40" width="42" height="22" rx="11" fill={p.lineSoft} />
-      <rect x="152" y="68" width="24" height="24" rx="8" fill={p.accent} />
-      <rect x="182" y="68" width="12" height="24" rx="6" fill={p.accentTwo} />
+
+      <path d="M184 54L190 60L202 46" fill="none" stroke={p.accentTwo} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -360,35 +392,38 @@ export default function LandingCapabilityAtlas({ copy, theme }) {
           </div>
 
           <div className="landing-page__atlas-inline-media landing-page__atlas-inline-media--bottom">
-            <svg className="landing-page__atlas-inline-svg" viewBox="0 0 620 152" aria-hidden="true">
-              <rect x="0" y="0" width="620" height="152" rx="28" fill={p.surfaceSoft} />
-              <rect x="40" y="30" width="180" height="92" rx="24" fill={p.surface} stroke={p.border} />
-              <circle cx="96" cy="76" r="28" fill="none" stroke={p.lineSoft} strokeWidth="14" />
-              <circle cx="96" cy="76" r="28" fill="none" stroke={p.accent} strokeWidth="14" strokeDasharray="90 176" strokeLinecap="round" transform="rotate(-90 96 76)" />
-              <circle cx="96" cy="76" r="28" fill="none" stroke={p.accentTwo} strokeWidth="14" strokeDasharray="54 176" strokeDashoffset="-98" strokeLinecap="round" transform="rotate(-90 96 76)" />
-              <text x="160" y="66" fill={p.text} fontSize="14" fontWeight="700">
+            <svg className="landing-page__atlas-inline-svg" viewBox="0 0 620 192" aria-hidden="true">
+              <rect x="0" y="0" width="620" height="192" rx="28" fill={p.surfaceSoft} />
+              <rect x="40" y="36" width="188" height="100" rx="24" fill={p.surface} stroke={p.border} />
+              <circle cx="98" cy="86" r="28" fill="none" stroke={p.lineSoft} strokeWidth="14" />
+              <circle cx="98" cy="86" r="28" fill="none" stroke={p.accent} strokeWidth="14" strokeDasharray="90 176" strokeLinecap="round" transform="rotate(-90 98 86)" />
+              <circle cx="98" cy="86" r="28" fill="none" stroke={p.accentTwo} strokeWidth="14" strokeDasharray="54 176" strokeDashoffset="-98" strokeLinecap="round" transform="rotate(-90 98 86)" />
+              <text x="154" y="76" fill={p.text} fontSize="14" fontWeight="700">
                 {copy.visualBridge}
               </text>
-              <text x="160" y="90" fill={p.muted} fontSize="12">
-                {copy.brandLine}
+              <text x="154" y="98" fill={p.muted} fontSize="11" fontWeight="600">
+                {copy.ecosystemBoardEyebrow}
               </text>
+              <rect x="154" y="108" width="54" height="10" rx="5" fill={p.lineSoft} />
+              <rect x="154" y="108" width="34" height="10" rx="5" fill={p.accent} />
 
               {bottomPreviewItems.map((item, index) => {
-                const x = 278 + index * 78;
-                const barHeight = [34, 58, 42, 70][index] || 34;
+                const x = 286 + index * 72;
+                const barHeight = [38, 62, 44, 76][index] || 34;
                 return (
                   <g key={item}>
-                    <rect x={x} y={108 - barHeight} width="36" height={barHeight} rx="14" fill={index % 2 === 0 ? p.accent : p.accentTwo} opacity={0.88 - index * 0.08} />
-                    <text x={x + 18} y="132" textAnchor="middle" fill={p.muted} fontSize="11" fontWeight="700">
+                    <rect x={x} y={134 - barHeight} width="40" height={barHeight} rx="16" fill={index % 2 === 0 ? p.accent : p.accentTwo} opacity={0.88 - index * 0.08} />
+                    <text x={x + 20} y="170" textAnchor="middle" fill={p.muted} fontSize="10" fontWeight="700">
                       {item}
                     </text>
                   </g>
                 );
               })}
 
-              <path d="M272 42H560" stroke={p.lineSoft} strokeDasharray="4 8" />
-              <path d="M272 72H560" stroke={p.lineSoft} strokeDasharray="4 8" />
-              <path d="M272 102H560" stroke={p.lineSoft} strokeDasharray="4 8" />
+              <path d="M272 48H566" stroke={p.lineSoft} strokeDasharray="4 8" />
+              <path d="M272 84H566" stroke={p.lineSoft} strokeDasharray="4 8" />
+              <path d="M272 120H566" stroke={p.lineSoft} strokeDasharray="4 8" />
+              <path d="M272 150H566" stroke={p.lineSoft} strokeDasharray="4 8" />
             </svg>
           </div>
         </article>

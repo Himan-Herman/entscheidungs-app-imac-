@@ -78,7 +78,7 @@ export default function LandingStoryCanvas({ copy, theme }) {
 
           <svg
             className="landing-page__story-svg"
-            viewBox="0 0 520 320"
+            viewBox="0 0 520 360"
             aria-hidden="true"
           >
             <defs>
@@ -93,48 +93,85 @@ export default function LandingStoryCanvas({ copy, theme }) {
               </linearGradient>
             </defs>
 
-            <rect x="0" y="0" width="520" height="320" rx="32" fill={p.surfaceSoft} />
-            <path d="M68 204C136 156 182 158 242 184C304 210 350 210 444 154" fill="none" stroke="url(#story-line)" strokeWidth="8" strokeLinecap="round" />
-            <path d="M74 72H446" stroke={p.lineSoft} strokeDasharray="5 9" />
-            <path d="M74 256H446" stroke={p.lineSoft} strokeDasharray="5 9" />
+            <rect x="0" y="0" width="520" height="360" rx="32" fill={p.surfaceSoft} />
+            <path d="M72 84H448" stroke={p.lineSoft} strokeDasharray="5 9" />
+            <path d="M72 286H448" stroke={p.lineSoft} strokeDasharray="5 9" />
+
+            {cloudItems.slice(0, 6).map((item, index) => {
+              const x = 120 + (index % 3) * 110;
+              const y = 38 + Math.floor(index / 3) * 26;
+              return (
+                <text
+                  key={item}
+                  x={x}
+                  y={y}
+                  textAnchor="middle"
+                  fill={p.muted}
+                  fontSize="11"
+                  fontWeight="700"
+                >
+                  {item}
+                </text>
+              );
+            })}
 
             {stageLabels.slice(0, 3).map((label, index) => {
-              const x = 88 + index * 172;
-              const y = index === 1 ? 172 : index === 2 ? 152 : 194;
+              const x = 96 + index * 154;
               return (
                 <g key={label}>
-                  <circle cx={x} cy={y} r="22" fill={p.surface} stroke={p.accent} strokeWidth="3" />
-                  <circle cx={x} cy={y} r="8" fill={index === 1 ? p.accent : p.accentTwo} />
-                  <rect x={x - 46} y={y - 70} width="92" height="28" rx="14" fill={p.surface} stroke={p.border} />
-                  <text x={x} y={y - 51} textAnchor="middle" fill={p.text} fontSize="11" fontWeight="700">
+                  <rect x={x - 48} y="102" width="96" height="30" rx="15" fill={p.surface} stroke={p.border} />
+                  <text x={x} y="121" textAnchor="middle" fill={p.text} fontSize="11" fontWeight="700">
                     {label}
                   </text>
                 </g>
               );
             })}
 
-            <rect x="184" y="88" width="152" height="94" rx="24" fill={p.surface} stroke={p.border} />
-            <text x="260" y="122" textAnchor="middle" fill={p.text} fontSize="20" fontWeight="700">
+            <path
+              d="M88 210C144 162 194 162 246 190C304 222 360 224 432 170"
+              fill="none"
+              stroke="url(#story-line)"
+              strokeWidth="10"
+              strokeLinecap="round"
+            />
+
+            <g>
+              <circle cx="92" cy="210" r="24" fill={p.surface} stroke={p.accent} strokeWidth="4" />
+              <circle cx="92" cy="210" r="9" fill={p.accentTwo} />
+            </g>
+
+            <g>
+              <circle cx="260" cy="186" r="18" fill={p.surface} stroke={p.accent} strokeWidth="3" />
+              <circle cx="260" cy="186" r="7" fill={p.accentTwo} />
+            </g>
+
+            <g>
+              <circle cx="432" cy="170" r="28" fill={p.surface} stroke={p.accent} strokeWidth="4" />
+              <circle cx="432" cy="170" r="10" fill={p.accentTwo} />
+            </g>
+
+            <rect x="162" y="126" width="196" height="112" rx="28" fill={p.surface} stroke={p.border} />
+            <text x="260" y="170" textAnchor="middle" fill={p.text} fontSize="22" fontWeight="700">
               {copy.visualBridge}
             </text>
-            <text x="260" y="145" textAnchor="middle" fill={p.muted} fontSize="12">
+            <text x="260" y="198" textAnchor="middle" fill={p.muted} fontSize="12">
               {copy.brandLine}
             </text>
-            <rect x="214" y="156" width="92" height="12" rx="6" fill={p.lineSoft} />
-            <rect x="214" y="156" width="58" height="12" rx="6" fill="url(#story-bar)" />
+            <rect x="206" y="214" width="108" height="12" rx="6" fill={p.lineSoft} />
+            <rect x="206" y="214" width="64" height="12" rx="6" fill="url(#story-bar)" />
 
             {moduleItems.slice(0, 4).map((item, index) => {
               const positions = [
-                { x: 42, y: 104 },
-                { x: 350, y: 98 },
-                { x: 54, y: 236 },
-                { x: 344, y: 236 },
+                { x: 40, y: 144, width: 126 },
+                { x: 340, y: 136, width: 134 },
+                { x: 52, y: 266, width: 126 },
+                { x: 348, y: 266, width: 124 },
               ];
               const pos = positions[index];
               return (
                 <g key={item}>
-                  <rect x={pos.x} y={pos.y} width="126" height="34" rx="17" fill={p.surface} stroke={p.border} />
-                  <text x={pos.x + 63} y={pos.y + 22} textAnchor="middle" fill={p.text} fontSize="12" fontWeight="700">
+                  <rect x={pos.x} y={pos.y} width={pos.width} height="34" rx="17" fill={p.surface} stroke={p.border} />
+                  <text x={pos.x + pos.width / 2} y={pos.y + 22} textAnchor="middle" fill={p.text} fontSize="12" fontWeight="700">
                     {item}
                   </text>
                 </g>
@@ -143,7 +180,7 @@ export default function LandingStoryCanvas({ copy, theme }) {
 
             {[44, 72, 58, 92].map((height, index) => {
               const x = 202 + index * 22;
-              const y = 270 - height;
+              const y = 306 - height;
               return (
                 <rect
                   key={x}
@@ -155,23 +192,6 @@ export default function LandingStoryCanvas({ copy, theme }) {
                   fill="url(#story-bar)"
                   opacity={0.82 - index * 0.08}
                 />
-              );
-            })}
-
-            {cloudItems.map((item, index) => {
-              const x = 158 + (index % 3) * 92;
-              const y = 34 + Math.floor(index / 3) * 28;
-              return (
-                <text
-                  key={item}
-                  x={x}
-                  y={y}
-                  fill={p.muted}
-                  fontSize="11"
-                  fontWeight="700"
-                >
-                  {item}
-                </text>
               );
             })}
           </svg>

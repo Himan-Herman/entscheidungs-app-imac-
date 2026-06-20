@@ -54,76 +54,79 @@ export default function LandingJourneyCharts({ copy, theme }) {
             <p>{copy.journeyChartOneBody}</p>
           </div>
 
-          <svg
-            className="landing-page__journey-svg"
-            viewBox="0 0 420 244"
-            aria-hidden="true"
-          >
-            <defs>
-              <linearGradient id="journey-bars-fill" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor={p.accent} />
-                <stop offset="100%" stopColor={p.accentTwo} />
-              </linearGradient>
-              <linearGradient id="journey-bars-line" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor={p.line} />
-                <stop offset="100%" stopColor={p.accent} />
-              </linearGradient>
-            </defs>
+          <div className="landing-page__journey-visual-shell">
+            <svg
+              className="landing-page__journey-svg"
+              viewBox="0 0 420 244"
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="journey-bars-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={p.accent} />
+                  <stop offset="100%" stopColor={p.accentTwo} />
+                </linearGradient>
+                <linearGradient id="journey-bars-line" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor={p.line} />
+                  <stop offset="100%" stopColor={p.accent} />
+                </linearGradient>
+              </defs>
 
-            <rect x="0" y="0" width="420" height="244" rx="28" fill={p.surfaceSoft} />
-            <path d="M50 40H374" stroke={p.lineSoft} strokeDasharray="4 9" />
-            <path d="M50 92H374" stroke={p.lineSoft} strokeDasharray="4 9" />
-            <path d="M50 144H374" stroke={p.lineSoft} strokeDasharray="4 9" />
-            <path d="M50 196H374" stroke={p.lineSoft} strokeDasharray="4 9" />
-            <path d="M50 196H374" stroke={p.border} strokeWidth="1.5" />
+              <rect x="0" y="0" width="420" height="244" rx="28" fill={p.surfaceSoft} />
+              <path d="M50 40H374" stroke={p.lineSoft} strokeDasharray="4 9" />
+              <path d="M50 92H374" stroke={p.lineSoft} strokeDasharray="4 9" />
+              <path d="M50 144H374" stroke={p.lineSoft} strokeDasharray="4 9" />
+              <path d="M50 196H374" stroke={p.lineSoft} strokeDasharray="4 9" />
+              <path d="M50 196H374" stroke={p.border} strokeWidth="1.5" />
 
-            {barHeights.map((height, index) => {
-              const x = 56 + index * 62;
-              const y = 196 - height;
-              return (
-                <g key={bars[index] || index}>
-                  <rect
-                    x={x}
-                    y={y}
-                    width="42"
-                    height={height}
-                    rx="16"
-                    fill="url(#journey-bars-fill)"
-                    opacity={0.9 - index * 0.08}
-                  />
-                  <text
-                    x={x + 21}
-                    y="220"
-                    textAnchor="middle"
-                    fill={p.muted}
-                    fontSize="11"
-                    fontWeight="700"
-                  >
-                    {bars[index] || ""}
-                  </text>
+              {barHeights.map((height, index) => {
+                const x = 56 + index * 62;
+                const y = 196 - height;
+                return (
+                  <g key={bars[index] || index}>
+                    <rect
+                      x={x}
+                      y={y}
+                      width="42"
+                      height={height}
+                      rx="16"
+                      fill="url(#journey-bars-fill)"
+                      opacity={0.9 - index * 0.08}
+                    />
+                    <text
+                      x={x + 21}
+                      y="220"
+                      textAnchor="middle"
+                      fill={p.muted}
+                      fontSize="11"
+                      fontWeight="700"
+                    >
+                      {bars[index] || ""}
+                    </text>
+                  </g>
+                );
+              })}
+
+              <path
+                d="M77 122C106 98 118 98 137 82C162 62 180 82 206 90C230 98 247 72 266 64C286 56 304 72 324 84"
+                stroke="url(#journey-bars-line)"
+                strokeWidth="6"
+                strokeLinecap="round"
+                fill="none"
+              />
+              {[["77", "122"], ["137", "82"], ["206", "90"], ["266", "64"], ["324", "84"]].map(([x, y]) => (
+                <g key={`${x}-${y}`}>
+                  <circle cx={x} cy={y} r="9" fill={p.surface} stroke={p.accent} strokeWidth="3" />
+                  <circle cx={x} cy={y} r="3.5" fill={p.accentTwo} />
                 </g>
-              );
-            })}
+              ))}
+            </svg>
 
-            <path
-              d="M77 122C106 98 118 98 137 82C162 62 180 82 206 90C230 98 247 72 266 64C286 56 304 72 324 84"
-              stroke="url(#journey-bars-line)"
-              strokeWidth="6"
-              strokeLinecap="round"
-              fill="none"
-            />
-            {[["77", "122"], ["137", "82"], ["206", "90"], ["266", "64"], ["324", "84"]].map(([x, y]) => (
-              <g key={`${x}-${y}`}>
-                <circle cx={x} cy={y} r="9" fill={p.surface} stroke={p.accent} strokeWidth="3" />
-                <circle cx={x} cy={y} r="3.5" fill={p.accentTwo} />
-              </g>
-            ))}
-
-            <rect x="258" y="24" width="118" height="28" rx="14" fill={p.surface} stroke={p.border} />
-            <text x="317" y="42" textAnchor="middle" fill={p.text} fontSize="11" fontWeight="700">
-              {copy.slogan}
-            </text>
-          </svg>
+            <div className="landing-page__journey-callout">
+              <span className="landing-page__journey-callout-label">
+                {copy.slogan}
+              </span>
+            </div>
+          </div>
         </article>
 
         <article className="landing-page__journey-card landing-page__journey-card--donut">
