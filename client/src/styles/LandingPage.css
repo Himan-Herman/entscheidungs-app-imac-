@@ -1677,52 +1677,51 @@
   transform: translateY(-1px);
 }
 
-.landing-page__hero-copy,
-.landing-page__hero-media,
-.landing-page__story-card,
-.landing-page__atlas-board,
-.landing-page__atlas-card,
-.landing-page__journey-card,
-.landing-page__pillar-card,
-.landing-page__workspace-card,
-.landing-page__flow-card,
-.landing-page__bridge,
-.landing-page__safety-card {
-  animation: landing-rise 620ms ease both;
+.landing-page__reveal {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0) scale(0.988);
+  filter: saturate(0.96);
+  transition:
+    opacity 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 640ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--landing-reveal-delay, 0ms);
+  will-change: opacity, transform;
 }
 
-.landing-page__hero-media {
-  animation-delay: 70ms;
+.landing-page__section-heading.landing-page__reveal,
+.landing-page__bridge-caption.landing-page__reveal,
+.landing-page__feature-cloud.landing-page__reveal {
+  transform: translate3d(0, 16px, 0);
 }
 
-.landing-page__journey-card:nth-child(2) {
-  animation-delay: 110ms;
+.landing-page__reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: none;
 }
 
-.landing-page__journey-card:nth-child(3) {
-  animation-delay: 150ms;
+.landing-page__hero-copy.landing-page__reveal::after,
+.landing-page__hero-media.landing-page__reveal::after,
+.landing-page__journey-card.landing-page__reveal::after,
+.landing-page__atlas-board.landing-page__reveal::after,
+.landing-page__atlas-card.landing-page__reveal::after,
+.landing-page__story-card.landing-page__reveal::after,
+.landing-page__bridge.landing-page__reveal::after {
+  transform-origin: left center;
+  transform: scaleX(0.34);
+  transition: transform 720ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--landing-reveal-delay, 0ms) + 60ms);
 }
 
-.landing-page__pillar-card:nth-child(2),
-.landing-page__workspace-card:nth-child(2) {
-  animation-delay: 110ms;
-}
-
-.landing-page__pillar-card:nth-child(3),
-.landing-page__flow-card {
-  animation-delay: 150ms;
-}
-
-@keyframes landing-rise {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.landing-page__hero-copy.landing-page__reveal.is-visible::after,
+.landing-page__hero-media.landing-page__reveal.is-visible::after,
+.landing-page__journey-card.landing-page__reveal.is-visible::after,
+.landing-page__atlas-board.landing-page__reveal.is-visible::after,
+.landing-page__atlas-card.landing-page__reveal.is-visible::after,
+.landing-page__story-card.landing-page__reveal.is-visible::after,
+.landing-page__bridge.landing-page__reveal.is-visible::after {
+  transform: scaleX(1);
 }
 
 @keyframes landing-float {
@@ -2004,18 +2003,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-.landing-page__hero-copy,
-.landing-page__hero-media,
-.landing-page__story-card,
-.landing-page__atlas-board,
-.landing-page__atlas-card,
-.landing-page__pillar-card,
-.landing-page__workspace-card,
-.landing-page__flow-card,
-.landing-page__bridge,
-.landing-page__safety-card {
-  animation: none;
-}
+  .landing-page__reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+    will-change: auto;
+  }
+
+  .landing-page__hero-copy.landing-page__reveal::after,
+  .landing-page__hero-media.landing-page__reveal::after,
+  .landing-page__journey-card.landing-page__reveal::after,
+  .landing-page__atlas-board.landing-page__reveal::after,
+  .landing-page__atlas-card.landing-page__reveal::after,
+  .landing-page__story-card.landing-page__reveal::after,
+  .landing-page__bridge.landing-page__reveal::after {
+    transform: scaleX(1);
+    transition: none;
+  }
 
   .landing-page::before,
   .landing-page::after,

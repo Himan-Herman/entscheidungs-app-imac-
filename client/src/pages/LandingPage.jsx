@@ -40,6 +40,83 @@ export default function LandingPage() {
     document.title = copy.pageTitle;
   }, [copy.pageTitle]);
 
+  useEffect(() => {
+    const root = document.querySelector(".landing-page");
+
+    if (!root) {
+      return undefined;
+    }
+
+    const revealSelector = [
+      ".landing-page__hero-copy",
+      ".landing-page__hero-media",
+      ".landing-page__section-heading",
+      ".landing-page__journey-card",
+      ".landing-page__feature-cloud",
+      ".landing-page__story-card",
+      ".landing-page__atlas-board",
+      ".landing-page__atlas-card",
+      ".landing-page__pillar-card",
+      ".landing-page__workspace-card",
+      ".landing-page__flow-card",
+      ".landing-page__bridge-photo",
+      ".landing-page__bridge-diagram",
+      ".landing-page__bridge-caption",
+      ".landing-page__safety-card",
+    ].join(", ");
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const revealTargets = Array.from(root.querySelectorAll(revealSelector));
+
+    revealTargets.forEach((element, index) => {
+      element.classList.add("landing-page__reveal");
+      element.style.setProperty(
+        "--landing-reveal-delay",
+        `${Math.min(index % 4, 3) * 60}ms`,
+      );
+    });
+
+    if (reduceMotion.matches) {
+      revealTargets.forEach((element) => {
+        element.classList.add("is-visible");
+      });
+
+      return () => {
+        revealTargets.forEach((element) => {
+          element.classList.remove("landing-page__reveal", "is-visible");
+          element.style.removeProperty("--landing-reveal-delay");
+        });
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          }
+        });
+      },
+      {
+        threshold: 0.18,
+        rootMargin: "0px 0px -10% 0px",
+      },
+    );
+
+    revealTargets.forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => {
+      observer.disconnect();
+
+      revealTargets.forEach((element) => {
+        element.classList.remove("landing-page__reveal", "is-visible");
+        element.style.removeProperty("--landing-reveal-delay");
+      });
+    };
+  }, []);
+
   const themeLabel =
     theme === "dark" ? headerCopy.themeLight : headerCopy.themeDark;
 
