@@ -89,9 +89,6 @@ export default function LandingHeroVisual({ copy, theme }) {
           <text x="136" y="138" fill={p.text} fontSize="20" fontWeight="700">
             {copy.visualPatient}
           </text>
-          <text x="136" y="162" fill={p.muted} fontSize="12">
-            {copy.visualStatusPrepared}
-          </text>
 
           <rect x="74" y="190" width="98" height="30" rx="15" fill={p.chip} stroke={p.chipStroke} />
           <text x="123" y="209" textAnchor="middle" fill={p.text} fontSize="11" fontWeight="600">
@@ -149,9 +146,6 @@ export default function LandingHeroVisual({ copy, theme }) {
           />
           <text x="482" y="138" fill={p.text} fontSize="20" fontWeight="700">
             {copy.visualPractice}
-          </text>
-          <text x="482" y="162" fill={p.muted} fontSize="12">
-            {copy.visualStatusLinked}
           </text>
 
           <rect x="424" y="190" width="134" height="12" rx="6" fill={p.line} fillOpacity="0.18" />

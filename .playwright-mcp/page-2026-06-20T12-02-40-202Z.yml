@@ -1,0 +1,99 @@
+- generic [ref=e5]:
+  - link "Zum Inhalt springen" [ref=e6] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e7]:
+    - generic [ref=e8]:
+      - button "Zur Startseite" [ref=e9] [cursor=pointer]:
+        - generic [ref=e12]: MedScoutX
+      - generic [ref=e13]:
+        - button "Auf Dunkelmodus umschalten" [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+        - button "Sprache" [ref=e19] [cursor=pointer]:
+          - img [ref=e20]
+          - generic [ref=e23]: Deutsch
+          - img [ref=e24]
+      - button "Einstellungen und Menü öffnen" [ref=e26] [cursor=pointer]:
+        - img [ref=e27]
+        - generic [ref=e30]: Menü
+  - main [ref=e31]:
+    - generic [ref=e32]:
+      - link "Zurück zu den Praxisdokumenten" [ref=e33] [cursor=pointer]:
+        - /url: /patient/practice-documents
+        - img [ref=e34]
+        - text: Zurück zu den Praxisdokumenten
+      - generic [ref=e36]:
+        - heading "Rechnung verstehen" [level=1] [ref=e37]
+        - paragraph [ref=e38]: Privatrechnung (GOÄ/PKV) verständlich erklärt – unverbindlich
+        - paragraph [ref=e39]: Diese Funktion hilft Ihnen, eine private Arztrechnung (GOÄ/PKV) besser zu verstehen. Sie geben die Angaben Ihrer Rechnung selbst ein, und wir erklären die enthaltenen Positionen in verständlicher Sprache und weisen auf mögliche Rückfragen hin. Es handelt sich um eine unverbindliche Orientierung, nicht um eine Prüfung Ihrer Rechnung.
+      - note [ref=e40]:
+        - img [ref=e41]
+        - generic [ref=e43]: Unverbindliche Orientierung. Diese Funktion erklärt Ihre Angaben in verständlicher Form und nennt mögliche Rückfragen. Sie ist keine Rechtsberatung, keine abschließende Rechnungsprüfung und keine medizinische Auskunft. Bei Unsicherheit wenden Sie sich bitte an Ihre Praxis, Ihre private Krankenversicherung oder eine fachkundige Beratung.
+      - note [ref=e44]: Ihre Eingaben werden nicht dauerhaft gespeichert und nur zur aktuellen Erklärung verarbeitet. Bitte geben Sie keine Namen, Geburtsdaten oder Diagnosen ein – die Abrechnungsangaben (Ziffer, Faktor, Anzahl, Betrag) oder der reine Rechnungstext genügen.
+      - tablist "Rechnung verstehen" [ref=e45]:
+        - tab "Felder ausfüllen" [selected] [ref=e46] [cursor=pointer]
+        - tab "Rechnungstext einfügen" [ref=e47] [cursor=pointer]
+      - region "Felder ausfüllen" [ref=e48]:
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]: GOÄ-Ziffer
+            - textbox "GOÄ-Ziffer" [ref=e52]:
+              - /placeholder: z. B. 1, 3, 250
+              - text: "1"
+          - generic [ref=e53]:
+            - generic [ref=e54]: Steigerungsfaktor
+            - textbox "Steigerungsfaktor" [ref=e55]:
+              - /placeholder: z. B. 2,3
+              - text: 2,3
+          - generic [ref=e56]:
+            - generic [ref=e57]: Anzahl
+            - textbox "Anzahl" [ref=e58]:
+              - /placeholder: z. B. 1
+              - text: "1"
+          - generic [ref=e59]:
+            - generic [ref=e60]: Betrag (optional)
+            - textbox "Betrag (optional)" [ref=e61]:
+              - /placeholder: z. B. 21,45 €
+          - generic [ref=e62]:
+            - generic [ref=e63]: Eigene Notiz (optional)
+            - textbox "Eigene Notiz (optional)" [ref=e64]:
+              - /placeholder: z. B. Hinweis aus der Rechnung
+        - button "Weitere Position hinzufügen" [ref=e66] [cursor=pointer]:
+          - img [ref=e67]
+          - text: Weitere Position hinzufügen
+      - generic [ref=e68]:
+        - button "Angaben erklären" [ref=e69] [cursor=pointer]
+        - button "Eingaben zurücksetzen" [ref=e70] [cursor=pointer]:
+          - img [ref=e71]
+          - text: Eingaben zurücksetzen
+      - generic [ref=e89]:
+        - heading "Erklärung Ihrer Angaben" [level=2] [ref=e90]
+        - note [ref=e91]: Die folgende Erklärung bezieht sich ausschließlich auf Ihre Eingaben. Sie ist eine unverbindliche Orientierung und keine Bewertung, ob Ihre Rechnung richtig oder vollständig ist. Offene Punkte können Sie mit den Entwürfen unten höflich bei Ihrer Praxis oder Ihrer privaten Krankenversicherung erfragen.
+        - list [ref=e92]:
+          - listitem [ref=e93]:
+            - generic [ref=e94]:
+              - generic [ref=e95]: "1"
+              - generic [ref=e96]: Beratung, auch mittels Fernsprecher
+            - paragraph [ref=e97]: "Steigerungsfaktor: 2,3 · Anzahl: 1"
+        - note [ref=e98]: Auf Basis Ihrer Eingaben sind keine offensichtlichen Rückfrage-Punkte aufgefallen. Dies ist eine unverbindliche Orientierung und keine Bestätigung, dass die Rechnung richtig oder vollständig ist. Bei Fragen hilft Ihnen Ihre Praxis oder Ihre private Krankenversicherung gern weiter.
+        - generic [ref=e100]:
+          - button "Rückfrage an die Praxis erstellen" [ref=e101] [cursor=pointer]
+          - button "Rückfrage an die PKV erstellen" [ref=e102] [cursor=pointer]
+      - note [ref=e74]: Unverbindliche Orientierung – keine Rechtsberatung und keine abschließende Rechnungsprüfung. Bei Unsicherheit kontaktieren Sie bitte Ihre Praxis, Ihre private Krankenversicherung oder eine fachkundige Beratung.
+  - contentinfo "Rechtliche Hinweise" [ref=e75]:
+    - generic [ref=e76]:
+      - navigation "Rechtliche Hinweise" [ref=e77]:
+        - link "Impressum" [ref=e78] [cursor=pointer]:
+          - /url: /impressum
+        - generic [ref=e79]: "|"
+        - link "Datenschutz" [ref=e80] [cursor=pointer]:
+          - /url: /datenschutz
+        - generic [ref=e81]: "|"
+        - link "AGB" [ref=e82] [cursor=pointer]:
+          - /url: /agb
+        - generic [ref=e83]: "|"
+        - link "Disclaimer" [ref=e84] [cursor=pointer]:
+          - /url: /disclaimer
+        - generic [ref=e85]: "|"
+        - link "Produktinfos" [ref=e86] [cursor=pointer]:
+          - /url: /info
+      - paragraph [ref=e87]: Kein Notdienst. Bei akuten oder starken Beschwerden wenden Sie sich an den Rettungsdienst oder eine Ärztin/einen Arzt.

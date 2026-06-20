@@ -12,6 +12,7 @@ const ARRAY_KEYS = new Set([
   "journeyChartBars",
   "journeyChartDonut",
   "journeyChartTags",
+  "journeyFeatureCloud",
 ]);
 
 /**

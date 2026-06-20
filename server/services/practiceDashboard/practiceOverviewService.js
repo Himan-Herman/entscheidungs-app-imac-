@@ -71,6 +71,17 @@ export async function getPracticeDashboardSummary(practiceProfileId, role) {
   const sinceDoc = new Date(Date.now() - RECENT_DOCUMENT_DAYS * 24 * 60 * 60 * 1000);
   const sinceMed = new Date(Date.now() - RECENT_MEDICATION_DAYS * 24 * 60 * 60 * 1000);
 
+  // Owner is implicit (PracticeProfile.userId) and always counts as one active team
+  // member; loaded only for the optional team KPIs (team-visible roles only).
+  const ownerUserId = visibility.team
+    ? (
+        await prisma.practiceProfile.findUnique({
+          where: { id: pid },
+          select: { userId: true },
+        })
+      )?.userId || null
+    : null;
+
   const [
     unreadInboxItems,
     openMessages,
@@ -79,6 +90,8 @@ export async function getPracticeDashboardSummary(practiceProfileId, role) {
     newDocumentShares,
     publishedMedicationPlans,
     recentlyActivePatients,
+    activeTeamMembersExclOwner,
+    pendingInvites,
   ] = await Promise.all([
     visibility.inbox
       ? prisma.practiceInboxItem.count({
@@ -128,6 +141,16 @@ export async function getPracticeDashboardSummary(practiceProfileId, role) {
         })
       : Promise.resolve(null),
     visibility.patients ? loadRecentlyActivePatients(pid, 5) : Promise.resolve([]),
+    visibility.team
+      ? prisma.practiceMember.count({
+          where: { practiceProfileId: pid, status: "active", userId: { not: ownerUserId } },
+        })
+      : Promise.resolve(null),
+    visibility.team
+      ? prisma.practiceMember.count({
+          where: { practiceProfileId: pid, status: "invited" },
+        })
+      : Promise.resolve(null),
   ]);
 
   return {
@@ -143,6 +166,11 @@ export async function getPracticeDashboardSummary(practiceProfileId, role) {
       newDocumentShares,
       publishedMedicationPlans,
       recentlyActivePatients,
+      memberCount:
+        activeTeamMembersExclOwner == null
+          ? null
+          : activeTeamMembersExclOwner + (ownerUserId ? 1 : 0),
+      pendingInvites,
     },
     quickActions: buildQuickActions(role),
   };

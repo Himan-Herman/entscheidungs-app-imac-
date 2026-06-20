@@ -80,6 +80,11 @@ export default {
   actionOpenDeveloper: "Entwicklerzugang",
   actionOpenBillingPlausibility: "GOÄ/PKV-Prüfung",
 
+  adminHeading: "Verwaltung",
+  adminAuditLink: "Audit-Protokoll",
+  adminMemberCount: "Aktive Teammitglieder",
+  adminPendingInvites: "Offene Einladungen",
+
   aiHeading: "Automatische Zusammenfassung – bitte prüfen",
   aiDisclaimer:
     "Fasst nur organisatorische Dashboard-Informationen zusammen. Keine medizinische Bewertung.",

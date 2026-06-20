@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchPatientPracticeDocuments } from "../api/patientPracticeDocumentsApi.js";
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import { groupByPracticeBranding, practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
+import { isPatientBillingExplainClientEnabled } from "../../patientBillingExplain/featureFlag.js";
 import "../../../styles/PatientInboxPage.css";
 import "../styles/PracticeDocuments.css";
+import "../../patientBillingExplain/styles/PatientBillingExplain.css";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
 function fmt(iso, lang) {
@@ -41,6 +44,13 @@ export default function PatientPracticeDocumentsListPage() {
       getMessages("en").patientPracticeDocuments,
     [language],
   );
+  const tBilling = useMemo(
+    () =>
+      getMessages(language).patientBillingExplain ||
+      getMessages("en").patientBillingExplain,
+    [language],
+  );
+  const billingExplainEnabled = isPatientBillingExplainClientEnabled();
 
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -90,6 +100,21 @@ export default function PatientPracticeDocumentsListPage() {
         <p className="patient-inbox__intro">{t.intro}</p>
         <p className="patient-inbox__safety">{t.safetyNote}</p>
       </header>
+
+      {billingExplainEnabled ? (
+        <Link className="billing-explain-entry" to="/patient/billing-explainer">
+          <span className="billing-explain-entry__text">
+            <span className="billing-explain-entry__title">{tBilling.entryCardTitle}</span>
+            <span className="billing-explain-entry__sub">{tBilling.entryCardSubtitle}</span>
+          </span>
+          <ChevronRight
+            size={20}
+            strokeWidth={2}
+            aria-hidden="true"
+            className="billing-explain-entry__chevron"
+          />
+        </Link>
+      ) : null}
 
       {loading ? <p className="patient-inbox__muted">{t.loading}</p> : null}
       {error ? (

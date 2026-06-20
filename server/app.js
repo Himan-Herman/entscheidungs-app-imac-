@@ -105,6 +105,7 @@ import practiceSosCardRouter from "./routes/practiceSosCard.js";
 import sosWalletRouter from "./routes/sosWallet.js";
 import publicAnamnesisRouter from "./routes/publicAnamnesis.js";
 import practiceBillingPlausibilityRouter from "./routes/practiceBillingPlausibility.js";
+import patientBillingExplainerRouter from "./routes/patientBillingExplainer.js";
 
 const app = express();
 const prismaHealth = new PrismaClient();
@@ -212,6 +213,7 @@ app.use("/api/practice/team", requireAuth, practiceTeamRouter);
 app.use("/api/practice/settings", requireAuth, practiceSettingsRouter);
 app.use("/api/practice/integrations", requireAuth, practiceIntegrationsRouter);
 app.use("/api/practice/billing-plausibility", requireAuth, practiceBillingPlausibilityRouter);
+app.use("/api/patient/billing-explainer", requireAuth, patientBillingExplainerRouter);
 app.use("/api/practice/calendar", requireAuth, practiceCalendarRouter);
 app.use("/api/practice/anamnesis", requireAuth, practiceAnamnesisRouter);
 app.use("/api/practice/booking", requireAuth, practiceBookingRouter);

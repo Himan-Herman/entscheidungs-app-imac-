@@ -336,3 +336,14 @@ export function isBillingAiReviewEnabled() {
   if (!isBillingPlausibilityEnabled()) return false;
   return envFlag("ENABLE_BILLING_AI_REVIEW", false);
 }
+
+/**
+ * Patient-facing "Rechnung verstehen" — plain-language explanation of a private
+ * (GOÄ/PKV) invoice the patient enters manually. Stateless: no storage, no upload,
+ * no OCR, no AI, no patient identifiers, no practiceId. Reuses the deterministic GOÄ
+ * catalogue/warning engine only. Non-binding guidance — not legal advice, not a final
+ * invoice review, not a medical assessment. Default off until ENABLE_PATIENT_BILLING_EXPLAIN is set.
+ */
+export function isPatientBillingExplainEnabled() {
+  return envFlag("ENABLE_PATIENT_BILLING_EXPLAIN", false);
+}

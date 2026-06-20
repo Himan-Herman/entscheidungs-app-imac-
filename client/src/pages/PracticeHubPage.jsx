@@ -155,6 +155,8 @@ const ROLE_LABEL_KEYS = {
   doctor: "roleDoctor",
   assistant: "roleAssistant",
   viewer: "roleViewer",
+  secretary: "roleSecretary",
+  practice_manager: "rolePracticeManager",
 };
 
 const NAV_ACCOUNT = "__nav_account__";
@@ -307,6 +309,13 @@ export default function PracticeHubPage() {
   const visibility = summary?.visibility || {};
   const metrics = summary?.metrics || {};
   const quickActions = summary?.quickActions || {};
+  const showAdmin =
+    Boolean(quickActions.manageTeam) ||
+    Boolean(quickActions.openSettings) ||
+    Boolean(quickActions.openSecurity) ||
+    Boolean(quickActions.openIntegrations) ||
+    Boolean(quickActions.openDeveloper) ||
+    Boolean(visibility.audit);
 
   const visibleCards = useMemo(
     () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
@@ -629,30 +638,6 @@ export default function PracticeHubPage() {
                   {t.actionUploadDocument}
                 </Link>
               ) : null}
-              {quickActions.manageTeam ? (
-                <Link
-                  className="practice-overview__action"
-                  to={`/practice/team?practiceId=${encodeURIComponent(practiceId)}`}
-                >
-                  {t.actionManageTeam}
-                </Link>
-              ) : null}
-              {quickActions.openSettings ? (
-                <Link
-                  className="practice-overview__action"
-                  to={`/practice/settings?practiceId=${encodeURIComponent(practiceId)}`}
-                >
-                  {t.actionOpenSettings}
-                </Link>
-              ) : null}
-              {quickActions.openIntegrations ? (
-                <Link
-                  className="practice-overview__action"
-                  to={`/practice/integrations?practiceId=${encodeURIComponent(practiceId)}`}
-                >
-                  {t.actionOpenIntegrations}
-                </Link>
-              ) : null}
               {quickActions.openCalendar ? (
                 <Link
                   className="practice-overview__action"
@@ -669,22 +654,6 @@ export default function PracticeHubPage() {
                   {t.actionOpenTelemedicine}
                 </Link>
               ) : null}
-              {quickActions.openDeveloper ? (
-                <Link
-                  className="practice-overview__action"
-                  to={`/practice/developer?practiceId=${encodeURIComponent(practiceId)}`}
-                >
-                  {t.actionOpenDeveloper}
-                </Link>
-              ) : null}
-              {quickActions.openSecurity ? (
-                <Link
-                  className="practice-overview__action"
-                  to={`/practice/security?practiceId=${encodeURIComponent(practiceId)}`}
-                >
-                  {t.actionOpenSecurity}
-                </Link>
-              ) : null}
               {quickActions.openBillingPlausibility ? (
                 <Link
                   className="practice-overview__action"
@@ -696,6 +665,88 @@ export default function PracticeHubPage() {
               ) : null}
             </div>
           </section>
+
+          {showAdmin ? (
+            <section aria-labelledby="practice-overview-admin-heading">
+              <h2
+                id="practice-overview-admin-heading"
+                className="practice-overview__section-title"
+              >
+                {t.adminHeading}
+              </h2>
+              {visibility.team &&
+              (metrics.memberCount != null || metrics.pendingInvites != null) ? (
+                <dl className="practice-overview__metrics-grid">
+                  {metrics.memberCount != null ? (
+                    <div className="practice-overview__metric">
+                      <dt>{t.adminMemberCount}</dt>
+                      <dd aria-label={`${t.adminMemberCount}: ${fmtMetric(metrics.memberCount, t.notProvided)}`}>
+                        {fmtMetric(metrics.memberCount, t.notProvided)}
+                      </dd>
+                    </div>
+                  ) : null}
+                  {metrics.pendingInvites != null ? (
+                    <div className="practice-overview__metric">
+                      <dt>{t.adminPendingInvites}</dt>
+                      <dd aria-label={`${t.adminPendingInvites}: ${fmtMetric(metrics.pendingInvites, t.notProvided)}`}>
+                        {fmtMetric(metrics.pendingInvites, t.notProvided)}
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
+              ) : null}
+              <div className="practice-overview__actions">
+                {quickActions.manageTeam ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/team?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.actionManageTeam}
+                  </Link>
+                ) : null}
+                {quickActions.openSettings ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/settings?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.actionOpenSettings}
+                  </Link>
+                ) : null}
+                {visibility.audit ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/audit?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.adminAuditLink}
+                  </Link>
+                ) : null}
+                {quickActions.openSecurity ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/security?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.actionOpenSecurity}
+                  </Link>
+                ) : null}
+                {quickActions.openIntegrations ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/integrations?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.actionOpenIntegrations}
+                  </Link>
+                ) : null}
+                {quickActions.openDeveloper ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/developer?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.actionOpenDeveloper}
+                  </Link>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
 
           <section id="practice-overview-activity" aria-labelledby="practice-overview-activity-heading">
             <h2 id="practice-overview-activity-heading" className="practice-overview__section-title">

@@ -1,0 +1,477 @@
+/*
+ * PatientBillingExplainPage — scoped BEM styles.
+ * Uses app CSS variables only (var(--token, fallback)). No hardcoded theme colors;
+ * the app data-theme switches the variables, so dark mode works automatically.
+ */
+
+.billing-explain {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 3rem;
+}
+
+.billing-explain__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--accent, #0f766e);
+  text-decoration: none;
+}
+
+.billing-explain__back:hover {
+  text-decoration: underline;
+}
+
+.billing-explain__back:focus-visible {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Header */
+.billing-explain__header {
+  margin-bottom: 1.25rem;
+}
+
+.billing-explain__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+  color: var(--text-body, #111827);
+}
+
+.billing-explain__subtitle {
+  margin: 0 0 0.625rem;
+  font-size: 0.9rem;
+  color: var(--text-muted, #4b5563);
+}
+
+.billing-explain__lead {
+  margin: 0;
+  line-height: 1.55;
+  color: var(--text-body, #111827);
+}
+
+/* Disclaimer — always first, always visible */
+.billing-explain__disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid var(--warning-border, #f59e0b);
+  background: var(--surface-warning, #fffbeb);
+  color: var(--text-body, #111827);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+
+.billing-explain__disclaimer-icon {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+  color: var(--warning-border, #b45309);
+}
+
+.billing-explain__privacy {
+  margin: 0 0 1.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted, #6b7280);
+  line-height: 1.5;
+}
+
+/* Mode toggle */
+.billing-explain__mode {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.billing-explain__mode-btn {
+  padding: 0.5rem 0.875rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--text-muted, #4b5563);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 2.5rem;
+}
+
+.billing-explain__mode-btn.is-active {
+  background: var(--accent, #0f766e);
+  color: var(--on-accent, #ffffff);
+}
+
+.billing-explain__mode-btn:focus-visible {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 2px;
+}
+
+/* Form */
+.billing-explain__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.billing-explain__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: end;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.billing-explain__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+/* Note field spans the full width on its own row below the numeric fields */
+.billing-explain__field--note {
+  grid-column: 1 / -1;
+}
+
+.billing-explain__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted, #4b5563);
+}
+
+.billing-explain__input,
+.billing-explain__textarea {
+  padding: 0.625rem 0.7rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  background: var(--input-bg, #ffffff);
+  color: var(--text-body, #111827);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.billing-explain__textarea {
+  resize: vertical;
+  min-height: 7rem;
+  line-height: 1.5;
+}
+
+.billing-explain__input:focus,
+.billing-explain__textarea:focus {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 1px;
+  border-color: var(--focus-ring, #0f766e);
+}
+
+.billing-explain__row-remove {
+  padding: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--text-muted, #4b5563);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  align-self: end;
+}
+
+.billing-explain__row-remove:hover {
+  background: var(--surface-danger, #fef2f2);
+  border-color: var(--danger, #ef4444);
+  color: var(--danger, #ef4444);
+}
+
+.billing-explain__row-remove:focus-visible {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 2px;
+}
+
+.billing-explain__form-actions,
+.billing-explain__actions,
+.billing-explain__draft-actions {
+  display: flex;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.billing-explain__actions {
+  margin: 0.5rem 0 1rem;
+}
+
+/* Buttons — large touch targets */
+.billing-explain__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.7rem 1.1rem;
+  min-height: 2.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border, #e5e7eb);
+  background: transparent;
+  color: var(--text-body, #111827);
+  transition: background 0.15s;
+}
+
+.billing-explain__btn:focus-visible {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 2px;
+}
+
+.billing-explain__btn--primary {
+  background: var(--accent, #0f766e);
+  color: var(--on-accent, #ffffff);
+  border-color: var(--accent, #0f766e);
+}
+
+.billing-explain__btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover, #115e59);
+  border-color: var(--accent-hover, #115e59);
+}
+
+.billing-explain__btn--secondary {
+  background: transparent;
+  color: var(--accent, #0f766e);
+  border-color: var(--accent, #0f766e);
+}
+
+.billing-explain__btn--secondary:hover:not(:disabled) {
+  background: var(--surface-muted, #f0fdfa);
+}
+
+.billing-explain__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Status messages */
+.billing-explain__status {
+  font-size: 0.875rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.375rem;
+  margin: 0.5rem 0 1rem;
+  line-height: 1.5;
+}
+
+.billing-explain__status--error {
+  background: var(--surface-danger, #fef2f2);
+  color: var(--danger, #b91c1c);
+  border: 1px solid var(--danger-border, #fca5a5);
+}
+
+.billing-explain__status--warn {
+  background: var(--surface-warning, #fffbeb);
+  color: var(--text-warning, #92400e);
+  border: 1px solid var(--warning-border, #fcd34d);
+}
+
+/* Result */
+.billing-explain__result {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border, #e5e7eb);
+}
+
+.billing-explain__result-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--text-body, #111827);
+}
+
+.billing-explain__result-note {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted, #4b5563);
+  line-height: 1.5;
+}
+
+.billing-explain__items {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.billing-explain__item {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.5rem;
+  background: var(--surface, #fff);
+}
+
+.billing-explain__item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.billing-explain__item-ziffer {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-body, #111827);
+}
+
+.billing-explain__item-title {
+  font-size: 0.9rem;
+  color: var(--text-body, #111827);
+}
+
+.billing-explain__item-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  background: var(--surface-muted, #f9fafb);
+  color: var(--text-muted, #4b5563);
+  border: 1px solid var(--border, #e5e7eb);
+}
+
+.billing-explain__item-meta {
+  margin: 0 0 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted, #4b5563);
+}
+
+.billing-explain__item-warnings {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.billing-explain__item-warning {
+  font-size: 0.82rem;
+  color: var(--text-warning, #92400e);
+  padding-left: 0.9rem;
+  position: relative;
+  line-height: 1.5;
+}
+
+.billing-explain__item-warning::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+}
+
+.billing-explain__no-findings {
+  margin: 0 0 1rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--surface-success, #f0fdf4);
+  color: var(--text-success, #15803d);
+  border: 1px solid var(--success-border, #86efac);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Inquiry drafts */
+.billing-explain__drafts {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border, #e5e7eb);
+}
+
+.billing-explain__draft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+}
+
+.billing-explain__footer {
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border, #e5e7eb);
+  font-size: 0.8rem;
+  color: var(--text-muted, #6b7280);
+  line-height: 1.5;
+}
+
+/* Entry card on the practice-documents page */
+.billing-explain-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.5rem;
+  background: var(--surface-muted, #f0fdfa);
+  text-decoration: none;
+  color: var(--text-body, #111827);
+}
+
+.billing-explain-entry:hover {
+  border-color: var(--accent, #0f766e);
+}
+
+.billing-explain-entry:focus-visible {
+  outline: 2px solid var(--focus-ring, #0f766e);
+  outline-offset: 2px;
+}
+
+.billing-explain-entry__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.billing-explain-entry__title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.billing-explain-entry__sub {
+  font-size: 0.8rem;
+  color: var(--text-muted, #4b5563);
+}
+
+.billing-explain-entry__chevron {
+  flex: 0 0 auto;
+  color: var(--accent, #0f766e);
+}
+
+/* Mobile: stack billing rows into single column, full-width touch targets */
+@media (max-width: 40rem) {
+  .billing-explain__row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .billing-explain__row-remove {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .billing-explain__btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

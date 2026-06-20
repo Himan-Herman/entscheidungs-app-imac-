@@ -117,6 +117,9 @@ const PatientMedicationPlanDetailPage = lazy(() =>
 const PatientPracticeDocumentsListPage = lazy(() =>
   import("./features/practiceDocuments/pages/PatientPracticeDocumentsListPage.jsx"),
 );
+const PatientBillingExplainPage = lazy(() =>
+  import("./features/patientBillingExplain/pages/PatientBillingExplainPage.jsx"),
+);
 const PatientPracticeDocumentDetailPage = lazy(() =>
   import("./features/practiceDocuments/pages/PatientPracticeDocumentDetailPage.jsx"),
 );
@@ -405,6 +408,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PatientPracticeDocumentDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/billing-explainer"
+                  element={
+                    <ProtectedRoute>
+                      <PatientBillingExplainPage />
                     </ProtectedRoute>
                   }
                 />

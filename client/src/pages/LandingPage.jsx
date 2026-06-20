@@ -178,10 +178,6 @@ export default function LandingPage() {
                 muted
                 playsInline
               />
-              <div className="landing-page__video-caption">
-                <span>{copy.videoEyebrow}</span>
-                <strong>{copy.videoTitle}</strong>
-              </div>
             </div>
 
             <LandingHeroVisual copy={copy} theme={theme} />
@@ -335,7 +331,6 @@ export default function LandingPage() {
 
       <footer className="landing-page__footer">
         <div className="landing-page__footer-shell">
-          <p className="landing-page__footer-note">{copy.footerDisclaimer}</p>
           <nav
             className="landing-page__footer-links"
             aria-label={footerCopy.ariaLabel}

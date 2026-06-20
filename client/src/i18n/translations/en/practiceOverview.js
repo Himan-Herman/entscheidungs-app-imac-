@@ -80,6 +80,11 @@ export default {
   actionOpenDeveloper: "Developer access",
   actionOpenBillingPlausibility: "GOÄ/PKV review",
 
+  adminHeading: "Administration",
+  adminAuditLink: "Audit log",
+  adminMemberCount: "Active team members",
+  adminPendingInvites: "Pending invitations",
+
   aiHeading: "AI summary – please review",
   aiDisclaimer:
     "AI only summarizes organizational dashboard information and does not provide medical assessment.",

@@ -35,6 +35,8 @@ export default function LandingJourneyCharts({ copy, theme }) {
   const bars = copy.journeyChartBars || [];
   const donutLabels = copy.journeyChartDonut || [];
   const tags = copy.journeyChartTags || [];
+  const featureCloud = copy.journeyFeatureCloud || [];
+  const barHeights = [74, 118, 92, 132, 104];
 
   return (
     <section className="landing-page__section landing-page__journey-data">
@@ -75,8 +77,8 @@ export default function LandingJourneyCharts({ copy, theme }) {
             <path d="M50 196H374" stroke={p.lineSoft} strokeDasharray="4 9" />
             <path d="M50 196H374" stroke={p.border} strokeWidth="1.5" />
 
-            {[86, 122, 100, 132].map((height, index) => {
-              const x = 72 + index * 76;
+            {barHeights.map((height, index) => {
+              const x = 56 + index * 62;
               const y = 196 - height;
               return (
                 <g key={bars[index] || index}>
@@ -104,13 +106,13 @@ export default function LandingJourneyCharts({ copy, theme }) {
             })}
 
             <path
-              d="M93 110C128 86 143 86 169 74C194 62 217 86 245 94C274 102 287 72 321 60"
+              d="M77 122C106 98 118 98 137 82C162 62 180 82 206 90C230 98 247 72 266 64C286 56 304 72 324 84"
               stroke="url(#journey-bars-line)"
               strokeWidth="6"
               strokeLinecap="round"
               fill="none"
             />
-            {[["93", "110"], ["169", "74"], ["245", "94"], ["321", "60"]].map(([x, y]) => (
+            {[["77", "122"], ["137", "82"], ["206", "90"], ["266", "64"], ["324", "84"]].map(([x, y]) => (
               <g key={`${x}-${y}`}>
                 <circle cx={x} cy={y} r="9" fill={p.surface} stroke={p.accent} strokeWidth="3" />
                 <circle cx={x} cy={y} r="3.5" fill={p.accentTwo} />
@@ -258,6 +260,17 @@ export default function LandingJourneyCharts({ copy, theme }) {
             <path d="M34 214H324" stroke={p.lineSoft} strokeDasharray="4 8" />
           </svg>
         </article>
+      </div>
+
+      <div className="landing-page__feature-cloud" aria-label={copy.metricsAria}>
+        {featureCloud.map((item, index) => (
+          <span
+            key={item}
+            className={`landing-page__feature-chip landing-page__feature-chip--${index % 4}`}
+          >
+            {item}
+          </span>
+        ))}
       </div>
     </section>
   );
