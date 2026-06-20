@@ -1,0 +1,59 @@
+- generic [ref=e3]:
+  - link "Zum Inhalt springen" [ref=e4] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - button "Zur Startseite" [ref=e7] [cursor=pointer]:
+        - generic [ref=e10]: MedScoutX
+      - generic [ref=e11]:
+        - button "Auf Dunkelmodus umschalten" [ref=e12] [cursor=pointer]:
+          - img [ref=e13]
+        - button "Sprache" [ref=e17] [cursor=pointer]:
+          - img [ref=e18]
+          - generic [ref=e21]: Deutsch
+          - img [ref=e22]
+      - button "Einstellungen und Menü öffnen" [ref=e24] [cursor=pointer]:
+        - img [ref=e25]
+        - generic [ref=e28]: Menü
+  - main [ref=e29]:
+    - main [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e33]: MedScoutX — Vorbereitung fürs Arztgespräch
+        - heading "Login" [level=1] [ref=e35]
+        - paragraph [ref=e36]: Strukturierte Vorbereitung Ihrer Angaben vor dem Termin — ersetzt keine ärztliche Beratung.
+        - generic [ref=e37]:
+          - generic [ref=e38]: E-Mail
+          - textbox "z.B. deinname@mail.de" [ref=e39]
+          - generic [ref=e40]: Passwort
+          - textbox "Passwort" [ref=e41]
+          - button "Einloggen" [ref=e42] [cursor=pointer]
+          - button "Passwort vergessen?" [ref=e43] [cursor=pointer]
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - text: Noch kein Konto?
+            - link "Jetzt registrieren" [ref=e46] [cursor=pointer]:
+              - /url: /register
+          - generic [ref=e47]:
+            - link "Impressum" [ref=e48] [cursor=pointer]:
+              - /url: /impressum
+            - text: "|"
+            - link "Datenschutz" [ref=e49] [cursor=pointer]:
+              - /url: /datenschutz
+  - contentinfo "Rechtliche Hinweise" [ref=e50]:
+    - generic [ref=e51]:
+      - navigation "Rechtliche Hinweise" [ref=e52]:
+        - link "Impressum" [ref=e53] [cursor=pointer]:
+          - /url: /impressum
+        - generic [ref=e54]: "|"
+        - link "Datenschutz" [ref=e55] [cursor=pointer]:
+          - /url: /datenschutz
+        - generic [ref=e56]: "|"
+        - link "AGB" [ref=e57] [cursor=pointer]:
+          - /url: /agb
+        - generic [ref=e58]: "|"
+        - link "Disclaimer" [ref=e59] [cursor=pointer]:
+          - /url: /disclaimer
+        - generic [ref=e60]: "|"
+        - link "Produktinfos" [ref=e61] [cursor=pointer]:
+          - /url: /info
+      - paragraph [ref=e62]: Kein Notdienst. Bei akuten oder starken Beschwerden wenden Sie sich an den Rettungsdienst oder eine Ärztin/einen Arzt.

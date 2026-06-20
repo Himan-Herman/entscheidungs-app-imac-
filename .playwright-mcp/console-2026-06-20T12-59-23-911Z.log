@@ -1,0 +1,86 @@
+[     755ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:20102
+[   16556ms] [ERROR] You are calling ReactDOMClient.createRoot() on a container that has already been passed to createRoot() before. Instead, call root.render() on the existing root instead if you want to update it. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:17253
+[   16777ms] Error: useLanguage must be used inside <LanguageProvider>
+    at useLanguage (http://localhost:5173/src/i18n/LanguageContext.jsx?t=1781960380130:113:11)
+    at Header (http://localhost:5173/src/components/Header.jsx?t=1781960379939:52:24)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:18509:20)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:5654:24)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:7475:21)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:8525:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:997:72)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12561:98)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12424:43)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12408:13)
+[   16772ms] [WARNING] %s
+
+%s
+ An error occurred in the <Header> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:6965
+[   16913ms] Error: useLanguage must be used inside <LanguageProvider>
+    at useLanguage (http://localhost:5173/src/i18n/LanguageContext.jsx:113:11)
+    at RouteFallback (http://localhost:5173/src/main.jsx?t=1781960379879:355:24)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:18509:20)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:5654:24)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:7475:21)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:8525:20)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:997:72)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12561:98)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12424:43)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12408:13)
+[   16911ms] [WARNING] %s
+
+%s
+ An error occurred in the <RouteFallback> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:6965
+[   16995ms] Error: useLanguage must be used inside <LanguageProvider>
+    at useLanguage (http://localhost:5173/src/i18n/LanguageContext.jsx:113:11)
+    at PatientBillingExplainPage (http://localhost:5173/src/features/patientBillingExplain/pages/PatientBillingExplainPage.jsx?t=1781960379879:45:24)
+    at Object.react_stack_bottom_frame (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:18509:20)
+    at renderWithHooks (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:5654:24)
+    at updateFunctionComponent (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:7475:21)
+    at beginWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:8484:199)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:997:72)
+    at performUnitOfWork (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12561:98)
+    at workLoopSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12424:43)
+    at renderRootSync (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:12408:13)
+[   16993ms] [WARNING] %s
+
+%s
+ An error occurred in the <PatientBillingExplainPage> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:6965
+[   16996ms] NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at removeChildFromContainer (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:15921:128)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:997:72)
+    at commitDeletionEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10175:19)
+    at recursivelyTraverseDeletionEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10115:11)
+    at commitDeletionEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10237:13)
+    at recursivelyTraverseDeletionEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10115:11)
+    at commitDeletionEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10272:13)
+    at recursivelyTraverseDeletionEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10115:11)
+    at commitDeletionEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10237:13)
+    at recursivelyTraverseDeletionEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10115:11)
+[   16995ms] [WARNING] %s
+
+%s
+ An error occurred in the <div> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:6965
+[   17090ms] [ERROR] You are calling ReactDOMClient.createRoot() on a container that has already been passed to createRoot() before. Instead, call root.render() on the existing root instead if you want to update it. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:17253
+[   17550ms] NotFoundError: Failed to execute 'removeChild' on 'Node': The node to be removed is not a child of this node.
+    at removeChildFromContainer (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:15921:128)
+    at runWithFiberInDEV (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:997:72)
+    at commitDeletionEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10175:19)
+    at recursivelyTraverseDeletionEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10115:11)
+    at commitDeletionEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10237:13)
+    at recursivelyTraverseDeletionEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10115:11)
+    at commitDeletionEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10272:13)
+    at recursivelyTraverseMutationEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10379:13)
+    at commitMutationEffectsOnFiber (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10639:13)
+    at recursivelyTraverseMutationEffects (http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:10396:13)
+[   17426ms] [WARNING] %s
+
+%s
+ An error occurred in the <div> component. Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:6965
+[   18373ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:20102
+[   23453ms] [ERROR] You are calling ReactDOMClient.createRoot() on a container that has already been passed to createRoot() before. Instead, call root.render() on the existing root instead if you want to update it. @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:17253
+[   24635ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:5173/node_modules/.vite/deps/react-dom_client.js?v=ace611e8:20102

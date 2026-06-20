@@ -8,11 +8,20 @@ const ARRAY_KEYS = new Set([
   "patientPoints",
   "practicePoints",
   "spotlightList",
+  "spotlightParagraphs",
   "moduleMapItems",
+  "moduleMapSignals",
   "journeyChartBars",
   "journeyChartDonut",
   "journeyChartTags",
   "journeyFeatureCloud",
+  "journeyStageLabels",
+  "ecosystemBands",
+  "ecosystemSignals",
+  "domainOneItems",
+  "domainTwoItems",
+  "domainThreeItems",
+  "domainFourItems",
 ]);
 
 /**

@@ -15,11 +15,13 @@ import {
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { resolveLanding } from "../i18n/translations/resolveLanding.js";
-import { HEADER_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
+import { LANDING_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import LandingHeroVisual from "../components/landing/LandingHeroVisual.jsx";
 import LandingJourneyCharts from "../components/landing/LandingJourneyCharts.jsx";
+import LandingStoryCanvas from "../components/landing/LandingStoryCanvas.jsx";
+import LandingCapabilityAtlas from "../components/landing/LandingCapabilityAtlas.jsx";
 import hookPatientPractice from "../assets/media/hook-patient-practice.png";
 import medScoutLogo from "../assets/img/medscout-logo.png";
 import heroPoster from "../assets/media/hero-medscoutx.png";
@@ -61,6 +63,9 @@ export default function LandingPage() {
 
   const patientPoints = copy.patientPoints || [];
   const practicePoints = copy.practicePoints || [];
+  const heroFlowItems = (copy.journeyChartBars || []).slice(0, 5);
+  const heroFeatureItems = (copy.journeyFeatureCloud || []).slice(0, 4);
+  const heroFlowHeights = [28, 52, 40, 62, 46];
 
   const bridgeSteps = [
     { icon: UserRound, label: copy.bridgeStepOne },
@@ -91,7 +96,7 @@ export default function LandingPage() {
           <GlobalLanguageSelector
             compact
             label={headerCopy.languageLabel}
-            selectableLocaleCodes={HEADER_SELECTABLE_LOCALE_CODES}
+            selectableLocaleCodes={LANDING_SELECTABLE_LOCALE_CODES}
           />
 
           <button
@@ -157,6 +162,35 @@ export default function LandingPage() {
                 <strong>{copy.metricC}</strong>
               </article>
             </div>
+
+            <div className="landing-page__hero-insight" aria-label={copy.metricsAria}>
+              <div className="landing-page__hero-insight-head">
+                <p className="landing-page__hero-insight-kicker">{copy.visualBridge}</p>
+                <strong>{copy.metricA}</strong>
+              </div>
+
+              <div className="landing-page__hero-ribbon">
+                {heroFlowItems.map((item, index) => (
+                  <div key={item} className="landing-page__hero-ribbon-step">
+                    <div
+                      className="landing-page__hero-ribbon-bar"
+                      style={{ height: `${heroFlowHeights[index] || 36}px` }}
+                      aria-hidden="true"
+                    />
+                    <div className="landing-page__hero-ribbon-dot" aria-hidden="true" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="landing-page__hero-chip-row">
+                {heroFeatureItems.map((item) => (
+                  <span key={item} className="landing-page__hero-chip">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="landing-page__hero-media">
@@ -200,6 +234,8 @@ export default function LandingPage() {
         </section>
 
         <LandingJourneyCharts copy={copy} theme={theme} />
+        <LandingStoryCanvas copy={copy} theme={theme} />
+        <LandingCapabilityAtlas copy={copy} theme={theme} />
 
         <section id="support" className="landing-page__section">
           <div className="landing-page__section-heading">

@@ -44,6 +44,11 @@ export default {
   spotlightTitle: "MedScoutX als verbindende Ebene im gesamten medizinischen Weg",
   spotlightBody:
     "Die Hero-Grafik zeigt logisch, wie Angaben aus Patientensicht gesammelt, im Verlauf weitergeführt und für die Praxis in den richtigen Momenten verständlicher gemacht werden.",
+  spotlightParagraphs: [
+    "Vorbereitung ist dabei nur der erste Schritt. MedScoutX denkt den Weg weiter und schafft auch waehrend des Kontakts und in der anschliessenden Begleitung mehr Ruhe in medizinischen Informationen.",
+    "Statt alles auf einmal zu erklaeren, fuehrt die Landingpage schrittweise in die Produktlogik ein: erst Orientierung, dann Verbindung, dann ausgewählte Bereiche aus dem System.",
+    "So entsteht ein professioneller Eindruck, der eher an einen gut strukturierten medizinischen Workflow erinnert als an eine laute Werbeseite.",
+  ],
   spotlightList: [
     "strukturierte Begleitung vor, während und nach dem Kontakt",
     "ruhige Animationen statt überladener Effekte",
@@ -56,6 +61,16 @@ export default {
     "Kommunikation",
     "Dokumente",
     "Nachsorge",
+  ],
+  moduleMapSignals: [
+    "individuell gefuehrte Uebergaenge",
+    "relevante Informationen im passenden Moment",
+    "medizinische Sprache ruhiger visualisiert",
+  ],
+  journeyStageLabels: [
+    "Vorbereitung",
+    "Kontakt",
+    "Begleitung",
   ],
   journeyCanvasEyebrow: "MedScoutX Infografik",
   journeyCanvasTitle: "Diagramme, Formen und Datenbilder aus echten MedScoutX-Bereichen",
@@ -104,6 +119,60 @@ export default {
     "Medikationsplan",
     "Praxisfinder",
     "Aktivitaet",
+  ],
+  ecosystemEyebrow: "Aus dem Produkt heraus gedacht",
+  ecosystemTitle: "Hinter der Startseite steht kein einzelnes Tool, sondern ein vernetztes MedScoutX-System",
+  ecosystemBody:
+    "Die Plattform verbindet orientierende Erfassung, Vorbereitung, Verlauf, Kommunikation, Praxisbezug und kontrollierte Weitergabe. Dadurch entsteht eher ein medizinischer Arbeitsfluss als eine einzelne Funktion mit nur einem Zweck.",
+  ecosystemBoardEyebrow: "Systemlandkarte",
+  ecosystemBoardTitle: "Vom ersten Signal bis zu Praxisorganisation und Nachverlauf",
+  ecosystemBoardBody:
+    "Die Grafik verdichtet reale MedScoutX-Bausteine aus Symptom Check, Koerperkarte, Bildupload, Pre-Visit, Vitals, Medikationsbereichen, Meda, Telemedizin, Dokumenten, Kalendern, Praxisverzeichnis und Data Control in eine gemeinsame Produktarchitektur.",
+  ecosystemBands: [
+    "Signal",
+    "Ordnung",
+    "Kontakt",
+    "Weitergabe",
+    "Praxis",
+  ],
+  ecosystemSignals: [
+    "Symptom Check",
+    "Koerperkarte",
+    "Pre-Visit",
+    "Meda",
+    "Data Control",
+  ],
+  domainOneTitle: "Beschwerden zuerst sinnvoll verorten",
+  domainOneBody:
+    "Nicht jede medizinische Information beginnt mit einem Formular. MedScoutX greift auch fruehe Einstiegspunkte auf, in denen Menschen Symptome beschreiben, Koerperbereiche markieren oder Bildmaterial einordnen wollen.",
+  domainOneItems: [
+    "Symptom Check",
+    "Bildupload und Bildanalyse",
+    "Koerperkarte und Regionenstart",
+  ],
+  domainTwoTitle: "Vorbereitung, Verlauf und eigene Gesundheitsdaten zusammenfuehren",
+  domainTwoBody:
+    "Sobald aus ersten Angaben eine Vorbereitung wird, verbindet MedScoutX strukturierte Erfassung mit Gesundheitsprofil, Vitals, Medikamenten, Impfungen, Dokumenten und persoenlicher Verlaufssicht.",
+  domainTwoItems: [
+    "Pre-Visit und gespeicherte Vorbereitungen",
+    "Vitals, Impfungen, Health History",
+    "Medikationsplan und eigene Dokumente",
+  ],
+  domainThreeTitle: "Kommunikation nicht nur senden, sondern anschlussfaehig machen",
+  domainThreeBody:
+    "Inbox, Nachrichten, Telemedizin, eRezept und Meda-Bereiche zeigen, dass Kommunikation im System nicht isoliert gedacht ist. Inhalte sollen auch spaeter noch verstehbar, auffindbar und weiterfuehrbar bleiben.",
+  domainThreeItems: [
+    "Inbox und Threads",
+    "Telemedizin und Meda Live",
+    "eRezept und praxisbezogene Uebergaben",
+  ],
+  domainFourTitle: "Praxisarbeit, Organisation und Kontrolle sichtbar mitdenken",
+  domainFourBody:
+    "Auf der anderen Seite stehen echte Praxisfunktionen wie Kalender, Team, Dokumente, Directory, Integrationen, Billing Plausibility und Sicherheitsbereiche. Die Landingpage deutet an, dass MedScoutX auch auf professioneller Betriebslogik aufbaut.",
+  domainFourItems: [
+    "Praxiskalender und Booking",
+    "Praxisdokumente, Team und Directory",
+    "Security, Integrationen und Billing Plausibility",
   ],
   purposeEyebrow: "Wofür MedScoutX gedacht ist",
   purposeTitle: "Nicht Medizin ersetzen, sondern den gesamten Weg medizinisch sinnvoller begleiten",

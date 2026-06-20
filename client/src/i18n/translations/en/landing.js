@@ -45,6 +45,11 @@ export default {
   spotlightTitle: "MedScoutX as a connecting layer across the medical journey",
   spotlightBody:
     "The hero illustration shows the logic clearly: patient input is gathered, carried forward over time, and prepared in a way the practice can understand faster.",
+  spotlightParagraphs: [
+    "Preparation is only the first layer. MedScoutX carries the journey forward and brings more order not only before, but also during the encounter and throughout follow-up.",
+    "Instead of revealing every capability at once, the landing page introduces the product logic in stages: orientation first, then connection, then selected parts of the wider system.",
+    "That creates a more professional impression that feels closer to a structured medical workflow than to a loud marketing page.",
+  ],
   spotlightList: [
     "structured support before, during, and after contact",
     "calm animations instead of overloaded effects",
@@ -56,6 +61,16 @@ export default {
     "Preparation",
     "Communication",
     "Documents",
+    "Follow-up",
+  ],
+  moduleMapSignals: [
+    "individually guided handoffs",
+    "relevant information at the right moment",
+    "medical language visualized more calmly",
+  ],
+  journeyStageLabels: [
+    "Preparation",
+    "Encounter",
     "Follow-up",
   ],
   journeyCanvasEyebrow: "MedScoutX infographic",
@@ -105,6 +120,60 @@ export default {
     "Medication Plan",
     "Practice Finder",
     "Activity",
+  ],
+  ecosystemEyebrow: "Grounded in the product",
+  ecosystemTitle: "Behind the landing page is not a single tool, but a connected MedScoutX system",
+  ecosystemBody:
+    "The platform connects early orientation, preparation, continuity, communication, practice collaboration, and controlled handoff. The result feels closer to a medical workflow than to a single-purpose feature.",
+  ecosystemBoardEyebrow: "System map",
+  ecosystemBoardTitle: "From first signal to practice operations and follow-up",
+  ecosystemBoardBody:
+    "This graphic condenses real MedScoutX building blocks from symptom check, body map, image upload, Pre-Visit, vitals, medication areas, Meda, telemedicine, documents, calendars, practice directory, and data control into one shared product architecture.",
+  ecosystemBands: [
+    "Signal",
+    "Structure",
+    "Encounter",
+    "Handoff",
+    "Practice",
+  ],
+  ecosystemSignals: [
+    "Symptom Check",
+    "Body Map",
+    "Pre-Visit",
+    "Meda",
+    "Data Control",
+  ],
+  domainOneTitle: "Place symptoms meaningfully before anything else",
+  domainOneBody:
+    "Not every medical input starts with a form. MedScoutX also covers early entry points where people want to describe symptoms, mark body areas, or sort image-based observations.",
+  domainOneItems: [
+    "Symptom Check",
+    "Image upload and image analysis",
+    "Body map and region-based orientation",
+  ],
+  domainTwoTitle: "Bring preparation, continuity, and personal health data together",
+  domainTwoBody:
+    "Once early input becomes preparation, MedScoutX combines structured capture with health profile, vitals, medications, vaccinations, documents, and a more continuous personal journey view.",
+  domainTwoItems: [
+    "Pre-Visit and saved preparations",
+    "Vitals, vaccinations, health history",
+    "Medication plan and personal documents",
+  ],
+  domainThreeTitle: "Make communication not only sendable, but reusable afterward",
+  domainThreeBody:
+    "Inbox, messages, telemedicine, e-prescription, and Meda areas show that communication is not treated as an isolated event. Content should stay understandable, searchable, and transferable later on.",
+  domainThreeItems: [
+    "Inbox and message threads",
+    "Telemedicine and Meda Live",
+    "ePrescription and practice-facing handoffs",
+  ],
+  domainFourTitle: "Reflect practice work, operations, and control on the same system layer",
+  domainFourBody:
+    "On the other side, real practice functions such as calendars, team, documents, directory, integrations, billing plausibility, and security make it clear that MedScoutX is also built around professional operating logic.",
+  domainFourItems: [
+    "Practice calendar and booking",
+    "Practice documents, team, and directory",
+    "Security, integrations, and billing plausibility",
   ],
   purposeEyebrow: "What MedScoutX is for",
   purposeTitle:

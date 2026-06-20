@@ -475,3 +475,148 @@
     justify-content: center;
   }
 }
+
+/*
+ * Dark mode overrides.
+ * The CSS variables used above (--text-body, --surface, --input-bg, --border, --accent …)
+ * are not defined app-wide, so in dark mode they fall back to light colors. This block
+ * supplies explicit dark values per class — the project's established pattern (see
+ * AccountPortal.css). Colors are derived from the app's existing dark palette
+ * (slate-900/200 surfaces + text, teal accents) — no arbitrary new colors. Layout and
+ * mobile rules are untouched; light mode is unaffected.
+ */
+:root[data-theme="dark"] .billing-explain__title,
+:root[data-theme="dark"] .billing-explain__lead,
+:root[data-theme="dark"] .billing-explain__result-heading,
+:root[data-theme="dark"] .billing-explain__item-ziffer,
+:root[data-theme="dark"] .billing-explain__item-title {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .billing-explain__subtitle,
+:root[data-theme="dark"] .billing-explain__privacy,
+:root[data-theme="dark"] .billing-explain__label,
+:root[data-theme="dark"] .billing-explain__mode-btn,
+:root[data-theme="dark"] .billing-explain__result-note,
+:root[data-theme="dark"] .billing-explain__item-meta,
+:root[data-theme="dark"] .billing-explain__footer,
+:root[data-theme="dark"] .billing-explain-entry__sub {
+  color: #cbd5e1;
+}
+
+/* Links / accent text */
+:root[data-theme="dark"] .billing-explain__back,
+:root[data-theme="dark"] .billing-explain-entry__chevron {
+  color: #5eead4;
+}
+
+/* Disclaimer (amber-tinted box) */
+:root[data-theme="dark"] .billing-explain__disclaimer {
+  background: rgba(245, 158, 11, 0.12);
+  border-left-color: #f59e0b;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .billing-explain__disclaimer-icon {
+  color: #fbbf24;
+}
+
+/* Mode toggle container + active tab */
+:root[data-theme="dark"] .billing-explain__mode {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .billing-explain__mode-btn.is-active {
+  background: #0d9488;
+  color: #f8fafc;
+}
+
+/* Inputs + textareas */
+:root[data-theme="dark"] .billing-explain__input,
+:root[data-theme="dark"] .billing-explain__textarea {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .billing-explain__input::placeholder,
+:root[data-theme="dark"] .billing-explain__textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Row separator + remove button */
+:root[data-theme="dark"] .billing-explain__row {
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .billing-explain__row-remove {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+
+/* Buttons */
+:root[data-theme="dark"] .billing-explain__btn {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .billing-explain__btn--secondary {
+  color: #5eead4;
+  border-color: rgba(94, 234, 212, 0.45);
+}
+
+:root[data-theme="dark"] .billing-explain__btn--secondary:hover:not(:disabled) {
+  background: rgba(45, 212, 191, 0.12);
+}
+
+/* Status messages */
+:root[data-theme="dark"] .billing-explain__status--error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+:root[data-theme="dark"] .billing-explain__status--warn {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fde68a;
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+/* Result container + cards */
+:root[data-theme="dark"] .billing-explain__result,
+:root[data-theme="dark"] .billing-explain__drafts,
+:root[data-theme="dark"] .billing-explain__footer {
+  border-top-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .billing-explain__item {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .billing-explain__item-badge {
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+:root[data-theme="dark"] .billing-explain__item-warning {
+  color: #fde68a;
+}
+
+:root[data-theme="dark"] .billing-explain__no-findings {
+  background: rgba(34, 197, 94, 0.12);
+  color: #86efac;
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+/* Entry card on the practice-documents page */
+:root[data-theme="dark"] .billing-explain-entry {
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(94, 234, 212, 0.2);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .billing-explain-entry:hover {
+  border-color: #5eead4;
+}
