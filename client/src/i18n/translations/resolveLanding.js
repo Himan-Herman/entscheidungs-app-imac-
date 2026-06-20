@@ -12,6 +12,7 @@ const ARRAY_KEYS = new Set([
   "moduleMapItems",
   "moduleMapSignals",
   "summaryJourneySignals",
+  "visualBridgeItems",
   "journeyChartBars",
   "journeyChartDonut",
   "journeyChartTags",

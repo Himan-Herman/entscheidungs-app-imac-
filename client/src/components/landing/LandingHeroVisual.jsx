@@ -36,7 +36,10 @@ function paletteFor(theme) {
 
 export default function LandingHeroVisual({ copy, theme }) {
   const p = paletteFor(theme);
-  const bridgeItems = (copy.journeyChartBars || []).slice(0, 3);
+  const bridgeItems =
+    (copy.visualBridgeItems || []).slice(0, 3).length > 0
+      ? (copy.visualBridgeItems || []).slice(0, 3)
+      : (copy.journeyChartBars || []).slice(0, 3);
   const practiceItems = (copy.journeyChartTags || []).slice(0, 3);
 
   return (
@@ -106,10 +109,10 @@ export default function LandingHeroVisual({ copy, theme }) {
           </text>
 
           <rect
-            x="268"
+            x="260"
             y="142"
-            width="110"
-            height="138"
+            width="126"
+            height="146"
             rx="26"
             fill={p.panelSoft}
             stroke={p.chipStroke}
@@ -122,20 +125,20 @@ export default function LandingHeroVisual({ copy, theme }) {
           {bridgeItems.map((item, index) => (
             <g key={item}>
               <rect
-                x="286"
-                y={188 + index * 24}
-                width="74"
-                height="18"
+                x="279"
+                y={186 + index * 26}
+                width="88"
+                height="20"
                 rx="9"
                 fill={p.chip}
                 stroke={p.chipStroke}
               />
               <text
                 x="323"
-                y={200 + index * 24}
+                y={199 + index * 26}
                 textAnchor="middle"
                 fill={p.text}
-                fontSize="9.5"
+                fontSize="9"
                 fontWeight="700"
               >
                 {item}

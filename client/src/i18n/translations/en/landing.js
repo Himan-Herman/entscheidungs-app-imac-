@@ -37,6 +37,11 @@ export default {
   visualChipDocuments: "Documents",
   visualChipMessages: "Messages",
   visualChipLanguage: "DE -> EN",
+  visualBridgeItems: [
+    "Live Translation",
+    "Meda",
+    "Language Help",
+  ],
   visualStatusPrepared: "Preparation organized",
   visualStatusLinked: "Practice sees what matters first",
   visualStatusSecure: "secure handoff",
