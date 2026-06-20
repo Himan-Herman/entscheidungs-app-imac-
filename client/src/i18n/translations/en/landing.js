@@ -102,6 +102,10 @@ export default {
   bridgeTitle: "From personal input to a clearer consultation context",
   bridgeBody:
     "MedScoutX supports an orderly transition between patient capture, document structure, and the clinical conversation.",
+  bridgePhotoAlt:
+    "Patient in the waiting area and doctor in the practice room as a visual bridge between preparation and treatment",
+  bridgePhotoEyebrow: "Between two perspectives",
+  bridgePhotoTitle: "Preparation on the patient side, context on the practice side",
   bridgeStepOne: "Patient describes the concern",
   bridgeStepTwo: "Information is organized",
   bridgeStepThree: "Content is prepared more clearly across language",

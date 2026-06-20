@@ -100,6 +100,10 @@ export default {
   bridgeTitle: "Von eigener Eingabe zu besserer Gesprächsbasis",
   bridgeBody:
     "MedScoutX unterstützt einen geordneten Übergang zwischen Patientenerfassung, Dokumentenstruktur und klinischem Gesprächskontext.",
+  bridgePhotoAlt:
+    "Patientin im Wartebereich und Ärztin im Praxisraum als visuelle Brücke zwischen Vorbereitung und Behandlung",
+  bridgePhotoEyebrow: "Zwischen zwei Perspektiven",
+  bridgePhotoTitle: "Vorbereitung auf Patientenseite, Einordnung auf Praxisseite",
   bridgeStepOne: "Patient beschreibt Anliegen",
   bridgeStepTwo: "Informationen werden geordnet",
   bridgeStepThree: "Sprachlich verständlicher vorbereitet",

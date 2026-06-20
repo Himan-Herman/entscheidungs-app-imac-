@@ -19,6 +19,7 @@ import { HEADER_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import LandingHeroVisual from "../components/landing/LandingHeroVisual.jsx";
+import hookPatientPractice from "../assets/media/hook-patient-practice.png";
 import "../styles/LandingPage.css";
 
 export default function LandingPage() {
@@ -261,6 +262,19 @@ export default function LandingPage() {
             <h2>{copy.bridgeTitle}</h2>
             <p>{copy.bridgeBody}</p>
           </div>
+
+          <figure className="landing-page__bridge-photo">
+            <img
+              className="landing-page__bridge-photo-image"
+              src={hookPatientPractice}
+              alt={copy.bridgePhotoAlt}
+              loading="lazy"
+            />
+            <figcaption className="landing-page__bridge-photo-caption">
+              <span>{copy.bridgePhotoEyebrow}</span>
+              <strong>{copy.bridgePhotoTitle}</strong>
+            </figcaption>
+          </figure>
 
           <div className="landing-page__bridge-diagram" aria-label={copy.bridgeTitle}>
             {bridgeSteps.map((step, index) => {
