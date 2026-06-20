@@ -20,7 +20,7 @@ export default {
   mediaEyebrow: "Product view",
   mediaTitle: "An interface that feels professional without becoming noisy",
   mediaText:
-    "The public homepage first explains purpose, boundaries, and use cases. From there, visitors continue directly into the patient or practice area.",
+    "Clear typography, calm information blocks, and a medical-professional layout keep the focus on understanding instead of distraction.",
   mediaSignalsAria: "Key product qualities",
   mediaSignalOne: "Capture patient information clearly",
   mediaSignalTwo: "Reduce language friction with intention",
@@ -84,12 +84,6 @@ export default {
   privacyTitle: "Privacy and professionalism",
   privacyBody:
     "Product communication should build trust: clear language, calm design, understandable areas, and legal information always available in the footer.",
-  finalEyebrow: "Next step",
-  finalTitle: "Continue into the right area now",
-  finalBody:
-    "After the overview, visitors move directly to the existing selection page for patients or practices.",
-  finalPrimary: "Choose patient or practice",
-  finalSecondary: "Go to login",
   footerDisclaimer:
     "MedScoutX does not replace a medical examination, diagnosis, or emergency service.",
 };

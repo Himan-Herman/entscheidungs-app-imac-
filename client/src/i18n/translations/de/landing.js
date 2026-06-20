@@ -19,7 +19,7 @@ export default {
   mediaEyebrow: "Produktansicht",
   mediaTitle: "Eine Oberfläche, die professionell wirkt und nicht überlädt",
   mediaText:
-    "Die öffentliche Startseite erklärt zuerst Nutzen, Grenzen und Einsatzbereiche. Danach geht es gezielt weiter in den Patienten- oder Praxisbereich.",
+    "Klare Typografie, ruhige Informationsblöcke und ein medizinisch-seriöser Aufbau halten den Fokus auf Verständlichkeit statt Ablenkung.",
   mediaSignalsAria: "Wesentliche Produktmerkmale",
   mediaSignalOne: "Patientenangaben klar erfassen",
   mediaSignalTwo: "Sprachbarrieren gezielter reduzieren",
@@ -82,12 +82,6 @@ export default {
   privacyTitle: "Datenschutz und Professionalität",
   privacyBody:
     "Die Produktkommunikation soll Vertrauen schaffen: klare Sprache, ruhiges Design, nachvollziehbare Bereiche und rechtliche Informationen jederzeit im Footer.",
-  finalEyebrow: "Nächster Schritt",
-  finalTitle: "Jetzt in den passenden Bereich weitergehen",
-  finalBody:
-    "Nach dem Überblick gelangen Besucherinnen und Besucher direkt zur bestehenden Auswahlseite für Patienten oder Praxen.",
-  finalPrimary: "Patient oder Praxis auswählen",
-  finalSecondary: "Zum Login",
   footerDisclaimer:
     "MedScoutX ersetzt keine ärztliche Untersuchung, keine Diagnose und keinen Notfalldienst.",
 };

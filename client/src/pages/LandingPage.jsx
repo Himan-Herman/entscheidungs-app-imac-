@@ -305,27 +305,6 @@ export default function LandingPage() {
           </article>
         </section>
 
-        <section className="landing-page__cta-panel">
-          <p className="landing-page__section-eyebrow">{copy.finalEyebrow}</p>
-          <h2>{copy.finalTitle}</h2>
-          <p>{copy.finalBody}</p>
-
-          <div className="landing-page__cta-row landing-page__cta-row--center">
-            <Link
-              className="landing-page__cta landing-page__cta--primary"
-              to="/choose"
-            >
-              {copy.finalPrimary}
-              <ArrowRight size={18} aria-hidden />
-            </Link>
-            <Link
-              className="landing-page__cta landing-page__cta--secondary"
-              to="/login"
-            >
-              {copy.finalSecondary}
-            </Link>
-          </div>
-        </section>
       </main>
 
       <footer className="landing-page__footer">
@@ -334,8 +313,6 @@ export default function LandingPage() {
           className="landing-page__footer-links"
           aria-label={footerCopy.ariaLabel}
         >
-          <Link to="/choose">{copy.enterCta}</Link>
-          <Link to="/login">{copy.login}</Link>
           <Link to="/impressum?public=1">{footerCopy.imprint}</Link>
           <Link to="/datenschutz?public=1">{footerCopy.privacy}</Link>
           <Link to="/agb?public=1">{footerCopy.terms}</Link>
