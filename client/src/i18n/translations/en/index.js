@@ -65,6 +65,7 @@ import patientChatHistory from "./patientChatHistory.js";
 import vaccinations from "./vaccinations.js";
 import vitals from "./vitals.js";
 import healthHistory from "./healthHistory.js";
+import symptomDiary from "./symptomDiary.js";
 import erezept from "./erezept.js";
 import sosCard from "./sosCard.js";
 import practiceAnamnesis from "./practiceAnamnesis.js";
@@ -144,6 +145,7 @@ export default {
   vaccinations,
   vitals,
   healthHistory,
+  symptomDiary,
   erezept,
   sosCard,
   practiceAnamnesis,

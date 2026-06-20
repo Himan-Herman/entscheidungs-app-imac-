@@ -52,6 +52,7 @@ import practicePatientVitalsRouter from "./routes/practicePatientVitals.js";
 import practicePatientVaccinationsRouter from "./routes/practicePatientVaccinations.js";
 import patientAllergiesRouter from "./routes/patientAllergies.js";
 import patientDiagnosesRouter from "./routes/patientDiagnoses.js";
+import patientSymptomsRouter from "./routes/patientSymptoms.js";
 import healthHistoryAiRouter from "./routes/healthHistoryAi.js";
 import practicePatientHealthHistoryRouter from "./routes/practicePatientHealthHistory.js";
 import patientErezeptRouter from "./routes/patientErezept.js";
@@ -191,6 +192,7 @@ app.use("/api/practice/patients/:linkId/vitals", requireAuth, practicePatientVit
 app.use("/api/practice/patients/:linkId/vaccinations", requireAuth, practicePatientVaccinationsRouter);
 app.use("/api/patient/allergies", requireAuth, patientAllergiesRouter);
 app.use("/api/patient/diagnoses", requireAuth, patientDiagnosesRouter);
+app.use("/api/patient/symptoms", requireAuth, patientSymptomsRouter);
 app.use("/api/patient/sos-card", requireAuth, patientSosCardRouter);
 app.use("/api/practice/patients/:linkId/sos-card", requireAuth, practiceSosCardRouter);
 app.use("/api/sos/wallet", requireAuth, sosWalletLimiter, sosWalletRouter);

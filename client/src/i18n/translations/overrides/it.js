@@ -14,6 +14,7 @@ import itPracticeModules from "./it/it.practice.modules.js";
 import itVaccinations from "./it/it.vaccinations.js";
 import itVitals from "./it/it.vitals.js";
 import itHealthHistory from "./it/it.healthHistory.js";
+import { itSymptomDiary } from "./it/it.symptomDiary.js";
 import itErezept from "./it/it.erezept.js";
 import itSosCard from "./it/it.sosCard.js";
 import { itPracticeBillingPlausibility, itPracticeIntegrationsVendors } from "./it/it.practiceBillingPlausibility.js";
@@ -188,7 +189,7 @@ export default deepMerge(
   deepMerge(
     deepMerge(deepMerge(itPatient, itMedicalInterpreter), itPracticeModules),
     deepMerge(
-      deepMerge(deepMerge(deepMerge(deepMerge({ vaccinations: itVaccinations }, { vitals: itVitals }), { healthHistory: itHealthHistory }), { erezept: itErezept }), { sosCard: itSosCard }),
+      deepMerge(deepMerge(deepMerge(deepMerge(deepMerge({ vaccinations: itVaccinations }, { vitals: itVitals }), { healthHistory: itHealthHistory }), { symptomDiary: itSymptomDiary }), { erezept: itErezept }), { sosCard: itSosCard }),
       deepMerge(
         deepMerge(
           { practiceBillingPlausibility: itPracticeBillingPlausibility },

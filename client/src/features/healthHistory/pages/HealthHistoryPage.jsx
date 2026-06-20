@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertTriangle, Plus, ShieldAlert, Stethoscope } from "lucide-react";
+import { AlertTriangle, NotebookPen, Plus, ShieldAlert, Stethoscope } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { isSymptomDiaryClientEnabled } from "../../symptomDiary/featureFlag.js";
+import SymptomDiarySection from "../../symptomDiary/components/SymptomDiarySection.jsx";
 import {
   fetchAllergies, createAllergy, updateAllergy, deleteAllergy,
   fetchDiagnoses, createDiagnosis, updateDiagnosis, deleteDiagnosis,
@@ -18,6 +20,13 @@ export default function HealthHistoryPage() {
     const msgs = getMessages(language);
     return msgs.healthHistory || getMessages("en").healthHistory;
   }, [language]);
+
+  const tSymptom = useMemo(
+    () => getMessages(language).symptomDiary || getMessages("en").symptomDiary,
+    [language],
+  );
+  const symptomEnabled = isSymptomDiaryClientEnabled();
+  const [symptomCount, setSymptomCount] = useState(0);
 
   const [activeTab, setActiveTab] = useState("allergies");
 
@@ -184,6 +193,20 @@ export default function HealthHistoryPage() {
           {t?.diagnosesHeading || "Diagnosen"}
           <span className="hh-tabs__count">{diagnoses.length}</span>
         </button>
+        {symptomEnabled && (
+          <button
+            role="tab"
+            aria-selected={activeTab === "symptoms"}
+            aria-controls="hh-panel-symptoms"
+            id="hh-tab-symptoms"
+            className={`hh-tabs__btn${activeTab === "symptoms" ? " hh-tabs__btn--active" : ""}`}
+            onClick={() => setActiveTab("symptoms")}
+          >
+            <NotebookPen size={16} aria-hidden="true" />
+            {tSymptom.tabName}
+            <span className="hh-tabs__count">{symptomCount}</span>
+          </button>
+        )}
       </nav>
 
       {/* ── Allergies panel ─────────────────────────────────────────────────── */}
@@ -263,6 +286,18 @@ export default function HealthHistoryPage() {
           </div>
         )}
       </div>
+
+      {/* ── Symptom history panel (feature-flagged) ─────────────────────────── */}
+      {symptomEnabled && (
+        <div
+          id="hh-panel-symptoms"
+          role="tabpanel"
+          aria-labelledby="hh-tab-symptoms"
+          hidden={activeTab !== "symptoms"}
+        >
+          <SymptomDiarySection t={tSymptom} locale={language} onCountChange={setSymptomCount} />
+        </div>
+      )}
 
       {/* Forms */}
       {showAllergyForm && (

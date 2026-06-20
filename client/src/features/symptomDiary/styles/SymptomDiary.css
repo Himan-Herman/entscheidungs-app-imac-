@@ -1,0 +1,337 @@
+/*
+ * Symptom diary — self-contained styles for the health-record tab.
+ * Light mode uses the app --ms-* tokens (with fallbacks) to match the health record.
+ * Dark mode is handled explicitly via :root[data-theme="dark"] overrides (the app toggle
+ * mechanism), with colors from the project dark palette — not relying on undefined tokens.
+ */
+
+.sd-privacy {
+  margin: 0 0 1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.sd-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  min-height: 2.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--ms-accent, #0d9488);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.sd-add-btn:hover { background: #0f766e; }
+.sd-add-btn:focus-visible { outline: 3px solid var(--ms-accent, #0d9488); outline-offset: 2px; }
+
+.sd-error {
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.5rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.sd-loading { padding: 1.5rem; text-align: center; color: var(--ms-text-secondary, #6b7280); }
+
+.sd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.sd-empty p { margin: 0; }
+
+/* Cards list — single column, mobile-friendly */
+.sd-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sd-card {
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--ms-border, #e5e7eb);
+  border-radius: 0.6rem;
+  background: var(--ms-surface, #fff);
+}
+
+.sd-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sd-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ms-text, #111827);
+}
+
+.sd-card__sev {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--ms-surface-muted, #f1f5f9);
+  color: var(--ms-text, #111827);
+  white-space: nowrap;
+}
+
+.sd-card__time {
+  margin: 0.35rem 0 0.5rem;
+  font-size: 0.82rem;
+  color: var(--ms-text-secondary, #6b7280);
+}
+
+.sd-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0;
+}
+
+.sd-card__detail {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ms-text, #1f2937);
+  line-height: 1.45;
+}
+
+.sd-card__detail strong { color: var(--ms-text-secondary, #4b5563); font-weight: 600; }
+
+.sd-card__notes {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ms-text-secondary, #4b5563);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.sd-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.sd-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
+  min-height: 2.5rem;
+  border: 1px solid var(--ms-border, #e5e7eb);
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--ms-text, #111827);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.sd-card__btn:hover { background: var(--ms-surface-hover, #f3f4f6); }
+.sd-card__btn:focus-visible { outline: 2px solid var(--ms-accent, #0d9488); outline-offset: 2px; }
+.sd-card__btn--danger { color: #b91c1c; border-color: #fca5a5; }
+.sd-card__btn--danger:hover { background: #fef2f2; }
+
+/* ── Form modal ──────────────────────────────────────────────────────────── */
+.sd-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.25rem;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.sd-form-panel {
+  width: 100%;
+  max-width: 34rem;
+  margin: auto;
+  background: var(--ms-surface, #fff);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.sd-form__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ms-text, #111827);
+}
+
+.sd-form__error {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.4rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  font-size: 0.85rem;
+}
+
+.sd-form__group { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.sd-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.sd-form__label { font-size: 0.85rem; font-weight: 600; color: var(--ms-text-secondary, #374151); }
+
+.sd-form__input,
+.sd-form__textarea {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--ms-border, #d1d5db);
+  border-radius: 0.45rem;
+  background: var(--ms-surface, #fff);
+  color: var(--ms-text, #111827);
+  font: inherit;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sd-form__textarea { resize: vertical; min-height: 4.5rem; }
+
+.sd-form__input:focus,
+.sd-form__textarea:focus {
+  outline: 2px solid var(--ms-accent, #0d9488);
+  outline-offset: 1px;
+  border-color: var(--ms-accent, #0d9488);
+}
+
+/* Severity range */
+.sd-sev-head { display: flex; align-items: baseline; justify-content: space-between; }
+.sd-sev-value { font-weight: 700; font-size: 0.95rem; color: var(--ms-accent, #0d9488); }
+.sd-sev-range { width: 100%; accent-color: var(--ms-accent, #0d9488); }
+.sd-sev-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--ms-text-secondary, #9ca3af);
+  margin-top: 0.1rem;
+}
+
+.sd-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.sd-form__cancel,
+.sd-form__submit {
+  padding: 0.6rem 1.1rem;
+  min-height: 2.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sd-form__cancel {
+  background: transparent;
+  border: 1px solid var(--ms-border, #d1d5db);
+  color: var(--ms-text, #111827);
+}
+
+.sd-form__submit {
+  background: var(--ms-accent, #0d9488);
+  border: 1px solid var(--ms-accent, #0d9488);
+  color: #fff;
+}
+
+.sd-form__submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.sd-form__cancel:focus-visible,
+.sd-form__submit:focus-visible { outline: 2px solid var(--ms-accent, #0d9488); outline-offset: 2px; }
+
+/* Mobile */
+@media (max-width: 40rem) {
+  .sd-form__row { grid-template-columns: 1fr; }
+  .sd-card__actions .sd-card__btn { flex: 1 1 auto; justify-content: center; }
+}
+
+/* ── Dark mode (app data-theme toggle) — explicit, project dark palette ───── */
+:root[data-theme="dark"] .sd-privacy,
+:root[data-theme="dark"] .sd-loading,
+:root[data-theme="dark"] .sd-empty,
+:root[data-theme="dark"] .sd-card__time,
+:root[data-theme="dark"] .sd-card__notes { color: #cbd5e1; }
+
+:root[data-theme="dark"] .sd-card,
+:root[data-theme="dark"] .sd-form-panel {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .sd-form-panel { background: #0f172a; }
+
+:root[data-theme="dark"] .sd-card__title,
+:root[data-theme="dark"] .sd-card__detail,
+:root[data-theme="dark"] .sd-form__title { color: #e2e8f0; }
+
+:root[data-theme="dark"] .sd-card__detail strong,
+:root[data-theme="dark"] .sd-form__label { color: #cbd5e1; }
+
+:root[data-theme="dark"] .sd-card__sev {
+  background: rgba(148, 163, 184, 0.16);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .sd-card__btn {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .sd-card__btn:hover { background: rgba(148, 163, 184, 0.12); }
+:root[data-theme="dark"] .sd-card__btn--danger { color: #fca5a5; border-color: rgba(248, 113, 113, 0.4); }
+:root[data-theme="dark"] .sd-card__btn--danger:hover { background: rgba(239, 68, 68, 0.14); }
+
+:root[data-theme="dark"] .sd-form__input,
+:root[data-theme="dark"] .sd-form__textarea {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .sd-form__input::placeholder,
+:root[data-theme="dark"] .sd-form__textarea::placeholder { color: #94a3b8; }
+
+:root[data-theme="dark"] .sd-form__cancel {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .sd-sev-value { color: #5eead4; }
+:root[data-theme="dark"] .sd-sev-scale { color: #94a3b8; }
+:root[data-theme="dark"] .sd-sev-range { accent-color: #2dd4bf; }
+
+:root[data-theme="dark"] .sd-error,
+:root[data-theme="dark"] .sd-form__error {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.4);
+}

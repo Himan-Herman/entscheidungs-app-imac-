@@ -13,6 +13,7 @@ import frMedicalInterpreter from "./fr/fr.medicalInterpreter.js";
 import frPracticeModules from "./fr/fr.practice.modules.js";
 import frVitals from "./fr/fr.vitals.js";
 import frHealthHistory from "./fr/fr.healthHistory.js";
+import { frSymptomDiary } from "./fr/fr.symptomDiary.js";
 import frErezept from "./fr/fr.erezept.js";
 import frSosCard from "./fr/fr.sosCard.js";
 import { frPracticeBillingPlausibility, frPracticeIntegrationsVendors } from "./fr/fr.practiceBillingPlausibility.js";
@@ -186,7 +187,7 @@ export default deepMerge(
   deepMerge(
     deepMerge(deepMerge(frPatient, frMedicalInterpreter), frPracticeModules),
     deepMerge(
-      deepMerge(deepMerge(deepMerge({ vitals: frVitals }, { healthHistory: frHealthHistory }), { erezept: frErezept }), { sosCard: frSosCard }),
+      deepMerge(deepMerge(deepMerge(deepMerge({ vitals: frVitals }, { healthHistory: frHealthHistory }), { symptomDiary: frSymptomDiary }), { erezept: frErezept }), { sosCard: frSosCard }),
       deepMerge(
         deepMerge(
           { practiceBillingPlausibility: frPracticeBillingPlausibility },

@@ -146,6 +146,15 @@ export function isHealthHistoryEnabled() {
   return envFlag("ENABLE_HEALTH_HISTORY", false);
 }
 
+/**
+ * Personal symptom diary — patient-owned, chronological self-reported symptom entries
+ * inside the health record. Documentation only: no diagnosis, therapy, triage, or urgency.
+ * No AI in Phase 1. Default off until ENABLE_SYMPTOM_DIARY is set.
+ */
+export function isSymptomDiaryEnabled() {
+  return envFlag("ENABLE_SYMPTOM_DIARY", false);
+}
+
 export function isDocumentOcrUiEnabled() {
   if (isLabInterpretationEnabled()) return false;
   return (
