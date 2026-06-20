@@ -16,6 +16,7 @@ const OPENAI_REALTIME_CALLS = 'https://api.openai.com/v1/realtime/calls';
  *   isDone: boolean,
  *   isUnclear: boolean,
  *   languageMismatch: boolean,
+ *   unsupportedLanguage: boolean,
  *   speakerRole: SpeakerRole|null,
  *   targetRole: SpeakerRole|null,
  *   sourceLanguage: string|null,
@@ -196,6 +197,7 @@ export function useRealtimeSession() {
           isDone:          false,
           isUnclear:       false,       // set true when language is unrecognisable
           languageMismatch: false,      // set true when output language guard fires
+          unsupportedLanguage: false,   // set true when the INPUT is a non-selected language
           speakerRole:     null,        // filled at transcription.completed
           targetRole:      null,        // filled at transcription.completed
           sourceLanguage:  null,
@@ -284,16 +286,21 @@ export function useRealtimeSession() {
           }
         }
 
-        // Marks isDone immediately so delta/done events cannot overwrite with hallucinated text.
+        // Privacy/safety: an utterance in a non-selected language must NOT have its
+        // raw foreign transcript exposed. We deliberately do NOT store transcript.trim()
+        // here — originalText stays empty so the UI, PDF and local history can never
+        // show or persist the foreign text. Marks isDone immediately so delta/done
+        // events cannot overwrite with hallucinated text.
         if (markUnclear) {
           setTurns(prev => {
             const idx = _findTurn(prev);
             if (idx < 0) return prev;
             return prev.map((t, i) => i === idx ? {
               ...t,
-              originalText:   transcript.trim(),
-              isUnclear:      true,
-              isDone:         true,
+              originalText:        '',
+              isUnclear:           true,
+              isDone:              true,
+              unsupportedLanguage: true,
               translatedText: 'Bitte wiederholen Sie die Aussage klar in einer der ausgewählten Gesprächssprachen.',
             } : t);
           });

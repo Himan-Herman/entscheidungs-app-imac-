@@ -1399,7 +1399,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                       {turn.isDone ? 'Unbekannte Sprache' : 'Erkenne Sprache …'}
                     </span>
                   )}
-                  {turn.isDone && editingKey !== turn.key && (
+                  {turn.isDone && !turn.unsupportedLanguage && editingKey !== turn.key && (
                     <button
                       className="mrt-turn-edit-trigger"
                       onClick={() => handleEditStart(turn)}
@@ -1441,6 +1441,11 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                       </button>
                     </div>
                   </div>
+                ) : turn.unsupportedLanguage ? (
+                  // Privacy/safety: never show the raw foreign transcript.
+                  <p className="mrt-turn-text mrt-turn-text--unsupported">
+                    Sprache außerhalb der ausgewählten Gesprächssprachen.
+                  </p>
                 ) : (
                   <p className="mrt-turn-text">
                     {turn.originalText !== null
