@@ -21,6 +21,8 @@ export default {
   mediaTitle: "An interface that feels professional without becoming noisy",
   mediaText:
     "Clear typography, calm information blocks, and a medical-professional layout keep the focus on understanding instead of distraction.",
+  videoEyebrow: "Inside the application",
+  videoTitle: "Product preview on desktop and mobile",
   mediaSignalsAria: "Key product qualities",
   mediaSignalOne: "Capture patient information clearly",
   mediaSignalTwo: "Reduce language friction with intention",

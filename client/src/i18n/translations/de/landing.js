@@ -20,6 +20,8 @@ export default {
   mediaTitle: "Eine Oberfläche, die professionell wirkt und nicht überlädt",
   mediaText:
     "Klare Typografie, ruhige Informationsblöcke und ein medizinisch-seriöser Aufbau halten den Fokus auf Verständlichkeit statt Ablenkung.",
+  videoEyebrow: "Einblick in die Anwendung",
+  videoTitle: "Produktvorschau auf Desktop und Smartphone",
   mediaSignalsAria: "Wesentliche Produktmerkmale",
   mediaSignalOne: "Patientenangaben klar erfassen",
   mediaSignalTwo: "Sprachbarrieren gezielter reduzieren",

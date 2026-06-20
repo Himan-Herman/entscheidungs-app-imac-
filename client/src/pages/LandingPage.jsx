@@ -20,6 +20,9 @@ import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import LandingHeroVisual from "../components/landing/LandingHeroVisual.jsx";
 import hookPatientPractice from "../assets/media/hook-patient-practice.png";
+import medScoutLogo from "../assets/img/medscout-logo.png";
+import heroPoster from "../assets/media/hero-medscoutx.png";
+import demoVideo from "../assets/media/medscoutx-demo.mp4";
 import "../styles/LandingPage.css";
 
 export default function LandingPage() {
@@ -74,7 +77,7 @@ export default function LandingPage() {
       <header className="landing-page__header">
         <Link to="/" className="landing-page__brand" aria-label="MedScoutX home">
           <span className="landing-page__brand-mark" aria-hidden="true">
-            MX
+            <img src={medScoutLogo} alt="" />
           </span>
           <span className="landing-page__brand-copy">
             <strong>MedScoutX</strong>
@@ -161,6 +164,22 @@ export default function LandingPage() {
               <p className="landing-page__media-eyebrow">{copy.mediaEyebrow}</p>
               <h2 className="landing-page__media-title">{copy.mediaTitle}</h2>
               <p className="landing-page__media-text">{copy.mediaText}</p>
+            </div>
+
+            <div className="landing-page__video-shell">
+              <video
+                className="landing-page__video"
+                src={demoVideo}
+                poster={heroPoster}
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+              <div className="landing-page__video-caption">
+                <span>{copy.videoEyebrow}</span>
+                <strong>{copy.videoTitle}</strong>
+              </div>
             </div>
 
             <LandingHeroVisual copy={copy} theme={theme} />
@@ -311,16 +330,18 @@ export default function LandingPage() {
       </main>
 
       <footer className="landing-page__footer">
-        <p>{copy.footerDisclaimer}</p>
-        <nav
-          className="landing-page__footer-links"
-          aria-label={footerCopy.ariaLabel}
-        >
-          <Link to="/impressum?public=1">{footerCopy.imprint}</Link>
-          <Link to="/datenschutz?public=1">{footerCopy.privacy}</Link>
-          <Link to="/agb?public=1">{footerCopy.terms}</Link>
-          <Link to="/disclaimer?public=1">{footerCopy.disclaimer}</Link>
-        </nav>
+        <div className="landing-page__footer-shell">
+          <p className="landing-page__footer-note">{copy.footerDisclaimer}</p>
+          <nav
+            className="landing-page__footer-links"
+            aria-label={footerCopy.ariaLabel}
+          >
+            <Link to="/impressum?public=1">{footerCopy.imprint}</Link>
+            <Link to="/datenschutz?public=1">{footerCopy.privacy}</Link>
+            <Link to="/agb?public=1">{footerCopy.terms}</Link>
+            <Link to="/disclaimer?public=1">{footerCopy.disclaimer}</Link>
+          </nav>
+        </div>
       </footer>
     </div>
   );
