@@ -66,6 +66,9 @@ export default function LandingPage() {
   const heroFlowItems = (copy.journeyChartBars || []).slice(0, 5);
   const heroFeatureItems = (copy.journeyFeatureCloud || []).slice(0, 4);
   const heroFlowHeights = [28, 52, 40, 62, 46];
+  const heroStageItems = (copy.journeyStageLabels || []).slice(0, 3);
+  const heroSignalItems = (copy.ecosystemSignals || copy.journeyFeatureCloud || []).slice(0, 4);
+  const heroSignalWidths = [72, 88, 58, 96];
 
   const bridgeSteps = [
     { icon: UserRound, label: copy.bridgeStepOne },
@@ -189,6 +192,34 @@ export default function LandingPage() {
                     {item}
                   </span>
                 ))}
+              </div>
+
+              <div className="landing-page__hero-canvas" aria-label={copy.visualInsightsAria}>
+                <div className="landing-page__hero-canvas-flow">
+                  {heroStageItems.map((item, index) => (
+                    <div key={item} className="landing-page__hero-canvas-stage">
+                      <span className="landing-page__hero-canvas-index">0{index + 1}</span>
+                      <strong>{item}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="landing-page__hero-canvas-graphic">
+                  <div className="landing-page__hero-orbit" aria-hidden="true">
+                    <div className="landing-page__hero-orbit-ring is-outer" />
+                    <div className="landing-page__hero-orbit-ring is-middle" />
+                    <div className="landing-page__hero-orbit-core" />
+                  </div>
+
+                  <div className="landing-page__hero-mini-bars" aria-hidden="true">
+                    {heroSignalItems.map((item, index) => (
+                      <div key={item} className="landing-page__hero-mini-bar-row">
+                        <span>{item}</span>
+                        <i style={{ width: `${heroSignalWidths[index] || 64}px` }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
