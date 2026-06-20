@@ -9,6 +9,9 @@ const ARRAY_KEYS = new Set([
   "practicePoints",
   "spotlightList",
   "moduleMapItems",
+  "journeyChartBars",
+  "journeyChartDonut",
+  "journeyChartTags",
 ]);
 
 /**

@@ -19,6 +19,7 @@ import { HEADER_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import LandingHeroVisual from "../components/landing/LandingHeroVisual.jsx";
+import LandingJourneyCharts from "../components/landing/LandingJourneyCharts.jsx";
 import hookPatientPractice from "../assets/media/hook-patient-practice.png";
 import medScoutLogo from "../assets/img/medscout-logo.png";
 import heroPoster from "../assets/media/hero-medscoutx.png";
@@ -80,8 +81,9 @@ export default function LandingPage() {
             <img src={medScoutLogo} alt="" />
           </span>
           <span className="landing-page__brand-copy">
+            <span className="landing-page__brand-kicker">{copy.slogan}</span>
             <strong>MedScoutX</strong>
-            <span>{copy.brandLine}</span>
+            <span className="landing-page__brand-line">{copy.brandLine}</span>
           </span>
         </Link>
 
@@ -200,6 +202,8 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        <LandingJourneyCharts copy={copy} theme={theme} />
 
         <section id="support" className="landing-page__section">
           <div className="landing-page__section-heading">

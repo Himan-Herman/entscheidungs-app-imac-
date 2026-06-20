@@ -1,26 +1,27 @@
 export default {
   pageTitle: "MedScoutX — Prepare medical communication with more clarity",
   skip: "Skip to content",
-  brandLine: "Structured preparation before the clinical encounter",
-  badge: "Calm. Clear. Better prepared for care.",
+  slogan: "Better prepared. Better care.",
+  brandLine: "Bridge between patients and practices",
+  badge: "Before. During. After the clinical encounter.",
   headline:
-    "MedScoutX helps explain symptoms, documents, and language needs before the appointment.",
+    "MedScoutX connects preparation, consultation, and follow-up in a clearer medical journey.",
   description:
-    "MedScoutX supports patients, practices, and clinics in preparing medical information more clearly, handing it over more cleanly, and entering the real consultation with better structure.",
+    "From the first preparation to the consultation and ongoing support, MedScoutX helps organize medical information more calmly, share it more clearly, and carry it forward in a more individualized way.",
   primaryCta: "Go to patient or practice",
   secondaryCta: "How MedScoutX helps",
   enterCta: "Continue to patient or practice",
   login: "Login",
   trustLine:
-    "No diagnosis. No treatment recommendation. Not a replacement for medical care. MedScoutX supports structured preparation and communication only.",
+    "No diagnosis. No treatment recommendation. Not a replacement for medical care. MedScoutX supports communication, orientation, and continuity across the care journey.",
   metricsAria: "Core areas of MedScoutX",
-  metricA: "Multilingual communication",
-  metricB: "Structured preparation",
-  metricC: "Clear handoff to the practice",
+  metricA: "Continuity across the journey",
+  metricB: "Multilingual communication",
+  metricC: "Clear transitions between roles",
   mediaEyebrow: "Product view",
   mediaTitle: "An interface that feels professional without becoming noisy",
   mediaText:
-    "Clear typography, calm information blocks, and a medical-professional layout keep the focus on understanding instead of distraction.",
+    "Clear typography, calm information blocks, and a medical-professional layout keep the focus on understanding, continuity, and the right next step.",
   videoEyebrow: "Inside the application",
   videoTitle: "Product preview on desktop and mobile",
   mediaSignalsAria: "Key product qualities",
@@ -41,27 +42,60 @@ export default {
   visualStatusSecure: "secure handoff",
   visualInsightsAria: "Additional insights into the product logic",
   spotlightEyebrow: "Visual logic",
-  spotlightTitle: "New MedScoutX-native visuals instead of only folder assets",
+  spotlightTitle: "MedScoutX as a connecting layer across the medical journey",
   spotlightBody:
-    "The hero illustration shows the logic clearly: patient input is gathered, structured, and then prepared in a way the practice can read faster.",
+    "The hero illustration shows the logic clearly: patient input is gathered, carried forward over time, and prepared in a way the practice can understand faster.",
   spotlightList: [
-    "custom SVG illustration created directly in the project",
+    "structured support before, during, and after contact",
     "calm animations instead of overloaded effects",
     "fully responsive even on small mobile screens",
   ],
-  moduleMapEyebrow: "Key areas",
-  moduleMapTitle: "Core feature fields at a glance",
+  moduleMapEyebrow: "Selected areas",
+  moduleMapTitle: "Capabilities are hinted at, not fully revealed at once",
   moduleMapItems: [
     "Preparation",
+    "Communication",
     "Documents",
-    "Messages",
-    "Appointments",
+    "Follow-up",
+  ],
+  journeyCanvasEyebrow: "MedScoutX infographic",
+  journeyCanvasTitle: "Diagrams, geometry, and calm data visuals as part of the brand language",
+  journeyCanvasBody:
+    "These visuals hint at how MedScoutX structures information, sharpens focus during the encounter, and keeps the journey connected between patient and practice.",
+  journeyCanvasAria:
+    "Infographic cards with histogram, donut chart, and geometric network for the MedScoutX journey",
+  journeyChartOneTitle: "Signal across the full journey",
+  journeyChartOneBody:
+    "A calm histogram shows preparation, consultation, handoff, and follow-up as one connected path.",
+  journeyChartTwoTitle: "Focus during the actual encounter",
+  journeyChartTwoBody:
+    "The donut chart balances communication, context, and documents without making the interface feel busy.",
+  journeyChartTwoCenter: "clear focus",
+  journeyChartThreeTitle: "Bridge in motion",
+  journeyChartThreeBody:
+    "Geometric lines and nodes visualize how people, context, and practice stay connected over time.",
+  journeyChartBars: [
+    "Before",
+    "Visit",
+    "Handoff",
+    "After",
+  ],
+  journeyChartDonut: [
+    "Communication",
+    "Context",
+    "Documents",
+  ],
+  journeyChartTags: [
+    "Patient",
+    "Context",
+    "Practice",
+    "Follow-up",
   ],
   purposeEyebrow: "What MedScoutX is for",
   purposeTitle:
-    "Not simulating medicine, but preparing medical communication better",
+    "Not replacing medicine, but supporting the full journey more meaningfully",
   purposeBody:
-    "MedScoutX is designed for the moments when communication becomes difficult: too much information, too many documents, language barriers, or unclear coordination between patient and practice.",
+    "MedScoutX is designed for the moments when care becomes hard to follow: too much information, language barriers, document handoffs, follow-up questions, and the need for more individualized coordination between patient and practice.",
   pillarOneTitle: "Structure before the visit",
   pillarOneBody:
     "Symptoms, questions, medication, and documents are brought into a clearer order before the conversation begins.",
@@ -72,54 +106,54 @@ export default {
   pillarThreeBody:
     "The product intentionally stays restrained, explains its boundaries clearly, and avoids an overloaded or alarmist feel.",
   forWhomTitle: "Use in everyday care",
-  workspaceTitle: "Two paths, one shared goal",
+  workspaceTitle: "Two perspectives, one connected journey",
   workspaceBody:
-    "The platform cleanly separates patient and practice flows so each side gets the right depth, language, and orientation.",
+    "The platform clearly separates patient and practice flows while connecting both sides where a more individualized, traceable medical journey matters.",
   patientCardTitle: "For patients",
   patientCardBody:
     "People can prepare better for appointments, collect documents, and describe their situation more clearly.",
   patientPoints: [
-    "Collect symptoms and questions before the visit",
+    "Understand symptoms, questions, and changes over time more clearly",
     "Keep documents, messages, and practice connections in one place",
-    "Enter the consultation with less uncertainty",
+    "Move through visits and next steps with less uncertainty",
   ],
   practiceCardTitle: "For practices and clinics",
   practiceCardBody:
     "Care teams receive more structured pre-information, better organized documents, and clearer communication paths.",
   practicePoints: [
-    "Review preparation before contact more efficiently",
+    "Review pre-information, context, and follow-up more efficiently",
     "Support multilingual workflows more calmly",
-    "Keep communication, documents, and follow-ups in one system",
+    "Keep communication, documents, and next steps in one system",
   ],
   howTitle: "How it works",
   howSteps: [
     "Choose the right area",
     "Capture information in a structured way",
-    "Prepare the relevant content linguistically and operationally",
+    "Carry relevant content forward at the right moment",
     "Continue into the actual patient or practice workspace",
   ],
   howOutcome:
-    "The outcome is not a medical judgment, but a better basis for real medical conversations.",
+    "The outcome is not a medical judgment, but a better basis for real medical conversations, handoffs, and follow-up.",
   bridgeEyebrow: "Communication flow",
   bridgeTitle: "From personal input to a clearer consultation context",
   bridgeBody:
-    "MedScoutX supports an orderly transition between patient capture, document structure, and the clinical conversation.",
+    "MedScoutX supports an orderly transition between personal input, practice understanding, and what happens after the encounter.",
   bridgePhotoAlt:
     "Patient in the waiting area and doctor in the practice room as a visual bridge between preparation and treatment",
   bridgePhotoEyebrow: "Between two perspectives",
-  bridgePhotoTitle: "Preparation on the patient side, context on the practice side",
+  bridgePhotoTitle: "Between waiting room, consultation, and ongoing support",
   bridgeStepOne: "Patient describes the concern",
   bridgeStepTwo: "Information is organized",
-  bridgeStepThree: "Content is prepared more clearly across language",
-  bridgeStepFour: "Practice conversation starts with more clarity",
+  bridgeStepThree: "Practice understands the context faster",
+  bridgeStepFour: "The journey stays connected afterward",
   bridgeCaption:
-    "The focus is on clarity, structure, and preparation, not automated diagnosis.",
+    "The focus is on clarity, structure, continuity, and more individualized guidance, not automated diagnosis.",
   safetyTitle: "Medical boundary",
   safetyBody:
     "MedScoutX is not an emergency tool and not a diagnostic app. For acute symptoms, breathing problems, severe pain, or other urgent situations, medical help must be contacted directly.",
   privacyTitle: "Privacy and professionalism",
   privacyBody:
-    "Product communication should build trust: clear language, calm design, understandable areas, and legal information always available in the footer.",
+    "Product communication should build trust: clear language, calm design, understandable areas, and legal information kept visible.",
   footerDisclaimer:
     "MedScoutX does not replace a medical examination, diagnosis, or emergency service.",
 };

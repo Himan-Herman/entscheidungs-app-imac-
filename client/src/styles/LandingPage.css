@@ -120,6 +120,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  gap: 2px;
 }
 
 .landing-page__brand-copy strong,
@@ -133,15 +134,25 @@
   font-family: "Fraunces", "Iowan Old Style", "Palatino Linotype", serif;
 }
 
+.landing-page__brand-kicker {
+  color: var(--landing-accent-strong);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .landing-page__brand-copy strong {
   font-size: 1.18rem;
   font-weight: 700;
+  line-height: 1.05;
   letter-spacing: 0.02em;
 }
 
-.landing-page__brand-copy span {
+.landing-page__brand-line {
   color: var(--landing-muted);
   font-size: 0.92rem;
+  line-height: 1.25;
 }
 
 .landing-page__header-actions {
@@ -589,6 +600,110 @@
   font-weight: 600;
 }
 
+.landing-page__journey-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.landing-page__journey-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 30px;
+  border: 1px solid var(--landing-border);
+  background:
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 12rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--landing-surface) 94%, transparent), color-mix(in srgb, var(--landing-surface-strong) 96%, transparent));
+  box-shadow: var(--landing-shadow);
+  padding: 22px;
+}
+
+.landing-page[data-theme="dark"] .landing-page__journey-card {
+  background:
+    radial-gradient(circle at top right, rgba(94, 234, 212, 0.09), transparent 12rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--landing-surface) 94%, transparent), color-mix(in srgb, var(--landing-surface-strong) 96%, transparent));
+}
+
+.landing-page__journey-card::before {
+  content: "";
+  position: absolute;
+  inset: auto -3rem -3rem auto;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.12), transparent 72%);
+  pointer-events: none;
+}
+
+.landing-page[data-theme="dark"] .landing-page__journey-card::before {
+  background: radial-gradient(circle, rgba(94, 234, 212, 0.12), transparent 72%);
+}
+
+.landing-page__journey-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-page__journey-eyebrow {
+  margin: 0;
+  color: var(--landing-accent-strong);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.landing-page__journey-copy h3 {
+  margin: 10px 0 0;
+  font-family: "Fraunces", "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: 1.55rem;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.landing-page__journey-copy p {
+  margin: 12px 0 0;
+  color: var(--landing-muted);
+  line-height: 1.6;
+}
+
+.landing-page__journey-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 18px;
+}
+
+.landing-page__journey-donut {
+  display: grid;
+  gap: 12px;
+}
+
+.landing-page__journey-legend {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-page__journey-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--landing-border);
+  background: color-mix(in srgb, var(--landing-surface-strong) 86%, transparent);
+  color: var(--landing-text);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.landing-page__journey-legend-item i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
 .landing-page__section {
   display: grid;
   gap: 22px;
@@ -867,6 +982,7 @@
 
 .landing-page__hero-copy,
 .landing-page__hero-media,
+.landing-page__journey-card,
 .landing-page__pillar-card,
 .landing-page__workspace-card,
 .landing-page__flow-card,
@@ -877,6 +993,14 @@
 
 .landing-page__hero-media {
   animation-delay: 70ms;
+}
+
+.landing-page__journey-card:nth-child(2) {
+  animation-delay: 110ms;
+}
+
+.landing-page__journey-card:nth-child(3) {
+  animation-delay: 150ms;
 }
 
 .landing-page__pillar-card:nth-child(2),
@@ -903,6 +1027,7 @@
 
 @media (max-width: 1080px) {
   .landing-page__hero,
+  .landing-page__journey-grid,
   .landing-page__pillar-grid,
   .landing-page__workspace-grid,
   .landing-page__safety-grid,
@@ -944,7 +1069,12 @@
     width: 100%;
   }
 
-  .landing-page__brand-copy span {
+  .landing-page__brand-kicker {
+    font-size: 0.64rem;
+    letter-spacing: 0.11em;
+  }
+
+  .landing-page__brand-line {
     display: none;
   }
 
@@ -985,6 +1115,7 @@
 
   .landing-page__hero-copy,
   .landing-page__hero-media,
+  .landing-page__journey-card,
   .landing-page__bridge,
   .landing-page__pillar-card,
   .landing-page__workspace-card,
@@ -997,7 +1128,8 @@
   .landing-page__visual-stage,
   .landing-page__insight-card,
   .landing-page__bridge-photo,
-  .landing-page__video-shell {
+  .landing-page__video-shell,
+  .landing-page__journey-card {
     border-radius: 22px;
   }
 
@@ -1041,6 +1173,14 @@
   .landing-page__signal-pill {
     width: 100%;
     justify-content: center;
+  }
+
+  .landing-page__journey-copy h3 {
+    font-size: 1.32rem;
+  }
+
+  .landing-page__journey-legend-item {
+    font-size: 0.88rem;
   }
 
   .landing-page__footer {
