@@ -309,13 +309,15 @@ export default function PracticeHubPage() {
   const visibility = summary?.visibility || {};
   const metrics = summary?.metrics || {};
   const quickActions = summary?.quickActions || {};
+  const permissions = summary?.permissions || [];
   const showAdmin =
     Boolean(quickActions.manageTeam) ||
     Boolean(quickActions.openSettings) ||
     Boolean(quickActions.openSecurity) ||
     Boolean(quickActions.openIntegrations) ||
     Boolean(quickActions.openDeveloper) ||
-    Boolean(visibility.audit);
+    Boolean(visibility.audit) ||
+    permissions.includes("booking.manage");
 
   const visibleCards = useMemo(
     () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
@@ -726,6 +728,14 @@ export default function PracticeHubPage() {
                     to={`/practice/consents?practiceId=${encodeURIComponent(practiceId)}`}
                   >
                     {t.adminConsentsLink}
+                  </Link>
+                ) : null}
+                {permissions.includes("booking.manage") ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/pre-visit?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.adminPreVisitLink}
                   </Link>
                 ) : null}
                 {quickActions.openSecurity ? (

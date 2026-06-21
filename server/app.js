@@ -27,6 +27,7 @@ import patientExportsRouter from "./routes/patientExports.js";
 import patientConsentsRouter from "./routes/patientConsents.js";
 import practiceExportsRouter from "./routes/practiceExports.js";
 import practiceConsentsRouter from "./routes/practiceConsents.js";
+import practicePreVisitRouter from "./routes/practicePreVisit.js";
 import practiceFollowUpsRouter from "./routes/practiceFollowUps.js";
 import previsitFollowUpsRouter from "./routes/previsitFollowUps.js";
 import accountRouter from "./routes/account.js";
@@ -248,6 +249,7 @@ app.use(
 app.use("/api/practice/dashboard", requireAuth, practiceOverviewDashboardRouter);
 app.use("/api/practice/exports", requireAuth, practiceExportsRouter);
 app.use("/api/practice/consents", requireAuth, practiceConsentsRouter);
+app.use("/api/practice/pre-visit", requireAuth, practicePreVisitRouter);
 app.use("/api/practice", requireAuth, practiceAnalyticsRouter);
 app.use("/api/practice", requireAuth, practicePortalRouter);
 app.use("/api/practice/api", requireAuth, practiceApiDataRouter);

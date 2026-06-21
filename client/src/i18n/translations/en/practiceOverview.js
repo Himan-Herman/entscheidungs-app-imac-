@@ -83,6 +83,7 @@ export default {
   adminHeading: "Administration",
   adminAuditLink: "Audit log",
   adminConsentsLink: "Consents",
+  adminPreVisitLink: "Appointment preparation",
   adminMemberCount: "Active team members",
   adminPendingInvites: "Pending invitations",
 

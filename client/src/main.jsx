@@ -244,6 +244,9 @@ const PracticeHubPage = lazy(() => import("./pages/PracticeHubPage.jsx"));
 const PracticeConsentOverviewPage = lazy(() =>
   import("./features/consent/pages/PracticeConsentOverviewPage.jsx"),
 );
+const PracticePreVisitSetupPage = lazy(() =>
+  import("./features/practicePreVisit/pages/PracticePreVisitSetupPage.jsx"),
+);
 const PracticeTeamPage = lazy(() =>
   import("./features/practiceTeam/pages/PracticeTeamPage.jsx"),
 );
@@ -483,6 +486,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PracticeConsentOverviewPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/pre-visit"
+                  element={
+                    <ProtectedRoute>
+                      <PracticePreVisitSetupPage />
                     </ProtectedRoute>
                   }
                 />
