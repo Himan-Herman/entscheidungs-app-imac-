@@ -59,8 +59,8 @@ export default [
         html: `
 <p>(1) MedScoutX provides in particular the following functions:</p>
 <ul>
-<li>AI-assisted symptom analysis via a chat area,</li>
-<li>AI-assisted analysis of image data,</li>
+<li>Structured capture of symptom information via a chat area,</li>
+<li>Upload and structured description of images,</li>
 <li>selection of body regions via a body map,</li>
 <li>user account management and history features,</li>
 <li>where applicable, additional functions within paid subscriptions.</li>

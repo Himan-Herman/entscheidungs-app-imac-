@@ -59,8 +59,8 @@ export default [
         html: `
 <p>(1) MedScoutX stellt insbesondere folgende Funktionen bereit:</p>
 <ul>
-<li>Automatische Symptomanalyse über einen Chatbereich,</li>
-<li>Automatische Analyse von Bilddaten,</li>
+<li>Strukturierte Erfassung von Symptomangaben über einen Chatbereich,</li>
+<li>Upload und strukturierte Beschreibung von Bildern,</li>
 <li>Auswahl von Körperregionen über eine Körperkarte,</li>
 <li>Verwaltung eines Nutzerkontos und Verlaufsfunktionen,</li>
 <li>ggf. zusätzliche Funktionen im Rahmen kostenpflichtiger Abonnements.</li>

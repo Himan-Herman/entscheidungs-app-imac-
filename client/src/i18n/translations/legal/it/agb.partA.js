@@ -59,8 +59,8 @@ export default [
         html: `
 <p>(1) MedScoutX fornisce in particolare le seguenti funzioni:</p>
 <ul>
-<li>analisi dei sintomi assistita da IA tramite area chat,</li>
-<li>analisi di dati immagine assistita da IA,</li>
+<li>raccolta strutturata delle informazioni sui sintomi tramite area chat,</li>
+<li>caricamento e descrizione strutturata delle immagini,</li>
 <li>selezione delle regioni corporee tramite mappa del corpo,</li>
 <li>gestione dell’account utente e funzioni di cronologia,</li>
 <li>ove applicabile, ulteriori funzioni nell’ambito di abbonamenti a pagamento.</li>
