@@ -191,20 +191,6 @@ export default function LandingStoryCanvas({ copy, theme }) {
               <circle cx="426" cy="160" r="9" fill={p.accentTwo} />
             </g>
 
-            <rect x="146" y="114" width="228" height="132" rx="30" fill={p.surface} stroke={p.border} />
-            <text x="260" y="164" textAnchor="middle" fill={p.text} fontSize="22" fontWeight="700">
-              {copy.visualBridge}
-            </text>
-            <text x="260" y="190" textAnchor="middle" fill={p.muted} fontSize="12">
-              {bridgeLines.map((line, index) => (
-                <tspan key={line} x="260" dy={index === 0 ? 0 : 16}>
-                  {line}
-                </tspan>
-              ))}
-            </text>
-            <rect x="202" y="218" width="116" height="12" rx="6" fill={p.lineSoft} />
-            <rect x="202" y="218" width="70" height="12" rx="6" fill="url(#story-bar)" />
-
             {visualModules.map((item, index) => {
               const positions = [
                 { x: 52, y: 270, width: 136 },
@@ -238,6 +224,20 @@ export default function LandingStoryCanvas({ copy, theme }) {
                 />
               );
             })}
+
+            <rect x="146" y="114" width="228" height="132" rx="30" fill={p.surface} stroke={p.border} />
+            <text x="260" y="164" textAnchor="middle" fill={p.text} fontSize="22" fontWeight="700">
+              {copy.visualBridge}
+            </text>
+            <text x="260" y="190" textAnchor="middle" fill={p.muted} fontSize="12">
+              {bridgeLines.map((line, index) => (
+                <tspan key={line} x="260" dy={index === 0 ? 0 : 16}>
+                  {line}
+                </tspan>
+              ))}
+            </text>
+            <rect x="202" y="218" width="116" height="12" rx="6" fill={p.lineSoft} />
+            <rect x="202" y="218" width="70" height="12" rx="6" fill="url(#story-bar)" />
           </svg>
 
           <div className="landing-page__story-signal-grid">

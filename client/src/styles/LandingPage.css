@@ -651,16 +651,16 @@
 
 .landing-page__hero-canvas-graphic {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
-  padding: 14px;
+  padding: 12px;
 }
 
 .landing-page__hero-orbit {
   position: relative;
-  width: 92px;
-  height: 92px;
+  width: 84px;
+  height: 84px;
 }
 
 .landing-page__hero-orbit-ring,
@@ -672,15 +672,15 @@
 }
 
 .landing-page__hero-orbit-ring.is-outer {
-  width: 92px;
-  height: 92px;
+  width: 84px;
+  height: 84px;
   border: 1px solid color-mix(in srgb, var(--landing-accent) 22%, transparent);
 }
 
 .landing-page__hero-orbit-ring.is-middle {
-  width: 58px;
-  height: 58px;
-  border: 10px solid color-mix(in srgb, var(--landing-highlight) 22%, transparent);
+  width: 54px;
+  height: 54px;
+  border: 9px solid color-mix(in srgb, var(--landing-highlight) 22%, transparent);
 }
 
 .landing-page__hero-orbit-core {
@@ -697,24 +697,26 @@
 
 .landing-page__hero-mini-bar-row {
   display: grid;
-  grid-template-columns: minmax(118px, 1fr) 110px;
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(56px, 88px);
+  gap: 10px;
   align-items: center;
+  min-width: 0;
 }
 
 .landing-page__hero-mini-bar-row span {
   color: var(--landing-text);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   line-height: 1.35;
   text-wrap: balance;
   overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .landing-page__hero-mini-bar-row i {
   display: block;
-  justify-self: end;
-  max-width: 110px;
+  justify-self: stretch;
+  max-width: 88px;
   height: 12px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--landing-accent) 0%, var(--landing-highlight) 100%);
@@ -2034,6 +2036,7 @@
 
 @media (max-width: 760px) {
   .landing-page {
+    --landing-mobile-gap: 16px;
     padding: 16px;
     padding-top: 18px;
     padding-bottom: 94px;
@@ -2050,6 +2053,11 @@
     padding: 12px;
     border-radius: 24px;
     gap: 10px;
+    margin-bottom: var(--landing-mobile-gap);
+  }
+
+  .landing-page__main {
+    gap: var(--landing-mobile-gap);
   }
 
   .landing-page__brand {
@@ -2127,6 +2135,20 @@
     justify-content: center;
   }
 
+  .landing-page__hero,
+  .landing-page__journey-grid,
+  .landing-page__story-grid,
+  .landing-page__atlas-grid,
+  .landing-page__atlas-card-grid,
+  .landing-page__pillar-grid,
+  .landing-page__workspace-grid,
+  .landing-page__safety-grid,
+  .landing-page__flow-list,
+  .landing-page__bridge-diagram,
+  .landing-page__insight-grid {
+    gap: var(--landing-mobile-gap);
+  }
+
   .landing-page__hero-copy,
   .landing-page__hero-media,
   .landing-page__story-card,
@@ -2149,6 +2171,10 @@
   .landing-page__video-shell,
   .landing-page__journey-card {
     border-radius: 22px;
+  }
+
+  .landing-page__section {
+    gap: 18px;
   }
 
   .landing-page__bridge-photo-caption {

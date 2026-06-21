@@ -657,6 +657,85 @@
   }
 }
 
+/* ── Dark mode via the in-app theme toggle (data-theme) ──────────────────────
+ * The prefers-color-scheme block above only covers OS-level dark. MedScoutX switches
+ * theme via :root[data-theme="dark"], under which the --ms-* surface tokens fall back
+ * to light values. These additive overrides give the patient health record correct
+ * dark contrast for the in-app toggle (colors from the project slate/teal dark palette).
+ * Light mode is unaffected. */
+:root[data-theme="dark"] .hh-page__title { color: #e2e8f0; }
+:root[data-theme="dark"] .hh-page__intro { color: #cbd5e1; }
+:root[data-theme="dark"] .hh-page__disclaimer {
+  background: rgba(14, 165, 233, 0.1);
+  border-color: #0ea5e9;
+  color: #cbd5e1;
+}
+
+:root[data-theme="dark"] .hh-tabs { border-bottom-color: rgba(148, 163, 184, 0.25); }
+:root[data-theme="dark"] .hh-tabs__btn { color: #cbd5e1; }
+:root[data-theme="dark"] .hh-tabs__btn:hover { color: #e2e8f0; background: rgba(148, 163, 184, 0.12); }
+:root[data-theme="dark"] .hh-tabs__btn--active { color: #5eead4; border-bottom-color: #5eead4; }
+:root[data-theme="dark"] .hh-tabs__count { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; }
+:root[data-theme="dark"] .hh-tabs__btn--active .hh-tabs__count { background: #0d9488; color: #fff; }
+
+:root[data-theme="dark"] .hh-card { background: #1e293b; border-color: rgba(148, 163, 184, 0.2); }
+:root[data-theme="dark"] .hh-card:hover { border-color: #5eead4; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+:root[data-theme="dark"] .hh-card__name { color: #e2e8f0; }
+:root[data-theme="dark"] .hh-card__detail { color: #cbd5e1; }
+:root[data-theme="dark"] .hh-card__detail strong { color: #e2e8f0; }
+:root[data-theme="dark"] .hh-card__notes { color: #cbd5e1; border-top-color: rgba(148, 163, 184, 0.2); }
+:root[data-theme="dark"] .hh-card__actions { border-top-color: rgba(148, 163, 184, 0.2); }
+:root[data-theme="dark"] .hh-card__btn { color: #e2e8f0; border-color: rgba(148, 163, 184, 0.3); }
+:root[data-theme="dark"] .hh-card__btn:hover { background: rgba(148, 163, 184, 0.12); border-color: rgba(148, 163, 184, 0.5); }
+:root[data-theme="dark"] .hh-card__btn--danger { color: #fca5a5; border-color: rgba(248, 113, 113, 0.4); }
+:root[data-theme="dark"] .hh-card__btn--danger:hover { background: rgba(239, 68, 68, 0.14); border-color: #fca5a5; color: #fca5a5; }
+
+:root[data-theme="dark"] .hh-badge--type { background: rgba(148, 163, 184, 0.16); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.25); }
+
+:root[data-theme="dark"] .hh-form-panel { background: #0f172a; }
+:root[data-theme="dark"] .hh-form-panel__title { color: #e2e8f0; }
+:root[data-theme="dark"] .hh-form__label { color: #cbd5e1; }
+:root[data-theme="dark"] .hh-form__input,
+:root[data-theme="dark"] .hh-form__select,
+:root[data-theme="dark"] .hh-form__textarea {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+:root[data-theme="dark"] .hh-form__input::placeholder,
+:root[data-theme="dark"] .hh-form__textarea::placeholder { color: #94a3b8; }
+:root[data-theme="dark"] .hh-form__actions { border-top-color: rgba(148, 163, 184, 0.2); }
+:root[data-theme="dark"] .hh-form__cancel { color: #e2e8f0; border-color: rgba(148, 163, 184, 0.3); }
+:root[data-theme="dark"] .hh-form__cancel:hover { background: rgba(148, 163, 184, 0.12); }
+:root[data-theme="dark"] .hh-form__error { color: #fca5a5; }
+
+:root[data-theme="dark"] .hh-severity-opt { border-color: rgba(148, 163, 184, 0.3); color: #e2e8f0; }
+:root[data-theme="dark"] .hh-severity-opt--mild { background: rgba(20, 83, 45, 0.2); }
+:root[data-theme="dark"] .hh-severity-opt--moderate { background: rgba(113, 63, 18, 0.2); }
+:root[data-theme="dark"] .hh-severity-opt--severe { background: rgba(124, 45, 18, 0.2); }
+:root[data-theme="dark"] .hh-severity-opt--life_threatening { background: rgba(127, 29, 29, 0.2); }
+
+:root[data-theme="dark"] .hh-page__empty { color: #cbd5e1; }
+:root[data-theme="dark"] .hh-page__spinner { border-color: rgba(148, 163, 184, 0.3); border-top-color: #5eead4; }
+:root[data-theme="dark"] .hh-page__error {
+  background: rgba(239, 68, 68, 0.14);
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+/* Badges — mirror the OS-dark values for the in-app toggle */
+:root[data-theme="dark"] .hh-badge--mild { background: #14532d; color: #86efac; }
+:root[data-theme="dark"] .hh-badge--moderate { background: #713f12; color: #fde68a; }
+:root[data-theme="dark"] .hh-badge--severe { background: #7c2d12; color: #fdba74; }
+:root[data-theme="dark"] .hh-badge--life_threatening { background: #7f1d1d; color: #fca5a5; }
+:root[data-theme="dark"] .hh-badge--active { background: #14532d; color: #86efac; }
+:root[data-theme="dark"] .hh-badge--chronic { background: #831843; color: #f9a8d4; }
+:root[data-theme="dark"] .hh-badge--resolved { background: #1e293b; color: #94a3b8; }
+:root[data-theme="dark"] .hh-badge--managed { background: #0c4a6e; color: #7dd3fc; }
+:root[data-theme="dark"] .hh-badge--uncertain { background: #78350f; color: #fcd34d; }
+:root[data-theme="dark"] .hh-badge--inactive { background: #1e293b; color: #94a3b8; }
+:root[data-theme="dark"] .hh-badge--icd { background: #3b0764; color: #c4b5fd; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .hh-cards {

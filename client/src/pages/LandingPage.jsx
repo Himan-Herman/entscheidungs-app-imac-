@@ -145,7 +145,7 @@ export default function LandingPage() {
   const heroFlowHeights = [28, 52, 40, 62, 46];
   const heroStageItems = (copy.journeyStageLabels || []).slice(0, 3);
   const heroSignalItems = (copy.ecosystemSignals || copy.journeyFeatureCloud || []).slice(0, 4);
-  const heroSignalWidths = [72, 88, 58, 96];
+  const heroSignalWidths = [56, 72, 52, 78];
 
   const bridgeSteps = [
     { icon: UserRound, label: copy.bridgeStepOne },
