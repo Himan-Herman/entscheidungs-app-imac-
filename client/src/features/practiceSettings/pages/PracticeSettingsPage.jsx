@@ -11,6 +11,7 @@ import {
   postPracticeDescriptionAiDraft,
   uploadPracticeLogo,
 } from "../api/practiceSettingsApi.js";
+import { IDENTITY_CHANGED_EVENT } from "../../../hooks/useAccountIdentity.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../styles/PracticeSettingsPage.css";
 
@@ -54,6 +55,12 @@ export default function PracticeSettingsPage() {
   const { language } = useLanguage();
   const t = useMemo(
     () => getMessages(language).practiceSettings || getMessages("en").practiceSettings,
+    [language],
+  );
+  const tOrg = useMemo(
+    () =>
+      getMessages(language).practiceOrganization ||
+      getMessages("en").practiceOrganization,
     [language],
   );
   const [searchParams, setSearchParams] = useSearchParams();
@@ -264,6 +271,7 @@ export default function PracticeSettingsPage() {
       const { res, data } = await uploadPracticeLogo(practiceId, file);
       if (!res.ok || !data.ok) throw new Error(data.error || "upload_failed");
       await applySettings(data.settings);
+      window.dispatchEvent(new CustomEvent(IDENTITY_CHANGED_EVENT));
       setStatusMsg(t.saved);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
@@ -281,6 +289,7 @@ export default function PracticeSettingsPage() {
       const { res, data } = await deletePracticeLogo(practiceId);
       if (!res.ok || !data.ok) throw new Error(data.error || "delete_failed");
       await applySettings(data.settings);
+      window.dispatchEvent(new CustomEvent(IDENTITY_CHANGED_EVENT));
       setStatusMsg(t.saved);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
