@@ -7,7 +7,7 @@ export default {
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Almanya"],
   ddLegalForm: "Karsazê takekesî",
-  emailDisplay: "himankhorshidy@gmail.com",
+  emailDisplay: "contact@medscoutx.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
   phoneHref: "tel:+4921115895272",
@@ -32,9 +32,6 @@ export default {
   s3p2:
     "Kontrola domdar a rûpelên girêdayî bê delîlên diyarkirî yên binpêkirinê ne mantiqî ye. Dema binpêkirinên hatine zanîn ev girêdan derhal werin rakirin.",
   s4Heading: "4. Çareserkirina nakokiyan",
-  s4p1Before:
-    "Komîsyona Ewropî platformek ji bo çareserkirina nakokiyan ser înternetê pêşkêş dike: ",
-  s4p1After: ".",
   s4p2:
     "Ez ne mecbûr im û ne jî dilxwaz im ku di prosedura çareserkirina nakokiyan li berendekek konsumatûr beşdar bibim.",
   s5Heading: "5. Mafên çapkirinê",

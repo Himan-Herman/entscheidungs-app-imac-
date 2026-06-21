@@ -7,7 +7,7 @@ export default {
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "آلمان"],
   ddLegalForm: "تاجر انفرادی",
-  emailDisplay: "himankhorshidy@gmail.com",
+  emailDisplay: "contact@medscoutx.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
   phoneHref: "tel:+4921115895272",
@@ -32,9 +32,6 @@ export default {
   s3p2:
     "پایش دائمی صفحات پیوندشده بدون نشانهٔ مشخص نقض معقول نیست. در صورت آگاهی از نقض‌ها، این پیوندها فوراً حذف می‌شوند.",
   s4Heading: "۴. حل اختلاف",
-  s4p1Before:
-    "کمیسیون اروپا بستری برای حل اختلاف آنلاین فراهم کرده است: ",
-  s4p1After: ".",
   s4p2:
     "نه ملزم به شرکت در رسیدگی اختلاف مصرف‌کننده در یک هیئت داوری هستم و نه مایل به آن.",
   s5Heading: "۵. حق نشر",

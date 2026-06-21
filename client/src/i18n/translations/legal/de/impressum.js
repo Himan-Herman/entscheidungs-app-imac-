@@ -7,10 +7,7 @@ export default {
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Deutschland"],
   ddLegalForm: "Einzelunternehmer",
-  // TODO(Himan): emailDisplay und emailHref weichen voneinander ab
-  // (angezeigt: gmail, verlinkt: contact@medscoutx.com). Bitte eine
-  // verbindliche Kontaktadresse festlegen und beide Felder angleichen.
-  emailDisplay: "himankhorshidy@gmail.com",
+  emailDisplay: "contact@medscoutx.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49\u00a0211\u00a015895272",
   phoneHref: "tel:+4921115895272",
@@ -35,9 +32,6 @@ export default {
   s3p2:
     "Eine permanente inhaltliche Kontrolle der verlinkten Seiten ohne konkrete Anhaltspunkte einer Rechtsverletzung ist nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden derartige Links umgehend entfernt.",
   s4Heading: "4. Streitbeilegung",
-  s4p1Before:
-    "Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: ",
-  s4p1After: ".",
   s4p2:
     "Ich bin weder verpflichtet noch bereit, an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
   s5Heading: "5. Urheberrecht",

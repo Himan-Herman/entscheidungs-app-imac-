@@ -7,7 +7,7 @@ export default {
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "ئاڵمان"],
   ddLegalForm: "بازرگانی تاکەکەسی",
-  emailDisplay: "himankhorshidy@gmail.com",
+  emailDisplay: "contact@medscoutx.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
   phoneHref: "tel:+4921115895272",
@@ -32,9 +32,6 @@ export default {
   s3p2:
     "چاودێری بەردەوامی پەڕە بەستەردراوەکان بە بێ ئاماژەی ڕوون بۆ پێشێلکاری شتێکی ئاسایی نییە. لە کاتی زانینی پێشێلکارییەکاندا، ئەم بەستەرانە دەسڕدرێنەوە.",
   s4Heading: "٤. چارەسەرکردنی ناکۆکی",
-  s4p1Before:
-    "کۆمیسیۆنی ئەورووپا پلاتفۆرمێکی بۆ چارەسەرکردنی ناکۆکی لەسەر ئینتەرنێت دابین دەکات: ",
-  s4p1After: ".",
   s4p2:
     "من نە پێویستم نە ویستم بەشداری بکەم لە ڕێکارەکانی چارەسەرکردنی ناکۆکی لەبەردەم دەستەیەکی ناکۆکی کڕیار.",
   s5Heading: "٥. مافەکانی بڵاوکردنەوە",

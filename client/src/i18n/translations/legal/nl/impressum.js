@@ -7,7 +7,7 @@ export default {
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Duitsland"],
   ddLegalForm: "Eenmanszaak",
-  emailDisplay: "himankhorshidy@gmail.com",
+  emailDisplay: "contact@medscoutx.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
   phoneHref: "tel:+4921115895272",
@@ -33,9 +33,6 @@ export default {
   s3p2:
     "Permanente controle van gelinkte pagina’s zonder concrete aanwijzingen van een inbreuk is niet redelijk. Bij bekendwording van inbreuken worden dergelijke links onverwijld verwijderd.",
   s4Heading: "4. Geschillenbeslechting",
-  s4p1Before:
-    "De Europese Commissie biedt een platform voor online geschillenbeslechting (OS): ",
-  s4p1After: ".",
   s4p2:
     "Ik ben noch verplicht noch bereid deel te nemen aan geschillenbeslechtingsprocedures voor een consumentenarbitragecommissie.",
   s5Heading: "5. Auteursrecht",

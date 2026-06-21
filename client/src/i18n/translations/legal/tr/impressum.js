@@ -7,7 +7,7 @@ export default {
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Almanya"],
   ddLegalForm: "Şahıs işletmesi",
-  emailDisplay: "himankhorshidy@gmail.com",
+  emailDisplay: "contact@medscoutx.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
   phoneHref: "tel:+4921115895272",
@@ -32,9 +32,6 @@ export default {
   s3p2:
     "Somut ihlal göstergesi olmadan bağlantılı sayfaların sürekli kontrolü makul değildir. İhlaller öğrenildiğinde bağlantılar derhal kaldırılır.",
   s4Heading: "4. Uyuşmazlık çözümü",
-  s4p1Before:
-    "Avrupa Komisyonu çevrim içi uyuşmazlık çözümü için bir platform sunar: ",
-  s4p1After: ".",
   s4p2:
     "Tüketici tahkim kurulu öncesi bir uyuşmazlık çözüm sürecine katılmakla yükümlü değilim ve buna istekli de değilim.",
   s5Heading: "5. Telif hakları",

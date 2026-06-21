@@ -8,10 +8,7 @@ export default {
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Alemania"],
   ddLegalForm: "Empresario individual",
-  // TODO(Himan): emailDisplay y emailHref no coinciden (mostrado: gmail,
-  // enlazado: contact@medscoutx.com). Define una dirección de contacto
-  // única y alinea ambos campos.
-  emailDisplay: "himankhorshidy@gmail.com",
+  emailDisplay: "contact@medscoutx.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
   phoneHref: "tel:+4921115895272",
@@ -37,9 +34,6 @@ export default {
   s3p2:
     "No es razonable un control permanente de las páginas enlazadas sin indicios concretos de una infracción. Si se conocen infracciones, dichos enlaces se eliminarán de inmediato.",
   s4Heading: "4. Resolución de controversias",
-  s4p1Before:
-    "La Comisión Europea ofrece una plataforma para la resolución de litigios en línea: ",
-  s4p1After: ".",
   s4p2:
     "No estoy obligado ni dispuesto a participar en un procedimiento de resolución de disputas ante una junta arbitral de consumo.",
   s5Heading: "5. Derechos de autor",
