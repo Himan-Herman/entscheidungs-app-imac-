@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Zbaton ligji i Republikës Federale të Gjermanisë. Dispozitat e detyrueshme të mbrojtjes së konsumatorit të shtetit ku përdoruesi ka vendbanimin e zakonshëm mbeten të paprekura.</p>
-<p>Platforma e BE-së për zgjidhjen e mosmarrëveshjeve në internet është e disponueshme në <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Ofruesi nuk është i detyruar as i gatshëm të marrë pjesë në procedura para një paneli arbitrazhi për konsumatorët.</p>
+<p>Ofruesi nuk është i detyruar as i gatshëm të marrë pjesë në procedura para një paneli arbitrazhi për konsumatorët.</p>
 `.trim(),
       },
     ],

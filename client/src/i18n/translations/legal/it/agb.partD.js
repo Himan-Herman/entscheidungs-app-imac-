@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Si applica la legge della Repubblica Federale di Germania. Restano inalterate le disposizioni imperative di tutela dei consumatori dello Stato in cui l’utente ha la residenza abituale.</p>
-<p>La piattaforma UE per la risoluzione online delle controversie è disponibile all’indirizzo <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Il fornitore non è tenuto né disposto a partecipare a procedure di risoluzione delle controversie davanti a un organismo di mediazione dei consumatori.</p>
+<p>Il fornitore non è tenuto né disposto a partecipare a procedure di risoluzione delle controversie davanti a un organismo di mediazione dei consumatori.</p>
 `.trim(),
       },
     ],

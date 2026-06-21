@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Het recht van de Bondsrepubliek Duitsland is van toepassing. Dwingende consumentenbeschermingsbepalingen van de staat waar de gebruiker gewoonlijk verblijft blijven onverlet.</p>
-<p>Het EU-platform voor online geschillenbeslechting is beschikbaar op <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. De aanbieder is noch verplicht noch bereid deel te nemen aan geschillenbeslechtingsprocedures bij een consumentenarbitragecommissie.</p>
+<p>De aanbieder is noch verplicht noch bereid deel te nemen aan geschillenbeslechtingsprocedures bij een consumentenarbitragecommissie.</p>
 `.trim(),
       },
     ],

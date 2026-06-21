@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Primjenjuje se pravo Savezne Republike Njemačke. Obavezne odredbe zaštite potrošača države u kojoj korisnik ima uobičajeno boravište ostaju na snazi.</p>
-<p>Platforma EU za online rješavanje sporova dostupna je na <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Pružalac nije dužan niti voljan učestvovati u postupcima rješavanja sporova pred tijelom za alternativno rješavanje sporova za potrošače.</p>
+<p>Pružalac nije dužan niti voljan učestvovati u postupcima rješavanja sporova pred tijelom za alternativno rješavanje sporova za potrošače.</p>
 `.trim(),
       },
     ],

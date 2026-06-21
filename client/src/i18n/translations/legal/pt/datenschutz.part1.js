@@ -21,7 +21,7 @@ export default [
       {
         type: "dl",
         items: [
-          { dt: "E-mail", dd: "himankhorshidy@gmail.com", href: "mailto:contact@medscoutx.com" },
+          { dt: "E-mail", dd: "contact@medscoutx.com", href: "mailto:contact@medscoutx.com" },
           { dt: "Telefone", dd: "+49 211 15895272", href: "tel:+4921115895272" },
         ],
       },

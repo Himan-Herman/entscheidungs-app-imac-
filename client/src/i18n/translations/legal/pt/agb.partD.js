@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Aplica-se a lei da República Federal da Alemanha. Mantêm-se inalteradas as disposições imperativas de proteção do consumidor do Estado onde o utilizador tem residência habitual.</p>
-<p>A plataforma UE para resolução de litígios em linha está disponível em <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. O prestador não está obrigado nem disposto a participar em procedimentos de resolução de litígios perante uma entidade arbitral de consumo.</p>
+<p>O prestador não está obrigado nem disposto a participar em procedimentos de resolução de litígios perante uma entidade arbitral de consumo.</p>
 `.trim(),
       },
     ],

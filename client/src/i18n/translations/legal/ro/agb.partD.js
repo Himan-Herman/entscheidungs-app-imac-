@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Se aplică legea Republicii Federale Germania. Dispozițiile imperative de protecție a consumatorilor din statul în care utilizatorul își are reședința obișnuită rămân neatinse.</p>
-<p>Platforma UE pentru soluționarea online a litigiilor este disponibilă la <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Furnizorul nu este nici obligat, nici dispus să participe la proceduri de soluționare a litigiilor în fața unei entități de arbitraj pentru consumatori.</p>
+<p>Furnizorul nu este nici obligat, nici dispus să participe la proceduri de soluționare a litigiilor în fața unei entități de arbitraj pentru consumatori.</p>
 `.trim(),
       },
     ],

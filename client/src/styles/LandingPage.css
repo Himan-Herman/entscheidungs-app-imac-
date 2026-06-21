@@ -708,8 +708,10 @@
   font-size: 0.76rem;
   font-weight: 700;
   line-height: 1.35;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
+  text-wrap: pretty;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
   min-width: 0;
 }
 
@@ -2307,12 +2309,17 @@
 
   .landing-page__hero-canvas-graphic {
     grid-template-columns: 1fr;
-    justify-items: center;
-    text-align: center;
+    justify-items: stretch;
+    text-align: left;
   }
 
   .landing-page__hero-mini-bars {
     width: 100%;
+  }
+
+  .landing-page__hero-mini-bar-row {
+    grid-template-columns: minmax(122px, 1fr) minmax(82px, 118px);
+    gap: 12px;
   }
 
   .landing-page__signal-pill {

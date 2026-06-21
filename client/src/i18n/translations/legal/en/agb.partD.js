@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>The law of the Federal Republic of Germany applies. Mandatory consumer protection provisions of the state in which the user has their habitual residence remain unaffected.</p>
-<p>The EU online dispute resolution platform is available at <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. The provider is neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board.</p>
+<p>The provider is neither obliged nor willing to participate in dispute resolution proceedings before a consumer arbitration board.</p>
 `.trim(),
       },
     ],

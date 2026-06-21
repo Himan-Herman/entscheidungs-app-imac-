@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Federal Almanya Cumhuriyeti hukuku uygulanır. Kullanıcının olağan ikametgâhının bulunduğu ülkedeki zorunlu tüketici koruma kuralları saklıdır.</p>
-<p>AB çevrim içi uyuşmazlık çözüm platformu şu adrestedir: <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Sağlayıcı bir tüketici tahkim kurulu öncesi uyuşmazlık çözüm sürecine katılmakla yükümlü değildir ve buna istekli de değildir.</p>
+<p>Sağlayıcı bir tüketici tahkim kurulu öncesi uyuşmazlık çözüm sürecine katılmakla yükümlü değildir ve buna istekli de değildir.</p>
 `.trim(),
       },
     ],

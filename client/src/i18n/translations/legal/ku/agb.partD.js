@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Qanûna Komara Federal a Almanyayê derbas e. Mercên parastina konsûmentê yên zordar ên welatê ku bikarhêner lê bi awayekî domdar dimîne bandor nabin.</p>
-<p>Platforma çareserkirina nakokiyan a serhînet a YE li <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a> berdest e. Pêşkêker ne mecbûr e ne jî dilxwaz e ku di prosedûrên çareserkirina nakokiyan berî komîteya arbitrasyonê ya konsûmentan beşdar bibe.</p>
+<p>Pêşkêker ne mecbûr e ne jî dilxwaz e ku di prosedûrên çareserkirina nakokiyan berî komîteya arbitrasyonê ya konsûmentan beşdar bibe.</p>
 `.trim(),
       },
     ],

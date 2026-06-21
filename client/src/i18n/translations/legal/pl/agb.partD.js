@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Maje zastosowanie prawo Republiki Federalnej Niemiec. Bezwzględnie stosowane przepisy ochrony konsumentów państwa miejsca zwykłego pobytu użytkownika pozostają nienaruszone.</p>
-<p>Platforma internetowego rozstrzygania sporów UE jest dostępna pod adresem <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Dostawca nie jest zobowiązany ani nie zamierza uczestniczyć w postępowaniu przed sądem polubownym dla konsumentów.</p>
+<p>Dostawca nie jest zobowiązany ani nie zamierza uczestniczyć w postępowaniu przed sądem polubownym dla konsumentów.</p>
 `.trim(),
       },
     ],

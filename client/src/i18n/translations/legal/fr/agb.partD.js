@@ -21,7 +21,7 @@ export default [
         type: "html",
         html: `
 <p>Le droit de la République fédérale d’Allemagne s’applique. Les dispositions impératives de protection des consommateurs de l’État où l’utilisateur a sa résidence habituelle demeurent applicables.</p>
-<p>La plateforme européenne de règlement des litiges en ligne est accessible à l’adresse <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a>. Le prestataire n’est ni tenu ni disposé à participer à une procédure de règlement des litiges devant une instance arbitrale de consommation.</p>
+<p>Le prestataire n’est ni tenu ni disposé à participer à une procédure de règlement des litiges devant une instance arbitrale de consommation.</p>
 `.trim(),
       },
     ],
