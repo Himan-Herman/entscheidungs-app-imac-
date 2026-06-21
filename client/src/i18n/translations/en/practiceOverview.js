@@ -84,6 +84,7 @@ export default {
   adminAuditLink: "Audit log",
   adminConsentsLink: "Consents",
   adminPreVisitLink: "Appointment preparation",
+  adminAnalyticsLink: "Statistics & ROI",
   adminMemberCount: "Active team members",
   adminPendingInvites: "Pending invitations",
 

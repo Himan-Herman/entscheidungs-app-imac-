@@ -1,0 +1,31 @@
+export default {
+  pageTitle: "MedScoutX — Statistik & ROI (Praxis)",
+  heading: "Nutzungsstatistik & ROI",
+  intro:
+    "Aggregierte, anonymisierte Kennzahlen zur Nutzung der digitalen Vorbereitung in Ihrer Praxis.",
+  safetyNote:
+    "Nur aggregierte Verwaltungs- und Nutzungszahlen. Keine Patientendaten, keine Gesundheitsdaten, keine medizinische Bewertung.",
+  backLink: "← Zur Praxis-Übersicht",
+  loading: "Statistik wird geladen …",
+  loadError: "Die Statistik konnte nicht geladen werden.",
+  empty: "Noch keine auswertbaren Nutzungsdaten.",
+  windowPrefix: "Letzte",
+  windowDays: "Tage",
+  kpiHeading: "Kennzahlen",
+  mCompletedWindow: "Abgeschlossene Vorgänge (Zeitraum)",
+  mSubmissionsWindow: "Digitale Vorbereitungen (Zeitraum)",
+  mPreVisitWindow: "Neue Vorgänge (Zeitraum)",
+  mTemplatesActive: "Aktive Vorlagen",
+  mTeamActive: "Aktive Teammitglieder",
+  mPendingInvites: "Offene Einladungen",
+  mTrackedEventsWindow: "Nutzungssignale (anonymisiert, Zeitraum)",
+  roiHeading: "Geschätzte Zeitersparnis",
+  roiMinutes: "Geschätzte Minuten",
+  roiHours: "Geschätzte Stunden",
+  roiBasisLabel: "Berücksichtigte Vorbereitungen",
+  roiFactorLabel: "Faktor je Vorbereitung",
+  roiFactorUnit: "Min.",
+  roiNote:
+    "Konservative Schätzung auf Basis der Anzahl digital vorbereiteter Vorgänge (Vorbereitungen × Minutenfaktor). Keine garantierte Abrechnung, kein finanzieller Wert, keine medizinische Aussage.",
+  roiNoBasis: "Noch nicht genügend Daten für eine Schätzung.",
+};

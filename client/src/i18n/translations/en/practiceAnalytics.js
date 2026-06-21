@@ -1,0 +1,31 @@
+export default {
+  pageTitle: "MedScoutX — Statistics & ROI (practice)",
+  heading: "Usage statistics & ROI",
+  intro:
+    "Aggregated, anonymized metrics on the use of digital preparation in your practice.",
+  safetyNote:
+    "Aggregated administrative and usage numbers only. No patient data, no health data, no medical assessment.",
+  backLink: "← Back to practice overview",
+  loading: "Loading statistics…",
+  loadError: "Could not load statistics.",
+  empty: "No usage data to evaluate yet.",
+  windowPrefix: "Last",
+  windowDays: "days",
+  kpiHeading: "Key metrics",
+  mCompletedWindow: "Completed cases (period)",
+  mSubmissionsWindow: "Digital preparations (period)",
+  mPreVisitWindow: "New cases (period)",
+  mTemplatesActive: "Active templates",
+  mTeamActive: "Active team members",
+  mPendingInvites: "Open invitations",
+  mTrackedEventsWindow: "Usage signals (anonymized, period)",
+  roiHeading: "Estimated time saved",
+  roiMinutes: "Estimated minutes",
+  roiHours: "Estimated hours",
+  roiBasisLabel: "Preparations considered",
+  roiFactorLabel: "Factor per preparation",
+  roiFactorUnit: "min",
+  roiNote:
+    "Conservative estimate based on the number of digitally prepared cases (preparations × minute factor). Not a guaranteed billing figure, not a financial value, and not a medical statement.",
+  roiNoBasis: "Not enough data yet for an estimate.",
+};

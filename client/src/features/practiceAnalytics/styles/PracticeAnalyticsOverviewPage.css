@@ -1,0 +1,109 @@
+/* Practice usage / ROI overview — design-system tokens only (no fixed hex). */
+.pan {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.pan__back {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--ms-color-link);
+}
+.pan__title {
+  margin: 0 0 4px;
+}
+.pan__intro {
+  color: var(--ms-color-text-secondary);
+  margin: 0 0 8px;
+}
+.pan__note {
+  color: var(--ms-color-text-muted);
+  font-size: 0.9em;
+  border-left: 3px solid var(--ms-color-border-strong);
+  padding-left: 10px;
+  margin: 0 0 12px;
+}
+.pan__window {
+  color: var(--ms-color-text-secondary);
+  font-size: 0.9em;
+  margin: 0 0 16px;
+}
+.pan__status {
+  color: var(--ms-color-text-secondary);
+  margin: 8px 0;
+}
+.pan__status--error {
+  color: var(--ms-color-danger);
+}
+.pan__section-title {
+  margin: 18px 0 8px;
+  font-size: 1.05rem;
+}
+
+/* KPI cards */
+.pan__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 560px) {
+  .pan__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 960px) {
+  .pan__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.pan__card {
+  border: 1px solid var(--ms-color-border);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--ms-color-surface);
+}
+.pan__card-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.pan__card-label {
+  margin-top: 4px;
+  color: var(--ms-color-text-muted);
+  font-size: 0.9em;
+}
+
+/* ROI box */
+.pan__roi {
+  margin-top: 10px;
+  border: 1px solid var(--ms-color-border);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--ms-color-surface-elevated);
+}
+.pan__roi-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+.pan__roi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ms-color-accent);
+  font-variant-numeric: tabular-nums;
+}
+.pan__roi-label {
+  color: var(--ms-color-text-muted);
+  font-size: 0.9em;
+}
+.pan__roi-meta {
+  margin-top: 10px;
+  color: var(--ms-color-text-secondary);
+  font-size: 0.9em;
+}
+.pan__roi-note {
+  margin-top: 10px;
+  color: var(--ms-color-text-muted);
+  font-size: 0.85em;
+}

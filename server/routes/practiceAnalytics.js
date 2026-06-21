@@ -4,13 +4,19 @@
 
 import express from "express";
 import { PrismaClient } from "@prisma/client";
-import { getPracticeAccess, canManageIntegrations } from "../utils/practiceAccess.js";
+import {
+  getPracticeAccess,
+  canManageIntegrations,
+  hasPracticePermission,
+  PERMISSIONS,
+} from "../utils/practiceAccess.js";
 import {
   ANALYTICS_CLIENT_EVENT_TYPES,
   trackAnalyticsEvent,
   sanitizeAnalyticsMetadata,
   summarizePracticeAnalytics,
 } from "../services/analyticsService.js";
+import { getPracticeAnalyticsOverview } from "../services/practiceAnalyticsOverviewService.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -37,6 +43,32 @@ router.get("/analytics/summary", async (req, res) => {
   } catch (err) {
     console.error("[practice/analytics/summary]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "server_error" });
+  }
+});
+
+/**
+ * Aggregated usage / ROI overview (owner / admin / practice_manager).
+ * Counts only — no patient data, no medical content. ROI is a labelled estimate.
+ */
+router.get("/analytics/overview", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access) return res.status(404).json({ ok: false, error: "practice_not_found" });
+  if (!hasPracticePermission(access.role, PERMISSIONS.SETTINGS_MANAGE)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const days = req.query.days != null ? Number(req.query.days) : undefined;
+    const overview = await getPracticeAnalyticsOverview(practiceId, { days });
+    return res.json({ ok: true, ...overview });
+  } catch (err) {
+    console.error("[practice/analytics/overview]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "overview_failed" });
   }
 });
 

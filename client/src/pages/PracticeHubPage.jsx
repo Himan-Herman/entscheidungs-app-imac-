@@ -738,6 +738,14 @@ export default function PracticeHubPage() {
                     {t.adminPreVisitLink}
                   </Link>
                 ) : null}
+                {permissions.includes("settings.manage") ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/analytics?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.adminAnalyticsLink}
+                  </Link>
+                ) : null}
                 {quickActions.openSecurity ? (
                   <Link
                     className="practice-overview__action"
