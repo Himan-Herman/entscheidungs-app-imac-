@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Legal notice",
   title: "Legal notice / Disclaimer",
-  subtitle: "Last updated: 29 November 2025",
+  subtitle: "Last updated: June 2026",
   backRegister: "Back to registration",
   backAria: "Back to registration page",
   sections: [
@@ -12,12 +12,12 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX is an automated information and orientation tool in the healthcare field. The app is solely intended to give users an initial structured overview of possible reasons for their complaints and potentially relevant medical specialties.",
+            "MedScoutX supports the structured preparation, translation and documentation of patient-provided information. It supports communication and preparation before, during and after medical encounters by organising users' own statements and presenting them in a clear, traceable form.",
         },
         {
           type: "p",
           text:
-            "MedScoutX is not a medical device within the meaning of the EU Medical Devices Regulation (MDR) and is not intended to provide diagnoses, recommend treatments, or replace clinical decisions.",
+            "MedScoutX is not a medical device within the meaning of the EU Medical Devices Regulation (MDR). MedScoutX does not provide diagnoses or treatment recommendations, does not assess medical urgency, does not make automated medical decisions, and does not replace medical examination or advice.",
         },
       ],
     },
@@ -28,12 +28,12 @@ export default {
         {
           type: "p",
           text:
-            "The outputs and hints provided by MedScoutX are based on algorithmic processing and statistical models. They do not constitute a diagnosis and never replace personal examination, guidance, or treatment by qualified healthcare professionals.",
+            "The preparations produced by MedScoutX only present users' own information in structured form. They do not constitute a diagnosis and never replace personal examination, guidance, or treatment by qualified healthcare professionals.",
         },
         {
           type: "p",
           text:
-            "Decisions on diagnostics, treatment, or medication must not be made on the basis of AI outputs alone.",
+            "Decisions on diagnostics, treatment, or medication must not be made on the basis of the content provided by MedScoutX alone.",
         },
       ],
     },
@@ -55,7 +55,7 @@ export default {
         {
           type: "p",
           text:
-            "AI models may contain errors, deliver incomplete information, or misinterpret symptoms. The usefulness of the outputs depends on the quality of what you enter (for example descriptions, selected body region, image quality).",
+            "Automated processing may reproduce inputs incompletely or incorrectly. The quality of the preparation depends on the quality of what you enter (for example descriptions, selected body region, image quality).",
         },
         {
           type: "p",
@@ -109,7 +109,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX does not make decisions within the meaning of Art. 22 GDPR that produce legal or similarly significant effects. All AI outputs serve orientation only.",
+            "MedScoutX does not make decisions within the meaning of Art. 22 GDPR that produce legal or similarly significant effects. All content provided by MedScoutX serves the structured preparation and documentation of user-provided information only.",
         },
       ],
     },

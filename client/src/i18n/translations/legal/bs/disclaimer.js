@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Odricanje odgovornosti",
   title: "Odricanje odgovornosti / Napomena",
-  subtitle: "Posljednje ažuriranje: 29. novembar 2025.",
+  subtitle: "Posljednje ažuriranje: juni 2026.",
   backRegister: "Nazad na registraciju",
   backAria: "Nazad na stranicu registracije",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX je informacioni i orijentacioni alat uz podršku vještačke inteligencije u oblasti zdravstva. Aplikacija je namijenjena isključivo da korisnicima pruži početni strukturisani pregled mogućih uzroka tegoba i potencijalno relevantnih medicinskih specijalnosti.",
+            "",
         },
         {
           type: "p",

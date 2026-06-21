@@ -4,7 +4,7 @@ import part2 from "./datenschutz.part2.js";
 export default {
   pageTitle: "MedScoutX — Privacy",
   title: "Privacybeleid",
-  subtitle: "Laatst bijgewerkt: 29 november 2025",
+  subtitle: "Laatst bijgewerkt: juni 2026",
   privacyLinkPath: "/datenschutz",
   backRegister: "Terug naar registratie",
   backRegisterAria: "Terug naar registratiepagina",

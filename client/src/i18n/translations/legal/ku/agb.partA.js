@@ -21,7 +21,6 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX di qada tenduristiyê de amûreke agahî û rêberiyê ye ku bi alîkariya AI tê. Serlêdan ji bo dayîna berîka rêzdar a sedemên mumkun ên gilîyan û şaxên tenduristiyê yên girêdayî ye.</p>
 <p>MedScoutX di wateya Rêziknameya Amûrên Tenduristiyê ya YE (MDR) de <strong>amûreke tenduristî nîne</strong>. Bi taybetî:</p>
 <ul>
 <li>Serlêdan <strong>dermanîkirinê nade</strong>,</li>

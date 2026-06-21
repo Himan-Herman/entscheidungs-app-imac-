@@ -21,7 +21,6 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX este un instrument de informare și orientare asistat de IA în domeniul sănătății. Aplicația are scopul de a oferi utilizatorilor o prezentare structurată inițială a posibilelor cauze ale plângerilor lor și a specialităților medicale potențial relevante.</p>
 <p>MedScoutX <strong>nu este un dispozitiv medical</strong> în sensul Regulamentului UE privind dispozitivele medicale (MDR). În special:</p>
 <ul>
 <li>Aplicația <strong>nu oferă diagnostice</strong>,</li>

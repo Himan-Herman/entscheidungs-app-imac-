@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Declinare",
   title: "Declinare / Aviz legal",
-  subtitle: "Ultima actualizare: 29 noiembrie 2025",
+  subtitle: "Ultima actualizare: iunie 2026",
   backRegister: "Înapoi la înregistrare",
   backAria: "Înapoi la pagina de înregistrare",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX este un instrument de informare și orientare susținut de IA în domeniul sănătății. Aplicația are exclusiv scopul de a oferi utilizatorilor o prezentare structurată inițială a posibilelor motive ale plângerilor lor și a specialităților medicale potențial relevante.",
+            "",
         },
         {
           type: "p",

@@ -21,7 +21,6 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX je informacioni i orijentacioni alat uz podršku vještačke inteligencije u oblasti zdravstva. Aplikacija je namijenjena da korisnicima pruži početni strukturisani pregled mogućih uzroka tegoba i potencijalno relevantnih medicinskih specijalnosti.</p>
 <p>MedScoutX <strong>nije medicinski uređaj</strong> u smislu EU Uredbe o medicinskim uređajima (MDR). Posebno:</p>
 <ul>
 <li>Aplikacija <strong>ne postavlja dijagnoze</strong>,</li>

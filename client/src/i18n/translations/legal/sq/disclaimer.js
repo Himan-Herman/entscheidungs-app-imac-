@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Njoftim ligjor",
   title: "Njoftim ligjor / Mohim përgjegjësie",
-  subtitle: "Përditësimi i fundit: 29 nëntor 2025",
+  subtitle: "Përditësimi i fundit: qershor 2026",
   backRegister: "Kthehu te regjistrimi",
   backAria: "Kthehu te faqja e regjistrimit",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX është një mjet informacioni dhe orientimi në fushën e kujdesit shëndetësor, i mbështetur nga IA. Aplikacioni synon vetëm të ofrojë një përmbledhje të parë të strukturuar të arsyeve të mundshme të ankesave dhe specialiteteve mjekësore përkatëse.",
+            "",
         },
         {
           type: "p",

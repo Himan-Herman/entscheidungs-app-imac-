@@ -4,7 +4,7 @@ import part2 from "./datenschutz.part2.js";
 export default {
   pageTitle: "MedScoutX — Nepenîtî",
   title: "Polîtîkaya nepênîtiyê",
-  subtitle: "Nûkirina dawî: 29ê mijdara 2025",
+  subtitle: "Nûkirina dawî: hezîran 2026",
   privacyLinkPath: "/datenschutz",
   backRegister: "Vegere tomarkirinê",
   backRegisterAria: "Vegere rûpela tomarkirinê",

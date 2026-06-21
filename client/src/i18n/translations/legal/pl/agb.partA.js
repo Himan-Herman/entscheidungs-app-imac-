@@ -21,7 +21,6 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX to narzędzie informacyjne i orientacyjne w obszarze ochrony zdrowia wspierane przez AI. Aplikacja ma na celu zapewnienie użytkownikom wstępnego, uporządkowanego przeglądu możliwych przyczyn dolegliwości oraz potencjalnie istotnych specjalizacji medycznych.</p>
 <p>MedScoutX <strong>nie jest wyrobem medycznym</strong> w rozumieniu rozporządzenia UE o wyrobach medycznych (MDR). W szczególności:</p>
 <ul>
 <li>Aplikacja <strong>nie stawia diagnoz</strong>,</li>

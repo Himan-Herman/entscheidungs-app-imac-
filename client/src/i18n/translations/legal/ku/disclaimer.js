@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Agahdariya qanûnî",
   title: "Agahdariya qanûnî / Redkirina berpirsiyariyê",
-  subtitle: "Rojanekirin: 29ê mijdara 2025",
+  subtitle: "Rojanekirin: hezîran 2026",
   backRegister: "Vegere tomarê",
   backAria: "Vegere rûpela tomarê",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX amûreke agahî û rêberiyê ye ku bi alîkariya AI di qada tenduristiyê de tê bikaranîn. Serlêdan tenê ji bo vekirina berî ya rêzdar a sedemên mumkun ên gilîyên we û şaxên tenduristiyê yên girêdayî ye.",
+            "",
         },
         {
           type: "p",

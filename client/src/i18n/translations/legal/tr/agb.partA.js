@@ -21,7 +21,6 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX, sağlık alanında yapay zekâ destekli bir bilgilendirme ve yönlendirme aracıdır. Uygulama, kullanıcılara şikâyetlerinin olası nedenleri ve ilgili olabilecek tıbbi branşlar hakkında ilk yapılandırılmış bir bakış sunmak içindir.</p>
 <p>MedScoutX, AB Tıbbi Cihazlar Tüzüğü (MDR) anlamında <strong>tıbbi bir cihaz değildir</strong>. Özellikle:</p>
 <ul>
 <li>Uygulama <strong>tanı koymaz</strong>,</li>

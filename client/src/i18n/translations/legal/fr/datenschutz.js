@@ -4,7 +4,7 @@ import part2 from "./datenschutz.part2.js";
 export default {
   pageTitle: "MedScoutX — Confidentialité",
   title: "Politique de confidentialité",
-  subtitle: "Dernière mise à jour : 29.11.2025",
+  subtitle: "Dernière mise à jour : juin 2026",
   privacyLinkPath: "/datenschutz",
   backRegister: "Retour à l’inscription",
   backRegisterAria: "Retour à la page d’inscription",

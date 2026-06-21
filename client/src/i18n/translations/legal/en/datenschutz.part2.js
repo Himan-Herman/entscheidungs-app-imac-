@@ -155,7 +155,7 @@ export default [
       {
         type: "p",
         text:
-          "MedScoutX does not make diagnoses or automated decisions producing legal or similarly significant effects. AI-generated content serves orientation only and does not replace medical advice. In medically relevant situations you will be prompted to contact a clinician.",
+          "MedScoutX does not make diagnoses or automated decisions producing legal or similarly significant effects. AI-generated content serves the structured preparation and documentation of your information only and does not replace medical advice. In medically relevant situations you will be prompted to contact a clinician.",
       },
     ],
   },

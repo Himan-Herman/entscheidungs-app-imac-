@@ -35,7 +35,7 @@ export default [
         html: `
 <p>General enquiries: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Technical support: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
-<p>Billing &amp; invoices: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
+<p>Billing &amp; invoices: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 `.trim(),
       },
     ],

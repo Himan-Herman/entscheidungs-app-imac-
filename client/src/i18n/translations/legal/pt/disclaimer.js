@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Aviso legal",
   title: "Aviso legal / Exclusão de responsabilidade",
-  subtitle: "Última atualização: 29 de novembro de 2025",
+  subtitle: "Última atualização: junho de 2026",
   backRegister: "Voltar ao registo",
   backAria: "Voltar à página de registo",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX é uma ferramenta de informação e orientação assistida por IA na área da saúde. A app destina-se apenas a dar aos utilizadores uma primeira visão estruturada das possíveis causas dos seus sintomas e especialidades médicas potencialmente relevantes.",
+            "",
         },
         {
           type: "p",

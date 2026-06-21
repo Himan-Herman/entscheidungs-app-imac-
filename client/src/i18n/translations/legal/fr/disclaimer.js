@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Avertissement juridique",
   title: "Avertissement juridique / Disclaimer",
-  subtitle: "Dernière mise à jour : 29.11.2025",
+  subtitle: "Dernière mise à jour : juin 2026",
   backRegister: "Retour à l’inscription",
   backAria: "Retour à la page d’inscription",
   sections: [
@@ -12,12 +12,12 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX est un outil d’information et d’orientation assisté par IA dans le domaine de la santé. L’application vise uniquement à fournir une première vue structurée des causes possibles de vos symptômes et des spécialités médicales potentiellement pertinentes.",
+            "MedScoutX sert à la préparation structurée, à la traduction et à la documentation des déclarations des patients. L’application soutient la communication et la préparation avant, pendant et après les contacts médicaux, en organisant les informations fournies par les utilisateurs et en les présentant de façon claire et traçable.",
         },
         {
           type: "p",
           text:
-            "MedScoutX n’est pas un dispositif médical au sens du règlement européen sur les dispositifs médicaux (MDR) et ne vise pas à poser des diagnostics, recommander des traitements ou remplacer une décision clinique.",
+            "MedScoutX n’est pas un dispositif médical au sens du règlement européen sur les dispositifs médicaux (MDR). MedScoutX ne pose pas de diagnostic, ne donne pas de recommandation thérapeutique, n’évalue pas l’urgence médicale, ne prend aucune décision médicale automatisée et ne remplace pas un examen ou un conseil médical.",
         },
       ],
     },
@@ -28,12 +28,12 @@ export default {
         {
           type: "p",
           text:
-            "Les résultats et indications fournis par MedScoutX reposent sur des traitements algorithmiques et des modèles statistiques. Ils ne constituent pas un diagnostic et ne remplacent en aucun cas un examen, un conseil ou des soins prodigués par des professionnels de santé qualifiés.",
+            "Les éléments produits par MedScoutX se contentent de présenter de façon structurée les informations fournies par les utilisateurs. Ils ne constituent pas un diagnostic et ne remplacent en aucun cas un examen, un conseil ou des soins prodigués par des professionnels de santé qualifiés.",
         },
         {
           type: "p",
           text:
-            "Les décisions concernant le diagnostic, le traitement ou les médicaments ne doivent pas être prises uniquement sur la base des sorties de l’IA.",
+            "Les décisions concernant le diagnostic, le traitement ou les médicaments ne doivent pas être prises uniquement sur la base des contenus fournis par MedScoutX.",
         },
       ],
     },
@@ -55,7 +55,7 @@ export default {
         {
           type: "p",
           text:
-            "Les modèles d’IA peuvent contenir des erreurs, fournir des informations incomplètes ou interpréter incorrectement des symptômes. La qualité des résultats dépend de la qualité de vos saisies (description, zone du corps concernée, qualité des images).",
+            "Le traitement automatisé peut restituer les saisies de façon incomplète ou erronée. La qualité de la préparation dépend de la qualité de vos saisies (description, zone du corps concernée, qualité des images).",
         },
         {
           type: "p",
@@ -109,7 +109,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX ne prend pas de décisions au sens de l’art. 22 du RGPD produisant des effets juridiques ou similaires significatifs. Les sorties de l’IA servent uniquement d’orientation.",
+            "MedScoutX ne prend pas de décisions au sens de l’art. 22 du RGPD produisant des effets juridiques ou similaires significatifs. Tous les contenus fournis par MedScoutX servent uniquement à la préparation structurée et à la documentation des informations fournies par l’utilisateur.",
         },
       ],
     },

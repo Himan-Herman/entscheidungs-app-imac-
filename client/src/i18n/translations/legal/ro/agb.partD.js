@@ -35,7 +35,7 @@ export default [
         html: `
 <p>Întrebări generale: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>Suport tehnic: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
-<p>Facturare și facturi: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
+<p>Facturare și facturi: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 `.trim(),
       },
     ],

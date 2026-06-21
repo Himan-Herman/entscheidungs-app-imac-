@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Rechtlicher Hinweis",
   title: "Rechtlicher Hinweis / Disclaimer",
-  subtitle: "Letzte Aktualisierung: 29.11.2025",
+  subtitle: "Letzte Aktualisierung: Juni 2026",
   backRegister: "Zurück zur Registrierung",
   backAria: "Zurück zur Registrierungsseite",
   sections: [
@@ -12,12 +12,12 @@ export default {
         {
           type: "p",
           text:
-            "Die Anwendung MedScoutX ist ein automatisiertes Informations- und Orientierungssystem im Gesundheitsbereich. Die App dient ausschließlich dazu, Nutzern eine erste strukturierte Einschätzung möglicher Ursachen ihrer Beschwerden sowie potenziell geeigneter medizinischer Fachrichtungen bereitzustellen.",
+            "Die Anwendung MedScoutX dient der strukturierten Vorbereitung, Übersetzung und Dokumentation von Patientenaussagen. Sie unterstützt die Kommunikation und Vorbereitung vor, während und nach medizinischen Kontakten, indem sie die Angaben der Nutzerinnen und Nutzer ordnet und nachvollziehbar darstellt.",
         },
         {
           type: "p",
           text:
-            "MedScoutX ist kein Medizinprodukt im Sinne der EU-Medizinprodukteverordnung (MDR) und verfolgt nicht den Zweck, Diagnosen zu stellen, Behandlungen zu empfehlen oder ärztliche Entscheidungen zu ersetzen.",
+            "MedScoutX ist kein Medizinprodukt im Sinne der EU-Medizinprodukteverordnung (MDR). MedScoutX stellt keine Diagnose, gibt keine Therapieempfehlung, bewertet keine medizinische Dringlichkeit, trifft keine automatisierte medizinische Entscheidung und ersetzt keine ärztliche Untersuchung oder Beratung.",
         },
       ],
     },
@@ -28,12 +28,12 @@ export default {
         {
           type: "p",
           text:
-            "Die von MedScoutX bereitgestellten Ergebnisse und Hinweise basieren auf algorithmischen Berechnungen und statistischen Modellen. Sie stellen keine Diagnose dar und ersetzen in keinem Fall die persönliche Untersuchung, Beratung oder Behandlung durch qualifiziertes medizinisches Fachpersonal.",
+            "Die von MedScoutX erstellten Aufbereitungen geben ausschließlich die Angaben der Nutzerinnen und Nutzer strukturiert wieder. Sie stellen keine Diagnose dar und ersetzen in keinem Fall die persönliche Untersuchung, Beratung oder Behandlung durch qualifiziertes medizinisches Fachpersonal.",
         },
         {
           type: "p",
           text:
-            "Entscheidungen über Diagnostik, Behandlung oder Medikation dürfen nicht auf Grundlage der automatisierten Ausgaben allein getroffen werden.",
+            "Entscheidungen über Diagnostik, Behandlung oder Medikation dürfen nicht auf Grundlage der von MedScoutX bereitgestellten Inhalte allein getroffen werden.",
         },
       ],
     },
@@ -55,7 +55,7 @@ export default {
         {
           type: "p",
           text:
-            "Die automatisierten Modelle können inhaltliche Fehler aufweisen, unvollständige Informationen liefern oder Symptome falsch einordnen. Die Genauigkeit der Ergebnisse hängt von der Qualität der Nutzereingaben ab (z. B. Beschreibung, gewählte Körperregion, Qualität der Bild-Uploads).",
+            "Die automatisierte Verarbeitung kann Eingaben unvollständig oder fehlerhaft wiedergeben. Die Qualität der Aufbereitung hängt von der Qualität der Nutzereingaben ab (z. B. Beschreibung, gewählte Körperregion, Qualität der Bild-Uploads).",
         },
         {
           type: "p",
@@ -109,7 +109,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX trifft keine Entscheidungen im Sinne von Art. 22 DSGVO, die rechtliche oder erhebliche Auswirkungen auf den Nutzer haben. Alle automatisierten Ausgaben dienen ausschließlich der orientierenden Einschätzung.",
+            "MedScoutX trifft keine Entscheidungen im Sinne von Art. 22 DSGVO, die rechtliche oder erhebliche Auswirkungen auf den Nutzer haben. Alle von MedScoutX bereitgestellten Inhalte dienen ausschließlich der strukturierten Vorbereitung und Dokumentation der Nutzerangaben.",
         },
       ],
     },

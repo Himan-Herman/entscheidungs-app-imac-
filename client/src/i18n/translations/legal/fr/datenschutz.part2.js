@@ -155,7 +155,7 @@ export default [
       {
         type: "p",
         text:
-          "MedScoutX ne pose pas de diagnostics et ne prend pas de décisions automatisées produisant des effets juridiques ou similaires significatifs. Les contenus générés par IA servent uniquement d’orientation et ne remplacent pas un avis médical. Dans les situations médicalement pertinentes, vous êtes invité à consulter un professionnel de santé.",
+          "MedScoutX ne pose pas de diagnostics et ne prend pas de décisions automatisées produisant des effets juridiques ou similaires significatifs. Les contenus générés par IA servent uniquement à la préparation structurée et à la documentation de vos informations et ne remplacent pas un avis médical. Dans les situations médicalement pertinentes, vous êtes invité à consulter un professionnel de santé.",
       },
     ],
   },

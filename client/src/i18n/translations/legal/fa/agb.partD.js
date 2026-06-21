@@ -35,7 +35,7 @@ export default [
         html: `
 <p>پرسش‌های عمومی: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 <p>پشتیبانی فنی: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
-<p>صورتحساب و فاکتور: <a href="mailto:billing@medscout.app">billing@medscout.app</a></p>
+<p>صورتحساب و فاکتور: <a href="mailto:contact@medscoutx.com">contact@medscoutx.com</a></p>
 `.trim(),
       },
     ],

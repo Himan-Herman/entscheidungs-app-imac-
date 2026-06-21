@@ -4,7 +4,7 @@ import part2 from "./datenschutz.part2.js";
 export default {
   pageTitle: "MedScoutX — Απόρρητο",
   title: "Πολιτική απορρήτου",
-  subtitle: "Τελευταία ενημέρωση: 29 Νοεμβρίου 2025",
+  subtitle: "Τελευταία ενημέρωση: Ιούνιος 2026",
   privacyLinkPath: "/datenschutz",
   backRegister: "Επιστροφή στην εγγραφή",
   backRegisterAria: "Επιστροφή στη σελίδα εγγραφής",

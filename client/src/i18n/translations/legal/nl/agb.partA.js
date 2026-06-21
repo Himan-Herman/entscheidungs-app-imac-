@@ -21,7 +21,6 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX is een AI-ondersteund informatie- en oriëntatie-instrument in de gezondheidszorg. De App is bedoeld om gebruikers een eerste gestructureerd overzicht te geven van mogelijke oorzaken van klachten en mogelijk relevante medische specialismen.</p>
 <p>MedScoutX is <strong>geen medisch hulpmiddel</strong> in de zin van de EU-Verordening medische hulpmiddelen (MDR). Met name:</p>
 <ul>
 <li>de App <strong>stelt geen diagnose</strong>,</li>

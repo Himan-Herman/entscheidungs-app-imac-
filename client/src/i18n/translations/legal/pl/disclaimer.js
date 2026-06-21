@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Informacja prawna",
   title: "Informacja prawna / Zastrzeżenie",
-  subtitle: "Ostatnia aktualizacja: 29 listopada 2025",
+  subtitle: "Ostatnia aktualizacja: czerwiec 2026",
   backRegister: "Powrót do rejestracji",
   backAria: "Powrót do strony rejestracji",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX to narzędzie informacyjne i orientacyjne w obszarze ochrony zdrowia wspierane przez AI. Aplikacja służy wyłącznie do wstępnego, uporządkowanego przeglądu możliwych przyczyn dolegliwości użytkownika oraz potencjalnie istotnych specjalizacji medycznych.",
+            "",
         },
         {
           type: "p",

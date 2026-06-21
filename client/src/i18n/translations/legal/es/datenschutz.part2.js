@@ -155,7 +155,7 @@ export default [
       {
         type: "p",
         text:
-          "MedScoutX no establece diagnósticos ni adopta decisiones automatizadas que produzcan efectos jurídicos o similares significativos. Los contenidos generados por IA tienen solo carácter orientativo y no sustituyen la orientación médica. En situaciones médicamente relevantes se le pedirá que consulte a un profesional sanitario.",
+          "MedScoutX no establece diagnósticos ni adopta decisiones automatizadas que produzcan efectos jurídicos o similares significativos. Los contenidos generados por IA sirven únicamente para la preparación estructurada y la documentación de su información y no sustituyen el asesoramiento médico. En situaciones médicamente relevantes se le pedirá que consulte a un profesional sanitario.",
       },
     ],
   },

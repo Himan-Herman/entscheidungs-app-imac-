@@ -154,7 +154,7 @@ export default [
       {
         type: "p",
         text:
-          "MedScoutX non formula diagnosi né decisioni automatizzate con effetti giuridici o analogamente rilevanti. I contenuti generati dall’IA servono solo all’orientamento e non sostituiscono il parere medico. In situazioni clinicamente rilevanti ti verrà chiesto di contattare un professionista sanitario.",
+          "MedScoutX non formula diagnosi né decisioni automatizzate con effetti giuridici o analogamente rilevanti. I contenuti generati dall’IA servono unicamente alla preparazione strutturata e alla documentazione delle tue informazioni e non sostituiscono il parere medico. In situazioni clinicamente rilevanti ti verrà chiesto di contattare un professionista sanitario.",
       },
     ],
   },

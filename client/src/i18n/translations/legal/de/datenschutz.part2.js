@@ -155,7 +155,7 @@ export default [
       {
         type: "p",
         text:
-          "MedScoutX trifft keine Diagnosen und keine automatisierten Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung. Die automatisierten Inhalte dienen ausschließlich der orientierenden Einschätzung und ersetzen keine ärztliche Beratung. Du wirst in medizinisch relevanten Fällen aufgefordert, eine Ärztin oder einen Arzt zu kontaktieren.",
+          "MedScoutX trifft keine Diagnosen und keine automatisierten Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung. Die automatisierten Inhalte dienen ausschließlich der strukturierten Vorbereitung und Dokumentation deiner Angaben und ersetzen keine ärztliche Beratung. Du wirst in medizinisch relevanten Fällen aufgefordert, eine Ärztin oder einen Arzt zu kontaktieren.",
       },
     ],
   },

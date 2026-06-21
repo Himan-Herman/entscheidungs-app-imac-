@@ -21,7 +21,7 @@ export default [
       {
         type: "html",
         html: `
-<p>MedScoutX è uno strumento di informazione e orientamento assistito da IA nel settore sanitario. L’App ha lo scopo di offrire una prima panoramica strutturata delle possibili cause dei disturbi e delle specialità mediche potenzialmente pertinenti.</p>
+<p>MedScoutX serve alla preparazione strutturata, alla traduzione e alla documentazione delle dichiarazioni dei pazienti. L’App supporta la comunicazione e la preparazione prima, durante e dopo i contatti medici, organizzando le informazioni fornite dagli utenti e presentandole in modo chiaro e tracciabile.</p>
 <p>MedScoutX <strong>non è un dispositivo medico</strong> ai sensi del regolamento UE sui dispositivi medici (MDR). In particolare:</p>
 <ul>
 <li>l’App <strong>non fornisce diagnosi</strong>,</li>

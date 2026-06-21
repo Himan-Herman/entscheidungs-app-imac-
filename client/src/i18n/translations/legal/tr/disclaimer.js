@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Yasal uyarı",
   title: "Yasal uyarı / Feragatname",
-  subtitle: "Son güncelleme: 29 Kasım 2025",
+  subtitle: "Son güncelleme: Haziran 2026",
   backRegister: "Kayda dön",
   backAria: "Kayıt sayfasına dön",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX, sağlık alanında yapay zekâ destekli bir bilgilendirme ve yönlendirme aracıdır. Uygulama yalnızca şikâyetlerinizin olası nedenleri ve ilgili olabilecek tıbbi branşlar hakkında ilk yapılandırılmış bir bakış sunmak içindir.",
+            "",
         },
         {
           type: "p",

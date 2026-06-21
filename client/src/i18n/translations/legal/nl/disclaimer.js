@@ -1,7 +1,7 @@
 export default {
   pageTitle: "MedScoutX — Disclaimer",
   title: "Disclaimer / Juridische mededeling",
-  subtitle: "Laatst bijgewerkt: 29 november 2025",
+  subtitle: "Laatst bijgewerkt: juni 2026",
   backRegister: "Terug naar registratie",
   backAria: "Terug naar registratiepagina",
   sections: [
@@ -12,7 +12,7 @@ export default {
         {
           type: "p",
           text:
-            "MedScoutX is een AI-ondersteund informatie- en oriëntatie-instrument in de gezondheidszorg. De app is uitsluitend bedoeld om gebruikers een eerste gestructureerd overzicht te geven van mogelijke oorzaken van klachten en mogelijk relevante medische specialismen.",
+            "",
         },
         {
           type: "p",
