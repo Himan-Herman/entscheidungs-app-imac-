@@ -25,7 +25,7 @@ export default {
   labelSpecialtyCard: "Fachrichtung",
   notProvided: "nicht angegeben",
   labelLanguagesFilter: "Sprache",
-  languagesFilterHint: "Praxen, die diese Sprache(n) laut Profil anbieten.",
+  languagesFilterHint: "Praxen, die mindestens eine dieser Sprachen laut Profil anbieten.",
   resetFilters: "Filter zurücksetzen",
   profileNote: "Angaben stammen aus dem Praxisprofil. Bitte prüfen Sie Details direkt bei der Praxis.",
   languageNames: {

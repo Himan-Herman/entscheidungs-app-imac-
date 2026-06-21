@@ -25,7 +25,7 @@ export default {
   labelSpecialtyCard: "Specialty",
   notProvided: "not provided",
   labelLanguagesFilter: "Language",
-  languagesFilterHint: "Practices that list these language(s) in their profile.",
+  languagesFilterHint: "Practices that list at least one of these languages in their profile.",
   resetFilters: "Reset filters",
   profileNote: "Details come from the practice profile. Please confirm specifics directly with the practice.",
   languageNames: {

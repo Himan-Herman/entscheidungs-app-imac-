@@ -26,7 +26,7 @@ export const itPracticeDirectory = {
   labelSpecialtyCard: "Specializzazione",
   notProvided: "non indicato",
   labelLanguagesFilter: "Lingua",
-  languagesFilterHint: "Studi che offrono queste lingue secondo il profilo.",
+  languagesFilterHint: "Studi che offrono almeno una di queste lingue secondo il profilo.",
   resetFilters: "Reimposta filtri",
   profileNote: "I dati provengono dal profilo dello studio. Verifica i dettagli direttamente con lo studio.",
   languageNames: {

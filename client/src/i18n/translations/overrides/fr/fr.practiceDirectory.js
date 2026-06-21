@@ -26,7 +26,7 @@ export const frPracticeDirectory = {
   labelSpecialtyCard: "Spécialité",
   notProvided: "non indiqué",
   labelLanguagesFilter: "Langue",
-  languagesFilterHint: "Cabinets proposant ces langues selon leur profil.",
+  languagesFilterHint: "Cabinets proposant au moins une de ces langues selon leur profil.",
   resetFilters: "Réinitialiser les filtres",
   profileNote: "Les informations proviennent du profil du cabinet. Veuillez vérifier les détails directement auprès du cabinet.",
   languageNames: {

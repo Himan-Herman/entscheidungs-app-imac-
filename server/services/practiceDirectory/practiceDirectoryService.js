@@ -83,7 +83,7 @@ function normaliseLanguages(input) {
  *
  * @param {{ q?: string, specialty?: string, city?: string, bookingOnly?: boolean,
  *           languages?: string[] | string }} params
- *   languages — practice must list EVERY requested language (AND) in its profile.
+ *   languages — practice must list AT LEAST ONE of the requested languages (OR) in its profile.
  * @returns {Promise<{ practices: object[], total: number }>}
  */
 export async function searchMedScoutXPractices({ q, specialty, city, bookingOnly, languages } = {}) {
@@ -152,19 +152,22 @@ export async function searchMedScoutXPractices({ q, specialty, city, bookingOnly
     }
   }
 
-  // Language filter — practice's supportedLanguages JSON string must contain EVERY
-  // requested code (AND). Codes are stored quoted (e.g. ["de","tr"]), so we match "<code>".
+  // Language filter — practice must list AT LEAST ONE of the requested codes (OR within the
+  // language selection). The OR group is then AND-combined with the other filters. Codes are
+  // stored quoted in the supportedLanguages JSON string (e.g. ["de","tr"]), so we match "<code>".
   if (languageTerms.length > 0) {
-    const langConditions = languageTerms.map((code) => ({
-      supportedLanguages: { contains: `"${code}"`, mode: "insensitive" },
-    }));
+    const langGroup = {
+      OR: languageTerms.map((code) => ({
+        supportedLanguages: { contains: `"${code}"`, mode: "insensitive" },
+      })),
+    };
     if (where.AND) {
-      where.AND.push(...langConditions);
+      where.AND.push(langGroup);
     } else if (where.OR) {
-      where.AND = [{ OR: where.OR }, ...langConditions];
+      where.AND = [{ OR: where.OR }, langGroup];
       delete where.OR;
     } else {
-      where.AND = langConditions;
+      where.AND = [langGroup];
     }
   }
 

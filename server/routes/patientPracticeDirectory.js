@@ -5,7 +5,7 @@
  *   ?q=<text>            full-text across name / specialty / city
  *   &specialty=<text>    filter by Fachrichtung
  *   &city=<text>         filter by city or postal code prefix
- *   &languages=de,tr     practice must list every given language (per practice profile)
+ *   &languages=de,tr     practice must list at least one of the given languages (per practice profile)
  *   &bookingOnly=true    only practices with medscoutx_request booking active
  *
  * Returns public practice fields only. No patient data, no medical content.

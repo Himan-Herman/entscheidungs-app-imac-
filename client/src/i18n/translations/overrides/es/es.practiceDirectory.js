@@ -26,7 +26,7 @@ export const esPracticeDirectory = {
   labelSpecialtyCard: "Especialidad",
   notProvided: "no indicado",
   labelLanguagesFilter: "Idioma",
-  languagesFilterHint: "Consultas que ofrecen estos idiomas según su perfil.",
+  languagesFilterHint: "Consultas que ofrecen al menos uno de estos idiomas según su perfil.",
   resetFilters: "Restablecer filtros",
   profileNote: "Los datos provienen del perfil de la consulta. Confirme los detalles directamente con la consulta.",
   languageNames: {
