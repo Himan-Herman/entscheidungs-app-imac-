@@ -22,13 +22,24 @@ export function practiceDisplayName(row) {
   return String(row.practiceName || "").trim();
 }
 
+/** Short, non-reversible content version so a replaced logo busts the HTTP cache. */
+function shortVersion(str) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i += 1) {
+    h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+  }
+  return h.toString(36);
+}
+
 /**
  * Logo URL for clients (uploaded logo uses API path).
  * @param {Pick<PracticeProfile, 'id' | 'logoUrl' | 'logoStorageKey'>} row
  */
 export function practiceLogoUrl(row) {
   if (row.logoStorageKey && row.id) {
-    return `/api/practice/settings/logo-file?practiceId=${encodeURIComponent(row.id)}`;
+    return `/api/practice/settings/logo-file?practiceId=${encodeURIComponent(
+      row.id,
+    )}&v=${shortVersion(row.logoStorageKey)}`;
   }
   const external = String(row.logoUrl || "").trim();
   return external || null;

@@ -1,7 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { getMessages } from "../../i18n/translations/index.js";
 import { authFetch } from "../../api/authFetch.js";
+import AccountAvatar from "../../components/account/AccountAvatar.jsx";
+import { patientInitials } from "../../utils/accountIdentity.js";
+import { IDENTITY_CHANGED_EVENT } from "../../hooks/useAccountIdentity.js";
+import {
+  deletePatientAvatar,
+  fetchAvatarBlobUrl,
+  uploadPatientAvatar,
+} from "../../api/accountAvatarApi.js";
 
 export default function AccountPersonalPage() {
   const { language } = useLanguage();
@@ -31,6 +39,18 @@ export default function AccountPersonalPage() {
   const [error, setError] = useState("");
   const [ok, setOk] = useState(false);
 
+  const [hasAvatar, setHasAvatar] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState("");
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+  const avatarRevokeRef = useRef(null);
+
+  const setAvatarBlob = useCallback((url) => {
+    if (avatarRevokeRef.current) URL.revokeObjectURL(avatarRevokeRef.current);
+    avatarRevokeRef.current = url || null;
+    setAvatarSrc(url || "");
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -40,6 +60,13 @@ export default function AccountPersonalPage() {
       if (!res.ok) throw new Error();
       const u = j.user || {};
       const p = j.profile || {};
+      setHasAvatar(Boolean(j.hasAvatar));
+      if (j.avatarUrl) {
+        const blob = await fetchAvatarBlobUrl(j.avatarUrl);
+        setAvatarBlob(blob);
+      } else {
+        setAvatarBlob(null);
+      }
       setForm({
         firstName: u.firstName || "",
         lastName: u.lastName || "",
@@ -62,15 +89,69 @@ export default function AccountPersonalPage() {
     } finally {
       setLoading(false);
     }
-  }, [t.loadError]);
+  }, [t.loadError, setAvatarBlob]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
+  // Revoke the avatar object URL on unmount.
+  useEffect(
+    () => () => {
+      if (avatarRevokeRef.current) URL.revokeObjectURL(avatarRevokeRef.current);
+    },
+    [],
+  );
+
   useEffect(() => {
     document.title = `${t.personalTitle} — MedScoutX`;
   }, [t.personalTitle]);
+
+  function avatarErrorLabel(code) {
+    if (code === "avatar_type_invalid") return t.imageErrorType;
+    if (code === "avatar_too_large") return t.imageErrorTooLarge;
+    return t.imageErrorGeneric;
+  }
+
+  async function handleAvatarUpload(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setAvatarBusy(true);
+    setAvatarError("");
+    try {
+      const { res, data } = await uploadPatientAvatar(file);
+      if (!res.ok || !data.ok) throw new Error(data.error || "avatar_upload_failed");
+      setHasAvatar(true);
+      if (data.avatarUrl) {
+        const blob = await fetchAvatarBlobUrl(data.avatarUrl);
+        setAvatarBlob(blob);
+      }
+      window.dispatchEvent(new CustomEvent(IDENTITY_CHANGED_EVENT));
+    } catch (err) {
+      if (err?.message === "SESSION_EXPIRED") return;
+      setAvatarError(avatarErrorLabel(err.message));
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
+  async function handleAvatarRemove() {
+    setAvatarBusy(true);
+    setAvatarError("");
+    try {
+      const { res, data } = await deletePatientAvatar();
+      if (!res.ok || !data.ok) throw new Error(data.error || "avatar_upload_failed");
+      setHasAvatar(false);
+      setAvatarBlob(null);
+      window.dispatchEvent(new CustomEvent(IDENTITY_CHANGED_EVENT));
+    } catch (err) {
+      if (err?.message === "SESSION_EXPIRED") return;
+      setAvatarError(avatarErrorLabel(err.message));
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -112,6 +193,12 @@ export default function AccountPersonalPage() {
     setForm((prev) => ({ ...prev, [k]: v }));
   }
 
+  const avatarInitials = patientInitials(
+    { firstName: form.firstName, lastName: form.lastName },
+    { displayName: form.displayName },
+    "P",
+  );
+
   if (loading) return <p className="account-portal-card__empty">{t.loading}</p>;
 
   return (
@@ -120,6 +207,54 @@ export default function AccountPersonalPage() {
       <p className="account-portal-page__lead">{t.personalIntro}</p>
       {error ? <p className="account-portal__error">{error}</p> : null}
       {ok ? <p className="account-portal__ok">{t.save}</p> : null}
+
+      <section className="account-portal-avatar" aria-labelledby="account-avatar-label">
+        <span id="account-avatar-label" className="account-portal-avatar__label">
+          {t.imageTitle}
+        </span>
+        <div className="account-portal-avatar__row">
+          <AccountAvatar
+            size="xl"
+            image={avatarSrc}
+            alt={t.imageAlt}
+            initials={avatarInitials}
+            isPractice={false}
+          />
+          <div className="account-portal-avatar__actions">
+            <label className="account-portal__btn account-portal-avatar__file-label">
+              {avatarBusy
+                ? t.imageUploading
+                : hasAvatar
+                  ? t.imageChange
+                  : t.imageUpload}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="account-portal-avatar__file-input"
+                disabled={avatarBusy}
+                onChange={handleAvatarUpload}
+                aria-label={hasAvatar ? t.imageChange : t.imageUpload}
+              />
+            </label>
+            {hasAvatar ? (
+              <button
+                type="button"
+                className="account-portal__btn account-portal-avatar__remove"
+                disabled={avatarBusy}
+                onClick={() => void handleAvatarRemove()}
+              >
+                {t.imageRemove}
+              </button>
+            ) : null}
+            <p className="account-portal-avatar__hint">{t.imageHint}</p>
+          </div>
+        </div>
+        {avatarError ? (
+          <p className="account-portal__error" role="alert">
+            {avatarError}
+          </p>
+        ) : null}
+      </section>
 
       <form className="account-portal-form" onSubmit={onSubmit}>
         <label className="account-portal-form__field">

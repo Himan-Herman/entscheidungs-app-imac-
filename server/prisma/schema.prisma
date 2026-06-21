@@ -214,6 +214,9 @@ model UserProfile {
   /// Optional salutation / gender label for forms (non-clinical)
   genderOrSalutation       String?
   displayName              String?
+  /// Optional self-uploaded profile picture — stored on disk, served via API; only the storage key + MIME live in the DB (no public file path).
+  avatarStorageKey         String?
+  avatarMimeType           String?
   preferredPatientLanguage String?
   preferredDoctorLanguage  String?
   /// App UI locale (de, en, …) — organizational preference only

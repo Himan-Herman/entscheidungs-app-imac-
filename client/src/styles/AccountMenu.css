@@ -1,0 +1,295 @@
+/* ===========================================================================
+   Account avatar + dropdown — premium account/settings control.
+   Reuses the header design tokens (--ms-*) so it tracks Light/Dark via the
+   app's own data-theme switch (not only prefers-color-scheme).
+   =========================================================================== */
+
+/* ---- Avatar (image | initials | role icon) ------------------------------- */
+.ms-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(140deg, var(--ms-accent) 0%, var(--ms-accent-strong) 100%);
+  color: #ffffff;
+  font-family: var(--ms-font);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  user-select: none;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.ms-avatar--practice {
+  background: linear-gradient(140deg, #0e7490 0%, #0b4f6c 100%);
+}
+
+.ms-avatar--md {
+  width: 40px;
+  height: 40px;
+  font-size: 0.68rem;
+}
+
+.ms-avatar--lg {
+  width: 54px;
+  height: 54px;
+  font-size: 0.95rem;
+}
+
+.ms-avatar--xl {
+  width: 96px;
+  height: 96px;
+  font-size: 1.7rem;
+}
+
+.ms-avatar--image {
+  background: var(--ms-panel);
+  color: var(--ms-fg);
+  box-shadow: inset 0 0 0 1px var(--ms-border);
+}
+
+.ms-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ms-avatar__initials {
+  transform: translateY(0.5px);
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+  padding: 0 2px;
+}
+
+/* ---- Toggle button (replaces the gear when signed in) -------------------- */
+.ms-account-toggle {
+  grid-area: menu;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid var(--ms-border);
+  border-radius: 999px;
+  background: var(--ms-panel);
+  color: var(--ms-fg);
+  cursor: pointer;
+  box-shadow: var(--ms-shadow);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.ms-account-toggle:hover,
+.ms-account-toggle:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(11, 79, 108, 0.32);
+  outline: none;
+  box-shadow: 0 14px 30px rgba(15, 118, 110, 0.18);
+}
+
+.ms-account-toggle:focus-visible {
+  outline: 2px solid var(--ms-focus);
+  outline-offset: 2px;
+}
+
+.ms-account-toggle.is-open {
+  border-color: var(--ms-accent);
+  background: linear-gradient(
+    135deg,
+    rgba(11, 79, 108, 0.1),
+    rgba(15, 118, 110, 0.12)
+  );
+}
+
+.ms-account-toggle__chevron {
+  color: var(--ms-muted);
+  transition: transform 180ms ease;
+}
+
+.ms-account-toggle.is-open .ms-account-toggle__chevron {
+  transform: rotate(180deg);
+}
+
+:root[data-theme="dark"] .ms-account-toggle {
+  border-color: rgba(148, 163, 184, 0.22);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme="dark"] .ms-account-toggle:hover,
+:root[data-theme="dark"] .ms-account-toggle:focus-visible {
+  border-color: rgba(94, 234, 212, 0.4);
+}
+
+/* On narrow screens keep just the avatar circle (no chevron) for touch. */
+@media (max-width: 479px) {
+  .ms-account-toggle {
+    padding: 3px;
+    gap: 0;
+  }
+  .ms-account-toggle__chevron {
+    display: none;
+  }
+}
+
+/* ---- Identity header inside the dropdown --------------------------------- */
+.ms-account-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--ms-border);
+  min-width: 0;
+}
+
+.ms-account-id__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ms-account-id__name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ms-fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.ms-account-id__role {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ms-muted);
+  margin-top: 2px;
+}
+
+/* ---- Quick-settings block (Appearance + Language) ------------------------ */
+.ms-account-quick {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ms-account-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ms-muted);
+  padding: 2px 6px 0;
+}
+
+.ms-account-quick__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 8px 0 16px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1px solid rgba(11, 79, 108, 0.12);
+  background: var(--ms-panel);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="dark"] .ms-account-quick__row {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.ms-account-quick__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--ms-font);
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--ms-fg);
+}
+
+.ms-account-quick__label svg {
+  flex: 0 0 auto;
+  color: var(--ms-accent-strong);
+}
+
+:root[data-theme="dark"] .ms-account-quick__label svg {
+  color: #5eead4;
+}
+
+/* Appearance toggle pill (Light/Dark) */
+.ms-appearance-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--ms-border);
+  border-radius: 999px;
+  background: var(--ms-bg);
+  color: var(--ms-fg);
+  font-family: var(--ms-font);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.ms-appearance-toggle:hover,
+.ms-appearance-toggle:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(11, 79, 108, 0.3);
+  outline: none;
+}
+
+.ms-appearance-toggle:focus-visible {
+  outline: 2px solid var(--ms-focus);
+  outline-offset: 2px;
+}
+
+.ms-appearance-toggle svg {
+  color: var(--ms-accent-strong);
+}
+
+:root[data-theme="dark"] .ms-appearance-toggle svg {
+  color: #5eead4;
+}
+
+/* Let the nested language selector fill its row nicely */
+.ms-account-quick__row .gls {
+  flex: 0 0 auto;
+}
+
+/* Keep the whole dropdown reachable on short / mobile viewports: scroll inside
+   the panel instead of pushing the last items (e.g. Logout) below the fold.
+   Scoped to the same breakpoint where the nested language menu switches to
+   fixed/viewport positioning, so it is never clipped by this overflow. */
+@media (max-width: 860px), (max-height: 820px) {
+  .ms-nav {
+    max-height: calc(100vh - 88px);
+    max-height: calc(100dvh - 88px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ms-account-toggle,
+  .ms-appearance-toggle,
+  .ms-account-toggle__chevron {
+    transition: none;
+  }
+}

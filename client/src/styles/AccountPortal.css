@@ -658,3 +658,73 @@
 :root[data-theme="dark"] .account-portal__btn--primary:hover {
   color: var(--ms-color-on-accent, #ffffff);
 }
+
+/* ---- Profile image (patient avatar) ------------------------------------- */
+.account-portal-avatar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 22px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--ms-color-border, #e2e8f0);
+}
+
+.account-portal-avatar__label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.account-portal-avatar__row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.account-portal-avatar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.account-portal-avatar__file-label {
+  position: relative;
+  cursor: pointer;
+}
+
+.account-portal-avatar__file-label:focus-within {
+  outline: 2px solid var(--ms-focus, #0ea5e9);
+  outline-offset: 2px;
+}
+
+.account-portal-avatar__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.account-portal-avatar__hint {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  color: var(--ms-color-text-secondary, #64748b);
+}
+
+:root[data-theme="dark"] .account-portal-avatar {
+  border-bottom-color: rgba(148, 163, 184, 0.28);
+}
+
+:root[data-theme="dark"] .account-portal-avatar__label {
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .account-portal-avatar__hint {
+  color: #94a3b8;
+}

@@ -6,9 +6,48 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { uploadUserAvatar } from "../middleware/uploadUserAvatar.js";
+import { userAvatarStorage } from "../services/account/userAvatarStorage.js";
 
 const prisma = new PrismaClient();
 const router = express.Router();
+
+/** Short, non-reversible content version so a replaced image busts the HTTP cache. */
+function shortVersion(str) {
+  let h = 5381;
+  for (let i = 0; i < str.length; i += 1) {
+    h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+  }
+  return h.toString(36);
+}
+
+/** Served (auth-gated) URL for the signed-in user's own avatar — never a file path. */
+function avatarUrlForProfile(profile) {
+  if (!profile?.avatarStorageKey) return null;
+  return `/api/account/avatar-file?v=${shortVersion(profile.avatarStorageKey)}`;
+}
+
+/**
+ * Lightweight content sniff so a renamed/spoofed file can't pass as an image.
+ * @param {Buffer} buf
+ * @returns {"image/png"|"image/jpeg"|"image/webp"|null}
+ */
+function sniffImageMime(buf) {
+  if (!buf || buf.length < 12) return null;
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) {
+    return "image/png";
+  }
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (
+    buf.toString("ascii", 0, 4) === "RIFF" &&
+    buf.toString("ascii", 8, 12) === "WEBP"
+  ) {
+    return "image/webp";
+  }
+  return null;
+}
 
 const DELETE_PREVISIT_CONFIRM = "DELETE_MY_PREVISIT_DATA";
 
@@ -227,6 +266,8 @@ router.get("/patient-settings", async (req, res) => {
         dateOfBirth: user.dateOfBirth?.toISOString?.() ?? user.dateOfBirth,
       },
       profile: userProfileJson(p),
+      avatarUrl: avatarUrlForProfile(p),
+      hasAvatar: Boolean(p?.avatarStorageKey),
     });
   } catch (err) {
     console.error("[account/patient-settings GET]", err?.message ?? err);
@@ -340,10 +381,144 @@ router.put("/patient-settings", async (req, res) => {
         dateOfBirth: next.dateOfBirth?.toISOString?.() ?? next.dateOfBirth,
       },
       profile: userProfileJson(next.profile),
+      avatarUrl: avatarUrlForProfile(next.profile),
+      hasAvatar: Boolean(next.profile?.avatarStorageKey),
     });
   } catch (err) {
     console.error("[account/patient-settings PUT]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "server_error" });
+  }
+});
+
+/** Run multer and map its errors (size / type) to clean client codes. */
+function receiveAvatarUpload(req, res, next) {
+  uploadUserAvatar.single("avatar")(req, res, (err) => {
+    if (!err) return next();
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ ok: false, error: "avatar_too_large" });
+    }
+    if (err.message === "avatar_type_invalid") {
+      return res.status(400).json({ ok: false, error: "avatar_type_invalid" });
+    }
+    return res.status(400).json({ ok: false, error: "avatar_upload_failed" });
+  });
+}
+
+/**
+ * POST /avatar — upload/replace the signed-in patient's profile picture.
+ * Multipart field name: "avatar". Always scoped to req.user.userId.
+ */
+router.post("/avatar", receiveAvatarUpload, async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!req.file?.buffer) {
+    return res.status(400).json({ ok: false, error: "avatar_missing" });
+  }
+
+  const declaredMime = req.file.mimetype;
+  const sniffed = sniffImageMime(req.file.buffer);
+  if (!sniffed || sniffed !== declaredMime) {
+    return res.status(400).json({ ok: false, error: "avatar_type_invalid" });
+  }
+
+  try {
+    const existing = await prisma.userProfile.findUnique({
+      where: { userId },
+      select: { avatarStorageKey: true },
+    });
+
+    const storageKey = await userAvatarStorage.putAvatar({
+      userId,
+      buffer: req.file.buffer,
+      mimeType: sniffed,
+    });
+
+    const profile = await prisma.userProfile.upsert({
+      where: { userId },
+      create: { userId, avatarStorageKey: storageKey, avatarMimeType: sniffed },
+      update: { avatarStorageKey: storageKey, avatarMimeType: sniffed },
+    });
+
+    if (existing?.avatarStorageKey) {
+      await userAvatarStorage.deleteAvatar(existing.avatarStorageKey);
+    }
+
+    writeAuditLog({
+      req,
+      userId,
+      action: "patient_avatar_uploaded",
+      entityType: "User",
+      entityId: userId,
+      metadata: {},
+    });
+
+    return res.json({
+      ok: true,
+      avatarUrl: avatarUrlForProfile(profile),
+      hasAvatar: true,
+    });
+  } catch (err) {
+    console.error("[account/avatar POST]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
+});
+
+/** DELETE /avatar — remove the signed-in patient's profile picture. */
+router.delete("/avatar", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const existing = await prisma.userProfile.findUnique({
+      where: { userId },
+      select: { avatarStorageKey: true },
+    });
+
+    if (existing?.avatarStorageKey) {
+      await prisma.userProfile.update({
+        where: { userId },
+        data: { avatarStorageKey: null, avatarMimeType: null },
+      });
+      await userAvatarStorage.deleteAvatar(existing.avatarStorageKey);
+
+      writeAuditLog({
+        req,
+        userId,
+        action: "patient_avatar_deleted",
+        entityType: "User",
+        entityId: userId,
+        metadata: {},
+      });
+    }
+
+    return res.json({ ok: true, avatarUrl: null, hasAvatar: false });
+  } catch (err) {
+    console.error("[account/avatar DELETE]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
+});
+
+/** GET /avatar-file — serve the signed-in patient's own avatar bytes. */
+router.get("/avatar-file", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId },
+      select: { avatarStorageKey: true, avatarMimeType: true },
+    });
+    if (!profile?.avatarStorageKey) {
+      return res.status(404).json({ ok: false, error: "avatar_not_found" });
+    }
+
+    const buffer = await userAvatarStorage.getAvatar(profile.avatarStorageKey);
+    res.setHeader("Content-Type", profile.avatarMimeType || "image/png");
+    res.setHeader("Cache-Control", "private, max-age=3600");
+    return res.send(buffer);
+  } catch (err) {
+    console.error("[account/avatar-file GET]", err?.message ?? err);
+    return res.status(404).json({ ok: false, error: "avatar_not_found" });
   }
 });
 

@@ -7,6 +7,7 @@ import {
   canViewIntegrationSettings,
   getPracticeAccess,
 } from "../utils/practiceAccess.js";
+import { practiceLogoUrl } from "../utils/practiceBranding.js";
 import {
   DOCUMENT_DELIVERY_MODES,
   PracticeWebhookEventType,
@@ -85,7 +86,8 @@ function profileJson(row) {
     updatedAt: row.updatedAt,
     practiceName: row.practiceName,
     publicSlug: row.publicSlug,
-    logoUrl: row.logoUrl,
+    logoUrl: practiceLogoUrl(row),
+    hasUploadedLogo: Boolean(row.logoStorageKey),
     address: row.address,
     phone: row.phone,
     email: row.email,

@@ -3,11 +3,14 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   BookUser,
   Building2,
+  ChevronDown,
   History,
   Home,
+  Languages,
   LayoutDashboard,
   LogOut,
   Moon,
+  Palette,
   Settings2,
   SunMedium,
   UserRound,
@@ -16,6 +19,7 @@ import logo from "../assets/img/medscout-logo.png";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
+import AccountAvatar from "./account/AccountAvatar.jsx";
 import {
   PATIENT_UI_SELECTABLE_LOCALE_CODES,
   PRACTICE_UI_SELECTABLE_LOCALE_CODES,
@@ -23,7 +27,9 @@ import {
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
 import { readUserMode, writeUserMode, USER_MODES } from "../utils/userMode.js";
+import { useAccountIdentity } from "../hooks/useAccountIdentity.js";
 import "../styles/Header.css";
+import "../styles/AccountMenu.css";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -45,6 +51,15 @@ export default function Header() {
       ? "/practice"
       : "/patient";
   const themeLabel = theme === "dark" ? copy.themeLight : copy.themeDark;
+
+  const identity = useAccountIdentity(isLoggedIn, userMode);
+  const account = copy.account ?? {};
+  const roleLabel = isPractice ? account.rolePractice : account.rolePatient;
+  const avatarAlt = isPractice
+    ? account.avatarPracticeAlt
+    : account.avatarPatientAlt;
+  const avatarInitials = identity.initials || identity.roleFallbackInitials;
+  const accountName = identity.displayName || roleLabel || "";
 
   useEffect(() => {
     setOpen(false);
@@ -131,49 +146,75 @@ export default function Header() {
             </span>
           </button>
 
-          <div className="ms-header__controls">
-            <button
-              type="button"
-              className="ms-theme-toggle"
-              onClick={toggleTheme}
-              aria-label={themeLabel}
-              title={themeLabel}
-            >
-              {theme === "dark" ? (
-                <SunMedium size={18} aria-hidden="true" />
-              ) : (
-                <Moon size={18} aria-hidden="true" />
-              )}
-            </button>
+          {!isLoggedIn && (
+            <div className="ms-header__controls">
+              <button
+                type="button"
+                className="ms-theme-toggle"
+                onClick={toggleTheme}
+                aria-label={themeLabel}
+                title={themeLabel}
+              >
+                {theme === "dark" ? (
+                  <SunMedium size={18} aria-hidden="true" />
+                ) : (
+                  <Moon size={18} aria-hidden="true" />
+                )}
+              </button>
 
-            <div className="ms-header__language">
-              <GlobalLanguageSelector
-                label={copy.languageLabel}
-                compact
-                selectableLocaleCodes={
-                  isPractice
-                    ? PRACTICE_UI_SELECTABLE_LOCALE_CODES
-                    : PATIENT_UI_SELECTABLE_LOCALE_CODES
-                }
-              />
+              <div className="ms-header__language">
+                <GlobalLanguageSelector
+                  label={copy.languageLabel}
+                  compact
+                  selectableLocaleCodes={PATIENT_UI_SELECTABLE_LOCALE_CODES}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
-          <button
-            ref={menuToggleRef}
-            type="button"
-            className={`ms-nav-toggle${open ? " is-open" : ""}`}
-            aria-controls="hauptnavigation"
-            aria-expanded={open ? "true" : "false"}
-            aria-label={copy.menuSettingsAria ?? copy.navToggle}
-            title={copy.menuSettingsLabel ?? copy.navToggle}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <Settings2 size={22} strokeWidth={2.25} aria-hidden="true" />
-            <span className="ms-nav-toggle__label">
-              {copy.menuSettingsLabel ?? "Menu"}
-            </span>
-          </button>
+          {isLoggedIn ? (
+            <button
+              ref={menuToggleRef}
+              type="button"
+              className={`ms-account-toggle${open ? " is-open" : ""}`}
+              aria-controls="hauptnavigation"
+              aria-expanded={open ? "true" : "false"}
+              aria-haspopup="menu"
+              aria-label={account.menuAria ?? copy.menuSettingsAria ?? copy.navToggle}
+              title={accountName || account.menuAria || copy.menuSettingsLabel}
+              onClick={() => setOpen((v) => !v)}
+            >
+              <AccountAvatar
+                size="md"
+                image={identity.image}
+                alt={avatarAlt}
+                initials={avatarInitials}
+                isPractice={isPractice}
+              />
+              <ChevronDown
+                className="ms-account-toggle__chevron"
+                size={16}
+                strokeWidth={2.25}
+                aria-hidden="true"
+              />
+            </button>
+          ) : (
+            <button
+              ref={menuToggleRef}
+              type="button"
+              className={`ms-nav-toggle${open ? " is-open" : ""}`}
+              aria-controls="hauptnavigation"
+              aria-expanded={open ? "true" : "false"}
+              aria-label={copy.menuSettingsAria ?? copy.navToggle}
+              title={copy.menuSettingsLabel ?? copy.navToggle}
+              onClick={() => setOpen((v) => !v)}
+            >
+              <Settings2 size={22} strokeWidth={2.25} aria-hidden="true" />
+              <span className="ms-nav-toggle__label">
+                {copy.menuSettingsLabel ?? "Menu"}
+              </span>
+            </button>
+          )}
 
           <nav
             ref={menuPanelRef}
@@ -181,6 +222,24 @@ export default function Header() {
             className={`ms-nav ${open ? "is-open" : ""}`}
             aria-label={copy.nav}
           >
+            {isLoggedIn && (
+              <div className="ms-account-id">
+                <AccountAvatar
+                  size="lg"
+                  image={identity.image}
+                  alt={avatarAlt}
+                  initials={avatarInitials}
+                  isPractice={isPractice}
+                />
+                <span className="ms-account-id__text">
+                  <span className="ms-account-id__name" title={accountName}>
+                    {accountName}
+                  </span>
+                  <span className="ms-account-id__role">{roleLabel}</span>
+                </span>
+              </div>
+            )}
+
             <ul>
               {isLoggedIn && (
                 <li className="ms-nav__mode-row">
@@ -313,6 +372,63 @@ export default function Header() {
                     <span>{copy.settingsPrivacy}</span>
                   </NavLink>
                 </li>
+              )}
+
+              {isLoggedIn && (
+                <li className="ms-nav__divider" role="presentation" aria-hidden />
+              )}
+
+              {isLoggedIn && (
+                <li className="ms-account-quick">
+                  <span className="ms-account-section-label">
+                    {account.preferences ?? copy.languageLabel}
+                  </span>
+
+                  <div className="ms-account-quick__row">
+                    <span className="ms-account-quick__label">
+                      <Palette size={16} aria-hidden="true" />
+                      {account.appearance ?? copy.themeDark}
+                    </span>
+                    <button
+                      type="button"
+                      className="ms-appearance-toggle"
+                      onClick={toggleTheme}
+                      aria-label={themeLabel}
+                      title={themeLabel}
+                    >
+                      {theme === "dark" ? (
+                        <SunMedium size={15} aria-hidden="true" />
+                      ) : (
+                        <Moon size={15} aria-hidden="true" />
+                      )}
+                      <span>
+                        {theme === "dark"
+                          ? account.themeLightShort ?? copy.themeLight
+                          : account.themeDarkShort ?? copy.themeDark}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="ms-account-quick__row">
+                    <span className="ms-account-quick__label">
+                      <Languages size={16} aria-hidden="true" />
+                      {copy.languageLabel}
+                    </span>
+                    <GlobalLanguageSelector
+                      label={copy.languageLabel}
+                      compact
+                      selectableLocaleCodes={
+                        isPractice
+                          ? PRACTICE_UI_SELECTABLE_LOCALE_CODES
+                          : PATIENT_UI_SELECTABLE_LOCALE_CODES
+                      }
+                    />
+                  </div>
+                </li>
+              )}
+
+              {isLoggedIn && (
+                <li className="ms-nav__divider" role="presentation" aria-hidden />
               )}
 
               {isLoggedIn && (

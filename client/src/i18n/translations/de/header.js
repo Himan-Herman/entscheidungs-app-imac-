@@ -26,4 +26,15 @@ export default {
   switchArea: "Bereich wechseln",
   switchPatient: "Patientenbereich",
   switchPractice: "Praxisbereich",
+  account: {
+    menuAria: "Kontomenü öffnen",
+    rolePatient: "Patientenkonto",
+    rolePractice: "Praxiskonto",
+    preferences: "Einstellungen",
+    appearance: "Darstellung",
+    themeLightShort: "Hell",
+    themeDarkShort: "Dunkel",
+    avatarPatientAlt: "Profilbild",
+    avatarPracticeAlt: "Praxislogo",
+  },
 };

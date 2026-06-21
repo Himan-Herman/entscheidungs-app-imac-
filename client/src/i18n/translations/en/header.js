@@ -26,4 +26,15 @@ export default {
   switchArea: "Switch area",
   switchPatient: "Patient workspace",
   switchPractice: "Practice workspace",
+  account: {
+    menuAria: "Open account menu",
+    rolePatient: "Patient account",
+    rolePractice: "Practice account",
+    preferences: "Preferences",
+    appearance: "Appearance",
+    themeLightShort: "Light",
+    themeDarkShort: "Dark",
+    avatarPatientAlt: "Patient profile image",
+    avatarPracticeAlt: "Practice logo",
+  },
 };
