@@ -57,15 +57,40 @@ function toDirectoryEntry(row) {
 }
 
 /**
+ * Normalise a list of requested language codes (e.g. ["de","TR"," ar "]).
+ * Lowercased, 2–8 chars, deduped, capped. Returns [] for invalid/empty input.
+ *
+ * @param {string[] | string | undefined} input
+ * @returns {string[]}
+ */
+function normaliseLanguages(input) {
+  const arr = Array.isArray(input)
+    ? input
+    : typeof input === "string"
+      ? input.split(",")
+      : [];
+  const seen = new Set();
+  for (const raw of arr) {
+    const code = String(raw || "").trim().toLowerCase();
+    if (code.length >= 2 && code.length <= 8 && /^[a-z-]+$/.test(code)) seen.add(code);
+    if (seen.size >= 10) break;
+  }
+  return [...seen];
+}
+
+/**
  * Search active MedScoutX practices.
  *
- * @param {{ q?: string, specialty?: string, city?: string, bookingOnly?: boolean }} params
+ * @param {{ q?: string, specialty?: string, city?: string, bookingOnly?: boolean,
+ *           languages?: string[] | string }} params
+ *   languages — practice must list EVERY requested language (AND) in its profile.
  * @returns {Promise<{ practices: object[], total: number }>}
  */
-export async function searchMedScoutXPractices({ q, specialty, city, bookingOnly } = {}) {
+export async function searchMedScoutXPractices({ q, specialty, city, bookingOnly, languages } = {}) {
   const qTerm = trim(q);
   const specialtyTerm = trim(specialty);
   const cityTerm = trim(city);
+  const languageTerms = normaliseLanguages(languages);
 
   // Base: only active practices
   const where = { isActive: true };
@@ -124,6 +149,22 @@ export async function searchMedScoutXPractices({ q, specialty, city, bookingOnly
       where.AND.push(bookingCondition);
     } else {
       Object.assign(where, bookingCondition);
+    }
+  }
+
+  // Language filter — practice's supportedLanguages JSON string must contain EVERY
+  // requested code (AND). Codes are stored quoted (e.g. ["de","tr"]), so we match "<code>".
+  if (languageTerms.length > 0) {
+    const langConditions = languageTerms.map((code) => ({
+      supportedLanguages: { contains: `"${code}"`, mode: "insensitive" },
+    }));
+    if (where.AND) {
+      where.AND.push(...langConditions);
+    } else if (where.OR) {
+      where.AND = [{ OR: where.OR }, ...langConditions];
+      delete where.OR;
+    } else {
+      where.AND = langConditions;
     }
   }
 

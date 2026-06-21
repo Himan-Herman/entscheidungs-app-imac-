@@ -18,6 +18,7 @@ import frErezept from "./fr/fr.erezept.js";
 import frSosCard from "./fr/fr.sosCard.js";
 import { frPracticeBillingPlausibility, frPracticeIntegrationsVendors } from "./fr/fr.practiceBillingPlausibility.js";
 import { frPatientBillingExplain } from "./fr/fr.patientBillingExplain.js";
+import { frPracticeDirectory } from "./fr/fr.practiceDirectory.js";
 
 const frBase = {
   legal: legalFr,
@@ -193,7 +194,7 @@ export default deepMerge(
           { practiceBillingPlausibility: frPracticeBillingPlausibility },
           { practiceIntegrations: frPracticeIntegrationsVendors },
         ),
-        { patientBillingExplain: frPatientBillingExplain },
+        deepMerge({ patientBillingExplain: frPatientBillingExplain }, { practiceDirectory: frPracticeDirectory }),
       ),
     ),
   ),

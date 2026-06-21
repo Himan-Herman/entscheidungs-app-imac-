@@ -2035,27 +2035,38 @@
 @media (max-width: 760px) {
   .landing-page {
     padding: 16px;
-    padding-top: 164px;
+    padding-top: 18px;
     padding-bottom: 94px;
   }
 
   .landing-page__header {
+    position: sticky;
     align-items: flex-start;
     flex-direction: column;
-    top: 10px;
-    left: 50%;
-    width: calc(100% - 20px);
-    padding: 14px;
-    border-radius: 28px;
+    top: 8px;
+    left: auto;
+    width: 100%;
+    transform: none;
+    padding: 12px;
+    border-radius: 24px;
+    gap: 10px;
   }
 
   .landing-page__brand {
     width: 100%;
+    gap: 10px;
   }
 
   .landing-page__brand-kicker {
-    font-size: 0.64rem;
-    letter-spacing: 0.11em;
+    display: none;
+  }
+
+  .landing-page__brand-copy strong {
+    font-size: 1.02rem;
+  }
+
+  .landing-page__brand-copy {
+    gap: 1px;
   }
 
   .landing-page__brand-line {
@@ -2063,8 +2074,9 @@
   }
 
   .landing-page__brand-mark {
-    width: 48px;
-    height: 48px;
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
   }
 
   .landing-page__header-actions,
@@ -2074,8 +2086,9 @@
 
   .landing-page__header-actions {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) 44px auto;
     align-items: stretch;
+    gap: 8px;
   }
 
   .landing-page__header-actions .gls {
@@ -2090,7 +2103,17 @@
   .landing-page__cta,
   .landing-page__signal-pill,
   .landing-page__story-signal {
-    min-height: 52px;
+    min-height: 44px;
+  }
+
+  .landing-page__icon-button {
+    width: 44px;
+    min-height: 44px;
+  }
+
+  .landing-page__utility-link {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.95rem;
   }
 
   .landing-page__cta-row {
@@ -2157,22 +2180,61 @@
   }
 
   .landing-page__atlas-summary-visual {
-    padding: 18px 16px 16px;
+    padding: 16px;
   }
 
   .landing-page__atlas-summary-rail {
     display: none;
   }
 
-  .landing-page__atlas-summary-nodes {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 12px;
+  .landing-page__atlas-summary-copy h3 {
+    font-size: 1.72rem;
+    line-height: 1.1;
   }
 
-  .landing-page__atlas-summary-node:last-child {
-    grid-column: 1 / -1;
-    justify-items: center;
+  .landing-page__atlas-summary-copy p:last-child {
+    font-size: 0.98rem;
+    line-height: 1.6;
+  }
+
+  .landing-page__atlas-summary-nodes {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .landing-page__atlas-summary-node {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px 12px;
+    align-items: center;
+    justify-items: stretch;
+  }
+
+  .landing-page__atlas-summary-node strong {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .landing-page__atlas-summary-node i {
+    grid-column: 2;
+  }
+
+  .landing-page__atlas-summary-index {
+    width: 40px;
+    height: 40px;
+    font-size: 0.78rem;
+  }
+
+  .landing-page__atlas-summary-signals {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .landing-page__atlas-summary-pill {
+    width: 100%;
+    justify-content: center;
     text-align: center;
+    font-size: 0.92rem;
   }
 
   .landing-page__description,

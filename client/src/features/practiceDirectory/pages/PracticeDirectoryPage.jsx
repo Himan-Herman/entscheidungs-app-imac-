@@ -5,6 +5,14 @@ import { getMessages } from "../../../i18n/translations";
 import { searchMedScoutXPractices } from "../api/practiceDirectoryApi.js";
 import "../../../styles/PracticeDirectoryPage.css";
 
+// Curated set of common languages offered as filter chips. Display names come from i18n
+// (t.languageNames); values are the codes stored in each practice's supportedLanguages.
+const FILTER_LANGUAGES = ["de", "en", "tr", "ar", "ru", "uk", "pl", "fr", "es", "it"];
+
+function langLabel(t, code) {
+  return t.languageNames?.[code] || code.toUpperCase();
+}
+
 function PracticeCard({ practice, t, onRequest }) {
   const {
     practiceName,
@@ -67,10 +75,16 @@ function PracticeCard({ practice, t, onRequest }) {
       )}
 
       {supportedLanguages && supportedLanguages.length > 0 && (
-        <p className="pdir-card__row">
+        <div className="pdir-card__row pdir-card__row--langs">
           <span className="pdir-card__label">{t.labelLanguages}:</span>{" "}
-          {supportedLanguages.join(", ")}
-        </p>
+          <span className="pdir-lang-badges">
+            {supportedLanguages.map((code) => (
+              <span className="pdir-lang-badge" key={code}>
+                {langLabel(t, code)}
+              </span>
+            ))}
+          </span>
+        </div>
       )}
 
       {bookingAvailable && (
@@ -97,12 +111,31 @@ export default function PracticeDirectoryPage() {
   const [specialty, setSpecialty] = useState("");
   const [city, setCity] = useState("");
   const [bookingOnly, setBookingOnly] = useState(false);
+  const [selectedLanguages, setSelectedLanguages] = useState([]);
 
   const [practices, setPractices] = useState([]);
   const [total, setTotal] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
+
+  const toggleLanguage = useCallback((code) => {
+    setSelectedLanguages((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+    );
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setQ("");
+    setSpecialty("");
+    setCity("");
+    setBookingOnly(false);
+    setSelectedLanguages([]);
+    setPractices([]);
+    setTotal(null);
+    setError("");
+    setSearched(false);
+  }, []);
 
   const handleSearch = useCallback(
     async (e) => {
@@ -115,6 +148,7 @@ export default function PracticeDirectoryPage() {
           specialty,
           city,
           bookingOnly,
+          languages: selectedLanguages,
         });
         if (!res.ok) {
           setError(t.loadError);
@@ -133,7 +167,7 @@ export default function PracticeDirectoryPage() {
         setSearched(true);
       }
     },
-    [q, specialty, city, bookingOnly, t],
+    [q, specialty, city, bookingOnly, selectedLanguages, t],
   );
 
   function handleRequest(practice) {
@@ -193,6 +227,35 @@ export default function PracticeDirectoryPage() {
             />
           </div>
 
+          <div className="pdir-form__row">
+            <span className="pdir-form__label" id="pdir-lang-label">
+              {t.labelLanguagesFilter}
+            </span>
+            {t.languagesFilterHint && (
+              <span className="pdir-form__hint">{t.languagesFilterHint}</span>
+            )}
+            <div
+              className="pdir-lang-chips"
+              role="group"
+              aria-labelledby="pdir-lang-label"
+            >
+              {FILTER_LANGUAGES.map((code) => {
+                const selected = selectedLanguages.includes(code);
+                return (
+                  <button
+                    type="button"
+                    key={code}
+                    className={`pdir-lang-chip${selected ? " pdir-lang-chip--selected" : ""}`}
+                    aria-pressed={selected}
+                    onClick={() => toggleLanguage(code)}
+                  >
+                    {langLabel(t, code)}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="pdir-form__row pdir-form__row--checkbox">
             <label className="pdir-form__checkbox-label">
               <input
@@ -205,14 +268,28 @@ export default function PracticeDirectoryPage() {
             </label>
           </div>
 
-          <button
-            type="submit"
-            className="pdir-form__submit"
-            disabled={loading}
-          >
-            {loading ? t.searching : t.searchButton}
-          </button>
+          <div className="pdir-form__actions">
+            <button
+              type="submit"
+              className="pdir-form__submit"
+              disabled={loading}
+            >
+              {loading ? t.searching : t.searchButton}
+            </button>
+            <button
+              type="button"
+              className="pdir-form__reset"
+              onClick={handleReset}
+              disabled={loading}
+            >
+              {t.resetFilters}
+            </button>
+          </div>
         </form>
+
+        <p className="pdir-page__profile-note" role="note">
+          {t.profileNote}
+        </p>
 
         <section className="pdir-results" aria-live="polite">
           {error && <p className="pdir-results__error">{error}</p>}

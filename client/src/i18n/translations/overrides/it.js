@@ -19,6 +19,7 @@ import itErezept from "./it/it.erezept.js";
 import itSosCard from "./it/it.sosCard.js";
 import { itPracticeBillingPlausibility, itPracticeIntegrationsVendors } from "./it/it.practiceBillingPlausibility.js";
 import { itPatientBillingExplain } from "./it/it.patientBillingExplain.js";
+import { itPracticeDirectory } from "./it/it.practiceDirectory.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
@@ -195,7 +196,7 @@ export default deepMerge(
           { practiceBillingPlausibility: itPracticeBillingPlausibility },
           { practiceIntegrations: itPracticeIntegrationsVendors },
         ),
-        { patientBillingExplain: itPatientBillingExplain },
+        deepMerge({ patientBillingExplain: itPatientBillingExplain }, { practiceDirectory: itPracticeDirectory }),
       ),
     ),
   ),
