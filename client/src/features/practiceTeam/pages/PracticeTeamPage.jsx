@@ -26,6 +26,18 @@ const ASSIGNABLE_ROLES = [
   "viewer",
 ];
 
+// Phase 4 — role categories for the additive team overview (display only).
+const TEAM_GROUPS = [
+  { key: "treaters", labelKey: "groupTreaters", roles: ["doctor"] },
+  {
+    key: "administration",
+    labelKey: "groupAdministration",
+    roles: ["owner", "admin", "practice_manager"],
+  },
+  { key: "support", labelKey: "groupSupport", roles: ["assistant", "secretary"] },
+  { key: "other", labelKey: "groupOther", roles: ["viewer"] },
+];
+
 function fmt(iso, lang) {
   if (!iso) return "—";
   try {
@@ -179,6 +191,21 @@ export default function PracticeTeamPage() {
     });
   }, [members, search, filterRole, filterStatus]);
 
+  const activeByGroup = useMemo(() => {
+    const out = {};
+    for (const g of TEAM_GROUPS) {
+      out[g.key] = members.filter(
+        (m) => m.status === "active" && g.roles.includes(m.role),
+      );
+    }
+    return out;
+  }, [members]);
+
+  const openInvites = useMemo(
+    () => members.filter((m) => m.status === "invited"),
+    [members],
+  );
+
   const onInvite = async (e) => {
     e.preventDefault();
     if (!canManage || !practiceId) return;
@@ -289,6 +316,68 @@ export default function PracticeTeamPage() {
             ))}
           </select>
         </label>
+      ) : null}
+
+      {!loading && !error && members.length > 0 ? (
+        <section className="practice-team__overview" aria-labelledby="team-overview-heading">
+          <h2 id="team-overview-heading">{t.overviewHeading}</h2>
+          <div className="practice-team__overview-groups">
+            {TEAM_GROUPS.map((g) => {
+              const groupMembers = activeByGroup[g.key] || [];
+              if (g.key === "other" && groupMembers.length === 0) return null;
+              return (
+                <div className="practice-team__overview-group" key={g.key}>
+                  <div className="practice-team__overview-group-head">
+                    <span className="practice-team__overview-group-title">{t[g.labelKey]}</span>
+                    <span
+                      className="practice-team__overview-count"
+                      aria-label={`${t[g.labelKey]}: ${groupMembers.length}`}
+                    >
+                      {groupMembers.length}
+                    </span>
+                  </div>
+                  {groupMembers.length === 0 ? (
+                    <p className="practice-team__overview-empty">{t.overviewGroupEmpty}</p>
+                  ) : (
+                    <ul className="practice-team__overview-list">
+                      {groupMembers.map((m) => (
+                        <li key={m.id}>
+                          <span>{m.user?.displayName || m.user?.email || t.notProvided}</span>
+                          <span className="practice-team__overview-role">{roleLabel(m.role)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+            <div className="practice-team__overview-group">
+              <div className="practice-team__overview-group-head">
+                <span className="practice-team__overview-group-title">
+                  {t.groupOpenInvitations}
+                </span>
+                <span
+                  className="practice-team__overview-count"
+                  aria-label={`${t.groupOpenInvitations}: ${openInvites.length}`}
+                >
+                  {openInvites.length}
+                </span>
+              </div>
+              {openInvites.length === 0 ? (
+                <p className="practice-team__overview-empty">{t.overviewNoInvites}</p>
+              ) : (
+                <ul className="practice-team__overview-list">
+                  {openInvites.map((m) => (
+                    <li key={m.id}>
+                      <span>{m.user?.displayName || m.user?.email || t.notProvided}</span>
+                      <span className="practice-team__overview-role">{roleLabel(m.role)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </section>
       ) : null}
 
       {pendingInvites.length > 0 ? (
