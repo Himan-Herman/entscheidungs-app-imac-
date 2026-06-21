@@ -2,12 +2,15 @@
 export default {
   pageTitle: "MedScoutX — Aviso legal",
   title: "Aviso legal",
-  subtitle:
-    "Información conforme al § 5 TMG y al § 18 apartado 2 MStV (Alemania)",
+  subtitle: "Identificación del prestador conforme al § 5 DDG (Alemania)",
+  lastUpdated: "Última actualización: junio de 2026",
   s1Heading: "1. Responsable",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Alemania"],
   ddLegalForm: "Empresario individual",
+  // TODO(Himan): emailDisplay y emailHref no coinciden (mostrado: gmail,
+  // enlazado: contact@medscoutx.com). Define una dirección de contacto
+  // única y alinea ambos campos.
   emailDisplay: "himankhorshidy@gmail.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
@@ -25,7 +28,7 @@ export default {
     "Este aviso legal se aplica a la aplicación MedScoutX y a los sitios web asociados a través de los cuales se ofrece o promociona la aplicación (p. ej. fichas en Apple App Store y Google Play Store).",
   s2Heading: "2. Responsabilidad por los contenidos",
   s2p1:
-    "Como prestador de servicios, soy responsable de mis propios contenidos en estas páginas según el derecho general (§ 7 apartado 1 TMG). Sin embargo, según los §§ 8 a 10 TMG no estoy obligado a supervisar información ajena transmitida o almacenada ni a investigar circunstancias que indiquen actividad ilícita.",
+    "Como prestador de servicios, soy responsable de mis propios contenidos en estas páginas según el derecho general (§ 7 apartado 1 DDG). Sin embargo, según los §§ 8 a 10 DDG no estoy obligado a supervisar información ajena transmitida o almacenada ni a investigar circunstancias que indiquen actividad ilícita.",
   s2p2:
     "Las obligaciones legales de eliminación o bloqueo del uso de información permanecen inalteradas. La responsabilidad al respecto solo es posible a partir del conocimiento de una infracción concreta. Si se notifican infracciones correspondientes, eliminaré esos contenidos de inmediato.",
   s3Heading: "3. Responsabilidad por enlaces",

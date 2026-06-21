@@ -108,6 +108,16 @@ body {
   margin: 2rem 0 1.7rem;
 }
 
+/* "Stand"-Angabe (Letzte Aktualisierung) */
+
+.legal__updated {
+  margin: 2rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
 /* Links */
 
 .legal a {
@@ -229,6 +239,11 @@ body {
 
 :root[data-theme="dark"] .legal__divider {
   border-top-color: rgba(148, 163, 184, 0.28);
+}
+
+:root[data-theme="dark"] .legal__updated {
+  border-top-color: rgba(148, 163, 184, 0.28);
+  color: #94a3b8;
 }
 
 :root[data-theme="dark"] .legal a {

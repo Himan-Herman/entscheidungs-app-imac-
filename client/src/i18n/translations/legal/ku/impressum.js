@@ -2,7 +2,7 @@
 export default {
   pageTitle: "MedScoutX — Agahî ya qanûnî (Impressum)",
   title: "Agahî ya qanûnî (Impressum)",
-  subtitle: "Agahî li gorî § 5 TMG û § 18 beşa 2 MStV (Almanya)",
+  subtitle: "Agahî li gorî § 5 DDG û § 18 beşa 2 MStV (Almanya)",
   s1Heading: "1. Bersipar",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Almanya"],
@@ -23,7 +23,7 @@ export default {
     "Ev agahî ya qanûnî ji sepanê MedScoutX û malperên girêdayî derbas dibe ku sepan her wiha tê pêşkêş an ragihandin (mînak rûpelên Apple App Store û Google Play Store).",
   s2Heading: "2. Bersiva naverokê",
   s2p1:
-    "Wek pêşkêşkerê xizmetê, ez ji naveroka xwe ya li ser van rûpelan li gorî qanûna giştî (§ 7 beşa 1 TMG) bersipar im. Lê li gorî §§ 8 heta 10 TMG ez ne mecbûr im ku agahiyên partiya sêyemîn ên hatine şandin an hatine hilanîn kontrol bikim an lê bigerim ka çalakiya neteqanûnî heye.",
+    "Wek pêşkêşkerê xizmetê, ez ji naveroka xwe ya li ser van rûpelan li gorî qanûna giştî (§ 7 beşa 1 DDG) bersipar im. Lê li gorî §§ 8 heta 10 DDG ez ne mecbûr im ku agahiyên partiya sêyemîn ên hatine şandin an hatine hilanîn kontrol bikim an lê bigerim ka çalakiya neteqanûnî heye.",
   s2p2:
     "Pêdiviyên qanûnî yên rakirin an astengkirina bikaranîna agahiyan dewam dikin. Bersiva tenê dema naskirina binpêkirinê dest pê dike. Piştî ragihandinê ev naverok bêyî derengî nebinî werin rakirin.",
   s3Heading: "3. Bersiva girêdanan",

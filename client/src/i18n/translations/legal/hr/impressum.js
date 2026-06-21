@@ -2,7 +2,7 @@ export default {
   pageTitle: "MedScoutX — Impresum",
   title: "Impresum",
   subtitle:
-    "Informacije prema § 5 TMG i § 18 st. (2) MStV (Njemačka)",
+    "Informacije prema § 5 DDG i § 18 st. (2) MStV (Njemačka)",
   s1Heading: "1. Odgovorno lice",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Njemačka"],
@@ -24,7 +24,7 @@ export default {
     "Ovaj impresum primjenjuje se na aplikaciju MedScoutX i sve povezane web prezentacije kroz koje se aplikacija pruža ili promoviše (npr. u Apple App Store i Google Play Store).",
   s2Heading: "2. Odgovornost za sadržaj",
   s2p1:
-    "Kao pružalac usluga, odgovoran sam za vlastiti sadržaj na ovim stranicama prema općem pravu u skladu sa § 7 st. (1) TMG. Međutim, prema §§ 8–10 TMG nisam dužan nadzirati prenesene ili pohranjene informacije trećih strana ni istraživati okolnosti koje ukazuju na nezakonitu aktivnost.",
+    "Kao pružalac usluga, odgovoran sam za vlastiti sadržaj na ovim stranicama prema općem pravu u skladu sa § 7 st. (1) DDG. Međutim, prema §§ 8–10 DDG nisam dužan nadzirati prenesene ili pohranjene informacije trećih strana ni istraživati okolnosti koje ukazuju na nezakonitu aktivnost.",
   s2p2:
     "Obaveze uklanjanja ili blokiranja korištenja informacija prema općem pravu ostaju na snazi. Odgovornost u tom pogledu moguća je tek od trenutka saznanja o konkretnom kršenju. Po obavještenju o odgovarajućim kršenjima takav sadržaj će se bez odgađanja ukloniti.",
   s3Heading: "3. Odgovornost za linkove",

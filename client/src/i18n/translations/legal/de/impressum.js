@@ -1,11 +1,15 @@
 export default {
   pageTitle: "MedScoutX — Impressum",
   title: "Impressum",
-  subtitle: "Angaben gemäß § 5 TMG und § 18 Abs. 2 MStV",
+  subtitle: "Anbieterkennzeichnung nach § 5 DDG",
+  lastUpdated: "Stand: Juni 2026",
   s1Heading: "1. Verantwortlich",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Deutschland"],
   ddLegalForm: "Einzelunternehmer",
+  // TODO(Himan): emailDisplay und emailHref weichen voneinander ab
+  // (angezeigt: gmail, verlinkt: contact@medscoutx.com). Bitte eine
+  // verbindliche Kontaktadresse festlegen und beide Felder angleichen.
   emailDisplay: "himankhorshidy@gmail.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49\u00a0211\u00a015895272",
@@ -22,7 +26,7 @@ export default {
     "Dieses Impressum gilt für die App MedScoutX sowie für ggf. verbundene Webauftritte, über die die App zur Verfügung gestellt oder beworben wird (z. B. Einträge im Apple App Store und Google Play Store).",
   s2Heading: "2. Haftung für Inhalte",
   s2p1:
-    "Als Diensteanbieter bin ich gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG bin ich jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.",
+    "Als Diensteanbieter bin ich gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG bin ich jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.",
   s2p2:
     "Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen werde ich diese Inhalte umgehend entfernen.",
   s3Heading: "3. Haftung für Links",

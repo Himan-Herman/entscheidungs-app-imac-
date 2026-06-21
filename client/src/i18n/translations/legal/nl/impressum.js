@@ -2,7 +2,7 @@ export default {
   pageTitle: "MedScoutX — Colofon (Impressum)",
   title: "Colofon (Impressum)",
   subtitle:
-    "Gegevens conform § 5 TMG en § 18 lid 2 MStV (Duitsland)",
+    "Gegevens conform § 5 DDG en § 18 lid 2 MStV (Duitsland)",
   s1Heading: "1. Verantwoordelijke",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Duitsland"],
@@ -24,7 +24,7 @@ export default {
     "Dit colofon geldt voor de MedScoutX-app en bijbehorende webpagina’s waarlangs de app wordt aangeboden of gepromoot (bijv. vermeldingen in de Apple App Store en Google Play Store).",
   s2Heading: "2. Aansprakelijkheid voor inhoud",
   s2p1:
-    "Als dienstenaanbieder ben ik ingevolge § 7 lid 1 TMG naar algemene wet voor eigen inhoud op deze pagina’s aansprakelijk. Volgens §§ 8 tot en met 10 TMG ben ik echter niet verplicht doorgegeven of opgeslagen informatie van derden te controleren of omstandigheden te onderzoeken die op onrechtmatige activiteit wijzen.",
+    "Als dienstenaanbieder ben ik ingevolge § 7 lid 1 DDG naar algemene wet voor eigen inhoud op deze pagina’s aansprakelijk. Volgens §§ 8 tot en met 10 DDG ben ik echter niet verplicht doorgegeven of opgeslagen informatie van derden te controleren of omstandigheden te onderzoeken die op onrechtmatige activiteit wijzen.",
   s2p2:
     "Verplichtingen tot verwijdering of blokkering van het gebruik van informatie naar algemeen recht blijven onverlet. Aansprakelijkheid is slechts mogelijk vanaf het moment van kennis van een concrete inbreuk. Na kennisgeving worden dergelijke inhouden onverwijld verwijderd.",
   s3Heading: "3. Aansprakelijkheid voor links",

@@ -1,0 +1,115 @@
+/* Practice-side consent overview — uses design-system tokens only (no fixed hex). */
+.pco {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.pco__back {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--ms-color-link);
+}
+.pco__title {
+  margin: 0 0 4px;
+}
+.pco__intro {
+  color: var(--ms-color-text-secondary);
+  margin: 0 0 8px;
+}
+.pco__note {
+  color: var(--ms-color-text-muted);
+  font-size: 0.9em;
+  border-left: 3px solid var(--ms-color-border-strong);
+  padding-left: 10px;
+  margin: 0 0 16px;
+}
+.pco__status {
+  color: var(--ms-color-text-secondary);
+  margin: 8px 0;
+}
+.pco__status--error {
+  color: var(--ms-color-danger);
+}
+
+/* Table (desktop) */
+.pco__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.pco__table th,
+.pco__table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--ms-color-border);
+  vertical-align: top;
+}
+.pco__table th {
+  color: var(--ms-color-text-secondary);
+  font-weight: 600;
+}
+
+/* Cards (mobile) */
+.pco-card {
+  border: 1px solid var(--ms-color-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: var(--ms-color-surface);
+}
+.pco-card__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+.pco-card__label {
+  color: var(--ms-color-text-muted);
+  font-size: 0.9em;
+}
+
+/* Status chip (token-based; theme-safe) */
+.pco-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.85em;
+  border: 1px solid var(--ms-color-border);
+}
+.pco-chip--granted {
+  color: var(--ms-color-success);
+}
+.pco-chip--revoked {
+  color: var(--ms-color-danger);
+}
+.pco-chip--expired {
+  color: var(--ms-color-text-muted);
+}
+
+.pco__footer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pco__count {
+  color: var(--ms-color-text-muted);
+  font-size: 0.9em;
+}
+.pco__btn {
+  appearance: none;
+  border: 1px solid var(--ms-color-border-strong);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  min-height: 40px;
+}
+.pco__btn:hover {
+  background: var(--ms-color-surface-elevated);
+}
+.pco__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

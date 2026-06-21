@@ -1,11 +1,15 @@
 export default {
   pageTitle: "MedScoutX — Legal notice (Impressum)",
   title: "Legal notice (Impressum)",
-  subtitle: "Information pursuant to § 5 TMG and § 18 (2) MStV (Germany)",
+  subtitle: "Provider identification pursuant to § 5 DDG (Germany)",
+  lastUpdated: "Last updated: June 2026",
   s1Heading: "1. Responsible party",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Germany"],
   ddLegalForm: "Sole proprietor",
+  // TODO(Himan): emailDisplay and emailHref differ (shown: gmail, linked:
+  // contact@medscoutx.com). Please confirm one authoritative contact
+  // address and align both fields.
   emailDisplay: "himankhorshidy@gmail.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
@@ -23,7 +27,7 @@ export default {
     "This legal notice applies to the MedScoutX app and any associated web presences through which the app is provided or promoted (e.g. listings in the Apple App Store and Google Play Store).",
   s2Heading: "2. Liability for content",
   s2p1:
-    "As a service provider, I am responsible for my own content on these pages under general law pursuant to § 7 (1) TMG. However, pursuant to §§ 8 to 10 TMG, I am not obliged to monitor transmitted or stored third-party information or to investigate circumstances indicating unlawful activity.",
+    "As a service provider, I am responsible for my own content on these pages under general law pursuant to § 7 (1) DDG. However, pursuant to §§ 8 to 10 DDG, I am not obliged to monitor transmitted or stored third-party information or to investigate circumstances indicating unlawful activity.",
   s2p2:
     "Obligations to remove or block the use of information under general law remain unaffected. Liability in this respect is only possible from the time knowledge of a specific infringement is obtained. Upon notification of corresponding infringements, such content will be removed promptly.",
   s3Heading: "3. Liability for links",

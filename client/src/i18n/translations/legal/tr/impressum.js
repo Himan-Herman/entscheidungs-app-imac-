@@ -2,7 +2,7 @@
 export default {
   pageTitle: "MedScoutX — Künye (Impressum)",
   title: "Künye (Impressum)",
-  subtitle: "§ 5 TMG ve § 18 f. 2 MStV uyarınca bilgiler (Almanya)",
+  subtitle: "§ 5 DDG ve § 18 f. 2 MStV uyarınca bilgiler (Almanya)",
   s1Heading: "1. Sorumlu taraf",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Almanya"],
@@ -23,7 +23,7 @@ export default {
     "Bu künye, MedScoutX uygulamasının sunulduğu veya tanıtıldığı ilişkili web siteleri için de geçerlidir (ör. Apple App Store ve Google Play Store kayıtları).",
   s2Heading: "2. İçeriklere ilişkin sorumluluk",
   s2p1:
-    "Hizmet sağlayıcı olarak, § 7 (1) TMG uyarınca bu sayfalardaki kendi içeriklerimden genel hukuk çerçevesinde sorumluyum. Ancak §§ 8–10 TMG uyarınca iletilen veya saklanan yabancı bilgileri izlemek veya hukuka aykırılığı işaret eden durumları araştırmakla yükümlü değilim.",
+    "Hizmet sağlayıcı olarak, § 7 (1) DDG uyarınca bu sayfalardaki kendi içeriklerimden genel hukuk çerçevesinde sorumluyum. Ancak §§ 8–10 DDG uyarınca iletilen veya saklanan yabancı bilgileri izlemek veya hukuka aykırılığı işaret eden durumları araştırmakla yükümlü değilim.",
   s2p2:
     "Genel hukuk uyarınca bilgilerin kaldırılması veya kullanımının engellenmesine ilişkin yükümlülükler saklıdır. Bu bağlamda sorumluluk, somut bir ihlalin bilinmesiyle mümkündür. İhlaller bildirildiğinde içerik derhal kaldırılır.",
   s3Heading: "3. Bağlantılara ilişkin sorumluluk",

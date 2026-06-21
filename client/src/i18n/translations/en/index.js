@@ -15,6 +15,7 @@ import settingsDoctorContacts from "./settingsDoctorContacts.js";
 import settingsPractices from "./settingsPractices.js";
 import practiceDashboard from "./practiceDashboard.js";
 import practiceOverview from "./practiceOverview.js";
+import practiceConsents from "./practiceConsents.js";
 import practicePatients from "./practicePatients.js";
 import settingsPrivacy from "./settingsPrivacy.js";
 import accountPortal from "./accountPortal.js";
@@ -95,6 +96,7 @@ export default {
   settingsPractices,
   practiceDashboard,
   practiceOverview,
+  practiceConsents,
   practicePatients,
   settingsPrivacy,
   accountPortal,

@@ -92,17 +92,9 @@ export default function Impressum() {
         aria-labelledby="imp-streit"
       >
         <h2 id="imp-streit">{t.s4Heading}</h2>
-        <p>
-          {t.s4p1Before}
-          <a
-            href="https://ec.europa.eu/consumers/odr"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            https://ec.europa.eu/consumers/odr
-          </a>
-          {t.s4p1After}
-        </p>
+        {/* Die EU-Plattform zur Online-Streitbeilegung (OS) wurde zum
+            20.07.2025 eingestellt; daher kein OS-/ODR-Link mehr. Es bleibt
+            der Hinweis zur (Nicht-)Teilnahme an der Verbraucherschlichtung. */}
         <p>{t.s4p2}</p>
       </section>
 
@@ -127,6 +119,10 @@ export default function Impressum() {
           {t.s6p1After}
         </p>
       </section>
+
+      {t.lastUpdated && (
+        <p className="legal__updated">{t.lastUpdated}</p>
+      )}
 
       {fromPublic && (
         <div className="legal__actions">

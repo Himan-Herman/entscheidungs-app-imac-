@@ -2,7 +2,7 @@ export default {
   pageTitle: "MedScoutX — Informacje prawne (Impressum)",
   title: "Informacje prawne (Impressum)",
   subtitle:
-    "Informacje zgodnie z § 5 TMG oraz § 18 ust. 2 MStV (Niemcy)",
+    "Informacje zgodnie z § 5 DDG oraz § 18 ust. 2 MStV (Niemcy)",
   s1Heading: "1. Podmiot odpowiedzialny",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Niemcy"],
@@ -24,7 +24,7 @@ export default {
     "Niniejsze informacje prawne dotyczą aplikacji MedScoutX oraz powiązanych witryn internetowych, za pośrednictwem których aplikacja jest udostępniana lub promowana (np. wpisy w Apple App Store i Google Play Store).",
   s2Heading: "2. Odpowiedzialność za treści",
   s2p1:
-    "Jako usługodawca odpowiadam za własne treści na tych stronach na podstawie przepisów ogólnych zgodnie z § 7 ust. 1 TMG. Jednakże zgodnie z §§ 8–10 TMG nie jestem zobowiązany do monitorowania przekazywanych lub przechowywanych informacji osób trzecich ani do badania okoliczności wskazujących na działania bezprawne.",
+    "Jako usługodawca odpowiadam za własne treści na tych stronach na podstawie przepisów ogólnych zgodnie z § 7 ust. 1 DDG. Jednakże zgodnie z §§ 8–10 DDG nie jestem zobowiązany do monitorowania przekazywanych lub przechowywanych informacji osób trzecich ani do badania okoliczności wskazujących na działania bezprawne.",
   s2p2:
     "Obowiązki usunięcia lub zablokowania korzystania z informacji na podstawie przepisów ogólnych pozostają nienaruszone. Odpowiedzialność w tym zakresie jest możliwa dopiero od momentu uzyskania wiedzy o konkretnym naruszeniu. Po otrzymaniu powiadomienia o takich naruszeniach treści te zostaną niezwłocznie usunięte.",
   s3Heading: "3. Odpowiedzialność za linki",

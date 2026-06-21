@@ -720,6 +720,14 @@ export default function PracticeHubPage() {
                     {t.adminAuditLink}
                   </Link>
                 ) : null}
+                {visibility.audit ? (
+                  <Link
+                    className="practice-overview__action"
+                    to={`/practice/consents?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    {t.adminConsentsLink}
+                  </Link>
+                ) : null}
                 {quickActions.openSecurity ? (
                   <Link
                     className="practice-overview__action"

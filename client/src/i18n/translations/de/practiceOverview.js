@@ -82,6 +82,7 @@ export default {
 
   adminHeading: "Verwaltung",
   adminAuditLink: "Audit-Protokoll",
+  adminConsentsLink: "Einwilligungen",
   adminMemberCount: "Aktive Teammitglieder",
   adminPendingInvites: "Offene Einladungen",
 

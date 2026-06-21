@@ -2,11 +2,15 @@
 export default {
   pageTitle: "MedScoutX — Note legali (Impressum)",
   title: "Note legali (Impressum)",
-  subtitle: "Informazioni ai sensi del § 5 TMG e del § 18 comma 2 MStV (Germania)",
+  subtitle: "Identificazione del fornitore ai sensi del § 5 DDG (Germania)",
+  lastUpdated: "Ultimo aggiornamento: giugno 2026",
   s1Heading: "1. Titolare / responsabile",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Germania"],
   ddLegalForm: "Ditta individuale",
+  // TODO(Himan): emailDisplay e emailHref non coincidono (mostrato: gmail,
+  // collegato: contact@medscoutx.com). Definire un unico indirizzo di
+  // contatto e allineare entrambi i campi.
   emailDisplay: "himankhorshidy@gmail.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
@@ -23,7 +27,7 @@ export default {
     "Le presenti note legali valgono per l’app MedScoutX e per i siti web associati tramite i quali l’app è resa disponibile o promossa (es. schede su Apple App Store e Google Play Store).",
   s2Heading: "2. Responsabilità per i contenuti",
   s2p1:
-    "In qualità di fornitore di servizi, rispondo dei miei contenuti su queste pagine secondo il diritto generale (§ 7 comma 1 TMG). Tuttavia, ai sensi dei §§ 8–10 TMG non sono obbligato a sorvegliare informazioni terze trasmesse o memorizzate né a ricercare circostanze che indichino attività illecite.",
+    "In qualità di fornitore di servizi, rispondo dei miei contenuti su queste pagine secondo il diritto generale (§ 7 comma 1 DDG). Tuttavia, ai sensi dei §§ 8–10 DDG non sono obbligato a sorvegliare informazioni terze trasmesse o memorizzate né a ricercare circostanze che indichino attività illecite.",
   s2p2:
     "Gli obblighi legali di rimozione o blocco dell’uso di informazioni restano salvi. La responsabilità è possibile solo dal momento in cui si viene a conoscenza di una concreta violazione. Se ciò viene segnalato, rimuoverò tali contenuti senza indebito ritardo.",
   s3Heading: "3. Responsabilità dei link",

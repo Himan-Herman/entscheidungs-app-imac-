@@ -2,12 +2,15 @@
 export default {
   pageTitle: "MedScoutX — Mentions légales",
   title: "Mentions légales",
-  subtitle:
-    "Informations conformément au § 5 TMG et au § 18 al. 2 MStV (Allemagne)",
+  subtitle: "Identification du fournisseur conformément au § 5 DDG (Allemagne)",
+  lastUpdated: "Dernière mise à jour : juin 2026",
   s1Heading: "1. Responsable",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Allemagne"],
   ddLegalForm: "Entrepreneur individuel",
+  // TODO(Himan): emailDisplay et emailHref diffèrent (affiché : gmail,
+  // lien : contact@medscoutx.com). Merci de définir une adresse de
+  // contact unique et d’aligner les deux champs.
   emailDisplay: "himankhorshidy@gmail.com",
   emailHref: "mailto:contact@medscoutx.com",
   phoneDisplay: "+49 211 15895272",
@@ -25,7 +28,7 @@ export default {
     "Les présentes mentions légales s’appliquent à l’application MedScoutX ainsi qu’aux sites web associés par lesquels l’application est mise à disposition ou promue (p. ex. fiches sur l’Apple App Store et Google Play Store).",
   s2Heading: "2. Responsabilité quant au contenu",
   s2p1:
-    "En tant que prestataire de services, je suis responsable de mes propres contenus sur ces pages conformément au droit général (§ 7 al. 1 TMG). Toutefois, selon les §§ 8 à 10 TMG, je ne suis pas tenu de surveiller des informations tierces transmises ou stockées ni de rechercher des indices d’activités illicites.",
+    "En tant que prestataire de services, je suis responsable de mes propres contenus sur ces pages conformément au droit général (§ 7 al. 1 DDG). Toutefois, selon les §§ 8 à 10 DDG, je ne suis pas tenu de surveiller des informations tierces transmises ou stockées ni de rechercher des indices d’activités illicites.",
   s2p2:
     "Les obligations légales de suppression ou de blocage de l’utilisation d’informations demeurent inchangées. Une responsabilité à cet égard n’est possible qu’à partir de la connaissance d’une violation concrète du droit. Dès qu’un tel manquement est porté à ma connaissance, je supprimerai ces contenus sans délai.",
   s3Heading: "3. Responsabilité des liens",

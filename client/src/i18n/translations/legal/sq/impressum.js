@@ -2,7 +2,7 @@ export default {
   pageTitle: "MedScoutX — Njoftim ligjor",
   title: "Impressum / Njoftim ligjor",
   subtitle:
-    "Informacion sipas § 5 TMG dhe § 18 (2) MStV (Gjermani)",
+    "Informacion sipas § 5 DDG dhe § 18 (2) MStV (Gjermani)",
   s1Heading: "1. Subjekti përgjegjës",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Gjermani"],
@@ -24,7 +24,7 @@ export default {
     "Ky njoftim ligjor vlen për aplikacionin MedScoutX dhe çdo prezencë në internet të lidhur përmes së cilës ofrohet ose promovohet aplikacioni (p.sh. listimet në Apple App Store dhe Google Play Store).",
   s2Heading: "2. Përgjegjësia për përmbajtjen",
   s2p1:
-    "Si ofrues shërbimi jam përgjegjës për përmbajtjen time në këto faqe sipas ligjit të përgjithshëm sipas § 7 (1) TMG. Megjithatë, sipas §§ 8 deri 10 TMG nuk jam i detyruar të monitoroj informacion të transmetuar ose të ruajtur të palëve të treta ose të hetoj rrethanat që tregojnë veprimtar të paligjshëm.",
+    "Si ofrues shërbimi jam përgjegjës për përmbajtjen time në këto faqe sipas ligjit të përgjithshëm sipas § 7 (1) DDG. Megjithatë, sipas §§ 8 deri 10 DDG nuk jam i detyruar të monitoroj informacion të transmetuar ose të ruajtur të palëve të treta ose të hetoj rrethanat që tregojnë veprimtar të paligjshëm.",
   s2p2:
     "Detyrimet për heqjen ose bllokimin e përdorimit të informacionit sipas ligjit të përgjithshëm mbeten të paprekura. Përgjegjësia në këtë kuptim është e mundur vetëm nga momenti i njohjes së një shkeljeje të konkretizuar. Pas njoftimit për shkelje përkatëse, përmbajtja tërhiqet menjëherë.",
   s3Heading: "3. Përgjegjësia për lidhjet",

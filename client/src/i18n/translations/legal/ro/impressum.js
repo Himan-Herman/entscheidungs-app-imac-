@@ -2,7 +2,7 @@ export default {
   pageTitle: "MedScoutX — Date legale (Impressum)",
   title: "Date legale (Impressum)",
   subtitle:
-    "Informații conform § 5 TMG și § 18 alin. (2) MStV (Germania)",
+    "Informații conform § 5 DDG și § 18 alin. (2) MStV (Germania)",
   s1Heading: "1. Persoana responsabilă",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Germania"],
@@ -24,7 +24,7 @@ export default {
     "Aceste date legale se aplică aplicației MedScoutX și oricăror prezențe web asociate prin care aplicația este oferită sau promovată (de ex. în Apple App Store și Google Play Store).",
   s2Heading: "2. Răspundere pentru conținut",
   s2p1:
-    "În calitate de furnizor de servicii, sunt responsabil pentru propriul conținut de pe aceste pagini conform legislației generale, potrivit § 7 alin. (1) TMG. Totuși, conform §§ 8–10 TMG, nu sunt obligat să monitorizez informații terțe transmise sau stocate sau să cercetez împrejurări care indică activități ilegale.",
+    "În calitate de furnizor de servicii, sunt responsabil pentru propriul conținut de pe aceste pagini conform legislației generale, potrivit § 7 alin. (1) DDG. Totuși, conform §§ 8–10 DDG, nu sunt obligat să monitorizez informații terțe transmise sau stocate sau să cercetez împrejurări care indică activități ilegale.",
   s2p2:
     "Obligațiile de eliminare sau blocare a utilizării informațiilor conform dreptului general rămân neschimbate. Răspunderea în acest sens este posibilă numai din momentul în care iau cunoștință de o încălcare concretă. După notificarea încălcărilor corespunzătoare, un astfel de conținut va fi eliminat prompt.",
   s3Heading: "3. Răspundere pentru linkuri",

@@ -2,7 +2,7 @@
 export default {
   pageTitle: "MedScoutX — Informações legais (Impressum)",
   title: "Informações legais (Impressum)",
-  subtitle: "Informações nos termos do § 5 TMG e do § 18 n.º 2 MStV (Alemanha)",
+  subtitle: "Informações nos termos do § 5 DDG e do § 18 n.º 2 MStV (Alemanha)",
   s1Heading: "1. Responsável",
   addressStrong: "Himan Khorshidi",
   addressLines: ["Eisenstraße 64", "40227 Düsseldorf", "Alemanha"],
@@ -23,7 +23,7 @@ export default {
     "Estas informações legais aplicam-se à app MedScoutX e aos sites associados através dos quais a app é disponibilizada ou promovida (por exemplo, fichas na Apple App Store e Google Play Store).",
   s2Heading: "2. Responsabilidade pelos conteúdos",
   s2p1:
-    "Na qualidade de prestador de serviços, sou responsável pelos meus próprios conteúdos nestas páginas ao abrigo da lei geral (§ 7 n.º 1 TMG). Contudo, nos termos dos §§ 8 a 10 TMG, não sou obrigado a monitorizar informações de terceiros transmitidas ou armazenadas nem a investigar circunstâncias que indiquem atividade ilícita.",
+    "Na qualidade de prestador de serviços, sou responsável pelos meus próprios conteúdos nestas páginas ao abrigo da lei geral (§ 7 n.º 1 DDG). Contudo, nos termos dos §§ 8 a 10 DDG, não sou obrigado a monitorizar informações de terceiros transmitidas ou armazenadas nem a investigar circunstâncias que indiquem atividade ilícita.",
   s2p2:
     "As obrigações legais de eliminação ou bloqueio da utilização de informações mantêm-se. A responsabilidade só é possível a partir do momento em que tenha conhecimento de uma violação concreta. Assim que tal for comunicado, esses conteúdos serão removidos sem demora injustificada.",
   s3Heading: "3. Responsabilidade pelas ligações",

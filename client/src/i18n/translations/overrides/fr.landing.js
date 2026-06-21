@@ -5,9 +5,9 @@ export default {
   brandLine: "Pont entre patients et cabinets",
   badge: "Avant. Pendant. Après le contact médical.",
   headline:
-    "MedScoutX relie la préparation, l’échange clinique et le suivi dans un parcours médical plus clair.",
+    "MedScoutX organise préparation, échange clinique et suivi dans un déroulé médical plus lisible.",
   description:
-    "De la première préparation à l’entretien médical puis au suivi, MedScoutX aide à organiser les informations médicales avec plus de calme, à les partager plus clairement et à les faire évoluer de manière plus individualisée.",
+    "La page d’accueil montre comment saisie personnelle, documents, soutien linguistique et transmission peuvent se rejoindre dans le quotidien de soin sans surcharger d’emblée patients et cabinets.",
   primaryCta: "Vers patient ou cabinet",
   secondaryCta: "Comment MedScoutX aide",
   enterCta: "Continuer vers patient ou cabinet",
@@ -21,7 +21,7 @@ export default {
   mediaEyebrow: "Vue produit",
   mediaTitle: "Une interface professionnelle sans devenir envahissante",
   mediaText:
-    "Une typographie claire, des blocs d’information apaisés et une structure médicale sérieuse maintiennent l’attention sur la compréhension, la continuité et la bonne étape suivante.",
+    "Une typographie claire, une hiérarchie nette et des surfaces retenues aident à repérer plus vite les contenus et les prochaines étapes.",
   videoEyebrow: "Dans l’application",
   videoTitle: "Aperçu du produit sur ordinateur et mobile",
   mediaSignalsAria: "Qualités clés du produit",
@@ -47,21 +47,21 @@ export default {
   visualStatusSecure: "transfert sécurisé",
   visualInsightsAria: "Aperçus supplémentaires de la logique produit",
   spotlightEyebrow: "Logique visuelle",
-  spotlightTitle: "MedScoutX comme couche de liaison sur l’ensemble du parcours médical",
+  spotlightTitle: "La logique produit apparaît étape par étape",
   spotlightBody:
-    "L’illustration principale montre clairement la logique : les informations saisies côté patient sont recueillies, poursuivies dans le temps et préparées pour que le cabinet comprenne plus vite le contexte.",
+    "L’illustration principale ne montre pas seulement des modules. Elle dessine le passage de la première saisie jusqu’au moment où l’information devient utile pour le cabinet ou pour la suite.",
   spotlightParagraphs: [
-    "La préparation n’est que la première étape. MedScoutX prolonge le parcours et apporte davantage d’ordre non seulement avant, mais aussi pendant le contact et lors du suivi.",
-    "Au lieu de révéler toutes les fonctions d’un seul coup, la page d’accueil introduit progressivement la logique du produit : d’abord l’orientation, puis la connexion, puis certaines parties du système.",
-    "Cela crée une impression plus professionnelle, plus proche d’un flux médical bien structuré que d’une page marketing bruyante.",
+    "L’entrée peut commencer par des symptômes, des questions ou des documents, sans s’arrêter au premier formulaire.",
+    "À chaque étape, le contexte devient plus précis : ce qui est d’abord décrit peut ensuite être ordonné, complété et transmis au bon moment.",
+    "La page ressemble ainsi davantage à un espace de travail médical calme qu’à une accumulation de promesses produit.",
   ],
   spotlightList: [
-    "accompagnement structuré avant, pendant et après le contact",
-    "animations calmes au lieu d’effets surchargés",
-    "entièrement responsive même sur de petits écrans",
+    "un fil conducteur clair plutôt que des fonctions isolées",
+    "un mouvement discret qui soutient l’orientation",
+    "une lecture stable sur mobile, tablette et desktop",
   ],
   moduleMapEyebrow: "Domaines sélectionnés",
-  moduleMapTitle: "Les capacités sont suggérées sans tout dévoiler immédiatement",
+  moduleMapTitle: "Ces domaines illustrent des principes sans dévoiler tout le système",
   moduleMapItems: [
     "Préparation",
     "Communication",
@@ -69,9 +69,9 @@ export default {
     "Suivi",
   ],
   moduleMapSignals: [
-    "transitions guidées de manière individualisée",
-    "information pertinente au bon moment",
-    "langage médical visualisé de façon plus apaisée",
+    "chaque zone reste concentrée sur sa mission",
+    "l’information apparaît lorsqu’elle devient utile",
+    "le langage médical est traduit en étapes lisibles",
   ],
   journeyStageLabels: [
     "Préparation",
@@ -79,21 +79,21 @@ export default {
     "Suivi",
   ],
   journeyCanvasEyebrow: "Infographie MedScoutX",
-  journeyCanvasTitle: "Diagrammes, géométries et visuels de données issus de vrais domaines MedScoutX",
+  journeyCanvasTitle: "Les visualisations rendent visibles structure, priorités et transmission",
   journeyCanvasBody:
-    "Ces visuels s’appuient sur de vrais domaines MedScoutX comme Pre-Visit, documents, vitals, Meda, inbox, télémédecine, anamnèse, e-prescription et data control, puis les traduisent dans un système visuel plus calme.",
+    "Ces diagrammes ne sont pas décoratifs. Ils abstraient de vrais domaines MedScoutX pour montrer comment l’information peut être triée, condensée et transmise entre plusieurs moments de soin.",
   journeyCanvasAria:
     "Cartes infographiques avec histogramme, diagramme circulaire et réseau géométrique pour le parcours MedScoutX",
-  journeyChartOneTitle: "Signal sur l’ensemble du parcours",
+  journeyChartOneTitle: "Rendre les domaines lisibles dans le temps",
   journeyChartOneBody:
-    "L’histogramme reprend de vrais domaines MedScoutX et montre Pre-Visit, documents, vitals, Meda et cabinet comme un flux produit continu.",
-  journeyChartTwoTitle: "Concentration pendant le contact réel",
+    "Les barres représentent différents espaces fonctionnels qui ne restent pas côte à côte, mais s’organisent en une séquence compréhensible.",
+  journeyChartTwoTitle: "Concentrer le contact réel sur l’essentiel",
   journeyChartTwoBody:
-    "Le diagramme circulaire équilibre des domaines concrets du contact comme inbox, rendez-vous et télémédecine sans rendre l’interface agitée.",
+    "Le diagramme circulaire condense ce qui compte pendant l’échange : accessibilité, contexte du rendez-vous et points de contact en télémédecine sans agitation visuelle.",
   journeyChartTwoCenter: "focus clair",
-  journeyChartThreeTitle: "Pont en mouvement",
+  journeyChartThreeTitle: "Transmettre le contexte proprement entre les zones",
   journeyChartThreeBody:
-    "Des lignes géométriques et des nœuds font référence à l’anamnèse, au transfert, à l’e-prescription et au suivi pour montrer comment les flux patient et cabinet restent connectés.",
+    "Les lignes et les nœuds représentent des transitions où l’information ne repart pas de zéro, mais avance avec son sens vers l’étape suivante.",
   journeyChartBars: [
     "Pre-Visit",
     "Docs",
@@ -127,13 +127,13 @@ export default {
     "Activité",
   ],
   ecosystemEyebrow: "Pensé à partir du produit réel",
-  ecosystemTitle: "Derrière la page d’accueil, il n’y a pas un outil unique, mais un système MedScoutX connecté",
+  ecosystemTitle: "La page d’accueil suggère une architecture produit plutôt qu’un simple point d’entrée",
   ecosystemBody:
-    "La plateforme relie orientation initiale, préparation, continuité, communication, collaboration avec le cabinet et transfert contrôlé. Le résultat ressemble davantage à un flux médical qu’à une fonction isolée.",
+    "MedScoutX relie orientation initiale, préparation structurée, communication continue, travail côté cabinet et transfert contrôlé dans une seule image système.",
   ecosystemBoardEyebrow: "Carte du système",
-  ecosystemBoardTitle: "Du premier signal à l’organisation du cabinet et au suivi",
+  ecosystemBoardTitle: "Les briques du système s’enchaînent de la saisie aux opérations du cabinet",
   ecosystemBoardBody:
-    "Ce visuel condense de vrais blocs MedScoutX issus du symptom check, de la body map, de l’upload d’images, du Pre-Visit, des vitals, des zones liées aux médicaments, de Meda, de la télémédecine, des documents, des calendriers, du répertoire de cabinets et du data control.",
+    "Cette carte regroupe de vraies zones produit dans une même architecture, du symptom check et de la body map jusqu’au Pre-Visit, à Meda, aux documents, aux calendriers, au répertoire de cabinets et au data control.",
   ecosystemBands: [
     "Signal",
     "Structure",
@@ -148,33 +148,33 @@ export default {
     "Meda",
     "Data Control",
   ],
-  domainOneTitle: "Situer utilement les symptômes dès le départ",
+  domainOneTitle: "Accueillir les premiers signaux avant qu’un rendez-vous se précise",
   domainOneBody:
-    "Toute information médicale ne commence pas par un formulaire. MedScoutX couvre aussi les premiers points d’entrée où l’on souhaite décrire des symptômes, marquer des zones du corps ou classer des observations visuelles.",
+    "Beaucoup de parcours commencent par une observation, pas par un rapport déjà structuré. MedScoutX prévoit donc des entrées pour décrire un ressenti, marquer une zone du corps ou trier des images.",
   domainOneItems: [
     "Symptom Check",
     "Upload d’images et analyse visuelle",
     "Body map et orientation par régions",
   ],
-  domainTwoTitle: "Réunir préparation, continuité et données personnelles de santé",
+  domainTwoTitle: "Garder ensemble données personnelles, préparation et continuité",
   domainTwoBody:
-    "Lorsque les premières informations deviennent une préparation, MedScoutX relie saisie structurée, profil de santé, vitals, médicaments, vaccinations, documents et vision plus continue du parcours personnel.",
+    "Quand les premières informations se transforment en préparation concrète, profil de santé, vitals, médicaments, vaccinations et documents restent reliés au lieu d’être dispersés.",
   domainTwoItems: [
     "Pre-Visit et préparations enregistrées",
     "Vitals, vaccinations, health history",
     "Plan thérapeutique et documents personnels",
   ],
-  domainThreeTitle: "Faire en sorte que la communication reste exploitable ensuite",
+  domainThreeTitle: "Construire une communication qui reste utile ensuite",
   domainThreeBody:
-    "Inbox, messages, télémédecine, e-prescription et zones Meda montrent que la communication n’est pas pensée comme un moment isolé. Les contenus doivent rester compréhensibles, retrouvables et transmissibles plus tard.",
+    "Messages, télémédecine, e-prescription et zones Meda sont pensés comme une communication qui peut se poursuivre. Les contenus doivent rester compréhensibles, retrouvables et enrichissables plus tard.",
   domainThreeItems: [
     "Inbox et fils de messages",
     "Télémédecine et Meda Live",
     "ePrescription et transferts vers le cabinet",
   ],
-  domainFourTitle: "Montrer aussi la logique du travail réel côté cabinet",
+  domainFourTitle: "Intégrer aussi le côté cabinet avec organisation, contrôle et travail d’équipe",
   domainFourBody:
-    "De l’autre côté, des fonctions réelles comme calendrier, équipe, documents, directory, intégrations, billing plausibility et sécurité indiquent que MedScoutX repose aussi sur une logique professionnelle d’exploitation.",
+    "La plateforme inclut aussi le versant opérationnel : calendriers, espaces d’équipe, logique documentaire, intégrations et sécurité montrent que MedScoutX s’appuie sur de vrais workflows professionnels.",
   domainFourItems: [
     "Calendrier et booking du cabinet",
     "Documents, équipe et directory",
@@ -182,47 +182,47 @@ export default {
   ],
   purposeEyebrow: "À quoi sert MedScoutX",
   purposeTitle:
-    "Ne pas remplacer la médecine, mais soutenir plus utilement l’ensemble du parcours",
+    "Conçu pour l’orientation, la coordination et des prochaines étapes plus lisibles",
   purposeBody:
-    "MedScoutX est conçu pour les moments où le parcours de soins devient difficile à suivre : trop d’informations, barrières linguistiques, transferts de documents, questions de suivi et besoin d’une coordination plus individualisée entre patient et cabinet.",
-  pillarOneTitle: "Structurer avant la visite",
+    "MedScoutX intervient là où des ruptures apparaissent facilement entre ressenti personnel, échange médical et suivi ultérieur. L’objectif est de rendre ces passages plus calmes, plus compréhensibles et plus continus.",
+  pillarOneTitle: "Prioriser avant la visite",
   pillarOneBody:
-    "Les symptômes, questions, médicaments et documents sont mis dans un ordre plus clair avant le début de l’échange.",
-  pillarTwoTitle: "Mieux relier les langues",
+    "Symptômes, questions, médicaments et documents peuvent être mis dans un ordre qui aide à atteindre plus vite l’essentiel pendant l’échange.",
+  pillarTwoTitle: "Préparer une meilleure compréhension",
   pillarTwoBody:
-    "Lorsque patient et cabinet ne partagent pas avec assurance la même langue, MedScoutX aide à préparer le contenu plus clairement.",
-  pillarThreeTitle: "Rester professionnel",
+    "Quand la langue, les termes ou les formulations médicales sont incertains, MedScoutX crée une base plus claire pour se comprendre.",
+  pillarThreeTitle: "Rester sobre et professionnel",
   pillarThreeBody:
-    "Le produit reste volontairement sobre, explique clairement ses limites et évite une impression surchargée ou alarmiste.",
+    "L’interface reste volontairement retenue, explicite ses limites et privilégie la crédibilité plutôt qu’une mise en scène dramatique.",
   forWhomTitle: "Usage au quotidien",
-  workspaceTitle: "Deux perspectives, un parcours connecté",
+  workspaceTitle: "Les vues patient et cabinet restent distinctes tout en restant reliées",
   workspaceBody:
-    "La plateforme sépare clairement les flux patient et cabinet tout en reliant les deux côtés là où un parcours médical plus individualisé et traçable compte réellement.",
+    "Chaque côté travaille dans son propre contexte. L’essentiel est que les informations réapparaissent au bon endroit au lieu de se perdre entre plusieurs zones.",
   patientCardTitle: "Pour les patientes et patients",
   patientCardBody:
-    "Les personnes peuvent mieux préparer leurs rendez-vous, rassembler leurs documents et décrire leur situation plus clairement.",
+    "Les patientes et patients gardent une meilleure vue d’ensemble sur leur préparation, leurs documents et leurs points ouverts avant le contact réel.",
   patientPoints: [
-    "Mieux comprendre les symptômes, questions et évolutions dans le temps",
-    "Garder documents, messages et liens avec les cabinets au même endroit",
-    "Aborder les visites et les étapes suivantes avec moins d’incertitude",
+    "noter plus clairement observations et questions de suivi",
+    "rassembler documents, messages et lien avec le cabinet",
+    "aborder rendez-vous, retours et étapes suivantes avec plus de clarté",
   ],
   practiceCardTitle: "Pour les cabinets et cliniques",
   practiceCardBody:
-    "Les équipes soignantes reçoivent des pré-informations plus structurées, des documents mieux organisés et des chemins de communication plus clairs.",
+    "Les cabinets et cliniques reçoivent des pré-informations dans une forme plus rapide à lire et plus simple à intégrer à leurs habitudes de travail.",
   practicePoints: [
-    "Évaluer plus efficacement les pré-informations, le contexte et le suivi",
-    "Soutenir plus sereinement les flux multilingues",
-    "Regrouper communication, documents et prochaines étapes dans un même système",
+    "évaluer demandes, documents et continuité avec moins de recherche",
+    "accompagner plus proprement les situations multilingues et les transmissions",
+    "piloter communication, documents et tâches de suivi dans le même cadre",
   ],
-  howTitle: "Comment cela fonctionne",
+  howTitle: "Un déroulé clair en quatre étapes",
   howSteps: [
-    "Choisir le bon espace",
-    "Saisir les informations de manière structurée",
-    "Faire avancer le contenu pertinent au bon moment",
-    "Poursuivre dans l’espace patient ou cabinet approprié",
+    "Ouvrir l’entrée adaptée à la situation",
+    "Rassembler informations, documents ou contexte",
+    "Préparer ce qui comptera pour l’étape suivante",
+    "Poursuivre directement dans l’espace cible",
   ],
   howOutcome:
-    "Le résultat n’est pas un jugement médical, mais une meilleure base pour de vrais échanges médicaux, des transmissions et un suivi.",
+    "Le résultat n’est pas un jugement automatisé, mais une base de travail plus solide pour l’échange, la transmission et le suivi.",
   summaryJourneyStages: [
     "Préparation",
     "Contact",
@@ -231,32 +231,32 @@ export default {
     "Médication",
   ],
   summaryJourneySignals: [
-    "La préparation reste guidée individuellement",
-    "Le contact reçoit le bon contexte",
-    "Le suivi reste connecté dans le temps",
-    "Les résultats sont mieux structurés",
-    "La médication reste traçable dans le parcours",
+    "les premières informations restent triables",
+    "le bon contexte accompagne immédiatement le contact",
+    "le suivi peut s’appuyer sur ce qui précède",
+    "les résultats trouvent une place plus claire",
+    "la médication se prolonge plus facilement ensuite",
   ],
   bridgeEyebrow: "Flux de communication",
-  bridgeTitle: "D’une saisie personnelle à un contexte de consultation plus clair",
+  bridgeTitle: "D’une description personnelle à un contexte partagé",
   bridgeBody:
-    "MedScoutX soutient une transition ordonnée entre la saisie personnelle, la compréhension du cabinet et ce qui se passe après le contact.",
+    "Le passage entre salle d’attente, traitement et suite du parcours est pensé comme une route de communication compréhensible, non comme une succession de moments isolés.",
   bridgePhotoAlt:
     "Patiente en salle d’attente et médecin dans le cabinet comme pont visuel entre préparation et traitement",
   bridgePhotoEyebrow: "Entre deux perspectives",
-  bridgePhotoTitle: "Entre salle d’attente, consultation et accompagnement continu",
-  bridgeStepOne: "Le patient décrit sa demande",
-  bridgeStepTwo: "Les informations sont organisées",
-  bridgeStepThree: "Le cabinet comprend plus vite le contexte",
-  bridgeStepFour: "Le parcours reste connecté ensuite",
+  bridgePhotoTitle: "Entre premier récit, consultation et interprétation ensuite",
+  bridgeStepOne: "Nommer le motif et les observations",
+  bridgeStepTwo: "Condenser documents et saisies",
+  bridgeStepThree: "Rendre le contexte visible pour le cabinet",
+  bridgeStepFour: "Se reconnecter après le contact",
   bridgeCaption:
-    "L’accent est mis sur la clarté, la structure, la continuité et un accompagnement plus individualisé, et non sur un diagnostic automatisé.",
+    "L’accent porte sur l’interprétation, la transmission et la préparation commune de l’échange, pas sur un diagnostic automatisé.",
   safetyTitle: "Limite médicale",
   safetyBody:
     "MedScoutX n’est ni un outil d’urgence ni une application de diagnostic. En cas de symptômes aigus, difficultés respiratoires, douleurs sévères ou autres situations urgentes, une aide médicale doit être contactée directement.",
   privacyTitle: "Confidentialité et professionnalisme",
   privacyBody:
-    "La communication produit doit inspirer confiance : langage clair, design calme, zones compréhensibles et informations juridiques toujours visibles.",
+    "La confiance passe ici par des informations juridiques visibles, des limites claires entre les zones, une bonne lisibilité et un design qui suggère le sérieux médical sans exagération.",
   footerDisclaimer:
     "MedScoutX ne remplace ni l’examen médical, ni le diagnostic, ni les services d’urgence.",
 };

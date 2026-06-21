@@ -1761,6 +1761,7 @@
 
 .landing-page__bridge-photo {
   position: relative;
+  display: grid;
   margin: 0;
   border-radius: 30px;
   overflow: hidden;
@@ -2032,6 +2033,24 @@
     background:
       linear-gradient(180deg, transparent 0%, var(--landing-line) 18%, var(--landing-line) 82%, transparent 100%);
   }
+
+  .landing-page__bridge-photo-caption {
+    position: static;
+    margin: 0;
+    max-width: none;
+    padding: 16px 18px 18px;
+    border-radius: 0;
+    border-top: 1px solid color-mix(in srgb, var(--landing-border) 88%, transparent);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--landing-surface-strong) 98%, transparent) 0%,
+        color-mix(in srgb, var(--landing-surface) 94%, transparent) 100%
+      );
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
 }
 
 @media (max-width: 760px) {
@@ -2178,15 +2197,11 @@
   }
 
   .landing-page__bridge-photo-caption {
-    left: 14px;
-    right: 14px;
-    bottom: 14px;
-    max-width: none;
-    padding: 12px 14px;
+    padding: 12px 14px 14px;
   }
 
   .landing-page__bridge-photo-caption strong {
-    font-size: 1.08rem;
+    font-size: 1.02rem;
   }
 
   .landing-page__video-caption {
