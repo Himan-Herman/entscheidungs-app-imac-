@@ -104,13 +104,14 @@ export function computeInitials(rawName, options = {}) {
 }
 
 /**
- * Format raw initials as premium dotted groups: "HK" → "H.K.", "H" → "H.".
+ * Format raw initials with dots only between letters (no trailing dot):
+ * "HK" → "H.K", "H" → "H".
  * @param {string} letters
  */
 export function formatDottedInitials(letters) {
   const clean = String(letters || "").replace(/[^A-Za-z]/g, "");
   if (!clean) return "";
-  return clean.split("").join(".") + ".";
+  return clean.split("").join(".");
 }
 
 /**
