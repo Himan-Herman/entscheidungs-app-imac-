@@ -19,6 +19,8 @@ export default function GlobalLanguageSelector({
   label,
   compact = false,
   className = "",
+  /** When true, show only the globe icon (no current-language label / chevron). */
+  iconOnly = false,
   /** When true, every listed locale is clickable (otherwise only de + en). */
   allowAllLocales = false,
   /** Locales users may select; others stay visible but disabled. */
@@ -165,7 +167,7 @@ export default function GlobalLanguageSelector({
   return (
     <div
       ref={rootRef}
-      className={`gls ${compact ? "gls--compact" : ""} ${className}`.trim()}
+      className={`gls ${compact ? "gls--compact" : ""} ${iconOnly ? "gls--icon-only" : ""} ${className}`.trim()}
     >
       <button
         ref={triggerRef}
@@ -176,15 +178,20 @@ export default function GlobalLanguageSelector({
         aria-expanded={open}
         aria-controls={`${listId}-listbox`}
         aria-label={ariaLabel}
+        title={iconOnly ? ariaLabel : undefined}
         onClick={() => setOpen((v) => !v)}
       >
         <Globe className="gls__globe" strokeWidth={1.75} aria-hidden />
-        <span className="gls__current">{current.nativeName}</span>
-        <ChevronDown
-          className={`gls__chevron ${open ? "is-open" : ""}`}
-          strokeWidth={2}
-          aria-hidden
-        />
+        {!iconOnly && (
+          <>
+            <span className="gls__current">{current.nativeName}</span>
+            <ChevronDown
+              className={`gls__chevron ${open ? "is-open" : ""}`}
+              strokeWidth={2}
+              aria-hidden
+            />
+          </>
+        )}
       </button>
 
       {open ? (

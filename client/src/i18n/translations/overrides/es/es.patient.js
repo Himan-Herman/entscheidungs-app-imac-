@@ -7,7 +7,6 @@ export default {
     privacy: "Privacidad",
     terms: "Términos y condiciones",
     disclaimer: "Descargo médico",
-    infoHelp: "Información del producto",
     ariaLabel: "Enlaces legales",
     safetyNote:
       "No es un servicio de emergencias. Ante síntomas agudos, contacte con los servicios de emergencia o con un profesional sanitario.",

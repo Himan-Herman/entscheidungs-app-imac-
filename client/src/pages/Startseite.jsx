@@ -87,13 +87,6 @@ export default function Startseite() {
                     >
                       {copy.heroPrimary}
                     </button>
-                    <button
-                      type="button"
-                      className="startseite__btn startseite__btn--secondary"
-                      onClick={() => navigate("/info")}
-                    >
-                      {copy.heroSecondary}
-                    </button>
                   </div>
 
                   <p id="hero-primary-desc" className="startseite__hero-helper">

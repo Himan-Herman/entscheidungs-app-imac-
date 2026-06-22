@@ -38,12 +38,6 @@ export default function Footer() {
           <Link className="ms-footer__link" to="/disclaimer">
             {f.disclaimer}
           </Link>
-          <span className="ms-footer__sep" aria-hidden>
-            |
-          </span>
-          <Link className="ms-footer__link" to="/info">
-            {f.infoHelp}
-          </Link>
         </nav>
         <p className="ms-footer__safety">{f.safetyNote}</p>
       </div>

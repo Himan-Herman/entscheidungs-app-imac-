@@ -7,7 +7,6 @@ export default {
     privacy: "Confidentialité",
     terms: "Conditions générales",
     disclaimer: "Avertissement médical",
-    infoHelp: "Informations produit",
     ariaLabel: "Liens juridiques",
     safetyNote:
       "Pas un service d’urgence. En cas de symptômes aigus, contactez les secours ou un professionnel de santé.",

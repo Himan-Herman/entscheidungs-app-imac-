@@ -21,7 +21,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Disclaimer from "./pages/Disclaimer";
 import AGB from "./pages/AGB.jsx";
-import Info from "./pages/Info";
 import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 import { getMessages } from "./i18n/translations";
@@ -956,7 +955,6 @@ void runPwaBuildMigration().then(() => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/disclaimer" element={<Disclaimer />} />
                 <Route path="/agb" element={<AGB />} />
-                <Route path="/info" element={<Info />} />
 
                 <Route path="/pre-visit/document" element={<PreVisitDocumentPage />} />
                 <Route

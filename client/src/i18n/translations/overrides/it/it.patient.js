@@ -7,7 +7,6 @@ export default {
     privacy: "Privacy",
     terms: "Termini e condizioni",
     disclaimer: "Disclaimer medico",
-    infoHelp: "Informazioni sul prodotto",
     ariaLabel: "Link legali",
     safetyNote:
       "Non è un servizio di emergenza. In caso di sintomi acuti, contatta i servizi di emergenza o un professionista sanitario.",

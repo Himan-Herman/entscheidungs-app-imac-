@@ -6,11 +6,9 @@ import {
   ChevronDown,
   History,
   Home,
-  Languages,
   LayoutDashboard,
   LogOut,
   Moon,
-  Palette,
   Settings2,
   SunMedium,
   UserRound,
@@ -146,31 +144,33 @@ export default function Header() {
             </span>
           </button>
 
-          {!isLoggedIn && (
-            <div className="ms-header__controls">
-              <button
-                type="button"
-                className="ms-theme-toggle"
-                onClick={toggleTheme}
-                aria-label={themeLabel}
-                title={themeLabel}
-              >
-                {theme === "dark" ? (
-                  <SunMedium size={18} aria-hidden="true" />
-                ) : (
-                  <Moon size={18} aria-hidden="true" />
-                )}
-              </button>
+          <div className="ms-header__controls">
+            <button
+              type="button"
+              className="ms-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={themeLabel}
+              title={themeLabel}
+            >
+              {theme === "dark" ? (
+                <SunMedium size={18} aria-hidden="true" />
+              ) : (
+                <Moon size={18} aria-hidden="true" />
+              )}
+            </button>
 
-              <div className="ms-header__language">
-                <GlobalLanguageSelector
-                  label={copy.languageLabel}
-                  compact
-                  selectableLocaleCodes={PATIENT_UI_SELECTABLE_LOCALE_CODES}
-                />
-              </div>
+            <div className="ms-header__language">
+              <GlobalLanguageSelector
+                label={copy.languageLabel}
+                iconOnly
+                selectableLocaleCodes={
+                  isPractice
+                    ? PRACTICE_UI_SELECTABLE_LOCALE_CODES
+                    : PATIENT_UI_SELECTABLE_LOCALE_CODES
+                }
+              />
             </div>
-          )}
+          </div>
 
           {isLoggedIn ? (
             <button
@@ -371,59 +371,6 @@ export default function Header() {
                   >
                     <span>{copy.settingsPrivacy}</span>
                   </NavLink>
-                </li>
-              )}
-
-              {isLoggedIn && (
-                <li className="ms-nav__divider" role="presentation" aria-hidden />
-              )}
-
-              {isLoggedIn && (
-                <li className="ms-account-quick">
-                  <span className="ms-account-section-label">
-                    {account.preferences ?? copy.languageLabel}
-                  </span>
-
-                  <div className="ms-account-quick__row">
-                    <span className="ms-account-quick__label">
-                      <Palette size={16} aria-hidden="true" />
-                      {account.appearance ?? copy.themeDark}
-                    </span>
-                    <button
-                      type="button"
-                      className="ms-appearance-toggle"
-                      onClick={toggleTheme}
-                      aria-label={themeLabel}
-                      title={themeLabel}
-                    >
-                      {theme === "dark" ? (
-                        <SunMedium size={15} aria-hidden="true" />
-                      ) : (
-                        <Moon size={15} aria-hidden="true" />
-                      )}
-                      <span>
-                        {theme === "dark"
-                          ? account.themeLightShort ?? copy.themeLight
-                          : account.themeDarkShort ?? copy.themeDark}
-                      </span>
-                    </button>
-                  </div>
-
-                  <div className="ms-account-quick__row">
-                    <span className="ms-account-quick__label">
-                      <Languages size={16} aria-hidden="true" />
-                      {copy.languageLabel}
-                    </span>
-                    <GlobalLanguageSelector
-                      label={copy.languageLabel}
-                      compact
-                      selectableLocaleCodes={
-                        isPractice
-                          ? PRACTICE_UI_SELECTABLE_LOCALE_CODES
-                          : PATIENT_UI_SELECTABLE_LOCALE_CODES
-                      }
-                    />
-                  </div>
                 </li>
               )}
 
