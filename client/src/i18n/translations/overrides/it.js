@@ -23,6 +23,73 @@ import { itPracticeDirectory } from "./it/it.practiceDirectory.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
+  roleEntry: {
+    hero: {
+      title: "Un unico accesso che rende la visita più serena.",
+      lead: "MedScoutX ti aiuta a mettere in ordine le tue esigenze prima dell’appuntamento — per colloqui più chiari, una documentazione curata e dati che restano nelle tue mani.",
+    },
+    flow: {
+      eyebrow: "Come funziona",
+      title: "Dall’incertezza a un colloquio strutturato",
+      aria: "Flusso in tre passaggi: Raccogliere, Strutturare, Consegnare",
+      steps: [
+        {
+          title: "Raccogliere",
+          body: "Prepara con calma sintomi, domande e documenti, al tuo ritmo.",
+        },
+        {
+          title: "Strutturare",
+          body: "MedScoutX trasforma i tuoi dati in una panoramica chiara e leggibile.",
+        },
+        {
+          title: "Consegnare",
+          body: "Condividila in sicurezza con il tuo studio in PDF o tramite codice QR.",
+        },
+      ],
+    },
+    metrics: {
+      eyebrow: "Ciò che distingue MedScoutX",
+      title: "Ponderato, multilingue, sicuro",
+      note: "Caratteristiche del prodotto — non statistiche d’uso.",
+      aria: "Caratteristiche del prodotto MedScoutX",
+      items: [
+        {
+          value: 2,
+          label: "Aree",
+          hint: "Pazienti e studi — un unico accesso",
+        },
+        {
+          value: 5,
+          label: "Lingue dell’interfaccia",
+          hint: "Deutsch · English · Français · Español · Italiano",
+        },
+        {
+          value: 14,
+          label: "Moduli di preparazione",
+          hint: "Sette per i pazienti, sette per gli studi",
+        },
+        {
+          value: 3,
+          label: "Passaggi per prepararsi",
+          hint: "Raccogliere, Strutturare, Consegnare",
+        },
+      ],
+    },
+    manifesto: {
+      eyebrow: "Digitalizzazione centrata sulla persona",
+      title: "Tecnologia al servizio del colloquio — non il contrario.",
+      body: [
+        "La buona medicina inizia dall’ascolto. MedScoutX ti solleva dalle scartoffie e dall’incertezza prima dell’appuntamento, così nello studio resta tempo per ciò che conta: il colloquio tra una persona e il suo medico.",
+        "Chi arriva preparato ricorda le domande giuste, descrive i sintomi con più precisione e comprende meglio le decisioni. La struttura porta calma — e la calma porta colloqui migliori.",
+        "I tuoi dati sanitari appartengono a te. MedScoutX elabora solo ciò che serve alla preparazione, rende trasparente ogni autorizzazione e consegna i documenti cifrati. La fiducia non è un extra — è il fondamento.",
+      ],
+      trust: [
+        "Conforme al GDPR",
+        "Nessuna diagnosi, nessuna terapia — solo preparazione",
+        "I tuoi dati restano nelle tue mani",
+      ],
+    },
+  },
   legal: legalIt,
   landing,
   info,

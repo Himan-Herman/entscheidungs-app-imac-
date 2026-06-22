@@ -1,11 +1,15 @@
 import { useEffect, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Building2, Moon, SunMedium, UserRound } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Check } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
 import { getMessages } from "../i18n/translations";
-import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
-import { PATIENT_UI_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
+import {
+  RoleCard,
+  RoleEntryBackdrop,
+  RoleEntryFlow,
+  RoleEntryMetrics,
+} from "../components/landing/RoleEntryVisuals.jsx";
 import {
   USER_MODES,
   writeUserMode,
@@ -16,18 +20,74 @@ import "../styles/RoleEntryPage.css";
 export default function RoleEntryPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   const t = useMemo(() => {
     const m = getMessages(language);
     return m.roleEntry ?? getMessages("en").roleEntry;
   }, [language]);
 
-  const copyHeader = useMemo(() => getMessages(language).header, [language]);
-
   useEffect(() => {
     document.title = t.pageTitle;
   }, [t.pageTitle]);
+
+  // Gentle, staggered scroll-reveal. Strictly disabled for reduced motion.
+  useEffect(() => {
+    const root = document.querySelector(".role-entry");
+    if (!root) return undefined;
+
+    const targets = [];
+    const addStatic = (selector) => {
+      root.querySelectorAll(selector).forEach((el) => {
+        el.style.setProperty("--role-reveal-delay", "0ms");
+        targets.push(el);
+      });
+    };
+    const addStaggered = (selector) => {
+      root.querySelectorAll(selector).forEach((el, index) => {
+        el.style.setProperty("--role-reveal-delay", `${index * 70}ms`);
+        targets.push(el);
+      });
+    };
+
+    addStatic(".role-entry__intro");
+    addStatic(".role-entry__section-head");
+    addStatic(".role-entry__manifesto-inner");
+    addStaggered(".role-entry__card");
+    addStaggered(".role-entry__flow-step");
+    addStaggered(".role-entry__metric");
+
+    targets.forEach((el) => el.classList.add("role-entry__reveal"));
+
+    const cleanup = () => {
+      targets.forEach((el) => {
+        el.classList.remove("role-entry__reveal", "is-visible");
+        el.style.removeProperty("--role-reveal-delay");
+      });
+    };
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduceMotion.matches) {
+      targets.forEach((el) => el.classList.add("is-visible"));
+      return cleanup;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add("is-visible");
+        });
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
+    );
+
+    targets.forEach((el) => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+      cleanup();
+    };
+  }, [language]);
 
   const isLoggedIn =
     !!localStorage.getItem("medscout_token") &&
@@ -59,84 +119,102 @@ export default function RoleEntryPage() {
     }
   }
 
-  const themeLabel =
-    theme === "dark" ? copyHeader.themeLight : copyHeader.themeDark;
-
   return (
     <div className="role-entry" data-theme={theme}>
-      <header className="role-entry__top" dir="ltr">
-        <Link className="role-entry__brand" to="/">
-          MedScoutX
-        </Link>
-        <div className="role-entry__top-actions">
-          <Link className="role-entry__marketing-link" to="/">
-            {t.marketingLink}
-          </Link>
-          <button
-            type="button"
-            className="role-entry__icon-btn"
-            onClick={toggleTheme}
-            aria-label={themeLabel}
-          >
-            {theme === "dark" ? (
-              <SunMedium size={20} aria-hidden />
-            ) : (
-              <Moon size={20} aria-hidden />
-            )}
-          </button>
-          <GlobalLanguageSelector
-            label={copyHeader.languageLabel}
-            compact
-            selectableLocaleCodes={PATIENT_UI_SELECTABLE_LOCALE_CODES}
-          />
-        </div>
-      </header>
+      <RoleEntryBackdrop theme={theme} />
 
       <div className="role-entry__main">
-        <p className="role-entry__eyebrow">{t.brandLine}</p>
-        <h1 className="role-entry__sr-only">{t.pageTitle}</h1>
+        <header className="role-entry__intro">
+          <p className="role-entry__eyebrow">{t.brandLine}</p>
+          <h1 className="role-entry__title">{t.hero.title}</h1>
+          <p className="role-entry__lead">{t.hero.lead}</p>
+        </header>
 
         <div className="role-entry__grid">
-          <article className="role-entry__card role-entry__card--patient">
-            <div className="role-entry__card-icon" aria-hidden>
-              <UserRound size={28} strokeWidth={1.5} />
-            </div>
-            <h2 className="role-entry__card-title">{t.b2c.title}</h2>
-            <p className="role-entry__card-sub">{t.b2c.subtitle}</p>
-            <ul className="role-entry__modules">
-              {t.b2c.modules.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <button
-              type="button"
-              className="role-entry__cta role-entry__cta--primary"
-              onClick={goPatient}
-            >
-              {t.b2c.cta}
-            </button>
-          </article>
-
-          <article className="role-entry__card role-entry__card--practice">
-            <div className="role-entry__card-icon" aria-hidden>
-              <Building2 size={28} strokeWidth={1.5} />
-            </div>
-            <h2 className="role-entry__card-title">{t.b2b.title}</h2>
-            <p className="role-entry__card-sub">{t.b2b.subtitle}</p>
-            <ul className="role-entry__modules">
-              {t.b2b.modules.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <button
-              type="button"
-              className="role-entry__cta role-entry__cta--secondary"
-              onClick={goPractice}
-            >
-              {t.b2b.cta}
-            </button>
-          </article>
+          <RoleCard
+            variant="patient"
+            title={t.b2c.title}
+            subtitle={t.b2c.subtitle}
+            modules={t.b2c.modules}
+            cta={t.b2c.cta}
+            onClick={goPatient}
+          />
+          <RoleCard
+            variant="practice"
+            title={t.b2b.title}
+            subtitle={t.b2b.subtitle}
+            modules={t.b2b.modules}
+            cta={t.b2b.cta}
+            onClick={goPractice}
+          />
         </div>
+
+        <section
+          className="role-entry__section role-entry__section--flow"
+          aria-labelledby="role-entry-flow-heading"
+        >
+          <div className="role-entry__section-head">
+            <p className="role-entry__section-eyebrow">{t.flow.eyebrow}</p>
+            <h2
+              id="role-entry-flow-heading"
+              className="role-entry__section-title"
+            >
+              {t.flow.title}
+            </h2>
+          </div>
+          <RoleEntryFlow flow={t.flow} />
+        </section>
+
+        <section
+          className="role-entry__section role-entry__section--metrics"
+          aria-labelledby="role-entry-metrics-heading"
+        >
+          <div className="role-entry__section-head">
+            <p className="role-entry__section-eyebrow">{t.metrics.eyebrow}</p>
+            <h2
+              id="role-entry-metrics-heading"
+              className="role-entry__section-title"
+            >
+              {t.metrics.title}
+            </h2>
+          </div>
+          <RoleEntryMetrics metrics={t.metrics} theme={theme} />
+          <p className="role-entry__metrics-note">{t.metrics.note}</p>
+        </section>
+
+        <section
+          className="role-entry__section role-entry__manifesto"
+          aria-labelledby="role-entry-manifesto-heading"
+        >
+          <div className="role-entry__manifesto-inner">
+            <div className="role-entry__section-head">
+              <p className="role-entry__section-eyebrow">
+                {t.manifesto.eyebrow}
+              </p>
+              <h2
+                id="role-entry-manifesto-heading"
+                className="role-entry__section-title"
+              >
+                {t.manifesto.title}
+              </h2>
+            </div>
+            <div className="role-entry__manifesto-body">
+              {t.manifesto.body.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+            <ul className="role-entry__trust">
+              {t.manifesto.trust.map((badge) => (
+                <li key={badge}>
+                  <span className="role-entry__trust-mark" aria-hidden="true">
+                    <Check size={15} strokeWidth={2.5} />
+                  </span>
+                  {badge}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
       </div>
     </div>
   );

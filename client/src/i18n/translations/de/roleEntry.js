@@ -32,6 +32,71 @@ export default {
     ],
     cta: "Praxisbereich öffnen",
   },
+  hero: {
+    title: "Ein Zugang, der Ihr Arztgespräch ruhiger macht.",
+    lead: "MedScoutX hilft Ihnen, Anliegen vor dem Termin zu ordnen – für klarere Gespräche, saubere Dokumentation und Daten, die in Ihrer Hand bleiben.",
+  },
+  flow: {
+    eyebrow: "So funktioniert es",
+    title: "Von der Unsicherheit zum strukturierten Gespräch",
+    aria: "Ablauf in drei Schritten: Erfassen, Strukturieren, Übergeben",
+    steps: [
+      {
+        title: "Erfassen",
+        body: "Beschwerden, Fragen und Unterlagen in Ruhe und in Ihrem Tempo vorbereiten.",
+      },
+      {
+        title: "Strukturieren",
+        body: "MedScoutX ordnet Ihre Angaben zu einem klaren, lesbaren Überblick.",
+      },
+      {
+        title: "Übergeben",
+        body: "Sicher als PDF oder per QR-Code an Ihre Praxis weitergeben.",
+      },
+    ],
+  },
+  metrics: {
+    eyebrow: "Was MedScoutX ausmacht",
+    title: "Durchdacht, mehrsprachig, sicher",
+    note: "Produktmerkmale – keine Nutzungsstatistik.",
+    aria: "Produktmerkmale von MedScoutX",
+    items: [
+      {
+        value: 2,
+        label: "Bereiche",
+        hint: "Patient:innen und Praxen – ein gemeinsamer Zugang",
+      },
+      {
+        value: 5,
+        label: "Oberflächensprachen",
+        hint: "Deutsch · English · Français · Español · Italiano",
+      },
+      {
+        value: 14,
+        label: "Vorbereitungs-Module",
+        hint: "Sieben für Patient:innen, sieben für Praxen",
+      },
+      {
+        value: 3,
+        label: "Schritte zur Vorbereitung",
+        hint: "Erfassen, Strukturieren, Übergeben",
+      },
+    ],
+  },
+  manifesto: {
+    eyebrow: "Menschzentrierte Digitalisierung",
+    title: "Technik, die dem Gespräch dient – nicht umgekehrt.",
+    body: [
+      "Gute Medizin beginnt mit Zuhören. MedScoutX nimmt Ihnen Papierkram und Unsicherheit vor dem Termin ab, damit im Behandlungszimmer Zeit für das Wesentliche bleibt: das Gespräch zwischen Mensch und Ärztin oder Arzt.",
+      "Wer vorbereitet ankommt, erinnert sich an die richtigen Fragen, schildert Beschwerden präziser und versteht Entscheidungen besser. Struktur schafft Ruhe – und Ruhe schafft bessere Gespräche.",
+      "Ihre Gesundheitsdaten gehören Ihnen. MedScoutX verarbeitet nur, was für die Vorbereitung nötig ist, macht Freigaben nachvollziehbar und stellt Dokumente verschlüsselt zu. Vertrauen ist kein Zusatz – es ist die Grundlage.",
+    ],
+    trust: [
+      "DSGVO-orientiert",
+      "Keine Diagnose, keine Therapie – nur Vorbereitung",
+      "Ihre Daten bleiben in Ihrer Hand",
+    ],
+  },
   patientHub: {
     pageTitle: "Patientenbereich — MedScoutX",
     heading: "Patientenbereich",

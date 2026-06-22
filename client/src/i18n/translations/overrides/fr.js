@@ -21,6 +21,73 @@ import { frPatientBillingExplain } from "./fr/fr.patientBillingExplain.js";
 import { frPracticeDirectory } from "./fr/fr.practiceDirectory.js";
 
 const frBase = {
+  roleEntry: {
+    hero: {
+      title: "Une entrée qui rend votre consultation plus sereine.",
+      lead: "MedScoutX vous aide à organiser vos préoccupations avant le rendez-vous — pour des échanges plus clairs, une documentation soignée et des données qui restent entre vos mains.",
+    },
+    flow: {
+      eyebrow: "Comment ça marche",
+      title: "De l’incertitude à un échange structuré",
+      aria: "Déroulé en trois étapes : Saisir, Structurer, Transmettre",
+      steps: [
+        {
+          title: "Saisir",
+          body: "Préparez sereinement vos symptômes, questions et documents, à votre rythme.",
+        },
+        {
+          title: "Structurer",
+          body: "MedScoutX transforme vos informations en un aperçu clair et lisible.",
+        },
+        {
+          title: "Transmettre",
+          body: "Partagez-le en sécurité avec votre cabinet en PDF ou via un QR code.",
+        },
+      ],
+    },
+    metrics: {
+      eyebrow: "Ce qui définit MedScoutX",
+      title: "Pensé, multilingue, sécurisé",
+      note: "Caractéristiques du produit — pas des statistiques d’usage.",
+      aria: "Caractéristiques du produit MedScoutX",
+      items: [
+        {
+          value: 2,
+          label: "Espaces",
+          hint: "Patients et cabinets — une entrée commune",
+        },
+        {
+          value: 5,
+          label: "Langues d’interface",
+          hint: "Deutsch · English · Français · Español · Italiano",
+        },
+        {
+          value: 14,
+          label: "Modules de préparation",
+          hint: "Sept pour les patients, sept pour les cabinets",
+        },
+        {
+          value: 3,
+          label: "Étapes de préparation",
+          hint: "Saisir, Structurer, Transmettre",
+        },
+      ],
+    },
+    manifesto: {
+      eyebrow: "Une digitalisation centrée sur l’humain",
+      title: "Une technologie au service de l’échange — et non l’inverse.",
+      body: [
+        "La bonne médecine commence par l’écoute. MedScoutX vous décharge de la paperasse et de l’incertitude avant le rendez-vous, pour que le cabinet ait le temps de l’essentiel : l’échange entre une personne et son médecin.",
+        "Qui arrive préparé se souvient des bonnes questions, décrit ses symptômes avec plus de précision et comprend mieux les décisions. La structure apporte le calme — et le calme, de meilleurs échanges.",
+        "Vos données de santé vous appartiennent. MedScoutX ne traite que ce que la préparation exige, rend chaque partage transparent et transmet les documents chiffrés. La confiance n’est pas une option — c’est le fondement.",
+      ],
+      trust: [
+        "Conforme au RGPD",
+        "Ni diagnostic ni traitement — uniquement la préparation",
+        "Vos données restent entre vos mains",
+      ],
+    },
+  },
   legal: legalFr,
   info,
   preVisit,

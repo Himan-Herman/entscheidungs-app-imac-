@@ -23,14 +23,79 @@ export default {
       "QR-based preparation, structured PDFs, follow-ups and practice management.",
     modules: [
       "Practice profiles",
-      "QR targets",
+      "QR system",
       "Practice dashboard",
       "Follow-ups",
-      "Integrations",
-      "Analytics",
       "Team/Roles",
+      "Secure document delivery",
+      "Analytics",
     ],
     cta: "Open practice area",
+  },
+  hero: {
+    title: "One entrance that makes your doctor visit calmer.",
+    lead: "MedScoutX helps you organise your concerns before the appointment — for clearer conversations, clean documentation and data that stays in your hands.",
+  },
+  flow: {
+    eyebrow: "How it works",
+    title: "From uncertainty to a structured conversation",
+    aria: "Three-step flow: Capture, Structure, Hand over",
+    steps: [
+      {
+        title: "Capture",
+        body: "Prepare symptoms, questions and documents calmly, at your own pace.",
+      },
+      {
+        title: "Structure",
+        body: "MedScoutX turns your input into a clear, readable overview.",
+      },
+      {
+        title: "Hand over",
+        body: "Share it securely with your practice as a PDF or via QR code.",
+      },
+    ],
+  },
+  metrics: {
+    eyebrow: "What defines MedScoutX",
+    title: "Considered, multilingual, secure",
+    note: "Product capabilities — not usage statistics.",
+    aria: "Product capabilities of MedScoutX",
+    items: [
+      {
+        value: 2,
+        label: "Areas",
+        hint: "Patients and practices — one shared entrance",
+      },
+      {
+        value: 5,
+        label: "Interface languages",
+        hint: "Deutsch · English · Français · Español · Italiano",
+      },
+      {
+        value: 14,
+        label: "Preparation modules",
+        hint: "Seven for patients, seven for practices",
+      },
+      {
+        value: 3,
+        label: "Steps to prepare",
+        hint: "Capture, Structure, Hand over",
+      },
+    ],
+  },
+  manifesto: {
+    eyebrow: "Human-centred digitalisation",
+    title: "Technology that serves the conversation — not the other way round.",
+    body: [
+      "Good medicine begins with listening. MedScoutX takes the paperwork and the pre-appointment uncertainty off your shoulders, so the consulting room has time for what matters: the conversation between a person and their doctor.",
+      "People who arrive prepared remember the right questions, describe symptoms more precisely and understand decisions better. Structure creates calm — and calm creates better conversations.",
+      "Your health data belongs to you. MedScoutX processes only what preparation requires, keeps every release transparent and delivers documents encrypted. Trust is not an add-on — it is the foundation.",
+    ],
+    trust: [
+      "GDPR-oriented",
+      "No diagnosis, no therapy — preparation only",
+      "Your data stays in your hands",
+    ],
   },
   patientHub: {
     pageTitle: "Patient workspace — MedScoutX",

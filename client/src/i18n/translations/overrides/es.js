@@ -23,6 +23,73 @@ import { esPracticeDirectory } from "./es/es.practiceDirectory.js";
 
 /** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
 const esBase = {
+  roleEntry: {
+    hero: {
+      title: "Una entrada que hace su consulta más serena.",
+      lead: "MedScoutX le ayuda a ordenar sus inquietudes antes de la cita — para conversaciones más claras, una documentación cuidada y datos que permanecen en sus manos.",
+    },
+    flow: {
+      eyebrow: "Cómo funciona",
+      title: "De la incertidumbre a una conversación estructurada",
+      aria: "Flujo en tres pasos: Registrar, Estructurar, Entregar",
+      steps: [
+        {
+          title: "Registrar",
+          body: "Prepare con calma sus síntomas, preguntas y documentos, a su ritmo.",
+        },
+        {
+          title: "Estructurar",
+          body: "MedScoutX convierte sus datos en un resumen claro y legible.",
+        },
+        {
+          title: "Entregar",
+          body: "Compártalo de forma segura con su consulta en PDF o mediante un código QR.",
+        },
+      ],
+    },
+    metrics: {
+      eyebrow: "Lo que define a MedScoutX",
+      title: "Pensado, multilingüe, seguro",
+      note: "Características del producto — no estadísticas de uso.",
+      aria: "Características del producto MedScoutX",
+      items: [
+        {
+          value: 2,
+          label: "Áreas",
+          hint: "Pacientes y consultas — una entrada común",
+        },
+        {
+          value: 5,
+          label: "Idiomas de la interfaz",
+          hint: "Deutsch · English · Français · Español · Italiano",
+        },
+        {
+          value: 14,
+          label: "Módulos de preparación",
+          hint: "Siete para pacientes, siete para consultas",
+        },
+        {
+          value: 3,
+          label: "Pasos para prepararse",
+          hint: "Registrar, Estructurar, Entregar",
+        },
+      ],
+    },
+    manifesto: {
+      eyebrow: "Digitalización centrada en las personas",
+      title: "Tecnología al servicio de la conversación — y no al revés.",
+      body: [
+        "La buena medicina empieza por escuchar. MedScoutX le libera del papeleo y de la incertidumbre antes de la cita, para que en la consulta haya tiempo para lo esencial: la conversación entre una persona y su médico.",
+        "Quien llega preparado recuerda las preguntas correctas, describe los síntomas con más precisión y entiende mejor las decisiones. La estructura aporta calma — y la calma, mejores conversaciones.",
+        "Sus datos de salud le pertenecen. MedScoutX solo procesa lo que la preparación requiere, hace transparente cada autorización y entrega los documentos cifrados. La confianza no es un extra — es la base.",
+      ],
+      trust: [
+        "Conforme al RGPD",
+        "Sin diagnóstico ni tratamiento — solo preparación",
+        "Sus datos permanecen en sus manos",
+      ],
+    },
+  },
   legal: legalEs,
   info,
   preVisit,
