@@ -74,7 +74,6 @@ export default {
     actionOpenSettings: "Impostazioni struttura",
     actionOpenIntegrations: "Integrazioni (PVS/FHIR)",
     actionOpenCalendar: "Calendario",
-    actionOpenTelemedicine: "Visitazioni video",
     actionOpenDeveloper: "Accesso sviluppatori",
     actionOpenBillingPlausibility: "Verifica GOÄ/PKV",
     aiHeading: "Sintesi IA — da verificare",

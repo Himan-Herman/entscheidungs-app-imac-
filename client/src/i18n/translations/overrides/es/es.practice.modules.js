@@ -74,7 +74,6 @@ export default {
     actionOpenSettings: "Ajustes del centro",
     actionOpenIntegrations: "Integraciones (PVS/FHIR)",
     actionOpenCalendar: "Calendario",
-    actionOpenTelemedicine: "Consultas por vídeo",
     actionOpenDeveloper: "Acceso para desarrolladores",
     actionOpenBillingPlausibility: "Revisión GOÄ/PKV",
     aiHeading: "Resumen IA — revisar",

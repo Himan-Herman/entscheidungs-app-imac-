@@ -13,6 +13,7 @@ import {
   Receipt,
   Shield,
   UsersRound,
+  Video,
 } from "lucide-react";
 import { ensureDemoPractice, fetchPractices } from "../api/practicesApi.js";
 import {
@@ -137,6 +138,13 @@ const CARD_DEFS = [
     labelKey: "cardBooking",
     to: (practiceId) => `/practice/booking?practiceId=${encodeURIComponent(practiceId)}`,
     Icon: CalendarCheck,
+  },
+  {
+    id: "telemedicine",
+    visibilityKey: "telemedicine",
+    labelKey: "cardTelemedicine",
+    to: (practiceId) => `/practice/telemedicine?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: Video,
   },
 ];
 
@@ -646,14 +654,6 @@ export default function PracticeHubPage() {
                   to={`/practice/calendar?practiceId=${encodeURIComponent(practiceId)}`}
                 >
                   {t.actionOpenCalendar}
-                </Link>
-              ) : null}
-              {quickActions.openTelemedicine ? (
-                <Link
-                  className="practice-overview__action"
-                  to={`/practice/telemedicine?practiceId=${encodeURIComponent(practiceId)}`}
-                >
-                  {t.actionOpenTelemedicine}
                 </Link>
               ) : null}
               {quickActions.openBillingPlausibility ? (

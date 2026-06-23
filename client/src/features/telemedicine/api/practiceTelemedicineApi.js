@@ -19,6 +19,16 @@ export async function fetchPracticeTelemedicineSession(practiceId, sessionId) {
   return { res, data };
 }
 
+export async function createPracticeSession(practiceId, body) {
+  const res = await authFetch(`/api/practice/telemedicine?${qs(practiceId)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function startPracticeSession(practiceId, sessionId) {
   const res = await authFetch(
     `/api/practice/telemedicine/${encodeURIComponent(sessionId)}/start?${qs(practiceId)}`,

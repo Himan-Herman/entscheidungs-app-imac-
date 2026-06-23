@@ -83,7 +83,6 @@ export default {
     actionOpenSettings: "Paramètres de l’établissement",
     actionOpenIntegrations: "Intégrations (PVS/FHIR)",
     actionOpenCalendar: "Calendrier",
-    actionOpenTelemedicine: "Consultations vidéo",
     actionOpenDeveloper: "Accès développeur",
     actionOpenBillingPlausibility: "Contrôle GOÄ/PKV",
 

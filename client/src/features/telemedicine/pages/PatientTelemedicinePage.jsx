@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchPatientTelemedicineSessions } from "../api/patientTelemedicineApi.js";
+import { statusLabelKey } from "../telemedicineSessionUtils.js";
 import "../../../styles/WorkspaceHubPages.css";
 import "../styles/TelemedicinePages.css";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
@@ -82,11 +83,11 @@ export default function PatientTelemedicinePage() {
                   type="button"
                   className="telemedicine-card"
                   onClick={() => navigate(`/patient/telemedicine/${s.id}`)}
-                  aria-label={`${s.title || s.id}, ${t[`status_${s.status}`] || s.status}, ${fmt(s.scheduledStartAt, language)}`}
+                  aria-label={`${s.title || s.id}, ${t[statusLabelKey(s.status)] || s.status}, ${fmt(s.scheduledStartAt, language)}`}
                 >
                   <strong>{s.title || s.id}</strong>
                   <div className="telemedicine-card__meta">
-                    <span className="telemedicine-status">{t[`status_${s.status}`] || s.status}</span>
+                    <span className="telemedicine-status">{t[statusLabelKey(s.status)] || s.status}</span>
                     {" · "}
                     {fmt(s.scheduledStartAt, language)}
                   </div>

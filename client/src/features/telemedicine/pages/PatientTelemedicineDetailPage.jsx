@@ -9,6 +9,12 @@ import {
   patientJoinTelemedicine,
   patientLeaveTelemedicine,
 } from "../api/patientTelemedicineApi.js";
+import {
+  canPatientJoin,
+  isExpiredSession,
+  isTerminalStatus,
+  statusLabelKey,
+} from "../telemedicineSessionUtils.js";
 import "../../../styles/WorkspaceHubPages.css";
 import "../styles/TelemedicinePages.css";
 
@@ -22,16 +28,6 @@ function fmt(iso, lang) {
   } catch {
     return "—";
   }
-}
-
-function isTerminalStatus(status) {
-  return ["completed", "cancelled", "failed"].includes(status);
-}
-
-function isExpiredSession(session) {
-  if (!session?.scheduledEndAt) return false;
-  if (!["planned", "waiting"].includes(session.status)) return false;
-  return new Date(session.scheduledEndAt).getTime() < Date.now();
 }
 
 export default function PatientTelemedicineDetailPage() {
@@ -116,7 +112,7 @@ export default function PatientTelemedicineDetailPage() {
     await reload();
   };
 
-  const canJoin = session && !session.linkRevoked && !isTerminalStatus(session.status) && !isExpiredSession(session);
+  const canJoin = canPatientJoin(session);
 
   return (
     <main className="telemedicine-page workspace-hub" lang={language}>
@@ -137,7 +133,7 @@ export default function PatientTelemedicineDetailPage() {
         <div className="telemedicine-panel">
           <p>
             <span className="telemedicine-status" aria-label={t.status}>
-              {t[`status_${session.status}`] || session.status}
+              {t[statusLabelKey(session.status)] || session.status}
             </span>
           </p>
           {isTerminalStatus(session.status) ? (

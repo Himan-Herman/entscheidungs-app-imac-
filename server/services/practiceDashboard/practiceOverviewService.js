@@ -1,5 +1,10 @@
 import { PrismaClient } from "@prisma/client";
-import { isMedicalInterpreterB2bEnabled, isPracticeAnamnesisEnabled, isPracticeBookingEnabled } from "../../config/featureFlags.js";
+import {
+  isMedicalInterpreterB2bEnabled,
+  isPracticeAnamnesisEnabled,
+  isPracticeBookingEnabled,
+  isTelemedicineUiEnabled,
+} from "../../config/featureFlags.js";
 import {
   hasPracticePermission,
   permissionsForRole,
@@ -56,6 +61,9 @@ function metricsVisibilityForRole(role) {
     booking:
       isPracticeBookingEnabled() &&
       hasPracticePermission(role, PERMISSIONS.BOOKING_READ),
+    telemedicine:
+      isTelemedicineUiEnabled() &&
+      hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_READ),
   };
 }
 
@@ -253,7 +261,6 @@ function buildQuickActions(role) {
     openSettings: hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE),
     openIntegrations: hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE),
     openCalendar: hasPracticePermission(role, PERMISSIONS.CALENDAR_READ),
-    openTelemedicine: hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_READ),
     openDeveloper: hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE),
     openSecurity: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
     openBillingPlausibility: hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE),

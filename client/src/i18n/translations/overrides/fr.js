@@ -19,6 +19,7 @@ import frSosCard from "./fr/fr.sosCard.js";
 import { frPracticeBillingPlausibility, frPracticeIntegrationsVendors } from "./fr/fr.practiceBillingPlausibility.js";
 import { frPatientBillingExplain } from "./fr/fr.patientBillingExplain.js";
 import { frPracticeDirectory } from "./fr/fr.practiceDirectory.js";
+import { frTelemedicine } from "./fr/fr.telemedicine.js";
 
 const frBase = {
   roleEntry: {
@@ -266,7 +267,7 @@ const frBase = {
 };
 
 /** fr → merging layers: extended FR modules override base; runtime getMessages merges fr → en → de per key */
-export default deepMerge(
+const frComposed = deepMerge(
   deepMerge(
     deepMerge(deepMerge(deepMerge(frBase, frCore), frAccount), frModules),
     frPractice,
@@ -285,3 +286,5 @@ export default deepMerge(
     ),
   ),
 );
+
+export default deepMerge(frComposed, frTelemedicine);

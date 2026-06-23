@@ -20,6 +20,7 @@ import itSosCard from "./it/it.sosCard.js";
 import { itPracticeBillingPlausibility, itPracticeIntegrationsVendors } from "./it/it.practiceBillingPlausibility.js";
 import { itPatientBillingExplain } from "./it/it.patientBillingExplain.js";
 import { itPracticeDirectory } from "./it/it.practiceDirectory.js";
+import { itTelemedicine } from "./it/it.telemedicine.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
@@ -268,7 +269,7 @@ const itBase = {
   },
 };
 
-export default deepMerge(
+const itComposed = deepMerge(
   deepMerge(
     deepMerge(deepMerge(deepMerge(itBase, itCore), itAccount), itModules),
     itPractice,
@@ -287,3 +288,5 @@ export default deepMerge(
     ),
   ),
 );
+
+export default deepMerge(itComposed, itTelemedicine);

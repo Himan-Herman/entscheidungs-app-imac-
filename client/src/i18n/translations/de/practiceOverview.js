@@ -51,6 +51,7 @@ export default {
   cardMedaLive: "Meda Live Translation",
   cardAnamnesis: "Anamnese",
   cardBooking: "Termine & Anfragen",
+  cardTelemedicine: "Videosprechstunden",
 
   metricUnreadInbox: "Ungelesene Postfach-Einträge",
   metricOpenMessages: "Offene Nachrichten",
@@ -76,7 +77,6 @@ export default {
   actionOpenSettings: "Praxis-Einstellungen",
   actionOpenIntegrations: "Integrationen (PVS/FHIR)",
   actionOpenCalendar: "Kalender",
-  actionOpenTelemedicine: "Videosprechstunden",
   actionOpenDeveloper: "Entwicklerzugang",
   actionOpenBillingPlausibility: "GOÄ/PKV-Prüfung",
 

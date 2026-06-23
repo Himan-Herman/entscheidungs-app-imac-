@@ -20,6 +20,7 @@ import esSosCard from "./es/es.sosCard.js";
 import { esPracticeBillingPlausibility, esPracticeIntegrationsVendors } from "./es/es.practiceBillingPlausibility.js";
 import { esPatientBillingExplain } from "./es/es.patientBillingExplain.js";
 import { esPracticeDirectory } from "./es/es.practiceDirectory.js";
+import { esTelemedicine } from "./es/es.telemedicine.js";
 
 /** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
 const esBase = {
@@ -267,7 +268,7 @@ const esBase = {
   },
 };
 
-export default deepMerge(
+const esComposed = deepMerge(
   deepMerge(
     deepMerge(deepMerge(deepMerge(esBase, esCore), esAccount), esModules),
     esPractice,
@@ -286,3 +287,5 @@ export default deepMerge(
     ),
   ),
 );
+
+export default deepMerge(esComposed, esTelemedicine);

@@ -12,6 +12,11 @@ import {
   telemedicineAiFollowup,
   telemedicineAiInstructions,
 } from "../api/practiceTelemedicineApi.js";
+import {
+  participantLabelKey,
+  statusLabelKey,
+  waitingPatients as selectWaitingPatients,
+} from "../telemedicineSessionUtils.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../styles/TelemedicinePages.css";
 
@@ -67,12 +72,10 @@ export default function PracticeTelemedicineDetailPage() {
     void reload();
   }, [reload]);
 
-  const waitingPatients = useMemo(() => {
-    if (!session?.participants) return [];
-    return session.participants.filter(
-      (p) => p.role === "patient" && (p.status === "waiting" || p.status === "joined"),
-    );
-  }, [session]);
+  const waitingPatients = useMemo(
+    () => selectWaitingPatients(session?.participants),
+    [session],
+  );
 
   const runStart = async () => {
     setBusy(true);
@@ -107,7 +110,7 @@ export default function PracticeTelemedicineDetailPage() {
 
   const runAiInstructions = async () => {
     setBusy(true);
-    const { res, data } = await telemedicineAiInstructions(practiceId, { language });
+    const { res, data } = await telemedicineAiInstructions(practiceId, { locale: language });
     setBusy(false);
     if (res.ok && data.text) setAiText(data.text);
   };
@@ -115,8 +118,8 @@ export default function PracticeTelemedicineDetailPage() {
   const runAiFollowup = async () => {
     setBusy(true);
     const { res, data } = await telemedicineAiFollowup(practiceId, sessionId, {
-      language,
-      note: followupNote,
+      locale: language,
+      notes: followupNote,
     });
     setBusy(false);
     if (res.ok && data.text) setFollowupDraft(data.text);
@@ -143,7 +146,7 @@ export default function PracticeTelemedicineDetailPage() {
           <section className="telemedicine-panel" aria-labelledby="tm-detail-info">
             <h2 id="tm-detail-info">{t.status}</h2>
             <p>
-              <span className="telemedicine-status">{t[`status_${session.status}`] || session.status}</span>
+              <span className="telemedicine-status">{t[statusLabelKey(session.status)] || session.status}</span>
             </p>
             {(session.status === "cancelled" || session.status === "failed") && session.endedAt ? (
               <p role="status" className="telemedicine-closed-hint" aria-live="polite">
@@ -152,6 +155,12 @@ export default function PracticeTelemedicineDetailPage() {
             ) : null}
             <p>
               <strong>{t.scheduled}:</strong> {fmt(session.scheduledStartAt, language)}
+            </p>
+            <p>
+              <strong>{t.consentStatusLabel}:</strong>{" "}
+              <span className="telemedicine-status">
+                {session.consentGranted ? t.consentYes : t.consentNo}
+              </span>
             </p>
             {session.practicePatientLinkId ? (
               <p>
@@ -206,7 +215,7 @@ export default function PracticeTelemedicineDetailPage() {
                 {waitingPatients.map((p) => (
                   <li key={p.id}>
                     <span className="telemedicine-status">
-                      {t[`participant_${p.status}`] || p.status}
+                      {t[participantLabelKey(p.status)] || p.status}
                     </span>
                     {p.joinedAt ? ` · ${fmt(p.joinedAt, language)}` : null}
                   </li>
