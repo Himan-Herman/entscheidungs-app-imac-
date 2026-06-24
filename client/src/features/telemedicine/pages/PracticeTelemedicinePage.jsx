@@ -176,22 +176,6 @@ export default function PracticeTelemedicinePage() {
           <ArrowLeft size={16} aria-hidden />
           <span>{t.backHub}</span>
         </Link>
-        <span className="telemedicine-page__toolbar-actions">
-          <Link
-            className="telemedicine-page__toolbar-link"
-            to={`/practice/calendar?practiceId=${encodeURIComponent(practiceId)}`}
-          >
-            <Calendar size={16} aria-hidden />
-            <span>{t.openCalendar}</span>
-          </Link>
-          <Link
-            className="telemedicine-page__toolbar-link"
-            to={`/practice/settings/video?practiceId=${encodeURIComponent(practiceId)}`}
-          >
-            <Settings size={16} aria-hidden />
-            <span>{t.openSettings}</span>
-          </Link>
-        </span>
       </nav>
 
       <header className="telemedicine-page__header">
@@ -251,10 +235,28 @@ export default function PracticeTelemedicinePage() {
             </div>
 
             {showCreate ? (
-              patients.length === 0 ? (
-                <p>{t.createNoPatients}</p>
-              ) : (
-                <form id="tm-create-form" className="telemedicine-form" onSubmit={onCreateSubmit}>
+              <>
+                <div className="telemedicine-create__links">
+                  <Link
+                    className="telemedicine-page__toolbar-link"
+                    to={`/practice/calendar?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    <Calendar size={16} aria-hidden />
+                    <span>{t.openCalendar}</span>
+                  </Link>
+                  <Link
+                    className="telemedicine-page__toolbar-link"
+                    to={`/practice/settings/video?practiceId=${encodeURIComponent(practiceId)}`}
+                  >
+                    <Settings size={16} aria-hidden />
+                    <span>{t.openSettings}</span>
+                  </Link>
+                </div>
+
+                {patients.length === 0 ? (
+                  <p>{t.createNoPatients}</p>
+                ) : (
+                  <form id="tm-create-form" className="telemedicine-form" onSubmit={onCreateSubmit}>
                   <label htmlFor="tm-create-patient">{t.createPatient}</label>
                   <select
                     id="tm-create-patient"
@@ -311,7 +313,8 @@ export default function PracticeTelemedicinePage() {
                     </button>
                   </div>
                 </form>
-              )
+                )}
+              </>
             ) : null}
           </section>
 
