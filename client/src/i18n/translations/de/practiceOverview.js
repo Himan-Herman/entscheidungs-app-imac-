@@ -123,6 +123,16 @@ export default {
     "Die Ansicht ist nur für Inhaber:in und Admin sichtbar (Berechtigung „security.view“); andere Rollen erhalten einen klaren Hinweis statt Zugriff. So schützt die Kachel Patientendaten indirekt: Zugriffe, Freigaben und Widerrufe werden nachvollziehbar, ohne dass selbst Daten freigegeben werden. Eine direkte Verbindung zum Patientenbereich besteht nicht.",
   cardSecurityInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Werden Kennzahlen und letzte Ereignisse korrekt angezeigt, erscheint für nicht berechtigte Rollen ein sauberer „kein Zugriff“-Hinweis, funktionieren Lade- und Leerzustände, und bleiben Patientennamen und sensible Inhalte unsichtbar?",
+  cardActivityInfoButton: "Mehr Informationen zu Aktivität",
+  cardActivityInfoTitle: "Aktivität",
+  cardActivityInfoIntro:
+    "Aktivität zeigt einen nachvollziehbaren Verlauf von Praxis- und Sicherheitsereignissen. Es ist eine reine Nur-Lese-Transparenzfunktion – es werden keine Patientennamen oder Gesundheitsdaten angezeigt, und MedScoutX nimmt keine medizinische Bewertung vor.",
+  cardActivityInfoEvents:
+    "Es gibt zwei Ansichten: die „Letzte Aktivitäten“ direkt auf der Übersicht (z. B. Nachricht, Dokumentfreigabe, veröffentlichter Medikationsplan, geänderter Profilzugriff, Datenanfrage, archivierte Beziehung) und – für berechtigte Rollen – das vollständige Audit-Protokoll mit Aktion, Rolle, Schweregrad (Info, Warnung, Sicherheit), Sichtbarkeit und Zeitpunkt, filterbar nach Schweregrad.",
+  cardActivityInfoAccess:
+    "Das vollständige Protokoll ist nur für Inhaber:in, Admin und Praxismanager:in sichtbar (Berechtigung „audit.view“); andere Rollen erhalten einen Hinweis statt Zugriff. So unterstützt die Kachel Transparenz und Datenschutz: Zugriffe und Änderungen werden nachvollziehbar, ohne Patientennamen oder Gesundheitsdaten anzuzeigen. Eine direkte Verbindung zum Patientenbereich besteht nicht.",
+  cardActivityInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Erscheinen aktuelle Ereignisse unter „Letzte Aktivitäten“, öffnet sich für berechtigte Rollen das Audit-Protokoll mit Schweregrad-Filter, erhalten nicht berechtigte Rollen einen sauberen Hinweis, und funktionieren Lade-, Leer- und Fehlerzustände ohne Patientennamen?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:

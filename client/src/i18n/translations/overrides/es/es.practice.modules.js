@@ -123,6 +123,16 @@ export default {
       "La vista solo es visible para el propietario y el admin (permiso « security.view »); los demás roles reciben una indicación clara en lugar de acceso. Así la tarjeta protege indirectamente los datos de los pacientes: los accesos, las comparticiones y las revocaciones se vuelven trazables sin que se divulgue ningún dato. No existe conexión directa con el área del paciente.",
     cardSecurityInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se muestran correctamente los indicadores y los últimos eventos, reciben los roles no autorizados una indicación « sin acceso » limpia, funcionan los estados de carga y vacíos, y permanecen ocultos los nombres de pacientes y el contenido sensible?",
+    cardActivityInfoButton: "Más información sobre la actividad",
+    cardActivityInfoTitle: "Actividad",
+    cardActivityInfoIntro:
+      "La actividad muestra un historial trazable de los eventos de la consulta y de seguridad. Es una función de transparencia de solo lectura — no se muestran nombres de pacientes ni datos de salud, y MedScoutX no realiza ninguna evaluación médica.",
+    cardActivityInfoEvents:
+      "Hay dos vistas: el flujo « Actividad reciente » directamente en la vista general (p. ej. mensaje, compartición de documento, plan de medicación publicado, acceso al perfil modificado, solicitud de datos, relación archivada) y — para los roles autorizados — el registro de auditoría completo con acción, rol, gravedad (info, advertencia, seguridad), visibilidad y hora, filtrable por gravedad.",
+    cardActivityInfoAccess:
+      "El registro completo solo es visible para el propietario, el admin y el gestor de consulta (permiso « audit.view »); los demás roles reciben una indicación en lugar de acceso. Así la tarjeta apoya la transparencia y la privacidad: los accesos y los cambios se vuelven trazables sin mostrar nombres de pacientes ni datos de salud. No existe conexión directa con el área del paciente.",
+    cardActivityInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿aparecen los eventos recientes en « Actividad reciente », se abre el registro de auditoría con filtro de gravedad para los roles autorizados, reciben los roles no autorizados una indicación limpia, y funcionan los estados de carga, vacíos y de error sin nombres de pacientes?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

@@ -123,6 +123,16 @@ export default {
       "La vista è visibile solo a titolare e admin (autorizzazione « security.view »); gli altri ruoli ricevono un’indicazione chiara invece dell’accesso. Così la scheda protegge indirettamente i dati dei pazienti: accessi, condivisioni e revoche diventano tracciabili senza che alcun dato venga divulgato. Non esiste alcun collegamento diretto con l’area paziente.",
     cardSecurityInfoAlpha:
       "Nel test alpha puoi verificare: gli indicatori e gli ultimi eventi vengono mostrati correttamente, i ruoli non autorizzati ricevono un’indicazione « nessun accesso » pulita, gli stati di caricamento e vuoti funzionano, e i nomi dei pazienti e i contenuti sensibili restano nascosti?",
+    cardActivityInfoButton: "Maggiori informazioni sull’attività",
+    cardActivityInfoTitle: "Attività",
+    cardActivityInfoIntro:
+      "L’attività mostra una cronologia tracciabile degli eventi dello studio e di sicurezza. È una funzione di trasparenza in sola lettura — non vengono mostrati nomi dei pazienti né dati sanitari, e MedScoutX non effettua alcuna valutazione medica.",
+    cardActivityInfoEvents:
+      "Esistono due viste: il flusso « Attività recente » direttamente nella panoramica (ad es. messaggio, condivisione di documenti, piano terapeutico pubblicato, accesso al profilo modificato, richiesta di dati, relazione archiviata) e — per i ruoli autorizzati — il registro di audit completo con azione, ruolo, gravità (info, avviso, sicurezza), visibilità e ora, filtrabile per gravità.",
+    cardActivityInfoAccess:
+      "Il registro completo è visibile solo a titolare, admin e responsabile di studio (autorizzazione « audit.view »); gli altri ruoli ricevono un’indicazione invece dell’accesso. Così la scheda sostiene trasparenza e privacy: accessi e modifiche diventano tracciabili senza mostrare nomi dei pazienti o dati sanitari. Non esiste alcun collegamento diretto con l’area paziente.",
+    cardActivityInfoAlpha:
+      "Nel test alpha puoi verificare: gli eventi recenti compaiono in « Attività recente », il registro di audit con filtro per gravità si apre per i ruoli autorizzati, i ruoli non autorizzati ricevono un’indicazione pulita, e gli stati di caricamento, vuoti e di errore funzionano senza nomi dei pazienti?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

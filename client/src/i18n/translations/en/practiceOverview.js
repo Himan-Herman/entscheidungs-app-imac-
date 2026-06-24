@@ -123,6 +123,16 @@ export default {
     "The view is visible only to owner and admin (the “security.view” permission); other roles get a clear note instead of access. This is how the tile protects patient data indirectly: access, sharing and revocations become traceable without releasing any data itself. There is no direct connection to the patient area.",
   cardSecurityInfoAlpha:
     "In the alpha test you can check: are metrics and recent events shown correctly, do unauthorized roles get a clean “no access” note, do loading and empty states work, and do patient names and sensitive content stay hidden?",
+  cardActivityInfoButton: "More information about activity",
+  cardActivityInfoTitle: "Activity",
+  cardActivityInfoIntro:
+    "Activity shows a traceable history of practice and security events. It is a purely read-only transparency function — no patient names or health data are shown, and MedScoutX makes no medical assessment.",
+  cardActivityInfoEvents:
+    "There are two views: the “Recent activity” feed directly on the overview (e.g. message, document share, published medication plan, changed profile access, data request, archived relationship) and — for authorized roles — the full audit log with action, role, severity (info, warning, security), visibility and time, filterable by severity.",
+  cardActivityInfoAccess:
+    "The full log is visible only to owner, admin and practice manager (the “audit.view” permission); other roles get a note instead of access. This is how the tile supports transparency and privacy: access and changes become traceable without showing patient names or health data. There is no direct connection to the patient area.",
+  cardActivityInfoAlpha:
+    "In the alpha test you can check: do recent events appear under “Recent activity”, does the audit log with severity filter open for authorized roles, do unauthorized roles get a clean note, and do loading, empty and error states work without patient names?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

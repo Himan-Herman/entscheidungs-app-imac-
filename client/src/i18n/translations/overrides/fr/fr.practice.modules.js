@@ -129,6 +129,16 @@ export default {
       "La vue n’est visible que par le propriétaire et l’admin (autorisation « security.view ») ; les autres rôles reçoivent une indication claire au lieu d’un accès. Ainsi, la tuile protège indirectement les données des patients : les accès, partages et révocations deviennent traçables sans qu’aucune donnée ne soit elle-même divulguée. Il n’existe aucun lien direct avec l’espace patient.",
     cardSecurityInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : les indicateurs et les derniers événements s’affichent-ils correctement, les rôles non autorisés reçoivent-ils une indication « aucun accès » propre, les états de chargement et vides fonctionnent-ils, et les noms de patients et contenus sensibles restent-ils masqués ?",
+    cardActivityInfoButton: "Plus d’informations sur l’activité",
+    cardActivityInfoTitle: "Activité",
+    cardActivityInfoIntro:
+      "L’activité affiche un historique traçable des événements de l’établissement et de sécurité. Il s’agit d’une fonction de transparence en lecture seule — aucun nom de patient ni donnée de santé n’est affiché, et MedScoutX n’effectue aucune évaluation médicale.",
+    cardActivityInfoEvents:
+      "Il existe deux vues : le flux « Activité récente » directement sur la vue d’ensemble (p. ex. message, partage de document, plan de médication publié, accès au profil modifié, demande de données, relation archivée) et — pour les rôles autorisés — le journal d’audit complet avec action, rôle, gravité (info, avertissement, sécurité), visibilité et heure, filtrable par gravité.",
+    cardActivityInfoAccess:
+      "Le journal complet n’est visible que par le propriétaire, l’admin et le gestionnaire de cabinet (autorisation « audit.view ») ; les autres rôles reçoivent une indication au lieu d’un accès. Ainsi, la tuile soutient la transparence et la confidentialité : les accès et les modifications deviennent traçables sans afficher de noms de patients ni de données de santé. Il n’existe aucun lien direct avec l’espace patient.",
+    cardActivityInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : les événements récents apparaissent-ils sous « Activité récente », le journal d’audit avec filtre de gravité s’ouvre-t-il pour les rôles autorisés, les rôles non autorisés reçoivent-ils une indication propre, et les états de chargement, vides et d’erreur fonctionnent-ils sans noms de patients ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",
