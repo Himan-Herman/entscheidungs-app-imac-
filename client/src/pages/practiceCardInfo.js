@@ -132,6 +132,17 @@ export const CARD_INFO = {
       "cardBookingInfoAlpha",
     ],
   },
+  billingPlausibility: {
+    titleId: "practice-card-info-billing-plausibility-title",
+    buttonKey: "cardBillingPlausibilityInfoButton",
+    titleKey: "cardBillingPlausibilityInfoTitle",
+    paragraphKeys: [
+      "cardBillingPlausibilityInfoIntro",
+      "cardBillingPlausibilityInfoScope",
+      "cardBillingPlausibilityInfoLimits",
+      "cardBillingPlausibilityInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */

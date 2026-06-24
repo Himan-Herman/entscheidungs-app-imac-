@@ -153,6 +153,16 @@ export default {
       "Los pacientes envían solicitudes de cita y otorgan un consentimiento explícito en ese proceso; ven sus citas en « Mis citas ». También se pueden gestionar citas para pacientes externos sin cuenta de MedScoutX — sin obligación de registrarse. Solo se procesan datos administrativos, sin compartición automática de datos.",
     cardBookingInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se puede activar la reserva de citas, aparece una solicitud de cita como solicitud, se pueden aceptar o rechazar las solicitudes y seguir los estados, ven los pacientes sus citas en « Mis citas », y se aplican el estado vacío y el bloqueo de la función?",
+    cardBillingPlausibilityInfoButton: "Más información sobre la verificación GOÄ/PKV",
+    cardBillingPlausibilityInfoTitle: "Verificación GOÄ/PKV",
+    cardBillingPlausibilityInfoIntro:
+      "La verificación GOÄ/PKV es una ayuda de orientación y plausibilidad para la facturación médica privada. Comprueba los códigos GOÄ introducidos de forma determinista frente a un catálogo almacenado y muestra indicaciones y advertencias — no es un sistema de facturación, no es un servicio GOÄ certificado y no realiza ninguna evaluación médica.",
+    cardBillingPlausibilityInfoScope:
+      "Crea una verificación (códigos, factor, cantidad, contexto opcional) y recibe por fila las coincidencias del catálogo y las advertencias; una sesión tiene el estado abierta, verificada o descartada. Es posible una exportación como simple informe de indicaciones de plausibilidad. Se trabaja con códigos de facturación — ninguna identidad de paciente. Opcionalmente se puede añadir una explicación de IA, activable por separado y sin carácter vinculante.",
+    cardBillingPlausibilityInfoLimits:
+      "Los resultados son solo orientativos — ninguna verificación de facturación vinculante, ningún asesoramiento legal o fiscal, ninguna garantía de reembolso y ninguna decisión automática sobre el pago o la facturación. Esta tarjeta es interna de la consulta; el « Entender la factura » del lado del paciente es una función separada e independiente, sin flujo de datos compartido.",
+    cardBillingPlausibilityInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se puede crear una verificación con códigos, aparecen las coincidencias del catálogo y las advertencias, funcionan los estados (abierta/verificada/descartada) y la exportación, se aplican el bloqueo de la función y el permiso, y permanece claramente reconocible el carácter puramente orientativo sin decisión vinculante?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

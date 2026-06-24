@@ -153,6 +153,16 @@ export default {
     "Patient:innen stellen Terminwünsche und erteilen dabei eine ausdrückliche Einwilligung; ihre Termine sehen sie unter „Meine Termine“. Termine können auch für externe Patient:innen ohne MedScoutX-Konto geführt werden – ohne Registrierungspflicht. Verarbeitet werden nur administrative Angaben, keine automatische Datenfreigabe.",
   cardBookingInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Lässt sich die Terminbuchung aktivieren, erscheint ein Terminwunsch als Anfrage, lassen sich Anfragen annehmen oder ablehnen und Status nachvollziehen, sehen Patient:innen ihre Termine unter „Meine Termine“, und greifen Leerzustand und Feature-Gate?",
+  cardBillingPlausibilityInfoButton: "Mehr Informationen zur GOÄ/PKV-Prüfung",
+  cardBillingPlausibilityInfoTitle: "GOÄ/PKV-Prüfung",
+  cardBillingPlausibilityInfoIntro:
+    "Die GOÄ/PKV-Prüfung ist eine Orientierungs- und Plausibilitätshilfe für die privatärztliche Abrechnung. Sie prüft eingegebene GOÄ-Ziffern deterministisch gegen einen hinterlegten Katalog und zeigt Hinweise und Warnungen – sie ist kein Abrechnungssystem, kein zertifizierter GOÄ-Dienst und nimmt keine medizinische Bewertung vor.",
+  cardBillingPlausibilityInfoScope:
+    "Sie legen eine Prüfung an (Ziffern, Faktor, Anzahl, optionaler Kontext) und erhalten je Zeile Katalogtreffer und Warnhinweise; eine Sitzung hat den Status offen, geprüft oder verworfen. Ein Export als reiner Plausibilitäts-Hinweisbericht ist möglich. Gearbeitet wird mit Abrechnungsziffern – keine Patientenidentitäten. Optional lässt sich eine separat freischaltbare, unverbindliche KI-Erläuterung ergänzen.",
+  cardBillingPlausibilityInfoLimits:
+    "Die Ergebnisse sind reine Orientierung – keine verbindliche Abrechnungsprüfung, keine Rechts- oder Steuerberatung, keine Erstattungsgarantie und keine automatische Entscheidung über Zahlung oder Abrechnung. Diese Kachel ist praxisintern; das patientenseitige „Rechnung verstehen“ ist eine separate, unabhängige Funktion ohne gemeinsamen Datenfluss.",
+  cardBillingPlausibilityInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Lässt sich eine Prüfung mit Ziffern anlegen, erscheinen Katalogtreffer und Warnhinweise, funktionieren Status (offen/geprüft/verworfen) und Export, greifen Feature-Flag und Berechtigung, und bleibt der reine Hinweischarakter ohne verbindliche Entscheidung klar erkennbar?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:

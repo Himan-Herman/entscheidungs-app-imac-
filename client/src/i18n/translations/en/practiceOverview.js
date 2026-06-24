@@ -153,6 +153,16 @@ export default {
     "Patients submit appointment requests and give explicit consent in the process; they see their appointments under “My appointments”. Appointments can also be kept for external patients without a MedScoutX account — without being forced to register. Only administrative data is processed, with no automatic data sharing.",
   cardBookingInfoAlpha:
     "In the alpha test you can check: can booking be enabled, does an appointment request appear as a request, can requests be accepted or declined and statuses be traced, do patients see their appointments under “My appointments”, and do the empty state and feature gate apply?",
+  cardBillingPlausibilityInfoButton: "More information about the GOÄ/PKV review",
+  cardBillingPlausibilityInfoTitle: "GOÄ/PKV review",
+  cardBillingPlausibilityInfoIntro:
+    "The GOÄ/PKV review is an orientation and plausibility aid for private medical billing. It checks entered GOÄ codes deterministically against a stored catalogue and shows hints and warnings — it is not a billing system, not a certified GOÄ service, and makes no medical assessment.",
+  cardBillingPlausibilityInfoScope:
+    "You create a review (codes, factor, count, optional context) and receive catalogue matches and warning hints per row; a session has the status open, reviewed or dismissed. An export as a pure plausibility hint report is possible. It works with billing codes — no patient identities. Optionally, a separately enabled, non-binding AI explanation can be added.",
+  cardBillingPlausibilityInfoLimits:
+    "The results are orientation only — not a binding billing check, no legal or tax advice, no reimbursement guarantee, and no automatic decision about payment or billing. This tile is practice-internal; the patient-facing “Understand your bill” is a separate, independent function with no shared data flow.",
+  cardBillingPlausibilityInfoAlpha:
+    "In the alpha test you can check: can a review with codes be created, do catalogue matches and warning hints appear, do the status (open/reviewed/dismissed) and export work, do the feature flag and permission apply, and does the purely advisory nature without a binding decision stay clearly recognizable?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

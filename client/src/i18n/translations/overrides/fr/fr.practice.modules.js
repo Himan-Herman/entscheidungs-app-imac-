@@ -159,6 +159,16 @@ export default {
       "Les patients soumettent des demandes de rendez-vous et donnent un consentement explicite à cette occasion ; ils voient leurs rendez-vous sous « Mes rendez-vous ». Des rendez-vous peuvent aussi être gérés pour des patients externes sans compte MedScoutX — sans obligation de s’inscrire. Seules des données administratives sont traitées, sans partage automatique de données.",
     cardBookingInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : la prise de rendez-vous peut-elle être activée, une demande de rendez-vous apparaît-elle comme une demande, les demandes peuvent-elles être acceptées ou refusées et les statuts suivis, les patients voient-ils leurs rendez-vous sous « Mes rendez-vous », et l’état vide et le verrou de fonctionnalité s’appliquent-ils ?",
+    cardBillingPlausibilityInfoButton: "Plus d’informations sur la vérification GOÄ/PKV",
+    cardBillingPlausibilityInfoTitle: "Vérification GOÄ/PKV",
+    cardBillingPlausibilityInfoIntro:
+      "La vérification GOÄ/PKV est une aide à l’orientation et à la plausibilité pour la facturation médicale privée. Elle vérifie les codes GOÄ saisis de manière déterministe par rapport à un catalogue enregistré et affiche des indications et des avertissements — ce n’est pas un système de facturation, pas un service GOÄ certifié, et elle n’effectue aucune évaluation médicale.",
+    cardBillingPlausibilityInfoScope:
+      "Vous créez une vérification (codes, facteur, nombre, contexte facultatif) et recevez par ligne les correspondances du catalogue et des avertissements ; une session a le statut ouverte, vérifiée ou rejetée. Un export sous forme de simple rapport d’indications de plausibilité est possible. Le traitement porte sur des codes de facturation — aucune identité de patient. En option, une explication par IA, activable séparément et sans valeur contraignante, peut être ajoutée.",
+    cardBillingPlausibilityInfoLimits:
+      "Les résultats ne sont qu’une orientation — pas une vérification de facturation contraignante, aucun conseil juridique ou fiscal, aucune garantie de remboursement et aucune décision automatique concernant le paiement ou la facturation. Cette tuile est interne à l’établissement ; le « Comprendre la facture » côté patient est une fonction distincte et indépendante, sans flux de données commun.",
+    cardBillingPlausibilityInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : peut-on créer une vérification avec des codes, les correspondances du catalogue et les avertissements apparaissent-ils, les statuts (ouverte/vérifiée/rejetée) et l’export fonctionnent-ils, le verrou de fonctionnalité et l’autorisation s’appliquent-ils, et le caractère purement indicatif sans décision contraignante reste-t-il clairement reconnaissable ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",
