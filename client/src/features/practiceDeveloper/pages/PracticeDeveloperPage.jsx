@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { authFetch } from "../../../api/authFetch.js";
+import { practiceDisplayName } from "../../../api/practicesApi.js";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import {
@@ -124,7 +125,7 @@ export default function PracticeDeveloperPage() {
       >
         {practices.map((p) => (
           <option key={p.id} value={p.id}>
-            {p.name || p.id}
+            {practiceDisplayName(p)}
           </option>
         ))}
       </select>

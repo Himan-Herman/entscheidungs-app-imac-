@@ -129,7 +129,7 @@ export default function PracticeAnamnesisHubPage() {
   return (
     <div className="anamnesis-hub">
       <nav className="anamnesis-hub__top-nav" aria-label="navigation">
-        <Link className="anamnesis-hub__back-link" to="/practice/hub">← {t.backHub}</Link>
+        <Link className="anamnesis-hub__back-link" to="/practice">← {t.backHub}</Link>
       </nav>
 
       <header className="anamnesis-hub__header">

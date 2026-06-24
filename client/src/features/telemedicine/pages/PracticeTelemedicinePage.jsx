@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Calendar, Settings } from "lucide-react";
 import { authFetch } from "../../../api/authFetch.js";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
@@ -8,6 +9,7 @@ import {
   fetchPracticeTelemedicineSessions,
 } from "../api/practiceTelemedicineApi.js";
 import { fetchPracticePatients } from "../../careRelationship/api/practicePatientsApi.js";
+import { practiceDisplayName } from "../../../api/practicesApi.js";
 import { partitionPracticeSessions, statusLabelKey } from "../telemedicineSessionUtils.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../styles/TelemedicinePages.css";
@@ -166,34 +168,52 @@ export default function PracticeTelemedicinePage() {
 
   return (
     <main className="telemedicine-page practice-dashboard" lang={language}>
+      <nav className="telemedicine-page__toolbar" aria-label={t.heading}>
+        <Link
+          className="telemedicine-page__toolbar-back"
+          to={`/practice?practiceId=${encodeURIComponent(practiceId)}`}
+        >
+          <ArrowLeft size={16} aria-hidden />
+          <span>{t.backHub}</span>
+        </Link>
+        <span className="telemedicine-page__toolbar-actions">
+          <Link
+            className="telemedicine-page__toolbar-link"
+            to={`/practice/calendar?practiceId=${encodeURIComponent(practiceId)}`}
+          >
+            <Calendar size={16} aria-hidden />
+            <span>{t.openCalendar}</span>
+          </Link>
+          <Link
+            className="telemedicine-page__toolbar-link"
+            to={`/practice/settings/video?practiceId=${encodeURIComponent(practiceId)}`}
+          >
+            <Settings size={16} aria-hidden />
+            <span>{t.openSettings}</span>
+          </Link>
+        </span>
+      </nav>
+
       <header className="telemedicine-page__header">
-        <nav className="telemedicine-page__nav" aria-label={t.heading}>
-          <Link to={`/practice?practiceId=${encodeURIComponent(practiceId)}`}>{t.backHub}</Link>
-          <Link to={`/practice/calendar?practiceId=${encodeURIComponent(practiceId)}`}>
-            {t.openCalendar}
-          </Link>
-          <Link to={`/practice/settings/video?practiceId=${encodeURIComponent(practiceId)}`}>
-            {t.openSettings}
-          </Link>
-        </nav>
         <h1>{t.heading}</h1>
         <p className="telemedicine-page__intro">{t.intro}</p>
       </header>
 
-      <label htmlFor="tm-practice">{t.selectPractice}</label>
-      <select
-        id="tm-practice"
-        value={practiceId}
-        onChange={onPracticeChange}
-        className="telemedicine-form"
-        style={{ maxWidth: 420, marginBottom: "1rem" }}
-      >
-        {practices.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.practiceName || p.name || p.id}
-          </option>
-        ))}
-      </select>
+      <div className="telemedicine-page__field">
+        <label htmlFor="tm-practice">{t.selectPractice}</label>
+        <select
+          id="tm-practice"
+          value={practiceId}
+          onChange={onPracticeChange}
+          className="telemedicine-page__select"
+        >
+          {practices.map((p) => (
+            <option key={p.id} value={p.id}>
+              {practiceDisplayName(p)}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {loading ? (
         <p aria-live="polite">{t.loading}</p>
@@ -206,12 +226,19 @@ export default function PracticeTelemedicinePage() {
 
       {!loading && !error ? (
         <>
-          <section className="telemedicine-panel" aria-labelledby="tm-create-heading">
+          <section
+            className="telemedicine-panel telemedicine-page__section"
+            aria-labelledby="tm-create-heading"
+          >
             <div className="telemedicine-create__header">
               <h2 id="tm-create-heading">{t.createHeading}</h2>
               <button
                 type="button"
-                className="telemedicine-btn telemedicine-btn--primary"
+                className={
+                  showCreate
+                    ? "telemedicine-btn telemedicine-btn--ghost"
+                    : "telemedicine-btn telemedicine-btn--primary"
+                }
                 aria-expanded={showCreate}
                 aria-controls="tm-create-form"
                 onClick={() => {
@@ -288,53 +315,68 @@ export default function PracticeTelemedicinePage() {
             ) : null}
           </section>
 
-          <h2>{t.waitingRoom}</h2>
-          {today.length === 0 ? (
-            <p>{t.noSessions}</p>
-          ) : (
-            <ul className="telemedicine-list" aria-label={t.heading}>
-              {today.map((s) => (
-                <li key={s.id}>
-                  <button
-                    type="button"
-                    className="telemedicine-card"
-                    onClick={() =>
-                      navigate(
-                        `/practice/telemedicine/${s.id}?practiceId=${encodeURIComponent(practiceId)}`,
-                      )
-                    }
-                  >
-                    <strong>{s.title || s.id}</strong>
-                    <div className="telemedicine-card__meta">
-                      <span className="telemedicine-status" aria-label={t.status}>
-                        {t[statusLabelKey(s.status)] || s.status}
-                      </span>
-                      {" · "}
-                      {fmt(s.scheduledStartAt, language)}
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <section
+            className="telemedicine-panel telemedicine-page__section"
+            aria-labelledby="tm-waiting-heading"
+          >
+            <h2 id="tm-waiting-heading" className="telemedicine-panel__title">
+              {t.waitingRoom}
+            </h2>
+            {today.length === 0 ? (
+              <p className="telemedicine-empty">{t.noSessions}</p>
+            ) : (
+              <ul className="telemedicine-list">
+                {today.map((s) => (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      className="telemedicine-card"
+                      onClick={() =>
+                        navigate(
+                          `/practice/telemedicine/${s.id}?practiceId=${encodeURIComponent(practiceId)}`,
+                        )
+                      }
+                    >
+                      <strong>{s.title || s.id}</strong>
+                      <div className="telemedicine-card__meta">
+                        <span className="telemedicine-status" aria-label={t.status}>
+                          {t[statusLabelKey(s.status)] || s.status}
+                        </span>
+                        {" · "}
+                        {fmt(s.scheduledStartAt, language)}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-          <h2 style={{ marginTop: "1.5rem" }}>{t.scheduled}</h2>
-          {upcoming.length === 0 ? (
-            <p>{t.noSessions}</p>
-          ) : (
-            <ul className="telemedicine-list">
-              {upcoming.map((s) => (
-                <li key={s.id}>
-                  <Link
-                    className="telemedicine-btn"
-                    to={`/practice/telemedicine/${s.id}?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {s.title || s.id} — {fmt(s.scheduledStartAt, language)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
+          <section
+            className="telemedicine-panel telemedicine-page__section"
+            aria-labelledby="tm-scheduled-heading"
+          >
+            <h2 id="tm-scheduled-heading" className="telemedicine-panel__title">
+              {t.scheduled}
+            </h2>
+            {upcoming.length === 0 ? (
+              <p className="telemedicine-empty">{t.noSessions}</p>
+            ) : (
+              <ul className="telemedicine-list">
+                {upcoming.map((s) => (
+                  <li key={s.id}>
+                    <Link
+                      className="telemedicine-card"
+                      to={`/practice/telemedicine/${s.id}?practiceId=${encodeURIComponent(practiceId)}`}
+                    >
+                      <strong>{s.title || s.id}</strong>
+                      <div className="telemedicine-card__meta">{fmt(s.scheduledStartAt, language)}</div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </>
       ) : null}
     </main>

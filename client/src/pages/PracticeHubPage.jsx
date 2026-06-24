@@ -7,6 +7,7 @@ import {
   ClipboardPen,
   FileText,
   Inbox,
+  Info,
   MessageSquare,
   Mic,
   Pill,
@@ -25,6 +26,10 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import "../styles/PracticeOverviewPage.css";
 import { formatUiDateTime } from "../i18n/intlLocale.js";
+import PracticeCardInfoModal from "./PracticeCardInfoModal.jsx";
+import { hasCardInfo, suppressCardNavigation } from "./practiceCardInfo.js";
+
+const TELEMEDICINE_INFO_TITLE_ID = "practice-card-info-telemedicine-title";
 
 function fmtDate(iso, lang) {
   return formatUiDateTime(iso, lang);
@@ -201,6 +206,7 @@ export default function PracticeHubPage() {
   const [aiError, setAiError] = useState("");
   const [demoCreating, setDemoCreating] = useState(false);
   const [demoCreateError, setDemoCreateError] = useState("");
+  const [infoOpenFor, setInfoOpenFor] = useState(null);
   const applyPracticeRows = useCallback((rows) => {
     const list = Array.isArray(rows) ? rows : [];
     setPractices(list);
@@ -540,13 +546,8 @@ export default function PracticeHubPage() {
                     : card.to(practiceId);
                 const metricValue =
                   card.metricKey != null ? metrics[card.metricKey] : null;
-                return (
-                  <Link
-                    key={card.id}
-                    className="practice-overview__card"
-                    to={href}
-                    aria-label={`${t[card.labelKey]}${metricValue != null ? `: ${metricValue}` : ""}`}
-                  >
+                const cardInner = (
+                  <>
                     <span className="practice-overview__card-icon" aria-hidden>
                       <CardIcon size={22} strokeWidth={1.75} />
                     </span>
@@ -556,7 +557,45 @@ export default function PracticeHubPage() {
                         {fmtMetric(metricValue, t.notProvided)}
                       </span>
                     ) : null}
-                  </Link>
+                  </>
+                );
+                const cardAriaLabel = `${t[card.labelKey]}${metricValue != null ? `: ${metricValue}` : ""}`;
+
+                if (!hasCardInfo(card.id)) {
+                  return (
+                    <Link
+                      key={card.id}
+                      className="practice-overview__card"
+                      to={href}
+                      aria-label={cardAriaLabel}
+                    >
+                      {cardInner}
+                    </Link>
+                  );
+                }
+
+                return (
+                  <div key={card.id} className="practice-overview__card-wrap">
+                    <Link
+                      className="practice-overview__card"
+                      to={href}
+                      aria-label={cardAriaLabel}
+                    >
+                      {cardInner}
+                    </Link>
+                    <button
+                      type="button"
+                      className="practice-overview__card-info"
+                      aria-label={t.cardTelemedicineInfoButton}
+                      aria-haspopup="dialog"
+                      onClick={(e) => {
+                        suppressCardNavigation(e);
+                        setInfoOpenFor(card.id);
+                      }}
+                    >
+                      <Info size={16} aria-hidden />
+                    </button>
+                  </div>
                 );
               })}
             </nav>
@@ -858,6 +897,19 @@ export default function PracticeHubPage() {
           </Link>
         </>
       ) : null}
+
+      <PracticeCardInfoModal
+        open={infoOpenFor === "telemedicine"}
+        titleId={TELEMEDICINE_INFO_TITLE_ID}
+        title={t.cardTelemedicineInfoTitle}
+        paragraphs={[
+          t.cardTelemedicineInfoIntro,
+          t.cardTelemedicineInfoUsage,
+          t.cardTelemedicineInfoPrivacy,
+        ]}
+        closeLabel={t.cardInfoClose}
+        onClose={() => setInfoOpenFor(null)}
+      />
     </div>
   );
 }

@@ -69,9 +69,9 @@ export function isIntegrationsUiEnabled() {
   return isIntegrationsEnabled() || isPvsSandboxEnabled();
 }
 
-/** Practice calendar / appointments. */
+/** Practice calendar / appointments. On by default; disable with ENABLE_PRACTICE_CALENDAR=false. */
 export function isPracticeCalendarEnabled() {
-  return envFlag("ENABLE_PRACTICE_CALENDAR", false);
+  return envFlag("ENABLE_PRACTICE_CALENDAR", true);
 }
 
 /** External calendar sync (Google/Outlook) — not in MVP. */

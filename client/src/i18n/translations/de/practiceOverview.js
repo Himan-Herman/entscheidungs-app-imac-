@@ -52,6 +52,15 @@ export default {
   cardAnamnesis: "Anamnese",
   cardBooking: "Termine & Anfragen",
   cardTelemedicine: "Videosprechstunden",
+  cardInfoClose: "Schließen",
+  cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
+  cardTelemedicineInfoTitle: "Videosprechstunden",
+  cardTelemedicineInfoIntro:
+    "Hier organisieren Sie Videosprechstunden mit Ihren Patient:innen – datensparsam, ohne Aufzeichnung und ohne medizinische Bewertung durch MedScoutX.",
+  cardTelemedicineInfoUsage:
+    "Sie können Videosprechstunden anlegen und eine:n Patient:in verknüpfen, die Sitzung starten, den Warteraum und die erteilte Einwilligung sehen sowie Sitzungen abschließen, absagen oder den Zugangslink widerrufen.",
+  cardTelemedicineInfoPrivacy:
+    "Patient:innen treten erst nach ausdrücklicher Einwilligung bei. Es werden keine Gespräche aufgezeichnet.",
 
   metricUnreadInbox: "Ungelesene Postfach-Einträge",
   metricOpenMessages: "Offene Nachrichten",

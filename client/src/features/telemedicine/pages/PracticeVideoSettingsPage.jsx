@@ -4,6 +4,8 @@ import { authFetch } from "../../../api/authFetch.js";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { fetchVideoSettings, patchVideoSettings } from "../api/practiceTelemedicineApi.js";
+import { practiceDisplayName } from "../../../api/practicesApi.js";
+import { PROVIDER_TYPES, providerLabelKey } from "../telemedicineSettingsUtils.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../styles/TelemedicinePages.css";
 
@@ -107,7 +109,7 @@ export default function PracticeVideoSettingsPage() {
       >
         {practices.map((p) => (
           <option key={p.id} value={p.id}>
-            {p.name || p.id}
+            {practiceDisplayName(p)}
           </option>
         ))}
       </select>
@@ -135,14 +137,11 @@ export default function PracticeVideoSettingsPage() {
             value={form.providerType}
             onChange={(e) => setForm((f) => ({ ...f, providerType: e.target.value }))}
           >
-            <option value="sandbox">sandbox</option>
-            <option value="external_link">external_link</option>
-            <option value="jitsi">jitsi</option>
-            <option value="daily">daily</option>
-            <option value="twilio">twilio</option>
-            <option value="whereby">whereby</option>
-            <option value="zoom">zoom</option>
-            <option value="google_meet">google_meet</option>
+            {PROVIDER_TYPES.map((v) => (
+              <option key={v} value={v}>
+                {t[providerLabelKey(v)] || v}
+              </option>
+            ))}
           </select>
           <label>
             <input

@@ -52,6 +52,15 @@ export default {
   cardAnamnesis: "Anamnesis",
   cardBooking: "Appointments & Requests",
   cardTelemedicine: "Video consultations",
+  cardInfoClose: "Close",
+  cardTelemedicineInfoButton: "More information about video consultations",
+  cardTelemedicineInfoTitle: "Video consultations",
+  cardTelemedicineInfoIntro:
+    "Organize video consultations with your patients here — data-minimal, without recording and without any medical assessment by MedScoutX.",
+  cardTelemedicineInfoUsage:
+    "You can schedule video consultations and link a patient, start the session, see the waiting room and granted consent, and complete, cancel or revoke the access link.",
+  cardTelemedicineInfoPrivacy:
+    "Patients only join after giving explicit consent. No conversations are recorded.",
 
   metricUnreadInbox: "Unread inbox items",
   metricOpenMessages: "Open messages",

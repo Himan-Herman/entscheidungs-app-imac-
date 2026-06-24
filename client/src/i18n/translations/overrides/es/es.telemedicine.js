@@ -5,6 +5,15 @@
 export const esTelemedicine = {
   practiceOverview: {
     cardTelemedicine: "Videoconsultas",
+    cardInfoClose: "Cerrar",
+    cardTelemedicineInfoButton: "Más información sobre las videoconsultas",
+    cardTelemedicineInfoTitle: "Videoconsultas",
+    cardTelemedicineInfoIntro:
+      "Aquí organizas las videoconsultas con tus pacientes: con datos mínimos, sin grabación y sin ninguna valoración médica por parte de MedScoutX.",
+    cardTelemedicineInfoUsage:
+      "Puedes programar videoconsultas y vincular un paciente, iniciar la sesión, ver la sala de espera y el consentimiento concedido, así como finalizar, cancelar o revocar el enlace de acceso.",
+    cardTelemedicineInfoPrivacy:
+      "Los pacientes se unen solo después de dar su consentimiento explícito. No se graba ninguna conversación.",
   },
   practiceTelemedicine: {
     pageTitle: "MedScoutX — Videoconsultas",
@@ -67,6 +76,14 @@ export const esTelemedicine = {
     sessionEnd: "Previsto hasta",
     videoEnabled: "Videoconsultas activadas",
     providerType: "Tipo de proveedor",
+    provider_sandbox: "Sandbox (prueba)",
+    provider_external_link: "Enlace externo",
+    provider_jitsi: "Jitsi Meet",
+    provider_daily: "Daily",
+    provider_twilio: "Twilio Video",
+    provider_whereby: "Whereby",
+    provider_zoom: "Zoom",
+    provider_google_meet: "Google Meet",
     sandboxMode: "Modo sandbox",
     externalLinkMode: "Modo de enlace externo",
     consentVersion: "Versión del consentimiento",

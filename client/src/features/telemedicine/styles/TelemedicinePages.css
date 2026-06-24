@@ -242,3 +242,154 @@
   border-color: rgba(148, 163, 184, 0.3);
   color: #f1f5f9;
 }
+
+/* ── List page: top action toolbar (back + secondary actions) ── */
+.telemedicine-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.telemedicine-page__toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.telemedicine-page__toolbar-back,
+.telemedicine-page__toolbar-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--ms-color-link, #0b6e67);
+}
+
+/* back = clearly navigation: borderless, leading arrow */
+.telemedicine-page__toolbar-back {
+  border: 1px solid transparent;
+  background: transparent;
+  padding-left: 0.4rem;
+}
+
+.telemedicine-page__toolbar-back:hover {
+  text-decoration: underline;
+}
+
+/* secondary actions = consistent bordered chips */
+.telemedicine-page__toolbar-link {
+  border: 1px solid var(--border, #d8dee9);
+  background: var(--surface, #fff);
+}
+
+.telemedicine-page__toolbar-link:hover {
+  border-color: var(--ms-color-link, #0b6e67);
+}
+
+.telemedicine-page__toolbar-back:focus-visible,
+.telemedicine-page__toolbar-link:focus-visible {
+  outline: 3px solid var(--focus, #2563eb);
+  outline-offset: 2px;
+}
+
+/* ── List page: heading + practice picker ── */
+.telemedicine-page__header h1 {
+  margin: 0 0 0.4rem;
+}
+
+.telemedicine-page__field {
+  max-width: 420px;
+  margin-bottom: 1.5rem;
+}
+
+.telemedicine-page__field > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.telemedicine-page__select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  border-radius: 8px;
+  border: 1px solid var(--border, #aaa);
+  background: var(--surface, #fff);
+  color: inherit;
+}
+
+/* ── List page: content sections ── */
+.telemedicine-page__section {
+  margin-bottom: 1.25rem;
+}
+
+.telemedicine-panel__title {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+}
+
+.telemedicine-empty {
+  margin: 0;
+  color: var(--text-muted, #64748b);
+}
+
+.telemedicine-card:hover {
+  border-color: var(--ms-color-link, #0b6e67);
+}
+
+/* ── Secondary / ghost button (e.g. cancel the create form) ── */
+.telemedicine-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ms-color-link, #0b6e67);
+}
+
+.telemedicine-btn--ghost:hover {
+  background: var(--surface-alt, rgba(15, 23, 42, 0.05));
+}
+
+/* ── Dark mode for the additions ── */
+:root[data-theme="dark"] .telemedicine-page__toolbar-back,
+:root[data-theme="dark"] .telemedicine-page__toolbar-link {
+  color: #67e8f9;
+}
+
+:root[data-theme="dark"] .telemedicine-page__toolbar-link {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+:root[data-theme="dark"] .telemedicine-page__select {
+  background: #1e293b;
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .telemedicine-empty {
+  color: #94a3b8;
+}
+
+/* lift cards above the panel surface so they read as rows in dark mode */
+:root[data-theme="dark"] .telemedicine-card {
+  background: rgba(51, 65, 85, 0.5);
+}
+
+:root[data-theme="dark"] .telemedicine-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #67e8f9;
+}
+
+:root[data-theme="dark"] .telemedicine-btn--ghost:hover {
+  background: rgba(148, 163, 184, 0.12);
+}

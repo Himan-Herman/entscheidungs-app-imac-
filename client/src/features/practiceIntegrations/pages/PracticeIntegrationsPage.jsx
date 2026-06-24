@@ -220,7 +220,7 @@ export default function PracticeIntegrationsPage() {
     <main className="practice-dashboard practice-integrations" aria-labelledby="practice-integrations-heading">
       <header className="practice-dashboard__header">
         <p className="practice-dashboard__eyebrow">
-          <Link to={`/practice/hub?practiceId=${encodeURIComponent(practiceId)}`}>{t.backHub}</Link>
+          <Link to={`/practice?practiceId=${encodeURIComponent(practiceId)}`}>{t.backHub}</Link>
         </p>
         <h1 id="practice-integrations-heading">{t.heading}</h1>
         <p className="practice-integrations__intro">{t.intro}</p>

@@ -240,7 +240,7 @@ export default function PracticeCalendarPage() {
     <main className="practice-dashboard practice-calendar" aria-labelledby="practice-calendar-heading">
       <header className="practice-dashboard__header">
         <p className="practice-dashboard__eyebrow">
-          <Link to={`/practice/hub?practiceId=${encodeURIComponent(practiceId)}`}>{t.backHub}</Link>
+          <Link to={`/practice?practiceId=${encodeURIComponent(practiceId)}`}>{t.backHub}</Link>
         </p>
         <h1 id="practice-calendar-heading">{t.heading}</h1>
         <p>{t.intro}</p>
@@ -264,60 +264,66 @@ export default function PracticeCalendarPage() {
         </select>
       </div>
 
-      <div className="practice-calendar__toolbar" role="toolbar" aria-label={t.heading}>
-        {VIEWS.map((v) => (
-          <button
-            key={v}
-            type="button"
-            className="practice-calendar__view-btn"
-            aria-pressed={view === v}
-            onClick={() => setView(v)}
-          >
-            {t[`view${v.charAt(0).toUpperCase()}${v.slice(1)}`]}
-          </button>
-        ))}
-        <select
-          aria-label={t.filterStatus}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="">{t.allStatuses}</option>
-          {["requested", "scheduled", "confirmed", "cancelled", "completed"].map((s) => (
-            <option key={s} value={s}>
-              {t[`status_${s}`]}
-            </option>
-          ))}
-        </select>
-        {canManage ? (
-          <>
+      <div className="practice-calendar__controls">
+        <div className="practice-calendar__views" role="group" aria-label={t.heading}>
+          {VIEWS.map((v) => (
             <button
+              key={v}
               type="button"
-              className="practice-calendar__btn practice-calendar__btn--primary"
-              onClick={() => {
-                setShowForm(true);
-                setSelected(null);
-                setForm({
-                  title: "",
-                  startAt: toLocalInput(new Date()),
-                  endAt: toLocalInput(new Date(Date.now() + 30 * 60000)),
-                  locationType: "practice",
-                  practicePatientLinkId: "",
-                  practiceNote: "",
-                });
-              }}
+              className="practice-calendar__view-btn"
+              aria-pressed={view === v}
+              onClick={() => setView(v)}
             >
-              {t.createAppointment}
+              {t[`view${v.charAt(0).toUpperCase()}${v.slice(1)}`]}
             </button>
-            <Link
-              className="practice-calendar__btn"
-              to={`/practice/calendar/settings?practiceId=${encodeURIComponent(practiceId)}`}
-            >
-              {t.openSettings}
-            </Link>
-          </>
-        ) : (
-          <p>{t.readOnly}</p>
-        )}
+          ))}
+        </div>
+
+        <div className="practice-calendar__bar">
+          <select
+            className="practice-calendar__filter"
+            aria-label={t.filterStatus}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">{t.allStatuses}</option>
+            {["requested", "scheduled", "confirmed", "cancelled", "completed"].map((s) => (
+              <option key={s} value={s}>
+                {t[`status_${s}`]}
+              </option>
+            ))}
+          </select>
+          {canManage ? (
+            <>
+              <button
+                type="button"
+                className="practice-calendar__btn practice-calendar__btn--primary"
+                onClick={() => {
+                  setShowForm(true);
+                  setSelected(null);
+                  setForm({
+                    title: "",
+                    startAt: toLocalInput(new Date()),
+                    endAt: toLocalInput(new Date(Date.now() + 30 * 60000)),
+                    locationType: "practice",
+                    practicePatientLinkId: "",
+                    practiceNote: "",
+                  });
+                }}
+              >
+                {t.createAppointment}
+              </button>
+              <Link
+                className="practice-calendar__btn"
+                to={`/practice/calendar/settings?practiceId=${encodeURIComponent(practiceId)}`}
+              >
+                {t.openSettings}
+              </Link>
+            </>
+          ) : (
+            <p className="practice-calendar__readonly">{t.readOnly}</p>
+          )}
+        </div>
       </div>
 
       {loading ? (

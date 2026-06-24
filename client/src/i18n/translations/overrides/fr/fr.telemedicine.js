@@ -5,6 +5,15 @@
 export const frTelemedicine = {
   practiceOverview: {
     cardTelemedicine: "Téléconsultations",
+    cardInfoClose: "Fermer",
+    cardTelemedicineInfoButton: "Plus d'informations sur les téléconsultations",
+    cardTelemedicineInfoTitle: "Téléconsultations",
+    cardTelemedicineInfoIntro:
+      "Organisez ici les téléconsultations avec vos patients — avec un minimum de données, sans enregistrement et sans aucune évaluation médicale par MedScoutX.",
+    cardTelemedicineInfoUsage:
+      "Vous pouvez planifier des téléconsultations et associer un patient, démarrer la session, voir la salle d'attente et le consentement accordé, ainsi que terminer, annuler ou révoquer le lien d'accès.",
+    cardTelemedicineInfoPrivacy:
+      "Les patients ne rejoignent qu'après avoir donné leur consentement explicite. Aucune conversation n'est enregistrée.",
   },
   practiceTelemedicine: {
     pageTitle: "MedScoutX — Téléconsultations",
@@ -67,6 +76,14 @@ export const frTelemedicine = {
     sessionEnd: "Prévu jusqu'à",
     videoEnabled: "Téléconsultations activées",
     providerType: "Type de fournisseur",
+    provider_sandbox: "Sandbox (test)",
+    provider_external_link: "Lien externe",
+    provider_jitsi: "Jitsi Meet",
+    provider_daily: "Daily",
+    provider_twilio: "Twilio Video",
+    provider_whereby: "Whereby",
+    provider_zoom: "Zoom",
+    provider_google_meet: "Google Meet",
     sandboxMode: "Mode bac à sable",
     externalLinkMode: "Mode lien externe",
     consentVersion: "Version du consentement",

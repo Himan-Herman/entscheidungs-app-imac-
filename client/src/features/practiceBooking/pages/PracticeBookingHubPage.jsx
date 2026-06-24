@@ -274,7 +274,7 @@ export default function PracticeBookingHubPage() {
   return (
     <div className="booking-hub">
       <nav className="booking-hub__top-nav" aria-label="navigation">
-        <Link className="booking-hub__back-link" to="/practice/hub">
+        <Link className="booking-hub__back-link" to="/practice">
           ← {t.backHub}
         </Link>
       </nav>

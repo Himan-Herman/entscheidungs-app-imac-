@@ -385,3 +385,137 @@
 :root[data-theme="dark"] .practice-overview__metric {
   background: rgba(15, 23, 42, 0.6);
 }
+
+/* ── Card info (ⓘ) button — overlaid on a card without nesting in its link ── */
+.practice-overview__card-wrap {
+  position: relative;
+  display: flex;
+}
+
+.practice-overview__card-wrap > .practice-overview__card {
+  flex: 1;
+}
+
+.practice-overview__card-info {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--surface, rgba(255, 255, 255, 0.95));
+  color: #0e7490;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.practice-overview__card-info:hover {
+  border-color: rgba(14, 116, 144, 0.35);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.practice-overview__card-info:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+:root[data-theme="dark"] .practice-overview__card-info {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #67e8f9;
+}
+
+/* ── Card info modal ── */
+.practice-overview__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.practice-overview__modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--surface, #fff);
+  color: var(--text-primary, #0f172a);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+.practice-overview__modal-title {
+  margin: 0 2.5rem 0.85rem 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.practice-overview__modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.practice-overview__modal-close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: transparent;
+  color: var(--text-primary, #0f172a);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.practice-overview__modal-close:hover {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.practice-overview__modal-close:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+:root[data-theme="dark"] .practice-overview__modal {
+  background: rgba(30, 41, 59, 0.98);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .practice-overview__modal-title {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .practice-overview__modal-close {
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .practice-overview__modal-close:hover {
+  background: rgba(148, 163, 184, 0.15);
+}

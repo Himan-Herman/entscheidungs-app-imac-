@@ -202,7 +202,7 @@ export default function PracticeBillingPlausibilityPage() {
     <main className="billing-plausibility" aria-labelledby="bp-heading" data-testid="bp-overview-page">
       <header>
         <p>
-          <Link to={`/practice/hub?practiceId=${encodeURIComponent(practiceId)}`}>
+          <Link to={`/practice?practiceId=${encodeURIComponent(practiceId)}`}>
             {t.backHub}
           </Link>
         </p>
