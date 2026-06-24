@@ -99,6 +99,16 @@ export default {
       "Les plans de médication de l’établissement nécessitent que le patient dispose d’un compte MedScoutX lié. Les patients externes sans compte ne sont jamais contraints de s’inscrire — continuez à utiliser vos canaux habituels pour eux. Indépendamment, les patients peuvent saisir eux-mêmes leurs propres informations de médication. La tuile et votre établissement restent pleinement fonctionnels.",
     cardMedicationInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : peut-on créer un plan en brouillon, le modifier et le publier, apparaît-il côté patient sous « Mon cabinet » → « Plans de médication » après publication, et les patients externes voient-ils une indication claire plutôt qu’une erreur ?",
+    cardDataRequestsInfoButton: "Plus d’informations sur les demandes de données",
+    cardDataRequestsInfoTitle: "Demandes de données",
+    cardDataRequestsInfoIntro:
+      "Les demandes de données sont des droits des personnes concernées au titre du RGPD : les patients demandent l’export, la suppression ou la limitation de leurs données. Le traitement est purement organisationnel — MedScoutX n’effectue aucune évaluation médicale, diagnostic ni classification d’urgence.",
+    cardDataRequestsInfoUsage:
+      "Sous « Demandes de données », vous voyez les demandes entrantes avec le type, le patient, le statut et la date. Vous ouvrez les détails, définissez le statut (soumise → en examen → terminée ou refusée) et ajoutez une note de réponse organisationnelle. Aucune donnée n’est partagée ou supprimée automatiquement — chaque action vous appartient.",
+    cardDataRequestsInfoControl:
+      "Les patients soumettent eux-mêmes les demandes sous « Mon cabinet » → « Mes données et partages » et gardent le contrôle de leurs données et autorisations. Les demandes numériques nécessitent un compte MedScoutX lié ; les patients externes sans compte ne sont jamais contraints de s’inscrire et utilisent les voies habituelles. La tuile et votre établissement restent fonctionnels.",
+    cardDataRequestsInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : une demande soumise par le patient apparaît-elle dans la liste de l’établissement, le statut et la note de réponse peuvent-ils être enregistrés, le patient voit-il l’avancement sous « Mes données et partages », et les états vides ou refusés s’affichent-ils proprement ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",

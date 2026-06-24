@@ -93,6 +93,16 @@ export default {
     "Praxis-Medikationspläne setzen ein verknüpftes MedScoutX-Konto der Patient:innen voraus. Externe Patient:innen ohne Konto werden nicht zur Registrierung gezwungen – nutzen Sie für sie weiterhin Ihre üblichen Wege. Unabhängig davon können Patient:innen eigene Medikationsangaben selbst erfassen. Kachel und Praxis bleiben voll funktionsfähig.",
   cardMedicationInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Lässt sich ein Plan als Entwurf anlegen, bearbeiten und veröffentlichen, erscheint er nach Veröffentlichung auf der Patientenseite unter „Meine Praxis“ → „Medikationspläne“, und zeigt sich für externe Patient:innen ein klarer Hinweis statt eines Fehlers?",
+  cardDataRequestsInfoButton: "Mehr Informationen zu Datenanfragen",
+  cardDataRequestsInfoTitle: "Datenanfragen",
+  cardDataRequestsInfoIntro:
+    "Datenanfragen sind Betroffenenrechte nach DSGVO: Patient:innen beantragen Export, Löschung oder Einschränkung ihrer Daten. Die Bearbeitung ist rein organisatorisch – MedScoutX trifft keine medizinische Bewertung, Diagnose oder Dringlichkeitseinschätzung.",
+  cardDataRequestsInfoUsage:
+    "Unter „Datenanfragen“ sehen Sie eingehende Anfragen mit Typ, Patient:in, Status und Datum. Sie öffnen Details, setzen den Status (eingereicht → in Prüfung → abgeschlossen oder abgelehnt) und hinterlegen eine organisatorische Antwortnotiz. Es erfolgt keine automatische Datenfreigabe oder -löschung – jede Aktion bleibt bei Ihnen.",
+  cardDataRequestsInfoControl:
+    "Patient:innen stellen Anfragen selbst unter „Meine Praxis“ → „Meine Daten & Freigaben“ und behalten die Kontrolle über ihre Daten und Freigaben. Digitale Anfragen setzen ein verknüpftes MedScoutX-Konto voraus; externe Patient:innen ohne Konto werden nicht zur Registrierung gezwungen und nutzen die üblichen Wege. Kachel und Praxis bleiben funktionsfähig.",
+  cardDataRequestsInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Erscheint eine von der Patient:in gestellte Anfrage in der Praxisliste, lassen sich Status und Antwortnotiz speichern, sieht die Patient:in den Fortschritt unter „Meine Daten & Freigaben“, und werden leere oder abgelehnte Zustände sauber angezeigt?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:

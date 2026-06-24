@@ -93,6 +93,16 @@ export default {
       "I piani terapeutici dello studio richiedono che il paziente abbia un account MedScoutX collegato. I pazienti esterni senza account non sono mai obbligati a registrarsi — continua a usare i tuoi canali abituali per loro. Indipendentemente, i pazienti possono inserire da soli le proprie informazioni sui farmaci. La scheda e il tuo studio restano pienamente funzionanti.",
     cardMedicationInfoAlpha:
       "Nel test alpha puoi verificare: è possibile creare un piano come bozza, modificarlo e pubblicarlo, compare sul lato paziente in « Il mio studio » → « Piani terapeutici » dopo la pubblicazione, e i pazienti esterni vedono un’indicazione chiara invece di un errore?",
+    cardDataRequestsInfoButton: "Maggiori informazioni sulle richieste di dati",
+    cardDataRequestsInfoTitle: "Richieste di dati",
+    cardDataRequestsInfoIntro:
+      "Le richieste di dati sono diritti dell’interessato ai sensi del GDPR: i pazienti richiedono l’esportazione, la cancellazione o la limitazione dei propri dati. La gestione è puramente organizzativa — MedScoutX non effettua alcuna valutazione medica, diagnosi o classificazione di urgenza.",
+    cardDataRequestsInfoUsage:
+      "In « Richieste di dati » vedi le richieste in arrivo con tipo, paziente, stato e data. Apri i dettagli, imposti lo stato (inviata → in esame → completata o respinta) e aggiungi una nota di risposta organizzativa. Nessun dato viene condiviso o cancellato automaticamente — ogni azione resta a te.",
+    cardDataRequestsInfoControl:
+      "I pazienti inviano le richieste autonomamente in « Il mio studio » → « I miei dati e permessi » e mantengono il controllo sui propri dati e permessi. Le richieste digitali richiedono un account MedScoutX collegato; i pazienti esterni senza account non sono mai obbligati a registrarsi e usano i canali abituali. La scheda e il tuo studio restano funzionanti.",
+    cardDataRequestsInfoAlpha:
+      "Nel test alpha puoi verificare: una richiesta inviata dal paziente compare nell’elenco dello studio, è possibile salvare stato e nota di risposta, il paziente vede l’avanzamento in « I miei dati e permessi », e gli stati vuoti o respinti vengono mostrati correttamente?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

@@ -66,6 +66,17 @@ export const CARD_INFO = {
       "cardMedicationInfoAlpha",
     ],
   },
+  dataRequests: {
+    titleId: "practice-card-info-data-requests-title",
+    buttonKey: "cardDataRequestsInfoButton",
+    titleKey: "cardDataRequestsInfoTitle",
+    paragraphKeys: [
+      "cardDataRequestsInfoIntro",
+      "cardDataRequestsInfoUsage",
+      "cardDataRequestsInfoControl",
+      "cardDataRequestsInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */

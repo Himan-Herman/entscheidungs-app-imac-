@@ -93,6 +93,16 @@ export default {
       "Los planes de medicación de la consulta requieren que el paciente tenga una cuenta de MedScoutX vinculada. A los pacientes externos sin cuenta nunca se les obliga a registrarse — siga usando sus canales habituales para ellos. De forma independiente, los pacientes pueden registrar ellos mismos su propia información de medicación. La tarjeta y su consulta siguen siendo plenamente funcionales.",
     cardMedicationInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se puede crear un plan como borrador, editarlo y publicarlo, aparece en el lado del paciente en « Mi consultorio » → « Planes de medicación » tras la publicación, y ven los pacientes externos una indicación clara en lugar de un error?",
+    cardDataRequestsInfoButton: "Más información sobre las solicitudes de datos",
+    cardDataRequestsInfoTitle: "Solicitudes de datos",
+    cardDataRequestsInfoIntro:
+      "Las solicitudes de datos son derechos del interesado según el RGPD: los pacientes solicitan la exportación, eliminación o limitación de sus datos. La gestión es puramente organizativa — MedScoutX no realiza ninguna evaluación médica, diagnóstico ni clasificación de urgencia.",
+    cardDataRequestsInfoUsage:
+      "En « Solicitudes de datos » ve las solicitudes entrantes con tipo, paciente, estado y fecha. Abre los detalles, establece el estado (enviada → en revisión → completada o rechazada) y añade una nota de respuesta organizativa. Ningún dato se comparte ni se elimina automáticamente — cada acción depende de usted.",
+    cardDataRequestsInfoControl:
+      "Los pacientes envían las solicitudes ellos mismos en « Mi consultorio » → « Mis datos y permisos » y mantienen el control sobre sus datos y permisos. Las solicitudes digitales requieren una cuenta de MedScoutX vinculada; a los pacientes externos sin cuenta nunca se les obliga a registrarse y usan los canales habituales. La tarjeta y su consulta siguen funcionando.",
+    cardDataRequestsInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿aparece en la lista de la consulta una solicitud enviada por el paciente, se pueden guardar el estado y la nota de respuesta, ve el paciente el progreso en « Mis datos y permisos », y se muestran correctamente los estados vacíos o rechazados?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

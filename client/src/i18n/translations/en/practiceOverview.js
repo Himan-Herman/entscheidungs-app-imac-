@@ -93,6 +93,16 @@ export default {
     "Practice medication plans require the patient to have a linked MedScoutX account. External patients without an account are never forced to register — keep using your usual channels for them. Independently, patients can record their own medication details themselves. The tile and your practice stay fully functional.",
   cardMedicationInfoAlpha:
     "In the alpha test you can check: can a plan be created as a draft, edited and published, does it appear on the patient side under “My practice” → “Medication plans” after publishing, and do external patients see a clear note instead of an error?",
+  cardDataRequestsInfoButton: "More information about data requests",
+  cardDataRequestsInfoTitle: "Data requests",
+  cardDataRequestsInfoIntro:
+    "Data requests are data-subject rights under the GDPR: patients request the export, deletion or restriction of their data. Handling is organizational only — MedScoutX makes no medical assessment, diagnosis or urgency rating.",
+  cardDataRequestsInfoUsage:
+    "Under “Data requests” you see incoming requests with type, patient, status and date. You open details, set the status (submitted → in review → completed or rejected) and add an organizational response note. No data is released or deleted automatically — every action stays with you.",
+  cardDataRequestsInfoControl:
+    "Patients submit requests themselves under “My practice” → “My data & permissions” and keep control over their data and permissions. Digital requests require a linked MedScoutX account; external patients without an account are never forced to register and use the usual channels. The tile and your practice stay functional.",
+  cardDataRequestsInfoAlpha:
+    "In the alpha test you can check: does a request submitted by the patient appear in the practice list, can the status and response note be saved, does the patient see the progress under “My data & permissions”, and are empty or rejected states shown cleanly?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:
