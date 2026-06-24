@@ -359,6 +359,7 @@ export default {
     tabErezept: "Recetas electrónicas",
     tabMessages: "Mensajes",
     tabActivity: "Actividad",
+    tabSosCard: "Tarjeta de emergencia",
     patientProvidedHint: "Parte de la información la ha facilitado el paciente.",
     openDataRequestHint: "Hay una solicitud de datos abierta (p. ej., supresión).",
     overviewLastMessage: "Último mensaje",

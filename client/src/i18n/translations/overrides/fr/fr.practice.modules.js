@@ -375,6 +375,7 @@ export default {
     tabErezept: "Ordonnances électroniques",
     tabMessages: "Messages",
     tabActivity: "Activité",
+    tabSosCard: "Carte d’urgence",
     patientProvidedHint: "Certaines informations ont été fournies par le patient.",
     openDataRequestHint:
       "Une demande de données est ouverte (p. ex. suppression).",
