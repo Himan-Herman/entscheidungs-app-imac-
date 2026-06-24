@@ -73,6 +73,26 @@ export default {
       "I messaggi sicuri nell’app richiedono che il paziente abbia un account MedScoutX. I pazienti esterni senza account non sono mai obbligati a registrarsi — continua a usare i tuoi canali abituali per loro. La scheda e il tuo studio restano pienamente funzionanti.",
     cardMessagesInfoAlpha:
       "Nel test alpha puoi verificare: è possibile aprire e rispondere a una conversazione dall’elenco dei pazienti, il messaggio compare sul lato paziente in « Il mio studio » → « Messaggi », e i pazienti esterni vedono un’indicazione chiara invece di un errore?",
+    cardDocumentsInfoButton: "Maggiori informazioni su documenti e referti",
+    cardDocumentsInfoTitle: "Documenti e referti",
+    cardDocumentsInfoIntro:
+      "Qui gestisci a livello organizzativo i documenti e i referti del tuo studio (ad es. referti, laboratorio, diagnostica per immagini, invii). MedScoutX non effettua alcuna interpretazione medica, diagnosi, raccomandazione terapeutica o classificazione di urgenza.",
+    cardDocumentsInfoUsage:
+      "Apri i documenti da un paziente nell’elenco dei pazienti, carichi i file e gestisci lo stato (bozza → condiviso). La pubblicazione avviene solo tramite la tua autorizzazione esplicita — mai automaticamente. Solo dopo l’autorizzazione i documenti compaiono sul lato paziente in « Il mio studio » → « Documenti dello studio », e solo con un collegamento attivo.",
+    cardDocumentsInfoExternal:
+      "Per i pazienti esterni senza account MedScoutX è possibile fornire link di download sicuri e a tempo limitato — senza URL di archiviazione pubblici e senza obbligo di registrazione. La scheda e il tuo studio restano pienamente funzionanti.",
+    cardDocumentsInfoAlpha:
+      "Nel test alpha puoi verificare: è possibile caricare un documento, autorizzarlo come « condiviso » e revocarlo, compare sul lato paziente dopo l’autorizzazione, e per i pazienti esterni si applica un link sicuro invece di un errore?",
+    cardMedicationInfoButton: "Maggiori informazioni sui piani terapeutici",
+    cardMedicationInfoTitle: "Piani terapeutici",
+    cardMedicationInfoIntro:
+      "Qui gestisci a livello organizzativo i piani terapeutici forniti dallo studio per i tuoi pazienti. I contenuti provengono dal tuo studio — MedScoutX non fornisce alcuna raccomandazione terapeutica, decisione di dosaggio, diagnosi o classificazione di urgenza.",
+    cardMedicationInfoUsage:
+      "Apri i piani terapeutici da un paziente nell’elenco dei pazienti e gestisci voci con versione (ad es. preparato, dosaggio, frequenza, note) con stato bozza → pubblicato. La pubblicazione avviene solo tramite la tua autorizzazione esplicita — mai automaticamente. Solo allora il piano compare sul lato paziente in « Il mio studio » → « Piani terapeutici », e solo con un collegamento attivo.",
+    cardMedicationInfoExternal:
+      "I piani terapeutici dello studio richiedono che il paziente abbia un account MedScoutX collegato. I pazienti esterni senza account non sono mai obbligati a registrarsi — continua a usare i tuoi canali abituali per loro. Indipendentemente, i pazienti possono inserire da soli le proprie informazioni sui farmaci. La scheda e il tuo studio restano pienamente funzionanti.",
+    cardMedicationInfoAlpha:
+      "Nel test alpha puoi verificare: è possibile creare un piano come bozza, modificarlo e pubblicarlo, compare sul lato paziente in « Il mio studio » → « Piani terapeutici » dopo la pubblicazione, e i pazienti esterni vedono un’indicazione chiara invece di un errore?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

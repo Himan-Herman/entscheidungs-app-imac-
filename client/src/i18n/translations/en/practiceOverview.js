@@ -73,6 +73,26 @@ export default {
     "Secure in-app messages require the patient to have a MedScoutX account. External patients without an account are never forced to register — keep using your usual channels for them. The tile and your practice stay fully functional.",
   cardMessagesInfoAlpha:
     "In the alpha test you can check: can a conversation be opened and answered from the patient list, does the message appear on the patient side under “My practice” → “Messages”, and do external patients see a clear note instead of an error?",
+  cardDocumentsInfoButton: "More information about documents & findings",
+  cardDocumentsInfoTitle: "Documents & findings",
+  cardDocumentsInfoIntro:
+    "Here you manage your practice's documents and findings organizationally (e.g. reports, lab, imaging, referrals). MedScoutX performs no medical interpretation, diagnosis, treatment recommendation or urgency rating.",
+  cardDocumentsInfoUsage:
+    "You open documents from a patient in the patient list, upload files and control the status (draft → shared). Publishing only happens through your explicit release — never automatically. Only after release do documents appear on the patient side under “My practice” → “Practice documents”, and only with an active link.",
+  cardDocumentsInfoExternal:
+    "For external patients without a MedScoutX account, secure, time-limited download links can be provided — without public storage URLs and without forcing registration. The tile and your practice stay fully functional.",
+  cardDocumentsInfoAlpha:
+    "In the alpha test you can check: can a document be uploaded, released as “shared” and revoked again, does it appear on the patient side after release, and does a secure link apply for external patients instead of an error?",
+  cardMedicationInfoButton: "More information about medication plans",
+  cardMedicationInfoTitle: "Medication plans",
+  cardMedicationInfoIntro:
+    "Here you manage practice-provided medication plans for your patients organizationally. The content comes from your practice — MedScoutX gives no treatment recommendation, no dosing decision, no diagnosis and no urgency rating.",
+  cardMedicationInfoUsage:
+    "You open medication plans from a patient in the patient list and maintain versioned entries (e.g. preparation, dosage, frequency, notes) with status draft → published. Publishing only happens through your explicit release — never automatically. Only then does the plan appear on the patient side under “My practice” → “Medication plans”, and only with an active link.",
+  cardMedicationInfoExternal:
+    "Practice medication plans require the patient to have a linked MedScoutX account. External patients without an account are never forced to register — keep using your usual channels for them. Independently, patients can record their own medication details themselves. The tile and your practice stay fully functional.",
+  cardMedicationInfoAlpha:
+    "In the alpha test you can check: can a plan be created as a draft, edited and published, does it appear on the patient side under “My practice” → “Medication plans” after publishing, and do external patients see a clear note instead of an error?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

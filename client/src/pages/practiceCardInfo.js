@@ -44,6 +44,28 @@ export const CARD_INFO = {
       "cardMessagesInfoAlpha",
     ],
   },
+  documents: {
+    titleId: "practice-card-info-documents-title",
+    buttonKey: "cardDocumentsInfoButton",
+    titleKey: "cardDocumentsInfoTitle",
+    paragraphKeys: [
+      "cardDocumentsInfoIntro",
+      "cardDocumentsInfoUsage",
+      "cardDocumentsInfoExternal",
+      "cardDocumentsInfoAlpha",
+    ],
+  },
+  medication: {
+    titleId: "practice-card-info-medication-title",
+    buttonKey: "cardMedicationInfoButton",
+    titleKey: "cardMedicationInfoTitle",
+    paragraphKeys: [
+      "cardMedicationInfoIntro",
+      "cardMedicationInfoUsage",
+      "cardMedicationInfoExternal",
+      "cardMedicationInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */

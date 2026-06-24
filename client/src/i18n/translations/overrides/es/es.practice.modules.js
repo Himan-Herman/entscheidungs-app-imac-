@@ -73,6 +73,26 @@ export default {
       "Los mensajes seguros en la app requieren que el paciente tenga una cuenta de MedScoutX. A los pacientes externos sin cuenta nunca se les obliga a registrarse — siga usando sus canales habituales para ellos. La tarjeta y su consulta siguen siendo plenamente funcionales.",
     cardMessagesInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se puede abrir y responder una conversación desde la lista de pacientes, aparece el mensaje en el lado del paciente en « Mi consultorio » → « Mensajes », y ven los pacientes externos una indicación clara en lugar de un error?",
+    cardDocumentsInfoButton: "Más información sobre documentos y resultados",
+    cardDocumentsInfoTitle: "Documentos y resultados",
+    cardDocumentsInfoIntro:
+      "Aquí gestiona, a nivel organizativo, los documentos y resultados de su consulta (p. ej. informes, laboratorio, diagnóstico por imagen, derivaciones). MedScoutX no realiza ninguna interpretación médica, diagnóstico, recomendación terapéutica ni clasificación de urgencia.",
+    cardDocumentsInfoUsage:
+      "Abre los documentos desde un paciente en la lista de pacientes, sube archivos y controla el estado (borrador → compartido). La publicación solo se produce mediante su autorización explícita — nunca de forma automática. Solo tras la autorización los documentos aparecen en el lado del paciente en « Mi consultorio » → « Documentos del consultorio », y solo con un vínculo activo.",
+    cardDocumentsInfoExternal:
+      "Para pacientes externos sin cuenta de MedScoutX se pueden proporcionar enlaces de descarga seguros y de tiempo limitado — sin URL de almacenamiento públicas y sin obligación de registro. La tarjeta y su consulta siguen siendo plenamente funcionales.",
+    cardDocumentsInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se puede subir un documento, autorizarlo como « compartido » y revocarlo, aparece en el lado del paciente tras la autorización, y se aplica un enlace seguro para pacientes externos en lugar de un error?",
+    cardMedicationInfoButton: "Más información sobre los planes de medicación",
+    cardMedicationInfoTitle: "Planes de medicación",
+    cardMedicationInfoIntro:
+      "Aquí gestiona, a nivel organizativo, los planes de medicación proporcionados por la consulta para sus pacientes. El contenido procede de su consulta — MedScoutX no ofrece ninguna recomendación terapéutica, decisión de dosificación, diagnóstico ni clasificación de urgencia.",
+    cardMedicationInfoUsage:
+      "Abre los planes de medicación desde un paciente en la lista de pacientes y mantiene entradas versionadas (p. ej. preparado, dosis, frecuencia, indicaciones) con estado borrador → publicado. La publicación solo se produce mediante su autorización explícita — nunca de forma automática. Solo entonces el plan aparece en el lado del paciente en « Mi consultorio » → « Planes de medicación », y solo con un vínculo activo.",
+    cardMedicationInfoExternal:
+      "Los planes de medicación de la consulta requieren que el paciente tenga una cuenta de MedScoutX vinculada. A los pacientes externos sin cuenta nunca se les obliga a registrarse — siga usando sus canales habituales para ellos. De forma independiente, los pacientes pueden registrar ellos mismos su propia información de medicación. La tarjeta y su consulta siguen siendo plenamente funcionales.",
+    cardMedicationInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se puede crear un plan como borrador, editarlo y publicarlo, aparece en el lado del paciente en « Mi consultorio » → « Planes de medicación » tras la publicación, y ven los pacientes externos una indicación clara en lugar de un error?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

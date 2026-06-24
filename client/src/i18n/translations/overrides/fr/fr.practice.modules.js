@@ -79,6 +79,26 @@ export default {
       "Les messages sécurisés dans l’application nécessitent que le patient dispose d’un compte MedScoutX. Les patients externes sans compte ne sont jamais contraints de s’inscrire — continuez à utiliser vos canaux habituels pour eux. La tuile et votre établissement restent pleinement fonctionnels.",
     cardMessagesInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : peut-on ouvrir et répondre à une conversation depuis la liste des patients, le message apparaît-il côté patient sous « Mon cabinet » → « Messages », et les patients externes voient-ils une indication claire plutôt qu’une erreur ?",
+    cardDocumentsInfoButton: "Plus d’informations sur les documents et résultats",
+    cardDocumentsInfoTitle: "Documents et résultats",
+    cardDocumentsInfoIntro:
+      "Vous gérez ici, sur le plan organisationnel, les documents et résultats de votre établissement (p. ex. comptes rendus, laboratoire, imagerie, orientations). MedScoutX n’effectue aucune interprétation médicale, diagnostic, recommandation thérapeutique ni classification d’urgence.",
+    cardDocumentsInfoUsage:
+      "Vous ouvrez les documents depuis un patient dans la liste des patients, téléversez des fichiers et gérez le statut (brouillon → partagé). La publication n’a lieu que par votre validation explicite — jamais automatiquement. Ce n’est qu’après validation que les documents apparaissent côté patient sous « Mon cabinet » → « Documents du cabinet », et uniquement avec un lien actif.",
+    cardDocumentsInfoExternal:
+      "Pour les patients externes sans compte MedScoutX, des liens de téléchargement sécurisés et limités dans le temps peuvent être fournis — sans URL de stockage publiques et sans obligation d’inscription. La tuile et votre établissement restent pleinement fonctionnels.",
+    cardDocumentsInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : peut-on téléverser un document, le valider comme « partagé » puis le retirer, apparaît-il côté patient après validation, et un lien sécurisé s’applique-t-il pour les patients externes plutôt qu’une erreur ?",
+    cardMedicationInfoButton: "Plus d’informations sur les plans de médication",
+    cardMedicationInfoTitle: "Plans de médication",
+    cardMedicationInfoIntro:
+      "Vous gérez ici, sur le plan organisationnel, les plans de médication fournis par l’établissement pour vos patients. Le contenu provient de votre établissement — MedScoutX ne donne aucune recommandation thérapeutique, aucune décision de posologie, aucun diagnostic ni classification d’urgence.",
+    cardMedicationInfoUsage:
+      "Vous ouvrez les plans de médication depuis un patient dans la liste des patients et gérez des entrées versionnées (p. ex. préparation, posologie, fréquence, remarques) avec le statut brouillon → publié. La publication n’a lieu que par votre validation explicite — jamais automatiquement. Ce n’est qu’ensuite que le plan apparaît côté patient sous « Mon cabinet » → « Plans de médication », et uniquement avec un lien actif.",
+    cardMedicationInfoExternal:
+      "Les plans de médication de l’établissement nécessitent que le patient dispose d’un compte MedScoutX lié. Les patients externes sans compte ne sont jamais contraints de s’inscrire — continuez à utiliser vos canaux habituels pour eux. Indépendamment, les patients peuvent saisir eux-mêmes leurs propres informations de médication. La tuile et votre établissement restent pleinement fonctionnels.",
+    cardMedicationInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : peut-on créer un plan en brouillon, le modifier et le publier, apparaît-il côté patient sous « Mon cabinet » → « Plans de médication » après publication, et les patients externes voient-ils une indication claire plutôt qu’une erreur ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",

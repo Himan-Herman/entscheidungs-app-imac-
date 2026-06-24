@@ -73,6 +73,26 @@ export default {
     "Sichere In-App-Nachrichten setzen ein MedScoutX-Konto der Patient:innen voraus. Externe Patient:innen ohne Konto werden nicht zur Registrierung gezwungen – nutzen Sie für sie weiterhin Ihre üblichen Kanäle. Kachel und Praxis bleiben voll funktionsfähig.",
   cardMessagesInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Lässt sich aus der Patient:innenliste eine Konversation öffnen und beantworten, erscheint die Nachricht auf der Patientenseite unter „Meine Praxis“ → „Nachrichten“, und zeigt sich für externe Patient:innen ein klarer Hinweis statt eines Fehlers?",
+  cardDocumentsInfoButton: "Mehr Informationen zu Dokumenten & Befunden",
+  cardDocumentsInfoTitle: "Dokumente & Befunde",
+  cardDocumentsInfoIntro:
+    "Hier verwalten Sie organisatorisch Dokumente und Befunde Ihrer Praxis (z. B. Berichte, Labor, Bildgebung, Überweisungen). MedScoutX nimmt keine medizinische Interpretation, Diagnose, Therapieempfehlung oder Dringlichkeitseinstufung vor.",
+  cardDocumentsInfoUsage:
+    "Sie öffnen Dokumente über eine:n Patient:in in der Patient:innenliste, laden Dateien hoch und steuern den Status (Entwurf → geteilt). Eine Veröffentlichung erfolgt nur durch Ihre ausdrückliche Freigabe – nie automatisch. Erst nach Freigabe erscheinen Dokumente auf der Patientenseite unter „Meine Praxis“ → „Praxisdokumente“, und nur bei aktiver Verknüpfung.",
+  cardDocumentsInfoExternal:
+    "Für externe Patient:innen ohne MedScoutX-Konto können sichere, zeitlich begrenzte Download-Links bereitgestellt werden – ohne öffentliche Speicher-URLs und ohne Registrierungspflicht. Kachel und Praxis bleiben voll funktionsfähig.",
+  cardDocumentsInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Lässt sich ein Dokument hochladen, als „geteilt“ freigeben und wieder zurückziehen, erscheint es nach Freigabe auf der Patientenseite, und greift für externe Patient:innen ein sicherer Link statt eines Fehlers?",
+  cardMedicationInfoButton: "Mehr Informationen zu Medikationsplänen",
+  cardMedicationInfoTitle: "Medikationspläne",
+  cardMedicationInfoIntro:
+    "Hier verwalten Sie organisatorisch praxisseitige Medikationspläne für Ihre Patient:innen. Die Inhalte stammen aus Ihrer Praxis – MedScoutX gibt keine Therapieempfehlung, keine Dosierungsentscheidung, keine Diagnose und keine Dringlichkeitsbewertung.",
+  cardMedicationInfoUsage:
+    "Sie öffnen Medikationspläne über eine:n Patient:in in der Patient:innenliste und pflegen versionierte Einträge (z. B. Präparat, Dosierung, Häufigkeit, Hinweise) mit Status Entwurf → veröffentlicht. Eine Veröffentlichung erfolgt nur durch Ihre ausdrückliche Freigabe – nie automatisch. Erst danach erscheint der Plan auf der Patientenseite unter „Meine Praxis“ → „Medikationspläne“, und nur bei aktiver Verknüpfung.",
+  cardMedicationInfoExternal:
+    "Praxis-Medikationspläne setzen ein verknüpftes MedScoutX-Konto der Patient:innen voraus. Externe Patient:innen ohne Konto werden nicht zur Registrierung gezwungen – nutzen Sie für sie weiterhin Ihre üblichen Wege. Unabhängig davon können Patient:innen eigene Medikationsangaben selbst erfassen. Kachel und Praxis bleiben voll funktionsfähig.",
+  cardMedicationInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Lässt sich ein Plan als Entwurf anlegen, bearbeiten und veröffentlichen, erscheint er nach Veröffentlichung auf der Patientenseite unter „Meine Praxis“ → „Medikationspläne“, und zeigt sich für externe Patient:innen ein klarer Hinweis statt eines Fehlers?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:
