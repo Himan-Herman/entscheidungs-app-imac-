@@ -23,4 +23,31 @@ export default {
   statusRevoked: "Revoked",
   statusArchived: "Archived",
   requestAppointment: "Request appointment",
+  connectCode: {
+    sectionTitle: "Generate a connection code for a practice",
+    sectionIntro:
+      "Create a voluntary connection code and share it only with the practice you choose. The practice can use it to connect to your account — for the areas you select only.",
+    scopesLegend: "Which areas would you like to share?",
+    scopesHint:
+      "Choose deliberately. There is no automatic full release — only the areas you tick are shared.",
+    generateButton: "Generate connection code",
+    regenerateButton: "Generate a new code",
+    revokeButton: "Revoke code",
+    activeCodeLabel: "Connection code",
+    plaintextNotice:
+      "This code is shown only once. Note it down or copy it now and give it only to your practice.",
+    copyButton: "Copy code",
+    copied: "Copied",
+    expiresIn: "Valid for {minutes} minutes.",
+    expiresAt: "Valid until {datetime}.",
+    codeReferenceLabel: "Code reference",
+    noActiveCode: "There is no active connection code at the moment.",
+    shareHint:
+      "Only give the code to the practice you intend to connect with. You can revoke it at any time.",
+    noScopeError: "Please select at least one area.",
+    createError: "The connection code could not be generated.",
+    revokeError: "The connection code could not be revoked.",
+    created: "Connection code generated.",
+    revoked: "Connection code revoked.",
+  },
 };

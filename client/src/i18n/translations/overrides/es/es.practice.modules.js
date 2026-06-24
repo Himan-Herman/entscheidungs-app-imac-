@@ -163,6 +163,18 @@ export default {
       "Los resultados son solo orientativos — ninguna verificación de facturación vinculante, ningún asesoramiento legal o fiscal, ninguna garantía de reembolso y ninguna decisión automática sobre el pago o la facturación. Esta tarjeta es interna de la consulta; el « Entender la factura » del lado del paciente es una función separada e independiente, sin flujo de datos compartido.",
     cardBillingPlausibilityInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se puede crear una verificación con códigos, aparecen las coincidencias del catálogo y las advertencias, funcionan los estados (abierta/verificada/descartada) y la exportación, se aplican el bloqueo de la función y el permiso, y permanece claramente reconocible el carácter puramente orientativo sin decisión vinculante?",
+    cardPatientsInfoButton: "Más información sobre los pacientes",
+    cardPatientsInfoTitle: "Pacientes",
+    cardPatientsInfoIntro:
+      "La lista de pacientes muestra las cuentas de paciente de MedScoutX vinculadas a su consulta.",
+    cardPatientsInfoConnection:
+      "La vinculación se realiza exclusivamente mediante un código de conexión voluntario que el paciente genera y le comunica — sin esa acción consciente no es posible ninguna vinculación.",
+    cardPatientsInfoExternal:
+      "Los pacientes externos se admiten módulo a módulo, pero no se gestionan como una vinculación de cuenta completa en esta lista.",
+    cardPatientsInfoControl:
+      "Los pacientes mantienen en todo momento el control de sus permisos y pueden revocarlos.",
+    cardPatientsInfoAlpha:
+      "Sin diagnóstico, terapia, triaje ni valoración médica — la lista sirve únicamente para la gestión organizativa.",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",
@@ -365,6 +377,25 @@ export default {
     preVisitUntitled: "Sin título",
     preVisitStatus: "Estado",
     openPreVisitDetail: "Abrir preparativo",
+    connect: {
+      ctaButton: "Vincular un paciente",
+      ctaSectionLabel: "Vincular un paciente",
+      ctaHint:
+        "La vinculación se realiza exclusivamente mediante un código de conexión voluntario generado por el paciente.",
+      redeemSuccess: "Paciente vinculado. La lista se ha actualizado.",
+      redeemError:
+        "El código no es válido, ha caducado o ya se ha utilizado. Pida al paciente un nuevo código.",
+      dialogTitle: "Canjear código de conexión",
+      dialogBody:
+        "Introduzca el código de conexión que le ha facilitado el paciente. El paciente decide qué ámbitos se comparten.",
+      dialogHint:
+        "La vinculación solo es posible con un código generado por el paciente. Sin valoración médica.",
+      inputLabel: "Código de conexión",
+      inputPlaceholder: "p. ej. ABCD-EFGH-JKLM",
+      cancel: "Cancelar",
+      submit: "Canjear",
+      submitting: "Canjeando…",
+    },
   },
   practiceMessages: {
     sectionTitle: "Mensajes",

@@ -33,6 +33,18 @@ export const CARD_INFO = {
       "cardInboxInfoAlpha",
     ],
   },
+  patients: {
+    titleId: "practice-card-info-patients-title",
+    buttonKey: "cardPatientsInfoButton",
+    titleKey: "cardPatientsInfoTitle",
+    paragraphKeys: [
+      "cardPatientsInfoIntro",
+      "cardPatientsInfoConnection",
+      "cardPatientsInfoExternal",
+      "cardPatientsInfoControl",
+      "cardPatientsInfoAlpha",
+    ],
+  },
   messages: {
     titleId: "practice-card-info-messages-title",
     buttonKey: "cardMessagesInfoButton",

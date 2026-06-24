@@ -169,6 +169,18 @@ export default {
       "Les résultats ne sont qu’une orientation — pas une vérification de facturation contraignante, aucun conseil juridique ou fiscal, aucune garantie de remboursement et aucune décision automatique concernant le paiement ou la facturation. Cette tuile est interne à l’établissement ; le « Comprendre la facture » côté patient est une fonction distincte et indépendante, sans flux de données commun.",
     cardBillingPlausibilityInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : peut-on créer une vérification avec des codes, les correspondances du catalogue et les avertissements apparaissent-ils, les statuts (ouverte/vérifiée/rejetée) et l’export fonctionnent-ils, le verrou de fonctionnalité et l’autorisation s’appliquent-ils, et le caractère purement indicatif sans décision contraignante reste-t-il clairement reconnaissable ?",
+    cardPatientsInfoButton: "Plus d’informations sur les patients",
+    cardPatientsInfoTitle: "Patients",
+    cardPatientsInfoIntro:
+      "La liste des patients affiche les comptes patients MedScoutX liés à votre cabinet.",
+    cardPatientsInfoConnection:
+      "La liaison se fait uniquement via un code de connexion volontaire que le patient génère et vous communique — sans cette action délibérée, aucune liaison n’est possible.",
+    cardPatientsInfoExternal:
+      "Les patients externes sont pris en charge module par module, mais ne sont pas conservés comme liaison de compte complète dans cette liste.",
+    cardPatientsInfoControl:
+      "Les patients gardent à tout moment le contrôle de leurs partages et peuvent les révoquer.",
+    cardPatientsInfoAlpha:
+      "Aucun diagnostic, traitement, triage ni évaluation médicale — la liste sert uniquement à la gestion organisationnelle.",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",
@@ -386,6 +398,25 @@ export default {
     preVisitUntitled: "Sans titre",
     preVisitStatus: "Statut",
     openPreVisitDetail: "Ouvrir la préparation",
+    connect: {
+      ctaButton: "Lier un patient",
+      ctaSectionLabel: "Lier un patient",
+      ctaHint:
+        "La liaison se fait uniquement via un code de connexion volontaire généré par le patient.",
+      redeemSuccess: "Patient lié. La liste a été mise à jour.",
+      redeemError:
+        "Le code est invalide, expiré ou déjà utilisé. Veuillez demander un nouveau code au patient.",
+      dialogTitle: "Utiliser un code de connexion",
+      dialogBody:
+        "Saisissez le code de connexion que le patient vous a communiqué. Le patient décide lui-même des domaines partagés.",
+      dialogHint:
+        "La liaison n’est possible qu’avec un code généré par le patient. Aucune évaluation médicale.",
+      inputLabel: "Code de connexion",
+      inputPlaceholder: "p. ex. ABCD-EFGH-JKLM",
+      cancel: "Annuler",
+      submit: "Utiliser",
+      submitting: "Validation…",
+    },
   },
 
   practiceMessages: {

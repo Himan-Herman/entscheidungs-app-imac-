@@ -410,6 +410,33 @@ export default {
     statusRevoked: "Revocado",
     statusArchived: "Archivado",
     requestAppointment: "Solicitar cita",
+    connectCode: {
+      sectionTitle: "Generar un código de conexión para una consulta",
+      sectionIntro:
+        "Cree un código de conexión voluntario y compártalo únicamente con la consulta que elija. La consulta puede usarlo para conectarse a su cuenta — solo para los ámbitos que seleccione.",
+      scopesLegend: "¿Qué ámbitos desea compartir?",
+      scopesHint:
+        "Elija de forma consciente. No hay liberación total automática — solo se comparten los ámbitos marcados.",
+      generateButton: "Generar código de conexión",
+      regenerateButton: "Generar un nuevo código",
+      revokeButton: "Revocar código",
+      activeCodeLabel: "Código de conexión",
+      plaintextNotice:
+        "Este código se muestra una sola vez. Anótelo o cópielo ahora y entréguelo únicamente a su consulta.",
+      copyButton: "Copiar código",
+      copied: "Copiado",
+      expiresIn: "Válido durante {minutes} minutos.",
+      expiresAt: "Válido hasta el {datetime}.",
+      codeReferenceLabel: "Referencia del código",
+      noActiveCode: "Actualmente no hay ningún código de conexión activo.",
+      shareHint:
+        "Entregue el código solo a la consulta con la que desea conectarse. Puede revocarlo en cualquier momento.",
+      noScopeError: "Seleccione al menos un ámbito.",
+      createError: "No se pudo generar el código de conexión.",
+      revokeError: "No se pudo revocar el código de conexión.",
+      created: "Código de conexión generado.",
+      revoked: "Código de conexión revocado.",
+    },
   },
 
   patientDataControl: {

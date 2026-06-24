@@ -410,6 +410,33 @@ export default {
     statusRevoked: "Révoqué",
     statusArchived: "Archivé",
     requestAppointment: "Demander un rendez-vous",
+    connectCode: {
+      sectionTitle: "Générer un code de connexion pour un cabinet",
+      sectionIntro:
+        "Créez un code de connexion volontaire et communiquez-le uniquement au cabinet de votre choix. Le cabinet peut l’utiliser pour se connecter à votre compte — pour les domaines que vous sélectionnez uniquement.",
+      scopesLegend: "Quels domaines souhaitez-vous partager ?",
+      scopesHint:
+        "Choisissez délibérément. Aucun partage total automatique — seuls les domaines cochés sont partagés.",
+      generateButton: "Générer un code de connexion",
+      regenerateButton: "Générer un nouveau code",
+      revokeButton: "Révoquer le code",
+      activeCodeLabel: "Code de connexion",
+      plaintextNotice:
+        "Ce code n’est affiché qu’une seule fois. Notez-le ou copiez-le maintenant et ne le donnez qu’à votre cabinet.",
+      copyButton: "Copier le code",
+      copied: "Copié",
+      expiresIn: "Valable pendant {minutes} minutes.",
+      expiresAt: "Valable jusqu’au {datetime}.",
+      codeReferenceLabel: "Référence du code",
+      noActiveCode: "Aucun code de connexion actif pour le moment.",
+      shareHint:
+        "Ne donnez le code qu’au cabinet avec lequel vous souhaitez vous connecter. Vous pouvez le révoquer à tout moment.",
+      noScopeError: "Veuillez sélectionner au moins un domaine.",
+      createError: "Le code de connexion n’a pas pu être généré.",
+      revokeError: "Le code de connexion n’a pas pu être révoqué.",
+      created: "Code de connexion généré.",
+      revoked: "Code de connexion révoqué.",
+    },
   },
 
   patientDataControl: {

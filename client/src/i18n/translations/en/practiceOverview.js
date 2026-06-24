@@ -171,6 +171,18 @@ export default {
     "You can schedule video consultations and link a patient, start the session, see the waiting room and granted consent, and complete, cancel or revoke the access link.",
   cardTelemedicineInfoPrivacy:
     "Patients only join after giving explicit consent. No conversations are recorded.",
+  cardPatientsInfoButton: "More information about patients",
+  cardPatientsInfoTitle: "Patients",
+  cardPatientsInfoIntro:
+    "The patient list shows the MedScoutX patient accounts linked to your practice.",
+  cardPatientsInfoConnection:
+    "Linking happens solely via a voluntary connection code that the patient generates and shares with you — without this deliberate action no link can be created.",
+  cardPatientsInfoExternal:
+    "External patients are supported on a per-module basis but are not kept as a full account link in this list.",
+  cardPatientsInfoControl:
+    "Patients keep control of their sharing at all times and can revoke it.",
+  cardPatientsInfoAlpha:
+    "No diagnosis, therapy, triage or medical assessment — the list is purely for organizational management.",
 
   metricUnreadInbox: "Unread inbox items",
   metricOpenMessages: "Open messages",

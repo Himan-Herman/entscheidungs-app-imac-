@@ -7,7 +7,9 @@ import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   fetchPracticePatients,
   postPracticePatientSearchAiSuggestion,
+  redeemPracticeConnectCode,
 } from "../api/practicePatientsApi.js";
+import RedeemConnectCodeDialog from "../components/RedeemConnectCodeDialog.jsx";
 import { patientDisplayName } from "../utils/patientDisplayName.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
@@ -79,6 +81,14 @@ export default function PracticePatientsListPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [aiSummary, setAiSummary] = useState("");
   const [aiBusy, setAiBusy] = useState(false);
+
+  // --- Redeem patient connection code (Phase 2) ---
+  const [redeemOpen, setRedeemOpen] = useState(false);
+  const [redeemCode, setRedeemCode] = useState("");
+  const [redeemBusy, setRedeemBusy] = useState(false);
+  const [redeemError, setRedeemError] = useState("");
+  const [redeemSuccess, setRedeemSuccess] = useState("");
+  const tConnect = t.connect || {};
 
   const loadPractices = useCallback(async () => {
     const res = await authFetch("/api/practices");
@@ -260,6 +270,44 @@ export default function PracticePatientsListPage() {
     }
   }
 
+  function openRedeemDialog() {
+    setRedeemCode("");
+    setRedeemError("");
+    setRedeemSuccess("");
+    setRedeemOpen(true);
+  }
+
+  function closeRedeemDialog() {
+    if (redeemBusy) return;
+    setRedeemOpen(false);
+  }
+
+  async function handleRedeemCode() {
+    const code = redeemCode.trim();
+    if (!practiceId || !code) return;
+    setRedeemBusy(true);
+    setRedeemError("");
+    try {
+      const { res, data } = await redeemPracticeConnectCode(practiceId, code);
+      if (!res.ok || !data.ok) {
+        // Generic message — invalid / expired / used / revoked are intentionally
+        // indistinguishable (no enumeration).
+        setRedeemError(tConnect.redeemError);
+        return;
+      }
+      setRedeemOpen(false);
+      setRedeemCode("");
+      setRedeemSuccess(tConnect.redeemSuccess);
+      setPage(1);
+      await loadLinks(false);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setRedeemError(tConnect.redeemError);
+    } finally {
+      setRedeemBusy(false);
+    }
+  }
+
   const detailPath = (linkId) => {
     const q = new URLSearchParams({ practiceId });
     if (searchQ.trim() || activeChips.length > 0) {
@@ -311,7 +359,6 @@ export default function PracticePatientsListPage() {
     const name = patientDisplayName(row, t.patientFallback);
     const email = row.patient?.email?.trim() || t.emailMissing;
     const statusText = statusLabel(row.status, t);
-    const summary = row.summary || {};
 
     return (
       <article key={row.id} className="practice-patients__card-item">
@@ -364,6 +411,24 @@ export default function PracticePatientsListPage() {
             </select>
           </label>
         </section>
+
+        {practiceId ? (
+          <section className="practice-patients__connect-cta" aria-label={tConnect.ctaSectionLabel}>
+            <button
+              type="button"
+              className="patient-threads__btn patient-threads__btn--primary"
+              onClick={openRedeemDialog}
+            >
+              {tConnect.ctaButton}
+            </button>
+            <p className="practice-dashboard__muted">{tConnect.ctaHint}</p>
+            {redeemSuccess ? (
+              <p className="practice-dashboard__muted" role="status" aria-live="polite">
+                {redeemSuccess}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
 
         {practiceId ? (
           <section className="practice-patients__search-panel" aria-label={t.searchPatients}>
@@ -567,9 +632,20 @@ export default function PracticePatientsListPage() {
         ) : null}
 
         {!loading && !error && links.length === 0 ? (
-          <p className="practice-dashboard__muted" role="status">
-            {activeChips.length > 0 || searchQ ? t.emptyFiltered : t.empty}
-          </p>
+          <div className="practice-patients__empty" role="status">
+            <p className="practice-dashboard__muted">
+              {activeChips.length > 0 || searchQ ? t.emptyFiltered : t.empty}
+            </p>
+            {practiceId && !(activeChips.length > 0 || searchQ) ? (
+              <button
+                type="button"
+                className="patient-threads__btn patient-threads__btn--primary"
+                onClick={openRedeemDialog}
+              >
+                {tConnect.ctaButton}
+              </button>
+            ) : null}
+          </div>
         ) : null}
 
         {!loading && !error && links.length > 0 ? (
@@ -611,6 +687,17 @@ export default function PracticePatientsListPage() {
           </>
         ) : null}
       </div>
+
+      <RedeemConnectCodeDialog
+        open={redeemOpen}
+        busy={redeemBusy}
+        code={redeemCode}
+        onCodeChange={setRedeemCode}
+        error={redeemError}
+        onSubmit={() => void handleRedeemCode()}
+        onCancel={closeRedeemDialog}
+        t={tConnect}
+      />
     </div>
   );
 }

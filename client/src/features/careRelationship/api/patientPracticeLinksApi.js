@@ -20,3 +20,36 @@ export async function patchPatientProfileAccess(linkId, granted) {
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
+
+/**
+ * Patient-generated practice connection code (Phase 2 UI).
+ * The plaintext `code` in the create response is shown ONCE — never persisted client-side
+ * and never logged.
+ */
+
+/** Generate a fresh connection code with the chosen consent scopes. */
+export async function createPatientConnectCode(scopes) {
+  const res = await authFetch(`${BASE}/connect-code`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scopes: Array.isArray(scopes) ? scopes : [] }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+/** Metadata for the patient's active code (never the plaintext). */
+export async function fetchPatientConnectCode() {
+  const res = await authFetch(`${BASE}/connect-code`);
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+/** Revoke an active code by id. */
+export async function revokePatientConnectCode(codeId) {
+  const res = await authFetch(`${BASE}/connect-code/${encodeURIComponent(codeId)}`, {
+    method: "DELETE",
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}

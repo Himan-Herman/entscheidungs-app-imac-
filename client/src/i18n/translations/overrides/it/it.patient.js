@@ -410,6 +410,33 @@ export default {
     statusRevoked: "Revocato",
     statusArchived: "Archiviato",
     requestAppointment: "Richiedi appuntamento",
+    connectCode: {
+      sectionTitle: "Genera un codice di collegamento per uno studio",
+      sectionIntro:
+        "Crea un codice di collegamento volontario e comunicalo solo allo studio che scegli. Lo studio può usarlo per collegarsi al tuo account — solo per gli ambiti che selezioni.",
+      scopesLegend: "Quali ambiti desideri condividere?",
+      scopesHint:
+        "Scegli in modo consapevole. Nessuna condivisione totale automatica — vengono condivisi solo gli ambiti selezionati.",
+      generateButton: "Genera codice di collegamento",
+      regenerateButton: "Genera un nuovo codice",
+      revokeButton: "Revoca codice",
+      activeCodeLabel: "Codice di collegamento",
+      plaintextNotice:
+        "Questo codice viene mostrato una sola volta. Annotalo o copialo ora e comunicalo solo al tuo studio.",
+      copyButton: "Copia codice",
+      copied: "Copiato",
+      expiresIn: "Valido per {minutes} minuti.",
+      expiresAt: "Valido fino al {datetime}.",
+      codeReferenceLabel: "Riferimento del codice",
+      noActiveCode: "Al momento non è presente alcun codice di collegamento attivo.",
+      shareHint:
+        "Comunica il codice solo allo studio con cui vuoi collegarti. Puoi revocarlo in qualsiasi momento.",
+      noScopeError: "Seleziona almeno un ambito.",
+      createError: "Impossibile generare il codice di collegamento.",
+      revokeError: "Impossibile revocare il codice di collegamento.",
+      created: "Codice di collegamento generato.",
+      revoked: "Codice di collegamento revocato.",
+    },
   },
 
   patientDataControl: {

@@ -24,4 +24,31 @@ export default {
   statusRevoked: "Widerrufen",
   statusArchived: "Archiviert",
   requestAppointment: "Termin anfragen",
+  connectCode: {
+    sectionTitle: "Verbindungscode für Praxis erzeugen",
+    sectionIntro:
+      "Erzeugen Sie einen freiwilligen Verbindungscode und geben Sie ihn ausschließlich Ihrer gewünschten Praxis. Die Praxis kann sich damit mit Ihrem Konto verbinden – nur für die von Ihnen gewählten Bereiche.",
+    scopesLegend: "Welche Bereiche möchten Sie freigeben?",
+    scopesHint:
+      "Wählen Sie bewusst aus. Es erfolgt keine automatische Vollfreigabe – nur die markierten Bereiche werden freigegeben.",
+    generateButton: "Verbindungscode erzeugen",
+    regenerateButton: "Neuen Code erzeugen",
+    revokeButton: "Code widerrufen",
+    activeCodeLabel: "Verbindungscode",
+    plaintextNotice:
+      "Dieser Code wird nur einmal angezeigt. Notieren oder kopieren Sie ihn jetzt und geben Sie ihn nur Ihrer Praxis.",
+    copyButton: "Code kopieren",
+    copied: "Kopiert",
+    expiresIn: "Gültig für {minutes} Minuten.",
+    expiresAt: "Gültig bis {datetime}.",
+    codeReferenceLabel: "Code-Kennung",
+    noActiveCode: "Derzeit ist kein aktiver Verbindungscode vorhanden.",
+    shareHint:
+      "Geben Sie den Code nur der gewünschten Praxis. Sie können ihn jederzeit widerrufen.",
+    noScopeError: "Bitte wählen Sie mindestens einen Bereich aus.",
+    createError: "Der Verbindungscode konnte nicht erzeugt werden.",
+    revokeError: "Der Verbindungscode konnte nicht widerrufen werden.",
+    created: "Verbindungscode wurde erzeugt.",
+    revoked: "Verbindungscode wurde widerrufen.",
+  },
 };

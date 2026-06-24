@@ -40,6 +40,24 @@ export async function fetchPracticePatients(practiceId, opts = {}) {
   return { res, data };
 }
 
+/**
+ * Redeem a patient-generated connection code (Phase 2). On success the backend creates or
+ * reuses the practice↔patient link with the consent scopes the patient chose. Errors are
+ * intentionally generic (invalid / expired / used / revoked all map to one message) — the
+ * code is never logged.
+ * @param {string} practiceId
+ * @param {string} code
+ */
+export async function redeemPracticeConnectCode(practiceId, code) {
+  const res = await authFetch("/api/practice/patients/redeem-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ practiceId, code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function postPracticePatientSearchAiSuggestion(practiceId, { q, filters, locale } = {}) {
   const res = await authFetch("/api/practice/patients/search/ai-filter-suggestion", {
     method: "POST",

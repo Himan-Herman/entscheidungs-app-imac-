@@ -163,6 +163,18 @@ export default {
       "I risultati sono solo orientativi — nessuna verifica di fatturazione vincolante, nessuna consulenza legale o fiscale, nessuna garanzia di rimborso e nessuna decisione automatica su pagamento o fatturazione. Questa scheda è interna allo studio; il « Capire la fattura » lato paziente è una funzione separata e indipendente, senza flusso di dati condiviso.",
     cardBillingPlausibilityInfoAlpha:
       "Nel test alpha puoi verificare: è possibile creare una verifica con codici, compaiono le corrispondenze del catalogo e gli avvisi, funzionano gli stati (aperta/verificata/respinta) e l’export, si applicano il blocco della funzione e l’autorizzazione, e il carattere puramente indicativo senza decisione vincolante resta chiaramente riconoscibile?",
+    cardPatientsInfoButton: "Maggiori informazioni sui pazienti",
+    cardPatientsInfoTitle: "Pazienti",
+    cardPatientsInfoIntro:
+      "L’elenco dei pazienti mostra gli account paziente MedScoutX collegati al tuo studio.",
+    cardPatientsInfoConnection:
+      "Il collegamento avviene esclusivamente tramite un codice di collegamento volontario che il paziente genera e ti comunica — senza questa azione consapevole non è possibile alcun collegamento.",
+    cardPatientsInfoExternal:
+      "I pazienti esterni sono supportati modulo per modulo, ma non sono gestiti come collegamento completo dell’account in questo elenco.",
+    cardPatientsInfoControl:
+      "I pazienti mantengono sempre il controllo delle proprie condivisioni e possono revocarle.",
+    cardPatientsInfoAlpha:
+      "Nessuna diagnosi, terapia, triage o valutazione medica — l’elenco serve esclusivamente alla gestione organizzativa.",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",
@@ -365,6 +377,25 @@ export default {
     preVisitUntitled: "Sin título",
     preVisitStatus: "Estado",
     openPreVisitDetail: "Apri preparativo",
+    connect: {
+      ctaButton: "Collega un paziente",
+      ctaSectionLabel: "Collega un paziente",
+      ctaHint:
+        "Il collegamento avviene esclusivamente tramite un codice di collegamento volontario generato dal paziente.",
+      redeemSuccess: "Paziente collegato. L’elenco è stato aggiornato.",
+      redeemError:
+        "Il codice non è valido, è scaduto o è già stato utilizzato. Chiedi al paziente un nuovo codice.",
+      dialogTitle: "Riscatta il codice di collegamento",
+      dialogBody:
+        "Inserisci il codice di collegamento che ti ha comunicato il paziente. È il paziente a decidere quali ambiti vengono condivisi.",
+      dialogHint:
+        "Il collegamento è possibile solo con un codice generato dal paziente. Nessuna valutazione medica.",
+      inputLabel: "Codice di collegamento",
+      inputPlaceholder: "es. ABCD-EFGH-JKLM",
+      cancel: "Annulla",
+      submit: "Riscatta",
+      submitting: "Riscatto in corso…",
+    },
   },
   practiceMessages: {
     sectionTitle: "Meseesaggi",

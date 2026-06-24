@@ -175,4 +175,23 @@ export default {
   preVisitUntitled: "Ohne Titel",
   preVisitStatus: "Status",
   openPreVisitDetail: "Vorbereitung öffnen",
+  connect: {
+    ctaButton: "Patient:in verknüpfen",
+    ctaSectionLabel: "Patient:in verknüpfen",
+    ctaHint:
+      "Verknüpfung erfolgt ausschließlich über einen freiwilligen Verbindungscode der Patient:in.",
+    redeemSuccess: "Patient:in wurde verknüpft. Die Liste wurde aktualisiert.",
+    redeemError:
+      "Der Code ist ungültig, abgelaufen oder bereits verwendet. Bitte lassen Sie sich von der Patient:in einen neuen Code geben.",
+    dialogTitle: "Verbindungscode einlösen",
+    dialogBody:
+      "Geben Sie den Verbindungscode ein, den Ihnen die Patient:in mitgeteilt hat. Die Patient:in legt selbst fest, welche Bereiche freigegeben werden.",
+    dialogHint:
+      "Eine Verknüpfung ist nur mit einem von der Patient:in erzeugten Code möglich. Keine medizinische Bewertung.",
+    inputLabel: "Verbindungscode",
+    inputPlaceholder: "z. B. ABCD-EFGH-JKLM",
+    cancel: "Abbrechen",
+    submit: "Einlösen",
+    submitting: "Wird eingelöst …",
+  },
 };
