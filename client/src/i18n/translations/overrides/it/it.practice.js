@@ -126,6 +126,19 @@ export default {
     filterLanguage: "Lingua",
     filterSearch: "Ricerca paziente o cartella",
     searchPlaceholder: "Nome paziente o titolo cartella",
+    navHub: "Area struttura",
+    resultsHeading: "Preparazioni in entrata",
+    resultsCount: "{count} voci",
+    clearFilters: "Reimposta i filtri",
+    emptyBody:
+      "Non appena un paziente invia una preparazione Pre-Visit — anche esternamente tramite QR code o link, senza account — compare qui automaticamente.",
+    emptyFilteredTitle: "Nessun risultato",
+    emptyFilteredBody:
+      "Nessuna preparazione corrisponde ai filtri attuali. Reimposta i filtri per vedere tutte le voci.",
+    noPracticeTitle: "Scegli un profilo struttura",
+    noPracticeBody:
+      "Scegli un profilo struttura qui sopra per vedere le preparazioni in entrata.",
+    cardReason: "Motivo indicato",
     allStatuses: "Tutti gli stati",
     allDoctors: "Tutti i clinici / destinazioni",
     allLanguages: "Tutte le lingue",

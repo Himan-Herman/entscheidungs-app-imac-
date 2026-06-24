@@ -16,6 +16,19 @@ export default {
   filterLanguage: "Language",
   filterSearch: "Search patient/case",
   searchPlaceholder: "Patient name or case title",
+  navHub: "Practice area",
+  resultsHeading: "Incoming preparations",
+  resultsCount: "{count} entries",
+  clearFilters: "Clear filters",
+  emptyBody:
+    "As soon as patients submit a Pre-Visit preparation — including external submissions via QR code or link without an account — it appears here automatically.",
+  emptyFilteredTitle: "No matches",
+  emptyFilteredBody:
+    "No preparation matches the current filters. Clear the filters to see all entries.",
+  noPracticeTitle: "Choose a practice profile",
+  noPracticeBody:
+    "Please choose a practice profile above to see incoming preparations.",
+  cardReason: "Reason given",
   allStatuses: "All statuses",
   allDoctors: "All doctors/targets",
   allLanguages: "All languages",

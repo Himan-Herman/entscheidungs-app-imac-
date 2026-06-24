@@ -126,6 +126,19 @@ export default {
     filterLanguage: "Langue",
     filterSearch: "Recherche patient ou dossier",
     searchPlaceholder: "Nom patient ou titre du dossier",
+    navHub: "Espace cabinet",
+    resultsHeading: "Préparations entrantes",
+    resultsCount: "{count} entrées",
+    clearFilters: "Réinitialiser les filtres",
+    emptyBody:
+      "Dès qu’un patient envoie une préparation Pre-Visit — y compris en externe via QR code ou lien, sans compte — elle apparaît ici automatiquement.",
+    emptyFilteredTitle: "Aucun résultat",
+    emptyFilteredBody:
+      "Aucune préparation ne correspond aux filtres actuels. Réinitialisez les filtres pour voir toutes les entrées.",
+    noPracticeTitle: "Choisir un profil d’établissement",
+    noPracticeBody:
+      "Veuillez choisir un profil d’établissement ci-dessus pour voir les préparations entrantes.",
+    cardReason: "Motif indiqué",
     allStatuses: "Tous les statuts",
     allDoctors: "Tous soignants / cibles",
     allLanguages: "Toutes les langues",

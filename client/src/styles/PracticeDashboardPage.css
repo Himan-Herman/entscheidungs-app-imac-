@@ -328,6 +328,406 @@
   border-color: rgba(14, 116, 144, 0.45);
 }
 
+/* ============================================================================
+   Pre-Visit dashboard polish — ALL scoped under .practice-dashboard--previsit so
+   the shared .practice-dashboard__* base classes (also used by the patients list
+   page) are never affected. Accent: teal #0e7490.
+   ============================================================================ */
+.practice-dashboard--previsit .practice-dashboard__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px 20px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__hero-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+.practice-dashboard--previsit .practice-dashboard__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(1.4rem, 2.6vw, 1.95rem);
+  line-height: 1.15;
+}
+
+.practice-dashboard--previsit .practice-dashboard__title svg {
+  color: #0e7490;
+  flex: none;
+}
+
+.practice-dashboard--previsit .practice-dashboard__intro {
+  max-width: 66ch;
+  line-height: 1.5;
+}
+
+.practice-dashboard--previsit .practice-dashboard__safety {
+  align-self: flex-start;
+  max-width: 66ch;
+  background: rgba(14, 116, 144, 0.08);
+  border: 1px solid rgba(14, 116, 144, 0.2);
+  color: #0f766e;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.practice-dashboard--previsit .practice-dashboard__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.practice-dashboard--previsit .practice-dashboard__nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-decoration: none;
+  min-height: 38px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__nav-link:hover {
+  background: #eef2f7;
+  border-color: rgba(15, 23, 42, 0.22);
+}
+
+.practice-dashboard--previsit .practice-dashboard__nav-link svg {
+  flex: none;
+  color: #0e7490;
+}
+
+/* KPI cards */
+.practice-dashboard--previsit .practice-dashboard__kpi {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__kpi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 10px;
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+}
+
+.practice-dashboard--previsit .practice-dashboard__kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.practice-dashboard--previsit .practice-dashboard__kpi .practice-dashboard__stat-label {
+  margin: 0;
+}
+
+.practice-dashboard--previsit .practice-dashboard__kpi .practice-dashboard__stat-value {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+/* Filter card head */
+.practice-dashboard--previsit .practice-dashboard__filter-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.practice-dashboard--previsit .practice-dashboard__filter-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.practice-dashboard--previsit .practice-dashboard__filter-title svg {
+  color: #0e7490;
+}
+
+/* Buttons */
+.practice-dashboard--previsit .practice-dashboard__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 10px;
+  padding: 9px 14px;
+  min-height: 40px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.practice-dashboard--previsit .practice-dashboard__btn--primary {
+  background: #0e7490;
+  color: #fff;
+  border-color: #0e7490;
+}
+
+.practice-dashboard--previsit .practice-dashboard__btn--primary:hover {
+  background: #0c6378;
+  border-color: #0c6378;
+}
+
+.practice-dashboard--previsit .practice-dashboard__btn--ghost {
+  background: transparent;
+  color: #0e7490;
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
+.practice-dashboard--previsit .practice-dashboard__btn--ghost:hover {
+  background: rgba(14, 116, 144, 0.08);
+}
+
+/* Results head */
+.practice-dashboard--previsit .practice-dashboard__results-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__results-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.practice-dashboard--previsit .practice-dashboard__results-title svg {
+  color: #0e7490;
+}
+
+.practice-dashboard--previsit .practice-dashboard__count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #0e7490;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty state */
+.practice-dashboard--previsit .practice-dashboard__empty {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  padding: 30px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+  margin-bottom: 4px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__empty-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.practice-dashboard--previsit .practice-dashboard__empty-body {
+  margin: 0;
+  max-width: 50ch;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.practice-dashboard--previsit .practice-dashboard__empty .practice-dashboard__btn {
+  margin-top: 8px;
+}
+
+/* Cards */
+.practice-dashboard--previsit .practice-dashboard__card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__card-name {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.02rem;
+}
+
+.practice-dashboard--previsit .practice-dashboard__meta {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.practice-dashboard--previsit .practice-dashboard__meta-row dt {
+  margin: 0;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+.practice-dashboard--previsit .practice-dashboard__meta-row dd {
+  margin: 0;
+  text-align: end;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.practice-dashboard--previsit .practice-dashboard__card-foot {
+  margin: 0;
+}
+
+.practice-dashboard--previsit .practice-dashboard__pdf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.practice-dashboard--previsit .practice-dashboard__pdf-badge--ready {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+@media (max-width: 640px) {
+  .practice-dashboard--previsit .practice-dashboard__nav {
+    width: 100%;
+  }
+  .practice-dashboard--previsit .practice-dashboard__nav-link {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .practice-dashboard--previsit .practice-dashboard__meta-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+  .practice-dashboard--previsit .practice-dashboard__meta-row dd {
+    text-align: start;
+  }
+}
+
+/* Dark theme — explicit toggle */
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__safety {
+  background: rgba(45, 212, 191, 0.1);
+  border-color: rgba(45, 212, 191, 0.28);
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__nav-link {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__nav-link:hover {
+  background: #1e293b;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__nav-link svg,
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__title svg,
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__filter-title svg,
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__results-title svg {
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__kpi-icon,
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__empty-icon {
+  background: rgba(45, 212, 191, 0.12);
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__btn--ghost {
+  color: #5eead4;
+  border-color: rgba(45, 212, 191, 0.4);
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__btn--ghost:hover {
+  background: rgba(45, 212, 191, 0.12);
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__empty {
+  background: #111827;
+  border-color: #334155;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__empty-body {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__meta-row dt {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__pdf-badge {
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .practice-dashboard--previsit .practice-dashboard__pdf-badge--ready {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .practice-dashboard {
     background: #0b1220;

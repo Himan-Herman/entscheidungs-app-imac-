@@ -126,6 +126,19 @@ export default {
     filterLanguage: "Idioma",
     filterSearch: "Búsqueda por paciente o expediente",
     searchPlaceholder: "Nombre del paciente o título del expediente",
+    navHub: "Área del centro",
+    resultsHeading: "Preparativos entrantes",
+    resultsCount: "{count} entradas",
+    clearFilters: "Restablecer filtros",
+    emptyBody:
+      "En cuanto un paciente envía un preparativo Pre-Visit — también de forma externa mediante código QR o enlace, sin cuenta — aparece aquí automáticamente.",
+    emptyFilteredTitle: "Sin resultados",
+    emptyFilteredBody:
+      "Ningún preparativo coincide con los filtros actuales. Restablezca los filtros para ver todas las entradas.",
+    noPracticeTitle: "Elegir un perfil de centro",
+    noPracticeBody:
+      "Elija un perfil de centro arriba para ver los preparativos entrantes.",
+    cardReason: "Motivo indicado",
     allStatuses: "Todos los estados",
     allDoctors: "Todos los facultativos / destinos",
     allLanguages: "Todos los idiomas",

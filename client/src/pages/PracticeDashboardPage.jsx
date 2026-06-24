@@ -1,5 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  ClipboardList,
+  FileText,
+  House,
+  Inbox,
+  LayoutDashboard,
+  Languages,
+  MessageSquare,
+  Mic,
+  QrCode,
+  RotateCcw,
+  ScanLine,
+  Send,
+  SlidersHorizontal,
+  Target,
+  Users,
+} from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
@@ -8,6 +26,29 @@ import "../styles/PracticeDashboardPage.css";
 import { getPrimaryIntlLocale } from '../i18n/intlLocale.js';
 
 const STATUSES = ["new", "opened", "in_review", "completed", "archived"];
+
+/**
+ * Anonymized usage KPIs. Data-driven so every card renders identically; the icon
+ * is purely decorative (aria-hidden). `value` reads only the already-loaded summary
+ * — no medical content, no interpretation.
+ */
+const KPI_DEFS = [
+  { labelKey: "analyticsPrevisitStarts", Icon: ClipboardList, value: (s) => s.previsitStarts },
+  { labelKey: "analyticsPdfCreated", Icon: FileText, value: (s) => s.pdfCreated },
+  { labelKey: "analyticsPdfSent", Icon: Send, value: (s) => s.pdfSent },
+  { labelKey: "analyticsQrStarts", Icon: QrCode, value: (s) => s.qrPrevisitStarts },
+  { labelKey: "analyticsQrLandings", Icon: ScanLine, value: (s) => s.qrLandingOpens },
+  {
+    labelKey: "analyticsSpeech",
+    Icon: Mic,
+    value: (s, t) =>
+      t.analyticsSpeechBreakdown
+        .replace("{{in}}", String(s.speechInputUses))
+        .replace("{{out}}", String(s.textToSpeechUses)),
+  },
+  { labelKey: "analyticsFollowUps", Icon: MessageSquare, value: (s) => s.followUpsCreated },
+  { labelKey: "analyticsActiveQrTargets", Icon: Target, value: (s) => s.activeQrTargets },
+];
 
 function fmt(iso, lang) {
   try {
@@ -157,6 +198,15 @@ export default function PracticeDashboardPage() {
     return Array.from(uniq).sort((a, b) => a.localeCompare(b));
   }, [items]);
 
+  const hasActiveFilters = Boolean(status || doctor || languageFilter || query.trim());
+
+  const clearFilters = useCallback(() => {
+    setStatus("");
+    setDoctor("");
+    setLanguageFilter("");
+    setQuery("");
+  }, []);
+
   function statusLabel(v) {
     if (v === "new") return t.statusNew;
     if (v === "opened") return t.statusOpened;
@@ -166,71 +216,87 @@ export default function PracticeDashboardPage() {
     return v;
   }
 
+  const hasLanguageLists =
+    analyticsSummary &&
+    ((analyticsSummary.patientLanguages?.length > 0) ||
+      (analyticsSummary.doctorLanguages?.length > 0) ||
+      (analyticsSummary.languagePairs?.length > 0));
+
+  // Empty-state copy depends on context: no practice selected, filtered-to-nothing,
+  // or a genuinely empty inbox.
+  let emptyTitle = t.empty;
+  let emptyBody = t.emptyBody;
+  if (!practiceId) {
+    emptyTitle = t.noPracticeTitle;
+    emptyBody = t.noPracticeBody;
+  } else if (hasActiveFilters) {
+    emptyTitle = t.emptyFilteredTitle;
+    emptyBody = t.emptyFilteredBody;
+  }
+  const showEmpty = !loading && !error && items.length === 0;
+
   return (
-    <div className="practice-dashboard">
+    <div className="practice-dashboard practice-dashboard--previsit">
       <div className="practice-dashboard__inner">
-        <header className="practice-dashboard__header">
-          <h1 className="practice-dashboard__title">{t.heading}</h1>
-          <p className="practice-dashboard__intro">{t.intro}</p>
-          <p className="practice-dashboard__safety">{t.safetyNote}</p>
-          <nav className="practice-dashboard__header-links" aria-label={t.heading}>
+        <header className="practice-dashboard__header practice-dashboard__hero">
+          <div className="practice-dashboard__hero-main">
+            <h1 className="practice-dashboard__title">
+              <LayoutDashboard size={22} strokeWidth={1.9} aria-hidden="true" />
+              {t.heading}
+            </h1>
+            <p className="practice-dashboard__intro">{t.intro}</p>
+            <p className="practice-dashboard__safety" role="note">
+              {t.safetyNote}
+            </p>
+          </div>
+          <nav className="practice-dashboard__nav" aria-label={t.heading}>
+            <Link className="practice-dashboard__nav-link" to="/practice">
+              <ArrowLeft size={16} aria-hidden="true" />
+              {t.navHub}
+            </Link>
             {practiceId ? (
               <Link
+                className="practice-dashboard__nav-link"
                 to={`/practice/patients?practiceId=${encodeURIComponent(practiceId)}`}
               >
+                <Users size={16} aria-hidden="true" />
                 {t.navPatients}
               </Link>
             ) : null}
-            <Link to="/settings/practices">{tPractices.heading}</Link>
-            <Link to="/startseite">{tPractices.backHome}</Link>
+            <Link className="practice-dashboard__nav-link" to="/settings/practices">
+              <ClipboardList size={16} aria-hidden="true" />
+              {tPractices.heading}
+            </Link>
+            <Link className="practice-dashboard__nav-link" to="/startseite">
+              <House size={16} aria-hidden="true" />
+              {tPractices.backHome}
+            </Link>
           </nav>
         </header>
 
         {analyticsSummary ? (
           <section className="practice-dashboard__analytics" aria-label={t.analyticsHeading}>
-            <h2 className="practice-dashboard__analytics-heading">{t.analyticsHeading}</h2>
+            <div className="practice-dashboard__section-head">
+              <h2 className="practice-dashboard__analytics-heading">{t.analyticsHeading}</h2>
+            </div>
             <p className="practice-dashboard__analytics-privacy">{t.analyticsPrivacy}</p>
             <div className="practice-dashboard__analytics-grid">
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsPrevisitStarts}</h3>
-                <p className="practice-dashboard__stat-value">{analyticsSummary.previsitStarts}</p>
-              </article>
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsPdfCreated}</h3>
-                <p className="practice-dashboard__stat-value">{analyticsSummary.pdfCreated}</p>
-              </article>
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsPdfSent}</h3>
-                <p className="practice-dashboard__stat-value">{analyticsSummary.pdfSent}</p>
-              </article>
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsQrStarts}</h3>
-                <p className="practice-dashboard__stat-value">{analyticsSummary.qrPrevisitStarts}</p>
-              </article>
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsQrLandings}</h3>
-                <p className="practice-dashboard__stat-value">{analyticsSummary.qrLandingOpens}</p>
-              </article>
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsSpeech}</h3>
-                <p className="practice-dashboard__stat-value">
-                  {t.analyticsSpeechBreakdown
-                    .replace("{{in}}", String(analyticsSummary.speechInputUses))
-                    .replace("{{out}}", String(analyticsSummary.textToSpeechUses))}
-                </p>
-              </article>
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsFollowUps}</h3>
-                <p className="practice-dashboard__stat-value">{analyticsSummary.followUpsCreated}</p>
-              </article>
-              <article className="practice-dashboard__stat-card">
-                <h3 className="practice-dashboard__stat-label">{t.analyticsActiveQrTargets}</h3>
-                <p className="practice-dashboard__stat-value">{analyticsSummary.activeQrTargets}</p>
-              </article>
+              {KPI_DEFS.map((def) => {
+                const Icon = def.Icon;
+                return (
+                  <article key={def.labelKey} className="practice-dashboard__stat-card practice-dashboard__kpi">
+                    <span className="practice-dashboard__kpi-icon" aria-hidden="true">
+                      <Icon size={18} strokeWidth={1.9} />
+                    </span>
+                    <div className="practice-dashboard__kpi-body">
+                      <h3 className="practice-dashboard__stat-label">{t[def.labelKey]}</h3>
+                      <p className="practice-dashboard__stat-value">{def.value(analyticsSummary, t)}</p>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-            {(analyticsSummary.patientLanguages?.length > 0 ||
-              analyticsSummary.doctorLanguages?.length > 0 ||
-              analyticsSummary.languagePairs?.length > 0) ? (
+            {hasLanguageLists ? (
               <div className="practice-dashboard__analytics-lists">
                 {analyticsSummary.patientLanguages?.length > 0 ? (
                   <div className="practice-dashboard__analytics-list-block">
@@ -290,6 +356,22 @@ export default function PracticeDashboardPage() {
         ) : null}
 
         <section className="practice-dashboard__filters" aria-label={t.filtersTitle}>
+          <div className="practice-dashboard__filter-head">
+            <h2 className="practice-dashboard__filter-title">
+              <SlidersHorizontal size={18} aria-hidden="true" />
+              {t.filtersTitle}
+            </h2>
+            {hasActiveFilters ? (
+              <button
+                type="button"
+                className="practice-dashboard__btn practice-dashboard__btn--ghost"
+                onClick={clearFilters}
+              >
+                <RotateCcw size={15} aria-hidden="true" />
+                {t.clearFilters}
+              </button>
+            ) : null}
+          </div>
           <label className="practice-dashboard__field">
             <span>{t.selectPractice}</span>
             <select value={practiceId} onChange={(e) => setPracticeId(e.target.value)}>
@@ -349,39 +431,119 @@ export default function PracticeDashboardPage() {
             {t.memberRoleLabel}: <strong>{role}</strong>
           </p>
         ) : null}
-        {loading ? <p className="practice-dashboard__muted">{t.loading}</p> : null}
-        {error ? <p className="practice-dashboard__error">{error}</p> : null}
-        {!loading && !error && items.length === 0 ? (
-          <p className="practice-dashboard__muted">{t.empty}</p>
+
+        {practiceId && !loading && !error && items.length > 0 ? (
+          <div className="practice-dashboard__results-head">
+            <h2 className="practice-dashboard__results-title">
+              <Inbox size={18} aria-hidden="true" />
+              {t.resultsHeading}
+            </h2>
+            <span
+              className="practice-dashboard__count-badge"
+              aria-live="polite"
+              aria-label={t.resultsCount.replace("{count}", String(items.length))}
+            >
+              {items.length}
+            </span>
+          </div>
         ) : null}
 
-        <div className="practice-dashboard__cards">
-          {items.map((row) => (
-            <article key={row.id} className="practice-dashboard__card">
-              <div className="practice-dashboard__card-top">
-                <span className={`practice-dashboard__chip practice-dashboard__chip--${row.practiceStatus}`}>
-                  {statusLabel(row.practiceStatus)}
-                </span>
-                <button
-                  type="button"
-                  className="practice-dashboard__link-btn"
-                  onClick={() =>
-                    navigate(`/practice/dashboard/preparations/${encodeURIComponent(row.id)}?practiceId=${encodeURIComponent(practiceId)}`)
-                  }
-                >
-                  {t.cardOpen}
-                </button>
-              </div>
-              <p><strong>{t.cardPatient}:</strong> {row.patientName || "—"}</p>
-              <p><strong>{t.cardCreatedAt}:</strong> {fmt(row.createdAt, language)}</p>
-              <p><strong>{t.cardPatientLanguage}:</strong> {row.patientLanguage || "—"}</p>
-              <p><strong>{t.cardDoctorLanguage}:</strong> {row.doctorLanguage || "—"}</p>
-              <p><strong>{t.cardTarget}:</strong> {row.targetDoctorName || row.targetName || "—"}</p>
-              <p><strong>{t.cardCase}:</strong> {row.preVisitCaseTitle || "—"}</p>
-              <p><strong>{t.cardPdf}:</strong> {row.pdfDownloaded ? t.cardPdfReady : t.cardNoPdf}</p>
-            </article>
-          ))}
-        </div>
+        {loading ? (
+          <p className="practice-dashboard__muted" aria-live="polite">
+            {t.loading}
+          </p>
+        ) : null}
+        {error ? (
+          <p className="practice-dashboard__error" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        {showEmpty ? (
+          <div className="practice-dashboard__empty" role="status">
+            <span className="practice-dashboard__empty-icon" aria-hidden="true">
+              <Inbox size={26} strokeWidth={1.6} />
+            </span>
+            <h3 className="practice-dashboard__empty-title">{emptyTitle}</h3>
+            <p className="practice-dashboard__empty-body">{emptyBody}</p>
+            {practiceId && hasActiveFilters ? (
+              <button
+                type="button"
+                className="practice-dashboard__btn practice-dashboard__btn--primary"
+                onClick={clearFilters}
+              >
+                <RotateCcw size={15} aria-hidden="true" />
+                {t.clearFilters}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        {items.length > 0 ? (
+          <div className="practice-dashboard__cards">
+            {items.map((row) => (
+              <article key={row.id} className="practice-dashboard__card">
+                <div className="practice-dashboard__card-top">
+                  <span className={`practice-dashboard__chip practice-dashboard__chip--${row.practiceStatus}`}>
+                    {statusLabel(row.practiceStatus)}
+                  </span>
+                  <button
+                    type="button"
+                    className="practice-dashboard__btn practice-dashboard__btn--primary practice-dashboard__link-btn"
+                    onClick={() =>
+                      navigate(`/practice/dashboard/preparations/${encodeURIComponent(row.id)}?practiceId=${encodeURIComponent(practiceId)}`)
+                    }
+                  >
+                    {t.cardOpen}
+                  </button>
+                </div>
+                <p className="practice-dashboard__card-name">{row.patientName || "—"}</p>
+                <dl className="practice-dashboard__meta">
+                  <div className="practice-dashboard__meta-row">
+                    <dt>{t.cardTarget}</dt>
+                    <dd>{row.targetDoctorName || row.targetName || "—"}</dd>
+                  </div>
+                  <div className="practice-dashboard__meta-row">
+                    <dt>{t.cardCase}</dt>
+                    <dd>{row.preVisitCaseTitle || "—"}</dd>
+                  </div>
+                  {row.appointmentReason ? (
+                    <div className="practice-dashboard__meta-row">
+                      <dt>{t.cardReason}</dt>
+                      <dd>{row.appointmentReason}</dd>
+                    </div>
+                  ) : null}
+                  <div className="practice-dashboard__meta-row">
+                    <dt>
+                      <Languages size={13} aria-hidden="true" /> {t.cardPatientLanguage}
+                    </dt>
+                    <dd>{row.patientLanguage || "—"}</dd>
+                  </div>
+                  <div className="practice-dashboard__meta-row">
+                    <dt>
+                      <Languages size={13} aria-hidden="true" /> {t.cardDoctorLanguage}
+                    </dt>
+                    <dd>{row.doctorLanguage || "—"}</dd>
+                  </div>
+                  <div className="practice-dashboard__meta-row">
+                    <dt>{t.cardCreatedAt}</dt>
+                    <dd>{fmt(row.createdAt, language)}</dd>
+                  </div>
+                </dl>
+                <p className="practice-dashboard__card-foot">
+                  <span
+                    className={`practice-dashboard__pdf-badge${
+                      row.pdfDownloaded ? " practice-dashboard__pdf-badge--ready" : ""
+                    }`}
+                  >
+                    <FileText size={13} aria-hidden="true" />
+                    {row.pdfDownloaded ? t.cardPdfReady : t.cardNoPdf}
+                  </span>
+                </p>
+              </article>
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   );

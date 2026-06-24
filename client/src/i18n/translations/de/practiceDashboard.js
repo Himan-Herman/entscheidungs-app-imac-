@@ -16,6 +16,19 @@ export default {
   filterLanguage: "Sprache",
   filterSearch: "Suche Patient/Fall",
   searchPlaceholder: "Patientenname oder Falltitel",
+  navHub: "Praxisbereich",
+  resultsHeading: "Eingehende Vorbereitungen",
+  resultsCount: "{count} Einträge",
+  clearFilters: "Filter zurücksetzen",
+  emptyBody:
+    "Sobald Patient:innen eine Pre-Visit-Vorbereitung absenden – auch extern per QR-Code oder Link ohne Konto – erscheint sie hier automatisch.",
+  emptyFilteredTitle: "Keine Treffer",
+  emptyFilteredBody:
+    "Keine Vorbereitung entspricht den aktuellen Filtern. Setzen Sie die Filter zurück, um alle Einträge zu sehen.",
+  noPracticeTitle: "Praxisprofil wählen",
+  noPracticeBody:
+    "Bitte wählen Sie oben ein Praxisprofil, um eingehende Vorbereitungen zu sehen.",
+  cardReason: "Anliegen",
   allStatuses: "Alle Status",
   allDoctors: "Alle Ärzt:innen/Ziele",
   allLanguages: "Alle Sprachen",
