@@ -175,6 +175,20 @@ export default {
       "Los pacientes mantienen en todo momento el control de sus permisos y pueden revocarlos.",
     cardPatientsInfoAlpha:
       "Sin diagnóstico, terapia, triaje ni valoración médica — la lista sirve únicamente para la gestión organizativa.",
+    cardMedaLiveInfoButton: "Más información sobre Meda Live Translation",
+    cardMedaLiveInfoTitle: "Meda Live Translation",
+    cardMedaLiveInfoIntro:
+      "Meda Live Translation es un apoyo lingüístico en directo para la conversación entre la consulta y el paciente — una mera ayuda a la comprensión, no una función de decisión médica.",
+    cardMedaLiveInfoUsage:
+      "Usted elige dos idiomas de conversación, habla por el micrófono y lo dicho se transcribe, traduce y lee en voz alta en directo. La detección del hablante es automática o manual; una sesión tiene tiempo limitado y se puede pausar, finalizar o reanudar.",
+    cardMedaLiveInfoLimits:
+      "Meda solo interpreta. Sin diagnóstico, recomendación terapéutica, valoración de la urgencia, triaje ni decisión de especialista, y sin interpretación médica automática. En situaciones críticas no sustituye a un intérprete profesional.",
+    cardMedaLiveInfoPrivacy:
+      "El audio no se almacena. La conversación no se guarda automáticamente en la nube; el informe PDF y el historial se crean solo localmente en este dispositivo. El micrófono solo se usa tras un consentimiento explícito.",
+    cardMedaLiveInfoExternal:
+      "También pueden participar pacientes externos sin cuenta de MedScoutX — sin registro; el acceso se puede compartir mediante un código QR a la página de inicio.",
+    cardMedaLiveInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se pueden elegir dos idiomas y autorizar el micrófono, se transcriben, traducen y leen en voz alta las intervenciones en directo, funcionan pausa/reanudar/finalizar y el límite de tiempo, se crea un informe PDF local, y permanece reconocible el carácter puramente comunicativo sin valoración médica?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

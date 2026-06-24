@@ -183,6 +183,20 @@ export default {
     "Patients keep control of their sharing at all times and can revoke it.",
   cardPatientsInfoAlpha:
     "No diagnosis, therapy, triage or medical assessment — the list is purely for organizational management.",
+  cardMedaLiveInfoButton: "More information about Meda Live Translation",
+  cardMedaLiveInfoTitle: "Meda Live Translation",
+  cardMedaLiveInfoIntro:
+    "Meda Live Translation is live language support for the conversation between practice and patient — purely an aid to understanding, not a medical decision function.",
+  cardMedaLiveInfoUsage:
+    "You choose two conversation languages, speak via the microphone, and what is said is transcribed, translated and read aloud live. Speaker detection runs automatically or manually; a session is time-limited and can be paused, ended or resumed.",
+  cardMedaLiveInfoLimits:
+    "Meda only interprets. No diagnosis, treatment recommendation, urgency assessment, triage or specialist decision, and no automatic medical interpretation. In critical situations it does not replace professional interpreting.",
+  cardMedaLiveInfoPrivacy:
+    "Audio is not stored. The conversation is not saved to the cloud automatically; the PDF record and history are created only locally on this device. The microphone is used only after explicit consent.",
+  cardMedaLiveInfoExternal:
+    "External patients without a MedScoutX account can take part too — no registration; access can be shared via a QR code to the start page.",
+  cardMedaLiveInfoAlpha:
+    "In the alpha test you can check: can you choose two languages and grant the microphone, are turns transcribed, translated and read aloud live, do pause/resume/end and the time limit work, is a local PDF record created, and does the purely communicative nature without medical assessment stay recognizable?",
 
   metricUnreadInbox: "Unread inbox items",
   metricOpenMessages: "Open messages",

@@ -155,6 +155,19 @@ export const CARD_INFO = {
       "cardBillingPlausibilityInfoAlpha",
     ],
   },
+  medaLive: {
+    titleId: "practice-card-info-meda-live-title",
+    buttonKey: "cardMedaLiveInfoButton",
+    titleKey: "cardMedaLiveInfoTitle",
+    paragraphKeys: [
+      "cardMedaLiveInfoIntro",
+      "cardMedaLiveInfoUsage",
+      "cardMedaLiveInfoLimits",
+      "cardMedaLiveInfoPrivacy",
+      "cardMedaLiveInfoExternal",
+      "cardMedaLiveInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */

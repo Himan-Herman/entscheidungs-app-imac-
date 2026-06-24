@@ -181,6 +181,20 @@ export default {
       "Les patients gardent à tout moment le contrôle de leurs partages et peuvent les révoquer.",
     cardPatientsInfoAlpha:
       "Aucun diagnostic, traitement, triage ni évaluation médicale — la liste sert uniquement à la gestion organisationnelle.",
+    cardMedaLiveInfoButton: "Plus d’informations sur Meda Live Translation",
+    cardMedaLiveInfoTitle: "Meda Live Translation",
+    cardMedaLiveInfoIntro:
+      "Meda Live Translation est une aide linguistique en direct pour l’échange entre le cabinet et le patient — une simple aide à la compréhension, et non une fonction de décision médicale.",
+    cardMedaLiveInfoUsage:
+      "Vous choisissez deux langues de conversation, vous parlez au micro, et les propos sont transcrits, traduits et lus à voix haute en direct. La détection du locuteur est automatique ou manuelle ; une session est limitée dans le temps et peut être mise en pause, arrêtée ou reprise.",
+    cardMedaLiveInfoLimits:
+      "Meda ne fait qu’interpréter. Aucun diagnostic, recommandation thérapeutique, évaluation de l’urgence, triage ni décision de spécialiste, et aucune interprétation médicale automatique. Dans les situations critiques, il ne remplace pas un interprète professionnel.",
+    cardMedaLiveInfoPrivacy:
+      "L’audio n’est pas enregistré. La conversation n’est pas archivée automatiquement dans le cloud ; le compte rendu PDF et l’historique sont créés uniquement en local sur cet appareil. Le micro n’est utilisé qu’après consentement explicite.",
+    cardMedaLiveInfoExternal:
+      "Les patients externes sans compte MedScoutX peuvent aussi participer — sans inscription ; l’accès peut être partagé via un QR code vers la page de démarrage.",
+    cardMedaLiveInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : peut-on choisir deux langues et autoriser le micro, les échanges sont-ils transcrits, traduits et lus à voix haute en direct, la pause/reprise/arrêt et la limite de temps fonctionnent-elles, un compte rendu PDF local est-il créé, et le caractère purement communicationnel sans évaluation médicale reste-t-il reconnaissable ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",

@@ -183,6 +183,20 @@ export default {
     "Patient:innen behalten jederzeit die Kontrolle über ihre Freigaben und können sie widerrufen.",
   cardPatientsInfoAlpha:
     "Keine Diagnose, Therapie, Triage oder medizinische Bewertung – die Liste dient ausschließlich der organisatorischen Verwaltung.",
+  cardMedaLiveInfoButton: "Mehr Informationen zu Meda Live Translation",
+  cardMedaLiveInfoTitle: "Meda Live Translation",
+  cardMedaLiveInfoIntro:
+    "Meda Live Translation ist eine Live-Sprachunterstützung für das Gespräch zwischen Praxis und Patient:in – eine reine Verständigungshilfe, keine medizinische Entscheidungsfunktion.",
+  cardMedaLiveInfoUsage:
+    "Sie wählen zwei Gesprächssprachen, sprechen über das Mikrofon, und das Gesagte wird live transkribiert, übersetzt und vorgelesen. Die Sprechererkennung läuft automatisch oder manuell; eine Sitzung ist zeitlich begrenzt und lässt sich pausieren, beenden oder fortsetzen.",
+  cardMedaLiveInfoLimits:
+    "Meda dolmetscht nur. Keine Diagnose, Therapieempfehlung, Dringlichkeitseinschätzung, Triage oder Facharztentscheidung und keine automatische medizinische Interpretation. In kritischen Situationen ersetzt es keine professionelle Dolmetschleistung.",
+  cardMedaLiveInfoPrivacy:
+    "Audio wird nicht gespeichert. Das Gespräch wird nicht automatisch in der Cloud abgelegt; PDF-Protokoll und Verlauf entstehen nur lokal auf diesem Gerät. Das Mikrofon wird erst nach ausdrücklicher Zustimmung verwendet.",
+  cardMedaLiveInfoExternal:
+    "Auch externe Patient:innen ohne MedScoutX-Konto können teilnehmen – ohne Registrierung; der Zugang lässt sich per QR-Code zur Startseite teilen.",
+  cardMedaLiveInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Lassen sich zwei Sprachen wählen und das Mikrofon freigeben, werden Beiträge live transkribiert, übersetzt und vorgelesen, funktionieren Pause/Fortsetzen/Beenden und das Zeitlimit, entsteht ein lokales PDF-Protokoll, und bleibt der reine Verständigungscharakter ohne medizinische Bewertung erkennbar?",
 
   metricUnreadInbox: "Ungelesene Postfach-Einträge",
   metricOpenMessages: "Offene Nachrichten",
