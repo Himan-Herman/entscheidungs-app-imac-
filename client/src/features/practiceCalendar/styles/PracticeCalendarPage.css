@@ -177,6 +177,22 @@
   outline-offset: 2px;
 }
 
+/* Month view: appointments grouped by day */
+.practice-calendar__day-group {
+  margin-bottom: 1.25rem;
+}
+
+.practice-calendar__day-heading {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+:root[data-theme="dark"] .practice-calendar__day-heading {
+  color: #f1f5f9;
+}
+
 .practice-calendar__btn--primary {
   background: var(--accent, #0f766e);
   color: #fff;

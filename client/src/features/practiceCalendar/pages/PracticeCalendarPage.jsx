@@ -12,6 +12,11 @@ import {
   patchAppointment,
   rescheduleAppointment,
 } from "../api/practiceCalendarApi.js";
+import {
+  appointmentsInMonth,
+  appointmentsOnDay,
+  groupAppointmentsByDay,
+} from "../calendarViewUtils.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../styles/PracticeCalendarPage.css";
 
@@ -20,6 +25,18 @@ function fmt(iso, lang) {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
+    });
+  } catch {
+    return "—";
+  }
+}
+
+function fmtDateOnly(ms, lang) {
+  try {
+    return new Date(ms).toLocaleDateString(getPrimaryIntlLocale(lang), {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
     });
   } catch {
     return "—";
@@ -47,7 +64,7 @@ export default function PracticeCalendarPage() {
   const [view, setView] = useState("list");
   const [statusFilter, setStatusFilter] = useState("");
   const [appointments, setAppointments] = useState([]);
-  const [types, setTypes] = useState([]);
+  const [, setTypes] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -70,46 +87,68 @@ export default function PracticeCalendarPage() {
     return Array.isArray(data.practices) ? data.practices : [];
   }, []);
 
-  const reload = useCallback(async (pid) => {
-    const now = new Date();
-    const from = new Date(now);
-    from.setDate(from.getDate() - (view === "month" ? 30 : 7));
-    const to = new Date(now);
-    to.setDate(to.getDate() + (view === "month" ? 60 : 14));
-    const params = {
-      from: from.toISOString(),
-      to: to.toISOString(),
-    };
-    if (statusFilter) params.status = statusFilter;
-    const [{ res, data }, typesRes] = await Promise.all([
-      fetchAppointments(pid, params),
-      fetchAppointmentTypes(pid),
-    ]);
-    if (res.status === 404 && data.error === "feature_disabled") throw new Error("feature_disabled");
-    if (!res.ok) throw new Error(data.error || "load_failed");
-    setAppointments(data.appointments || []);
-    if (typesRes.res.ok) setTypes(typesRes.data.types || []);
-  }, [statusFilter, view]);
+  // Self-managing loader: owns loading + error so a single failed call never
+  // leaves a sticky red banner while stale appointments stay on screen.
+  const reload = useCallback(
+    async (pid) => {
+      if (!pid) return;
+      setLoading(true);
+      setError("");
+      try {
+        const now = new Date();
+        const from = new Date(now);
+        from.setDate(from.getDate() - (view === "month" ? 30 : 7));
+        const to = new Date(now);
+        to.setDate(to.getDate() + (view === "month" ? 60 : 14));
+        const params = { from: from.toISOString(), to: to.toISOString() };
+        if (statusFilter) params.status = statusFilter;
+        const [{ res, data }, typesRes] = await Promise.all([
+          fetchAppointments(pid, params),
+          fetchAppointmentTypes(pid),
+        ]);
+        if (res.status === 404 && data.error === "feature_disabled") {
+          setAppointments([]);
+          setError(t.errors?.feature_disabled || t.loadError);
+          return;
+        }
+        if (!res.ok) {
+          setAppointments([]);
+          setError(t.errors?.[data.error] || t.loadError);
+          return;
+        }
+        setAppointments(data.appointments || []);
+        // Appointment types are secondary — a failure here must not block the page.
+        if (typesRes.res.ok) setTypes(typesRes.data.types || []);
+        setError(""); // success → never leave a stale banner
+      } catch (e) {
+        if (e?.message === "SESSION_EXPIRED") return;
+        setError(t.loadError);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [statusFilter, view, t],
+  );
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoading(true);
-      setError("");
       try {
         const list = await loadPractices();
         if (cancelled) return;
         setPractices(list);
         const pid =
           practiceId && list.some((p) => p.id === practiceId) ? practiceId : list[0]?.id || "";
-        setPracticeId(pid);
+        if (pid !== practiceId) setPracticeId(pid);
         if (pid) {
           setSearchParams({ practiceId: pid }, { replace: true });
           await reload(pid);
+        } else {
+          setError("");
+          setLoading(false);
         }
       } catch (e) {
-        if (!cancelled) setError(t.errors?.[e.message] || t.loadError);
-      } finally {
+        if (!cancelled && e?.message !== "SESSION_EXPIRED") setError(t.loadError);
         if (!cancelled) setLoading(false);
       }
     })();
@@ -117,11 +156,6 @@ export default function PracticeCalendarPage() {
       cancelled = true;
     };
   }, [loadPractices, practiceId, reload, setSearchParams, t]);
-
-  useEffect(() => {
-    if (!practiceId) return;
-    reload(practiceId).catch(() => {});
-  }, [practiceId, statusFilter, view, reload]);
 
   const onSelect = (appt) => {
     setSelected(appt);
@@ -235,6 +269,31 @@ export default function PracticeCalendarPage() {
       return { date: d, appointments: dayAppts };
     });
   }, [appointments, view]);
+
+  const dayAppointments = useMemo(
+    () => (view === "day" ? appointmentsOnDay(appointments, Date.now()) : []),
+    [appointments, view],
+  );
+  const monthGroups = useMemo(
+    () => (view === "month" ? groupAppointmentsByDay(appointmentsInMonth(appointments, Date.now())) : []),
+    [appointments, view],
+  );
+  const listAppointments = view === "day" ? dayAppointments : appointments;
+
+  const renderAppt = (a) => (
+    <li key={a.id}>
+      <button
+        type="button"
+        className={`practice-calendar__card${selected?.id === a.id ? " practice-calendar__card--selected" : ""}`}
+        onClick={() => onSelect(a)}
+        aria-current={selected?.id === a.id ? "true" : undefined}
+      >
+        <strong>{a.title}</strong>
+        <div>{fmt(a.startAt, language)}</div>
+        <span className="practice-calendar__status">{t[`status_${a.status}`] || a.status}</span>
+      </button>
+    </li>
+  );
 
   return (
     <main className="practice-dashboard practice-calendar" aria-labelledby="practice-calendar-heading">
@@ -363,25 +422,27 @@ export default function PracticeCalendarPage() {
                 </div>
               ))}
             </div>
+          ) : view === "month" ? (
+            monthGroups.length === 0 ? (
+              <ul className="practice-calendar__list">
+                <li>{t.noAppointments}</li>
+              </ul>
+            ) : (
+              monthGroups.map((group) => (
+                <div key={group.dateMs} className="practice-calendar__day-group">
+                  <h3 className="practice-calendar__day-heading">
+                    {fmtDateOnly(group.dateMs, language)}
+                  </h3>
+                  <ul className="practice-calendar__list">{group.items.map(renderAppt)}</ul>
+                </div>
+              ))
+            )
           ) : (
             <ul className="practice-calendar__list">
-              {appointments.length === 0 ? (
+              {listAppointments.length === 0 ? (
                 <li>{t.noAppointments}</li>
               ) : (
-                appointments.map((a) => (
-                  <li key={a.id}>
-                    <button
-                      type="button"
-                      className={`practice-calendar__card${selected?.id === a.id ? " practice-calendar__card--selected" : ""}`}
-                      onClick={() => onSelect(a)}
-                      aria-current={selected?.id === a.id ? "true" : undefined}
-                    >
-                      <strong>{a.title}</strong>
-                      <div>{fmt(a.startAt, language)}</div>
-                      <span className="practice-calendar__status">{t[`status_${a.status}`] || a.status}</span>
-                    </button>
-                  </li>
-                ))
+                listAppointments.map(renderAppt)
               )}
             </ul>
           )}

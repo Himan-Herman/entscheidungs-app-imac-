@@ -63,11 +63,16 @@ function mapError(err) {
     "appointment_cancelled",
     "invalid_status_transition",
   ]);
-  if (msg === "ai_not_configured") return { status: 503, error: msg };
-  if (forbidden.has(msg)) return { status: 403, error: msg };
-  if (notFound.has(msg)) return { status: 404, error: msg };
-  if (bad.has(msg)) return { status: 400, error: msg };
-  return { status: 500, error: "request_failed" };
+  let mapped;
+  if (msg === "ai_not_configured") mapped = { status: 503, error: msg };
+  else if (forbidden.has(msg)) mapped = { status: 403, error: msg };
+  else if (notFound.has(msg)) mapped = { status: 404, error: msg };
+  else if (bad.has(msg)) mapped = { status: 400, error: msg };
+  else mapped = { status: 500, error: "request_failed" };
+  // Surface the real cause in logs: 500s with full stack, expected 4xx as a short line.
+  if (mapped.status >= 500) console.error("[practice/calendar] unexpected error:", err);
+  else console.warn(`[practice/calendar] ${mapped.status} ${msg}`);
+  return mapped;
 }
 
 router.get("/appointments", async (req, res) => {

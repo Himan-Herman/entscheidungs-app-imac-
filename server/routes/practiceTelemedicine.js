@@ -34,14 +34,20 @@ function pid(req) {
 
 function mapError(err) {
   const msg = err?.message || "request_failed";
+  let mapped;
   if (msg === "forbidden" || msg === "consent_required" || msg === "link_revoked") {
-    return { status: 403, error: msg };
+    mapped = { status: 403, error: msg };
+  } else if (msg === "session_not_found" || msg === "practice_not_found") {
+    mapped = { status: 404, error: msg };
+  } else if (msg === "ai_not_configured") {
+    mapped = { status: 503, error: msg };
+  } else {
+    mapped = { status: 500, error: "request_failed" };
   }
-  if (msg === "session_not_found" || msg === "practice_not_found") {
-    return { status: 404, error: msg };
-  }
-  if (msg === "ai_not_configured") return { status: 503, error: msg };
-  return { status: 500, error: "request_failed" };
+  // Surface the real cause in logs: 500s with full stack, expected 4xx as a short line.
+  if (mapped.status >= 500) console.error("[practice/telemedicine] unexpected error:", err);
+  else console.warn(`[practice/telemedicine] ${mapped.status} ${msg}`);
+  return mapped;
 }
 
 router.get("/settings/video", async (req, res) => {
