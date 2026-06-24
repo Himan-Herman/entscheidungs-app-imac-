@@ -69,6 +69,16 @@ export default {
       "Lorsque les patients utilisent eux aussi MedScoutX et sont liés à votre établissement, les informations correspondantes apparaissent également dans leur boîte de réception — uniquement via des autorisations claires. Pour les patients externes sans compte MedScoutX, votre boîte de réception continue de fonctionner ; aucune inscription n’est imposée.",
     cardInboxInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : les nouvelles entrées sont-elles comptées et affichées correctement, les statuts peuvent-ils être modifiés, et les informations liées apparaissent-elles côté patient sous « Mon cabinet » → « Boîte de réception » ?",
+    cardMessagesInfoButton: "Plus d’informations sur les messages",
+    cardMessagesInfoTitle: "Messages",
+    cardMessagesInfoIntro:
+      "Les messages regroupent la communication écrite et sécurisée entre votre établissement et les patients liés — uniquement organisationnelle, sans évaluation médicale, diagnostic ni classification d’urgence par MedScoutX.",
+    cardMessagesInfoUsage:
+      "Vous ouvrez les messages depuis un patient dans la liste des patients et y tenez des conversations (fils). Vos réponses apparaissent dans la boîte de réception du patient, ses réponses vous reviennent. Le contenu n’est visible qu’avec un lien actif et une autorisation de messagerie accordée.",
+    cardMessagesInfoExternal:
+      "Les messages sécurisés dans l’application nécessitent que le patient dispose d’un compte MedScoutX. Les patients externes sans compte ne sont jamais contraints de s’inscrire — continuez à utiliser vos canaux habituels pour eux. La tuile et votre établissement restent pleinement fonctionnels.",
+    cardMessagesInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : peut-on ouvrir et répondre à une conversation depuis la liste des patients, le message apparaît-il côté patient sous « Mon cabinet » → « Messages », et les patients externes voient-ils une indication claire plutôt qu’une erreur ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",

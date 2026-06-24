@@ -63,6 +63,16 @@ export default {
     "When patients also use MedScoutX and are linked to your practice, matching notices appear in their inbox too — only via clear permissions. For external patients without a MedScoutX account, your practice inbox keeps working; registration is never forced.",
   cardInboxInfoAlpha:
     "In the alpha test you can check: are new entries counted and shown correctly, can statuses be changed, and do linked notices appear on the patient side under “My practice” → “Inbox”?",
+  cardMessagesInfoButton: "More information about messages",
+  cardMessagesInfoTitle: "Messages",
+  cardMessagesInfoIntro:
+    "Messages bundle the secure, written communication between your practice and linked patients — organizational only, without any medical assessment, diagnosis or urgency rating by MedScoutX.",
+  cardMessagesInfoUsage:
+    "You open messages from a patient in the patient list and hold conversations (threads) there. Your replies appear in the patient's inbox, their replies come back to you. Content is only visible with an active link and granted messaging permission.",
+  cardMessagesInfoExternal:
+    "Secure in-app messages require the patient to have a MedScoutX account. External patients without an account are never forced to register — keep using your usual channels for them. The tile and your practice stay fully functional.",
+  cardMessagesInfoAlpha:
+    "In the alpha test you can check: can a conversation be opened and answered from the patient list, does the message appear on the patient side under “My practice” → “Messages”, and do external patients see a clear note instead of an error?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

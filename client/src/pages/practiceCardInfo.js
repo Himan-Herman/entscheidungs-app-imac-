@@ -33,6 +33,17 @@ export const CARD_INFO = {
       "cardInboxInfoAlpha",
     ],
   },
+  messages: {
+    titleId: "practice-card-info-messages-title",
+    buttonKey: "cardMessagesInfoButton",
+    titleKey: "cardMessagesInfoTitle",
+    paragraphKeys: [
+      "cardMessagesInfoIntro",
+      "cardMessagesInfoUsage",
+      "cardMessagesInfoExternal",
+      "cardMessagesInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */

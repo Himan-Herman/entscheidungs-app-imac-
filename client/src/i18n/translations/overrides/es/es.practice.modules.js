@@ -63,6 +63,16 @@ export default {
       "Cuando los pacientes también usan MedScoutX y están vinculados a su consulta, los avisos correspondientes aparecen también en su bandeja de entrada — solo mediante autorizaciones claras. Para pacientes externos sin cuenta de MedScoutX, la bandeja de entrada de su consulta sigue funcionando; nunca se obliga a registrarse.",
     cardInboxInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se cuentan y muestran correctamente las nuevas entradas, se pueden cambiar los estados y aparecen los avisos vinculados en el lado del paciente en « Mi consultorio » → « Bandeja de entrada »?",
+    cardMessagesInfoButton: "Más información sobre los mensajes",
+    cardMessagesInfoTitle: "Mensajes",
+    cardMessagesInfoIntro:
+      "Los mensajes reúnen la comunicación escrita y segura entre su consulta y los pacientes vinculados — solo a nivel organizativo, sin ninguna evaluación médica, diagnóstico ni clasificación de urgencia por parte de MedScoutX.",
+    cardMessagesInfoUsage:
+      "Abre los mensajes desde un paciente en la lista de pacientes y mantiene conversaciones (hilos) allí. Sus respuestas aparecen en la bandeja de entrada del paciente, las respuestas de este vuelven a usted. El contenido solo es visible con un vínculo activo y un permiso de mensajería concedido.",
+    cardMessagesInfoExternal:
+      "Los mensajes seguros en la app requieren que el paciente tenga una cuenta de MedScoutX. A los pacientes externos sin cuenta nunca se les obliga a registrarse — siga usando sus canales habituales para ellos. La tarjeta y su consulta siguen siendo plenamente funcionales.",
+    cardMessagesInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se puede abrir y responder una conversación desde la lista de pacientes, aparece el mensaje en el lado del paciente en « Mi consultorio » → « Mensajes », y ven los pacientes externos una indicación clara en lugar de un error?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

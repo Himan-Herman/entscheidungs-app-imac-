@@ -63,6 +63,16 @@ export default {
       "Se anche i pazienti usano MedScoutX e sono collegati al tuo studio, le indicazioni corrispondenti compaiono anche nella loro posta in arrivo — solo tramite autorizzazioni chiare. Per i pazienti esterni senza account MedScoutX, la posta in arrivo del tuo studio continua a funzionare; la registrazione non è mai obbligatoria.",
     cardInboxInfoAlpha:
       "Nel test alpha puoi verificare: le nuove voci vengono conteggiate e mostrate correttamente, è possibile modificare gli stati e le indicazioni collegate compaiono sul lato paziente in « Il mio studio » → « Posta in arrivo »?",
+    cardMessagesInfoButton: "Maggiori informazioni sui messaggi",
+    cardMessagesInfoTitle: "Messaggi",
+    cardMessagesInfoIntro:
+      "I messaggi raccolgono la comunicazione scritta e sicura tra il tuo studio e i pazienti collegati — solo a livello organizzativo, senza alcuna valutazione medica, diagnosi o classificazione di urgenza da parte di MedScoutX.",
+    cardMessagesInfoUsage:
+      "Apri i messaggi da un paziente nell’elenco dei pazienti e vi conduci conversazioni (thread). Le tue risposte compaiono nella posta in arrivo del paziente, le sue risposte tornano a te. Il contenuto è visibile solo con un collegamento attivo e un’autorizzazione ai messaggi concessa.",
+    cardMessagesInfoExternal:
+      "I messaggi sicuri nell’app richiedono che il paziente abbia un account MedScoutX. I pazienti esterni senza account non sono mai obbligati a registrarsi — continua a usare i tuoi canali abituali per loro. La scheda e il tuo studio restano pienamente funzionanti.",
+    cardMessagesInfoAlpha:
+      "Nel test alpha puoi verificare: è possibile aprire e rispondere a una conversazione dall’elenco dei pazienti, il messaggio compare sul lato paziente in « Il mio studio » → « Messaggi », e i pazienti esterni vedono un’indicazione chiara invece di un errore?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

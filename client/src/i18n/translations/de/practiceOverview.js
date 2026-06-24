@@ -63,6 +63,16 @@ export default {
     "Nutzen Patient:innen ebenfalls MedScoutX und sind mit Ihrer Praxis verknüpft, erscheinen passende Hinweise – nur über klare Freigaben – auch in deren Postfach. Für externe Patient:innen ohne MedScoutX-Konto funktioniert Ihr Praxis-Postfach weiterhin; eine Registrierung wird nicht erzwungen.",
   cardInboxInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Werden neue Einträge korrekt gezählt und angezeigt, lassen sich Status ändern, und erscheinen verknüpfte Hinweise auf der Patientenseite unter „Meine Praxis“ → „Postfach“?",
+  cardMessagesInfoButton: "Mehr Informationen zu Nachrichten",
+  cardMessagesInfoTitle: "Nachrichten",
+  cardMessagesInfoIntro:
+    "Nachrichten bündeln die sichere, schriftliche Kommunikation zwischen Ihrer Praxis und verknüpften Patient:innen – rein organisatorisch, ohne medizinische Bewertung, Diagnose oder Dringlichkeitseinstufung durch MedScoutX.",
+  cardMessagesInfoUsage:
+    "Sie öffnen die Nachrichten über eine:n Patient:in in der Patient:innenliste und führen dort Konversationen (Threads). Ihre Antworten erscheinen im Postfach der Patient:innen, deren Antworten wieder bei Ihnen. Inhalte sind nur bei aktiver Verknüpfung und erteilter Nachrichten-Freigabe sichtbar.",
+  cardMessagesInfoExternal:
+    "Sichere In-App-Nachrichten setzen ein MedScoutX-Konto der Patient:innen voraus. Externe Patient:innen ohne Konto werden nicht zur Registrierung gezwungen – nutzen Sie für sie weiterhin Ihre üblichen Kanäle. Kachel und Praxis bleiben voll funktionsfähig.",
+  cardMessagesInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Lässt sich aus der Patient:innenliste eine Konversation öffnen und beantworten, erscheint die Nachricht auf der Patientenseite unter „Meine Praxis“ → „Nachrichten“, und zeigt sich für externe Patient:innen ein klarer Hinweis statt eines Fehlers?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:
