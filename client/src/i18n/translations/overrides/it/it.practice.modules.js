@@ -143,6 +143,16 @@ export default {
       "I pazienti compilano il modulo volontariamente e forniscono un consenso GDPR esplicito prima dell’invio; senza di esso non viene trasmesso nulla. I pazienti esterni senza account MedScoutX usano il link o il codice QR — senza obbligo di registrazione. Indipendentemente, i pazienti con MedScoutX possono usare autonomamente la propria preparazione alla visita.",
     cardAnamnesisInfoAlpha:
       "Nel test alpha puoi verificare: è possibile creare un modello e generare un link, un’anamnesi inviata tramite il link compare come invio, la traduzione nella lingua dello studio funziona, gli stati vuoti e il blocco della funzione si applicano, e le informazioni restano nascoste senza consenso?",
+    cardBookingInfoButton: "Maggiori informazioni su appuntamenti e richieste",
+    cardBookingInfoTitle: "Appuntamenti e richieste",
+    cardBookingInfoIntro:
+      "Appuntamenti e richieste serve al coordinamento amministrativo degli appuntamenti e delle richieste di appuntamento in arrivo. La gestione è puramente organizzativa — MedScoutX non effettua alcuna valutazione medica, diagnosi, raccomandazione terapeutica, classificazione di urgenza o prioritizzazione in base alla gravità.",
+    cardBookingInfoUsage:
+      "Attivi la prenotazione, definisci tipi di appuntamento e disponibilità, e gestisci le richieste in arrivo con uno stato (richiesto, pianificato, confermato, annullato, completato, non presentato, riprogrammato). Le richieste possono essere accettate o rifiutate — le azioni di gestione solo con l’autorizzazione corrispondente.",
+    cardBookingInfoPatients:
+      "I pazienti inviano richieste di appuntamento e forniscono un consenso esplicito in tale occasione; vedono i loro appuntamenti in « I miei appuntamenti ». Gli appuntamenti possono essere gestiti anche per pazienti esterni senza account MedScoutX — senza obbligo di registrazione. Vengono trattati solo dati amministrativi, senza condivisione automatica dei dati.",
+    cardBookingInfoAlpha:
+      "Nel test alpha puoi verificare: è possibile attivare la prenotazione, una richiesta di appuntamento compare come richiesta, le richieste possono essere accettate o rifiutate e gli stati tracciati, i pazienti vedono i loro appuntamenti in « I miei appuntamenti », e si applicano lo stato vuoto e il blocco della funzione?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

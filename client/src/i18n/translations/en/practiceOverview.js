@@ -143,6 +143,16 @@ export default {
     "Patients fill in the form voluntarily and give explicit GDPR consent before sending; without it, nothing is submitted. External patients without a MedScoutX account use the link or QR code — without being forced to register. Independently, patients with MedScoutX can use their visit preparation on their own.",
   cardAnamnesisInfoAlpha:
     "In the alpha test you can check: can a template be created and a link generated, does an anamnesis submitted via the link appear as a submission, does translation into the practice language work, do empty states and the feature gate apply, and does information stay hidden without consent?",
+  cardBookingInfoButton: "More information about appointments & requests",
+  cardBookingInfoTitle: "Appointments & requests",
+  cardBookingInfoIntro:
+    "Appointments & requests is for the administrative coordination of appointments and incoming appointment requests. Handling is purely organizational — MedScoutX makes no medical assessment, diagnosis, treatment recommendation, urgency rating or prioritization by severity.",
+  cardBookingInfoUsage:
+    "You enable booking, define appointment types and availabilities, and handle incoming requests with a status (requested, scheduled, confirmed, cancelled, completed, no-show, rescheduled). Requests can be accepted or declined — management actions only with the corresponding permission.",
+  cardBookingInfoPatients:
+    "Patients submit appointment requests and give explicit consent in the process; they see their appointments under “My appointments”. Appointments can also be kept for external patients without a MedScoutX account — without being forced to register. Only administrative data is processed, with no automatic data sharing.",
+  cardBookingInfoAlpha:
+    "In the alpha test you can check: can booking be enabled, does an appointment request appear as a request, can requests be accepted or declined and statuses be traced, do patients see their appointments under “My appointments”, and do the empty state and feature gate apply?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

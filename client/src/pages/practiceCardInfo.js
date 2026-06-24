@@ -121,6 +121,17 @@ export const CARD_INFO = {
       "cardAnamnesisInfoAlpha",
     ],
   },
+  booking: {
+    titleId: "practice-card-info-booking-title",
+    buttonKey: "cardBookingInfoButton",
+    titleKey: "cardBookingInfoTitle",
+    paragraphKeys: [
+      "cardBookingInfoIntro",
+      "cardBookingInfoUsage",
+      "cardBookingInfoPatients",
+      "cardBookingInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */

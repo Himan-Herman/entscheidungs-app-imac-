@@ -143,6 +143,16 @@ export default {
       "Los pacientes rellenan el formulario de forma voluntaria y otorgan un consentimiento RGPD explícito antes de enviarlo; sin él, no se transmite nada. Los pacientes externos sin cuenta de MedScoutX usan el enlace o el código QR — sin obligación de registro. De forma independiente, los pacientes con MedScoutX pueden usar su preparación de la consulta por su cuenta.",
     cardAnamnesisInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se puede crear una plantilla y generar un enlace, aparece como envío una anamnesis enviada a través del enlace, funciona la traducción al idioma de la consulta, se aplican los estados vacíos y el bloqueo de la función, y permanece oculta la información sin consentimiento?",
+    cardBookingInfoButton: "Más información sobre citas y solicitudes",
+    cardBookingInfoTitle: "Citas y solicitudes",
+    cardBookingInfoIntro:
+      "Citas y solicitudes sirve para la coordinación administrativa de las citas y de las solicitudes de cita entrantes. La gestión es puramente organizativa — MedScoutX no realiza ninguna evaluación médica, diagnóstico, recomendación terapéutica, clasificación de urgencia ni priorización por gravedad.",
+    cardBookingInfoUsage:
+      "Activa la reserva de citas, define tipos de cita y disponibilidades, y gestiona las solicitudes entrantes con un estado (solicitada, planificada, confirmada, cancelada, completada, no presentada, reprogramada). Las solicitudes se pueden aceptar o rechazar — las acciones de gestión solo con el permiso correspondiente.",
+    cardBookingInfoPatients:
+      "Los pacientes envían solicitudes de cita y otorgan un consentimiento explícito en ese proceso; ven sus citas en « Mis citas ». También se pueden gestionar citas para pacientes externos sin cuenta de MedScoutX — sin obligación de registrarse. Solo se procesan datos administrativos, sin compartición automática de datos.",
+    cardBookingInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se puede activar la reserva de citas, aparece una solicitud de cita como solicitud, se pueden aceptar o rechazar las solicitudes y seguir los estados, ven los pacientes sus citas en « Mis citas », y se aplican el estado vacío y el bloqueo de la función?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

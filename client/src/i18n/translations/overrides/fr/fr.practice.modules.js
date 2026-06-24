@@ -149,6 +149,16 @@ export default {
       "Les patients remplissent le formulaire volontairement et donnent un consentement RGPD explicite avant l’envoi ; sans cela, rien n’est transmis. Les patients externes sans compte MedScoutX utilisent le lien ou le code QR — sans être contraints de s’inscrire. Indépendamment, les patients disposant de MedScoutX peuvent utiliser leur préparation de consultation de manière autonome.",
     cardAnamnesisInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : peut-on créer un modèle et générer un lien, une anamnèse soumise via le lien apparaît-elle comme une soumission, la traduction dans la langue de l’établissement fonctionne-t-elle, les états vides et le verrou de fonctionnalité s’appliquent-ils, et les informations restent-elles masquées sans consentement ?",
+    cardBookingInfoButton: "Plus d’informations sur les rendez-vous et demandes",
+    cardBookingInfoTitle: "Rendez-vous et demandes",
+    cardBookingInfoIntro:
+      "Rendez-vous et demandes sert à la coordination administrative des rendez-vous et des demandes de rendez-vous entrantes. Le traitement est purement organisationnel — MedScoutX n’effectue aucune évaluation médicale, diagnostic, recommandation thérapeutique, classification d’urgence ni priorisation selon la gravité.",
+    cardBookingInfoUsage:
+      "Vous activez la prise de rendez-vous, définissez des types de rendez-vous et des disponibilités, et traitez les demandes entrantes avec un statut (demandé, planifié, confirmé, annulé, terminé, non présenté, reporté). Les demandes peuvent être acceptées ou refusées — les actions de gestion uniquement avec l’autorisation correspondante.",
+    cardBookingInfoPatients:
+      "Les patients soumettent des demandes de rendez-vous et donnent un consentement explicite à cette occasion ; ils voient leurs rendez-vous sous « Mes rendez-vous ». Des rendez-vous peuvent aussi être gérés pour des patients externes sans compte MedScoutX — sans obligation de s’inscrire. Seules des données administratives sont traitées, sans partage automatique de données.",
+    cardBookingInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : la prise de rendez-vous peut-elle être activée, une demande de rendez-vous apparaît-elle comme une demande, les demandes peuvent-elles être acceptées ou refusées et les statuts suivis, les patients voient-ils leurs rendez-vous sous « Mes rendez-vous », et l’état vide et le verrou de fonctionnalité s’appliquent-ils ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",

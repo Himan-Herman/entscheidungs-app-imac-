@@ -14,7 +14,7 @@ import {
   suppressCardNavigation,
 } from "../practiceCardInfo.js";
 
-test("only the 10 designated practice-hub cards expose an info button", () => {
+test("only the 11 designated practice-hub cards expose an info button", () => {
   assert.deepEqual(INFO_CARD_IDS, [
     "telemedicine",
     "inbox",
@@ -26,6 +26,7 @@ test("only the 10 designated practice-hub cards expose an info button", () => {
     "security",
     "activity",
     "anamnesis",
+    "booking",
   ]);
   assert.equal(hasCardInfo("telemedicine"), true);
   assert.equal(hasCardInfo("inbox"), true);
@@ -37,7 +38,9 @@ test("only the 10 designated practice-hub cards expose an info button", () => {
   assert.equal(hasCardInfo("security"), true);
   assert.equal(hasCardInfo("activity"), true);
   assert.equal(hasCardInfo("anamnesis"), true);
-  for (const other of ["patients", "booking", "medaLive", ""]) {
+  assert.equal(hasCardInfo("booking"), true);
+  // The 3 hub cards that intentionally have NO info button.
+  for (const other of ["patients", "billingPlausibility", "medaLive", ""]) {
     assert.equal(hasCardInfo(other), false);
   }
 });

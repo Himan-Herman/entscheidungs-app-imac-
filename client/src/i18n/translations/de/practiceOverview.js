@@ -143,6 +143,16 @@ export default {
     "Patient:innen füllen den Bogen freiwillig aus und erteilen vor dem Absenden eine ausdrückliche DSGVO-Einwilligung; ohne diese wird nichts übermittelt. Externe Patient:innen ohne MedScoutX-Konto nutzen den Link bzw. QR-Code – ohne Registrierungspflicht. Unabhängig davon können Patient:innen mit MedScoutX ihre Gesprächsvorbereitung eigenständig nutzen.",
   cardAnamnesisInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Lässt sich eine Vorlage anlegen und ein Link erzeugen, erscheint eine über den Link eingereichte Anamnese als Einreichung, funktioniert die Übersetzung in die Praxissprache, greifen Leerzustände und das Feature-Gate, und bleiben Angaben ohne Einwilligung unsichtbar?",
+  cardBookingInfoButton: "Mehr Informationen zu Termine & Anfragen",
+  cardBookingInfoTitle: "Termine & Anfragen",
+  cardBookingInfoIntro:
+    "Termine & Anfragen dient der administrativen Koordination von Terminen und eingehenden Terminwünschen. Die Bearbeitung ist rein organisatorisch – MedScoutX nimmt keine medizinische Bewertung, Diagnose, Therapieempfehlung, Dringlichkeitseinschätzung oder Priorisierung nach Schwere vor.",
+  cardBookingInfoUsage:
+    "Sie aktivieren die Terminbuchung, legen Termintypen und Verfügbarkeiten fest und bearbeiten eingehende Anfragen mit Status (angefragt, geplant, bestätigt, abgesagt, abgeschlossen, nicht erschienen, verschoben). Anfragen lassen sich annehmen oder ablehnen – Verwaltungsaktionen nur mit entsprechendem Recht.",
+  cardBookingInfoPatients:
+    "Patient:innen stellen Terminwünsche und erteilen dabei eine ausdrückliche Einwilligung; ihre Termine sehen sie unter „Meine Termine“. Termine können auch für externe Patient:innen ohne MedScoutX-Konto geführt werden – ohne Registrierungspflicht. Verarbeitet werden nur administrative Angaben, keine automatische Datenfreigabe.",
+  cardBookingInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Lässt sich die Terminbuchung aktivieren, erscheint ein Terminwunsch als Anfrage, lassen sich Anfragen annehmen oder ablehnen und Status nachvollziehen, sehen Patient:innen ihre Termine unter „Meine Termine“, und greifen Leerzustand und Feature-Gate?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:
