@@ -103,6 +103,16 @@ export default {
     "Patients submit requests themselves under “My practice” → “My data & permissions” and keep control over their data and permissions. Digital requests require a linked MedScoutX account; external patients without an account are never forced to register and use the usual channels. The tile and your practice stay functional.",
   cardDataRequestsInfoAlpha:
     "In the alpha test you can check: does a request submitted by the patient appear in the practice list, can the status and response note be saved, does the patient see the progress under “My data & permissions”, and are empty or rejected states shown cleanly?",
+  cardTeamInfoButton: "More information about team & permissions",
+  cardTeamInfoTitle: "Team & permissions",
+  cardTeamInfoIntro:
+    "Here you manage your practice team: invite members, assign roles, control permissions and revoke access. This is a purely practice-internal administration function — no patient data is shown in this view.",
+  cardTeamInfoRoles:
+    "There are graduated roles (owner, admin, practice manager, doctor, secretary, assistant, viewer) with a fixed permission profile. Only owner, admin and practice manager can manage the team. Write permissions are protected server-side, and privilege escalation is prevented.",
+  cardTeamInfoSecurity:
+    "Roles and permissions protect patient data indirectly: practice users only see or edit what they are authorized for. No patient data is opened automatically and no permissions are extended automatically. This tile has no direct connection to the patient area.",
+  cardTeamInfoAlpha:
+    "In the alpha test you can check: do only authorized roles see the management actions, can members be invited and roles changed only as owner/admin, do restricted roles stay read-only, and are single-owner, empty and error states shown cleanly?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

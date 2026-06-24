@@ -103,6 +103,16 @@ export default {
     "Patient:innen stellen Anfragen selbst unter „Meine Praxis“ → „Meine Daten & Freigaben“ und behalten die Kontrolle über ihre Daten und Freigaben. Digitale Anfragen setzen ein verknüpftes MedScoutX-Konto voraus; externe Patient:innen ohne Konto werden nicht zur Registrierung gezwungen und nutzen die üblichen Wege. Kachel und Praxis bleiben funktionsfähig.",
   cardDataRequestsInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Erscheint eine von der Patient:in gestellte Anfrage in der Praxisliste, lassen sich Status und Antwortnotiz speichern, sieht die Patient:in den Fortschritt unter „Meine Daten & Freigaben“, und werden leere oder abgelehnte Zustände sauber angezeigt?",
+  cardTeamInfoButton: "Mehr Informationen zu Team & Rechte",
+  cardTeamInfoTitle: "Team & Rechte",
+  cardTeamInfoIntro:
+    "Hier verwalten Sie Ihr Praxisteam: Mitglieder einladen, Rollen zuweisen, Rechte steuern und Zugänge entziehen. Dies ist eine rein praxisinterne Verwaltungsfunktion – in dieser Ansicht werden keine Patientendaten angezeigt.",
+  cardTeamInfoRoles:
+    "Es gibt abgestufte Rollen (Inhaber:in, Admin, Praxismanager:in, Ärzt:in, Sekretariat, Assistenz, Betrachter:in) mit festem Rechteprofil. Nur Inhaber:in, Admin und Praxismanager:in können das Team verwalten. Schreibrechte sind serverseitig geschützt, eine Rechte-Eskalation wird verhindert.",
+  cardTeamInfoSecurity:
+    "Rollen und Rechte schützen Patientendaten indirekt: Praxisnutzer:innen sehen oder bearbeiten nur das, wozu sie berechtigt sind. Es werden keine Patientendaten automatisch geöffnet und keine Rechte automatisch erweitert. Diese Kachel hat keine direkte Verbindung zum Patientenbereich.",
+  cardTeamInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Sehen nur berechtigte Rollen die Verwaltungsaktionen, lassen sich Mitglieder einladen und Rollen nur als Inhaber:in/Admin ändern, bleiben eingeschränkte Rollen schreibgeschützt, und werden Einzelinhaber:in-, Leer- und Fehlerzustände sauber angezeigt?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:

@@ -109,6 +109,16 @@ export default {
       "Les patients soumettent eux-mêmes les demandes sous « Mon cabinet » → « Mes données et partages » et gardent le contrôle de leurs données et autorisations. Les demandes numériques nécessitent un compte MedScoutX lié ; les patients externes sans compte ne sont jamais contraints de s’inscrire et utilisent les voies habituelles. La tuile et votre établissement restent fonctionnels.",
     cardDataRequestsInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : une demande soumise par le patient apparaît-elle dans la liste de l’établissement, le statut et la note de réponse peuvent-ils être enregistrés, le patient voit-il l’avancement sous « Mes données et partages », et les états vides ou refusés s’affichent-ils proprement ?",
+    cardTeamInfoButton: "Plus d’informations sur l’équipe et les droits",
+    cardTeamInfoTitle: "Équipe et droits",
+    cardTeamInfoIntro:
+      "Vous gérez ici votre équipe : inviter des membres, attribuer des rôles, contrôler les droits et révoquer des accès. Il s’agit d’une fonction d’administration purement interne à l’établissement — aucune donnée de patient n’est affichée dans cette vue.",
+    cardTeamInfoRoles:
+      "Il existe des rôles gradués (propriétaire, admin, gestionnaire de cabinet, médecin, secrétariat, assistant, lecteur) avec un profil de droits fixe. Seuls le propriétaire, l’admin et le gestionnaire de cabinet peuvent gérer l’équipe. Les droits d’écriture sont protégés côté serveur et toute élévation de privilèges est empêchée.",
+    cardTeamInfoSecurity:
+      "Les rôles et les droits protègent indirectement les données des patients : les utilisateurs de l’établissement ne voient ou ne modifient que ce pour quoi ils sont autorisés. Aucune donnée de patient n’est ouverte automatiquement et aucun droit n’est étendu automatiquement. Cette tuile n’a aucun lien direct avec l’espace patient.",
+    cardTeamInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : seuls les rôles autorisés voient-ils les actions de gestion, peut-on inviter des membres et modifier les rôles uniquement en tant que propriétaire/admin, les rôles restreints restent-ils en lecture seule, et les états propriétaire unique, vides et d’erreur s’affichent-ils proprement ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",

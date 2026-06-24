@@ -103,6 +103,16 @@ export default {
       "I pazienti inviano le richieste autonomamente in « Il mio studio » → « I miei dati e permessi » e mantengono il controllo sui propri dati e permessi. Le richieste digitali richiedono un account MedScoutX collegato; i pazienti esterni senza account non sono mai obbligati a registrarsi e usano i canali abituali. La scheda e il tuo studio restano funzionanti.",
     cardDataRequestsInfoAlpha:
       "Nel test alpha puoi verificare: una richiesta inviata dal paziente compare nell’elenco dello studio, è possibile salvare stato e nota di risposta, il paziente vede l’avanzamento in « I miei dati e permessi », e gli stati vuoti o respinti vengono mostrati correttamente?",
+    cardTeamInfoButton: "Maggiori informazioni su team e permessi",
+    cardTeamInfoTitle: "Team e permessi",
+    cardTeamInfoIntro:
+      "Qui gestisci il tuo team: invitare membri, assegnare ruoli, controllare i permessi e revocare gli accessi. È una funzione di amministrazione puramente interna allo studio — in questa vista non vengono mostrati dati dei pazienti.",
+    cardTeamInfoRoles:
+      "Esistono ruoli graduati (titolare, admin, responsabile di studio, medico, segreteria, assistente, visualizzatore) con un profilo di permessi fisso. Solo titolare, admin e responsabile di studio possono gestire il team. I permessi di scrittura sono protetti lato server e l’escalation dei privilegi è impedita.",
+    cardTeamInfoSecurity:
+      "Ruoli e permessi proteggono indirettamente i dati dei pazienti: gli utenti dello studio vedono o modificano solo ciò per cui sono autorizzati. Nessun dato del paziente viene aperto automaticamente e nessun permesso viene esteso automaticamente. Questa scheda non ha alcun collegamento diretto con l’area paziente.",
+    cardTeamInfoAlpha:
+      "Nel test alpha puoi verificare: solo i ruoli autorizzati vedono le azioni di gestione, è possibile invitare membri e modificare i ruoli solo come titolare/admin, i ruoli con restrizioni restano in sola lettura, e gli stati titolare unico, vuoti e di errore vengono mostrati correttamente?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

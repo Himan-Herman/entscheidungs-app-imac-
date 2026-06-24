@@ -103,6 +103,16 @@ export default {
       "Los pacientes envían las solicitudes ellos mismos en « Mi consultorio » → « Mis datos y permisos » y mantienen el control sobre sus datos y permisos. Las solicitudes digitales requieren una cuenta de MedScoutX vinculada; a los pacientes externos sin cuenta nunca se les obliga a registrarse y usan los canales habituales. La tarjeta y su consulta siguen funcionando.",
     cardDataRequestsInfoAlpha:
       "En la prueba alfa puede comprobar: ¿aparece en la lista de la consulta una solicitud enviada por el paciente, se pueden guardar el estado y la nota de respuesta, ve el paciente el progreso en « Mis datos y permisos », y se muestran correctamente los estados vacíos o rechazados?",
+    cardTeamInfoButton: "Más información sobre el equipo y los permisos",
+    cardTeamInfoTitle: "Equipo y permisos",
+    cardTeamInfoIntro:
+      "Aquí gestiona su equipo: invitar miembros, asignar roles, controlar los permisos y revocar accesos. Es una función de administración puramente interna de la consulta — en esta vista no se muestran datos de pacientes.",
+    cardTeamInfoRoles:
+      "Existen roles graduados (propietario, admin, gestor de consulta, médico, secretaría, asistente, lector) con un perfil de permisos fijo. Solo el propietario, el admin y el gestor de consulta pueden gestionar el equipo. Los permisos de escritura están protegidos en el servidor y se impide la escalada de privilegios.",
+    cardTeamInfoSecurity:
+      "Los roles y permisos protegen indirectamente los datos de los pacientes: los usuarios de la consulta solo ven o editan aquello para lo que están autorizados. Ningún dato de paciente se abre automáticamente y ningún permiso se amplía automáticamente. Esta tarjeta no tiene conexión directa con el área del paciente.",
+    cardTeamInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿ven solo los roles autorizados las acciones de gestión, se pueden invitar miembros y cambiar roles solo como propietario/admin, permanecen los roles restringidos en modo de solo lectura, y se muestran correctamente los estados de propietario único, vacíos y de error?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

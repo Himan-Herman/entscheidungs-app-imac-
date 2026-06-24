@@ -77,6 +77,17 @@ export const CARD_INFO = {
       "cardDataRequestsInfoAlpha",
     ],
   },
+  team: {
+    titleId: "practice-card-info-team-title",
+    buttonKey: "cardTeamInfoButton",
+    titleKey: "cardTeamInfoTitle",
+    paragraphKeys: [
+      "cardTeamInfoIntro",
+      "cardTeamInfoRoles",
+      "cardTeamInfoSecurity",
+      "cardTeamInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */
