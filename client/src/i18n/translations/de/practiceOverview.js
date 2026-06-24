@@ -232,6 +232,21 @@ export default {
   adminAnalyticsLink: "Statistik & ROI",
   adminMemberCount: "Aktive Teammitglieder",
   adminPendingInvites: "Offene Einladungen",
+  adminIntro:
+    "Administrative Werkzeuge für Ihre Praxis – sichtbar je nach Ihrer Rolle und Berechtigung.",
+  adminGroupAccess: "Team & Zugang",
+  adminGroupCompliance: "Compliance & Sicherheit",
+  adminGroupOrganization: "Organisation",
+  adminGroupConnectivity: "Schnittstellen & Entwicklung",
+  adminDescTeam: "Mitglieder einladen sowie Rollen und Berechtigungen verwalten.",
+  adminDescSettings: "Stammdaten und Grundeinstellungen Ihrer Praxis.",
+  adminDescAudit: "Nachvollziehbares Protokoll administrativer Ereignisse.",
+  adminDescConsents: "Übersicht der von Patient:innen erteilten Freigaben.",
+  adminDescSecurity: "Sicherheits- und Datenschutz-Übersicht Ihrer Praxis.",
+  adminDescPreVisit: "Organisatorische Terminvorbereitung – ohne medizinische Bewertung.",
+  adminDescAnalytics: "Anonymisierte Nutzungsstatistik und konservative Zeitschätzung.",
+  adminDescIntegrations: "PVS-/FHIR-Anbindung – Sandbox-Status für den Alpha-Test.",
+  adminDescDeveloper: "API-Zugänge und Webhooks für die technische Anbindung.",
 
   aiHeading: "Automatische Zusammenfassung – bitte prüfen",
   aiDisclaimer:

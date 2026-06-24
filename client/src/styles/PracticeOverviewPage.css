@@ -519,3 +519,185 @@
 :root[data-theme="dark"] .practice-overview__modal-close:hover {
   background: rgba(148, 163, 184, 0.15);
 }
+
+/* ============================================================================
+   Verwaltung (admin) section — modern KPI + grouped action cards.
+   Scoped under .practice-overview__admin; new element classes only, so nothing
+   else on the hub (shared metric/action classes) is affected.
+   ============================================================================ */
+.practice-overview__admin {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.practice-overview__admin-intro {
+  margin: -0.35rem 0 0;
+  color: var(--text-muted, #64748b);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  max-width: 70ch;
+}
+
+.practice-overview__admin-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.practice-overview__admin-kpi {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--surface-muted, rgba(248, 250, 252, 0.9));
+}
+
+.practice-overview__admin-kpi-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 11px;
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+}
+
+.practice-overview__admin-kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.practice-overview__admin-kpi-label {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted, #64748b);
+}
+
+.practice-overview__admin-kpi-value {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary, #0f172a);
+}
+
+.practice-overview__admin-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.practice-overview__admin-group-title {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+}
+
+.practice-overview__admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.7rem;
+}
+
+.practice-overview__admin-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: var(--ms-color-surface, #ffffff);
+  color: var(--ms-color-text, #0f172a);
+  text-decoration: none;
+  min-height: 64px;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.practice-overview__admin-card:hover {
+  border-color: rgba(14, 116, 144, 0.5);
+  background: var(--ms-color-bg-subtle, #f8fafc);
+  text-decoration: none;
+}
+
+.practice-overview__admin-card:focus-visible {
+  outline: 2px solid #0e7490;
+  outline-offset: 2px;
+}
+
+.practice-overview__admin-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 10px;
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+}
+
+.practice-overview__admin-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.practice-overview__admin-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.practice-overview__admin-card-desc {
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: var(--text-muted, #64748b);
+}
+
+/* Dark theme */
+:root[data-theme="dark"] .practice-overview__admin-intro,
+:root[data-theme="dark"] .practice-overview__admin-group-title,
+:root[data-theme="dark"] .practice-overview__admin-kpi-label,
+:root[data-theme="dark"] .practice-overview__admin-card-desc {
+  color: #94a3b8;
+}
+
+:root[data-theme="dark"] .practice-overview__admin-kpi {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+:root[data-theme="dark"] .practice-overview__admin-kpi-value,
+:root[data-theme="dark"] .practice-overview__admin-card-title {
+  color: #f1f5f9;
+}
+
+:root[data-theme="dark"] .practice-overview__admin-kpi-icon,
+:root[data-theme="dark"] .practice-overview__admin-card-icon {
+  background: rgba(45, 212, 191, 0.14);
+  color: #5eead4;
+}
+
+:root[data-theme="dark"] .practice-overview__admin-card {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #e2e8f0;
+}
+
+:root[data-theme="dark"] .practice-overview__admin-card:hover {
+  border-color: rgba(45, 212, 191, 0.5);
+  background: rgba(30, 41, 59, 0.6);
+}

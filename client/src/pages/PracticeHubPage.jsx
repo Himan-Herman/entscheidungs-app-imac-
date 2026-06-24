@@ -2,17 +2,24 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Activity,
+  BarChart3,
   CalendarCheck,
   ClipboardList,
   ClipboardPen,
+  Code2,
   FileText,
   Inbox,
   Info,
   MessageSquare,
   Mic,
   Pill,
+  Plug,
   Receipt,
+  ScrollText,
+  Settings,
   Shield,
+  ShieldCheck,
+  UserPlus,
   UsersRound,
   Video,
 } from "lucide-react";
@@ -330,6 +337,51 @@ export default function PracticeHubPage() {
     Boolean(quickActions.openDeveloper) ||
     Boolean(visibility.audit) ||
     permissions.includes("booking.manage");
+
+  // Admin ("Verwaltung") action cards, grouped. Each item keeps the EXACT same
+  // permission gate as before (no rights are widened) — items the role cannot use
+  // are simply not listed, and a group with no visible items is dropped.
+  const adminGroups = (() => {
+    const pid = encodeURIComponent(practiceId);
+    const groups = [
+      {
+        key: "access",
+        titleKey: "adminGroupAccess",
+        items: [
+          { key: "team", show: quickActions.manageTeam, to: `/practice/team?practiceId=${pid}`, Icon: UsersRound, titleKey: "actionManageTeam", descKey: "adminDescTeam" },
+          { key: "settings", show: quickActions.openSettings, to: `/practice/settings?practiceId=${pid}`, Icon: Settings, titleKey: "actionOpenSettings", descKey: "adminDescSettings" },
+        ],
+      },
+      {
+        key: "compliance",
+        titleKey: "adminGroupCompliance",
+        items: [
+          { key: "audit", show: visibility.audit, to: `/practice/audit?practiceId=${pid}`, Icon: ScrollText, titleKey: "adminAuditLink", descKey: "adminDescAudit" },
+          { key: "consents", show: visibility.audit, to: `/practice/consents?practiceId=${pid}`, Icon: ShieldCheck, titleKey: "adminConsentsLink", descKey: "adminDescConsents" },
+          { key: "security", show: quickActions.openSecurity, to: `/practice/security?practiceId=${pid}`, Icon: Shield, titleKey: "actionOpenSecurity", descKey: "adminDescSecurity" },
+        ],
+      },
+      {
+        key: "organization",
+        titleKey: "adminGroupOrganization",
+        items: [
+          { key: "previsit", show: permissions.includes("booking.manage"), to: `/practice/pre-visit?practiceId=${pid}`, Icon: CalendarCheck, titleKey: "adminPreVisitLink", descKey: "adminDescPreVisit" },
+          { key: "analytics", show: permissions.includes("settings.manage"), to: `/practice/analytics?practiceId=${pid}`, Icon: BarChart3, titleKey: "adminAnalyticsLink", descKey: "adminDescAnalytics" },
+        ],
+      },
+      {
+        key: "connectivity",
+        titleKey: "adminGroupConnectivity",
+        items: [
+          { key: "integrations", show: quickActions.openIntegrations, to: `/practice/integrations?practiceId=${pid}`, Icon: Plug, titleKey: "actionOpenIntegrations", descKey: "adminDescIntegrations" },
+          { key: "developer", show: quickActions.openDeveloper, to: `/practice/developer?practiceId=${pid}`, Icon: Code2, titleKey: "actionOpenDeveloper", descKey: "adminDescDeveloper" },
+        ],
+      },
+    ];
+    return groups
+      .map((g) => ({ ...g, items: g.items.filter((it) => it.show) }))
+      .filter((g) => g.items.length > 0);
+  })();
 
   const visibleCards = useMemo(
     () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
@@ -706,108 +758,68 @@ export default function PracticeHubPage() {
           </section>
 
           {showAdmin ? (
-            <section aria-labelledby="practice-overview-admin-heading">
+            <section className="practice-overview__admin" aria-labelledby="practice-overview-admin-heading">
               <h2
                 id="practice-overview-admin-heading"
                 className="practice-overview__section-title"
               >
                 {t.adminHeading}
               </h2>
+              <p className="practice-overview__admin-intro">{t.adminIntro}</p>
+
               {visibility.team &&
               (metrics.memberCount != null || metrics.pendingInvites != null) ? (
-                <dl className="practice-overview__metrics-grid">
+                <div className="practice-overview__admin-kpis">
                   {metrics.memberCount != null ? (
-                    <div className="practice-overview__metric">
-                      <dt>{t.adminMemberCount}</dt>
-                      <dd aria-label={`${t.adminMemberCount}: ${fmtMetric(metrics.memberCount, t.notProvided)}`}>
-                        {fmtMetric(metrics.memberCount, t.notProvided)}
-                      </dd>
-                    </div>
+                    <article className="practice-overview__admin-kpi">
+                      <span className="practice-overview__admin-kpi-icon" aria-hidden="true">
+                        <UsersRound size={20} strokeWidth={1.9} />
+                      </span>
+                      <div className="practice-overview__admin-kpi-body">
+                        <p className="practice-overview__admin-kpi-label">{t.adminMemberCount}</p>
+                        <p className="practice-overview__admin-kpi-value">
+                          {fmtMetric(metrics.memberCount, t.notProvided)}
+                        </p>
+                      </div>
+                    </article>
                   ) : null}
                   {metrics.pendingInvites != null ? (
-                    <div className="practice-overview__metric">
-                      <dt>{t.adminPendingInvites}</dt>
-                      <dd aria-label={`${t.adminPendingInvites}: ${fmtMetric(metrics.pendingInvites, t.notProvided)}`}>
-                        {fmtMetric(metrics.pendingInvites, t.notProvided)}
-                      </dd>
-                    </div>
+                    <article className="practice-overview__admin-kpi">
+                      <span className="practice-overview__admin-kpi-icon" aria-hidden="true">
+                        <UserPlus size={20} strokeWidth={1.9} />
+                      </span>
+                      <div className="practice-overview__admin-kpi-body">
+                        <p className="practice-overview__admin-kpi-label">{t.adminPendingInvites}</p>
+                        <p className="practice-overview__admin-kpi-value">
+                          {fmtMetric(metrics.pendingInvites, t.notProvided)}
+                        </p>
+                      </div>
+                    </article>
                   ) : null}
-                </dl>
+                </div>
               ) : null}
-              <div className="practice-overview__actions">
-                {quickActions.manageTeam ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/team?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.actionManageTeam}
-                  </Link>
-                ) : null}
-                {quickActions.openSettings ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/settings?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.actionOpenSettings}
-                  </Link>
-                ) : null}
-                {visibility.audit ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/audit?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.adminAuditLink}
-                  </Link>
-                ) : null}
-                {visibility.audit ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/consents?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.adminConsentsLink}
-                  </Link>
-                ) : null}
-                {permissions.includes("booking.manage") ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/pre-visit?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.adminPreVisitLink}
-                  </Link>
-                ) : null}
-                {permissions.includes("settings.manage") ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/analytics?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.adminAnalyticsLink}
-                  </Link>
-                ) : null}
-                {quickActions.openSecurity ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/security?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.actionOpenSecurity}
-                  </Link>
-                ) : null}
-                {quickActions.openIntegrations ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/integrations?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.actionOpenIntegrations}
-                  </Link>
-                ) : null}
-                {quickActions.openDeveloper ? (
-                  <Link
-                    className="practice-overview__action"
-                    to={`/practice/developer?practiceId=${encodeURIComponent(practiceId)}`}
-                  >
-                    {t.actionOpenDeveloper}
-                  </Link>
-                ) : null}
-              </div>
+
+              {adminGroups.map((group) => (
+                <div key={group.key} className="practice-overview__admin-group">
+                  <h3 className="practice-overview__admin-group-title">{t[group.titleKey]}</h3>
+                  <div className="practice-overview__admin-grid">
+                    {group.items.map((item) => {
+                      const ItemIcon = item.Icon;
+                      return (
+                        <Link key={item.key} className="practice-overview__admin-card" to={item.to}>
+                          <span className="practice-overview__admin-card-icon" aria-hidden="true">
+                            <ItemIcon size={20} strokeWidth={1.9} />
+                          </span>
+                          <span className="practice-overview__admin-card-body">
+                            <span className="practice-overview__admin-card-title">{t[item.titleKey]}</span>
+                            <span className="practice-overview__admin-card-desc">{t[item.descKey]}</span>
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </section>
           ) : null}
 
