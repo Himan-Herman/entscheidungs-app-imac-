@@ -8,16 +8,31 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  CARD_INFO,
   INFO_CARD_IDS,
   hasCardInfo,
   suppressCardNavigation,
 } from "../practiceCardInfo.js";
 
-test("only the telemedicine card exposes an info button", () => {
-  assert.deepEqual(INFO_CARD_IDS, ["telemedicine"]);
+test("only the telemedicine and inbox cards expose an info button", () => {
+  assert.deepEqual(INFO_CARD_IDS, ["telemedicine", "inbox"]);
   assert.equal(hasCardInfo("telemedicine"), true);
-  for (const other of ["inbox", "patients", "booking", "anamnesis", "security", ""]) {
+  assert.equal(hasCardInfo("inbox"), true);
+  for (const other of ["patients", "booking", "anamnesis", "security", ""]) {
     assert.equal(hasCardInfo(other), false);
+  }
+});
+
+test("each info card has a title id, button/title keys and at least one paragraph key", () => {
+  for (const cardId of INFO_CARD_IDS) {
+    const cfg = CARD_INFO[cardId];
+    assert.ok(cfg.titleId, `${cardId} has a titleId`);
+    assert.ok(cfg.buttonKey, `${cardId} has a buttonKey`);
+    assert.ok(cfg.titleKey, `${cardId} has a titleKey`);
+    assert.ok(
+      Array.isArray(cfg.paragraphKeys) && cfg.paragraphKeys.length > 0,
+      `${cardId} has paragraph keys`,
+    );
   }
 });
 

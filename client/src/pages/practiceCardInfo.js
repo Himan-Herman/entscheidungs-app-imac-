@@ -4,12 +4,43 @@
  * the "which card has an info button" rule can be unit-tested (node --test).
  */
 
+/**
+ * Per-card info-overlay config for the practice hub.
+ * Holds only i18n KEY NAMES + a stable DOM id (never translated strings), so
+ * this file stays framework-free and node --test friendly; the page resolves
+ * the keys against the active locale at render time. `paragraphKeys` are shown
+ * in order inside the modal body.
+ */
+export const CARD_INFO = {
+  telemedicine: {
+    titleId: "practice-card-info-telemedicine-title",
+    buttonKey: "cardTelemedicineInfoButton",
+    titleKey: "cardTelemedicineInfoTitle",
+    paragraphKeys: [
+      "cardTelemedicineInfoIntro",
+      "cardTelemedicineInfoUsage",
+      "cardTelemedicineInfoPrivacy",
+    ],
+  },
+  inbox: {
+    titleId: "practice-card-info-inbox-title",
+    buttonKey: "cardInboxInfoButton",
+    titleKey: "cardInboxInfoTitle",
+    paragraphKeys: [
+      "cardInboxInfoIntro",
+      "cardInboxInfoUsage",
+      "cardInboxInfoConnection",
+      "cardInboxInfoAlpha",
+    ],
+  },
+};
+
 /** Card ids that show an info (ⓘ) button + explanation modal. */
-export const INFO_CARD_IDS = ["telemedicine"];
+export const INFO_CARD_IDS = Object.keys(CARD_INFO);
 
 /** @param {string} cardId */
 export function hasCardInfo(cardId) {
-  return INFO_CARD_IDS.includes(cardId);
+  return Object.prototype.hasOwnProperty.call(CARD_INFO, cardId);
 }
 
 /**

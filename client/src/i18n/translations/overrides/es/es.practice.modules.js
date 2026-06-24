@@ -52,6 +52,18 @@ export default {
     cardMedaLive: "Meda Live Translation",
     cardAnamnesis: "Anamnesis",
     cardBooking: "Citas & Solicitudes",
+
+    cardInboxInfoButton: "Más información sobre la bandeja de entrada",
+    cardInboxInfoTitle: "Bandeja de entrada",
+    cardInboxInfoIntro:
+      "La bandeja de entrada reúne en un solo lugar los avisos organizativos de su consulta — por ejemplo sobre mensajes, documentos, planes de medicación o solicitudes de datos. MedScoutX no realiza aquí ninguna evaluación médica, diagnóstico ni clasificación de urgencia.",
+    cardInboxInfoUsage:
+      "Verá entradas neutrales con título, origen y estado (nuevo, leído, hecho). Las entradas se pueden abrir, marcar como leídas o hechas y archivar. No se evalúa ningún contenido médico.",
+    cardInboxInfoConnection:
+      "Cuando los pacientes también usan MedScoutX y están vinculados a su consulta, los avisos correspondientes aparecen también en su bandeja de entrada — solo mediante autorizaciones claras. Para pacientes externos sin cuenta de MedScoutX, la bandeja de entrada de su consulta sigue funcionando; nunca se obliga a registrarse.",
+    cardInboxInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se cuentan y muestran correctamente las nuevas entradas, se pueden cambiar los estados y aparecen los avisos vinculados en el lado del paciente en « Mi consultorio » → « Bandeja de entrada »?",
+
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",
     metricOpenDataRequests: "Solicitudes de datos abiertas",

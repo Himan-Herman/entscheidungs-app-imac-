@@ -52,6 +52,18 @@ export default {
     cardMedaLive: "Meda Live Translation",
     cardAnamnesis: "Anamnesi",
     cardBooking: "Appuntamenti & Richieste",
+
+    cardInboxInfoButton: "Maggiori informazioni sulla posta in arrivo",
+    cardInboxInfoTitle: "Posta in arrivo",
+    cardInboxInfoIntro:
+      "La posta in arrivo raccoglie in un unico luogo le indicazioni organizzative del tuo studio — ad esempio su messaggi, documenti, piani terapeutici o richieste di dati. MedScoutX non effettua qui alcuna valutazione medica, diagnosi o classificazione di urgenza.",
+    cardInboxInfoUsage:
+      "Vedi voci neutre con titolo, origine e stato (nuovo, letto, completato). Le voci possono essere aperte, contrassegnate come lette o completate e archiviate. Nessun contenuto medico viene valutato.",
+    cardInboxInfoConnection:
+      "Se anche i pazienti usano MedScoutX e sono collegati al tuo studio, le indicazioni corrispondenti compaiono anche nella loro posta in arrivo — solo tramite autorizzazioni chiare. Per i pazienti esterni senza account MedScoutX, la posta in arrivo del tuo studio continua a funzionare; la registrazione non è mai obbligatoria.",
+    cardInboxInfoAlpha:
+      "Nel test alpha puoi verificare: le nuove voci vengono conteggiate e mostrate correttamente, è possibile modificare gli stati e le indicazioni collegate compaiono sul lato paziente in « Il mio studio » → « Posta in arrivo »?",
+
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",
     metricOpenDataRequests: "Richieste dati abiertas",

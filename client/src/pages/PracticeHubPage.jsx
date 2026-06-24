@@ -27,9 +27,7 @@ import { getMessages } from "../i18n/translations";
 import "../styles/PracticeOverviewPage.css";
 import { formatUiDateTime } from "../i18n/intlLocale.js";
 import PracticeCardInfoModal from "./PracticeCardInfoModal.jsx";
-import { hasCardInfo, suppressCardNavigation } from "./practiceCardInfo.js";
-
-const TELEMEDICINE_INFO_TITLE_ID = "practice-card-info-telemedicine-title";
+import { CARD_INFO, hasCardInfo, suppressCardNavigation } from "./practiceCardInfo.js";
 
 function fmtDate(iso, lang) {
   return formatUiDateTime(iso, lang);
@@ -586,7 +584,7 @@ export default function PracticeHubPage() {
                     <button
                       type="button"
                       className="practice-overview__card-info"
-                      aria-label={t.cardTelemedicineInfoButton}
+                      aria-label={t[CARD_INFO[card.id].buttonKey]}
                       aria-haspopup="dialog"
                       onClick={(e) => {
                         suppressCardNavigation(e);
@@ -898,18 +896,16 @@ export default function PracticeHubPage() {
         </>
       ) : null}
 
-      <PracticeCardInfoModal
-        open={infoOpenFor === "telemedicine"}
-        titleId={TELEMEDICINE_INFO_TITLE_ID}
-        title={t.cardTelemedicineInfoTitle}
-        paragraphs={[
-          t.cardTelemedicineInfoIntro,
-          t.cardTelemedicineInfoUsage,
-          t.cardTelemedicineInfoPrivacy,
-        ]}
-        closeLabel={t.cardInfoClose}
-        onClose={() => setInfoOpenFor(null)}
-      />
+      {infoOpenFor && CARD_INFO[infoOpenFor] ? (
+        <PracticeCardInfoModal
+          open
+          titleId={CARD_INFO[infoOpenFor].titleId}
+          title={t[CARD_INFO[infoOpenFor].titleKey]}
+          paragraphs={CARD_INFO[infoOpenFor].paragraphKeys.map((key) => t[key])}
+          closeLabel={t.cardInfoClose}
+          onClose={() => setInfoOpenFor(null)}
+        />
+      ) : null}
     </div>
   );
 }

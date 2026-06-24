@@ -53,6 +53,16 @@ export default {
   cardBooking: "Appointments & Requests",
   cardTelemedicine: "Video consultations",
   cardInfoClose: "Close",
+  cardInboxInfoButton: "More information about the inbox",
+  cardInboxInfoTitle: "Inbox",
+  cardInboxInfoIntro:
+    "The inbox brings your practice's organizational notices together in one place — for example about messages, documents, medication plans or data requests. MedScoutX performs no medical assessment, diagnosis or urgency rating here.",
+  cardInboxInfoUsage:
+    "You see neutral entries with title, source and status (new, read, done). Entries can be opened, marked as read or done, and archived. No medical content is evaluated.",
+  cardInboxInfoConnection:
+    "When patients also use MedScoutX and are linked to your practice, matching notices appear in their inbox too — only via clear permissions. For external patients without a MedScoutX account, your practice inbox keeps working; registration is never forced.",
+  cardInboxInfoAlpha:
+    "In the alpha test you can check: are new entries counted and shown correctly, can statuses be changed, and do linked notices appear on the patient side under “My practice” → “Inbox”?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

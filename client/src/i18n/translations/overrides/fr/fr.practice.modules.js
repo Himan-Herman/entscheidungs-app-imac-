@@ -59,6 +59,17 @@ export default {
     cardAnamnesis: "Anamnèse",
     cardBooking: "Rendez-vous & Demandes",
 
+    cardInboxInfoButton: "Plus d’informations sur la boîte de réception",
+    cardInboxInfoTitle: "Boîte de réception",
+    cardInboxInfoIntro:
+      "La boîte de réception regroupe en un seul endroit les informations organisationnelles de votre établissement — par exemple sur les messages, les documents, les plans de médication ou les demandes de données. MedScoutX n’effectue ici aucune évaluation médicale, aucun diagnostic ni classification d’urgence.",
+    cardInboxInfoUsage:
+      "Vous voyez des entrées neutres avec titre, source et statut (nouveau, lu, traité). Les entrées peuvent être ouvertes, marquées comme lues ou traitées, puis archivées. Aucun contenu médical n’est évalué.",
+    cardInboxInfoConnection:
+      "Lorsque les patients utilisent eux aussi MedScoutX et sont liés à votre établissement, les informations correspondantes apparaissent également dans leur boîte de réception — uniquement via des autorisations claires. Pour les patients externes sans compte MedScoutX, votre boîte de réception continue de fonctionner ; aucune inscription n’est imposée.",
+    cardInboxInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : les nouvelles entrées sont-elles comptées et affichées correctement, les statuts peuvent-ils être modifiés, et les informations liées apparaissent-elles côté patient sous « Mon cabinet » → « Boîte de réception » ?",
+
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",
     metricOpenDataRequests: "Demandes de données ouvertes",

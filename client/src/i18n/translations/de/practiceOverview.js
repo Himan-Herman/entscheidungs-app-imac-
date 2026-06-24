@@ -53,6 +53,16 @@ export default {
   cardBooking: "Termine & Anfragen",
   cardTelemedicine: "Videosprechstunden",
   cardInfoClose: "Schließen",
+  cardInboxInfoButton: "Mehr Informationen zum Postfach",
+  cardInboxInfoTitle: "Postfach",
+  cardInboxInfoIntro:
+    "Das Postfach bündelt organisatorische Hinweise Ihrer Praxis an einem Ort – etwa zu Nachrichten, Dokumenten, Medikationsplänen oder Datenanfragen. MedScoutX nimmt dabei keine medizinische Bewertung, Diagnose oder Dringlichkeitseinstufung vor.",
+  cardInboxInfoUsage:
+    "Sie sehen neutrale Einträge mit Titel, Quelle und Status (neu, gelesen, erledigt). Einträge lassen sich öffnen, als gelesen oder erledigt markieren und archivieren. Medizinische Inhalte werden nicht bewertet.",
+  cardInboxInfoConnection:
+    "Nutzen Patient:innen ebenfalls MedScoutX und sind mit Ihrer Praxis verknüpft, erscheinen passende Hinweise – nur über klare Freigaben – auch in deren Postfach. Für externe Patient:innen ohne MedScoutX-Konto funktioniert Ihr Praxis-Postfach weiterhin; eine Registrierung wird nicht erzwungen.",
+  cardInboxInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Werden neue Einträge korrekt gezählt und angezeigt, lassen sich Status ändern, und erscheinen verknüpfte Hinweise auf der Patientenseite unter „Meine Praxis“ → „Postfach“?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:
