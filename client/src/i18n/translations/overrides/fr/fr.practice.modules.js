@@ -119,6 +119,16 @@ export default {
       "Les rôles et les droits protègent indirectement les données des patients : les utilisateurs de l’établissement ne voient ou ne modifient que ce pour quoi ils sont autorisés. Aucune donnée de patient n’est ouverte automatiquement et aucun droit n’est étendu automatiquement. Cette tuile n’a aucun lien direct avec l’espace patient.",
     cardTeamInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : seuls les rôles autorisés voient-ils les actions de gestion, peut-on inviter des membres et modifier les rôles uniquement en tant que propriétaire/admin, les rôles restreints restent-ils en lecture seule, et les états propriétaire unique, vides et d’erreur s’affichent-ils proprement ?",
+    cardSecurityInfoButton: "Plus d’informations sur la sécurité et la confidentialité",
+    cardSecurityInfoTitle: "Sécurité et confidentialité",
+    cardSecurityInfoIntro:
+      "Cette tuile offre à votre établissement un aperçu transparent et en lecture seule de son statut de confidentialité et de sécurité. Aucune donnée ni aucun nom de patient n’est affiché, et MedScoutX ne fournit aucun conseil juridique individuel ni évaluation médicale.",
+    cardSecurityInfoView:
+      "Vous voyez des indicateurs agrégés (événements de sécurité des 7 derniers jours, demandes de données ouvertes, liens sécurisés révoqués, liens patients actifs et archivés, consentements actifs et expirés), une liste de principes de sécurité, les derniers événements de sécurité (type, heure, rôle) et un lien vers le journal d’audit — uniquement des chiffres et des types d’événements, aucun nom de patient.",
+    cardSecurityInfoProtection:
+      "La vue n’est visible que par le propriétaire et l’admin (autorisation « security.view ») ; les autres rôles reçoivent une indication claire au lieu d’un accès. Ainsi, la tuile protège indirectement les données des patients : les accès, partages et révocations deviennent traçables sans qu’aucune donnée ne soit elle-même divulguée. Il n’existe aucun lien direct avec l’espace patient.",
+    cardSecurityInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : les indicateurs et les derniers événements s’affichent-ils correctement, les rôles non autorisés reçoivent-ils une indication « aucun accès » propre, les états de chargement et vides fonctionnent-ils, et les noms de patients et contenus sensibles restent-ils masqués ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",

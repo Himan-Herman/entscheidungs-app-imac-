@@ -113,6 +113,16 @@ export default {
     "Rollen und Rechte schützen Patientendaten indirekt: Praxisnutzer:innen sehen oder bearbeiten nur das, wozu sie berechtigt sind. Es werden keine Patientendaten automatisch geöffnet und keine Rechte automatisch erweitert. Diese Kachel hat keine direkte Verbindung zum Patientenbereich.",
   cardTeamInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Sehen nur berechtigte Rollen die Verwaltungsaktionen, lassen sich Mitglieder einladen und Rollen nur als Inhaber:in/Admin ändern, bleiben eingeschränkte Rollen schreibgeschützt, und werden Einzelinhaber:in-, Leer- und Fehlerzustände sauber angezeigt?",
+  cardSecurityInfoButton: "Mehr Informationen zu Sicherheit & Datenschutz",
+  cardSecurityInfoTitle: "Sicherheit & Datenschutz",
+  cardSecurityInfoIntro:
+    "Diese Kachel gibt Ihrer Praxis eine transparente, schreibgeschützte Übersicht zum Datenschutz- und Sicherheitsstatus. Es werden keine Patientendaten oder -namen angezeigt, und MedScoutX gibt keine rechtliche Einzelfallberatung oder medizinische Bewertung.",
+  cardSecurityInfoView:
+    "Sie sehen aggregierte Kennzahlen (Sicherheitsereignisse der letzten 7 Tage, offene Datenanfragen, widerrufene sichere Links, aktive und archivierte Patientenverknüpfungen, aktive und abgelaufene Einwilligungen), eine Liste der Sicherheitsprinzipien, die letzten Sicherheitsereignisse (Typ, Zeit, Rolle) sowie einen Verweis auf das Audit-Protokoll – nur Zahlen und Ereignistypen, keine Patientennamen.",
+  cardSecurityInfoProtection:
+    "Die Ansicht ist nur für Inhaber:in und Admin sichtbar (Berechtigung „security.view“); andere Rollen erhalten einen klaren Hinweis statt Zugriff. So schützt die Kachel Patientendaten indirekt: Zugriffe, Freigaben und Widerrufe werden nachvollziehbar, ohne dass selbst Daten freigegeben werden. Eine direkte Verbindung zum Patientenbereich besteht nicht.",
+  cardSecurityInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Werden Kennzahlen und letzte Ereignisse korrekt angezeigt, erscheint für nicht berechtigte Rollen ein sauberer „kein Zugriff“-Hinweis, funktionieren Lade- und Leerzustände, und bleiben Patientennamen und sensible Inhalte unsichtbar?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:

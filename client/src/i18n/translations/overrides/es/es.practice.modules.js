@@ -113,6 +113,16 @@ export default {
       "Los roles y permisos protegen indirectamente los datos de los pacientes: los usuarios de la consulta solo ven o editan aquello para lo que están autorizados. Ningún dato de paciente se abre automáticamente y ningún permiso se amplía automáticamente. Esta tarjeta no tiene conexión directa con el área del paciente.",
     cardTeamInfoAlpha:
       "En la prueba alfa puede comprobar: ¿ven solo los roles autorizados las acciones de gestión, se pueden invitar miembros y cambiar roles solo como propietario/admin, permanecen los roles restringidos en modo de solo lectura, y se muestran correctamente los estados de propietario único, vacíos y de error?",
+    cardSecurityInfoButton: "Más información sobre seguridad y privacidad",
+    cardSecurityInfoTitle: "Seguridad y privacidad",
+    cardSecurityInfoIntro:
+      "Esta tarjeta ofrece a su consulta una vista transparente y de solo lectura sobre su estado de privacidad y seguridad. No se muestran datos ni nombres de pacientes, y MedScoutX no ofrece asesoramiento legal individual ni evaluación médica.",
+    cardSecurityInfoView:
+      "Ve indicadores agregados (eventos de seguridad de los últimos 7 días, solicitudes de datos abiertas, enlaces seguros revocados, vínculos de paciente activos y archivados, consentimientos activos y vencidos), una lista de principios de seguridad, los últimos eventos de seguridad (tipo, hora, rol) y un enlace al registro de auditoría — solo cifras y tipos de evento, ningún nombre de paciente.",
+    cardSecurityInfoProtection:
+      "La vista solo es visible para el propietario y el admin (permiso « security.view »); los demás roles reciben una indicación clara en lugar de acceso. Así la tarjeta protege indirectamente los datos de los pacientes: los accesos, las comparticiones y las revocaciones se vuelven trazables sin que se divulgue ningún dato. No existe conexión directa con el área del paciente.",
+    cardSecurityInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se muestran correctamente los indicadores y los últimos eventos, reciben los roles no autorizados una indicación « sin acceso » limpia, funcionan los estados de carga y vacíos, y permanecen ocultos los nombres de pacientes y el contenido sensible?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

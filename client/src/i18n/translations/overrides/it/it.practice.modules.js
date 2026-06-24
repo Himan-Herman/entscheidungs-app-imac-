@@ -113,6 +113,16 @@ export default {
       "Ruoli e permessi proteggono indirettamente i dati dei pazienti: gli utenti dello studio vedono o modificano solo ciò per cui sono autorizzati. Nessun dato del paziente viene aperto automaticamente e nessun permesso viene esteso automaticamente. Questa scheda non ha alcun collegamento diretto con l’area paziente.",
     cardTeamInfoAlpha:
       "Nel test alpha puoi verificare: solo i ruoli autorizzati vedono le azioni di gestione, è possibile invitare membri e modificare i ruoli solo come titolare/admin, i ruoli con restrizioni restano in sola lettura, e gli stati titolare unico, vuoti e di errore vengono mostrati correttamente?",
+    cardSecurityInfoButton: "Maggiori informazioni su sicurezza e privacy",
+    cardSecurityInfoTitle: "Sicurezza e privacy",
+    cardSecurityInfoIntro:
+      "Questa scheda offre al tuo studio una panoramica trasparente e in sola lettura sullo stato di privacy e sicurezza. Non vengono mostrati dati né nomi dei pazienti, e MedScoutX non fornisce alcuna consulenza legale individuale o valutazione medica.",
+    cardSecurityInfoView:
+      "Vedi indicatori aggregati (eventi di sicurezza degli ultimi 7 giorni, richieste di dati aperte, link sicuri revocati, collegamenti paziente attivi e archiviati, consensi attivi e scaduti), un elenco di principi di sicurezza, gli ultimi eventi di sicurezza (tipo, ora, ruolo) e un link al registro di audit — solo numeri e tipi di evento, nessun nome di paziente.",
+    cardSecurityInfoProtection:
+      "La vista è visibile solo a titolare e admin (autorizzazione « security.view »); gli altri ruoli ricevono un’indicazione chiara invece dell’accesso. Così la scheda protegge indirettamente i dati dei pazienti: accessi, condivisioni e revoche diventano tracciabili senza che alcun dato venga divulgato. Non esiste alcun collegamento diretto con l’area paziente.",
+    cardSecurityInfoAlpha:
+      "Nel test alpha puoi verificare: gli indicatori e gli ultimi eventi vengono mostrati correttamente, i ruoli non autorizzati ricevono un’indicazione « nessun accesso » pulita, gli stati di caricamento e vuoti funzionano, e i nomi dei pazienti e i contenuti sensibili restano nascosti?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

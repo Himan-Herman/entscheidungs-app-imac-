@@ -113,6 +113,16 @@ export default {
     "Roles and permissions protect patient data indirectly: practice users only see or edit what they are authorized for. No patient data is opened automatically and no permissions are extended automatically. This tile has no direct connection to the patient area.",
   cardTeamInfoAlpha:
     "In the alpha test you can check: do only authorized roles see the management actions, can members be invited and roles changed only as owner/admin, do restricted roles stay read-only, and are single-owner, empty and error states shown cleanly?",
+  cardSecurityInfoButton: "More information about security & privacy",
+  cardSecurityInfoTitle: "Security & privacy",
+  cardSecurityInfoIntro:
+    "This tile gives your practice a transparent, read-only overview of its privacy and security status. No patient data or names are shown, and MedScoutX provides no individual legal advice or medical assessment.",
+  cardSecurityInfoView:
+    "You see aggregated metrics (security events in the last 7 days, open data requests, revoked secure links, active and archived patient links, active and expired consents), a list of security principles, the most recent security events (type, time, role) and a link to the audit log — only figures and event types, no patient names.",
+  cardSecurityInfoProtection:
+    "The view is visible only to owner and admin (the “security.view” permission); other roles get a clear note instead of access. This is how the tile protects patient data indirectly: access, sharing and revocations become traceable without releasing any data itself. There is no direct connection to the patient area.",
+  cardSecurityInfoAlpha:
+    "In the alpha test you can check: are metrics and recent events shown correctly, do unauthorized roles get a clean “no access” note, do loading and empty states work, and do patient names and sensitive content stay hidden?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

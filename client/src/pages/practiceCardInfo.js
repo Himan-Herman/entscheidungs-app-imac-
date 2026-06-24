@@ -88,6 +88,17 @@ export const CARD_INFO = {
       "cardTeamInfoAlpha",
     ],
   },
+  security: {
+    titleId: "practice-card-info-security-title",
+    buttonKey: "cardSecurityInfoButton",
+    titleKey: "cardSecurityInfoTitle",
+    paragraphKeys: [
+      "cardSecurityInfoIntro",
+      "cardSecurityInfoView",
+      "cardSecurityInfoProtection",
+      "cardSecurityInfoAlpha",
+    ],
+  },
 };
 
 /** Card ids that show an info (ⓘ) button + explanation modal. */
