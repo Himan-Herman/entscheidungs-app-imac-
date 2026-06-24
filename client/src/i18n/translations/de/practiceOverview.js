@@ -133,6 +133,16 @@ export default {
     "Das vollständige Protokoll ist nur für Inhaber:in, Admin und Praxismanager:in sichtbar (Berechtigung „audit.view“); andere Rollen erhalten einen Hinweis statt Zugriff. So unterstützt die Kachel Transparenz und Datenschutz: Zugriffe und Änderungen werden nachvollziehbar, ohne Patientennamen oder Gesundheitsdaten anzuzeigen. Eine direkte Verbindung zum Patientenbereich besteht nicht.",
   cardActivityInfoAlpha:
     "Im Alpha-Test können Sie prüfen: Erscheinen aktuelle Ereignisse unter „Letzte Aktivitäten“, öffnet sich für berechtigte Rollen das Audit-Protokoll mit Schweregrad-Filter, erhalten nicht berechtigte Rollen einen sauberen Hinweis, und funktionieren Lade-, Leer- und Fehlerzustände ohne Patientennamen?",
+  cardAnamnesisInfoButton: "Mehr Informationen zur Anamnese",
+  cardAnamnesisInfoTitle: "Anamnese",
+  cardAnamnesisInfoIntro:
+    "Die Anamnese dient der strukturierten Erfassung und Übersicht vorbereiteter Patient:innenangaben vor dem Termin. MedScoutX strukturiert, stellt dar und übersetzt vorhandene Aussagen – es gibt keine Diagnose, Therapieempfehlung, Dringlichkeitseinschätzung oder Facharztentscheidung.",
+  cardAnamnesisInfoUsage:
+    "Sie erstellen mehrsprachige Anamnese-Vorlagen (Abschnitte und Fragen, de/en/fr/it/es) und teilen einen sicheren Link oder QR-Code. Eingereichte Bögen erscheinen als Einreichungen mit Status (neu, angesehen, archiviert) und können bei Bedarf in die Praxissprache übersetzt werden. Angezeigt werden nur von Patient:innen aktiv übermittelte Angaben, keine automatisch abgerufenen Daten.",
+  cardAnamnesisInfoControl:
+    "Patient:innen füllen den Bogen freiwillig aus und erteilen vor dem Absenden eine ausdrückliche DSGVO-Einwilligung; ohne diese wird nichts übermittelt. Externe Patient:innen ohne MedScoutX-Konto nutzen den Link bzw. QR-Code – ohne Registrierungspflicht. Unabhängig davon können Patient:innen mit MedScoutX ihre Gesprächsvorbereitung eigenständig nutzen.",
+  cardAnamnesisInfoAlpha:
+    "Im Alpha-Test können Sie prüfen: Lässt sich eine Vorlage anlegen und ein Link erzeugen, erscheint eine über den Link eingereichte Anamnese als Einreichung, funktioniert die Übersetzung in die Praxissprache, greifen Leerzustände und das Feature-Gate, und bleiben Angaben ohne Einwilligung unsichtbar?",
   cardTelemedicineInfoButton: "Mehr Informationen zu Videosprechstunden",
   cardTelemedicineInfoTitle: "Videosprechstunden",
   cardTelemedicineInfoIntro:

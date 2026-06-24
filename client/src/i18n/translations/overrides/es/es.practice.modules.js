@@ -133,6 +133,16 @@ export default {
       "El registro completo solo es visible para el propietario, el admin y el gestor de consulta (permiso « audit.view »); los demás roles reciben una indicación en lugar de acceso. Así la tarjeta apoya la transparencia y la privacidad: los accesos y los cambios se vuelven trazables sin mostrar nombres de pacientes ni datos de salud. No existe conexión directa con el área del paciente.",
     cardActivityInfoAlpha:
       "En la prueba alfa puede comprobar: ¿aparecen los eventos recientes en « Actividad reciente », se abre el registro de auditoría con filtro de gravedad para los roles autorizados, reciben los roles no autorizados una indicación limpia, y funcionan los estados de carga, vacíos y de error sin nombres de pacientes?",
+    cardAnamnesisInfoButton: "Más información sobre la anamnesis",
+    cardAnamnesisInfoTitle: "Anamnesis",
+    cardAnamnesisInfoIntro:
+      "La anamnesis sirve para la captura estructurada y la vista general de la información preparada por el paciente antes de la cita. MedScoutX estructura, muestra y traduce las declaraciones existentes — sin diagnóstico, recomendación terapéutica, clasificación de urgencia ni decisión especializada.",
+    cardAnamnesisInfoUsage:
+      "Crea plantillas de anamnesis multilingües (secciones y preguntas, de/en/fr/it/es) y comparte un enlace seguro o un código QR. Los formularios enviados aparecen como envíos con un estado (nuevo, visto, archivado) y pueden traducirse al idioma de la consulta si es necesario. Solo se muestra la información transmitida activamente por los pacientes — ningún dato recuperado automáticamente.",
+    cardAnamnesisInfoControl:
+      "Los pacientes rellenan el formulario de forma voluntaria y otorgan un consentimiento RGPD explícito antes de enviarlo; sin él, no se transmite nada. Los pacientes externos sin cuenta de MedScoutX usan el enlace o el código QR — sin obligación de registro. De forma independiente, los pacientes con MedScoutX pueden usar su preparación de la consulta por su cuenta.",
+    cardAnamnesisInfoAlpha:
+      "En la prueba alfa puede comprobar: ¿se puede crear una plantilla y generar un enlace, aparece como envío una anamnesis enviada a través del enlace, funciona la traducción al idioma de la consulta, se aplican los estados vacíos y el bloqueo de la función, y permanece oculta la información sin consentimiento?",
 
     metricUnreadInbox: "Elementos no leídos en la bandeja de entrada",
     metricOpenMessages: "Mensajes abiertos",

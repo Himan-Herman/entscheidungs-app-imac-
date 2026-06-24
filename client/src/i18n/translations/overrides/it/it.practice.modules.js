@@ -133,6 +133,16 @@ export default {
       "Il registro completo è visibile solo a titolare, admin e responsabile di studio (autorizzazione « audit.view »); gli altri ruoli ricevono un’indicazione invece dell’accesso. Così la scheda sostiene trasparenza e privacy: accessi e modifiche diventano tracciabili senza mostrare nomi dei pazienti o dati sanitari. Non esiste alcun collegamento diretto con l’area paziente.",
     cardActivityInfoAlpha:
       "Nel test alpha puoi verificare: gli eventi recenti compaiono in « Attività recente », il registro di audit con filtro per gravità si apre per i ruoli autorizzati, i ruoli non autorizzati ricevono un’indicazione pulita, e gli stati di caricamento, vuoti e di errore funzionano senza nomi dei pazienti?",
+    cardAnamnesisInfoButton: "Maggiori informazioni sull’anamnesi",
+    cardAnamnesisInfoTitle: "Anamnesi",
+    cardAnamnesisInfoIntro:
+      "L’anamnesi serve alla raccolta strutturata e alla panoramica delle informazioni preparate dal paziente prima dell’appuntamento. MedScoutX struttura, mostra e traduce le dichiarazioni esistenti — senza diagnosi, raccomandazione terapeutica, classificazione di urgenza o decisione specialistica.",
+    cardAnamnesisInfoUsage:
+      "Crei modelli di anamnesi multilingue (sezioni e domande, de/en/fr/it/es) e condividi un link sicuro o un codice QR. I moduli inviati compaiono come invii con uno stato (nuovo, visualizzato, archiviato) e possono essere tradotti nella lingua dello studio se necessario. Vengono mostrate solo le informazioni trasmesse attivamente dai pazienti — nessun dato recuperato automaticamente.",
+    cardAnamnesisInfoControl:
+      "I pazienti compilano il modulo volontariamente e forniscono un consenso GDPR esplicito prima dell’invio; senza di esso non viene trasmesso nulla. I pazienti esterni senza account MedScoutX usano il link o il codice QR — senza obbligo di registrazione. Indipendentemente, i pazienti con MedScoutX possono usare autonomamente la propria preparazione alla visita.",
+    cardAnamnesisInfoAlpha:
+      "Nel test alpha puoi verificare: è possibile creare un modello e generare un link, un’anamnesi inviata tramite il link compare come invio, la traduzione nella lingua dello studio funziona, gli stati vuoti e il blocco della funzione si applicano, e le informazioni restano nascoste senza consenso?",
 
     metricUnreadInbox: "Elementi non letti in posta in arrivo",
     metricOpenMessages: "Meseesaggi apertos",

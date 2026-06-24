@@ -14,7 +14,7 @@ import {
   suppressCardNavigation,
 } from "../practiceCardInfo.js";
 
-test("only telemedicine, inbox, messages, documents, medication, dataRequests, team, security and activity cards expose an info button", () => {
+test("only the 10 designated practice-hub cards expose an info button", () => {
   assert.deepEqual(INFO_CARD_IDS, [
     "telemedicine",
     "inbox",
@@ -25,6 +25,7 @@ test("only telemedicine, inbox, messages, documents, medication, dataRequests, t
     "team",
     "security",
     "activity",
+    "anamnesis",
   ]);
   assert.equal(hasCardInfo("telemedicine"), true);
   assert.equal(hasCardInfo("inbox"), true);
@@ -35,7 +36,8 @@ test("only telemedicine, inbox, messages, documents, medication, dataRequests, t
   assert.equal(hasCardInfo("team"), true);
   assert.equal(hasCardInfo("security"), true);
   assert.equal(hasCardInfo("activity"), true);
-  for (const other of ["patients", "booking", "anamnesis", "medaLive", ""]) {
+  assert.equal(hasCardInfo("anamnesis"), true);
+  for (const other of ["patients", "booking", "medaLive", ""]) {
     assert.equal(hasCardInfo(other), false);
   }
 });

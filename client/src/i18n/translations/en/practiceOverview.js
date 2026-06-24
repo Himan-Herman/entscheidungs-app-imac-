@@ -133,6 +133,16 @@ export default {
     "The full log is visible only to owner, admin and practice manager (the “audit.view” permission); other roles get a note instead of access. This is how the tile supports transparency and privacy: access and changes become traceable without showing patient names or health data. There is no direct connection to the patient area.",
   cardActivityInfoAlpha:
     "In the alpha test you can check: do recent events appear under “Recent activity”, does the audit log with severity filter open for authorized roles, do unauthorized roles get a clean note, and do loading, empty and error states work without patient names?",
+  cardAnamnesisInfoButton: "More information about anamnesis",
+  cardAnamnesisInfoTitle: "Anamnesis",
+  cardAnamnesisInfoIntro:
+    "Anamnesis is for the structured capture and overview of prepared patient information before the appointment. MedScoutX structures, displays and translates existing statements — there is no diagnosis, treatment recommendation, urgency rating or specialist decision.",
+  cardAnamnesisInfoUsage:
+    "You create multilingual anamnesis templates (sections and questions, de/en/fr/it/es) and share a secure link or QR code. Submitted forms appear as submissions with a status (new, viewed, archived) and can be translated into the practice language if needed. Only information actively submitted by patients is shown — no automatically retrieved data.",
+  cardAnamnesisInfoControl:
+    "Patients fill in the form voluntarily and give explicit GDPR consent before sending; without it, nothing is submitted. External patients without a MedScoutX account use the link or QR code — without being forced to register. Independently, patients with MedScoutX can use their visit preparation on their own.",
+  cardAnamnesisInfoAlpha:
+    "In the alpha test you can check: can a template be created and a link generated, does an anamnesis submitted via the link appear as a submission, does translation into the practice language work, do empty states and the feature gate apply, and does information stay hidden without consent?",
   cardTelemedicineInfoButton: "More information about video consultations",
   cardTelemedicineInfoTitle: "Video consultations",
   cardTelemedicineInfoIntro:

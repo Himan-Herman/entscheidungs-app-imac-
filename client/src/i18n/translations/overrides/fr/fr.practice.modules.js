@@ -139,6 +139,16 @@ export default {
       "Le journal complet n’est visible que par le propriétaire, l’admin et le gestionnaire de cabinet (autorisation « audit.view ») ; les autres rôles reçoivent une indication au lieu d’un accès. Ainsi, la tuile soutient la transparence et la confidentialité : les accès et les modifications deviennent traçables sans afficher de noms de patients ni de données de santé. Il n’existe aucun lien direct avec l’espace patient.",
     cardActivityInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : les événements récents apparaissent-ils sous « Activité récente », le journal d’audit avec filtre de gravité s’ouvre-t-il pour les rôles autorisés, les rôles non autorisés reçoivent-ils une indication propre, et les états de chargement, vides et d’erreur fonctionnent-ils sans noms de patients ?",
+    cardAnamnesisInfoButton: "Plus d’informations sur l’anamnèse",
+    cardAnamnesisInfoTitle: "Anamnèse",
+    cardAnamnesisInfoIntro:
+      "L’anamnèse sert à la saisie structurée et à l’aperçu des informations préparées par le patient avant le rendez-vous. MedScoutX structure, affiche et traduit les déclarations existantes — sans diagnostic, recommandation thérapeutique, classification d’urgence ni décision spécialisée.",
+    cardAnamnesisInfoUsage:
+      "Vous créez des modèles d’anamnèse multilingues (sections et questions, de/en/fr/it/es) et partagez un lien sécurisé ou un code QR. Les formulaires soumis apparaissent comme des soumissions avec un statut (nouveau, consulté, archivé) et peuvent être traduits dans la langue de l’établissement si nécessaire. Seules les informations activement transmises par les patients sont affichées — aucune donnée récupérée automatiquement.",
+    cardAnamnesisInfoControl:
+      "Les patients remplissent le formulaire volontairement et donnent un consentement RGPD explicite avant l’envoi ; sans cela, rien n’est transmis. Les patients externes sans compte MedScoutX utilisent le lien ou le code QR — sans être contraints de s’inscrire. Indépendamment, les patients disposant de MedScoutX peuvent utiliser leur préparation de consultation de manière autonome.",
+    cardAnamnesisInfoAlpha:
+      "Lors du test alpha, vous pouvez vérifier : peut-on créer un modèle et générer un lien, une anamnèse soumise via le lien apparaît-elle comme une soumission, la traduction dans la langue de l’établissement fonctionne-t-elle, les états vides et le verrou de fonctionnalité s’appliquent-ils, et les informations restent-elles masquées sans consentement ?",
 
     metricUnreadInbox: "Éléments non lus dans la boîte de réception",
     metricOpenMessages: "Messages ouverts",
