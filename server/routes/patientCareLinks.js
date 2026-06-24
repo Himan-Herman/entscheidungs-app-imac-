@@ -14,6 +14,11 @@ import {
 } from "../services/careRelationship/practicePatientLinkService.js";
 import { updatePatientProfileAccess } from "../services/careRelationship/practicePatientProfileService.js";
 import { archiveLinkForPatient } from "../services/careRelationship/patientLinkArchiveService.js";
+import {
+  createConnectCode,
+  getActiveConnectCode,
+  revokeConnectCode,
+} from "../services/careRelationship/connectCodeService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
@@ -37,8 +42,68 @@ function mapError(err) {
   if (msg === "link_not_found") return { status: 404, error: msg };
   if (msg === "link_not_active") return { status: 409, error: msg };
   if (msg === "link_already_archived") return { status: 409, error: msg };
+  if (msg === "connect_code_not_found") return { status: 404, error: msg };
+  if (msg === "connect_code_not_active") return { status: 409, error: msg };
   return { status: 500, error: "request_failed" };
 }
+
+// --- Patient-generated practice connection code (Phase 1) ---
+// Registered before the "/:linkId" routes so the literal path is not captured.
+
+/** POST /api/patient/links/connect-code — generate a fresh code (body: { scopes: string[] }). */
+router.post("/connect-code", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  try {
+    const result = await createConnectCode({ patientUserId: userId, scopes: req.body?.scopes });
+    await writeAuditLog({
+      userId,
+      action: "patient_connect_code_created",
+      entityType: "PatientPracticeConnectCode",
+      entityId: result.id,
+      metadata: { scopeCount: result.consentScopes.length },
+    });
+    return res.status(201).json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[patient/links/connect-code/create]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** GET /api/patient/links/connect-code — metadata for the active code (never the plaintext). */
+router.get("/connect-code", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  try {
+    const code = await getActiveConnectCode(userId);
+    return res.json({ ok: true, code });
+  } catch (err) {
+    console.error("[patient/links/connect-code/get]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** DELETE /api/patient/links/connect-code/:id — revoke an active code. */
+router.delete("/connect-code/:id", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+  try {
+    const code = await revokeConnectCode({ patientUserId: userId, codeId: req.params.id });
+    await writeAuditLog({
+      userId,
+      action: "patient_connect_code_revoked",
+      entityType: "PatientPracticeConnectCode",
+      entityId: code.id,
+    });
+    return res.json({ ok: true, code });
+  } catch (err) {
+    console.error("[patient/links/connect-code/revoke]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
 
 /** GET /api/patient/links?status=&limit=&offset= */
 router.get("/", async (req, res) => {

@@ -26,6 +26,7 @@ model User {
   followUpCreatedThreads           PreVisitFollowUpThread[]         @relation("FollowUpCreatedByUser")
   visitMedicationEntriesAuthored   VisitMedicationEntry[]           @relation("VisitMedicationCreatedBy")
   practicePatientLinks             PracticePatientLink[]            @relation("PracticePatientLinks")
+  patientPracticeConnectCodes      PatientPracticeConnectCode[]     @relation("PatientPracticeConnectCodes")
   profileAccessGrants              PracticePatientLink[]            @relation("ProfileAccessGrantedBy")
   practiceLinksAsAssignedDoctor    PracticePatientLink[]            @relation("PracticeLinkAssignedDoctor")
   practiceLinksAsAssignedTeam      PracticePatientLink[]            @relation("PracticeLinkAssignedTeam")
@@ -930,6 +931,34 @@ model PracticePatientLink {
   @@index([practiceProfileId, assignmentStatus])
   @@index([practiceProfileId, assignedDoctorUserId])
   @@index([practiceProfileId, assignedTeamMemberUserId])
+}
+
+/// Patient-generated, short-lived, single-use code that lets a practice create an
+/// ACTIVE PracticePatientLink only after a deliberate patient action. The plaintext
+/// code is never stored (SHA-256 hash only); consentScopesJson holds exactly the
+/// scopes the patient chose, which are copied onto the link on redemption. Purely
+/// organizational — no clinical content.
+model PatientPracticeConnectCode {
+  id                      String    @id @default(cuid())
+  patientUserId           String
+  /// SHA-256 hex of the raw code — plaintext code never stored.
+  tokenHash               String    @unique
+  /// First chars of the raw code for the patient's own list display only.
+  tokenPrefix             String?   @db.VarChar(12)
+  /// Consent scopes chosen by the patient (subset of CONSENT_SCOPES) — copied to the link.
+  consentScopesJson       Json
+  /// active | used | expired | revoked
+  status                  String    @default("active") @db.VarChar(20)
+  expiresAt               DateTime
+  createdAt               DateTime  @default(now())
+  usedAt                  DateTime?
+  usedByPracticeProfileId String?
+  revokedAt               DateTime?
+
+  patientUser User @relation("PatientPracticeConnectCodes", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([patientUserId, status])
+  @@index([status, expiresAt])
 }
 
 /// Organizational assignment history for a practice–patient link (no clinical content).

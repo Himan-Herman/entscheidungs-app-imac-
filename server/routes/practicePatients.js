@@ -38,6 +38,7 @@ import {
   anonymizeSearchQueryForAudit,
 } from "../services/careRelationship/practicePatientSearchService.js";
 import { generatePracticePatientSearchAiSuggestion } from "../services/careRelationship/practicePatientSearchAiService.js";
+import { redeemConnectCode } from "../services/careRelationship/connectCodeService.js";
 import { createExportJob } from "../services/export/exportJobService.js";
 import { listPracticeLinkConsents } from "../services/consent/consentRecordService.js";
 import { practiceExportLimiter } from "../middleware/ipRateLimit.js";
@@ -77,6 +78,9 @@ function mapError(err) {
   }
   if (msg === "link_already_exists") {
     return { status: 409, error: msg };
+  }
+  if (msg === "invalid_or_expired_code") {
+    return { status: 400, error: msg };
   }
   if (
     msg === "link_not_found" ||
@@ -245,6 +249,49 @@ router.post("/link", async (req, res) => {
     return res.status(201).json({ ok: true, link });
   } catch (err) {
     console.error("[practice/patients/link]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/**
+ * POST /api/practice/patients/redeem-code
+ * Redeem a patient-generated connection code (body: { practiceId, code }). Creates or
+ * reuses an active PracticePatientLink with the consent scopes the patient chose. The
+ * practice can only act for its own practiceProfileId and only with write permission.
+ */
+router.post("/redeem-code", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.body?.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canWritePracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const result = await redeemConnectCode({
+      practiceProfileId: practiceId,
+      code: req.body?.code,
+    });
+
+    await writeAuditLog({
+      userId,
+      actorRole: access.role,
+      action: "practice_patient_link_connect_code_redeemed",
+      entityType: "PracticePatientLink",
+      entityId: result.link.id,
+      metadata: { scopeCount: result.consentScopes.length },
+    });
+
+    return res.status(201).json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[practice/patients/redeem-code]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
