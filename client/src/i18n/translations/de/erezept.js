@@ -2,9 +2,9 @@ export default {
   pageTitle: "Rezepte & Verordnungen — MedScoutX",
   pageHeading: "Rezepte & Verordnungen",
   breadcrumb: "Meine Praxis",
-  intro: "Von deiner Praxis ausgestellte Rezepte — immer griffbereit für die Apotheke.",
+  intro: "Von Ihrer Praxis ausgestellte Rezepte — immer griffbereit für die Apotheke.",
   disclaimer:
-    "Simuliertes e-Rezept — kein offizieller TI-Nachweis. Zeige den QR-Code oder Token in der Apotheke vor.",
+    "Simuliertes e-Rezept — kein offizieller TI-Nachweis. Zeigen Sie den QR-Code oder Token in der Apotheke vor.",
   loadingError: "Rezepte konnten nicht geladen werden.",
   backToPractice: "Zur Praxis-Übersicht",
   pdfDownload: "PDF herunterladen",
@@ -12,7 +12,7 @@ export default {
   issuedBy: "Ausgestellt von",
   filtersLabel: "Status-Filter",
   noEntries: "Noch keine Rezepte vorhanden.",
-  noEntriesHint: "Rezepte erscheinen hier, sobald deine Praxis sie ausstellt.",
+  noEntriesHint: "Rezepte erscheinen hier, sobald Ihre Praxis sie ausstellt.",
   noEntriesFilter: "Keine Rezepte mit diesem Status.",
   noConsent: "Freigabe für Rezepte noch nicht erteilt.",
 
@@ -65,7 +65,7 @@ export default {
   submitBtn: "Rezept ausstellen",
   cancelBtn: "Abbrechen",
   saving: "Ausstellen…",
-  errorMedication: "Bitte gib das Medikament an.",
+  errorMedication: "Bitte geben Sie das Medikament an.",
 
   sectionHeading: "e-Rezepte",
   practiceDisclaimer: "Simulierte Rezeptverwaltung — keine echte Telematikinfrastruktur.",

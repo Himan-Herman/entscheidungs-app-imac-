@@ -121,7 +121,7 @@ export default function ErezeptPage() {
             : (t?.noEntriesFilter || "Keine Rezepte mit diesem Status.")}
           </p>
           {activeFilter === "all" && (
-            <p className="erx-page__empty-hint">{t?.noEntriesHint || "Rezepte erscheinen hier, sobald deine Praxis sie ausstellt."}</p>
+            <p className="erx-page__empty-hint">{t?.noEntriesHint || "Rezepte erscheinen hier, sobald Ihre Praxis sie ausstellt."}</p>
           )}
         </div>
       ) : (
