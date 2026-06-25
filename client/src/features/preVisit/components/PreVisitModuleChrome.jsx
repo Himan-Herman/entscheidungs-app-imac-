@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { readUserMode, USER_MODES } from "../../../utils/userMode.js";
@@ -32,6 +33,7 @@ export default function PreVisitModuleChrome({ variant = "workflow" }) {
     <div className={`pre-visit-chrome${isLibrary ? " pre-visit-chrome--library" : ""}`}>
       <nav className="pre-visit-chrome__nav" aria-label={t.navAria}>
         <Link className="pre-visit-chrome__back" to={back.to}>
+          <ArrowLeft size={16} aria-hidden="true" />
           {back.label}
         </Link>
         <span className="pre-visit-chrome__module">{moduleLabel}</span>

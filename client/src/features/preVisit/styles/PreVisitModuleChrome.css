@@ -16,19 +16,34 @@
 .pre-visit-chrome__back {
   display: inline-flex;
   align-items: center;
-  min-height: 48px;
-  padding: 8px 12px;
-  margin-left: -8px;
+  gap: 7px;
+  min-height: 44px;
+  padding: 8px 14px;
   font-size: clamp(0.95rem, 2.8vw, 1rem);
   font-weight: 600;
-  color: #0e7490;
+  color: #0b6e67;
   text-decoration: none;
   border-radius: 10px;
+  border: 1px solid rgba(15, 118, 110, 0.35);
+  background: #ffffff;
   box-sizing: border-box;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.pre-visit-chrome__back svg {
+  flex: none;
+  transition: transform 0.15s ease;
 }
 
 .pre-visit-chrome__back:hover {
   text-decoration: none;
+  border-color: rgba(15, 118, 110, 0.6);
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+}
+
+.pre-visit-chrome__back:hover svg {
+  transform: translateX(-2px);
 }
 
 .pre-visit-chrome__back:focus-visible {
@@ -58,6 +73,13 @@
 
 .pre-visit-chrome--library .pre-visit-chrome__back {
   color: #475569;
+  border-color: rgba(71, 85, 105, 0.28);
+}
+
+.pre-visit-chrome--library .pre-visit-chrome__back:hover {
+  background: rgba(248, 250, 252, 0.95);
+  border-color: rgba(71, 85, 105, 0.45);
+  color: #334155;
 }
 
 .pre-visit-chrome--library .pre-visit-chrome__safety {
@@ -84,6 +106,14 @@
 
 :root[data-theme="dark"] .pre-visit-chrome__back {
   color: #5eead4;
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(45, 212, 191, 0.38);
+}
+
+:root[data-theme="dark"] .pre-visit-chrome__back:hover {
+  background: rgba(45, 212, 191, 0.12);
+  border-color: rgba(45, 212, 191, 0.55);
+  color: #99f6e4;
 }
 
 :root[data-theme="dark"] .pre-visit-chrome__module {
@@ -102,6 +132,14 @@
 
 :root[data-theme="dark"] .pre-visit-chrome--library .pre-visit-chrome__back {
   color: #94a3b8;
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+:root[data-theme="dark"] .pre-visit-chrome--library .pre-visit-chrome__back:hover {
+  background: rgba(30, 41, 59, 0.92);
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #cbd5e1;
 }
 
 :root[data-theme="dark"] .pre-visit-chrome--library .pre-visit-chrome__safety {

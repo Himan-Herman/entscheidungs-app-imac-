@@ -267,7 +267,7 @@ export default function PracticeDashboardPage() {
               <ClipboardList size={16} aria-hidden="true" />
               {tPractices.heading}
             </Link>
-            <Link className="practice-dashboard__nav-link" to="/startseite">
+            <Link className="practice-dashboard__nav-link" to="/choose">
               <House size={16} aria-hidden="true" />
               {tPractices.backHome}
             </Link>

@@ -284,7 +284,7 @@ export default function SettingsPracticesPage() {
           <h1 className="settings-practices__title">{t.heading}</h1>
           <p className="settings-practices__intro">{t.intro}</p>
           <div className="settings-practices__top-links">
-            <Link className="settings-practices__back" to="/startseite">
+            <Link className="settings-practices__back" to="/choose">
               {t.backHome}
             </Link>
             <Link className="settings-practices__back" to="/practice/dashboard">

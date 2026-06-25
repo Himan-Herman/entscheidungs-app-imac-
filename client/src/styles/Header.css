@@ -427,6 +427,39 @@
 .ms-nav-item--button {
   cursor: pointer;
   font: inherit;
+  background: rgba(190, 18, 60, 0.05);
+  border-color: rgba(190, 18, 60, 0.22);
+  color: #9f1239;
+  box-shadow: 0 10px 24px rgba(159, 18, 57, 0.1);
+}
+
+.ms-nav-item--button svg {
+  color: #be123c;
+}
+
+.ms-nav-item--button:hover,
+.ms-nav-item--button:focus-visible {
+  background: rgba(190, 18, 60, 0.1);
+  border-color: rgba(190, 18, 60, 0.4);
+  color: #9f1239;
+}
+
+:root[data-theme="dark"] .ms-nav-item--button {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: #fda4af;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .ms-nav-item--button svg {
+  color: #fb7185;
+}
+
+:root[data-theme="dark"] .ms-nav-item--button:hover,
+:root[data-theme="dark"] .ms-nav-item--button:focus-visible {
+  background: rgba(244, 63, 94, 0.16);
+  border-color: rgba(244, 63, 94, 0.45);
+  color: #fecdd3;
 }
 
 .visually-hidden {
