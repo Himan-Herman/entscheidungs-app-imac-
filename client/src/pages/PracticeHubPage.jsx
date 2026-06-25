@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Activity,
+  ArrowLeft,
   BarChart3,
+  Building2,
   CalendarCheck,
   ClipboardList,
   ClipboardPen,
@@ -10,6 +12,7 @@ import {
   FileText,
   Inbox,
   Info,
+  LayoutDashboard,
   MessageSquare,
   Mic,
   Pill,
@@ -476,19 +479,24 @@ export default function PracticeHubPage() {
     <div className="practice-overview">
       <nav className="practice-overview__top-nav" aria-label={t.topNavAria}>
         <Link className="practice-overview__top-nav-link practice-overview__top-nav-link--back" to="/account">
-          ← {t.backAccount}
+          <ArrowLeft size={16} aria-hidden="true" />
+          {t.backAccount}
         </Link>
-        <Link className="practice-overview__top-nav-link" to="/settings/practices">
-          {t.linkPracticeProfiles}
-        </Link>
-        {practiceId ? (
-          <Link
-            className="practice-overview__top-nav-link"
-            to={`/practice/dashboard?practiceId=${encodeURIComponent(practiceId)}`}
-          >
-            {t.linkPracticeDashboard}
+        <div className="practice-overview__top-nav-group">
+          <Link className="practice-overview__top-nav-link practice-overview__top-nav-pill" to="/settings/practices">
+            <Building2 size={15} aria-hidden="true" />
+            {t.linkPracticeProfiles}
           </Link>
-        ) : null}
+          {practiceId ? (
+            <Link
+              className="practice-overview__top-nav-link practice-overview__top-nav-pill"
+              to={`/practice/dashboard?practiceId=${encodeURIComponent(practiceId)}`}
+            >
+              <LayoutDashboard size={15} aria-hidden="true" />
+              {t.linkPracticeDashboard}
+            </Link>
+          ) : null}
+        </div>
       </nav>
 
       <header className="practice-overview__hero">
