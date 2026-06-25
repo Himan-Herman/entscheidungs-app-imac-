@@ -9,8 +9,8 @@ export default {
     modules: [
       "Arztgespräch vorbereiten",
       "Symptom Check",
-      "Bildanalyse",
-      "Körperkarte",
+      "Meine Praxis",
+      "Meda Live",
       "Meine Vorbereitungen",
       "Meine Verläufe",
       "Ärztebuch",

@@ -9,8 +9,8 @@ export default {
     modules: [
       "Prepare a doctor visit",
       "Symptom Check",
-      "Image analysis",
-      "Body map",
+      "My practice",
+      "Meda Live",
       "My preparations",
       "My cases",
       "Doctor contacts",

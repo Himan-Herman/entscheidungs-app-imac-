@@ -67,8 +67,8 @@ export default {
       modules: [
         "Preparazione alla visita medica",
         "Raccolta guidata dei sintomi",
-        "Descrizione strutturata delle immagini",
-        "Mappa corporea",
+        "Il mio studio",
+        "Meda Live",
         "Le mie preparazioni",
         "Le mie cronologie",
         "Contatti clinici",

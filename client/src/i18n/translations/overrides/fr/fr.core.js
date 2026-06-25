@@ -68,8 +68,8 @@ export default {
       modules: [
         "Préparer une consultation médicale",
         "Bilan symptomatique",
-        "Description d’images",
-        "Schéma corporel",
+        "Mon cabinet",
+        "Meda Live",
         "Mes préparations",
         "Mes dossiers",
         "Contacts médicaux",
