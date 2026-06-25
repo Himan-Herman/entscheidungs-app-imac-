@@ -197,13 +197,28 @@
 
 .practice-dashboard__link-btn,
 .practice-dashboard__card button {
-  border: 1px solid rgba(14, 116, 144, 0.25);
-  background: #f0f9ff;
-  color: #075985;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(15, 118, 110, 0.4);
+  background: #ffffff;
+  color: #0b6e67;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 8px 14px;
+  font-weight: 600;
   cursor: pointer;
   min-height: 40px;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.practice-dashboard__link-btn:hover,
+.practice-dashboard__card button:hover {
+  border-color: rgba(15, 118, 110, 0.6);
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+  text-decoration: none;
 }
 
 .practice-dashboard__back {
@@ -323,9 +338,9 @@
 
 :root[data-theme="dark"] .practice-dashboard__link-btn,
 :root[data-theme="dark"] .practice-dashboard__card button {
-  background: rgba(14, 116, 144, 0.18);
-  color: #bae6fd;
-  border-color: rgba(14, 116, 144, 0.45);
+  background: rgba(45, 212, 191, 0.12);
+  color: #5eead4;
+  border-color: rgba(45, 212, 191, 0.45);
 }
 
 /* ============================================================================
@@ -778,8 +793,8 @@
   }
   :root:not([data-theme="light"]) .practice-dashboard__link-btn,
   :root:not([data-theme="light"]) .practice-dashboard__card button {
-    background: rgba(14, 116, 144, 0.18);
-    color: #bae6fd;
-    border-color: rgba(14, 116, 144, 0.45);
+    background: rgba(45, 212, 191, 0.12);
+    color: #5eead4;
+    border-color: rgba(45, 212, 191, 0.45);
   }
 }

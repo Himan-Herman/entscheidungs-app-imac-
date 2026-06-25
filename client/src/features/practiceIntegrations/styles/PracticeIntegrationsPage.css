@@ -83,15 +83,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.4rem;
   min-height: 2.5rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border, #d1d5db);
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--border, #cbd5e1);
   background: var(--surface, #fff);
   color: inherit;
   font: inherit;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.practice-integrations__btn:hover {
+  border-color: rgba(15, 118, 110, 0.5);
+  background: rgba(15, 118, 110, 0.07);
 }
 
 .practice-integrations__btn:focus-visible {

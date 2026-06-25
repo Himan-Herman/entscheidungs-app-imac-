@@ -298,22 +298,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
   min-height: 44px;
   padding: 0.55rem 1rem;
   border-radius: 10px;
   border: 1px solid var(--ms-color-border-strong, #cbd5e1);
   background: var(--ms-color-surface, #ffffff);
-  color: var(--ms-color-text, #0f172a);
+  color: var(--ms-color-link, #0b6e67);
   font-size: 0.92rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
 
 .practice-overview__action:hover {
-  border-color: var(--ms-color-accent, #0f766e);
-  background: var(--ms-color-bg-subtle, #f8fafc);
-  color: var(--ms-color-text, #0f172a);
+  border-color: rgba(15, 118, 110, 0.45);
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--ms-color-link-hover, #0f766e);
   text-decoration: none;
 }
 
