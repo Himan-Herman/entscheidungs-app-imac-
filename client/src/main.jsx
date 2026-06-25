@@ -125,6 +125,9 @@ const PatientPracticeDocumentDetailPage = lazy(() =>
 const PatientDataControlPage = lazy(() =>
   import("./features/careRelationship/pages/PatientDataControlPage.jsx"),
 );
+const PatientPracticeLinksPage = lazy(() =>
+  import("./features/careRelationship/pages/PatientPracticeLinksPage.jsx"),
+);
 const PatientExportsPage = lazy(() =>
   import("./features/exports/pages/PatientExportsPage.jsx"),
 );
@@ -455,7 +458,7 @@ void runPwaBuildMigration().then(() => {
                   path="/patient/practice-links"
                   element={
                     <ProtectedRoute>
-                      <PatientDataControlPage />
+                      <PatientPracticeLinksPage />
                     </ProtectedRoute>
                   }
                 />
