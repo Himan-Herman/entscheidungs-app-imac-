@@ -17,8 +17,11 @@ export default {
     backHome: "Torna alla home MedScoutX",
     backPatientHub: "Torna all’area paziente",
     moduleLabel: "Prepara la visita medica",
+    libraryModuleLabel: "Le mie preparazioni",
     safety:
       "Questo modulo serve solo a preparare e documentare le tue informazioni. Non sostituisce il parere medico.",
+    librarySafety:
+      "Gestisci qui le preparazioni salvate. Nulla viene sincronizzato automaticamente — nella libreria compaiono solo gli elementi che hai salvato esplicitamente.",
     navAria: "Navigazione pre-visita",
   },
   chat: {
@@ -191,6 +194,27 @@ export default {
     backPracticeHub: "Torna al mio studio",
     title: "Le mie cronologie",
     pageTitle: "MedScoutX — Le mie cronologie",
+    intro:
+      "Raggruppa più preparazioni attorno a un tema nel tempo. Sei tu a controllare contenuti ed eliminazione.",
+    safetyNote:
+      "Nessuna diagnosi, nessuna urgenza, nessun consiglio terapeutico. Vengono confrontate e organizzate solo le tue voci.",
+    searchPlaceholder: "Cerca…",
+    showArchived: "Mostra archiviati",
+    createCase: "Crea cronologia",
+    fieldTitle: "Titolo",
+    fieldCategory: "Categoria (facoltativo)",
+    fieldDescription: "Descrizione (facoltativo)",
+    save: "Salva",
+    cancel: "Annulla",
+    loading: "Caricamento…",
+    loadError: "Impossibile caricare le cronologie.",
+    saveError: "Impossibile salvare la cronologia.",
+    empty: "Ancora nessuna cronologia.",
+    sessionCount: "Preparazioni",
+    loginHint: "Accedi per gestire le cronologie.",
+    loginCta: "Accedi",
+    linkPreparations: "Le mie preparazioni",
+    backHome: "Torna alla home",
   },
   caseDetail: {
     backPracticeHub: "Torna al mio studio",

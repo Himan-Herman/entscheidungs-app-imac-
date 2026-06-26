@@ -17,8 +17,11 @@ export default {
     backHome: "Retour à l’accueil MedScoutX",
     backPatientHub: "Retour à l’espace patient",
     moduleLabel: "Préparer la consultation",
+    libraryModuleLabel: "Mes préparations",
     safety:
       "Ce module sert uniquement à préparer et documenter vos informations. Il ne remplace pas un avis médical.",
+    librarySafety:
+      "Gérez ici les préparations enregistrées. Rien n’est synchronisé automatiquement — seuls les éléments que vous avez explicitement enregistrés apparaissent dans cette bibliothèque.",
     navAria: "Navigation pré-consultation",
   },
   chat: {
@@ -201,6 +204,27 @@ export default {
     backPracticeHub: "Retour à Mon cabinet",
     title: "Mes dossiers",
     pageTitle: "MedScoutX — Mes dossiers",
+    intro:
+      "Regroupez plusieurs préparations autour d’un sujet dans le temps. Vous contrôlez le contenu et la suppression.",
+    safetyNote:
+      "Pas de diagnostic, pas d’urgence, pas de conseil thérapeutique. Seules vos propres saisies sont comparées et organisées.",
+    searchPlaceholder: "Rechercher…",
+    showArchived: "Afficher les archivés",
+    createCase: "Créer un dossier",
+    fieldTitle: "Titre",
+    fieldCategory: "Catégorie (facultatif)",
+    fieldDescription: "Description (facultatif)",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    loading: "Chargement…",
+    loadError: "Impossible de charger les dossiers.",
+    saveError: "Le dossier n’a pas pu être enregistré.",
+    empty: "Aucun dossier pour l’instant.",
+    sessionCount: "Préparations",
+    loginHint: "Connectez-vous pour gérer les dossiers.",
+    loginCta: "Se connecter",
+    linkPreparations: "Mes préparations",
+    backHome: "Retour à l’accueil",
   },
   caseDetail: {
     backPracticeHub: "Retour à Mon cabinet",

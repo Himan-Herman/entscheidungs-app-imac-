@@ -2,6 +2,7 @@ export default {
   pageTitle: "Cartilla de vacunación",
   pageHeading: "Mi cartilla de vacunación",
   intro: "Lleva un seguimiento de tus vacunas en un solo lugar.",
+  groupBy: "Agrupado por enfermedad",
   disclaimer:
     "Resumen personal – no es un certificado de vacunación oficial. Lleva tu cartilla física a las consultas médicas.",
   addEntry: "Añadir vacuna",

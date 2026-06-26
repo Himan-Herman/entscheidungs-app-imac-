@@ -17,8 +17,11 @@ export default {
     backHome: "Volver al inicio de MedScoutX",
     backPatientHub: "Volver al espacio del paciente",
     moduleLabel: "Preparar la consulta médica",
+    libraryModuleLabel: "Mis preparativos",
     safety:
       "Este módulo solo sirve para preparar y documentar su información. No sustituye el consejo médico.",
+    librarySafety:
+      "Gestione aquí las preparaciones guardadas. Nada se sincroniza automáticamente — en esta biblioteca solo aparecen los elementos que usted guardó explícitamente.",
     navAria: "Navegación de pre-consulta",
   },
   chat: {
@@ -201,6 +204,27 @@ export default {
     backPracticeHub: "Volver a Mi consultorio",
     title: "Mis registros",
     pageTitle: "MedScoutX — Mis registros",
+    intro:
+      "Agrupe varias preparaciones en torno a un tema a lo largo del tiempo. Usted controla el contenido y la eliminación.",
+    safetyNote:
+      "Sin diagnóstico, sin urgencia, sin recomendación terapéutica. Solo se comparan y organizan sus propias entradas.",
+    searchPlaceholder: "Buscar…",
+    showArchived: "Mostrar archivados",
+    createCase: "Crear registro",
+    fieldTitle: "Título",
+    fieldCategory: "Categoría (opcional)",
+    fieldDescription: "Descripción (opcional)",
+    save: "Guardar",
+    cancel: "Cancelar",
+    loading: "Cargando…",
+    loadError: "No se han podido cargar los registros.",
+    saveError: "No se ha podido guardar el registro.",
+    empty: "Aún no hay registros.",
+    sessionCount: "Preparaciones",
+    loginHint: "Inicie sesión para gestionar los registros.",
+    loginCta: "Iniciar sesión",
+    linkPreparations: "Mis preparativos",
+    backHome: "Volver al inicio",
   },
   caseDetail: {
     backPracticeHub: "Volver a Mi consultorio",

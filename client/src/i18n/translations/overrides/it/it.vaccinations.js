@@ -2,6 +2,7 @@ export default {
   pageTitle: "Libretto vaccinale",
   pageHeading: "Il mio libretto vaccinale",
   intro: "Tieni traccia delle tue vaccinazioni in un unico posto.",
+  groupBy: "Raggruppato per malattia",
   disclaimer:
     "Panoramica personale – non è un certificato vaccinale ufficiale. Porta il tuo libretto vaccinale fisico alle visite mediche.",
   addEntry: "Aggiungi vaccinazione",
