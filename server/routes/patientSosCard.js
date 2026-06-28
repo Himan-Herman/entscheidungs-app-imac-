@@ -390,14 +390,15 @@ router.post("/ai-summary", async (req, res) => {
       }),
       prisma.diagnosisEntry.findMany({
         where: { userId, deletedAt: null },
-        select: { condition: true, status: true },
+        // DB column is conditionName; the summary service expects { condition }.
+        select: { conditionName: true, status: true },
       }),
     ]);
 
     const summary = await generateSosCardSummary({
       bloodType: card?.bloodType,
       allergies,
-      diagnoses,
+      diagnoses: diagnoses.map((d) => ({ condition: d.conditionName, status: d.status })),
       emergencyContact1Name: card?.emergencyContact1Name,
       emergencyContact1Phone: card?.emergencyContact1Phone,
       emergencyContact2Name: card?.emergencyContact2Name,

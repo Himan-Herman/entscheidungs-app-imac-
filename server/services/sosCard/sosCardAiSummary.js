@@ -6,9 +6,19 @@
 
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 const SOS_AI_MODEL = process.env.SOS_CARD_AI_MODEL || "gpt-4o-mini";
+
+// Lazy client: the OpenAI SDK throws in its constructor when no API key is present, so building
+// it at module load would crash the whole route import (and server start) when the key is unset.
+// Constructing on first use keeps the module import safe; the route already returns a clean 503
+// when OPENAI_API_KEY is missing, so this is only reached when a key exists.
+let openaiClient = null;
+function getOpenAiClient() {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return openaiClient;
+}
 
 /**
  * @param {{
@@ -72,7 +82,7 @@ First-responder note: ${firstResponderNote || "None"}
 
 Generate the summary now:`;
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAiClient().chat.completions.create({
     model: SOS_AI_MODEL,
     messages: [{ role: "user", content: prompt }],
     max_tokens: 200,

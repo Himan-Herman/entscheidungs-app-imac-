@@ -32,6 +32,7 @@ export default {
   aiGenerate: "Genera riepilogo",
   aiGenerating: "Generazione…",
   aiError: "Riepilogo IA non disponibile.",
+  aiUnavailable: "Il riepilogo automatico non è al momento disponibile.",
   aiSummaryLabel: "Riepilogo IA",
   aiSummaryUpdated: "Aggiornato",
   qrSection: "QR Code offline",

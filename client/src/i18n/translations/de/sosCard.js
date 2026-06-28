@@ -38,6 +38,7 @@ export default {
   aiGenerate: "Zusammenfassung erstellen",
   aiGenerating: "Wird erstellt…",
   aiError: "Zusammenfassung fehlgeschlagen. Bitte später erneut versuchen.",
+  aiUnavailable: "Automatische Zusammenfassung ist derzeit nicht verfügbar.",
   aiSummaryLabel: "Automatische Zusammenfassung",
   aiSummaryUpdated: "Aktualisiert am",
 

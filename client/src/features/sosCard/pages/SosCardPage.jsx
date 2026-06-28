@@ -103,12 +103,20 @@ export default function SosCardPage() {
     setAiError("");
     try {
       const { res, data } = await generateAiSummary();
-      if (!res.ok || !data.ok) throw new Error("ai_failed");
-      setCard((prev) => ({
-        ...prev,
-        aiSummary: data.aiSummary,
-        aiSummaryUpdatedAt: data.aiSummaryUpdatedAt,
-      }));
+      if (res.ok && data.ok) {
+        setCard((prev) => ({
+          ...prev,
+          aiSummary: data.aiSummary,
+          aiSummaryUpdatedAt: data.aiSummaryUpdatedAt,
+        }));
+        return;
+      }
+      // AI not configured (no OpenAI key) → clear "unavailable" notice, not a generic failure.
+      if (res.status === 503 || data?.error === "openai_not_configured") {
+        setAiError(t?.aiUnavailable || "Automatische Zusammenfassung ist derzeit nicht verfügbar.");
+      } else {
+        setAiError(t?.aiError || "Zusammenfassung fehlgeschlagen.");
+      }
     } catch {
       setAiError(t?.aiError || "Zusammenfassung fehlgeschlagen.");
     } finally {

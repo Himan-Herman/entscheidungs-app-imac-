@@ -38,6 +38,7 @@ export default {
   aiGenerate: "Generate summary",
   aiGenerating: "Generating…",
   aiError: "AI summary failed. Please try again later.",
+  aiUnavailable: "The automatic summary is currently unavailable.",
   aiSummaryLabel: "AI Summary",
   aiSummaryUpdated: "Updated",
 

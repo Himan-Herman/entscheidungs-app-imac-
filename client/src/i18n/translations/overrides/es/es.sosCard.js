@@ -32,6 +32,7 @@ export default {
   aiGenerate: "Generar resumen",
   aiGenerating: "Generando…",
   aiError: "Resumen IA no disponible.",
+  aiUnavailable: "El resumen automático no está disponible por ahora.",
   aiSummaryLabel: "Resumen IA",
   aiSummaryUpdated: "Actualizado",
   qrSection: "Código QR sin conexión",
