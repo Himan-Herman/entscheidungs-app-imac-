@@ -454,6 +454,22 @@ export default {
       submit: "Utiliser",
       submitting: "Validation…",
     },
+    linkRequest: {
+      ctaButton: "Envoyer une demande de connexion",
+      dialogTitle: "Envoyer une demande de connexion",
+      dialogBody:
+        "Saisissez l’adresse e-mail du patient. Si un compte MedScoutX existe, il reçoit une demande de connexion que le patient doit confirmer.",
+      inputLabel: "E-mail du patient",
+      inputPlaceholder: "nom@exemple.com",
+      dialogHint:
+        "Pour des raisons de confidentialité, nous ne révélons pas si un compte existe. Les données ne sont partagées qu’après confirmation du patient.",
+      cancel: "Annuler",
+      submit: "Envoyer la demande",
+      submitting: "Envoi…",
+      neutralSuccess:
+        "Si un compte MedScoutX avec cet e-mail existe, une demande de connexion a été envoyée.",
+      error: "La demande n’a pas pu être envoyée.",
+    },
   },
 
   practiceMessages: {

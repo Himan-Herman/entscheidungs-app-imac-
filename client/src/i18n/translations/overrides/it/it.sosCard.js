@@ -51,6 +51,14 @@ export default {
   voluntaryHint: "Tutte le informazioni sono facoltative.",
   profileField: "Ripreso dal tuo profilo — modificabile lì.",
   years: "anni",
+  referencedSection: "Da profilo e cartella sanitaria",
+  referencedHint:
+    "Questi valori provengono dal tuo profilo o dalla cartella sanitaria e sono solo referenziati — non salvati nella tessera SOS.",
+  notYetSet: "Non ancora inserito",
+  editInProfile: "Modifica nel profilo",
+  editInHealthRecord: "Modifica nella cartella sanitaria",
+  entriesLabel: "voci",
+  noEntries: "Nessuna voce",
   allergiesHeading: "Allergie",
   diagnosesHeading: "Diagnosi",
   medicalDataLegend: "Dati d'emergenza",
@@ -186,6 +194,10 @@ export default {
     googleAdd: "Aggiungi a Google Wallet",
     preparing: "L'integrazione wallet è in preparazione.",
     needsToken: "Crea prima un QR code per generare un pass wallet.",
+    dataAutoSync:
+      "Le modifiche ai tuoi dati SOS appaiono automaticamente tramite il QR code esistente. Il pass wallet non deve essere aggiunto di nuovo.",
+    tokenRotationWarning:
+      "Se rigeneri o disattivi il QR code, i pass wallet già salvati con il vecchio QR code smetteranno di funzionare. Aggiungi nuovamente il pass wallet in seguito.",
   },
 
   practice: {

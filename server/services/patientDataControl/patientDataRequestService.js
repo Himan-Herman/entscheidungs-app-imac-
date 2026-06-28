@@ -289,6 +289,18 @@ export async function updatePracticeDataRequestStatus(input) {
   });
   if (!row) throw new Error("request_not_found");
 
+  // GDPR honesty guard (Art. 17): a "deletion" request must not be marked
+  // "completed" unless a real erasure was actually executed. There is no automated
+  // practice-scoped erasure yet, and K4's account-wide eraseUser is deliberately NOT
+  // reused here — it would delete the patient's entire account and data at EVERY
+  // practice, far beyond this single practice's request scope (and may conflict with
+  // medical-record retention duties). Until a dedicated practice-scoped erasure
+  // exists, a deletion request stays in manual review: the practice may set
+  // "in_review" or "rejected" (with a reason), but cannot silently report "completed".
+  if (row.type === "deletion" && status === "completed") {
+    throw new Error("deletion_requires_manual_erasure");
+  }
+
   const responseNote = input.responseNote
     ? String(input.responseNote).trim().slice(0, MAX_RESPONSE_NOTE_LEN) || null
     : null;

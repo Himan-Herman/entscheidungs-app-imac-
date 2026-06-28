@@ -7,9 +7,11 @@
  * 3) Doctor contact — DELETE /api/user/doctor-contacts/:id
  * 4) Practice profile (owner) — DELETE /api/practices/:id
  * 5) All user-owned Pre-Visit-related data (this file) — DELETE /api/account/delete
- * 6) Full account removal — not implemented in v1; may be added with separate explicit confirmation
+ * 6) Full account erasure (GDPR Art. 17) — DELETE /api/account/delete also removes the login
+ *    User row, which DB-level ON DELETE CASCADE propagates to all patient-owned data.
  *
- * This route only implements (5) for MedScoutX-stored B2B2C / pre-visit artifacts; the login user row is kept.
+ * The deletion transaction removes the User row; cascades erase patient-owned health data,
+ * while practice-side actor references are SET NULL per the schema design.
  */
 import express from "express";
 import { PrismaClient } from "@prisma/client";
@@ -341,9 +343,48 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       await tx.practiceMember.deleteMany({ where: { userId } });
       await tx.interpreterCloudSession.deleteMany({ where: { userId } });
       await tx.interpreterCloudPreference.deleteMany({ where: { userId } });
+
+      // ── Full erasure (GDPR Art. 17) ───────────────────────────────────────
+      // The only onDelete: Restrict FK to User (PracticeInterpreterInvite.createdBy)
+      // would block the user-row delete; remove those invites first — their usage
+      // rows cascade from the invite.
+      await tx.practiceInterpreterInvite.deleteMany({ where: { createdByUserId: userId } });
+
+      // Scalar *UserId columns with NO @relation get no DB-level cascade, so the
+      // patient's rows must be removed explicitly or they would be orphaned.
+      await tx.externalResourceReference.deleteMany({ where: { patientUserId: userId } });
+      await tx.practiceMedaSession.deleteMany({
+        where: { OR: [{ patientUserId: userId }, { createdByUserId: userId }] },
+      });
+
+      // Practice-authored audit rows ABOUT this patient (authored by a different
+      // user, so they do not cascade) — drop the dangling patient identifier.
+      // Audit rows store no health data; this only removes the reference.
+      await tx.auditLog.updateMany({
+        where: { patientUserId: userId },
+        data: { patientUserId: null },
+      });
+      await tx.practiceDocumentAuditEntry.updateMany({
+        where: { patientUserId: userId },
+        data: { patientUserId: null },
+      });
+
+      // Finally remove the login user row. DB-level ON DELETE CASCADE then erases all
+      // patient-owned data (profile, SOS card, symptoms, allergies, diagnoses, vitals,
+      // vaccinations, medication plans, e-prescriptions, pre-visit sessions/cases,
+      // consent records, patient documents/shares, data requests, export jobs, …).
+      await tx.user.delete({ where: { id: userId } });
     });
 
-    return res.json({ ok: true, deleted: true, scope: "user_previsit_practice_artifacts" });
+    // Accountability trace that survives the erasure: no user/patient identifiers,
+    // no health data — only the fact that an account was deleted.
+    writeAuditLog({
+      req,
+      action: "account_deleted",
+      metadata: { scope: "full_account_erasure" },
+    });
+
+    return res.json({ ok: true, deleted: true, scope: "full_account_erasure" });
   } catch (err) {
     logServerError("account/delete", err);
     return sendSafeJsonError(res, 500, "server_error", "Deletion could not be completed.");

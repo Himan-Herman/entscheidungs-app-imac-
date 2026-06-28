@@ -10,7 +10,13 @@ import { assignmentExtras } from "../../utils/practiceOrganizationJson.js";
 
 const prisma = new PrismaClient();
 
-export const LINK_STATUSES = new Set(["invited", "active", "revoked", "archived"]);
+export const LINK_STATUSES = new Set([
+  "invited",
+  "active",
+  "revoked",
+  "archived",
+  "declined",
+]);
 
 const ACTIVE_LIKE = new Set(["invited", "active"]);
 
@@ -347,6 +353,61 @@ export async function findOrCreatePracticePatientLink(input) {
     patientProfileId,
     status: "active",
   });
+}
+
+/**
+ * Practice-initiated link request by patient email (Fall A). PRIVACY: never reveals to the
+ * practice whether an account exists — the route always responds neutrally; this verdict is
+ * for audit/logging only. Creates at most a PENDING ("invited") link the patient must accept;
+ * no data flows before acceptance.
+ * @param {{ practiceProfileId: string, email: string }} input
+ * @returns {Promise<{ created: boolean, reason: "created"|"no_account"|"already_linked", link?: object, linkId?: string }>}
+ */
+export async function requestLinkByEmail(input) {
+  const practiceProfileId = String(input.practiceProfileId || "").trim();
+  const email = String(input.email || "").trim().toLowerCase();
+  if (!practiceProfileId || !email) throw new Error("validation_required");
+
+  const patientUser = await prisma.user.findFirst({
+    where: { email: { equals: email, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (!patientUser) return { created: false, reason: "no_account" };
+
+  const existing = await findActiveDuplicate(practiceProfileId, patientUser.id, null);
+  if (existing) return { created: false, reason: "already_linked", linkId: existing.id };
+
+  const link = await createPracticePatientLink({
+    practiceProfileId,
+    patientUserId: patientUser.id,
+    status: "invited",
+  });
+  return { created: true, reason: "created", link };
+}
+
+/**
+ * Patient declines a PENDING ("invited") practice link request (Fall A). Only invited links
+ * can be declined; an active link is ended via archive (revoke) instead.
+ * @param {string} linkId
+ * @param {string} patientUserId
+ */
+export async function declinePracticePatientLink(linkId, patientUserId) {
+  const id = String(linkId || "").trim();
+  const uid = String(patientUserId || "").trim();
+  if (!id || !uid) throw new Error("validation_required");
+
+  const existing = await prisma.practicePatientLink.findFirst({
+    where: { id, patientUserId: uid },
+  });
+  if (!existing) throw new Error("link_not_found");
+  if (existing.status !== "invited") throw new Error("link_not_invited");
+
+  const row = await prisma.practicePatientLink.update({
+    where: { id },
+    data: { status: "declined", updatedAt: new Date() },
+    include: includePatientPortal,
+  });
+  return linkToPatientJson(row);
 }
 
 /**

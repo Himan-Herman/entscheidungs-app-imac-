@@ -59,9 +59,6 @@ export default function PatientHubPage() {
         <div className="workspace-hub__hero-text">
           <h1 className="workspace-hub__title">{t.patientHub.heading}</h1>
           <p className="workspace-hub__sub">{t.patientHub.sub}</p>
-          <Link className="workspace-hub__classic" to="/startseite">
-            {t.patientHub.classic}
-          </Link>
         </div>
         <Link
           to="/patient/sos-card"

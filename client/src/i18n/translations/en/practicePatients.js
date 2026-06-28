@@ -190,4 +190,20 @@ export default {
     submit: "Redeem",
     submitting: "Redeeming…",
   },
+  linkRequest: {
+    ctaButton: "Send connection request",
+    dialogTitle: "Send connection request",
+    dialogBody:
+      "Enter the patient's email address. If a MedScoutX account exists, it receives a connection request the patient must confirm.",
+    inputLabel: "Patient's email",
+    inputPlaceholder: "name@example.com",
+    dialogHint:
+      "For privacy reasons we don't reveal whether an account exists. Data is shared only after the patient confirms.",
+    cancel: "Cancel",
+    submit: "Send request",
+    submitting: "Sending…",
+    neutralSuccess:
+      "If a MedScoutX account with this email exists, a connection request has been sent.",
+    error: "The request could not be sent.",
+  },
 };

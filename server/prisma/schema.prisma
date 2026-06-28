@@ -1974,21 +1974,23 @@ model SosCard {
   preferredEmergencyLanguage String? @db.VarChar(5)
 
   /// Field-level visibility flags for the PUBLIC emergency page.
-  /// Defaults preserve current behaviour; sensitive/identifying fields default to opt-in (false).
-  showBloodType          Boolean @default(true)
+  /// Data-minimised by default (DSGVO Art. 5(1)(c)): every health / Art. 9 / third-party-contact
+  /// field is opt-in (false) and only surfaces after the patient explicitly enables it.
+  /// Only non-health basics (coarse age, preferred language) default to true.
+  showBloodType          Boolean @default(false)
   showAge                Boolean @default(true)
   showDateOfBirth        Boolean @default(false)
-  showBiologicalSex      Boolean @default(true)
-  showHeight             Boolean @default(true)
-  showWeight             Boolean @default(true)
-  showAllergies          Boolean @default(true)
-  showDiagnoses          Boolean @default(true)
-  showMedications        Boolean @default(true)
-  showImplants           Boolean @default(true)
+  showBiologicalSex      Boolean @default(false)
+  showHeight             Boolean @default(false)
+  showWeight             Boolean @default(false)
+  showAllergies          Boolean @default(false)
+  showDiagnoses          Boolean @default(false)
+  showMedications        Boolean @default(false)
+  showImplants           Boolean @default(false)
   showPregnancyStatus    Boolean @default(false)
-  showEmergencyContacts  Boolean @default(true)
-  showFirstResponderNote Boolean @default(true)
-  showAiSummary          Boolean @default(true)
+  showEmergencyContacts  Boolean @default(false)
+  showFirstResponderNote Boolean @default(false)
+  showAiSummary          Boolean @default(false)
   showPreferredLanguage  Boolean @default(true)
 
   /// Soft delete — when set, the card is treated as absent everywhere (patient, practice, public).

@@ -194,4 +194,20 @@ export default {
     submit: "Einlösen",
     submitting: "Wird eingelöst …",
   },
+  linkRequest: {
+    ctaButton: "Verknüpfungsanfrage senden",
+    dialogTitle: "Verknüpfungsanfrage senden",
+    dialogBody:
+      "Geben Sie die E-Mail-Adresse der Patient:in ein. Falls ein MedScoutX-Konto existiert, erhält es eine Verknüpfungsanfrage, die die Patient:in bestätigen muss.",
+    inputLabel: "E-Mail der Patient:in",
+    inputPlaceholder: "name@example.com",
+    dialogHint:
+      "Aus Datenschutzgründen wird nicht angezeigt, ob ein Konto existiert. Daten werden erst nach Bestätigung durch die Patient:in ausgetauscht.",
+    cancel: "Abbrechen",
+    submit: "Anfrage senden",
+    submitting: "Wird gesendet …",
+    neutralSuccess:
+      "Falls ein MedScoutX-Konto mit dieser E-Mail existiert, wurde eine Verknüpfungsanfrage gesendet.",
+    error: "Anfrage konnte nicht gesendet werden.",
+  },
 };

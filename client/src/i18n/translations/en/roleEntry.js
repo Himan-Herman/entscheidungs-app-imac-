@@ -101,7 +101,6 @@ export default {
     pageTitle: "Patient workspace — MedScoutX",
     heading: "Patient workspace",
     sub: "Structured preparation and documentation — not a substitute for medical care.",
-    classic: "Classic overview (all modules)",
   },
   patientPracticeHub: {
     pageTitle: "My practice — MedScoutX",

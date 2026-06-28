@@ -51,4 +51,16 @@ export default {
     created: "Verbindungscode wurde erzeugt.",
     revoked: "Verbindungscode wurde widerrufen.",
   },
+  requestsHeading: "Eingehende Verknüpfungsanfragen",
+  requestsIntro:
+    "Eine Praxis möchte sich mit Ihrem MedScoutX-Konto verbinden. Daten werden erst nach Ihrer Zustimmung ausgetauscht.",
+  requestFrom: "{practice} möchte sich mit Ihrem Konto verbinden.",
+  acceptScopesHint:
+    "Beim Annehmen geben Sie die unten unter „Welche Bereiche möchten Sie freigeben?“ gewählten Bereiche frei (Standard: Profil + Nachrichten).",
+  acceptButton: "Annehmen",
+  declineButton: "Ablehnen",
+  acceptedMsg: "Verbindung aktiviert.",
+  declinedMsg: "Anfrage abgelehnt.",
+  acceptError: "Anfrage konnte nicht angenommen werden.",
+  declineError: "Anfrage konnte nicht abgelehnt werden.",
 };

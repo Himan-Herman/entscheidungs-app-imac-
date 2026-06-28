@@ -9,6 +9,8 @@ import {
   createPatientConnectCode,
   fetchPatientConnectCode,
   revokePatientConnectCode,
+  acceptPatientLinkRequest,
+  declinePatientLinkRequest,
 } from "../api/patientPracticeLinksApi.js";
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
@@ -217,6 +219,54 @@ export default function PatientPracticeLinksPage() {
     }
   }
 
+  // Fall A — incoming practice-initiated link requests (status "invited").
+  async function handleAcceptRequest(link) {
+    setError("");
+    setStatusMsg("");
+    if (scopes.length === 0) {
+      setError(tc.noScopeError);
+      return;
+    }
+    setBusyId(link.id);
+    try {
+      const { res, data } = await acceptPatientLinkRequest(link.id, scopes);
+      if (!res.ok || !data.ok) {
+        setError(t.acceptError);
+        return;
+      }
+      setStatusMsg(t.acceptedMsg);
+      await load();
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setError(t.acceptError);
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  async function handleDeclineRequest(link) {
+    setError("");
+    setStatusMsg("");
+    setBusyId(link.id);
+    try {
+      const { res, data } = await declinePatientLinkRequest(link.id);
+      if (!res.ok || !data.ok) {
+        setError(t.declineError);
+        return;
+      }
+      setStatusMsg(t.declinedMsg);
+      await load();
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setError(t.declineError);
+    } finally {
+      setBusyId("");
+    }
+  }
+
+  const incomingRequests = links.filter((l) => l.status === "invited");
+  const activeLinks = links.filter((l) => l.status === "active");
+
   return (
     <div className="patient-inbox">
       <Link className="patient-inbox__back" to="/patient">
@@ -226,6 +276,53 @@ export default function PatientPracticeLinksPage() {
         <h1 className="patient-inbox__title">{t.heading}</h1>
         <p className="patient-inbox__intro">{t.intro}</p>
       </header>
+
+      {incomingRequests.length > 0 ? (
+        <section
+          className="patient-inbox__item"
+          style={{ padding: "1rem", marginBottom: "1.5rem", borderColor: "rgba(15,118,110,0.45)" }}
+          aria-labelledby="link-requests-heading"
+        >
+          <h2 id="link-requests-heading" className="patient-inbox__item-title" style={{ fontSize: "1.1rem" }}>
+            {t.requestsHeading}
+          </h2>
+          <p className="patient-inbox__muted">{t.requestsIntro}</p>
+          <ul className="patient-inbox__list" style={{ listStyle: "none", padding: 0, margin: "0.75rem 0 0" }}>
+            {incomingRequests.map((link) => {
+              const practiceName = practiceDisplayLabel(link.practice) || "—";
+              return (
+                <li key={link.id} className="patient-inbox__item" style={{ padding: "0.75rem", marginTop: "0.5rem" }}>
+                  <PracticeBrandingBar branding={link.practice} compact />
+                  <p className="patient-inbox__item-title">
+                    {t.requestFrom.replace("{practice}", practiceName)}
+                  </p>
+                  <p className="patient-inbox__muted" style={{ marginTop: "0.25rem" }}>
+                    {t.acceptScopesHint}
+                  </p>
+                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                    <button
+                      type="button"
+                      className="patient-threads__btn patient-threads__btn--primary"
+                      disabled={busyId === link.id}
+                      onClick={() => void handleAcceptRequest(link)}
+                    >
+                      {t.acceptButton}
+                    </button>
+                    <button
+                      type="button"
+                      className="patient-threads__btn patient-threads__btn--secondary"
+                      disabled={busyId === link.id}
+                      onClick={() => void handleDeclineRequest(link)}
+                    >
+                      {t.declineButton}
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
       <section
         className="patient-inbox__item"
@@ -353,13 +450,13 @@ export default function PatientPracticeLinksPage() {
         </p>
       ) : null}
 
-      {!loading && !error && links.length === 0 ? (
+      {!loading && !error && activeLinks.length === 0 ? (
         <p className="patient-inbox__muted">{t.empty}</p>
       ) : null}
 
-      {!loading && !error && links.length > 0 ? (
+      {!loading && !error && activeLinks.length > 0 ? (
         <ul className="patient-inbox__list" aria-label={t.listCaption}>
-          {links.map((link) => {
+          {activeLinks.map((link) => {
             const practiceName = practiceDisplayLabel(link.practice) || "—";
             const granted = Boolean(link.profileAccessGranted);
             const st = statusLabel(link.status, t);

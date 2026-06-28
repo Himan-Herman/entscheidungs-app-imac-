@@ -15,6 +15,7 @@ import {
   createPracticePatientLink,
   getPracticePatientLink,
   updatePracticePatientLinkStatus,
+  requestLinkByEmail,
   LINK_STATUSES,
 } from "../services/careRelationship/practicePatientLinkService.js";
 import {
@@ -41,7 +42,7 @@ import { generatePracticePatientSearchAiSuggestion } from "../services/careRelat
 import { redeemConnectCode } from "../services/careRelationship/connectCodeService.js";
 import { createExportJob } from "../services/export/exportJobService.js";
 import { listPracticeLinkConsents } from "../services/consent/consentRecordService.js";
-import { practiceExportLimiter } from "../middleware/ipRateLimit.js";
+import { practiceExportLimiter, practiceLinkRequestLimiter } from "../middleware/ipRateLimit.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { generatePracticeLinkActivityAiSummary } from "../services/activity/activityFeedAiService.js";
 import { logAccessDenied } from "../services/activity/activityFeedAiService.js";
@@ -292,6 +293,56 @@ router.post("/redeem-code", async (req, res) => {
     return res.status(201).json({ ok: true, ...result });
   } catch (err) {
     console.error("[practice/patients/redeem-code]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/**
+ * POST /api/practice/patients/link-request
+ * Practice-initiated link request by patient email (Fall A). PRIVACY: the response is ALWAYS
+ * neutral — it never reveals whether a MedScoutX account exists (no account-enumeration). If a
+ * matching account exists and is not already linked, a PENDING ("invited") link is created that
+ * the patient must accept before ANY data flows. Rate-limited, write permission required.
+ */
+router.post("/link-request", practiceLinkRequestLimiter, async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const practiceId = String(req.body?.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+  const email = String(req.body?.email || "").trim();
+  if (!email || !email.includes("@")) {
+    return res.status(400).json({ ok: false, error: "validation_invalid_email" });
+  }
+
+  const access = await getPracticeAccess(userId, practiceId);
+  if (!access || !canWritePracticePatientLinks(access.role)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const result = await requestLinkByEmail({ practiceProfileId: practiceId, email });
+
+    // Audit only the meaningful action (a request was actually created); a missing account or
+    // an already-existing link is NOT distinguished to the practice.
+    if (result.created) {
+      await writeAuditLog({
+        userId,
+        actorRole: access.role,
+        action: "practice_patient_link_request_created",
+        entityType: "PracticePatientLink",
+        entityId: result.link.id,
+        metadata: { verificationMethod: "account_request" },
+      });
+    }
+
+    // Neutral response regardless of outcome — no enumeration.
+    return res.json({ ok: true, message: "link_request_processed" });
+  } catch (err) {
+    console.error("[practice/patients/link-request]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

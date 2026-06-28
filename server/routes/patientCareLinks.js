@@ -8,6 +8,7 @@ import express from "express";
 import { requireCareRelationshipFeature } from "../middleware/requireCareRelationship.js";
 import {
   acceptPracticePatientLinkConsent,
+  declinePracticePatientLink,
   getPatientCareLink,
   listPatientCareLinks,
   LINK_STATUSES,
@@ -19,6 +20,7 @@ import {
   getActiveConnectCode,
   revokeConnectCode,
 } from "../services/careRelationship/connectCodeService.js";
+import { CARE_CONSENT_VERSION } from "../services/careRelationship/consentScopes.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
@@ -41,6 +43,7 @@ function mapError(err) {
   }
   if (msg === "link_not_found") return { status: 404, error: msg };
   if (msg === "link_not_active") return { status: 409, error: msg };
+  if (msg === "link_not_invited") return { status: 409, error: msg };
   if (msg === "link_already_archived") return { status: 409, error: msg };
   if (msg === "connect_code_not_found") return { status: 404, error: msg };
   if (msg === "connect_code_not_active") return { status: 409, error: msg };
@@ -153,7 +156,7 @@ router.post("/:linkId/consent", async (req, res) => {
     const link = await acceptPracticePatientLinkConsent({
       linkId: req.params.linkId,
       patientUserId: userId,
-      consentVersion: req.body?.consentVersion,
+      consentVersion: req.body?.consentVersion || CARE_CONSENT_VERSION,
       scopes: req.body?.scopes,
     });
 
@@ -187,6 +190,28 @@ router.patch("/:linkId/archive", async (req, res) => {
     return res.json({ ok: true, link });
   } catch (err) {
     console.error("[patient/links/archive]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/** PATCH /api/patient/links/:linkId/decline — patient declines a pending (invited) request. */
+router.patch("/:linkId/decline", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const link = await declinePracticePatientLink(req.params.linkId, userId);
+    await writeAuditLog({
+      userId,
+      actorRole: "patient",
+      action: "practice_patient_link_declined",
+      entityType: "PracticePatientLink",
+      entityId: link.id,
+    });
+    return res.json({ ok: true, link });
+  } catch (err) {
+    console.error("[patient/links/decline]", err?.message ?? err);
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }

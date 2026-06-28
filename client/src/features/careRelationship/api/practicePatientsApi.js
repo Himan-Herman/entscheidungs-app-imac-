@@ -58,6 +58,23 @@ export async function redeemPracticeConnectCode(practiceId, code) {
   return { res, data };
 }
 
+/**
+ * Practice-initiated link request by patient email (Fall A). PRIVACY: the response is always
+ * neutral — it never reveals whether a MedScoutX account exists. If a matching account exists,
+ * a pending request is sent that the patient must accept before any data flows.
+ * @param {string} practiceId
+ * @param {string} email
+ */
+export async function requestPracticePatientLink(practiceId, email) {
+  const res = await authFetch("/api/practice/patients/link-request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ practiceId, email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function postPracticePatientSearchAiSuggestion(practiceId, { q, filters, locale } = {}) {
   const res = await authFetch("/api/practice/patients/search/ai-filter-suggestion", {
     method: "POST",

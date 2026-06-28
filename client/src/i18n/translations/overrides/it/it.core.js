@@ -95,7 +95,6 @@ export default {
       heading: "Area pazienti",
       sub:
         "Preparazione e documentazione ordinate — non sostituiscono la cura.",
-      classic: "Vista classica (tutti i moduli)",
     },
     practiceHub: {
       pageTitle: "Area professionale — MedScoutX",

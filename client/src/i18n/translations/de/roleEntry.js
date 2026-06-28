@@ -101,7 +101,6 @@ export default {
     pageTitle: "Patientenbereich — MedScoutX",
     heading: "Patientenbereich",
     sub: "Strukturierte Vorbereitung und Dokumentation — kein Ersatz für medizinische Versorgung.",
-    classic: "Klassische Übersicht (alle Module)",
   },
   patientPracticeHub: {
     pageTitle: "Meine Praxis — MedScoutX",

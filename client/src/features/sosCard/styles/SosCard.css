@@ -238,6 +238,54 @@
   color: var(--ms-color-text, #0f172a);
 }
 
+/* Referenced read-only rows (profile / health record) with edit links */
+.sos-card__ref-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.sos-card__ref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--ms-color-border, #e5e7eb);
+}
+
+.sos-card__ref-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sos-card__ref-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.sos-card__ref-value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ms-color-text, #0f172a);
+}
+
+.sos-card__ref-link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ms-color-link, #2563eb);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.sos-card__ref-link:focus-visible {
+  outline: 2px solid var(--ms-color-focus-ring, #2563eb);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
 /* Visibility toggle list */
 .sos-card__toggle-list {
   list-style: none;

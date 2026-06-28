@@ -29,7 +29,11 @@ const BLOOD_TYPES = new Set([
   "O+", "O-",
 ]);
 
-const EMERGENCY_LANGS = new Set(["de", "en", "fr", "es", "it"]);
+// Allowed preferred-emergency-language codes. Mirrors client EMERGENCY_LANGUAGES.
+const EMERGENCY_LANGS = new Set([
+  "de", "en", "fr", "es", "it",
+  "ckb", "kmr", "fa", "ar", "tr", "pl", "ru", "uk", "el", "ur",
+]);
 // Medically-relevant, self-reported emergency values — not identity/political fields.
 const BIOLOGICAL_SEX = new Set(["MALE", "FEMALE", "DIVERSE_INTERSEX", "UNKNOWN", "PREFER_NOT_TO_SAY"]);
 const PREGNANCY_STATUS = new Set(["UNKNOWN", "NO", "YES", "NOT_APPLICABLE", "PREFER_NOT_TO_SAY"]);

@@ -34,6 +34,8 @@ function mapError(err) {
   if (msg === "validation_invalid_status") return { status: 400, error: msg };
   if (msg === "request_not_found") return { status: 404, error: msg };
   if (msg === "forbidden") return { status: 403, error: msg };
+  // Deletion requests cannot be marked completed without a real erasure (honesty guard).
+  if (msg === "deletion_requires_manual_erasure") return { status: 409, error: msg };
   return { status: 500, error: "request_failed" };
 }
 

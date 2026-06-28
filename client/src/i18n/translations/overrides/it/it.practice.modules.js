@@ -433,6 +433,22 @@ export default {
       submit: "Riscatta",
       submitting: "Riscatto in corso…",
     },
+    linkRequest: {
+      ctaButton: "Invia richiesta di collegamento",
+      dialogTitle: "Invia richiesta di collegamento",
+      dialogBody:
+        "Inserisci l’indirizzo e-mail del paziente. Se esiste un account MedScoutX, riceve una richiesta di collegamento che il paziente deve confermare.",
+      inputLabel: "E-mail del paziente",
+      inputPlaceholder: "nome@esempio.com",
+      dialogHint:
+        "Per motivi di privacy non riveliamo se un account esiste. I dati vengono condivisi solo dopo la conferma del paziente.",
+      cancel: "Annulla",
+      submit: "Invia richiesta",
+      submitting: "Invio in corso…",
+      neutralSuccess:
+        "Se esiste un account MedScoutX con questa e-mail, è stata inviata una richiesta di collegamento.",
+      error: "Impossibile inviare la richiesta.",
+    },
   },
   practiceMessages: {
     sectionTitle: "Meseesaggi",

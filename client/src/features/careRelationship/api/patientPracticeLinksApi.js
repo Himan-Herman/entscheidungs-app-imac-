@@ -22,6 +22,29 @@ export async function patchPatientProfileAccess(linkId, granted) {
 }
 
 /**
+ * Incoming practice-initiated link requests (Fall A).
+ * Accept = grant consent for the chosen scopes (flips invited → active). Decline = mark the
+ * pending request declined. No data flows before acceptance.
+ */
+export async function acceptPatientLinkRequest(linkId, scopes) {
+  const res = await authFetch(`${BASE}/${encodeURIComponent(linkId)}/consent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scopes: Array.isArray(scopes) ? scopes : [] }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function declinePatientLinkRequest(linkId) {
+  const res = await authFetch(`${BASE}/${encodeURIComponent(linkId)}/decline`, {
+    method: "PATCH",
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+/**
  * Patient-generated practice connection code (Phase 2 UI).
  * The plaintext `code` in the create response is shown ONCE — never persisted client-side
  * and never logged.

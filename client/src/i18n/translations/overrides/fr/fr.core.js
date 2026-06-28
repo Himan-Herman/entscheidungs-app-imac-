@@ -96,7 +96,6 @@ export default {
       heading: "Espace patient",
       sub:
         "Préparation et documentation structurées — ne remplace pas les soins médicaux.",
-      classic: "Vue classique (tous les modules)",
     },
     practiceHub: {
       pageTitle: "Espace établissement — MedScoutX",

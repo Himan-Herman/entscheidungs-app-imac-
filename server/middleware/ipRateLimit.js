@@ -101,6 +101,16 @@ export const authRegisterLimiter = createIpRateLimiter({
   keyPrefix: 'auth:register',
 });
 
+/**
+ * POST /api/practice/patients/link-request — practice-initiated link request by patient email.
+ * Tight cap to prevent account-fishing (the endpoint always responds neutrally regardless of
+ * whether an account exists, but rate-limiting adds defence in depth).
+ */
+export const practiceLinkRequestLimiter = createIpRateLimiter({
+  max: 12,
+  keyPrefix: 'practice:link-request',
+});
+
 /** POST /api/practice/meda/pdf-link — authenticated PDF upload for the QR link */
 export const medaPdfLinkLimiter = createIpRateLimiter({
   max: 30,

@@ -227,7 +227,15 @@ export default function SosCardPage() {
 
       {tab === "edit" && (
         <>
-          <SosCardForm card={card} referenced={referenced} saving={saving} onSave={handleSave} t={t} />
+          <SosCardForm
+            card={card}
+            referenced={referenced}
+            allergiesCount={allergies.length}
+            diagnosesCount={diagnoses.length}
+            saving={saving}
+            onSave={handleSave}
+            t={t}
+          />
           <p
             className={saveMsg && saving ? "sos-card__error" : "sos-card__success"}
             role="status"
@@ -292,6 +300,11 @@ export default function SosCardPage() {
             </button>
           ) : (
             <>
+              {/* Reassurance: editing SOS data does NOT require re-adding the wallet pass —
+                  the QR points at a stable URL that always serves current released data. */}
+              <p className="sos-card__success" role="note" style={{ marginBottom: "1rem" }}>
+                {t?.wallet?.dataAutoSync}
+              </p>
               {showQr && publicToken !== "hidden" && (
                 <SosCardQr token={publicToken} t={t} />
               )}
@@ -305,6 +318,10 @@ export default function SosCardPage() {
                   {tokenLoading ? t?.generating : t?.qrRegenerate}
                 </button>
               )}
+              {/* Warning: regenerating or deactivating the token DOES invalidate old wallet passes. */}
+              <div className="sos-card__disclaimer" role="note" style={{ marginTop: "1rem" }}>
+                {t?.wallet?.tokenRotationWarning}
+              </div>
               <div style={{ marginTop: "1rem" }}>
                 <button
                   className="sos-card__btn sos-card__btn--danger"

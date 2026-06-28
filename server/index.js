@@ -1,6 +1,9 @@
 import dotenv from 'dotenv';
 dotenv.config();
-console.log("🔍 OPENAI_API_KEY:", process.env.OPENAI_API_KEY);
+import { logEnvStatus } from './utils/secretSafety.js';
+
+// Never log the secret value — presence only. See utils/secretSafety.js.
+logEnvStatus('OPENAI_API_KEY');
 
 import express from 'express';
 import cors from 'cors';

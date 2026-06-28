@@ -453,6 +453,18 @@ export default {
       created: "Code de connexion généré.",
       revoked: "Code de connexion révoqué.",
     },
+    requestsHeading: "Demandes de connexion entrantes",
+    requestsIntro:
+      "Un cabinet souhaite se connecter à votre compte MedScoutX. Les données ne sont partagées qu’après votre accord.",
+    requestFrom: "{practice} souhaite se connecter à votre compte.",
+    acceptScopesHint:
+      "En acceptant, vous partagez les domaines sélectionnés ci-dessous sous « Quels domaines souhaitez-vous partager ? » (par défaut : profil + messages).",
+    acceptButton: "Accepter",
+    declineButton: "Refuser",
+    acceptedMsg: "Connexion activée.",
+    declinedMsg: "Demande refusée.",
+    acceptError: "La demande n’a pas pu être acceptée.",
+    declineError: "La demande n’a pas pu être refusée.",
   },
 
   patientDataControl: {

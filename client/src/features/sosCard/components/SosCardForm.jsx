@@ -1,10 +1,17 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Plus, Trash2 } from "lucide-react";
+import { EMERGENCY_LANGUAGES } from "../emergencyLanguages.js";
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "0+", "0-", "O+", "O-"];
 const SEX_VALUES = ["MALE", "FEMALE", "DIVERSE_INTERSEX", "UNKNOWN", "PREFER_NOT_TO_SAY"];
 const PREGNANCY_VALUES = ["UNKNOWN", "NO", "YES", "NOT_APPLICABLE", "PREFER_NOT_TO_SAY"];
-const LANGS = ["de", "en", "fr", "es", "it"];
+
+// Edit destinations for referenced (read-only) data, so every visibility toggle has a clear
+// "where to maintain it" path. Profile = account health data (height/weight, DOB → age);
+// health record = allergies/diagnoses.
+const PROFILE_EDIT_PATH = "/account/health";
+const HEALTH_RECORD_PATH = "/patient/health-history";
 
 // Visibility flags in display order. Defaults match the backend schema:
 // identifying / sensitive fields are opt-in (false), the rest visible.
@@ -25,13 +32,16 @@ const VISIBILITY_KEYS = [
   "showAiSummary",
   "showPreferredLanguage",
 ];
-const VISIBILITY_DEFAULT_FALSE = new Set(["showDateOfBirth", "showPregnancyStatus"]);
+// Data-minimised defaults (DSGVO Art. 5(1)(c)): a new card exposes nothing sensitive
+// until the patient opts in. Only non-health basics default to visible; mirrors the
+// SosCard Prisma defaults so client and server agree.
+const VISIBILITY_DEFAULT_TRUE = new Set(["showAge", "showPreferredLanguage"]);
 
 function initVisibility(card) {
   const out = {};
   for (const key of VISIBILITY_KEYS) {
     if (card && typeof card[key] === "boolean") out[key] = card[key];
-    else out[key] = !VISIBILITY_DEFAULT_FALSE.has(key);
+    else out[key] = VISIBILITY_DEFAULT_TRUE.has(key);
   }
   return out;
 }
@@ -49,12 +59,22 @@ function initList(value) {
  * @param {{
  *   card: object | null;
  *   referenced: { dateOfBirth?: string|null; age?: number|null; heightCm?: number|null; weightKg?: number|null } | null;
+ *   allergiesCount?: number;
+ *   diagnosesCount?: number;
  *   saving: boolean;
  *   onSave: (data: object) => void;
  *   t: object;
  * }} props
  */
-export default function SosCardForm({ card, referenced, saving, onSave, t }) {
+export default function SosCardForm({
+  card,
+  referenced,
+  allergiesCount = 0,
+  diagnosesCount = 0,
+  saving,
+  onSave,
+  t,
+}) {
   const ref = referenced || {};
 
   const [bloodType, setBloodType] = useState(card?.bloodType || "");
@@ -118,6 +138,17 @@ export default function SosCardForm({ card, referenced, saving, onSave, t }) {
   const hasHeight = typeof ref.heightCm === "number";
   const hasWeight = typeof ref.weightKg === "number";
 
+  // Read-only fields with a clear source + edit destination. Each maps to a visibility toggle
+  // so the patient can see where the underlying data is maintained (profile / health record).
+  const referencedRows = [
+    { id: "age", label: t.ageLabel, value: hasAge ? `${ref.age} ${t.years}` : "", path: PROFILE_EDIT_PATH, editLabel: t.editInProfile },
+    { id: "dob", label: t.dateOfBirthLabel, value: hasDob ? new Date(ref.dateOfBirth).toLocaleDateString() : "", path: PROFILE_EDIT_PATH, editLabel: t.editInProfile },
+    { id: "height", label: t.heightLabel, value: hasHeight ? `${ref.heightCm} ${t.heightUnit}` : "", path: PROFILE_EDIT_PATH, editLabel: t.editInProfile },
+    { id: "weight", label: t.weightLabel, value: hasWeight ? `${ref.weightKg} ${t.weightUnit}` : "", path: PROFILE_EDIT_PATH, editLabel: t.editInProfile },
+    { id: "allergies", label: t.allergiesHeading, value: allergiesCount > 0 ? `${allergiesCount} ${t.entriesLabel}` : t.noEntries, path: HEALTH_RECORD_PATH, editLabel: t.editInHealthRecord },
+    { id: "diagnoses", label: t.diagnosesHeading, value: diagnosesCount > 0 ? `${diagnosesCount} ${t.entriesLabel}` : t.noEntries, path: HEALTH_RECORD_PATH, editLabel: t.editInHealthRecord },
+  ];
+
   return (
     <form onSubmit={handleSubmit} noValidate>
       <fieldset className="sos-card__fieldset">
@@ -149,47 +180,29 @@ export default function SosCardForm({ card, referenced, saving, onSave, t }) {
           </div>
         </div>
 
-        {/* Referenced profile data: age / DOB / height / weight (read-only here) */}
-        {(hasAge || hasDob || hasHeight || hasWeight) && (
-          <div className="sos-card__section">
-            <p className="sos-card__section-title">{t.medicalDataLegend}</p>
-            <p className="sos-card__hint">{t.profileField}</p>
-            <dl className="sos-card__meta-grid">
-              {hasAge && (
-                <div className="sos-card__meta-item">
-                  <dt className="sos-card__label">{t.ageLabel}</dt>
-                  <dd className="sos-card__meta-value">
-                    {ref.age} {t.years}
-                  </dd>
+        {/* Referenced read-only data — age / DOB / height / weight from the profile and
+            allergies / diagnoses from the health record. Each row shows the current value
+            (or "not yet set") plus a link to where it is maintained, so every visibility
+            toggle below has a clear, non-duplicated data source. */}
+        <div className="sos-card__section">
+          <p className="sos-card__section-title">{t.referencedSection}</p>
+          <p className="sos-card__hint">{t.referencedHint}</p>
+          <div className="sos-card__ref-list">
+            {referencedRows.map((r) => (
+              <div key={r.id} className="sos-card__ref-row">
+                <div className="sos-card__ref-main">
+                  <span className="sos-card__label">{r.label}</span>
+                  <span className="sos-card__ref-value">
+                    {r.value ? r.value : <span className="sos-card__na">{t.notYetSet}</span>}
+                  </span>
                 </div>
-              )}
-              {hasDob && (
-                <div className="sos-card__meta-item">
-                  <dt className="sos-card__label">{t.dateOfBirthLabel}</dt>
-                  <dd className="sos-card__meta-value">
-                    {new Date(ref.dateOfBirth).toLocaleDateString()}
-                  </dd>
-                </div>
-              )}
-              {hasHeight && (
-                <div className="sos-card__meta-item">
-                  <dt className="sos-card__label">{t.heightLabel}</dt>
-                  <dd className="sos-card__meta-value">
-                    {ref.heightCm} {t.heightUnit}
-                  </dd>
-                </div>
-              )}
-              {hasWeight && (
-                <div className="sos-card__meta-item">
-                  <dt className="sos-card__label">{t.weightLabel}</dt>
-                  <dd className="sos-card__meta-value">
-                    {ref.weightKg} {t.weightUnit}
-                  </dd>
-                </div>
-              )}
-            </dl>
+                <Link to={r.path} className="sos-card__ref-link">
+                  {r.editLabel}
+                </Link>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
 
         {/* Biological sex */}
         <div className="sos-card__section">
@@ -487,9 +500,9 @@ export default function SosCardForm({ card, referenced, saving, onSave, t }) {
               onChange={(e) => setPreferredLanguage(e.target.value)}
             >
               <option value="">{t.preferredLanguageNone}</option>
-              {LANGS.map((l) => (
-                <option key={l} value={l}>
-                  {t.languageNames?.[l] || l}
+              {EMERGENCY_LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
                 </option>
               ))}
             </select>

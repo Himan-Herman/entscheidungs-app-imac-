@@ -8,8 +8,10 @@ import {
   fetchPracticePatients,
   postPracticePatientSearchAiSuggestion,
   redeemPracticeConnectCode,
+  requestPracticePatientLink,
 } from "../api/practicePatientsApi.js";
 import RedeemConnectCodeDialog from "../components/RedeemConnectCodeDialog.jsx";
+import LinkRequestDialog from "../components/LinkRequestDialog.jsx";
 import { patientDisplayName } from "../utils/patientDisplayName.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
@@ -89,6 +91,14 @@ export default function PracticePatientsListPage() {
   const [redeemError, setRedeemError] = useState("");
   const [redeemSuccess, setRedeemSuccess] = useState("");
   const tConnect = t.connect || {};
+
+  // --- Practice-initiated link request by email (Fall A) ---
+  const [linkReqOpen, setLinkReqOpen] = useState(false);
+  const [linkReqEmail, setLinkReqEmail] = useState("");
+  const [linkReqBusy, setLinkReqBusy] = useState(false);
+  const [linkReqError, setLinkReqError] = useState("");
+  const [linkReqSuccess, setLinkReqSuccess] = useState("");
+  const tLinkReq = t.linkRequest || {};
 
   const loadPractices = useCallback(async () => {
     const res = await authFetch("/api/practices");
@@ -308,6 +318,41 @@ export default function PracticePatientsListPage() {
     }
   }
 
+  function openLinkRequestDialog() {
+    setLinkReqEmail("");
+    setLinkReqError("");
+    setLinkReqSuccess("");
+    setLinkReqOpen(true);
+  }
+
+  function closeLinkRequestDialog() {
+    if (linkReqBusy) return;
+    setLinkReqOpen(false);
+  }
+
+  async function handleSendLinkRequest() {
+    const email = linkReqEmail.trim();
+    if (!practiceId || !email) return;
+    setLinkReqBusy(true);
+    setLinkReqError("");
+    try {
+      const { res, data } = await requestPracticePatientLink(practiceId, email);
+      if (!res.ok || !data.ok) {
+        setLinkReqError(tLinkReq.error);
+        return;
+      }
+      setLinkReqOpen(false);
+      setLinkReqEmail("");
+      // Neutral success — never reveals whether an account exists.
+      setLinkReqSuccess(tLinkReq.neutralSuccess);
+    } catch (e) {
+      if (e?.message === "SESSION_EXPIRED") return;
+      setLinkReqError(tLinkReq.error);
+    } finally {
+      setLinkReqBusy(false);
+    }
+  }
+
   const detailPath = (linkId) => {
     const q = new URLSearchParams({ practiceId });
     if (searchQ.trim() || activeChips.length > 0) {
@@ -421,10 +466,22 @@ export default function PracticePatientsListPage() {
             >
               {tConnect.ctaButton}
             </button>
+            <button
+              type="button"
+              className="patient-threads__btn patient-threads__btn--secondary"
+              onClick={openLinkRequestDialog}
+            >
+              {tLinkReq.ctaButton}
+            </button>
             <p className="practice-dashboard__muted">{tConnect.ctaHint}</p>
             {redeemSuccess ? (
               <p className="practice-dashboard__muted" role="status" aria-live="polite">
                 {redeemSuccess}
+              </p>
+            ) : null}
+            {linkReqSuccess ? (
+              <p className="practice-dashboard__muted" role="status" aria-live="polite">
+                {linkReqSuccess}
               </p>
             ) : null}
           </section>
@@ -697,6 +754,17 @@ export default function PracticePatientsListPage() {
         onSubmit={() => void handleRedeemCode()}
         onCancel={closeRedeemDialog}
         t={tConnect}
+      />
+
+      <LinkRequestDialog
+        open={linkReqOpen}
+        busy={linkReqBusy}
+        email={linkReqEmail}
+        onEmailChange={setLinkReqEmail}
+        error={linkReqError}
+        onSubmit={() => void handleSendLinkRequest()}
+        onCancel={closeLinkRequestDialog}
+        t={tLinkReq}
       />
     </div>
   );

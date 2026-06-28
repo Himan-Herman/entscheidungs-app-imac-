@@ -60,6 +60,14 @@ export default {
   voluntaryHint: "All entries are voluntary.",
   profileField: "Taken from your profile — editable there.",
   years: "years",
+  referencedSection: "From profile & health record",
+  referencedHint:
+    "These values come from your profile or health record and are only referenced — not stored in the SOS card.",
+  notYetSet: "Not yet set",
+  editInProfile: "Edit in profile",
+  editInHealthRecord: "Edit in health record",
+  entriesLabel: "entries",
+  noEntries: "No entries",
 
   allergiesHeading: "Allergies",
   diagnosesHeading: "Diagnoses",
@@ -207,6 +215,10 @@ export default {
     googleAdd: "Add to Google Wallet",
     preparing: "Wallet integration is being prepared.",
     needsToken: "Generate a QR code first to create a wallet pass.",
+    dataAutoSync:
+      "Changes to your SOS data appear automatically via the existing QR code. The wallet pass does not need to be added again.",
+    tokenRotationWarning:
+      "If you regenerate or deactivate the QR code, wallet passes already saved with the old QR code will stop working. Please add the wallet pass again afterwards.",
   },
 
   practice: {

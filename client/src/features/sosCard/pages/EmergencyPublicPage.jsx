@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AlertTriangle, Phone, Pill, ShieldAlert, Stethoscope } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
-import { getMessages } from "../../../i18n/translations";
 import { fetchPublicEmergency } from "../api/sosCardApi.js";
+import { getEmergencyStrings } from "../emergencyI18n.js";
+import { emergencyLanguageLabel, isRtlEmergencyLang } from "../emergencyLanguages.js";
 import "../styles/SosCard.css";
 
 const SEVERITY_ORDER = { life_threatening: 0, severe: 1, moderate: 2, mild: 3 };
@@ -16,13 +17,14 @@ export default function EmergencyPublicPage() {
   const [error, setError] = useState("");
 
   // Page locale: prefer the patient's chosen emergency language, else the site language.
-  const t = useMemo(() => {
-    const locale = data?.preferredEmergencyLanguage || language;
-    const msgs = getMessages(locale);
-    return (msgs.sosCard && msgs.sosCard.emergency)
-      ? { ...msgs.sosCard.emergency, severities: msgs.sosCard.severities, languageNames: msgs.sosCard.languageNames, biologicalSexValues: msgs.sosCard.biologicalSexValues, pregnancyValues: msgs.sosCard.pregnancyValues }
-      : getMessages("en").sosCard.emergency;
-  }, [data, language]);
+  // Self-contained translations (no app-i18n dependency) so codes like kmr/ur work and there
+  // is no mixed language for the public emergency strings.
+  const localeCode = data?.preferredEmergencyLanguage || language || "en";
+  const isRtl = isRtlEmergencyLang(localeCode);
+  const t = useMemo(
+    () => getEmergencyStrings(data?.preferredEmergencyLanguage, language),
+    [data, language],
+  );
 
   useEffect(() => {
     document.title = "Emergency Medical Card";
@@ -50,6 +52,22 @@ export default function EmergencyPublicPage() {
       document.head.removeChild(meta);
     };
   }, []);
+
+  // Render the page in the emergency language: set <html lang> + dir (rtl for ar/fa/ckb/ur).
+  // Previous values are restored on unmount so the rest of the app keeps its own direction.
+  useEffect(() => {
+    const html = document.documentElement;
+    const prevLang = html.getAttribute("lang");
+    const prevDir = html.getAttribute("dir");
+    html.setAttribute("lang", localeCode);
+    html.setAttribute("dir", isRtl ? "rtl" : "ltr");
+    return () => {
+      if (prevLang === null) html.removeAttribute("lang");
+      else html.setAttribute("lang", prevLang);
+      if (prevDir === null) html.removeAttribute("dir");
+      else html.setAttribute("dir", prevDir);
+    };
+  }, [localeCode, isRtl]);
 
   if (loading) {
     return (
@@ -116,7 +134,7 @@ export default function EmergencyPublicPage() {
   ].filter(Boolean);
 
   return (
-    <main className="emergency-card" lang={data.preferredEmergencyLanguage || undefined}>
+    <main className="emergency-card" lang={localeCode} dir={isRtl ? "rtl" : "ltr"}>
       {/* 1. SOS header */}
       <div className="emergency-card__sos-badge">
         <ShieldAlert size={22} aria-hidden="true" />
@@ -254,7 +272,7 @@ export default function EmergencyPublicPage() {
           {contacts.map((c, i) => (
             <div key={i} className="emergency-card__contact">
               <strong>{c.name}</strong>{" "}
-              <a href={`tel:${c.phone}`} aria-label={`${c.name}: ${c.phone}`}>{c.phone}</a>
+              <a href={`tel:${c.phone}`} aria-label={`${t.callAria}: ${c.name} ${c.phone}`}>{c.phone}</a>
             </div>
           ))}
         </section>
@@ -264,7 +282,7 @@ export default function EmergencyPublicPage() {
       {data.preferredEmergencyLanguage && (
         <section className="emergency-card__block" aria-label={t.language}>
           <h2 className="emergency-card__block-title">{t.language}</h2>
-          <p>{t.languageNames?.[data.preferredEmergencyLanguage] || data.preferredEmergencyLanguage}</p>
+          <p>{emergencyLanguageLabel(data.preferredEmergencyLanguage)}</p>
         </section>
       )}
 

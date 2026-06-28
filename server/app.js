@@ -92,6 +92,7 @@ import {
   publicAnamnesisLimiter,
   sosWalletLimiter,
   medaPdfLinkLimiter,
+  mailSendRouteLimiter,
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
@@ -170,7 +171,13 @@ app.use('/api/auth', authRouter);
 app.use('/api/i18n', i18nRouter);
 app.use('/api/account', requireAuth, accountRouter);
 app.use('/api/account', requireAuth, accountPatientPortalRouter);
-app.use('/api/mail', mailRoutes);
+// Generic outbound mailer (arbitrary recipient/body) — no legitimate client or
+// server-internal usage exists. Disabled in production to remove the open-relay
+// surface; in development it stays available but auth-gated. Real mail flows
+// (verification, password reset, notifications) use emailService.js directly.
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/api/mail', requireAuth, mailRoutes);
+}
 app.use("/api/tts", ttsRouter);
 app.use("/api/ki", kiRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
@@ -322,22 +329,35 @@ app.get('/', (_req, res) => {
 });
 
 
-app.post('/test-email', async (req, res) => {
-  try {
-    const { email } = req.body;
-    const APP_BASE_URL =
-      process.env.APP_BASE_URL ||
-      process.env.VITE_APP_BASE_URL ||
-      'https://medscout.app';
-    const verifyLink = `${APP_BASE_URL}/verify-email?token=TEST123`;
+// Development-only debug endpoint: sends a verification mail with a fixed dummy
+// token. It is NOT registered in production, and even in development it requires
+// authentication + rate limiting and validates the recipient to prevent
+// open-relay abuse and header injection.
+if (process.env.NODE_ENV !== 'production') {
+  app.post('/test-email', mailSendRouteLimiter, requireAuth, async (req, res) => {
+    try {
+      const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+      // Single well-formed address only; reject separators, brackets, quotes and
+      // CR/LF so a caller cannot inject headers or fan out to many recipients.
+      const SINGLE_EMAIL = /^[^\s@,;:<>"]+@[^\s@,;:<>"]+\.[^\s@,;:<>"]+$/;
+      if (!SINGLE_EMAIL.test(email)) {
+        return res.status(400).json({ ok: false, error: 'invalid_email' });
+      }
+      const APP_BASE_URL =
+        process.env.APP_BASE_URL ||
+        process.env.VITE_APP_BASE_URL ||
+        'https://medscout.app';
+      const verifyLink = `${APP_BASE_URL}/verify-email?token=TEST123`;
 
-    const info = await sendVerificationEmail(email, verifyLink);
-    res.json({ ok: true, info });
-  } catch (err) {
-    console.error('[test-email]', err);
-    res.status(500).json({ ok: false, error: 'Request failed.' });
-  }
-});
+      await sendVerificationEmail(email, verifyLink);
+      res.json({ ok: true });
+    } catch {
+      // No recipient or provider detail in logs.
+      console.error('[test-email] send failed');
+      res.status(500).json({ ok: false, error: 'Request failed.' });
+    }
+  });
+}
 
 app.use((req, res, next) => {
   if (res.headersSent) return;

@@ -1,4 +1,5 @@
 import { AlertTriangle, Phone, User } from "lucide-react";
+import { emergencyLanguageLabel } from "../emergencyLanguages.js";
 
 const SEVERITY_ORDER = { life_threatening: 0, severe: 1, moderate: 2, mild: 3 };
 
@@ -193,7 +194,7 @@ export default function SosCardPreview({
         <div className="sos-card__section">
           <p className="sos-card__section-title">{t.preferredLanguageLabel}</p>
           <p className="sos-card__data-item">
-            {t.languageNames?.[card.preferredEmergencyLanguage] || card.preferredEmergencyLanguage}
+            {emergencyLanguageLabel(card.preferredEmergencyLanguage)}
           </p>
         </div>
       )}

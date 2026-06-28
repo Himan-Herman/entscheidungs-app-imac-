@@ -433,6 +433,22 @@ export default {
       submit: "Canjear",
       submitting: "Canjeando…",
     },
+    linkRequest: {
+      ctaButton: "Enviar solicitud de conexión",
+      dialogTitle: "Enviar solicitud de conexión",
+      dialogBody:
+        "Introduzca la dirección de correo del paciente. Si existe una cuenta de MedScoutX, recibirá una solicitud de conexión que el paciente debe confirmar.",
+      inputLabel: "Correo del paciente",
+      inputPlaceholder: "nombre@ejemplo.com",
+      dialogHint:
+        "Por motivos de privacidad no revelamos si existe una cuenta. Los datos solo se comparten tras la confirmación del paciente.",
+      cancel: "Cancelar",
+      submit: "Enviar solicitud",
+      submitting: "Enviando…",
+      neutralSuccess:
+        "Si existe una cuenta de MedScoutX con este correo, se ha enviado una solicitud de conexión.",
+      error: "No se pudo enviar la solicitud.",
+    },
   },
   practiceMessages: {
     sectionTitle: "Mensajes",
