@@ -24,6 +24,9 @@ export default defineConfig({
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api(?:\/|$)/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,mp4}'],
+        // Keep the landing preview clips out of the precache so the service
+        // worker install stays lean; they load on demand when /choose opens.
+        globIgnores: ['**/medscoutx-intro*.mp4'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
         runtimeCaching: [
           {

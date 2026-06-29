@@ -5,8 +5,12 @@ import {
   Check,
   ClipboardList,
   LayoutList,
+  Pause,
+  Play,
   ShieldCheck,
   UserRound,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 /**
@@ -235,6 +239,129 @@ export function RoleCard({ variant, title, subtitle, modules, cta, onClick }) {
         </button>
       </div>
     </article>
+  );
+}
+
+/**
+ * One preview clip in an elegant 9:16 media frame.
+ * Click anywhere on the video toggles play/pause; a corner button toggles sound.
+ * Starts on the poster (no autoplay) — light on bandwidth and reduced-motion safe.
+ */
+function ShowcaseVideo({ src, poster, copy }) {
+  const videoRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return undefined;
+
+    const onPlay = () => setPlaying(true);
+    const onPause = () => setPlaying(false);
+    const onVolume = () => setMuted(v.muted);
+
+    v.addEventListener("play", onPlay);
+    v.addEventListener("pause", onPause);
+    v.addEventListener("volumechange", onVolume);
+
+    return () => {
+      v.removeEventListener("play", onPlay);
+      v.removeEventListener("pause", onPause);
+      v.removeEventListener("volumechange", onVolume);
+    };
+  }, []);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      const promise = v.play();
+      if (promise && typeof promise.catch === "function") {
+        promise.catch(() => {});
+      }
+    } else {
+      v.pause();
+    }
+  };
+
+  const toggleMute = (event) => {
+    event.stopPropagation();
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+  };
+
+  return (
+    <div className="role-entry__media-frame">
+      <video
+        ref={videoRef}
+        className="role-entry__video"
+        src={src}
+        poster={poster}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label={copy.aria}
+      />
+      <button
+        type="button"
+        className={`role-entry__video-toggle${playing ? " is-playing" : ""}`}
+        onClick={togglePlay}
+        aria-label={playing ? copy.pause : copy.play}
+      >
+        <span
+          className="role-entry__video-icon role-entry__video-icon--play"
+          aria-hidden="true"
+        >
+          <Play size={24} strokeWidth={2} />
+        </span>
+        <span
+          className="role-entry__video-icon role-entry__video-icon--pause"
+          aria-hidden="true"
+        >
+          <Pause size={22} strokeWidth={2} />
+        </span>
+      </button>
+      <button
+        type="button"
+        className="role-entry__video-mute"
+        onClick={toggleMute}
+        aria-label={muted ? copy.unmute : copy.mute}
+      >
+        {muted ? (
+          <VolumeX size={17} aria-hidden="true" />
+        ) : (
+          <Volume2 size={17} aria-hidden="true" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+/** Showcase section: a centred heading plus one or more preview clips. */
+export function RoleEntryShowcase({ copy, videos }) {
+  const items = Array.isArray(videos) ? videos.filter(Boolean) : [];
+
+  return (
+    <div className="role-entry__showcase">
+      <div className="role-entry__section-head role-entry__showcase-head">
+        <p className="role-entry__section-eyebrow">{copy.eyebrow}</p>
+        <h2 className="role-entry__section-title">{copy.title}</h2>
+        <p className="role-entry__showcase-body">{copy.body}</p>
+      </div>
+
+      <div className="role-entry__media-row" data-count={items.length}>
+        {items.map((video) => (
+          <ShowcaseVideo
+            key={video.src}
+            src={video.src}
+            poster={video.poster}
+            copy={copy}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 

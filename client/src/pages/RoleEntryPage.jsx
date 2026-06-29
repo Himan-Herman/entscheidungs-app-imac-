@@ -9,7 +9,12 @@ import {
   RoleEntryBackdrop,
   RoleEntryFlow,
   RoleEntryMetrics,
+  RoleEntryShowcase,
 } from "../components/landing/RoleEntryVisuals.jsx";
+import introVideo from "../assets/media/medscoutx-intro.mp4";
+import introPoster from "../assets/media/medscoutx-intro-poster.jpg";
+import introVideo2 from "../assets/media/medscoutx-intro2.mp4";
+import introPoster2 from "../assets/media/medscoutx-intro2-poster.jpg";
 import {
   USER_MODES,
   writeUserMode,
@@ -52,6 +57,7 @@ export default function RoleEntryPage() {
 
     addStatic(".role-entry__intro");
     addStatic(".role-entry__section-head");
+    addStatic(".role-entry__media-row");
     addStatic(".role-entry__manifesto-inner");
     addStaggered(".role-entry__card");
     addStaggered(".role-entry__flow-step");
@@ -148,6 +154,16 @@ export default function RoleEntryPage() {
             onClick={goPractice}
           />
         </div>
+
+        <section className="role-entry__section role-entry__section--showcase">
+          <RoleEntryShowcase
+            copy={t.video}
+            videos={[
+              { src: introVideo, poster: introPoster },
+              { src: introVideo2, poster: introPoster2 },
+            ]}
+          />
+        </section>
 
         <section
           className="role-entry__section role-entry__section--flow"

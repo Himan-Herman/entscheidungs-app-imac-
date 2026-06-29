@@ -97,6 +97,16 @@ export default {
       "Your data stays in your hands",
     ],
   },
+  video: {
+    eyebrow: "MedScoutX in action",
+    title: "A short glimpse",
+    body: "See in a few seconds what structured preparation feels like — calm, clear and entirely at your own pace.",
+    aria: "MedScoutX preview video",
+    play: "Play video",
+    pause: "Pause video",
+    mute: "Mute sound",
+    unmute: "Unmute sound",
+  },
   patientHub: {
     pageTitle: "Patient workspace — MedScoutX",
     heading: "Patient workspace",

@@ -97,6 +97,16 @@ export default {
       "Ihre Daten bleiben in Ihrer Hand",
     ],
   },
+  video: {
+    eyebrow: "MedScoutX in Aktion",
+    title: "Ein kurzer Einblick",
+    body: "Sehen Sie in wenigen Sekunden, wie sich strukturierte Vorbereitung anfühlt – ruhig, klar und ganz in Ihrem Tempo.",
+    aria: "Vorschauvideo von MedScoutX",
+    play: "Video abspielen",
+    pause: "Video pausieren",
+    mute: "Ton ausschalten",
+    unmute: "Ton einschalten",
+  },
   patientHub: {
     pageTitle: "Patientenbereich — MedScoutX",
     heading: "Patientenbereich",
