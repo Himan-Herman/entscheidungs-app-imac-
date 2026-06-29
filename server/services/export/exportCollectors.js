@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticePatientOverview } from "../careRelationship/practicePatientRecordService.js";
 import { listPracticeLinkActivity } from "../activity/activityFeedService.js";
 import { listPatientActivity } from "../activity/activityFeedService.js";
 import { registryForAction } from "../activity/activityFeedRegistry.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {Date | string | null | undefined} d

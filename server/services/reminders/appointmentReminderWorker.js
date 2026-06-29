@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { deliverAppointmentReminder } from "./appointmentReminderDelivery.js";
 import {
@@ -9,7 +9,6 @@ import {
   workerBatchSize,
 } from "./reminderConstants.js";
 
-const prisma = new PrismaClient();
 
 const TERMINAL_APPOINTMENT = new Set(["cancelled", "completed", "no_show"]);
 

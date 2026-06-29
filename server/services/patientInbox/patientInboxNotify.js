@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { isPatientInboxEnabled } from "../../config/featureFlags.js";
 import {
   patientInboxTitleForType,
@@ -6,7 +6,6 @@ import {
 } from "../../constants/inboxNotificationCatalog.js";
 import { upsertPatientInboxItem } from "./patientInboxService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {{

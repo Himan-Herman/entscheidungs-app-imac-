@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { linkToPatientJson } from "./practicePatientLinkService.js";
 import {
@@ -9,7 +9,6 @@ import {
 import { notifyPatientInboxOfProfileAccess } from "../patientInbox/patientInboxNotify.js";
 import { notifyPracticeInboxOfProfileRevoked } from "../practiceInbox/practiceInboxNotify.js";
 
-const prisma = new PrismaClient();
 
 const LINK_READABLE = new Set(["invited", "active"]);
 

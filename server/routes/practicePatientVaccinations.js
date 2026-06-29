@@ -9,14 +9,13 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isVaccinationPassEnabled } from "../config/featureFlags.js";
 import { resolvePatientLinkForPractice } from "../services/careRelationship/resolvePatientLink.js";
 import { assertConsentForLink } from "../services/consent/consentRecordService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router({ mergeParams: true });
-const prisma = new PrismaClient();
 
 const LINK_ACTIVE = new Set(["invited", "active"]);
 

@@ -12,7 +12,7 @@
  * scopes come solely from the code (no auto-grant of everything). Organizational
  * only — no clinical content.
  */
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import {
   generateConnectCode,
   hashConnectCode,
@@ -27,7 +27,6 @@ import {
   acceptPracticePatientLinkConsent,
 } from "./practicePatientLinkService.js";
 
-const prisma = new PrismaClient();
 
 /** A link is reusable for a fresh code if it is still in an active-like state. */
 const REUSABLE_LINK_STATUSES = ["invited", "active"];

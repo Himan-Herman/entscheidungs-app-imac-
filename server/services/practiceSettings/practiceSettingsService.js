@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { hasPracticePermission, PERMISSIONS } from "../../utils/practicePermissions.js";
@@ -19,7 +19,6 @@ import {
   stringifyJsonArray,
 } from "../../utils/practiceOrganizationJson.js";
 
-const prisma = new PrismaClient();
 
 const ALLOWED_LANGS = new Set([
   "de",

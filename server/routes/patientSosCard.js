@@ -11,7 +11,7 @@
 
 import { randomUUID } from "crypto";
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isSosCardEnabled } from "../config/featureFlags.js";
 import { generateSosCardSummary } from "../services/sosCard/sosCardAiSummary.js";
 import {
@@ -22,7 +22,6 @@ import {
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const BLOOD_TYPES = new Set([
   "A+", "A-", "B+", "B-", "AB+", "AB-", "0+", "0-",

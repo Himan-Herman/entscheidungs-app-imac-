@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { patientInboxTitleForType } from "../../constants/inboxNotificationCatalog.js";
 import {
@@ -7,7 +7,6 @@ import {
 } from "../../utils/practiceBranding.js";
 import { resolvePatientInboxDedupeKey } from "./patientInboxDedupe.js";
 
-const prisma = new PrismaClient();
 
 export const INBOX_TYPES = new Set([
   "medication",

@@ -8,7 +8,7 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import OpenAI from "openai";
 import { isHealthHistoryEnabled } from "../config/featureFlags.js";
 import { resolvePatientLinkForPractice } from "../services/careRelationship/resolvePatientLink.js";
@@ -18,7 +18,6 @@ import { getOpenAiChatModel } from "../config/openAiModels.js";
 import { logServerError } from "../utils/safeApiError.js";
 
 const router = express.Router({ mergeParams: true });
-const prisma = new PrismaClient();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const LINK_ACTIVE = new Set(["invited", "active"]);

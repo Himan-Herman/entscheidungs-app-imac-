@@ -58,7 +58,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 
 const SAFE_SESSION_THRESHOLD = 500;
 const MAX_PRINTED_IDS = 20;
@@ -156,7 +156,6 @@ if (!Number.isFinite(days) || !Number.isInteger(days) || days <= 0) {
   fatal(`--days must be a positive integer; got "${daysRaw}".`);
 }
 
-const prisma = new PrismaClient();
 
 function isoOrNull(d) {
   if (!d) return null;

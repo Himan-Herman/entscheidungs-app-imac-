@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { notifyPracticeInboxOfDocumentQuestion } from "../practiceInbox/practiceInboxNotify.js";
 import { getSharedDocumentForPatient } from "./practiceDocumentService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * Patient question about a shared document — neutral practice inbox only.

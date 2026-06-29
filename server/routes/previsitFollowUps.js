@@ -1,11 +1,10 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
 import { notifyPracticeInboxOfFollowUpReply } from "../services/practiceInbox/practiceInboxNotify.js";
 import { cancelFollowUpReminders } from "../services/reminders/appointmentReminderSchedule.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function userIdFromReq(req) {

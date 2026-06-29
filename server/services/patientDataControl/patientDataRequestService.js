@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { linkHasConsentScope } from "../careRelationship/consentScopes.js";
 import { updatePatientProfileAccess } from "../careRelationship/practicePatientProfileService.js";
 import { notifyPracticeInboxOfDataRequest } from "../practiceInbox/practiceInboxNotify.js";
 import { notifyPatientInboxOfDataRequestStatus } from "../patientInbox/patientInboxNotify.js";
 
-const prisma = new PrismaClient();
 
 export const REQUEST_TYPES = new Set(["deletion", "access_restriction", "export"]);
 export const REQUEST_STATUSES = new Set([

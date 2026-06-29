@@ -5,14 +5,13 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   columnExists,
   getSchemaConstraintState,
   logColumnMissing,
 } from "./lib/schemaColumns.js";
 
-const prisma = new PrismaClient();
 
 function section(title) {
   console.log(`\n=== ${title} ===`);

@@ -31,7 +31,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   createSessionForPractice,
   listSessionsForPractice,
@@ -161,7 +161,6 @@ async function createCiFixture(prismaClient) {
 // Setting it here ensures future calls are safe even if flag-checking is added.
 process.env.ENABLE_BILLING_PLAUSIBILITY = "true";
 
-const prisma = new PrismaClient();
 
 /** Collected IDs of test sessions created during this run — cleaned up in finally. */
 const createdSessionIds = [];

@@ -4,7 +4,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   processTelemedicineCleanup,
   getTelemedicineCleanupStatus,
@@ -14,7 +14,6 @@ import {
   TELEMEDICINE_WAITING_MAX_MS,
 } from "../services/telemedicine/telemedicineCleanupConstants.js";
 
-const prisma = new PrismaClient();
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);

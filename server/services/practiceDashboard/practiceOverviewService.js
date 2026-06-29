@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import {
   isMedicalInterpreterB2bEnabled,
   isPracticeAnamnesisEnabled,
@@ -12,7 +12,6 @@ import {
 } from "../../utils/practicePermissions.js";
 import { registryForAction } from "../activity/activityFeedRegistry.js";
 
-const prisma = new PrismaClient();
 
 const OPEN_DATA_REQUEST_STATUSES = ["submitted", "in_review"];
 const RECENT_DOCUMENT_DAYS = 14;

@@ -15,12 +15,11 @@
  */
 
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { hasPracticePermission, PERMISSIONS } from "../../utils/practicePermissions.js";
 import { GOAE_CATALOGUE_META } from "../../data/goaeCatalogue.js";
 
-const prisma = new PrismaClient();
 
 /** Supported report locales. */
 const SUPPORTED_LOCALES = new Set(["de", "en", "fr", "it", "es"]);

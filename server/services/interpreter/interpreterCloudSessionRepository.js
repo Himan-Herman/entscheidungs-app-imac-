@@ -3,13 +3,12 @@
  * No business rules, audit, or encryption here.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import {
   INTERPRETER_CLOUD_CONSENT_VERSION,
   INTERPRETER_CLOUD_SCHEMA_VERSION,
 } from "../../config/interpreterCloudEnv.js";
 
-const prisma = new PrismaClient();
 
 export { prisma as interpreterCloudPrisma };
 

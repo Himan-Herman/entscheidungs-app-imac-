@@ -1,8 +1,7 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 router.get("/qr/:qrToken", async (req, res) => {

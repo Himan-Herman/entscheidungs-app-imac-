@@ -16,7 +16,7 @@
  * returned and the appointment workflow is unaffected.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { openai } from "../../openaiClient.js";
 import { getOpenAiChatModel } from "../../config/openAiModels.js";
 import {
@@ -27,7 +27,6 @@ import {
 import { sanitizeAiOutput } from "../aiSafetySanitizer.js";
 import { writeAuditLog } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 
 /** Maximum characters of patientNote sent to AI. */
 const MAX_PATIENT_NOTE_CHARS = 500;

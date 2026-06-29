@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import {
   canManageCalendarSettings,
@@ -10,7 +10,6 @@ import {
   defaultTypeDisplayName,
 } from "./calendarConstants.js";
 
-const prisma = new PrismaClient();
 
 export async function ensureDefaultAppointmentTypes(practiceId, locale = "de") {
   const count = await prisma.appointmentType.count({ where: { practiceProfileId: practiceId } });

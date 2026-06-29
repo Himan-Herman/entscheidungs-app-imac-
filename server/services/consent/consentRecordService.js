@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { logSecurityEvent } from "../security/securityEventService.js";
 import {
@@ -12,7 +12,6 @@ import {
 } from "./consentTypes.js";
 import { PRACTICE_BRANDING_SELECT, practiceBrandingJson } from "../../utils/practiceBranding.js";
 
-const prisma = new PrismaClient();
 const LINK_ACTIVE = new Set(["invited", "active"]);
 
 /**

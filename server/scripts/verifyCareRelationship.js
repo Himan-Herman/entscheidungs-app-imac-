@@ -4,7 +4,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   LINK_STATUSES,
   createLink,
@@ -12,7 +12,6 @@ import {
 } from "../services/careRelationship/practicePatientLinkService.js";
 import { isCareRelationshipEnabled } from "../config/featureFlags.js";
 
-const prisma = new PrismaClient();
 
 async function main() {
   console.log("[verify] CARE_RELATIONSHIP_ENABLED=", isCareRelationshipEnabled());

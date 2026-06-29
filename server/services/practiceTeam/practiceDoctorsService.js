@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import {
   hasPracticePermission,
@@ -8,7 +8,6 @@ import {
 import { memberProfileExtras } from "../../utils/practiceOrganizationJson.js";
 import { writeAuditLog } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 
 function displayName(user, member) {
   if (member?.displayName) return member.displayName;

@@ -4,12 +4,11 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { uploadUserAvatar } from "../middleware/uploadUserAvatar.js";
 import { userAvatarStorage } from "../services/account/userAvatarStorage.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 /** Short, non-reversible content version so a replaced image busts the HTTP cache. */

@@ -19,7 +19,7 @@
  *   address, insurance number, user names, session IDs.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { openai } from "../../openaiClient.js";
 import { getOpenAiChatModel } from "../../config/openAiModels.js";
 import {
@@ -31,7 +31,6 @@ import { detectForbiddenMedicalClaims, logAiSafetyEvent } from "../aiSafetySanit
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { hasPracticePermission, PERMISSIONS } from "../../utils/practicePermissions.js";
 
-const prisma = new PrismaClient();
 
 /** Max tokens for the AI review response (intentionally tight). */
 const BILLING_AI_MAX_TOKENS = 400;

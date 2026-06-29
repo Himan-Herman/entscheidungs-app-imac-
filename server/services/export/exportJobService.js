@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { EXPORT_FORMATS, EXPORT_TTL_MS } from "./exportConstants.js";
 import { collectExportDataset } from "./exportCollectors.js";
 import { buildExportCsv, buildExportPdf } from "./exportBuilders.js";
@@ -13,7 +13,6 @@ import {
   JOB_STATUS,
 } from "../backgroundJobs/jobConstants.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {import('@prisma/client').ExportJob} row

@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { INTERPRETER_CLOUD_CONSENT_VERSION } from "../../config/interpreterCloudEnv.js";
 import { writeAuditLog } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 
 const CONSENT_TYPE = "interpreter_cloud_storage";
 

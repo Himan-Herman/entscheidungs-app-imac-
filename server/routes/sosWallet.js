@@ -10,7 +10,7 @@
  * health data. Detailed emergency data stays server-side, reachable only via the public page.
  */
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isSosCardEnabled } from "../config/featureFlags.js";
 import { buildEmergencyUrl } from "../services/sosCard/wallet/walletConfig.js";
 import { mapSosCardToWalletPayload } from "../services/sosCard/wallet/sosWalletMapper.js";
@@ -24,7 +24,6 @@ import {
 } from "../services/sosCard/wallet/googleWalletService.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 function uid(req) {
   const id = req.user?.userId;

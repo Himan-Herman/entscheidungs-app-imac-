@@ -8,10 +8,9 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { findOrCreatePracticePatientLink } from "../services/careRelationship/practicePatientLinkService.js";
 
-const prisma = new PrismaClient();
 const dryRun = process.argv.includes("--dry-run");
 
 async function main() {

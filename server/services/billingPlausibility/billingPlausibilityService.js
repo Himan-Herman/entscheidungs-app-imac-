@@ -8,13 +8,12 @@
  * IMPORTANT: Sessions represent plausibility HINTS only — not legal billing decisions.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { hasPracticePermission, PERMISSIONS } from "../../utils/practicePermissions.js";
 import { validateGoaeRows } from "./goaeCatalogueService.js";
 import { GOAE_CATALOGUE_META } from "../../data/goaeCatalogue.js";
 
-const prisma = new PrismaClient();
 
 /** Current disclaimer semver — bump when the disclaimer text changes. */
 const DISCLAIMER_VERSION = "1.0.0";

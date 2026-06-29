@@ -4,12 +4,11 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isHealthHistoryEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const VALID_STATUSES = ["active", "chronic", "resolved", "managed", "uncertain"];
 

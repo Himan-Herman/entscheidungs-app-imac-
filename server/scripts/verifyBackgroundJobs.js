@@ -4,7 +4,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   createExportJob,
   exportJobToJson,
@@ -17,7 +17,6 @@ import {
 } from "../services/backgroundJobs/jobConstants.js";
 import { runBackgroundJobWorker } from "../services/backgroundJobs/backgroundJobWorker.js";
 
-const prisma = new PrismaClient();
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);

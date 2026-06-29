@@ -6,7 +6,7 @@
  */
 
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   PracticeWebhookEventType,
   PRACTICE_WEBHOOK_EVENT_TYPES,
@@ -16,7 +16,6 @@ import {
 } from "./webhooks/webhookWorker.js";
 import { LEGACY_POLL_STATUSES, WEBHOOK_DELIVERY_STATUS } from "./webhooks/webhookConstants.js";
 
-const prisma = new PrismaClient();
 
 export const PRACTICE_WEBHOOK_HTTP_ENABLED =
   process.env.PRACTICE_WEBHOOK_HTTP_ENABLED === "true";

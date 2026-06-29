@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { notifyPatientInboxOfMedicationPlan } from "./inboxNotify.js";
 import {
@@ -6,7 +6,6 @@ import {
   practiceBrandingJson,
 } from "../../utils/practiceBranding.js";
 
-const prisma = new PrismaClient();
 
 export const PLAN_STATUSES = new Set(["draft", "published", "archived", "deleted"]);
 const ACTIVE_PRACTICE_STATUSES = { not: "deleted" };

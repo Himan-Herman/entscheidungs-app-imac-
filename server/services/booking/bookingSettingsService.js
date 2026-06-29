@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canReadBooking, canManageBooking } from "../../utils/practicePermissions.js";
 import { writeAuditLog } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 
 /** Valid bookingMode values — no external link modes. */
 const ALLOWED_BOOKING_MODES = ["disabled", "medscoutx_request"];

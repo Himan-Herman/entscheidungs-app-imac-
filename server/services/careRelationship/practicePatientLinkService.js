@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { PRACTICE_BRANDING_SELECT, practiceBrandingJson } from "../../utils/practiceBranding.js";
 import {
   CARE_CONSENT_VERSION,
@@ -8,7 +8,6 @@ import {
 } from "./consentScopes.js";
 import { assignmentExtras } from "../../utils/practiceOrganizationJson.js";
 
-const prisma = new PrismaClient();
 
 export const LINK_STATUSES = new Set([
   "invited",

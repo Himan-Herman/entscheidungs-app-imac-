@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { normalizeConsentScopes } from "./consentScopes.js";
 import { linkToPatientJson } from "./practicePatientLinkService.js";
 import { updatePatientProfileAccess } from "./practicePatientProfileService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * Patient archives a practice relationship — revokes profile access and sets status archived.

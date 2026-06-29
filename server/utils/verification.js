@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "../lib/prisma.js";
 
 export function newToken() {
   const token = crypto.randomBytes(32).toString("hex");

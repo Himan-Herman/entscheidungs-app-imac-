@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import {
   DEFAULT_MAX_ATTEMPTS,
@@ -12,7 +12,6 @@ import {
   SUBJECT_KIND,
 } from "./reminderConstants.js";
 
-const prisma = new PrismaClient();
 
 const ACTIVE_APPOINTMENT = new Set([
   "scheduled",

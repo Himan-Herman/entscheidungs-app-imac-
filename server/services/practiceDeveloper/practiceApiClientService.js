@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { API_SCOPES } from "../../constants/practiceDeveloperApi.js";
 import {
   generateAccessToken,
@@ -7,7 +7,6 @@ import {
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManageIntegrations } from "../../utils/practicePermissions.js";
 
-const prisma = new PrismaClient();
 
 function normalizeScopes(scopes) {
   const list = Array.isArray(scopes) ? scopes : [];

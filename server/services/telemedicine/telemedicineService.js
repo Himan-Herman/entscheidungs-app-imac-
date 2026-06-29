@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import {
   canManageTelemedicine,
@@ -9,7 +9,6 @@ import { isTelemedicineUiEnabled } from "../../config/featureFlags.js";
 import { getVideoAdapter } from "./videoProviderAdapter.js";
 import { notifyTelemedicineEvent } from "./telemedicineNotify.js";
 
-const prisma = new PrismaClient();
 
 const SESSION_STATUSES = new Set([
   "planned",

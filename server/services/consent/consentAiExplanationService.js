@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { CONSENT_TYPES } from "./consentTypes.js";
 
-const prisma = new PrismaClient();
 
 const DISCLAIMER_DE =
   "Die KI unterstützt nur bei organisatorischen Erläuterungen zu Zustimmungen.";

@@ -5,7 +5,7 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isSosCardEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import {
@@ -16,7 +16,6 @@ import {
 } from "../services/sosCard/sosCardEmergencyData.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 function requireFeature(_req, res, next) {
   if (!isSosCardEnabled()) return res.status(404).json({ ok: false, error: "feature_disabled" });

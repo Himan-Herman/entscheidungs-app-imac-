@@ -1,6 +1,6 @@
 import express from "express";
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import {
   canManageIntegrations,
@@ -24,7 +24,6 @@ import {
   isPracticeDemoProfileEnabled,
 } from "../services/practiceDemoProfileService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 const TARGET_TYPES = new Set([

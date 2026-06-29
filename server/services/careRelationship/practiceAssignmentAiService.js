@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManagePatientAssignment } from "../../utils/practicePermissions.js";
 import { listPublicPracticeDoctors } from "../practiceTeam/practiceDoctorsService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * Organizational assignment suggestion only — language, patient-selected doctor, no clinical logic.

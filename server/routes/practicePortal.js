@@ -5,7 +5,7 @@
 
 import express from "express";
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   canManageIntegrations,
   canViewIntegrationSettings,
@@ -19,7 +19,6 @@ import {
 } from "../services/practiceWebhookService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function userIdFromReq(req) {

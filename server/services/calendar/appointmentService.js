@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManageCalendar, canReadCalendar } from "../../utils/practicePermissions.js";
 import { writeAuditLog } from "../auditLogService.js";
@@ -11,7 +11,6 @@ import {
   scheduleAppointmentReminders,
 } from "../reminders/appointmentReminderSchedule.js";
 
-const prisma = new PrismaClient();
 
 function parseDate(v) {
   if (!v) return null;

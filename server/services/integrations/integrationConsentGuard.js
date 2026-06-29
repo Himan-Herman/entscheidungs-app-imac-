@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import {
   isIntegrationsEnabled,
@@ -6,7 +6,6 @@ import {
 } from "../../config/featureFlags.js";
 import { canExportViaIntegrations } from "../../utils/practicePermissions.js";
 
-const prisma = new PrismaClient();
 
 /**
  * Ensures export/integration job is allowed — active link + data_export consent.

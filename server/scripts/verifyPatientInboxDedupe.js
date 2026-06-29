@@ -4,14 +4,13 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { upsertPatientInboxItem, countUnreadPatientInbox } from "../services/patientInbox/patientInboxService.js";
 import { buildPatientInboxDedupeKey } from "../services/patientInbox/patientInboxDedupe.js";
 import { notifyPatientInboxOfPracticeDocument } from "../services/practiceDocument/inboxNotify.js";
 import { notifyPatientInboxOfMedicationPlan } from "../services/medicationPlan/inboxNotify.js";
 import { notifyPatientInboxOfPracticeMessage } from "../services/communication/inboxNotify.js";
 
-const prisma = new PrismaClient();
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);

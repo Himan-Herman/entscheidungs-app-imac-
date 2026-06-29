@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import {
   canManageIntegrations,
@@ -23,7 +23,6 @@ import {
 import { getConnector, listConnectorDescriptors } from "./pvsConnectorRegistry.js";
 import { assertIntegrationExportAllowed } from "./integrationConsentGuard.js";
 
-const prisma = new PrismaClient();
 
 function stripSecretsFromConfig(config) {
   if (!config || typeof config !== "object") return {};

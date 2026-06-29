@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import {
   canManageTeam,
@@ -12,7 +12,6 @@ import {
 } from "../../utils/practicePermissions.js";
 import { memberProfileExtras } from "../../utils/practiceOrganizationJson.js";
 
-const prisma = new PrismaClient();
 
 export const MEMBER_STATUSES = new Set(["invited", "active", "revoked"]);
 export const ASSIGNABLE_ROLES = new Set([

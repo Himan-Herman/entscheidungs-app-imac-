@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { linkHasConsentScope } from "./consentScopes.js";
 import { getPracticePatientLink } from "./practicePatientLinkService.js";
 import { listPracticeLinkActivity } from "../activity/activityFeedService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {Date | string | null | undefined} a

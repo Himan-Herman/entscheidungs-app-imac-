@@ -6,10 +6,9 @@ import {
 } from "../services/export/exportJobService.js";
 import { generateExportAiOrganize } from "../services/export/exportAiOrganizeService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { patientExportLimiter } from "../middleware/ipRateLimit.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 router.use(patientExportLimiter);

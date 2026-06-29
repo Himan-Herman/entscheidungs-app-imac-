@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { isTelemedicineUiEnabled } from "../../config/featureFlags.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { notifyTelemedicineEvent } from "./telemedicineNotify.js";
@@ -12,7 +12,6 @@ import {
   telemedicineCleanupBatchSize,
 } from "./telemedicineCleanupConstants.js";
 
-const prisma = new PrismaClient();
 
 let lastRunAt = null;
 

@@ -14,7 +14,7 @@
  * while practice-side actor references are SET NULL per the schema design.
  */
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { sendSafeJsonError, logServerError } from "../utils/safeApiError.js";
 import {
@@ -23,7 +23,6 @@ import {
 } from "../middleware/ipRateLimit.js";
 import { getBillingPlausibilityExportForUser } from "../services/billingPlausibility/billingPlausibilityService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 const DELETE_CONFIRM = "DELETE_MY_MEDSCOUTX_DATA";

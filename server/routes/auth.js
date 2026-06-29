@@ -1,6 +1,6 @@
 // routes/auth.js
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail, sendMail, sendPasswordResetEmail } from "../emailService.js";
@@ -19,7 +19,6 @@ import {
 } from "../middleware/ipRateLimit.js";
 
 
-const prisma = new PrismaClient();
 const authRouter = express.Router();
 
 const INSURANCE_WHITELIST = new Set(["gesetzlich", "privat", "sonstiges"]);

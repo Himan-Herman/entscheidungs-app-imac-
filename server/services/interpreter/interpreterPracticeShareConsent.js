@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import {
   INTERPRETER_PRACTICE_SHARE_CONSENT_TYPE,
   INTERPRETER_PRACTICE_SHARE_CONSENT_VERSION,
 } from "../../config/interpreterPracticeShareEnv.js";
 import { auditInterpreterPracticeShare } from "./interpreterPracticeShareAudit.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {{

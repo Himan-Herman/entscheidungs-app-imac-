@@ -6,7 +6,7 @@
  * Mail failure never affects appointment status.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import {
   deliverAppointmentEventEmail,
@@ -14,7 +14,6 @@ import {
 } from "../emailQueueService.js";
 import { resolveEmailLocale } from "./appointmentService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * Events that trigger a patient email.

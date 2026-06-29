@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import {
@@ -14,7 +14,6 @@ import {
 import { assignmentExtras } from "../../utils/practiceOrganizationJson.js";
 import { linkToJson } from "./practicePatientLinkService.js";
 
-const prisma = new PrismaClient();
 
 const linkInclude = {
   patientUser: {

@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { registryForAction } from "./activityFeedRegistry.js";
 
-const prisma = new PrismaClient();
 
 const PRACTICE_VISIBILITIES = ["practice_visible", "patient_visible"];
 const PATIENT_VISIBILITIES = ["patient_visible"];

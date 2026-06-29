@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { notifyPracticeInboxOfMedicationQuestion } from "../practiceInbox/practiceInboxNotify.js";
 import { getMedicationPlanForPatient } from "./medicationPlanService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * Patient asks a question about a published plan — practice inbox only (neutral titles).

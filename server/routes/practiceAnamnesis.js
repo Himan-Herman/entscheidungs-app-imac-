@@ -4,7 +4,7 @@
 
 import express from "express";
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { requirePracticeAnamnesisFeature } from "../middleware/requirePracticeAnamnesis.js";
 import { getPracticeAccess } from "../utils/practiceAccess.js";
 import { canManageAnamnesis, canReadAnamnesis } from "../utils/practicePermissions.js";
@@ -12,7 +12,6 @@ import { canManageAnamnesis, canReadAnamnesis } from "../utils/practicePermissio
 const router = express.Router();
 router.use(requirePracticeAnamnesisFeature);
 
-const prisma = new PrismaClient();
 
 const VALID_QUESTION_TYPES = new Set([
   "text",

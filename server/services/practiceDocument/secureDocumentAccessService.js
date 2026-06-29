@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeDocumentStorage } from "./storage/index.js";
 import {
   getDocumentFileForPractice,
@@ -9,7 +9,6 @@ import {
 import { assertLinkForPractice } from "./practiceDocumentService.js";
 import { writeAuditLog } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 const storage = getPracticeDocumentStorage();
 
 const DEFAULT_TTL_MINUTES = 15;

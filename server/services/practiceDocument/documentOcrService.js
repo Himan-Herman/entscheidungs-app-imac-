@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import {
   isDocumentOcrUiEnabled,
   isLabInterpretationEnabled,
@@ -23,7 +23,6 @@ import {
   JOB_STATUS,
 } from "../backgroundJobs/jobConstants.js";
 
-const prisma = new PrismaClient();
 const storage = getPracticeDocumentStorage();
 
 const OCR_ACTIVE_STATUSES = [JOB_STATUS.PENDING, JOB_STATUS.PROCESSING, "running"];

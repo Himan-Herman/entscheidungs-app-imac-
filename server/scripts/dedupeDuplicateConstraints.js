@@ -6,13 +6,12 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   columnExists,
   logColumnMissing,
 } from "./lib/schemaColumns.js";
 
-const prisma = new PrismaClient();
 
 const args = new Set(process.argv.slice(2));
 const dryRun = !args.has("--execute");

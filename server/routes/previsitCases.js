@@ -3,12 +3,11 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { summarizeCaseContinuity } from "../services/preVisitCaseContinuityClient.js";
 import { previsitCaseContinuityLimiter } from "../middleware/ipRateLimit.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 const TITLE_MAX = 140;

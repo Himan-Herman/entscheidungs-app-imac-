@@ -4,14 +4,13 @@
 
 import express from "express";
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { buildNeutralSecureDocumentPdf } from "../services/secureDocumentPdf.js";
 import {
   enqueuePracticeWebhook,
   PracticeWebhookEventType,
 } from "../services/practiceWebhookService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function hashToken(raw) {

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { decryptWebhookSecretFromStorage } from "../../utils/integrationCrypto.js";
 import {
   buildSafeWebhookPayload,
@@ -8,7 +8,6 @@ import { postWebhookOnce } from "./webhookHttp.js";
 import { classifyWebhookHttpResult } from "./webhookConstants.js";
 import { signLegacyWebhookBody } from "./webhookSigning.js";
 
-const prisma = new PrismaClient();
 
 /**
  * One delivery attempt for a legacy PracticeWebhookEvent (no DB status mutation).

@@ -7,7 +7,7 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isSosCardEnabled } from "../config/featureFlags.js";
 import { resolvePatientLinkForPractice } from "../services/careRelationship/resolvePatientLink.js";
 import { assertConsentForLink } from "../services/consent/consentRecordService.js";
@@ -18,7 +18,6 @@ import {
 } from "../services/sosCard/sosCardEmergencyData.js";
 
 const router = express.Router({ mergeParams: true });
-const prisma = new PrismaClient();
 
 const LINK_ACTIVE = new Set(["invited", "active"]);
 

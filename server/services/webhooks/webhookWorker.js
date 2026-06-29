@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import {
   isPracticeWebhooksEnabled,
@@ -21,7 +21,6 @@ import {
   workerBatchSize,
 } from "./webhookConstants.js";
 
-const prisma = new PrismaClient();
 
 let lastRunAt = null;
 

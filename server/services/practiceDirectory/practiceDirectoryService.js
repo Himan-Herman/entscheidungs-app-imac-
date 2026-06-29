@@ -5,10 +5,9 @@
  * No patient data, no anamnesis, no external providers, no medical evaluation.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { parseJsonStringArray } from "../../utils/practiceOrganizationJson.js";
 
-const prisma = new PrismaClient();
 
 const MAX_RESULTS = 100;
 const MAX_PARAM_LENGTH = 200;

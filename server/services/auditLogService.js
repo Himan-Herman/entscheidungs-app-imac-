@@ -1,10 +1,9 @@
 // server/services/auditLogService.js
 // Fire-and-forget operational logging. Never pass medical narrative, PDF bytes, or raw AI output.
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { registryForAction } from "./activity/activityFeedRegistry.js";
 
-const prisma = new PrismaClient();
 
 const SENSITIVE_METADATA_KEYS =
   /^(password|token|secret|authorization|cookie|email|transcript|pdf|body|symptom|diagnosis|content|message|medication|lab|befund|thread|nachricht)$/i;

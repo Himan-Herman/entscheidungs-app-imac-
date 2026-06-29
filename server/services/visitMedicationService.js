@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 
-const prisma = new PrismaClient();
 
 const MAX_ENTRIES = 20;
 const MAX_DRUG = 200;

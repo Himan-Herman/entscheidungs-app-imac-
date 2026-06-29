@@ -1,5 +1,5 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
 import {
@@ -7,7 +7,6 @@ import {
   scheduleFollowUpPatientNudge,
 } from "../services/reminders/appointmentReminderSchedule.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 const THREAD_STATUS = new Set([

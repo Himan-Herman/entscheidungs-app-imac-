@@ -4,11 +4,10 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { createInboxItem, NEUTRAL_INBOX_TITLE } from "../services/patientInbox/patientInboxService.js";
 import { isPatientInboxEnabled } from "../config/featureFlags.js";
 
-const prisma = new PrismaClient();
 
 async function main() {
   if (!isPatientInboxEnabled()) {

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { requireConsentScopeAsync } from "../careRelationship/requireConsentScope.js";
 import { notifyPatientInboxOfPracticeMessage } from "./inboxNotify.js";
 import { notifyPracticeInboxOfPatientMessage } from "../practiceInbox/practiceInboxNotify.js";
@@ -7,7 +7,6 @@ import {
   practiceBrandingJson,
 } from "../../utils/practiceBranding.js";
 
-const prisma = new PrismaClient();
 
 export const THREAD_STATUSES = new Set(["open", "closed", "archived"]);
 export const SENDER_TYPES = new Set(["practice", "patient", "system"]);

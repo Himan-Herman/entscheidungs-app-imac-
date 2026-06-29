@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { linkHasConsentType } from "../consent/consentRecordService.js";
 
-const prisma = new PrismaClient();
 
 export async function v1GetPracticeMe(practiceProfileId) {
   const p = await prisma.practiceProfile.findUnique({

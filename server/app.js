@@ -3,7 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './lib/prisma.js';
 
 import symptomRoute from './routes/symptom.js';
 import symptomThreadRoute from './routes/symptomThread.js';
@@ -112,7 +112,6 @@ import practiceBillingPlausibilityRouter from "./routes/practiceBillingPlausibil
 import patientBillingExplainerRouter from "./routes/patientBillingExplainer.js";
 
 const app = express();
-const prismaHealth = new PrismaClient();
 
 // Startup checks prevent silent misconfiguration that can break auth/email/API links in production.
 validateStartupEnv();
@@ -274,7 +273,7 @@ app.get(['/health', '/api/health'], (_req, res) =>
 
 app.get('/api/health/db', async (_req, res) => {
   try {
-    await prismaHealth.$queryRaw`SELECT 1`;
+    await prisma.$queryRaw`SELECT 1`;
     return res.json({ ok: true, db: true });
   } catch {
     return res.status(503).json({ ok: false, db: false });

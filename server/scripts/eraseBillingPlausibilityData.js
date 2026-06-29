@@ -56,7 +56,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 
 const SAFE_SESSION_THRESHOLD = 100;
 
@@ -163,7 +163,6 @@ if (sessionId) where.id = sessionId;
 if (practiceProfileId) where.practiceProfileId = practiceProfileId;
 if (createdByUserId) where.createdByUserId = createdByUserId;
 
-const prisma = new PrismaClient();
 
 function isoOrNull(d) {
   if (!d) return null;

@@ -6,10 +6,9 @@ import express from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { listLocalesMetadata, validateUiLocale } from "../services/i18n/i18nLocaleService.js";
 import { translateOrganizationalText } from "../services/i18n/i18nAiTranslationService.js";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function userIdFromReq(req) {

@@ -4,7 +4,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   cancelAppointmentReminders,
   scheduleAppointmentReminders,
@@ -18,7 +18,6 @@ import {
   runAppointmentReminderWorker,
 } from "../services/reminders/appointmentReminderWorker.js";
 
-const prisma = new PrismaClient();
 
 function assert(cond, msg) {
   if (!cond) throw new Error(msg);

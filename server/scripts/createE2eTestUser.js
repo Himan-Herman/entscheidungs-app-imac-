@@ -51,7 +51,7 @@
  */
 
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 
 // ─── Argument parsing ─────────────────────────────────────────────────────────
@@ -139,7 +139,6 @@ const testPassword =
   process.env.E2E_TEST_PASSWORD ||
   "E2eTestBilling!2026";
 
-const prisma = new PrismaClient();
 
 // ─── Cleanup ──────────────────────────────────────────────────────────────────
 

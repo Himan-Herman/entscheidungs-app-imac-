@@ -9,14 +9,13 @@
  * Output (findings/normalizedItems/metadata) contains NO patient data, NO free-text
  * and NO clinical content — only codes, parsed numbers and rule/severity identifiers.
  */
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { findGoaeEntry } from "./goaeCatalogueService.js";
 import {
   GOAE_CATALOGUE_META,
   GOAE_FACTOR_THRESHOLDS,
 } from "../../data/goaeCatalogue.js";
 
-const prisma = new PrismaClient();
 
 export const RULE_SEVERITY = Object.freeze({
   INFO: "info",

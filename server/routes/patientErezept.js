@@ -9,13 +9,12 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isErezeptEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { logServerError } from "../utils/safeApiError.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const PATIENT_ALLOWED_STATUSES = new Set(["at_pharmacy", "redeemed"]);
 

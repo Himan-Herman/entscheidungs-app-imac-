@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { getPracticeDocumentStorage } from "./storage/index.js";
 import { notifyPatientInboxOfPracticeDocument } from "./inboxNotify.js";
@@ -9,7 +9,6 @@ import {
   practiceBrandingJson,
 } from "../../utils/practiceBranding.js";
 
-const prisma = new PrismaClient();
 const storage = getPracticeDocumentStorage();
 
 export const DOCUMENT_TYPES = new Set([

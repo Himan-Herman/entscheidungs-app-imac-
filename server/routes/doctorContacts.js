@@ -8,13 +8,11 @@
 
 import express from 'express';
 import multer from 'multer';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/prisma.js';
 import { deliverPrevisitPdfEmail } from '../services/emailQueueService.js';
 import { sendPrevisitPdfLimiter } from '../middleware/ipRateLimit.js';
 import { writeAuditLog } from '../services/auditLogService.js';
 import { trackAnalyticsEvent } from '../services/analyticsService.js';
-
-const prisma = new PrismaClient();
 
 const router = express.Router();
 

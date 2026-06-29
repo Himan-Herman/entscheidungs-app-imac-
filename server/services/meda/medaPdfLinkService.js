@@ -1,10 +1,9 @@
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeDocumentStorage } from "../practiceDocument/storage/index.js";
 import { createSecureDocumentDownloadLink } from "../practiceDocument/secureDocumentAccessService.js";
 import { writeAuditLog } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 const storage = getPracticeDocumentStorage();
 
 const MEDA_PDF_TTL_MINUTES = 60;

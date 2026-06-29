@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   isPracticeAnamnesisEnabled,
   isPracticeBookingEnabled,
@@ -10,7 +10,6 @@ import {
   canReadBooking,
 } from "../utils/practicePermissions.js";
 
-const prisma = new PrismaClient();
 
 const MAX_TEMPLATES = 50;
 

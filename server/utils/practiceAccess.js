@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { hasPracticePermission } from "./practicePermissions.js";
 
-const prisma = new PrismaClient();
 
 export {
   canAccessPracticeDataApi,

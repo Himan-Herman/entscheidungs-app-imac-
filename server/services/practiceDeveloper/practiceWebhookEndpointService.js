@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { PRACTICE_DEVELOPER_WEBHOOK_EVENTS } from "../../constants/practiceDeveloperApi.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManageIntegrations } from "../../utils/practicePermissions.js";
@@ -9,7 +9,6 @@ import {
   storeWebhookSecretFields,
 } from "./practiceDeveloperWebhookService.js";
 
-const prisma = new PrismaClient();
 
 function normalizeEventTypes(types) {
   const list = Array.isArray(types) ? types : [];

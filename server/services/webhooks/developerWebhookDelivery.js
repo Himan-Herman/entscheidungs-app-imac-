@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { isPracticeWebhooksEnabled } from "../../config/featureFlags.js";
 import { decryptWebhookSecretFromStorage } from "../../utils/integrationCrypto.js";
 import { buildDeveloperWebhookPayload } from "./developerWebhookPayload.js";
@@ -6,7 +6,6 @@ import { postWebhookOnce } from "./webhookHttp.js";
 import { classifyWebhookHttpResult } from "./webhookConstants.js";
 import { signDeveloperWebhook } from "./webhookSigning.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {import('@prisma/client').PracticeWebhookDelivery & { endpoint?: object | null }} delivery

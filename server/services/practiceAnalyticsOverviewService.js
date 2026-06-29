@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { hashAnalyticsId } from "./analyticsService.js";
 
-const prisma = new PrismaClient();
 
 const DEFAULT_DAYS = 30;
 const MAX_DAYS = 365;

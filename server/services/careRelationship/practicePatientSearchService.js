@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { LINK_STATUSES, linkToJson } from "./practicePatientLinkService.js";
 import { enrichPracticePatientLinks } from "./practicePatientRecordService.js";
 import { registryForAction } from "../activity/activityFeedRegistry.js";
 
-const prisma = new PrismaClient();
 
 const SORT_FIELDS = new Set(["activity", "name", "linkedAt", "status"]);
 const MAX_FETCH = 500;

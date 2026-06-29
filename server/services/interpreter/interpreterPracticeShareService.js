@@ -619,8 +619,7 @@ export async function listPatientPracticeShares(patientUserId) {
  * @param {string} practiceProfileId
  */
 export async function getPracticeInterpreterProfile(practiceProfileId) {
-  const { PrismaClient } = await import("@prisma/client");
-  const prisma = new PrismaClient();
+  const { prisma } = await import("../../lib/prisma.js");
   const practice = await prisma.practiceProfile.findUnique({
     where: { id: practiceProfileId },
     select: {

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { isPatientInboxEnabled, isPracticeInboxEnabled } from "../../config/featureFlags.js";
 import { notifyPatientInbox } from "../patientInbox/patientInboxNotify.js";
 import { upsertPracticeInboxItem } from "../practiceInbox/practiceInboxService.js";
@@ -6,7 +6,6 @@ import { deliverOrganizationalReminderEmail } from "../emailQueueService.js";
 import { reminderCopyForTemplate } from "./reminderCopy.js";
 import { REMINDER_CHANNEL } from "./reminderConstants.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {import('@prisma/client').AppointmentReminder & { appointment?: object | null, followUpThread?: object | null }} reminder

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { openai } from "../../openaiClient.js";
 import { getOpenAiChatModel } from '../../config/openAiModels.js';
 import {
@@ -9,7 +9,6 @@ import {
 import { sanitizeAiOutput, shouldRegenerateUnsafeOutput } from "../aiSafetySanitizer.js";
 import { getPracticeInboxItem } from "./practiceInboxService.js";
 
-const prisma = new PrismaClient();
 const MODULE = "practice_inbox_org";
 
 const ORG_SYSTEM = `You assist medical practice staff with ORGANIZATIONAL tasks only.

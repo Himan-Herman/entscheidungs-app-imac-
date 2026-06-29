@@ -1,7 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { sanitizeAuditMetadata } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 
 export const AUDIT_ACTOR_ROLES = new Set(["practice", "patient", "system"]);
 export const AUDIT_RESOURCE_TYPES = new Set([

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import {
   canManageCalendarSettings,
@@ -6,7 +6,6 @@ import {
 } from "../../utils/practicePermissions.js";
 import { writeAuditLog } from "../auditLogService.js";
 
-const prisma = new PrismaClient();
 
 function availabilityToJson(row) {
   return {

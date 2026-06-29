@@ -2,9 +2,8 @@
  * Persistence for interpreter practice invites — Prisma only.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {import('@prisma/client').PracticeInterpreterInvite} row

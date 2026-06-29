@@ -4,12 +4,11 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { isVitalsEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const VALID_TYPES = ["blood_pressure", "heart_rate", "glucose", "weight", "oxygen", "temperature"];
 const DEFAULT_UNITS = {

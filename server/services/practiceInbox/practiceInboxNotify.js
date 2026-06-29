@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { isPracticeInboxEnabled } from "../../config/featureFlags.js";
 import { upsertPracticeInboxItem } from "./practiceInboxService.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {{ practiceProfileId: string, practicePatientLinkId?: string, patientUserId?: string, type: string, titleDe: string, titleEn: string, summaryDe?: string, summaryEn?: string, priority?: string, sourceRefType?: string, sourceRefId?: string, targetUrl?: string, lang?: string }} p

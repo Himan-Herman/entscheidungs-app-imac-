@@ -13,10 +13,9 @@
  * Run MANUALLY (e.g. once on Render after `npx prisma migrate deploy`):
  *   node server/scripts/seedGoaeCatalogue.js
  */
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { GOAE_ENTRIES, GOAE_CATALOGUE_META } from "../data/goaeCatalogue.js";
 
-const prisma = new PrismaClient();
 const LABEL = "initial-internal-subset";
 
 async function main() {

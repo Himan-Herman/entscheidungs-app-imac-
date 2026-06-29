@@ -10,7 +10,7 @@
 
 import { openai } from "../../openaiClient.js";
 import { getOpenAiChatModel } from "../../config/openAiModels.js";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import {
   buildAnamnesisTranslationSystemPrompt,
   buildAnamnesisTranslationUserMessage,
@@ -26,7 +26,6 @@ import {
   ANAMNESIS_TRANSLATION_TIMEOUT_MS,
 } from "../../utils/anamnesisTranslationSafety.js";
 
-const prisma = new PrismaClient();
 
 /** @returns {boolean} */
 function isTranslationConfigured() {

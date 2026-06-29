@@ -4,7 +4,7 @@
  */
 
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { buildDeveloperWebhookPayload } from "../webhooks/developerWebhookPayload.js";
 import {
   PRACTICE_DEVELOPER_WEBHOOK_EVENTS,
@@ -26,7 +26,6 @@ import {
 } from "../webhooks/webhookConstants.js";
 import { processDeveloperWebhookDelivery } from "../webhooks/webhookWorker.js";
 
-const prisma = new PrismaClient();
 
 export function isWebhookUrlAllowed(url) {
   try {

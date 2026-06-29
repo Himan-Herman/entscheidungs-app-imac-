@@ -6,9 +6,8 @@
  */
 
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 
-const prisma = new PrismaClient();
 
 const PEPPER =
   typeof process.env.ANALYTICS_HASH_PEPPER === "string" &&

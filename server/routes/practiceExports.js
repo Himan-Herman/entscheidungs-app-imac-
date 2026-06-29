@@ -1,5 +1,5 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { getPracticeAccess } from "../utils/practiceAccess.js";
 import { canReadPracticePatientLinks } from "../utils/practicePermissions.js";
 import {
@@ -11,7 +11,6 @@ import { generateExportAiOrganize } from "../services/export/exportAiOrganizeSer
 import { writeAuditLog } from "../services/auditLogService.js";
 import { practiceExportLimiter } from "../middleware/ipRateLimit.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 router.use(practiceExportLimiter);

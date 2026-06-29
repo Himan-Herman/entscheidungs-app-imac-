@@ -1,10 +1,9 @@
 import { isPracticeApiEnabled } from "../config/featureFlags.js";
 import { findApiClientByToken, touchApiClientUsed } from "../services/practiceDeveloper/practiceApiClientService.js";
 import { checkPracticeApiRateLimit } from "./practiceApiRateLimit.js";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import crypto from "crypto";
 
-const prisma = new PrismaClient();
 
 function hashIp(ip) {
   return crypto.createHash("sha256").update(String(ip || "")).digest("hex").slice(0, 32);

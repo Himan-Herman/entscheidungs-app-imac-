@@ -3,7 +3,7 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   getPracticeMedications,
   savePracticeMedications,
@@ -13,7 +13,6 @@ import {
 } from "../services/visitMedicationService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function userIdFromReq(req) {

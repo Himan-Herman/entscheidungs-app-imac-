@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { isDocumentOcrUiEnabled } from "../../config/featureFlags.js";
 import {
   cleanupExpiredExports,
@@ -16,7 +16,6 @@ import {
   STALE_JOB_PROCESSING_MS,
 } from "./jobConstants.js";
 
-const prisma = new PrismaClient();
 
 let lastRunAt = null;
 

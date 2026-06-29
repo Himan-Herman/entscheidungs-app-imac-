@@ -1,8 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../../lib/prisma.js";
 import { listPracticeAuditLog } from "../activity/activityFeedService.js";
 import { SECURITY_PRINCIPLES } from "./securityPrinciples.js";
 
-const prisma = new PrismaClient();
 
 /**
  * @param {import("@prisma/client").AuditLog} row

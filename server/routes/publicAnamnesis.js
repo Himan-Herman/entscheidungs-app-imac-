@@ -6,12 +6,11 @@
 
 import express from "express";
 import crypto from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import { translateAnamnesisSubmission } from "../services/practiceAnamnesis/anamnesisTranslationService.js";
 import { translateQuestionLabels } from "../services/practiceAnamnesis/questionLabelTranslationService.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Extended language set for anamnesis communication — superset of the global UI locales.
 // Includes ja/ko/zh which are not in LOCALE_OPTIONS but are valid for patient communication.

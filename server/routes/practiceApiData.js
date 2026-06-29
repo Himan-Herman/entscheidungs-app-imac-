@@ -3,13 +3,12 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   canAccessPracticeDataApi,
   getPracticeAccess,
 } from "../utils/practiceAccess.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function userIdFromReq(req) {

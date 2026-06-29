@@ -3,7 +3,7 @@
  */
 
 import express from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../lib/prisma.js";
 import {
   getPracticeAccess,
   canManageIntegrations,
@@ -18,7 +18,6 @@ import {
 } from "../services/analyticsService.js";
 import { getPracticeAnalyticsOverview } from "../services/practiceAnalyticsOverviewService.js";
 
-const prisma = new PrismaClient();
 const router = express.Router();
 
 function userIdFromReq(req) {
