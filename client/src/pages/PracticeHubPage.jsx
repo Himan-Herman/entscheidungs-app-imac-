@@ -362,6 +362,7 @@ export default function PracticeHubPage() {
           { key: "audit", show: visibility.audit, to: `/practice/audit?practiceId=${pid}`, Icon: ScrollText, titleKey: "adminAuditLink", descKey: "adminDescAudit" },
           { key: "consents", show: visibility.audit, to: `/practice/consents?practiceId=${pid}`, Icon: ShieldCheck, titleKey: "adminConsentsLink", descKey: "adminDescConsents" },
           { key: "security", show: quickActions.openSecurity, to: `/practice/security?practiceId=${pid}`, Icon: Shield, titleKey: "actionOpenSecurity", descKey: "adminDescSecurity" },
+          { key: "billing", show: permissions.includes("settings.manage"), to: `/practice/settings/billing-plausibility?practiceId=${pid}`, Icon: Receipt, titleKey: "actionOpenBillingPlausibility", descKey: "adminDescBilling" },
         ],
       },
       {

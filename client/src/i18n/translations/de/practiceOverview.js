@@ -247,6 +247,7 @@ export default {
   adminDescAnalytics: "Anonymisierte Nutzungsstatistik und konservative Zeitschätzung.",
   adminDescIntegrations: "PVS-/FHIR-Anbindung – Sandbox-Status für den Alpha-Test.",
   adminDescDeveloper: "API-Zugänge und Webhooks für die technische Anbindung.",
+  adminDescBilling: "Deterministische GOÄ-Plausibilitätsprüfung – Hinweise, keine verbindliche Abrechnungsberatung.",
 
   aiHeading: "Automatische Zusammenfassung – bitte prüfen",
   aiDisclaimer:

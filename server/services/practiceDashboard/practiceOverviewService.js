@@ -51,6 +51,8 @@ function metricsVisibilityForRole(role) {
     team: hasPracticePermission(role, PERMISSIONS.TEAM_VIEW),
     audit: hasPracticePermission(role, PERMISSIONS.AUDIT_VIEW),
     security: hasPracticePermission(role, PERMISSIONS.SECURITY_VIEW),
+    // Billing plausibility: aligned with the backend route gate (SETTINGS_MANAGE,
+    // owner/admin/practice_manager) so the hub never shows an entry the API would reject.
     billing: hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE),
     interpreter:
       isMedicalInterpreterB2bEnabled() &&

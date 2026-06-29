@@ -247,6 +247,7 @@ export default {
   adminDescAnalytics: "Anonymized usage statistics and a conservative time estimate.",
   adminDescIntegrations: "PVS/FHIR connection — sandbox status for the alpha test.",
   adminDescDeveloper: "API access and webhooks for technical integration.",
+  adminDescBilling: "Deterministic GOÄ plausibility check – hints only, not binding billing advice.",
 
   aiHeading: "AI summary – please review",
   aiDisclaimer:

@@ -30,7 +30,8 @@ const MAX_SESSIONS_LIST = 50;
  * @returns {boolean}
  */
 function canAccessBilling(role) {
-  return hasPracticePermission(role, PERMISSIONS.INTEGRATIONS_MANAGE);
+  // Billing-1.1: owner / admin / practice_manager (SETTINGS_MANAGE).
+  return hasPracticePermission(role, PERMISSIONS.SETTINGS_MANAGE);
 }
 
 /**
