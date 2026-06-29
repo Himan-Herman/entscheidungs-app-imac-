@@ -1,0 +1,125 @@
+/**
+ * Patient "My practice" hub — info-modal texts (EN source).
+ * No medical assessment, no diagnosis/therapy/triage; only code-backed, honest
+ * statements. No patient data is shown in these modals.
+ */
+export default {
+  close: "Close",
+
+  inboxButton: "More information about the inbox",
+  inboxTitle: "Inbox",
+  inboxP1:
+    "The inbox gathers organizational notices from MedScoutX and your linked practices — neutral and without medical details.",
+  inboxP2:
+    "Entries appear only with an active link to a MedScoutX practice. MedScoutX sends no push notifications for this; you see new notices when you open MedScoutX. No medical assessment takes place.",
+  inboxP3:
+    "In the alpha test you can check: do new notices appear clearly, can they be marked as read, and do medical details stay out?",
+
+  messagesButton: "More information about messages",
+  messagesTitle: "Messages",
+  messagesP1:
+    "Here you hold secure, written communication with a linked MedScoutX practice — organizational and without medical assessment.",
+  messagesP2:
+    "Messages are only possible with a linked MedScoutX practice. This is not an emergency channel and not an assessment of urgency. For acute symptoms, contact emergency services or 112.",
+  messagesP3:
+    "In the alpha test you can check: can a conversation be opened and answered, and does it appear only with an active practice link?",
+
+  appointmentsButton: "More information about “My appointments”",
+  appointmentsTitle: "My appointments",
+  appointmentsP1:
+    "Here you see appointment requests, confirmed appointments and organizational appointment information, as far as available in the system.",
+  appointmentsP2:
+    "Appointments are arranged with your linked practice; you submit appointment requests with explicit consent. There is no triage and no assessment of urgency.",
+  appointmentsP3:
+    "In the alpha test you can check: does a submitted appointment request appear, and are status and time traceable?",
+
+  telemedicineButton: "More information about video consultations",
+  telemedicineTitle: "Video consultations",
+  telemedicineP1:
+    "Here video consultations with your practice are supported organizationally — for example joining the waiting room and starting the session.",
+  telemedicineP2:
+    "You only join after explicit consent; camera and microphone are used only for the running session, and conversations are not recorded. MedScoutX makes no diagnosis.",
+  telemedicineP3:
+    "In the alpha test you can check: can the waiting room be opened, is the consent clear, and do the browser's camera/microphone permissions work?",
+
+  documentsButton: "More information about practice documents",
+  documentsTitle: "Practice documents",
+  documentsP1:
+    "Here documents and findings that your practice has released for you appear.",
+  documentsP2:
+    "Documents are not published automatically — they are visible only after explicit release by the practice and with an active link, sometimes via secure, time-limited links. MedScoutX does not medically assess the content.",
+  documentsP3:
+    "In the alpha test you can check: does a released document appear, and does anything not released stay hidden?",
+
+  erezeptButton: "More information about “Prescriptions & orders”",
+  erezeptTitle: "Prescriptions & orders",
+  erezeptP1:
+    "Here you see prescriptions and orders clearly, provided your practice makes them available.",
+  erezeptP2:
+    "This is a simulated view — not an official TI / e-prescription proof and not a replacement for the telematics infrastructure. The official prescription from your practice or pharmacy always remains binding.",
+  erezeptP3:
+    "In the alpha test you can check: are provided prescriptions shown clearly, and is the simulated nature clearly recognizable?",
+
+  medicationsButton: "More information about “Medication & intake”",
+  medicationsTitle: "Medication & intake",
+  medicationsP1:
+    "Here you can record your own medication and intake information and structure it for a doctor's appointment, as far as available in the system.",
+  medicationsP2:
+    "These entries are your own notes and are only shared via the matching flow. MedScoutX gives no dosing recommendation, checks no interactions and makes no treatment recommendation.",
+  medicationsP3:
+    "In the alpha test you can check: can entries be recorded and edited, and do they stay private without active sharing?",
+
+  dataControlButton: "More information about “My data & permissions”",
+  dataControlTitle: "My data & permissions",
+  dataControlP1:
+    "Here you keep control over your data permissions and data requests towards linked practices.",
+  dataControlP2:
+    "There is no automatic full release — you decide on individual permissions and can submit export, restriction or deletion requests, as far as provided in the system. Practices only see what you have released.",
+  dataControlP3:
+    "In the alpha test you can check: can permissions be viewed and adjusted, and can a data request be submitted whose status is traceable?",
+
+  activityButton: "More information about “My activity”",
+  activityTitle: "My activity",
+  activityP1:
+    "Here you can trace your own important actions and status events.",
+  activityP2:
+    "Traceable history information is shown without unnecessary sensitive details. MedScoutX makes no medical assessment.",
+  activityP3:
+    "In the alpha test you can check: are events shown understandably, and do sensitive contents stay out?",
+
+  casesButton: "More information about “My cases”",
+  casesTitle: "My cases (preparation)",
+  casesP1:
+    "Here you prepare doctor's appointments and structure your own information — for example symptoms and questions.",
+  casesP2:
+    "The preparation belongs to you and is only shared via the matching flow or with explicit release. MedScoutX supports the structure and makes no diagnosis, no triage and no specialist decision.",
+  casesP3:
+    "In the alpha test you can check: can a preparation be created and structured, and does it stay private without release?",
+
+  findPracticesButton: "More information about “Find practices”",
+  findPracticesTitle: "Find practices",
+  findPracticesP1:
+    "Here you can search for practices to find a suitable point of contact.",
+  findPracticesP2:
+    "The search is for orientation. There is no guarantee of availability, and no medical recommendation is made. A connection via MedScoutX is only possible with MedScoutX practices.",
+  findPracticesP3:
+    "In the alpha test you can check: does the search return understandable results, and are empty and error states clear?",
+
+  directoryButton: "More information about “Find MedScoutX practices”",
+  directoryTitle: "Find MedScoutX practices",
+  directoryP1:
+    "Here you find practices that use MedScoutX and can — where provided — connect with them.",
+  directoryP2:
+    "A connection is created only through your deliberate action, for example via a time-limited connection code you generate. There is no automatic full release and no medical recommendation.",
+  directoryP3:
+    "In the alpha test you can check: are MedScoutX practices found, and is the path to connecting understandable?",
+
+  myPracticeButton: "More information about “My practice”",
+  myPracticeTitle: "My practice",
+  myPracticeP1:
+    "Under “My practice”, all functions around your linked MedScoutX practices are gathered — for example inbox, messages, appointments, practice documents and permissions.",
+  myPracticeP2:
+    "Content appears only with an active connection to a MedScoutX practice that you deliberately established; you keep control via permissions. MedScoutX makes no medical assessment, diagnosis or urgency rating.",
+  myPracticeP3:
+    "In the alpha test you can check: does the tile open the practice area, are the individual functions reachable, and does content stay empty without an active connection?",
+};

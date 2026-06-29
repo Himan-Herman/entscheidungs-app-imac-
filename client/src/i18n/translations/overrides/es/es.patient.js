@@ -2,6 +2,126 @@
  * Spanish — patient workspace modules (inbox, hub nav, Meda, exports, …).
  */
 export default {
+  patientCardInfo: {
+    close: "Cerrar",
+
+    inboxButton: "Más información sobre la bandeja de entrada",
+    inboxTitle: "Bandeja de entrada",
+    inboxP1:
+      "En la bandeja de entrada se reúnen avisos organizativos de MedScoutX y de sus consultas vinculadas — neutrales y sin detalles médicos.",
+    inboxP2:
+      "Las entradas solo aparecen con un vínculo activo a una consulta de MedScoutX. MedScoutX no envía notificaciones push para esto; verá los nuevos avisos al abrir MedScoutX. No se realiza ninguna evaluación médica.",
+    inboxP3:
+      "En la prueba alfa puede comprobar: ¿aparecen los nuevos avisos de forma comprensible, se pueden marcar como leídos, y quedan excluidos los detalles médicos?",
+
+    messagesButton: "Más información sobre los mensajes",
+    messagesTitle: "Mensajes",
+    messagesP1:
+      "Aquí mantiene la comunicación escrita y segura con una consulta de MedScoutX vinculada — organizativa y sin evaluación médica.",
+    messagesP2:
+      "Los mensajes solo son posibles con una consulta de MedScoutX vinculada. No es un canal de emergencias ni una evaluación de la urgencia. En caso de síntomas agudos, contacte con los servicios de emergencia o el 112.",
+    messagesP3:
+      "En la prueba alfa puede comprobar: ¿se puede abrir y responder una conversación, y aparece solo con un vínculo activo a la consulta?",
+
+    appointmentsButton: "Más información sobre « Mis citas »",
+    appointmentsTitle: "Mis citas",
+    appointmentsP1:
+      "Aquí ve las solicitudes de cita, las citas confirmadas y la información organizativa de citas, en la medida en que exista en el sistema.",
+    appointmentsP2:
+      "Las citas se acuerdan con su consulta vinculada; usted envía las solicitudes de cita con consentimiento explícito. No hay triaje ni evaluación de la urgencia.",
+    appointmentsP3:
+      "En la prueba alfa puede comprobar: ¿aparece una solicitud de cita enviada, y son trazables el estado y la hora?",
+
+    telemedicineButton: "Más información sobre las videoconsultas",
+    telemedicineTitle: "Videoconsultas",
+    telemedicineP1:
+      "Aquí se admiten organizativamente las videoconsultas con su consulta — por ejemplo, unirse a la sala de espera e iniciar la sesión.",
+    telemedicineP2:
+      "Solo se une tras un consentimiento explícito; la cámara y el micrófono se usan únicamente para la sesión en curso, y las conversaciones no se graban. MedScoutX no realiza ningún diagnóstico.",
+    telemedicineP3:
+      "En la prueba alfa puede comprobar: ¿se puede abrir la sala de espera, está claro el consentimiento, y funcionan los permisos de cámara/micrófono del navegador?",
+
+    documentsButton: "Más información sobre los documentos de la consulta",
+    documentsTitle: "Documentos de la consulta",
+    documentsP1:
+      "Aquí aparecen los documentos y resultados que su consulta ha compartido para usted.",
+    documentsP2:
+      "Los documentos no se publican automáticamente — solo son visibles tras una autorización explícita de la consulta y con un vínculo activo, a veces mediante enlaces seguros y de tiempo limitado. MedScoutX no evalúa médicamente el contenido.",
+    documentsP3:
+      "En la prueba alfa puede comprobar: ¿aparece un documento compartido, y permanece oculto lo que no se ha compartido?",
+
+    erezeptButton: "Más información sobre « Recetas y prescripciones »",
+    erezeptTitle: "Recetas y prescripciones",
+    erezeptP1:
+      "Aquí ve recetas y prescripciones de forma clara, siempre que su consulta las ponga a disposición.",
+    erezeptP2:
+      "Es una representación simulada — no un comprobante oficial de TI / e-receta y no un sustituto de la infraestructura telemática. La receta oficial de su consulta o farmacia sigue siendo siempre vinculante.",
+    erezeptP3:
+      "En la prueba alfa puede comprobar: ¿se muestran de forma clara las recetas facilitadas, y es claramente reconocible el carácter simulado?",
+
+    medicationsButton: "Más información sobre « Medicación y toma »",
+    medicationsTitle: "Medicación y toma",
+    medicationsP1:
+      "Aquí puede registrar su propia medicación e información de toma y estructurarla para una consulta médica, en la medida en que exista en el sistema.",
+    medicationsP2:
+      "Esta información son sus propias notas y solo se comparte mediante el flujo correspondiente. MedScoutX no ofrece ninguna recomendación de dosificación, no comprueba interacciones y no formula ninguna recomendación terapéutica.",
+    medicationsP3:
+      "En la prueba alfa puede comprobar: ¿se pueden registrar y editar las entradas, y permanecen privadas sin una compartición activa?",
+
+    dataControlButton: "Más información sobre « Mis datos y permisos »",
+    dataControlTitle: "Mis datos y permisos",
+    dataControlP1:
+      "Aquí mantiene el control sobre sus permisos de datos y sus solicitudes de datos frente a las consultas vinculadas.",
+    dataControlP2:
+      "No hay ninguna compartición total automática — usted decide sobre los permisos individuales y puede enviar solicitudes de exportación, limitación o eliminación, en la medida prevista por el sistema. Las consultas solo ven lo que usted ha compartido.",
+    dataControlP3:
+      "En la prueba alfa puede comprobar: ¿se pueden consultar y ajustar los permisos, y se puede enviar una solicitud de datos cuyo estado sea trazable?",
+
+    activityButton: "Más información sobre « Mi actividad »",
+    activityTitle: "Mi actividad",
+    activityP1:
+      "Aquí puede seguir sus propias acciones importantes y eventos de estado.",
+    activityP2:
+      "Se muestra información de historial trazable sin detalles sensibles innecesarios. MedScoutX no realiza ninguna evaluación médica.",
+    activityP3:
+      "En la prueba alfa puede comprobar: ¿se presentan los eventos de forma comprensible, y quedan excluidos los contenidos sensibles?",
+
+    casesButton: "Más información sobre « Mis casos »",
+    casesTitle: "Mis casos (preparación)",
+    casesP1:
+      "Aquí prepara las consultas médicas y estructura su propia información — por ejemplo, síntomas y preguntas.",
+    casesP2:
+      "La preparación le pertenece y solo se comparte mediante el flujo correspondiente o con una autorización explícita. MedScoutX apoya la estructura y no realiza ningún diagnóstico, triaje ni decisión de especialista.",
+    casesP3:
+      "En la prueba alfa puede comprobar: ¿se puede crear y estructurar una preparación, y permanece privada sin autorización?",
+
+    findPracticesButton: "Más información sobre « Buscar consultas »",
+    findPracticesTitle: "Buscar consultas",
+    findPracticesP1:
+      "Aquí puede buscar consultas para encontrar un punto de contacto adecuado.",
+    findPracticesP2:
+      "La búsqueda sirve de orientación. No hay ninguna garantía de disponibilidad y no se ofrece ninguna recomendación médica. Una conexión mediante MedScoutX solo es posible con consultas de MedScoutX.",
+    findPracticesP3:
+      "En la prueba alfa puede comprobar: ¿devuelve la búsqueda resultados comprensibles, y son claros los estados vacíos y de error?",
+
+    directoryButton: "Más información sobre « Buscar consultas de MedScoutX »",
+    directoryTitle: "Buscar consultas de MedScoutX",
+    directoryP1:
+      "Aquí encuentra consultas que usan MedScoutX y puede — cuando esté previsto — conectarse con ellas.",
+    directoryP2:
+      "Una conexión solo se crea mediante su acción deliberada, por ejemplo mediante un código de conexión de tiempo limitado que usted genera. No hay ninguna compartición total automática ni recomendación médica.",
+    directoryP3:
+      "En la prueba alfa puede comprobar: ¿se encuentran consultas de MedScoutX, y es comprensible el camino hacia la conexión?",
+
+    myPracticeButton: "Más información sobre « Mi consulta »",
+    myPracticeTitle: "Mi consulta",
+    myPracticeP1:
+      "En « Mi consulta » se reúnen todas las funciones relacionadas con sus consultas de MedScoutX vinculadas — por ejemplo bandeja de entrada, mensajes, citas, documentos de la consulta y permisos.",
+    myPracticeP2:
+      "El contenido solo aparece con una conexión activa a una consulta de MedScoutX que usted haya establecido deliberadamente; mantiene el control mediante los permisos. MedScoutX no realiza ninguna evaluación médica, diagnóstico ni clasificación de urgencia.",
+    myPracticeP3:
+      "En la prueba alfa puede comprobar: ¿abre la tarjeta el área de la consulta, son accesibles las distintas funciones, y permanece vacío el contenido sin una conexión activa?",
+  },
   footer: {
     imprint: "Aviso legal",
     privacy: "Privacidad",

@@ -2,6 +2,126 @@
  * Italian — patient workspace modules (inbox, hub nav, Meda, exports, …).
  */
 export default {
+  patientCardInfo: {
+    close: "Chiudi",
+
+    inboxButton: "Maggiori informazioni sulla posta in arrivo",
+    inboxTitle: "Posta in arrivo",
+    inboxP1:
+      "Nella posta in arrivo si raccolgono indicazioni organizzative da MedScoutX e dai tuoi studi collegati — neutre e senza dettagli medici.",
+    inboxP2:
+      "Le voci compaiono solo con un collegamento attivo a uno studio MedScoutX. MedScoutX non invia notifiche push a questo scopo; vedi le nuove indicazioni aprendo MedScoutX. Non viene effettuata alcuna valutazione medica.",
+    inboxP3:
+      "Nel test alpha puoi verificare: le nuove indicazioni compaiono in modo comprensibile, possono essere contrassegnate come lette, e i dettagli medici restano esclusi?",
+
+    messagesButton: "Maggiori informazioni sui messaggi",
+    messagesTitle: "Messaggi",
+    messagesP1:
+      "Qui conduci la comunicazione scritta e sicura con uno studio MedScoutX collegato — organizzativa e senza valutazione medica.",
+    messagesP2:
+      "I messaggi sono possibili solo con uno studio MedScoutX collegato. Non è un canale per emergenze né una valutazione dell’urgenza. In caso di sintomi acuti, contatta i servizi di emergenza o il 112.",
+    messagesP3:
+      "Nel test alpha puoi verificare: è possibile aprire e rispondere a una conversazione, e compare solo con un collegamento attivo allo studio?",
+
+    appointmentsButton: "Maggiori informazioni su « I miei appuntamenti »",
+    appointmentsTitle: "I miei appuntamenti",
+    appointmentsP1:
+      "Qui vedi le richieste di appuntamento, gli appuntamenti confermati e le informazioni organizzative sugli appuntamenti, per quanto presenti nel sistema.",
+    appointmentsP2:
+      "Gli appuntamenti vengono concordati con il tuo studio collegato; invii le richieste di appuntamento con consenso esplicito. Non c’è triage né valutazione dell’urgenza.",
+    appointmentsP3:
+      "Nel test alpha puoi verificare: una richiesta di appuntamento inviata compare, e lo stato e l’orario sono tracciabili?",
+
+    telemedicineButton: "Maggiori informazioni sulle videoconsulenze",
+    telemedicineTitle: "Videoconsulenze",
+    telemedicineP1:
+      "Qui le videoconsulenze con il tuo studio sono supportate a livello organizzativo — ad esempio l’accesso alla sala d’attesa e l’avvio della sessione.",
+    telemedicineP2:
+      "Accedi solo dopo un consenso esplicito; la fotocamera e il microfono vengono usati solo per la sessione in corso e le conversazioni non vengono registrate. MedScoutX non formula alcuna diagnosi.",
+    telemedicineP3:
+      "Nel test alpha puoi verificare: è possibile aprire la sala d’attesa, il consenso è chiaro, e funzionano le autorizzazioni fotocamera/microfono del browser?",
+
+    documentsButton: "Maggiori informazioni sui documenti dello studio",
+    documentsTitle: "Documenti dello studio",
+    documentsP1:
+      "Qui compaiono i documenti e i referti che il tuo studio ha condiviso per te.",
+    documentsP2:
+      "I documenti non vengono pubblicati automaticamente — sono visibili solo dopo una condivisione esplicita da parte dello studio e con un collegamento attivo, talvolta tramite link sicuri e a tempo limitato. MedScoutX non valuta i contenuti dal punto di vista medico.",
+    documentsP3:
+      "Nel test alpha puoi verificare: un documento condiviso compare, e ciò che non è condiviso resta nascosto?",
+
+    erezeptButton: "Maggiori informazioni su « Ricette e prescrizioni »",
+    erezeptTitle: "Ricette e prescrizioni",
+    erezeptP1:
+      "Qui vedi ricette e prescrizioni in modo chiaro, se il tuo studio le mette a disposizione.",
+    erezeptP2:
+      "Si tratta di una rappresentazione simulata — non una prova ufficiale TI / e-ricetta e non un sostituto dell’infrastruttura telematica. La ricetta ufficiale del tuo studio o della farmacia resta sempre vincolante.",
+    erezeptP3:
+      "Nel test alpha puoi verificare: le ricette messe a disposizione vengono mostrate in modo chiaro, e il carattere simulato è chiaramente riconoscibile?",
+
+    medicationsButton: "Maggiori informazioni su « Farmaci e assunzione »",
+    medicationsTitle: "Farmaci e assunzione",
+    medicationsP1:
+      "Qui puoi registrare i tuoi farmaci e le informazioni sull’assunzione e strutturarli per una visita medica, per quanto previsto dal sistema.",
+    medicationsP2:
+      "Queste informazioni sono i tuoi appunti e vengono condivise solo tramite il flusso appropriato. MedScoutX non fornisce alcuna raccomandazione di dosaggio, non verifica interazioni e non formula alcuna raccomandazione terapeutica.",
+    medicationsP3:
+      "Nel test alpha puoi verificare: le voci possono essere registrate e modificate, e restano private senza una condivisione attiva?",
+
+    dataControlButton: "Maggiori informazioni su « I miei dati e permessi »",
+    dataControlTitle: "I miei dati e permessi",
+    dataControlP1:
+      "Qui mantieni il controllo sulle tue autorizzazioni ai dati e sulle richieste di dati verso gli studi collegati.",
+    dataControlP2:
+      "Non c’è alcuna condivisione totale automatica — decidi tu sulle singole autorizzazioni e puoi inviare richieste di esportazione, limitazione o cancellazione, per quanto previsto dal sistema. Gli studi vedono solo ciò che hai condiviso.",
+    dataControlP3:
+      "Nel test alpha puoi verificare: le autorizzazioni possono essere consultate e modificate, e si può inviare una richiesta di dati il cui stato è tracciabile?",
+
+    activityButton: "Maggiori informazioni su « La mia attività »",
+    activityTitle: "La mia attività",
+    activityP1:
+      "Qui puoi tracciare le tue azioni importanti e gli eventi di stato.",
+    activityP2:
+      "Vengono mostrate informazioni di cronologia tracciabili senza dettagli sensibili superflui. MedScoutX non effettua alcuna valutazione medica.",
+    activityP3:
+      "Nel test alpha puoi verificare: gli eventi vengono presentati in modo comprensibile, e i contenuti sensibili restano esclusi?",
+
+    casesButton: "Maggiori informazioni su « I miei casi »",
+    casesTitle: "I miei casi (preparazione)",
+    casesP1:
+      "Qui prepari le visite mediche e strutturi le tue informazioni — ad esempio sintomi e domande.",
+    casesP2:
+      "La preparazione appartiene a te e viene condivisa solo tramite il flusso appropriato o con una condivisione esplicita. MedScoutX supporta la struttura e non formula alcuna diagnosi, alcun triage né decisione specialistica.",
+    casesP3:
+      "Nel test alpha puoi verificare: una preparazione può essere creata e strutturata, e resta privata senza condivisione?",
+
+    findPracticesButton: "Maggiori informazioni su « Trovare studi »",
+    findPracticesTitle: "Trovare studi",
+    findPracticesP1:
+      "Qui puoi cercare studi per trovare un punto di riferimento adatto.",
+    findPracticesP2:
+      "La ricerca serve all’orientamento. Non c’è alcuna garanzia di disponibilità e non viene fornita alcuna raccomandazione medica. Un collegamento tramite MedScoutX è possibile solo con studi MedScoutX.",
+    findPracticesP3:
+      "Nel test alpha puoi verificare: la ricerca restituisce risultati comprensibili, e gli stati vuoti e di errore sono chiari?",
+
+    directoryButton: "Maggiori informazioni su « Trovare studi MedScoutX »",
+    directoryTitle: "Trovare studi MedScoutX",
+    directoryP1:
+      "Qui trovi gli studi che usano MedScoutX e puoi — ove previsto — collegarti con loro.",
+    directoryP2:
+      "Un collegamento si crea solo tramite una tua azione consapevole, ad esempio tramite un codice di collegamento a tempo limitato che generi tu. Non c’è alcuna condivisione totale automatica né raccomandazione medica.",
+    directoryP3:
+      "Nel test alpha puoi verificare: gli studi MedScoutX vengono trovati, e il percorso per il collegamento è comprensibile?",
+
+    myPracticeButton: "Maggiori informazioni su « Il mio studio »",
+    myPracticeTitle: "Il mio studio",
+    myPracticeP1:
+      "In « Il mio studio » sono raccolte tutte le funzioni relative ai tuoi studi MedScoutX collegati — ad esempio posta in arrivo, messaggi, appuntamenti, documenti dello studio e autorizzazioni.",
+    myPracticeP2:
+      "I contenuti compaiono solo con un collegamento attivo a uno studio MedScoutX che hai stabilito consapevolmente; mantieni il controllo tramite le autorizzazioni. MedScoutX non effettua alcuna valutazione medica, diagnosi o classificazione di urgenza.",
+    myPracticeP3:
+      "Nel test alpha puoi verificare: la scheda apre l’area dello studio, le singole funzioni sono raggiungibili, e i contenuti restano vuoti senza un collegamento attivo?",
+  },
   footer: {
     imprint: "Note legali",
     privacy: "Privacy",

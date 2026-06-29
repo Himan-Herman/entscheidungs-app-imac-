@@ -2,6 +2,126 @@
  * French — patient workspace modules (inbox, hub nav, Meda, exports, …).
  */
 export default {
+  patientCardInfo: {
+    close: "Fermer",
+
+    inboxButton: "Plus d’informations sur la boîte de réception",
+    inboxTitle: "Boîte de réception",
+    inboxP1:
+      "La boîte de réception rassemble des informations organisationnelles de MedScoutX et de vos cabinets liés — neutres et sans détails médicaux.",
+    inboxP2:
+      "Les entrées n’apparaissent qu’avec une connexion active à un cabinet MedScoutX. MedScoutX n’envoie pas de notifications push à cet effet ; vous voyez les nouvelles informations en ouvrant MedScoutX. Aucune évaluation médicale n’a lieu.",
+    inboxP3:
+      "Lors du test alpha, vous pouvez vérifier : les nouvelles informations apparaissent-elles clairement, peuvent-elles être marquées comme lues, et les détails médicaux restent-ils exclus ?",
+
+    messagesButton: "Plus d’informations sur les messages",
+    messagesTitle: "Messages",
+    messagesP1:
+      "Vous menez ici une communication écrite et sécurisée avec un cabinet MedScoutX lié — organisationnelle et sans évaluation médicale.",
+    messagesP2:
+      "Les messages ne sont possibles qu’avec un cabinet MedScoutX lié. Ce n’est pas un canal d’urgence ni une évaluation de l’urgence. En cas de symptômes aigus, contactez les services d’urgence ou le 112.",
+    messagesP3:
+      "Lors du test alpha, vous pouvez vérifier : peut-on ouvrir et répondre à une conversation, et n’apparaît-elle qu’avec une connexion active au cabinet ?",
+
+    appointmentsButton: "Plus d’informations sur « Mes rendez-vous »",
+    appointmentsTitle: "Mes rendez-vous",
+    appointmentsP1:
+      "Vous voyez ici les demandes de rendez-vous, les rendez-vous confirmés et les informations organisationnelles de rendez-vous, dans la mesure où elles existent dans le système.",
+    appointmentsP2:
+      "Les rendez-vous sont organisés avec votre cabinet lié ; vous soumettez des demandes de rendez-vous avec un consentement explicite. Il n’y a ni triage ni évaluation de l’urgence.",
+    appointmentsP3:
+      "Lors du test alpha, vous pouvez vérifier : une demande de rendez-vous soumise apparaît-elle, et le statut et l’heure sont-ils traçables ?",
+
+    telemedicineButton: "Plus d’informations sur les téléconsultations",
+    telemedicineTitle: "Téléconsultations",
+    telemedicineP1:
+      "Les téléconsultations avec votre cabinet sont prises en charge ici sur le plan organisationnel — par exemple rejoindre la salle d’attente et démarrer la séance.",
+    telemedicineP2:
+      "Vous ne rejoignez qu’après un consentement explicite ; la caméra et le microphone ne sont utilisés que pour la séance en cours, et les conversations ne sont pas enregistrées. MedScoutX ne pose aucun diagnostic.",
+    telemedicineP3:
+      "Lors du test alpha, vous pouvez vérifier : la salle d’attente peut-elle être ouverte, le consentement est-il clair, et les autorisations caméra/microphone du navigateur fonctionnent-elles ?",
+
+    documentsButton: "Plus d’informations sur les documents du cabinet",
+    documentsTitle: "Documents du cabinet",
+    documentsP1:
+      "Les documents et résultats que votre cabinet a partagés pour vous apparaissent ici.",
+    documentsP2:
+      "Les documents ne sont pas publiés automatiquement — ils ne sont visibles qu’après un partage explicite par le cabinet et avec une connexion active, parfois via des liens sécurisés et limités dans le temps. MedScoutX n’évalue pas médicalement le contenu.",
+    documentsP3:
+      "Lors du test alpha, vous pouvez vérifier : un document partagé apparaît-il, et ce qui n’est pas partagé reste-t-il masqué ?",
+
+    erezeptButton: "Plus d’informations sur « Ordonnances et prescriptions »",
+    erezeptTitle: "Ordonnances et prescriptions",
+    erezeptP1:
+      "Vous voyez ici les ordonnances et prescriptions de manière claire, si votre cabinet les met à disposition.",
+    erezeptP2:
+      "Il s’agit d’une représentation simulée — pas une preuve officielle TI / e-ordonnance et pas un remplacement de l’infrastructure télématique. L’ordonnance officielle de votre cabinet ou pharmacie reste toujours contraignante.",
+    erezeptP3:
+      "Lors du test alpha, vous pouvez vérifier : les ordonnances fournies sont-elles affichées clairement, et le caractère simulé est-il clairement reconnaissable ?",
+
+    medicationsButton: "Plus d’informations sur « Médicaments et prise »",
+    medicationsTitle: "Médicaments et prise",
+    medicationsP1:
+      "Vous pouvez ici enregistrer vos propres médicaments et informations de prise et les structurer pour une consultation, dans la mesure où le système le permet.",
+    medicationsP2:
+      "Ces informations sont vos propres notes et ne sont partagées que via le flux approprié. MedScoutX ne donne aucune recommandation de dosage, ne vérifie aucune interaction et ne formule aucune recommandation thérapeutique.",
+    medicationsP3:
+      "Lors du test alpha, vous pouvez vérifier : les entrées peuvent-elles être saisies et modifiées, et restent-elles privées sans partage actif ?",
+
+    dataControlButton: "Plus d’informations sur « Mes données et partages »",
+    dataControlTitle: "Mes données et partages",
+    dataControlP1:
+      "Vous gardez ici le contrôle de vos partages de données et de vos demandes de données vis-à-vis des cabinets liés.",
+    dataControlP2:
+      "Il n’y a pas de partage total automatique — vous décidez des partages individuels et pouvez soumettre des demandes d’export, de limitation ou de suppression, dans la mesure prévue par le système. Les cabinets ne voient que ce que vous avez partagé.",
+    dataControlP3:
+      "Lors du test alpha, vous pouvez vérifier : les partages peuvent-ils être consultés et ajustés, et une demande de données peut-elle être soumise avec un statut traçable ?",
+
+    activityButton: "Plus d’informations sur « Mon activité »",
+    activityTitle: "Mon activité",
+    activityP1:
+      "Vous pouvez ici suivre vos propres actions importantes et événements de statut.",
+    activityP2:
+      "Des informations d’historique traçables sont affichées sans détails sensibles inutiles. MedScoutX n’effectue aucune évaluation médicale.",
+    activityP3:
+      "Lors du test alpha, vous pouvez vérifier : les événements sont-ils présentés de manière compréhensible, et les contenus sensibles restent-ils exclus ?",
+
+    casesButton: "Plus d’informations sur « Mes cas »",
+    casesTitle: "Mes cas (préparation)",
+    casesP1:
+      "Vous préparez ici vos consultations et structurez vos propres informations — par exemple symptômes et questions.",
+    casesP2:
+      "La préparation vous appartient et n’est partagée que via le flux approprié ou avec un partage explicite. MedScoutX soutient la structure et ne pose aucun diagnostic, aucun triage et aucune décision spécialisée.",
+    casesP3:
+      "Lors du test alpha, vous pouvez vérifier : une préparation peut-elle être créée et structurée, et reste-t-elle privée sans partage ?",
+
+    findPracticesButton: "Plus d’informations sur « Trouver des cabinets »",
+    findPracticesTitle: "Trouver des cabinets",
+    findPracticesP1:
+      "Vous pouvez ici rechercher des cabinets pour trouver un point de contact adapté.",
+    findPracticesP2:
+      "La recherche sert à l’orientation. Il n’y a aucune garantie de disponibilité et aucune recommandation médicale n’est faite. Une connexion via MedScoutX n’est possible qu’avec des cabinets MedScoutX.",
+    findPracticesP3:
+      "Lors du test alpha, vous pouvez vérifier : la recherche renvoie-t-elle des résultats compréhensibles, et les états vides et d’erreur sont-ils clairs ?",
+
+    directoryButton: "Plus d’informations sur « Trouver des cabinets MedScoutX »",
+    directoryTitle: "Trouver des cabinets MedScoutX",
+    directoryP1:
+      "Vous trouvez ici les cabinets qui utilisent MedScoutX et pouvez — lorsque c’est prévu — vous connecter avec eux.",
+    directoryP2:
+      "Une connexion ne se crée que par votre action délibérée, par exemple via un code de connexion limité dans le temps que vous générez. Il n’y a pas de partage total automatique ni de recommandation médicale.",
+    directoryP3:
+      "Lors du test alpha, vous pouvez vérifier : des cabinets MedScoutX sont-ils trouvés, et le chemin vers la connexion est-il compréhensible ?",
+
+    myPracticeButton: "Plus d’informations sur « Mon cabinet »",
+    myPracticeTitle: "Mon cabinet",
+    myPracticeP1:
+      "Sous « Mon cabinet » sont regroupées toutes les fonctions liées à vos cabinets MedScoutX connectés — par exemple boîte de réception, messages, rendez-vous, documents du cabinet et partages.",
+    myPracticeP2:
+      "Le contenu n’apparaît qu’avec une connexion active à un cabinet MedScoutX que vous avez établie délibérément ; vous gardez le contrôle via les partages. MedScoutX n’effectue aucune évaluation médicale, diagnostic ni classification d’urgence.",
+    myPracticeP3:
+      "Lors du test alpha, vous pouvez vérifier : la tuile ouvre-t-elle l’espace cabinet, les différentes fonctions sont-elles accessibles, et le contenu reste-t-il vide sans connexion active ?",
+  },
   footer: {
     imprint: "Mentions légales",
     privacy: "Confidentialité",
