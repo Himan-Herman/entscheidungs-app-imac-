@@ -21,6 +21,7 @@ import {
 import { generateBillingPlausibilityReport } from "../services/billingPlausibility/billingPlausibilityReportService.js";
 import { requestAiReviewForSession } from "../services/billingPlausibility/billingPlausibilityAiReviewService.js";
 import { getActiveGoaeCatalogueVersion } from "../services/billingPlausibility/goaeCatalogueVersionService.js";
+import { runGoaePlausibilityCheck } from "../services/billingPlausibility/goaeRuleEngineService.js";
 import { getPracticeAccess } from "../utils/practiceAccess.js";
 import { hasPracticePermission, PERMISSIONS } from "../utils/practicePermissions.js";
 
@@ -92,6 +93,53 @@ router.get("/catalogue/active", async (req, res) => {
     return res.json({ ok: true, version });
   } catch (err) {
     console.error("[billing/catalogue/active]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
+});
+
+/**
+ * POST /rule-check — stateless deterministic GOÄ plausibility check (Billing-3).
+ * Access: owner / admin / practice_manager (SETTINGS_MANAGE). Feature-flag gated.
+ * STATELESS — nothing is stored. No patient data accepted; neutral hints only.
+ */
+router.post("/rule-check", async (req, res) => {
+  const uid = userId(req);
+  const practiceId = practiceIdFromQuery(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+
+  const body = req.body || {};
+  for (const field of FORBIDDEN_PATIENT_FIELDS) {
+    if (body[field] !== undefined && body[field] !== null && body[field] !== "") {
+      return res.status(400).json({ ok: false, error: "patient_data_not_accepted" });
+    }
+  }
+
+  const access = await getPracticeAccess(uid, practiceId);
+  if (!access) return res.status(404).json({ ok: false, error: "practice_not_found" });
+  if (!hasPracticePermission(access.role, PERMISSIONS.SETTINGS_MANAGE)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  const items = Array.isArray(body.items) ? body.items : null;
+  if (!items || items.length === 0) {
+    return res.status(400).json({ ok: false, error: "rows_required" });
+  }
+  if (items.length > 200) {
+    return res.status(400).json({ ok: false, error: "too_many_rows" });
+  }
+
+  try {
+    // Reduce to non-sensitive fields only — no note/free-text reaches the engine or response.
+    const safeItems = items.map((it) => ({
+      code: typeof it?.code === "string" ? it.code : it?.ziffer,
+      factor: it?.factor,
+      quantity: it?.quantity ?? it?.count,
+    }));
+    const result = await runGoaePlausibilityCheck(safeItems);
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("[billing/rule-check]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "server_error" });
   }
 });

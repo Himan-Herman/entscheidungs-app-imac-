@@ -112,6 +112,24 @@ export default {
   catalogueBaseNote: "Not a complete official GOÄ catalogue.",
   catalogueBaseNone: "No active GOÄ catalogue base configured yet.",
 
+  severityInfo: "Info",
+  severityWarning: "Notice",
+  severityReviewRequired: "Review required",
+  ruleCatalogueBaseMissing:
+    "No active GOÄ catalogue base configured – checks run against the bundled reference subset.",
+  ruleCatalogueBaseInitial:
+    "GOÄ catalogue base is initial/limited – hints for orientation only.",
+  ruleCodeMissing: "GOÄ code missing in this item.",
+  ruleCodeNotFound: "GOÄ code not found in the active catalogue.",
+  rulePointsMissing: "No point value stored for this code – please verify.",
+  ruleEntryNeedsReview: "Catalogue entry is flagged as needs-review.",
+  ruleEntryPointsUncertain: "Point value of this entry is not verified.",
+  ruleFactorInvalid: "Factor is not a valid number.",
+  ruleFactorBelowMin: "Factor is below the usual minimum (1.0).",
+  ruleFactorAboveMax: "Factor exceeds the maximum (§ 5 GOÄ) – please verify.",
+  ruleFactorAboveThreshold: "Factor above 2.3 usually requires justification (§ 5 GOÄ).",
+  ruleQuantityInvalid: "Quantity is empty, negative or invalid.",
+
   errors: {
     rows_required: "At least one GOÄ code is required.",
     ziffer_required: "Code missing in row {{rowIndex}}.",

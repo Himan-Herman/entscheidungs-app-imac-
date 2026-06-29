@@ -112,6 +112,25 @@ export default {
   catalogueBaseNote: "Kein vollständiger offizieller GOÄ-Katalog.",
   catalogueBaseNone: "Noch keine aktive GOÄ-Katalogbasis hinterlegt.",
 
+  severityInfo: "Info",
+  severityWarning: "Hinweis",
+  severityReviewRequired: "Prüfung erforderlich",
+  ruleCatalogueBaseMissing:
+    "Keine aktive GOÄ-Katalogbasis hinterlegt – Prüfung erfolgt gegen den gebündelten Referenz-Subset.",
+  ruleCatalogueBaseInitial:
+    "GOÄ-Katalogbasis ist initial/limitiert – Hinweise nur zur Orientierung.",
+  ruleCodeMissing: "GOÄ-Ziffer fehlt in dieser Position.",
+  ruleCodeNotFound: "GOÄ-Ziffer nicht im aktiven Katalog gefunden.",
+  rulePointsMissing: "Für diese Ziffer ist kein Punktwert hinterlegt – bitte prüfen.",
+  ruleEntryNeedsReview: "Katalogeintrag ist als prüfbedürftig markiert.",
+  ruleEntryPointsUncertain: "Punktwert dieses Eintrags ist nicht verifiziert.",
+  ruleFactorInvalid: "Faktor ist keine gültige Zahl.",
+  ruleFactorBelowMin: "Faktor liegt unter dem üblichen Mindestwert (1,0).",
+  ruleFactorAboveMax: "Faktor überschreitet den Höchstwert (§ 5 GOÄ) – bitte prüfen.",
+  ruleFactorAboveThreshold:
+    "Faktor über 2,3 erfordert in der Regel eine Begründung (§ 5 GOÄ).",
+  ruleQuantityInvalid: "Anzahl ist leer, negativ oder ungültig.",
+
   errors: {
     rows_required: "Mindestens eine GOÄ-Ziffer ist erforderlich.",
     ziffer_required: "Ziffer fehlt in Zeile {{rowIndex}}.",
