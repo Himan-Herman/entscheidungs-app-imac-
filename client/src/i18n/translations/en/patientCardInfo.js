@@ -131,4 +131,13 @@ export default {
     "Self-recorded entries are your own notes; practice-provided plans appear only after the practice publishes them and only with an active connection. MedScoutX gives no dosing decision, checks no interactions and makes no treatment recommendation, diagnosis or urgency rating.",
   medicationPlansP3:
     "In the alpha test you can check: can your own medication be recorded and edited, do published practice plans and their details appear, and are loading, empty and error states understandable?",
+
+  healthProfileButton: "More information about the health profile",
+  healthProfileTitle: "Health profile",
+  healthProfileP1:
+    "In your health profile you manage important base data and health-related core details in one structured place. This supports better preparation and overview — for example ahead of an appointment.",
+  healthProfileP2:
+    "Only provide the details that are necessary. Visibility or sharing with a practice happens solely in line with an existing connection and your explicit consent. MedScoutX makes no diagnosis, no treatment recommendation and no urgency assessment.",
+  healthProfileP3:
+    "In the alpha test you can check: can the base details be recorded and edited, are loading, empty and error states understandable, and does content stay private without an active connection? Contents must be reviewed by you and/or your practice.",
 };

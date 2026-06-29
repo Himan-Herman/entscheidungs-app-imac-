@@ -20,6 +20,9 @@ import {
 } from "../services/billingPlausibility/billingPlausibilityService.js";
 import { generateBillingPlausibilityReport } from "../services/billingPlausibility/billingPlausibilityReportService.js";
 import { requestAiReviewForSession } from "../services/billingPlausibility/billingPlausibilityAiReviewService.js";
+import { getActiveGoaeCatalogueVersion } from "../services/billingPlausibility/goaeCatalogueVersionService.js";
+import { getPracticeAccess } from "../utils/practiceAccess.js";
+import { hasPracticePermission, PERMISSIONS } from "../utils/practicePermissions.js";
 
 const router = express.Router();
 
@@ -66,6 +69,32 @@ function mapServiceError(result) {
 }
 
 router.use(requireBillingFlag);
+
+/**
+ * GET /catalogue/active — active GOÄ catalogue version (reference metadata only).
+ * Access: owner / admin / practice_manager (SETTINGS_MANAGE). Feature-flag gated.
+ * Returns NO patient data and NO billing records — catalogue metadata + item count only.
+ */
+router.get("/catalogue/active", async (req, res) => {
+  const uid = userId(req);
+  const practiceId = practiceIdFromQuery(req);
+  if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+  if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
+
+  const access = await getPracticeAccess(uid, practiceId);
+  if (!access) return res.status(404).json({ ok: false, error: "practice_not_found" });
+  if (!hasPracticePermission(access.role, PERMISSIONS.SETTINGS_MANAGE)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  try {
+    const version = await getActiveGoaeCatalogueVersion();
+    return res.json({ ok: true, version });
+  } catch (err) {
+    console.error("[billing/catalogue/active]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
+});
 
 /** GET / — list sessions for a practice. */
 router.get("/", async (req, res) => {

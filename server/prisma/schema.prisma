@@ -2306,3 +2306,69 @@ model BillingPlausibilityAuditLog {
   @@index([sessionId, createdAt])
   @@index([actorUserId])
 }
+
+// ─── GOÄ Catalogue (Billing-2) ───────────────────────────────────────────────
+// Versioned GOÄ reference catalogue — technical data basis for a future rule
+// engine. Reference data only: NO patient data, NO billing records, NO clinical
+// free-text. `completeness` MUST stay honest (e.g. "initial-internal-subset") and
+// must never claim a complete/authoritative official GOÄ catalogue.
+
+/**
+ * One catalogue version groups a set of GOÄ code items with provenance + status.
+ * status: draft | active | archived
+ */
+model GoaeCatalogueVersion {
+  id           String    @id @default(cuid())
+  /// Code system — "GOAE" now; reserved for future systems (no EBM yet).
+  codeSystem   String    @default("GOAE") @db.VarChar(20)
+  /// Human-readable version label, e.g. "initial-internal-subset".
+  label        String    @db.VarChar(120)
+  /// draft | active | archived
+  status       String    @default("draft") @db.VarChar(20)
+  /// Honest completeness marker — never "complete-official".
+  completeness String    @db.VarChar(40)
+  /// Provenance (reference only).
+  source       String?   @db.VarChar(300)
+  sourceUrl    String?   @db.VarChar(300)
+  validFrom    DateTime?
+  validTo      DateTime?
+  notes        String?   @db.VarChar(600)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  items GoaeCatalogueItem[]
+
+  @@index([codeSystem, status])
+  @@index([status])
+}
+
+/**
+ * One GOÄ code entry within a catalogue version. Reference data only.
+ * `points` may be null when the official value is not yet verified.
+ */
+model GoaeCatalogueItem {
+  id                 String   @id @default(cuid())
+  versionId          String
+  /// GOÄ ziffer / code.
+  code               String   @db.VarChar(20)
+  title              String   @db.VarChar(300)
+  points             Int?
+  section            String?  @db.VarChar(20)
+  /// active | deprecated
+  activeStatus       String?  @db.VarChar(20)
+  /// verified | points-uncertain | needs-review
+  completenessStatus String?  @db.VarChar(30)
+  sourceName         String?  @db.VarChar(200)
+  sourceUrl          String?  @db.VarChar(300)
+  sourceReference    String?  @db.VarChar(200)
+  sourceVersionDate  String?  @db.VarChar(20)
+  /// Billing-rule annotation (no patient/clinical content).
+  notes              String?  @db.VarChar(800)
+  createdAt          DateTime @default(now())
+
+  version GoaeCatalogueVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, code])
+  @@index([versionId])
+  @@index([code])
+}

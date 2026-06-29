@@ -131,4 +131,13 @@ export default {
     "Selbst erfasste Einträge sind Ihre eigenen Notizen; praxisbereitgestellte Pläne erscheinen erst nach Veröffentlichung durch die Praxis und nur bei aktiver Verbindung. MedScoutX gibt keine Dosierungsentscheidung, prüft keine Wechselwirkungen und spricht keine Therapieempfehlung, Diagnose oder Dringlichkeitsbewertung aus.",
   medicationPlansP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich eigene Medikamente erfassen und bearbeiten, erscheinen veröffentlichte Praxis-Pläne samt Details, und sind Lade-, Leer- und Fehlerzustände verständlich?",
+
+  healthProfileButton: "Mehr Informationen zum Gesundheitsprofil",
+  healthProfileTitle: "Gesundheitsprofil",
+  healthProfileP1:
+    "Im Gesundheitsprofil verwalten Sie wichtige Stammdaten und gesundheitsbezogene Basisangaben strukturiert an einem Ort. Das dient der besseren Vorbereitung und Übersicht – zum Beispiel vor einem Termin.",
+  healthProfileP2:
+    "Machen Sie nur notwendige Angaben. Eine Sichtbarkeit oder Weitergabe an eine Praxis erfolgt ausschließlich entsprechend einer bestehenden Verbindung und Ihrer Freigabe. MedScoutX nimmt keine Diagnose, keine Therapieempfehlung und keine Dringlichkeitseinschätzung vor.",
+  healthProfileP3:
+    "Im Alpha-Test können Sie prüfen: Lassen sich die Basisangaben erfassen und bearbeiten, sind Lade-, Leer- und Fehlerzustände verständlich, und bleiben Inhalte ohne aktive Verbindung privat? Inhalte sind von Ihnen bzw. Ihrer Praxis zu prüfen.",
 };

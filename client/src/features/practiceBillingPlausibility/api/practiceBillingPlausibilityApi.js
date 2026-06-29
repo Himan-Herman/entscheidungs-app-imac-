@@ -10,6 +10,19 @@ export async function fetchBillingPlausibilitySessions(practiceId) {
   return { res, data };
 }
 
+/**
+ * Read the active GOÄ catalogue version (reference metadata only).
+ * Returns { version: null } when no active catalogue has been seeded yet.
+ * @param {string} practiceId
+ */
+export async function fetchActiveGoaeCatalogue(practiceId) {
+  const res = await authFetch(
+    `/api/practice/billing-plausibility/catalogue/active?${qs(practiceId)}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function createBillingPlausibilitySession(practiceId, payload) {
   const res = await authFetch(`/api/practice/billing-plausibility?${qs(practiceId)}`, {
     method: "POST",

@@ -7,6 +7,7 @@ import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import {
   createBillingPlausibilitySession,
   fetchBillingPlausibilitySessions,
+  fetchActiveGoaeCatalogue,
   requestBillingPlausibilityAiReview,
 } from "../api/practiceBillingPlausibilityApi.js";
 import "../styles/PracticeBillingPlausibilityPage.css";
@@ -58,6 +59,7 @@ export default function PracticeBillingPlausibilityPage() {
   const [aiReviewResult, setAiReviewResult] = useState(null);
   const [aiReviewError, setAiReviewError] = useState("");
   const [aiReviewAvailable, setAiReviewAvailable] = useState(false);
+  const [catalogueVersion, setCatalogueVersion] = useState(null);
 
   const loadPractices = useCallback(async () => {
     const res = await authFetch("/api/practices");
@@ -80,6 +82,13 @@ export default function PracticeBillingPlausibilityPage() {
     setSessions(Array.isArray(data.sessions) ? data.sessions : []);
     setAiReviewAvailable(data.capabilities?.aiReview === true);
     setFeatureDisabled(false);
+    // Active GOÄ catalogue base (reference metadata only). Non-fatal on failure.
+    try {
+      const cat = await fetchActiveGoaeCatalogue(pid);
+      setCatalogueVersion(cat.res.ok && cat.data?.ok ? cat.data.version : null);
+    } catch {
+      setCatalogueVersion(null);
+    }
   }, [t.forbidden]);
 
   useEffect(() => {
@@ -208,6 +217,11 @@ export default function PracticeBillingPlausibilityPage() {
         </p>
         <h1 id="bp-heading">{t.heading}</h1>
         <p className="billing-plausibility__intro">{t.intro}</p>
+        <p className="billing-plausibility__intro" data-testid="bp-catalogue-base">
+          {catalogueVersion
+            ? `${t.catalogueBaseLabel}: ${t.catalogueInitialName} · ${catalogueVersion.itemCount} ${t.catalogueItemsSuffix} — ${t.catalogueBaseNote}`
+            : t.catalogueBaseNone}
+        </p>
       </header>
 
       {/* Disclaimer — always first visible content after heading */}

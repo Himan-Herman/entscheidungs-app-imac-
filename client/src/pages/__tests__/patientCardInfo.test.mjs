@@ -14,7 +14,7 @@ import {
   suppressTileNavigation,
 } from "../patientCardInfo.js";
 
-test("exactly the 'Meine Praxis' tiles + entry tile + medication-plans dashboard tile expose an info button", () => {
+test("exactly the 'Meine Praxis' tiles + entry tile + medication-plans + health-profile tiles expose an info button", () => {
   assert.deepEqual(PATIENT_INFO_TILE_KEYS, [
     "hubLinkInbox",
     "hubLinkThreads",
@@ -30,13 +30,13 @@ test("exactly the 'Meine Praxis' tiles + entry tile + medication-plans dashboard
     "hubLinkMedScoutXDirectory",
     "hubLinkMyPractice",
     "hubLinkMedicationPlans",
+    "hubLinkHealthProfile",
   ]);
   for (const key of PATIENT_INFO_TILE_KEYS) {
     assert.equal(hasPatientCardInfo(key), true, `${key} has info`);
   }
   // Tiles from other hub groups / main overview must NOT get an info button.
   for (const other of [
-    "hubLinkHealthProfile",
     "hubLinkVitals",
     "hubLinkPreVisit",
     "hubLinkSymptom",

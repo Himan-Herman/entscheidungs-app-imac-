@@ -90,6 +90,12 @@ export const PATIENT_CARD_INFO = {
     titleKey: "medicationPlansTitle",
     paragraphKeys: ["medicationPlansP1", "medicationPlansP2", "medicationPlansP3"],
   },
+  hubLinkHealthProfile: {
+    titleId: "patient-card-info-health-profile-title",
+    buttonKey: "healthProfileButton",
+    titleKey: "healthProfileTitle",
+    paragraphKeys: ["healthProfileP1", "healthProfileP2", "healthProfileP3"],
+  },
 };
 
 /** Hub-link keys that expose an info (ⓘ) button + modal. */

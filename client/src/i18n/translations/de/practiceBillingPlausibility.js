@@ -106,6 +106,12 @@ export default {
   catalogueStatusUnknown: "Katalogstatus nicht angegeben",
   catalogueSourceReference: "Quellenangabe",
 
+  catalogueBaseLabel: "GOÄ-Katalogbasis",
+  catalogueInitialName: "initial / intern, limitiert",
+  catalogueItemsSuffix: "Ziffern",
+  catalogueBaseNote: "Kein vollständiger offizieller GOÄ-Katalog.",
+  catalogueBaseNone: "Noch keine aktive GOÄ-Katalogbasis hinterlegt.",
+
   errors: {
     rows_required: "Mindestens eine GOÄ-Ziffer ist erforderlich.",
     ziffer_required: "Ziffer fehlt in Zeile {{rowIndex}}.",

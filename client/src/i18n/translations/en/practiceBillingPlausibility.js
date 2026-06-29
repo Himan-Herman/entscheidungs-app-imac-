@@ -106,6 +106,12 @@ export default {
   catalogueStatusUnknown: "Catalogue status not specified",
   catalogueSourceReference: "Source reference",
 
+  catalogueBaseLabel: "GOÄ catalogue base",
+  catalogueInitialName: "initial / internal, limited",
+  catalogueItemsSuffix: "codes",
+  catalogueBaseNote: "Not a complete official GOÄ catalogue.",
+  catalogueBaseNone: "No active GOÄ catalogue base configured yet.",
+
   errors: {
     rows_required: "At least one GOÄ code is required.",
     ziffer_required: "Code missing in row {{rowIndex}}.",
