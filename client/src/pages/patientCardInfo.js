@@ -84,6 +84,12 @@ export const PATIENT_CARD_INFO = {
     titleKey: "myPracticeTitle",
     paragraphKeys: ["myPracticeP1", "myPracticeP2", "myPracticeP3"],
   },
+  hubLinkMedicationPlans: {
+    titleId: "patient-card-info-medication-plans-title",
+    buttonKey: "medicationPlansButton",
+    titleKey: "medicationPlansTitle",
+    paragraphKeys: ["medicationPlansP1", "medicationPlansP2", "medicationPlansP3"],
+  },
 };
 
 /** Hub-link keys that expose an info (ⓘ) button + modal. */

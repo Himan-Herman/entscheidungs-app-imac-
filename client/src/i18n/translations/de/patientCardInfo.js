@@ -122,4 +122,13 @@ export default {
     "Inhalte erscheinen nur bei einer aktiven, von Ihnen bewusst hergestellten Verbindung zu einer MedScoutX-Praxis; über Freigaben behalten Sie die Kontrolle. MedScoutX nimmt keine medizinische Bewertung, Diagnose oder Dringlichkeitseinstufung vor.",
   myPracticeP3:
     "Im Alpha-Test können Sie prüfen: Öffnet die Kachel den Praxisbereich, sind die einzelnen Funktionen erreichbar, und bleiben Inhalte ohne aktive Verbindung leer?",
+
+  medicationPlansButton: "Mehr Informationen zu Medikationsplänen",
+  medicationPlansTitle: "Medikationspläne",
+  medicationPlansP1:
+    "Diese Übersicht bündelt zwei getrennte Bereiche: Ihre selbst erfasste Medikation und die von verknüpften MedScoutX-Praxen veröffentlichten Medikationspläne. Sie dient der Übersicht und Dokumentation.",
+  medicationPlansP2:
+    "Selbst erfasste Einträge sind Ihre eigenen Notizen; praxisbereitgestellte Pläne erscheinen erst nach Veröffentlichung durch die Praxis und nur bei aktiver Verbindung. MedScoutX gibt keine Dosierungsentscheidung, prüft keine Wechselwirkungen und spricht keine Therapieempfehlung, Diagnose oder Dringlichkeitsbewertung aus.",
+  medicationPlansP3:
+    "Im Alpha-Test können Sie prüfen: Lassen sich eigene Medikamente erfassen und bearbeiten, erscheinen veröffentlichte Praxis-Pläne samt Details, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 };

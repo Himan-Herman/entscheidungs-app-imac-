@@ -121,6 +121,15 @@ export default {
       "Le contenu n’apparaît qu’avec une connexion active à un cabinet MedScoutX que vous avez établie délibérément ; vous gardez le contrôle via les partages. MedScoutX n’effectue aucune évaluation médicale, diagnostic ni classification d’urgence.",
     myPracticeP3:
       "Lors du test alpha, vous pouvez vérifier : la tuile ouvre-t-elle l’espace cabinet, les différentes fonctions sont-elles accessibles, et le contenu reste-t-il vide sans connexion active ?",
+
+    medicationPlansButton: "Plus d’informations sur les plans de médication",
+    medicationPlansTitle: "Plans de médication",
+    medicationPlansP1:
+      "Cet aperçu regroupe deux zones distinctes : votre propre médication saisie et les plans de médication publiés par les cabinets MedScoutX connectés. Il sert à la vue d’ensemble et à la documentation.",
+    medicationPlansP2:
+      "Les entrées que vous saisissez sont vos propres notes ; les plans fournis par le cabinet n’apparaissent qu’après leur publication par le cabinet et uniquement avec une connexion active. MedScoutX ne donne aucune décision de posologie, ne vérifie aucune interaction et ne formule aucune recommandation thérapeutique, diagnostic ni évaluation de l’urgence.",
+    medicationPlansP3:
+      "Lors du test alpha, vous pouvez vérifier : votre propre médication peut-elle être saisie et modifiée, les plans publiés par le cabinet et leurs détails apparaissent-ils, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
   },
   footer: {
     imprint: "Mentions légales",

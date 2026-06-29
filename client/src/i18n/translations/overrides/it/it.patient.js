@@ -121,6 +121,15 @@ export default {
       "I contenuti compaiono solo con un collegamento attivo a uno studio MedScoutX che hai stabilito consapevolmente; mantieni il controllo tramite le autorizzazioni. MedScoutX non effettua alcuna valutazione medica, diagnosi o classificazione di urgenza.",
     myPracticeP3:
       "Nel test alpha puoi verificare: la scheda apre l’area dello studio, le singole funzioni sono raggiungibili, e i contenuti restano vuoti senza un collegamento attivo?",
+
+    medicationPlansButton: "Maggiori informazioni sui piani terapeutici",
+    medicationPlansTitle: "Piani terapeutici",
+    medicationPlansP1:
+      "Questa panoramica raccoglie due aree distinte: la tua medicazione registrata personalmente e i piani terapeutici pubblicati dagli studi MedScoutX collegati. Serve alla panoramica e alla documentazione.",
+    medicationPlansP2:
+      "Le voci che registri tu sono i tuoi appunti; i piani forniti dallo studio compaiono solo dopo la pubblicazione da parte dello studio e solo con un collegamento attivo. MedScoutX non fornisce alcuna decisione di dosaggio, non verifica interazioni e non formula alcuna raccomandazione terapeutica, diagnosi o valutazione dell’urgenza.",
+    medicationPlansP3:
+      "Nel test alpha puoi verificare: la tua medicazione può essere registrata e modificata, i piani pubblicati dallo studio e i loro dettagli compaiono, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
   },
   footer: {
     imprint: "Note legali",

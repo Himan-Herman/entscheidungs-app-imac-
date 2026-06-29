@@ -122,4 +122,13 @@ export default {
     "Content appears only with an active connection to a MedScoutX practice that you deliberately established; you keep control via permissions. MedScoutX makes no medical assessment, diagnosis or urgency rating.",
   myPracticeP3:
     "In the alpha test you can check: does the tile open the practice area, are the individual functions reachable, and does content stay empty without an active connection?",
+
+  medicationPlansButton: "More information about medication plans",
+  medicationPlansTitle: "Medication plans",
+  medicationPlansP1:
+    "This overview gathers two separate areas: your own recorded medication and the medication plans published by linked MedScoutX practices. It serves overview and documentation.",
+  medicationPlansP2:
+    "Self-recorded entries are your own notes; practice-provided plans appear only after the practice publishes them and only with an active connection. MedScoutX gives no dosing decision, checks no interactions and makes no treatment recommendation, diagnosis or urgency rating.",
+  medicationPlansP3:
+    "In the alpha test you can check: can your own medication be recorded and edited, do published practice plans and their details appear, and are loading, empty and error states understandable?",
 };

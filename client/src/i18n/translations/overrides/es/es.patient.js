@@ -121,6 +121,15 @@ export default {
       "El contenido solo aparece con una conexión activa a una consulta de MedScoutX que usted haya establecido deliberadamente; mantiene el control mediante los permisos. MedScoutX no realiza ninguna evaluación médica, diagnóstico ni clasificación de urgencia.",
     myPracticeP3:
       "En la prueba alfa puede comprobar: ¿abre la tarjeta el área de la consulta, son accesibles las distintas funciones, y permanece vacío el contenido sin una conexión activa?",
+
+    medicationPlansButton: "Más información sobre los planes de medicación",
+    medicationPlansTitle: "Planes de medicación",
+    medicationPlansP1:
+      "Esta vista general reúne dos áreas distintas: su propia medicación registrada y los planes de medicación publicados por las consultas de MedScoutX vinculadas. Sirve de vista general y documentación.",
+    medicationPlansP2:
+      "Las entradas que registra usted son sus propias notas; los planes facilitados por la consulta solo aparecen tras su publicación por parte de la consulta y solo con una conexión activa. MedScoutX no ofrece ninguna decisión de dosificación, no comprueba interacciones y no formula ninguna recomendación terapéutica, diagnóstico ni evaluación de la urgencia.",
+    medicationPlansP3:
+      "En la prueba alfa puede comprobar: ¿se puede registrar y editar su propia medicación, aparecen los planes publicados por la consulta y sus detalles, y son comprensibles los estados de carga, vacíos y de error?",
   },
   footer: {
     imprint: "Aviso legal",
