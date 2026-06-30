@@ -15,6 +15,10 @@ import introVideo from "../assets/media/medscoutx-intro.mp4";
 import introPoster from "../assets/media/medscoutx-intro-poster.jpg";
 import introVideo2 from "../assets/media/medscoutx-intro2.mp4";
 import introPoster2 from "../assets/media/medscoutx-intro2-poster.jpg";
+import introVideo3 from "../assets/media/medscoutx-intro3.mp4";
+import introPoster3 from "../assets/media/medscoutx-intro3-poster.jpg";
+import introVideo4 from "../assets/media/medscoutx-intro4.mp4";
+import introPoster4 from "../assets/media/medscoutx-intro4-poster.jpg";
 import {
   USER_MODES,
   writeUserMode,
@@ -159,6 +163,8 @@ export default function RoleEntryPage() {
           <RoleEntryShowcase
             copy={t.video}
             videos={[
+              { src: introVideo4, poster: introPoster4 },
+              { src: introVideo3, poster: introPoster3 },
               { src: introVideo, poster: introPoster },
               { src: introVideo2, poster: introPoster2 },
             ]}
