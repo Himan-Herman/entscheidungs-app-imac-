@@ -298,4 +298,97 @@ const esComposed = deepMerge(
   ),
 );
 
-export default deepMerge(esComposed, esTelemedicine);
+/** Public Messe/DemoDay showcase — sample data only, no API. */
+const esPublicDemo = {
+  publicDemo: {
+    pageTitle: "MedScoutX — Demo",
+    badge: "Demo · datos de ejemplo",
+    entryButton: "Ver la demo",
+    heading: "MedScoutX de un vistazo",
+    sub: "Explore una demo segura con datos de ejemplo, sin iniciar sesión. Todo el contenido es ficticio y solo sirve de ilustración.",
+    bannerTitle: "Esto es una demo con datos de ejemplo.",
+    bannerBody:
+      "No se muestran datos reales de pacientes ni de consultas. Para usar la aplicación real con sus datos, inicie sesión con normalidad.",
+    backToSite: "Volver al inicio",
+    loginCta: "Ir al inicio de sesión",
+    sectionPatient: "Para pacientes",
+    sectionPatientSub: "Lo que los asegurados pueden ver y gestionar en MedScoutX.",
+    sectionPractice: "Para consultas",
+    sectionPracticeSub: "Cómo trabajan los equipos con MedScoutX.",
+    openLabel: "Ver ejemplo",
+    modalClose: "Cerrar",
+    sampleNote: "Datos de ejemplo — solo a modo de ilustración.",
+    badges: {
+      ok: "Al día",
+      pending: "Pendiente",
+      info: "Info",
+      done: "Hecho",
+      scheduled: "Programado",
+      review: "Revisar",
+    },
+    tiles: {
+      appointments: {
+        label: "Citas",
+        sub: "Próximas citas",
+        detail: "Citas próximas y solicitadas, reunidas en un solo lugar.",
+      },
+      messages: {
+        label: "Mensajes",
+        sub: "Intercambio seguro con la consulta",
+        detail: "Mensajes entre el paciente y la consulta cuando existe un vínculo.",
+      },
+      medication: {
+        label: "Plan de medicación",
+        sub: "Medicación actual",
+        detail: "El plan de medicación actual con dosis e indicaciones de toma.",
+      },
+      documents: {
+        label: "Informes y documentos",
+        sub: "Documentos guardados de forma segura",
+        detail: "Informes compartidos por la consulta y documentos personales.",
+      },
+      vitals: {
+        label: "Constantes vitales",
+        sub: "Tensión, pulso y más",
+        detail: "Constantes vitales registradas por usted, a lo largo del tiempo.",
+      },
+      vaccinations: {
+        label: "Cartilla de vacunación",
+        sub: "Vacunas y refuerzos",
+        detail: "Resumen digital de vacunas y refuerzos pendientes.",
+      },
+      patients: {
+        label: "Pacientes",
+        sub: "Personas vinculadas",
+        detail: "Personas vinculadas a la consulta, solo con consentimiento activo.",
+      },
+      booking: {
+        label: "Citas y solicitudes",
+        sub: "Gestionar solicitudes",
+        detail: "Aceptar, planificar y confirmar las solicitudes de cita.",
+      },
+      anamnesis: {
+        label: "Anamnesis",
+        sub: "Plantillas y respuestas",
+        detail: "Crear plantillas de anamnesis y revisar las respuestas recibidas.",
+      },
+      billing: {
+        label: "Comprobación GOÄ / PKV",
+        sub: "Comprobar plausibilidad",
+        detail: "Comprobación determinista de las partidas de facturación — sin compromiso.",
+      },
+      telemedicine: {
+        label: "Videoconsulta",
+        sub: "Citas por vídeo",
+        detail: "Planificar y realizar videoconsultas.",
+      },
+      activity: {
+        label: "Actividad",
+        sub: "Eventos recientes",
+        detail: "Resumen trazable de la actividad reciente del equipo.",
+      },
+    },
+  },
+};
+
+export default deepMerge(deepMerge(esComposed, esTelemedicine), esPublicDemo);

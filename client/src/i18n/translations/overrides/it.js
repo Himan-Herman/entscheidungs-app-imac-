@@ -299,4 +299,97 @@ const itComposed = deepMerge(
   ),
 );
 
-export default deepMerge(itComposed, itTelemedicine);
+/** Public Messe/DemoDay showcase — sample data only, no API. */
+const itPublicDemo = {
+  publicDemo: {
+    pageTitle: "MedScoutX — Demo",
+    badge: "Demo · dati di esempio",
+    entryButton: "Guarda la demo",
+    heading: "MedScoutX in sintesi",
+    sub: "Esplora una demo sicura con dati di esempio, senza accedere. Tutti i contenuti sono fittizi e servono solo a scopo illustrativo.",
+    bannerTitle: "Questa è una demo con dati di esempio.",
+    bannerBody:
+      "Non vengono mostrati dati reali di pazienti o studi. Per usare l’app reale con i tuoi dati, accedi normalmente.",
+    backToSite: "Torna alla home",
+    loginCta: "Vai all’accesso",
+    sectionPatient: "Per i pazienti",
+    sectionPatientSub: "Cosa possono vedere e gestire gli assistiti in MedScoutX.",
+    sectionPractice: "Per gli studi",
+    sectionPracticeSub: "Come lavorano i team con MedScoutX.",
+    openLabel: "Vedi esempio",
+    modalClose: "Chiudi",
+    sampleNote: "Dati di esempio — solo a scopo illustrativo.",
+    badges: {
+      ok: "Aggiornato",
+      pending: "In sospeso",
+      info: "Info",
+      done: "Fatto",
+      scheduled: "Pianificato",
+      review: "Da verificare",
+    },
+    tiles: {
+      appointments: {
+        label: "Appuntamenti",
+        sub: "Prossimi appuntamenti",
+        detail: "Appuntamenti in arrivo e richiesti — riuniti in un unico posto.",
+      },
+      messages: {
+        label: "Messaggi",
+        sub: "Scambio sicuro con lo studio",
+        detail: "Messaggi tra paziente e studio quando esiste un collegamento.",
+      },
+      medication: {
+        label: "Piano terapeutico",
+        sub: "Farmaci attuali",
+        detail: "Il piano terapeutico attuale con dosaggio e indicazioni di assunzione.",
+      },
+      documents: {
+        label: "Referti e documenti",
+        sub: "Documenti archiviati in sicurezza",
+        detail: "Referti condivisi dallo studio e documenti personali.",
+      },
+      vitals: {
+        label: "Parametri vitali",
+        sub: "Pressione, polso e altro",
+        detail: "Parametri vitali registrati da te, nel tempo.",
+      },
+      vaccinations: {
+        label: "Libretto vaccinale",
+        sub: "Vaccini e richiami",
+        detail: "Panoramica digitale dei vaccini e dei richiami in programma.",
+      },
+      patients: {
+        label: "Pazienti",
+        sub: "Persone collegate",
+        detail: "Persone collegate allo studio — solo con consenso attivo.",
+      },
+      booking: {
+        label: "Appuntamenti e richieste",
+        sub: "Gestire le richieste",
+        detail: "Accettare, pianificare e confermare le richieste di appuntamento.",
+      },
+      anamnesis: {
+        label: "Anamnesi",
+        sub: "Modelli e risposte",
+        detail: "Creare modelli di anamnesi e consultare le risposte ricevute.",
+      },
+      billing: {
+        label: "Verifica GOÄ / PKV",
+        sub: "Verificare la plausibilità",
+        detail: "Verifica deterministica delle voci di fatturazione — non vincolante.",
+      },
+      telemedicine: {
+        label: "Videoconsulto",
+        sub: "Appuntamenti in video",
+        detail: "Pianificare e svolgere videoconsulti.",
+      },
+      activity: {
+        label: "Attività",
+        sub: "Eventi recenti",
+        detail: "Panoramica tracciabile dell’attività recente del team.",
+      },
+    },
+  },
+};
+
+export default deepMerge(deepMerge(itComposed, itTelemedicine), itPublicDemo);

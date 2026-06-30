@@ -21,12 +21,14 @@ export default function Layout() {
 
   const hideHeader =
     pathname === "/" ||
+    pathname === "/demo" ||
     pathname.startsWith("/check-email") ||
     pathname.startsWith("/verified") ||
     isPublicAnamnesisPage;
 
   const hideFooter =
     pathname === "/" ||
+    pathname === "/demo" ||
     pathname === "/register" ||
     isPublicAnamnesisPage ||
     (isLegal && (!isLoggedIn || forcePublic));

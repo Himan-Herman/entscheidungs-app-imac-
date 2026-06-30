@@ -297,4 +297,97 @@ const frComposed = deepMerge(
   ),
 );
 
-export default deepMerge(frComposed, frTelemedicine);
+/** Public Messe/DemoDay showcase — sample data only, no API. */
+const frPublicDemo = {
+  publicDemo: {
+    pageTitle: "MedScoutX — Démo",
+    badge: "Démo · données fictives",
+    entryButton: "Voir la démo",
+    heading: "MedScoutX en un coup d’œil",
+    sub: "Parcourez une démo sécurisée avec des données fictives — sans connexion. Tous les contenus sont fictifs et servent uniquement d’illustration.",
+    bannerTitle: "Ceci est une démo avec des données fictives.",
+    bannerBody:
+      "Aucune donnée réelle de patient ou de cabinet n’est affichée. Pour utiliser l’application réelle avec vos données, connectez-vous normalement.",
+    backToSite: "Retour à l’accueil",
+    loginCta: "Aller à la connexion",
+    sectionPatient: "Pour les patients",
+    sectionPatientSub: "Ce que les assurés peuvent consulter et gérer dans MedScoutX.",
+    sectionPractice: "Pour les cabinets",
+    sectionPracticeSub: "Comment les équipes travaillent avec MedScoutX.",
+    openLabel: "Voir l’exemple",
+    modalClose: "Fermer",
+    sampleNote: "Données fictives — à titre d’illustration uniquement.",
+    badges: {
+      ok: "À jour",
+      pending: "En attente",
+      info: "Info",
+      done: "Terminé",
+      scheduled: "Planifié",
+      review: "À vérifier",
+    },
+    tiles: {
+      appointments: {
+        label: "Rendez-vous",
+        sub: "Vos prochains rendez-vous",
+        detail: "Rendez-vous à venir et demandés — réunis au même endroit.",
+      },
+      messages: {
+        label: "Messages",
+        sub: "Échange sécurisé avec le cabinet",
+        detail: "Messages entre le patient et le cabinet lorsqu’un lien existe.",
+      },
+      medication: {
+        label: "Plan de médication",
+        sub: "Médicaments actuels",
+        detail: "Le plan de médication actuel avec posologie et conseils de prise.",
+      },
+      documents: {
+        label: "Résultats & documents",
+        sub: "Documents conservés en sécurité",
+        detail: "Résultats partagés par le cabinet et documents personnels.",
+      },
+      vitals: {
+        label: "Signes vitaux",
+        sub: "Tension, pouls et plus",
+        detail: "Signes vitaux saisis par vous-même, au fil du temps.",
+      },
+      vaccinations: {
+        label: "Carnet de vaccination",
+        sub: "Vaccins & rappels",
+        detail: "Aperçu numérique des vaccins et des rappels à venir.",
+      },
+      patients: {
+        label: "Patients",
+        sub: "Personnes liées",
+        detail: "Personnes liées au cabinet — uniquement avec un consentement actif.",
+      },
+      booking: {
+        label: "Rendez-vous & demandes",
+        sub: "Traiter les demandes",
+        detail: "Accepter, planifier et confirmer les demandes de rendez-vous.",
+      },
+      anamnesis: {
+        label: "Anamnèse",
+        sub: "Modèles & réponses",
+        detail: "Créer des modèles d’anamnèse et consulter les réponses reçues.",
+      },
+      billing: {
+        label: "Contrôle GOÄ / PKV",
+        sub: "Vérifier la plausibilité",
+        detail: "Contrôle déterministe des postes de facturation — sans engagement.",
+      },
+      telemedicine: {
+        label: "Téléconsultation",
+        sub: "Rendez-vous en vidéo",
+        detail: "Planifier et réaliser des téléconsultations.",
+      },
+      activity: {
+        label: "Activité",
+        sub: "Événements récents",
+        detail: "Aperçu traçable de l’activité récente de l’équipe.",
+      },
+    },
+  },
+};
+
+export default deepMerge(deepMerge(frComposed, frTelemedicine), frPublicDemo);

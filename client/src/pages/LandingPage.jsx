@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { isPublicDemoModeEnabled } from "../features/publicDemo/featureFlag.js";
 import { resolveLanding } from "../i18n/translations/resolveLanding.js";
 import { LANDING_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useTheme } from "../ThemeMode";
@@ -35,6 +36,11 @@ export default function LandingPage() {
   const copy = useMemo(() => resolveLanding(language), [language]);
   const headerCopy = useMemo(() => getMessages(language).header, [language]);
   const footerCopy = useMemo(() => getMessages(language).footer, [language]);
+  const demoCopy = useMemo(
+    () => getMessages(language).publicDemo || getMessages("en").publicDemo,
+    [language],
+  );
+  const showDemoEntry = isPublicDemoModeEnabled();
 
   useEffect(() => {
     document.title = copy.pageTitle;
@@ -192,6 +198,12 @@ export default function LandingPage() {
               <Moon size={18} aria-hidden />
             )}
           </button>
+
+          {showDemoEntry ? (
+            <Link className="landing-page__utility-link" to="/demo">
+              {demoCopy.entryButton}
+            </Link>
+          ) : null}
 
           <Link className="landing-page__utility-link" to="/login">
             {copy.login}

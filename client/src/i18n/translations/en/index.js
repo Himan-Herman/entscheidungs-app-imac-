@@ -80,6 +80,7 @@ import practiceBooking from "./practiceBooking.js";
 import practiceDirectory from "./practiceDirectory.js";
 import practiceBillingPlausibility from "./practiceBillingPlausibility.js";
 import patientBillingExplain from "./patientBillingExplain.js";
+import publicDemo from "./publicDemo.js";
 
 export default {
   header,
@@ -164,4 +165,5 @@ export default {
   practiceDirectory,
   practiceBillingPlausibility,
   patientBillingExplain,
+  publicDemo,
 };

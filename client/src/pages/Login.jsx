@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { isPublicDemoModeEnabled } from "../features/publicDemo/featureFlag.js";
 import { useAuthFlowPalette } from "../ThemeMode";
 import {
   writeUserMode,
@@ -23,6 +24,11 @@ export default function Login() {
   const [resetStatus, setResetStatus] = useState(null);
 
   const copy = useMemo(() => getMessages(language).login, [language]);
+  const demoCopy = useMemo(
+    () => getMessages(language).publicDemo || getMessages("en").publicDemo,
+    [language],
+  );
+  const showDemoEntry = isPublicDemoModeEnabled();
 
   const [sessionExpiredBanner, setSessionExpiredBanner] = useState(false);
 
@@ -383,6 +389,27 @@ export default function Login() {
             {copy.forgot}
           </button>
         </form>
+
+        {showDemoEntry ? (
+          <button
+            type="button"
+            onClick={() => navigate("/demo")}
+            style={{
+              width: "100%",
+              marginTop: 14,
+              padding: "10px 14px",
+              borderRadius: 999,
+              border: `1px solid ${p.linkAccent}`,
+              background: "transparent",
+              color: p.linkAccent,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            {demoCopy.entryButton}
+          </button>
+        ) : null}
 
         <div
           style={{

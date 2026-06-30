@@ -4,6 +4,7 @@ import { registerSW } from "virtual:pwa-register";
 import { APP_BUILD_ID, runPwaBuildMigration } from "./utils/pwaBuildMigration.js";
 import "./index.css";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { isPublicDemoModeEnabled } from "./features/publicDemo/featureFlag.js";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Layout from "./Layout.jsx";
@@ -260,6 +261,9 @@ const MedaLiveTranslationPage = lazy(() =>
 );
 const MedaRealtimePage = lazy(() =>
   import("./features/medaLiveTranslation/realtime/MedaRealtimePage.jsx"),
+);
+const PublicDemoHubPage = lazy(() =>
+  import("./features/publicDemo/pages/PublicDemoHubPage.jsx"),
 );
 
 function RouteFallback() {
@@ -952,6 +956,16 @@ void runPwaBuildMigration().then(() => {
                 <Route path="/impressum" element={<Impressum />} />
                 <Route path="/datenschutz" element={<Datenschutz />} />
                 <Route path="/check-email" element={<CheckEmail />} />
+                <Route
+                  path="/demo"
+                  element={
+                    isPublicDemoModeEnabled() ? (
+                      <PublicDemoHubPage />
+                    ) : (
+                      <Navigate to="/" replace />
+                    )
+                  }
+                />
                 <Route path="/login" element={<Login />} />
                 <Route path="/verified" element={<Verified />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
