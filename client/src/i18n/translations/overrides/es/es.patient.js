@@ -191,6 +191,14 @@ export default {
       "Sus contactos le pertenecen y son privados: solo usted puede verlos, una consulta no tiene acceso y no se realiza ningún uso compartido automático. Puede utilizar un contacto guardado para enviar un documento preparado por correo electrónico, pero solo con su consentimiento explícito. MedScoutX no elige al médico, no toma ninguna decisión sobre el especialista y no ofrece ninguna recomendación médica; solo ayuda a estructurar los contactos.",
     doctorsP3:
       "En la prueba alfa puede comprobar: ¿se pueden añadir, editar y eliminar los contactos, funcionan los enlaces al correo electrónico, el teléfono y la dirección, y son comprensibles los estados de carga, vacíos y de error?",
+    myDocumentsButton: "Más información sobre « Documentos »",
+    myDocumentsTitle: "Documentos",
+    myDocumentsP1:
+      "La sección « Documentos » le ofrece una visión general de sus propios documentos en MedScoutX en un solo lugar, sobre todo sus documentos de preparación de la consulta médica y sus enlaces de uso compartido seguros. Desde aquí puede volver a abrir la preparación asociada. Sirve para tener una visión general y organizarse.",
+    myDocumentsP2:
+      "Estos documentos le pertenecen y están separados de los « Documentos de la consulta » que una consulta pone a su disposición en « Mi consulta ». Aquí solo se muestran metadatos; ningún contenido se analiza automáticamente. Una consulta recibe un documento solo si usted lo comparte deliberadamente a través de un enlace seguro; sin su acción no se transmite nada. MedScoutX no evalúa los documentos desde el punto de vista médico: ningún diagnóstico, ninguna valoración de resultados, ninguna urgencia.",
+    myDocumentsP3:
+      "En la prueba alfa puede comprobar: ¿aparece la visión general de documentos, son comprensibles el estado (p. ej. compartido, revocado, caducado) y la fecha, se puede volver a abrir la preparación asociada, y son comprensibles los estados de carga, vacíos y de error?",
   },
   footer: {
     imprint: "Aviso legal",

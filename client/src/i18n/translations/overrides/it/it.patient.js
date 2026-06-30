@@ -191,6 +191,14 @@ export default {
       "I tuoi contatti appartengono a te e sono privati: solo tu puoi vederli, uno studio non vi ha accesso e non avviene alcuna condivisione automatica. Puoi usare un contatto salvato per inviare un documento preparato via e-mail — ma solo con il tuo consenso esplicito. MedScoutX non sceglie il medico, non prende alcuna decisione sullo specialista e non dà alcuna raccomandazione medica; aiuta soltanto a strutturare i contatti.",
     doctorsP3:
       "Nel test alpha puoi verificare: i contatti si possono aggiungere, modificare ed eliminare, funzionano i collegamenti a e-mail, telefono e indirizzo, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
+    myDocumentsButton: "Maggiori informazioni su « Documenti »",
+    myDocumentsTitle: "Documenti",
+    myDocumentsP1:
+      "L’area « Documenti » ti offre una panoramica dei tuoi documenti in MedScoutX in un unico posto — soprattutto i tuoi documenti di preparazione creati per il colloquio con il medico e i tuoi link di condivisione sicuri. Da qui puoi riaprire la preparazione associata. Serve per avere una panoramica e per organizzarti.",
+    myDocumentsP2:
+      "Questi documenti appartengono a te e sono separati dai « Documenti dello studio » che uno studio mette a tua disposizione in « Il mio studio ». Qui vengono mostrati solo i metadati; nessun contenuto viene analizzato automaticamente. Uno studio riceve un documento solo se lo condividi consapevolmente tramite un link sicuro; senza la tua azione non viene trasmesso nulla. MedScoutX non valuta i documenti dal punto di vista medico — nessuna diagnosi, nessuna valutazione dei referti, nessuna urgenza.",
+    myDocumentsP3:
+      "Nel test alpha puoi verificare: la panoramica dei documenti viene mostrata, lo stato (ad es. condiviso, revocato, scaduto) e la data sono comprensibili, la preparazione associata si può riaprire, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
   },
   footer: {
     imprint: "Note legali",

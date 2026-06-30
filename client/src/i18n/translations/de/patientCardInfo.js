@@ -194,4 +194,13 @@ export default {
     "Ihre Kontakte gehören Ihnen und sind privat: Nur Sie sehen sie, eine Praxis hat keinen Zugriff, und es erfolgt keine automatische Weitergabe. Einen gespeicherten Kontakt können Sie nutzen, um ein vorbereitetes Dokument per E-Mail zu senden – aber nur mit Ihrer ausdrücklichen Zustimmung. MedScoutX trifft keine Arztwahl, keine Facharztentscheidung und gibt keine medizinische Empfehlung; es hilft nur, Kontakte zu strukturieren.",
   doctorsP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich Kontakte anlegen, bearbeiten und löschen, funktionieren die Verknüpfungen zu E-Mail, Telefon und Adresse, und sind Lade-, Leer- und Fehlerzustände verständlich?",
+
+  myDocumentsButton: "Mehr Informationen zu „Dokumente“",
+  myDocumentsTitle: "Dokumente",
+  myDocumentsP1:
+    "Der Bereich „Dokumente“ gibt Ihnen eine Übersicht Ihrer eigenen Dokumente in MedScoutX an einem Ort – vor allem Ihrer Vorbereitungs-Dokumente aus der Arztgespräch-Vorbereitung und Ihrer sicheren Freigabe-Links. Von hier können Sie die zugehörige Vorbereitung erneut öffnen. Das dient der Übersicht und Organisation.",
+  myDocumentsP2:
+    "Diese Dokumente gehören Ihnen und sind getrennt von den „Praxisdokumenten“, die eine Praxis im Bereich „Meine Praxis“ für Sie freigibt. Hier werden nur Metadaten angezeigt, keine Inhalte automatisch ausgewertet. Eine Praxis erhält ein Dokument nur, wenn Sie es bewusst über einen sicheren Link teilen; ohne Ihre Aktion wird nichts übermittelt. MedScoutX bewertet Dokumente nicht medizinisch – keine Diagnose, keine Befundbewertung, keine Dringlichkeit.",
+  myDocumentsP3:
+    "Im Alpha-Test können Sie prüfen: Erscheint die Dokumentenübersicht, sind Status (z. B. geteilt, widerrufen, abgelaufen) und Datum verständlich, lässt sich die zugehörige Vorbereitung erneut öffnen, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 };

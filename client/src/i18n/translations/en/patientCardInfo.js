@@ -194,4 +194,13 @@ export default {
     "Your contacts belong to you and are private: only you can see them, a practice has no access, and there is no automatic sharing. You can use a saved contact to send a prepared document by email — but only with your explicit consent. MedScoutX makes no doctor choice, no specialist decision and no medical recommendation; it only helps to structure contacts.",
   doctorsP3:
     "In the alpha test you can check: can contacts be added, edited and deleted, do the links to email, phone and address work, and are loading, empty and error states understandable?",
+
+  myDocumentsButton: "More information about “Documents”",
+  myDocumentsTitle: "Documents",
+  myDocumentsP1:
+    "The “Documents” area gives you an overview of your own documents in MedScoutX in one place — above all your preparation documents from the appointment preparation and your secure sharing links. From here you can reopen the related preparation. This serves overview and organization.",
+  myDocumentsP2:
+    "These documents belong to you and are separate from the “Practice documents” that a practice releases for you under “My practice”. Only metadata is shown here; no contents are evaluated automatically. A practice receives a document only when you deliberately share it via a secure link; without your action nothing is transmitted. MedScoutX does not assess documents medically — no diagnosis, no findings evaluation, no urgency.",
+  myDocumentsP3:
+    "In the alpha test you can check: does the document overview appear, are status (e.g. shared, revoked, expired) and date understandable, can the related preparation be reopened, and are loading, empty and error states understandable?",
 };

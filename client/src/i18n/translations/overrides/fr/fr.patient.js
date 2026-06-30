@@ -191,6 +191,14 @@ export default {
       "Vos contacts vous appartiennent et sont privés : vous seul pouvez les voir, un cabinet n’y a pas accès et aucun partage automatique n’a lieu. Vous pouvez utiliser un contact enregistré pour envoyer un document préparé par e-mail — mais uniquement avec votre consentement explicite. MedScoutX ne choisit pas de médecin, ne prend aucune décision de spécialiste et ne donne aucune recommandation médicale ; il aide seulement à structurer les contacts.",
     doctorsP3:
       "Lors du test alpha, vous pouvez vérifier : les contacts peuvent-ils être ajoutés, modifiés et supprimés, les liens vers l’e-mail, le téléphone et l’adresse fonctionnent-ils, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
+    myDocumentsButton: "Plus d’informations sur « Documents »",
+    myDocumentsTitle: "Documents",
+    myDocumentsP1:
+      "L’espace « Documents » vous donne un aperçu de vos propres documents dans MedScoutX à un seul endroit — surtout vos documents de préparation issus de la préparation à la consultation et vos liens de partage sécurisés. Depuis cet espace, vous pouvez rouvrir la préparation associée. Cela sert à la vue d’ensemble et à l’organisation.",
+    myDocumentsP2:
+      "Ces documents vous appartiennent et sont distincts des « Documents du cabinet » qu’un cabinet met à votre disposition dans « Mon cabinet ». Seules des métadonnées sont affichées ici ; aucun contenu n’est analysé automatiquement. Un cabinet ne reçoit un document que si vous le partagez délibérément via un lien sécurisé ; sans votre action, rien n’est transmis. MedScoutX n’évalue pas les documents sur le plan médical — aucun diagnostic, aucune évaluation de résultats, aucune urgence.",
+    myDocumentsP3:
+      "Lors du test alpha, vous pouvez vérifier : l’aperçu des documents s’affiche-t-il, le statut (p. ex. partagé, révoqué, expiré) et la date sont-ils compréhensibles, la préparation associée peut-elle être rouverte, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
   },
   footer: {
     imprint: "Mentions légales",
