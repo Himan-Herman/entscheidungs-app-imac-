@@ -140,4 +140,13 @@ export default {
     "Only provide the details that are necessary. Visibility or sharing with a practice happens solely in line with an existing connection and your explicit consent. MedScoutX makes no diagnosis, no treatment recommendation and no urgency assessment.",
   healthProfileP3:
     "In the alpha test you can check: can the base details be recorded and edited, are loading, empty and error states understandable, and does content stay private without an active connection? Contents must be reviewed by you and/or your practice.",
+
+  preVisitButton: "More information about “Prepare for the doctor's appointment”",
+  preVisitTitle: "Prepare for the doctor's appointment",
+  preVisitP1:
+    "Here you prepare your doctor's appointment in a structured way — you organize symptoms, medication, documents and questions, also in your language, and can create a structured doctor version from it.",
+  preVisitP2:
+    "MedScoutX only structures and documents your own information and derives no diagnosis, therapy or urgency from it. A practice only sees what you deliberately share via the intended path; without your release, nothing is transmitted. You can also use the preparation without a connected practice — there is no automatic synchronization.",
+  preVisitP3:
+    "In the alpha test you can check: can the preparation be done step by step, does an understandable doctor version result, and do loading, empty and error states as well as your language stay clean?",
 };

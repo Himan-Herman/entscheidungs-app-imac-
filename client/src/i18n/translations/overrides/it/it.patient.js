@@ -130,6 +130,15 @@ export default {
       "Le voci che registri tu sono i tuoi appunti; i piani forniti dallo studio compaiono solo dopo la pubblicazione da parte dello studio e solo con un collegamento attivo. MedScoutX non fornisce alcuna decisione di dosaggio, non verifica interazioni e non formula alcuna raccomandazione terapeutica, diagnosi o valutazione dell’urgenza.",
     medicationPlansP3:
       "Nel test alpha puoi verificare: la tua medicazione può essere registrata e modificata, i piani pubblicati dallo studio e i loro dettagli compaiono, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
+
+    preVisitButton: "Maggiori informazioni sulla preparazione della visita",
+    preVisitTitle: "Preparare la visita medica",
+    preVisitP1:
+      "Qui prepari la tua visita medica in modo strutturato — organizzi sintomi, farmaci, documenti e domande, anche nella tua lingua, e puoi crearne una versione per il medico strutturata.",
+    preVisitP2:
+      "MedScoutX si limita a strutturare e documentare le tue informazioni e non ne deduce alcuna diagnosi, terapia o urgenza. Uno studio vede solo ciò che condividi consapevolmente tramite il percorso previsto; senza la tua autorizzazione non viene trasmesso nulla. Puoi usare la preparazione anche senza uno studio collegato — non c’è alcuna sincronizzazione automatica.",
+    preVisitP3:
+      "Nel test alpha puoi verificare: la preparazione può essere svolta passo dopo passo, ne risulta una versione per il medico comprensibile, e gli stati di caricamento, vuoti e di errore così come la tua lingua restano corretti?",
   },
   footer: {
     imprint: "Note legali",

@@ -130,6 +130,15 @@ export default {
       "Las entradas que registra usted son sus propias notas; los planes facilitados por la consulta solo aparecen tras su publicación por parte de la consulta y solo con una conexión activa. MedScoutX no ofrece ninguna decisión de dosificación, no comprueba interacciones y no formula ninguna recomendación terapéutica, diagnóstico ni evaluación de la urgencia.",
     medicationPlansP3:
       "En la prueba alfa puede comprobar: ¿se puede registrar y editar su propia medicación, aparecen los planes publicados por la consulta y sus detalles, y son comprensibles los estados de carga, vacíos y de error?",
+
+    preVisitButton: "Más información sobre la preparación de la consulta",
+    preVisitTitle: "Preparar la consulta médica",
+    preVisitP1:
+      "Aquí prepara su consulta médica de forma estructurada — organiza síntomas, medicación, documentos y preguntas, también en su idioma, y puede crear a partir de ello una versión para el médico estructurada.",
+    preVisitP2:
+      "MedScoutX solo estructura y documenta su propia información y no deduce de ella ningún diagnóstico, terapia ni urgencia. Una consulta solo ve lo que usted comparte deliberadamente por la vía prevista; sin su autorización, no se transmite nada. También puede usar la preparación sin una consulta vinculada — no hay ninguna sincronización automática.",
+    preVisitP3:
+      "En la prueba alfa puede comprobar: ¿se puede realizar la preparación paso a paso, resulta una versión para el médico comprensible, y permanecen correctos los estados de carga, vacíos y de error así como su idioma?",
   },
   footer: {
     imprint: "Aviso legal",

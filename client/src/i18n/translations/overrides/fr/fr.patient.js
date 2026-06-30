@@ -130,6 +130,15 @@ export default {
       "Les entrées que vous saisissez sont vos propres notes ; les plans fournis par le cabinet n’apparaissent qu’après leur publication par le cabinet et uniquement avec une connexion active. MedScoutX ne donne aucune décision de posologie, ne vérifie aucune interaction et ne formule aucune recommandation thérapeutique, diagnostic ni évaluation de l’urgence.",
     medicationPlansP3:
       "Lors du test alpha, vous pouvez vérifier : votre propre médication peut-elle être saisie et modifiée, les plans publiés par le cabinet et leurs détails apparaissent-ils, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
+
+    preVisitButton: "Plus d’informations sur la préparation de la consultation",
+    preVisitTitle: "Préparer la consultation",
+    preVisitP1:
+      "Vous préparez ici votre consultation de manière structurée — vous organisez les symptômes, les médicaments, les documents et les questions, également dans votre langue, et pouvez en créer une version médecin structurée.",
+    preVisitP2:
+      "MedScoutX ne fait que structurer et documenter vos propres informations et n’en déduit aucun diagnostic, traitement ni urgence. Un cabinet ne voit que ce que vous partagez délibérément via la voie prévue ; sans votre autorisation, rien n’est transmis. Vous pouvez aussi utiliser la préparation sans cabinet connecté — il n’y a aucune synchronisation automatique.",
+    preVisitP3:
+      "Lors du test alpha, vous pouvez vérifier : la préparation peut-elle se faire étape par étape, une version médecin compréhensible en résulte-t-elle, et les états de chargement, vides et d’erreur ainsi que votre langue restent-ils corrects ?",
   },
   footer: {
     imprint: "Mentions légales",

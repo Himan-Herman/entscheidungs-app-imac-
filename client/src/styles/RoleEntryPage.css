@@ -598,16 +598,19 @@
   color: var(--ms-color-text-muted);
 }
 
-/* Mobile: swipeable, scroll-snapping carousel (one clip per view + peek). */
+/* Swipeable, scroll-snapping carousel on EVERY viewport — one clip in focus
+   with a peek of its neighbours. Touch/trackpad swipe natively; mouse drag is
+   wired up in JS; the dots navigate on any device. */
 .role-entry__media-row {
   display: flex;
-  gap: 1rem;
+  gap: clamp(1rem, 2.5vw, 1.5rem);
   width: 100%;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 0.75rem 0 1.75rem;
+  padding: 1rem 0 2.5rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 7%;
+  scroll-padding-inline: 5%;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -617,45 +620,17 @@
 }
 
 .role-entry__media-row > .role-entry__media-frame {
-  flex: 0 0 86%;
+  flex: 0 0 clamp(260px, 86%, 560px);
   scroll-snap-align: center;
 }
 
-/* Desktop: static grid — every clip visible, no carousel. */
-@media (min-width: 760px) {
-  .role-entry__media-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(1rem, 3vw, 1.75rem);
-    max-width: 880px;
-    padding: 0;
-    overflow: visible;
-    scroll-snap-type: none;
-  }
-
-  .role-entry__media-row > .role-entry__media-frame {
-    flex: none;
-  }
-
-  .role-entry__media-row[data-count="3"] {
-    grid-template-columns: repeat(3, 1fr);
-    max-width: 1100px;
-  }
-}
-
-/* Pagination dots — only meaningful for the mobile carousel. */
+/* Pagination dots — navigate the carousel on any device. */
 .role-entry__dots {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.25rem;
-}
-
-@media (min-width: 760px) {
-  .role-entry__dots {
-    display: none;
-  }
 }
 
 .role-entry__dot {
@@ -692,24 +667,12 @@
   overflow: hidden;
   background: #0b1220;
   border: 1px solid var(--ms-color-border);
-  box-shadow:
-    0 24px 48px rgba(15, 23, 42, 0.18),
-    0 2px 6px rgba(15, 23, 42, 0.1);
+  /* Soft shadow kept within the carousel's vertical padding so it isn't clipped. */
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.16);
 }
 
 .role-entry[data-theme="dark"] .role-entry__media-frame {
-  box-shadow: 0 34px 66px rgba(0, 0, 0, 0.5);
-}
-
-/* Lighter shadow on mobile so the carousel's overflow clip doesn't cut it. */
-@media (max-width: 759px) {
-  .role-entry__media-frame {
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
-  }
-
-  .role-entry[data-theme="dark"] .role-entry__media-frame {
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-  }
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.5);
 }
 
 .role-entry__video {

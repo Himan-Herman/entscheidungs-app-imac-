@@ -380,9 +380,52 @@ export function RoleEntryShowcase({ copy, videos }) {
       frame = requestAnimationFrame(update);
     };
 
+    // Mouse drag-to-scroll ("swipe" with a mouse). Touch / trackpad use native
+    // scrolling, so only handle a primary mouse button here.
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startScroll = 0;
+    const onPointerDown = (event) => {
+      if (event.pointerType !== "mouse" || event.button !== 0) return;
+      dragging = true;
+      moved = false;
+      startX = event.clientX;
+      startScroll = track.scrollLeft;
+    };
+    const onPointerMove = (event) => {
+      if (!dragging) return;
+      const dx = event.clientX - startX;
+      if (Math.abs(dx) > 6) moved = true;
+      if (moved) {
+        track.scrollLeft = startScroll - dx;
+        event.preventDefault();
+      }
+    };
+    const onPointerUp = () => {
+      dragging = false;
+    };
+    // Swallow the click that ends a drag so it can't toggle a video.
+    const onClickCapture = (event) => {
+      if (moved) {
+        event.stopPropagation();
+        event.preventDefault();
+        moved = false;
+      }
+    };
+
     track.addEventListener("scroll", onScroll, { passive: true });
+    track.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("pointermove", onPointerMove, { passive: false });
+    window.addEventListener("pointerup", onPointerUp);
+    track.addEventListener("click", onClickCapture, true);
+
     return () => {
       track.removeEventListener("scroll", onScroll);
+      track.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", onPointerUp);
+      track.removeEventListener("click", onClickCapture, true);
       cancelAnimationFrame(frame);
     };
   }, [items.length]);

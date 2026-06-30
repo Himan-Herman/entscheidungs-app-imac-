@@ -140,4 +140,13 @@ export default {
     "Machen Sie nur notwendige Angaben. Eine Sichtbarkeit oder Weitergabe an eine Praxis erfolgt ausschließlich entsprechend einer bestehenden Verbindung und Ihrer Freigabe. MedScoutX nimmt keine Diagnose, keine Therapieempfehlung und keine Dringlichkeitseinschätzung vor.",
   healthProfileP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich die Basisangaben erfassen und bearbeiten, sind Lade-, Leer- und Fehlerzustände verständlich, und bleiben Inhalte ohne aktive Verbindung privat? Inhalte sind von Ihnen bzw. Ihrer Praxis zu prüfen.",
+
+  preVisitButton: "Mehr Informationen zu „Arztgespräch vorbereiten“",
+  preVisitTitle: "Arztgespräch vorbereiten",
+  preVisitP1:
+    "Hier bereiten Sie Ihr Arztgespräch strukturiert vor – Sie ordnen Beschwerden, Medikamente, Dokumente und Fragen, auch in Ihrer Sprache, und können daraus eine strukturierte Arztversion erstellen.",
+  preVisitP2:
+    "MedScoutX strukturiert und dokumentiert nur Ihre eigenen Angaben und leitet daraus keine Diagnose, Therapie oder Dringlichkeit ab. Eine Praxis sieht nur, was Sie bewusst über den vorgesehenen Weg teilen; ohne Freigabe wird nichts übermittelt. Die Vorbereitung können Sie auch ohne verbundene Praxis nutzen – es erfolgt keine automatische Synchronisation.",
+  preVisitP3:
+    "Im Alpha-Test können Sie prüfen: Lässt sich die Vorbereitung Schritt für Schritt durchführen, entsteht eine verständliche Arztversion, und bleiben Lade-, Leer- und Fehlerzustände sowie Ihre Sprache sauber?",
 };
