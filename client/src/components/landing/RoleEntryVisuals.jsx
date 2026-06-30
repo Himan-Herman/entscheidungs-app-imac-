@@ -339,9 +339,65 @@ function ShowcaseVideo({ src, poster, copy }) {
   );
 }
 
-/** Showcase section: a centred heading plus one or more preview clips. */
+/**
+ * Showcase section: a centred heading plus the preview clips.
+ * Desktop shows every clip in a grid; on mobile the same row becomes a
+ * swipeable, scroll-snapping carousel with pagination dots.
+ */
 export function RoleEntryShowcase({ copy, videos }) {
   const items = Array.isArray(videos) ? videos.filter(Boolean) : [];
+  const trackRef = useRef(null);
+  const [active, setActive] = useState(0);
+
+  const cardsOf = (track) =>
+    Array.from(track.children).filter((c) =>
+      c.classList.contains("role-entry__media-frame"),
+    );
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || items.length < 2) return undefined;
+
+    let frame = 0;
+    const update = () => {
+      const cards = cardsOf(track);
+      if (!cards.length) return;
+      const center = track.scrollLeft + track.clientWidth / 2;
+      let best = 0;
+      let bestDist = Infinity;
+      cards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(cardCenter - center);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = index;
+        }
+      });
+      setActive(best);
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [items.length]);
+
+  const goTo = (index) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const card = cardsOf(track)[index];
+    if (!card) return;
+    const left = card.offsetLeft - (track.clientWidth - card.clientWidth) / 2;
+    track.scrollTo({
+      left,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
+  };
 
   return (
     <div className="role-entry__showcase">
@@ -351,7 +407,11 @@ export function RoleEntryShowcase({ copy, videos }) {
         <p className="role-entry__showcase-body">{copy.body}</p>
       </div>
 
-      <div className="role-entry__media-row" data-count={items.length}>
+      <div
+        ref={trackRef}
+        className="role-entry__media-row"
+        data-count={items.length}
+      >
         {items.map((video) => (
           <ShowcaseVideo
             key={video.src}
@@ -361,6 +421,21 @@ export function RoleEntryShowcase({ copy, videos }) {
           />
         ))}
       </div>
+
+      {items.length > 1 && (
+        <div className="role-entry__dots" role="group" aria-label={copy.eyebrow}>
+          {items.map((video, index) => (
+            <button
+              key={video.src}
+              type="button"
+              className={`role-entry__dot${index === active ? " is-active" : ""}`}
+              aria-label={`${index + 1}`}
+              aria-current={index === active ? "true" : undefined}
+              onClick={() => goTo(index)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -130,6 +130,17 @@ export default {
   ruleFactorAboveThreshold: "Factor above 2.3 usually requires justification (§ 5 GOÄ).",
   ruleQuantityInvalid: "Quantity is empty, negative or invalid.",
 
+  ruleCheckHeading: "Quick check (not saved)",
+  ruleCheckIntro:
+    "Check GOÄ positions instantly — entries are not saved. Plausibility hints, not binding billing advice.",
+  ruleCheckSubmit: "Check positions",
+  ruleCheckChecking: "Checking…",
+  ruleCheckResultHeading: "Plausibility check result",
+  ruleCheckNoFindings: "No findings — the entries look plausible.",
+  ruleCheckEmpty: "Please enter at least one position with a GOÄ code.",
+  ruleCheckError: "The plausibility check could not be performed.",
+  ruleCheckPosition: "Position",
+
   errors: {
     rows_required: "At least one GOÄ code is required.",
     ziffer_required: "Code missing in row {{rowIndex}}.",

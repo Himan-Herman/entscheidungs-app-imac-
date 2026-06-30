@@ -131,6 +131,17 @@ export default {
     "Faktor über 2,3 erfordert in der Regel eine Begründung (§ 5 GOÄ).",
   ruleQuantityInvalid: "Anzahl ist leer, negativ oder ungültig.",
 
+  ruleCheckHeading: "Schnellprüfung (ohne Speicherung)",
+  ruleCheckIntro:
+    "GOÄ-Positionen sofort prüfen – Eingaben werden nicht gespeichert. Plausibilitätshinweise, keine verbindliche Abrechnungsberatung.",
+  ruleCheckSubmit: "Positionen prüfen",
+  ruleCheckChecking: "Wird geprüft …",
+  ruleCheckResultHeading: "Ergebnis der Plausibilitätsprüfung",
+  ruleCheckNoFindings: "Keine Hinweise – die Eingaben sind plausibel.",
+  ruleCheckEmpty: "Bitte mindestens eine Position mit GOÄ-Ziffer eingeben.",
+  ruleCheckError: "Die Plausibilitätsprüfung konnte nicht durchgeführt werden.",
+  ruleCheckPosition: "Position",
+
   errors: {
     rows_required: "Mindestens eine GOÄ-Ziffer ist erforderlich.",
     ziffer_required: "Ziffer fehlt in Zeile {{rowIndex}}.",

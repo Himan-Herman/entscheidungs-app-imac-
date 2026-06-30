@@ -23,6 +23,22 @@ export async function fetchActiveGoaeCatalogue(practiceId) {
   return { res, data };
 }
 
+/**
+ * Stateless GOÄ rule-check (Billing-4a) — runs the deterministic rule engine
+ * without storing anything. Sends only code/factor/quantity per position.
+ * @param {string} practiceId
+ * @param {Array<{ ziffer?: string, code?: string, factor?: string|number, count?: string|number, quantity?: string|number }>} items
+ */
+export async function runGoaeRuleCheck(practiceId, items) {
+  const res = await authFetch(`/api/practice/billing-plausibility/rule-check?${qs(practiceId)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function createBillingPlausibilitySession(practiceId, payload) {
   const res = await authFetch(`/api/practice/billing-plausibility?${qs(practiceId)}`, {
     method: "POST",

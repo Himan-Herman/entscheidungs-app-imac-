@@ -8,7 +8,6 @@ import {
   createBillingPlausibilitySession,
   fetchBillingPlausibilitySessions,
   fetchActiveGoaeCatalogue,
-  runGoaeRuleCheck,
   requestBillingPlausibilityAiReview,
 } from "../api/practiceBillingPlausibilityApi.js";
 import "../styles/PracticeBillingPlausibilityPage.css";
@@ -61,12 +60,6 @@ export default function PracticeBillingPlausibilityPage() {
   const [aiReviewError, setAiReviewError] = useState("");
   const [aiReviewAvailable, setAiReviewAvailable] = useState(false);
   const [catalogueVersion, setCatalogueVersion] = useState(null);
-
-  // Billing-4a — stateless quick rule-check (not persisted)
-  const [ruleRows, dispatchRuleRows] = useReducer(rowsReducer, [emptyRow()]);
-  const [ruleResult, setRuleResult] = useState(null);
-  const [ruleBusy, setRuleBusy] = useState(false);
-  const [ruleError, setRuleError] = useState("");
 
   const loadPractices = useCallback(async () => {
     const res = await authFetch("/api/practices");
@@ -199,48 +192,6 @@ export default function PracticeBillingPlausibilityPage() {
       setAiReviewError(t.aiReviewError);
     } finally {
       setAiReviewPending(false);
-    }
-  };
-
-  const severityLabel = (sev) => {
-    if (sev === "info") return t.severityInfo;
-    if (sev === "warning") return t.severityWarning;
-    if (sev === "review_required") return t.severityReviewRequired;
-    return sev;
-  };
-
-  const handleRuleCheck = async (e) => {
-    e.preventDefault();
-    if (!practiceId) return;
-    // Only code/factor/quantity leave the client — no free-text, no patient data.
-    const items = ruleRows
-      .filter((r) => String(r.ziffer ?? "").trim())
-      .map((r) => ({ ziffer: String(r.ziffer ?? "").trim(), factor: r.factor, count: r.count }));
-    if (items.length === 0) {
-      setRuleError(t.ruleCheckEmpty);
-      setRuleResult(null);
-      return;
-    }
-    setRuleBusy(true);
-    setRuleError("");
-    setRuleResult(null);
-    try {
-      const { res, data } = await runGoaeRuleCheck(practiceId, items);
-      if (res.status === 404 && data?.error === "feature_disabled") {
-        setFeatureDisabled(true);
-        return;
-      }
-      if (res.status === 403) {
-        setRuleError(t.forbidden);
-        return;
-      }
-      if (!res.ok || !data.ok) throw new Error(data?.error || "failed");
-      setRuleResult(data);
-    } catch (err) {
-      if (err?.message === "SESSION_EXPIRED") return;
-      setRuleError(t.ruleCheckError);
-    } finally {
-      setRuleBusy(false);
     }
   };
 
@@ -476,144 +427,6 @@ export default function PracticeBillingPlausibilityPage() {
                 </button>
               </div>
             </form>
-          </section>
-
-          {/* Billing-4a — stateless quick rule-check (not saved) */}
-          <section
-            className="billing-plausibility__section"
-            aria-labelledby="bp-rulecheck-heading"
-            data-testid="bp-rulecheck-section"
-          >
-            <h2 id="bp-rulecheck-heading" className="billing-plausibility__section-heading">
-              {t.ruleCheckHeading}
-            </h2>
-            <p className="billing-plausibility__intro">{t.ruleCheckIntro}</p>
-            <form
-              className="billing-plausibility__form"
-              onSubmit={handleRuleCheck}
-              data-testid="bp-rulecheck-form"
-            >
-              <div className="billing-plausibility__rows" role="list" aria-label={t.ruleCheckHeading}>
-                {ruleRows.map((row, idx) => (
-                  <div key={row.id} className="billing-plausibility__row" role="listitem">
-                    <div className="billing-plausibility__field">
-                      <label htmlFor={`bp-rc-ziffer-${row.id}`} className="billing-plausibility__label">
-                        {t.labelZiffer}
-                      </label>
-                      <input
-                        id={`bp-rc-ziffer-${row.id}`}
-                        className="billing-plausibility__input"
-                        type="text"
-                        inputMode="numeric"
-                        value={row.ziffer}
-                        data-testid={`bp-rc-ziffer-${idx}`}
-                        onChange={(e) =>
-                          dispatchRuleRows({ type: "update", id: row.id, field: "ziffer", value: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="billing-plausibility__field">
-                      <label htmlFor={`bp-rc-factor-${row.id}`} className="billing-plausibility__label">
-                        {t.labelFactor}
-                      </label>
-                      <input
-                        id={`bp-rc-factor-${row.id}`}
-                        className="billing-plausibility__input"
-                        type="text"
-                        inputMode="decimal"
-                        value={row.factor}
-                        data-testid={`bp-rc-factor-${idx}`}
-                        onChange={(e) =>
-                          dispatchRuleRows({ type: "update", id: row.id, field: "factor", value: e.target.value })
-                        }
-                      />
-                    </div>
-                    <div className="billing-plausibility__field">
-                      <label htmlFor={`bp-rc-count-${row.id}`} className="billing-plausibility__label">
-                        {t.labelCount}
-                      </label>
-                      <input
-                        id={`bp-rc-count-${row.id}`}
-                        className="billing-plausibility__input"
-                        type="number"
-                        min="1"
-                        max="99"
-                        value={row.count}
-                        data-testid={`bp-rc-count-${idx}`}
-                        onChange={(e) =>
-                          dispatchRuleRows({ type: "update", id: row.id, field: "count", value: e.target.value })
-                        }
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="billing-plausibility__row-remove"
-                      onClick={() => dispatchRuleRows({ type: "remove", id: row.id })}
-                      aria-label={`${t.btnRemoveRow} ${idx + 1}`}
-                      disabled={ruleRows.length === 1}
-                    >
-                      {t.btnRemoveRow}
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="billing-plausibility__actions">
-                <button
-                  type="button"
-                  className="billing-plausibility__btn billing-plausibility__btn--secondary"
-                  onClick={() => dispatchRuleRows({ type: "add" })}
-                >
-                  {t.btnAddRow}
-                </button>
-                <button
-                  type="submit"
-                  className="billing-plausibility__btn billing-plausibility__btn--primary"
-                  disabled={ruleBusy}
-                  aria-busy={ruleBusy}
-                  data-testid="bp-rulecheck-submit"
-                >
-                  {ruleBusy ? t.ruleCheckChecking : t.ruleCheckSubmit}
-                </button>
-              </div>
-            </form>
-
-            {ruleError && (
-              <p className="billing-plausibility__status billing-plausibility__status--error" role="alert">
-                {ruleError}
-              </p>
-            )}
-
-            {ruleResult && (
-              <div
-                className="billing-plausibility__rulecheck-result"
-                data-testid="bp-rulecheck-result"
-                aria-live="polite"
-              >
-                <h3 className="billing-plausibility__items-heading">{t.ruleCheckResultHeading}</h3>
-                {ruleResult.findings.length === 0 ? (
-                  <p className="billing-plausibility__result-stub">{t.ruleCheckNoFindings}</p>
-                ) : (
-                  <ul className="billing-plausibility__findings">
-                    {ruleResult.findings.map((f, i) => (
-                      <li
-                        key={i}
-                        className={`billing-plausibility__finding billing-plausibility__finding--${f.severity}`}
-                      >
-                        <span className="billing-plausibility__severity">{severityLabel(f.severity)}</span>
-                        {f.index != null && (
-                          <span className="billing-plausibility__finding-pos">
-                            {t.ruleCheckPosition} {f.index + 1}
-                            {f.code ? ` · ${f.code}` : ""}
-                          </span>
-                        )}
-                        <span>{t[f.messageKey] || f.ruleId}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
           </section>
 
           {/* Result area — shown after a session is created */}

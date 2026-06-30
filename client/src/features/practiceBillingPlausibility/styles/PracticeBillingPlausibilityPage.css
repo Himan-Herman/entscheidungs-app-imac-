@@ -552,3 +552,48 @@
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* Billing-4a — stateless rule-check findings (design-system tokens only, no fixed hex) */
+.billing-plausibility__rulecheck-result {
+  margin-top: 1rem;
+}
+.billing-plausibility__findings {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.billing-plausibility__finding {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ms-color-border);
+  border-radius: 8px;
+  background: var(--ms-color-surface);
+}
+.billing-plausibility__severity {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid var(--ms-color-border);
+}
+.billing-plausibility__finding--info .billing-plausibility__severity {
+  color: var(--ms-color-text-muted);
+}
+.billing-plausibility__finding--warning .billing-plausibility__severity {
+  color: var(--ms-color-text-secondary);
+}
+.billing-plausibility__finding--review_required .billing-plausibility__severity {
+  color: var(--ms-color-danger);
+}
+.billing-plausibility__finding-pos {
+  color: var(--ms-color-text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
