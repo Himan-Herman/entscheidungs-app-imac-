@@ -139,6 +139,15 @@ export default {
       "MedScoutX si limita a strutturare e documentare le tue informazioni e non ne deduce alcuna diagnosi, terapia o urgenza. Uno studio vede solo ciò che condividi consapevolmente tramite il percorso previsto; senza la tua autorizzazione non viene trasmesso nulla. Puoi usare la preparazione anche senza uno studio collegato — non c’è alcuna sincronizzazione automatica.",
     preVisitP3:
       "Nel test alpha puoi verificare: la preparazione può essere svolta passo dopo passo, ne risulta una versione per il medico comprensibile, e gli stati di caricamento, vuoti e di errore così come la tua lingua restano corretti?",
+
+    healthProfileButton: "Maggiori informazioni sul profilo sanitario",
+    healthProfileTitle: "Profilo sanitario",
+    healthProfileP1:
+      "Nel profilo sanitario gestisci dati anagrafici importanti e informazioni di base legate alla salute, strutturati in un unico posto. Questo facilita la preparazione e la panoramica — ad esempio prima di un appuntamento.",
+    healthProfileP2:
+      "Inserisci solo le informazioni necessarie. La visibilità o la condivisione con uno studio avviene esclusivamente in base a un collegamento esistente e alla tua autorizzazione. MedScoutX non effettua alcuna diagnosi, raccomandazione terapeutica né valutazione dell’urgenza.",
+    healthProfileP3:
+      "Nel test alpha puoi verificare: le informazioni di base possono essere registrate e modificate, gli stati di caricamento, vuoti e di errore sono comprensibili, e i contenuti restano privati senza un collegamento attivo? I contenuti devono essere verificati da te e/o dal tuo studio.",
   },
   footer: {
     imprint: "Note legali",

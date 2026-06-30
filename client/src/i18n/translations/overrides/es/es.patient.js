@@ -139,6 +139,15 @@ export default {
       "MedScoutX solo estructura y documenta su propia información y no deduce de ella ningún diagnóstico, terapia ni urgencia. Una consulta solo ve lo que usted comparte deliberadamente por la vía prevista; sin su autorización, no se transmite nada. También puede usar la preparación sin una consulta vinculada — no hay ninguna sincronización automática.",
     preVisitP3:
       "En la prueba alfa puede comprobar: ¿se puede realizar la preparación paso a paso, resulta una versión para el médico comprensible, y permanecen correctos los estados de carga, vacíos y de error así como su idioma?",
+
+    healthProfileButton: "Más información sobre el perfil de salud",
+    healthProfileTitle: "Perfil de salud",
+    healthProfileP1:
+      "En su perfil de salud gestiona datos básicos importantes e información esencial relacionada con la salud, estructurados en un solo lugar. Esto facilita la preparación y la vista general — por ejemplo antes de una cita.",
+    healthProfileP2:
+      "Indique solo la información necesaria. La visibilidad o el uso compartido con una consulta se produce únicamente conforme a una conexión existente y a su autorización. MedScoutX no realiza ningún diagnóstico, recomendación terapéutica ni evaluación de la urgencia.",
+    healthProfileP3:
+      "En la prueba alfa puede comprobar: ¿se pueden registrar y editar los datos básicos, son comprensibles los estados de carga, vacíos y de error, y permanece privado el contenido sin una conexión activa? Los contenidos deben ser revisados por usted y/o su consulta.",
   },
   footer: {
     imprint: "Aviso legal",

@@ -139,6 +139,15 @@ export default {
       "MedScoutX ne fait que structurer et documenter vos propres informations et n’en déduit aucun diagnostic, traitement ni urgence. Un cabinet ne voit que ce que vous partagez délibérément via la voie prévue ; sans votre autorisation, rien n’est transmis. Vous pouvez aussi utiliser la préparation sans cabinet connecté — il n’y a aucune synchronisation automatique.",
     preVisitP3:
       "Lors du test alpha, vous pouvez vérifier : la préparation peut-elle se faire étape par étape, une version médecin compréhensible en résulte-t-elle, et les états de chargement, vides et d’erreur ainsi que votre langue restent-ils corrects ?",
+
+    healthProfileButton: "Plus d’informations sur le profil de santé",
+    healthProfileTitle: "Profil de santé",
+    healthProfileP1:
+      "Dans votre profil de santé, vous gérez des données de base importantes et des informations essentielles liées à la santé, structurées en un seul endroit. Cela facilite la préparation et la vue d’ensemble — par exemple avant un rendez-vous.",
+    healthProfileP2:
+      "Ne renseignez que les informations nécessaires. La visibilité ou le partage avec un cabinet se fait uniquement conformément à une connexion existante et à votre autorisation. MedScoutX n’effectue aucun diagnostic, aucune recommandation thérapeutique ni évaluation de l’urgence.",
+    healthProfileP3:
+      "Lors du test alpha, vous pouvez vérifier : les informations de base peuvent-elles être saisies et modifiées, les états de chargement, vides et d’erreur sont-ils compréhensibles, et le contenu reste-t-il privé sans connexion active ? Les contenus doivent être vérifiés par vous et/ou votre cabinet.",
   },
   footer: {
     imprint: "Mentions légales",
