@@ -113,10 +113,22 @@
   font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
-  color: #fff;
+  color: #fff !important;
   background: #0f766e;
   box-shadow: 0 8px 18px rgba(15, 118, 110, 0.3);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+/* Keep the label + icon white over the teal pill in every link state — a global
+   anchor-color rule otherwise bleeds through (same fix as the anamnesis CTAs). */
+.public-demo__login-link:link,
+.public-demo__login-link:visited,
+.public-demo__login-link:hover,
+.public-demo__login-link:focus,
+.public-demo__login-link:active,
+.public-demo__login-link span,
+.public-demo__login-link svg {
+  color: #fff !important;
 }
 
 .public-demo__login-link:hover {
