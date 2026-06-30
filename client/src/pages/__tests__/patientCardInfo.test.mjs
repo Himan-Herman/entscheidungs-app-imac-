@@ -34,6 +34,7 @@ test("exactly the designated patient-hub tiles expose an info button", () => {
     "hubLinkHealthProfile",
     "hubLinkVaccinations",
     "hubLinkVitals",
+    "hubLinkHealthHistory",
   ]);
   for (const key of PATIENT_INFO_TILE_KEYS) {
     assert.equal(hasPatientCardInfo(key), true, `${key} has info`);
@@ -41,7 +42,7 @@ test("exactly the designated patient-hub tiles expose an info button", () => {
   // Tiles from other hub groups / main overview must NOT get an info button.
   for (const other of [
     "hubLinkMyPrep",
-    "hubLinkHealthHistory",
+    "hubLinkMedaLive",
     "hubLinkSymptom",
     "hubLinkOrientation",
     "",

@@ -167,4 +167,13 @@ export default {
     "You record, edit and delete values yourself. Displayed reference ranges are for orientation only — MedScoutX does not assess your values and derives no diagnosis, warning, therapy, urgency or risk analysis. A connected practice can only see your values with an active connection and your granted permission. Please have conspicuous values clarified medically.",
   vitalsP3:
     "In the alpha test you can check: can values be recorded, edited and deleted, do the filter and chart work per measurement type, and are loading, empty and error states understandable?",
+
+  healthHistoryButton: "More information about the health record",
+  healthHistoryTitle: "Health record",
+  healthHistoryP1:
+    "In the health record you document your allergies and diagnoses yourself in a structured way — and, if enabled, a symptom history. It serves personal overview and documentation, not as an official medical report.",
+  healthHistoryP2:
+    "You record, edit and delete entries yourself; only your own information is documented, for example already known diagnoses. MedScoutX makes no diagnosis, gives no treatment recommendation and makes no urgency decision. A connected practice can only see this information with an active connection and your granted permission.",
+  healthHistoryP3:
+    "In the alpha test you can check: can allergies and diagnoses be recorded, edited and deleted, does switching between sections work, and are loading, empty and error states understandable?",
 };

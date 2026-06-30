@@ -166,6 +166,15 @@ export default {
       "Vous saisissez, modifiez et supprimez les valeurs vous-même. Les plages de référence affichées ne servent qu’à titre indicatif — MedScoutX n’évalue pas vos valeurs et n’en déduit aucun diagnostic, avertissement, traitement, urgence ni analyse de risque. Un cabinet connecté ne peut voir vos valeurs qu’avec une connexion active et votre autorisation. Veuillez faire clarifier médicalement les valeurs inhabituelles.",
     vitalsP3:
       "Lors du test alpha, vous pouvez vérifier : les valeurs peuvent-elles être saisies, modifiées et supprimées, le filtre et le graphique fonctionnent-ils par type de mesure, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
+
+    healthHistoryButton: "Plus d’informations sur le dossier de santé",
+    healthHistoryTitle: "Dossier de santé",
+    healthHistoryP1:
+      "Dans le dossier de santé, vous documentez vous-même de manière structurée vos allergies et vos diagnostics — et, si cette option est activée, un historique des symptômes. Il sert d’aperçu personnel et de documentation, et non de compte rendu officiel.",
+    healthHistoryP2:
+      "Vous saisissez, modifiez et supprimez les entrées vous-même ; seules vos propres informations sont documentées, par exemple des diagnostics déjà connus. MedScoutX n’établit aucun diagnostic, ne donne aucune recommandation thérapeutique et ne prend aucune décision d’urgence. Un cabinet connecté ne peut voir ces informations qu’avec une connexion active et votre autorisation.",
+    healthHistoryP3:
+      "Lors du test alpha, vous pouvez vérifier : les allergies et les diagnostics peuvent-ils être saisis, modifiés et supprimés, le passage d’une section à l’autre fonctionne-t-il, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
   },
   footer: {
     imprint: "Mentions légales",

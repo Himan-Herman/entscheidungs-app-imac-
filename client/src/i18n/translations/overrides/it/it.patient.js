@@ -166,6 +166,15 @@ export default {
       "Registri, modifichi ed elimini i valori tu stesso. Gli intervalli di riferimento mostrati servono solo a titolo orientativo — MedScoutX non valuta i tuoi valori e non ne deduce alcuna diagnosi, avviso, terapia, urgenza o analisi del rischio. Uno studio collegato può vedere i tuoi valori solo con un collegamento attivo e la tua autorizzazione. Fai chiarire dal punto di vista medico i valori anomali.",
     vitalsP3:
       "Nel test alpha puoi verificare: i valori possono essere registrati, modificati ed eliminati, il filtro e il grafico funzionano per tipo di misurazione, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
+
+    healthHistoryButton: "Maggiori informazioni sulla cartella sanitaria",
+    healthHistoryTitle: "Cartella sanitaria",
+    healthHistoryP1:
+      "Nella cartella sanitaria documenti tu stesso in modo strutturato le tue allergie e diagnosi — e, se attivato, un andamento dei sintomi. Serve come panoramica personale e documentazione, non come referto ufficiale.",
+    healthHistoryP2:
+      "Registri, modifichi ed elimini le voci tu stesso; vengono documentate solo le tue informazioni, ad esempio diagnosi già note. MedScoutX non formula alcuna diagnosi, non fornisce alcuna raccomandazione terapeutica e non prende alcuna decisione di urgenza. Uno studio collegato può vedere queste informazioni solo con un collegamento attivo e la tua autorizzazione.",
+    healthHistoryP3:
+      "Nel test alpha puoi verificare: le allergie e le diagnosi possono essere registrate, modificate ed eliminate, il passaggio tra le sezioni funziona, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
   },
   footer: {
     imprint: "Note legali",

@@ -167,4 +167,13 @@ export default {
     "Sie erfassen, bearbeiten und löschen Werte selbst. Angezeigte Referenzbereiche dienen nur der Orientierung – MedScoutX bewertet Ihre Werte nicht und leitet keine Diagnose, Warnung, Therapie, Dringlichkeit oder Risikoanalyse ab. Eine verbundene Praxis kann Ihre Werte nur bei aktiver Verbindung und erteilter Freigabe sehen. Auffällige Werte klären Sie bitte ärztlich ab.",
   vitalsP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich Werte erfassen, bearbeiten und löschen, funktionieren Filter und Diagramm je Messwert-Typ, und sind Lade-, Leer- und Fehlerzustände verständlich?",
+
+  healthHistoryButton: "Mehr Informationen zur Gesundheitsakte",
+  healthHistoryTitle: "Gesundheitsakte",
+  healthHistoryP1:
+    "In der Gesundheitsakte dokumentieren Sie selbst strukturiert Ihre Allergien und Diagnosen – und, falls aktiviert, einen Symptom-Verlauf. Sie dient der persönlichen Übersicht und Dokumentation, nicht als offizieller Befund.",
+  healthHistoryP2:
+    "Sie erfassen, bearbeiten und löschen Einträge selbst; dokumentiert werden nur Ihre eigenen Angaben, etwa bereits bekannte Diagnosen. MedScoutX stellt keine Diagnose, gibt keine Therapieempfehlung und trifft keine Dringlichkeitsentscheidung. Eine verbundene Praxis kann diese Angaben nur bei aktiver Verbindung und erteilter Freigabe sehen.",
+  healthHistoryP3:
+    "Im Alpha-Test können Sie prüfen: Lassen sich Allergien und Diagnosen erfassen, bearbeiten und löschen, funktioniert der Wechsel zwischen den Bereichen, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 };

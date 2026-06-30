@@ -166,6 +166,15 @@ export default {
       "Usted registra, edita y elimina los valores. Los rangos de referencia mostrados son solo orientativos — MedScoutX no evalúa sus valores y no deduce ningún diagnóstico, advertencia, terapia, urgencia ni análisis de riesgo. Una consulta vinculada solo puede ver sus valores con una conexión activa y su autorización. Aclare médicamente los valores llamativos.",
     vitalsP3:
       "En la prueba alfa puede comprobar: ¿se pueden registrar, editar y eliminar los valores, funcionan el filtro y el gráfico por tipo de medición, y son comprensibles los estados de carga, vacíos y de error?",
+
+    healthHistoryButton: "Más información sobre el historial de salud",
+    healthHistoryTitle: "Historial de salud",
+    healthHistoryP1:
+      "En el historial de salud documenta usted mismo de forma estructurada sus alergias y diagnósticos — y, si está activado, un historial de síntomas. Sirve como vista general personal y documentación, no como un informe médico oficial.",
+    healthHistoryP2:
+      "Usted registra, edita y elimina las entradas; solo se documenta su propia información, por ejemplo diagnósticos ya conocidos. MedScoutX no establece ningún diagnóstico, no ofrece ninguna recomendación terapéutica y no toma ninguna decisión de urgencia. Una consulta vinculada solo puede ver esta información con una conexión activa y su autorización.",
+    healthHistoryP3:
+      "En la prueba alfa puede comprobar: ¿se pueden registrar, editar y eliminar las alergias y los diagnósticos, funciona el cambio entre secciones, y son comprensibles los estados de carga, vacíos y de error?",
   },
   footer: {
     imprint: "Aviso legal",
