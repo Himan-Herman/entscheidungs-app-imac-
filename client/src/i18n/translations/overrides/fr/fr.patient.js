@@ -157,6 +157,15 @@ export default {
       "Les entrées sont votre propre documentation et ne constituent pas une preuve de vaccination officielle. MedScoutX ne donne aucune recommandation de vaccination, n’effectue aucun contrôle d’exhaustivité ou de calendrier vaccinal ni évaluation médicale. Un cabinet connecté ne peut voir vos entrées qu’avec une connexion active et votre autorisation. Les décisions de vaccination doivent être clarifiées avec un personnel médical.",
     vaccinationsP3:
       "Lors du test alpha, vous pouvez vérifier : les entrées peuvent-elles être saisies, modifiées et supprimées, le téléversement facultatif d’un document fonctionne-t-il, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
+
+    vitalsButton: "Plus d’informations sur « Mes mesures »",
+    vitalsTitle: "Mes mesures",
+    vitalsP1:
+      "Dans « Mes mesures », vous documentez vous-même des valeurs telles que la tension artérielle, le pouls, la glycémie, le poids, la saturation en oxygène et la température, et vous les visualisez dans le temps — sous forme de tableau et de graphique. Cela sert au suivi de l’évolution et à la documentation.",
+    vitalsP2:
+      "Vous saisissez, modifiez et supprimez les valeurs vous-même. Les plages de référence affichées ne servent qu’à titre indicatif — MedScoutX n’évalue pas vos valeurs et n’en déduit aucun diagnostic, avertissement, traitement, urgence ni analyse de risque. Un cabinet connecté ne peut voir vos valeurs qu’avec une connexion active et votre autorisation. Veuillez faire clarifier médicalement les valeurs inhabituelles.",
+    vitalsP3:
+      "Lors du test alpha, vous pouvez vérifier : les valeurs peuvent-elles être saisies, modifiées et supprimées, le filtre et le graphique fonctionnent-ils par type de mesure, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
   },
   footer: {
     imprint: "Mentions légales",

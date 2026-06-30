@@ -158,4 +158,13 @@ export default {
     "The entries are your own documentation and not an official vaccination certificate. MedScoutX gives no vaccination recommendation, performs no completeness or vaccination-schedule check and no medical assessment. A connected practice can only see your entries with an active connection and your granted permission. Vaccination decisions should be clarified with medical professionals.",
   vaccinationsP3:
     "In the alpha test you can check: can entries be recorded, edited and deleted, does an optional document upload work, and are loading, empty and error states understandable?",
+
+  vitalsButton: "More information about “My measurements”",
+  vitalsTitle: "My measurements",
+  vitalsP1:
+    "Under “My measurements” you document values such as blood pressure, pulse, blood glucose, weight, oxygen saturation and temperature yourself and see them over time — as a table and chart. This serves trend tracking and documentation.",
+  vitalsP2:
+    "You record, edit and delete values yourself. Displayed reference ranges are for orientation only — MedScoutX does not assess your values and derives no diagnosis, warning, therapy, urgency or risk analysis. A connected practice can only see your values with an active connection and your granted permission. Please have conspicuous values clarified medically.",
+  vitalsP3:
+    "In the alpha test you can check: can values be recorded, edited and deleted, do the filter and chart work per measurement type, and are loading, empty and error states understandable?",
 };

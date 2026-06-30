@@ -158,4 +158,13 @@ export default {
     "Die Einträge sind Ihre eigene Dokumentation und kein offizieller Impfnachweis. MedScoutX gibt keine Impfempfehlung, nimmt keine Vollständigkeits- oder STIKO-Prüfung und keine medizinische Bewertung vor. Eine verbundene Praxis kann Ihre Einträge nur bei aktiver Verbindung und erteilter Freigabe sehen. Impfentscheidungen klären Sie mit medizinischem Fachpersonal.",
   vaccinationsP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich Einträge erfassen, bearbeiten und löschen, funktioniert ein optionaler Dokument-Upload, und sind Lade-, Leer- und Fehlerzustände verständlich?",
+
+  vitalsButton: "Mehr Informationen zu „Meine Messwerte“",
+  vitalsTitle: "Meine Messwerte",
+  vitalsP1:
+    "Unter „Meine Messwerte“ dokumentieren Sie selbst Werte wie Blutdruck, Puls, Blutzucker, Gewicht, Sauerstoffsättigung und Temperatur und sehen sie im Verlauf – als Tabelle und Diagramm. Das dient der Verlaufskontrolle und Dokumentation.",
+  vitalsP2:
+    "Sie erfassen, bearbeiten und löschen Werte selbst. Angezeigte Referenzbereiche dienen nur der Orientierung – MedScoutX bewertet Ihre Werte nicht und leitet keine Diagnose, Warnung, Therapie, Dringlichkeit oder Risikoanalyse ab. Eine verbundene Praxis kann Ihre Werte nur bei aktiver Verbindung und erteilter Freigabe sehen. Auffällige Werte klären Sie bitte ärztlich ab.",
+  vitalsP3:
+    "Im Alpha-Test können Sie prüfen: Lassen sich Werte erfassen, bearbeiten und löschen, funktionieren Filter und Diagramm je Messwert-Typ, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 };

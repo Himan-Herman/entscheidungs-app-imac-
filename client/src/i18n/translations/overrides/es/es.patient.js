@@ -157,6 +157,15 @@ export default {
       "Las entradas son su propia documentación y no constituyen un comprobante de vacunación oficial. MedScoutX no ofrece ninguna recomendación de vacunación, no realiza ninguna comprobación de exhaustividad o del calendario de vacunación ni evaluación médica. Una consulta vinculada solo puede ver sus entradas con una conexión activa y su autorización. Las decisiones de vacunación deben aclararse con personal médico.",
     vaccinationsP3:
       "En la prueba alfa puede comprobar: ¿se pueden registrar, editar y eliminar las entradas, funciona la subida opcional de un documento, y son comprensibles los estados de carga, vacíos y de error?",
+
+    vitalsButton: "Más información sobre « Mis mediciones »",
+    vitalsTitle: "Mis mediciones",
+    vitalsP1:
+      "En « Mis mediciones » documenta usted mismo valores como la tensión arterial, el pulso, la glucosa, el peso, la saturación de oxígeno y la temperatura, y los ve a lo largo del tiempo — como tabla y gráfico. Esto sirve para el seguimiento de la evolución y la documentación.",
+    vitalsP2:
+      "Usted registra, edita y elimina los valores. Los rangos de referencia mostrados son solo orientativos — MedScoutX no evalúa sus valores y no deduce ningún diagnóstico, advertencia, terapia, urgencia ni análisis de riesgo. Una consulta vinculada solo puede ver sus valores con una conexión activa y su autorización. Aclare médicamente los valores llamativos.",
+    vitalsP3:
+      "En la prueba alfa puede comprobar: ¿se pueden registrar, editar y eliminar los valores, funcionan el filtro y el gráfico por tipo de medición, y son comprensibles los estados de carga, vacíos y de error?",
   },
   footer: {
     imprint: "Aviso legal",

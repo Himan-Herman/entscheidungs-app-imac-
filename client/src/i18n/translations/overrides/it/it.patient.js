@@ -157,6 +157,15 @@ export default {
       "Le voci sono la tua documentazione personale e non costituiscono un certificato vaccinale ufficiale. MedScoutX non fornisce alcuna raccomandazione vaccinale, non effettua alcun controllo di completezza o del calendario vaccinale né valutazione medica. Uno studio collegato può vedere le tue voci solo con un collegamento attivo e la tua autorizzazione. Le decisioni sulle vaccinazioni vanno chiarite con personale medico.",
     vaccinationsP3:
       "Nel test alpha puoi verificare: le voci possono essere registrate, modificate ed eliminate, il caricamento facoltativo di un documento funziona, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
+
+    vitalsButton: "Maggiori informazioni su « I miei valori »",
+    vitalsTitle: "I miei valori",
+    vitalsP1:
+      "In « I miei valori » documenti tu stesso valori come pressione sanguigna, polso, glicemia, peso, saturazione dell’ossigeno e temperatura e li vedi nel tempo — come tabella e grafico. Questo serve al monitoraggio dell’andamento e alla documentazione.",
+    vitalsP2:
+      "Registri, modifichi ed elimini i valori tu stesso. Gli intervalli di riferimento mostrati servono solo a titolo orientativo — MedScoutX non valuta i tuoi valori e non ne deduce alcuna diagnosi, avviso, terapia, urgenza o analisi del rischio. Uno studio collegato può vedere i tuoi valori solo con un collegamento attivo e la tua autorizzazione. Fai chiarire dal punto di vista medico i valori anomali.",
+    vitalsP3:
+      "Nel test alpha puoi verificare: i valori possono essere registrati, modificati ed eliminati, il filtro e il grafico funzionano per tipo di misurazione, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
   },
   footer: {
     imprint: "Note legali",
