@@ -176,4 +176,13 @@ export default {
     "You record, edit and delete entries yourself; only your own information is documented, for example already known diagnoses. MedScoutX makes no diagnosis, gives no treatment recommendation and makes no urgency decision. A connected practice can only see this information with an active connection and your granted permission.",
   healthHistoryP3:
     "In the alpha test you can check: can allergies and diagnoses be recorded, edited and deleted, does switching between sections work, and are loading, empty and error states understandable?",
+
+  myPrepButton: "More information about “My preparations”",
+  myPrepTitle: "My preparations",
+  myPrepP1:
+    "Under “My preparations” you find your saved preparations for doctor's appointments in one place — both saved in your account and stored locally on the device. You can reopen, continue, save as PDF (doctor version) or delete individual preparations. This serves overview and organization.",
+  myPrepP2:
+    "MedScoutX only structures and documents your own information and derives no diagnosis, therapy or urgency from it. Your preparations belong to you; a practice only sees what you deliberately share via the intended path or a release. Use without a connected practice is possible, and there is no automatic transmission.",
+  myPrepP3:
+    "In the alpha test you can check: can saved preparations be found again, reopened, continued, saved as PDF and deleted, do search and filter work, and are loading, empty and error states understandable?",
 };

@@ -175,6 +175,14 @@ export default {
       "Registri, modifichi ed elimini le voci tu stesso; vengono documentate solo le tue informazioni, ad esempio diagnosi già note. MedScoutX non formula alcuna diagnosi, non fornisce alcuna raccomandazione terapeutica e non prende alcuna decisione di urgenza. Uno studio collegato può vedere queste informazioni solo con un collegamento attivo e la tua autorizzazione.",
     healthHistoryP3:
       "Nel test alpha puoi verificare: le allergie e le diagnosi possono essere registrate, modificate ed eliminate, il passaggio tra le sezioni funziona, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
+    myPrepButton: "Maggiori informazioni su « Le mie preparazioni »",
+    myPrepTitle: "Le mie preparazioni",
+    myPrepP1:
+      "In « Le mie preparazioni » trovi le tue preparazioni salvate per i colloqui con il medico in un unico posto — sia quelle salvate nel tuo account sia quelle conservate localmente sul dispositivo. Puoi riaprire, proseguire, salvare in PDF (versione per il medico) o eliminare le singole preparazioni. Serve per avere una panoramica e per organizzarti.",
+    myPrepP2:
+      "MedScoutX struttura e documenta soltanto le tue indicazioni e non ne ricava alcuna diagnosi, terapia o livello di urgenza. Le tue preparazioni appartengono a te; uno studio vede solo ciò che condividi consapevolmente tramite il percorso previsto o un’autorizzazione. È possibile l’uso senza uno studio collegato e non avviene alcuna trasmissione automatica.",
+    myPrepP3:
+      "Nel test alpha puoi verificare: le preparazioni salvate si possono ritrovare, riaprire, proseguire, salvare in PDF ed eliminare, funzionano la ricerca e il filtro, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
   },
   footer: {
     imprint: "Note legali",

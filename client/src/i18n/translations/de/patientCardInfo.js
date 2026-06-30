@@ -176,4 +176,13 @@ export default {
     "Sie erfassen, bearbeiten und löschen Einträge selbst; dokumentiert werden nur Ihre eigenen Angaben, etwa bereits bekannte Diagnosen. MedScoutX stellt keine Diagnose, gibt keine Therapieempfehlung und trifft keine Dringlichkeitsentscheidung. Eine verbundene Praxis kann diese Angaben nur bei aktiver Verbindung und erteilter Freigabe sehen.",
   healthHistoryP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich Allergien und Diagnosen erfassen, bearbeiten und löschen, funktioniert der Wechsel zwischen den Bereichen, und sind Lade-, Leer- und Fehlerzustände verständlich?",
+
+  myPrepButton: "Mehr Informationen zu Meine Vorbereitungen",
+  myPrepTitle: "Meine Vorbereitungen",
+  myPrepP1:
+    "Unter „Meine Vorbereitungen“ finden Sie Ihre gespeicherten Vorbereitungen für Arztgespräche an einem Ort – sowohl im Konto gespeicherte als auch lokal auf dem Gerät gesicherte. Sie können einzelne Vorbereitungen erneut öffnen, fortsetzen, als PDF (Arztversion) sichern oder löschen. Das dient der Übersicht und Organisation.",
+  myPrepP2:
+    "MedScoutX strukturiert und dokumentiert nur Ihre eigenen Angaben und leitet daraus keine Diagnose, Therapie oder Dringlichkeit ab. Ihre Vorbereitungen gehören Ihnen; eine Praxis sieht nur das, was Sie bewusst über den vorgesehenen Weg bzw. eine Freigabe teilen. Eine Nutzung ohne verbundene Praxis ist möglich, und es erfolgt keine automatische Übermittlung.",
+  myPrepP3:
+    "Im Alpha-Test können Sie prüfen: Lassen sich gespeicherte Vorbereitungen wiederfinden, erneut öffnen, fortsetzen, als PDF sichern und löschen, funktionieren Suche und Filter, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 };

@@ -175,6 +175,14 @@ export default {
       "Vous saisissez, modifiez et supprimez les entrées vous-même ; seules vos propres informations sont documentées, par exemple des diagnostics déjà connus. MedScoutX n’établit aucun diagnostic, ne donne aucune recommandation thérapeutique et ne prend aucune décision d’urgence. Un cabinet connecté ne peut voir ces informations qu’avec une connexion active et votre autorisation.",
     healthHistoryP3:
       "Lors du test alpha, vous pouvez vérifier : les allergies et les diagnostics peuvent-ils être saisis, modifiés et supprimés, le passage d’une section à l’autre fonctionne-t-il, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
+    myPrepButton: "Plus d’informations sur « Mes préparations »",
+    myPrepTitle: "Mes préparations",
+    myPrepP1:
+      "Sous « Mes préparations », vous retrouvez vos préparations enregistrées pour les consultations à un seul endroit — aussi bien celles enregistrées dans votre compte que celles conservées localement sur l’appareil. Vous pouvez rouvrir, poursuivre, enregistrer en PDF (version médecin) ou supprimer chaque préparation. Cela sert à la vue d’ensemble et à l’organisation.",
+    myPrepP2:
+      "MedScoutX structure et documente uniquement vos propres indications et n’en déduit aucun diagnostic, traitement ni degré d’urgence. Vos préparations vous appartiennent ; un cabinet ne voit que ce que vous partagez délibérément via le parcours prévu ou une autorisation. Une utilisation sans cabinet connecté est possible, et aucune transmission automatique n’a lieu.",
+    myPrepP3:
+      "Lors du test alpha, vous pouvez vérifier : les préparations enregistrées peuvent-elles être retrouvées, rouvertes, poursuivies, enregistrées en PDF et supprimées, la recherche et le filtre fonctionnent-ils, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
   },
   footer: {
     imprint: "Mentions légales",

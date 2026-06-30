@@ -175,6 +175,14 @@ export default {
       "Usted registra, edita y elimina las entradas; solo se documenta su propia información, por ejemplo diagnósticos ya conocidos. MedScoutX no establece ningún diagnóstico, no ofrece ninguna recomendación terapéutica y no toma ninguna decisión de urgencia. Una consulta vinculada solo puede ver esta información con una conexión activa y su autorización.",
     healthHistoryP3:
       "En la prueba alfa puede comprobar: ¿se pueden registrar, editar y eliminar las alergias y los diagnósticos, funciona el cambio entre secciones, y son comprensibles los estados de carga, vacíos y de error?",
+    myPrepButton: "Más información sobre « Mis preparaciones »",
+    myPrepTitle: "Mis preparaciones",
+    myPrepP1:
+      "En « Mis preparaciones » encuentra sus preparaciones guardadas para las consultas médicas en un solo lugar, tanto las guardadas en su cuenta como las conservadas localmente en el dispositivo. Puede volver a abrir, continuar, guardar en PDF (versión para el médico) o eliminar cada preparación. Sirve para tener una visión general y organizarse.",
+    myPrepP2:
+      "MedScoutX solo estructura y documenta sus propios datos y no deduce de ellos ningún diagnóstico, tratamiento ni grado de urgencia. Sus preparaciones le pertenecen; una consulta solo ve lo que usted comparte deliberadamente a través de la vía prevista o una autorización. Es posible el uso sin una consulta vinculada y no se realiza ninguna transmisión automática.",
+    myPrepP3:
+      "En la prueba alfa puede comprobar: ¿se pueden encontrar de nuevo, volver a abrir, continuar, guardar en PDF y eliminar las preparaciones guardadas, funcionan la búsqueda y el filtro, y son comprensibles los estados de carga, vacíos y de error?",
   },
   footer: {
     imprint: "Aviso legal",

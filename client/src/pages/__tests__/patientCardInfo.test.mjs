@@ -31,6 +31,7 @@ test("exactly the designated patient-hub tiles expose an info button", () => {
     "hubLinkMyPractice",
     "hubLinkMedicationPlans",
     "hubLinkPreVisit",
+    "hubLinkMyPrep",
     "hubLinkHealthProfile",
     "hubLinkVaccinations",
     "hubLinkVitals",
@@ -41,7 +42,6 @@ test("exactly the designated patient-hub tiles expose an info button", () => {
   }
   // Tiles from other hub groups / main overview must NOT get an info button.
   for (const other of [
-    "hubLinkMyPrep",
     "hubLinkMedaLive",
     "hubLinkSymptom",
     "hubLinkOrientation",

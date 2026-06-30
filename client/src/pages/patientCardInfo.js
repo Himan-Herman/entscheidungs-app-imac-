@@ -96,6 +96,12 @@ export const PATIENT_CARD_INFO = {
     titleKey: "preVisitTitle",
     paragraphKeys: ["preVisitP1", "preVisitP2", "preVisitP3"],
   },
+  hubLinkMyPrep: {
+    titleId: "patient-card-info-my-prep-title",
+    buttonKey: "myPrepButton",
+    titleKey: "myPrepTitle",
+    paragraphKeys: ["myPrepP1", "myPrepP2", "myPrepP3"],
+  },
   hubLinkHealthProfile: {
     titleId: "patient-card-info-health-profile-title",
     buttonKey: "healthProfileButton",
