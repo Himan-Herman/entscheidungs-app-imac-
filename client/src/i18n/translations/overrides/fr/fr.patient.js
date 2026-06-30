@@ -148,6 +148,15 @@ export default {
       "Ne renseignez que les informations nécessaires. La visibilité ou le partage avec un cabinet se fait uniquement conformément à une connexion existante et à votre autorisation. MedScoutX n’effectue aucun diagnostic, aucune recommandation thérapeutique ni évaluation de l’urgence.",
     healthProfileP3:
       "Lors du test alpha, vous pouvez vérifier : les informations de base peuvent-elles être saisies et modifiées, les états de chargement, vides et d’erreur sont-ils compréhensibles, et le contenu reste-t-il privé sans connexion active ? Les contenus doivent être vérifiés par vous et/ou votre cabinet.",
+
+    vaccinationsButton: "Plus d’informations sur le carnet de vaccination",
+    vaccinationsTitle: "Carnet de vaccination",
+    vaccinationsP1:
+      "Dans le carnet de vaccination, vous documentez vous-même vos vaccinations et gardez une vue d’ensemble — avec des informations telles que le vaccin, la maladie, la date, la dose, le numéro de lot, le lieu et des notes, éventuellement avec un document téléversé.",
+    vaccinationsP2:
+      "Les entrées sont votre propre documentation et ne constituent pas une preuve de vaccination officielle. MedScoutX ne donne aucune recommandation de vaccination, n’effectue aucun contrôle d’exhaustivité ou de calendrier vaccinal ni évaluation médicale. Un cabinet connecté ne peut voir vos entrées qu’avec une connexion active et votre autorisation. Les décisions de vaccination doivent être clarifiées avec un personnel médical.",
+    vaccinationsP3:
+      "Lors du test alpha, vous pouvez vérifier : les entrées peuvent-elles être saisies, modifiées et supprimées, le téléversement facultatif d’un document fonctionne-t-il, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
   },
   footer: {
     imprint: "Mentions légales",

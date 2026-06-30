@@ -32,6 +32,7 @@ test("exactly the designated patient-hub tiles expose an info button", () => {
     "hubLinkMedicationPlans",
     "hubLinkPreVisit",
     "hubLinkHealthProfile",
+    "hubLinkVaccinations",
   ]);
   for (const key of PATIENT_INFO_TILE_KEYS) {
     assert.equal(hasPatientCardInfo(key), true, `${key} has info`);

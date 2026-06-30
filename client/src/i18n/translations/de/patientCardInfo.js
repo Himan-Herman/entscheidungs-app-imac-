@@ -149,4 +149,13 @@ export default {
     "MedScoutX strukturiert und dokumentiert nur Ihre eigenen Angaben und leitet daraus keine Diagnose, Therapie oder Dringlichkeit ab. Eine Praxis sieht nur, was Sie bewusst über den vorgesehenen Weg teilen; ohne Freigabe wird nichts übermittelt. Die Vorbereitung können Sie auch ohne verbundene Praxis nutzen – es erfolgt keine automatische Synchronisation.",
   preVisitP3:
     "Im Alpha-Test können Sie prüfen: Lässt sich die Vorbereitung Schritt für Schritt durchführen, entsteht eine verständliche Arztversion, und bleiben Lade-, Leer- und Fehlerzustände sowie Ihre Sprache sauber?",
+
+  vaccinationsButton: "Mehr Informationen zum Impfpass",
+  vaccinationsTitle: "Impfpass",
+  vaccinationsP1:
+    "Im Impfpass dokumentieren Sie Ihre Impfungen selbst und behalten den Überblick – mit Angaben wie Impfstoff, Krankheit, Datum, Dosis, Chargennummer, Ort und Notizen, optional mit einem hochgeladenen Dokument.",
+  vaccinationsP2:
+    "Die Einträge sind Ihre eigene Dokumentation und kein offizieller Impfnachweis. MedScoutX gibt keine Impfempfehlung, nimmt keine Vollständigkeits- oder STIKO-Prüfung und keine medizinische Bewertung vor. Eine verbundene Praxis kann Ihre Einträge nur bei aktiver Verbindung und erteilter Freigabe sehen. Impfentscheidungen klären Sie mit medizinischem Fachpersonal.",
+  vaccinationsP3:
+    "Im Alpha-Test können Sie prüfen: Lassen sich Einträge erfassen, bearbeiten und löschen, funktioniert ein optionaler Dokument-Upload, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 };

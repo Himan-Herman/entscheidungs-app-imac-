@@ -14,6 +14,16 @@ const publicDemo = {
   backToSite: "Back to home",
   loginCta: "Go to sign-in",
 
+  notice: {
+    badge: "DemoDay / Trade fair",
+    title: "Welcome to MedScoutX",
+    body: "A public sample demo is available for the trade fair and DemoDay. You can explore MedScoutX without an account, using sample data, and get to know the most important areas.",
+    body2: "Existing users can still sign in as usual. The demo contains sample data only and shows no real patient data.",
+    primary: "View the trade fair demo",
+    secondary: "Sign in",
+    dismiss: "Continue to home page",
+  },
+
   sectionPatient: "For patients",
   sectionPatientSub: "What insured people can see and manage in MedScoutX.",
   sectionPractice: "For practices",

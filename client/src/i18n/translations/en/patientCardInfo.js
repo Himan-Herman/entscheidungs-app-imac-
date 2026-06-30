@@ -149,4 +149,13 @@ export default {
     "MedScoutX only structures and documents your own information and derives no diagnosis, therapy or urgency from it. A practice only sees what you deliberately share via the intended path; without your release, nothing is transmitted. You can also use the preparation without a connected practice — there is no automatic synchronization.",
   preVisitP3:
     "In the alpha test you can check: can the preparation be done step by step, does an understandable doctor version result, and do loading, empty and error states as well as your language stay clean?",
+
+  vaccinationsButton: "More information about the vaccination record",
+  vaccinationsTitle: "Vaccination record",
+  vaccinationsP1:
+    "In the vaccination record you document your vaccinations yourself and keep an overview — with details such as vaccine, disease, date, dose, lot number, location and notes, optionally with an uploaded document.",
+  vaccinationsP2:
+    "The entries are your own documentation and not an official vaccination certificate. MedScoutX gives no vaccination recommendation, performs no completeness or vaccination-schedule check and no medical assessment. A connected practice can only see your entries with an active connection and your granted permission. Vaccination decisions should be clarified with medical professionals.",
+  vaccinationsP3:
+    "In the alpha test you can check: can entries be recorded, edited and deleted, does an optional document upload work, and are loading, empty and error states understandable?",
 };

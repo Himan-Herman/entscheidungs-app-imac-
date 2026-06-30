@@ -148,6 +148,15 @@ export default {
       "Indique solo la información necesaria. La visibilidad o el uso compartido con una consulta se produce únicamente conforme a una conexión existente y a su autorización. MedScoutX no realiza ningún diagnóstico, recomendación terapéutica ni evaluación de la urgencia.",
     healthProfileP3:
       "En la prueba alfa puede comprobar: ¿se pueden registrar y editar los datos básicos, son comprensibles los estados de carga, vacíos y de error, y permanece privado el contenido sin una conexión activa? Los contenidos deben ser revisados por usted y/o su consulta.",
+
+    vaccinationsButton: "Más información sobre el registro de vacunación",
+    vaccinationsTitle: "Registro de vacunación",
+    vaccinationsP1:
+      "En el registro de vacunación documenta usted mismo sus vacunas y mantiene una vista general — con datos como la vacuna, la enfermedad, la fecha, la dosis, el número de lote, el lugar y notas, opcionalmente con un documento subido.",
+    vaccinationsP2:
+      "Las entradas son su propia documentación y no constituyen un comprobante de vacunación oficial. MedScoutX no ofrece ninguna recomendación de vacunación, no realiza ninguna comprobación de exhaustividad o del calendario de vacunación ni evaluación médica. Una consulta vinculada solo puede ver sus entradas con una conexión activa y su autorización. Las decisiones de vacunación deben aclararse con personal médico.",
+    vaccinationsP3:
+      "En la prueba alfa puede comprobar: ¿se pueden registrar, editar y eliminar las entradas, funciona la subida opcional de un documento, y son comprensibles los estados de carga, vacíos y de error?",
   },
   footer: {
     imprint: "Aviso legal",

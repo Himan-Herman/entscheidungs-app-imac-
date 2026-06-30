@@ -102,6 +102,12 @@ export const PATIENT_CARD_INFO = {
     titleKey: "healthProfileTitle",
     paragraphKeys: ["healthProfileP1", "healthProfileP2", "healthProfileP3"],
   },
+  hubLinkVaccinations: {
+    titleId: "patient-card-info-vaccinations-title",
+    buttonKey: "vaccinationsButton",
+    titleKey: "vaccinationsTitle",
+    paragraphKeys: ["vaccinationsP1", "vaccinationsP2", "vaccinationsP3"],
+  },
 };
 
 /** Hub-link keys that expose an info (ⓘ) button + modal. */

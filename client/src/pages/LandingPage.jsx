@@ -15,6 +15,7 @@ import {
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { isPublicDemoModeEnabled } from "../features/publicDemo/featureFlag.js";
+import PublicDemoNoticeModal from "../features/publicDemo/components/PublicDemoNoticeModal.jsx";
 import { resolveLanding } from "../i18n/translations/resolveLanding.js";
 import { LANDING_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useTheme } from "../ThemeMode";
@@ -165,6 +166,8 @@ export default function LandingPage() {
       <a href="#landing-main" className="landing-page__skip-link">
         {copy.skip}
       </a>
+
+      {showDemoEntry ? <PublicDemoNoticeModal /> : null}
 
       <header className="landing-page__header">
         <Link to="/" className="landing-page__brand" aria-label="MedScoutX home">

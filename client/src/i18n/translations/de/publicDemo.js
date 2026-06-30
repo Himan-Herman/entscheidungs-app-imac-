@@ -14,6 +14,16 @@ const publicDemo = {
   backToSite: "Zur Startseite",
   loginCta: "Zur Anmeldung",
 
+  notice: {
+    badge: "DemoDay / Messe",
+    title: "Willkommen bei MedScoutX",
+    body: "Für Messe und DemoDay ist eine öffentliche Beispiel-Demo verfügbar. Sie können MedScoutX ohne Konto mit Musterdaten ansehen und die wichtigsten Bereiche kennenlernen.",
+    body2: "Bestehende Nutzerinnen und Nutzer können sich weiterhin wie gewohnt einloggen. Die Demo enthält ausschließlich Beispieldaten und zeigt keine echten Patientendaten.",
+    primary: "Messe-Demo ansehen",
+    secondary: "Einloggen",
+    dismiss: "Weiter zur Startseite",
+  },
+
   sectionPatient: "Für Patient:innen",
   sectionPatientSub: "Was Versicherte in MedScoutX sehen und verwalten können.",
   sectionPractice: "Für Praxen",

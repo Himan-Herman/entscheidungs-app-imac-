@@ -148,6 +148,15 @@ export default {
       "Inserisci solo le informazioni necessarie. La visibilità o la condivisione con uno studio avviene esclusivamente in base a un collegamento esistente e alla tua autorizzazione. MedScoutX non effettua alcuna diagnosi, raccomandazione terapeutica né valutazione dell’urgenza.",
     healthProfileP3:
       "Nel test alpha puoi verificare: le informazioni di base possono essere registrate e modificate, gli stati di caricamento, vuoti e di errore sono comprensibili, e i contenuti restano privati senza un collegamento attivo? I contenuti devono essere verificati da te e/o dal tuo studio.",
+
+    vaccinationsButton: "Maggiori informazioni sul libretto delle vaccinazioni",
+    vaccinationsTitle: "Libretto delle vaccinazioni",
+    vaccinationsP1:
+      "Nel libretto delle vaccinazioni documenti tu stesso le tue vaccinazioni e mantieni la panoramica — con informazioni come vaccino, malattia, data, dose, numero di lotto, luogo e note, eventualmente con un documento caricato.",
+    vaccinationsP2:
+      "Le voci sono la tua documentazione personale e non costituiscono un certificato vaccinale ufficiale. MedScoutX non fornisce alcuna raccomandazione vaccinale, non effettua alcun controllo di completezza o del calendario vaccinale né valutazione medica. Uno studio collegato può vedere le tue voci solo con un collegamento attivo e la tua autorizzazione. Le decisioni sulle vaccinazioni vanno chiarite con personale medico.",
+    vaccinationsP3:
+      "Nel test alpha puoi verificare: le voci possono essere registrate, modificate ed eliminate, il caricamento facoltativo di un documento funziona, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
   },
   footer: {
     imprint: "Note legali",
