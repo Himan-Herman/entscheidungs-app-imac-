@@ -183,6 +183,14 @@ export default {
       "MedScoutX solo estructura y documenta sus propios datos y no deduce de ellos ningún diagnóstico, tratamiento ni grado de urgencia. Sus preparaciones le pertenecen; una consulta solo ve lo que usted comparte deliberadamente a través de la vía prevista o una autorización. Es posible el uso sin una consulta vinculada y no se realiza ninguna transmisión automática.",
     myPrepP3:
       "En la prueba alfa puede comprobar: ¿se pueden encontrar de nuevo, volver a abrir, continuar, guardar en PDF y eliminar las preparaciones guardadas, funcionan la búsqueda y el filtro, y son comprensibles los estados de carga, vacíos y de error?",
+    doctorsButton: "Más información sobre « Contactos clínicos »",
+    doctorsTitle: "Contactos clínicos",
+    doctorsP1:
+      "En « Contactos clínicos » guarda usted mismo a sus médicos y consultas como sus propios contactos, con nombre, consulta, especialidad, correo electrónico, teléfono, dirección y nota. Puede añadir, editar y eliminar contactos. Sirve para tener una visión general organizativa.",
+    doctorsP2:
+      "Sus contactos le pertenecen y son privados: solo usted puede verlos, una consulta no tiene acceso y no se realiza ningún uso compartido automático. Puede utilizar un contacto guardado para enviar un documento preparado por correo electrónico, pero solo con su consentimiento explícito. MedScoutX no elige al médico, no toma ninguna decisión sobre el especialista y no ofrece ninguna recomendación médica; solo ayuda a estructurar los contactos.",
+    doctorsP3:
+      "En la prueba alfa puede comprobar: ¿se pueden añadir, editar y eliminar los contactos, funcionan los enlaces al correo electrónico, el teléfono y la dirección, y son comprensibles los estados de carga, vacíos y de error?",
   },
   footer: {
     imprint: "Aviso legal",

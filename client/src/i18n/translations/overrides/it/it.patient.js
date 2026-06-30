@@ -183,6 +183,14 @@ export default {
       "MedScoutX struttura e documenta soltanto le tue indicazioni e non ne ricava alcuna diagnosi, terapia o livello di urgenza. Le tue preparazioni appartengono a te; uno studio vede solo ciò che condividi consapevolmente tramite il percorso previsto o un’autorizzazione. È possibile l’uso senza uno studio collegato e non avviene alcuna trasmissione automatica.",
     myPrepP3:
       "Nel test alpha puoi verificare: le preparazioni salvate si possono ritrovare, riaprire, proseguire, salvare in PDF ed eliminare, funzionano la ricerca e il filtro, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
+    doctorsButton: "Maggiori informazioni su « Contatti clinici »",
+    doctorsTitle: "Contatti clinici",
+    doctorsP1:
+      "In « Contatti clinici » salvi tu stesso i tuoi medici e studi come contatti personali — con nome, studio, specialità, e-mail, telefono, indirizzo e nota. Puoi aggiungere, modificare ed eliminare i contatti. Serve per avere una panoramica organizzativa.",
+    doctorsP2:
+      "I tuoi contatti appartengono a te e sono privati: solo tu puoi vederli, uno studio non vi ha accesso e non avviene alcuna condivisione automatica. Puoi usare un contatto salvato per inviare un documento preparato via e-mail — ma solo con il tuo consenso esplicito. MedScoutX non sceglie il medico, non prende alcuna decisione sullo specialista e non dà alcuna raccomandazione medica; aiuta soltanto a strutturare i contatti.",
+    doctorsP3:
+      "Nel test alpha puoi verificare: i contatti si possono aggiungere, modificare ed eliminare, funzionano i collegamenti a e-mail, telefono e indirizzo, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
   },
   footer: {
     imprint: "Note legali",

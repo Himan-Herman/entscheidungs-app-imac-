@@ -183,6 +183,14 @@ export default {
       "MedScoutX structure et documente uniquement vos propres indications et n’en déduit aucun diagnostic, traitement ni degré d’urgence. Vos préparations vous appartiennent ; un cabinet ne voit que ce que vous partagez délibérément via le parcours prévu ou une autorisation. Une utilisation sans cabinet connecté est possible, et aucune transmission automatique n’a lieu.",
     myPrepP3:
       "Lors du test alpha, vous pouvez vérifier : les préparations enregistrées peuvent-elles être retrouvées, rouvertes, poursuivies, enregistrées en PDF et supprimées, la recherche et le filtre fonctionnent-ils, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
+    doctorsButton: "Plus d’informations sur « Contacts médicaux »",
+    doctorsTitle: "Contacts médicaux",
+    doctorsP1:
+      "Dans « Contacts médicaux », vous enregistrez vous-même vos médecins et cabinets comme vos propres contacts — avec nom, cabinet, spécialité, e-mail, téléphone, adresse et note. Vous pouvez ajouter, modifier et supprimer des contacts. Cela sert à la vue d’ensemble organisationnelle.",
+    doctorsP2:
+      "Vos contacts vous appartiennent et sont privés : vous seul pouvez les voir, un cabinet n’y a pas accès et aucun partage automatique n’a lieu. Vous pouvez utiliser un contact enregistré pour envoyer un document préparé par e-mail — mais uniquement avec votre consentement explicite. MedScoutX ne choisit pas de médecin, ne prend aucune décision de spécialiste et ne donne aucune recommandation médicale ; il aide seulement à structurer les contacts.",
+    doctorsP3:
+      "Lors du test alpha, vous pouvez vérifier : les contacts peuvent-ils être ajoutés, modifiés et supprimés, les liens vers l’e-mail, le téléphone et l’adresse fonctionnent-ils, et les états de chargement, vides et d’erreur sont-ils compréhensibles ?",
   },
   footer: {
     imprint: "Mentions légales",

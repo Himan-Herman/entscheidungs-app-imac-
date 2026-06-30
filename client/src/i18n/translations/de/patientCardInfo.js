@@ -185,4 +185,13 @@ export default {
     "MedScoutX strukturiert und dokumentiert nur Ihre eigenen Angaben und leitet daraus keine Diagnose, Therapie oder Dringlichkeit ab. Ihre Vorbereitungen gehören Ihnen; eine Praxis sieht nur das, was Sie bewusst über den vorgesehenen Weg bzw. eine Freigabe teilen. Eine Nutzung ohne verbundene Praxis ist möglich, und es erfolgt keine automatische Übermittlung.",
   myPrepP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich gespeicherte Vorbereitungen wiederfinden, erneut öffnen, fortsetzen, als PDF sichern und löschen, funktionieren Suche und Filter, und sind Lade-, Leer- und Fehlerzustände verständlich?",
+
+  doctorsButton: "Mehr Informationen zum Ärztebuch",
+  doctorsTitle: "Ärztebuch",
+  doctorsP1:
+    "Im Ärztebuch speichern Sie selbst Ihre Ärztinnen, Ärzte und Praxen als eigene Kontakte – mit Name, Praxis, Fachgebiet, E-Mail, Telefon, Adresse und Notiz. Sie können Kontakte anlegen, bearbeiten und löschen. Das dient der organisatorischen Übersicht.",
+  doctorsP2:
+    "Ihre Kontakte gehören Ihnen und sind privat: Nur Sie sehen sie, eine Praxis hat keinen Zugriff, und es erfolgt keine automatische Weitergabe. Einen gespeicherten Kontakt können Sie nutzen, um ein vorbereitetes Dokument per E-Mail zu senden – aber nur mit Ihrer ausdrücklichen Zustimmung. MedScoutX trifft keine Arztwahl, keine Facharztentscheidung und gibt keine medizinische Empfehlung; es hilft nur, Kontakte zu strukturieren.",
+  doctorsP3:
+    "Im Alpha-Test können Sie prüfen: Lassen sich Kontakte anlegen, bearbeiten und löschen, funktionieren die Verknüpfungen zu E-Mail, Telefon und Adresse, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 };

@@ -185,4 +185,13 @@ export default {
     "MedScoutX only structures and documents your own information and derives no diagnosis, therapy or urgency from it. Your preparations belong to you; a practice only sees what you deliberately share via the intended path or a release. Use without a connected practice is possible, and there is no automatic transmission.",
   myPrepP3:
     "In the alpha test you can check: can saved preparations be found again, reopened, continued, saved as PDF and deleted, do search and filter work, and are loading, empty and error states understandable?",
+
+  doctorsButton: "More information about doctor contacts",
+  doctorsTitle: "Doctor contacts",
+  doctorsP1:
+    "In doctor contacts you save your doctors and practices as your own contacts — with name, practice, specialty, email, phone, address and note. You can add, edit and delete contacts. This serves organizational overview.",
+  doctorsP2:
+    "Your contacts belong to you and are private: only you can see them, a practice has no access, and there is no automatic sharing. You can use a saved contact to send a prepared document by email — but only with your explicit consent. MedScoutX makes no doctor choice, no specialist decision and no medical recommendation; it only helps to structure contacts.",
+  doctorsP3:
+    "In the alpha test you can check: can contacts be added, edited and deleted, do the links to email, phone and address work, and are loading, empty and error states understandable?",
 };
