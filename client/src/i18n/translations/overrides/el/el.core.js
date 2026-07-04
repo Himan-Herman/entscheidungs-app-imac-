@@ -103,7 +103,8 @@ export default {
       sub:
         "Εργαλεία για τη ροή προετοιμασίας πριν την επίσκεψη και ασφαλή διαβίβαση εγγράφων.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "Προετοιμασία για την ιατρική επίσκεψη",
+    hubLinkPreVisitSub: "Έναρξη νέας προετοιμασίας",
     hubLinkSymptom: "Δομημένη καταγραφή συμπτωμάτων",
     hubLinkImage: "Δομημένη περιγραφή εικόνας",
     hubLinkBody: "Χάρτης σώματος",

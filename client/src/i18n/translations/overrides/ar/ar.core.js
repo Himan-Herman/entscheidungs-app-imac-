@@ -102,7 +102,8 @@ export default {
       sub:
         "أدوات لتدفّق التحضير قبل اللقاء الطبي وتسليم المستندات بأمان.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "التحضير لزيارة الطبيب",
+    hubLinkPreVisitSub: "بدء تحضير جديد",
     hubLinkSymptom: "توثيق منظَّم للأعراض",
     hubLinkImage: "وصف منظَّم للصور",
     hubLinkBody: "الخريطة الجسدية",

@@ -76,6 +76,23 @@ export default {
     delete: "Remove",
     deleteConfirm: "Remove this medication?",
   },
+  supply: {
+    sectionTitle: "Supply & quantity (optional)",
+    hint: "If you fill these in, we automatically calculate when the package runs low – and flag it in time.",
+    packageTotalLabel: "Total amount in the package",
+    packageTotalPlaceholder: "e.g. 30",
+    unitLabel: "Unit",
+    unitPlaceholder: "e.g. tablets or ml",
+    dosePerIntakeLabel: "Amount per intake",
+    dosePerIntakePlaceholder: "e.g. 1",
+    timesPerDayLabel: "Intakes per day",
+    timesPerDayPlaceholder: "e.g. 2",
+    remainingLabel: "Supply",
+    remaining: "about {remaining} {unit} left · lasts until {date}",
+    unitFallback: "units",
+    low: "Runs out in {days} day(s) – please get a refill in good time.",
+    today: "Supply used up – please get a refill.",
+  },
   summary: {
     ctaTitle: "Summary & sharing",
     ctaHint:
@@ -141,5 +158,40 @@ export default {
       "You have no saved doctor contacts yet. Add a contact in the doctor book first.",
     sendManageContacts: "Manage doctor book",
     sendNoEmail: "This contact has no email address on file.",
+    pharmacy: {
+      title: "Pharmacy assistant – general hints",
+      intro:
+        "General hints generated automatically from your entries. This is NOT a complete interaction check and NOT a substitute for your pharmacy or doctor. Nothing is sent to any server.",
+      none:
+        "There are no general hints for your current list. This does NOT mean there are no interactions. Please still discuss your medications with your pharmacy or doctor.",
+      talkTo: "Please discuss this with your pharmacy or doctor.",
+      severityWarning: "Important",
+      severityInfo: "Hint",
+      medsLabel: "Affects",
+      disclaimer:
+        "A small, fixed set of well-known hints. No diagnosis, no treatment or dosage recommendation, not a complete check. When in doubt, always ask your pharmacy or doctor.",
+      rules: {
+        antibiotic_dairy: {
+          title: "Certain antibiotics and milk/calcium",
+          message:
+            "Some antibiotics (e.g. tetracyclines or certain “-floxacin” agents) should not be taken at the same time as milk, dairy products, calcium, magnesium or iron. Ideally keep about 2–3 hours between them.",
+        },
+        levothyroxine_fasting: {
+          title: "Take thyroid hormone (levothyroxine) on an empty stomach",
+          message:
+            "Levothyroxine works best on an empty stomach, about 30 minutes before breakfast, with some water – separate from coffee, milk, calcium or iron.",
+        },
+        anticoag_nsaid: {
+          title: "Blood thinners together with painkillers (NSAIDs)",
+          message:
+            "Blood thinners together with anti-inflammatory painkillers (e.g. ibuprofen, diclofenac, aspirin) can increase the risk of bleeding.",
+        },
+        double_anticoag: {
+          title: "Several blood thinners at the same time",
+          message:
+            "It looks like several blood-thinning medicines are being taken together. This can markedly increase the risk of bleeding.",
+        },
+      },
+    },
   },
 };

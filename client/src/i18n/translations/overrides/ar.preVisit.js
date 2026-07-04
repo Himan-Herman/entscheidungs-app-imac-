@@ -15,9 +15,13 @@ export default {
   },
   chrome: {
     backHome: "العودة إلى الرئيسية في MedScoutX",
+    backPatientHub: "العودة إلى منطقة المريض",
     moduleLabel: "التحضير لزيارة الطبيب",
+    libraryModuleLabel: "تحضيراتي",
     safety:
       "هذه الوحدة فقط لتحضير وتوثيق معلوماتك. لا تغني عن المشورة الطبية.",
+    librarySafety:
+      "أدر التحضيرات المحفوظة هنا. لا تتم مزامنة أي شيء تلقائياً — لا تظهر في هذه المكتبة إلا العناصر التي حفظتها أنت صراحةً.",
     navAria: "التنقّل قبل الموعد",
   },
   chat: {
@@ -50,10 +54,18 @@ export default {
     pageTitle: "MedScoutX — معاينة المستند",
     title: "إعداد مستند للطبيب",
     explanation:
-      "اختر اللغة التي يُنشَأ بها النسخة المنظّمة للطبيب.",
+      "يُنشأ ملف PDF للطبيب باللغة الألمانية. وتبقى عباراتك الأصلية مرفقة أيضًا بلغتك.",
     doctorLangLabel: "لغة النسخة الطبية",
     doctorLangHint:
-      "اختر اللغة التي سيقرأ بها الطبيب أو العيادة المستند.",
+      "تُنشأ النسخة المنظَّمة للطبيب وملف PDF المرسل إلى الجهة الطبية باللغة الألمانية.",
+    patientMetaSection: "بيانات المريض الاختيارية",
+    patientMetaNote:
+      "هذه البيانات اختيارية وتساعد الجهة الطبية على مطابقة المستند.",
+    patientNameLabel: "الاسم",
+    patientDateOfBirthLabel: "تاريخ الميلاد",
+    patientEmailLabel: "البريد الإلكتروني",
+    patientPhoneLabel: "الهاتف (اختياري)",
+    patientGenderOrSalutationLabel: "الجنس / المخاطبة",
     sectionStructured: "نسخة طبية منظّمة",
     sectionOriginal: "عبارات المريض الأصلية",
     disclaimer:
@@ -92,8 +104,11 @@ export default {
       "تم حفظ التحضير في حسابك.",
     accountSaveError:
       "تعذّر حفظ التحضير الآن.",
+    emailPdfConsent:
+      "أؤكد أن هذا المستند قد يحتوي على معلومات صحية شخصية وأنه يمكن إرساله إلى الجهة / الطبيب المحدد.",
     sessionTitleDe: "تحضير موعد الطبيب",
     sessionTitleEn: "Doctor visit preparation",
+    sessionTitleAr: "التحضير للموعد الطبي",
     viewMyPreparations: "عرض تحضيراتي",
     mainNavAria:
       "النسخة الطبية، تصدير PDF، العودة إلى المراجعة",
@@ -105,6 +120,33 @@ export default {
       preExistingConditions: "الأمراض المزمنة المعروفة",
       relevantDocuments: "مستندات ذات صلة",
       patientQuestions: "أسئلة للطبيب",
+    },
+    assistantQuestions: {
+      sectionTitle: "أسئلة إرشادية للتحضير للمحادثة",
+      intro:
+        "استنادًا إلى معلوماتك حول الأعراض والتطور والتحضير، يقترح الذكاء الاصطناعي بعض الأسئلة التنظيمية. هذه الأسئلة مخصّصة لتحضيرك الشخصي فقط ولا تتضمن تقييمًا طبيًا.",
+      noAiAnswersNote:
+        "يتم اقتراح الأسئلة فقط. تبقى إجاباتك جزءًا من تحضيرك الشخصي ولا تُرسل إلى الطبيب كقسم منفصل من الأسئلة.",
+      generateButton: "إنشاء أسئلة إرشادية",
+      generating: "جارٍ إعداد الأسئلة…",
+      successStatus:
+        "تم إنشاء الأسئلة الإرشادية استنادًا إلى معلوماتك.",
+      error:
+        "تعذّر إنشاء الأسئلة الإرشادية الآن. يمكنك المتابعة أو المحاولة لاحقًا.",
+      staleHint:
+        "تغيّرت معلوماتك. أنشئ الأسئلة من جديد لتطابق الحالة الحالية.",
+      emptyState:
+        "لا توجد أسئلة إرشادية بعد. يمكنك إنشاؤها اختياريًا للتحضير للمحادثة.",
+      questionCounter: "السؤال {{current}} من {{total}}",
+      doctorVersionLabel: "صياغة للطبيب",
+      answerLabel: "إجابتك",
+      answerPlaceholder:
+        "إجابتك بكلماتك أنت فقط — وليست من الذكاء الاصطناعي…",
+      previewSectionTitle: "أسئلة إرشادية لتحضيرك",
+      pdfSectionHeading: "أسئلة إرشادية (إجابات المريض)",
+      pdfPatientQuestionLabel: "السؤال (المريض)",
+      pdfDoctorQuestionLabel: "السؤال (الطبيب)",
+      pdfPatientAnswerLabel: "إجابة المريض",
     },
   },
   localHistory: {
@@ -153,5 +195,9 @@ export default {
     statusDraft: "مسودّة",
     statusPdfCreated: "تم إنشاء PDF",
     statusCompleted: "مكتمل",
+    linkCases: "فتح تسلسلاتي",
+    startNewPrep: "بدء تحضير جديد",
+    retryLoad: "إعادة المحاولة",
+    listAriaLabel: "التحضيرات المحفوظة",
   },
 };

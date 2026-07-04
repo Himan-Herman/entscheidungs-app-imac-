@@ -15,9 +15,13 @@ export default {
   },
   chrome: {
     backHome: "Voltar ao início do MedScoutX",
+    backPatientHub: "Voltar à área do paciente",
     moduleLabel: "Preparação da consulta médica",
+    libraryModuleLabel: "As minhas preparações",
     safety:
       "Este módulo serve apenas para preparar e documentar a sua informação. Não substitui o parecer médico.",
+    librarySafety:
+      "Gerir aqui as preparações guardadas. Nada é sincronizado automaticamente — nesta biblioteca aparecem apenas os itens que guardou explicitamente.",
     navAria: "Navegação de pré-consulta",
   },
   chat: {
@@ -50,10 +54,18 @@ export default {
     pageTitle: "MedScoutX — Pré-visualização do documento",
     title: "Preparar documento para o médico",
     explanation:
-      "Escolha o idioma em que deve ser criada a versão estruturada para o médico.",
+      "O PDF para o médico é criado em alemão. As suas declarações originais permanecem também anexadas no seu idioma.",
     doctorLangLabel: "Idioma da versão para o médico",
     doctorLangHint:
-      "Escolha o idioma em que o médico ou a unidade devem ler o documento.",
+      "A versão estruturada para o médico e o PDF enviado à unidade são criados em alemão.",
+    patientMetaSection: "Informações opcionais do utente",
+    patientMetaNote:
+      "Estas informações são opcionais e ajudam a unidade a identificar o documento.",
+    patientNameLabel: "Nome",
+    patientDateOfBirthLabel: "Data de nascimento",
+    patientEmailLabel: "E-mail",
+    patientPhoneLabel: "Telefone (opcional)",
+    patientGenderOrSalutationLabel: "Género / tratamento",
     sectionStructured: "Versão estruturada para o médico",
     sectionOriginal: "Declarações originais do utente",
     disclaimer:
@@ -92,8 +104,11 @@ export default {
       "A preparação foi guardada na sua conta.",
     accountSaveError:
       "Não foi possível guardar a preparação agora.",
+    emailPdfConsent:
+      "Confirmo que este documento pode conter dados pessoais de saúde e que pode ser enviado à unidade / ao médico selecionado.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Doctor visit preparation",
+    sessionTitlePt: "Preparação da consulta médica",
     viewMyPreparations: "Ver as minhas preparações",
     mainNavAria:
       "Versão para o médico, exportar PDF, voltar ao resumo",
@@ -105,6 +120,33 @@ export default {
       preExistingConditions: "Doenças pré-existentes conhecidas",
       relevantDocuments: "Documentos relevantes",
       patientQuestions: "Perguntas para o médico",
+    },
+    assistantQuestions: {
+      sectionTitle: "Perguntas de orientação para a consulta",
+      intro:
+        "Com base nas suas informações sobre sintomas, evolução e preparação, a IA sugere algumas perguntas estruturantes. Servem apenas para a sua própria preparação e não incluem avaliação médica.",
+      noAiAnswersNote:
+        "São sugeridas apenas perguntas. As suas respostas permanecem parte da sua preparação pessoal e não são enviadas ao médico como um bloco separado de perguntas.",
+      generateButton: "Criar perguntas de orientação",
+      generating: "A preparar perguntas…",
+      successStatus:
+        "As perguntas de orientação foram criadas com base nas suas informações.",
+      error:
+        "Não foi possível criar as perguntas de orientação neste momento. Pode continuar ou tentar novamente mais tarde.",
+      staleHint:
+        "As suas informações mudaram. Gere novamente as perguntas para que correspondam ao estado atual.",
+      emptyState:
+        "Ainda não existem perguntas de orientação. Pode criá-las opcionalmente para se preparar para a conversa.",
+      questionCounter: "Pergunta {{current}} de {{total}}",
+      doctorVersionLabel: "Formulação para o médico",
+      answerLabel: "A sua resposta",
+      answerPlaceholder:
+        "A sua resposta nas suas próprias palavras — apenas sua, não da IA…",
+      previewSectionTitle: "Perguntas de orientação para a sua preparação",
+      pdfSectionHeading: "Perguntas de orientação (respostas do utente)",
+      pdfPatientQuestionLabel: "Pergunta (utente)",
+      pdfDoctorQuestionLabel: "Pergunta (médico)",
+      pdfPatientAnswerLabel: "Resposta do utente",
     },
   },
   localHistory: {
@@ -153,5 +195,9 @@ export default {
     statusDraft: "Rascunho",
     statusPdfCreated: "PDF criado",
     statusCompleted: "Concluído",
+    linkCases: "Abrir os meus casos",
+    startNewPrep: "Iniciar nova preparação",
+    retryLoad: "Tentar novamente",
+    listAriaLabel: "Preparações guardadas",
   },
 };

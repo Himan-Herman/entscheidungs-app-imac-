@@ -102,7 +102,8 @@ export default {
       sub:
         "ئامراز بۆ ڕەوتی ئامادەکاری پێش چاوپێکەوتن و ڕادەستکردنی بەڵگەنامە بە ئاسایش.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "ئامادەکاری چاوپێکەوتنی پزیشکی",
+    hubLinkPreVisitSub: "دەستپێکردنی ئامادەکاریی نوێ",
     hubLinkSymptom: "تۆمارکردنی ڕێکخراوی ئاڵامەکان",
     hubLinkImage: "ڕێکخستنی وێنە",
     hubLinkBody: "نەخشەی جەستە",

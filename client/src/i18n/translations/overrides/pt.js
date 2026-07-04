@@ -112,6 +112,17 @@ export default {
     cancel: "Cancelar",
     close: "Fechar",
   },
+  roleEntry: {
+    patientHub: {
+      pageTitle: "Área do paciente — MedScoutX",
+      heading: "Área do paciente",
+      sub:
+        "Preparação e documentação estruturadas — não substituem o aconselhamento médico.",
+      classic: "Vista clássica (todos os módulos)",
+    },
+    hubLinkPreVisit: "Preparar a consulta médica",
+    hubLinkPreVisitSub: "Iniciar nova preparação",
+  },
   forgotPassword: {
     title: "Redefinir palavra-passe",
     text: "Introduza o e-mail. Enviaremos uma ligação.",

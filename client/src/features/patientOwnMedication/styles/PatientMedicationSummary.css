@@ -233,6 +233,23 @@
   color: var(--ms-color-text, #0f172a);
   overflow-wrap: anywhere;
 }
+.pmed-preview__supply-warn {
+  margin: 0.6rem 0 0 2.3rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: #fefce8;
+  border: 1px solid #eab308;
+  border-left: 4px solid #eab308;
+  color: #854d0e;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+:root[data-theme="dark"] .pmed-preview__supply-warn {
+  background: rgba(234, 179, 8, 0.14);
+  color: #fde68a;
+  border-color: #ca8a04;
+  border-left-color: #eab308;
+}
 .pmed-preview__disclaimer {
   margin: 1.4rem 0 0;
   padding-top: 1rem;
@@ -442,6 +459,132 @@
   .pmed-summary__controls .pmed-btn {
     flex: 1 1 100%;
   }
+}
+
+/* ---- Pharmacy assistant ---- */
+.pharm {
+  margin-bottom: 2rem;
+  padding: 1.4rem 1.3rem;
+  border: 1px solid var(--ms-color-border, #e2e8f0);
+  border-radius: var(--ms-radius-lg, 16px);
+  background: var(--ms-color-surface, #fff);
+}
+.pharm__title {
+  font-size: 1.2rem;
+  font-weight: 720;
+  margin: 0 0 0.4rem;
+}
+.pharm__intro {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ms-color-text-secondary, #475569);
+  margin: 0 0 1rem;
+}
+.pharm__none {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ms-color-text-secondary, #475569);
+  background: var(--ms-color-bg-subtle, #f8fafc);
+  border: 1px solid var(--ms-color-border, #e2e8f0);
+  border-radius: var(--ms-radius-md, 10px);
+  padding: 0.8rem 0.95rem;
+  margin: 0 0 1rem;
+}
+.pharm__list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.pharm__item {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--ms-color-border, #e2e8f0);
+  border-left-width: 5px;
+  border-radius: var(--ms-radius-md, 12px);
+  background: var(--ms-color-bg-subtle, #f8fafc);
+}
+.pharm__item--warning {
+  border-color: var(--ms-color-danger, #dc2626);
+  border-left-color: var(--ms-color-danger, #dc2626);
+  background: var(--ms-color-danger-bg, #fef2f2);
+}
+.pharm__item--info {
+  border-left-color: var(--ms-color-accent, #0d9488);
+}
+.pharm__badge {
+  flex-shrink: 0;
+  font-size: 1.3rem;
+  line-height: 1.4;
+}
+.pharm__item--warning .pharm__badge {
+  color: var(--ms-color-danger, #dc2626);
+}
+.pharm__item--info .pharm__badge {
+  color: var(--ms-color-accent, #0e7490);
+}
+.pharm__body {
+  min-width: 0;
+}
+.pharm__severity {
+  margin: 0 0 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.pharm__item--warning .pharm__severity {
+  color: var(--ms-color-danger, #b91c1c);
+}
+.pharm__item--info .pharm__severity {
+  color: var(--ms-color-accent, #0e7490);
+}
+.pharm__item-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.35rem;
+  color: var(--ms-color-text, #0f172a);
+}
+.pharm__meds {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+  color: var(--ms-color-text, #0f172a);
+  overflow-wrap: anywhere;
+}
+.pharm__meds-label {
+  font-weight: 700;
+  color: var(--ms-color-text-secondary, #475569);
+}
+.pharm__message {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ms-color-text, #0f172a);
+}
+.pharm__talk {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ms-color-text-secondary, #334155);
+}
+.pharm__item--warning .pharm__talk {
+  color: var(--ms-color-danger, #b91c1c);
+}
+.pharm__disclaimer {
+  margin: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--ms-color-border, #e2e8f0);
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--ms-color-text-muted, #64748b);
+}
+:root[data-theme="dark"] .pharm__item--warning {
+  background: rgba(220, 38, 38, 0.12);
 }
 
 /* ---- Public shared view ---- */

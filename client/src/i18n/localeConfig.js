@@ -49,8 +49,8 @@ export const HEADER_SELECTABLE_LOCALE_CODES = ["de", "en"];
 /** Public landing page: full UI in DE, EN, FR, ES, or IT. */
 export const LANDING_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it"];
 
-/** Patient workspace: full UI in DE, EN, FR, ES, IT, TR, RU, or UK. */
-export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it", "tr", "ru", "uk"];
+/** Patient workspace: full UI in DE, EN, FR, ES, IT, TR, RU, UK, PT, AR, FA, CKB, KU, EL, RO, or PL. */
+export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it", "tr", "ru", "uk", "pt", "ar", "fa", "ckb", "ku", "el", "ro", "pl"];
 
 /** Practice workspace: full UI in DE, EN, FR, ES, or IT. */
 export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it"];

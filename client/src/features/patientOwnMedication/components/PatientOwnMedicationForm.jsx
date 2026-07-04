@@ -10,6 +10,10 @@ const EMPTY = {
   startDate: "",
   endDate: "",
   instructions: "",
+  packageTotal: "",
+  unit: "",
+  dosePerIntake: "",
+  timesPerDay: "",
   reminderEnabled: false,
 };
 
@@ -74,6 +78,10 @@ export default function PatientOwnMedicationForm({
       startDate: fields.startDate || "",
       endDate: fields.endDate || "",
       instructions: String(fields.instructions || "").trim(),
+      packageTotal: String(fields.packageTotal || "").trim(),
+      unit: String(fields.unit || "").trim(),
+      dosePerIntake: String(fields.dosePerIntake || "").trim(),
+      timesPerDay: String(fields.timesPerDay || "").trim(),
       reminderEnabled: reminderConsent && fields.reminderEnabled === true,
       createdAt: initial?.createdAt,
     });
@@ -196,6 +204,79 @@ export default function PatientOwnMedicationForm({
           onChange={(e) => set("instructions", e.target.value)}
         />
       </div>
+
+      <fieldset className="patient-own-med__supply-fieldset">
+        <legend className="patient-own-med__legend">{t.supply.sectionTitle}</legend>
+        <p className="patient-own-med__hint">{t.supply.hint}</p>
+
+        <div className="patient-own-med__row">
+          <div className="patient-own-med__field">
+            <label className="patient-own-med__label" htmlFor={`${formId}-total`}>
+              {t.supply.packageTotalLabel}
+            </label>
+            <input
+              id={`${formId}-total`}
+              className="patient-own-med__input"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="any"
+              value={fields.packageTotal}
+              onChange={(e) => set("packageTotal", e.target.value)}
+              placeholder={t.supply.packageTotalPlaceholder}
+            />
+          </div>
+          <div className="patient-own-med__field">
+            <label className="patient-own-med__label" htmlFor={`${formId}-unit`}>
+              {t.supply.unitLabel}
+            </label>
+            <input
+              id={`${formId}-unit`}
+              className="patient-own-med__input"
+              type="text"
+              value={fields.unit}
+              onChange={(e) => set("unit", e.target.value)}
+              placeholder={t.supply.unitPlaceholder}
+              autoComplete="off"
+            />
+          </div>
+        </div>
+
+        <div className="patient-own-med__row">
+          <div className="patient-own-med__field">
+            <label className="patient-own-med__label" htmlFor={`${formId}-dose`}>
+              {t.supply.dosePerIntakeLabel}
+            </label>
+            <input
+              id={`${formId}-dose`}
+              className="patient-own-med__input"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="any"
+              value={fields.dosePerIntake}
+              onChange={(e) => set("dosePerIntake", e.target.value)}
+              placeholder={t.supply.dosePerIntakePlaceholder}
+            />
+          </div>
+          <div className="patient-own-med__field">
+            <label className="patient-own-med__label" htmlFor={`${formId}-times`}>
+              {t.supply.timesPerDayLabel}
+            </label>
+            <input
+              id={`${formId}-times`}
+              className="patient-own-med__input"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              step="1"
+              value={fields.timesPerDay}
+              onChange={(e) => set("timesPerDay", e.target.value)}
+              placeholder={t.supply.timesPerDayPlaceholder}
+            />
+          </div>
+        </div>
+      </fieldset>
 
       <div className="patient-own-med__checkbox-row">
         <input

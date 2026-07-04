@@ -1,4 +1,6 @@
 import { daysUntilEnd } from "../patientOwnMedicationStore.js";
+import { computeSupply, isRunningLow } from "../supplyCalc.js";
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 
 /**
  * @param {{
@@ -6,12 +8,35 @@ import { daysUntilEnd } from "../patientOwnMedicationStore.js";
  *   onEdit: () => void;
  *   onDelete: () => void;
  *   labels: object;
+ *   lang?: string;
  * }} props
  */
-export default function PatientOwnMedicationCard({ entry, onEdit, onDelete, labels: t }) {
+export default function PatientOwnMedicationCard({
+  entry,
+  onEdit,
+  onDelete,
+  labels: t,
+  lang = "de",
+}) {
   const daysLeft = daysUntilEnd(entry.endDate);
   const showEndWarning =
     typeof daysLeft === "number" && daysLeft >= 0 && daysLeft <= 3;
+
+  const supply = computeSupply(entry);
+  const runningLow = isRunningLow(supply, 2);
+  const runOutDate = supply
+    ? (() => {
+        try {
+          return supply.runOutDate.toLocaleDateString(getPrimaryIntlLocale(lang), {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+        } catch {
+          return "";
+        }
+      })()
+    : "";
 
   return (
     <article className="patient-own-med__card">
@@ -35,6 +60,22 @@ export default function PatientOwnMedicationCard({ entry, onEdit, onDelete, labe
       {entry.endDate ? (
         <p className="patient-own-med__card-line">
           <span className="patient-own-med__card-k">{t.fieldEnd}:</span> {entry.endDate}
+        </p>
+      ) : null}
+      {supply ? (
+        <p className="patient-own-med__card-line patient-own-med__supply-info">
+          <span className="patient-own-med__card-k">{t.supply.remainingLabel}:</span>{" "}
+          {t.supply.remaining
+            .replace("{remaining}", String(Math.round(supply.remaining)))
+            .replace("{unit}", supply.unit || t.supply.unitFallback)
+            .replace("{date}", runOutDate)}
+        </p>
+      ) : null}
+      {runningLow ? (
+        <p className="patient-own-med__supply-warn" role="status">
+          {supply.daysLeft <= 0
+            ? t.supply.today
+            : t.supply.low.replace("{days}", String(supply.daysLeft))}
         </p>
       ) : null}
       {showEndWarning ? (

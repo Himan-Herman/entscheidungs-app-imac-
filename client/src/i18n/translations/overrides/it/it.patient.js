@@ -553,6 +553,23 @@ export default {
       delete: "Rimuovi",
       deleteConfirm: "Rimuovere questo farmaco?",
     },
+    supply: {
+      sectionTitle: "Scorta e quantità (facoltativo)",
+      hint: "Se compili questi campi, calcoliamo automaticamente quando la confezione sta per finire – e te lo segnaliamo in tempo.",
+      packageTotalLabel: "Quantità totale nella confezione",
+      packageTotalPlaceholder: "es. 30",
+      unitLabel: "Unità",
+      unitPlaceholder: "es. compresse o ml",
+      dosePerIntakeLabel: "Quantità per assunzione",
+      dosePerIntakePlaceholder: "es. 1",
+      timesPerDayLabel: "Assunzioni al giorno",
+      timesPerDayPlaceholder: "es. 2",
+      remainingLabel: "Scorta",
+      remaining: "circa {remaining} {unit} rimasti · bastano fino al {date}",
+      unitFallback: "unità",
+      low: "Finisce tra {days} giorno/i – procurati una nuova confezione per tempo.",
+      today: "Scorta esaurita – procurati una nuova confezione.",
+    },
     summary: {
       ctaTitle: "Riepilogo e condivisione",
       ctaHint:
@@ -619,6 +636,41 @@ export default {
         "Non hai ancora contatti medici salvati. Aggiungi prima un contatto nella rubrica medici.",
       sendManageContacts: "Gestisci rubrica medici",
       sendNoEmail: "Per questo contatto non è registrato alcun indirizzo e-mail.",
+      pharmacy: {
+        title: "Assistente farmacia – indicazioni generali",
+        intro:
+          "Indicazioni generali generate automaticamente dalle tue voci. NON è un controllo completo delle interazioni e NON sostituisce la farmacia o il medico. Non viene inviato nulla a un server.",
+        none:
+          "Non ci sono indicazioni generali per il tuo elenco attuale. Questo NON significa che non ci siano interazioni. Parla comunque dei tuoi farmaci con la tua farmacia o il tuo medico.",
+        talkTo: "Parlane con la tua farmacia o il tuo medico.",
+        severityWarning: "Importante",
+        severityInfo: "Nota",
+        medsLabel: "Riguarda",
+        disclaimer:
+          "Piccola selezione fissa di indicazioni ben note. Nessuna diagnosi, nessuna raccomandazione terapeutica o di dosaggio, nessun controllo completo. In caso di dubbio, chiedi sempre alla farmacia o al medico.",
+        rules: {
+          antibiotic_dairy: {
+            title: "Alcuni antibiotici e latte/calcio",
+            message:
+              "Alcuni antibiotici (es. tetracicline o alcuni principi attivi in « -floxacina ») non dovrebbero essere assunti contemporaneamente a latte, latticini, calcio, magnesio o ferro. Meglio mantenere circa 2–3 ore di distanza.",
+          },
+          levothyroxine_fasting: {
+            title: "Assumere l’ormone tiroideo (levotiroxina) a digiuno",
+            message:
+              "La levotiroxina agisce meglio a digiuno, circa 30 minuti prima di colazione, con un po’ d’acqua – separata da caffè, latte, calcio o ferro.",
+          },
+          anticoag_nsaid: {
+            title: "Anticoagulanti insieme ad antidolorifici (FANS)",
+            message:
+              "Gli anticoagulanti insieme ad antidolorifici antinfiammatori (es. ibuprofene, diclofenac, aspirina) possono aumentare il rischio di sanguinamento.",
+          },
+          double_anticoag: {
+            title: "Più anticoagulanti contemporaneamente",
+            message:
+              "Sembra che vengano assunti insieme più farmaci anticoagulanti. Questo può aumentare notevolmente il rischio di sanguinamento.",
+          },
+        },
+      },
     },
   },
 

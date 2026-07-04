@@ -15,9 +15,13 @@ export default {
   },
   chrome: {
     backHome: "Vegere malpera sereke ya MedScoutX",
+    backPatientHub: "Vegere herêma nexweş",
     moduleLabel: "Amadekirina serdana tenduristî",
+    libraryModuleLabel: "Amadekirinên min",
     safety:
       "Ev modûl tenê ji bo amadekirina û belgekirina agahiyên te ye; şîreta tenduristî nagire.",
+    librarySafety:
+      "Amadekirinên tomarkirî li vir birêve bibe. Tiştek bi xweber nayê hevdemkirin — tenê wan tiştan dibînî ku tu bi eşkere tomarkiriye.",
     navAria: "Navîgasyona berî-serdanê",
   },
   chat: {
@@ -50,10 +54,18 @@ export default {
     pageTitle: "MedScoutX — Pêşdîtinî belgeyê",
     title: "Belge ji bo doktor amade bike",
     explanation:
-      "Zimanê ku guhertoya rêzdar ji bo doktor divê tê de were çêkirin hilbijêre.",
+      "PDF ji bo doktor bi almanî tê çêkirin. Ravekirinên te yên resen jî wekî pêvek bi zimanê xwe dimînin.",
     doctorLangLabel: "Zimanê guhertoya ji bo doktor",
     doctorLangHint:
-      "Zimanê ku doktor an koça tenduristî divê belgeyê bixwîne hilbijêre.",
+      "Guhertoya rêzdar ji bo doktor û PDF ya ku ji bo saziyayê tê şandin bi almanî tê çêkirin.",
+    patientMetaSection: "Agahiyên bijarte yên nexweş",
+    patientMetaNote:
+      "Ev agahî bijarte ne û saziyayê ji bo nasandina belgeyê alîkar dikin.",
+    patientNameLabel: "Nav",
+    patientDateOfBirthLabel: "Roja jidayikbûnê",
+    patientEmailLabel: "E-name",
+    patientPhoneLabel: "Telefon (bijarte)",
+    patientGenderOrSalutationLabel: "Zayend / xitab",
     sectionStructured: "Guhertoya rêzdar ji bo doktor",
     sectionOriginal: "Ravekirinên resen ên nexweş",
     disclaimer:
@@ -92,8 +104,11 @@ export default {
       "Amadekirin di hesabê de hate tomar kirin.",
     accountSaveError:
       "Niha tomarkirin bi ser neket.",
+    emailPdfConsent:
+      "Ez piştrast dikim ku ev belge dikare agahiyên kesane yên tenduristiyê hebe û ji bo saziya / doktorê hilbijartî were şandin.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Amadekirina hevdîtina bijîşkî",
+    sessionTitleKu: "Amadekirina serdana tenduristî",
     viewMyPreparations: "Amadekirinên min bibîne",
     mainNavAria:
       "Guhertoya ji bo doktor, PDF derxe, vegerê kurteyê",
@@ -105,6 +120,33 @@ export default {
       preExistingConditions: "Nexweşiyên berê yên nenas",
       relevantDocuments: "Belgeyên girêdar",
       patientQuestions: "Pirs ji bo doktor",
+    },
+    assistantQuestions: {
+      sectionTitle: "Pirsên rêber ji bo axaftinê",
+      intro:
+        "Li ser bingeha agahiyên te derbarê belîşan, pêşketin û amadekirinê de, AI çend pirsên sazkar pêşniyar dike. Ev tenê ji bo amadekirina te ye û nirxandina tenduristî tê de tune ye.",
+      noAiAnswersNote:
+        "Tenê pirs tên pêşniyarkirin. Bersivên te beşek ji amadekirina xwe dimînin û wekî blokeke cuda ji bo doktor nayên şandin.",
+      generateButton: "Pirsên rêber çêbike",
+      generating: "Pirs tên amadekirin…",
+      successStatus:
+        "Pirsên rêber li ser bingeha agahiyên te hatin çêkirin.",
+      error:
+        "Niha pirsên rêber nehatin çêkirin. Tu dikarî berdewam bikî an paşê dîsa biceribînî.",
+      staleHint:
+        "Agahiyên te guhertine. Pirsan dîsa çêbike da ku bi rewşa niha re biguncin.",
+      emptyState:
+        "Hîn pirsên rêber tune ne. Heke tu bixwazî, ji bo amadekirina axaftinê wan çêbike.",
+      questionCounter: "Pirs {{current}} ji {{total}}",
+      doctorVersionLabel: "Formulasyona ji bo doktor",
+      answerLabel: "Bersiva te",
+      answerPlaceholder:
+        "Bersiva te bi gotinên xwe — tenê ji te, ne ji AI…",
+      previewSectionTitle: "Pirsên rêber ji bo amadekirina te",
+      pdfSectionHeading: "Pirsên rêber (bersivên nexweş)",
+      pdfPatientQuestionLabel: "Pirs (nexweş)",
+      pdfDoctorQuestionLabel: "Pirs (doktor)",
+      pdfPatientAnswerLabel: "Bersiva nexweş",
     },
   },
   localHistory: {
@@ -153,5 +195,9 @@ export default {
     statusDraft: "Taslaq",
     statusPdfCreated: "PDF hate çêkirin",
     statusCompleted: "Qediya",
+    linkCases: "Rêzên min veke",
+    startNewPrep: "Amadekirineke nû dest pê bike",
+    retryLoad: "Dîsa biceribîne",
+    listAriaLabel: "Amadekirinên tomarkirî",
   },
 };

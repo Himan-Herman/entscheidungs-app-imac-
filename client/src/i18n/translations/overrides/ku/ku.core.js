@@ -102,7 +102,8 @@ export default {
       sub:
         "Amûr ji bo herikîna amadekirina berî hevdîtina bijîşkî û radestkirina belgeyan bi ewlehî.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "Amadekirina serdana tenduristî",
+    hubLinkPreVisitSub: "Amadekirineke nû dest pê bike",
     hubLinkSymptom: "Belgekirina belîşan bi rêzî",
     hubLinkImage: "Wekrkirina wêneyî ya rêzdar",
     hubLinkBody: "Nexşeya laşê",

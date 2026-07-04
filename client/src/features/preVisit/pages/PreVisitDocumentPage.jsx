@@ -675,7 +675,23 @@ export default function PreVisitDocumentPage() {
                       ? t.sessionTitleRu || t.sessionTitleEn
                       : language === "uk"
                         ? t.sessionTitleUk || t.sessionTitleEn
-                  : t.sessionTitleEn,
+                        : language === "pt"
+                          ? t.sessionTitlePt || t.sessionTitleEn
+                          : language === "ar"
+                            ? t.sessionTitleAr || t.sessionTitleEn
+                            : language === "fa"
+                              ? t.sessionTitleFa || t.sessionTitleEn
+                              : language === "ckb"
+                                ? t.sessionTitleCkb || t.sessionTitleEn
+                                : language === "ku"
+                                  ? t.sessionTitleKu || t.sessionTitleEn
+                                  : language === "el"
+                                    ? t.sessionTitleEl || t.sessionTitleEn
+                                    : language === "ro"
+                                      ? t.sessionTitleRo || t.sessionTitleEn
+                                      : language === "pl"
+                                        ? t.sessionTitlePl || t.sessionTitleEn
+                                : t.sessionTitleEn,
         status: latest.pdfDownloaded ? "pdf_created" : "draft",
         pdfDownloaded: !!latest.pdfDownloaded,
         ...(caseLinkId ? { preVisitCaseId: caseLinkId } : {}),

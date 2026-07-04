@@ -171,6 +171,7 @@ export default function PatientMedicationPlansListPage() {
                 <PatientOwnMedicationCard
                   entry={entry}
                   labels={t}
+                  lang={language}
                   onEdit={() => {
                     setShowForm(false);
                     setEditing(entry);

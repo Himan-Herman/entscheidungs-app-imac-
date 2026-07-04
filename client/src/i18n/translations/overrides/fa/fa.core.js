@@ -102,7 +102,8 @@ export default {
       sub:
         "ابزار برای جریان آماده‌سازی قبل از جلسه و تحویل امن مستند.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "آماده‌سازی ویزیت پزشک",
+    hubLinkPreVisitSub: "شروع آماده‌سازی جدید",
     hubLinkSymptom: "ثبت ساخت‌یافتهٔ علائم",
     hubLinkImage: "توضیح ساخت‌یافتهٔ تصاویر",
     hubLinkBody: "نقشهٔ بدن",

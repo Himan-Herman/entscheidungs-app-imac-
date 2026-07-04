@@ -553,6 +553,23 @@ export default {
       delete: "Eliminar",
       deleteConfirm: "¿Eliminar este medicamento?",
     },
+    supply: {
+      sectionTitle: "Existencias y cantidad (opcional)",
+      hint: "Si completa estos campos, calculamos automáticamente cuándo se agota el envase – y se lo avisamos a tiempo.",
+      packageTotalLabel: "Cantidad total del envase",
+      packageTotalPlaceholder: "p. ej. 30",
+      unitLabel: "Unidad",
+      unitPlaceholder: "p. ej. comprimidos o ml",
+      dosePerIntakeLabel: "Cantidad por toma",
+      dosePerIntakePlaceholder: "p. ej. 1",
+      timesPerDayLabel: "Tomas al día",
+      timesPerDayPlaceholder: "p. ej. 2",
+      remainingLabel: "Existencias",
+      remaining: "quedan unos {remaining} {unit} · alcanza hasta el {date}",
+      unitFallback: "unidades",
+      low: "Se agota en {days} día(s) – consiga reposición a tiempo.",
+      today: "Existencias agotadas – consiga reposición.",
+    },
     summary: {
       ctaTitle: "Resumen y uso compartido",
       ctaHint:
@@ -619,6 +636,41 @@ export default {
         "Aún no tiene contactos médicos guardados. Añada primero un contacto en la agenda de médicos.",
       sendManageContacts: "Gestionar agenda de médicos",
       sendNoEmail: "Este contacto no tiene dirección de correo registrada.",
+      pharmacy: {
+        title: "Asistente de farmacia – avisos generales",
+        intro:
+          "Avisos generales generados automáticamente a partir de sus entradas. NO es una comprobación completa de interacciones y NO sustituye a su farmacia ni a su médico. No se envía nada a ningún servidor.",
+        none:
+          "No hay avisos generales para su lista actual. Esto NO significa que no existan interacciones. Comente igualmente sus medicamentos con su farmacia o su médico.",
+        talkTo: "Coméntelo con su farmacia o su médico.",
+        severityWarning: "Importante",
+        severityInfo: "Aviso",
+        medsLabel: "Afecta a",
+        disclaimer:
+          "Pequeña selección fija de avisos bien conocidos. Sin diagnóstico, sin recomendación de tratamiento o dosis, sin comprobación completa. En caso de duda, pregunte siempre a su farmacia o a su médico.",
+        rules: {
+          antibiotic_dairy: {
+            title: "Ciertos antibióticos y la leche/el calcio",
+            message:
+              "Algunos antibióticos (p. ej. tetraciclinas o ciertos principios activos en « -floxacino ») no deben tomarse al mismo tiempo que leche, productos lácteos, calcio, magnesio o hierro. Lo ideal es dejar unas 2–3 horas de diferencia.",
+          },
+          levothyroxine_fasting: {
+            title: "Tomar la hormona tiroidea (levotiroxina) en ayunas",
+            message:
+              "La levotiroxina actúa mejor en ayunas, unos 30 minutos antes del desayuno, con un poco de agua – separada del café, la leche, el calcio o el hierro.",
+          },
+          anticoag_nsaid: {
+            title: "Anticoagulantes junto con analgésicos (AINE)",
+            message:
+              "Los anticoagulantes junto con analgésicos antiinflamatorios (p. ej. ibuprofeno, diclofenaco, aspirina) pueden aumentar el riesgo de sangrado.",
+          },
+          double_anticoag: {
+            title: "Varios anticoagulantes al mismo tiempo",
+            message:
+              "Parece que se están tomando juntos varios medicamentos anticoagulantes. Esto puede aumentar notablemente el riesgo de sangrado.",
+          },
+        },
+      },
     },
   },
 

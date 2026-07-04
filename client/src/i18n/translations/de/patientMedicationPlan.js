@@ -78,6 +78,23 @@ export default {
     delete: "Entfernen",
     deleteConfirm: "Dieses Medikament wirklich entfernen?",
   },
+  supply: {
+    sectionTitle: "Vorrat & Menge (optional)",
+    hint: "Wenn Sie diese Angaben ausfüllen, berechnen wir automatisch, wann die Packung zur Neige geht – und weisen Sie rechtzeitig darauf hin.",
+    packageTotalLabel: "Gesamtmenge in der Packung",
+    packageTotalPlaceholder: "z. B. 30",
+    unitLabel: "Einheit",
+    unitPlaceholder: "z. B. Tabletten oder ml",
+    dosePerIntakeLabel: "Menge pro Einnahme",
+    dosePerIntakePlaceholder: "z. B. 1",
+    timesPerDayLabel: "Einnahmen pro Tag",
+    timesPerDayPlaceholder: "z. B. 2",
+    remainingLabel: "Vorrat",
+    remaining: "noch ca. {remaining} {unit} · reicht bis {date}",
+    unitFallback: "Einheiten",
+    low: "Läuft in {days} Tag(en) aus – bitte rechtzeitig Nachschub besorgen.",
+    today: "Vorrat aufgebraucht – bitte Nachschub besorgen.",
+  },
   summary: {
     ctaTitle: "Zusammenfassung & Teilen",
     ctaHint:
@@ -144,5 +161,40 @@ export default {
       "Sie haben noch keine Arztkontakte gespeichert. Legen Sie zuerst einen Kontakt im Ärztebuch an.",
     sendManageContacts: "Ärztebuch verwalten",
     sendNoEmail: "Für diesen Kontakt ist keine E-Mail-Adresse hinterlegt.",
+    pharmacy: {
+      title: "Apotheken-Assistent – allgemeine Hinweise",
+      intro:
+        "Automatisch aus Ihren Einträgen erstellte, allgemeine Hinweise. Dies ist KEINE vollständige Wechselwirkungsprüfung und KEIN Ersatz für Apotheke oder Arzt. Es wird nichts an einen Server gesendet.",
+      none:
+        "Für Ihre aktuelle Liste gibt es keine allgemeinen Hinweise. Das bedeutet NICHT, dass keine Wechselwirkungen bestehen. Bitte besprechen Sie Ihre Medikamente trotzdem mit Ihrer Apotheke oder Ihrem Arzt.",
+      talkTo: "Bitte mit Ihrer Apotheke oder Ihrem Arzt besprechen.",
+      severityWarning: "Wichtig",
+      severityInfo: "Hinweis",
+      medsLabel: "Betrifft",
+      disclaimer:
+        "Kleine, feste Auswahl allgemein bekannter Hinweise. Keine Diagnose, keine Therapie- oder Dosierungsempfehlung, keine vollständige Prüfung. Im Zweifel immer Apotheke oder Arzt fragen.",
+      rules: {
+        antibiotic_dairy: {
+          title: "Bestimmte Antibiotika und Milch/Kalzium",
+          message:
+            "Manche Antibiotika (z. B. Tetracycline oder bestimmte „-floxacin“-Wirkstoffe) sollten nicht gleichzeitig mit Milch, Milchprodukten, Kalzium, Magnesium oder Eisen eingenommen werden. Halten Sie am besten etwa 2–3 Stunden Abstand.",
+        },
+        levothyroxine_fasting: {
+          title: "Schilddrüsenhormon (Levothyroxin) nüchtern einnehmen",
+          message:
+            "Levothyroxin wirkt am besten nüchtern, etwa 30 Minuten vor dem Frühstück, mit etwas Wasser – getrennt von Kaffee, Milch, Kalzium oder Eisen.",
+        },
+        anticoag_nsaid: {
+          title: "Blutverdünner zusammen mit Schmerzmitteln (NSAR)",
+          message:
+            "Blutverdünner zusammen mit entzündungshemmenden Schmerzmitteln (z. B. Ibuprofen, Diclofenac, ASS) können das Blutungsrisiko erhöhen.",
+        },
+        double_anticoag: {
+          title: "Mehrere Blutverdünner gleichzeitig",
+          message:
+            "Es sieht so aus, als würden mehrere blutverdünnende Mittel zusammen eingenommen. Das kann das Blutungsrisiko deutlich erhöhen.",
+        },
+      },
+    },
   },
 };

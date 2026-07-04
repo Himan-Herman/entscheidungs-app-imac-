@@ -553,6 +553,23 @@ export default {
       delete: "Supprimer",
       deleteConfirm: "Supprimer ce médicament ?",
     },
+    supply: {
+      sectionTitle: "Stock et quantité (facultatif)",
+      hint: "Si vous renseignez ces champs, nous calculons automatiquement quand la boîte arrive à sa fin – et vous le signalons à temps.",
+      packageTotalLabel: "Quantité totale dans la boîte",
+      packageTotalPlaceholder: "p. ex. 30",
+      unitLabel: "Unité",
+      unitPlaceholder: "p. ex. comprimés ou ml",
+      dosePerIntakeLabel: "Quantité par prise",
+      dosePerIntakePlaceholder: "p. ex. 1",
+      timesPerDayLabel: "Prises par jour",
+      timesPerDayPlaceholder: "p. ex. 2",
+      remainingLabel: "Stock",
+      remaining: "environ {remaining} {unit} restant(s) · suffit jusqu’au {date}",
+      unitFallback: "unités",
+      low: "Épuisé dans {days} jour(s) – pensez à renouveler à temps.",
+      today: "Stock épuisé – pensez à renouveler.",
+    },
     summary: {
       ctaTitle: "Résumé et partage",
       ctaHint:
@@ -619,6 +636,41 @@ export default {
         "Vous n’avez encore aucun contact médecin enregistré. Ajoutez d’abord un contact dans le carnet de médecins.",
       sendManageContacts: "Gérer le carnet de médecins",
       sendNoEmail: "Aucune adresse e-mail n’est enregistrée pour ce contact.",
+      pharmacy: {
+        title: "Assistant pharmacie – conseils généraux",
+        intro:
+          "Conseils généraux générés automatiquement à partir de vos saisies. Ce n’est PAS un contrôle d’interactions complet et PAS un substitut à votre pharmacie ou à votre médecin. Rien n’est envoyé à un serveur.",
+        none:
+          "Aucun conseil général pour votre liste actuelle. Cela ne signifie PAS qu’il n’y a pas d’interactions. Veuillez tout de même en parler à votre pharmacie ou à votre médecin.",
+        talkTo: "Veuillez en parler à votre pharmacie ou à votre médecin.",
+        severityWarning: "Important",
+        severityInfo: "Conseil",
+        medsLabel: "Concerne",
+        disclaimer:
+          "Petite sélection fixe de conseils bien connus. Pas de diagnostic, pas de recommandation de traitement ou de posologie, pas de contrôle complet. En cas de doute, demandez toujours à votre pharmacie ou à votre médecin.",
+        rules: {
+          antibiotic_dairy: {
+            title: "Certains antibiotiques et le lait/calcium",
+            message:
+              "Certains antibiotiques (p. ex. tétracyclines ou certains principes actifs en « -floxacine ») ne doivent pas être pris en même temps que du lait, des produits laitiers, du calcium, du magnésium ou du fer. Espacez-les idéalement d’environ 2 à 3 heures.",
+          },
+          levothyroxine_fasting: {
+            title: "Prendre l’hormone thyroïdienne (lévothyroxine) à jeun",
+            message:
+              "La lévothyroxine agit mieux à jeun, environ 30 minutes avant le petit-déjeuner, avec un peu d’eau – séparément du café, du lait, du calcium ou du fer.",
+          },
+          anticoag_nsaid: {
+            title: "Anticoagulants avec des antalgiques (AINS)",
+            message:
+              "Les anticoagulants associés à des antalgiques anti-inflammatoires (p. ex. ibuprofène, diclofénac, aspirine) peuvent augmenter le risque de saignement.",
+          },
+          double_anticoag: {
+            title: "Plusieurs anticoagulants en même temps",
+            message:
+              "Il semble que plusieurs médicaments anticoagulants soient pris ensemble. Cela peut nettement augmenter le risque de saignement.",
+          },
+        },
+      },
     },
   },
 
