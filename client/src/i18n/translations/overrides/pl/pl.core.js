@@ -103,7 +103,8 @@ export default {
       sub:
         "Narzędzia do przepływu przygotowania przed wizytą i bezpiecznego przekazu dokumentów.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "Przygotowanie do wizyty lekarskiej",
+    hubLinkPreVisitSub: "Rozpocznij nowe przygotowanie",
     hubLinkSymptom: "Uporządkowany zapis objawów",
     hubLinkImage: "Uporządkowany opis obrazu",
     hubLinkBody: "Mapa ciała",

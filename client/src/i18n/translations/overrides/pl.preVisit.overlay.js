@@ -80,6 +80,10 @@ export default {
     timelineSummaryError:
       "Podsumowanie osi czasu nie mogło zostać teraz utworzone.",
     timelineSelectCaseFirst: "Najpierw wybierz wcześniejsze przygotowanie.",
+    explanation:
+      "PDF dla lekarza jest tworzony po niemiecku. Twoje oryginalne wypowiedzi pozostają również dołączone w Twoim własnym języku.",
+    doctorLangHint:
+      "Ustrukturyzowana wersja dla lekarza oraz PDF wysyłany do placówki są tworzone po niemiecku.",
     disclaimer:
       "Wersja dla personelu opiera się wyłącznie na Twoich sformułowaniach; nie jest oceną kliniczną i nie zawiera zaleceń terapeutycznych.",
     qrShareButton: "Kod QR (udostępnianie bez e-maila)",
@@ -134,6 +138,7 @@ export default {
     emailPdfNoPdf:
       "Nie udało się utworzyć PDF. Spróbuj ponownie.",
     sessionTitleEn: "Przygotowanie do wizyty lekarskiej",
+    sessionTitlePl: "Przygotowanie do wizyty lekarskiej",
   },
   pdf: {
     legalNotice:
@@ -313,5 +318,8 @@ export default {
   },
   accountHistory: {
     linkCases: "Otwórz moje sprawy",
+    startNewPrep: "Rozpocznij nowe przygotowanie",
+    retryLoad: "Spróbuj ponownie",
+    listAriaLabel: "Zapisane przygotowania",
   },
 };

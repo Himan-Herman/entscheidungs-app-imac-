@@ -112,6 +112,17 @@ export default {
     cancel: "Anulează",
     close: "Închide",
   },
+  roleEntry: {
+    patientHub: {
+      pageTitle: "Zona pacientului — MedScoutX",
+      heading: "Zona pacientului",
+      sub:
+        "Pregătire și documentare structurată — nu înlocuiesc îngrijirea medicală.",
+      classic: "Vizualizare clasică (toate modulele)",
+    },
+    hubLinkPreVisit: "Pregătire pentru consultația medicală",
+    hubLinkPreVisitSub: "Începeți o pregătire nouă",
+  },
   forgotPassword: {
     title: "Resetare parolă",
     text: "Introduceți e-mailul — vom trimite un link de resetare.",

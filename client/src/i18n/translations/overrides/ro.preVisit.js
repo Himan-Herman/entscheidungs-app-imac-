@@ -15,9 +15,13 @@ export default {
   },
   chrome: {
     backHome: "Înapoi la pagina principală MedScoutX",
+    backPatientHub: "Înapoi la zona pacientului",
     moduleLabel: "Pregătire pentru vizita medicală",
+    libraryModuleLabel: "Pregătirile mele",
     safety:
       "Acest modul servește exclusiv pregătirii și documentării informațiilor dumneavoastră; nu înlocuiește sfatul medical.",
+    librarySafety:
+      "Gestionați aici pregătirile salvate. Nimic nu se sincronizează automat — în această bibliotecă apar doar elementele pe care le-ați salvat explicit.",
     navAria: "Navigare înainte de vizită",
   },
   chat: {
@@ -50,10 +54,18 @@ export default {
     pageTitle: "MedScoutX — Previzualizare document",
     title: "Pregătiți documentul pentru medic",
     explanation:
-      "Alegeți limba în care va fi creată versiunea structurată pentru medic.",
+      "PDF-ul pentru medic este creat în limba germană. Declarațiile dumneavoastră originale rămân atașate și în limba proprie.",
     doctorLangLabel: "Limba versiunii pentru medic",
     doctorLangHint:
-      "Selectați limba în care medicul sau unitatea va citi documentul.",
+      "Versiunea structurată pentru medic și PDF-ul trimis către unitate sunt create în limba germană.",
+    patientMetaSection: "Informații opționale despre pacient",
+    patientMetaNote:
+      "Aceste informații sunt opționale și ajută unitatea să identifice documentul.",
+    patientNameLabel: "Nume",
+    patientDateOfBirthLabel: "Data nașterii",
+    patientEmailLabel: "E-mail",
+    patientPhoneLabel: "Telefon (opțional)",
+    patientGenderOrSalutationLabel: "Gen / formulă de adresare",
     sectionStructured: "Versiune structurată pentru medic",
     sectionOriginal: "Declarațiile originale ale pacientului",
     disclaimer:
@@ -92,8 +104,11 @@ export default {
       "Pregătirea a fost salvată în cont.",
     accountSaveError:
       "Salvarea pregătirii nu a reușit momentan.",
+    emailPdfConsent:
+      "Confirm că acest document poate conține date personale de sănătate și că poate fi trimis către unitatea / medicul selectat.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Doctor visit preparation",
+    sessionTitleRo: "Pregătire pentru vizita medicală",
     viewMyPreparations: "Pregătirile mele",
     mainNavAria:
       "Versiune pentru medic, export PDF, înapoi la rezumat",
@@ -105,6 +120,33 @@ export default {
       preExistingConditions: "Boli cronice cunoscute",
       relevantDocuments: "Documente relevante",
       patientQuestions: "Întrebări pentru medic",
+    },
+    assistantQuestions: {
+      sectionTitle: "Întrebări orientative pentru discuție",
+      intro:
+        "Pe baza informațiilor despre simptome, evoluție și pregătire, AI sugerează câteva întrebări structurante. Acestea sunt doar pentru propria dumneavoastră pregătire și nu includ evaluare medicală.",
+      noAiAnswersNote:
+        "Sunt sugerate doar întrebări. Răspunsurile dumneavoastră rămân parte a pregătirii personale și nu sunt trimise medicului ca bloc separat de întrebări.",
+      generateButton: "Creați întrebări orientative",
+      generating: "Se pregătesc întrebările…",
+      successStatus:
+        "Întrebările orientative au fost create pe baza informațiilor dumneavoastră.",
+      error:
+        "Întrebările orientative nu pot fi create acum. Puteți continua sau încerca din nou mai târziu.",
+      staleHint:
+        "Informațiile dumneavoastră s-au schimbat. Creați din nou întrebările pentru a corespunde situației actuale.",
+      emptyState:
+        "Încă nu există întrebări orientative. Le puteți crea opțional pentru pregătirea discuției.",
+      questionCounter: "Întrebarea {{current}} din {{total}}",
+      doctorVersionLabel: "Formulare pentru medic",
+      answerLabel: "Răspunsul dumneavoastră",
+      answerPlaceholder:
+        "Răspunsul dumneavoastră în propriile cuvinte — doar de la dumneavoastră, nu de la AI…",
+      previewSectionTitle: "Întrebări orientative pentru pregătirea dumneavoastră",
+      pdfSectionHeading: "Întrebări orientative (răspunsurile pacientului)",
+      pdfPatientQuestionLabel: "Întrebare (pacient)",
+      pdfDoctorQuestionLabel: "Întrebare (medic)",
+      pdfPatientAnswerLabel: "Răspunsul pacientului",
     },
   },
   localHistory: {
@@ -153,5 +195,9 @@ export default {
     statusDraft: "Ciornă",
     statusPdfCreated: "PDF creat",
     statusCompleted: "Finalizat",
+    linkCases: "Deschideți parcursurile mele",
+    startNewPrep: "Începeți o pregătire nouă",
+    retryLoad: "Încercați din nou",
+    listAriaLabel: "Pregătiri salvate",
   },
 };

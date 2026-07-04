@@ -15,9 +15,13 @@ export default {
   },
   chrome: {
     backHome: "Powrót do strony głównej MedScoutX",
+    backPatientHub: "Powrót do obszaru pacjenta",
     moduleLabel: "Przygotowanie do wizyty lekarskiej",
+    libraryModuleLabel: "Moje przygotowania",
     safety:
       "Ten moduł służy wyłącznie do przygotowania i dokumentacji Twoich informacji; nie zastępuje porady lekarskiej.",
+    librarySafety:
+      "Zarządzaj tutaj zapisanymi przygotowaniami. Nic nie synchronizuje się automatycznie — w tej bibliotece pojawiają się tylko elementy zapisane przez Ciebie świadomie.",
     navAria: "Nawigacja przedwizytowa",
   },
   chat: {
@@ -50,10 +54,10 @@ export default {
     pageTitle: "MedScoutX — Podgląd dokumentu",
     title: "Przygotuj dokument dla lekarza",
     explanation:
-      "Wybierz język, w którym ma zostać utworzona ustrukturyzowana wersja dla lekarza.",
+      "PDF dla lekarza jest tworzony po niemiecku. Twoje oryginalne wypowiedzi pozostają również dołączone w Twoim własnym języku.",
     doctorLangLabel: "Język wersji dla lekarza",
     doctorLangHint:
-      "Wybierz język, w którym lekarz lub placówka ma czytać dokument.",
+      "Ustrukturyzowana wersja dla lekarza oraz PDF wysyłany do placówki są tworzone po niemiecku.",
     sectionStructured: "Ustrukturyzowana wersja dla lekarza",
     sectionOriginal: "Oryginalne oświadczenia pacjenta",
     disclaimer:
@@ -94,6 +98,7 @@ export default {
       "Nie udało się teraz zapisać przygotowania.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Doctor visit preparation",
+    sessionTitlePl: "Przygotowanie do wizyty lekarskiej",
     viewMyPreparations: "Moje przygotowania",
     mainNavAria:
       "Wersja dla lekarza, eksport PDF, powrót do podsumowania",
@@ -105,6 +110,33 @@ export default {
       preExistingConditions: "Znane choroby przewlekłe",
       relevantDocuments: "Istotne dokumenty",
       patientQuestions: "Pytania do lekarza",
+    },
+    assistantQuestions: {
+      sectionTitle: "Pytania orientacyjne do rozmowy",
+      intro:
+        "Na podstawie Twoich informacji o objawach, przebiegu i przygotowaniu AI proponuje kilka porządkujących pytań. Służą one wyłącznie Twojemu własnemu przygotowaniu i nie zawierają oceny medycznej.",
+      noAiAnswersNote:
+        "Proponowane są tylko pytania. Twoje odpowiedzi pozostają częścią Twojego przygotowania i nie są wysyłane lekarzowi jako osobny blok pytań.",
+      generateButton: "Utwórz pytania orientacyjne",
+      generating: "Przygotowywanie pytań…",
+      successStatus:
+        "Pytania orientacyjne zostały utworzone na podstawie Twoich informacji.",
+      error:
+        "Nie udało się teraz utworzyć pytań orientacyjnych. Możesz kontynuować lub spróbować później.",
+      staleHint:
+        "Twoje informacje się zmieniły. Utwórz pytania ponownie, aby odpowiadały aktualnemu stanowi.",
+      emptyState:
+        "Nie ma jeszcze pytań orientacyjnych. Możesz utworzyć je opcjonalnie do przygotowania rozmowy.",
+      questionCounter: "Pytanie {{current}} z {{total}}",
+      doctorVersionLabel: "Sformułowanie dla lekarza",
+      answerLabel: "Twoja odpowiedź",
+      answerPlaceholder:
+        "Twoja odpowiedź własnymi słowami — tylko od Ciebie, nie od AI…",
+      previewSectionTitle: "Pytania orientacyjne do Twojego przygotowania",
+      pdfSectionHeading: "Pytania orientacyjne (odpowiedzi pacjenta)",
+      pdfPatientQuestionLabel: "Pytanie (pacjent)",
+      pdfDoctorQuestionLabel: "Pytanie (lekarz)",
+      pdfPatientAnswerLabel: "Odpowiedź pacjenta",
     },
   },
   localHistory: {
@@ -153,5 +185,8 @@ export default {
     statusDraft: "Szkic",
     statusPdfCreated: "Utworzono PDF",
     statusCompleted: "Zakończono",
+    startNewPrep: "Rozpocznij nowe przygotowanie",
+    retryLoad: "Spróbuj ponownie",
+    listAriaLabel: "Zapisane przygotowania",
   },
 };
