@@ -553,6 +553,73 @@ export default {
       delete: "Eliminar",
       deleteConfirm: "¿Eliminar este medicamento?",
     },
+    summary: {
+      ctaTitle: "Resumen y uso compartido",
+      ctaHint:
+        "Reúna todos sus medicamentos en una vista previa clara — como PDF, código QR o por correo a su médico.",
+      ctaButton: "Abrir el resumen",
+      pageTitle: "Mi resumen de medicamentos – MedScoutX",
+      heading: "Mi resumen de medicamentos",
+      intro:
+        "Todos los medicamentos que ha introducido, resumidos con claridad. La vista previa se actualiza automáticamente cada vez que añade o cambia un medicamento.",
+      back: "Volver a los medicamentos",
+      refresh: "Actualizar vista previa",
+      emptyTitle: "Aún no hay nada que resumir",
+      emptyText:
+        "Todavía no ha introducido medicamentos propios. Añada primero un medicamento.",
+      emptyCta: "Añadir medicamento",
+      nameLabel: "Su nombre (opcional, aparece en el documento)",
+      namePlaceholder: "p. ej. María Pérez",
+      generatedAt: "Resumido el {date}",
+      countLabel: "{count} medicamento(s)",
+      previewTitle: "Vista previa",
+      documentTitle: "Mis medicamentos actuales",
+      periodLabel: "Periodo",
+      addedLabel: "Añadido",
+      ongoing: "en curso",
+      disclaimer:
+        "Solo indicaciones propias del paciente. Sin diagnóstico, sin recomendación de tratamiento o dosis, sin comprobación de interacciones.",
+      footerBrand: "Creado localmente con MedScoutX",
+      footerPage: "Página",
+      exportTitle: "Descargar y compartir",
+      downloadPdf: "Descargar como PDF",
+      qrOpen: "Mostrar código QR",
+      qrTitle: "Código QR de su lista de medicamentos",
+      qrIntro:
+        "Al escanear se abre una vista de solo lectura de su lista de medicamentos — sin necesidad de una cuenta de MedScoutX. Los datos están dentro del propio código y no se envían a ningún servidor. Muestre el código solo a personas de confianza (p. ej. su médico o farmacia).",
+      qrTooLong:
+        "Su lista es demasiado larga para un código QR. Utilice en su lugar el PDF o el envío por correo.",
+      qrError: "No se pudo crear el código QR.",
+      qrCopy: "Copiar enlace",
+      qrCopied: "Enlace copiado",
+      qrDownload: "Guardar el QR como imagen",
+      qrPrint: "Imprimir",
+      qrClose: "Cerrar",
+      qrAlt: "Código QR con su lista de medicamentos",
+      sharedPageTitle: "Lista de medicamentos compartida – MedScoutX",
+      sharedBanner:
+        "Lista de medicamentos compartida — solo lectura. Son únicamente las indicaciones propias del paciente. Sin diagnóstico ni recomendación de tratamiento.",
+      sharedInvalidTitle: "No se encontró ninguna lista de medicamentos",
+      sharedInvalidText:
+        "Este enlace no contiene una lista de medicamentos válida.",
+      sendTitle: "Enviar a un médico (agenda de médicos)",
+      sendIntro:
+        "Envíe su lista de medicamentos en PDF por correo a un contacto de su agenda de médicos (p. ej. médico de cabecera o neurología).",
+      sendSelectLabel: "Elegir contacto",
+      sendSelectPlaceholder: "Seleccione…",
+      sendSelectRequired: "Elija un contacto.",
+      sendConsentLabel:
+        "Deseo enviar ahora este PDF por correo al contacto seleccionado.",
+      sendConsentRequired: "Confirme el envío.",
+      sendButton: "Enviar por correo",
+      sendBusy: "Enviando…",
+      sendSuccess: "Su lista de medicamentos se ha enviado.",
+      sendErrorGeneric: "No se pudo enviar el correo.",
+      sendNoContacts:
+        "Aún no tiene contactos médicos guardados. Añada primero un contacto en la agenda de médicos.",
+      sendManageContacts: "Gestionar agenda de médicos",
+      sendNoEmail: "Este contacto no tiene dirección de correo registrada.",
+    },
   },
 
   patientPracticeDocuments: {

@@ -6,7 +6,6 @@ import {
   formatLanguageDisplayName,
   getPrimaryIntlLocale,
 } from "../../../i18n/intlLocale.js";
-import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
   pickLocalized,
@@ -14,6 +13,7 @@ import {
 import { STRUCTURED_SECTION_ORDER } from "../constants/structuredDoctorLabels.js";
 import {
   computePreVisitAiFingerprint,
+  DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
   isAiDoctorVersionFresh,
   loadPreVisitSession,
   normalizeLongitudinalCase,
@@ -52,11 +52,6 @@ export default function PreVisitDocumentPage() {
     [t.assistantQuestions],
   );
 
-  const assistantPreview = useMemo(
-    () => normalizeAssistantQuestions(session?.assistantQuestions),
-    [session?.assistantQuestions],
-  );
-
   const pdfLabelOverrides = useMemo(
     () => ({
       patientAddedNewInformationLabel: t.timelinePatientAddedNewInformation,
@@ -80,6 +75,10 @@ export default function PreVisitDocumentPage() {
   );
 
   const [session, setSession] = useState(() => loadPreVisitSession());
+  const assistantPreview = useMemo(
+    () => normalizeAssistantQuestions(session?.assistantQuestions),
+    [session?.assistantQuestions],
+  );
   const autoDownloadPdfRef = useRef(false);
   const [consentLocalSave, setConsentLocalSave] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -143,11 +142,8 @@ export default function PreVisitDocumentPage() {
       navigate("/pre-visit", { replace: true });
       return;
     }
-    const preferredFromPractice = String(
-      s?.practiceContext?.preferredDoctorLanguage || ""
-    ).trim();
-    if (!s.doctorLanguage) {
-      setDoctorLanguage(preferredFromPractice || s.patientLanguage || "de");
+    if (s.doctorLanguage !== DEFAULT_PREVISIT_DOCTOR_LANGUAGE) {
+      setDoctorLanguage(DEFAULT_PREVISIT_DOCTOR_LANGUAGE);
       setSession(loadPreVisitSession());
       return;
     }
@@ -181,19 +177,18 @@ export default function PreVisitDocumentPage() {
   }, [t.pageTitle]);
 
   const patientLang = session?.patientLanguage || "de";
-
-  const doctorLang = useMemo(() => {
-    const fromSession = session?.doctorLanguage;
-    if (fromSession) return fromSession;
-    return patientLang;
-  }, [session?.doctorLanguage, patientLang]);
+  const doctorLang = DEFAULT_PREVISIT_DOCTOR_LANGUAGE;
 
   const langOptions = useMemo(
-    () =>
-      PRE_VISIT_LANGUAGE_OPTIONS.map((row) => ({
-        value: row.id,
-        label: formatLanguageDisplayName(language, row.id),
-      })),
+    () => [
+      {
+        value: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
+        label: formatLanguageDisplayName(
+          language,
+          DEFAULT_PREVISIT_DOCTOR_LANGUAGE
+        ),
+      },
+    ],
     [language]
   );
 
@@ -411,7 +406,7 @@ export default function PreVisitDocumentPage() {
     if (!latest?.answers) return;
     const blob = buildPreVisitPdfBlob({
       session: latest,
-      uiLanguage: language,
+      uiLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
       labels: pdfLabelOverrides,
     });
     if (!blob) {
@@ -421,9 +416,13 @@ export default function PreVisitDocumentPage() {
     setEmailPdfSending(true);
     try {
       const fd = new FormData();
-      fd.append("pdf", blob, getPreVisitPdfFilename(language));
+      fd.append(
+        "pdf",
+        blob,
+        getPreVisitPdfFilename(DEFAULT_PREVISIT_DOCTOR_LANGUAGE)
+      );
       fd.append("emailSendConsent", "true");
-      fd.append("locale", language);
+      fd.append("locale", DEFAULT_PREVISIT_DOCTOR_LANGUAGE);
       const storedId = String(loadPreVisitSession()?.cloudSessionId || "").trim();
       if (storedId) fd.append("preVisitSessionId", storedId);
       const res = await authFetch(
@@ -507,13 +506,13 @@ export default function PreVisitDocumentPage() {
     return labels[key] || "";
   }
 
-  function handleDownloadPdf() {
+  const handleDownloadPdf = useCallback(() => {
     const latest = loadPreVisitSession();
     if (!latest?.answers) return;
     try {
       const ok = generatePreVisitPdf({
         session: latest,
-        uiLanguage: language,
+        uiLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
         labels: pdfLabelOverrides,
       });
       if (!ok) return;
@@ -523,14 +522,19 @@ export default function PreVisitDocumentPage() {
     } catch {
       /* PDF generation failed — do not set pdfDownloaded */
     }
-  }
+  }, [pdfLabelOverrides]);
 
   useEffect(() => {
     if (!location.state?.autoDownloadPdf || autoDownloadPdfRef.current) return;
     if (!session?.answers || aiLoading) return;
     autoDownloadPdfRef.current = true;
     handleDownloadPdf();
-  }, [location.state?.autoDownloadPdf, session?.answers, aiLoading]);
+  }, [
+    aiLoading,
+    handleDownloadPdf,
+    location.state?.autoDownloadPdf,
+    session?.answers,
+  ]);
 
   async function handleOpenQrShare() {
     setQrBusy(true);
@@ -646,29 +650,10 @@ export default function PreVisitDocumentPage() {
       const caseLinkId =
         normalizeLongitudinalCase(latest.longitudinalCase)?.caseId || "";
 
-      const assistantItems = normalizeAssistantQuestions(
-        latest.assistantQuestions,
-      );
-      const answersWithAssistant =
-        assistantItems?.items?.length
-          ? {
-              ...answersForAccountWithTimeline,
-              assistantQuestionPrep: {
-                items: assistantItems.items.map((row) => ({
-                  id: row.id,
-                  patientQuestion: row.patientQuestion,
-                  doctorQuestion: row.doctorQuestion,
-                  patientAnswer: row.patientAnswer || "",
-                })),
-                safetyNotice: assistantItems.safetyNotice || "",
-              },
-            }
-          : answersForAccountWithTimeline;
-
       const payload = {
         patientLanguage: latest.patientLanguage || "de",
         doctorLanguage: dl || null,
-        answers: answersWithAssistant,
+        answers: answersForAccountWithTimeline,
         aiDoctorVersion: latest.aiDoctorVersion ?? null,
         aiSafetyNotice:
           typeof latest.aiSafetyNotice === "string" &&
@@ -684,6 +669,12 @@ export default function PreVisitDocumentPage() {
                 ? t.sessionTitleEs || t.sessionTitleEn
                 : language === "it"
                   ? t.sessionTitleIt || t.sessionTitleEn
+                  : language === "tr"
+                    ? t.sessionTitleTr || t.sessionTitleEn
+                    : language === "ru"
+                      ? t.sessionTitleRu || t.sessionTitleEn
+                      : language === "uk"
+                        ? t.sessionTitleUk || t.sessionTitleEn
                   : t.sessionTitleEn,
         status: latest.pdfDownloaded ? "pdf_created" : "draft",
         pdfDownloaded: !!latest.pdfDownloaded,
@@ -806,6 +797,7 @@ export default function PreVisitDocumentPage() {
             value={doctorLang}
             onChange={handleDoctorLangChange}
             aria-describedby="previsit-doctor-lang-hint"
+            disabled
           >
             {langOptions.map((o) => (
               <option key={o.value} value={o.value}>
@@ -1246,10 +1238,6 @@ export default function PreVisitDocumentPage() {
                             String(assistantPreview.items.length),
                           )}{" "}
                         — {item.patientQuestion}
-                      </p>
-                      <p className="pre-visit-doc__row-meta">
-                        {assistantLabels.doctorVersionLabel}:{" "}
-                        {item.doctorQuestion}
                       </p>
                       <p
                         className={`pre-visit-doc__row-value ${

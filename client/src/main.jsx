@@ -114,6 +114,12 @@ const PatientMedicationPlansListPage = lazy(() =>
 const PatientMedicationPlanDetailPage = lazy(() =>
   import("./features/medicationPlan/pages/PatientMedicationPlanDetailPage.jsx"),
 );
+const PatientMedicationSummaryPage = lazy(() =>
+  import("./features/patientOwnMedication/pages/PatientMedicationSummaryPage.jsx"),
+);
+const SharedMedicationViewPage = lazy(() =>
+  import("./features/patientOwnMedication/pages/SharedMedicationViewPage.jsx"),
+);
 const PatientPracticeDocumentsListPage = lazy(() =>
   import("./features/practiceDocuments/pages/PatientPracticeDocumentsListPage.jsx"),
 );
@@ -399,6 +405,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PatientMedicationPlansListPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/medication-plans/summary"
+                  element={
+                    <ProtectedRoute>
+                      <PatientMedicationSummaryPage />
                     </ProtectedRoute>
                   }
                 />
@@ -724,6 +738,7 @@ void runPwaBuildMigration().then(() => {
                 />
                 <Route path="/emergency/:token" element={<EmergencyPublicPage />} />
                 <Route path="/anamnesis/qr/:token" element={<AnamnesisPublicPage />} />
+                <Route path="/m" element={<SharedMedicationViewPage />} />
                 <Route
                   path="/practice/security"
                   element={

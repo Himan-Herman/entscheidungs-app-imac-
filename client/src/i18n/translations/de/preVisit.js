@@ -97,10 +97,10 @@ export default {
     pageTitle: "MedScoutX — Dokument",
     title: "Dokument für den Arzt vorbereiten",
     explanation:
-      "Wählen Sie die Sprache, in der die strukturierte Arztversion erstellt werden soll.",
+      "Die Arzt-PDF wird auf Deutsch erstellt. Ihre ursprünglichen Angaben bleiben zusätzlich in Ihrer eigenen Sprache erhalten.",
     doctorLangLabel: "Sprache für die Arztversion",
     doctorLangHint:
-      "Wählen Sie die Sprache, in der der Arzt oder die Praxis das Dokument lesen soll.",
+      "Die strukturierte Arztversion und die PDF für die Praxis werden auf Deutsch erstellt.",
     practiceContextTitle: "Ausgewählter Praxis-Kontext",
     practiceContextPractice: "Praxis",
     practiceContextTarget: "Ziel",
@@ -244,9 +244,9 @@ export default {
     assistantQuestions: {
       sectionTitle: "Orientierungsfragen für das Gespräch",
       intro:
-        "Auf Basis Ihrer Angaben zu Beschwerden, Verlauf und Vorbereitung werden einige strukturierende Fragen automatisch vorgeschlagen — formuliert wie eine medizinische Assistenz, ohne medizinische Bewertung.",
+        "Auf Basis Ihrer Angaben zu Beschwerden, Verlauf und Vorbereitung werden einige strukturierende Fragen automatisch vorgeschlagen. Sie dienen nur Ihrer eigenen Gesprächsvorbereitung — ohne medizinische Bewertung.",
       noAiAnswersNote:
-        "Es werden nur Fragen vorgeschlagen. Antworten geben Sie selbst in eigenen Worten; der Arzt liest diese im PDF.",
+        "Es werden nur Fragen vorgeschlagen. Ihre Antworten bleiben für Ihre eigene Vorbereitung und werden nicht als separater Fragenblock an die Ärztin oder den Arzt geschickt.",
       generateButton: "Orientierungsfragen erstellen",
       generating: "Fragen werden vorbereitet …",
       successStatus:
@@ -259,10 +259,10 @@ export default {
         "Noch keine Orientierungsfragen. Erstellen Sie sie optional, um sich auf das Gespräch vorzubereiten.",
       questionCounter: "Frage {{current}} von {{total}}",
       doctorVersionLabel: "Formulierung für den Arzt",
-      answerLabel: "Ihre Antwort (für den Arzt)",
+      answerLabel: "Ihre Antwort",
       answerPlaceholder:
         "Ihre Antwort in eigenen Worten …",
-      previewSectionTitle: "Orientierungsfragen mit Ihren Antworten",
+      previewSectionTitle: "Orientierungsfragen für Ihre Vorbereitung",
       pdfSectionHeading: "Orientierungsfragen (Patientenantworten)",
       pdfPatientQuestionLabel: "Frage (Patient)",
       pdfDoctorQuestionLabel: "Frage (Arzt)",

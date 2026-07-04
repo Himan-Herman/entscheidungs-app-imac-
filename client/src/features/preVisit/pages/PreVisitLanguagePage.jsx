@@ -5,11 +5,16 @@ import { getMessages } from "../../../i18n/translations/index.js";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
 import {
+  DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
   PREVISIT_LOCALE_STORAGE_KEY,
   loadPreVisitSession,
+  savePreVisitSession,
 } from "../constants/preVisitSession.js";
+import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
+import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
+import "../styles/PreVisitLanguagePage.css";
 
-function readInitialPatientLocale() {
+function readInitialPatientLocale(uiLanguage) {
   const allowed = new Set(PRE_VISIT_LANGUAGE_OPTIONS.map((o) => o.id));
   try {
     const stored = sessionStorage.getItem(PREVISIT_LOCALE_STORAGE_KEY);
@@ -20,18 +25,18 @@ function readInitialPatientLocale() {
   const session = loadPreVisitSession();
   const fromSession = session?.patientLanguage;
   if (fromSession && allowed.has(fromSession)) return fromSession;
+  if (allowed.has(uiLanguage)) return uiLanguage;
   return "de";
 }
-import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
-import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
-import "../styles/PreVisitLanguagePage.css";
 
 export default function PreVisitLanguagePage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const t = useMemo(() => getMessages(language).preVisit.language, [language]);
 
-  const [selectedLocale, setSelectedLocale] = useState(readInitialPatientLocale);
+  const [selectedLocale, setSelectedLocale] = useState(() =>
+    readInitialPatientLocale(language)
+  );
 
   useEffect(() => {
     document.title = t.pageTitle;
@@ -53,6 +58,18 @@ export default function PreVisitLanguagePage() {
       /* ignore quota / private mode */
     }
     const pv = loadPreVisitSession();
+    if (pv && typeof pv === "object") {
+      const next = {
+        ...pv,
+        patientLanguage: selectedLocale,
+        doctorLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
+      };
+      delete next.assistantQuestions;
+      delete next.aiDoctorVersion;
+      delete next.aiDoctorVersionFingerprint;
+      delete next.aiSafetyNotice;
+      savePreVisitSession(next);
+    }
     const qr =
       pv?.practiceContext?.qrToken != null
         ? String(pv.practiceContext.qrToken).trim()

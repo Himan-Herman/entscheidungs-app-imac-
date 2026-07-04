@@ -1,27 +1,19 @@
+import {
+  LOCALE_OPTIONS,
+  PATIENT_UI_SELECTABLE_LOCALE_CODES,
+} from "../../../i18n/localeConfig.js";
+
+const localeNameByCode = new Map(
+  LOCALE_OPTIONS.map((row) => [row.code, row.nativeName]),
+);
+
 /**
- * Display languages for the Pre-Visit module (patient + doctor selection).
- * Codes are stable for API / PDF / session (ISO 639-1 where applicable; regional codes where needed).
+ * Patient-facing Pre-Visit intake follows the same selectable locale set as
+ * the patient header language picker, so the language choices stay 1:1.
  */
-export const PRE_VISIT_LANGUAGE_OPTIONS = [
-  { id: "de", labelDe: "Deutsch", labelEn: "German" },
-  { id: "en", labelDe: "Englisch", labelEn: "English" },
-  { id: "fr", labelDe: "Französisch", labelEn: "French" },
-  { id: "es", labelDe: "Spanisch", labelEn: "Spanish" },
-  { id: "it", labelDe: "Italienisch", labelEn: "Italian" },
-  { id: "tr", labelDe: "Türkisch", labelEn: "Turkish" },
-  { id: "ar", labelDe: "Arabisch", labelEn: "Arabic" },
-  { id: "fa", labelDe: "Persisch (Farsi)", labelEn: "Persian (Farsi)" },
-  { id: "ckb", labelDe: "Kurdisch (Sorani)", labelEn: "Kurdish (Sorani)" },
-  { id: "ku", labelDe: "Kurdisch (Kurmanji)", labelEn: "Kurdish (Kurmanji)" },
-  { id: "ru", labelDe: "Russisch", labelEn: "Russian" },
-  { id: "uk", labelDe: "Ukrainisch", labelEn: "Ukrainian" },
-  { id: "pl", labelDe: "Polnisch", labelEn: "Polish" },
-  { id: "ro", labelDe: "Rumänisch", labelEn: "Romanian" },
-  { id: "el", labelDe: "Griechisch", labelEn: "Greek" },
-  { id: "nl", labelDe: "Niederländisch", labelEn: "Dutch" },
-  { id: "pt", labelDe: "Portugiesisch", labelEn: "Portuguese" },
-  { id: "sq", labelDe: "Albanisch", labelEn: "Albanian" },
-  { id: "sr", labelDe: "Serbisch", labelEn: "Serbian" },
-  { id: "hr", labelDe: "Kroatisch", labelEn: "Croatian" },
-  { id: "bs", labelDe: "Bosnisch", labelEn: "Bosnian" },
-];
+export const PRE_VISIT_LANGUAGE_OPTIONS = PATIENT_UI_SELECTABLE_LOCALE_CODES.map(
+  (code) => ({
+    id: code,
+    labelEn: localeNameByCode.get(code) || code.toUpperCase(),
+  }),
+);

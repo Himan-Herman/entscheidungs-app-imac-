@@ -7,6 +7,7 @@ import { normalizeAdaptiveIntakeV1 } from "../adaptive/adaptiveSessionUtils.js";
 
 /** Same key as language selection screen — single source of truth */
 export const PREVISIT_LOCALE_STORAGE_KEY = "medscoutx_previsit_locale";
+export const DEFAULT_PREVISIT_DOCTOR_LANGUAGE = "de";
 
 /**
  * Canonical session payload for Pre-Visit (PDF/API later).
@@ -332,7 +333,7 @@ export function resetSessionForCaseFollowUp({
   }
   const fresh = {
     patientLanguage: locale,
-    doctorLanguage: locale,
+    doctorLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
     answers: createEmptyAnswers(),
     stepIndex: 0,
     longitudinalCase: normalizeLongitudinalCase({

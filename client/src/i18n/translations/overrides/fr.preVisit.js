@@ -54,10 +54,10 @@ export default {
     pageTitle: "MedScoutX — Aperçu du document",
     title: "Préparer le document pour le médecin",
     explanation:
-      "Choisissez la langue dans laquelle la version structurée pour le médecin doit être créée.",
+      "Le PDF destiné au médecin est créé en allemand. Vos déclarations originales restent également jointes dans votre propre langue.",
     doctorLangLabel: "Langue de la version médecin",
     doctorLangHint:
-      "Choisissez la langue dans laquelle le médecin ou le cabinet doit lire le document.",
+      "La version structurée pour le médecin et le PDF envoyé au cabinet sont créés en allemand.",
     patientMetaSection: "Informations patient facultatives",
     patientMetaNote:
       "Ces informations sont facultatives et aident le cabinet à identifier le document.",
@@ -124,9 +124,9 @@ export default {
     assistantQuestions: {
       sectionTitle: "Questions d’orientation pour la consultation",
       intro:
-        "À partir de vos indications sur les symptômes, l’évolution et la préparation, l’IA propose quelques questions structurantes — formulées comme une assistante médicale, sans évaluation médicale.",
+        "À partir de vos indications sur les symptômes, l’évolution et la préparation, l’IA propose quelques questions structurantes. Elles servent uniquement à votre propre préparation, sans évaluation médicale.",
       noAiAnswersNote:
-        "Seules des questions sont proposées. Vous répondez avec vos propres mots ; le médecin lit vos réponses dans le PDF.",
+        "Seules des questions sont proposées. Vos réponses restent destinées à votre propre préparation et ne sont pas envoyées au médecin comme bloc de questions séparé.",
       generateButton: "Créer les questions d’orientation",
       generating: "Préparation des questions…",
       successStatus:
@@ -139,10 +139,10 @@ export default {
         "Pas encore de questions d’orientation. Créez-les en option pour préparer la consultation.",
       questionCounter: "Question {{current}} sur {{total}}",
       doctorVersionLabel: "Formulation pour le médecin",
-      answerLabel: "Votre réponse (pour le médecin)",
+      answerLabel: "Votre réponse",
       answerPlaceholder:
         "Votre réponse avec vos propres mots — de vous seulement, pas de l’IA…",
-      previewSectionTitle: "Questions d’orientation avec vos réponses",
+      previewSectionTitle: "Questions d’orientation pour votre préparation",
       pdfSectionHeading: "Questions d’orientation (réponses du patient)",
       pdfPatientQuestionLabel: "Question (patient)",
       pdfDoctorQuestionLabel: "Question (médecin)",

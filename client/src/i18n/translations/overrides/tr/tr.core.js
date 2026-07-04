@@ -102,7 +102,8 @@ export default {
       sub:
         "Muayene öncesi hazırlık süreci ve belgelerin güvenle teslimi için araçlar.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "Doktor görüşmesine hazırlan",
+    hubLinkPreVisitSub: "Yeni hazırlık başlat",
     hubLinkSymptom: "Yapılandırılmış semptom kaydı",
     hubLinkImage: "Yapılandırılmış görsel açıklama",
     hubLinkBody: "Vücut haritası",

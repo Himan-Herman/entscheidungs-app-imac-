@@ -15,9 +15,13 @@ export default {
   },
   chrome: {
     backHome: "MedScoutX ana sayfasına dön",
+    backPatientHub: "Hasta alanına dön",
     moduleLabel: "Muayeneye hazırlık",
+    libraryModuleLabel: "Hazırlıklarım",
     safety:
       "Bu modül yalnızca bilgi hazırlığı ve dokümantasyon içindir; tedavi önerisi sunmaz.",
+    librarySafety:
+      "Kaydedilmiş hazırlıkları burada yönetin. Hiçbir şey otomatik eşitlenmez — bu kütüphanede yalnızca açıkça kaydettiğiniz öğeler görünür.",
     navAria: "Ziyaret öncesi gezinme",
   },
   chat: {
@@ -50,10 +54,18 @@ export default {
     pageTitle: "MedScoutX — Belge önizlemesi",
     title: "Hekim için belge hazırlayın",
     explanation:
-      "Yapılandırılmış hekim sürümünün oluşturulacağı dili seçin.",
+      "Hekim için PDF Almanca oluşturulur. Özgün hasta ifadeleriniz ayrıca kendi dilinizde de ekli kalır.",
     doctorLangLabel: "Hekim sürümü dili",
     doctorLangHint:
-      "Hekimin veya kurumun belgeyi okuyacağı dili seçin.",
+      "Hekim için yapılandırılmış sürüm ve kuruma gönderilen PDF Almanca oluşturulur.",
+    patientMetaSection: "İsteğe bağlı hasta bilgileri",
+    patientMetaNote:
+      "Bu bilgiler isteğe bağlıdır ve kurumun belgeyi eşleştirmesine yardımcı olur.",
+    patientNameLabel: "Ad",
+    patientDateOfBirthLabel: "Doğum tarihi",
+    patientEmailLabel: "E-posta",
+    patientPhoneLabel: "Telefon (isteğe bağlı)",
+    patientGenderOrSalutationLabel: "Cinsiyet / hitap",
     sectionStructured: "Hekim için yapılandırılmış sürüm",
     sectionOriginal: "Hastanın özgün ifadeleri",
     disclaimer:
@@ -92,6 +104,7 @@ export default {
     accountSaveError: "Hazırlık şu anda kaydedilemedi.",
     sessionTitleDe: "Vorbereitung Arztgespräch",
     sessionTitleEn: "Doktor görüşmesine hazırlık",
+    sessionTitleTr: "Doktor görüşmesine hazırlık",
     viewMyPreparations: "Hazırlıklarım",
     mainNavAria:
       "Hekim sürümü, PDF dışa aktarma, özete dönüş",
@@ -103,6 +116,33 @@ export default {
       preExistingConditions: "Bilinen kronik hastalıklar",
       relevantDocuments: "İlgili belgeler",
       patientQuestions: "Hekime sorular",
+    },
+    assistantQuestions: {
+      sectionTitle: "Görüşme için yönlendirme soruları",
+      intro:
+        "Semptomlar, seyir ve hazırlıkla ilgili girdilerinize dayanarak yapay zekâ birkaç yapılandırıcı soru önerir. Bunlar yalnızca sizin kendi hazırlığınız içindir ve tıbbi değerlendirme içermez.",
+      noAiAnswersNote:
+        "Yalnızca sorular önerilir. Yanıtlarınız kendi hazırlığınızın parçası olarak kalır ve hekime ayrı bir soru bloğu olarak gönderilmez.",
+      generateButton: "Yönlendirme sorularını oluştur",
+      generating: "Sorular hazırlanıyor…",
+      successStatus:
+        "Yönlendirme soruları girdilerinize dayanarak oluşturuldu.",
+      error:
+        "Yönlendirme soruları şu anda oluşturulamadı. Devam edebilir veya daha sonra tekrar deneyebilirsiniz.",
+      staleHint:
+        "Girdileriniz değişti. Soruları güncel duruma uyarlamak için yeniden oluşturun.",
+      emptyState:
+        "Henüz yönlendirme sorusu yok. Görüşmeye hazırlanmak için isterseniz oluşturabilirsiniz.",
+      questionCounter: "Soru {{current}} / {{total}}",
+      doctorVersionLabel: "Hekim için ifade",
+      answerLabel: "Yanıtınız",
+      answerPlaceholder:
+        "Yanıtınızı kendi sözlerinizle yazın — yalnızca sizden gelsin, yapay zekâdan değil…",
+      previewSectionTitle: "Hazırlığınız için yönlendirme soruları",
+      pdfSectionHeading: "Yönlendirme soruları (hasta yanıtları)",
+      pdfPatientQuestionLabel: "Soru (hasta)",
+      pdfDoctorQuestionLabel: "Soru (hekim)",
+      pdfPatientAnswerLabel: "Hasta yanıtı",
     },
   },
   localHistory: {
@@ -150,5 +190,9 @@ export default {
     statusDraft: "Taslak",
     statusPdfCreated: "PDF oluşturuldu",
     statusCompleted: "Tamamlandı",
+    linkCases: "Akışlarımı aç",
+    startNewPrep: "Yeni hazırlık başlat",
+    retryLoad: "Tekrar dene",
+    listAriaLabel: "Kaydedilmiş hazırlıklar",
   },
 };

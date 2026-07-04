@@ -78,4 +78,71 @@ export default {
     delete: "Entfernen",
     deleteConfirm: "Dieses Medikament wirklich entfernen?",
   },
+  summary: {
+    ctaTitle: "Zusammenfassung & Teilen",
+    ctaHint:
+      "Fassen Sie alle Medikamente zu einer übersichtlichen Vorschau zusammen — als PDF, QR-Code oder per E-Mail an Ihren Arzt.",
+    ctaButton: "Zusammenfassung öffnen",
+    pageTitle: "Meine Medikationsübersicht – MedScoutX",
+    heading: "Meine Medikationsübersicht",
+    intro:
+      "Alle von Ihnen eingetragenen Medikamente – übersichtlich zusammengefasst. Die Vorschau aktualisiert sich automatisch, sobald Sie ein Medikament ergänzen oder ändern.",
+    back: "Zurück zu den Medikamenten",
+    refresh: "Vorschau aktualisieren",
+    emptyTitle: "Noch nichts zusammenzufassen",
+    emptyText:
+      "Sie haben noch keine eigenen Medikamente eingetragen. Fügen Sie zuerst ein Medikament hinzu.",
+    emptyCta: "Medikament hinzufügen",
+    nameLabel: "Ihr Name (optional, erscheint im Dokument)",
+    namePlaceholder: "z. B. Maria Muster",
+    generatedAt: "Zusammengefasst am {date}",
+    countLabel: "{count} Medikament(e)",
+    previewTitle: "Vorschau",
+    documentTitle: "Meine aktuellen Medikamente",
+    periodLabel: "Zeitraum",
+    addedLabel: "Hinzugefügt",
+    ongoing: "laufend",
+    disclaimer:
+      "Nur eigene Angaben der Patientin/des Patienten. Keine Diagnose, keine Therapie- oder Dosierungsempfehlung, keine Wechselwirkungsprüfung.",
+    footerBrand: "Lokal erstellt mit MedScoutX",
+    footerPage: "Seite",
+    exportTitle: "Herunterladen & Teilen",
+    downloadPdf: "Als PDF herunterladen",
+    qrOpen: "QR-Code anzeigen",
+    qrTitle: "QR-Code Ihrer Medikamentenliste",
+    qrIntro:
+      "Beim Scannen öffnet sich eine schreibgeschützte Ansicht Ihrer Medikamentenliste – ganz ohne MedScoutX-Konto. Die Daten stecken direkt im Code und werden nicht an einen Server gesendet. Zeigen Sie den Code nur Personen, denen Sie vertrauen (z. B. Ärztin/Arzt oder Apotheke).",
+    qrTooLong:
+      "Ihre Liste ist zu lang für einen QR-Code. Bitte nutzen Sie stattdessen das PDF oder den E-Mail-Versand.",
+    qrError: "Der QR-Code konnte nicht erstellt werden.",
+    qrCopy: "Link kopieren",
+    qrCopied: "Link kopiert",
+    qrDownload: "QR als Bild speichern",
+    qrPrint: "Drucken",
+    qrClose: "Schließen",
+    qrAlt: "QR-Code mit Ihrer Medikamentenliste",
+    sharedPageTitle: "Geteilte Medikamentenliste – MedScoutX",
+    sharedBanner:
+      "Geteilte Medikamentenliste – nur zur Ansicht. Dies sind ausschließlich die eigenen Angaben der Patientin/des Patienten. Keine Diagnose oder Therapieempfehlung.",
+    sharedInvalidTitle: "Keine Medikamentenliste gefunden",
+    sharedInvalidText:
+      "Dieser Link enthält keine gültige Medikamentenliste.",
+    sendTitle: "An Arzt senden (Ärztebuch)",
+    sendIntro:
+      "Senden Sie Ihre Medikamentenliste als PDF per E-Mail an einen Kontakt aus Ihrem Ärztebuch (z. B. Hausarzt oder Neurologie).",
+    sendSelectLabel: "Kontakt auswählen",
+    sendSelectPlaceholder: "Bitte wählen …",
+    sendSelectRequired: "Bitte wählen Sie einen Kontakt aus.",
+    sendConsentLabel:
+      "Ich möchte diese PDF jetzt per E-Mail an den gewählten Kontakt senden.",
+    sendConsentRequired: "Bitte bestätigen Sie den Versand.",
+    sendButton: "Per E-Mail senden",
+    sendBusy: "Wird gesendet …",
+    sendSuccess: "Ihre Medikamentenliste wurde gesendet.",
+    sendErrorGeneric: "Die E-Mail konnte nicht gesendet werden.",
+    sendNoContacts:
+      "Sie haben noch keine Arztkontakte gespeichert. Legen Sie zuerst einen Kontakt im Ärztebuch an.",
+    sendManageContacts: "Ärztebuch verwalten",
+    sendNoEmail: "Für diesen Kontakt ist keine E-Mail-Adresse hinterlegt.",
+  },
 };

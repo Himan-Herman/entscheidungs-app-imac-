@@ -4,6 +4,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
 import { generatePreVisitPdf } from "../features/preVisit/pdf/generatePreVisitPdf.js";
+import { DEFAULT_PREVISIT_DOCTOR_LANGUAGE } from "../features/preVisit/constants/preVisitSession.js";
 import { PRE_VISIT_QUESTION_STEPS, pickLocalized } from "../features/preVisit/constants/questionFlow.js";
 import { STRUCTURED_SECTION_ORDER, STRUCTURED_DOCTOR_LABELS } from "../features/preVisit/constants/structuredDoctorLabels.js";
 import "../styles/PracticeDashboardPage.css";
@@ -234,13 +235,13 @@ export default function PracticePreparationDetailPage() {
         aiDoctorVersion: row.aiDoctorVersion,
         aiSafetyNotice: row.aiSafetyNotice,
         patientLanguage: row.patientLanguage || "de",
-        doctorLanguage: row.doctorLanguage || row.patientLanguage || "de",
+        doctorLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
         followUpHistory: {
           includeInPdf: includeFollowUpsInPdf,
           messages: followupMessages,
         },
       },
-      uiLanguage: language,
+      uiLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
       labels: {},
     });
   }

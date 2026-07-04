@@ -88,12 +88,21 @@ function dashboardItemJson(row) {
   };
 }
 
+function stripPatientOnlyAnswers(rawAnswers) {
+  const answers =
+    rawAnswers &&
+    typeof rawAnswers === "object" &&
+    !Array.isArray(rawAnswers)
+      ? rawAnswers
+      : {};
+  const sanitized = { ...answers };
+  delete sanitized.assistantQuestionPrep;
+  return sanitized;
+}
+
 function preparationDetailJson(row) {
   const base = dashboardItemJson(row);
-  const answers =
-    row.answers && typeof row.answers === "object" && !Array.isArray(row.answers)
-      ? row.answers
-      : {};
+  const answers = stripPatientOnlyAnswers(row.answers);
   const caseTimeline =
     answers.caseTimeline &&
     typeof answers.caseTimeline === "object" &&

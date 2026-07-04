@@ -1,5 +1,8 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { getAdaptiveCategoryConfig } from "./adaptiveCategories.js";
+import {
+  getAdaptiveCategoryConfig,
+  getAdaptiveSeedPrompt,
+} from "./adaptiveCategories.js";
 import {
   compactAdaptiveContext,
   getAdaptiveSlice,
@@ -22,6 +25,15 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
   ref
 ) {
   const cfg = getAdaptiveCategoryConfig(categoryKey);
+  const seedPrompt = useMemo(
+    () =>
+      getAdaptiveSeedPrompt(
+        categoryKey,
+        patientLanguage,
+        labels.adaptiveSeedHint
+      ),
+    [categoryKey, labels.adaptiveSeedHint, patientLanguage]
+  );
   const slice = useMemo(
     () => getAdaptiveSlice(session, categoryKey),
     [session, categoryKey]
@@ -185,7 +197,7 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
   return (
     <>
       <p className="pre-visit-adaptive__hint">
-        {cfg && patientLanguage === "en" ? cfg.seedPromptEn : cfg?.seedPromptDe || labels.adaptiveSeedHint}
+        {seedPrompt}
       </p>
       {slice.currentQuestion ? (
         <div className="pre-visit-adaptive__followup" role="region">
@@ -257,4 +269,3 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
 AdaptiveIntakePanel.displayName = "AdaptiveIntakePanel";
 
 export default AdaptiveIntakePanel;
-

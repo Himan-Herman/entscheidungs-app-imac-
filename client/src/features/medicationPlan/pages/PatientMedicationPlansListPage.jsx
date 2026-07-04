@@ -181,6 +181,21 @@ export default function PatientMedicationPlansListPage() {
             ))}
           </ul>
         ) : null}
+
+        {ownMeds.length > 0 && t.summary ? (
+          <div className="patient-own-med__summary-cta">
+            <div className="patient-own-med__summary-cta-text">
+              <strong>{t.summary.ctaTitle}</strong>
+              <span className="patient-own-med__hint">{t.summary.ctaHint}</span>
+            </div>
+            <Link
+              className="patient-own-med__btn patient-own-med__btn--primary"
+              to="/patient/medication-plans/summary"
+            >
+              {t.summary.ctaButton}
+            </Link>
+          </div>
+        ) : null}
       </section>
 
       {(practiceLoading || practicePlans.length > 0 || practiceError) && (

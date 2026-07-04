@@ -95,10 +95,10 @@ export default {
     pageTitle: "MedScoutX — Document preview",
     title: "Prepare document for the doctor",
     explanation:
-      "Choose the language in which the structured doctor version should be created.",
+      "The doctor PDF is created in German. Your original statements stay included in your own language as well.",
     doctorLangLabel: "Language for the doctor version",
     doctorLangHint:
-      "Choose the language in which the doctor or practice should read the document.",
+      "The structured doctor version and the PDF sent to the practice are created in German.",
     practiceContextTitle: "Selected practice context",
     practiceContextPractice: "Practice",
     practiceContextTarget: "Target",
@@ -242,9 +242,9 @@ export default {
     assistantQuestions: {
       sectionTitle: "Orientation questions for your visit",
       intro:
-        "Based on your entries about symptoms, course and preparation, the AI suggests a few structuring questions — phrased like a medical assistant, without medical assessment.",
+        "Based on your entries about symptoms, course and preparation, the AI suggests a few structuring questions. They are only for your own visit preparation and do not contain medical assessment.",
       noAiAnswersNote:
-        "Only questions are suggested. You answer in your own words; the doctor reads these in the PDF.",
+        "Only questions are suggested. Your answers stay part of your own preparation and are not sent as a separate question block to the doctor.",
       generateButton: "Create orientation questions",
       generating: "Preparing questions …",
       successStatus:
@@ -257,10 +257,10 @@ export default {
         "No orientation questions yet. Create them optionally to prepare for the conversation.",
       questionCounter: "Question {{current}} of {{total}}",
       doctorVersionLabel: "Wording for the doctor",
-      answerLabel: "Your answer (for the doctor)",
+      answerLabel: "Your answer",
       answerPlaceholder:
         "Your answer in your own words — from you only, not from the AI …",
-      previewSectionTitle: "Orientation questions with your answers",
+      previewSectionTitle: "Orientation questions for your preparation",
       pdfSectionHeading: "Orientation questions (patient answers)",
       pdfPatientQuestionLabel: "Question (patient)",
       pdfDoctorQuestionLabel: "Question (doctor)",

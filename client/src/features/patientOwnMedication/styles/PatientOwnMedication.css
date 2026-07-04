@@ -82,6 +82,39 @@
   margin: 0.35rem 0 0.75rem;
 }
 
+.patient-own-med__summary-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--ms-accent, #0d9488);
+  border-radius: 12px;
+  background: var(--ms-surface-muted, #f0fdfa);
+}
+
+.patient-own-med__summary-cta-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 200px;
+  flex: 1 1 240px;
+}
+
+.patient-own-med__summary-cta-text strong {
+  font-size: 1.02rem;
+}
+
+.patient-own-med__summary-cta-text .patient-own-med__hint {
+  margin: 0;
+}
+
+:root[data-theme="dark"] .patient-own-med__summary-cta {
+  background: rgba(13, 148, 136, 0.12);
+}
+
 .patient-own-med__field {
   margin-bottom: 1rem;
 }

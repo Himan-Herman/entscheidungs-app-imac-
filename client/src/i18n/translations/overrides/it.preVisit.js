@@ -54,10 +54,10 @@ export default {
     pageTitle: "MedScoutX — Anteprima documento",
     title: "Prepara documento per il medico",
     explanation:
-      "Scegli la lingua in cui creare la versione strutturata per il medico.",
+      "Il PDF per il medico viene creato in tedesco. Le tue dichiarazioni originali restano comunque incluse nella tua lingua.",
     doctorLangLabel: "Lingua della versione medico",
     doctorLangHint:
-      "Scegli la lingua in cui medico o studio devono leggere il documento.",
+      "La versione strutturata per il medico e il PDF inviato allo studio vengono creati in tedesco.",
     sectionStructured: "Versione strutturata per il medico",
     sectionOriginal: "Dichiarazioni originali del paziente",
     disclaimer:
@@ -114,9 +114,9 @@ export default {
     assistantQuestions: {
       sectionTitle: "Domande di orientamento per la visita",
       intro:
-        "In base alle tue indicazioni su sintomi, decorso e preparazione, l’IA propone alcune domande strutturanti — formulate come un’assistente medica, senza valutazione clinica.",
+        "In base alle tue indicazioni su sintomi, decorso e preparazione, l’IA propone alcune domande strutturanti. Servono solo alla tua preparazione e non contengono valutazioni cliniche.",
       noAiAnswersNote:
-        "Vengono suggerite solo domande. Rispondi con parole tue; il medico legge le risposte nel PDF.",
+        "Vengono suggerite solo domande. Le tue risposte restano nella tua preparazione personale e non vengono inviate al medico come blocco di domande separato.",
       generateButton: "Crea domande di orientamento",
       generating: "Preparazione domande…",
       successStatus:
@@ -129,10 +129,10 @@ export default {
         "Nessuna domanda di orientamento ancora. Creale facoltativamente per preparare il colloquio.",
       questionCounter: "Domanda {{current}} di {{total}}",
       doctorVersionLabel: "Formulazione per il medico",
-      answerLabel: "La tua risposta (per il medico)",
+      answerLabel: "La tua risposta",
       answerPlaceholder:
         "La tua risposta con parole tue — solo da te, non dall’IA…",
-      previewSectionTitle: "Domande di orientamento con le tue risposte",
+      previewSectionTitle: "Domande di orientamento per la tua preparazione",
       pdfSectionHeading: "Domande di orientamento (risposte del paziente)",
       pdfPatientQuestionLabel: "Domanda (paziente)",
       pdfDoctorQuestionLabel: "Domanda (medico)",

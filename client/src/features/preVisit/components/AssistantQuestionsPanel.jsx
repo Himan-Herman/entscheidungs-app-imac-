@@ -145,7 +145,6 @@ export default function AssistantQuestionsPanel({
         <ul className="pre-visit-assistant-q__grid" role="list">
           {assistantData.items.map((item, index) => {
             const answerId = `${sectionId}-answer-${item.id}`;
-            const doctorHintId = `${sectionId}-doctor-${item.id}`;
             return (
               <li key={item.id} className="pre-visit-assistant-q__tile">
                 <article
@@ -163,15 +162,6 @@ export default function AssistantQuestionsPanel({
                   >
                     {item.patientQuestion}
                   </h3>
-                  <p
-                    id={doctorHintId}
-                    className="pre-visit-assistant-q__doctor-line"
-                  >
-                    <span className="pre-visit-assistant-q__doctor-label">
-                      {labels.doctorVersionLabel}:
-                    </span>{" "}
-                    {item.doctorQuestion}
-                  </p>
                   <div className="pre-visit-assistant-q__answer-field">
                     <label
                       className="pre-visit-assistant-q__answer-label"
@@ -188,7 +178,6 @@ export default function AssistantQuestionsPanel({
                       }
                       placeholder={labels.answerPlaceholder}
                       rows={4}
-                      aria-describedby={doctorHintId}
                       autoComplete="off"
                     />
                   </div>

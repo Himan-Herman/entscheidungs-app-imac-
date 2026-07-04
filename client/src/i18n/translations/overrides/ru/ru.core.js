@@ -102,7 +102,8 @@ export default {
       sub:
         "Инструменты для процесса подготовки перед приёмом и безопасной передачи документов.",
     },
-    hubLinkPreVisit: "Pre-Visit",
+    hubLinkPreVisit: "Подготовить разговор с врачом",
+    hubLinkPreVisitSub: "Начать новую подготовку",
     hubLinkSymptom: "Структурированная запись симптомов",
     hubLinkImage: "Структурированное описание изображений",
     hubLinkBody: "Карта тела",
