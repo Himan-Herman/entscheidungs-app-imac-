@@ -18,6 +18,8 @@ export default defineConfig({
       injectRegister: false,
 
       workbox: {
+        // Adds push + notificationclick handlers without changing caching.
+        importScripts: ['push-sw.js'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,

@@ -193,5 +193,39 @@ export default {
         },
       },
     },
+    reminders: {
+      title: "Phone reminders",
+      intro:
+        "Turn on friendly reminders for your intake – even when the app is closed. The server only stores the reminder times, no medication names.",
+      loading: "Loading …",
+      unsupported: "Your browser does not support push reminders.",
+      serverDisabled: "Reminders are not enabled on this server yet.",
+      iosHint:
+        "iPhone/iPad: please add the app via “Share” → “Add to Home Screen” so reminders can arrive.",
+      enableLabel: "Enable reminders on this device",
+      enabledMsg: "Reminders are enabled.",
+      disabledMsg: "Reminders were turned off.",
+      savedMsg: "Reminder times saved.",
+      permissionDenied:
+        "Please allow notifications in your browser to receive reminders.",
+      genericError: "That didn't work. Please try again.",
+      timesLegend: "Intake reminders (times)",
+      timeLabel: "Time",
+      addTime: "Add time",
+      removeTime: "Remove time",
+      soundLabel: "With sound",
+      vibrationLabel: "With vibration",
+      refillNote:
+        "We also remind you automatically 2 days before a medication runs low (calculated from your supply details).",
+      saveBtn: "Save",
+      testBtn: "Test notification",
+      testSent: "Test notification sent.",
+      testFailed: "Could not send the test notification.",
+      disclaimer:
+        "Voluntary, can be turned off anytime. Reminders do not replace advice from your doctor or pharmacy.",
+      intakeBody: "Time for your medication 💊 – please remember to take it.",
+      refillBody: "A medication is running low – please remember to get a refill.",
+      testBody: "Test: this is what your reminders look like. 💊",
+    },
   },
 };

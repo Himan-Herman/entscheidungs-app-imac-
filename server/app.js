@@ -96,6 +96,8 @@ import {
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
+import patientPushRouter from "./routes/patientPush.js";
+import { startPushReminderScheduler } from "./services/push/pushReminderScheduler.js";
 import medaRouter from "./routes/meda.js";
 import medaLiveTranslationRouter from "./routes/medaLiveTranslation.js";
 import medaRealtimeRouter from "./routes/medaRealtime.js";
@@ -193,6 +195,7 @@ app.use("/api/patient/inbox", requireAuth, patientInboxRouter);
 app.use("/api/patient/threads", requireAuth, patientThreadsRouter);
 app.use("/api/patient/messages", requireAuth, patientThreadsRouter);
 app.use("/api/patient/medication-plans", requireAuth, patientMedicationPlansRouter);
+app.use("/api/patient/push", requireAuth, patientPushRouter);
 app.use("/api/patient/practice-documents", requireAuth, patientPracticeDocumentsRouter);
 app.use("/api/patient/vaccinations", requireAuth, patientVaccinationsRouter);
 app.use("/api/patient/vitals", requireAuth, patientVitalsRouter);
@@ -371,4 +374,11 @@ app.use(httpErrorHandler);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server läuft unter http://localhost:${PORT}`);
+  // Guarded: no-op unless VAPID is configured. Isolated in try/catch so a
+  // scheduler problem can never affect server startup or other routes.
+  try {
+    startPushReminderScheduler();
+  } catch (err) {
+    console.error("[push-scheduler] start failed:", err?.message ?? err);
+  }
 });

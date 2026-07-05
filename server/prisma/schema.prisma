@@ -17,6 +17,8 @@ model User {
   consent                          Consent?
   doctors                          Doctor[]
   doctorContacts                   DoctorContact[]
+  pushSubscriptions                PushSubscription[] @relation("UserPushSubscriptions")
+  pushReminders                    PushReminder[]     @relation("UserPushReminders")
   preVisitSessions                 PreVisitSession[]
   preVisitCases                    PreVisitCase[]
   practiceProfiles                 PracticeProfile[]
@@ -2371,4 +2373,47 @@ model GoaeCatalogueItem {
   @@unique([versionId, code])
   @@index([versionId])
   @@index([code])
+}
+
+/// Web Push subscription for medication reminders (device-local meds; only the
+/// push endpoint + delivery prefs are stored server-side — no medication names).
+model PushSubscription {
+  id               String   @id @default(cuid())
+  userId           String
+  endpoint         String   @unique
+  p256dh           String
+  auth             String
+  soundEnabled     Boolean  @default(true)
+  vibrationEnabled Boolean  @default(true)
+  timezone         String   @default("Europe/Berlin")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user      User           @relation("UserPushSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+  reminders PushReminder[]
+
+  @@index([userId])
+}
+
+/// A scheduled reminder tied to a push subscription. `label` carries a generic,
+/// client-localized message (no diagnosis/clinical wording, no medication name).
+model PushReminder {
+  id             String    @id @default(cuid())
+  userId         String
+  subscriptionId String
+  type           String    // "intake" (daily at timeOfDay) | "refill" (one-off at fireAt)
+  timeOfDay      String?    // "HH:MM" (24h) for intake reminders
+  fireAt         DateTime?  // one-off timestamp for refill reminders
+  label          String?    // generic, pre-localized notification body
+  url            String?    // deep link opened on notification click
+  active         Boolean   @default(true)
+  lastSentOn     String?    // "YYYY-MM-DD" send-dedupe guard
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user         User             @relation("UserPushReminders", fields: [userId], references: [id], onDelete: Cascade)
+  subscription PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type, active])
 }

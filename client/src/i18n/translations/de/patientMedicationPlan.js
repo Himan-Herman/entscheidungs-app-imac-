@@ -196,5 +196,40 @@ export default {
         },
       },
     },
+    reminders: {
+      title: "Erinnerungen ans Handy",
+      intro:
+        "Aktivieren Sie freundliche Erinnerungen an Ihre Einnahme – auch wenn die App geschlossen ist. Auf dem Server werden nur die Erinnerungszeiten gespeichert, keine Medikamentennamen.",
+      loading: "Wird geladen …",
+      unsupported: "Ihr Browser unterstützt keine Push-Erinnerungen.",
+      serverDisabled: "Erinnerungen sind auf diesem Server noch nicht aktiviert.",
+      iosHint:
+        "iPhone/iPad: Bitte fügen Sie die App über „Teilen“ → „Zum Home-Bildschirm“ hinzu, damit Erinnerungen ankommen.",
+      enableLabel: "Erinnerungen auf diesem Gerät aktivieren",
+      enabledMsg: "Erinnerungen sind aktiviert.",
+      disabledMsg: "Erinnerungen wurden deaktiviert.",
+      savedMsg: "Erinnerungszeiten gespeichert.",
+      permissionDenied:
+        "Bitte erlauben Sie Benachrichtigungen in Ihrem Browser, um Erinnerungen zu erhalten.",
+      genericError: "Das hat nicht geklappt. Bitte versuchen Sie es erneut.",
+      timesLegend: "Einnahme-Erinnerungen (Uhrzeiten)",
+      timeLabel: "Uhrzeit",
+      addTime: "Uhrzeit hinzufügen",
+      removeTime: "Uhrzeit entfernen",
+      soundLabel: "Mit Ton",
+      vibrationLabel: "Mit Vibration",
+      refillNote:
+        "Zusätzlich erinnern wir Sie automatisch 2 Tage bevor ein Medikament zur Neige geht (aus Ihren Vorrats-Angaben berechnet).",
+      saveBtn: "Speichern",
+      testBtn: "Testbenachrichtigung",
+      testSent: "Testbenachrichtigung gesendet.",
+      testFailed: "Testbenachrichtigung konnte nicht gesendet werden.",
+      disclaimer:
+        "Freiwillig, jederzeit abschaltbar. Erinnerungen ersetzen keine ärztliche oder apothekerliche Beratung.",
+      intakeBody: "Zeit für Ihre Medikamente 💊 – bitte an die Einnahme denken.",
+      refillBody:
+        "Ein Medikament geht bald zur Neige – bitte an Nachschub denken.",
+      testBody: "Test: So sehen Ihre Erinnerungen aus. 💊",
+    },
   },
 };

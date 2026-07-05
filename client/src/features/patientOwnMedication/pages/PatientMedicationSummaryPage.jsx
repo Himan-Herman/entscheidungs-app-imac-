@@ -17,6 +17,7 @@ import {
 } from "../api/doctorContactsApi.js";
 import OwnMedicationQrModal from "../components/OwnMedicationQrModal.jsx";
 import PharmacyAssistantPanel from "../components/PharmacyAssistantPanel.jsx";
+import MedicationRemindersPanel from "../components/MedicationRemindersPanel.jsx";
 import "../styles/PatientMedicationSummary.css";
 
 const NAME_STORAGE_KEY = "medscoutx_med_summary_name_v1";
@@ -366,6 +367,8 @@ export default function PatientMedicationSummaryPage() {
           </section>
 
           <PharmacyAssistantPanel entries={entries} t={t.pharmacy || {}} />
+
+          <MedicationRemindersPanel entries={entries} t={t.reminders || {}} />
 
           <section className="pmed-summary__export" aria-label={t.exportTitle}>
             <button

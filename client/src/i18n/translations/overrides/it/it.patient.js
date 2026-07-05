@@ -671,6 +671,41 @@ export default {
           },
         },
       },
+      reminders: {
+        title: "Promemoria sul telefono",
+        intro:
+          "Attiva promemoria gentili per l’assunzione – anche quando l’app è chiusa. Sul server vengono salvati solo gli orari dei promemoria, nessun nome di farmaco.",
+        loading: "Caricamento …",
+        unsupported: "Il tuo browser non supporta i promemoria push.",
+        serverDisabled: "I promemoria non sono ancora attivati su questo server.",
+        iosHint:
+          "iPhone/iPad: aggiungi l’app tramite « Condividi » → « Aggiungi a Home » per ricevere i promemoria.",
+        enableLabel: "Attiva i promemoria su questo dispositivo",
+        enabledMsg: "I promemoria sono attivi.",
+        disabledMsg: "I promemoria sono stati disattivati.",
+        savedMsg: "Orari dei promemoria salvati.",
+        permissionDenied:
+          "Consenti le notifiche nel tuo browser per ricevere i promemoria.",
+        genericError: "Non ha funzionato. Riprova.",
+        timesLegend: "Promemoria di assunzione (orari)",
+        timeLabel: "Ora",
+        addTime: "Aggiungi orario",
+        removeTime: "Rimuovi orario",
+        soundLabel: "Con suono",
+        vibrationLabel: "Con vibrazione",
+        refillNote:
+          "Ti ricordiamo anche automaticamente 2 giorni prima che un farmaco stia per finire (calcolato dai tuoi dati di scorta).",
+        saveBtn: "Salva",
+        testBtn: "Notifica di prova",
+        testSent: "Notifica di prova inviata.",
+        testFailed: "Impossibile inviare la notifica di prova.",
+        disclaimer:
+          "Facoltativo, disattivabile in qualsiasi momento. I promemoria non sostituiscono il parere del medico o del farmacista.",
+        intakeBody: "È ora del tuo farmaco 💊 – ricordati di assumerlo.",
+        refillBody:
+          "Un farmaco sta per finire – ricordati di procurarne una nuova confezione.",
+        testBody: "Prova: ecco come appaiono i tuoi promemoria. 💊",
+      },
     },
   },
 

@@ -671,6 +671,41 @@ export default {
           },
         },
       },
+      reminders: {
+        title: "Recordatorios en el teléfono",
+        intro:
+          "Active recordatorios amables para su toma – incluso con la app cerrada. En el servidor solo se guardan las horas de recordatorio, ningún nombre de medicamento.",
+        loading: "Cargando …",
+        unsupported: "Su navegador no admite recordatorios push.",
+        serverDisabled: "Los recordatorios aún no están activados en este servidor.",
+        iosHint:
+          "iPhone/iPad: añada la app mediante « Compartir » → « Añadir a inicio » para recibir recordatorios.",
+        enableLabel: "Activar recordatorios en este dispositivo",
+        enabledMsg: "Los recordatorios están activados.",
+        disabledMsg: "Los recordatorios se han desactivado.",
+        savedMsg: "Horas de recordatorio guardadas.",
+        permissionDenied:
+          "Permita las notificaciones en su navegador para recibir recordatorios.",
+        genericError: "No ha funcionado. Inténtelo de nuevo.",
+        timesLegend: "Recordatorios de toma (horas)",
+        timeLabel: "Hora",
+        addTime: "Añadir hora",
+        removeTime: "Quitar hora",
+        soundLabel: "Con sonido",
+        vibrationLabel: "Con vibración",
+        refillNote:
+          "También le avisamos automáticamente 2 días antes de que un medicamento se agote (calculado a partir de sus datos de existencias).",
+        saveBtn: "Guardar",
+        testBtn: "Notificación de prueba",
+        testSent: "Notificación de prueba enviada.",
+        testFailed: "No se pudo enviar la notificación de prueba.",
+        disclaimer:
+          "Voluntario, se puede desactivar en cualquier momento. Los recordatorios no sustituyen el consejo de su médico o farmacia.",
+        intakeBody: "Es hora de su medicamento 💊 – recuerde tomarlo.",
+        refillBody:
+          "Un medicamento se está agotando – recuerde conseguir una reposición.",
+        testBody: "Prueba: así se ven sus recordatorios. 💊",
+      },
     },
   },
 

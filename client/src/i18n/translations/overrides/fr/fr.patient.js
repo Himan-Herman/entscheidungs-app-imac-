@@ -671,6 +671,41 @@ export default {
           },
         },
       },
+      reminders: {
+        title: "Rappels sur le téléphone",
+        intro:
+          "Activez des rappels bienveillants pour vos prises – même quand l’application est fermée. Le serveur ne stocke que les heures de rappel, aucun nom de médicament.",
+        loading: "Chargement …",
+        unsupported: "Votre navigateur ne prend pas en charge les rappels push.",
+        serverDisabled: "Les rappels ne sont pas encore activés sur ce serveur.",
+        iosHint:
+          "iPhone/iPad : ajoutez l’application via « Partager » → « Sur l’écran d’accueil » pour recevoir les rappels.",
+        enableLabel: "Activer les rappels sur cet appareil",
+        enabledMsg: "Les rappels sont activés.",
+        disabledMsg: "Les rappels ont été désactivés.",
+        savedMsg: "Heures de rappel enregistrées.",
+        permissionDenied:
+          "Veuillez autoriser les notifications dans votre navigateur pour recevoir les rappels.",
+        genericError: "Cela n’a pas fonctionné. Veuillez réessayer.",
+        timesLegend: "Rappels de prise (heures)",
+        timeLabel: "Heure",
+        addTime: "Ajouter une heure",
+        removeTime: "Supprimer l’heure",
+        soundLabel: "Avec son",
+        vibrationLabel: "Avec vibration",
+        refillNote:
+          "Nous vous rappelons aussi automatiquement 2 jours avant qu’un médicament ne s’épuise (calculé à partir de vos informations de stock).",
+        saveBtn: "Enregistrer",
+        testBtn: "Notification de test",
+        testSent: "Notification de test envoyée.",
+        testFailed: "Impossible d’envoyer la notification de test.",
+        disclaimer:
+          "Facultatif, désactivable à tout moment. Les rappels ne remplacent pas les conseils de votre médecin ou pharmacie.",
+        intakeBody: "C’est l’heure de votre médicament 💊 – pensez à le prendre.",
+        refillBody:
+          "Un médicament arrive bientôt à épuisement – pensez au renouvellement.",
+        testBody: "Test : voici à quoi ressemblent vos rappels. 💊",
+      },
     },
   },
 
