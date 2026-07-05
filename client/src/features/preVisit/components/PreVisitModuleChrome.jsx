@@ -19,11 +19,18 @@ function resolveChromeBack(t) {
 }
 
 /**
- * @param {{ variant?: "workflow" | "library" }} props
+ * @param {{ variant?: "workflow" | "library", languageOverride?: string }} props
  */
-export default function PreVisitModuleChrome({ variant = "workflow" }) {
+export default function PreVisitModuleChrome({
+  variant = "workflow",
+  languageOverride,
+}) {
   const { language } = useLanguage();
-  const t = getMessages(language).preVisit.chrome;
+  const effectiveLanguage = languageOverride || language;
+  const t = useMemo(
+    () => getMessages(effectiveLanguage).preVisit.chrome,
+    [effectiveLanguage]
+  );
   const back = useMemo(() => resolveChromeBack(t), [t]);
   const isLibrary = variant === "library";
   const moduleLabel = isLibrary ? t.libraryModuleLabel : t.moduleLabel;

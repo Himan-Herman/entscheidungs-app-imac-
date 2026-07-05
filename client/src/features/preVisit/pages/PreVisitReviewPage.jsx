@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
@@ -15,16 +14,20 @@ import {
 } from "../constants/preVisitSession.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
+import { usePreVisitUiLanguage } from "../hooks/usePreVisitUiLanguage.js";
 import "../styles/PreVisitReviewPage.css";
 
 export default function PreVisitReviewPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { language } = useLanguage();
   const fromArchive = Boolean(location.state?.fromArchive);
-  const t = useMemo(() => getMessages(language).preVisit.review, [language]);
 
   const [session, setSession] = useState(() => loadPreVisitSession());
+  const uiLanguage = usePreVisitUiLanguage(session?.patientLanguage);
+  const t = useMemo(
+    () => getMessages(uiLanguage).preVisit.review,
+    [uiLanguage]
+  );
   const reviewOpenedRef = useRef(false);
 
   useEffect(() => {
@@ -53,10 +56,10 @@ export default function PreVisitReviewPage() {
       metadata: {
         flowStep: "review",
         deviceType: detectDeviceType(),
-        uiLanguage: language,
+        uiLanguage,
       },
     });
-  }, [session?.answers, language]);
+  }, [session?.answers, uiLanguage]);
 
   if (!session?.answers) {
     return null;
@@ -87,7 +90,7 @@ export default function PreVisitReviewPage() {
   return (
     <div className="pre-visit-review">
       <div className="pre-visit-review__inner">
-        <PreVisitModuleChrome />
+        <PreVisitModuleChrome languageOverride={uiLanguage} />
         <article className="pre-visit-review__card">
           <h1 className="pre-visit-review__title">{t.title}</h1>
 

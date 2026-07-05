@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
@@ -22,6 +21,7 @@ import {
   createEmptyAdaptiveSlice,
 } from "../adaptive/adaptiveSessionUtils.js";
 import { isAdaptiveCategoryKey } from "../adaptive/adaptiveCategories.js";
+import { usePreVisitUiLanguage } from "../hooks/usePreVisitUiLanguage.js";
 import "../styles/PreVisitChatPage.css";
 
 function readLocaleKey() {
@@ -55,11 +55,16 @@ function progressFromTemplate(template, current, total) {
 
 export default function PreVisitChatPage() {
   const navigate = useNavigate();
-  const { language } = useLanguage();
-  const tUi = useMemo(() => getMessages(language).preVisit.chat, [language]);
 
   const [session, setSession] = useState(() =>
     buildInitialSession(readLocaleKey() || "de")
+  );
+  const uiLanguage = usePreVisitUiLanguage(
+    session?.patientLanguage || readLocaleKey() || "de"
+  );
+  const tUi = useMemo(
+    () => getMessages(uiLanguage).preVisit.chat,
+    [uiLanguage]
   );
 
   useEffect(() => {
@@ -171,14 +176,14 @@ export default function PreVisitChatPage() {
     void sendPracticeAnalyticsEvent({
       eventType: "previsit_adaptive_category_started",
       ...(qr ? { qrToken: qr } : {}),
-      metadata: {
-        adaptiveCategoryKey: step.key,
-        flowStep: step.key,
-        deviceType: detectDeviceType(),
-        uiLanguage: language,
-      },
-    });
-  }, [useAdaptiveStep, step.key, session?.practiceContext?.qrToken, language]);
+        metadata: {
+          adaptiveCategoryKey: step.key,
+          flowStep: step.key,
+          deviceType: detectDeviceType(),
+          uiLanguage,
+        },
+      });
+  }, [useAdaptiveStep, step.key, session?.practiceContext?.qrToken, uiLanguage]);
 
   const handleAdaptiveFinished = useCallback(
     (compiled) => {
@@ -193,7 +198,7 @@ export default function PreVisitChatPage() {
           adaptiveCategoryKey: step.key,
           flowStep: step.key,
           deviceType: detectDeviceType(),
-          uiLanguage: language,
+          uiLanguage,
         },
       });
       setSession((prev) => {
@@ -221,7 +226,7 @@ export default function PreVisitChatPage() {
         };
       });
     },
-    [language, navigate, session?.practiceContext?.qrToken, step.key]
+    [navigate, session?.practiceContext?.qrToken, step.key, uiLanguage]
   );
 
   function setAnswer(value) {
@@ -331,7 +336,7 @@ export default function PreVisitChatPage() {
   return (
     <div className="pre-visit-chat">
       <div className="pre-visit-chat__inner">
-        <PreVisitModuleChrome />
+        <PreVisitModuleChrome languageOverride={uiLanguage} />
 
         <div className="pre-visit-chat__progress-wrap">
           <p

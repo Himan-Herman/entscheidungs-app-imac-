@@ -42,13 +42,17 @@ function readInitialDoctorLocale() {
 export default function PreVisitLanguagePage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const t = useMemo(() => getMessages(language).preVisit.language, [language]);
 
   const [selectedLocale, setSelectedLocale] = useState(() =>
     readInitialPatientLocale(language)
   );
   const [selectedDoctorLocale, setSelectedDoctorLocale] = useState(() =>
     readInitialDoctorLocale()
+  );
+  const previewLanguage = selectedLocale || language;
+  const t = useMemo(
+    () => getMessages(previewLanguage).preVisit.language,
+    [previewLanguage]
   );
 
   useEffect(() => {
@@ -114,7 +118,7 @@ export default function PreVisitLanguagePage() {
   return (
     <div className="pre-visit-page">
       <div className="pre-visit-page__shell">
-        <PreVisitModuleChrome />
+        <PreVisitModuleChrome languageOverride={previewLanguage} />
         <article
           className="pre-visit-card"
           aria-labelledby="previsit-title"

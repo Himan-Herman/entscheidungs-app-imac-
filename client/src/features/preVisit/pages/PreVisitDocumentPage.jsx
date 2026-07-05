@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import {
@@ -36,16 +35,21 @@ import {
 import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import AssistantQuestionsPanel from "../components/AssistantQuestionsPanel.jsx";
+import { usePreVisitUiLanguage } from "../hooks/usePreVisitUiLanguage.js";
 import "../styles/PreVisitDocumentPage.css";
 
 export default function PreVisitDocumentPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { language } = useLanguage();
-  const t = useMemo(() => getMessages(language).preVisit.document, [language]);
+  const [session, setSession] = useState(() => loadPreVisitSession());
+  const uiLanguage = usePreVisitUiLanguage(session?.patientLanguage);
+  const t = useMemo(
+    () => getMessages(uiLanguage).preVisit.document,
+    [uiLanguage]
+  );
   const tCaseDetail = useMemo(
-    () => getMessages(language).preVisit.caseDetail,
-    [language],
+    () => getMessages(uiLanguage).preVisit.caseDetail,
+    [uiLanguage]
   );
   const assistantLabels = useMemo(
     () => t.assistantQuestions || {},
@@ -74,7 +78,6 @@ export default function PreVisitDocumentPage() {
     [t, tCaseDetail],
   );
 
-  const [session, setSession] = useState(() => loadPreVisitSession());
   const assistantPreview = useMemo(
     () => normalizeAssistantQuestions(session?.assistantQuestions),
     [session?.assistantQuestions],
@@ -306,7 +309,7 @@ export default function PreVisitDocumentPage() {
         setLongitudinalPdfErr(t.longitudinalLoadOverviewError);
         return;
       }
-      const localeTag = getPrimaryIntlLocale(language);
+      const localeTag = getPrimaryIntlLocale(uiLanguage);
       const lines = data.case.sessions.map((s) => {
         const d = new Date(s.createdAt);
         const ds = Number.isNaN(d.getTime())
@@ -665,35 +668,35 @@ export default function PreVisitDocumentPage() {
             ? latest.aiSafetyNotice.trim()
             : null,
         title:
-          language === "de"
+          uiLanguage === "de"
             ? t.sessionTitleDe
-            : language === "fr"
+            : uiLanguage === "fr"
               ? t.sessionTitleFr || t.sessionTitleEn
-              : language === "es"
+              : uiLanguage === "es"
                 ? t.sessionTitleEs || t.sessionTitleEn
-                : language === "it"
+                : uiLanguage === "it"
                   ? t.sessionTitleIt || t.sessionTitleEn
-                  : language === "tr"
+                  : uiLanguage === "tr"
                     ? t.sessionTitleTr || t.sessionTitleEn
-                    : language === "ru"
+                    : uiLanguage === "ru"
                       ? t.sessionTitleRu || t.sessionTitleEn
-                      : language === "uk"
+                      : uiLanguage === "uk"
                         ? t.sessionTitleUk || t.sessionTitleEn
-                        : language === "pt"
+                        : uiLanguage === "pt"
                           ? t.sessionTitlePt || t.sessionTitleEn
-                          : language === "ar"
+                          : uiLanguage === "ar"
                             ? t.sessionTitleAr || t.sessionTitleEn
-                            : language === "fa"
+                            : uiLanguage === "fa"
                               ? t.sessionTitleFa || t.sessionTitleEn
-                              : language === "ckb"
+                              : uiLanguage === "ckb"
                                 ? t.sessionTitleCkb || t.sessionTitleEn
-                                : language === "ku"
+                                : uiLanguage === "ku"
                                   ? t.sessionTitleKu || t.sessionTitleEn
-                                  : language === "el"
+                                  : uiLanguage === "el"
                                     ? t.sessionTitleEl || t.sessionTitleEn
-                                    : language === "ro"
+                                    : uiLanguage === "ro"
                                       ? t.sessionTitleRo || t.sessionTitleEn
-                                      : language === "pl"
+                                      : uiLanguage === "pl"
                                         ? t.sessionTitlePl || t.sessionTitleEn
                                 : t.sessionTitleEn,
         status: latest.pdfDownloaded ? "pdf_created" : "draft",
@@ -726,7 +729,7 @@ export default function PreVisitDocumentPage() {
           metadata: {
             source: "account",
             deviceType: detectDeviceType(),
-            uiLanguage: language,
+            uiLanguage,
           },
         });
       }
@@ -774,7 +777,7 @@ export default function PreVisitDocumentPage() {
   return (
     <div className="pre-visit-doc">
       <div className="pre-visit-doc__inner">
-        <PreVisitModuleChrome />
+        <PreVisitModuleChrome languageOverride={uiLanguage} />
         <header className="pre-visit-doc__header">
           <h1 className="pre-visit-doc__title">{t.title}</h1>
           <p className="pre-visit-doc__lead">
