@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
-import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
 import {
   DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
@@ -46,9 +45,9 @@ export default function PreVisitLanguagePage() {
     () =>
       PRE_VISIT_LANGUAGE_OPTIONS.map((row) => ({
         value: row.id,
-        label: formatLanguageDisplayName(language, row.id),
+        label: row.nativeName,
       })),
-    [language]
+    []
   );
 
   function handleContinue() {

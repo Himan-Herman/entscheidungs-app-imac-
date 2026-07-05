@@ -14,6 +14,6 @@ const localeNameByCode = new Map(
 export const PRE_VISIT_LANGUAGE_OPTIONS = PATIENT_UI_SELECTABLE_LOCALE_CODES.map(
   (code) => ({
     id: code,
-    labelEn: localeNameByCode.get(code) || code.toUpperCase(),
+    nativeName: localeNameByCode.get(code) || code.toUpperCase(),
   }),
 );

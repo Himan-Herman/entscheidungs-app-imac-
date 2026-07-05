@@ -19,7 +19,7 @@ export function formatLanguageDisplayName(uiLanguageCode, languageId) {
     /* Intl unsupported or invalid tag */
   }
   const row = PRE_VISIT_LANGUAGE_OPTIONS.find((r) => r.id === code);
-  return row?.labelEn ?? code;
+  return row?.nativeName ?? code;
 }
 
 export function formatUiDate(isoOrDate, uiLanguageCode) {
