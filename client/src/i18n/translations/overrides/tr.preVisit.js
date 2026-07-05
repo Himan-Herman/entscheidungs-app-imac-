@@ -11,6 +11,9 @@ export default {
     languageLabel: "MedScoutX’te kullanmak istediğiniz dil",
     languageHint:
       "Bilgileri kendinizi en rahat hissettiğiniz dilde girebilirsiniz.",
+    doctorLanguageLabel: "Hekim sürümünün dili",
+    doctorLanguageHint:
+      "Hekime yönelik sürümün hangi dilde hazırlanacağını burada seçin.",
     continue: "Devam",
   },
   qrLanding: {
@@ -103,9 +106,13 @@ export default {
     title: "Hekim için belge hazırlayın",
     explanation:
       "Hekim için PDF Almanca oluşturulur. Özgün hasta ifadeleriniz ayrıca kendi dilinizde de ekli kalır.",
+    pageLeadFlexible:
+      "Bilgilerinizi gözden geçirin ve hekim için yapılandırılmış sürümün hangi dilde oluşturulacağını seçin. Özgün hasta ifadeleriniz ayrıca ayrı olarak ekli kalır.",
     doctorLangLabel: "Hekim sürümü dili",
     doctorLangHint:
       "Hekim için yapılandırılmış sürüm ve kuruma gönderilen PDF Almanca oluşturulur.",
+    doctorLangSelectableHint:
+      "Hekime yönelik sürümün hangi dilde oluşturulacağını burada belirleyebilirsiniz.",
     practiceContextTitle: "Seçilen muayenehane bağlamı",
     practiceContextPractice: "Muayenehane",
     practiceContextTarget: "Hedef",

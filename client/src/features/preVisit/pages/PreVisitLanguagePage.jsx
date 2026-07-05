@@ -4,6 +4,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages";
 import {
+  buildInitialSession,
   DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
   PREVISIT_LOCALE_STORAGE_KEY,
   loadPreVisitSession,
@@ -28,6 +29,16 @@ function readInitialPatientLocale(uiLanguage) {
   return "de";
 }
 
+function readInitialDoctorLocale() {
+  const allowed = new Set(PRE_VISIT_LANGUAGE_OPTIONS.map((o) => o.id));
+  const session = loadPreVisitSession();
+  const fromSession = session?.doctorLanguage;
+  if (fromSession && allowed.has(fromSession)) return fromSession;
+  const fromPractice = session?.practiceContext?.preferredDoctorLanguage;
+  if (fromPractice && allowed.has(fromPractice)) return fromPractice;
+  return DEFAULT_PREVISIT_DOCTOR_LANGUAGE;
+}
+
 export default function PreVisitLanguagePage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -35,6 +46,9 @@ export default function PreVisitLanguagePage() {
 
   const [selectedLocale, setSelectedLocale] = useState(() =>
     readInitialPatientLocale(language)
+  );
+  const [selectedDoctorLocale, setSelectedDoctorLocale] = useState(() =>
+    readInitialDoctorLocale()
   );
 
   useEffect(() => {
@@ -57,21 +71,21 @@ export default function PreVisitLanguagePage() {
       /* ignore quota / private mode */
     }
     const pv = loadPreVisitSession();
-    if (pv && typeof pv === "object") {
-      const next = {
-        ...pv,
-        patientLanguage: selectedLocale,
-        doctorLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
-      };
-      delete next.assistantQuestions;
-      delete next.aiDoctorVersion;
-      delete next.aiDoctorVersionFingerprint;
-      delete next.aiSafetyNotice;
-      savePreVisitSession(next);
-    }
+    const base =
+      pv && typeof pv === "object" ? pv : buildInitialSession(selectedLocale);
+    const next = {
+      ...base,
+      patientLanguage: selectedLocale,
+      doctorLanguage: selectedDoctorLocale,
+    };
+    delete next.assistantQuestions;
+    delete next.aiDoctorVersion;
+    delete next.aiDoctorVersionFingerprint;
+    delete next.aiSafetyNotice;
+    savePreVisitSession(next);
     const qr =
-      pv?.practiceContext?.qrToken != null
-        ? String(pv.practiceContext.qrToken).trim()
+      base?.practiceContext?.qrToken != null
+        ? String(base.practiceContext.qrToken).trim()
         : "";
     const deviceType = detectDeviceType();
     void sendPracticeAnalyticsEvent({
@@ -79,6 +93,7 @@ export default function PreVisitLanguagePage() {
       ...(qr ? { qrToken: qr } : {}),
       metadata: {
         patientLanguage: selectedLocale,
+        doctorLanguage: selectedDoctorLocale,
         uiLanguage: language,
         deviceType,
         source: qr ? "qr" : "manual",
@@ -89,6 +104,7 @@ export default function PreVisitLanguagePage() {
       ...(qr ? { qrToken: qr } : {}),
       metadata: {
         patientLanguage: selectedLocale,
+        doctorLanguage: selectedDoctorLocale,
         deviceType,
       },
     });
@@ -133,6 +149,34 @@ export default function PreVisitLanguagePage() {
             </select>
             <p id="previsit-language-hint" className="pre-visit-card__field-hint">
               {t.languageHint}
+            </p>
+          </div>
+
+          <div className="pre-visit-card__field">
+            <label
+              className="pre-visit-card__label"
+              htmlFor="previsit-doctor-language"
+            >
+              {t.doctorLanguageLabel}
+            </label>
+            <select
+              id="previsit-doctor-language"
+              className="pre-visit-card__select"
+              value={selectedDoctorLocale}
+              onChange={(e) => setSelectedDoctorLocale(e.target.value)}
+              aria-describedby="previsit-doctor-language-hint"
+            >
+              {options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <p
+              id="previsit-doctor-language-hint"
+              className="pre-visit-card__field-hint"
+            >
+              {t.doctorLanguageHint}
             </p>
           </div>
 

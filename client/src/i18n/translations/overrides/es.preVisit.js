@@ -11,6 +11,9 @@ export default {
     languageLabel: "Idioma que desea usar con MedScoutX",
     languageHint:
       "Puede introducir la información en el idioma en el que se sienta más seguro.",
+    doctorLanguageLabel: "Idioma de la versión para el médico",
+    doctorLanguageHint:
+      "Elija aquí en qué idioma debe prepararse la versión destinada al médico.",
     continue: "Continuar",
   },
   chrome: {
@@ -55,9 +58,13 @@ export default {
     title: "Preparar documento para el médico",
     explanation:
       "El PDF para el médico se crea en alemán. Sus declaraciones originales también se mantienen adjuntas en su propio idioma.",
+    pageLeadFlexible:
+      "Revise su información y elija en qué idioma debe crearse la versión estructurada para el médico. Sus declaraciones originales como paciente seguirán adjuntas por separado.",
     doctorLangLabel: "Idioma de la versión para el médico",
     doctorLangHint:
       "La versión estructurada para el médico y el PDF enviado al centro se crean en alemán.",
+    doctorLangSelectableHint:
+      "Aquí puede definir en qué idioma debe crearse la versión destinada al médico.",
     patientMetaSection: "Información opcional del paciente",
     patientMetaNote:
       "Esta información es opcional y ayuda al centro a identificar el documento.",

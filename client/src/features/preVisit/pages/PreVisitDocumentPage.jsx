@@ -2,14 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations/index.js";
-import {
-  formatLanguageDisplayName,
-  getPrimaryIntlLocale,
-} from "../../../i18n/intlLocale.js";
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import {
   PRE_VISIT_QUESTION_STEPS,
   pickLocalized,
 } from "../constants/questionFlow.js";
+import { PRE_VISIT_LANGUAGE_OPTIONS } from "../constants/languages.js";
 import { STRUCTURED_SECTION_ORDER } from "../constants/structuredDoctorLabels.js";
 import {
   computePreVisitAiFingerprint,
@@ -146,11 +144,6 @@ export default function PreVisitDocumentPage() {
       navigate("/pre-visit", { replace: true });
       return;
     }
-    if (s.doctorLanguage !== DEFAULT_PREVISIT_DOCTOR_LANGUAGE) {
-      setDoctorLanguage(DEFAULT_PREVISIT_DOCTOR_LANGUAGE);
-      setSession(loadPreVisitSession());
-      return;
-    }
     setSession(s);
     const p = s?.patientIdentity || {};
     setPatientIdentity({
@@ -182,19 +175,15 @@ export default function PreVisitDocumentPage() {
   }, [t.pageTitle]);
 
   const patientLang = session?.patientLanguage || "de";
-  const doctorLang = DEFAULT_PREVISIT_DOCTOR_LANGUAGE;
+  const doctorLang = session?.doctorLanguage || DEFAULT_PREVISIT_DOCTOR_LANGUAGE;
 
   const langOptions = useMemo(
-    () => [
-      {
-        value: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
-        label: formatLanguageDisplayName(
-          language,
-          DEFAULT_PREVISIT_DOCTOR_LANGUAGE
-        ),
-      },
-    ],
-    [language]
+    () =>
+      PRE_VISIT_LANGUAGE_OPTIONS.map((row) => ({
+        value: row.id,
+        label: row.nativeName,
+      })),
+    []
   );
 
   const longitudinalUi = useMemo(
@@ -788,7 +777,9 @@ export default function PreVisitDocumentPage() {
         <PreVisitModuleChrome />
         <header className="pre-visit-doc__header">
           <h1 className="pre-visit-doc__title">{t.title}</h1>
-          <p className="pre-visit-doc__lead">{t.explanation}</p>
+          <p className="pre-visit-doc__lead">
+            {t.pageLeadFlexible || t.explanation}
+          </p>
         </header>
 
         <div className="pre-visit-doc__field">
@@ -828,7 +819,6 @@ export default function PreVisitDocumentPage() {
             value={doctorLang}
             onChange={handleDoctorLangChange}
             aria-describedby="previsit-doctor-lang-hint"
-            disabled
           >
             {langOptions.map((o) => (
               <option key={o.value} value={o.value}>
@@ -837,7 +827,7 @@ export default function PreVisitDocumentPage() {
             ))}
           </select>
           <p id="previsit-doctor-lang-hint" className="pre-visit-doc__field-hint">
-            {t.doctorLangHint}
+            {t.doctorLangSelectableHint || t.doctorLangHint}
           </p>
         </div>
 

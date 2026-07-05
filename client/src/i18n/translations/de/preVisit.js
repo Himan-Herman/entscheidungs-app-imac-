@@ -12,6 +12,9 @@ export default {
       "Sprache, in der Sie mit MedScoutX antworten möchten",
     languageHint:
       "Sie können Ihre Angaben in der Sprache machen, in der Sie sich am sichersten ausdrücken können.",
+    doctorLanguageLabel: "Sprache der Arztversion",
+    doctorLanguageHint:
+      "Wählen Sie hier, in welcher Sprache die Arztversion später erstellt werden soll.",
     continue: "Weiter",
   },
   qrLanding: {
@@ -98,9 +101,13 @@ export default {
     title: "Dokument für den Arzt vorbereiten",
     explanation:
       "Die Arzt-PDF wird auf Deutsch erstellt. Ihre ursprünglichen Angaben bleiben zusätzlich in Ihrer eigenen Sprache erhalten.",
+    pageLeadFlexible:
+      "Prüfen Sie Ihre Angaben und wählen Sie, in welcher Sprache die strukturierte Arztversion erstellt werden soll. Ihre ursprünglichen Patientenangaben bleiben zusätzlich separat erhalten.",
     doctorLangLabel: "Sprache für die Arztversion",
     doctorLangHint:
       "Die strukturierte Arztversion und die PDF für die Praxis werden auf Deutsch erstellt.",
+    doctorLangSelectableHint:
+      "Hier können Sie festlegen, in welcher Sprache die Arztversion erstellt werden soll.",
     practiceContextTitle: "Ausgewählter Praxis-Kontext",
     practiceContextPractice: "Praxis",
     practiceContextTarget: "Ziel",

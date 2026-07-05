@@ -11,6 +11,9 @@ export default {
     languageLabel: "Lingua che vuoi usare con MedScoutX",
     languageHint:
       "Puoi inserire le informazioni nella lingua in cui ti senti più a tuo agio.",
+    doctorLanguageLabel: "Lingua della versione medico",
+    doctorLanguageHint:
+      "Scegli qui in quale lingua dovrà essere preparata la versione destinata al medico.",
     continue: "Continua",
   },
   qrLanding: {
@@ -102,9 +105,13 @@ export default {
     title: "Prepara documento per il medico",
     explanation:
       "Il PDF per il medico viene creato in tedesco. Le tue dichiarazioni originali restano comunque incluse nella tua lingua.",
+    pageLeadFlexible:
+      "Controlla le tue informazioni e scegli in quale lingua deve essere creata la versione strutturata per il medico. Le tue dichiarazioni originali come paziente restano inoltre allegate separatamente.",
     doctorLangLabel: "Lingua della versione medico",
     doctorLangHint:
       "La versione strutturata per il medico e il PDF inviato allo studio vengono creati in tedesco.",
+    doctorLangSelectableHint:
+      "Qui puoi definire in quale lingua deve essere creata la versione destinata al medico.",
     practiceContextTitle: "Contesto dello studio selezionato",
     practiceContextPractice: "Studio",
     practiceContextTarget: "Destinazione",
