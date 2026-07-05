@@ -68,6 +68,22 @@ export function isAiDoctorVersionFresh(session) {
   );
 }
 
+export function resolvePdfIncludePatientIdentity(session) {
+  if (
+    session &&
+    Object.prototype.hasOwnProperty.call(session, "pdfIncludePatientIdentity")
+  ) {
+    return session.pdfIncludePatientIdentity === true;
+  }
+  const answers =
+    session?.answers &&
+    typeof session.answers === "object" &&
+    !Array.isArray(session.answers)
+      ? session.answers
+      : {};
+  return answers.pdfIncludePatientIdentity === true;
+}
+
 export function buildInitialSession(patientLanguage) {
   const empty = createEmptyAnswers();
   const stored = loadPreVisitSession();
@@ -182,6 +198,9 @@ export function buildInitialSession(patientLanguage) {
       ...(patientIdentity ? { patientIdentity } : {}),
       ...(practiceContext ? { practiceContext } : {}),
       ...(longitudinalCase ? { longitudinalCase } : {}),
+      ...(resolvePdfIncludePatientIdentity(stored)
+        ? { pdfIncludePatientIdentity: true }
+        : {}),
     };
   }
 
@@ -388,6 +407,14 @@ export function setOptionalPatientIdentity(patch) {
       patientPhone: String(patch.patientPhone ?? current.patientPhone ?? ""),
     },
   };
+  savePreVisitSession(next);
+  return next;
+}
+
+export function setPdfIncludePatientIdentity(include) {
+  const s = loadPreVisitSession();
+  if (!s) return null;
+  const next = { ...s, pdfIncludePatientIdentity: include === true };
   savePreVisitSession(next);
   return next;
 }

@@ -61,6 +61,10 @@ export default {
     patientMetaSection: "زانیاری ھەڵبژاردەی نەخۆش",
     patientMetaNote:
       "ئەم زانیارییانە ھەڵبژاردەن و یارمەتی دامەزراوە دەدەن بۆ ناساندنی بەڵگەنامەکە.",
+    patientIdentityPdfConsent:
+      "ئەم زانیارییەکانی ناسنامەی نەخۆش لە PDF ـەکەدا بۆ دامەزراوە/پزیشک پیشان بدە.",
+    patientIdentityPdfConsentHint:
+      "زانیارییەکانی ناسنامە تەنها ئەگەر ئەم هەڵبژاردنە چالاک بکەیت لە PDF ـەکەدا دەردەکەون. دەتوانیت خانەکان بۆ بەکارهێنانی دواتر هەروا لەسەر ئامێرەکەت پڕکراو بهێڵیت.",
     patientNameLabel: "ناو",
     patientDateOfBirthLabel: "ڕۆژی لەدایکبوون",
     patientEmailLabel: "ئیمەیڵ",

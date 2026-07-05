@@ -61,6 +61,10 @@ export default {
     patientMetaSection: "Información opcional del paciente",
     patientMetaNote:
       "Esta información es opcional y ayuda al centro a identificar el documento.",
+    patientIdentityPdfConsent:
+      "Incluir estos datos del paciente en el PDF para el centro/médico.",
+    patientIdentityPdfConsentHint:
+      "Los datos de identidad solo aparecerán en el PDF si activa esta opción. Puede dejar los campos rellenados localmente para usarlos después.",
     patientNameLabel: "Nombre",
     patientDateOfBirthLabel: "Fecha de nacimiento",
     patientEmailLabel: "Correo electrónico",

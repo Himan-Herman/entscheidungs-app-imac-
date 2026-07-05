@@ -1,6 +1,6 @@
 /**
- * jsPDF default fonts cover Latin/Western European. Cyrillic, Arabic, Persian,
- * Sorani, etc. may not render correctly until a Unicode font or HTML→PDF path is added.
+ * Pre-Visit PDF generation with embedded Unicode fonts for multilingual
+ * patient wording, including Arabic-script languages.
  */
 import { jsPDF } from "jspdf";
 import {
@@ -11,7 +11,11 @@ import {
   STRUCTURED_DOCTOR_LABELS,
   STRUCTURED_SECTION_ORDER,
 } from "../constants/structuredDoctorLabels.js";
-import { isAiDoctorVersionFresh } from "../constants/preVisitSession.js";
+import {
+  isAiDoctorVersionFresh,
+  normalizeLongitudinalCase,
+  resolvePdfIncludePatientIdentity,
+} from "../constants/preVisitSession.js";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
 
@@ -28,6 +32,143 @@ const COL = {
 /** Reserve bottom space so body never overlaps footer */
 const FOOTER_RESERVE_MM = 26;
 const RTL_LANGS = new Set(["ar", "fa", "ku", "he", "ur"]);
+const PDF_FONT_FILES = {
+  normal: "previsit-pdf-tahoma.ttf",
+  bold: "previsit-pdf-tahoma-bold.ttf",
+};
+const PDF_FONT_FAMILY = "PreVisitTahoma";
+let pdfFontRegistrationPromise = null;
+
+function getPdfAssetUrl(filename) {
+  const base = String(import.meta.env?.BASE_URL || "/");
+  return `${base.endsWith("/") ? base : `${base}/`}${filename}`;
+}
+
+function arrayBufferToBinaryString(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let out = "";
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    out += String.fromCharCode(...chunk);
+  }
+  return out;
+}
+
+async function ensurePreVisitPdfFonts(doc) {
+  if (!pdfFontRegistrationPromise) {
+    pdfFontRegistrationPromise = (async () => {
+      const [normalRes, boldRes] = await Promise.all([
+        fetch(getPdfAssetUrl(PDF_FONT_FILES.normal)),
+        fetch(getPdfAssetUrl(PDF_FONT_FILES.bold)),
+      ]);
+      if (!normalRes.ok || !boldRes.ok) {
+        throw new Error("previsit_pdf_font_load_failed");
+      }
+      const [normalBuffer, boldBuffer] = await Promise.all([
+        normalRes.arrayBuffer(),
+        boldRes.arrayBuffer(),
+      ]);
+      return {
+        normal: arrayBufferToBinaryString(normalBuffer),
+        bold: arrayBufferToBinaryString(boldBuffer),
+      };
+    })().catch((err) => {
+      pdfFontRegistrationPromise = null;
+      throw err;
+    });
+  }
+
+  const fontData = await pdfFontRegistrationPromise;
+  if (!doc.existsFileInVFS(PDF_FONT_FILES.normal)) {
+    doc.addFileToVFS(PDF_FONT_FILES.normal, fontData.normal);
+  }
+  if (!doc.existsFileInVFS(PDF_FONT_FILES.bold)) {
+    doc.addFileToVFS(PDF_FONT_FILES.bold, fontData.bold);
+  }
+  doc.addFont(PDF_FONT_FILES.normal, PDF_FONT_FAMILY, "normal");
+  doc.addFont(PDF_FONT_FILES.bold, PDF_FONT_FAMILY, "bold");
+}
+
+function setPdfFont(doc, style = "normal") {
+  doc.setFont(PDF_FONT_FAMILY, style === "bold" ? "bold" : "normal");
+}
+
+function resolveAnswerObject(session) {
+  return session?.answers &&
+    typeof session.answers === "object" &&
+    !Array.isArray(session.answers)
+    ? session.answers
+    : {};
+}
+
+function resolveStructuredPatientIdentity(session) {
+  const top =
+    session?.patientIdentity &&
+    typeof session.patientIdentity === "object" &&
+    !Array.isArray(session.patientIdentity)
+      ? session.patientIdentity
+      : null;
+  const answers = resolveAnswerObject(session);
+  const nested =
+    answers.patientIdentity &&
+    typeof answers.patientIdentity === "object" &&
+    !Array.isArray(answers.patientIdentity)
+      ? answers.patientIdentity
+      : null;
+  const src = top || nested;
+  if (!src) return null;
+  return {
+    patientName: String(src.patientName || "").trim(),
+    patientEmail: String(src.patientEmail || "").trim(),
+    patientDateOfBirth: String(src.patientDateOfBirth || "").trim(),
+    patientGenderOrSalutation: String(
+      src.patientGenderOrSalutation || "",
+    ).trim(),
+    patientPhone: String(src.patientPhone || "").trim(),
+  };
+}
+
+function resolvePracticeContext(session) {
+  const top =
+    session?.practiceContext &&
+    typeof session.practiceContext === "object" &&
+    !Array.isArray(session.practiceContext)
+      ? session.practiceContext
+      : null;
+  const answers = resolveAnswerObject(session);
+  const nested =
+    answers.practiceContext &&
+    typeof answers.practiceContext === "object" &&
+    !Array.isArray(answers.practiceContext)
+      ? answers.practiceContext
+      : null;
+  return top || nested || null;
+}
+
+function resolveCaseTimeline(session) {
+  const top =
+    session?.caseTimeline &&
+    typeof session.caseTimeline === "object" &&
+    !Array.isArray(session.caseTimeline)
+      ? session.caseTimeline
+      : null;
+  const answers = resolveAnswerObject(session);
+  const nested =
+    answers.caseTimeline &&
+    typeof answers.caseTimeline === "object" &&
+    !Array.isArray(answers.caseTimeline)
+      ? answers.caseTimeline
+      : null;
+  return top || nested || null;
+}
+
+function resolveLongitudinalCase(session) {
+  const top = normalizeLongitudinalCase(session?.longitudinalCase);
+  if (top) return top;
+  const answers = resolveAnswerObject(session);
+  return normalizeLongitudinalCase(answers.longitudinalCase);
+}
 
 function isRtlLanguage(lang) {
   const s = String(lang || "").toLowerCase();
@@ -198,7 +339,7 @@ function applyFooters(doc, L, _uiLanguage, pageWidth, pageHeight, margin) {
     const noteY = pageHeight - margin - 3;
     const brandY = noteY - lh - 2;
 
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...COL.slateMuted);
 
@@ -215,20 +356,20 @@ function applyFooters(doc, L, _uiLanguage, pageWidth, pageHeight, margin) {
 }
 
 /**
- * @returns {{ doc: import("jspdf").jsPDF; pdfFilename: string } | null}
+ * @returns {Promise<{ doc: import("jspdf").jsPDF; pdfFilename: string } | null>}
  */
-function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
+async function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
   if (!session?.answers) {
     return null;
   }
 
   const L = { ...defaultLabels(uiLanguage), ...labels };
-  const timeline = session?.caseTimeline;
-  const longitudinal = session?.longitudinalCase;
+  const answers = resolveAnswerObject(session);
+  const timeline = resolveCaseTimeline(session);
+  const longitudinal = resolveLongitudinalCase(session);
   const followUpHistory = session?.followUpHistory;
   const relatedReportsInLongitudinal =
     longitudinal?.pdfInclude?.relatedReportsSummary === true;
-  const answers = session.answers;
   const patientLang = session.patientLanguage || "de";
   const doctorLang = session.doctorLanguage || patientLang;
   const defaultRtl = isRtlLanguage(patientLang);
@@ -236,11 +377,15 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     isAiDoctorVersionFresh(session) && session.aiDoctorVersion;
 
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  await ensurePreVisitPdfFonts(doc);
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 18;
   const contentW = pageWidth - 2 * margin;
   let y = margin;
+  const includePatientIdentity = resolvePdfIncludePatientIdentity(session);
+  const patientMeta = resolveStructuredPatientIdentity(session);
+  const practiceContext = resolvePracticeContext(session);
 
   const bodySize = 10;
   const metaSize = 9;
@@ -282,15 +427,17 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     const align = textAlignFor(text, options.forceRtl);
     const lh = lineHeightMm(fontSizePt);
     const lines = doc.splitTextToSize(text, width);
+    doc.setR2L(align === "right");
     for (const line of lines) {
       needSpace(lh + 0.6);
       doc.text(line, textXFor(align), y, { align });
       y += lh;
     }
+    doc.setR2L(false);
   }
 
   function drawLabelAndBody(label, body, emptyPlaceholder, forceRtl = false) {
-    doc.setFont("helvetica", "bold");
+    setPdfFont(doc, "bold");
     doc.setFontSize(labelSize);
     doc.setTextColor(...COL.slate);
     drawWrappedText(label, contentW, labelSize, { forceRtl });
@@ -298,7 +445,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     gap(2);
 
     const empty = !String(body || "").trim();
-    doc.setFont("helvetica", empty ? "italic" : "normal");
+    setPdfFont(doc, "normal");
     doc.setFontSize(bodySize);
     doc.setTextColor(...(empty ? COL.slateMuted : COL.slate));
     drawWrappedText(empty ? emptyPlaceholder : body, contentW, bodySize, {
@@ -310,10 +457,6 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
 
   /** First page only: brand (text; logo TODO), title, date, rule */
   function drawDocumentHeader() {
-    const practiceContext =
-      session?.practiceContext && typeof session.practiceContext === "object"
-        ? session.practiceContext
-        : null;
     const hasPracticeContext = !!practiceContext?.practiceName;
     const logoDataCandidate = String(
       practiceContext?.logoDataUrl || practiceContext?.logoUrl || ""
@@ -330,7 +473,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     }
 
     doc.setTextColor(...COL.teal);
-    doc.setFont("helvetica", "bold");
+    setPdfFont(doc, "bold");
     doc.setFontSize(brandSize);
     needSpace(lineHeightMm(brandSize) + 1);
     doc.text(
@@ -341,10 +484,10 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     y += lineHeightMm(brandSize) + 2;
 
     if (hasPracticeContext) {
-      doc.setFont("helvetica", "bold");
+      setPdfFont(doc, "bold");
       doc.setFontSize(10.5);
       drawWrappedText(practiceContext.practiceName, contentW, 10.5);
-      doc.setFont("helvetica", "normal");
+      setPdfFont(doc, "normal");
       doc.setFontSize(8.8);
       const infoBits = [
         practiceContext.targetName ? String(practiceContext.targetName) : "",
@@ -364,7 +507,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     drawWrappedText(L.pdfDocumentTitle, contentW, docTitleSize);
     y += 1;
 
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
     doc.setFontSize(metaSize);
     doc.setTextColor(...COL.slateMuted);
     const genLine = `${L.documentCreatedLabel}: ${formatCreated(uiLanguage)}`;
@@ -389,7 +532,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
    * Disclaimer strip — same legal text, boxed for emphasis.
    */
   function drawDisclaimerStrip() {
-    doc.setFont("helvetica", "italic");
+    setPdfFont(doc, "normal");
     doc.setFontSize(bodySize);
     const lh = lineHeightMm(bodySize);
     const pad = 4;
@@ -415,7 +558,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     }
 
     y = boxTop + boxH + 6;
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
   }
 
   /**
@@ -426,34 +569,26 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     const innerW = contentW - pad * 2;
     const lh = lineHeightMm(metaSize);
 
-    const patientMeta =
-      session?.patientIdentity && typeof session.patientIdentity === "object"
-        ? session.patientIdentity
-        : {};
-    const patientName = String(patientMeta.patientName || "").trim();
+    const patientName = String(patientMeta?.patientName || "").trim();
     const patientSalutation = String(
-      patientMeta.patientGenderOrSalutation || ""
+      patientMeta?.patientGenderOrSalutation || ""
     ).trim();
-    const patientDob = String(patientMeta.patientDateOfBirth || "").trim();
-    const patientEmail = String(patientMeta.patientEmail || "").trim();
-    const patientPhone = String(patientMeta.patientPhone || "").trim();
+    const patientDob = String(patientMeta?.patientDateOfBirth || "").trim();
+    const patientEmail = String(patientMeta?.patientEmail || "").trim();
+    const patientPhone = String(patientMeta?.patientPhone || "").trim();
     const contactParts = [patientEmail, patientPhone].filter(Boolean);
-    const practiceContext =
-      session?.practiceContext && typeof session.practiceContext === "object"
-        ? session.practiceContext
-        : null;
 
     const metaLines = [];
-    if (patientName || patientSalutation) {
+    if (includePatientIdentity && (patientName || patientSalutation)) {
       const patientValue = [patientName, patientSalutation]
         .filter(Boolean)
         .join(" — ");
       metaLines.push(`${L.patientLabel}: ${patientValue}`);
     }
-    if (patientDob) {
+    if (includePatientIdentity && patientDob) {
       metaLines.push(`${L.patientDateOfBirthLabel}: ${patientDob}`);
     }
-    if (contactParts.length > 0) {
+    if (includePatientIdentity && contactParts.length > 0) {
       metaLines.push(`${L.contactLabel}: ${contactParts.join(" · ")}`);
     }
     if (practiceContext?.practiceName) {
@@ -476,7 +611,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     );
     metaLines.push(`${L.documentCreatedLabel}: ${formatCreated(uiLanguage)}`);
 
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
     doc.setFontSize(metaSize);
     const bodyLineArrays = metaLines.map((row) =>
       doc.splitTextToSize(row, innerW)
@@ -509,7 +644,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
 
   function writeSectionHeading(text) {
     gap(6);
-    doc.setFont("helvetica", "bold");
+    setPdfFont(doc, "bold");
     doc.setFontSize(sectionSize);
     doc.setTextColor(...COL.teal);
     drawWrappedText(text, contentW, sectionSize, { forceRtl: defaultRtl });
@@ -521,12 +656,12 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     y += 5;
     doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.2);
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
   }
 
   function writeFieldBlock(labelText, bodyText, emptyPlaceholder) {
     drawLabelAndBody(labelText, bodyText, emptyPlaceholder, defaultRtl);
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
   }
 
   // ——— Build body (order unchanged from product spec) ———
@@ -551,7 +686,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     gap(4);
     doc.setFillColor(...COL.boxBg);
     doc.setDrawColor(...COL.boxBorder);
-    doc.setFont("helvetica", "italic");
+    setPdfFont(doc, "normal");
     doc.setFontSize(bodySize);
     const lh = lineHeightMm(bodySize);
     const pad = 4;
@@ -569,7 +704,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
       textY += lh;
     }
     y = boxTop + boxH + 6;
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
     doc.setTextColor(...COL.slate);
   }
 
@@ -622,7 +757,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     gap(4);
     writeSectionHeading(L.longitudinalSectionHeading);
     gap(3);
-    doc.setFont("helvetica", "italic");
+    setPdfFont(doc, "normal");
     doc.setFontSize(metaSize);
     doc.setTextColor(...COL.slateMuted);
     const hintLines = doc.splitTextToSize(L.longitudinalSectionNote, contentW);
@@ -633,7 +768,7 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
       y += hintLh;
     }
     doc.setTextColor(...COL.slate);
-    doc.setFont("helvetica", "normal");
+    setPdfFont(doc, "normal");
     gap(4);
 
     if (pdfInc.caseTitle && String(longitudinal.caseTitle || "").trim()) {
@@ -750,15 +885,19 @@ function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
  * @param {object} params.session — medscoutx_previsit_session shape
  * @param {string} params.uiLanguage — app UI locale for labels (ISO-style code)
  * @param {object} [params.labels] — optional overrides (merged with defaults)
- * @returns {boolean} true if the PDF was built and download triggered
+ * @returns {Promise<boolean>} true if the PDF was built and download triggered
  */
-export function generatePreVisitPdf({
+export async function generatePreVisitPdf({
   session,
   uiLanguage,
   labels: labelOverrides = {},
 }) {
   try {
-    const built = buildPreVisitPdfDocument(session, uiLanguage, labelOverrides);
+    const built = await buildPreVisitPdfDocument(
+      session,
+      uiLanguage,
+      labelOverrides,
+    );
     if (!built) return false;
     built.doc.save(built.pdfFilename);
     return true;
@@ -770,15 +909,19 @@ export function generatePreVisitPdf({
 
 /**
  * Same layout as download PDF — blob for optional email upload (no automatic send).
- * @returns {Blob | null}
+ * @returns {Promise<Blob | null>}
  */
-export function buildPreVisitPdfBlob({
+export async function buildPreVisitPdfBlob({
   session,
   uiLanguage,
   labels: labelOverrides = {},
 }) {
   try {
-    const built = buildPreVisitPdfDocument(session, uiLanguage, labelOverrides);
+    const built = await buildPreVisitPdfDocument(
+      session,
+      uiLanguage,
+      labelOverrides,
+    );
     if (!built) return null;
     return built.doc.output("blob");
   } catch (err) {

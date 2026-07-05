@@ -61,6 +61,10 @@ export default {
     patientMetaSection: "Agahiyên bijarte yên nexweş",
     patientMetaNote:
       "Ev agahî bijarte ne û saziyayê ji bo nasandina belgeyê alîkar dikin.",
+    patientIdentityPdfConsent:
+      "Van agahiyên nasnameyê di PDFê de ji bo saziya / doktor nîşan bide.",
+    patientIdentityPdfConsentHint:
+      "Agahiyên nasnameyê tenê gava ku ev vebijark çalak bibe di PDFê de xuya dibin. Tu dikarî qadên dagirtî ji bo paşê li herêmî bihêlî.",
     patientNameLabel: "Nav",
     patientDateOfBirthLabel: "Roja jidayikbûnê",
     patientEmailLabel: "E-name",

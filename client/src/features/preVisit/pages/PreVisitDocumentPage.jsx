@@ -17,11 +17,13 @@ import {
   isAiDoctorVersionFresh,
   loadPreVisitSession,
   normalizeLongitudinalCase,
+  resolvePdfIncludePatientIdentity,
   normalizeAssistantQuestions,
   savePreVisitSession,
   setCaseTimelineData,
   setLongitudinalCaseData,
   setOptionalPatientIdentity,
+  setPdfIncludePatientIdentity,
   setDoctorLanguage,
   setSelectedDoctorContact,
 } from "../constants/preVisitSession.js";
@@ -116,6 +118,8 @@ export default function PreVisitDocumentPage() {
       patientPhone: String(p.patientPhone || ""),
     };
   });
+  const [includePatientIdentityInPdf, setIncludePatientIdentityInPdfState] =
+    useState(() => resolvePdfIncludePatientIdentity(loadPreVisitSession()));
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState(null);
   const [timelineSessions, setTimelineSessions] = useState([]);
@@ -156,6 +160,7 @@ export default function PreVisitDocumentPage() {
       patientGenderOrSalutation: String(p.patientGenderOrSalutation || ""),
       patientPhone: String(p.patientPhone || ""),
     });
+    setIncludePatientIdentityInPdfState(resolvePdfIncludePatientIdentity(s));
     const c = s?.caseTimeline || {};
     setCaseTimeline({
       relatedSessionId: String(c.relatedSessionId || ""),
@@ -247,6 +252,12 @@ export default function PreVisitDocumentPage() {
     const nextIdentity = { ...patientIdentity, [field]: value };
     setPatientIdentity(nextIdentity);
     const next = setOptionalPatientIdentity(nextIdentity);
+    if (next) setSession(next);
+  }
+
+  function handlePatientIdentityPdfConsentChange(checked) {
+    setIncludePatientIdentityInPdfState(checked);
+    const next = setPdfIncludePatientIdentity(checked);
     if (next) setSession(next);
   }
 
@@ -404,7 +415,7 @@ export default function PreVisitDocumentPage() {
     }
     const latest = loadPreVisitSession();
     if (!latest?.answers) return;
-    const blob = buildPreVisitPdfBlob({
+    const blob = await buildPreVisitPdfBlob({
       session: latest,
       uiLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
       labels: pdfLabelOverrides,
@@ -506,11 +517,11 @@ export default function PreVisitDocumentPage() {
     return labels[key] || "";
   }
 
-  const handleDownloadPdf = useCallback(() => {
+  const handleDownloadPdf = useCallback(async () => {
     const latest = loadPreVisitSession();
     if (!latest?.answers) return;
     try {
-      const ok = generatePreVisitPdf({
+      const ok = await generatePreVisitPdf({
         session: latest,
         uiLanguage: DEFAULT_PREVISIT_DOCTOR_LANGUAGE,
         labels: pdfLabelOverrides,
@@ -528,7 +539,7 @@ export default function PreVisitDocumentPage() {
     if (!location.state?.autoDownloadPdf || autoDownloadPdfRef.current) return;
     if (!session?.answers || aiLoading) return;
     autoDownloadPdfRef.current = true;
-    handleDownloadPdf();
+    void handleDownloadPdf();
   }, [
     aiLoading,
     handleDownloadPdf,
@@ -595,9 +606,13 @@ export default function PreVisitDocumentPage() {
       const hasPatientIdentity = Object.values(normalizedPatientIdentity).some(
         (v) => v.length > 0
       );
-      const answersForAccount = hasPatientIdentity
-        ? { ...latest.answers, patientIdentity: normalizedPatientIdentity }
-        : { ...latest.answers };
+      const answersForAccount = {
+        ...latest.answers,
+        ...(hasPatientIdentity
+          ? { patientIdentity: normalizedPatientIdentity }
+          : {}),
+        pdfIncludePatientIdentity: resolvePdfIncludePatientIdentity(latest),
+      };
       const timelineSummary = latest?.caseTimeline?.summary;
       const timelinePayload =
         latest?.caseTimeline?.relatedSessionId &&
@@ -906,6 +921,22 @@ export default function PreVisitDocumentPage() {
             }
             autoComplete="tel"
           />
+          <label className="pre-visit-doc__checkbox-label">
+            <input
+              type="checkbox"
+              className="pre-visit-doc__checkbox"
+              checked={includePatientIdentityInPdf}
+              onChange={(e) =>
+                handlePatientIdentityPdfConsentChange(e.target.checked)
+              }
+            />
+            <span className="pre-visit-doc__checkbox-text">
+              {t.patientIdentityPdfConsent}
+            </span>
+          </label>
+          <p className="pre-visit-doc__field-hint">
+            {t.patientIdentityPdfConsentHint}
+          </p>
         </div>
 
         {hasAuthToken ? (
@@ -1315,7 +1346,7 @@ export default function PreVisitDocumentPage() {
               <button
                 type="button"
                 className="pre-visit-doc__btn pre-visit-doc__btn--pdf-primary"
-                onClick={handleDownloadPdf}
+                onClick={() => void handleDownloadPdf()}
                 aria-describedby="previsit-pdf-local-note"
               >
                 {t.pdfDisabled}

@@ -222,14 +222,14 @@ export default function PracticePreparationDetailPage() {
     }
   }
 
-  function downloadPdf() {
+  async function downloadPdf() {
     if (!row?.answers) return;
     const followupMessages = includeFollowUpsInPdf
       ? threads
           .flatMap((th) => (Array.isArray(th.messages) ? th.messages : []))
           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
       : [];
-    generatePreVisitPdf({
+    await generatePreVisitPdf({
       session: {
         answers: row.answers,
         aiDoctorVersion: row.aiDoctorVersion,
@@ -273,7 +273,7 @@ export default function PracticePreparationDetailPage() {
           <p>{row.targetDoctorName || row.targetName || "—"}</p>
           <p>{row.preVisitCaseTitle || "—"}</p>
           <p>{statusLabel(row.practiceStatus)}</p>
-          <button type="button" onClick={downloadPdf}>{t.detailDownloadPdf}</button>
+          <button type="button" onClick={() => void downloadPdf()}>{t.detailDownloadPdf}</button>
           <Link to="/pre-visit/document">{t.detailOpenPatientFlow}</Link>
         </section>
 

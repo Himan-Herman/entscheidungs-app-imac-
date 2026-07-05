@@ -114,6 +114,10 @@ export default {
     patientMetaSection: "İsteğe bağlı hasta bilgileri",
     patientMetaNote:
       "Bu bilgiler isteğe bağlıdır ve kurumun belgeyi eşleştirmesine yardımcı olur.",
+    patientIdentityPdfConsent:
+      "Bu hasta bilgilerini muayenehane/doktor için PDF’de göster.",
+    patientIdentityPdfConsentHint:
+      "Kimlik bilgileri yalnızca bu seçenek açıksa PDF’de görünür. Alanları daha sonra kullanmak için yine de yerelde doldurulmuş bırakabilirsiniz.",
     patientNameLabel: "Ad",
     patientDateOfBirthLabel: "Doğum tarihi",
     patientEmailLabel: "E-posta",

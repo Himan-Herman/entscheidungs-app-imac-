@@ -3,6 +3,7 @@ import {
   computePreVisitAiFingerprint,
   normalizeLongitudinalCase,
   PREVISIT_LOCALE_STORAGE_KEY,
+  resolvePdfIncludePatientIdentity,
   savePreVisitSession,
 } from "../constants/preVisitSession.js";
 
@@ -92,6 +93,27 @@ export function hydrateServerSessionToLocal(record, options = {}) {
     answers,
     stepIndex,
   };
+
+  const patientIdentity =
+    answers?.patientIdentity &&
+    typeof answers.patientIdentity === "object" &&
+    !Array.isArray(answers.patientIdentity)
+      ? answers.patientIdentity
+      : null;
+  if (patientIdentity) {
+    payload.patientIdentity = {
+      patientName: String(patientIdentity.patientName || ""),
+      patientDateOfBirth: String(patientIdentity.patientDateOfBirth || ""),
+      patientEmail: String(patientIdentity.patientEmail || ""),
+      patientPhone: String(patientIdentity.patientPhone || ""),
+      patientGenderOrSalutation: String(
+        patientIdentity.patientGenderOrSalutation || "",
+      ),
+    };
+  }
+  if (resolvePdfIncludePatientIdentity(record)) {
+    payload.pdfIncludePatientIdentity = true;
+  }
 
   if (typeof record.id === "string" && record.id.trim()) {
     payload.cloudSessionId = record.id.trim();

@@ -113,6 +113,10 @@ export default {
     patientMetaSection: "Dettagli facoltativi del paziente",
     patientMetaNote:
       "Queste informazioni sono facoltative e aiutano lo studio a identificare il documento.",
+    patientIdentityPdfConsent:
+      "Includi questi dati del paziente nel PDF per lo studio/medico.",
+    patientIdentityPdfConsentHint:
+      "I dati identificativi compaiono nel PDF solo se attivi questa opzione. Puoi comunque lasciare i campi compilati localmente per usarli più tardi.",
     patientNameLabel: "Nome",
     patientEmailLabel: "E-mail",
     patientDateOfBirthLabel: "Data di nascita",

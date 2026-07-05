@@ -61,6 +61,10 @@ export default {
     patientMetaSection: "Informations patient facultatives",
     patientMetaNote:
       "Ces informations sont facultatives et aident le cabinet à identifier le document.",
+    patientIdentityPdfConsent:
+      "Inclure ces informations patient dans le PDF pour le cabinet/le médecin.",
+    patientIdentityPdfConsentHint:
+      "Les données d’identité n’apparaissent dans le PDF que si cette option est activée. Vous pouvez néanmoins conserver les champs remplis localement pour plus tard.",
     patientNameLabel: "Nom",
     patientDateOfBirthLabel: "Date de naissance",
     patientEmailLabel: "E-mail",

@@ -1,5 +1,8 @@
 import { openai } from "../openaiClient.js";
-import { CATEGORY_MICRO_RULES } from "./adaptive/adaptiveCategoryMeta.js";
+import {
+  CATEGORY_MICRO_RULES,
+  getAdaptiveTurnStrategy,
+} from "./adaptive/adaptiveCategoryMeta.js";
 import { getOpenAiChatModel } from '../config/openAiModels.js';
 import {
   ADAPTIVE_SYSTEM_PROMPT,
@@ -169,12 +172,20 @@ export async function runAdaptiveIntakeStep(params) {
   const categoryRule =
     CATEGORY_MICRO_RULES[categoryKey] ||
     "Stop when enough patient-stated detail exists.";
+  const turnStrategy = getAdaptiveTurnStrategy(
+    categoryKey,
+    previousReplies.length,
+  );
 
   const userBlob = buildAdaptiveUserBlob({
     patientLanguage,
     categoryKey,
     categoryTitle: toShortString(params?.categoryTitle || categoryKey, 100),
     categoryRule,
+    followUpCount: previousReplies.length,
+    stage: turnStrategy.stage,
+    turnStrategy: turnStrategy.strategy,
+    genericIntroTurns: turnStrategy.genericIntroTurns,
     existingCategoryAnswer: params?.existingCategoryAnswer || "",
     currentPatientReply: params?.currentPatientReply || "",
     previousReplies,

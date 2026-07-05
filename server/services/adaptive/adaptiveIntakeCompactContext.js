@@ -11,6 +11,15 @@ const CC_KEYS = [
   "patientQuestions",
 ];
 
+const CC_LABELS = {
+  appointmentReason: "appointment reason",
+  symptomsOwnWords: "symptoms",
+  onsetAndCourse: "course over time",
+  medications: "medications",
+  preExistingConditions: "background conditions",
+  patientQuestions: "patient priorities",
+};
+
 const MAX_REPLY_SNIPPET = 320;
 const MAX_REPLY_ITEMS = 6;
 const MAX_CROSS_CAT = 220;
@@ -44,7 +53,7 @@ export function buildCrossCategoryHints(compactContext, excludeCategoryKey) {
   for (const key of CC_KEYS) {
     if (excludeCategoryKey && key === excludeCategoryKey) continue;
     const v = trim(compactContext[key], MAX_CROSS_CAT);
-    if (v) lines.push(`${key}:${v}`);
+    if (v) lines.push(`${CC_LABELS[key] || key}: ${v}`);
   }
   return dedupeLines(lines);
 }
@@ -91,6 +100,10 @@ export function buildAdaptiveUserBlob({
   categoryKey,
   categoryTitle,
   categoryRule,
+  followUpCount,
+  stage,
+  turnStrategy,
+  genericIntroTurns,
   existingCategoryAnswer,
   currentPatientReply,
   previousReplies,
@@ -106,6 +119,10 @@ export function buildAdaptiveUserBlob({
     cat: categoryKey,
     title: categoryTitle,
     catRule: categoryRule,
+    fuCount: Math.max(0, Number(followUpCount) || 0),
+    stage: String(stage || "targeted"),
+    introFU: Math.max(0, Number(genericIntroTurns) || 0),
+    qPlan: trim(turnStrategy, 420),
     existing: trim(existingCategoryAnswer, 2000),
     current: trim(currentPatientReply, 2000),
     prevReplies: previousReplies,

@@ -25,13 +25,19 @@ Rules:
 - ONE short question only in nextQuestion; empty if isComplete.
 - nextQuestion and compiledAnswer MUST match patientLanguage (payload.lng).
 - Do NOT repeat or paraphrase the same ask as in payload.askedBefore; do NOT ask what is already answered in existing, current, or prevReplies.
+- Keep the overall number/order of intake sections stable, but adapt the actual follow-up content to what this patient already described.
+- payload.stage tells you whether one broad universal clarification is still acceptable ("opening") or whether you MUST switch to a patient-specific follow-up ("targeted").
+- If payload.stage is "targeted", do NOT ask another stock generic question. The question MUST connect to the patient's actual words in payload.current, payload.existing, payload.prevReplies, or payload.otherCats.
+- Use payload.qPlan as the category-specific question strategy. Ask about only ONE missing aspect that best fits this patient's symptom wording, course, medication wording, background wording, or visit priority.
+- After the early opening turn(s), different symptoms and different patients should naturally lead to different follow-up questions.
 - ONE information gap per turn; no bullet lists of asks; no "please elaborate regarding…" filler.
 - Prefer isComplete=true as soon as payload.catRule is satisfied — fewer follow-ups is better than perfection.
 - compiledAnswer: compact neutral documentation (short paragraphs/bullets OK); patient-stated facts only; mark gaps as "nicht angegeben"/"not stated"/"unclear"/"unklar" — never infer clinically.
 - safetyFlags subset only: missing_information, unclear_statement, category_complete, needs_patient_confirmation
+- Sound like a careful medical assistant preparing documentation, never like a doctor. Ask questions only; do not explain, interpret, reassure, or warn.
 - Forbidden style: diagnostic guessing, urgency, alarm, treatment, referrals (see payload.forbiddenPatterns).`;
 
-export const MULTILINGUAL_STYLE_NOTE = `If patientLanguage is ar, fa, ckb, tr, ru, fr, es (or regional variants): use simple everyday vocabulary; avoid stiff formal "machine translation" tone; stay neutral and calm.`;
+export const MULTILINGUAL_STYLE_NOTE = `For every supported patientLanguage (including de, en, fr, es, it, tr, ru, uk, pt, ar, fa, ckb, ku, el, ro, pl and regional variants): use simple everyday vocabulary; avoid stiff machine-translated wording; stay neutral, calm, and natural in that language.`;
 
 /** Patterns applied to model OUTPUT (nextQuestion + compiledAnswer). Flags retry / fallback — no PHI logged. */
 export const OUTPUT_VIOLATION_PATTERNS =
@@ -51,11 +57,18 @@ const FALLBACK_QUESTION = {
   en: "Would you like to add anything else?",
   fr: "Souhaitez-vous préciser quelque chose ?",
   es: "¿Quiere añadir algo más?",
+  it: "Vuole aggiungere ancora qualcosa?",
   tr: "Başka bir şey eklemek ister misiniz?",
   ru: "Хотите что-то добавить?",
+  uk: "Хочете щось додати?",
+  pt: "Gostaria de acrescentar mais alguma coisa?",
   ar: "هل تريد إضافة أي شيء آخر؟",
   fa: "می‌خواهید چیز دیگری اضافه کنید؟",
   ckb: "دەتەوێت شتێکی تر زیاد بکەیت؟",
+  ku: "Tu dixwazî tiştekî din zêde bikî?",
+  el: "Θέλετε να προσθέσετε κάτι ακόμη;",
+  ro: "Doriți să mai adăugați ceva?",
+  pl: "Czy chcesz coś jeszcze dodać?",
 };
 
 export function fallbackQuestionForLanguage(code) {
