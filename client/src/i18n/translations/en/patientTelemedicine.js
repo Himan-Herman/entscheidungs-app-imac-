@@ -9,6 +9,7 @@ export default {
   loading: "Loading …",
   loadError: "Could not load video consultations.",
   actionError: "Could not complete this action.",
+  notAvailable: "Not available",
   sessionNotFound: "Video consultation not found.",
   featureDisabled: "Telemedicine is currently unavailable.",
   noSessions: "No scheduled video consultations.",

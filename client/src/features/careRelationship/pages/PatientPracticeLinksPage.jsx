@@ -23,7 +23,7 @@ function statusLabel(status, t) {
     revoked: t.statusRevoked,
     archived: t.statusArchived,
   };
-  return map[status] || status;
+  return map[status] || t.notProvided;
 }
 
 /**
@@ -289,7 +289,7 @@ export default function PatientPracticeLinksPage() {
           <p className="patient-inbox__muted">{t.requestsIntro}</p>
           <ul className="patient-inbox__list" style={{ listStyle: "none", padding: 0, margin: "0.75rem 0 0" }}>
             {incomingRequests.map((link) => {
-              const practiceName = practiceDisplayLabel(link.practice) || "—";
+              const practiceName = practiceDisplayLabel(link.practice) || t.notProvided;
               return (
                 <li key={link.id} className="patient-inbox__item" style={{ padding: "0.75rem", marginTop: "0.5rem" }}>
                   <PracticeBrandingBar branding={link.practice} compact />
@@ -457,7 +457,7 @@ export default function PatientPracticeLinksPage() {
       {!loading && !error && activeLinks.length > 0 ? (
         <ul className="patient-inbox__list" aria-label={t.listCaption}>
           {activeLinks.map((link) => {
-            const practiceName = practiceDisplayLabel(link.practice) || "—";
+            const practiceName = practiceDisplayLabel(link.practice) || t.notProvided;
             const granted = Boolean(link.profileAccessGranted);
             const st = statusLabel(link.status, t);
 

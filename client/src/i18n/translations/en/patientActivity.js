@@ -6,6 +6,7 @@ export default {
   backDataControl: "Data & permissions",
   loading: "Loading…",
   loadError: "Could not load activity.",
+  notAvailable: "Not available",
   featureDisabled: "This feature is not enabled in this environment yet.",
   empty: "No activity yet.",
   listLabel: "Activity timeline",

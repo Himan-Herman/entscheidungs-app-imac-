@@ -15,6 +15,7 @@ export default {
   profileAccessOff: "Profile sharing inactive",
   enableProfile: "Allow profile sharing",
   disableProfile: "Revoke profile sharing",
+  notProvided: "Not provided",
   saveError: "Could not save setting.",
   savedGranted: "Profile sharing enabled.",
   savedRevoked: "Profile sharing revoked.",

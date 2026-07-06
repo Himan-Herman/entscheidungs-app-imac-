@@ -9,6 +9,7 @@ export default {
   backList: "Back to list",
   loading: "Loading…",
   loadError: "Could not load messages.",
+  notAvailable: "Not available",
   featureDisabled: "Messaging is not enabled in this environment yet.",
   empty: "No messages yet.",
   listCaption: "Messages with your practice",

@@ -16,6 +16,7 @@ export default {
   noEntries: "Noch keine Rezepte vorhanden.",
   noEntriesHint: "Rezepte erscheinen hier, sobald Ihre Praxis sie ausstellt.",
   noEntriesFilter: "Keine Rezepte mit diesem Status.",
+  notAvailable: "Nicht verfügbar",
   noConsent: "Freigabe für Rezepte noch nicht erteilt.",
 
   filters: {

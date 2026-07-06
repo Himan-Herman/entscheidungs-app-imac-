@@ -4,6 +4,7 @@ import {
   isPlacesDemoModeEnabled,
   PlacesServiceUnavailableError,
 } from "../../config/placesEnv.js";
+import { normalizePlacesLanguage } from "./language.js";
 import {
   geocodeManualLocation,
   hasManualLocationFields,
@@ -42,7 +43,7 @@ export async function runPracticeSearch(input) {
   if (!specialty) throw new Error("validation_specialty_required");
 
   const radiusKm = clampRadius(input.radiusKm);
-  const language = input.language === "de" ? "de" : "en";
+  const language = normalizePlacesLanguage(input.language);
 
   let lat = input.latitude;
   let lng = input.longitude;

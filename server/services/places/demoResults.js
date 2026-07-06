@@ -2,12 +2,21 @@
 
 export function buildDemoResults(center, specialty, language) {
   const isDe = language === "de";
+  const isRu = language === "ru";
   return [
     {
       placeId: "demo-1",
-      name: isDe ? "Praxis am Stadtpark" : "City Park Medical Office",
+      name: isDe
+        ? "Praxis am Stadtpark"
+        : isRu
+          ? "Клиника у городского парка"
+          : "City Park Medical Office",
       specialty,
-      address: isDe ? "Musterstraße 12, 10115 Berlin" : "Sample Street 12, 10115 Berlin",
+      address: isDe
+        ? "Musterstraße 12, 10115 Berlin"
+        : isRu
+          ? "ул. Примерная 12, 10115 Берлин"
+          : "Sample Street 12, 10115 Berlin",
       latitude: center.lat + 0.008,
       longitude: center.lng + 0.006,
       distanceKm: 1.2,
@@ -17,16 +26,32 @@ export function buildDemoResults(center, specialty, language) {
       mapsUrl: "https://www.google.com/maps",
       routeUrl: `https://www.google.com/maps/dir/?api=1&destination=${center.lat},${center.lng}`,
       phone: "+49 30 1234567",
-      openingHoursSummary: isDe ? "Mo–Fr 8:00–18:00" : "Mon–Fri 8:00–18:00",
+      openingHoursSummary: isDe
+        ? "Mo–Fr 8:00–18:00"
+        : isRu
+          ? "Пн–Пт 8:00–18:00"
+          : "Mon–Fri 8:00–18:00",
       openingHours: [],
-      languages: isDe ? ["Deutsch", "English"] : ["German", "English"],
+      languages: isDe
+        ? ["Deutsch", "English"]
+        : isRu
+          ? ["Немецкий", "Английский"]
+          : ["German", "English"],
       bookingUrl: null,
     },
     {
       placeId: "demo-2",
-      name: isDe ? "Gemeinschaftspraxis Nord" : "North Community Practice",
+      name: isDe
+        ? "Gemeinschaftspraxis Nord"
+        : isRu
+          ? "Северная групповая клиника"
+          : "North Community Practice",
       specialty,
-      address: isDe ? "Nordweg 4, 10115 Berlin" : "North Way 4, 10115 Berlin",
+      address: isDe
+        ? "Nordweg 4, 10115 Berlin"
+        : isRu
+          ? "Северный путь 4, 10115 Берлин"
+          : "North Way 4, 10115 Berlin",
       latitude: center.lat - 0.012,
       longitude: center.lng + 0.01,
       distanceKm: 2.8,

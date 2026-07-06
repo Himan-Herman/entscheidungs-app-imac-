@@ -11,13 +11,13 @@ import {
 } from "../api/visitMedicationsApi.js";
 import "../styles/VisitMedications.css";
 
-function fmt(iso, lang) {
+function fmt(iso, lang, fallback) {
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
     });
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
@@ -95,7 +95,7 @@ export default function PatientVisitMedicationsPage() {
           </h1>
           {detail?.session?.createdAt ? (
             <p className="vm-page__sub">
-              {t.visitDate}: {fmt(detail.session.createdAt, language)}
+              {t.visitDate}: {fmt(detail.session.createdAt, language, t.notAvailable)}
             </p>
           ) : null}
         </header>
@@ -169,7 +169,7 @@ export default function PatientVisitMedicationsPage() {
           <p>{t.emptyHint}</p>
           <p>
             <Link to="/pre-visit/follow-ups" className="vm-link">
-              {getMessages(language).preVisit?.followUps?.navTitle ?? "Rückfragen"}
+              {getMessages(language).preVisit?.followUps?.navTitle ?? t.followUpsLink}
             </Link>
           </p>
         </section>
@@ -180,7 +180,7 @@ export default function PatientVisitMedicationsPage() {
               <Link
                 to={`/pre-visit/medications/${encodeURIComponent(s.sessionId)}`}
                 className="vm-session-card"
-                aria-label={`${s.practiceName || t.practiceLabel}, ${t.visitDate} ${fmt(s.sessionCreatedAt || s.publishedAt, language)}, ${t.entryCount.replace("{count}", String(s.entryCount))}`}
+                aria-label={`${s.practiceName || t.practiceLabel}, ${t.visitDate} ${fmt(s.sessionCreatedAt || s.publishedAt, language, t.notAvailable)}, ${t.entryCount.replace("{count}", String(s.entryCount))}`}
               >
                 <div className="vm-session-card__top">
                   <strong>{s.practiceName || t.practiceLabel}</strong>
@@ -189,7 +189,7 @@ export default function PatientVisitMedicationsPage() {
                   ) : null}
                 </div>
                 <p className="vm-session-card__meta">
-                  {t.visitDate}: {fmt(s.sessionCreatedAt || s.publishedAt, language)}
+                  {t.visitDate}: {fmt(s.sessionCreatedAt || s.publishedAt, language, t.notAvailable)}
                 </p>
                 <p className="vm-session-card__meta">
                   {t.entryCount.replace("{count}", String(s.entryCount))}

@@ -10,6 +10,11 @@ const PLACES_LANGUAGE = {
   fr: "fr",
   es: "es",
   it: "it",
+  ru: "ru",
+  tr: "tr",
+  ar: "ar",
+  uk: "uk",
+  pl: "pl",
 };
 
 function placesLanguage(uiLanguage) {

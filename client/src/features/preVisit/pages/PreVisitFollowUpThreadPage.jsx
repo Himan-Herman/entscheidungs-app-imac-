@@ -7,14 +7,15 @@ import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitFollowUpsPage.css";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
-function fmt(iso, lang) {
+function fmt(iso, lang, fallback) {
+  if (!iso) return fallback;
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
@@ -98,13 +99,13 @@ export default function PreVisitFollowUpThreadPage() {
         ) : null}
         {!loading && row ? (
           <>
-            <p className="previsit-followups__lead"><strong>{t.practiceLabel}:</strong> {row.practice?.practiceName || "—"}</p>
-            <p className="previsit-followups__lead"><strong>{t.relatedPreparation}:</strong> {row.session?.title || "—"}</p>
+            <p className="previsit-followups__lead"><strong>{t.practiceLabel}:</strong> {row.practice?.practiceName || t.notAvailable}</p>
+            <p className="previsit-followups__lead"><strong>{t.relatedPreparation}:</strong> {row.session?.title || t.notAvailable}</p>
             <div className="previsit-followups__thread">
               {Array.isArray(row.messages) && row.messages.length > 0 ? row.messages.map((m) => (
                 <article key={m.id} className="previsit-followups__message">
                   <p>
-                    <strong>{senderLabel(m.senderType)}</strong> · {fmt(m.createdAt, language)}
+                    <strong>{senderLabel(m.senderType)}</strong> · {fmt(m.createdAt, language, t.notAvailable)}
                   </p>
                   <p>{m.body}</p>
                 </article>

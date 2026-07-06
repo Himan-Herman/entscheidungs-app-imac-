@@ -34,7 +34,7 @@ export default function RevokeProfileSharingDialog({
   const title = isStep2 ? t.revokeConfirmTitle2 : t.revokeConfirmTitle1;
   const body = isStep2
     ? t.revokeConfirmBody2
-    : t.revokeConfirmBody1.replace("{practice}", practiceName || "—");
+    : t.revokeConfirmBody1.replace("{practice}", practiceName || t.notProvided);
 
   return (
     <dialog

@@ -37,7 +37,7 @@ export default function PracticeFinderResultCard({ item, t, cardIndex }) {
           <dd>
             {item.distanceKm != null
               ? t.cardDistance.replace("{value}", String(item.distanceKm))
-              : "—"}
+              : t.notAvailable}
           </dd>
         </div>
         <div className="pf-card__meta-row">

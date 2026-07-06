@@ -22,15 +22,19 @@ import {
 import "../../../styles/PatientInboxPage.css";
 import "../../../styles/PatientAppointmentsPage.css";
 
-function fmt(iso, lang) {
+function fmt(iso, lang, fallback) {
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
+}
+
+function statusText(status, t) {
+  return t[`status_${status}`] || t.notProvided;
 }
 
 function statusBadgeClass(status) {
@@ -378,13 +382,13 @@ export default function PatientAppointmentsPage() {
                 className="patient-inbox__item patient-appt__row"
                 onClick={() => selectAppointment(a)}
                 aria-current={selected?.id === a.id ? "true" : undefined}
-                aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language)}, ${t[`status_${a.status}`] || a.status}`}
+                aria-label={`${a.title}, ${a.practiceName || t.notProvided}, ${fmt(a.startAt, language, t.notProvided)}, ${statusText(a.status, t)}`}
               >
                 <strong>{a.title}</strong>
                 <span className="patient-inbox__meta">{a.practiceName || t.notProvided}</span>
-                <span className="patient-inbox__meta">{fmt(a.startAt, language)}</span>
+                <span className="patient-inbox__meta">{fmt(a.startAt, language, t.notProvided)}</span>
                 <span className={statusBadgeClass(a.status)}>
-                  {t[`status_${a.status}`] || a.status}
+                  {statusText(a.status, t)}
                 </span>
               </button>
             </li>
@@ -470,7 +474,7 @@ export default function PatientAppointmentsPage() {
               .filter((l) => l.status === "active")
               .map((l) => (
                 <option key={l.id} value={l.practice?.id || ""}>
-                  {l.practice?.practiceName || l.practice?.id || "—"}
+                  {l.practice?.practiceName || t.notProvided}
                 </option>
               ))}
           </select>
@@ -583,9 +587,9 @@ export default function PatientAppointmentsPage() {
         <section className="patient-appt__panel" aria-label={t.detailHeading}>
           <h2 className="patient-inbox__item-title">{selected.title}</h2>
           <p className="patient-inbox__meta">
-            <strong>{t.status}:</strong>{" "}
+              <strong>{t.status}:</strong>{" "}
             <span className={statusBadgeClass(selected.status)}>
-              {t[`status_${selected.status}`] || selected.status}
+              {statusText(selected.status, t)}
             </span>
           </p>
           {selected.practiceName && (
@@ -594,12 +598,12 @@ export default function PatientAppointmentsPage() {
             </p>
           )}
           {selected.startAt && (
-            <p className="patient-inbox__meta">{fmt(selected.startAt, language)}</p>
+            <p className="patient-inbox__meta">{fmt(selected.startAt, language, t.notProvided)}</p>
           )}
           {selected.locationType && (
             <p className="patient-inbox__meta">
               <strong>{t.location}:</strong>{" "}
-              {t[`location_${selected.locationType}`] || selected.locationType}
+              {t[`location_${selected.locationType}`] || t.notProvided}
               {selected.locationText ? ` — ${selected.locationText}` : ""}
             </p>
           )}

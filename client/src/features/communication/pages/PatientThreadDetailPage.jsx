@@ -14,14 +14,14 @@ import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js"
 import "../../../styles/PatientInboxPage.css";
 import "../../../styles/PatientThreadsPage.css";
 
-function fmt(iso, lang) {
+function fmt(iso, lang, fallback) {
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "short",
       timeStyle: "short",
     });
   } catch {
-    return "";
+    return fallback;
   }
 }
 
@@ -207,7 +207,7 @@ export default function PatientThreadDetailPage() {
           >
             {msg.body}
             <span className="patient-threads__bubble-meta">
-              {senderLabel(msg.senderType, t)} · {fmt(msg.createdAt, language)}
+              {senderLabel(msg.senderType, t)} · {fmt(msg.createdAt, language, t.notAvailable)}
               {msg.senderType === "practice"
                 ? ` · ${msg.readAt ? t.readAt : t.notReadYet}`
                 : null}

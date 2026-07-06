@@ -8,14 +8,14 @@ import "../../../styles/PatientInboxPage.css";
 import "../../../styles/PatientThreadsPage.css";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
-function fmt(iso, lang) {
+function fmt(iso, lang, fallback) {
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
@@ -25,7 +25,7 @@ function threadStatusLabel(status, t) {
     closed: t.statusClosed,
     archived: t.statusArchived,
   };
-  return map[status] || status;
+  return map[status] || t.notAvailable;
 }
 
 export default function PatientThreadsListPage() {
@@ -147,7 +147,7 @@ export default function PatientThreadsListPage() {
                         </span>
                       </div>
                       <p className="patient-inbox__meta" style={{ margin: "0.5rem 0" }}>
-                        {fmt(thread.updatedAt, language)}
+                        {fmt(thread.updatedAt, language, t.notAvailable)}
                       </p>
                       <Link
                         className="patient-threads__btn patient-threads__btn--primary"

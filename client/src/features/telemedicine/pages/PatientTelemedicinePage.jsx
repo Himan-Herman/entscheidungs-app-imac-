@@ -8,16 +8,20 @@ import "../../../styles/WorkspaceHubPages.css";
 import "../styles/TelemedicinePages.css";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
-function fmt(iso, lang) {
-  if (!iso) return "—";
+function fmt(iso, lang, fallback) {
+  if (!iso) return fallback;
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
+}
+
+function statusText(status, t) {
+  return t[statusLabelKey(status)] || t.notAvailable;
 }
 
 export default function PatientTelemedicinePage() {
@@ -83,13 +87,13 @@ export default function PatientTelemedicinePage() {
                   type="button"
                   className="telemedicine-card"
                   onClick={() => navigate(`/patient/telemedicine/${s.id}`)}
-                  aria-label={`${s.title || s.id}, ${t[statusLabelKey(s.status)] || s.status}, ${fmt(s.scheduledStartAt, language)}`}
+                  aria-label={`${s.title || s.id}, ${statusText(s.status, t)}, ${fmt(s.scheduledStartAt, language, t.notAvailable)}`}
                 >
                   <strong>{s.title || s.id}</strong>
                   <div className="telemedicine-card__meta">
-                    <span className="telemedicine-status">{t[statusLabelKey(s.status)] || s.status}</span>
+                    <span className="telemedicine-status">{statusText(s.status, t)}</span>
                     {" · "}
-                    {fmt(s.scheduledStartAt, language)}
+                    {fmt(s.scheduledStartAt, language, t.notAvailable)}
                   </div>
                 </button>
               </li>

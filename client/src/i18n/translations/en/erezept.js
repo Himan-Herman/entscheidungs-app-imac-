@@ -16,6 +16,7 @@ export default {
   noEntries: "No prescriptions yet.",
   noEntriesHint: "Prescriptions appear here as soon as your practice issues them.",
   noEntriesFilter: "No prescriptions with this status.",
+  notAvailable: "Not available",
   noConsent: "Prescription access not yet granted.",
 
   filters: {

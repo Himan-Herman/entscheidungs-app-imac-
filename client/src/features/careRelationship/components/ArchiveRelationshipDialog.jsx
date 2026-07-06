@@ -34,7 +34,7 @@ export default function ArchiveRelationshipDialog({
   const title = isStep2 ? t.archiveConfirmTitle2 : t.archiveConfirmTitle1;
   const body = isStep2
     ? t.archiveConfirmBody2
-    : t.archiveConfirmBody1.replace("{practice}", practiceName || "—");
+    : t.archiveConfirmBody1.replace("{practice}", practiceName || t.notProvided);
 
   return (
     <dialog

@@ -57,7 +57,7 @@ async function generatePrescriptionPdf(entry, t, language) {
     cancelled: [254, 226, 226],
   };
   const [sr, sg, sb] = statusColors[entry.status] || [241, 245, 249];
-  const statusLabel = t?.statuses?.[entry.status] || entry.status;
+  const statusLabel = t?.statuses?.[entry.status] || t?.notAvailable || entry.status;
   doc.setFillColor(sr, sg, sb);
   doc.roundedRect(margin, 42, 45, 8, 2, 2, "F");
   doc.setFontSize(8);
@@ -199,7 +199,7 @@ export default function ErezeptCard({
         <h3 className="erx-card__name">{entry.medicationName}</h3>
         <span className={`erx-badge erx-badge--${entry.status}`}>
           {STATUS_ICONS[entry.status]}
-          {s[entry.status] || entry.status}
+          {s[entry.status] || t.notAvailable || entry.status}
         </span>
       </div>
 

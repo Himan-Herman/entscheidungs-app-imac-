@@ -12,6 +12,7 @@ import {
   runPracticeSearch,
   getPlaceDetails,
 } from "../services/places/index.js";
+import { normalizePlacesLanguage } from "../services/places/language.js";
 import { createIpRateLimiter } from "../middleware/ipRateLimit.js";
 
 const router = express.Router();
@@ -79,7 +80,7 @@ router.post("/search", searchLimiter, async (req, res) => {
           ? longitude
           : null,
       pageToken: typeof b.pageToken === "string" ? b.pageToken : null,
-      language: b.language === "de" ? "de" : "en",
+      language: normalizePlacesLanguage(b.language),
     });
 
     return res.json({
@@ -103,10 +104,7 @@ router.post("/search", searchLimiter, async (req, res) => {
 router.post("/details", detailsLimiter, async (req, res) => {
   const b = req.body || {};
   try {
-    const place = await getPlaceDetails(
-      b.placeId,
-      b.language === "de" ? "de" : "en",
-    );
+    const place = await getPlaceDetails(b.placeId, normalizePlacesLanguage(b.language));
     return res.json({
       ok: true,
       configured: isPlacesApiConfigured(),

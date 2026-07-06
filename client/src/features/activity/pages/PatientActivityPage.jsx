@@ -13,21 +13,21 @@ import "../../../styles/PatientDataControlPage.css";
 
 const LIST_LIMIT = 80;
 
-function fmt(iso, lang) {
-  if (!iso) return "—";
+function fmt(iso, lang, fallback) {
+  if (!iso) return fallback;
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
 function typeLabel(type, t) {
   const key = `type_${type}`;
-  return t[key] || type;
+  return t[key] || t.notAvailable;
 }
 
 export default function PatientActivityPage() {
@@ -279,7 +279,7 @@ export default function PatientActivityPage() {
                     ) : null}
                   </div>
                   <time className="practice-record__activity-time" dateTime={ev.occurredAt}>
-                    {fmt(ev.occurredAt, language)}
+                    {fmt(ev.occurredAt, language, t.notAvailable)}
                   </time>
                 </li>
               );

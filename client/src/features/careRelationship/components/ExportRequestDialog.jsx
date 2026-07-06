@@ -38,7 +38,7 @@ export default function ExportRequestDialog({
   const title = isStep2 ? t.exportConfirmTitle2 : t.exportConfirmTitle1;
   const body = isStep2
     ? t.exportConfirmBody2
-    : t.exportConfirmBody1.replace("{practice}", practiceName || "—");
+    : t.exportConfirmBody1.replace("{practice}", practiceName || t.notProvided);
 
   return (
     <dialog

@@ -13,14 +13,14 @@ import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBa
 import { groupByPracticeBranding, practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 
-function fmt(iso, lang) {
+function fmt(iso, lang, fallback) {
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
@@ -90,7 +90,7 @@ export default function PatientInboxPage() {
         read: t.statusRead,
         archived: t.statusArchived,
       };
-      return map[status] || status;
+      return map[status] || t.notAvailable;
     },
     [t],
   );
@@ -286,7 +286,7 @@ export default function PatientInboxPage() {
                   {t.colSource}: {sourceLabel(item)}
                 </p>
                 <p className="patient-inbox__meta">
-                  {t.colDate}: {fmt(item.createdAt, language)}
+                  {t.colDate}: {fmt(item.createdAt, language, t.notAvailable)}
                 </p>
                 <div className="patient-inbox__actions">
                   {canOpen ? (

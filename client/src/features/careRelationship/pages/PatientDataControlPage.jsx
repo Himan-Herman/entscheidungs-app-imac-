@@ -27,7 +27,7 @@ function statusLabel(status, t) {
     revoked: t.statusRevoked,
     archived: t.statusArchived,
   };
-  return map[status] || status;
+  return map[status] || t.notProvided;
 }
 
 function requestTypeLabel(type, t) {
@@ -36,7 +36,7 @@ function requestTypeLabel(type, t) {
     access_restriction: t.typeAccessRestriction,
     export: t.typeExport,
   };
-  return map[type] || type;
+  return map[type] || t.notProvided;
 }
 
 function requestStatusLabel(status, t) {
@@ -46,18 +46,18 @@ function requestStatusLabel(status, t) {
     completed: t.statusCompleted,
     rejected: t.statusRejected,
   };
-  return map[status] || status;
+  return map[status] || t.notProvided;
 }
 
-function fmtActivity(iso, lang) {
-  if (!iso) return "—";
+function fmtActivity(iso, lang, fallback) {
+  if (!iso) return fallback;
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
@@ -386,10 +386,10 @@ export default function PatientDataControlPage() {
               {requests.map((req) => (
                 <li key={req.id} className="patient-inbox__item" style={{ padding: "0.75rem 1rem" }}>
                   <p className="patient-inbox__item-title">
-                    {req.practice?.practiceName || "—"} — {requestTypeLabel(req.type, t)}
+                    {req.practice?.practiceName || t.notProvided} — {requestTypeLabel(req.type, t)}
                   </p>
                   <p className="patient-inbox__item-meta">
-                    {requestStatusLabel(req.status, t)} · {fmtActivity(req.createdAt, language)}
+                    {requestStatusLabel(req.status, t)} · {fmtActivity(req.createdAt, language, t.notProvided)}
                   </p>
                   <button
                     type="button"
@@ -425,7 +425,7 @@ export default function PatientDataControlPage() {
       {!loading && !error && practices.length > 0 ? (
         <ul className="patient-inbox__list" aria-label={t.listCaption}>
           {practices.map((link) => {
-            const practiceName = link.practice?.practiceName || "—";
+            const practiceName = link.practice?.practiceName || t.notProvided;
             const granted = Boolean(link.profileAccessGranted);
             const st = statusLabel(link.status, t);
             const canManage = link.status === "active" || link.status === "invited";
@@ -444,7 +444,7 @@ export default function PatientDataControlPage() {
                 <p className="patient-inbox__item-meta">{st}</p>
                 {link.linkedAt ? (
                   <p className="patient-inbox__item-meta">
-                    {t.linkedSince}: {fmtActivity(link.linkedAt, language)}
+                    {t.linkedSince}: {fmtActivity(link.linkedAt, language, t.notProvided)}
                   </p>
                 ) : null}
                 {pendingDeletion ? (
@@ -477,7 +477,7 @@ export default function PatientDataControlPage() {
                   </div>
                   <div>
                     <dt>{t.lastActivity}</dt>
-                    <dd>{fmtActivity(link.lastActivityAt, language)}</dd>
+                    <dd>{fmtActivity(link.lastActivityAt, language, t.notProvided)}</dd>
                   </div>
                 </dl>
 
@@ -520,12 +520,12 @@ export default function PatientDataControlPage() {
                       </p>
                       {link.profileAccessGrantedAt ? (
                         <p className="patient-inbox__item-meta">
-                          {t.grantedAtLabel}: {fmtActivity(link.profileAccessGrantedAt, language)}
+                          {t.grantedAtLabel}: {fmtActivity(link.profileAccessGrantedAt, language, t.notProvided)}
                         </p>
                       ) : null}
                       {!granted && link.profileAccessRevokedAt ? (
                         <p className="patient-inbox__item-meta">
-                          {t.revokedAtLabel}: {fmtActivity(link.profileAccessRevokedAt, language)}
+                          {t.revokedAtLabel}: {fmtActivity(link.profileAccessRevokedAt, language, t.notProvided)}
                         </p>
                       ) : null}
                       <div className="patient-data-control__actions">

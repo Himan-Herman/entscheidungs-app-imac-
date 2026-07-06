@@ -18,16 +18,20 @@ import {
 import "../../../styles/WorkspaceHubPages.css";
 import "../styles/TelemedicinePages.css";
 
-function fmt(iso, lang) {
-  if (!iso) return "—";
+function fmt(iso, lang, fallback) {
+  if (!iso) return fallback;
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
+}
+
+function statusText(status, t) {
+  return t[statusLabelKey(status)] || t.notAvailable;
 }
 
 export default function PatientTelemedicineDetailPage() {
@@ -132,8 +136,8 @@ export default function PatientTelemedicineDetailPage() {
       {session ? (
         <div className="telemedicine-panel">
           <p>
-            <span className="telemedicine-status" aria-label={t.status}>
-              {t[statusLabelKey(session.status)] || session.status}
+              <span className="telemedicine-status" aria-label={t.status}>
+              {statusText(session.status, t)}
             </span>
           </p>
           {isTerminalStatus(session.status) ? (
@@ -147,7 +151,7 @@ export default function PatientTelemedicineDetailPage() {
             </p>
           ) : null}
           <p>
-            <strong>{t.scheduled}:</strong> {fmt(session.scheduledStartAt, language)}
+            <strong>{t.scheduled}:</strong> {fmt(session.scheduledStartAt, language, t.notAvailable)}
           </p>
 
           <section aria-labelledby="tm-tech-heading">

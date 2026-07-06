@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
@@ -106,6 +106,10 @@ export default function PracticeDirectoryPage() {
   const t =
     getMessages(language).practiceDirectory ||
     getMessages("en").practiceDirectory;
+
+  useEffect(() => {
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   const [q, setQ] = useState("");
   const [specialty, setSpecialty] = useState("");

@@ -8,6 +8,7 @@ export default {
   filterToolbarAria: "Filter inbox",
   loading: "Loading…",
   loadError: "Could not load your inbox.",
+  notAvailable: "Not available",
   featureDisabled:
     "The inbox is not enabled in this environment yet. Please contact support.",
   empty: "No new information.",

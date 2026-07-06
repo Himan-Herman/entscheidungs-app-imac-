@@ -13,10 +13,12 @@ export default {
   emptyHint:
     "When your practice publishes medication and intake instructions after a visit, they will appear here.",
   loadError: "Could not load entries.",
+  notAvailable: "Not available",
   notFound: "This visit was not found or is no longer available.",
   newBadge: "New",
   entryCount: "{count} entries",
   openSession: "View details",
+  followUpsLink: "Follow-ups",
   practiceLabel: "Practice",
   visitDate: "Visit",
   fieldDrug: "Medication / tablet",

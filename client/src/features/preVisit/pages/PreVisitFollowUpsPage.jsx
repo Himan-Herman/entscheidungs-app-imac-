@@ -7,14 +7,15 @@ import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import "../styles/PreVisitFollowUpsPage.css";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
-function fmt(iso, lang) {
+function fmt(iso, lang, fallback) {
+  if (!iso) return fallback;
   try {
     return new Date(iso).toLocaleString(getPrimaryIntlLocale(lang), {
       dateStyle: "medium",
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
@@ -90,10 +91,10 @@ export default function PreVisitFollowUpsPage() {
           {rows.map((row) => (
             <li key={row.id} className="previsit-followups__card">
               <p><strong>{t.statusLabel}:</strong> {statusLabel(row.status)}</p>
-              <p><strong>{t.practiceLabel}:</strong> {row.practice?.practiceName || "—"}</p>
-              <p><strong>{t.targetLabel}:</strong> {row.target?.doctorName || row.target?.targetName || "—"}</p>
-              <p><strong>{t.relatedPreparation}:</strong> {row.session?.title || "—"}</p>
-              <p><strong>{t.createdAt}:</strong> {fmt(row.createdAt, language)}</p>
+              <p><strong>{t.practiceLabel}:</strong> {row.practice?.practiceName || t.notAvailable}</p>
+              <p><strong>{t.targetLabel}:</strong> {row.target?.doctorName || row.target?.targetName || t.notAvailable}</p>
+              <p><strong>{t.relatedPreparation}:</strong> {row.session?.title || t.notAvailable}</p>
+              <p><strong>{t.createdAt}:</strong> {fmt(row.createdAt, language, t.notAvailable)}</p>
               <Link
                 className="previsit-followups__link-btn"
                 to={`/pre-visit/follow-ups/${encodeURIComponent(row.id)}`}

@@ -10,6 +10,7 @@ export default {
   openConsents: "Manage consents",
   loading: "Loading…",
   loadError: "Could not load data overview.",
+  notProvided: "Not provided",
   featureDisabled: "This feature is not enabled in this environment yet.",
   empty: "No practice connections yet.",
   listCaption: "Practice connections and data",

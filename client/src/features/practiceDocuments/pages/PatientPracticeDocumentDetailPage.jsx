@@ -43,7 +43,7 @@ function typeLabel(type, t) {
     prescription_info: t.typePrescriptionInfo,
     other: t.typeOther,
   };
-  return map[type] || type;
+  return map[type] || t.typeOther;
 }
 
 export default function PatientPracticeDocumentDetailPage() {
