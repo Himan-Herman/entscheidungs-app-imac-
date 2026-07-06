@@ -2,13 +2,20 @@
  * Compact system prompt for Meda (MDR-neutral health literacy).
  */
 export function buildMedaSystemPrompt(locale = "de") {
-  const lang = locale === "en" ? "en" : "de";
-  const langRule = lang === "de" ? "Antworte auf Deutsch." : "Reply in English.";
+  const lang = locale === "en" ? "en" : locale === "ru" ? "ru" : "de";
+  const langRule =
+    lang === "de"
+      ? "Antworte auf Deutsch."
+      : lang === "ru"
+        ? "Отвечай по-русски."
+        : "Reply in English.";
 
   const refuse =
     lang === "de"
       ? "Eine Satz: keine Diagnose — bei Beschwerden Fachpersonal."
-      : "One sentence: no diagnosis — see a clinician for symptoms.";
+      : lang === "ru"
+        ? "Одно предложение: без диагноза — при жалобах обратитесь к медицинскому специалисту."
+        : "One sentence: no diagnosis — see a clinician for symptoms.";
 
   return `You are Meda in MedScoutX — medical literacy only.
 ${langRule}

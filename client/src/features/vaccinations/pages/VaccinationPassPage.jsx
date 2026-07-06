@@ -127,12 +127,12 @@ export default function VaccinationPassPage() {
   const grouped = useMemo(() => {
     const map = {};
     for (const e of entries) {
-      const key = e.disease || "—";
+      const key = e.disease || t.notAvailable;
       if (!map[key]) map[key] = [];
       map[key].push(e);
     }
     return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
-  }, [entries]);
+  }, [entries, t.notAvailable]);
 
   return (
     <main className="vacc-pass" aria-label={t.pageHeading}>

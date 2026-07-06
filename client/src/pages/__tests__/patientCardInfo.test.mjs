@@ -1,5 +1,5 @@
 /**
- * Unit tests for patientCardInfo.js — guarantees the patient "Meine Praxis" hub
+ * Unit tests for patientCardInfo.js — guarantees the patient hub
  * info button suppresses tile navigation and only the intended tiles show it.
  * Run: node --test client/src/pages/__tests__/patientCardInfo.test.mjs
  */
@@ -29,13 +29,18 @@ test("exactly the designated patient-hub tiles expose an info button", () => {
     "hubLinkFindPractices",
     "hubLinkMedScoutXDirectory",
     "hubLinkMyPractice",
+    "hubLinkOrientation",
     "hubLinkMedicationPlans",
     "hubLinkPreVisit",
+    "hubLinkSymptom",
+    "hubLinkImage",
+    "hubLinkBody",
     "hubLinkMyPrep",
     "hubLinkHealthProfile",
     "hubLinkVaccinations",
     "hubLinkVitals",
     "hubLinkHealthHistory",
+    "hubLinkMedaLive",
     "hubLinkDoctors",
     "hubLinkDocuments",
   ]);
@@ -44,9 +49,8 @@ test("exactly the designated patient-hub tiles expose an info button", () => {
   }
   // Tiles from other hub groups / main overview must NOT get an info button.
   for (const other of [
-    "hubLinkMedaLive",
-    "hubLinkSymptom",
-    "hubLinkOrientation",
+    "hubLinkInterpreter",
+    "hubLinkSosCard",
     "",
   ]) {
     assert.equal(hasPatientCardInfo(other), false, `${other} has no info`);

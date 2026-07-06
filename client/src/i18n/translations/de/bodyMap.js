@@ -84,6 +84,8 @@ export default {
     btnFinish: "Zusammenfassung erstellen",
     btnFinishTitle: "Neutrale Zusammenfassung für den Arzttermin erstellen",
     btnFinishDisabledHint: "Bitte zuerst mindestens eine Beschreibung senden.",
+    summaryRequestUser:
+      "Bitte erstellen Sie die neutrale Zusammenfassung für meinen Arzttermin.",
     speakAria: "Antwort vorlesen",
     micNotice:
       "Spracheingabe nur nach Tippen auf das Mikrofon. Keine Hintergrundaufnahme.",

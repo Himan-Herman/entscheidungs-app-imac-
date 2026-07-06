@@ -5,6 +5,10 @@ import { getMessages } from "../../../i18n/translations";
 import { isSymptomDiaryClientEnabled } from "../../symptomDiary/featureFlag.js";
 import SymptomDiarySection from "../../symptomDiary/components/SymptomDiarySection.jsx";
 import {
+  getHealthHistoryMessages,
+  withHealthHistoryAiLoading,
+} from "../healthHistoryI18n.js";
+import {
   fetchAllergies, createAllergy, updateAllergy, deleteAllergy,
   fetchDiagnoses, createDiagnosis, updateDiagnosis, deleteDiagnosis,
 } from "../api/healthHistoryApi.js";
@@ -16,10 +20,15 @@ import "../styles/HealthHistory.css";
 
 export default function HealthHistoryPage() {
   const { language } = useLanguage();
-  const t = useMemo(() => {
-    const msgs = getMessages(language);
-    return msgs.healthHistory || getMessages("en").healthHistory;
-  }, [language]);
+  const t = useMemo(() => getHealthHistoryMessages(language), [language]);
+  const allergyCopy = useMemo(
+    () => withHealthHistoryAiLoading(t.allergy, t.aiLoading),
+    [t],
+  );
+  const diagnosisCopy = useMemo(
+    () => withHealthHistoryAiLoading(t.diagnosis, t.aiLoading),
+    [t],
+  );
 
   const tSymptom = useMemo(
     () => getMessages(language).symptomDiary || getMessages("en").symptomDiary,
@@ -60,7 +69,7 @@ export default function HealthHistoryPage() {
       setAllergies(Array.isArray(data.entries) ? data.entries : []);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
-      setAllergyError(t?.loadingError || "Laden fehlgeschlagen.");
+      setAllergyError(t.loadingError);
     } finally {
       setAllergyLoading(false);
     }
@@ -76,7 +85,7 @@ export default function HealthHistoryPage() {
       setDiagnoses(Array.isArray(data.entries) ? data.entries : []);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
-      setDiagnosisError(t?.loadingError || "Laden fehlgeschlagen.");
+      setDiagnosisError(t.loadingError);
     } finally {
       setDiagnosisLoading(false);
     }
@@ -159,16 +168,16 @@ export default function HealthHistoryPage() {
   }
 
   return (
-    <main className="hh-page" aria-label={t?.pageHeading || "Gesundheitsakte"}>
+    <main className="hh-page" aria-label={t.pageHeading}>
       {/* Header */}
       <header className="hh-page__header">
-        <h1 className="hh-page__title">{t?.pageHeading || "Meine Gesundheitsakte"}</h1>
-        <p className="hh-page__intro">{t?.intro || "Allergien und Diagnosen persönlich dokumentieren."}</p>
-        <p className="hh-page__disclaimer">{t?.disclaimer || "Persönliche Übersicht – kein offizieller Befund."}</p>
+        <h1 className="hh-page__title">{t.pageHeading}</h1>
+        <p className="hh-page__intro">{t.intro}</p>
+        <p className="hh-page__disclaimer">{t.disclaimer}</p>
       </header>
 
       {/* Tabs */}
-      <nav className="hh-tabs" aria-label={t?.tabsLabel || "Bereiche"} role="tablist">
+      <nav className="hh-tabs" aria-label={t.tabsLabel} role="tablist">
         <button
           role="tab"
           aria-selected={activeTab === "allergies"}
@@ -178,7 +187,7 @@ export default function HealthHistoryPage() {
           onClick={() => setActiveTab("allergies")}
         >
           <AlertTriangle size={16} aria-hidden="true" />
-          {t?.allergiesHeading || "Allergien"}
+          {t.allergiesHeading}
           <span className="hh-tabs__count">{allergies.length}</span>
         </button>
         <button
@@ -190,7 +199,7 @@ export default function HealthHistoryPage() {
           onClick={() => setActiveTab("diagnoses")}
         >
           <Stethoscope size={16} aria-hidden="true" />
-          {t?.diagnosesHeading || "Diagnosen"}
+          {t.diagnosesHeading}
           <span className="hh-tabs__count">{diagnoses.length}</span>
         </button>
         {symptomEnabled && (
@@ -218,7 +227,7 @@ export default function HealthHistoryPage() {
       >
         <button className="hh-section__add-btn" onClick={openAddAllergy}>
           <Plus size={18} aria-hidden="true" />
-          {t?.allergy?.addTitle || "Allergie hinzufügen"}
+          {t.allergy.addTitle}
         </button>
 
         {allergyError && <div className="hh-page__error" role="alert">{allergyError}</div>}
@@ -230,8 +239,8 @@ export default function HealthHistoryPage() {
         ) : allergies.length === 0 ? (
           <div className="hh-page__empty">
             <ShieldAlert size={44} strokeWidth={1.5} aria-hidden="true" />
-            <p>{t?.allergy?.noEntries || "Noch keine Allergien eingetragen."}</p>
-            <p style={{ fontSize: "0.875rem" }}>{t?.allergy?.noEntriesHint || "Füge deine erste Allergie hinzu."}</p>
+            <p>{t.allergy.noEntries}</p>
+            <p style={{ fontSize: "0.875rem" }}>{t.allergy.noEntriesHint}</p>
           </div>
         ) : (
           <div className="hh-cards">
@@ -239,7 +248,8 @@ export default function HealthHistoryPage() {
               <AllergyCard
                 key={entry.id}
                 entry={entry}
-                t={t?.allergy}
+                t={t.allergy}
+                language={language}
                 onEdit={openEditAllergy}
                 onDelete={handleAllergyDelete}
               />
@@ -257,7 +267,7 @@ export default function HealthHistoryPage() {
       >
         <button className="hh-section__add-btn" onClick={openAddDiagnosis}>
           <Plus size={18} aria-hidden="true" />
-          {t?.diagnosis?.addTitle || "Diagnose hinzufügen"}
+          {t.diagnosis.addTitle}
         </button>
 
         {diagnosisError && <div className="hh-page__error" role="alert">{diagnosisError}</div>}
@@ -269,8 +279,8 @@ export default function HealthHistoryPage() {
         ) : diagnoses.length === 0 ? (
           <div className="hh-page__empty">
             <Stethoscope size={44} strokeWidth={1.5} aria-hidden="true" />
-            <p>{t?.diagnosis?.noEntries || "Noch keine Diagnosen eingetragen."}</p>
-            <p style={{ fontSize: "0.875rem" }}>{t?.diagnosis?.noEntriesHint || "Füge deine erste Diagnose hinzu."}</p>
+            <p>{t.diagnosis.noEntries}</p>
+            <p style={{ fontSize: "0.875rem" }}>{t.diagnosis.noEntriesHint}</p>
           </div>
         ) : (
           <div className="hh-cards">
@@ -278,7 +288,8 @@ export default function HealthHistoryPage() {
               <DiagnosisCard
                 key={entry.id}
                 entry={entry}
-                t={t?.diagnosis}
+                t={t.diagnosis}
+                language={language}
                 onEdit={openEditDiagnosis}
                 onDelete={handleDiagnosisDelete}
               />
@@ -303,7 +314,7 @@ export default function HealthHistoryPage() {
       {showAllergyForm && (
         <AllergyForm
           initial={editingAllergy}
-          t={t?.allergy}
+          t={allergyCopy}
           onSave={handleAllergySubmit}
           onCancel={closeAllergyForm}
           saving={savingAllergy}
@@ -312,7 +323,7 @@ export default function HealthHistoryPage() {
       {showDiagnosisForm && (
         <DiagnosisForm
           initial={editingDiagnosis}
-          t={t?.diagnosis}
+          t={diagnosisCopy}
           onSave={handleDiagnosisSubmit}
           onCancel={closeDiagnosisForm}
           saving={savingDiagnosis}

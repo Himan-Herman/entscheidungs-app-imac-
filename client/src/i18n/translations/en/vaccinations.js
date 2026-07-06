@@ -10,6 +10,7 @@ export default {
   noEntriesHint: "Add your first vaccination to keep track.",
   loadingError: "Could not load vaccinations.",
   groupBy: "Grouped by disease",
+  notAvailable: "Not available",
 
   status: {
     upToDate: "Up to date",

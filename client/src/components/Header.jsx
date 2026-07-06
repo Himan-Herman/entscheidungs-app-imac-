@@ -20,6 +20,8 @@ import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
 import AccountAvatar from "./account/AccountAvatar.jsx";
 import {
   HEADER_SELECTABLE_LOCALE_CODES,
+  PATIENT_UI_SELECTABLE_LOCALE_CODES,
+  PRACTICE_UI_SELECTABLE_LOCALE_CODES,
 } from "../i18n/localeConfig";
 import { getMessages } from "../i18n/translations";
 import { authFetch } from "../api/authFetch.js";
@@ -47,6 +49,11 @@ export default function Header() {
     : isPractice
       ? "/practice"
       : "/patient";
+  const selectableLocaleCodes = !isLoggedIn
+    ? HEADER_SELECTABLE_LOCALE_CODES
+    : isPractice
+      ? PRACTICE_UI_SELECTABLE_LOCALE_CODES
+      : PATIENT_UI_SELECTABLE_LOCALE_CODES;
   const themeLabel = theme === "dark" ? copy.themeLight : copy.themeDark;
 
   const identity = useAccountIdentity(isLoggedIn, userMode);
@@ -162,7 +169,7 @@ export default function Header() {
               <GlobalLanguageSelector
                 label={copy.languageLabel}
                 iconOnly
-                selectableLocaleCodes={HEADER_SELECTABLE_LOCALE_CODES}
+                selectableLocaleCodes={selectableLocaleCodes}
               />
             </div>
           </div>

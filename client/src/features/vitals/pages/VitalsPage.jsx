@@ -130,7 +130,7 @@ export default function VitalsPage() {
 
       {/* Tab filter */}
       {!loading && entries.length > 0 && (
-        <nav className="vitals-tabs" aria-label="Filter">
+        <nav className="vitals-tabs" aria-label={t.tabs.ariaLabel}>
           <button
             type="button"
             className={`vitals-tabs__btn${activeTab === "all" ? " vitals-tabs__btn--active" : ""}`}

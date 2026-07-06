@@ -53,7 +53,9 @@ function fmtDateTime(date, lang) {
   }
 }
 
-export function getOwnMedicationPdfFilename(lang) {
+export function getOwnMedicationPdfFilename(lang, labels = null) {
+  const translated = String(labels?.pdfFilename || "").trim();
+  if (translated) return translated;
   return String(lang || "").toLowerCase().startsWith("en")
     ? "medscoutx-my-medications.pdf"
     : "medscoutx-meine-medikamente.pdf";
@@ -298,5 +300,5 @@ export function buildOwnMedicationPdfBlob(args) {
 
 export function downloadOwnMedicationPdf(args) {
   const doc = buildOwnMedicationPdfDoc(args);
-  doc.save(getOwnMedicationPdfFilename(args?.lang));
+  doc.save(getOwnMedicationPdfFilename(args?.lang, args?.t));
 }

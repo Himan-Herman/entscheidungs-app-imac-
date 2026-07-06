@@ -16,7 +16,9 @@ export default function MedaWidget() {
     return m.meda ?? getMessages("en").meda;
   }, [language]);
 
-  const chat = useMedaChat(language === "en" ? "en" : "de", t);
+  const medaLanguage =
+    language === "en" ? "en" : language === "ru" ? "ru" : "de";
+  const chat = useMedaChat(medaLanguage, t);
 
   useEffect(() => {
     if (!chat.open) return undefined;

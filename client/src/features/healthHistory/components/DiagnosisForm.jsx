@@ -36,7 +36,7 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
           setIcdLabel(data.icdLabel || "");
           setAiResult(`${data.icdCode}${data.icdLabel ? ` — ${data.icdLabel}` : ""}`);
         } else {
-          setAiResult(t?.aiNoCode || "Kein ICD-10-Code gefunden");
+          setAiResult(t.aiNoCode);
         }
       }
     } catch {
@@ -48,7 +48,7 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!conditionName.trim()) { setError(t?.errorCondition || "Erkrankung eingeben"); return; }
+    if (!conditionName.trim()) { setError(t.errorCondition); return; }
     setError("");
     onSave({
       conditionName: conditionName.trim(),
@@ -72,14 +72,14 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
     >
       <form className="hh-form-panel" onSubmit={handleSubmit} noValidate>
         <h2 id="hh-diagnosis-form-title" className="hh-form-panel__title">
-          {initial ? (t?.editTitle || "Diagnose bearbeiten") : (t?.addTitle || "Diagnose hinzufügen")}
+          {initial ? t.editTitle : t.addTitle}
         </h2>
 
         {error && <p className="hh-form__error" role="alert">{error}</p>}
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-condition">
-            {t?.conditionLabel || "Erkrankung / Diagnose"} *
+            {t.conditionLabel} *
           </label>
           <div className="hh-ai-row">
             <input
@@ -89,7 +89,7 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
               value={conditionName}
               onChange={(e) => setConditionName(e.target.value)}
               maxLength={300}
-              placeholder={t?.conditionPlaceholder || "z.B. Diabetes mellitus Typ 2, Bluthochdruck"}
+              placeholder={t.conditionPlaceholder}
               required
             />
             <button
@@ -97,11 +97,11 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
               className="hh-ai-btn"
               onClick={handleAiSuggest}
               disabled={aiLoading || conditionName.trim().length < 2}
-              title={t?.aiSuggestIcd || "KI: ICD-10 vorschlagen"}
-              aria-label={t?.aiSuggestIcd || "KI: ICD-10 vorschlagen"}
+              title={t.aiSuggestIcd}
+              aria-label={t.aiSuggestIcd}
             >
               <Sparkles size={14} aria-hidden="true" />
-              {aiLoading ? (t?.aiLoading || "…") : "ICD"}
+              {aiLoading ? t.aiLoading : "ICD"}
             </button>
           </div>
           {aiResult && (
@@ -114,7 +114,7 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-icd-code">
-            {t?.icdCodeLabel || "ICD-10-Code"}
+            {t.icdCodeLabel}
           </label>
           <input
             id="hh-icd-code"
@@ -122,14 +122,14 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
             value={icdCode}
             onChange={(e) => setIcdCode(e.target.value.toUpperCase())}
             maxLength={20}
-            placeholder={t?.icdCodePlaceholder || "z.B. E11, I10"}
+            placeholder={t.icdCodePlaceholder}
             style={{ fontFamily: "monospace", letterSpacing: "0.05em" }}
           />
         </div>
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-diag-status">
-            {t?.statusLabel || "Status"}
+            {t.statusLabel}
           </label>
           <select
             id="hh-diag-status"
@@ -145,7 +145,7 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-diag-date">
-            {t?.diagnosedDateLabel || "Diagnostiziert am"}
+            {t.diagnosedDateLabel}
           </label>
           <input
             id="hh-diag-date"
@@ -159,7 +159,7 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-doctor">
-            {t?.treatingDoctorLabel || "Behandelnde:r Arzt/Ärztin"}
+            {t.treatingDoctorLabel}
           </label>
           <input
             id="hh-doctor"
@@ -167,13 +167,13 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
             value={treatingDoctor}
             onChange={(e) => setTreatingDoctor(e.target.value)}
             maxLength={200}
-            placeholder={t?.treatingDoctorPlaceholder || "Name der Praxis oder Arztperson"}
+            placeholder={t.treatingDoctorPlaceholder}
           />
         </div>
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-diag-notes">
-            {t?.notesLabel || "Notizen"}
+            {t.notesLabel}
           </label>
           <textarea
             id="hh-diag-notes"
@@ -182,16 +182,16 @@ export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) 
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
             rows={2}
-            placeholder={t?.notesPlaceholder || "Weitere Hinweise..."}
+            placeholder={t.notesPlaceholder}
           />
         </div>
 
         <div className="hh-form__actions">
           <button type="button" className="hh-form__cancel" onClick={onCancel}>
-            {t?.cancel || "Abbrechen"}
+            {t.cancel}
           </button>
           <button type="submit" className="hh-form__submit" disabled={saving}>
-            {saving ? (t?.saving || "Speichern…") : (t?.save || "Speichern")}
+            {saving ? t.saving : t.save}
           </button>
         </div>
       </form>

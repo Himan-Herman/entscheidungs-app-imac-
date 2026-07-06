@@ -6,25 +6,9 @@ import {
   readBodyMapConsent,
   rememberBodyMapSelection,
 } from "../features/bodyMap/bodyMapSession";
+import { getBodyMapRegionLabel } from "../features/bodyMap/bodyMapRegionLabels.js";
 import "../styles/BodyMapPages.css";
 import rueckenBild from "../assets/img/Koerper_Rueckseite.png";
-
-function regionHitProps(goRegion, organId, ariaLabel) {
-  const label = ariaLabel || String(organId).replace(/_/g, " ");
-  return {
-    tabIndex: 0,
-    role: "button",
-    "aria-label": label,
-    style: { cursor: "pointer" },
-    onClick: () => goRegion(organId),
-    onKeyDown: (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        goRegion(organId);
-      }
-    },
-  };
-}
 
 export default function KoerperRueckseite() {
   const navigate = useNavigate();
@@ -52,6 +36,20 @@ export default function KoerperRueckseite() {
       { state: { from: "/rueckseite" } },
     );
   };
+
+  const regionHitProps = (organId) => ({
+    tabIndex: 0,
+    role: "button",
+    "aria-label": getBodyMapRegionLabel(t, organId),
+    style: { cursor: "pointer" },
+    onClick: () => goRegion(organId),
+    onKeyDown: (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goRegion(organId);
+      }
+    },
+  });
 
   return (
     <main
@@ -104,7 +102,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'nacken')}
+  {...regionHitProps('nacken')}
 />
 
 
@@ -117,7 +115,7 @@ export default function KoerperRueckseite() {
           fill="transparent" 
   stroke="transparent"
           strokeWidth="2"
-          {...regionHitProps(goRegion, 'schulterblatt_links')}
+          {...regionHitProps('schulterblatt_links')}
         />
         <circle
           cx="214"
@@ -126,7 +124,7 @@ export default function KoerperRueckseite() {
           fill="transparent" 
   stroke="transparent"
           strokeWidth="2"
-          {...regionHitProps(goRegion, 'schulterblatt_rechts')}
+          {...regionHitProps('schulterblatt_rechts')}
         />
 
         {/* 3 – Rückenmitte (Wirbelsäule) als vertikales Rechteck */}
@@ -138,7 +136,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'wirbelsaeule')}
+  {...regionHitProps('wirbelsaeule')}
 />
         
 
@@ -151,7 +149,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'niere_links')}
+  {...regionHitProps('niere_links')}
 />
 <ellipse
   cx="172"
@@ -161,7 +159,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'niere_rechts')}
+  {...regionHitProps('niere_rechts')}
 />
        
 
@@ -174,7 +172,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'becken_rechts')}
+  {...regionHitProps('becken_rechts')}
 />
 <ellipse
   cx="180"
@@ -184,7 +182,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'becken_links')}
+  {...regionHitProps('becken_links')}
 />
         
         {/* 6 – Hinterkopf */}
@@ -195,7 +193,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'hinterkopf')}
+  {...regionHitProps('hinterkopf')}
 />
 <ellipse
   cx="127"
@@ -205,7 +203,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'ohr_links')}
+  {...regionHitProps('ohr_links')}
 />
 
 <ellipse
@@ -216,7 +214,7 @@ export default function KoerperRueckseite() {
   fill="transparent" 
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'ohr_rechts')}
+  {...regionHitProps('ohr_rechts')}
 />
 {/*Linkes Bein}*/}
 <ellipse
@@ -226,7 +224,7 @@ export default function KoerperRueckseite() {
   ry="150"
   fill="transparent" 
   stroke="transparent"
-  {...regionHitProps(goRegion, 'bein_links')}
+  {...regionHitProps('bein_links')}
 />
 
 {/*Rechtes Bein */}
@@ -237,7 +235,7 @@ export default function KoerperRueckseite() {
   ry="150"
   fill="transparent" 
   stroke="transparent"
-  {...regionHitProps(goRegion, 'bein_rechts')}
+  {...regionHitProps('bein_rechts')}
 />
 
 

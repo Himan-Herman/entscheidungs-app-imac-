@@ -46,20 +46,42 @@ function sanitize(v) {
   return String(v ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trimEnd();
 }
 
-function orNA(v) {
+function orNA(v, fallback = 'Not provided') {
   const s = sanitize(v);
-  return s || 'nicht angegeben';
+  return s || fallback;
 }
 
-function formatDate(isoOrDateOrNull) {
+function formatDate(isoOrDateOrNull, locale = 'de-DE') {
   const d = isoOrDateOrNull ? new Date(isoOrDateOrNull) : new Date();
-  return d.toLocaleString('de-DE', { dateStyle: 'long', timeStyle: 'short' });
+  try {
+    return d.toLocaleString(locale, { dateStyle: 'long', timeStyle: 'short' });
+  } catch {
+    return d.toLocaleString('de-DE', { dateStyle: 'long', timeStyle: 'short' });
+  }
 }
 
-function formatTime(isoOrNull) {
+function formatTime(isoOrNull, locale = 'de-DE') {
   if (!isoOrNull) return '';
   const d = new Date(isoOrNull);
-  return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  try {
+    return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  }
+}
+
+function formatLanguageLabel(code, locale = 'en') {
+  if (!code) return '—';
+  if (typeof Intl !== 'undefined' && typeof Intl.DisplayNames === 'function') {
+    try {
+      const display = new Intl.DisplayNames([locale], { type: 'language' });
+      const label = display.of(code);
+      if (label) return `${String(label).charAt(0).toUpperCase()}${String(label).slice(1)}`;
+    } catch {
+      // fall back to static labels below
+    }
+  }
+  return REALTIME_LANGUAGE_MAP[code] ?? code;
 }
 
 /**
@@ -83,7 +105,7 @@ function slugifyForFile(value) {
  *   medscoutx-meda-2026-06-10-1744-hautarzt-dr-heinrich.pdf
  * Falls back to medscoutx-meda-<date>-<time>.pdf when practice/doctor are missing.
  */
-function buildPdfFileName(isoOrNull, practiceInfo) {
+function buildPdfFileName(isoOrNull, practiceInfo, prefix = 'medscoutx-interpreter') {
   const d   = isoOrNull ? new Date(isoOrNull) : new Date();
   const pad = (n) => String(n).padStart(2, '0');
   const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -91,7 +113,37 @@ function buildPdfFileName(isoOrNull, practiceInfo) {
   const partySlug = slugifyForFile(
     [practiceInfo?.department, practiceInfo?.doctorName].filter(Boolean).join(' '),
   );
-  return ['medscoutx', 'meda', date, time, partySlug].filter(Boolean).join('-') + '.pdf';
+  return [prefix, date, time, partySlug].filter(Boolean).join('-') + '.pdf';
+}
+
+function localizeGender(value, setupTx = {}, fallback) {
+  const raw = sanitize(value);
+  if (!raw) return fallback;
+  switch (raw) {
+    case 'weiblich':
+      return setupTx.genderFemale || raw;
+    case 'männlich':
+      return setupTx.genderMale || raw;
+    case 'divers':
+      return setupTx.genderDiverse || raw;
+    default:
+      return raw;
+  }
+}
+
+function localizeInsuranceStatus(value, setupTx = {}, fallback) {
+  const raw = sanitize(value);
+  if (!raw) return fallback;
+  switch (raw) {
+    case 'gesetzlich':
+      return setupTx.insuranceStatutory || raw;
+    case 'privat':
+      return setupTx.insurancePrivate || raw;
+    case 'Selbstzahler':
+      return setupTx.insuranceSelfPay || raw;
+    default:
+      return raw;
+  }
 }
 
 /**
@@ -152,6 +204,8 @@ function fitLogoInBox(natW, natH, maxW, maxH) {
  *   practiceInfo:     { practiceName?: string, doctorName?: string, department?: string, location?: string },
  *   languages:        { patientLanguage: string, practiceLanguage: string },
  *   sessionStartedAt: string|null,
+ *   messages?:        Record<string, any>,
+ *   locale?:          string,
  * }} params
  * @param {{ returnBlob?: boolean }} [options]
  * @returns {Promise<Blob|void>} a Blob when options.returnBlob is true, otherwise void
@@ -162,6 +216,8 @@ export async function exportRealtimeConversationPdf({
   practiceInfo  = {},
   languages     = {},
   sessionStartedAt = null,
+  messages = {},
+  locale = 'de-DE',
 }, options = {}) {
   const { dataUrl: logoDataUrl, natW: logoNatW, natH: logoNatH } = await loadLogoData(logo6Url);
   const { w: logoW, h: logoH } = fitLogoInBox(logoNatW, logoNatH, LOGO_BOX_W, LOGO_BOX_H);
@@ -172,8 +228,79 @@ export async function exportRealtimeConversationPdf({
   const contentW = pageW - 2 * MARGIN;
   let y          = MARGIN;
 
-  const patientLangLabel  = REALTIME_LANGUAGE_MAP[languages.patientLanguage]  ?? languages.patientLanguage  ?? '—';
-  const practiceLangLabel = REALTIME_LANGUAGE_MAP[languages.practiceLanguage] ?? languages.practiceLanguage ?? '—';
+  const setupTx = messages?.realtimePage?.setup ?? messages?.setup ?? {};
+  const conversationTx = messages?.realtimePage?.conversation ?? messages?.conversation ?? {};
+  const historyTx = messages?.realtimePage?.history ?? messages?.history ?? {};
+  const sessionBarTx = messages?.realtimePage?.sessionBar ?? messages?.sessionBar ?? {};
+  const reviewTx = messages?.review ?? {};
+  const pdfTx = messages?.pdf ?? {};
+  const endBoxTx = messages?.realtimePage?.endBox ?? messages?.endBox ?? {};
+
+  const pdfText = {
+    documentTitle: pdfTx.documentTitle ?? 'Medical Interpreter / doctor visit translation',
+    documentSubtitle: pdfTx.documentSubtitle ?? 'Conversation documentation',
+    headerRecordTitle: reviewTx.heading ?? 'Conversation documentation',
+    startedLabel: reviewTx.created ?? 'Started',
+    disclaimer: [
+      pdfTx.legalParagraph1,
+      pdfTx.legalParagraph2,
+      pdfTx.legalParagraph3,
+    ].filter(Boolean).join(' '),
+    generatedNote:
+      pdfTx.generatedNote ??
+      'Generated by MedScoutX · communication support only · automatic transcription/translation may contain errors · verify important information with your healthcare professional',
+    footerNote:
+      pdfTx.legalParagraph1 ??
+      'Communication support only. This is not a diagnosis or treatment recommendation.',
+    footerPage: pdfTx.footerPage ?? 'Page',
+    filenamePrefix: pdfTx.filenamePrefix ?? 'medscoutx-interpreter',
+    patientBoxTitle:
+      conversationTx.rolePatient ?? sessionBarTx.patientLabel ?? pdfTx.patientNameLabel ?? 'Patient',
+    practiceBoxTitle:
+      setupTx.practiceNameLabel ?? sessionBarTx.practiceLabel ?? 'Practice / facility',
+    sessionBoxTitle: reviewTx.metadataHeading ?? 'Session details',
+    fullNameLabel: setupTx.fullNameLabel ?? pdfTx.patientNameLabel ?? 'Full name',
+    dateOfBirthLabel: setupTx.dateOfBirthLabel ?? pdfTx.patientDateOfBirthLabel ?? 'Date of birth',
+    genderLabel: setupTx.genderLabel ?? 'Gender',
+    insuranceStatusLabel: setupTx.insuranceStatusLabel ?? 'Insurance status',
+    insuranceNameLabel: setupTx.insuranceNameLabel ?? 'Health insurer / insurance',
+    insuranceNumberLabel: setupTx.insuranceNumberLabel ?? 'Insurance number',
+    emailLabel: setupTx.emailLabel ?? pdfTx.patientEmailLabel ?? 'Email',
+    phoneLabel: setupTx.phoneLabel ?? pdfTx.patientPhoneLabel ?? 'Phone',
+    streetLabel: setupTx.streetLabel ?? 'Street and house number',
+    postalCodeLabel: setupTx.postalCodeLabel ?? 'Postal code',
+    cityLabel: setupTx.cityLabel ?? 'City',
+    countryLabel: setupTx.countryLabel ?? 'Country',
+    relationLabel: setupTx.relationLabel ?? 'Relation to the person',
+    practiceNameLabel: setupTx.practiceNameLabel ?? 'Practice / facility',
+    doctorNameLabel: setupTx.doctorNameLabel ?? 'Doctor / clinician',
+    specialtyLabel: setupTx.specialtyLabel ?? 'Specialty',
+    practiceEmailLabel: setupTx.practiceEmailLabel ?? 'Practice email',
+    practicePhoneLabel: setupTx.practicePhoneLabel ?? 'Practice phone',
+    practiceStreetLabel: setupTx.practiceStreetLabel ?? 'Street and house number',
+    practicePostalCodeLabel: setupTx.practicePostalCodeLabel ?? 'Postal code',
+    practiceCityLabel: setupTx.practiceCityLabel ?? 'City',
+    practiceCountryLabel: setupTx.countryLabel ?? 'Country',
+    patientLanguageLabel: historyTx.patientLanguage ?? 'Patient language',
+    practiceLanguageLabel: historyTx.practiceLanguage ?? 'Practice language',
+    conversationHeading: conversationTx.aria ?? 'Conversation history',
+    noTurns: historyTx.noStoredTurns ?? pdfTx.exportNoTurns ?? 'No conversation history stored.',
+    rolePatient: conversationTx.rolePatient ?? sessionBarTx.patientLabel ?? 'Patient',
+    rolePractice: conversationTx.rolePractice ?? sessionBarTx.practiceLabel ?? 'Practice / doctor',
+    unclear: historyTx.unclear ?? 'Unclear',
+    sourceLanguageLabel: conversationTx.sourceLanguageLabel ?? 'Original language',
+    originalLabel: historyTx.originalLabel ?? reviewTx.originalLabel ?? 'Original',
+    editedBadge: historyTx.editedBadge ?? 'Original text corrected manually',
+    translationForPractice:
+      conversationTx.translationForPractice ?? 'Translation for practice',
+    translationForPatient:
+      conversationTx.translationForPatient ?? 'Translation for patient',
+    translationLabel: conversationTx.translationGeneric ?? reviewTx.translatedLabel ?? 'Translation',
+    notProvided: endBoxTx.notProvided ?? 'Not provided',
+  };
+
+  const patientLangLabel = formatLanguageLabel(languages.patientLanguage, locale);
+  const practiceLangLabel = formatLanguageLabel(languages.practiceLanguage, locale);
 
   const contentBottom = () => pageH - MARGIN - FOOTER_RESERVE;
 
@@ -336,29 +463,29 @@ export async function exportRealtimeConversationPdf({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
   doc.setTextColor(...COL.teal);
-  doc.text('Meda Live Translation', titleX, y + 5);
+  doc.text(pdfText.documentTitle, titleX, y + 5);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
   doc.setTextColor(...COL.slate);
-  doc.text('Gesprächsprotokoll', titleX, y + 5 + lh(15) + 1);
+  doc.text(pdfText.headerRecordTitle, titleX, y + 5 + lh(15) + 1);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(...COL.slateMuted);
-  const subtitleLines = doc.splitTextToSize('Medizinische Sprachvermittlung – Original und Übersetzung', titleW);
+  const subtitleLines = doc.splitTextToSize(pdfText.documentSubtitle, titleW);
   let subY = y + 5 + lh(15) + lh(11) + 2.5;
   for (const ln of subtitleLines) { doc.text(ln, titleX, subY); subY += lh(8.5); }
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...COL.slateMuted);
-  doc.text(`Datum: ${formatDate(sessionStartedAt)}`, titleX, subY + 1.5);
+  doc.text(`${pdfText.startedLabel}: ${formatDate(sessionStartedAt, locale)}`, titleX, subY + 1.5);
 
   y = Math.max(y + logoH + 6, subY + lh(8) + 6);
 
   // Disclaimer strip
-  const disclaimer = 'Dieses Dokument enthält eine sprachliche Gesprächsdokumentation. Es ersetzt keine ärztliche Diagnose, Therapieempfehlung oder medizinische Bewertung.';
+  const disclaimer = pdfText.disclaimer;
   const dPad       = 4;
   const dInnerW    = contentW - dPad * 2;
   const dLines     = doc.splitTextToSize(disclaimer, dInnerW);
@@ -382,50 +509,50 @@ export async function exportRealtimeConversationPdf({
   // ── Patient info box ────────────────────────────────────────────────────────
 
   const patientRelRow = sanitize(patientInfo.relationship)
-    ? [['Beziehung zur Person', sanitize(patientInfo.relationship)]]
+    ? [[pdfText.relationLabel, sanitize(patientInfo.relationship)]]
     : [];
 
-  labeledInfoBox('Patient', [
-    ['Name',                orNA(patientInfo.name)],
-    ['Geburtsdatum',        orNA(patientInfo.dateOfBirth)],
-    ['Geschlecht',          orNA(patientInfo.gender)],
-    ['Versicherungsstatus', orNA(patientInfo.insuranceStatus)],
-    ['Krankenkasse',        orNA(patientInfo.insuranceName)],
-    ['Versicherungsnummer', orNA(patientInfo.insuranceNumber)],
-    ['E-Mail',              orNA(patientInfo.email)],
-    ['Telefon',             orNA(patientInfo.phone)],
-    ['Strasse',             orNA(patientInfo.street)],
-    ['PLZ',                 orNA(patientInfo.postalCode)],
-    ['Ort',                 orNA(patientInfo.city)],
-    ['Land',                orNA(patientInfo.country)],
+  labeledInfoBox(pdfText.patientBoxTitle, [
+    [pdfText.fullNameLabel,        orNA(patientInfo.name, pdfText.notProvided)],
+    [pdfText.dateOfBirthLabel,     orNA(patientInfo.dateOfBirth, pdfText.notProvided)],
+    [pdfText.genderLabel,          localizeGender(patientInfo.gender, setupTx, pdfText.notProvided)],
+    [pdfText.insuranceStatusLabel, localizeInsuranceStatus(patientInfo.insuranceStatus, setupTx, pdfText.notProvided)],
+    [pdfText.insuranceNameLabel,   orNA(patientInfo.insuranceName, pdfText.notProvided)],
+    [pdfText.insuranceNumberLabel, orNA(patientInfo.insuranceNumber, pdfText.notProvided)],
+    [pdfText.emailLabel,           orNA(patientInfo.email, pdfText.notProvided)],
+    [pdfText.phoneLabel,           orNA(patientInfo.phone, pdfText.notProvided)],
+    [pdfText.streetLabel,          orNA(patientInfo.street, pdfText.notProvided)],
+    [pdfText.postalCodeLabel,      orNA(patientInfo.postalCode, pdfText.notProvided)],
+    [pdfText.cityLabel,            orNA(patientInfo.city, pdfText.notProvided)],
+    [pdfText.countryLabel,         orNA(patientInfo.country, pdfText.notProvided)],
     ...patientRelRow,
   ]);
 
   // ── Practice info box ────────────────────────────────────────────────────────
 
-  labeledInfoBox('Praxis / Einrichtung', [
-    ['Praxis',         orNA(practiceInfo.practiceName)],
-    ['Aerztin / Arzt', orNA(practiceInfo.doctorName)],
-    ['Fachbereich',    orNA(practiceInfo.department)],
-    ['E-Mail',         orNA(practiceInfo.email)],
-    ['Telefon',        orNA(practiceInfo.phone)],
-    ['Strasse',        orNA(practiceInfo.street)],
-    ['PLZ',            orNA(practiceInfo.postalCode)],
-    ['Ort',            orNA(practiceInfo.city)],
-    ['Land',           orNA(practiceInfo.country)],
+  labeledInfoBox(pdfText.practiceBoxTitle, [
+    [pdfText.practiceNameLabel,   orNA(practiceInfo.practiceName, pdfText.notProvided)],
+    [pdfText.doctorNameLabel,     orNA(practiceInfo.doctorName, pdfText.notProvided)],
+    [pdfText.specialtyLabel,      orNA(practiceInfo.department, pdfText.notProvided)],
+    [pdfText.practiceEmailLabel,  orNA(practiceInfo.email, pdfText.notProvided)],
+    [pdfText.practicePhoneLabel,  orNA(practiceInfo.phone, pdfText.notProvided)],
+    [pdfText.practiceStreetLabel, orNA(practiceInfo.street, pdfText.notProvided)],
+    [pdfText.practicePostalCodeLabel, orNA(practiceInfo.postalCode, pdfText.notProvided)],
+    [pdfText.practiceCityLabel,   orNA(practiceInfo.city, pdfText.notProvided)],
+    [pdfText.practiceCountryLabel, orNA(practiceInfo.country, pdfText.notProvided)],
   ]);
 
   // ── Session / languages box ─────────────────────────────────────────────────
 
-  labeledInfoBox('Sitzung – Sprachen', [
-    ['Patientensprache', patientLangLabel],
-    ['Praxissprache',    practiceLangLabel],
-    ['Sitzungsbeginn',   formatDate(sessionStartedAt)],
+  labeledInfoBox(pdfText.sessionBoxTitle, [
+    [pdfText.patientLanguageLabel, patientLangLabel],
+    [pdfText.practiceLanguageLabel, practiceLangLabel],
+    [pdfText.startedLabel, formatDate(sessionStartedAt, locale)],
   ]);
 
   // ── Conversation turns ──────────────────────────────────────────────────────
 
-  sectionHeading('Gesprächsverlauf');
+  sectionHeading(pdfText.conversationHeading);
 
   const doneTurns = turns.filter(t => t.isDone && (t.originalText || t.translatedText));
 
@@ -434,7 +561,7 @@ export async function exportRealtimeConversationPdf({
     doc.setFontSize(9.5);
     doc.setTextColor(...COL.slateMuted);
     needSpace(lh(9.5) + 2);
-    doc.text('Kein Gesprächsverlauf aufgezeichnet.', MARGIN, y);
+    doc.text(pdfText.noTurns, MARGIN, y);
     y += lh(9.5) + 4;
   }
 
@@ -443,11 +570,11 @@ export async function exportRealtimeConversationPdf({
     const accentColor = isPatient ? COL.patientAccent : COL.practiceAccent;
     const turnBg      = isPatient ? COL.patientBg     : COL.practiceBg;
     const turnBorder  = isPatient ? COL.patientBorder  : COL.practiceBorder;
-    const roleLabel   = isPatient ? 'Patient' : 'Praxis / Arzt';
-    const transLabel  = isPatient ? 'Übersetzung für Praxis' : 'Übersetzung für Patient';
-    const srcLabel    = REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage ?? '—';
-    const tgtLabel    = REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage ?? '—';
-    const timeStr     = formatTime(turn.timestamp);
+    const roleLabel   = isPatient ? pdfText.rolePatient : pdfText.rolePractice;
+    const transLabel  = isPatient ? pdfText.translationForPractice : pdfText.translationForPatient;
+    const srcLabel    = formatLanguageLabel(turn.sourceLanguage, locale);
+    const tgtLabel    = formatLanguageLabel(turn.targetLanguage, locale);
+    const timeStr     = formatTime(turn.timestamp, locale);
     const origText    = sanitize(turn.originalText   ?? '');
     const transText   = sanitize(turn.translatedText ?? '');
 
@@ -472,8 +599,7 @@ export async function exportRealtimeConversationPdf({
 
     // Unclear banner
     if (turn.isUnclear) {
-      const unclearText  = 'Aussage akustisch/sprachlich nicht sicher zugeordnet – Wiederholungsbitte wurde ausgegeben.';
-      const unclearLines = doc.splitTextToSize(unclearText, contentW - 4);
+      const unclearLines = doc.splitTextToSize(pdfText.unclear, contentW - 4);
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(146, 64, 14);
@@ -505,7 +631,7 @@ export async function exportRealtimeConversationPdf({
     doc.setFontSize(8.5);
     doc.setTextColor(...COL.slateMuted);
     needSpace(lh(8.5) + 0.5);
-    doc.text(`Originalsprache: ${srcLabel}`, MARGIN + 4, y);
+    doc.text(`${pdfText.sourceLanguageLabel}: ${srcLabel}`, MARGIN + 4, y);
     y += lh(8.5) + 3;
 
     // "Original:" section label
@@ -513,7 +639,7 @@ export async function exportRealtimeConversationPdf({
     doc.setFontSize(9);
     doc.setTextColor(...COL.slate);
     needSpace(lh(9));
-    doc.text('Original:', MARGIN + 4, y);
+    doc.text(`${pdfText.originalLabel}:`, MARGIN + 4, y);
     y += lh(9) + 1.5;
 
     // Original text (indented)
@@ -525,7 +651,7 @@ export async function exportRealtimeConversationPdf({
       doc.setFontSize(7.5);
       doc.setTextColor(146, 64, 14);
       needSpace(lh(7.5) + 1);
-      doc.text('[Originaltext manuell korrigiert]', MARGIN + 6, y);
+      doc.text(`[${pdfText.editedBadge}]`, MARGIN + 6, y);
       y += lh(7.5) + 1.5;
     }
 
@@ -549,7 +675,7 @@ export async function exportRealtimeConversationPdf({
     doc.setFontSize(8.5);
     doc.setTextColor(...COL.slateMuted);
     needSpace(lh(8.5) + 0.5);
-    doc.text(`Übersetzungssprache: ${tgtLabel}`, MARGIN + 4, y);
+    doc.text(`${pdfText.translationLabel}: ${tgtLabel}`, MARGIN + 4, y);
     y += lh(8.5) + 1.5;
 
     // Translation text (indented)
@@ -580,11 +706,11 @@ export async function exportRealtimeConversationPdf({
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(...COL.slateMuted);
-    doc.text('MedScoutX · Meda Live Translation · Lokaler Export', MARGIN, fy1);
-    doc.text(`Seite ${p} / ${totalPages}`, pageW - MARGIN, fy1, { align: 'right' });
+    doc.text(`MedScoutX · ${pdfText.documentTitle}`, MARGIN, fy1);
+    doc.text(`${pdfText.footerPage} ${p} / ${totalPages}`, pageW - MARGIN, fy1, { align: 'right' });
 
     doc.setFontSize(6.5);
-    doc.text('Nur zur Gesprächsdokumentation der Sprachvermittlung. Kein medizinischer Befund.', MARGIN, fy2);
+    doc.text(pdfText.footerNote, MARGIN, fy2);
   }
 
   // ── Save / return ─────────────────────────────────────────────────────────────
@@ -595,5 +721,5 @@ export async function exportRealtimeConversationPdf({
   }
 
   // Default behaviour (unchanged): trigger the local browser download.
-  doc.save(buildPdfFileName(sessionStartedAt, practiceInfo));
+  doc.save(buildPdfFileName(sessionStartedAt, practiceInfo, pdfText.filenamePrefix));
 }

@@ -38,6 +38,44 @@ export default {
     sectionLabelAnswer: "Votre réponse",
     devInsertDemo: "Insérer des données de démonstration",
     devOnlyNote: "Visible uniquement en développement local.",
+    adaptiveSeedHint:
+      "Décrivez ce point avec vos propres mots, de la manière la plus concrète et neutre possible.",
+    adaptiveFollowupLabel: "Question complémentaire pour la préparation",
+    adaptiveSeedRequired:
+      "Décrivez brièvement la situation avec vos propres mots.",
+    adaptiveAnswerRequired:
+      "Répondez brièvement à la question complémentaire.",
+    adaptiveBusy: "Un instant…",
+    adaptiveProgressMeta:
+      "Questions complémentaires pour cette saisie : {{n}} sur un maximum de {{max}}",
+    adaptiveSkip: "Passer",
+    adaptiveServiceError:
+      "La question complémentaire adaptative ne peut pas être créée pour le moment. Vous pouvez continuer ou modifier plus tard.",
+    audioHint:
+      "Vous pouvez écouter la question ou dicter votre réponse.",
+    audioPrivacy:
+      "Pour la lecture à voix haute et la saisie vocale, du texte ou de l’audio est envoyé au service d’IA pour traitement. Cette fonction ne stocke rien de manière permanente.",
+    audioMicUnsupported:
+      "L’enregistrement audio n’est pas pris en charge par ce navigateur.",
+    audioListenAria: "Lire la question à voix haute",
+    audioListenTitle:
+      "Lire la question et une brève indication à voix haute",
+    audioDictateAria: "Dicter la réponse",
+    audioDictateTitle:
+      "Touchez pour démarrer l’enregistrement, touchez à nouveau pour l’arrêter",
+    audioStatusLoading: "Préparation de l’audio…",
+    audioStatusPlaying: "Lecture…",
+    audioStatusRecording:
+      "Enregistrement… touchez à nouveau lorsque vous avez terminé.",
+    audioStatusTranscribing: "Transformation de votre voix en texte…",
+    audioErrorGeneric:
+      "La fonction audio n’est pas disponible pour le moment. Veuillez réessayer plus tard.",
+    audioErrorPlayback:
+      "La lecture n’a pas pu être démarrée.",
+    audioMicPermission:
+      "L’accès au microphone a été refusé ou n’est pas disponible.",
+    longitudinalCaseBanner:
+      "Facultatif : un historique longitudinal est lié. La collecte utilise uniquement vos propres déclarations précédentes, sans interprétation médicale.",
   },
   review: {
     pageTitle: "MedScoutX — Récapitulatif préalable",

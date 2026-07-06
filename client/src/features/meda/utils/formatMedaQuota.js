@@ -1,12 +1,14 @@
 /**
  * @param {number | null | undefined} resetAtMs
- * @param {'de' | 'en'} language
+ * @param {'de' | 'en' | 'ru'} language
  */
 export function formatMedaResetTime(resetAtMs, language) {
   if (!resetAtMs || !Number.isFinite(resetAtMs)) return null;
   const locale =
     language === "en"
       ? "en-GB"
+      : language === "ru"
+        ? "ru-RU"
       : language === "fr"
         ? "fr-FR"
         : language === "es"
@@ -23,7 +25,7 @@ export function formatMedaResetTime(resetAtMs, language) {
 /**
  * @param {Record<string, string>} t
  * @param {{ resetAt?: number | null, remaining?: number, limit?: number }} quota
- * @param {'de' | 'en'} language
+ * @param {'de' | 'en' | 'ru'} language
  */
 export function formatMedaRateLimitMessage(t, quota, language) {
   const time = formatMedaResetTime(quota?.resetAt, language);

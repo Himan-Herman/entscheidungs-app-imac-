@@ -123,6 +123,7 @@ export default {
       "Nur eigene Angaben der Patientin/des Patienten. Keine Diagnose, keine Therapie- oder Dosierungsempfehlung, keine Wechselwirkungsprüfung.",
     footerBrand: "Lokal erstellt mit MedScoutX",
     footerPage: "Seite",
+    pdfFilename: "medscoutx-meine-medikamente.pdf",
     exportTitle: "Herunterladen & Teilen",
     downloadPdf: "Als PDF herunterladen",
     qrOpen: "QR-Code anzeigen",

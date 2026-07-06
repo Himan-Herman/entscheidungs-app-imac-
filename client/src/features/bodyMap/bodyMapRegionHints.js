@@ -46,12 +46,25 @@ const HINTS_EN = {
   default: "how long; what you notice; what changes it",
 };
 
+const HINTS_RU = {
+  head: "как давно; с одной стороны или с обеих; скорее давление или резкая боль",
+  neck: "как давно; при движении; с одной стороны или с обеих",
+  chest: "при движении или в покое; давление, жжение или тянущее ощущение",
+  abdomen: "сверху или снизу; сильнее после еды; как давно",
+  back: "сверху или снизу; при нагрузке; как давно",
+  limb: "при движении; при каком движении; как давно",
+  skin: "как давно; размер или изменение; зудит или болит",
+  pelvis: "как давно; когда возникает; сопутствующие наблюдения",
+  default: "как давно; что вы замечаете; что это меняет",
+};
+
 /**
  * @param {string} organName
- * @param {'de'|'en'} locale
+ * @param {'de'|'en'|'ru'} locale
  */
 export function getRegionQuestionHints(organName, locale = "de") {
   const cat = categorizeBodyRegion(organName);
-  const pack = locale === "en" ? HINTS_EN : HINTS_DE;
+  const pack =
+    locale === "en" ? HINTS_EN : locale === "ru" ? HINTS_RU : HINTS_DE;
   return pack[cat] || pack.default;
 }

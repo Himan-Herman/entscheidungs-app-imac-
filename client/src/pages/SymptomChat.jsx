@@ -11,6 +11,7 @@ import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations/index.js";
 import { useOnlineStatus } from "../hooks/useOnlineStatus.js";
+import { getBodyMapRegionLabel } from "../features/bodyMap/bodyMapRegionLabels.js";
 import DisclaimerShort from "../components/DisclaimerShort";
 import VoiceInput from "../components/VoiceInput.jsx";
 import SymptomChatThread from "../features/symptomCheck/components/SymptomChatThread.jsx";
@@ -39,9 +40,13 @@ export default function SymptomChat() {
   const { language } = useLanguage();
   const online = useOnlineStatus();
   const [searchParams] = useSearchParams();
+  const bodyMapMessages = useMemo(() => {
+    const bundle = getMessages(language);
+    return bundle.bodyMap ?? getMessages("en").bodyMap;
+  }, [language]);
   const organ = searchParams.get("organ");
-  const organHint = organ ? organ.replace(/_/g, " ") : null;
-  const locale = language === "en" ? "en" : "de";
+  const organHint = organ ? getBodyMapRegionLabel(bodyMapMessages, organ) : null;
+  const locale = language === "en" ? "en" : language === "ru" ? "ru" : "de";
 
   const initial = useMemo(
     () => loadSymptomCheckState(organHint, locale),
@@ -56,6 +61,10 @@ export default function SymptomChat() {
   const t = useMemo(() => {
     const bundle = getMessages(language);
     return bundle.symptomCheck ?? getMessages("en").symptomCheck;
+  }, [language]);
+  const disclaimerLabel = useMemo(() => {
+    const bundle = getMessages(language);
+    return bundle.footer?.disclaimer || getMessages("en").footer.disclaimer;
   }, [language]);
 
   const historyLabels = useMemo(() => {
@@ -154,10 +163,10 @@ export default function SymptomChat() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `medscoutx-symptom-check-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `${t.downloadFilenamePrefix}-${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [buildExportText]);
+  }, [buildExportText, t.downloadFilenamePrefix]);
 
   const handleVoice = (text) => {
     if (!text) return;
@@ -249,7 +258,7 @@ export default function SymptomChat() {
           <p>{t.storeSafetyNotice}</p>
         </section>
 
-        <section className="symptom-check-page__disclaimer" aria-label="Disclaimer">
+        <section className="symptom-check-page__disclaimer" aria-label={disclaimerLabel}>
           <DisclaimerShort />
         </section>
 

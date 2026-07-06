@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Clock, Copy, Download, QrCode, Pill, Trash2, X } from "lucide-react";
 import QRCode from "qrcode";
 import { jsPDF } from "jspdf";
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import "../styles/Erezept.css";
 
 const STATUS_ICONS = {
@@ -16,13 +17,14 @@ function daysLeft(validUntil) {
   return Math.ceil((new Date(validUntil) - Date.now()) / 86_400_000);
 }
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString("de-DE", {
+function formatDate(iso, language, options = {}) {
+  return new Date(iso).toLocaleDateString(getPrimaryIntlLocale(language), {
     year: "numeric", month: "2-digit", day: "2-digit",
+    ...options,
   });
 }
 
-async function generatePrescriptionPdf(entry, t) {
+async function generatePrescriptionPdf(entry, t, language) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -38,7 +40,7 @@ async function generatePrescriptionPdf(entry, t) {
   doc.text("MedScoutX", margin, 13);
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Rezept & Verordnung", margin + 42, 13);
+  doc.text(t.pageHeading, margin + 42, 13);
 
   // Title
   doc.setTextColor(17, 24, 39);
@@ -98,11 +100,11 @@ async function generatePrescriptionPdf(entry, t) {
   doc.setTextColor(17, 24, 39);
 
   const details = [];
-  if (entry.dosage) details.push([t?.dosage || "Dosierung", entry.dosage]);
-  if (entry.icdCode) details.push(["ICD-10", entry.icdCode]);
-  details.push([t?.issuedAt || "Ausgestellt", formatDate(entry.issuedAt)]);
-  details.push([t?.validUntil || "Gültig bis", formatDate(entry.validUntil)]);
-  if (entry.instructions) details.push([t?.instructions || "Hinweise", entry.instructions]);
+  if (entry.dosage) details.push([t.dosage, entry.dosage]);
+  if (entry.icdCode) details.push([t.icdCodeLabel, entry.icdCode]);
+  details.push([t.issuedAt, formatDate(entry.issuedAt, language)]);
+  details.push([t.validUntil, formatDate(entry.validUntil, language)]);
+  if (entry.instructions) details.push([t.instructions, entry.instructions]);
 
   let dy = detailY;
   for (const [label, value] of details) {
@@ -126,19 +128,30 @@ async function generatePrescriptionPdf(entry, t) {
   doc.setFont("helvetica", "italic");
   doc.setFontSize(7.5);
   doc.setTextColor(107, 114, 128);
-  const disclaimer = t?.disclaimer ||
-    "Simuliertes e-Rezept — kein offizieller TI-Nachweis. Zeige den QR-Code oder Token in der Apotheke vor.";
-  const dLines = doc.splitTextToSize(disclaimer, contentW);
+  const dLines = doc.splitTextToSize(t.disclaimer, contentW);
   doc.text(dLines, margin, footerY + 6);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
-  doc.text(`Erstellt: ${new Date().toLocaleDateString("de-DE")}`, pageW - margin, footerY + 6, { align: "right" });
+  doc.text(
+    `${t.generatedAt}: ${formatDate(new Date().toISOString(), language)}`,
+    pageW - margin,
+    footerY + 6,
+    { align: "right" },
+  );
 
-  doc.save(`rezept-${entry.tokenCode}.pdf`);
+  doc.save(`medscoutx-erezept-${entry.tokenCode}.pdf`);
 }
 
-export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOnly = false, saving = false }) {
-  const s = t?.statuses || {};
+export default function ErezeptCard({
+  entry,
+  t,
+  language = "en",
+  onStatusUpdate,
+  onDelete,
+  readOnly = false,
+  saving = false,
+}) {
+  const s = t.statuses || {};
   const [showQr, setShowQr] = useState(false);
   const [qrUrl, setQrUrl] = useState(null);
   const [copied, setCopied] = useState(false);
@@ -164,7 +177,7 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
   async function handlePdfDownload() {
     setPdfLoading(true);
     try {
-      await generatePrescriptionPdf(entry, t);
+      await generatePrescriptionPdf(entry, t, language);
     } finally {
       setPdfLoading(false);
     }
@@ -173,10 +186,10 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
   const days = daysLeft(entry.validUntil);
   const isFinal = ["redeemed", "expired", "cancelled"].includes(entry.status);
 
-  const issuedDate = new Date(entry.issuedAt).toLocaleDateString(undefined, {
+  const issuedDate = formatDate(entry.issuedAt, language, {
     year: "numeric", month: "short", day: "numeric",
   });
-  const validDate = new Date(entry.validUntil).toLocaleDateString(undefined, {
+  const validDate = formatDate(entry.validUntil, language, {
     year: "numeric", month: "short", day: "numeric",
   });
 
@@ -192,35 +205,35 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
 
       {entry.dosage && (
         <p className="erx-card__detail">
-          <strong>{t?.dosage || "Dosierung"}:</strong> {entry.dosage}
+          <strong>{t.dosage}:</strong> {entry.dosage}
         </p>
       )}
 
       {entry.icdCode && (
         <p className="erx-card__detail">
-          <strong>ICD-10:</strong>
+          <strong>{t.icdCodeLabel}:</strong>
           <span className="erx-icd-code">{entry.icdCode}</span>
         </p>
       )}
 
       <p className="erx-card__detail">
-        <strong>{t?.issuedAt || "Ausgestellt"}:</strong> {issuedDate}
+        <strong>{t.issuedAt}:</strong> {issuedDate}
       </p>
 
       <p className={`erx-validity erx-validity--${days <= 3 && !isFinal ? "warn" : isFinal ? "expired" : "ok"}`}>
         <Clock size={13} aria-hidden="true" />
         {isFinal
           ? entry.status === "redeemed"
-            ? `${t?.redeemedOn || "Eingelöst am"} ${entry.redeemedAt ? new Date(entry.redeemedAt).toLocaleDateString() : ""}`
-            : `${t?.validUntil || "Gültig bis"} ${validDate}`
+            ? `${t.redeemedOn} ${entry.redeemedAt ? formatDate(entry.redeemedAt, language) : ""}`
+            : `${t.validUntil} ${validDate}`
           : days > 0
-          ? `${t?.validDays || "Noch"} ${days} ${t?.days || "Tage"} (${validDate})`
-          : (t?.expired || "Abgelaufen")}
+          ? `${t.validDays} ${days} ${t.days} (${validDate})`
+          : t.expired}
       </p>
 
       {entry.instructions && (
         <p className="erx-card__detail">
-          <strong>{t?.instructions || "Hinweise"}:</strong> {entry.instructions}
+          <strong>{t.instructions}:</strong> {entry.instructions}
         </p>
       )}
 
@@ -228,13 +241,13 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
 
       {/* Token code */}
       {!isFinal && (
-        <div className="erx-token" aria-label={t?.tokenCode || "Rezept-Code"}>
+        <div className="erx-token" aria-label={t.tokenCode}>
           <span className="erx-token__code" aria-label={entry.tokenCode}>{entry.tokenCode}</span>
           <button
             className="erx-token__copy"
             onClick={copyToken}
-            title={t?.copy || "Kopieren"}
-            aria-label={t?.copy || "Code kopieren"}
+            title={t.copy}
+            aria-label={t.copy}
           >
             {copied ? <Check size={13} /> : <Copy size={13} />}
           </button>
@@ -250,18 +263,18 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
             aria-expanded={showQr}
           >
             <QrCode size={14} aria-hidden="true" />
-            {showQr ? (t?.hideQr || "QR verbergen") : (t?.showQr || "QR-Code anzeigen")}
+            {showQr ? t.hideQr : t.showQr}
           </button>
           {showQr && qrUrl && (
             <div className="erx-qr-panel">
               <img
                 src={qrUrl}
-                alt={`QR-Code: ${entry.tokenCode}`}
+                alt={`${t.tokenCode}: ${entry.tokenCode}`}
                 width={180}
                 height={180}
                 className="erx-qr-panel__img"
               />
-              <p className="erx-qr-panel__label">{t?.qrHint || "In der Apotheke vorzeigen"}</p>
+              <p className="erx-qr-panel__label">{t.qrHint}</p>
             </div>
           )}
         </>
@@ -273,10 +286,10 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
           className="erx-card__btn erx-card__btn--pdf"
           onClick={handlePdfDownload}
           disabled={pdfLoading}
-          aria-label={t?.pdfDownload || "PDF herunterladen"}
+          aria-label={t.pdfDownload}
         >
           <Download size={14} aria-hidden="true" />
-          {pdfLoading ? (t?.pdfGenerating || "PDF wird erstellt…") : (t?.pdfDownload || "PDF herunterladen")}
+          {pdfLoading ? t.pdfGenerating : t.pdfDownload}
         </button>
       </div>
 
@@ -288,10 +301,10 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
               className="erx-card__btn erx-card__btn--warn"
               onClick={() => onStatusUpdate(entry.id, "at_pharmacy")}
               disabled={saving}
-              aria-label={t?.markAtPharmacy || "In Apotheke abgeben"}
+              aria-label={t.markAtPharmacy}
             >
               <Pill size={14} aria-hidden="true" />
-              {t?.markAtPharmacy || "In Apotheke"}
+              {t.markAtPharmacy}
             </button>
           )}
           {(entry.status === "issued" || entry.status === "at_pharmacy") && (
@@ -299,10 +312,10 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
               className="erx-card__btn erx-card__btn--primary"
               onClick={() => onStatusUpdate(entry.id, "redeemed")}
               disabled={saving}
-              aria-label={t?.markRedeemed || "Als eingelöst markieren"}
+              aria-label={t.markRedeemed}
             >
               <Check size={14} aria-hidden="true" />
-              {t?.markRedeemed || "Eingelöst"}
+              {t.markRedeemed}
             </button>
           )}
         </div>
@@ -314,12 +327,12 @@ export default function ErezeptCard({ entry, t, onStatusUpdate, onDelete, readOn
           <button
             className="erx-card__btn erx-card__btn--danger"
             onClick={() => {
-              if (window.confirm(t?.confirmCancel || "Rezept stornieren?")) onDelete(entry.id);
+              if (window.confirm(t.confirmCancel)) onDelete(entry.id);
             }}
             disabled={saving}
           >
             <Trash2 size={14} aria-hidden="true" />
-            {t?.cancel || "Stornieren"}
+            {t.cancel}
           </button>
         </div>
       )}

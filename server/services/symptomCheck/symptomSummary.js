@@ -18,7 +18,10 @@ function sanitizeField(value, locale) {
  * @param {{ locale?: string }} options
  */
 export function parseAndSanitizeSymptomResponse(raw, options = {}) {
-  const locale = options.locale === "en" ? "en" : "de";
+  const locale =
+    options.locale === "en" || options.locale === "ru"
+      ? options.locale
+      : "de";
   const { displayText, summaryRaw } = splitSymptomAssistantResponse(raw);
 
   const safeDisplay = sanitizeAiOutput(displayText, {

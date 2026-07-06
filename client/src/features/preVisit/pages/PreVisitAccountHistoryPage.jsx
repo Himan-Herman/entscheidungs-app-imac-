@@ -26,17 +26,17 @@ function langLabel(code, uiLang) {
   return formatLanguageDisplayName(uiLang, code);
 }
 
-function formatCreated(iso, uiLang) {
+function formatCreated(iso, uiLang, fallback) {
   try {
     const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
+    if (Number.isNaN(d.getTime())) return fallback;
     const localeTag = getPrimaryIntlLocale(uiLang);
     return new Intl.DateTimeFormat(localeTag, {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(d);
   } catch {
-    return "—";
+    return fallback;
   }
 }
 
@@ -410,7 +410,7 @@ export default function PreVisitAccountHistoryPage() {
                           <div className="pre-visit-account__meta-item">
                             <span className="pre-visit-account__meta-label">{t.created}</span>
                             <span className="pre-visit-account__meta-value">
-                              {formatCreated(row.createdAt, language)}
+                              {formatCreated(row.createdAt, language, t.notAvailable)}
                             </span>
                           </div>
                           <div className="pre-visit-account__meta-item">
@@ -424,7 +424,7 @@ export default function PreVisitAccountHistoryPage() {
                             <span className="pre-visit-account__meta-value">
                               {row.doctorLanguage
                                 ? langLabel(row.doctorLanguage, language)
-                                : "—"}
+                                : t.notAvailable}
                             </span>
                           </div>
                           {row.preVisitCaseId ? (
@@ -442,7 +442,7 @@ export default function PreVisitAccountHistoryPage() {
                           ) : null}
                         </div>
                         <p className="pre-visit-account__preview">
-                          {previewFromAnswers(row.answers)}
+                          {previewFromAnswers(row.answers, 140, t.notAvailable)}
                         </p>
                         <div className="pre-visit-account__actions">
                           <button
@@ -524,7 +524,7 @@ export default function PreVisitAccountHistoryPage() {
                       <div className="pre-visit-account__meta-item">
                         <span className="pre-visit-account__meta-label">{t.savedAt}</span>
                         <span className="pre-visit-account__meta-value">
-                          {formatCreated(item.createdAt, language)}
+                              {formatCreated(item.createdAt, language, t.notAvailable)}
                         </span>
                       </div>
                       <div className="pre-visit-account__meta-item">
@@ -541,7 +541,7 @@ export default function PreVisitAccountHistoryPage() {
                       </div>
                     </div>
                     <p className="pre-visit-account__preview">
-                      {previewFromAnswers(item.answers)}
+                          {previewFromAnswers(item.answers, 140, t.notAvailable)}
                     </p>
                     <div className="pre-visit-account__actions">
                       <button

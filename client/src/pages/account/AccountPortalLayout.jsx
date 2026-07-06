@@ -76,7 +76,7 @@ export default function AccountPortalLayout() {
       </div>
 
       <div className="account-portal__shell">
-        <aside className="account-portal__nav-wrap" aria-label="Account">
+        <aside className="account-portal__nav-wrap" aria-label={t.title}>
           <nav className="account-portal__nav">
             {links.map((l) => (
               <NavLink

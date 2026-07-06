@@ -177,7 +177,7 @@ export default function AccountHealthProfilePage() {
       ) : null}
       {ok ? (
         <p className="account-portal__ok" role="status">
-          {t.save}
+          {t.healthSaveSuccess}
         </p>
       ) : null}
 

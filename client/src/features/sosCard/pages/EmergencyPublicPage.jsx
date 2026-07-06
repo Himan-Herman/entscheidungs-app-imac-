@@ -27,7 +27,10 @@ export default function EmergencyPublicPage() {
   );
 
   useEffect(() => {
-    document.title = "Emergency Medical Card";
+    document.title = t.pageTitle || "Emergency Medical Card";
+  }, [t.pageTitle]);
+
+  useEffect(() => {
     if (!token) { setError("invalid_token"); setLoading(false); return; }
     fetchPublicEmergency(token)
       .then(({ res, data: d }) => {
@@ -119,7 +122,7 @@ export default function EmergencyPublicPage() {
     typeof data.age === "number" && { label: t.age, value: `${data.age}` },
     data.dateOfBirth && {
       label: t.dateOfBirth,
-      value: new Date(data.dateOfBirth).toLocaleDateString(),
+      value: new Date(data.dateOfBirth).toLocaleDateString(localeCode),
     },
     data.biologicalSex && {
       label: t.biologicalSex,

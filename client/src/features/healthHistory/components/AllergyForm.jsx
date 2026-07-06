@@ -45,7 +45,7 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!allergen.trim()) { setError(t?.errorAllergen || "Allergen eingeben"); return; }
+    if (!allergen.trim()) { setError(t.errorAllergen); return; }
     setError("");
     onSave({
       allergen: allergen.trim(),
@@ -72,14 +72,14 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
     >
       <form className="hh-form-panel" onSubmit={handleSubmit} noValidate>
         <h2 id="hh-allergy-form-title" className="hh-form-panel__title">
-          {initial ? (t?.editTitle || "Allergie bearbeiten") : (t?.addTitle || "Allergie hinzufügen")}
+          {initial ? t.editTitle : t.addTitle}
         </h2>
 
         {error && <p className="hh-form__error" role="alert">{error}</p>}
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-allergen">
-            {t?.allergenLabel || "Allergen / Auslöser"} *
+            {t.allergenLabel} *
           </label>
           <input
             id="hh-allergen"
@@ -88,14 +88,14 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
             value={allergen}
             onChange={(e) => setAllergen(e.target.value)}
             maxLength={200}
-            placeholder={t?.allergenPlaceholder || "z.B. Penicillin, Nüsse, Bienenstich"}
+            placeholder={t.allergenPlaceholder}
             required
           />
         </div>
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-allergy-type">
-            {t?.typeLabel || "Typ"}
+            {t.typeLabel}
           </label>
           <select
             id="hh-allergy-type"
@@ -111,7 +111,7 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-reaction">
-            {t?.reactionLabel || "Reaktion / Symptome"}
+            {t.reactionLabel}
           </label>
           <div className="hh-ai-row">
             <textarea
@@ -121,18 +121,18 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
               onChange={(e) => setReaction(e.target.value)}
               maxLength={2000}
               rows={3}
-              placeholder={t?.reactionPlaceholder || "Beschreibe die Symptome..."}
+              placeholder={t.reactionPlaceholder}
             />
             <button
               type="button"
               className="hh-ai-btn"
               onClick={handleAiSuggest}
               disabled={aiLoading || reaction.trim().length < 3}
-              title={t?.aiSuggestSeverity || "KI: Schweregrad vorschlagen"}
-              aria-label={t?.aiSuggestSeverity || "KI: Schweregrad vorschlagen"}
+              title={t.aiSuggestSeverity}
+              aria-label={t.aiSuggestSeverity}
             >
               <Sparkles size={14} aria-hidden="true" />
-              {aiLoading ? (t?.aiLoading || "…") : (t?.aiBtn || "KI")}
+              {aiLoading ? t.aiLoading : t.aiBtn}
             </button>
           </div>
           {aiResult && (
@@ -144,8 +144,8 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
         </div>
 
         <div className="hh-form__group">
-          <p className="hh-form__label">{t?.severityLabel || "Schweregrad"} *</p>
-          <div className="hh-severity-grid" role="radiogroup" aria-label={t?.severityLabel || "Schweregrad"}>
+          <p className="hh-form__label">{t.severityLabel} *</p>
+          <div className="hh-severity-grid" role="radiogroup" aria-label={t.severityLabel}>
             {SEVERITIES.map((sv) => (
               <label
                 key={sv}
@@ -166,7 +166,7 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-allergy-date">
-            {t?.diagnosedDateLabel || "Diagnostiziert am"}
+            {t.diagnosedDateLabel}
           </label>
           <input
             id="hh-allergy-date"
@@ -180,7 +180,7 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-allergy-status">
-            {t?.statusLabel || "Status"}
+            {t.statusLabel}
           </label>
           <select
             id="hh-allergy-status"
@@ -196,7 +196,7 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
 
         <div className="hh-form__group">
           <label className="hh-form__label" htmlFor="hh-allergy-notes">
-            {t?.notesLabel || "Notizen"}
+            {t.notesLabel}
           </label>
           <textarea
             id="hh-allergy-notes"
@@ -205,16 +205,16 @@ export default function AllergyForm({ initial, t, onSave, onCancel, saving }) {
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
             rows={2}
-            placeholder={t?.notesPlaceholder || "Weitere Hinweise..."}
+            placeholder={t.notesPlaceholder}
           />
         </div>
 
         <div className="hh-form__actions">
           <button type="button" className="hh-form__cancel" onClick={onCancel}>
-            {t?.cancel || "Abbrechen"}
+            {t.cancel}
           </button>
           <button type="submit" className="hh-form__submit" disabled={saving}>
-            {saving ? (t?.saving || "Speichern…") : (t?.save || "Speichern")}
+            {saving ? t.saving : t.save}
           </button>
         </div>
       </form>

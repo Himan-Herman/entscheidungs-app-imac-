@@ -12,6 +12,9 @@ export default {
     languageLabel: "Язык, на котором вы хотите работать с MedScoutX",
     languageHint:
       "Вы можете вводить информацию на языке, на котором вам комфортнее всего.",
+    doctorLanguageLabel: "Язык версии для врача",
+    doctorLanguageHint:
+      "Выберите, на каком языке должна быть подготовлена версия для врача.",
     continue: "Далее",
   },
   qrLanding: {
@@ -89,15 +92,21 @@ export default {
     newSession: "Начать новую сессию",
     wipeSession: "Полностью удалить сессию",
     prepareDocument: "Подготовить документ",
+    resumeFromArchive:
+      "Вы возобновили сохранённую подготовку. Проверьте свои записи и продолжайте, если всё верно.",
   },
   document: {
     pageTitle: "MedScoutX — Просмотр документа",
     title: "Подготовить документ для врача",
     explanation:
       "PDF для врача создаётся на немецком языке. Ваши исходные формулировки также остаются приложенными на вашем собственном языке.",
+    pageLeadFlexible:
+      "Проверьте свои данные и выберите, на каком языке должна быть создана структурированная версия для врача. Исходные формулировки пациента остаются приложены отдельно.",
     doctorLangLabel: "Язык версии для врача",
     doctorLangHint:
       "Структурированная версия для врача и PDF, отправляемый в учреждение, создаются на немецком языке.",
+    doctorLangSelectableHint:
+      "Здесь можно выбрать язык, на котором будет создана версия для врача.",
     practiceContextTitle: "Выбранный контекст учреждения",
     practiceContextPractice: "Учреждение",
     practiceContextTarget: "Цель",
@@ -106,6 +115,10 @@ export default {
     patientMetaSection: "Необязательные сведения о пациенте",
     patientMetaNote:
       "Эти сведения необязательны и помогают учреждению сопоставить документ.",
+    patientIdentityPdfConsent:
+      "Включить эти данные пациента в PDF для клиники / врача.",
+    patientIdentityPdfConsentHint:
+      "Данные личности попадут в PDF только если вы включите этот параметр. Поля при этом можно оставить заполненными локально для последующего использования.",
     patientNameLabel: "Имя",
     patientEmailLabel: "Эл. почта",
     patientDateOfBirthLabel: "Дата рождения",
@@ -291,6 +304,10 @@ export default {
     longitudinalContinuitySubheading:
       "Сводка преемственности (только формулировки пациента)",
     followUpHeading: "Задокументированные вопросы сопровождения",
+    assistantQuestionsHeading: "Ориентирующие вопросы (ответы пациента)",
+    assistantQuestionPatientLabel: "Вопрос (пациент)",
+    assistantQuestionDoctorLabel: "Вопрос (врач)",
+    assistantAnswerPatientLabel: "Ответ пациента",
     followUpSenderPractice: "Учреждение",
     followUpSenderPatient: "Пациент",
     followUpSenderSystem: "Система",
@@ -336,10 +353,14 @@ export default {
     loginCta: "Войти",
     linkPreparations: "Мои подготовки",
     backHome: "На главную",
+    backPracticeHub: "Назад в «Моя клиника»",
   },
   caseDetail: {
     pageTitle: "MedScoutX — Дело",
     backToList: "Все дела",
+    backPracticeHub: "Назад в «Моя клиника»",
+    notFound: "Это дело не найдено или больше недоступно.",
+    unnamedSession: "Подготовка без названия",
     loading: "Загрузка…",
     loadError: "Не удалось загрузить дело.",
     saveError: "Не удалось сохранить изменения.",
@@ -456,6 +477,7 @@ export default {
   },
   accountHistory: {
     pageTitle: "MedScoutX — Мои подготовки",
+    workspaceBadge: "Библиотека",
     title: "Мои подготовки",
     subtitle:
       "Здесь видны подготовки, которые вы явно сохранили в аккаунте MedScoutX.",
@@ -464,12 +486,33 @@ export default {
     loading: "Загрузка…",
     loadError: "Сейчас не удалось загрузить список. Попробуйте позже.",
     empty: "В аккаунте пока нет сохранённых подготовок.",
+    emptyHint:
+      "Подготовки появятся здесь только после того, как вы сохраните их в аккаунт в конце процесса.",
+    searchLabel: "Поиск",
+    searchPlaceholder: "Искать по названию или предпросмотру…",
+    filterLabel: "Статус",
+    filterAll: "Все",
+    sectionAccount: "Сохранено в аккаунте",
+    sectionAccountHint:
+      "Эти подготовки связаны с вашим аккаунтом MedScoutX и видны на всех устройствах, где вы вошли в систему.",
+    sectionDevice: "Только на этом устройстве",
+    sectionDeviceHint:
+      "Локальные копии остаются только в этом браузере. Они не добавляются в ваш аккаунт автоматически.",
+    storageAccount: "Аккаунт",
+    storageDevice: "Только это устройство",
     patientLang: "Язык пациента",
     doctorLang: "Язык врача",
     created: "Создано",
+    notAvailable: "Недоступно",
+    savedAt: "Сохранено",
     statusLabel: "Статус",
     open: "Открыть",
+    resume: "Продолжить",
+    downloadPdf: "Скачать PDF",
     deleteOne: "Удалить",
+    confirmDeleteOne:
+      "Удалить эту подготовку? Это действие нельзя отменить.",
+    confirmDeleteDevice: "Удалить эту локальную копию с этого устройства?",
     deleteAll: "Удалить все подготовки",
     confirmDeleteAll:
       "Удалить все подготовки, сохранённые в аккаунте? Это действие нельзя отменить.",
@@ -481,7 +524,16 @@ export default {
     statusDraft: "Черновик",
     statusPdfCreated: "PDF создан",
     statusCompleted: "Завершено",
+    statusLocalSaved: "Сохранено локально",
     linkCases: "Открыть мои дела",
+    linkDocuments: "Документы и PDF",
+    linkDocumentsHint:
+      "Защищённые ссылки и метаданные PDF в разделе ваших документов",
+    linkedCase: "Связанное дело",
+    noAccountResults: "Совпадений в вашем аккаунте не найдено.",
+    clearDeviceAll: "Удалить все локальные копии",
+    confirmClearDevice:
+      "Безвозвратно удалить все локально сохранённые копии на этом устройстве?",
     startNewPrep: "Начать новую подготовку",
     retryLoad: "Попробовать снова",
     listAriaLabel: "Сохранённые подготовки",

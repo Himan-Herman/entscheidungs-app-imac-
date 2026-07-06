@@ -1,12 +1,21 @@
 import { authFetch } from "../../../api/authFetch.js";
 import { MEDA_API_CHAT, MEDA_API_STATUS } from "../constants.js";
 
+function normalizeMedaLanguage(language) {
+  const code = String(language || "de")
+    .trim()
+    .split(/[-_]/)[0]
+    .toLowerCase();
+  if (code === "en" || code === "ru") return code;
+  return "de";
+}
+
 /**
  * @param {string} language
  */
 export async function fetchMedaStatus(language) {
   const res = await authFetch(
-    `${MEDA_API_STATUS}?patientLanguage=${language === "en" ? "en" : "de"}`,
+    `${MEDA_API_STATUS}?patientLanguage=${normalizeMedaLanguage(language)}`,
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) return { ok: false, enabled: false, quota: null };
@@ -23,7 +32,7 @@ export async function sendMedaMessage({ message, history, language }) {
     body: JSON.stringify({
       message,
       history,
-      patientLanguage: language === "en" ? "en" : "de",
+      patientLanguage: normalizeMedaLanguage(language),
     }),
   });
   const data = await res.json().catch(() => ({}));

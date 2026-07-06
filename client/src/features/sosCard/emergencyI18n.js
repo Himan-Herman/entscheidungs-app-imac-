@@ -10,6 +10,7 @@
  */
 
 const en = {
+  pageTitle: "Emergency Medical Card — MedScoutX",
   sosBadge: "EMERGENCY",
   identification: "Identification",
   age: "Age",
@@ -41,6 +42,7 @@ const en = {
 };
 
 const de = {
+  pageTitle: "Medizinischer Notfallausweis — MedScoutX",
   sosBadge: "NOTFALL",
   identification: "Identifikation",
   age: "Alter",
@@ -351,6 +353,7 @@ const pl = {
 };
 
 const ru = {
+  pageTitle: "Экстренная медицинская карта — MedScoutX",
   sosBadge: "ЭКСТРЕННЫЙ СЛУЧАЙ",
   identification: "Идентификация",
   age: "Возраст",

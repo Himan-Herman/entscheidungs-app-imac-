@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FileText, Plus } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
-import { getMessages } from "../../../i18n/translations";
 import {
   fetchPracticeErezept,
   createPracticeErezept,
@@ -10,14 +9,12 @@ import {
 } from "../api/practiceErezeptApi.js";
 import ErezeptCard from "./ErezeptCard.jsx";
 import ErezeptForm from "./ErezeptForm.jsx";
+import { getErezeptMessages } from "../erezeptI18n.js";
 import "../styles/Erezept.css";
 
 export default function PracticePatientErezeptSection({ linkId, practiceId }) {
   const { language } = useLanguage();
-  const t = useMemo(() => {
-    const msgs = getMessages(language);
-    return msgs.erezept || getMessages("en").erezept;
-  }, [language]);
+  const t = useMemo(() => getErezeptMessages(language), [language]);
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +41,7 @@ export default function PracticePatientErezeptSection({ linkId, practiceId }) {
       setEntries(Array.isArray(data.entries) ? data.entries : []);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
-      setLoadError(t?.loadingError || "Rezepte konnten nicht geladen werden.");
+      setLoadError(t.loadingError);
     } finally {
       setLoading(false);
     }
@@ -96,24 +93,24 @@ export default function PracticePatientErezeptSection({ linkId, practiceId }) {
     return (
       <div className="erx-page__empty">
         <FileText size={44} strokeWidth={1.5} aria-hidden="true" />
-        <p>{t?.noConsent || "Patient hat den Zugriff auf Rezepte noch nicht freigegeben."}</p>
+        <p>{t.noConsent}</p>
       </div>
     );
   }
 
   return (
-    <section aria-label={t?.sectionHeading || "e-Rezepte"}>
+    <section aria-label={t.sectionHeading}>
       <h2 className="erx-section__heading">
         <FileText size={20} aria-hidden="true" />
-        {t?.sectionHeading || "e-Rezepte"}
+        {t.sectionHeading}
       </h2>
       <p className="erx-section__disclaimer">
-        {t?.practiceDisclaimer || "Simulierte Rezeptverwaltung — keine echte Telematikinfrastruktur."}
+        {t.practiceDisclaimer}
       </p>
 
       <button className="erx-issue-btn" onClick={() => setShowForm(true)}>
         <Plus size={18} aria-hidden="true" />
-        {t?.issueTitle || "e-Rezept ausstellen"}
+        {t.issueTitle}
       </button>
 
       {loadError && <div className="erx-page__error" role="alert">{loadError}</div>}
@@ -121,7 +118,7 @@ export default function PracticePatientErezeptSection({ linkId, practiceId }) {
       {entries.length === 0 ? (
         <div className="erx-page__empty">
           <FileText size={40} strokeWidth={1.5} aria-hidden="true" />
-          <p>{t?.noEntries || "Noch keine Rezepte ausgestellt."}</p>
+          <p>{t.noEntries}</p>
         </div>
       ) : (
         <div className="erx-cards">
@@ -130,6 +127,7 @@ export default function PracticePatientErezeptSection({ linkId, practiceId }) {
               key={entry.id}
               entry={entry}
               t={t}
+              language={language}
               onStatusUpdate={async (id, status) => {
                 setSaving(true);
                 await updatePracticeErezept(linkId, practiceId, id, { status });

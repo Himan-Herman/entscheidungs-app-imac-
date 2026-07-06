@@ -16,6 +16,7 @@ import { useTheme } from "../ThemeMode";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { readBodyMapConsent } from "../features/bodyMap/bodyMapSession";
+import { getBodyMapRegionLabel } from "../features/bodyMap/bodyMapRegionLabels.js";
 import {
   loadBodyMapChatState,
   useBodyMapChat,
@@ -45,17 +46,27 @@ export default function KoerperSymptomChat() {
   const [searchParams, setSearchParams] = useSearchParams();
   const inputRef = useRef(null);
 
+  const bodyMapMessages = useMemo(() => {
+    const bundle = getMessages(language);
+    return bundle.bodyMap ?? getMessages("en").bodyMap;
+  }, [language]);
   const organ = searchParams.get("organ");
-  const organLabel = organ ? organ.replace(/_/g, " ") : "";
+  const organLabel = useMemo(
+    () => getBodyMapRegionLabel(bodyMapMessages, organ),
+    [bodyMapMessages, organ],
+  );
   const seite =
     searchParams.get("seite") ||
     sessionStorage.getItem("koerperSeite") ||
     "vorderseite";
-  const locale = language === "en" ? "en" : "de";
+  const locale = language === "en" ? "en" : language === "ru" ? "ru" : "de";
 
   const tc = useMemo(() => {
-    const b = getMessages(language);
-    return b.bodyMap?.chat ?? getMessages("en").bodyMap.chat;
+    return bodyMapMessages.chat ?? getMessages("en").bodyMap.chat;
+  }, [bodyMapMessages]);
+  const disclaimerLabel = useMemo(() => {
+    const bundle = getMessages(language);
+    return bundle.footer?.disclaimer || getMessages("en").footer.disclaimer;
   }, [language]);
 
   const historyLabels = useMemo(() => {
@@ -256,7 +267,7 @@ export default function KoerperSymptomChat() {
           </div>
         </header>
 
-        <section className="body-map-page__disclaimer" aria-label={tc.sectionChat}>
+        <section className="body-map-page__disclaimer" aria-label={disclaimerLabel}>
           <DisclaimerShort />
         </section>
 

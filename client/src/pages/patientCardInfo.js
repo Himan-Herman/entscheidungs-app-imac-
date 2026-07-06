@@ -1,8 +1,8 @@
 /**
- * Patient "Meine Praxis" hub — per-tile info-overlay config (mirrors the practice-side
+ * Patient hub — per-tile info-overlay config (mirrors the practice-side
  * practiceCardInfo.js). Holds only i18n KEY NAMES + a stable DOM id (never translated
  * strings), keyed by the hub-link `key`, so the shared tile renderer shows an ⓘ button
- * + explanation modal ONLY for these "Meine Praxis" tiles. Framework-free + node --test
+ * + explanation modal only for designated patient tiles. Framework-free + node --test
  * friendly. Keys resolve against the `patientCardInfo` i18n namespace.
  */
 export const PATIENT_CARD_INFO = {
@@ -84,6 +84,12 @@ export const PATIENT_CARD_INFO = {
     titleKey: "myPracticeTitle",
     paragraphKeys: ["myPracticeP1", "myPracticeP2", "myPracticeP3"],
   },
+  hubLinkOrientation: {
+    titleId: "patient-card-info-orientation-title",
+    buttonKey: "orientationButton",
+    titleKey: "orientationTitle",
+    paragraphKeys: ["orientationP1", "orientationP2", "orientationP3"],
+  },
   hubLinkMedicationPlans: {
     titleId: "patient-card-info-medication-plans-title",
     buttonKey: "medicationPlansButton",
@@ -95,6 +101,24 @@ export const PATIENT_CARD_INFO = {
     buttonKey: "preVisitButton",
     titleKey: "preVisitTitle",
     paragraphKeys: ["preVisitP1", "preVisitP2", "preVisitP3"],
+  },
+  hubLinkSymptom: {
+    titleId: "patient-card-info-symptom-title",
+    buttonKey: "symptomButton",
+    titleKey: "symptomTitle",
+    paragraphKeys: ["symptomP1", "symptomP2", "symptomP3"],
+  },
+  hubLinkImage: {
+    titleId: "patient-card-info-image-title",
+    buttonKey: "imageButton",
+    titleKey: "imageTitle",
+    paragraphKeys: ["imageP1", "imageP2", "imageP3"],
+  },
+  hubLinkBody: {
+    titleId: "patient-card-info-body-title",
+    buttonKey: "bodyButton",
+    titleKey: "bodyTitle",
+    paragraphKeys: ["bodyP1", "bodyP2", "bodyP3"],
   },
   hubLinkMyPrep: {
     titleId: "patient-card-info-my-prep-title",
@@ -125,6 +149,12 @@ export const PATIENT_CARD_INFO = {
     buttonKey: "healthHistoryButton",
     titleKey: "healthHistoryTitle",
     paragraphKeys: ["healthHistoryP1", "healthHistoryP2", "healthHistoryP3"],
+  },
+  hubLinkMedaLive: {
+    titleId: "patient-card-info-meda-live-title",
+    buttonKey: "medaLiveButton",
+    titleKey: "medaLiveTitle",
+    paragraphKeys: ["medaLiveP1", "medaLiveP2", "medaLiveP3"],
   },
   hubLinkDoctors: {
     titleId: "patient-card-info-doctors-title",

@@ -44,6 +44,10 @@ export default function BildUpload() {
     const bundle = getMessages(language);
     return bundle.imageAnalysis ?? getMessages("en").imageAnalysis;
   }, [language]);
+  const disclaimerLabel = useMemo(() => {
+    const bundle = getMessages(language);
+    return bundle.footer?.disclaimer || getMessages("en").footer.disclaimer;
+  }, [language]);
 
   const uiLanguageLabel = useMemo(() => {
     const code =
@@ -372,7 +376,7 @@ export default function BildUpload() {
           <p className="image-analysis-safety__storage">{t.storageNote}</p>
         </section>
 
-        <section className="bildupload-disclaimer-section" aria-label="Disclaimer">
+        <section className="bildupload-disclaimer-section" aria-label={disclaimerLabel}>
           <DisclaimerShort />
         </section>
 

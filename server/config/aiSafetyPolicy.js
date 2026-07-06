@@ -468,6 +468,7 @@ export function getOutputSafetyPatterns(module) {
 export const STRUCTURED_FIELD_PLACEHOLDER = {
   de: "(Angabe gekürzt — bitte prüfen.)",
   en: "(Entry shortened — please review.)",
+  ru: "(Запись сокращена — пожалуйста, проверьте.)",
 };
 
 /** Fallback user-facing strings when output cannot be safely shown. */
@@ -475,18 +476,22 @@ export const SAFE_FALLBACKS = {
   [AI_MODULES.SYMPTOM_CHECK]: {
     de: "Die Angaben konnten nicht sicher strukturiert werden. Bitte beschreiben Sie Ihre Beschwerden möglichst neutral und besprechen Sie medizinische Fragen direkt mit medizinischem Fachpersonal.",
     en: "The information could not be safely structured. Please describe your symptoms as neutrally as possible and discuss medical questions directly with healthcare professionals.",
+    ru: "Информацию не удалось безопасно структурировать. Пожалуйста, опишите свои жалобы максимально нейтрально и обсуждайте медицинские вопросы напрямую с медицинскими специалистами.",
   },
   [AI_MODULES.IMAGE_ANALYSIS]: {
     de: "Die Bildbeschreibung konnte nicht in einer sicheren, neutralen Form ausgegeben werden. Bitte beschreiben Sie sichtbare Merkmale in eigenen Worten und klären Sie medizinische Fragen direkt mit medizinischem Fachpersonal.",
     en: "The image notes could not be returned in a safe neutral form. Please describe what you see in your own words and discuss medical questions directly with healthcare professionals.",
+    ru: "Описание изображения не удалось безопасно выдать в нейтральной форме. Пожалуйста, опишите видимые признаки своими словами и обсуждайте медицинские вопросы напрямую с медицинскими специалистами.",
   },
   [AI_MODULES.BODY_MAP]: {
     de: "Die Antwort konnte nicht sicher formuliert werden. Bitte ergänzen Sie Ihre Notizen in eigenen Worten; medizinische Fragen besprechen Sie direkt mit medizinischem Fachpersonal.",
     en: "This reply could not be safely worded. Please add notes in your own words and discuss medical questions directly with healthcare professionals.",
+    ru: "Ответ не удалось безопасно сформулировать. Пожалуйста, дополните заметки своими словами, а медицинские вопросы обсуждайте напрямую с медицинскими специалистами.",
   },
   [AI_MODULES.MEDA]: {
     de: "Dazu kann ich keine sichere Kurzantwort geben. Bei persönlichen Beschwerden wende dich bitte an medizinisches Fachpersonal.",
     en: "I cannot provide a safe short answer on that. For personal symptoms, please speak with a healthcare professional.",
+    ru: "Я не могу дать на это безопасный краткий ответ. При личных жалобах, пожалуйста, обратитесь к медицинскому специалисту.",
   },
   [AI_MODULES.PREVISIT_INTAKE]: {
     de: "Die Rückfrage konnte nicht sicher formuliert werden. Bitte ergänzen Sie den Abschnitt in eigenen Worten.",
@@ -539,6 +544,7 @@ export const SAFE_FALLBACKS = {
   generic: {
     de: "Die Ausgabe konnte nicht sicher strukturiert werden. Bitte formulieren Sie neutral und besprechen Sie medizinische Fragen mit medizinischem Fachpersonal.",
     en: "The output could not be safely structured. Please phrase neutrally and discuss medical questions with healthcare professionals.",
+    ru: "Вывод не удалось безопасно структурировать. Пожалуйста, формулируйте нейтрально и обсуждайте медицинские вопросы с медицинскими специалистами.",
   },
 };
 
@@ -548,6 +554,7 @@ export function normalizeUiLocale(lang) {
     .split(/[-_]/)[0]
     .toLowerCase();
   if (c === "de") return "de";
+  if (c === "ru") return "ru";
   return "en";
 }
 

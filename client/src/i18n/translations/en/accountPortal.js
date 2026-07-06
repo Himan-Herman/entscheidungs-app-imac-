@@ -48,6 +48,7 @@ export default {
   secureLinkFallback: "Secure link",
   kindPreparation: "Preparation",
   kindSecureLink: "Secure link",
+  notAvailable: "Not available",
   retryLoad: "Try again",
   statusDraft: "Draft",
   statusCreated: "Created",

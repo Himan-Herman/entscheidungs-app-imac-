@@ -18,7 +18,7 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!medicationName.trim()) { setError(t?.errorMedication || "Medikament eingeben"); return; }
+    if (!medicationName.trim()) { setError(t.errorMedication); return; }
     setError("");
     onSave({
       medicationName: medicationName.trim(),
@@ -41,14 +41,14 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
       <form className="erx-form-panel" onSubmit={handleSubmit} noValidate>
         <h2 id="erx-form-title" className="erx-form-panel__title">
           <FileText size={20} aria-hidden="true" />
-          {t?.issueTitle || "e-Rezept ausstellen"}
+          {t.issueTitle}
         </h2>
 
         {error && <p className="erx-form__error" role="alert">{error}</p>}
 
         <div className="erx-form__group">
           <label className="erx-form__label" htmlFor="erx-medication">
-            {t?.medicationLabel || "Medikament"} *
+            {t.medicationLabel} *
           </label>
           <input
             id="erx-medication"
@@ -57,7 +57,7 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
             value={medicationName}
             onChange={(e) => setMedicationName(e.target.value)}
             maxLength={300}
-            placeholder={t?.medicationPlaceholder || "z.B. Amoxicillin 500 mg, Ibuprofen 400 mg"}
+            placeholder={t.medicationPlaceholder}
             required
           />
         </div>
@@ -65,7 +65,7 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
         <div className="erx-form__row">
           <div className="erx-form__group">
             <label className="erx-form__label" htmlFor="erx-icd">
-              {t?.icdCodeLabel || "ICD-10-Code"}
+              {t.icdCodeLabel}
             </label>
             <input
               id="erx-icd"
@@ -73,13 +73,13 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
               value={icdCode}
               onChange={(e) => setIcdCode(e.target.value.toUpperCase())}
               maxLength={20}
-              placeholder="z.B. J06, M54"
+              placeholder={t.icdPlaceholder}
               style={{ fontFamily: "monospace", letterSpacing: "0.05em" }}
             />
           </div>
           <div className="erx-form__group">
             <label className="erx-form__label" htmlFor="erx-validity">
-              {t?.validityLabel || "Gültigkeit (Tage)"}
+              {t.validityLabel}
             </label>
             <input
               id="erx-validity"
@@ -95,7 +95,7 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
 
         <div className="erx-form__group">
           <label className="erx-form__label" htmlFor="erx-dosage">
-            {t?.dosageLabel || "Dosierung / Einnahme"}
+            {t.dosageLabel}
           </label>
           <input
             id="erx-dosage"
@@ -103,13 +103,13 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
             value={dosage}
             onChange={(e) => setDosage(e.target.value)}
             maxLength={200}
-            placeholder={t?.dosagePlaceholder || "z.B. 3× täglich 1 Tablette nach dem Essen"}
+            placeholder={t.dosagePlaceholder}
           />
         </div>
 
         <div className="erx-form__group">
           <label className="erx-form__label" htmlFor="erx-instructions">
-            {t?.instructionsLabel || "Hinweise / Besonderheiten"}
+            {t.instructionsLabel}
           </label>
           <textarea
             id="erx-instructions"
@@ -118,13 +118,13 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
             onChange={(e) => setInstructions(e.target.value)}
             maxLength={2000}
             rows={2}
-            placeholder={t?.instructionsPlaceholder || "Besondere Hinweise für die Einnahme…"}
+            placeholder={t.instructionsPlaceholder}
           />
         </div>
 
         <div className="erx-form__group">
           <label className="erx-form__label" htmlFor="erx-notes">
-            {t?.notesLabel || "Interne Notizen (nur Praxis)"}
+            {t.notesLabel}
           </label>
           <textarea
             id="erx-notes"
@@ -133,16 +133,16 @@ export default function ErezeptForm({ t, onSave, onCancel, saving }) {
             onChange={(e) => setNotes(e.target.value)}
             maxLength={2000}
             rows={2}
-            placeholder={t?.notesPlaceholder || "Für interne Dokumentation…"}
+            placeholder={t.notesPlaceholder}
           />
         </div>
 
         <div className="erx-form__actions">
           <button type="button" className="erx-form__cancel" onClick={onCancel}>
-            {t?.cancelBtn || "Abbrechen"}
+            {t.cancelBtn}
           </button>
           <button type="submit" className="erx-form__submit" disabled={saving}>
-            {saving ? (t?.saving || "Ausstellen…") : (t?.submitBtn || "Rezept ausstellen")}
+            {saving ? t.saving : t.submitBtn}
           </button>
         </div>
       </form>

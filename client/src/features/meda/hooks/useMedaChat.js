@@ -6,7 +6,7 @@ import { formatMedaRateLimitMessage } from "../utils/formatMedaQuota.js";
 const LOADING = "__meda_loading__";
 
 /**
- * @param {'de'|'en'} language
+ * @param {'de'|'en'|'ru'} language
  * @param {Record<string, string>} t
  */
 export function useMedaChat(language, t) {

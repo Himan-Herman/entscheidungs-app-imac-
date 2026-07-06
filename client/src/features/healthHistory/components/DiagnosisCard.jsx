@@ -1,15 +1,27 @@
 import { Stethoscope, Pencil, Trash2 } from "lucide-react";
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import "../styles/HealthHistory.css";
 
-export default function DiagnosisCard({ entry, t, onEdit, onDelete, readOnly = false }) {
-  const st = t?.statuses || {};
+export default function DiagnosisCard({
+  entry,
+  t,
+  onEdit,
+  onDelete,
+  readOnly = false,
+  language = "en",
+}) {
+  const st = t.statuses || {};
 
   const dateStr = entry.diagnosedDate
-    ? new Date(entry.diagnosedDate).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+    ? new Date(entry.diagnosedDate).toLocaleDateString(getPrimaryIntlLocale(language), {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
     : null;
 
   function handleDelete() {
-    if (window.confirm(t?.confirmDelete || "Eintrag wirklich löschen?")) {
+    if (window.confirm(t.confirmDelete)) {
       onDelete(entry.id);
     }
   }
@@ -34,13 +46,13 @@ export default function DiagnosisCard({ entry, t, onEdit, onDelete, readOnly = f
 
       {entry.treatingDoctor && (
         <p className="hh-card__detail">
-          <strong>{t?.treatingDoctorLabel || "Arzt/Ärztin"}:</strong> {entry.treatingDoctor}
+          <strong>{t.treatingDoctorLabel}:</strong> {entry.treatingDoctor}
         </p>
       )}
 
       {dateStr && (
         <p className="hh-card__detail">
-          <strong>{t?.diagnosedDateLabel || "Diagnostiziert"}:</strong> {dateStr}
+          <strong>{t.diagnosedDateLabel}:</strong> {dateStr}
         </p>
       )}
 
@@ -50,13 +62,13 @@ export default function DiagnosisCard({ entry, t, onEdit, onDelete, readOnly = f
 
       {!readOnly && (
         <div className="hh-card__actions">
-          <button className="hh-card__btn" onClick={() => onEdit(entry)} aria-label={`${t?.edit || "Bearbeiten"}: ${entry.conditionName}`}>
+          <button className="hh-card__btn" onClick={() => onEdit(entry)} aria-label={`${t.edit}: ${entry.conditionName}`}>
             <Pencil size={14} aria-hidden="true" />
-            {t?.edit || "Bearbeiten"}
+            {t.edit}
           </button>
-          <button className="hh-card__btn hh-card__btn--danger" onClick={handleDelete} aria-label={`${t?.delete || "Löschen"}: ${entry.conditionName}`}>
+          <button className="hh-card__btn hh-card__btn--danger" onClick={handleDelete} aria-label={`${t.delete}: ${entry.conditionName}`}>
             <Trash2 size={14} aria-hidden="true" />
-            {t?.delete || "Löschen"}
+            {t.delete}
           </button>
         </div>
       )}

@@ -168,12 +168,12 @@ export function hydrateServerSessionToLocal(record, options = {}) {
   return options.resumeTarget || resolveAccountSessionResumeTarget(record);
 }
 
-export function previewFromAnswers(answers, maxLen = 140) {
+export function previewFromAnswers(answers, maxLen = 140, fallback = "—") {
   const raw =
     String(answers?.appointmentReason || "").trim() ||
     String(answers?.symptomsOwnWords || "").trim() ||
     "";
-  if (!raw) return "—";
+  if (!raw) return fallback;
   if (raw.length <= maxLen) return raw;
   return `${raw.slice(0, maxLen).trim()}…`;
 }

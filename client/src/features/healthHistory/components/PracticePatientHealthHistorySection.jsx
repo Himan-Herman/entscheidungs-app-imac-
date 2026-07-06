@@ -1,21 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Sparkles, Stethoscope } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
-import { getMessages } from "../../../i18n/translations";
 import {
   fetchPracticePatientHealthHistory,
   fetchPracticeHealthHistoryAiSummary,
 } from "../api/practiceHealthHistoryApi.js";
+import { getHealthHistoryMessages } from "../healthHistoryI18n.js";
 import AllergyCard from "./AllergyCard.jsx";
 import DiagnosisCard from "./DiagnosisCard.jsx";
 import "../styles/HealthHistory.css";
 
 export default function PracticePatientHealthHistorySection({ linkId, practiceId }) {
   const { language } = useLanguage();
-  const t = useMemo(() => {
-    const msgs = getMessages(language);
-    return msgs.healthHistory || getMessages("en").healthHistory;
-  }, [language]);
+  const t = useMemo(() => getHealthHistoryMessages(language), [language]);
 
   const [allergies, setAllergies] = useState([]);
   const [diagnoses, setDiagnoses] = useState([]);
@@ -47,7 +44,7 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
       setDiagnoses(Array.isArray(data.diagnoses) ? data.diagnoses : []);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
-      setLoadError(t?.loadingError || "Gesundheitsdaten konnten nicht geladen werden.");
+      setLoadError(t.loadingError);
     } finally {
       setLoading(false);
     }
@@ -63,12 +60,12 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
       const { res, data } = await fetchPracticeHealthHistoryAiSummary(linkId, practiceId, language);
       if (!res.ok || !data.ok) throw new Error("ai_unavailable");
       if (data.reason === "no_data") {
-        setAiSummary(t?.practice?.aiNoData || "Keine Daten für eine Zusammenfassung vorhanden.");
+        setAiSummary(t.practice.aiNoData);
       } else {
         setAiSummary(data.summary || "");
       }
     } catch {
-      setAiError(t?.practice?.aiError || "Zusammenfassung nicht verfügbar.");
+      setAiError(t.practice.aiError);
     } finally {
       setAiLoading(false);
     }
@@ -86,7 +83,7 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
     return (
       <div className="hh-page__empty">
         <Stethoscope size={44} strokeWidth={1.5} aria-hidden="true" />
-        <p>{t?.practice?.noConsent || "Der Patient hat den Zugriff auf Gesundheitsdaten noch nicht freigegeben."}</p>
+        <p>{t.practice.noConsent}</p>
       </div>
     );
   }
@@ -94,13 +91,13 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
   const hasData = allergies.length > 0 || diagnoses.length > 0;
 
   return (
-    <section className="hh-practice" aria-label={t?.practice?.heading || "Gesundheitsakte"}>
+    <section className="hh-practice" aria-label={t.practice.heading}>
       <h2 className="hh-practice__heading">
         <Stethoscope size={20} aria-hidden="true" />
-        {t?.practice?.heading || "Gesundheitsakte"}
+        {t.practice.heading}
       </h2>
       <p className="hh-practice__disclaimer">
-        {t?.practice?.disclaimer || "Patientenseitig eingetragene Daten — kein offizieller Befund."}
+        {t.practice.disclaimer}
       </p>
 
       {hasData && (
@@ -109,12 +106,10 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
             className="hh-practice__ai-btn"
             onClick={handleAiSummary}
             disabled={aiLoading}
-            aria-label={t?.practice?.aiSummaryBtn || "Risikozusammenfassung erstellen"}
+            aria-label={t.practice.aiSummaryBtn}
           >
             <Sparkles size={15} aria-hidden="true" />
-            {aiLoading
-              ? (t?.aiLoading || "Analysiere…")
-              : (t?.practice?.aiSummaryBtn || "Risikozusammenfassung")}
+            {aiLoading ? t.aiLoading : t.practice.aiSummaryBtn}
           </button>
           {aiError && <span style={{ color: "#dc2626", fontSize: "0.875rem" }}>{aiError}</span>}
         </div>
@@ -133,11 +128,11 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
       {/* Allergies */}
       <h3 className="hh-practice__section-title">
         <AlertTriangle size={16} aria-hidden="true" />
-        {t?.allergiesHeading || "Allergien"} ({allergies.length})
+        {t.allergiesHeading} ({allergies.length})
       </h3>
       {allergies.length === 0 ? (
         <p className="hh-page__empty" style={{ padding: "1rem 0" }}>
-          <span>{t?.practice?.noAllergies || "Keine Allergien eingetragen."}</span>
+          <span>{t.practice.noAllergies}</span>
         </p>
       ) : (
         <div className="hh-cards" style={{ marginBottom: "1.5rem" }}>
@@ -145,7 +140,8 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
             <AllergyCard
               key={entry.id}
               entry={entry}
-              t={t?.allergy}
+              t={t.allergy}
+              language={language}
               onEdit={() => {}}
               onDelete={() => {}}
               readOnly
@@ -157,11 +153,11 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
       {/* Diagnoses */}
       <h3 className="hh-practice__section-title">
         <Stethoscope size={16} aria-hidden="true" />
-        {t?.diagnosesHeading || "Diagnosen"} ({diagnoses.length})
+        {t.diagnosesHeading} ({diagnoses.length})
       </h3>
       {diagnoses.length === 0 ? (
         <p className="hh-page__empty" style={{ padding: "1rem 0" }}>
-          <span>{t?.practice?.noDiagnoses || "Keine Diagnosen eingetragen."}</span>
+          <span>{t.practice.noDiagnoses}</span>
         </p>
       ) : (
         <div className="hh-cards">
@@ -169,7 +165,8 @@ export default function PracticePatientHealthHistorySection({ linkId, practiceId
             <DiagnosisCard
               key={entry.id}
               entry={entry}
-              t={t?.diagnosis}
+              t={t.diagnosis}
+              language={language}
               onEdit={() => {}}
               onDelete={() => {}}
               readOnly

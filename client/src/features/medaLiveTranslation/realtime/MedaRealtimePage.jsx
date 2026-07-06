@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import { useRealtimeSession } from './useRealtimeSession.js';
 import { useLanguage } from '../../../i18n/LanguageContext.jsx';
+import { getMessages } from '../../../i18n/translations/index.js';
 import { getPracticeChromeMessages } from './medaRealtimePractice.i18n.js';
 import { usePracticeProfilePrefill } from './usePracticeProfilePrefill.js';
 import PracticeMedaQrModal from './PracticeMedaQrModal.jsx';
@@ -24,11 +25,6 @@ import {
 } from './realtimeConversationArchive.js';
 import './MedaRealtimePage.css';
 
-const ROLE_LABEL = {
-  patient:  'Patient',
-  practice: 'Praxis',
-};
-
 /**
  * Maximum session duration in seconds — the single source for the time limit.
  * Bump this one constant to allow 15/20/30-minute sessions later (e.g. 20 * 60).
@@ -47,118 +43,32 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-function formatTurnTime(isoString) {
+function interpolate(text, values = {}) {
+  return String(text || '').replace(/\{\{(\w+)\}\}/g, (_, key) => String(values[key] ?? ''));
+}
+
+function formatTurnTime(isoString, locale) {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleString('de-DE', {
+  return new Date(isoString).toLocaleString(locale, {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
 }
 
 /** Date only, e.g. "10.06.2026". */
-function formatSessionDate(isoString) {
+function formatSessionDate(isoString, locale) {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleDateString('de-DE', {
+  return new Date(isoString).toLocaleDateString(locale, {
     day: '2-digit', month: '2-digit', year: 'numeric',
   });
 }
 
 /** Time only, e.g. "17:44". */
-function formatSessionTime(isoString) {
+function formatSessionTime(isoString, locale) {
   if (!isoString) return '';
-  return new Date(isoString).toLocaleTimeString('de-DE', {
+  return new Date(isoString).toLocaleTimeString(locale, {
     hour: '2-digit', minute: '2-digit',
   });
-}
-
-/**
- * Centralised German UI strings for the post-conversation area + local history.
- * i18n-ready: this block is the single place to lift these texts into the
- * `medicalInterpreter` namespace (de/en + fr/it/es overrides) once the whole
- * Realtime page is localised. Kept German-only for now so the page stays in a
- * single language (no mixed UI).
- */
-const RT_TEXT = {
-  endTitle:         'Gesprächsprotokoll bereit',
-  endHint:          'Sie können das PDF jetzt herunterladen oder den lokalen Verlauf auf diesem Gerät nutzen.',
-  endHintEmpty:     'Kein Gesprächsverlauf aufgezeichnet.',
-  continueTitle:    'Gespräch fortsetzen',
-  continueHint:     'Die bisherige Gesprächshistorie bleibt erhalten. Es wird nur die Live-Verbindung neu aufgebaut.',
-  continueButton:   'Gespräch fortsetzen',
-  continuing:       'Verbinde erneut …',
-  endReasonManual:      'Gespräch beendet.',
-  endReasonTimeLimit:   'Die vorgesehene Gesprächszeit ist abgelaufen.',
-  endReasonInactivity:  'Das Gespräch wurde wegen Inaktivität angehalten.',
-  endReasonConnection:  'Die Live-Verbindung wurde unterbrochen.',
-  downloadPdf:      'PDF herunterladen',
-  creatingPdf:      'Erstelle PDF …',
-  saveToHistory:    'Im lokalen Verlauf speichern',
-  savedLocally:     'Dieses Protokoll wurde lokal auf diesem Gerät gespeichert.',
-  newSession:       'Neues Gespräch starten',
-  documentationFor: 'Dokumentation für',
-  practice:         'Praxis',
-  notProvided:      'nicht angegeben',
-  medaConversation: 'Meda-Gespräch',
-  historyTitle:     'Lokaler Verlauf',
-  historyPrivacy:   'Der Verlauf wird nur lokal auf diesem Gerät gespeichert. Es erfolgt keine Übertragung an MedScoutX oder eine Praxis.',
-  historyEmpty:     'Noch keine gespeicherten Gespräche auf diesem Gerät.',
-  pdf:              'PDF',
-  pdfShortLoading:  'PDF …',
-  viewDetails:      'Verlauf ansehen',
-  closeDetails:     'Schließen',
-  deleteEntry:      'Löschen',
-  deleteAll:        'Alle lokalen Verläufe löschen',
-  patientLanguage:  'Patientensprache',
-  practiceLanguage: 'Praxissprache',
-  turnsCount:       (n) => `${n} ${n === 1 ? 'Eintrag' : 'Einträge'}`,
-  ariaDownloadPdf:  'Gesprächsprotokoll als PDF herunterladen',
-  ariaArchivePdf:   (label) => `PDF für „${label}" herunterladen`,
-  ariaDelete:       (label) => `Verlaufseintrag „${label}" löschen`,
-};
-
-/** Maps an endReason to its end-box message (null → no banner). */
-function endReasonText(reason) {
-  switch (reason) {
-    case 'time_limit':       return RT_TEXT.endReasonTimeLimit;
-    case 'inactivity':       return RT_TEXT.endReasonInactivity;
-    case 'connection_error': return RT_TEXT.endReasonConnection;
-    case 'manual':
-    case 'completed':        return RT_TEXT.endReasonManual;
-    default:                 return null;
-  }
-}
-
-/**
- * Compact, human-readable label for a history entry.
- * Prefers specialty + doctor (e.g. "Hautarzt Dr. Heinrich"); falls back to the
- * practice name, then to a neutral "Meda-Gespräch". Never invents data.
- */
-function archivePartyLabel(entry) {
-  const dept   = String(entry?.practiceDepartment ?? entry?.practiceInfo?.department  ?? '').trim();
-  const doctor = String(entry?.doctorName         ?? entry?.practiceInfo?.doctorName  ?? '').trim();
-  const parts  = [dept, doctor].filter(Boolean);
-  if (parts.length) return parts.join(' ');
-  const practice = String(entry?.practiceName ?? '').trim();
-  if (practice) return practice;
-  return RT_TEXT.medaConversation;
-}
-
-/** Human-readable status label from connection + session state. */
-function buildStatusLabel(connectionState, sessionStatus, sessionExpired, isPaused) {
-  if (sessionExpired)                   return 'Sitzung beendet';
-  if (connectionState === 'connecting') return 'Verbinde …';
-  if (connectionState === 'error')      return 'Nicht verbunden';
-  if (connectionState !== 'connected')  return 'Bereit';
-  if (isPaused)                         return 'Pausiert';
-
-  switch (sessionStatus) {
-    case 'ready':         return 'Wartet auf Sprecher';
-    case 'speech_active': return 'Jemand spricht …';
-    case 'processing':    return 'Verarbeite …';
-    case 'translating':   return 'Meda übersetzt …';
-    case 'speaking':      return 'Meda spricht';
-    default:              return 'Bereit';
-  }
 }
 
 /** CSS modifier for the status badge. */
@@ -180,6 +90,30 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   const isPractice = variant === 'practice';
   const { language } = useLanguage();
   const practiceTx = useMemo(() => getPracticeChromeMessages(language), [language]);
+  const interpreterTx = useMemo(() => {
+    const fallback = getMessages('en').medicalInterpreter ?? {};
+    return getMessages(language).medicalInterpreter ?? fallback;
+  }, [language]);
+  const rt = interpreterTx.realtimePage ?? {};
+  const uiLocale = useMemo(() => {
+    if (language) return language;
+    if (typeof navigator !== 'undefined' && navigator.language) return navigator.language;
+    return 'en';
+  }, [language]);
+  const pdfFilePrefix = interpreterTx.pdf?.filenamePrefix || 'medscoutx-interpreter';
+  const languageDisplayNames = useMemo(() => {
+    if (typeof Intl === 'undefined' || typeof Intl.DisplayNames !== 'function') return null;
+    try {
+      return new Intl.DisplayNames([uiLocale], { type: 'language' });
+    } catch {
+      return null;
+    }
+  }, [uiLocale]);
+  const getLanguageName = useCallback((code) => {
+    const label = languageDisplayNames?.of(code) || REALTIME_LANGUAGE_MAP[code] || code;
+    if (!label) return code;
+    return `${String(label).charAt(0).toUpperCase()}${String(label).slice(1)}`;
+  }, [languageDisplayNames]);
 
   // Practice variant only: read practiceId from the URL (?practiceId=...).
   // Patient variant always resolves to '' so it never triggers a practice fetch.
@@ -459,8 +393,46 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   const hasName      = patientInfo.name.trim() !== '';
   const canStart     = !isBusy && !langMismatch && allConsents && hasName;
 
-  const patientLangLabel  = REALTIME_LANGUAGE_MAP[patientLang]  ?? patientLang;
-  const practiceLangLabel = REALTIME_LANGUAGE_MAP[practiceLang] ?? practiceLang;
+  const patientLangLabel  = getLanguageName(patientLang);
+  const practiceLangLabel = getLanguageName(practiceLang);
+
+  function endReasonText(reason) {
+    switch (reason) {
+      case 'time_limit':       return rt.endBox.reasonTimeLimit;
+      case 'inactivity':       return rt.endBox.reasonInactivity;
+      case 'connection_error': return rt.endBox.reasonConnection;
+      case 'manual':
+      case 'completed':        return rt.endBox.reasonManual;
+      default:                 return null;
+    }
+  }
+
+  function archivePartyLabel(entry) {
+    const dept = String(entry?.practiceDepartment ?? entry?.practiceInfo?.department ?? '').trim();
+    const doctor = String(entry?.doctorName ?? entry?.practiceInfo?.doctorName ?? '').trim();
+    const parts = [dept, doctor].filter(Boolean);
+    if (parts.length) return parts.join(' ');
+    const practice = String(entry?.practiceName ?? '').trim();
+    if (practice) return practice;
+    return rt.title;
+  }
+
+  function buildStatusLabel() {
+    if (sessionExpired) return rt.status.ended;
+    if (connectionState === 'connecting') return rt.status.connecting;
+    if (connectionState === 'error') return rt.status.disconnected;
+    if (connectionState !== 'connected') return rt.status.ready;
+    if (isPaused) return rt.status.paused;
+
+    switch (sessionStatus) {
+      case 'ready': return rt.status.waitingSpeaker;
+      case 'speech_active': return rt.status.speakingDetected;
+      case 'processing': return rt.status.processing;
+      case 'translating': return rt.status.translating;
+      case 'speaking': return rt.status.speakingOutput;
+      default: return rt.status.ready;
+    }
+  }
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -505,13 +477,15 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         forSelf,
         languages: { patientLanguage: patientLang, practiceLanguage: practiceLang },
         sessionStartedAt: sessionStartedAtRef.current,
+        messages: interpreterTx,
+        locale: uiLocale,
       });
     } catch (err) {
       console.error('[MedaRealtimePage] PDF export failed:', err?.message);
     } finally {
       setPdfLoading(false);
     }
-  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang]);
+  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, interpreterTx, uiLocale]);
 
   // Practice PDF-QR: build the PDF blob and upload it for a secure token link.
   // Runs ONLY on explicit user action inside the practice variant — never on the
@@ -524,18 +498,20 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       forSelf,
       languages: { patientLanguage: patientLang, practiceLanguage: practiceLang },
       sessionStartedAt: sessionStartedAtRef.current,
+      messages: interpreterTx,
+      locale: uiLocale,
     }, { returnBlob: true });
 
-    const datePart = (sessionStartedAtRef.current || '').slice(0, 10) || 'protokoll';
+    const datePart = (sessionStartedAtRef.current || '').slice(0, 10) || 'session';
     return createMedaPdfLink({
       practiceId,
       blob,
-      fileName: `medscoutx-meda-${datePart}.pdf`,
+      fileName: `${pdfFilePrefix}-${datePart}.pdf`,
       sessionStartedAt: sessionStartedAtRef.current,
       patientLanguage:  patientLang,
       practiceLanguage: practiceLang,
     });
-  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, practiceId]);
+  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, practiceId, interpreterTx, uiLocale, pdfFilePrefix]);
 
   function handleEditStart(turn) {
     setEditingKey(turn.key);
@@ -630,14 +606,14 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   }
 
   function handleDeleteArchiveEntry(id) {
-    if (!window.confirm('Dieses lokale Gesprächsprotokoll wirklich löschen?')) return;
+    if (!window.confirm(rt.confirm.deleteEntry)) return;
     deleteArchivedConversation(id);
     setArchivedConversations(getArchivedConversations());
     if (archiveExpandedId === id) setArchiveExpandedId(null);
   }
 
   function handleClearArchive() {
-    if (!window.confirm('Alle lokalen Gesprächsprotokolle wirklich löschen?')) return;
+    if (!window.confirm(rt.confirm.deleteAll)) return;
     clearArchivedConversations();
     setArchivedConversations([]);
     setArchiveExpandedId(null);
@@ -652,6 +628,8 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         practiceInfo:    entry.practiceInfo,
         languages:       { patientLanguage: entry.patientLanguage, practiceLanguage: entry.practiceLanguage },
         sessionStartedAt: entry.sessionStartedAt,
+        messages: interpreterTx,
+        locale: uiLocale,
       });
     } catch (err) {
       console.error('[MedaRealtimePage] Archiv-PDF-Export fehlgeschlagen:', err?.message);
@@ -665,14 +643,14 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   }
 
   function getBlockHint() {
-    if (langMismatch) return 'Bitte zwei verschiedene Sprachen wählen.';
-    if (!hasName)     return 'Bitte vollständigen Namen der Person eingeben.';
-    if (!allConsents) return 'Bitte alle Zustimmungen bestätigen.';
+    if (langMismatch) return rt.setup.blockLanguages;
+    if (!hasName) return rt.setup.blockName;
+    if (!allConsents) return rt.setup.blockConsents;
     return null;
   }
   const blockHint = (!canStart && !isBusy) ? getBlockHint() : null;
 
-  const label    = buildStatusLabel(connectionState, sessionStatus, sessionExpired, isPaused);
+  const label = buildStatusLabel();
   const badgeCls = statusCls(connectionState, sessionStatus, sessionExpired, isPaused);
   const showPulse = badgeCls === 'active' || badgeCls === 'speaking';
 
@@ -687,17 +665,17 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       <header className={`mrt-header${isPractice ? ' mrt-header--practice' : ''}`}>
         <div className="mrt-header-titles">
           <h1 className="mrt-title">
-            {isPractice ? practiceTx.title : 'Meda Live-Dolmetscher'}
+            {isPractice ? practiceTx.title : rt.title}
           </h1>
-          {isPractice && (
-            <p className="mrt-subtitle">{practiceTx.subtitle}</p>
+          {(isPractice || rt.subtitle) && (
+            <p className="mrt-subtitle">{isPractice ? practiceTx.subtitle : rt.subtitle}</p>
           )}
         </div>
         <div className="mrt-header-right">
           {isConnected && (
             <div
               className={`mrt-timer${remainingSeconds <= SESSION_WARN_SECONDS ? ' mrt-timer--warn' : ''}`}
-              aria-label={`Verbleibende Sitzungszeit: ${formatTime(remainingSeconds)}`}
+              aria-label={interpolate(rt.timerAria, { time: formatTime(remainingSeconds) })}
             >
               {formatTime(remainingSeconds)}
             </div>
@@ -756,25 +734,25 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       {/* ── Warning / expired banners ────────────────────────────────────────── */}
       {showWarning && (
         <div className="mrt-timeout-warning" role="alert">
-          Die Sitzung endet in {formatTime(remainingSeconds)} — bitte Gespräch beenden oder fortsetzen.
+          {interpolate(rt.warningEnding, { time: formatTime(remainingSeconds) })}
         </div>
       )}
       {sessionExpired && (
         <div className="mrt-expired-banner" role="status">
-          Sitzung beendet. Für eine neue Sitzung bitte „Live-Gespräch starten" klicken.
+          {rt.expiredBanner}
         </div>
       )}
 
       {/* ── Setup panel — visible only before the first session ─────────────── */}
       {!isConnected && !sessionHasStarted && (
-        <section className="mrt-setup" aria-label="Live-Gespräch einrichten">
+        <section className="mrt-setup" aria-label={rt.setup.aria}>
 
           {/* ── 1. Sprachauswahl ──────────────────────────────────────────────── */}
           <div className="mrt-setup-section">
-            <h2 className="mrt-setup-section-title">Sprachen</h2>
+            <h2 className="mrt-setup-section-title">{rt.setup.languagesTitle}</h2>
             <div className="mrt-lang-row">
               <div className="mrt-field">
-                <label className="mrt-label" htmlFor="mrt-patient-lang">Patient spricht</label>
+                <label className="mrt-label" htmlFor="mrt-patient-lang">{rt.setup.patientSpeaks}</label>
                 <select
                   id="mrt-patient-lang"
                   className="mrt-select"
@@ -783,7 +761,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                   disabled={isBusy}
                 >
                   {REALTIME_LANGUAGES.map(l => (
-                    <option key={l.code} value={l.code}>{l.label}</option>
+                    <option key={l.code} value={l.code}>{getLanguageName(l.code)}</option>
                   ))}
                 </select>
               </div>
@@ -791,7 +769,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               <span className="mrt-arrow" aria-hidden="true">⇄</span>
 
               <div className="mrt-field">
-                <label className="mrt-label" htmlFor="mrt-practice-lang">Praxis spricht</label>
+                <label className="mrt-label" htmlFor="mrt-practice-lang">{rt.setup.practiceSpeaks}</label>
                 <select
                   id="mrt-practice-lang"
                   className="mrt-select"
@@ -800,7 +778,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                   disabled={isBusy}
                 >
                   {REALTIME_LANGUAGES.map(l => (
-                    <option key={l.code} value={l.code}>{l.label}</option>
+                    <option key={l.code} value={l.code}>{getLanguageName(l.code)}</option>
                   ))}
                 </select>
               </div>
@@ -809,12 +787,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
           {/* ── 2. Angaben zur Person ─────────────────────────────────────────── */}
           <div className="mrt-setup-section">
-            <h2 className="mrt-setup-section-title">Angaben zur Person</h2>
+            <h2 className="mrt-setup-section-title">{rt.setup.personTitle}</h2>
 
             <div
               className="mrt-person-toggle"
               role="group"
-              aria-label="Für wen ist das Gespräch?"
+              aria-label={rt.setup.personGroupAria}
             >
               <button
                 type="button"
@@ -822,7 +800,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 onClick={() => handleForSelf(true)}
                 disabled={isBusy}
               >
-                Das Gespräch betrifft mich selbst
+                {rt.setup.forSelf}
               </button>
               <button
                 type="button"
@@ -830,20 +808,20 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 onClick={() => handleForSelf(false)}
                 disabled={isBusy}
               >
-                Das Gespräch betrifft eine andere Person
+                {rt.setup.forOther}
               </button>
             </div>
 
             <div className="mrt-form-grid">
               <div className="mrt-form-field mrt-form-field--full">
                 <label className="mrt-form-label" htmlFor="mrt-person-name">
-                  Vollständiger Name <span className="mrt-required-star" aria-label="Pflichtfeld">*</span>
+                  {rt.setup.fullNameLabel} <span className="mrt-required-star" aria-label={rt.setup.required}>*</span>
                 </label>
                 <input
                   id="mrt-person-name"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Max Mustermann"
+                  placeholder={rt.setup.fullNamePlaceholder}
                   value={patientInfo.name}
                   onChange={e => handlePatientInfo('name', e.target.value)}
                   disabled={isBusy}
@@ -852,12 +830,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-person-dob">Geburtsdatum</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-dob">{rt.setup.dateOfBirthLabel}</label>
                 <input
                   id="mrt-person-dob"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="TT.MM.JJJJ"
+                  placeholder={rt.setup.dateOfBirthPlaceholder}
                   value={patientInfo.dateOfBirth}
                   onChange={e => handlePatientInfo('dateOfBirth', e.target.value)}
                   disabled={isBusy}
@@ -865,7 +843,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-person-gender">Geschlecht</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-gender">{rt.setup.genderLabel}</label>
                 <select
                   id="mrt-person-gender"
                   className="mrt-form-select"
@@ -873,15 +851,15 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                   onChange={e => handlePatientInfo('gender', e.target.value)}
                   disabled={isBusy}
                 >
-                  <option value="">keine Angabe</option>
-                  <option value="weiblich">weiblich</option>
-                  <option value="männlich">männlich</option>
-                  <option value="divers">divers</option>
+                  <option value="">{rt.setup.genderUnknown}</option>
+                  <option value="weiblich">{rt.setup.genderFemale}</option>
+                  <option value="männlich">{rt.setup.genderMale}</option>
+                  <option value="divers">{rt.setup.genderDiverse}</option>
                 </select>
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-person-insurance">Versicherungsstatus</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-insurance">{rt.setup.insuranceStatusLabel}</label>
                 <select
                   id="mrt-person-insurance"
                   className="mrt-form-select"
@@ -889,23 +867,23 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                   onChange={e => handlePatientInfo('insuranceStatus', e.target.value)}
                   disabled={isBusy}
                 >
-                  <option value="">unbekannt / nicht angegeben</option>
-                  <option value="gesetzlich">gesetzlich</option>
-                  <option value="privat">privat</option>
-                  <option value="Selbstzahler">Selbstzahler</option>
+                  <option value="">{rt.setup.insuranceStatusUnknown}</option>
+                  <option value="gesetzlich">{rt.setup.insuranceStatutory}</option>
+                  <option value="privat">{rt.setup.insurancePrivate}</option>
+                  <option value="Selbstzahler">{rt.setup.insuranceSelfPay}</option>
                 </select>
               </div>
 
               <div className="mrt-form-field">
                 <label className="mrt-form-label" htmlFor="mrt-person-ins-name">
-                  Krankenkasse / Versicherung
-                  <span className="mrt-form-opt"> (optional)</span>
+                  {rt.setup.insuranceNameLabel}
+                  <span className="mrt-form-opt"> {rt.setup.insuranceNameOptional}</span>
                 </label>
                 <input
                   id="mrt-person-ins-name"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. AOK, TK, Barmer, Debeka"
+                  placeholder={rt.setup.insuranceNamePlaceholder}
                   value={patientInfo.insuranceName}
                   onChange={e => handlePatientInfo('insuranceName', e.target.value)}
                   disabled={isBusy}
@@ -914,14 +892,14 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
               <div className="mrt-form-field">
                 <label className="mrt-form-label" htmlFor="mrt-person-ins-nr">
-                  Versicherungsnummer
-                  <span className="mrt-form-opt"> (optional)</span>
+                  {rt.setup.insuranceNumberLabel}
+                  <span className="mrt-form-opt"> {rt.setup.insuranceNameOptional}</span>
                 </label>
                 <input
                   id="mrt-person-ins-nr"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="optional"
+                  placeholder={rt.setup.insuranceNumberPlaceholder}
                   value={patientInfo.insuranceNumber}
                   onChange={e => handlePatientInfo('insuranceNumber', e.target.value)}
                   disabled={isBusy}
@@ -929,12 +907,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-person-email">E-Mail</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-email">{rt.setup.emailLabel}</label>
                 <input
                   id="mrt-person-email"
                   className="mrt-form-input"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={rt.setup.emailPlaceholder || "name@example.com"}
                   value={patientInfo.email}
                   onChange={e => handlePatientInfo('email', e.target.value)}
                   disabled={isBusy}
@@ -942,12 +920,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-person-phone">Telefonnummer</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-phone">{rt.setup.phoneLabel}</label>
                 <input
                   id="mrt-person-phone"
                   className="mrt-form-input"
                   type="tel"
-                  placeholder="+49 …"
+                  placeholder={rt.setup.phonePlaceholder}
                   value={patientInfo.phone}
                   onChange={e => handlePatientInfo('phone', e.target.value)}
                   disabled={isBusy}
@@ -955,12 +933,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field mrt-form-field--full">
-                <label className="mrt-form-label" htmlFor="mrt-person-street">Straße und Hausnummer</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-street">{rt.setup.streetLabel}</label>
                 <input
                   id="mrt-person-street"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Eisenstraße 64"
+                  placeholder={rt.setup.streetPlaceholder}
                   value={patientInfo.street}
                   onChange={e => handlePatientInfo('street', e.target.value)}
                   disabled={isBusy}
@@ -968,12 +946,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-person-plz">PLZ</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-plz">{rt.setup.postalCodeLabel}</label>
                 <input
                   id="mrt-person-plz"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. 40227"
+                  placeholder={rt.setup.postalCodePlaceholder}
                   value={patientInfo.postalCode}
                   onChange={e => handlePatientInfo('postalCode', e.target.value)}
                   disabled={isBusy}
@@ -981,12 +959,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-person-city">Ort</label>
+                <label className="mrt-form-label" htmlFor="mrt-person-city">{rt.setup.cityLabel}</label>
                 <input
                   id="mrt-person-city"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Düsseldorf"
+                  placeholder={rt.setup.cityPlaceholder}
                   value={patientInfo.city}
                   onChange={e => handlePatientInfo('city', e.target.value)}
                   disabled={isBusy}
@@ -995,14 +973,14 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
               <div className="mrt-form-field">
                 <label className="mrt-form-label" htmlFor="mrt-person-country">
-                  Land
-                  <span className="mrt-form-opt"> (optional)</span>
+                  {rt.setup.countryLabel}
+                  <span className="mrt-form-opt"> {rt.setup.insuranceNameOptional}</span>
                 </label>
                 <input
                   id="mrt-person-country"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="Deutschland"
+                  placeholder={rt.setup.countryPlaceholder}
                   value={patientInfo.country}
                   onChange={e => handlePatientInfo('country', e.target.value)}
                   disabled={isBusy}
@@ -1012,14 +990,14 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               {!forSelf && (
                 <div className="mrt-form-field mrt-form-field--full">
                   <label className="mrt-form-label" htmlFor="mrt-person-relation">
-                    Beziehung zur Person
-                    <span className="mrt-form-opt"> (optional)</span>
+                    {rt.setup.relationLabel}
+                    <span className="mrt-form-opt"> {rt.setup.insuranceNameOptional}</span>
                   </label>
                   <input
                     id="mrt-person-relation"
                     className="mrt-form-input"
                     type="text"
-                    placeholder="z. B. Mutter, Vater, Kind, Angehörige/r"
+                    placeholder={rt.setup.relationPlaceholder}
                     value={patientInfo.relationship}
                     onChange={e => handlePatientInfo('relationship', e.target.value)}
                     disabled={isBusy}
@@ -1040,9 +1018,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               disabled={isBusy}
             >
               <span className="mrt-practice-toggle-label">
-                {showPracticeFields ? 'Praxis-/Arztdaten ausblenden' : 'Praxis-/Arztdaten hinzufügen'}
+                {showPracticeFields ? rt.setup.practiceHide : rt.setup.practiceShow}
               </span>
-              <span className="mrt-practice-toggle-hint">Optional – hilfreich für das Gesprächsprotokoll</span>
+              <span className="mrt-practice-toggle-hint">{rt.setup.practiceHint}</span>
               <span className="mrt-practice-toggle-arrow" aria-hidden="true">
                 {showPracticeFields ? '▲' : '▼'}
               </span>
@@ -1051,16 +1029,16 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             <div id="mrt-practice-fields" className="mrt-form-grid">
               {practicePrefilled && (
                 <p className="mrt-privacy-note mrt-form-field--full" role="status">
-                  Praxisdaten wurden aus dem Praxisprofil übernommen und können angepasst werden.
+                  {rt.setup.practicePrefilled}
                 </p>
               )}
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-practice-name">Praxis / Einrichtung</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-name">{rt.setup.practiceNameLabel}</label>
                 <input
                   id="mrt-practice-name"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Hausarztpraxis Müller"
+                  placeholder={rt.setup.practiceNamePlaceholder}
                   value={practiceInfo.practiceName}
                   onChange={e => handlePracticeInfo('practiceName', e.target.value)}
                   disabled={isBusy}
@@ -1068,12 +1046,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-doctor-name">Arzt / Ärztin / Behandler</label>
+                <label className="mrt-form-label" htmlFor="mrt-doctor-name">{rt.setup.doctorNameLabel}</label>
                 <input
                   id="mrt-doctor-name"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Dr. Anna Müller"
+                  placeholder={rt.setup.doctorNamePlaceholder}
                   value={practiceInfo.doctorName}
                   onChange={e => handlePracticeInfo('doctorName', e.target.value)}
                   disabled={isBusy}
@@ -1081,12 +1059,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-practice-dept">Fachrichtung</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-dept">{rt.setup.specialtyLabel}</label>
                 <input
                   id="mrt-practice-dept"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Allgemeinmedizin, Orthopädie"
+                  placeholder={rt.setup.specialtyPlaceholder}
                   value={practiceInfo.department}
                   onChange={e => handlePracticeInfo('department', e.target.value)}
                   disabled={isBusy}
@@ -1094,12 +1072,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-practice-email">E-Mail der Praxis</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-email">{rt.setup.practiceEmailLabel}</label>
                 <input
                   id="mrt-practice-email"
                   className="mrt-form-input"
                   type="email"
-                  placeholder="praxis@example.de"
+                  placeholder={rt.setup.practiceEmailPlaceholder}
                   value={practiceInfo.email}
                   onChange={e => handlePracticeInfo('email', e.target.value)}
                   disabled={isBusy}
@@ -1107,12 +1085,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-practice-phone">Telefon der Praxis</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-phone">{rt.setup.practicePhoneLabel}</label>
                 <input
                   id="mrt-practice-phone"
                   className="mrt-form-input"
                   type="tel"
-                  placeholder="+49 …"
+                  placeholder={rt.setup.phonePlaceholder}
                   value={practiceInfo.phone}
                   onChange={e => handlePracticeInfo('phone', e.target.value)}
                   disabled={isBusy}
@@ -1120,12 +1098,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field mrt-form-field--full">
-                <label className="mrt-form-label" htmlFor="mrt-practice-street">Straße und Hausnummer</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-street">{rt.setup.practiceStreetLabel}</label>
                 <input
                   id="mrt-practice-street"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Musterstraße 1"
+                  placeholder={rt.setup.practiceStreetPlaceholder}
                   value={practiceInfo.street}
                   onChange={e => handlePracticeInfo('street', e.target.value)}
                   disabled={isBusy}
@@ -1133,12 +1111,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-practice-plz">PLZ</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-plz">{rt.setup.practicePostalCodeLabel}</label>
                 <input
                   id="mrt-practice-plz"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. 10115"
+                  placeholder={rt.setup.practicePostalCodePlaceholder}
                   value={practiceInfo.postalCode}
                   onChange={e => handlePracticeInfo('postalCode', e.target.value)}
                   disabled={isBusy}
@@ -1146,12 +1124,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               </div>
 
               <div className="mrt-form-field">
-                <label className="mrt-form-label" htmlFor="mrt-practice-city">Ort</label>
+                <label className="mrt-form-label" htmlFor="mrt-practice-city">{rt.setup.practiceCityLabel}</label>
                 <input
                   id="mrt-practice-city"
                   className="mrt-form-input"
                   type="text"
-                  placeholder="z. B. Berlin"
+                  placeholder={rt.setup.practiceCityPlaceholder}
                   value={practiceInfo.city}
                   onChange={e => handlePracticeInfo('city', e.target.value)}
                   disabled={isBusy}
@@ -1162,7 +1140,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
           </div>
 
           {/* ── 4. Zustimmungen ───────────────────────────────────────────────── */}
-          <div className="mrt-consent-list" role="group" aria-label="Zustimmungen">
+          <div className="mrt-consent-list" role="group" aria-label={rt.setup.consentsAria}>
             <div className="mrt-consent-item">
               <input
                 type="checkbox"
@@ -1173,7 +1151,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-audio" className="mrt-consent-label">
-                Ich bestätige, dass Audio und erkannter Text zur Live-Übersetzung verarbeitet werden.
+                {rt.setup.consentAudio}
               </label>
             </div>
 
@@ -1187,7 +1165,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-context" className="mrt-consent-label">
-                Ich bestätige, dass Meda nur im medizinischen Arzt-Patient-Gespräch verwendet wird.
+                {rt.setup.consentContext}
               </label>
             </div>
 
@@ -1201,8 +1179,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-medical" className="mrt-consent-label">
-                Ich verstehe, dass Meda nur dolmetscht und keine Diagnose, Therapieempfehlung oder
-                Dringlichkeitseinschätzung gibt.
+                {rt.setup.consentMedical}
               </label>
             </div>
 
@@ -1216,15 +1193,13 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-patient" className="mrt-consent-label">
-                Der Patient wurde über die automatisierte Live-Übersetzung informiert und stimmt der
-                Verarbeitung während dieser Sitzung zu.
+                {rt.setup.consentPatient}
               </label>
             </div>
           </div>
 
           <p className="mrt-privacy-note mrt-privacy-note--data">
-            Audio wird nicht gespeichert. Das Gesprächsprotokoll wird in dieser Version nicht
-            automatisch in der Cloud gespeichert. PDF und Archiv werden lokal auf diesem Gerät erstellt.
+            {rt.setup.localAudioNote}
           </p>
 
           {blockHint && (
@@ -1232,8 +1207,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
           )}
 
           <p className="mrt-privacy-note">
-            Diese Angaben werden in dieser Version nur lokal für die aktuelle Sitzung und den
-            PDF-Export verwendet. Es findet keine Speicherung statt.
+            {rt.setup.localSessionNote}
           </p>
 
           <div className="mrt-controls">
@@ -1243,7 +1217,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               disabled={!canStart}
               aria-disabled={!canStart}
             >
-              {isConnecting ? 'Verbinde …' : 'Live-Gespräch starten'}
+              {isConnecting ? rt.setup.connecting : rt.setup.start}
             </button>
           </div>
 
@@ -1257,25 +1231,25 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       {isConnected && (
         <div className="mrt-session-bar">
           <span className="mrt-session-langs">
-            Patient: <strong>{patientLangLabel}</strong>
+            {rt.sessionBar.patientLabel}: <strong>{patientLangLabel}</strong>
             <span className="mrt-session-sep" aria-hidden="true"> · </span>
-            Praxis: <strong>{practiceLangLabel}</strong>
+            {rt.sessionBar.practiceLabel}: <strong>{practiceLangLabel}</strong>
           </span>
           <div className="mrt-session-controls">
             <button
               className={`mrt-btn mrt-btn--pause mrt-btn--compact${isPaused ? ' mrt-btn--pause-active' : ''}`}
               onClick={isPaused ? handleResume : handlePause}
               aria-pressed={isPaused}
-              aria-label={isPaused ? 'Gespräch fortsetzen' : 'Gespräch pausieren'}
-              title={isPaused ? 'Gespräch fortsetzen' : 'Gespräch pausieren'}
+              aria-label={isPaused ? rt.sessionBar.resumeAria : rt.sessionBar.pauseAria}
+              title={isPaused ? rt.sessionBar.resumeTitle : rt.sessionBar.pauseTitle}
             >
-              {isPaused ? '▶ Fortsetzen' : '⏸ Pause'}
+              {isPaused ? `▶ ${rt.sessionBar.resumeButton}` : `⏸ ${rt.sessionBar.pauseButton}`}
             </button>
             <button
               className="mrt-btn mrt-btn--stop mrt-btn--compact"
               onClick={handleStopSession}
             >
-              Gespräch beenden
+              {rt.sessionBar.endButton}
             </button>
           </div>
         </div>
@@ -1288,7 +1262,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
           <div
             className="mrt-mode-seg"
             role="group"
-            aria-label="Sprechererkennung Modus"
+            aria-label={rt.mode.groupAria}
           >
             <button
               type="button"
@@ -1296,9 +1270,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               onClick={() => setMode('auto')}
               aria-pressed={mode === 'auto'}
               disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
-              title="Meda erkennt die Sprache automatisch"
+              title={rt.mode.autoTitle}
             >
-              Automatisch
+              {rt.mode.autoLabel}
             </button>
             <button
               type="button"
@@ -1306,9 +1280,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               onClick={() => setMode('manual')}
               aria-pressed={mode === 'manual'}
               disabled={sessionStatus === 'speaking' || sessionStatus === 'translating'}
-              title="Sie wählen, wer gerade spricht"
+              title={rt.mode.manualTitle}
             >
-              Manuell
+              {rt.mode.manualLabel}
             </button>
           </div>
 
@@ -1317,7 +1291,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             <div
               className="mrt-mode-speaker"
               role="group"
-              aria-label="Aktiver Sprecher"
+              aria-label={rt.mode.activeSpeakerAria}
             >
               <button
                 type="button"
@@ -1326,7 +1300,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 aria-pressed={manualSpeaker === 'patient'}
                 disabled={sessionStatus === 'speaking' || sessionStatus === 'translating' || sessionStatus === 'processing' || sessionStatus === 'speech_active'}
               >
-                Patient spricht
+                {rt.mode.activePatient}
               </button>
               <button
                 type="button"
@@ -1335,7 +1309,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 aria-pressed={manualSpeaker === 'practice'}
                 disabled={sessionStatus === 'speaking' || sessionStatus === 'translating' || sessionStatus === 'processing' || sessionStatus === 'speech_active'}
               >
-                Praxis spricht
+                {rt.mode.activePractice}
               </button>
             </div>
           )}
@@ -1344,37 +1318,39 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
       {/* ── Speaker bar — highlights last detected speaker ──────────────────── */}
       {isConnected && (
-        <div className="mrt-pingpong-bar" aria-live="polite" aria-label="Zuletzt erkannter Sprecher">
+        <div className="mrt-pingpong-bar" aria-live="polite" aria-label={rt.mode.detectedSpeakerAria}>
           <div className={`mrt-speaker-pill${currentSpeakerRole === 'patient' ? ' mrt-speaker-pill--active' : ''}`}>
-            Patient · {patientLangLabel}
+            {rt.sessionBar.patientLabel} · {patientLangLabel}
           </div>
           <div className="mrt-pingpong-arrow" aria-hidden="true">⇄</div>
           <div className={`mrt-speaker-pill${currentSpeakerRole === 'practice' ? ' mrt-speaker-pill--active' : ''}`}>
-            Praxis · {practiceLangLabel}
+            {rt.sessionBar.practiceLabel} · {practiceLangLabel}
           </div>
         </div>
       )}
 
       {/* ── Conversation turns ───────────────────────────────────────────────── */}
-      <section className="mrt-conversation" aria-label="Gesprächsverlauf">
+      <section className="mrt-conversation" aria-label={rt.conversation.aria}>
         {turns.length === 0 && isConnected && (
           <p className="mrt-conversation-empty">
             {mode === 'manual'
-              ? `${manualSpeaker === 'patient' ? 'Patient' : 'Praxis'} ist aktiv — bitte sprechen.`
-              : 'Bitte sprechen — Meda erkennt die Sprache automatisch.'}
+              ? (manualSpeaker === 'patient'
+                ? rt.conversation.emptyManualPatient
+                : rt.conversation.emptyManualPractice)
+              : rt.conversation.emptyAuto}
           </p>
         )}
         {turns.length === 0 && !isConnected && !isConnecting && !sessionExpired && (
           <p className="mrt-conversation-empty mrt-conversation-empty--idle">
-            Starten Sie ein Gespräch — der Gesprächsverlauf erscheint hier.
+            {rt.conversation.emptyIdle}
           </p>
         )}
 
         {turns.map(turn => {
           const roleLabel =
-            turn.speakerRole === 'patient'  ? 'Patient' :
-            turn.speakerRole === 'practice' ? 'Praxis / Arzt' :
-            turn.isDone ? 'Sprache nicht erkannt' : 'Erkenne Sprache …';
+            turn.speakerRole === 'patient' ? rt.conversation.rolePatient :
+            turn.speakerRole === 'practice' ? rt.conversation.rolePractice :
+            turn.isDone ? rt.conversation.roleUnknownLanguage : rt.conversation.roleDetecting;
 
           return (
             <div
@@ -1384,7 +1360,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               {/* ── Header: Rolle + Zeitstempel ──────────────────────────────── */}
               <div className="mrt-turn-header">
                 <span className="mrt-turn-role">{roleLabel}</span>
-                <span className="mrt-turn-timestamp">{formatTurnTime(turn.timestamp)}</span>
+                <span className="mrt-turn-timestamp">{formatTurnTime(turn.timestamp, uiLocale)}</span>
               </div>
 
               {/* ── Originaltext ─────────────────────────────────────────────── */}
@@ -1392,19 +1368,19 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 <div className="mrt-turn-original-header">
                   {turn.sourceLanguage ? (
                     <span className="mrt-turn-section-label">
-                      Originalsprache: <strong>{REALTIME_LANGUAGE_MAP[turn.sourceLanguage] ?? turn.sourceLanguage}</strong>
+                      {rt.conversation.sourceLanguageLabel}: <strong>{getLanguageName(turn.sourceLanguage)}</strong>
                     </span>
                   ) : (
                     <span className="mrt-turn-section-label mrt-turn-section-label--muted">
-                      {turn.isDone ? 'Unbekannte Sprache' : 'Erkenne Sprache …'}
+                      {turn.isDone ? rt.conversation.unknownLanguage : rt.conversation.detectingLanguage}
                     </span>
                   )}
                   {turn.isDone && !turn.unsupportedLanguage && editingKey !== turn.key && (
                     <button
                       className="mrt-turn-edit-trigger"
                       onClick={() => handleEditStart(turn)}
-                      aria-label="Originaltext bearbeiten"
-                      title="Originaltext bearbeiten (Ctrl+Enter speichern, Esc abbrechen)"
+                      aria-label={rt.conversation.editOriginalAria}
+                      title={rt.conversation.editOriginalTitle}
                     >
                       ✎
                     </button>
@@ -1431,31 +1407,31 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                         onClick={() => handleEditSave(turn.key)}
                         disabled={!editDraft.trim()}
                       >
-                        Speichern
+                        {rt.conversation.save}
                       </button>
                       <button
                         className="mrt-turn-edit-btn mrt-turn-edit-btn--cancel"
                         onClick={handleEditCancel}
                       >
-                        Abbrechen
+                        {rt.conversation.cancel}
                       </button>
                     </div>
                   </div>
                 ) : turn.unsupportedLanguage ? (
                   // Privacy/safety: never show the raw foreign transcript.
                   <p className="mrt-turn-text mrt-turn-text--unsupported">
-                    Sprache außerhalb der ausgewählten Gesprächssprachen.
+                    {rt.conversation.unsupportedLanguage}
                   </p>
                 ) : (
                   <p className="mrt-turn-text">
                     {turn.originalText !== null
                       ? turn.originalText
-                      : <span className="mrt-turn-pending">Transkription …</span>}
+                      : <span className="mrt-turn-pending">{rt.conversation.pendingTranscription}</span>}
                   </p>
                 )}
 
                 {turn.originalEdited && editingKey !== turn.key && (
-                  <span className="mrt-turn-edited-badge">Originaltext manuell korrigiert</span>
+                  <span className="mrt-turn-edited-badge">{rt.conversation.editedBadge}</span>
                 )}
               </div>
 
@@ -1468,22 +1444,24 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                       turn.targetRole ? ' mrt-turn-section-label--for' : ''
                     }`}>
                       {turn.isUnclear
-                        ? 'Meda'
+                        ? rt.conversation.translatorLabel
                         : turn.targetRole
-                          ? `Übersetzung für ${turn.targetRole === 'patient' ? 'Patient' : 'Praxis'}`
-                          : 'Übersetzung'}
+                          ? (turn.targetRole === 'patient'
+                            ? rt.conversation.translationForPatient
+                            : rt.conversation.translationForPractice)
+                          : rt.conversation.translationGeneric}
                     </span>
                     {!turn.isUnclear && turn.targetLanguage && (
                       <span className="mrt-turn-lang mrt-turn-lang--translation">
-                        {REALTIME_LANGUAGE_MAP[turn.targetLanguage] ?? turn.targetLanguage}
+                        {getLanguageName(turn.targetLanguage)}
                       </span>
                     )}
                     {turn.isDone && turn.translatedText && !turn.isUnclear && (
                       <button
                         className="mrt-turn-speak-btn"
                         onClick={() => speakTranslation(turn.translatedText, turn.targetLanguage)}
-                        aria-label="Übersetzung vorlesen"
-                        title="Übersetzung vorlesen"
+                        aria-label={rt.conversation.speakTranslationAria}
+                        title={rt.conversation.speakTranslationTitle}
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                           <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
@@ -1494,7 +1472,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                   <p className={`mrt-turn-text${turn.isUnclear ? ' mrt-turn-text--unclear' : ' mrt-turn-text--translation'}`}>
                     {turn.translatedText
                       ? turn.translatedText
-                      : <span className="mrt-turn-pending">Übersetze …</span>}
+                      : <span className="mrt-turn-pending">{rt.conversation.pendingTranslation}</span>}
                     {!turn.isDone && turn.translatedText && (
                       <span className="mrt-turn-cursor" aria-hidden="true"> ▌</span>
                     )}
@@ -1509,8 +1487,8 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
       {/* ── End-of-session box — replaces the duplicate form after stop ────────── */}
       {!isConnected && sessionHasStarted && (
-        <section className="mrt-end-box" aria-label={RT_TEXT.endTitle}>
-          <h2 className="mrt-end-title">{RT_TEXT.endTitle}</h2>
+        <section className="mrt-end-box" aria-label={rt.endBox.title}>
+          <h2 className="mrt-end-title">{rt.endBox.title}</h2>
 
           {endReasonText(endReason) && (
             <p
@@ -1524,12 +1502,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
           <div className="mrt-end-meta">
             <span>
-              {RT_TEXT.documentationFor}:{' '}
-              <strong>{patientInfo.name.trim() || RT_TEXT.notProvided}</strong>
+              {rt.endBox.documentationFor}:{' '}
+              <strong>{patientInfo.name.trim() || rt.endBox.notProvided}</strong>
             </span>
             {practiceInfo.practiceName.trim() && (
               <span>
-                {RT_TEXT.practice}: <strong>{practiceInfo.practiceName.trim()}</strong>
+                {rt.endBox.practiceLabel}: <strong>{practiceInfo.practiceName.trim()}</strong>
               </span>
             )}
           </div>
@@ -1539,23 +1517,23 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               (a page refresh clears it, so no stale live session is resumed). */}
           {turns.length > 0 && (
             <div className="mrt-continue-card">
-              <h3 className="mrt-continue-title">{RT_TEXT.continueTitle}</h3>
-              <p className="mrt-continue-hint">{RT_TEXT.continueHint}</p>
+              <h3 className="mrt-continue-title">{rt.endBox.continueTitle}</h3>
+              <p className="mrt-continue-hint">{rt.endBox.continueHint}</p>
               <button
                 className="mrt-btn mrt-continue-btn"
                 onClick={handleContinueSession}
                 disabled={isBusy}
                 aria-disabled={isBusy}
               >
-                {isConnecting ? RT_TEXT.continuing : RT_TEXT.continueButton}
+                {isConnecting ? rt.endBox.continuing : rt.endBox.continueButton}
               </button>
             </div>
           )}
 
           {turns.length > 0 ? (
-            <p className="mrt-end-hint">{RT_TEXT.endHint}</p>
+            <p className="mrt-end-hint">{rt.endBox.hint}</p>
           ) : (
-            <p className="mrt-end-hint">{RT_TEXT.endHintEmpty}</p>
+            <p className="mrt-end-hint">{rt.endBox.hintEmpty}</p>
           )}
 
           {isPractice ? (
@@ -1570,9 +1548,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                     onClick={handleDownloadPdf}
                     disabled={pdfLoading}
                     aria-disabled={pdfLoading}
-                    aria-label={RT_TEXT.ariaDownloadPdf}
+                    aria-label={rt.endBox.ariaDownloadPdf}
                   >
-                    {pdfLoading ? RT_TEXT.creatingPdf : RT_TEXT.downloadPdf}
+                    {pdfLoading ? rt.endBox.creatingPdf : rt.endBox.downloadPdf}
                   </button>
                 </div>
               )}
@@ -1594,19 +1572,19 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                     className="mrt-btn mrt-btn--archive-save"
                     onClick={handleSaveToArchive}
                   >
-                    {RT_TEXT.saveToHistory}
+                    {rt.endBox.saveToHistory}
                   </button>
                 )}
                 <button
                   className="mrt-btn mrt-btn--new-session"
                   onClick={handleNewSession}
                 >
-                  {RT_TEXT.newSession}
+                  {rt.endBox.newSession}
                 </button>
               </div>
               {archiveSaved && (
                 <p className="mrt-archive-saved-hint" role="status" aria-live="polite">
-                  {RT_TEXT.savedLocally}
+                  {rt.endBox.savedLocally}
                 </p>
               )}
             </>
@@ -1619,9 +1597,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                     onClick={handleDownloadPdf}
                     disabled={pdfLoading}
                     aria-disabled={pdfLoading}
-                    aria-label={RT_TEXT.ariaDownloadPdf}
+                    aria-label={rt.endBox.ariaDownloadPdf}
                   >
-                    {pdfLoading ? RT_TEXT.creatingPdf : RT_TEXT.downloadPdf}
+                    {pdfLoading ? rt.endBox.creatingPdf : rt.endBox.downloadPdf}
                   </button>
                 )}
                 {turns.length > 0 && !archiveSaved && (
@@ -1629,19 +1607,19 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                     className="mrt-btn mrt-btn--archive-save"
                     onClick={handleSaveToArchive}
                   >
-                    {RT_TEXT.saveToHistory}
+                    {rt.endBox.saveToHistory}
                   </button>
                 )}
                 <button
                   className="mrt-btn mrt-btn--new-session"
                   onClick={handleNewSession}
                 >
-                  {RT_TEXT.newSession}
+                  {rt.endBox.newSession}
                 </button>
               </div>
               {archiveSaved && (
                 <p className="mrt-archive-saved-hint" role="status" aria-live="polite">
-                  {RT_TEXT.savedLocally}
+                  {rt.endBox.savedLocally}
                 </p>
               )}
             </>
@@ -1651,19 +1629,19 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
       {/* ── Local conversation history ──────────────────────────────────────── */}
       {(archivedConversations.length > 0 || (!isConnected && sessionHasStarted)) && (
-        <section className="mrt-archive" aria-label={RT_TEXT.historyTitle}>
-          <h2 className="mrt-archive-title">{RT_TEXT.historyTitle}</h2>
-          <p className="mrt-archive-privacy">{RT_TEXT.historyPrivacy}</p>
+        <section className="mrt-archive" aria-label={rt.history.title}>
+          <h2 className="mrt-archive-title">{rt.history.title}</h2>
+          <p className="mrt-archive-privacy">{rt.history.privacy}</p>
 
           {archivedConversations.length === 0 ? (
-            <p className="mrt-archive-empty">{RT_TEXT.historyEmpty}</p>
+            <p className="mrt-archive-empty">{rt.history.empty}</p>
           ) : (
           <ul className="mrt-archive-list">
             {archivedConversations.map(entry => {
               const partyLabel = archivePartyLabel(entry);
               const sessionIso = entry.sessionStartedAt || entry.createdAt;
-              const dateStr    = formatSessionDate(sessionIso);
-              const timeStr    = formatSessionTime(sessionIso);
+              const dateStr    = formatSessionDate(sessionIso, uiLocale);
+              const timeStr    = formatSessionTime(sessionIso, uiLocale);
               return (
               <li key={entry.id} className="mrt-archive-entry">
                 <div className="mrt-archive-entry-header">
@@ -1676,34 +1654,34 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                       <span className="mrt-archive-entry-time">{timeStr}</span>
                     </span>
                     <span className="mrt-archive-entry-langs">
-                      {RT_TEXT.patientLanguage}: {REALTIME_LANGUAGE_MAP[entry.patientLanguage] ?? entry.patientLanguage ?? '—'}
+                      {rt.history.patientLanguage}: {entry.patientLanguage ? getLanguageName(entry.patientLanguage) : '—'}
                       <span className="mrt-archive-entry-sep" aria-hidden="true"> · </span>
-                      {RT_TEXT.practiceLanguage}: {REALTIME_LANGUAGE_MAP[entry.practiceLanguage] ?? entry.practiceLanguage ?? '—'}
+                      {rt.history.practiceLanguage}: {entry.practiceLanguage ? getLanguageName(entry.practiceLanguage) : '—'}
                     </span>
-                    <span className="mrt-archive-entry-count">{RT_TEXT.turnsCount(entry.turns.length)}</span>
+                    <span className="mrt-archive-entry-count">{interpolate(rt.history.turnsCount, { count: entry.turns.length })}</span>
                   </div>
                   <div className="mrt-archive-entry-actions">
                     <button
                       className="mrt-btn mrt-btn--archive-pdf"
                       onClick={() => handleArchivePdf(entry)}
                       disabled={archivePdfLoadingId === entry.id}
-                      aria-label={RT_TEXT.ariaArchivePdf(`${dateStr} ${partyLabel}`)}
+                      aria-label={interpolate(rt.history.ariaArchivePdf, { label: `${dateStr} ${partyLabel}` })}
                     >
-                      {archivePdfLoadingId === entry.id ? RT_TEXT.pdfShortLoading : RT_TEXT.pdf}
+                      {archivePdfLoadingId === entry.id ? rt.history.pdfLoadingShort : rt.history.pdf}
                     </button>
                     <button
                       className="mrt-btn mrt-btn--archive-view"
                       onClick={() => handleToggleExpand(entry.id)}
                       aria-expanded={archiveExpandedId === entry.id}
                     >
-                      {archiveExpandedId === entry.id ? RT_TEXT.closeDetails : RT_TEXT.viewDetails}
+                      {archiveExpandedId === entry.id ? rt.history.closeDetails : rt.history.viewDetails}
                     </button>
                     <button
                       className="mrt-btn mrt-btn--archive-delete"
                       onClick={() => handleDeleteArchiveEntry(entry.id)}
-                      aria-label={RT_TEXT.ariaDelete(`${dateStr} ${partyLabel}`)}
+                      aria-label={interpolate(rt.history.ariaDelete, { label: `${dateStr} ${partyLabel}` })}
                     >
-                      {RT_TEXT.deleteEntry}
+                      {rt.history.deleteEntry}
                     </button>
                   </div>
                 </div>
@@ -1711,14 +1689,14 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 {archiveExpandedId === entry.id && (
                   <div className="mrt-archive-turns">
                     {entry.turns.length === 0 && (
-                      <p className="mrt-archive-turns-empty">Kein Gesprächsverlauf gespeichert.</p>
+                      <p className="mrt-archive-turns-empty">{rt.history.noStoredTurns}</p>
                     )}
                     {entry.turns.map((t, i) => {
                       const isPatient  = t.speakerRole === 'patient';
-                      const roleLabel  = isPatient ? 'Patient' : 'Praxis / Arzt';
-                      const srcLabel   = REALTIME_LANGUAGE_MAP[t.sourceLanguage] ?? t.sourceLanguage ?? '—';
-                      const tgtLabel   = REALTIME_LANGUAGE_MAP[t.targetLanguage] ?? t.targetLanguage ?? '—';
-                      const transLabel = isPatient ? 'Übersetzung für Praxis' : 'Übersetzung für Patient';
+                      const roleLabel  = isPatient ? rt.conversation.rolePatient : rt.conversation.rolePractice;
+                      const srcLabel   = t.sourceLanguage ? getLanguageName(t.sourceLanguage) : '—';
+                      const tgtLabel   = t.targetLanguage ? getLanguageName(t.targetLanguage) : '—';
+                      const transLabel = isPatient ? rt.history.translationForPractice : rt.history.translationForPatient;
                       return (
                         <div
                           key={t.key ?? i}
@@ -1727,18 +1705,18 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                           <div className="mrt-archive-turn-header">
                             <span className="mrt-archive-turn-role">{roleLabel}</span>
                             {t.timestamp && (
-                              <span className="mrt-archive-turn-time">{formatTurnTime(t.timestamp)}</span>
+                              <span className="mrt-archive-turn-time">{formatTurnTime(t.timestamp, uiLocale)}</span>
                             )}
                             {t.isUnclear && (
-                              <span className="mrt-archive-turn-unclear">Nicht sicher zugeordnet</span>
+                              <span className="mrt-archive-turn-unclear">{rt.history.unclear}</span>
                             )}
                           </div>
                           <div className="mrt-archive-turn-body">
                             <div className="mrt-archive-turn-section">
-                              <span className="mrt-archive-turn-label">Original ({srcLabel})</span>
+                              <span className="mrt-archive-turn-label">{rt.history.originalLabel} ({srcLabel})</span>
                               <p className="mrt-archive-turn-text">{t.originalText || '—'}</p>
                               {t.originalEdited && (
-                                <span className="mrt-archive-turn-edited">Originaltext manuell korrigiert</span>
+                                <span className="mrt-archive-turn-edited">{rt.history.editedBadge}</span>
                               )}
                             </div>
                             <div className="mrt-archive-turn-section mrt-archive-turn-section--translation">
@@ -1762,7 +1740,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
               className="mrt-btn mrt-btn--archive-clear"
               onClick={handleClearArchive}
             >
-              {RT_TEXT.deleteAll}
+              {rt.history.deleteAll}
             </button>
           )}
         </section>
@@ -1775,12 +1753,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
           onClick={() => setShowDebug(v => !v)}
           aria-expanded={showDebug}
         >
-          Debug-Events ({events.length}) {showDebug ? '▲' : '▼'}
+          {interpolate(rt.debug.toggle, { count: events.length })} {showDebug ? '▲' : '▼'}
         </button>
         {showDebug && (
           <div className="mrt-debug-log" ref={debugLogRef}>
             {events.length === 0 && (
-              <p className="mrt-debug-empty">Keine Events.</p>
+              <p className="mrt-debug-empty">{rt.debug.empty}</p>
             )}
             {events.map((ev, i) => (
               <div key={i} className="mrt-debug-entry">

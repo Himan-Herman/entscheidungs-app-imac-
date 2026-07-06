@@ -6,13 +6,27 @@ export function buildSymptomCheckPrompt({
   locale = "de",
   organHint = null,
 }) {
-  const lang = locale === "en" ? "en" : "de";
-  const langRule = lang === "de" ? "Antworte auf Deutsch." : "Reply in English.";
+  const lang = locale === "en" ? "en" : locale === "ru" ? "ru" : "de";
+  const langRule =
+    lang === "de"
+      ? "Antworte auf Deutsch."
+      : lang === "ru"
+        ? "Отвечай по-русски."
+        : "Reply in English.";
 
   const specialtyRule =
     lang === "de"
       ? 'Fachrichtungen nur am Ende und neutral: „Passende medizinische Fachbereiche könnten sein: …“ (max. 3).'
-      : 'Specialties only at end, neutral: "Relevant medical specialties may include: …" (max 3).';
+      : lang === "ru"
+        ? 'Медицинские направления только в конце и нейтрально: «Подходящие медицинские направления могут включать: …» (макс. 3).'
+        : 'Specialties only at end, neutral: "Relevant medical specialties may include: …" (max 3).';
+
+  const missingInfoRule =
+    lang === "de"
+      ? 'Fehlende Angaben → "nicht angegeben".'
+      : lang === "ru"
+        ? 'Если чего-то не хватает, используйте: "не указано".'
+        : 'Missing info → "not specified".';
 
   const organLine = organHint
     ? `Optional focus from user context: "${organHint}".`
@@ -23,7 +37,7 @@ ${langRule}
 ${organLine}
 
 TASK: One short follow-up (max 2 sentences). Ask about one missing detail: onset, location, quality, pattern, impact — only what is still unclear.
-Use prior answers; do not repeat. Missing → "nicht angegeben" / "not specified".
+Use prior answers; do not repeat. ${missingInfoRule}
 
 ALLOWED: structure symptoms; neutral recap bullets only if user asks to finish.
 FORBIDDEN: diagnosis; suspected illness; urgency/triage; treatment/doses; probabilities; "likely/probably/Verdacht"; emergency routing; specialist/clinic recommendations as action.

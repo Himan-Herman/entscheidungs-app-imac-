@@ -69,6 +69,32 @@ const FALLBACK_QUESTIONS = {
       "What other question should be documented for the visit?",
     ],
   },
+  ru: {
+    symptomsOwnWords: [
+      "Когда появились эти жалобы?",
+      "Они скорее постоянные или появляются и проходят?",
+      "Есть ли что-то, что делает их лучше или хуже?",
+      "Что ещё важно записать, чтобы ваше описание было понятным?",
+    ],
+    onsetAndCourse: [
+      "Когда вы впервые это заметили?",
+      "Как это изменялось со временем?",
+      "Есть ли повторяющиеся закономерности в течение дня или недели?",
+      "Какое изменение течения вам особенно важно зафиксировать?",
+    ],
+    medications: [
+      "Какие лекарства вы сейчас принимаете регулярно?",
+      "Можете указать название, дозу и как часто принимаете?",
+      "Есть ли лекарства, которые вы принимаете только при необходимости?",
+      "Какую ещё информацию о лекарствах важно указать к этому визиту?",
+    ],
+    patientQuestions: [
+      "Какой вопрос вы хотите обсудить на приёме в первую очередь?",
+      "Есть ли решения или следующие шаги, по которым вам нужна ясность?",
+      "Какую информацию вы хотели бы получить в особенно понятной форме?",
+      "Какой ещё вопрос стоит зафиксировать к визиту?",
+    ],
+  },
 };
 
 const CATEGORY_NOTE = {
@@ -84,7 +110,20 @@ const CATEGORY_NOTE = {
     medications: "Follow-up notes (medications):",
     patientQuestions: "Follow-up notes (patient questions):",
   },
+  ru: {
+    symptomsOwnWords: "Уточнения (симптомы):",
+    onsetAndCourse: "Уточнения (начало и течение):",
+    medications: "Уточнения (лекарства):",
+    patientQuestions: "Уточнения (вопросы пациента):",
+  },
 };
+
+function resolveAdaptiveLocale(lang) {
+  const code = String(lang || "").split("-")[0].toLowerCase();
+  if (code === "en") return "en";
+  if (code === "ru") return "ru";
+  return "de";
+}
 
 export function createEmptyAdaptiveIntakeSlice() {
   return {
@@ -109,10 +148,12 @@ export function compileAdaptiveDocumentation(categoryKey, lang, seed, qaHistory)
   const pairs = Array.isArray(qaHistory) ? qaHistory : [];
   if (pairs.length) {
     lines.push("");
-    const locale = lang === "en" ? "en" : "de";
+    const locale = resolveAdaptiveLocale(lang);
     const note =
       CATEGORY_NOTE[locale]?.[categoryKey] ||
-      CATEGORY_NOTE[locale].symptomsOwnWords;
+      CATEGORY_NOTE.de[categoryKey] ||
+      CATEGORY_NOTE[locale]?.symptomsOwnWords ||
+      CATEGORY_NOTE.de.symptomsOwnWords;
     lines.push(note);
     for (const p of pairs) {
       const q = String(p?.question || "").trim();
@@ -131,10 +172,12 @@ export function compileAdaptiveDocumentation(categoryKey, lang, seed, qaHistory)
  * @param {number} index zero-based follow-up index
  */
 export function getOfflineFollowUpQuestion(lang, categoryKey, index) {
-  const locale = lang === "en" ? "en" : "de";
+  const locale = resolveAdaptiveLocale(lang);
   const list =
     FALLBACK_QUESTIONS[locale]?.[categoryKey] ||
-    FALLBACK_QUESTIONS[locale].symptomsOwnWords;
+    FALLBACK_QUESTIONS.de[categoryKey] ||
+    FALLBACK_QUESTIONS[locale]?.symptomsOwnWords ||
+    FALLBACK_QUESTIONS.de.symptomsOwnWords;
   if (index < 0 || index >= list.length) return null;
   return list[index];
 }

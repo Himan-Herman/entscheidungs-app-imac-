@@ -19,7 +19,7 @@ function fmt(iso, lang) {
       timeStyle: "short",
     });
   } catch {
-    return "—";
+    return null;
   }
 }
 
@@ -136,8 +136,9 @@ export default function PatientPracticeDocumentsListPage() {
                 {group.items.map((doc) => {
             const practiceName =
               practiceDisplayLabel(doc.practice) || doc.practiceName || t.fromPractice;
-            const shared = doc.sharedAt
-              ? t.sharedAt.replace("{date}", fmt(doc.sharedAt, language))
+            const sharedDate = doc.sharedAt ? fmt(doc.sharedAt, language) : null;
+            const shared = sharedDate
+              ? t.sharedAt.replace("{date}", sharedDate)
               : "";
 
             return (

@@ -91,6 +91,7 @@ export default {
   },
 
   tabs: {
+    ariaLabel: "Filter measurements",
     all: "All",
     blood_pressure: "Blood pressure",
     heart_rate: "Pulse",

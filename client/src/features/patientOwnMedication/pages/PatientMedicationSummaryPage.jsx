@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
-import { getMessages } from "../../../i18n/translations";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
+import { getPatientMedicationPlanMessages } from "../../medicationPlan/patientMedicationPlanI18n.js";
 import { listOwnMedications } from "../patientOwnMedicationStore.js";
 import {
   buildOwnMedicationPdfBlob,
@@ -58,12 +58,10 @@ function fmtPeriod(entry, lang, ongoingLabel) {
 export default function PatientMedicationSummaryPage() {
   const { language } = useLanguage();
   const base = useMemo(
-    () =>
-      getMessages(language).patientMedicationPlan ||
-      getMessages("en").patientMedicationPlan,
+    () => getPatientMedicationPlanMessages(language),
     [language],
   );
-  const t = useMemo(() => base.summary || {}, [base]);
+  const t = useMemo(() => base.summary, [base]);
   // Merge field labels used by the PDF/text builders.
   const pdfLabels = useMemo(
     () => ({
@@ -103,8 +101,8 @@ export default function PatientMedicationSummaryPage() {
   }, [refresh]);
 
   useEffect(() => {
-    document.title = t.pageTitle || base.pageTitle || "Medication summary";
-  }, [t.pageTitle, base.pageTitle]);
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   const loadContacts = useCallback(async () => {
     setContactsLoading(true);
@@ -190,7 +188,7 @@ export default function PatientMedicationSummaryPage() {
       const { res, data } = await sendMedicationPdfToContact(
         selectedContactId,
         blob,
-        getOwnMedicationPdfFilename(language),
+        getOwnMedicationPdfFilename(language, t),
         language,
       );
       if (!res.ok || !data.ok) {
@@ -213,11 +211,11 @@ export default function PatientMedicationSummaryPage() {
 
   const hasEntries = entries.length > 0;
   const loc = getPrimaryIntlLocale(language);
-  const generatedLabel = (t.generatedAt || "Summarized on {date}").replace(
+  const generatedLabel = t.generatedAt.replace(
     "{date}",
     generatedAt.toLocaleString(loc, { dateStyle: "medium", timeStyle: "short" }),
   );
-  const countLabel = (t.countLabel || "{count} medication(s)").replace(
+  const countLabel = t.countLabel.replace(
     "{count}",
     String(entries.length),
   );
@@ -229,7 +227,7 @@ export default function PatientMedicationSummaryPage() {
       </Link>
 
       <header className="pmed-summary__header">
-        <h1 className="pmed-summary__title">{t.heading || "Medication summary"}</h1>
+        <h1 className="pmed-summary__title">{t.heading}</h1>
         <p className="pmed-summary__intro">{t.intro}</p>
         <p className="pmed-summary__safety">{t.safetyNote || base.safetyNote}</p>
       </header>
@@ -285,7 +283,7 @@ export default function PatientMedicationSummaryPage() {
 
               <ul className="pmed-preview__list">
                 {entries.map((entry, idx) => {
-                  const period = fmtPeriod(entry, language, t.ongoing || "ongoing");
+                  const period = fmtPeriod(entry, language, t.ongoing);
                   const supply = computeSupply(entry);
                   const runningLow = isRunningLow(supply, 2);
                   return (

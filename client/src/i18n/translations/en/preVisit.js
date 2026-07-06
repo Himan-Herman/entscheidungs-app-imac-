@@ -511,6 +511,7 @@ export default {
     patientLang: "Patient language",
     doctorLang: "Doctor language",
     created: "Created",
+    notAvailable: "Not available",
     savedAt: "Saved",
     statusLabel: "Status",
     open: "Open",

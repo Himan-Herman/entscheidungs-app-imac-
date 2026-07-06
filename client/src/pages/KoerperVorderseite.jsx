@@ -6,25 +6,9 @@ import {
   readBodyMapConsent,
   rememberBodyMapSelection,
 } from "../features/bodyMap/bodyMapSession";
+import { getBodyMapRegionLabel } from "../features/bodyMap/bodyMapRegionLabels.js";
 import "../styles/BodyMapPages.css";
 import koerperBild from "../assets/img/Koerper_Vorderseite.png";
-
-function regionHitProps(goRegion, organId, ariaLabel) {
-  const label = ariaLabel || String(organId).replace(/_/g, " ");
-  return {
-    tabIndex: 0,
-    role: "button",
-    "aria-label": label,
-    style: { cursor: "pointer" },
-    onClick: () => goRegion(organId),
-    onKeyDown: (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        goRegion(organId);
-      }
-    },
-  };
-}
 
 export default function Koerperkarte() {
   const navigate = useNavigate();
@@ -52,6 +36,20 @@ export default function Koerperkarte() {
       { state: { from: "/koerperregionen" } },
     );
   };
+
+  const regionHitProps = (organId) => ({
+    tabIndex: 0,
+    role: "button",
+    "aria-label": getBodyMapRegionLabel(t, organId),
+    style: { cursor: "pointer" },
+    onClick: () => goRegion(organId),
+    onKeyDown: (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        goRegion(organId);
+      }
+    },
+  });
 
   return (
     <main
@@ -100,7 +98,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    {...regionHitProps(goRegion, 'herz')}
+    {...regionHitProps('herz')}
   />
 
   {/* Lunge rechts erledigt */}
@@ -112,7 +110,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    {...regionHitProps(goRegion, 'rechte Lunge')}
+    {...regionHitProps('rechte Lunge')}
   />
   {/* leber erledigt */}
   <ellipse
@@ -123,7 +121,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    {...regionHitProps(goRegion, 'Leber')}
+    {...regionHitProps('Leber')}
   />
    <ellipse
     cx="128"
@@ -133,7 +131,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    {...regionHitProps(goRegion, 'Leber')}
+    {...regionHitProps('Leber')}
   />
   {/* Lunge links erledigt */}
   <ellipse
@@ -144,7 +142,7 @@ export default function Koerperkarte() {
     fill="transparent"
     stroke="transparent"
     strokeWidth="2"
-    {...regionHitProps(goRegion, 'linke Lunge')}
+    {...regionHitProps('linke Lunge')}
   />
 
   
@@ -156,7 +154,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'kopf')}
+  {...regionHitProps('kopf')}
 />
 
 {/* Hals erledigt*/} 
@@ -168,7 +166,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'hals')}
+  {...regionHitProps('hals')}
 />
 
 {/* Magen erledigt */}
@@ -180,7 +178,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'magen')}
+  {...regionHitProps('magen')}
 />
 <ellipse
   cx="184"
@@ -190,7 +188,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'magen')}
+  {...regionHitProps('magen')}
 />
 <ellipse
   cx="191"
@@ -200,7 +198,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'magen')}
+  {...regionHitProps('magen')}
 />
 <ellipse
   cx="197"
@@ -210,7 +208,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'magen')}
+  {...regionHitProps('magen')}
 />
 <ellipse
   cx="185"
@@ -220,7 +218,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'magen')}
+  {...regionHitProps('magen')}
 />
 {/* Darm erledigt*/}
 <rect
@@ -233,7 +231,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'darm')}
+  {...regionHitProps('darm')}
 />
 
 
@@ -247,7 +245,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'gallenblase')}
+  {...regionHitProps('gallenblase')}
 />
 
 {/* Bauchspeicheldrüse erledigt */}
@@ -259,7 +257,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'bauchspeicheldrüse')}
+  {...regionHitProps('bauchspeicheldrüse')}
 />
 <rect
   x="166"
@@ -269,7 +267,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'bauchspeicheldrüse')}
+  {...regionHitProps('bauchspeicheldrüse')}
 />
 <rect
   x="176"
@@ -279,7 +277,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'bauchspeicheldrüse')}
+  {...regionHitProps('bauchspeicheldrüse')}
 />
 <rect
   x="170"
@@ -289,7 +287,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'bauchspeicheldrüse')}
+  {...regionHitProps('bauchspeicheldrüse')}
 />
 <rect
   x="149"
@@ -299,7 +297,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'bauchspeicheldrüse')}
+  {...regionHitProps('bauchspeicheldrüse')}
 />
 
 
@@ -313,7 +311,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'niere_links')}
+  {...regionHitProps('niere_links')}
 />
 
 {/* Niere rechts erledigt */}
@@ -325,7 +323,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'niere_rechts')}
+  {...regionHitProps('niere_rechts')}
 />
 <ellipse
   cx="194"
@@ -335,7 +333,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'niere_rechts')}
+  {...regionHitProps('niere_rechts')}
 />
 {/* Blase erledigt */}
 <circle
@@ -345,7 +343,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="2"
-  {...regionHitProps(goRegion, 'blase')}
+  {...regionHitProps('blase')}
 />
 
 {/* Uterus/Prostata erledigt */}
@@ -357,7 +355,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  {...regionHitProps(goRegion, 'uterus_prostata')}
+  {...regionHitProps('uterus_prostata')}
 />
 
 {/* Brustdrüse rechts erledigt */}
@@ -369,7 +367,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  {...regionHitProps(goRegion, 'brust_rechts')}
+  {...regionHitProps('brust_rechts')}
 />
 
 {/* Brustdrüse links erledigt */}
@@ -381,7 +379,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  {...regionHitProps(goRegion, 'brust_links')}
+  {...regionHitProps('brust_links')}
 />
 
 {/* Schulter rechts erledigt */}
@@ -393,7 +391,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  {...regionHitProps(goRegion, 'schulter_rechts')}
+  {...regionHitProps('schulter_rechts')}
 />
 <ellipse
   cx="109"
@@ -403,7 +401,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  {...regionHitProps(goRegion, 'schulter_rechts')}
+  {...regionHitProps('schulter_rechts')}
 />
 
 {/* Schulter links erledigt */}
@@ -415,7 +413,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  {...regionHitProps(goRegion, 'schulter_links')}
+  {...regionHitProps('schulter_links')}
 />
 <ellipse
   cx="209"
@@ -425,7 +423,7 @@ export default function Koerperkarte() {
   fill="transparent"
   stroke="transparent"
   strokeWidth="1"
-  {...regionHitProps(goRegion, 'schulter_links')}
+  {...regionHitProps('schulter_links')}
 />
 
 {/* Ellbogen rechts erledigt */}
@@ -435,7 +433,7 @@ export default function Koerperkarte() {
   r="15"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'ellenbogen_rechts')}
+  {...regionHitProps('ellenbogen_rechts')}
 />
 
 {/* Ellbogen links erledigt */}
@@ -445,7 +443,7 @@ export default function Koerperkarte() {
   r="15"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'ellenbogen_links')}
+  {...regionHitProps('ellenbogen_links')}
 />
 
 {/* Hand rechts erledigt */}
@@ -456,7 +454,7 @@ export default function Koerperkarte() {
   ry="33"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'hand_rechts')}
+  {...regionHitProps('hand_rechts')}
 />
 
 {/* Unterarm links */}
@@ -467,7 +465,7 @@ export default function Koerperkarte() {
   ry="33"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Unterarm_links')}
+  {...regionHitProps('Unterarm_links')}
 />
 
 {/* Unterarm rechts */}
@@ -478,7 +476,7 @@ export default function Koerperkarte() {
   ry="38"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Unterarm_rechts')}
+  {...regionHitProps('Unterarm_rechts')}
 />
 
 {/* Hand links erledigt */}
@@ -489,7 +487,7 @@ export default function Koerperkarte() {
   ry="33"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'hand_links')}
+  {...regionHitProps('hand_links')}
 />
 
 {/* Oberarm links erledigt */}
@@ -500,7 +498,7 @@ export default function Koerperkarte() {
   ry="20"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Oberarm_links')}
+  {...regionHitProps('Oberarm_links')}
 />
 
 {/* Oberarm rechts erledigt */}
@@ -511,7 +509,7 @@ export default function Koerperkarte() {
   ry="20"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Oberarm_rechts')}
+  {...regionHitProps('Oberarm_rechts')}
 />
 
 {/* Oberschenkel rechts erledigt */}
@@ -522,7 +520,7 @@ export default function Koerperkarte() {
   ry="78"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Oberschenkel_rechts')}
+  {...regionHitProps('Oberschenkel_rechts')}
 />
 
 {/* Oberschenkel links erledigt */}
@@ -533,7 +531,7 @@ export default function Koerperkarte() {
   ry="78"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Oberschenkel_rechts')}
+  {...regionHitProps('Oberschenkel_rechts')}
 />
 
 {/* Knie rechts erledigt */}
@@ -543,7 +541,7 @@ export default function Koerperkarte() {
   r="22"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'knie_rechts')}
+  {...regionHitProps('knie_rechts')}
 />
 
 {/* Knie links erledigt */}
@@ -553,7 +551,7 @@ export default function Koerperkarte() {
   r="22"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'knie_links')}
+  {...regionHitProps('knie_links')}
 />
 
 {/* Unterschenkel rechts erledigt */}
@@ -564,7 +562,7 @@ export default function Koerperkarte() {
   ry="71"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Unteschenkel_rechts')}
+  {...regionHitProps('Unteschenkel_rechts')}
 />
 
 {/* Unterschenkel links erledigt */}
@@ -575,7 +573,7 @@ export default function Koerperkarte() {
   ry="71"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'Unterschenkel_links')}
+  {...regionHitProps('Unterschenkel_links')}
 />
 
 {/* Fuß rechts erledigt */}
@@ -586,7 +584,7 @@ export default function Koerperkarte() {
   ry="21"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'fuss_rechts')}
+  {...regionHitProps('fuss_rechts')}
 />
 
 {/* Fuß links erledigt */}
@@ -597,7 +595,7 @@ export default function Koerperkarte() {
   ry="21"
   fill="transparent"
   stroke="transparent"
-  {...regionHitProps(goRegion, 'fuss_links')}
+  {...regionHitProps('fuss_links')}
 />
 
 

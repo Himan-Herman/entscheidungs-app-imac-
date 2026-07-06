@@ -34,7 +34,12 @@ function extractAssistantText(assistantMsg) {
 }
 
 function normalizeLocale(value) {
-  return value === "en" ? "en" : "de";
+  const code = String(value || "de")
+    .trim()
+    .split(/[-_]/)[0]
+    .toLowerCase();
+  if (code === "en" || code === "ru") return code;
+  return "de";
 }
 
 function isValidThreadId(id) {

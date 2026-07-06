@@ -251,7 +251,7 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
           onClick={onSkipStep}
           disabled={busy}
         >
-          {labels.adaptiveSkip || "Skip"}
+          {labels.adaptiveSkip}
         </button>
         <button
           type="button"

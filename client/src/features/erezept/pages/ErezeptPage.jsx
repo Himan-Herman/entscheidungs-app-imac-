@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ChevronLeft, Clock, FileText, Pill, Receipt, X } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
-import { getMessages } from "../../../i18n/translations";
 import { fetchErezept, updateErezeptStatus } from "../api/erezeptApi.js";
 import ErezeptCard from "../components/ErezeptCard.jsx";
+import { getErezeptMessages } from "../erezeptI18n.js";
 import "../styles/Erezept.css";
 
 const FILTERS = ["all", "issued", "at_pharmacy", "redeemed", "expired"];
@@ -19,12 +19,11 @@ const FILTER_ICONS = {
 
 export default function ErezeptPage() {
   const { language } = useLanguage();
-  const t = useMemo(() => {
-    const msgs = getMessages(language);
-    return msgs.erezept || getMessages("en").erezept;
-  }, [language]);
+  const t = useMemo(() => getErezeptMessages(language), [language]);
 
-  useEffect(() => { if (t?.pageTitle) document.title = t.pageTitle; }, [t]);
+  useEffect(() => {
+    document.title = t.pageTitle;
+  }, [t.pageTitle]);
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +41,7 @@ export default function ErezeptPage() {
       setEntries(Array.isArray(data.entries) ? data.entries : []);
     } catch (err) {
       if (err?.message === "SESSION_EXPIRED") return;
-      setLoadError(t?.loadingError || "Rezepte konnten nicht geladen werden.");
+      setLoadError(t.loadingError);
     } finally {
       setLoading(false);
     }
@@ -72,25 +71,24 @@ export default function ErezeptPage() {
   }, [entries]);
 
   return (
-    <main className="erx-page" aria-label={t?.pageHeading || "Rezepte & Verordnungen"}>
-      {/* Breadcrumb back to Meine Praxis */}
-      <nav className="erx-breadcrumb" aria-label="Breadcrumb">
+    <main className="erx-page" aria-label={t.pageHeading}>
+      <nav className="erx-breadcrumb" aria-label={t.breadcrumbAria}>
         <Link to="/patient/practice" className="erx-breadcrumb__back">
           <ChevronLeft size={16} aria-hidden="true" />
-          {t?.breadcrumb || "Meine Praxis"}
+          {t.breadcrumb}
         </Link>
       </nav>
 
       <header className="erx-page__header">
         <h1 className="erx-page__title">
           <Receipt size={22} aria-hidden="true" />
-          {t?.pageHeading || "Rezepte & Verordnungen"}
+          {t.pageHeading}
         </h1>
-        <p className="erx-page__intro">{t?.intro}</p>
-        <p className="erx-page__disclaimer">{t?.disclaimer}</p>
+        <p className="erx-page__intro">{t.intro}</p>
+        <p className="erx-page__disclaimer">{t.disclaimer}</p>
       </header>
 
-      <nav className="erx-tabs" aria-label={t?.filtersLabel || "Status-Filter"}>
+      <nav className="erx-tabs" aria-label={t.filtersLabel}>
         {FILTERS.map((f) => (
           <button
             key={f}
@@ -99,7 +97,7 @@ export default function ErezeptPage() {
             aria-pressed={activeFilter === f}
           >
             {FILTER_ICONS[f]}
-            {t?.filters?.[f] || f}
+            {t.filters[f]}
             {counts[f] > 0 && (
               <span className="erx-tabs__count">{counts[f]}</span>
             )}
@@ -117,11 +115,11 @@ export default function ErezeptPage() {
         <div className="erx-page__empty">
           <Receipt size={44} strokeWidth={1.2} aria-hidden="true" />
           <p>{activeFilter === "all"
-            ? (t?.noEntries || "Noch keine Rezepte vorhanden.")
-            : (t?.noEntriesFilter || "Keine Rezepte mit diesem Status.")}
+            ? t.noEntries
+            : t.noEntriesFilter}
           </p>
           {activeFilter === "all" && (
-            <p className="erx-page__empty-hint">{t?.noEntriesHint || "Rezepte erscheinen hier, sobald Ihre Praxis sie ausstellt."}</p>
+            <p className="erx-page__empty-hint">{t.noEntriesHint}</p>
           )}
         </div>
       ) : (
@@ -131,6 +129,7 @@ export default function ErezeptPage() {
               key={entry.id}
               entry={entry}
               t={t}
+              language={language}
               onStatusUpdate={handleStatusUpdate}
               onDelete={null}
               readOnly={false}

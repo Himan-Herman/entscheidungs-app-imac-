@@ -38,6 +38,44 @@ export default {
     sectionLabelAnswer: "Su respuesta",
     devInsertDemo: "Insertar datos de demostración",
     devOnlyNote: "Visible solo en desarrollo local.",
+    adaptiveSeedHint:
+      "Describa este punto con sus propias palabras, de la forma más concreta y neutral posible.",
+    adaptiveFollowupLabel: "Pregunta adicional para la preparación",
+    adaptiveSeedRequired:
+      "Describa brevemente la situación con sus propias palabras.",
+    adaptiveAnswerRequired:
+      "Responda brevemente a la pregunta adicional.",
+    adaptiveBusy: "Un momento…",
+    adaptiveProgressMeta:
+      "Preguntas adicionales para esta entrada: {{n}} de un máximo de {{max}}",
+    adaptiveSkip: "Omitir",
+    adaptiveServiceError:
+      "La pregunta adicional adaptativa no puede crearse ahora mismo. Puede continuar o editar más tarde.",
+    audioHint:
+      "Puede escuchar la pregunta o dictar su respuesta.",
+    audioPrivacy:
+      "Para la lectura en voz alta y la entrada por voz, se envía texto o audio al servicio de IA para su procesamiento. Esta función no almacena nada de forma permanente.",
+    audioMicUnsupported:
+      "La grabación de audio no es compatible con este navegador.",
+    audioListenAria: "Leer la pregunta en voz alta",
+    audioListenTitle:
+      "Leer en voz alta la pregunta y una breve indicación",
+    audioDictateAria: "Dictar la respuesta",
+    audioDictateTitle:
+      "Toque para iniciar la grabación y vuelva a tocar para detenerla",
+    audioStatusLoading: "Preparando audio…",
+    audioStatusPlaying: "Reproduciendo…",
+    audioStatusRecording:
+      "Grabando… vuelva a tocar cuando haya terminado.",
+    audioStatusTranscribing: "Convirtiendo su voz en texto…",
+    audioErrorGeneric:
+      "La función de audio no está disponible en este momento. Inténtelo de nuevo más tarde.",
+    audioErrorPlayback:
+      "No se pudo iniciar la reproducción.",
+    audioMicPermission:
+      "Se denegó el acceso al micrófono o no está disponible.",
+    longitudinalCaseBanner:
+      "Opcional: hay un caso longitudinal vinculado. La recogida utiliza solo sus propias declaraciones anteriores, sin interpretación médica.",
   },
   review: {
     pageTitle: "MedScoutX — Resumen previo",

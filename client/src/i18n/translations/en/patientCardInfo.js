@@ -1,5 +1,5 @@
 /**
- * Patient "My practice" hub — info-modal texts (EN source).
+ * Patient hub — info-modal texts (EN source).
  * No medical assessment, no diagnosis/therapy/triage; only code-backed, honest
  * statements. No patient data is shown in these modals.
  */
@@ -123,6 +123,15 @@ export default {
   myPracticeP3:
     "In the alpha test you can check: does the tile open the practice area, are the individual functions reachable, and does content stay empty without an active connection?",
 
+  orientationButton: "More information about “Capture symptoms”",
+  orientationTitle: "Capture symptoms",
+  orientationP1:
+    "This tile groups three preparation tools in one place: Symptom Check, image analysis and body map.",
+  orientationP2:
+    "All three tools serve only to structure your own observations before a doctor's appointment. MedScoutX makes no diagnosis, no treatment recommendation and no urgency decision from them.",
+  orientationP3:
+    "In the alpha test you can check: does the tile open the orientation area, are all three tools reachable, and is it clear that they are preparation aids rather than medical assessment?",
+
   medicationPlansButton: "More information about medication plans",
   medicationPlansTitle: "Medication plans",
   medicationPlansP1:
@@ -150,6 +159,33 @@ export default {
   preVisitP3:
     "In the alpha test you can check: can the preparation be done step by step, does an understandable doctor version result, and do loading, empty and error states as well as your language stay clean?",
 
+  symptomButton: "More information about Symptom Check",
+  symptomTitle: "Symptom Check",
+  symptomP1:
+    "In Symptom Check you describe symptoms in your own words and receive a structured preparation summary for your doctor's appointment.",
+  symptomP2:
+    "The function supports wording and structure only. MedScoutX does not provide diagnosis, triage, treatment advice or emergency classification. Acute complaints must be clarified medically.",
+  symptomP3:
+    "In the alpha test you can check: can you enter symptoms clearly, does the chat remain understandable in your language, and are loading, empty and error states handled cleanly?",
+
+  imageButton: "More information about image analysis",
+  imageTitle: "Image analysis",
+  imageP1:
+    "Here you can upload a medical image and add your own context so MedScoutX creates a structured description for the appointment.",
+  imageP2:
+    "The function does not interpret findings medically and does not replace a professional review. MedScoutX derives no diagnosis, no urgency and no treatment recommendation from the image.",
+  imageP3:
+    "In the alpha test you can check: does image upload work reliably, is the consent flow clear, and does the result stay recognizably descriptive instead of diagnostic?",
+
+  bodyButton: "More information about the body map",
+  bodyTitle: "Body map",
+  bodyP1:
+    "On the body map you mark body regions and add your own notes to prepare symptoms visually for a doctor's appointment.",
+  bodyP2:
+    "The body map serves only for orientation and documentation of your own observations. MedScoutX makes no diagnosis, no treatment recommendation and no urgency classification from the selected area.",
+  bodyP3:
+    "In the alpha test you can check: can body regions be selected clearly, can notes be added understandably, and do the views and states behave reliably?",
+
   vaccinationsButton: "More information about the vaccination record",
   vaccinationsTitle: "Vaccination record",
   vaccinationsP1:
@@ -176,6 +212,15 @@ export default {
     "You record, edit and delete entries yourself; only your own information is documented, for example already known diagnoses. MedScoutX makes no diagnosis, gives no treatment recommendation and makes no urgency decision. A connected practice can only see this information with an active connection and your granted permission.",
   healthHistoryP3:
     "In the alpha test you can check: can allergies and diagnoses be recorded, edited and deleted, does switching between sections work, and are loading, empty and error states understandable?",
+
+  medaLiveButton: "More information about Meda Live Translation",
+  medaLiveTitle: "Meda Live Translation",
+  medaLiveP1:
+    "Meda Live Translation supports multilingual conversations during a doctor's appointment by microphone, transcription and translation display.",
+  medaLiveP2:
+    "The function supports communication only. MedScoutX does not provide diagnosis, treatment advice or urgency assessment from the spoken content. Microphone use starts only after your deliberate action.",
+  medaLiveP3:
+    "In the alpha test you can check: does the session start clearly, are transcript and translation understandable, and are language selection, audio and session controls reliable?",
 
   myPrepButton: "More information about “My preparations”",
   myPrepTitle: "My preparations",

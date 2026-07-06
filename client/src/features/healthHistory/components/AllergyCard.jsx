@@ -1,4 +1,5 @@
 import { AlertTriangle, Pencil, Trash2 } from "lucide-react";
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import "../styles/HealthHistory.css";
 
 const SEVERITY_ORDER = ["life_threatening", "severe", "moderate", "mild"];
@@ -7,17 +8,28 @@ function severityClass(severity) {
   return `hh-badge hh-badge--${severity}`;
 }
 
-export default function AllergyCard({ entry, t, onEdit, onDelete, readOnly = false }) {
-  const s = t?.severities || {};
-  const ty = t?.types || {};
-  const st = t?.statuses || {};
+export default function AllergyCard({
+  entry,
+  t,
+  onEdit,
+  onDelete,
+  readOnly = false,
+  language = "en",
+}) {
+  const s = t.severities || {};
+  const ty = t.types || {};
+  const st = t.statuses || {};
 
   const dateStr = entry.diagnosedDate
-    ? new Date(entry.diagnosedDate).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+    ? new Date(entry.diagnosedDate).toLocaleDateString(getPrimaryIntlLocale(language), {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
     : null;
 
   function handleDelete() {
-    if (window.confirm(t?.confirmDelete || "Eintrag wirklich löschen?")) {
+    if (window.confirm(t.confirmDelete)) {
       onDelete(entry.id);
     }
   }
@@ -49,14 +61,14 @@ export default function AllergyCard({ entry, t, onEdit, onDelete, readOnly = fal
 
       {entry.reaction && (
         <p className="hh-card__detail">
-          <strong>{t?.reaction || "Reaktion"}:</strong>{" "}
+          <strong>{t.reaction}:</strong>{" "}
           {entry.reaction.length > 160 ? entry.reaction.slice(0, 157) + "…" : entry.reaction}
         </p>
       )}
 
       {dateStr && (
         <p className="hh-card__detail">
-          <strong>{t?.diagnosedDate || "Diagnostiziert"}:</strong> {dateStr}
+          <strong>{t.diagnosedDate}:</strong> {dateStr}
         </p>
       )}
 
@@ -66,13 +78,13 @@ export default function AllergyCard({ entry, t, onEdit, onDelete, readOnly = fal
 
       {!readOnly && (
         <div className="hh-card__actions">
-          <button className="hh-card__btn" onClick={() => onEdit(entry)} aria-label={`${t?.edit || "Bearbeiten"}: ${entry.allergen}`}>
+          <button className="hh-card__btn" onClick={() => onEdit(entry)} aria-label={`${t.edit}: ${entry.allergen}`}>
             <Pencil size={14} aria-hidden="true" />
-            {t?.edit || "Bearbeiten"}
+            {t.edit}
           </button>
-          <button className="hh-card__btn hh-card__btn--danger" onClick={handleDelete} aria-label={`${t?.delete || "Löschen"}: ${entry.allergen}`}>
+          <button className="hh-card__btn hh-card__btn--danger" onClick={handleDelete} aria-label={`${t.delete}: ${entry.allergen}`}>
             <Trash2 size={14} aria-hidden="true" />
-            {t?.delete || "Löschen"}
+            {t.delete}
           </button>
         </div>
       )}

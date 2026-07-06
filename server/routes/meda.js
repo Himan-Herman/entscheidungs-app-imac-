@@ -21,6 +21,15 @@ function resolveUserId(req) {
   return typeof req.user?.userId === "string" ? req.user.userId : null;
 }
 
+function normalizeMedaLocale(value) {
+  const code = String(value || "de")
+    .trim()
+    .split(/[-_]/)[0]
+    .toLowerCase();
+  if (code === "en" || code === "ru") return code;
+  return "de";
+}
+
 router.get("/status", requireAuth, (req, res) => {
   const userId = resolveUserId(req);
   if (!userId) {
@@ -35,7 +44,7 @@ router.post("/chat", requireAuth, medaIpLimiter, async (req, res) => {
     return res.status(401).json({ ok: false, error: "unauthorized" });
   }
 
-  const locale = req.body?.patientLanguage === "en" ? "en" : "de";
+  const locale = normalizeMedaLocale(req.body?.patientLanguage);
   const message = req.body?.message;
   const history = Array.isArray(req.body?.history) ? req.body.history : [];
 

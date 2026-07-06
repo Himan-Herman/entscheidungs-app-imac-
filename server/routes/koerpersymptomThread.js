@@ -41,7 +41,12 @@ function extractAssistantText(assistantMsg) {
 }
 
 function normalizeLocale(value) {
-  return value === "en" ? "en" : "de";
+  const code = String(value || "de")
+    .trim()
+    .split(/[-_]/)[0]
+    .toLowerCase();
+  if (code === "en" || code === "ru") return code;
+  return "de";
 }
 
 router.post("/", async (req, res) => {
@@ -52,6 +57,10 @@ router.post("/", async (req, res) => {
     typeof req.body?.organName === "string" && req.body.organName.trim()
       ? req.body.organName.trim()
       : "marked body region";
+  const organLabel =
+    typeof req.body?.organLabel === "string" && req.body.organLabel.trim()
+      ? req.body.organLabel.trim()
+      : organName;
 
   if (!Array.isArray(verlauf) || verlauf.length === 0) {
     return res.status(400).json({
@@ -89,8 +98,13 @@ router.post("/", async (req, res) => {
     const userTurns = messages.filter((v) => v.role === "user").length;
     const instructions =
       intent === "summary"
-        ? buildKoerpersymptomSummaryPrompt({ organName, locale })
-        : buildKoerpersymptomPrompt({ organName, userTurns, locale });
+        ? buildKoerpersymptomSummaryPrompt({ organName, displayRegion: organLabel, locale })
+        : buildKoerpersymptomPrompt({
+            organName,
+            displayRegion: organLabel,
+            userTurns,
+            locale,
+          });
 
     const run = await openai.beta.threads.runs.create(currentThreadId, {
       assistant_id: ASSISTANT_ID,
@@ -107,7 +121,7 @@ router.post("/", async (req, res) => {
 
     const parsed = parseAndSanitizeBodyMapResponse(raw, {
       locale,
-      organLabel: organName,
+      organLabel,
     });
 
     return res.json({

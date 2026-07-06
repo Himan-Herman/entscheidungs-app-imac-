@@ -7,7 +7,10 @@ import startseite from "./ru.startseite.js";
 import ruCore from "./ru/ru.core.js";
 import ruAccount from "./ru/ru.account.js";
 import ruModules from "./ru/ru.modules.js";
+import ruMedicalInterpreter from "./ru/ru.medicalInterpreter.js";
+import ruPatient from "./ru/ru.patient.js";
 import ruPractice from "./ru/ru.practice.js";
+import ruSosCard from "./ru/ru.sosCard.js";
 
 /** Russian — base bundle merged with layered overrides (ru → en → de per key). */
 const ruBase = {
@@ -116,6 +119,8 @@ const ruBase = {
     terms: "Условия",
     disclaimer: "Дисклеймер",
     ariaLabel: "Юридические ссылки",
+    safetyNote:
+      "Не является экстренной службой. При срочных симптомах свяжитесь с местной службой неотложной помощи или с врачом.",
   },
   common: {
     continue: "Продолжить",
@@ -168,6 +173,11 @@ const ruBase = {
 };
 
 export default deepMerge(
-  deepMerge(deepMerge(deepMerge(ruBase, ruCore), ruAccount), ruModules),
-  ruPractice,
+  deepMerge(
+    deepMerge(deepMerge(deepMerge(ruBase, ruCore), ruAccount), ruModules),
+    ruPatient,
+  ),
+  deepMerge(deepMerge(ruPractice, { sosCard: ruSosCard }), {
+    medicalInterpreter: ruMedicalInterpreter,
+  }),
 );

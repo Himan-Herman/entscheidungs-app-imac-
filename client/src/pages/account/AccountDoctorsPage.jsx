@@ -101,7 +101,7 @@ export default function AccountDoctorsPage() {
                   {t.touchUse}
                 </button>
                 <Link className="account-portal__btn account-portal__btn--small" to={`/pre-visit`}>
-                  Pre-Visit
+                  {t.defaultPrepTitle}
                 </Link>
               </div>
             </li>

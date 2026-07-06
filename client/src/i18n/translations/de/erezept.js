@@ -2,6 +2,7 @@ export default {
   pageTitle: "Rezepte & Verordnungen — MedScoutX",
   pageHeading: "Rezepte & Verordnungen",
   breadcrumb: "Meine Praxis",
+  breadcrumbAria: "Brotkrumen-Navigation",
   intro: "Von Ihrer Praxis ausgestellte Rezepte — immer griffbereit für die Apotheke.",
   disclaimer:
     "Simuliertes e-Rezept — kein offizieller TI-Nachweis. Zeigen Sie den QR-Code oder Token in der Apotheke vor.",
@@ -9,6 +10,7 @@ export default {
   backToPractice: "Zur Praxis-Übersicht",
   pdfDownload: "PDF herunterladen",
   pdfGenerating: "PDF wird erstellt…",
+  generatedAt: "Erstellt",
   issuedBy: "Ausgestellt von",
   filtersLabel: "Status-Filter",
   noEntries: "Noch keine Rezepte vorhanden.",
@@ -55,6 +57,7 @@ export default {
   medicationLabel: "Medikament",
   medicationPlaceholder: "z.B. Amoxicillin 500 mg, Ibuprofen 400 mg",
   icdCodeLabel: "ICD-10-Code",
+  icdPlaceholder: "z.B. J06, M54",
   dosageLabel: "Dosierung / Einnahme",
   dosagePlaceholder: "z.B. 3× täglich 1 Tablette nach dem Essen",
   validityLabel: "Gültigkeit (Tage)",

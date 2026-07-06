@@ -450,7 +450,7 @@ export default function SosCardForm({
                 maxLength={40}
                 value={ec1Phone}
                 onChange={(e) => setEc1Phone(e.target.value)}
-                placeholder="+49 123 456789"
+                placeholder={t.contactPhonePlaceholder}
               />
             </div>
           </div>
@@ -480,7 +480,7 @@ export default function SosCardForm({
                 maxLength={40}
                 value={ec2Phone}
                 onChange={(e) => setEc2Phone(e.target.value)}
-                placeholder="+49 123 456789"
+                placeholder={t.contactPhonePlaceholder}
               />
             </div>
           </div>

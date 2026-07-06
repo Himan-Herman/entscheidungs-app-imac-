@@ -20,6 +20,7 @@ export default {
   contact2Name: "Contact 2 — Name",
   contact2Phone: "Contact 2 — Phone",
   contactNamePlaceholder: "e.g. Jane Doe",
+  contactPhonePlaceholder: "e.g. +49 123 456789",
 
   noteSection: "First Responder Note",
   noteLabel: "Note",

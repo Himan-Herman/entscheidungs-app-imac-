@@ -2,7 +2,7 @@
  * Final structured summary for Symptom Check (MDR-neutral).
  */
 export function buildSymptomCheckSummaryPrompt({ locale = "de" }) {
-  const lang = locale === "en" ? "en" : "de";
+  const lang = locale === "en" ? "en" : locale === "ru" ? "ru" : "de";
 
   const rules =
     lang === "de"
@@ -10,6 +10,11 @@ export function buildSymptomCheckSummaryPrompt({ locale = "de" }) {
 Keine Diagnose, Dringlichkeit, Therapie, Wahrscheinlichkeiten.
 Fachrichtungen nur: „Passende medizinische Fachbereiche könnten sein: …“ (max. 3).
 Fehlende Angaben: „nicht angegeben“.`
+      : lang === "ru"
+        ? `Язык: русский.
+Без диагноза, срочности, лечения или вероятностей.
+Медицинские направления только: «Подходящие медицинские направления могут включать: …» (макс. 3).
+Если данных нет: «не указано».`
       : `Language: English.
 No diagnosis, urgency, treatment, or probabilities.
 Specialties only: "Relevant medical specialties may include: …" (max 3).

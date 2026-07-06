@@ -18,7 +18,7 @@ function statusLabel(t, st) {
     case "expired":
       return t.statusExpired;
     default:
-      return st || "—";
+      return st || t.notAvailable;
   }
 }
 

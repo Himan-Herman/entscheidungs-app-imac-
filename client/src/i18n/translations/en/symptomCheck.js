@@ -42,6 +42,7 @@ export default {
   summaryError: "The summary could not be created.",
   copyConversation: "Copy conversation",
   downloadTxt: "Download as text",
+  downloadFilenamePrefix: "medscoutx-symptom-check",
   copyDone: "Copied.",
   copyFail: "Copy failed.",
   copySummary: "Copy summary",

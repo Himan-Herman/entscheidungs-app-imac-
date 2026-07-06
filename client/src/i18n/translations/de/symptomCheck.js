@@ -44,6 +44,7 @@ export default {
   summaryError: "Die Zusammenfassung konnte nicht erstellt werden.",
   copyConversation: "Gespräch kopieren",
   downloadTxt: "Als Text speichern",
+  downloadFilenamePrefix: "medscoutx-symptomcheck",
   copyDone: "Kopiert.",
   copyFail: "Kopieren fehlgeschlagen.",
   copySummary: "Zusammenfassung kopieren",

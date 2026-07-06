@@ -121,6 +121,7 @@ export default {
       "Patient's own statements only. No diagnosis, no treatment or dosage recommendation, no interaction check.",
     footerBrand: "Locally created with MedScoutX",
     footerPage: "Page",
+    pdfFilename: "medscoutx-my-medications.pdf",
     exportTitle: "Download & share",
     downloadPdf: "Download as PDF",
     qrOpen: "Show QR code",

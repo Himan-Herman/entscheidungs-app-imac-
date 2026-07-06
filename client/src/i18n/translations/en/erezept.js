@@ -2,6 +2,7 @@ export default {
   pageTitle: "Prescriptions & Orders — MedScoutX",
   pageHeading: "Prescriptions & Orders",
   breadcrumb: "My Practice",
+  breadcrumbAria: "Breadcrumb navigation",
   intro: "Prescriptions issued by your practice — always ready for the pharmacy.",
   disclaimer:
     "Simulated e-prescription — not an official TI document. Show the QR code or token at the pharmacy.",
@@ -9,6 +10,7 @@ export default {
   backToPractice: "Back to practice overview",
   pdfDownload: "Download PDF",
   pdfGenerating: "Generating PDF…",
+  generatedAt: "Created",
   issuedBy: "Issued by",
   filtersLabel: "Status filter",
   noEntries: "No prescriptions yet.",
@@ -55,6 +57,7 @@ export default {
   medicationLabel: "Medication",
   medicationPlaceholder: "e.g. Amoxicillin 500 mg, Ibuprofen 400 mg",
   icdCodeLabel: "ICD-10 code",
+  icdPlaceholder: "e.g. J06, M54",
   dosageLabel: "Dosage / intake",
   dosagePlaceholder: "e.g. 3× daily 1 tablet after meals",
   validityLabel: "Validity (days)",

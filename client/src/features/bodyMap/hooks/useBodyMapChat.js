@@ -125,7 +125,7 @@ export function findOrCreateBodyMapSession(organ, organLabel, seite, language) {
  * @param {string | null} opts.organ
  * @param {string} opts.organLabel
  * @param {string} opts.seite
- * @param {'de'|'en'} opts.language
+ * @param {'de'|'en'|'ru'} opts.language
  * @param {Record<string, string>} opts.tc
  */
 export function useBodyMapChat({
@@ -221,6 +221,7 @@ export function useBodyMapChat({
       const payload = {
         threadId: threadId || null,
         organName: organ || organLabel,
+        organLabel: organLabel || organ || "",
         patientLanguage: language,
         intent,
         verlauf:
@@ -302,10 +303,7 @@ export function useBodyMapChat({
       const data = await postToThread({
         userMsg: {
           role: "user",
-          content:
-            language === "en"
-              ? "Please create the final neutral summary for my doctor visit."
-              : "Bitte erstellen Sie die neutrale Zusammenfassung für meinen Arzttermin.",
+          content: tc.summaryRequestUser,
         },
         intent: "summary",
       });
@@ -339,11 +337,10 @@ export function useBodyMapChat({
   }, [
     isSending,
     isSummarizing,
-    language,
     organLabel,
     postToThread,
+    tc.summaryRequestUser,
     userTurnCount,
-    verlauf,
   ]);
 
   const applySession = useCallback(

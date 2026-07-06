@@ -11,6 +11,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const DIAGNOSIS_REFUSAL = {
   de: "Dazu kann ich keine Diagnose stellen. Bei Beschwerden bitte medizinisches Fachpersonal kontaktieren.",
   en: "I cannot diagnose. For symptoms, please contact a healthcare professional.",
+  ru: "Я не могу ставить диагноз. При жалобах, пожалуйста, обратитесь к медицинскому специалисту.",
 };
 
 /**
@@ -22,7 +23,10 @@ export async function runMedaChat(userId, input) {
     return { ok: false, code: "meda_unavailable" };
   }
 
-  const locale = input.locale === "en" ? "en" : "de";
+  const locale =
+    input.locale === "en" || input.locale === "ru"
+      ? input.locale
+      : "de";
   const quota = getMedaQuota(userId);
   if (!quota.ok) {
     return { ok: false, code: "rate_limit_exceeded", quota };

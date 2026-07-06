@@ -10,7 +10,10 @@ import { AI_MODULES } from "../../config/aiSafetyPolicy.js";
  * @param {{ locale?: string, organLabel?: string }} options
  */
 export function parseAndSanitizeBodyMapResponse(raw, options = {}) {
-  const locale = options.locale === "en" ? "en" : "de";
+  const locale =
+    options.locale === "en" || options.locale === "ru"
+      ? options.locale
+      : "de";
   const { displayText, summaryRaw } = splitBodyMapAssistantResponse(raw);
 
   const safeDisplay = sanitizeAiOutput(displayText, {

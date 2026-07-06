@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { getMessages } from "../../../i18n/translations";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
+import { getPatientMedicationPlanMessages } from "../../medicationPlan/patientMedicationPlanI18n.js";
 import { readSharePayloadFromHash } from "../shareCodec.js";
 import "../styles/PatientMedicationSummary.css";
 
@@ -52,14 +52,12 @@ export default function SharedMedicationViewPage() {
 
   const lang = payload?.l || "de";
   const t = useMemo(() => {
-    const bundle =
-      getMessages(lang).patientMedicationPlan ||
-      getMessages("en").patientMedicationPlan;
-    return { base: bundle, s: bundle.summary || {} };
+    const bundle = getPatientMedicationPlanMessages(lang);
+    return { base: bundle, s: bundle.summary };
   }, [lang]);
 
   useEffect(() => {
-    document.title = t.s.sharedPageTitle || t.s.documentTitle || "Medication list";
+    document.title = t.s.sharedPageTitle;
   }, [t]);
 
   const loc = getPrimaryIntlLocale(lang);
@@ -70,11 +68,10 @@ export default function SharedMedicationViewPage() {
       <div className="pmed-summary pmed-shared">
         <div className="pmed-summary__empty">
           <p className="pmed-summary__empty-title">
-            {t.s.sharedInvalidTitle || "No medication list found"}
+            {t.s.sharedInvalidTitle}
           </p>
           <p className="pmed-summary__empty-text">
-            {t.s.sharedInvalidText ||
-              "This link does not contain a valid medication list."}
+            {t.s.sharedInvalidText}
           </p>
         </div>
       </div>
@@ -82,7 +79,7 @@ export default function SharedMedicationViewPage() {
   }
 
   const generatedLabel = payload.g
-    ? (t.s.generatedAt || "Summarized on {date}").replace(
+    ? t.s.generatedAt.replace(
         "{date}",
         (() => {
           try {
@@ -96,7 +93,7 @@ export default function SharedMedicationViewPage() {
         })(),
       )
     : "";
-  const countLabel = (t.s.countLabel || "{count} medication(s)").replace(
+  const countLabel = t.s.countLabel.replace(
     "{count}",
     String(meds.length),
   );
@@ -104,8 +101,7 @@ export default function SharedMedicationViewPage() {
   return (
     <div className="pmed-summary pmed-shared">
       <div className="pmed-shared__banner" role="note">
-        {t.s.sharedBanner ||
-          "Shared medication list — view only. These are the patient's own statements."}
+        {t.s.sharedBanner}
       </div>
 
       <section className="pmed-preview" aria-label={t.s.previewTitle}>
@@ -125,7 +121,7 @@ export default function SharedMedicationViewPage() {
               const period =
                 m.b || m.e
                   ? `${fmtDate(m.b, loc) || "…"} – ${
-                      fmtDate(m.e, loc) || (t.s.ongoing || "ongoing")
+                      fmtDate(m.e, loc) || t.s.ongoing
                     }`
                   : "";
               return (
@@ -180,7 +176,7 @@ export default function SharedMedicationViewPage() {
           className="pmed-btn pmed-btn--secondary"
           onClick={() => window.print()}
         >
-          {t.s.qrPrint || "Print"}
+          {t.s.qrPrint}
         </button>
       </div>
     </div>

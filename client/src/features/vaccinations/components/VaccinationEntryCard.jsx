@@ -2,12 +2,12 @@ import { useState } from "react";
 import { ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 
-function fmtDate(iso, lang) {
-  if (!iso) return "—";
+function fmtDate(iso, lang, fallback) {
+  if (!iso) return fallback;
   try {
     return new Date(iso).toLocaleDateString(getPrimaryIntlLocale(lang), { dateStyle: "medium" });
   } catch {
-    return iso.slice(0, 10);
+    return typeof iso === "string" && iso.slice(0, 10) ? iso.slice(0, 10) : fallback;
   }
 }
 
@@ -57,7 +57,7 @@ export default function VaccinationEntryCard({ entry, t, lang, onEdit, onDelete,
       </div>
 
       <p className="vacc-card__date">
-        {fmtDate(entry.vaccinationDate, lang)}
+        {fmtDate(entry.vaccinationDate, lang, t.notAvailable)}
       </p>
 
       <div className="vacc-card__meta">
@@ -82,13 +82,13 @@ export default function VaccinationEntryCard({ entry, t, lang, onEdit, onDelete,
         {entry.nextDueDate && (
           <div className="vacc-card__meta-item">
             <span className="vacc-card__meta-label">{t.card.nextDue}</span>
-            <span className="vacc-card__meta-value">{fmtDate(entry.nextDueDate, lang)}</span>
+            <span className="vacc-card__meta-value">{fmtDate(entry.nextDueDate, lang, t.notAvailable)}</span>
           </div>
         )}
         {entry.createdAt && (
           <div className="vacc-card__meta-item">
             <span className="vacc-card__meta-label">{t.card.createdAt}</span>
-            <span className="vacc-card__meta-value">{fmtDate(entry.createdAt, lang)}</span>
+            <span className="vacc-card__meta-value">{fmtDate(entry.createdAt, lang, t.notAvailable)}</span>
           </div>
         )}
       </div>
