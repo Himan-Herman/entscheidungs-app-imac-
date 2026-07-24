@@ -11,6 +11,7 @@ export const CONSENT_TYPES = Object.freeze([
   "interpreter_cloud_storage",
   "interpreter_practice_share",
   "vitals_access",
+  "wearable_import",
   "vaccinations_access",
   "health_history_access",
   "prescriptions_access",

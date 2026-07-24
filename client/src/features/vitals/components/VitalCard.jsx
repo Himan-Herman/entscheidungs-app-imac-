@@ -86,6 +86,11 @@ export default function VitalCard({ entry, t, lang, onEdit, onDelete, readOnly =
         <span className={`vital-card__status ${statusClass}`}>
           {t.status[status]}
         </span>
+        {entry.source === "import" && (
+          <span className="vital-card__origin">
+            {t.connect?.providers?.[entry.sourceProvider] || t.connect?.importedBadge || t.card.source}
+          </span>
+        )}
         <p className="vital-card__date">
           {t.card.measuredAt}: {fmtDatetime(entry.measuredAt, lang)}
         </p>

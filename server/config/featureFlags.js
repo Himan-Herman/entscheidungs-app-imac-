@@ -261,6 +261,17 @@ export function isVitalsEnabled() {
 }
 
 /**
+ * Wearable / health-data connections (Phase 0, provider-neutral) — lets patients who own a
+ * smartwatch or health device connect it so measurements flow into "Meine Messwerte"
+ * automatically. Manual entry is unaffected. Requires the vitals module to be enabled first.
+ * No diagnosis, no triage, no interpretation — import plumbing only. Default off.
+ */
+export function isWearablesEnabled() {
+  if (!isVitalsEnabled()) return false;
+  return envFlag("ENABLE_WEARABLES", false);
+}
+
+/**
  * Simulated e-Rezept — practice issues prescriptions, patient views + redeems at pharmacy.
  * No real Telematikinfrastruktur connectivity. Upgrade path via FHIR adapter when TI is live.
  */

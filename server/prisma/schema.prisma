@@ -78,6 +78,7 @@ model User {
   interpreterSessionLinksRevoked   PracticeInterpreterSessionLink[] @relation("InterpreterSessionLinkRevokedBy")
   vaccinationEntries               VaccinationEntry[]
   vitalEntries                     VitalEntry[]
+  wearableConnections              WearableConnection[]
   allergyEntries                   AllergyEntry[]
   diagnosisEntries                 DiagnosisEntry[]
   symptomEntries                   SymptomEntry[]
@@ -1797,14 +1798,47 @@ model VitalEntry {
   notes          String?   @db.Text
   /// manual | import
   source         String    @default("manual") @db.VarChar(40)
+  /// Origin of an imported value: apple_health | health_connect | withings | ... (null for manual)
+  sourceProvider String?   @db.VarChar(40)
+  /// Provider-side stable id for idempotent imports (null for manual). Prevents duplicate re-imports.
+  externalId     String?   @db.VarChar(191)
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, sourceProvider, externalId])
   @@index([userId, type, measuredAt])
   @@index([userId, deletedAt])
+}
+
+/// Patient-owned link to a wearable / health-data source (e.g. Apple Health, Health Connect).
+/// Phase 0 is provider-neutral: it records the connection + consent only. No OAuth secrets or
+/// access tokens are stored here — on-device native apps hold their own permissions; cloud
+/// providers (later phase) keep tokens in a separate, encrypted store. Documentation/import
+/// plumbing only: no diagnosis, no triage, no interpretation.
+model WearableConnection {
+  id             String    @id @default(cuid())
+  userId         String
+  /// apple_health | health_connect | withings | fitbit | garmin | oura | ...
+  provider       String    @db.VarChar(40)
+  /// connected | disconnected | error
+  status         String    @default("connected") @db.VarChar(20)
+  /// JSON array of allowed vital types (data minimisation — only what the patient opted into)
+  scopes         String?   @db.Text
+  /// When the patient granted explicit import consent (Art. 9 GDPR)
+  consentAt      DateTime?
+  lastSyncedAt   DateTime?
+  lastError      String?   @db.VarChar(300)
+  disconnectedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([userId])
 }
 
 /// Patient-recorded symptom diary entry — self-reported, chronological. Documentation only:

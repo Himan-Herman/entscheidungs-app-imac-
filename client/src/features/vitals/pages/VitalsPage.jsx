@@ -6,6 +6,7 @@ import { createVital, deleteVital, fetchVitals, updateVital } from "../api/vital
 import VitalCard from "../components/VitalCard.jsx";
 import VitalChart from "../components/VitalChart.jsx";
 import VitalForm from "../components/VitalForm.jsx";
+import WearableConnectPanel from "../components/WearableConnectPanel.jsx";
 import "../styles/Vitals.css";
 
 const ALL_TYPES = ["blood_pressure", "heart_rate", "glucose", "weight", "oxygen", "temperature"];
@@ -110,6 +111,8 @@ export default function VitalsPage() {
         <p className="vitals-page__intro">{t.intro}</p>
         <p className="vitals-page__disclaimer">{t.disclaimer}</p>
       </div>
+
+      <WearableConnectPanel t={t} />
 
       {!showForm && (
         <button type="button" className="vitals-page__add-btn" onClick={openAdd}>

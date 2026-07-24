@@ -525,6 +525,180 @@
   background: rgba(0,0,0,0.6);
 }
 
+/* ── Wearables — "Gerät verbinden" ───────────────────────────────────────── */
+.wearables {
+  background: var(--ms-surface, #fff);
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: 14px;
+  padding: 1rem 1.1rem 1.15rem;
+  margin-bottom: 1.5rem;
+}
+.wearables__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  color: var(--ms-accent, #0d9488);
+}
+.wearables__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.15rem;
+  color: var(--ms-text, #111827);
+  line-height: 1.3;
+}
+.wearables__intro {
+  font-size: 0.9rem;
+  color: var(--ms-text-secondary, #4b5563);
+  margin: 0;
+}
+.wearables__app-hint {
+  font-size: 0.8rem;
+  color: var(--ms-text-secondary, #6b7280);
+  background: var(--ms-surface-muted, #f1f5f9);
+  border-radius: 9px;
+  padding: 0.55rem 0.75rem;
+  margin: 0.8rem 0 0.4rem;
+}
+.wearables__error {
+  font-size: 0.85rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 9px;
+  padding: 0.5rem 0.7rem;
+  margin: 0.6rem 0 0;
+}
+
+.wearables__loading { display: flex; justify-content: center; padding: 1.25rem; }
+.wearables__spinner {
+  width: 22px; height: 22px;
+  border: 2.5px solid var(--ms-border, #d1d5db);
+  border-top-color: var(--ms-accent, #0d9488);
+  border-radius: 50%;
+  animation: wearables-spin 0.8s linear infinite;
+}
+@keyframes wearables-spin { to { transform: rotate(360deg); } }
+
+.wearables__list { list-style: none; margin: 0.75rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.55rem; }
+.wearables__item {
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: 11px;
+  padding: 0.7rem 0.8rem;
+  background: var(--ms-surface, #fff);
+}
+.wearables__item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.wearables__item-text { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.wearables__provider-name { font-weight: 600; color: var(--ms-text, #111827); }
+.wearables__provider-types { font-size: 0.78rem; color: var(--ms-text-secondary, #6b7280); }
+
+.wearables__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+}
+.wearables__badge--connected { background: rgba(16,185,129,0.14); color: #047857; }
+.wearables__badge--planned { background: var(--ms-surface-muted, #f1f5f9); color: var(--ms-text-secondary, #475569); }
+
+.wearables__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 9px;
+  border: 1.5px solid var(--ms-border, #d1d5db);
+  background: transparent;
+  color: var(--ms-text, #111827);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.wearables__btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.wearables__btn:focus-visible { outline: 3px solid var(--ms-accent, #0d9488); outline-offset: 2px; }
+.wearables__btn--primary { background: var(--ms-accent, #0d9488); border-color: var(--ms-accent, #0d9488); color: #fff; }
+.wearables__btn--primary:hover:not(:disabled) { background: #0f766e; }
+.wearables__btn--ghost:hover:not(:disabled) { background: var(--ms-surface-muted, #f1f5f9); }
+
+.wearables__consent {
+  margin-top: 0.75rem;
+  padding: 0.8rem;
+  border: 1px dashed var(--ms-border, #cbd5e1);
+  border-radius: 10px;
+  background: var(--ms-surface-muted, #f8fafc);
+}
+.wearables__consent:focus-visible { outline: 3px solid var(--ms-accent, #0d9488); outline-offset: 2px; }
+.wearables__consent-title {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-weight: 700; font-size: 0.9rem; margin: 0 0 0.4rem;
+  color: var(--ms-text, #111827);
+}
+.wearables__consent-body { font-size: 0.85rem; color: var(--ms-text-secondary, #4b5563); margin: 0 0 0.5rem; }
+.wearables__consent-points { font-size: 0.82rem; color: var(--ms-text-secondary, #4b5563); margin: 0 0 0.6rem; padding-left: 1.1rem; }
+.wearables__consent-points li { margin-bottom: 0.2rem; }
+.wearables__consent-check {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  font-size: 0.85rem; color: var(--ms-text, #111827); cursor: pointer;
+  margin-bottom: 0.7rem;
+}
+.wearables__consent-check input { margin-top: 0.15rem; width: 18px; height: 18px; accent-color: var(--ms-accent, #0d9488); flex-shrink: 0; }
+.wearables__consent-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.vital-card__origin {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ms-accent, #0f766e);
+  background: rgba(13,148,136,0.1);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  margin-top: 0.2rem;
+}
+
+/* ── Wearables — dark mode ───────────────────────────────────────────────── */
+:root[data-theme="dark"] .wearables,
+:root[data-theme="dark"] .wearables__item {
+  background: rgba(15,23,42,0.9);
+  border-color: rgba(148,163,184,0.28);
+}
+:root[data-theme="dark"] .wearables__title,
+:root[data-theme="dark"] .wearables__provider-name,
+:root[data-theme="dark"] .wearables__consent-title,
+:root[data-theme="dark"] .wearables__consent-check { color: #e2e8f0; }
+:root[data-theme="dark"] .wearables__intro,
+:root[data-theme="dark"] .wearables__provider-types,
+:root[data-theme="dark"] .wearables__app-hint,
+:root[data-theme="dark"] .wearables__consent-body,
+:root[data-theme="dark"] .wearables__consent-points { color: #94a3b8; }
+:root[data-theme="dark"] .wearables__app-hint,
+:root[data-theme="dark"] .wearables__consent { background: rgba(148,163,184,0.08); }
+:root[data-theme="dark"] .wearables__consent { border-color: rgba(148,163,184,0.35); }
+:root[data-theme="dark"] .wearables__btn {
+  border-color: rgba(148,163,184,0.35);
+  color: #e2e8f0;
+}
+:root[data-theme="dark"] .wearables__btn--ghost:hover:not(:disabled) { background: rgba(148,163,184,0.12); }
+:root[data-theme="dark"] .wearables__btn--primary { color: #fff; }
+:root[data-theme="dark"] .wearables__badge--connected { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+:root[data-theme="dark"] .wearables__badge--planned { background: rgba(100,116,139,0.2); color: #94a3b8; }
+:root[data-theme="dark"] .wearables__error {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.35);
+  color: #fca5a5;
+}
+:root[data-theme="dark"] .vital-card__origin { background: rgba(13,148,136,0.22); color: #5eead4; }
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .vitals-form__grid { grid-template-columns: 1fr; }
@@ -542,4 +716,9 @@
 
   .vitals-tabs { gap: 0.3rem; }
   .vitals-tabs__btn { font-size: 0.8rem; padding: 0.3rem 0.65rem; }
+
+  .wearables__item-main { align-items: flex-start; }
+  .wearables__item-action { width: 100%; }
+  .wearables__item-action .wearables__btn { width: 100%; justify-content: center; }
+  .wearables__consent-actions .wearables__btn { flex: 1; justify-content: center; }
 }

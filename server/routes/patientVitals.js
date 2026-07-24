@@ -7,26 +7,9 @@ import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { isVitalsEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { VALID_TYPES, DEFAULT_UNITS, validateVital } from "../services/vitals/vitalConstants.js";
 
 const router = express.Router();
-
-const VALID_TYPES = ["blood_pressure", "heart_rate", "glucose", "weight", "oxygen", "temperature"];
-const DEFAULT_UNITS = {
-  blood_pressure: "mmHg",
-  heart_rate: "bpm",
-  glucose: "mg/dL",
-  weight: "kg",
-  oxygen: "%",
-  temperature: "°C",
-};
-const MAX_VALUES = {
-  blood_pressure: { primary: [40, 300], secondary: [20, 200] },
-  heart_rate: { primary: [20, 300] },
-  glucose: { primary: [20, 1000] },
-  weight: { primary: [10, 700] },
-  oxygen: { primary: [50, 100] },
-  temperature: { primary: [25, 45] },
-};
 
 function userId(req) {
   const id = req.user?.userId;
@@ -38,24 +21,7 @@ function requireFeature(_req, res, next) {
   return next();
 }
 
-function validateEntry(body) {
-  const { type, valuePrimary, valueSecondary, unit, measuredAt } = body;
-  if (!VALID_TYPES.includes(type)) return "invalid_type";
-  const p = Number(valuePrimary);
-  if (!Number.isFinite(p)) return "invalid_value";
-  const limits = MAX_VALUES[type];
-  if (limits?.primary && (p < limits.primary[0] || p > limits.primary[1])) return "value_out_of_range";
-  if (type === "blood_pressure") {
-    const s = Number(valueSecondary);
-    if (!Number.isFinite(s)) return "missing_diastolic";
-    if (s < limits.secondary[0] || s > limits.secondary[1]) return "value_out_of_range";
-  }
-  if (!measuredAt || isNaN(Date.parse(measuredAt))) return "invalid_date";
-  const d = new Date(measuredAt);
-  if (d > new Date()) return "date_in_future";
-  if (unit && unit.length > 20) return "invalid_unit";
-  return null;
-}
+const validateEntry = validateVital;
 
 function entryToJson(row) {
   return {
@@ -67,6 +33,7 @@ function entryToJson(row) {
     measuredAt: row.measuredAt,
     notes: row.notes,
     source: row.source,
+    sourceProvider: row.sourceProvider ?? null,
     createdAt: row.createdAt,
   };
 }
@@ -117,7 +84,7 @@ router.post("/", requireFeature, async (req, res) => {
         source: "manual",
       },
     });
-    await writeAuditLog({ userId: uid, action: "vitals_create", meta: { type, entryId: entry.id } }).catch(() => {});
+    writeAuditLog({ userId: uid, action: "vitals_create", meta: { type, entryId: entry.id } });
     return res.status(201).json({ ok: true, entry: entryToJson(entry) });
   } catch (err) {
     console.error("[vitals] POST error", err);
@@ -150,7 +117,7 @@ router.patch("/:id", requireFeature, async (req, res) => {
         notes: body.notes?.trim() || null,
       },
     });
-    await writeAuditLog({ userId: uid, action: "vitals_update", meta: { entryId: req.params.id } }).catch(() => {});
+    writeAuditLog({ userId: uid, action: "vitals_update", meta: { entryId: req.params.id } });
     return res.json({ ok: true, entry: entryToJson(updated) });
   } catch (err) {
     console.error("[vitals] PATCH error", err);
@@ -173,7 +140,7 @@ router.delete("/:id", requireFeature, async (req, res) => {
       where: { id: req.params.id },
       data: { deletedAt: new Date() },
     });
-    await writeAuditLog({ userId: uid, action: "vitals_delete", meta: { entryId: req.params.id } }).catch(() => {});
+    writeAuditLog({ userId: uid, action: "vitals_delete", meta: { entryId: req.params.id } });
     return res.json({ ok: true });
   } catch (err) {
     console.error("[vitals] DELETE error", err);
