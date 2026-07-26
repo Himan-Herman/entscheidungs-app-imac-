@@ -5,6 +5,7 @@ import { PATIENT_UI_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { useAuthFlowPalette } from "../ThemeMode";
+import { appFetch } from "../lib/apiBase.js";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function ForgotPassword() {
     setMsg("");
 
     try {
-      const r = await fetch("/api/auth/request-password-reset", {
+      const r = await appFetch("/api/auth/request-password-reset", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

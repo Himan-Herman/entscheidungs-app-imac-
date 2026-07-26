@@ -1,10 +1,8 @@
 // client/src/lib/api.js
 // Universelle Fetch-Hilfsfunktionen für MedScout
 
-// Automatisch passende API-Base ermitteln
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  "https://api.medscout.app"; // Fallback für Vercel / Deployment
+// Automatisch passende API-Base ermitteln (gemeinsame Quelle mit authFetch / nativer App)
+import { API_BASE } from "./apiBase.js";
 
 // Hilfsfunktion für vollständige URL
 function buildUrl(path) {

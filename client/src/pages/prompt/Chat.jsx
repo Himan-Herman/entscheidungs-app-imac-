@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getOrganPrompt } from './organPrompts';
+import { appFetch } from "../../lib/apiBase.js";
 
 export default function Chat() {
   const [eingabe, setEingabe] = useState('');
@@ -37,7 +38,7 @@ export default function Chat() {
     try {
       const base64Bild = bild ? await dateiZuBase64(bild) : null;
 
-      const res = await fetch('/api/ki', {
+      const res = await appFetch('/api/ki', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

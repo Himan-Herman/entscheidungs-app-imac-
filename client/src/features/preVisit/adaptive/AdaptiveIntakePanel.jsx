@@ -8,6 +8,7 @@ import {
   getAdaptiveSlice,
 } from "./adaptiveSessionUtils.js";
 import { sanitizeSafetyFlags } from "./adaptivePromptRules.js";
+import { appFetch } from "../../../lib/apiBase.js";
 
 const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
   {
@@ -113,7 +114,7 @@ const AdaptiveIntakePanel = forwardRef(function AdaptiveIntakePanel(
           sessionRef.current?.longitudinalCase?.compactTimelineSnippet || "",
         ).slice(0, 1200),
       };
-      const res = await fetch("/api/previsit/adaptive-intake", {
+      const res = await appFetch("/api/previsit/adaptive-intake", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

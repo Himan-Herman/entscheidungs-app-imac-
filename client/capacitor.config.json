@@ -1,0 +1,15 @@
+{
+  "appId": "com.medscoutx.app",
+  "appName": "MedScoutX",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "always"
+  }
+}

@@ -8,6 +8,7 @@ import {
   PENDING_MODE_KEY,
   USER_MODES,
 } from "../utils/userMode.js";
+import { appFetch } from "../lib/apiBase.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await appFetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

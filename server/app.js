@@ -124,16 +124,31 @@ app.set('trust proxy', 1);
 
 app.use(requestContextMiddleware);
 
-const allowedOrigins = (process.env.CORS_ORIGIN || '')
+/**
+ * Origins of our own native app shell (Capacitor). Inside the store app the web layer
+ * is not served from our domain but from the device-local webview, so these fixed
+ * origins must be allowed or every API call from the iOS/Android app fails CORS.
+ * They are constants of our own build, not user input — no wildcard is introduced.
+ *   https://localhost      → Android (androidScheme "https")
+ *   capacitor://localhost  → iOS (default Capacitor scheme)
+ */
+const NATIVE_APP_ORIGINS = ['https://localhost', 'capacitor://localhost'];
+
+const configuredOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map(o => o.trim())
   .filter(Boolean);
 
+const allowedOrigins = [
+  ...new Set([
+    ...(configuredOrigins.length ? configuredOrigins : ['http://localhost:5173']),
+    ...NATIVE_APP_ORIGINS,
+  ]),
+];
+
 app.use(
   cors({
-    origin: allowedOrigins.length
-      ? allowedOrigins
-      : ['http://localhost:5173'], // Fallback für lokale Entwicklung
+    origin: allowedOrigins,
     credentials: false, // kein Cookie-Handling nötig
   })
 );

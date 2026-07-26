@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
+import { appFetch } from "../lib/apiBase.js";
 
 export default function SpeakButton({ text, className = "", ariaLabel = "" }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -18,7 +19,7 @@ export default function SpeakButton({ text, className = "", ariaLabel = "" }) {
     try {
       setIsPlaying(true);
 
-      const response = await fetch("/api/tts", {
+      const response = await appFetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),

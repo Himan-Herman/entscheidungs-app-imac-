@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import { APP_BUILD_ID, runPwaBuildMigration } from "./utils/pwaBuildMigration.js";
+import { isNativeApp, unregisterServiceWorkers } from "./lib/apiBase.js";
 import "./index.css";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -288,19 +289,28 @@ function Gate() {
 }
 
 void runPwaBuildMigration().then(() => {
-  const updateSW = registerSW({
-    immediate: true,
-    onNeedRefresh() {
-      updateSW(true);
-    },
-    onRegisteredSW(_url, registration) {
-      if (registration) {
-        window.setInterval(() => {
-          void registration.update();
-        }, 60 * 60 * 1000);
-      }
-    },
-  });
+  // Inside the native app (Capacitor) the web assets ship with the binary and are
+  // replaced by the store update itself. A service worker would add a second,
+  // competing cache that can keep serving the previous build after an app update —
+  // so registration stays web-only. Any SW left over from a web visit is removed.
+  // NOTE: this must never short-circuit the render below, or the app starts blank.
+  if (isNativeApp()) {
+    void unregisterServiceWorkers();
+  } else {
+    const updateSW = registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        updateSW(true);
+      },
+      onRegisteredSW(_url, registration) {
+        if (registration) {
+          window.setInterval(() => {
+            void registration.update();
+          }, 60 * 60 * 1000);
+        }
+      },
+    });
+  }
 
   if (import.meta.env.PROD && typeof document !== "undefined") {
     let meta = document.querySelector('meta[name="medscout-build-id"]');

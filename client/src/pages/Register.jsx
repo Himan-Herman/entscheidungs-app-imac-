@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import "../styles/Register.css";
+import { appFetch } from "../lib/apiBase.js";
 
 const pwdRule =
   /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_\-+=[{\]}:;,.?~]{8,}$/;
@@ -108,7 +109,7 @@ export default function Register() {
         },
       };
 
-      const res = await fetch("/api/auth/register", {
+      const res = await appFetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

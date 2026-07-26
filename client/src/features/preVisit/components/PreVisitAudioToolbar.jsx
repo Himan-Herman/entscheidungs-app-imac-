@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Volume2 } from "lucide-react";
 
 import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
+import { appFetch } from "../../../lib/apiBase.js";
 
 const MAX_SPEAK_CHARS = 1200;
 
@@ -68,7 +69,7 @@ export default function PreVisitAudioToolbar({
     speakAbortRef.current = ac;
 
     try {
-      const res = await fetch("/api/previsit/audio/speak", {
+      const res = await appFetch("/api/previsit/audio/speak", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -182,7 +183,7 @@ export default function PreVisitAudioToolbar({
         const fd = new FormData();
         fd.append("audio", blob, "previsit-recording.webm");
         if (patientLanguage) fd.append("language", patientLanguage);
-        const res = await fetch("/api/previsit/audio/transcribe", {
+        const res = await appFetch("/api/previsit/audio/transcribe", {
           method: "POST",
           body: fd,
         });

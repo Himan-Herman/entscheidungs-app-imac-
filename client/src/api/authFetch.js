@@ -1,4 +1,5 @@
 import { getAuthHeaders } from "./authHeaders";
+import { resolveApiUrl } from "../lib/apiBase.js";
 
 /**
  * Wie fetch, setzt Authorization aus dem gespeicherten JWT und leitet bei abgelaufenem
@@ -14,7 +15,8 @@ export async function authFetch(input, init = {}) {
     headers.set("Authorization", auth.Authorization);
   }
 
-  const res = await fetch(input, { ...init, headers });
+  // Relative API paths must become absolute inside the native shell; unchanged on web.
+  const res = await fetch(resolveApiUrl(input), { ...init, headers });
 
   if (res.status === 401) {
     let body = {};

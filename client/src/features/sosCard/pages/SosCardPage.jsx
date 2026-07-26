@@ -16,6 +16,7 @@ import SosCardForm from "../components/SosCardForm.jsx";
 import SosCardPreview from "../components/SosCardPreview.jsx";
 import SosCardQr from "../components/SosCardQr.jsx";
 import "../styles/SosCard.css";
+import { appFetch } from "../../../lib/apiBase.js";
 
 export default function SosCardPage() {
   const { language } = useLanguage();
@@ -51,10 +52,10 @@ export default function SosCardPage() {
     try {
       const [cardRes, allergyRes, diagRes] = await Promise.all([
         fetchSosCard(),
-        fetch("/api/patient/allergies", {
+        appFetch("/api/patient/allergies", {
           headers: { Authorization: `Bearer ${localStorage.getItem("medscout_token")}` },
         }).then((r) => r.json()).catch(() => ({})),
-        fetch("/api/patient/diagnoses", {
+        appFetch("/api/patient/diagnoses", {
           headers: { Authorization: `Bearer ${localStorage.getItem("medscout_token")}` },
         }).then((r) => r.json()).catch(() => ({})),
       ]);

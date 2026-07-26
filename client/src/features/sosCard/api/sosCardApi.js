@@ -1,4 +1,5 @@
 import { authFetch } from "../../../api/authFetch.js";
+import { appFetch } from "../../../lib/apiBase.js";
 
 const BASE = "/api/patient/sos-card";
 
@@ -37,7 +38,7 @@ export async function generateAiSummary() {
 }
 
 export async function fetchPublicEmergency(token) {
-  const res = await fetch(`/api/public/emergency/${encodeURIComponent(token)}`);
+  const res = await appFetch(`/api/public/emergency/${encodeURIComponent(token)}`);
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }

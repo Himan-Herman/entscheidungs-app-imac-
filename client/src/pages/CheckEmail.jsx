@@ -4,6 +4,7 @@ import { PATIENT_UI_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { useAuthFlowPalette } from "../ThemeMode";
+import { appFetch } from "../lib/apiBase.js";
 
 export default function CheckEmail() {
   const [msg, setMsg] = useState("");
@@ -26,7 +27,7 @@ export default function CheckEmail() {
       setBusy(true);
       setMsg("");
 
-      const r = await fetch("/api/auth/resend-verification", {
+      const r = await appFetch("/api/auth/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

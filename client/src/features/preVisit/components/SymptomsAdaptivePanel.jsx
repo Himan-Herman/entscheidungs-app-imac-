@@ -13,6 +13,7 @@ import {
   createEmptyAdaptiveIntakeSlice,
   getOfflineFollowUpQuestion,
 } from "../engine/symptomsAdaptiveEngine.js";
+import { appFetch } from "../../../lib/apiBase.js";
 
 /**
  * Adaptive intake (bounded) for selected category.
@@ -110,7 +111,7 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
         };
       }
       try {
-        const res = await fetch("/api/previsit/symptoms-followup", {
+        const res = await appFetch("/api/previsit/symptoms-followup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
