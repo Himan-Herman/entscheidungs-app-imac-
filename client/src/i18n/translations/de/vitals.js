@@ -142,6 +142,7 @@ export default {
     syncNow: "Jetzt synchronisieren",
     syncing: "Wird synchronisiert …",
     syncDone: "{n} neu übernommen, {dup} bereits vorhanden, {skip} übersprungen.",
+    syncTruncated: "Hinweis: Für {types} wurden nicht alle Werte des Zeitraums übertragen. Synchronisieren Sie erneut, um weitere zu laden.",
     syncNothingNew: "Keine neuen Messwerte gefunden.",
     syncOffline: "Keine Verbindung. Bitte später erneut versuchen.",
     syncError: "Synchronisierung fehlgeschlagen. Bitte später erneut versuchen.",

@@ -182,7 +182,12 @@ export default function WearableConnectPanel({ t, locale }) {
         [SYNC_RESULT.OFFLINE]: c?.syncOffline,
         [SYNC_RESULT.SERVER_ERROR]: c?.syncError,
       };
-      setSyncNote(map[r.result] || "");
+      let note = map[r.result] || "";
+      // Never claim completeness: if a type hit the safety ceiling, say so.
+      if (r.truncatedTypes?.length) {
+        note += ` ${(c?.syncTruncated || "").replace("{types}", r.truncatedTypes.map(typeLabel).join(", "))}`;
+      }
+      setSyncNote(note.trim());
       await refreshHealthState();
       await load();
     } catch (err) {

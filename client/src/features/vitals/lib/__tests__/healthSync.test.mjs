@@ -180,3 +180,45 @@ test("offline midway still reports what already succeeded", async () => {
   assert.equal(r.result, SYNC_RESULT.OFFLINE);
   assert.equal(r.imported, 200);
 });
+
+// ── lastSyncedAt may only advance after a COMPLETE sync ────────────────────
+test("only the final chunk carries finalizeSync", async () => {
+  const many = Array.from({ length: 450 }, (_, i) => ({ type: "heart_rate", externalId: `e${i}` }));
+  const flags = [];
+  await run({
+    readEntries: async () => ({ entries: many, failedTypes: [] }),
+    importEntries: async ({ entries, finalizeSync }) => {
+      flags.push(finalizeSync === true);
+      return { res: { ok: true }, data: { ok: true, imported: entries.length, duplicates: 0, skipped: [] } };
+    },
+  });
+  assert.deepEqual(flags, [false, false, true], "lastSyncedAt must advance once, at the end");
+});
+
+test("a failed chunk never finalises the sync", async () => {
+  const many = Array.from({ length: 450 }, (_, i) => ({ type: "heart_rate", externalId: `e${i}` }));
+  const flags = [];
+  let call = 0;
+  const r = await run({
+    readEntries: async () => ({ entries: many, failedTypes: [] }),
+    importEntries: async ({ finalizeSync }) => {
+      flags.push(finalizeSync === true);
+      call += 1;
+      return call === 2
+        ? { res: { ok: false }, data: { ok: false, error: "request_failed" } }
+        : { res: { ok: true }, data: { ok: true, imported: 200, duplicates: 0, skipped: [] } };
+    },
+  });
+  assert.equal(r.result, SYNC_RESULT.SERVER_ERROR, "must NOT report success");
+  assert.equal(flags.includes(true), false,
+    "no chunk may finalise → lastSyncedAt stays put → the rest is re-read next time");
+  assert.equal(r.imported, 200, "the first chunk's readings are kept");
+});
+
+test("truncated types are surfaced to the caller", async () => {
+  const r = await run({
+    readEntries: async () => ({ entries: [{ type: "heart_rate", externalId: "a" }],
+                                failedTypes: [], truncatedTypes: ["heart_rate"] }),
+  });
+  assert.deepEqual(r.truncatedTypes, ["heart_rate"]);
+});

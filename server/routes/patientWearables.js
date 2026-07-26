@@ -160,7 +160,7 @@ router.post("/import", requireFeature, async (req, res) => {
   const uid = userId(req);
   if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
 
-  const { provider, entries } = req.body || {};
+  const { provider, entries, finalizeSync } = req.body || {};
   if (!isKnownProvider(provider)) return res.status(400).json({ ok: false, error: "unknown_provider" });
   if (!Array.isArray(entries)) return res.status(400).json({ ok: false, error: "invalid_entries" });
   if (entries.length === 0) return res.json({ ok: true, imported: 0, duplicates: 0, skipped: [] });
@@ -177,9 +177,16 @@ router.post("/import", requireFeature, async (req, res) => {
 
   try {
     const result = await importVitalEntries({ userId: uid, provider, allowedTypes, entries });
-    await prisma.wearableConnection
-      .update({ where: { id: connection.id }, data: { lastSyncedAt: new Date(), lastError: null } })
-      .catch(() => {});
+
+    // A sync is uploaded in several chunks. Advancing lastSyncedAt after every chunk
+    // would move the next sync's start date past readings a later, failed chunk still
+    // carried — they would be skipped forever. The client therefore sets finalizeSync
+    // only on the last chunk, and only when every earlier chunk succeeded.
+    if (finalizeSync === true) {
+      await prisma.wearableConnection
+        .update({ where: { id: connection.id }, data: { lastSyncedAt: new Date(), lastError: null } })
+        .catch(() => {});
+    }
     if (result.imported > 0) {
       writeAuditLog({
         userId: uid,

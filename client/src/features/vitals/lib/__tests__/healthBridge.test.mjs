@@ -203,15 +203,16 @@ test("one unauthorized type does not abort the whole read", async () => {
 test("no data available yields an empty result, not an error", async () => {
   asPlatform("android");
   __setHealthPluginForTests({ readSamples: async () => ({ samples: [] }) });
-  const { entries, failedTypes } = await readHealthEntries({});
+  const { entries, failedTypes, truncatedTypes } = await readHealthEntries({});
   assert.deepEqual(entries, []);
   assert.deepEqual(failedTypes, []);
+  assert.deepEqual(truncatedTypes, []);
 });
 
 test("missing plugin yields empty results rather than crashing", async () => {
   asPlatform("ios");
   __setHealthPluginForTests(undefined);
-  assert.deepEqual(await readHealthEntries({}), { entries: [], failedTypes: [] });
+  assert.deepEqual(await readHealthEntries({}), { entries: [], failedTypes: [], truncatedTypes: [] });
   assert.deepEqual(await requestHealthReadAccess(), { authorized: [], denied: [] });
 });
 
@@ -258,4 +259,95 @@ test("normalised sample carries the category, never the raw source name", () => 
   assert.equal("sourceName" in e, false);
   assert.equal("sourceId" in e, false);
   assert.equal(JSON.stringify(e).includes("com.apple.health"), false, "no bundle id may leak");
+});
+
+// ── Time-window pagination (the plugin has no sample cursor) ────────────────
+const { SAMPLES_PER_PAGE, MAX_SAMPLES_PER_TYPE } = B;
+
+const mkSamples = (n, startMs) => Array.from({ length: n }, (_, i) => ({
+  dataType: "heartRate", value: 60 + (i % 20), unit: "bpm",
+  endDate: new Date(startMs + i * 60_000).toISOString(),
+  platformId: `hr-${startMs}-${i}`,
+}));
+
+test("pages through a window until it is exhausted", async () => {
+  asPlatform("ios");
+  const base = Date.parse("2026-07-01T00:00:00.000Z");
+  const calls = [];
+  __setHealthPluginForTests({
+    readSamples: async ({ startDate, limit, ascending }) => {
+      calls.push({ startDate, ascending });
+      const from = Date.parse(startDate);
+      // three full pages, then a short one
+      if (calls.length <= 3) return { samples: mkSamples(limit, Math.max(from, base)) };
+      return { samples: mkSamples(7, Math.max(from, base)) };
+    },
+  });
+  const { entries, truncatedTypes } = await readHealthEntries({ vitalTypes: ["heart_rate"] });
+  assert.equal(calls.length, 4, "keeps paging while pages come back full");
+  assert.ok(calls.every(c => c.ascending === true), "must read ascending to page over time");
+  assert.ok(entries.length > SAMPLES_PER_PAGE, "more than one page was imported");
+  assert.deepEqual(truncatedTypes, [], "a naturally exhausted window is not truncated");
+});
+
+test("a short first page stops paging immediately", async () => {
+  asPlatform("ios");
+  let calls = 0;
+  __setHealthPluginForTests({
+    readSamples: async () => { calls += 1; return { samples: mkSamples(5, Date.parse("2026-07-01T00:00:00.000Z")) }; },
+  });
+  const { entries } = await readHealthEntries({ vitalTypes: ["heart_rate"] });
+  assert.equal(calls, 1);
+  assert.equal(entries.length, 5);
+});
+
+test("truncation is reported, never silent", async () => {
+  asPlatform("ios");
+  const base = Date.parse("2026-07-01T00:00:00.000Z");
+  __setHealthPluginForTests({
+    readSamples: async ({ startDate, limit }) =>
+      ({ samples: mkSamples(limit, Math.max(Date.parse(startDate), base)) }),   // never runs out
+  });
+  const { entries, truncatedTypes } = await readHealthEntries({ vitalTypes: ["heart_rate"] });
+  assert.deepEqual(truncatedTypes, ["heart_rate"], "the user must be told the set was capped");
+  assert.ok(entries.length <= MAX_SAMPLES_PER_TYPE);
+});
+
+test("a platform that keeps returning the same instant cannot loop forever", async () => {
+  asPlatform("ios");
+  let calls = 0;
+  const fixed = "2026-07-01T00:00:00.000Z";
+  __setHealthPluginForTests({
+    readSamples: async ({ limit }) => {
+      calls += 1;
+      return { samples: Array.from({ length: limit }, (_, i) => ({
+        dataType: "heartRate", value: 60, unit: "bpm", endDate: fixed, platformId: `same-${calls}-${i}`,
+      })) };
+    },
+  });
+  const { truncatedTypes } = await readHealthEntries({ vitalTypes: ["heart_rate"] });
+  assert.ok(calls < 100, `must terminate, took ${calls} calls`);
+  assert.deepEqual(truncatedTypes, ["heart_rate"]);
+});
+
+test("one unauthorised type still does not abort the others", async () => {
+  asPlatform("ios");
+  __setHealthPluginForTests({
+    readSamples: async ({ dataType }) => {
+      if (dataType === "bloodGlucose") throw new Error("not authorized");
+      return { samples: mkSamples(3, Date.parse("2026-07-01T00:00:00.000Z")) };
+    },
+  });
+  const { entries, failedTypes } = await readHealthEntries({ vitalTypes: ["heart_rate", "glucose"] });
+  assert.ok(entries.length > 0);
+  assert.deepEqual(failedTypes, ["glucose"]);
+});
+
+test("app names that merely contain 'Apple Watch' are NOT claimed as a device", () => {
+  for (const s of ["Apple Watch Sync Pro", "MyApp for Apple Watch users", "Watch Buddy"]) {
+    assert.equal(deriveSourceDevice(s, "apple_health"), null, `${s} must stay neutral`);
+  }
+  // Apple's own naming still works
+  assert.equal(deriveSourceDevice("Apple Watch", "apple_health"), SOURCE_DEVICE.APPLE_WATCH);
+  assert.equal(deriveSourceDevice("Himans Apple Watch", "apple_health"), SOURCE_DEVICE.APPLE_WATCH);
 });

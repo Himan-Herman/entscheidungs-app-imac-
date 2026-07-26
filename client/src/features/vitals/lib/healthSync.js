@@ -62,7 +62,7 @@ export async function syncHealthData({ scopes, lastSyncedAt, deps } = {}) {
     now = () => Date.now(),
   } = deps || {};
 
-  const empty = { imported: 0, duplicates: 0, skipped: 0, deniedTypes: [], failedTypes: [] };
+  const empty = { imported: 0, duplicates: 0, skipped: 0, deniedTypes: [], failedTypes: [], truncatedTypes: [] };
 
   const provider = getProvider();
   if (!provider) return { result: SYNC_RESULT.NO_PLATFORM, ...empty };
@@ -79,13 +79,13 @@ export async function syncHealthData({ scopes, lastSyncedAt, deps } = {}) {
     return { result: SYNC_RESULT.NO_PERMISSION, ...empty, deniedTypes };
   }
 
-  const { entries, failedTypes } = await readEntries({
+  const { entries, failedTypes, truncatedTypes } = await readEntries({
     vitalTypes: granted,
     startDate: resolveSyncStart(lastSyncedAt, now()),
   });
 
   if (entries.length === 0) {
-    return { result: SYNC_RESULT.NOTHING_NEW, ...empty, deniedTypes, failedTypes };
+    return { result: SYNC_RESULT.NOTHING_NEW, ...empty, deniedTypes, failedTypes, truncatedTypes: truncatedTypes || [] };
   }
 
   // The server caps one import call; a 30-day window across six types easily exceeds
@@ -94,20 +94,22 @@ export async function syncHealthData({ scopes, lastSyncedAt, deps } = {}) {
   try {
     for (let i = 0; i < entries.length; i += MAX_UPLOAD_CHUNK) {
       const chunk = entries.slice(i, i + MAX_UPLOAD_CHUNK);
-      const { res, data } = await importEntries({ provider, entries: chunk });
+      const isLast = i + MAX_UPLOAD_CHUNK >= entries.length;
+      // lastSyncedAt may only advance once every chunk has landed.
+      const { res, data } = await importEntries({ provider, entries: chunk, finalizeSync: isLast });
       if (!res?.ok || !data?.ok) {
         // Keep what already made it through — a later chunk failing must not
         // discard earlier successes, and the next sync will pick up the rest.
-        return { result: SYNC_RESULT.SERVER_ERROR, ...totals, deniedTypes, failedTypes };
+        return { result: SYNC_RESULT.SERVER_ERROR, ...totals, deniedTypes, failedTypes, truncatedTypes: truncatedTypes || [] };
       }
       totals.imported += data.imported || 0;
       totals.duplicates += data.duplicates || 0;
       totals.skipped += Array.isArray(data.skipped) ? data.skipped.length : 0;
     }
-    return { result: SYNC_RESULT.OK, ...totals, deniedTypes, failedTypes };
+    return { result: SYNC_RESULT.OK, ...totals, deniedTypes, failedTypes, truncatedTypes: truncatedTypes || [] };
   } catch (err) {
     if (err?.message === "SESSION_EXPIRED") throw err;
     // Network failure — the device is offline or the API is unreachable.
-    return { result: SYNC_RESULT.OFFLINE, ...totals, deniedTypes, failedTypes };
+    return { result: SYNC_RESULT.OFFLINE, ...totals, deniedTypes, failedTypes, truncatedTypes: truncatedTypes || [] };
   }
 }

@@ -44,8 +44,24 @@ export const CANONICAL_UNIT = Object.freeze({
 /** First sync window. Deliberately bounded — we do not pull a user's entire history. */
 export const INITIAL_SYNC_DAYS = 30;
 
-/** Upper bound per type and per sync, aligned with the server's MAX_IMPORT_BATCH. */
-export const MAX_SAMPLES_PER_TYPE = 100;
+/**
+ * Page size for one readSamples call.
+ *
+ * IMPORTANT — the plugin has NO cursor pagination for samples. `anchor` exists only on
+ * queryWorkouts (QueryWorkoutsOptions/QueryWorkoutsResult); readSamples takes just
+ * {dataType,startDate,endDate,limit,ascending} and returns {samples}. We therefore
+ * paginate over TIME: read ascending, then continue from the last sample's timestamp.
+ */
+export const SAMPLES_PER_PAGE = 100;
+
+/**
+ * Hard safety ceiling per type and sync. Reaching it means the 30-day window held more
+ * readings than we import in one go — the UI must say so; we never claim completeness.
+ */
+export const MAX_SAMPLES_PER_TYPE = 2000;
+
+/** Guards against a pathological loop if a platform keeps returning the same page. */
+const MAX_PAGES_PER_TYPE = 40;
 
 const MAX_EXTERNAL_ID_LEN = 191;
 
@@ -77,8 +93,13 @@ export function deriveSourceDevice(sourceName, provider) {
   const s = sourceName.toLowerCase();
 
   if (provider === "apple_health") {
-    if (/\bapple\s*watch\b/.test(s)) return SOURCE_DEVICE.APPLE_WATCH;
-    if (/\biphone\b/.test(s)) return SOURCE_DEVICE.IPHONE;
+    // Conservative on purpose: HealthKit device names follow "<owner>'s Apple Watch",
+    // so the name must END with the device. A third-party app called e.g.
+    // "Apple Watch Sync Pro" must NOT be presented to a doctor as an Apple Watch.
+    // UNVERIFIED against a real watch record — until then, when in doubt we fall
+    // through to null and the UI shows the neutral "Apple Health".
+    if (/apple\s*watch$/.test(s.trim())) return SOURCE_DEVICE.APPLE_WATCH;
+    if (/iphone$/.test(s.trim())) return SOURCE_DEVICE.IPHONE;
     // "Health" is what HealthKit reports for values typed into Apple Health by hand.
     if (/^health$/.test(s.trim())) return SOURCE_DEVICE.MANUAL;
     return null;
@@ -303,7 +324,7 @@ export async function checkHealthReadAccess(vitalTypes) {
  */
 export async function readHealthEntries({ vitalTypes, startDate, endDate } = {}) {
   const plugin = await loadPlugin();
-  if (!plugin?.readSamples) return { entries: [], failedTypes: [] };
+  if (!plugin?.readSamples) return { entries: [], failedTypes: [], truncatedTypes: [] };
 
   const types = Array.isArray(vitalTypes) && vitalTypes.length
     ? vitalTypes
@@ -313,25 +334,61 @@ export async function readHealthEntries({ vitalTypes, startDate, endDate } = {})
 
   const collected = [];
   const failedTypes = [];
+  const truncatedTypes = [];
 
   for (const vitalType of types) {
     const dataType = VITAL_TO_HEALTH_TYPE[vitalType];
     if (!dataType) continue;
+
+    let cursor = start;
+    let forType = 0;
+    let pages = 0;
+
     try {
-      const res = await plugin.readSamples({
-        dataType,
-        startDate: start,
-        endDate: end,
-        limit: MAX_SAMPLES_PER_TYPE,
-      });
-      if (Array.isArray(res?.samples)) collected.push(...res.samples);
+      // Time-window pagination: ascending order lets us resume from the newest sample
+      // we have seen. Boundary samples may repeat — the stable externalId dedupes them.
+      for (;;) {
+        const res = await plugin.readSamples({
+          dataType,
+          startDate: cursor,
+          endDate: end,
+          limit: SAMPLES_PER_PAGE,
+          ascending: true,
+        });
+        const page = Array.isArray(res?.samples) ? res.samples : [];
+        if (page.length === 0) break;
+
+        collected.push(...page);
+        forType += page.length;
+        pages += 1;
+
+        if (page.length < SAMPLES_PER_PAGE) break;          // window exhausted
+        if (forType >= MAX_SAMPLES_PER_TYPE || pages >= MAX_PAGES_PER_TYPE) {
+          truncatedTypes.push(vitalType);                    // surfaced to the user
+          break;
+        }
+
+        const lastTs = Date.parse(page[page.length - 1]?.endDate || page[page.length - 1]?.startDate);
+        if (!Number.isFinite(lastTs)) { truncatedTypes.push(vitalType); break; }
+
+        const nextCursor = new Date(lastTs + 1).toISOString();  // +1ms: never re-read the same instant
+        if (Date.parse(nextCursor) >= Date.parse(end)) break;   // reached the end of the window: complete
+
+        if (nextCursor === cursor) {
+          // The cursor cannot advance — more full pages share one timestamp than a page
+          // holds. We stop instead of looping, and say so rather than dropping silently.
+          truncatedTypes.push(vitalType);
+          break;
+        }
+        cursor = nextCursor;
+      }
     } catch {
       // Typically "not authorised for this type" — expected with partial permission.
       failedTypes.push(vitalType);
     }
   }
 
-  return { entries: normalizeHealthSamples(collected), failedTypes };
+  return { entries: normalizeHealthSamples(collected), failedTypes, truncatedTypes };
 }
 
 /** Android only: open the Health Connect settings screen. No-op elsewhere. */

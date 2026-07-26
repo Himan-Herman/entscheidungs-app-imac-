@@ -132,6 +132,7 @@ export default {
     syncNow: "Sincronizza ora",
     syncing: "Sincronizzazione …",
     syncDone: "{n} nuove, {dup} già presenti, {skip} ignorate.",
+    syncTruncated: "Nota: non tutte le misurazioni del periodo sono state trasferite per {types}. Sincronizza di nuovo per caricarne altre.",
     syncNothingNew: "Nessuna nuova misurazione trovata.",
     syncOffline: "Nessuna connessione. Riprova più tardi.",
     syncError: "Sincronizzazione non riuscita. Riprova più tardi.",

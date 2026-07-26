@@ -143,6 +143,7 @@ export default {
     syncNow: "Sync now",
     syncing: "Syncing …",
     syncDone: "{n} newly imported, {dup} already present, {skip} skipped.",
+    syncTruncated: "Note: not all readings in the period were transferred for {types}. Sync again to load more.",
     syncNothingNew: "No new measurements found.",
     syncOffline: "No connection. Please try again later.",
     syncError: "Sync failed. Please try again later.",
