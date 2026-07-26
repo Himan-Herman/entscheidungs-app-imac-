@@ -10,3 +10,10 @@ server/storage/
 .cursor/
 .claude/
 .playwright-mcp/
+
+# Duplicates of the Capacitor-generated config.xml, created by a file-sync
+# mechanism (iCloud/Dropbox). The canonical config.xml is itself generated and
+# already ignored inside ios/.gitignore and android/.gitignore.
+# Scoped to these two exact paths on purpose — no global "* 2.*" rule.
+/client/ios/App/App/config [0-9].xml
+/client/android/app/src/main/res/xml/config [0-9].xml
