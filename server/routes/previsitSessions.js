@@ -14,7 +14,7 @@ import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
-import { withSanitizedVitalsSnapshot } from "../services/vitals/vitalsSnapshotSanitizer.js";
+import { withServerDerivedSnapshot } from "../services/vitals/vitalsSnapshotBuilder.js";
 
 
 const router = express.Router();
@@ -188,9 +188,10 @@ router.post("/", async (req, res) => {
   const ans = validateAnswers(answers, true);
   if (!ans.ok) return res.status(400).json({ ok: false, error: ans.error });
 
-  // Optional patient-attached measurements: re-derive the allowed shape server-side
-  // so a tampered client cannot smuggle extra fields (e.g. free-text notes) into storage.
-  const safeAnswers = withSanitizedVitalsSnapshot(answers);
+  // Optional patient-attached measurements. The client's payload only signals consent;
+  // the values themselves are rebuilt from this user's stored readings, so a tampered
+  // client can neither invent numbers nor smuggle extra fields into the practice's view.
+  const safeAnswers = await withServerDerivedSnapshot(answers, userId);
 
   const st = normalizeStatus(status, "draft");
   if (!st.ok) return res.status(400).json({ ok: false, error: st.error });
@@ -374,7 +375,7 @@ router.put("/:id", async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(body, "answers")) {
       const ans = validateAnswers(body.answers, true);
       if (!ans.ok) return res.status(400).json({ ok: false, error: ans.error });
-      data.answers = withSanitizedVitalsSnapshot(body.answers);
+      data.answers = await withServerDerivedSnapshot(body.answers, userId);
       const practiceContext = await resolvePracticeContextFromAnswers(body.answers);
       if (practiceContext) {
         data.practiceProfileId = practiceContext.practiceProfileId;

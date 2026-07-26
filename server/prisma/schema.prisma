@@ -1802,6 +1802,10 @@ model VitalEntry {
   sourceProvider String?   @db.VarChar(40)
   /// Provider-side stable id for idempotent imports (null for manual). Prevents duplicate re-imports.
   externalId     String?   @db.VarChar(191)
+  /// Coarse, allow-listed device category the reading came from
+  /// (apple_watch | iphone | samsung_watch | manual_entry). Never a device id,
+  /// package name or free-text source string — display only.
+  sourceDevice   String?   @db.VarChar(40)
   deletedAt      DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

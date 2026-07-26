@@ -14,6 +14,15 @@ const MAX_EXTERNAL_ID_LEN = 191;
 const MAX_NOTES_LEN = 2000;
 
 /**
+ * The only device categories we accept. Anything else — including a raw device
+ * name, bundle id or package name — is discarded, so free-text metadata from the
+ * phone can never reach the database or the doctor's PDF.
+ */
+const ALLOWED_SOURCE_DEVICES = new Set([
+  "apple_watch", "iphone", "samsung_watch", "manual_entry",
+]);
+
+/**
  * @param {object} params
  * @param {string} params.userId
  * @param {string} params.provider           provider id (already validated by caller)
@@ -56,6 +65,7 @@ export async function importVitalEntries({ userId, provider, allowedTypes, entri
       notes: typeof raw.notes === "string" && raw.notes.trim() ? raw.notes.trim().slice(0, MAX_NOTES_LEN) : null,
       source: "import",
       sourceProvider: provider,
+      sourceDevice: ALLOWED_SOURCE_DEVICES.has(raw.sourceDevice) ? raw.sourceDevice : null,
       externalId,
     };
 

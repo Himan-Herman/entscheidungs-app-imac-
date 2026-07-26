@@ -303,6 +303,17 @@ export default {
     vitalsSectionNote:
       "Included only because the patient opted in. Self-recorded values — not an official medical measurement, no diagnosis or evaluation. Most recent value per type.",
     vitalsImportedLabel: "from device",
+    vitalsMeasuredAtWord: "Measured",
+    vitalsSourceWord: "Source",
+    vitalsOriginLabels: {
+      manual: "Manual entry",
+      apple_health: "Apple Health",
+      health_connect: "Health Connect",
+      apple_watch: "Apple Watch",
+      iphone: "iPhone",
+      samsung_watch: "Samsung Watch",
+      manual_entry: "entered manually",
+    },
     vitalsTypeLabels: {
       blood_pressure: "Blood pressure",
       heart_rate: "Heart rate",

@@ -75,6 +75,7 @@ export function buildVitalsSnapshot(entries, options = {}) {
       sourceProvider: e.source === "import" && typeof e.sourceProvider === "string"
         ? e.sourceProvider.slice(0, 40)
         : null,
+      sourceDevice: typeof e.sourceDevice === "string" ? e.sourceDevice.slice(0, 40) : null,
       // `notes` is deliberately omitted — data minimisation.
     });
   }
@@ -117,24 +118,42 @@ export function formatSnapshotLines(snapshot, labels = {}) {
   if (!snapshot || !Array.isArray(snapshot.items)) return [];
   const typeLabels = labels.typeLabels || {};
   const locale = labels.locale || "de";
+  const originLabels = labels.originLabels || {};
 
   return snapshot.items.map((item) => {
     const name = typeLabels[item.type] || item.type;
     const value = formatSnapshotValue(item);
     const unit = item.unit ? ` ${item.unit}` : "";
-    let when = item.measuredAt;
+
+    // The real measurement time — never the sync time. Date AND time are shown so a
+    // doctor can tell a morning reading from an evening one.
+    let when = String(item.measuredAt).slice(0, 16).replace("T", " ");
     try {
-      when = new Date(item.measuredAt).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
+      when = new Date(item.measuredAt).toLocaleString(locale, {
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit",
       });
-    } catch {
-      when = String(item.measuredAt).slice(0, 10);
-    }
-    const origin = item.source === "import" && labels.importedLabel ? ` · ${labels.importedLabel}` : "";
-    return `${name}: ${value}${unit} (${when})${origin}`;
+    } catch { /* keep the ISO fallback */ }
+
+    const origin = resolveOriginLabel(item, originLabels);
+    return `${name}: ${value}${unit}\n${labels.measuredAtWord || "Gemessen"}: ${when}` +
+           (origin ? `\n${labels.sourceWord || "Quelle"}: ${origin}` : "");
   });
+}
+
+/**
+ * Human-readable origin. A device is only ever named when the platform metadata
+ * positively identified it; otherwise we fall back to the platform, and never to a
+ * guess like "Apple Watch".
+ */
+export function resolveOriginLabel(item, originLabels = {}) {
+  if (!item) return "";
+  if (item.source !== "import") return originLabels.manual || "";
+
+  const platform = originLabels[item.sourceProvider] || "";
+  const device = item.sourceDevice ? originLabels[item.sourceDevice] : "";
+  if (platform && device) return `${platform} – ${device}`;
+  return device || platform || "";
 }
 
 /**

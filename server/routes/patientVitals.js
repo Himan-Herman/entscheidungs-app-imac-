@@ -34,6 +34,7 @@ function entryToJson(row) {
     notes: row.notes,
     source: row.source,
     sourceProvider: row.sourceProvider ?? null,
+    sourceDevice: row.sourceDevice ?? null,
     createdAt: row.createdAt,
   };
 }

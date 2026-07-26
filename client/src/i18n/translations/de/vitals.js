@@ -141,7 +141,7 @@ export default {
     consentConfirm: "Einwilligen & verbinden",
     syncNow: "Jetzt synchronisieren",
     syncing: "Wird synchronisiert …",
-    syncDone: "{n} neue Messwerte übernommen.",
+    syncDone: "{n} neu übernommen, {dup} bereits vorhanden, {skip} übersprungen.",
     syncNothingNew: "Keine neuen Messwerte gefunden.",
     syncOffline: "Keine Verbindung. Bitte später erneut versuchen.",
     syncError: "Synchronisierung fehlgeschlagen. Bitte später erneut versuchen.",
@@ -154,6 +154,12 @@ export default {
     healthUnavailable: "Auf diesem Gerät ist Apple Health nicht verfügbar.",
     healthConnectMissing: "Health Connect ist auf diesem Gerät nicht eingerichtet. Bitte installieren oder aktivieren Sie „Health Connect“.",
     webOnlyHint: "Das Verbinden eines Geräts ist nur in der MedScoutX-App für iPhone oder Android möglich. Im Browser tragen Sie Ihre Werte weiterhin manuell ein.",
+    devices: {
+      apple_watch: "Apple Watch",
+      iphone: "iPhone",
+      samsung_watch: "Samsung Watch",
+      manual_entry: "manuell erfasst",
+    },
     providers: {
       apple_health: "Apple Health / Apple Watch",
       health_connect: "Health Connect (Samsung, Google u. a.)",

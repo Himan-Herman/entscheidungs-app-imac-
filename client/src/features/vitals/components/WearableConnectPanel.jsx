@@ -172,7 +172,10 @@ export default function WearableConnectPanel({ t, locale }) {
     try {
       const r = await syncHealthData({ scopes: conn.scopes, lastSyncedAt: conn.lastSyncedAt });
       const map = {
-        [SYNC_RESULT.OK]: (c?.syncDone || "").replace("{n}", String(r.imported)),
+        [SYNC_RESULT.OK]: (c?.syncDone || "")
+          .replace("{n}", String(r.imported))
+          .replace("{dup}", String(r.duplicates))
+          .replace("{skip}", String(r.skipped)),
         [SYNC_RESULT.NOTHING_NEW]: c?.syncNothingNew,
         [SYNC_RESULT.NO_PERMISSION]: c?.permissionDenied,
         [SYNC_RESULT.NO_PLATFORM]: c?.webOnlyHint,

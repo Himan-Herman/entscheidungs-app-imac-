@@ -221,3 +221,41 @@ test("every canonical unit matches the server's expected unit", () => {
     weight: "kg", oxygen: "%", temperature: "°C",
   });
 });
+
+// ── Provenance (Phase 2.2): never claim a device without proof ──────────────
+const { deriveSourceDevice, SOURCE_DEVICE, INITIAL_SYNC_DAYS: WINDOW } = B;
+
+test("first sync window is 30 days", () => {
+  assert.equal(WINDOW, 30);
+});
+
+test("Apple Watch is only claimed when HealthKit says so", () => {
+  assert.equal(deriveSourceDevice("Apple Watch", "apple_health"), SOURCE_DEVICE.APPLE_WATCH);
+  assert.equal(deriveSourceDevice("Himans Apple Watch", "apple_health"), SOURCE_DEVICE.APPLE_WATCH);
+  assert.equal(deriveSourceDevice("iPhone", "apple_health"), SOURCE_DEVICE.IPHONE);
+  assert.equal(deriveSourceDevice("Health", "apple_health"), SOURCE_DEVICE.MANUAL);
+});
+
+test("unknown or third-party sources never become a device claim", () => {
+  for (const s of ["Withings Health Mate", "MyFitnessPal", "", "com.apple.health.ABC123", null, 42]) {
+    assert.equal(deriveSourceDevice(s, "apple_health"), null, `${s} must not be identified`);
+  }
+});
+
+test("Samsung Watch needs BOTH vendor and form factor", () => {
+  assert.equal(deriveSourceDevice("Galaxy Watch6", "health_connect"), SOURCE_DEVICE.SAMSUNG_WATCH);
+  assert.equal(deriveSourceDevice("Samsung Health", "health_connect"), null, "vendor alone is not enough");
+  assert.equal(deriveSourceDevice("Fitbit Watch", "health_connect"), null, "other vendor");
+});
+
+test("normalised sample carries the category, never the raw source name", () => {
+  asPlatform("ios");
+  const e = normalizeHealthSample(S({
+    dataType: "heartRate", value: 61, unit: "bpm", platformId: "hk-1",
+    sourceName: "Himans Apple Watch", sourceId: "com.apple.health.SECRET",
+  }));
+  assert.equal(e.sourceDevice, "apple_watch");
+  assert.equal("sourceName" in e, false);
+  assert.equal("sourceId" in e, false);
+  assert.equal(JSON.stringify(e).includes("com.apple.health"), false, "no bundle id may leak");
+});

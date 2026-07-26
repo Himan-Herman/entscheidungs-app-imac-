@@ -306,6 +306,17 @@ export default {
     vitalsSectionNote:
       "Wurde nur aufgrund der Auswahl des Patienten eingefügt. Selbst erfasste Werte — keine offizielle medizinische Messung, keine Diagnose oder Bewertung. Jeweils der aktuellste Wert je Messgröße.",
     vitalsImportedLabel: "vom Gerät",
+    vitalsMeasuredAtWord: "Gemessen",
+    vitalsSourceWord: "Quelle",
+    vitalsOriginLabels: {
+      manual: "Manuelle Eingabe",
+      apple_health: "Apple Health",
+      health_connect: "Health Connect",
+      apple_watch: "Apple Watch",
+      iphone: "iPhone",
+      samsung_watch: "Samsung Watch",
+      manual_entry: "manuell erfasst",
+    },
     vitalsTypeLabels: {
       blood_pressure: "Blutdruck",
       heart_rate: "Puls / Herzfrequenz",

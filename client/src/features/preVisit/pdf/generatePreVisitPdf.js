@@ -706,7 +706,9 @@ async function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     const vitalsLines = formatSnapshotLines(answers.vitalsSnapshot, {
       typeLabels: L.vitalsTypeLabels,
       locale: uiLanguage === "en" ? "en-GB" : "de-DE",
-      importedLabel: L.vitalsImportedLabel,
+      originLabels: L.vitalsOriginLabels,
+      measuredAtWord: L.vitalsMeasuredAtWord,
+      sourceWord: L.vitalsSourceWord,
     });
     if (vitalsLines.length > 0) {
       gap(4);
@@ -714,10 +716,13 @@ async function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
       setPdfFont(doc, "normal");
       doc.setFontSize(bodySize);
       const valueLh = lineHeightMm(bodySize);
-      for (const ln of vitalsLines) {
-        needSpace(valueLh + 1);
-        doc.text(ln, margin, y);
-        y += valueLh;
+      for (const block of vitalsLines) {
+        for (const ln of String(block).split("\n")) {
+          needSpace(valueLh + 1);
+          doc.text(ln, margin, y);
+          y += valueLh;
+        }
+        y += 1.5;   // small gap between readings
       }
       gap(2);
       doc.setFontSize(metaSize);

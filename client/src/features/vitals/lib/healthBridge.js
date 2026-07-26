@@ -42,12 +42,59 @@ export const CANONICAL_UNIT = Object.freeze({
 });
 
 /** First sync window. Deliberately bounded — we do not pull a user's entire history. */
-export const INITIAL_SYNC_DAYS = 90;
+export const INITIAL_SYNC_DAYS = 30;
 
 /** Upper bound per type and per sync, aligned with the server's MAX_IMPORT_BATCH. */
 export const MAX_SAMPLES_PER_TYPE = 100;
 
 const MAX_EXTERNAL_ID_LEN = 191;
+
+/**
+ * Coarse device categories we are willing to claim to the patient and the practice.
+ * Anything we cannot positively identify stays null and is shown as the platform
+ * itself ("Apple Health" / "Health Connect") — we never guess "Apple Watch".
+ */
+export const SOURCE_DEVICE = Object.freeze({
+  APPLE_WATCH: "apple_watch",
+  IPHONE: "iphone",
+  SAMSUNG_WATCH: "samsung_watch",
+  MANUAL: "manual_entry",
+});
+
+/**
+ * Map the platform's free-text source name to one of the categories above.
+ *
+ * Only the category is ever stored or displayed — never the raw name, bundle id,
+ * package name or device identifier. An unrecognised source deliberately yields
+ * null so the UI falls back to the neutral platform label.
+ *
+ * @param {unknown} sourceName e.g. "Apple Watch", "Max's iPhone", "Galaxy Watch6"
+ * @param {"apple_health"|"health_connect"|null} provider
+ * @returns {string|null}
+ */
+export function deriveSourceDevice(sourceName, provider) {
+  if (typeof sourceName !== "string") return null;
+  const s = sourceName.toLowerCase();
+
+  if (provider === "apple_health") {
+    if (/\bapple\s*watch\b/.test(s)) return SOURCE_DEVICE.APPLE_WATCH;
+    if (/\biphone\b/.test(s)) return SOURCE_DEVICE.IPHONE;
+    // "Health" is what HealthKit reports for values typed into Apple Health by hand.
+    if (/^health$/.test(s.trim())) return SOURCE_DEVICE.MANUAL;
+    return null;
+  }
+
+  if (provider === "health_connect") {
+    // Only claim a watch when both vendor and form factor are stated.
+    // No trailing \b — model names like "Galaxy Watch6" must still match.
+    if (/\bsamsung\b|\bgalaxy\b/.test(s) && /\bwatch/.test(s)) {
+      return SOURCE_DEVICE.SAMSUNG_WATCH;
+    }
+    return null;
+  }
+
+  return null;
+}
 
 /**
  * Which provider id the current device maps to.
@@ -122,6 +169,8 @@ export function normalizeHealthSample(sample) {
     unit: CANONICAL_UNIT[vitalType],
     measuredAt: new Date(measuredMs).toISOString(),
     externalId,
+    // Category only — the raw sourceName/sourceId never leaves this function.
+    sourceDevice: deriveSourceDevice(sample.sourceName, getHealthProvider()),
   };
 }
 

@@ -53,13 +53,31 @@ test("blood pressure formats as sys/dia", () => {
   assert.equal(formatSnapshotValue({ type:"weight", valuePrimary:70 }), "70", "ganze Zahl bleibt ganz");
 });
 
-test("formatSnapshotLines renders label, value, unit, date", () => {
+test("formatSnapshotLines renders label, value, unit, date AND time, source", () => {
   const s = buildVitalsSnapshot([
-    { type:"heart_rate", valuePrimary:66, unit:"bpm", measuredAt: daysAgo(1), source:"import", sourceProvider:"apple_health" },
+    { type:"heart_rate", valuePrimary:66, unit:"bpm", measuredAt: daysAgo(1), source:"import", sourceProvider:"apple_health", sourceDevice:"apple_watch" },
   ], { now: NOW });
-  const [line] = formatSnapshotLines(s, { typeLabels:{heart_rate:"Puls"}, locale:"de-DE", importedLabel:"vom Gerät" });
-  assert.match(line, /^Puls: 66 bpm \(/);
-  assert.match(line, /vom Gerät/);
+  const [line] = formatSnapshotLines(s, {
+    typeLabels:{heart_rate:"Puls"}, locale:"de-DE",
+    originLabels:{ apple_health:"Apple Health", apple_watch:"Apple Watch" },
+    measuredAtWord:"Gemessen", sourceWord:"Quelle",
+  });
+  assert.match(line, /^Puls: 66 bpm\n/);
+  assert.match(line, /Gemessen: .*\d{2}:\d{2}/, "Uhrzeit muss enthalten sein");
+  assert.match(line, /Quelle: Apple Health – Apple Watch/);
+});
+
+test("origin never claims a device without proof", () => {
+  const mk = (over) => buildVitalsSnapshot([
+    { type:"weight", valuePrimary:70, unit:"kg", measuredAt: daysAgo(1), ...over },
+  ], { now: NOW });
+  const labels = { originLabels:{ apple_health:"Apple Health", manual:"Manuelle Eingabe" }, typeLabels:{weight:"Gewicht"} };
+  // importiert, aber Gerät unbekannt -> nur Plattform
+  assert.match(formatSnapshotLines(mk({source:"import", sourceProvider:"apple_health"}), labels)[0],
+    /Quelle: Apple Health$/);
+  // manuell -> "Manuelle Eingabe"
+  assert.match(formatSnapshotLines(mk({source:"manual"}), labels)[0],
+    /Quelle: Manuelle Eingabe$/);
 });
 
 test("empty / garbage input yields null, never throws", () => {

@@ -88,7 +88,9 @@ export default function VitalCard({ entry, t, lang, onEdit, onDelete, readOnly =
         </span>
         {entry.source === "import" && (
           <span className="vital-card__origin">
-            {t.connect?.providers?.[entry.sourceProvider] || t.connect?.importedBadge || t.card.source}
+            {[t.connect?.providers?.[entry.sourceProvider],
+              entry.sourceDevice ? t.connect?.devices?.[entry.sourceDevice] : null]
+              .filter(Boolean).join(" · ") || t.connect?.importedBadge || t.card.source}
           </span>
         )}
         <p className="vital-card__date">
