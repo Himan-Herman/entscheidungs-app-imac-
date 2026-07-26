@@ -543,6 +543,30 @@ export function clearAnswerField(fieldKey) {
 }
 
 /**
+ * Attach (or remove) the patient's vitals snapshot on the Pre-Visit document.
+ *
+ * Stored inside `answers` on purpose: both delivery paths — cloud save
+ * (POST /api/previsit/sessions) and the e-mailed PDF — read `answers`, so a
+ * single write covers both. Pass null to withdraw the attachment.
+ *
+ * @param {object | null} snapshot see features/vitals/lib/vitalsSnapshot.js
+ * @returns {object | null}
+ */
+export function setVitalsSnapshot(snapshot) {
+  const s = loadPreVisitSession();
+  if (!s?.answers) return null;
+  const answers = { ...s.answers };
+  if (snapshot && typeof snapshot === "object") {
+    answers.vitalsSnapshot = snapshot;
+  } else {
+    delete answers.vitalsSnapshot;
+  }
+  const next = { ...s, answers };
+  savePreVisitSession(next);
+  return next;
+}
+
+/**
  * @param {number} stepIndex
  * @returns {object | null}
  */

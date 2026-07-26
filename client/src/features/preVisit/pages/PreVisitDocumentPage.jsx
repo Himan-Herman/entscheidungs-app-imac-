@@ -23,6 +23,7 @@ import {
   setPdfIncludePatientIdentity,
   setDoctorLanguage,
   setSelectedDoctorContact,
+  setVitalsSnapshot,
 } from "../constants/preVisitSession.js";
 import { apiFetch } from "../../../lib/api.js";
 import { authFetch } from "../../../api/authFetch.js";
@@ -35,6 +36,7 @@ import {
 import { savePreVisitArchiveItem } from "../session/localPreVisitArchive.js";
 import PreVisitModuleChrome from "../components/PreVisitModuleChrome.jsx";
 import AssistantQuestionsPanel from "../components/AssistantQuestionsPanel.jsx";
+import VitalsAttachPanel from "../../vitals/components/VitalsAttachPanel.jsx";
 import { usePreVisitUiLanguage } from "../hooks/usePreVisitUiLanguage.js";
 import "../styles/PreVisitDocumentPage.css";
 
@@ -54,6 +56,11 @@ export default function PreVisitDocumentPage() {
   const assistantLabels = useMemo(
     () => t.assistantQuestions || {},
     [t.assistantQuestions],
+  );
+  /** Measurement-type names come from the vitals namespace so both modules stay in sync. */
+  const vitalsTypeLabels = useMemo(
+    () => getMessages(uiLanguage).vitals?.types || {},
+    [uiLanguage],
   );
 
   const pdfLabelOverrides = useMemo(
@@ -105,6 +112,7 @@ export default function PreVisitDocumentPage() {
   const [emailPdfSuccess, setEmailPdfSuccess] = useState(false);
   const [emailPdfError, setEmailPdfError] = useState(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [vitalsAttached, setVitalsAttached] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [qrBusy, setQrBusy] = useState(false);
   const [qrError, setQrError] = useState(null);
@@ -387,6 +395,18 @@ export default function PreVisitDocumentPage() {
       setTimelineBusy(false);
     }
   }
+
+  /**
+   * Patient opted in (or out) of attaching their measurements. Writing into the
+   * session `answers` covers both delivery paths at once — the cloud-saved
+   * document and the e-mailed PDF both read from there.
+   * @param {object|null} snapshot
+   */
+  const handleVitalsAttachChange = useCallback((snapshot) => {
+    const next = setVitalsSnapshot(snapshot);
+    if (next) setSession(next);
+    setVitalsAttached(!!snapshot);
+  }, []);
 
   async function handleSendPdfEmail() {
     setEmailPdfError(null);
@@ -1405,9 +1425,23 @@ export default function PreVisitDocumentPage() {
           ) : null}
 
           {hasAuthToken ? (
+            <VitalsAttachPanel
+              t={t.vitalsAttach}
+              typeLabels={vitalsTypeLabels}
+              locale={getPrimaryIntlLocale(uiLanguage)}
+              onChange={handleVitalsAttachChange}
+            />
+          ) : null}
+
+          {hasAuthToken ? (
             <div className="pre-visit-doc__email-block">
               <h2 className="pre-visit-doc__email-heading">{t.emailPdfSection}</h2>
               <p className="pre-visit-doc__email-privacy">{t.emailPdfPrivacy}</p>
+              {vitalsAttached ? (
+                <p className="pre-visit-doc__email-privacy" role="status">
+                  {t.vitalsAttach?.attachedHint}
+                </p>
+              ) : null}
               <label className="pre-visit-doc__checkbox-label">
                 <input
                   type="checkbox"

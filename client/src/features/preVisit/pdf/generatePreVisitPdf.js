@@ -18,6 +18,10 @@ import {
 } from "../constants/preVisitSession.js";
 import { getMessages } from "../../../i18n/translations/index.js";
 import { formatLanguageDisplayName } from "../../../i18n/intlLocale.js";
+import {
+  formatSnapshotLines,
+  isValidSnapshot,
+} from "../../vitals/lib/vitalsSnapshot.js";
 
 /** Clinical palette — printer-friendly, calm */
 const COL = {
@@ -223,6 +227,21 @@ function legacyDefaultLabels(isEnglishUi) {
     patientDidNotMentionPreviouslyLabel: en
       ? "Previously reported information not mentioned in this session"
       : "Früher berichtete Angaben in dieser Session nicht erwähnt",
+    vitalsSectionHeading: en
+      ? "Measurements recorded by the patient (optional)"
+      : "Vom Patienten erfasste Messwerte (optional)",
+    vitalsSectionNote: en
+      ? "Included only because the patient opted in. Self-recorded values — not an official medical measurement, no diagnosis or evaluation. Most recent value per type."
+      : "Wurde nur aufgrund der Auswahl des Patienten eingefügt. Selbst erfasste Werte — keine offizielle medizinische Messung, keine Diagnose oder Bewertung. Jeweils der aktuellste Wert je Messgröße.",
+    vitalsImportedLabel: en ? "from device" : "vom Gerät",
+    vitalsTypeLabels: {
+      blood_pressure: en ? "Blood pressure" : "Blutdruck",
+      heart_rate: en ? "Heart rate" : "Puls / Herzfrequenz",
+      glucose: en ? "Blood glucose" : "Blutzucker",
+      weight: en ? "Weight" : "Gewicht",
+      oxygen: en ? "Oxygen saturation" : "Sauerstoffsättigung",
+      temperature: en ? "Body temperature" : "Körpertemperatur",
+    },
     longitudinalSectionHeading: en ? "Case / timeline (optional)" : "Fall / Verlauf (optional)",
     longitudinalSectionNote: en
       ? "Included only because you opted in below. Patient statements only; no diagnosis or medical evaluation."
@@ -680,6 +699,40 @@ async function buildPreVisitPdfDocument(session, uiLanguage, labels = {}) {
     }
     const title = structuredFieldTitle(key, uiLanguage);
     writeFieldBlock(`${title}`, raw, L.empty);
+  }
+
+  // ——— Patient-recorded measurements (only when the patient opted in) ———
+  if (isValidSnapshot(answers?.vitalsSnapshot)) {
+    const vitalsLines = formatSnapshotLines(answers.vitalsSnapshot, {
+      typeLabels: L.vitalsTypeLabels,
+      locale: uiLanguage === "en" ? "en-GB" : "de-DE",
+      importedLabel: L.vitalsImportedLabel,
+    });
+    if (vitalsLines.length > 0) {
+      gap(4);
+      writeSectionHeading(L.vitalsSectionHeading);
+      setPdfFont(doc, "normal");
+      doc.setFontSize(bodySize);
+      const valueLh = lineHeightMm(bodySize);
+      for (const ln of vitalsLines) {
+        needSpace(valueLh + 1);
+        doc.text(ln, margin, y);
+        y += valueLh;
+      }
+      gap(2);
+      doc.setFontSize(metaSize);
+      doc.setTextColor(...COL.slateMuted);
+      const vitalsHint = doc.splitTextToSize(L.vitalsSectionNote, contentW);
+      const vitalsHintLh = lineHeightMm(metaSize);
+      for (const ln of vitalsHint) {
+        needSpace(vitalsHintLh + 1);
+        doc.text(ln, margin, y);
+        y += vitalsHintLh;
+      }
+      doc.setTextColor(...COL.slate);
+      doc.setFontSize(bodySize);
+      gap(4);
+    }
   }
 
   if (useAiStructured && session.aiSafetyNotice?.trim()) {

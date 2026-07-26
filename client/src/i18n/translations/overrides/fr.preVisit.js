@@ -92,6 +92,19 @@ export default {
     prepareDocument: "Préparer le document",
   },
   document: {
+    vitalsAttach: {
+      heading: "Joindre mes mesures",
+      intro:
+        "Vous avez enregistré des mesures dans MedScoutX. Vous pouvez joindre automatiquement la valeur la plus récente de chacune à ce document.",
+      consent:
+        "Je consens à ce que mes mesures actuelles soient jointes à ce document et transmises avec lui au cabinet.",
+      previewTitle: "Ces valeurs seront jointes",
+      minimisationNote:
+        "Seule la valeur la plus récente par type de mesure des 90 derniers jours est transmise — sans vos notes. Vous pouvez désélectionner cette option à tout moment.",
+      importedLabel: "depuis l'appareil",
+      attachError: "Les mesures n'ont pas pu être jointes.",
+      attachedHint: "Vos mesures seront jointes à ce PDF.",
+    },
     pageTitle: "MedScoutX — Aperçu du document",
     title: "Préparer le document pour le médecin",
     explanation:

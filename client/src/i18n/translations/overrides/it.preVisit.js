@@ -238,6 +238,19 @@ export default {
     doctorRecipientLoading: "Caricamento contatti…",
     doctorRecipientEmailMissing:
       "Per questo contatto non è registrato alcun indirizzo e-mail.",
+    vitalsAttach: {
+      heading: "Allega le mie misurazioni",
+      intro:
+        "Hai registrato misurazioni in MedScoutX. Puoi allegare automaticamente il valore più recente di ciascuna a questo documento.",
+      consent:
+        "Acconsento che le mie misurazioni attuali siano allegate a questo documento e trasmesse con esso allo studio medico.",
+      previewTitle: "Questi valori verranno allegati",
+      minimisationNote:
+        "Viene trasmesso solo il valore più recente per tipo di misurazione degli ultimi 90 giorni — senza le tue note. Puoi annullare la selezione in qualsiasi momento.",
+      importedLabel: "dal dispositivo",
+      attachError: "Non è stato possibile allegare le misurazioni.",
+      attachedHint: "Le tue misurazioni saranno allegate a questo PDF.",
+    },
     emailPdfSection: "Invia PDF via e-mail",
     emailPdfPrivacy:
       "Se invii il PDF, MedScoutX trasmetterà il file all’indirizzo e-mail salvato per quel contatto nei tuoi contatti medici. Nulla viene inviato automaticamente: l’invio parte solo da te. Il contenuto riflette solo le tue dichiarazioni e non costituisce diagnosi né raccomandazione terapeutica.",

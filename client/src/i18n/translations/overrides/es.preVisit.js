@@ -92,6 +92,19 @@ export default {
     prepareDocument: "Preparar documento",
   },
   document: {
+    vitalsAttach: {
+      heading: "Adjuntar mis mediciones",
+      intro:
+        "Ha registrado mediciones en MedScoutX. Puede adjuntar automáticamente el valor más reciente de cada una a este documento.",
+      consent:
+        "Consiento que mis mediciones actuales se adjunten a este documento y se envíen con él a la consulta.",
+      previewTitle: "Se adjuntarán estos valores",
+      minimisationNote:
+        "Solo se transmite el valor más reciente por tipo de medición de los últimos 90 días, sin sus notas. Puede anular la selección en cualquier momento.",
+      importedLabel: "del dispositivo",
+      attachError: "No se pudieron adjuntar las mediciones.",
+      attachedHint: "Sus mediciones se adjuntarán a este PDF.",
+    },
     pageTitle: "MedScoutX — Vista previa del documento",
     title: "Preparar documento para el médico",
     explanation:

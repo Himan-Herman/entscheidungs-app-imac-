@@ -226,6 +226,20 @@ export default {
     doctorRecipientLoading: "Kontakte werden geladen …",
     doctorRecipientEmailMissing:
       "Für diesen Kontakt ist keine E-Mail-Adresse hinterlegt.",
+    vitalsAttach: {
+      heading: "Messwerte mitschicken",
+      intro:
+        "Sie haben Messwerte in MedScoutX erfasst. Sie können den jeweils aktuellsten Wert automatisch an dieses Dokument anhängen.",
+      consent:
+        "Ich willige ein, dass meine aktuellen Messwerte diesem Dokument beigefügt und mit ihm an die Praxis übermittelt werden.",
+      previewTitle: "Diese Werte werden angehängt",
+      minimisationNote:
+        "Es wird nur der aktuellste Wert je Messgröße aus den letzten 90 Tagen übertragen — ohne Ihre Notizen. Sie können die Auswahl jederzeit wieder abwählen.",
+      importedLabel: "vom Gerät",
+      attachError: "Die Messwerte konnten nicht angehängt werden.",
+      attachedHint:
+        "Ihre Messwerte werden diesem PDF beigefügt.",
+    },
     emailPdfSection: "PDF per E-Mail senden",
     emailPdfPrivacy:
       "Wenn Sie das PDF senden, wird die Datei über MedScoutX an die im Ärztebuch gespeicherte E-Mail-Adresse übermittelt. Es erfolgt kein automatischer Versand; Sie lösen den Versand selbst aus. Der Inhalt entspricht nur Ihren eigenen Angaben und stellt keine Diagnose oder Therapieempfehlung dar.",
@@ -288,6 +302,18 @@ export default {
     footerPageLabel: "Seite",
     part1Heading: "Strukturierte Arztversion",
     part2Heading: "Originalangaben des Patienten",
+    vitalsSectionHeading: "Vom Patienten erfasste Messwerte (optional)",
+    vitalsSectionNote:
+      "Wurde nur aufgrund der Auswahl des Patienten eingefügt. Selbst erfasste Werte — keine offizielle medizinische Messung, keine Diagnose oder Bewertung. Jeweils der aktuellste Wert je Messgröße.",
+    vitalsImportedLabel: "vom Gerät",
+    vitalsTypeLabels: {
+      blood_pressure: "Blutdruck",
+      heart_rate: "Puls / Herzfrequenz",
+      glucose: "Blutzucker",
+      weight: "Gewicht",
+      oxygen: "Sauerstoffsättigung",
+      temperature: "Körpertemperatur",
+    },
     previousReportsHeading: "Frühere zugeordnete Berichte (Zusammenfassung)",
     newlyMentionedLabel: "Neu erwähnt",
     stillMentionedLabel: "Weiterhin erwähnt",

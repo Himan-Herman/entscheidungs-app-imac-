@@ -14,6 +14,7 @@ import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { trackAnalyticsEvent } from "../services/analyticsService.js";
+import { withSanitizedVitalsSnapshot } from "../services/vitals/vitalsSnapshotSanitizer.js";
 
 
 const router = express.Router();
@@ -187,6 +188,10 @@ router.post("/", async (req, res) => {
   const ans = validateAnswers(answers, true);
   if (!ans.ok) return res.status(400).json({ ok: false, error: ans.error });
 
+  // Optional patient-attached measurements: re-derive the allowed shape server-side
+  // so a tampered client cannot smuggle extra fields (e.g. free-text notes) into storage.
+  const safeAnswers = withSanitizedVitalsSnapshot(answers);
+
   const st = normalizeStatus(status, "draft");
   if (!st.ok) return res.status(400).json({ ok: false, error: st.error });
 
@@ -236,7 +241,7 @@ router.post("/", async (req, res) => {
         title: ti.value,
         status: st.value,
         pdfDownloaded,
-        answers,
+        answers: safeAnswers,
         aiDoctorVersion:
           aiDoctorVersion === undefined || aiDoctorVersion === null ? null : aiDoctorVersion,
         aiSafetyNotice: aiNotice,
@@ -369,7 +374,7 @@ router.put("/:id", async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(body, "answers")) {
       const ans = validateAnswers(body.answers, true);
       if (!ans.ok) return res.status(400).json({ ok: false, error: ans.error });
-      data.answers = body.answers;
+      data.answers = withSanitizedVitalsSnapshot(body.answers);
       const practiceContext = await resolvePracticeContextFromAnswers(body.answers);
       if (practiceContext) {
         data.practiceProfileId = practiceContext.practiceProfileId;

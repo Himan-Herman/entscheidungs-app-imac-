@@ -224,6 +224,19 @@ export default {
     doctorRecipientLoading: "Loading contacts…",
     doctorRecipientEmailMissing:
       "This contact has no email address on file.",
+    vitalsAttach: {
+      heading: "Include my measurements",
+      intro:
+        "You have recorded measurements in MedScoutX. You can attach the most recent value of each automatically to this document.",
+      consent:
+        "I consent to my current measurements being attached to this document and sent with it to the practice.",
+      previewTitle: "These values will be attached",
+      minimisationNote:
+        "Only the most recent value per measurement type from the last 90 days is transferred — without your notes. You can deselect this at any time.",
+      importedLabel: "from device",
+      attachError: "The measurements could not be attached.",
+      attachedHint: "Your measurements will be included in this PDF.",
+    },
     emailPdfSection: "Send PDF by email",
     emailPdfPrivacy:
       "If you send the PDF, MedScoutX will transmit the file to the email address stored for that contact in your doctor contacts. Nothing is sent automatically; you trigger sending yourself. The content reflects only your own statements and is not a diagnosis or treatment recommendation.",
@@ -286,6 +299,18 @@ export default {
     footerPageLabel: "Page",
     part1Heading: "Structured doctor version",
     part2Heading: "Original patient statements",
+    vitalsSectionHeading: "Measurements recorded by the patient (optional)",
+    vitalsSectionNote:
+      "Included only because the patient opted in. Self-recorded values — not an official medical measurement, no diagnosis or evaluation. Most recent value per type.",
+    vitalsImportedLabel: "from device",
+    vitalsTypeLabels: {
+      blood_pressure: "Blood pressure",
+      heart_rate: "Heart rate",
+      glucose: "Blood glucose",
+      weight: "Weight",
+      oxygen: "Oxygen saturation",
+      temperature: "Body temperature",
+    },
     previousReportsHeading: "Previous related reports (summary)",
     newlyMentionedLabel: "Newly mentioned",
     stillMentionedLabel: "Still mentioned",
