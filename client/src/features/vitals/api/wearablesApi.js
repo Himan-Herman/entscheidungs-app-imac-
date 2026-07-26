@@ -32,11 +32,11 @@ export async function connectWearable({ provider, scopes, consentAccepted }) {
  * The server validates, bounds-checks and deduplicates — see patientWearables.js.
  * @param {{provider: string, entries: Array<object>}} payload
  */
-export async function importWearableEntries({ provider, entries, finalizeSync }) {
+export async function importWearableEntries({ provider, entries, finalizeSync, checkpoints, complete }) {
   const res = await authFetch(`${BASE}/import`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ provider, entries, finalizeSync: finalizeSync === true }),
+    body: JSON.stringify({ provider, entries, finalizeSync: finalizeSync === true, checkpoints, complete }),
   });
   const data = await res.json().catch(() => ({}));
   return { res, data };

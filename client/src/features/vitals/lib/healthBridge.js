@@ -322,7 +322,7 @@ export async function checkHealthReadAccess(vitalTypes) {
  *
  * @returns {Promise<{entries: Array<object>, failedTypes: string[]}>}
  */
-export async function readHealthEntries({ vitalTypes, startDate, endDate } = {}) {
+export async function readHealthEntries({ vitalTypes, startDate, endDate, checkpoints } = {}) {
   const plugin = await loadPlugin();
   if (!plugin?.readSamples) return { entries: [], failedTypes: [], truncatedTypes: [] };
 
@@ -335,12 +335,16 @@ export async function readHealthEntries({ vitalTypes, startDate, endDate } = {})
   const collected = [];
   const failedTypes = [];
   const truncatedTypes = [];
+  /** Per type: newest measuredAt actually read, so a truncated type can resume there. */
+  const lastReadAt = {};
 
   for (const vitalType of types) {
     const dataType = VITAL_TO_HEALTH_TYPE[vitalType];
     if (!dataType) continue;
 
-    let cursor = start;
+    // A checkpoint from a previous, truncated sync wins over the global start date —
+    // otherwise the readings past the cap would never be reached.
+    let cursor = checkpoints?.[vitalType] || start;
     let forType = 0;
     let pages = 0;
 
@@ -361,6 +365,13 @@ export async function readHealthEntries({ vitalTypes, startDate, endDate } = {})
         collected.push(...page);
         forType += page.length;
         pages += 1;
+
+        // Record the resume point for EVERY page we actually took, including the one
+        // that trips the ceiling — otherwise the next sync re-reads that whole page.
+        const pageLastTs = Date.parse(
+          page[page.length - 1]?.endDate || page[page.length - 1]?.startDate,
+        );
+        if (Number.isFinite(pageLastTs)) lastReadAt[vitalType] = new Date(pageLastTs).toISOString();
 
         if (page.length < SAMPLES_PER_PAGE) break;          // window exhausted
         if (forType >= MAX_SAMPLES_PER_TYPE || pages >= MAX_PAGES_PER_TYPE) {
@@ -388,7 +399,7 @@ export async function readHealthEntries({ vitalTypes, startDate, endDate } = {})
     }
   }
 
-  return { entries: normalizeHealthSamples(collected), failedTypes, truncatedTypes };
+  return { entries: normalizeHealthSamples(collected), failedTypes, truncatedTypes, lastReadAt };
 }
 
 /** Android only: open the Health Connect settings screen. No-op elsewhere. */

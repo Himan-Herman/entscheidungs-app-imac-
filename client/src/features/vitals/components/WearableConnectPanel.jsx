@@ -170,7 +170,11 @@ export default function WearableConnectPanel({ t, locale }) {
     setSyncNote("");
     setActionError("");
     try {
-      const r = await syncHealthData({ scopes: conn.scopes, lastSyncedAt: conn.lastSyncedAt });
+      const r = await syncHealthData({
+        scopes: conn.scopes,
+        lastSyncedAt: conn.lastSyncedAt,
+        checkpoints: conn.syncCheckpoints,
+      });
       const map = {
         [SYNC_RESULT.OK]: (c?.syncDone || "")
           .replace("{n}", String(r.imported))

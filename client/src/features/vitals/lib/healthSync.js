@@ -53,7 +53,7 @@ export const SYNC_RESULT = Object.freeze({
  * @returns {Promise<{result: string, imported: number, duplicates: number, skipped: number,
  *                    deniedTypes: string[], failedTypes: string[]}>}
  */
-export async function syncHealthData({ scopes, lastSyncedAt, deps } = {}) {
+export async function syncHealthData({ scopes, lastSyncedAt, checkpoints, deps } = {}) {
   const {
     getProvider = getHealthProvider,
     checkAccess = checkHealthReadAccess,
@@ -79,10 +79,25 @@ export async function syncHealthData({ scopes, lastSyncedAt, deps } = {}) {
     return { result: SYNC_RESULT.NO_PERMISSION, ...empty, deniedTypes };
   }
 
-  const { entries, failedTypes, truncatedTypes } = await readEntries({
+  const { entries, failedTypes, truncatedTypes, lastReadAt } = await readEntries({
     vitalTypes: granted,
     startDate: resolveSyncStart(lastSyncedAt, now()),
+    checkpoints,
   });
+
+  /**
+   * A truncated type keeps a resume point; a type read to the end has its checkpoint
+   * cleared (null). lastSyncedAt may only advance when nothing is left over — otherwise
+   * the next sync would start after the readings we did not fetch.
+   */
+  const nextCheckpoints = {};
+  for (const t of truncatedTypes || []) {
+    if (lastReadAt?.[t]) nextCheckpoints[t] = lastReadAt[t];
+  }
+  for (const t of granted) {
+    if (!(t in nextCheckpoints) && checkpoints?.[t]) nextCheckpoints[t] = null; // done → clear
+  }
+  const fullyComplete = Object.values(nextCheckpoints).every((v) => v === null);
 
   if (entries.length === 0) {
     return { result: SYNC_RESULT.NOTHING_NEW, ...empty, deniedTypes, failedTypes, truncatedTypes: truncatedTypes || [] };
@@ -96,7 +111,11 @@ export async function syncHealthData({ scopes, lastSyncedAt, deps } = {}) {
       const chunk = entries.slice(i, i + MAX_UPLOAD_CHUNK);
       const isLast = i + MAX_UPLOAD_CHUNK >= entries.length;
       // lastSyncedAt may only advance once every chunk has landed.
-      const { res, data } = await importEntries({ provider, entries: chunk, finalizeSync: isLast });
+      const { res, data } = await importEntries({
+        provider, entries: chunk,
+        finalizeSync: isLast, checkpoints: isLast ? nextCheckpoints : undefined,
+        complete: isLast ? fullyComplete : undefined,
+      });
       if (!res?.ok || !data?.ok) {
         // Keep what already made it through — a later chunk failing must not
         // discard earlier successes, and the next sync will pick up the rest.

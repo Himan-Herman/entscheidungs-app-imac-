@@ -1834,6 +1834,10 @@ model WearableConnection {
   /// When the patient granted explicit import consent (Art. 9 GDPR)
   consentAt      DateTime?
   lastSyncedAt   DateTime?
+  /// Per-type resume points as JSON {"heart_rate":"<ISO>"} for types whose 30-day
+  /// window held more readings than one sync imports. Cleared per type once that
+  /// type has been read to the end, so nothing is ever skipped.
+  syncCheckpoints String?  @db.Text
   lastError      String?   @db.VarChar(300)
   disconnectedAt DateTime?
   createdAt      DateTime  @default(now())

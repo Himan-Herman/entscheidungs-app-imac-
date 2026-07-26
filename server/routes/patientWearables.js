@@ -43,6 +43,36 @@ function parseScopes(row) {
   }
 }
 
+/**
+ * Resume points are patient-scoped state, not health data. Only known vital types and
+ * plausible ISO timestamps survive; a null clears that type because it is fully read.
+ */
+function safeParseCheckpoints(json) {
+  try {
+    const v = JSON.parse(json);
+    return v && typeof v === "object" && !Array.isArray(v) ? v : null;
+  } catch { return null; }
+}
+
+function mergeCheckpoints(storedJson, incoming, allowedTypes) {
+  let merged = {};
+  try {
+    const parsed = storedJson ? JSON.parse(storedJson) : {};
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) merged = { ...parsed };
+  } catch { /* corrupt state must not break a sync */ }
+
+  if (incoming && typeof incoming === "object" && !Array.isArray(incoming)) {
+    for (const [type, value] of Object.entries(incoming)) {
+      if (!allowedTypes.includes(type)) continue;
+      if (value === null) { delete merged[type]; continue; }
+      const ts = Date.parse(value);
+      if (!Number.isFinite(ts) || ts > Date.now()) continue;
+      merged[type] = new Date(ts).toISOString();
+    }
+  }
+  return merged;
+}
+
 function connectionToJson(row) {
   return {
     id: row.id,
@@ -51,6 +81,7 @@ function connectionToJson(row) {
     scopes: parseScopes(row),
     consentAt: row.consentAt,
     lastSyncedAt: row.lastSyncedAt,
+    syncCheckpoints: row.syncCheckpoints ? safeParseCheckpoints(row.syncCheckpoints) : null,
     lastError: row.lastError,
     disconnectedAt: row.disconnectedAt,
     createdAt: row.createdAt,
@@ -160,7 +191,7 @@ router.post("/import", requireFeature, async (req, res) => {
   const uid = userId(req);
   if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
 
-  const { provider, entries, finalizeSync } = req.body || {};
+  const { provider, entries, finalizeSync, checkpoints, complete } = req.body || {};
   if (!isKnownProvider(provider)) return res.status(400).json({ ok: false, error: "unknown_provider" });
   if (!Array.isArray(entries)) return res.status(400).json({ ok: false, error: "invalid_entries" });
   if (entries.length === 0) return res.json({ ok: true, imported: 0, duplicates: 0, skipped: [] });
@@ -183,8 +214,22 @@ router.post("/import", requireFeature, async (req, res) => {
     // carried — they would be skipped forever. The client therefore sets finalizeSync
     // only on the last chunk, and only when every earlier chunk succeeded.
     if (finalizeSync === true) {
+      // Merge the client's per-type resume points into the stored map: a value means
+      // "this type still has older readings to fetch", null means "this type is done".
+      const merged = mergeCheckpoints(connection.syncCheckpoints, checkpoints, allowedTypes);
+      const hasOpenWork = Object.keys(merged).length > 0;
+
       await prisma.wearableConnection
-        .update({ where: { id: connection.id }, data: { lastSyncedAt: new Date(), lastError: null } })
+        .update({
+          where: { id: connection.id },
+          data: {
+            // lastSyncedAt may only move once nothing is left over — otherwise the next
+            // sync would start after readings this one could not fetch.
+            ...(complete === true && !hasOpenWork ? { lastSyncedAt: new Date() } : {}),
+            syncCheckpoints: hasOpenWork ? JSON.stringify(merged) : null,
+            lastError: null,
+          },
+        })
         .catch(() => {});
     }
     if (result.imported > 0) {
