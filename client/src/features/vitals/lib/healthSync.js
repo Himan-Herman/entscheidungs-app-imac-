@@ -24,6 +24,12 @@ async function defaultImportEntries(payload) {
 }
 
 /** Sync outcome codes — the UI maps these to translated messages. */
+/**
+ * Upload chunk size. Must stay <= the server's MAX_IMPORT_BATCH, otherwise a sync
+ * with a full 30-day window is rejected wholesale with 413.
+ */
+export const MAX_UPLOAD_CHUNK = 200;
+
 export const SYNC_RESULT = Object.freeze({
   OK: "ok",
   NO_PLATFORM: "no_platform",
@@ -82,22 +88,26 @@ export async function syncHealthData({ scopes, lastSyncedAt, deps } = {}) {
     return { result: SYNC_RESULT.NOTHING_NEW, ...empty, deniedTypes, failedTypes };
   }
 
+  // The server caps one import call; a 30-day window across six types easily exceeds
+  // it, so the batch is uploaded in chunks and the counts are accumulated.
+  const totals = { imported: 0, duplicates: 0, skipped: 0 };
   try {
-    const { res, data } = await importEntries({ provider, entries });
-    if (!res?.ok || !data?.ok) {
-      return { result: SYNC_RESULT.SERVER_ERROR, ...empty, deniedTypes, failedTypes };
+    for (let i = 0; i < entries.length; i += MAX_UPLOAD_CHUNK) {
+      const chunk = entries.slice(i, i + MAX_UPLOAD_CHUNK);
+      const { res, data } = await importEntries({ provider, entries: chunk });
+      if (!res?.ok || !data?.ok) {
+        // Keep what already made it through — a later chunk failing must not
+        // discard earlier successes, and the next sync will pick up the rest.
+        return { result: SYNC_RESULT.SERVER_ERROR, ...totals, deniedTypes, failedTypes };
+      }
+      totals.imported += data.imported || 0;
+      totals.duplicates += data.duplicates || 0;
+      totals.skipped += Array.isArray(data.skipped) ? data.skipped.length : 0;
     }
-    return {
-      result: SYNC_RESULT.OK,
-      imported: data.imported || 0,
-      duplicates: data.duplicates || 0,
-      skipped: Array.isArray(data.skipped) ? data.skipped.length : 0,
-      deniedTypes,
-      failedTypes,
-    };
+    return { result: SYNC_RESULT.OK, ...totals, deniedTypes, failedTypes };
   } catch (err) {
     if (err?.message === "SESSION_EXPIRED") throw err;
     // Network failure — the device is offline or the API is unreachable.
-    return { result: SYNC_RESULT.OFFLINE, ...empty, deniedTypes, failedTypes };
+    return { result: SYNC_RESULT.OFFLINE, ...totals, deniedTypes, failedTypes };
   }
 }

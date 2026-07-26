@@ -113,3 +113,70 @@ test("subsequent sync starts from lastSyncedAt, not the full window", async () =
              { lastSyncedAt: "2026-07-25T12:00:00.000Z" });
   assert.equal(Date.parse("2026-07-25T12:00:00.000Z") - Date.parse(start), 3600_000);
 });
+
+// ── Chunked upload: a full 30-day window must not be rejected wholesale ─────
+const { MAX_UPLOAD_CHUNK } = await import("../healthSync.js");
+
+test("a batch larger than the server cap is uploaded in chunks", async () => {
+  const big = Array.from({ length: 470 }, (_, i) => ({ type: "heart_rate", externalId: `e${i}` }));
+  const sizes = [];
+  const r = await run({
+    readEntries: async () => ({ entries: big, failedTypes: [] }),
+    importEntries: async ({ entries }) => {
+      sizes.push(entries.length);
+      return { res: { ok: true }, data: { ok: true, imported: entries.length, duplicates: 0, skipped: [] } };
+    },
+  });
+  assert.equal(r.result, SYNC_RESULT.OK);
+  assert.deepEqual(sizes, [200, 200, 70], "must be split into server-sized chunks");
+  assert.ok(sizes.every((n) => n <= MAX_UPLOAD_CHUNK));
+  assert.equal(r.imported, 470, "counts accumulate across chunks");
+});
+
+test("counts from all chunks are summed, not overwritten", async () => {
+  const many = Array.from({ length: 300 }, (_, i) => ({ type: "weight", externalId: `w${i}` }));
+  let call = 0;
+  const r = await run({
+    readEntries: async () => ({ entries: many, failedTypes: [] }),
+    importEntries: async () => {
+      call += 1;
+      return call === 1
+        ? { res: { ok: true }, data: { ok: true, imported: 150, duplicates: 50, skipped: [{ reason: "x" }] } }
+        : { res: { ok: true }, data: { ok: true, imported: 40, duplicates: 60, skipped: [] } };
+    },
+  });
+  assert.equal(r.imported, 190);
+  assert.equal(r.duplicates, 110);
+  assert.equal(r.skipped, 1);
+});
+
+test("a failing later chunk keeps the values already imported", async () => {
+  const many = Array.from({ length: 300 }, (_, i) => ({ type: "weight", externalId: `w${i}` }));
+  let call = 0;
+  const r = await run({
+    readEntries: async () => ({ entries: many, failedTypes: [] }),
+    importEntries: async () => {
+      call += 1;
+      return call === 1
+        ? { res: { ok: true }, data: { ok: true, imported: 200, duplicates: 0, skipped: [] } }
+        : { res: { ok: false }, data: { ok: false, error: "request_failed" } };
+    },
+  });
+  assert.equal(r.result, SYNC_RESULT.SERVER_ERROR);
+  assert.equal(r.imported, 200, "the first chunk's 200 readings must not be reported as lost");
+});
+
+test("offline midway still reports what already succeeded", async () => {
+  const many = Array.from({ length: 300 }, (_, i) => ({ type: "weight", externalId: `w${i}` }));
+  let call = 0;
+  const r = await run({
+    readEntries: async () => ({ entries: many, failedTypes: [] }),
+    importEntries: async () => {
+      call += 1;
+      if (call === 1) return { res: { ok: true }, data: { ok: true, imported: 200, duplicates: 0, skipped: [] } };
+      throw new TypeError("Failed to fetch");
+    },
+  });
+  assert.equal(r.result, SYNC_RESULT.OFFLINE);
+  assert.equal(r.imported, 200);
+});
