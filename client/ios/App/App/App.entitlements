@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  HealthKit read access (Phase 2). MedScoutX reads six vital types and never writes.
+	  `health-records` is deliberately NOT requested — that is clinical record access
+	  (lab results, medications from providers) which MedScoutX does not use.
+
+	  This file only declares the entitlement. It becomes effective once the HealthKit
+	  capability is enabled for the App ID `com.medscoutx.app` in the Apple Developer
+	  portal and the target is signed with a matching provisioning profile (Xcode:
+	  Signing & Capabilities → + Capability → HealthKit).
+	-->
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<key>com.apple.developer.healthkit.access</key>
+	<array/>
+</dict>
+</plist>

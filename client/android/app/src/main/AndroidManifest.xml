@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -33,9 +34,84 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Health Connect requires a reachable privacy-policy screen from the
+             permission sheet (both the pre-Android-14 and the Android-14+ intent). -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
     </application>
 
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- ── Health Connect (Phase 2) ──────────────────────────────────────── -->
+    <!-- Data minimisation: MedScoutX reads exactly six vital types, read-only. -->
+    <uses-permission android:name="android.permission.health.READ_BLOOD_GLUCOSE" />
+    <uses-permission android:name="android.permission.health.READ_BLOOD_PRESSURE" />
+    <uses-permission android:name="android.permission.health.READ_BODY_TEMPERATURE" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION" />
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+
+    <!-- The plugin ships ~47 health permissions. Everything MedScoutX does not use is
+         removed by the manifest merger so the app never declares (or is reviewed for)
+         permissions it cannot exercise. Includes ALL write permissions — we never write. -->
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_BASAL_BODY_TEMPERATURE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_BASAL_METABOLIC_RATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_BODY_FAT" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_DISTANCE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_FLOORS_CLIMBED" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE_VARIABILITY" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_HEIGHT" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_HYDRATION" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_MINDFULNESS" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_NUTRITION" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_RESPIRATORY_RATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_STEPS" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.READ_VO2_MAX" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_ACTIVE_CALORIES_BURNED" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_BASAL_BODY_TEMPERATURE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_BASAL_METABOLIC_RATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_BLOOD_GLUCOSE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_BLOOD_PRESSURE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_BODY_FAT" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_BODY_TEMPERATURE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_DISTANCE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_FLOORS_CLIMBED" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE_VARIABILITY" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_HEIGHT" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_HYDRATION" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_MINDFULNESS" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_NUTRITION" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_OXYGEN_SATURATION" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_RESPIRATORY_RATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_RESTING_HEART_RATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_SLEEP" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_STEPS" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_TOTAL_CALORIES_BURNED" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_VO2_MAX" tools:node="remove" />
+    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" tools:node="remove" />
+
+    <!-- Android 11+ package visibility so isAvailable() can detect Health Connect. -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+        <intent>
+            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent>
+    </queries>
 </manifest>

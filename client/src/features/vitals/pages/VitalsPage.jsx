@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, TrendingUp } from "lucide-react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
+import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { createVital, deleteVital, fetchVitals, updateVital } from "../api/vitalsApi.js";
 import VitalCard from "../components/VitalCard.jsx";
 import VitalChart from "../components/VitalChart.jsx";
@@ -112,7 +113,7 @@ export default function VitalsPage() {
         <p className="vitals-page__disclaimer">{t.disclaimer}</p>
       </div>
 
-      <WearableConnectPanel t={t} />
+      <WearableConnectPanel t={t} locale={getPrimaryIntlLocale(language)} />
 
       {!showForm && (
         <button type="button" className="vitals-page__add-btn" onClick={openAdd}>

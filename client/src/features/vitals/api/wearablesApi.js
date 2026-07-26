@@ -27,6 +27,21 @@ export async function connectWearable({ provider, scopes, consentAccepted }) {
   return { res, data };
 }
 
+/**
+ * Push measurements read from the device's health store.
+ * The server validates, bounds-checks and deduplicates — see patientWearables.js.
+ * @param {{provider: string, entries: Array<object>}} payload
+ */
+export async function importWearableEntries({ provider, entries }) {
+  const res = await authFetch(`${BASE}/import`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ provider, entries }),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 /** Soft-disconnect a connection (stops future imports; keeps existing measurements). */
 export async function disconnectWearable(id) {
   const res = await authFetch(`${BASE}/${encodeURIComponent(id)}/disconnect`, {

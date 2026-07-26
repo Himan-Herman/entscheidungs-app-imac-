@@ -1,18 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Watch, Plus, Check, X, ShieldCheck } from "lucide-react";
+import { Watch, Plus, Check, X, ShieldCheck, RefreshCw, Smartphone } from "lucide-react";
 import {
   fetchWearableProviders,
   fetchWearableConnections,
   connectWearable,
   disconnectWearable,
 } from "../api/wearablesApi.js";
+import {
+  getHealthProvider,
+  isHealthAvailable,
+  requestHealthReadAccess,
+  checkHealthReadAccess,
+} from "../lib/healthBridge.js";
+import { syncHealthData, SYNC_RESULT } from "../lib/healthSync.js";
 
 /**
  * "Gerät verbinden" section inside Meine Messwerte.
  * Additive: manual entry is unaffected. Provider-neutral. Fails closed and silent
  * when the feature flag is off (renders nothing). Never throws to the page.
  */
-export default function WearableConnectPanel({ t }) {
+export default function WearableConnectPanel({ t, locale }) {
   const c = t?.connect;
 
   const [disabled, setDisabled] = useState(false);
@@ -25,6 +32,13 @@ export default function WearableConnectPanel({ t }) {
   const [consentChecked, setConsentChecked] = useState(false);
   const [busyProvider, setBusyProvider] = useState("");
   const [actionError, setActionError] = useState("");
+
+  // ── Native health platform (Phase 2) ──────────────────────────────────────
+  const nativeProvider = getHealthProvider();          // apple_health | health_connect | null
+  const [healthAvailable, setHealthAvailable] = useState(false);
+  const [grantedTypes, setGrantedTypes] = useState([]);
+  const [syncing, setSyncing] = useState(false);
+  const [syncNote, setSyncNote] = useState("");
 
   const consentBoxRef = useRef(null);
 
@@ -60,11 +74,34 @@ export default function WearableConnectPanel({ t }) {
     }
   }, [consentProvider]);
 
+  // Detect the native health store and re-read the OS permission state.
+  // Read-only check — this never opens a system dialog.
+  const refreshHealthState = useCallback(async () => {
+    if (!nativeProvider) return;
+    const available = await isHealthAvailable();
+    setHealthAvailable(available);
+    if (!available) { setGrantedTypes([]); return; }
+    const { authorized } = await checkHealthReadAccess();
+    setGrantedTypes(authorized);
+  }, [nativeProvider]);
+
+  useEffect(() => { void refreshHealthState(); }, [refreshHealthState]);
+
   const connByProvider = useMemo(() => {
     const m = new Map();
     for (const conn of connections) m.set(conn.provider, conn);
     return m;
   }, [connections]);
+
+  /**
+   * Never offer a platform the device cannot use: Apple Health only on iOS,
+   * Health Connect only on Android. On web both are hidden and an explanatory
+   * hint is shown instead. Cloud providers ("planned") stay visible everywhere.
+   */
+  const visibleProviders = useMemo(() => {
+    const NATIVE = new Set(["apple_health", "health_connect"]);
+    return providers.filter((p) => !NATIVE.has(p.id) || p.id === nativeProvider);
+  }, [providers, nativeProvider]);
 
   function providerLabel(id) {
     return c?.providers?.[id] || id;
@@ -72,6 +109,17 @@ export default function WearableConnectPanel({ t }) {
 
   function typeLabel(type) {
     return t?.types?.[type] || type;
+  }
+
+  function fmtWhen(iso) {
+    try {
+      return new Date(iso).toLocaleString(locale || undefined, {
+        dateStyle: "short",
+        timeStyle: "short",
+      });
+    } catch {
+      return String(iso).slice(0, 16).replace("T", " ");
+    }
   }
 
   function openConsent(providerId) {
@@ -92,6 +140,20 @@ export default function WearableConnectPanel({ t }) {
     try {
       const { res, data } = await connectWearable({ provider, consentAccepted: true });
       if (!res.ok || !data?.ok) throw new Error(data?.error || "connect_failed");
+
+      // Only now — after a deliberate user action and the Art. 9 consent — do we ask
+      // the operating system for read access. Never on app start.
+      if (provider === nativeProvider && healthAvailable) {
+        try {
+          const scopes = data?.connection?.scopes;
+          const { authorized } = await requestHealthReadAccess(scopes);
+          setGrantedTypes(authorized);
+          if (authorized.length === 0) setActionError(c?.permissionDenied || "");
+        } catch {
+          setActionError(c?.permissionDenied || "");
+        }
+      }
+
       closeConsent();
       await load();
     } catch (err) {
@@ -99,6 +161,32 @@ export default function WearableConnectPanel({ t }) {
       setActionError(c?.connectError || "");
     } finally {
       setBusyProvider("");
+    }
+  }
+
+  /** Manual foreground sync. No background sync exists in this version. */
+  async function handleSyncNow(conn) {
+    setSyncing(true);
+    setSyncNote("");
+    setActionError("");
+    try {
+      const r = await syncHealthData({ scopes: conn.scopes, lastSyncedAt: conn.lastSyncedAt });
+      const map = {
+        [SYNC_RESULT.OK]: (c?.syncDone || "").replace("{n}", String(r.imported)),
+        [SYNC_RESULT.NOTHING_NEW]: c?.syncNothingNew,
+        [SYNC_RESULT.NO_PERMISSION]: c?.permissionDenied,
+        [SYNC_RESULT.NO_PLATFORM]: c?.webOnlyHint,
+        [SYNC_RESULT.OFFLINE]: c?.syncOffline,
+        [SYNC_RESULT.SERVER_ERROR]: c?.syncError,
+      };
+      setSyncNote(map[r.result] || "");
+      await refreshHealthState();
+      await load();
+    } catch (err) {
+      if (err?.message === "SESSION_EXPIRED") return;
+      setSyncNote(c?.syncError || "");
+    } finally {
+      setSyncing(false);
     }
   }
 
@@ -129,10 +217,25 @@ export default function WearableConnectPanel({ t }) {
         </div>
       </div>
 
+      {/* On web the native stores are unreachable — say so plainly instead of
+          offering a button that cannot work. */}
+      {nativeProvider ? (
+        healthAvailable ? null : (
+          <p className="wearables__app-hint">
+            {nativeProvider === "health_connect" ? c.healthConnectMissing : c.healthUnavailable}
+          </p>
+        )
+      ) : (
+        <p className="wearables__app-hint">
+          <Smartphone size={15} aria-hidden="true" /> {c.webOnlyHint}
+        </p>
+      )}
+
       <p className="wearables__app-hint">{c.appHint}</p>
 
       {loadError && <p className="wearables__error" role="alert">{loadError}</p>}
       {actionError && <p className="wearables__error" role="alert">{actionError}</p>}
+      {syncNote && <p className="wearables__sync-note" role="status">{syncNote}</p>}
 
       {loading ? (
         <div className="wearables__loading" aria-live="polite" aria-busy="true">
@@ -140,7 +243,7 @@ export default function WearableConnectPanel({ t }) {
         </div>
       ) : (
         <ul className="wearables__list">
-          {providers.map((p) => {
+          {visibleProviders.map((p) => {
             const conn = connByProvider.get(p.id);
             const isConnected = conn && conn.status === "connected";
             const isPlanned = p.availability !== "app";
@@ -163,6 +266,24 @@ export default function WearableConnectPanel({ t }) {
                     <span className="wearables__provider-types">
                       {p.supportedTypes.map(typeLabel).join(" · ")}
                     </span>
+
+                    {isConnected && p.id === nativeProvider && (
+                      <span className="wearables__meta">
+                        {healthAvailable && (
+                          <>
+                            {grantedTypes.length === 0
+                              ? c.permissionNone
+                              : grantedTypes.length < p.supportedTypes.length
+                                ? (c.permissionPartial || "").replace("{types}", grantedTypes.map(typeLabel).join(", "))
+                                : c.permissionAll}
+                            {" · "}
+                          </>
+                        )}
+                        {conn.lastSyncedAt
+                          ? (c.lastSync || "").replace("{when}", fmtWhen(conn.lastSyncedAt))
+                          : c.neverSynced}
+                      </span>
+                    )}
                   </div>
 
                   <div className="wearables__item-action">
@@ -171,14 +292,28 @@ export default function WearableConnectPanel({ t }) {
                         {c.comingSoon}
                       </button>
                     ) : isConnected ? (
-                      <button
-                        type="button"
-                        className="wearables__btn wearables__btn--ghost"
-                        onClick={() => handleDisconnect(conn)}
-                        disabled={busy}
-                      >
-                        {busy ? c.working : c.disconnect}
-                      </button>
+                      <div className="wearables__actions-row">
+                        {p.id === nativeProvider && healthAvailable && (
+                          <button
+                            type="button"
+                            className="wearables__btn wearables__btn--primary"
+                            onClick={() => handleSyncNow(conn)}
+                            disabled={syncing || busy}
+                            aria-busy={syncing}
+                          >
+                            <RefreshCw size={15} aria-hidden="true" />
+                            {syncing ? c.syncing : c.syncNow}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="wearables__btn wearables__btn--ghost"
+                          onClick={() => handleDisconnect(conn)}
+                          disabled={busy || syncing}
+                        >
+                          {busy ? c.working : c.disconnect}
+                        </button>
+                      </div>
                     ) : (
                       <button
                         type="button"

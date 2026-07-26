@@ -47,5 +47,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSHealthShareUsageDescription</key>
+	<string>MedScoutX liest auf Ihren ausdrücklichen Wunsch Blutdruck, Puls, Blutzucker, Gewicht, Sauerstoffsättigung und Körpertemperatur aus Apple Health, damit diese Werte in Ihrer persönlichen Übersicht erscheinen. Es werden keine Daten geschrieben, keine Diagnosen erstellt und nichts ohne Ihre Einwilligung weitergegeben.</string>
 </dict>
 </plist>

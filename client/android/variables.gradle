@@ -1,5 +1,7 @@
 ext {
-    minSdkVersion = 24
+    // 26 (Android 8.0) is the floor for Health Connect — the API does not exist below it.
+    // Raised from 24 in Phase 2; drops Android 7, ~1% of devices in 2026.
+    minSdkVersion = 26
     compileSdkVersion = 36
     targetSdkVersion = 36
     androidxActivityVersion = '1.11.0'

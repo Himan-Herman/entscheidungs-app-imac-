@@ -553,7 +553,8 @@
 }
 .wearables__app-hint {
   font-size: 0.8rem;
-  color: var(--ms-text-secondary, #6b7280);
+  /* #4b5563 keeps ≥4.5:1 on the muted surface; #6b7280 measured 4.41 (below AA). */
+  color: var(--ms-text-strong, #4b5563);
   background: var(--ms-surface-muted, #f1f5f9);
   border-radius: 9px;
   padding: 0.55rem 0.75rem;
@@ -721,4 +722,37 @@
   .wearables__item-action { width: 100%; }
   .wearables__item-action .wearables__btn { width: 100%; justify-content: center; }
   .wearables__consent-actions .wearables__btn { flex: 1; justify-content: center; }
+}
+
+/* ── Wearables Phase 2: sync status + actions ────────────────────────────── */
+.wearables__meta {
+  font-size: 0.76rem;
+  color: var(--ms-text-secondary, #6b7280);
+  line-height: 1.5;
+}
+
+.wearables__actions-row {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.wearables__sync-note {
+  font-size: 0.85rem;
+  color: var(--ms-text, #111827);
+  background: var(--ms-surface-muted, #f1f5f9);
+  border-radius: 9px;
+  padding: 0.55rem 0.75rem;
+  margin: 0.6rem 0 0;
+}
+
+:root[data-theme="dark"] .wearables__meta { color: #94a3b8; }
+:root[data-theme="dark"] .wearables__sync-note {
+  background: rgba(148,163,184,0.12);
+  color: #e2e8f0;
+}
+
+@media (max-width: 480px) {
+  .wearables__actions-row { width: 100%; }
+  .wearables__actions-row .wearables__btn { flex: 1; justify-content: center; }
 }
