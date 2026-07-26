@@ -77,7 +77,9 @@
   position: relative;
   max-width: 1120px;
   margin: 0 auto;
-  padding: calc(8px + env(safe-area-inset-top)) 12px 10px;
+  /* Same --safe-top as the content offset in layout.css, so header height and the
+     padding-top of .layout-main can never drift apart again. */
+  padding: calc(8px + var(--safe-top, 0px)) 12px 10px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   grid-template-areas: "logo controls menu";

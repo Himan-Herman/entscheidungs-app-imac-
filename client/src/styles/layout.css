@@ -2,6 +2,14 @@
 :root {
   --container: 1100px;
   --global-header-height: 72px;
+  /**
+   * Top safe area (iPhone notch / Dynamic Island). 0px on desktop, Android without
+   * a cutout, and any browser — so layout there is unchanged.
+   * The fixed header grows by this amount, so every offset derived from the header
+   * height must add it too, otherwise the first ~47-59px of page content end up
+   * underneath the header on iOS (viewport-fit=cover is set in index.html).
+   */
+  --safe-top: env(safe-area-inset-top, 0px);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -30,8 +38,8 @@ html, body { margin: 0; }
 }
 
 .layout-main--with-header {
-  --page-header-top: calc(var(--global-header-height) + 8px);
-  padding-top: var(--global-header-height);
+  --page-header-top: calc(var(--global-header-height) + var(--safe-top) + 8px);
+  padding-top: calc(var(--global-header-height) + var(--safe-top));
 }
 
 :root[data-theme="dark"] .layout-main {
