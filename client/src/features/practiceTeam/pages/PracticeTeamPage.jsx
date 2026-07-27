@@ -609,7 +609,7 @@ export default function PracticeTeamPage() {
                             <button
                               type="button"
                               onClick={() => void onClinicalRoleAction(m.id, "request")}
-                              aria-label={`${t.clinicalActionRequest} — ${displayName}`}
+                              aria-label={t.clinicalAriaRequest.replace("{name}", displayName)}
                             >
                               {t.clinicalActionRequest}
                             </button>
@@ -619,14 +619,14 @@ export default function PracticeTeamPage() {
                               <button
                                 type="button"
                                 onClick={() => void onClinicalRoleAction(m.id, "approve")}
-                                aria-label={`${t.clinicalActionApprove} — ${displayName}`}
+                                aria-label={t.clinicalAriaApprove.replace("{name}", displayName)}
                               >
                                 {t.clinicalActionApprove}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => void onClinicalRoleAction(m.id, "reject")}
-                                aria-label={`${t.clinicalActionReject} — ${displayName}`}
+                                aria-label={t.clinicalAriaReject.replace("{name}", displayName)}
                               >
                                 {t.clinicalActionReject}
                               </button>
@@ -642,7 +642,7 @@ export default function PracticeTeamPage() {
                               type="button"
                               className="practice-team__danger"
                               onClick={() => void onClinicalRoleAction(m.id, "revoke")}
-                              aria-label={`${t.clinicalActionRevoke} — ${displayName}`}
+                              aria-label={t.clinicalAriaRevoke.replace("{name}", displayName)}
                             >
                               {t.clinicalActionRevoke}
                             </button>

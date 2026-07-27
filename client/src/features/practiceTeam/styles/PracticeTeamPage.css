@@ -400,7 +400,9 @@
 :root[data-theme="dark"] .practice-team__clinical-actions button {
   background: var(--surface, #202124);
   color: var(--text-strong, #e8eaed);
-  border-color: var(--border-strong, #5f6368);
+  /* #5f6368 on #202124 is only 2.66:1 — below the 3:1 WCAG 1.4.11 minimum for
+     a control boundary. #7a8085 reaches 4.03:1 on the same surface. */
+  border-color: var(--border-strong, #7a8085);
 }
 
 :root[data-theme="dark"] .practice-team__clinical-actions button:hover {
