@@ -31,6 +31,49 @@ export const PERMISSIONS = {
   MEDICATION_READ: "medication.read",
   MEDICATION_WRITE: "medication.write",
   MEDICATION_PUBLISH: "medication.publish",
+  /**
+   * Prescriptions (e-Rezept) are deliberately NOT covered by the medication.*
+   * permissions: a medication plan is documentation, a prescription is a
+   * medical act.
+   *
+   * Four concepts must be kept apart:
+   *   1. organizational tenant role   -> PracticeProfile.userId ("owner")
+   *   2. medical occupational role    -> PracticeMember.role === "doctor"
+   *   3. verified professional status -> DOES NOT EXIST in this data model
+   *   4. concrete prescribing right   -> PRESCRIPTION_ISSUE / _CANCEL
+   *
+   * (3) is the problem: nothing in the schema proves a medical qualification.
+   * `User.verified` is e-mail verification only; `PracticeMember.role`,
+   * `doctorTitle` and `specialty` are self-declared free text set by whoever
+   * owns the practice, and any authenticated user can create a practice and
+   * become its owner. "owner" is organizational ownership, not a clinician.
+   *
+   * Therefore ISSUE and CANCEL are granted to NO role (deny by default) until
+   * a verifiable clinician attribute exists. See ISSUE_REQUIRES_VERIFIED_CLINICIAN.
+   * No PRESCRIPTION_DRAFT exists because ErezeptEntry has no draft state.
+   */
+  PRESCRIPTION_READ: "prescription.read",
+  PRESCRIPTION_ISSUE: "prescription.issue",
+  PRESCRIPTION_CANCEL: "prescription.cancel",
+  /**
+   * Clinical content permissions.
+   *
+   * PATIENT_LINKS_READ means "may see that this practice has a care
+   * relationship with this patient, and the administrative basics of it".
+   * It deliberately does NOT imply access to health data — that is what these
+   * separate permissions are for. Every clinical route requires the matching
+   * CLINICAL_* permission in addition to the patient's consent.
+   *
+   * CLINICAL_AI_SUMMARY_GENERATE is a PROCESSING right, not a read right:
+   * generating a summary sends Art. 9 GDPR health data to an external AI
+   * processor. Holding CLINICAL_HEALTH_HISTORY_READ must never imply it, so the
+   * AI route requires BOTH.
+   */
+  CLINICAL_VITALS_READ: "clinical.vitals.read",
+  CLINICAL_VACCINATIONS_READ: "clinical.vaccinations.read",
+  CLINICAL_HEALTH_HISTORY_READ: "clinical.health_history.read",
+  CLINICAL_SOS_READ: "clinical.sos.read",
+  CLINICAL_AI_SUMMARY_GENERATE: "clinical.ai_summary.generate",
   DATA_REQUESTS_MANAGE: "data_requests.manage",
   CALENDAR_READ: "calendar.read",
   CALENDAR_MANAGE: "calendar.manage",
@@ -51,9 +94,91 @@ export const PERMISSIONS = {
   INTERPRETER_ADMIN: "interpreter.admin",
 };
 
-/** @type {Record<string, Set<string>>} */
+/**
+ * Permissions that NO role may hold until a verifiable professional
+ * qualification exists in the data model.
+ *
+ * MODEL GAP (documented, not worked around): nothing in the schema proves a
+ * medical qualification. `User.verified` is e-mail verification; `role`,
+ * `doctorTitle` and `specialty` on PracticeMember are self-declared free text,
+ * assigned by whoever owns the practice — and any authenticated user can create
+ * a practice and become its owner without any check. A role name is therefore
+ * not evidence of authorization.
+ *
+ * Where the line is drawn:
+ *  - Reading clinical data inside an ESTABLISHED, patient-consented care
+ *    relationship rests on the patient's explicit consent for that practice.
+ *    Roles then allocate need-to-know inside the practice. That is workable
+ *    without professional verification.
+ *  - Issuing or cancelling a prescription is a regulated medical act with legal
+ *    effect. Patient consent cannot substitute for professional licensure, so
+ *    these stay denied.
+ *  - Sending health data to an external AI processor is a separate processing
+ *    purpose. The route checks consent type "health_history_access", which is a
+ *    consent to SHARE WITH THE PRACTICE, not to process externally. Until a
+ *    dedicated legal basis is wired (an "ai_organizational_assistance" consent
+ *    type already exists but is not checked here), this stays denied too.
+ */
+export const REQUIRES_VERIFIED_QUALIFICATION = Object.freeze([
+  PERMISSIONS.PRESCRIPTION_READ,
+  PERMISSIONS.PRESCRIPTION_ISSUE,
+  PERMISSIONS.PRESCRIPTION_CANCEL,
+  PERMISSIONS.CLINICAL_AI_SUMMARY_GENERATE,
+]);
+
+/**
+ * Explicit allowlist per role. Never derive a role from Object.values() — a new
+ * permission must always be an opt-in decision per role, never something a role
+ * silently inherits because it was added to the enum.
+ *
+ * `owner` is an ORGANIZATIONAL role (the account that created the practice).
+ * Ownership alone does not establish a treatment relationship, so it carries
+ * full administrative power but NO clinical read rights. An owner who also
+ * treats patients must additionally hold a `doctor` membership — the data model
+ * supports exactly that via PracticeMember, but note that getPracticeAccess()
+ * short-circuits to "owner" for the practice creator, so such a combined role
+ * is not currently expressible. That gap is documented, not worked around.
+ *
+ * @type {Record<string, Set<string>>}
+ */
 const ROLE_PERMISSIONS = {
-  owner: new Set(Object.values(PERMISSIONS)),
+  owner: new Set([
+    PERMISSIONS.TEAM_VIEW,
+    PERMISSIONS.TEAM_MANAGE,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.SECURITY_VIEW,
+    PERMISSIONS.SETTINGS_MANAGE,
+    PERMISSIONS.INTEGRATIONS_MANAGE,
+    PERMISSIONS.INTEGRATIONS_EXPORT,
+    PERMISSIONS.PATIENT_LINKS_READ,
+    PERMISSIONS.PATIENT_LINKS_WRITE,
+    PERMISSIONS.PATIENT_ASSIGNMENT_MANAGE,
+    PERMISSIONS.MESSAGES_SEND,
+    PERMISSIONS.INBOX_MANAGE,
+    PERMISSIONS.DOCUMENTS_READ,
+    PERMISSIONS.DOCUMENTS_WRITE,
+    PERMISSIONS.DOCUMENTS_DELETE,
+    PERMISSIONS.MEDICATION_READ,
+    PERMISSIONS.MEDICATION_WRITE,
+    PERMISSIONS.MEDICATION_PUBLISH,
+    PERMISSIONS.DATA_REQUESTS_MANAGE,
+    PERMISSIONS.CALENDAR_READ,
+    PERMISSIONS.CALENDAR_MANAGE,
+    PERMISSIONS.CALENDAR_SETTINGS,
+    PERMISSIONS.TELEMEDICINE_READ,
+    PERMISSIONS.TELEMEDICINE_MANAGE,
+    PERMISSIONS.TELEMEDICINE_SETTINGS,
+    PERMISSIONS.ANAMNESIS_READ,
+    PERMISSIONS.ANAMNESIS_MANAGE,
+    PERMISSIONS.BOOKING_READ,
+    PERMISSIONS.BOOKING_MANAGE,
+    PERMISSIONS.INTERPRETER_VIEW,
+    PERMISSIONS.INTERPRETER_INVITE,
+    PERMISSIONS.INTERPRETER_MANAGE,
+    PERMISSIONS.INTERPRETER_EXPORT,
+    PERMISSIONS.INTERPRETER_ADMIN,
+    // NO CLINICAL_* and NO PRESCRIPTION_*: ownership is not a care relationship.
+  ]),
   admin: new Set([
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.TEAM_MANAGE,
@@ -72,6 +197,8 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.MEDICATION_READ,
     PERMISSIONS.MEDICATION_WRITE,
     PERMISSIONS.MEDICATION_PUBLISH,
+    // NO CLINICAL_* and NO PRESCRIPTION_*: administering a practice does not
+    // require reading a patient's health data.
     PERMISSIONS.DATA_REQUESTS_MANAGE,
     PERMISSIONS.INTEGRATIONS_EXPORT,
     PERMISSIONS.CALENDAR_READ,
@@ -150,6 +277,15 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.MEDICATION_READ,
     PERMISSIONS.MEDICATION_WRITE,
     PERMISSIONS.MEDICATION_PUBLISH,
+    // Treating clinician — the only role with a treatment purpose for health
+    // data. Reading rests on the patient's per-practice consent; the role
+    // allocates need-to-know inside the practice.
+    PERMISSIONS.CLINICAL_VITALS_READ,
+    PERMISSIONS.CLINICAL_VACCINATIONS_READ,
+    PERMISSIONS.CLINICAL_HEALTH_HISTORY_READ,
+    PERMISSIONS.CLINICAL_SOS_READ,
+    // NO CLINICAL_AI_SUMMARY_GENERATE (external processing, separate legal
+    // basis) and NO PRESCRIPTION_* (regulated act, needs licensure).
     PERMISSIONS.DATA_REQUESTS_MANAGE,
     PERMISSIONS.ANAMNESIS_READ,
     PERMISSIONS.ANAMNESIS_MANAGE,
@@ -172,6 +308,11 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.ANAMNESIS_READ,
     PERMISSIONS.BOOKING_READ,
     PERMISSIONS.INTERPRETER_VIEW,
+    // NO CLINICAL_*: an assistant plausibly performs delegated tasks such as
+    // taking vitals or maintaining the vaccination record, which would justify
+    // CLINICAL_VITALS_READ / CLINICAL_VACCINATIONS_READ. Denied by default
+    // anyway, because "assistant" is a self-assigned label and no concrete
+    // workflow requirement has been established. Grant deliberately if needed.
   ]),
   viewer: new Set([
     PERMISSIONS.TEAM_VIEW,
@@ -183,8 +324,24 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.ANAMNESIS_READ,
     PERMISSIONS.BOOKING_READ,
     PERMISSIONS.INTERPRETER_VIEW,
+    // NO CLINICAL_*: a read-only observer role has no treatment purpose.
   ]),
 };
+
+/**
+ * Guard: no role may hold a permission that requires a professional
+ * qualification the data model cannot express. Enforced at module load so a
+ * future grant cannot slip through review.
+ */
+for (const [role, granted] of Object.entries(ROLE_PERMISSIONS)) {
+  for (const permission of REQUIRES_VERIFIED_QUALIFICATION) {
+    if (granted.has(permission)) {
+      throw new Error(
+        `Role "${role}" must not hold "${permission}" — see REQUIRES_VERIFIED_QUALIFICATION.`,
+      );
+    }
+  }
+}
 
 /**
  * @param {string | null | undefined} role

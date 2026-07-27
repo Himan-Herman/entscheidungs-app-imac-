@@ -12,6 +12,11 @@ import {
   getPatientSessionMedications,
 } from "../services/visitMedicationService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import {
+  getPracticeAccess,
+  accessHasPermission,
+  PERMISSIONS,
+} from "../utils/practiceAccess.js";
 
 const router = express.Router();
 
@@ -20,23 +25,20 @@ function userIdFromReq(req) {
   return typeof id === "string" && id.length > 0 ? id : null;
 }
 
+/**
+ * Delegates to the central access check. The previous local copy omitted the
+ * `status === "active"` test, so revoked and merely invited members kept access.
+ */
 async function resolvePracticeAccess(userId, practiceId) {
-  const practice = await prisma.practiceProfile.findUnique({ where: { id: practiceId } });
-  if (!practice) return null;
-  if (practice.userId === userId) return { practice, role: "owner" };
-  const member = await prisma.practiceMember.findUnique({
-    where: { practiceProfileId_userId: { practiceProfileId: practiceId, userId } },
-  });
-  if (!member) return null;
-  return { practice, role: member.role };
+  return getPracticeAccess(userId, practiceId);
 }
 
-function canRead(role) {
-  return ["owner", "admin", "doctor", "assistant", "viewer"].includes(role);
+function canRead(access) {
+  return accessHasPermission(access, PERMISSIONS.MEDICATION_READ);
 }
 
-function canWrite(role) {
-  return ["owner", "admin", "doctor", "assistant"].includes(role);
+function canWrite(access) {
+  return accessHasPermission(access, PERMISSIONS.MEDICATION_WRITE);
 }
 
 /** GET /api/practice-dashboard/preparations/:id/medications */
@@ -47,7 +49,7 @@ router.get("/preparations/:id/medications", async (req, res) => {
   const sessionId = String(req.params.id || "").trim();
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   const access = await resolvePracticeAccess(userId, practiceId);
-  if (!access || !canRead(access.role)) {
+  if (!access || !canRead(access)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
   const entries = await getPracticeMedications(sessionId, practiceId);
@@ -62,7 +64,7 @@ router.put("/preparations/:id/medications", async (req, res) => {
   const sessionId = String(req.params.id || "").trim();
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   const access = await resolvePracticeAccess(userId, practiceId);
-  if (!access || !canWrite(access.role)) {
+  if (!access || !canWrite(access)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 

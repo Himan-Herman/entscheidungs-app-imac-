@@ -20,14 +20,31 @@ export const LINK_STATUSES = new Set([
 const ACTIVE_LIKE = new Set(["invited", "active"]);
 
 /**
+ * A link the patient has never accepted must not disclose identity to the
+ * practice. Otherwise a practice could turn a known user id into a name and an
+ * e-mail address by creating a pending link (account enumeration). Once the
+ * patient has accepted (or the link is active), the practice is in a care
+ * relationship and identity is part of it. Revoked/archived links that were
+ * accepted at some point keep their identity so existing records stay readable.
+ *
+ * @param {{ status: string, consentAcceptedAt?: Date | null }} row
+ */
+function mayDiscloseIdentity(row) {
+  return row.status === "active" || Boolean(row.consentAcceptedAt);
+}
+
+/**
  * @param {import("@prisma/client").PracticePatientLink & { patientUser?: object, patientProfile?: object | null }} row
  */
 export function linkToJson(row) {
-  const user = row.patientUser;
+  const user = mayDiscloseIdentity(row) ? row.patientUser : null;
   return {
     id: row.id,
     practiceProfileId: row.practiceProfileId,
-    patientUserId: row.patientUserId,
+    // The global patientUserId is deliberately NOT exposed. A practice must
+    // reference a patient only through this practice-scoped link id, so a
+    // global account identifier can never be correlated across tenants or
+    // replayed into another practice's request. It stays available internally.
     patientProfileId: row.patientProfileId,
     status: row.status,
     linkedAt: row.linkedAt,
@@ -40,7 +57,8 @@ export function linkToJson(row) {
     assignment: assignmentExtras(row),
     patient: user
       ? {
-          id: user.id,
+          // No `id` here either: it is the same global account identifier and
+          // would defeat the point of withholding patientUserId above.
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
@@ -139,8 +157,16 @@ export async function createPracticePatientLink(input) {
     throw new Error("validation_required");
   }
 
+  // A practice must never be able to activate a link on its own. New links are
+  // always PENDING; only the patient may promote them to "active", and only via
+  // acceptPracticePatientLinkConsent (connect code redemption or accepting an
+  // email invitation). No caller needs "active" here — the connect-code flow
+  // creates "invited" and activates through the consent path.
   let status = "invited";
-  if (input.status === "active" || input.status === "invited") {
+  if (input.status === "active") {
+    throw new Error("validation_link_activation_requires_patient_consent");
+  }
+  if (input.status === "invited") {
     status = input.status;
   } else if (input.status != null && String(input.status).trim()) {
     throw new Error("validation_invalid_status");
@@ -346,11 +372,13 @@ export async function findOrCreatePracticePatientLink(input) {
     return linkToJson(row);
   }
 
+  // Pending by design: a link created by a practice-side hook must still be
+  // accepted by the patient before any data flows.
   return createPracticePatientLink({
     practiceProfileId,
     patientUserId,
     patientProfileId,
-    status: "active",
+    status: "invited",
   });
 }
 

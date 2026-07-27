@@ -9,8 +9,8 @@
 import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { isSosCardEnabled } from "../config/featureFlags.js";
-import { resolvePatientLinkForPractice } from "../services/careRelationship/resolvePatientLink.js";
-import { assertConsentForLink } from "../services/consent/consentRecordService.js";
+import { requirePracticePatientLinkAccess } from "../services/authorization/practicePatientLinkAuthorization.js";
+import { PERMISSIONS } from "../utils/practicePermissions.js";
 import {
   computeAge,
   plausibleHeightCm,
@@ -19,48 +19,32 @@ import {
 
 const router = express.Router({ mergeParams: true });
 
-const LINK_ACTIVE = new Set(["invited", "active"]);
-
 function requireFeature(_req, res, next) {
   if (!isSosCardEnabled()) return res.status(404).json({ ok: false, error: "feature_disabled" });
   return next();
 }
 
-async function resolveLink(req, res) {
-  const { linkId } = req.params;
-  const practiceId = req.query.practiceId || "";
-  const actorUserId = req.user?.userId;
-  if (!practiceId || !actorUserId) {
-    res.status(400).json({ ok: false, error: "missing_practice_id" });
-    return null;
-  }
-  let link;
-  try {
-    link = await resolvePatientLinkForPractice(linkId, practiceId);
-  } catch (err) {
-    if (err?.message === "link_not_found") res.status(404).json({ ok: false, error: "link_not_found" });
-    else res.status(400).json({ ok: false, error: "invalid_request" });
-    return null;
-  }
-  if (!LINK_ACTIVE.has(link.status)) {
-    res.status(403).json({ ok: false, error: "link_inactive" });
-    return null;
-  }
-  return link;
-}
-
 router.use(requireFeature);
 
-/** GET /api/practice/patients/:linkId/sos-card */
-router.get("/", async (req, res) => {
-  const link = await resolveLink(req, res);
-  if (!link) return;
-
-  try {
-    await assertConsentForLink(link.id, "sos_card_access");
-  } catch {
-    return res.status(403).json({ ok: false, error: "no_consent" });
-  }
+/**
+ * GET /api/practice/patients/:linkId/sos-card
+ *
+ * The consent gate previously passed `link.id` (a string) instead of the link
+ * object, so the check crashed into "deny" for the wrong reason. Consent is now
+ * evaluated centrally against the loaded link.
+ *
+ * NOTE: "sos_card_access" is not part of CONSENT_TYPES and is not granted
+ * anywhere in the codebase, so this route still denies every request — now for
+ * the correct reason (no consent record can exist). Introducing the consent
+ * type plus a patient-facing way to grant it is a feature change and is
+ * deliberately out of scope for this security patch; it must not be widened
+ * into an implicit grant.
+ */
+router.get("/", requirePracticePatientLinkAccess({
+  permission: PERMISSIONS.CLINICAL_SOS_READ,
+  consentType: "sos_card_access",
+}), async (req, res) => {
+  const { link } = req.linkAccess;
 
   try {
     const [cardRow, patientUser, allergies, diagnoses] = await Promise.all([

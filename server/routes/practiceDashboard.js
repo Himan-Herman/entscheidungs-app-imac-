@@ -1,5 +1,10 @@
 import express from "express";
 import { prisma } from "../lib/prisma.js";
+import {
+  getPracticeAccess,
+  accessHasPermission,
+  PERMISSIONS,
+} from "../utils/practiceAccess.js";
 
 const router = express.Router();
 
@@ -16,29 +21,24 @@ function userIdFromReq(req) {
   return typeof id === "string" && id.length > 0 ? id : null;
 }
 
+/**
+ * Delegates to the central access check. The previous local copy omitted the
+ * `status === "active"` test, so revoked and merely invited members kept access.
+ */
 async function resolvePracticeAccess(userId, practiceId) {
-  const practice = await prisma.practiceProfile.findUnique({
-    where: { id: practiceId },
-  });
-  if (!practice) return null;
-  if (practice.userId === userId) return { practice, role: "owner" };
-  const member = await prisma.practiceMember.findUnique({
-    where: { practiceProfileId_userId: { practiceProfileId: practiceId, userId } },
-  });
-  if (!member) return null;
-  return { practice, role: member.role };
+  return getPracticeAccess(userId, practiceId);
 }
 
-function canRead(role) {
-  return ["owner", "admin", "doctor", "assistant", "viewer"].includes(role);
+function canRead(access) {
+  return accessHasPermission(access, PERMISSIONS.PATIENT_LINKS_READ);
 }
 
-function canUpdateStatus(role) {
-  return ["owner", "admin", "doctor", "assistant"].includes(role);
+function canUpdateStatus(access) {
+  return accessHasPermission(access, PERMISSIONS.PATIENT_LINKS_WRITE);
 }
 
-function canArchiveOrDelete(role) {
-  return ["owner", "admin"].includes(role);
+function canArchiveOrDelete(access) {
+  return accessHasPermission(access, PERMISSIONS.SETTINGS_MANAGE);
 }
 
 function dashboardItemJson(row) {
@@ -124,7 +124,7 @@ router.get("/inbox", async (req, res) => {
   const practiceId = String(req.query.practiceId || "").trim();
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   const access = await resolvePracticeAccess(userId, practiceId);
-  if (!access || !canRead(access.role)) return res.status(403).json({ ok: false, error: "forbidden" });
+  if (!access || !canRead(access)) return res.status(403).json({ ok: false, error: "forbidden" });
 
   const status = String(req.query.status || "").trim();
   const targetId = String(req.query.targetId || "").trim();
@@ -186,7 +186,7 @@ router.get("/preparations/:id", async (req, res) => {
   const practiceId = String(req.query.practiceId || "").trim();
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   const access = await resolvePracticeAccess(userId, practiceId);
-  if (!access || !canRead(access.role)) return res.status(403).json({ ok: false, error: "forbidden" });
+  if (!access || !canRead(access)) return res.status(403).json({ ok: false, error: "forbidden" });
 
   const row = await prisma.preVisitSession.findFirst({
     where: { id: req.params.id, practiceProfileId: access.practice.id },
@@ -219,7 +219,7 @@ router.put("/preparations/:id/appointment", async (req, res) => {
   const practiceId = String(req.body?.practiceId || "").trim();
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   const access = await resolvePracticeAccess(userId, practiceId);
-  if (!access || !canUpdateStatus(access.role)) {
+  if (!access || !canUpdateStatus(access)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -277,12 +277,12 @@ router.put("/preparations/:id/status", async (req, res) => {
   const practiceId = String(req.body?.practiceId || "").trim();
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   const access = await resolvePracticeAccess(userId, practiceId);
-  if (!access || !canUpdateStatus(access.role)) return res.status(403).json({ ok: false, error: "forbidden" });
+  if (!access || !canUpdateStatus(access)) return res.status(403).json({ ok: false, error: "forbidden" });
   const nextStatus = String(req.body?.practiceStatus || "").trim();
   if (!PRACTICE_STATUSES.has(nextStatus)) {
     return res.status(400).json({ ok: false, error: "practiceStatus_invalid" });
   }
-  if ((nextStatus === "archived" || nextStatus === "completed") && !canArchiveOrDelete(access.role) && nextStatus === "archived") {
+  if ((nextStatus === "archived" || nextStatus === "completed") && !canArchiveOrDelete(access) && nextStatus === "archived") {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -318,7 +318,7 @@ router.delete("/preparations/:id", async (req, res) => {
   const practiceId = String(req.body?.practiceId || req.query.practiceId || "").trim();
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   const access = await resolvePracticeAccess(userId, practiceId);
-  if (!access || !canArchiveOrDelete(access.role)) return res.status(403).json({ ok: false, error: "forbidden" });
+  if (!access || !canArchiveOrDelete(access)) return res.status(403).json({ ok: false, error: "forbidden" });
 
   const mode = String(req.body?.mode || req.query.mode || "archive").trim();
   const row = await prisma.preVisitSession.findFirst({

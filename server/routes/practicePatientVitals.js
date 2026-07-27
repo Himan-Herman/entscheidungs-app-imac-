@@ -11,14 +11,13 @@
 import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { isVitalsEnabled } from "../config/featureFlags.js";
-import { resolvePatientLinkForPractice } from "../services/careRelationship/resolvePatientLink.js";
-import { assertConsentForLink } from "../services/consent/consentRecordService.js";
+import { requirePracticePatientLinkAccess } from "../services/authorization/practicePatientLinkAuthorization.js";
+import { PERMISSIONS } from "../utils/practicePermissions.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router({ mergeParams: true });
 
 const VALID_TYPES = ["blood_pressure", "heart_rate", "glucose", "weight", "oxygen", "temperature"];
-const LINK_ACTIVE = new Set(["invited", "active"]);
 
 function requireFeature(_req, res, next) {
   if (!isVitalsEnabled()) return res.status(404).json({ ok: false, error: "feature_disabled" });
@@ -43,32 +42,12 @@ function entryToJson(row) {
  * GET /api/practice/patients/:linkId/vitals
  * Query: ?type=blood_pressure&limit=200&practiceId=<id>
  */
-router.get("/", requireFeature, async (req, res) => {
+router.get("/", requireFeature, requirePracticePatientLinkAccess({
+  permission: PERMISSIONS.CLINICAL_VITALS_READ,
+  consentType: "vitals_access",
+}), async (req, res) => {
+  const { link, actorUserId } = req.linkAccess;
   const { linkId } = req.params;
-  const practiceId = req.query.practiceId || req.user?.practiceId || "";
-  const actorUserId = req.user?.userId;
-
-  if (!practiceId || !actorUserId) {
-    return res.status(400).json({ ok: false, error: "missing_practice_id" });
-  }
-
-  let link;
-  try {
-    link = await resolvePatientLinkForPractice(linkId, practiceId);
-  } catch (err) {
-    if (err?.message === "link_not_found") return res.status(404).json({ ok: false, error: "link_not_found" });
-    return res.status(400).json({ ok: false, error: "invalid_request" });
-  }
-
-  if (!LINK_ACTIVE.has(link.status)) {
-    return res.status(403).json({ ok: false, error: "link_inactive" });
-  }
-
-  try {
-    await assertConsentForLink(link, "vitals_access", { req, actorUserId, actorRole: "practice" });
-  } catch {
-    return res.status(403).json({ ok: false, error: "consent_required" });
-  }
 
   const { type, limit: rawLimit } = req.query;
   const where = { userId: link.patientUserId, deletedAt: null };
@@ -82,11 +61,11 @@ router.get("/", requireFeature, async (req, res) => {
       take: limit,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: actorUserId,
       action: "practice_vitals_viewed",
-      meta: { linkId, patientUserId: link.patientUserId, count: entries.length },
-    }).catch(() => {});
+      metadata: { linkId, patientUserId: link.patientUserId, count: entries.length },
+    });
 
     return res.json({ ok: true, entries: entries.map(entryToJson) });
   } catch (err) {

@@ -11,8 +11,8 @@ import express from "express";
 import { prisma } from "../lib/prisma.js";
 import OpenAI from "openai";
 import { isHealthHistoryEnabled } from "../config/featureFlags.js";
-import { resolvePatientLinkForPractice } from "../services/careRelationship/resolvePatientLink.js";
-import { assertConsentForLink } from "../services/consent/consentRecordService.js";
+import { requirePracticePatientLinkAccess } from "../services/authorization/practicePatientLinkAuthorization.js";
+import { PERMISSIONS } from "../utils/practicePermissions.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { getOpenAiChatModel } from "../config/openAiModels.js";
 import { logServerError } from "../utils/safeApiError.js";
@@ -20,47 +20,34 @@ import { logServerError } from "../utils/safeApiError.js";
 const router = express.Router({ mergeParams: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const LINK_ACTIVE = new Set(["invited", "active"]);
-
 function requireFeature(_req, res, next) {
   if (!isHealthHistoryEnabled()) return res.status(404).json({ ok: false, error: "feature_disabled" });
   return next();
 }
 
-async function resolveLink(req, res) {
-  const { linkId } = req.params;
-  const practiceId = req.query.practiceId || "";
-  const actorUserId = req.user?.userId;
-  if (!practiceId || !actorUserId) {
-    res.status(400).json({ ok: false, error: "missing_practice_id" });
-    return null;
-  }
-  let link;
-  try {
-    link = await resolvePatientLinkForPractice(linkId, practiceId);
-  } catch (err) {
-    if (err?.message === "link_not_found") res.status(404).json({ ok: false, error: "link_not_found" });
-    else res.status(400).json({ ok: false, error: "invalid_request" });
-    return null;
-  }
-  if (!LINK_ACTIVE.has(link.status)) {
-    res.status(403).json({ ok: false, error: "link_inactive" });
-    return null;
-  }
-  try {
-    await assertConsentForLink(link, "health_history_access", { req, actorUserId, actorRole: "practice" });
-  } catch {
-    res.status(403).json({ ok: false, error: "consent_required" });
-    return null;
-  }
-  return { link, actorUserId };
-}
+const requireHealthHistoryAccess = requirePracticePatientLinkAccess({
+  permission: PERMISSIONS.CLINICAL_HEALTH_HISTORY_READ,
+  consentType: "health_history_access",
+});
+
+/**
+ * The AI summary needs BOTH permissions. Being allowed to READ the health
+ * history must never imply being allowed to send it to an external AI
+ * processor — that is a separate purpose under Art. 9 GDPR.
+ * CLINICAL_AI_SUMMARY_GENERATE is currently held by no role, so this route
+ * denies by default until a legal basis is wired.
+ */
+const requireAiSummaryAccess = requirePracticePatientLinkAccess({
+  permission: [
+    PERMISSIONS.CLINICAL_HEALTH_HISTORY_READ,
+    PERMISSIONS.CLINICAL_AI_SUMMARY_GENERATE,
+  ],
+  consentType: "health_history_access",
+});
 
 /** GET /api/practice/patients/:linkId/health-history */
-router.get("/", requireFeature, async (req, res) => {
-  const ctx = await resolveLink(req, res);
-  if (!ctx) return;
-  const { link, actorUserId } = ctx;
+router.get("/", requireFeature, requireHealthHistoryAccess, async (req, res) => {
+  const { link, actorUserId } = req.linkAccess;
 
   try {
     const [allergies, diagnoses] = await Promise.all([
@@ -74,11 +61,11 @@ router.get("/", requireFeature, async (req, res) => {
       }),
     ]);
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: actorUserId,
       action: "practice_health_history_viewed",
-      meta: { linkId: req.params.linkId, patientUserId: link.patientUserId, allergyCount: allergies.length, diagnosisCount: diagnoses.length },
-    }).catch(() => {});
+      metadata: { linkId: req.params.linkId, patientUserId: link.patientUserId, allergyCount: allergies.length, diagnosisCount: diagnoses.length },
+    });
 
     return res.json({
       ok: true,
@@ -104,10 +91,8 @@ router.get("/", requireFeature, async (req, res) => {
  * Generates an anonymised clinical risk summary for the practice.
  * No patient name, DOB, or identifiers are included in the AI prompt.
  */
-router.post("/ai-summary", requireFeature, async (req, res) => {
-  const ctx = await resolveLink(req, res);
-  if (!ctx) return;
-  const { link, actorUserId } = ctx;
+router.post("/ai-summary", requireFeature, requireAiSummaryAccess, async (req, res) => {
+  const { link, actorUserId } = req.linkAccess;
   const { locale = "de" } = req.body || {};
 
   try {
@@ -151,11 +136,11 @@ Keep it under 120 words. Use bullet points. Do not include patient names or iden
 
     const summary = completion.choices[0].message.content?.trim() || null;
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: actorUserId,
       action: "practice_health_history_ai_summary",
-      meta: { linkId: req.params.linkId },
-    }).catch(() => {});
+      metadata: { linkId: req.params.linkId },
+    });
 
     return res.json({ ok: true, summary });
   } catch (err) {
