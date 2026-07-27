@@ -33,7 +33,8 @@ function sessionToJson(row, { includeParticipants = false } = {}) {
     appointmentId: row.appointmentId,
     practiceProfileId: row.practiceProfileId,
     practicePatientLinkId: row.practicePatientLinkId,
-    patientUserId: row.patientUserId,
+    // Global patientUserId withheld from API responses; notifications consume
+    // the Prisma row directly, so nothing depends on it being serialized.
     providerType: row.providerType,
     status: row.status,
     title: row.title,
@@ -157,6 +158,25 @@ export async function createPracticeSession(actorUserId, practiceId, body, ctx =
   if (!access) throw new Error("practice_not_found");
   if (!canManageTelemedicine(access.role)) throw new Error("forbidden");
 
+  // The patient is derived from the link, never taken from the request body.
+  // Trusting body.patientUserId allowed a practice to bind a session (and the
+  // inbox notification it triggers) to an arbitrary account. The link is also
+  // re-checked against this practice, so a foreign link cannot be attached.
+  let practicePatientLinkId = null;
+  let patientUserId = null;
+  if (body.practicePatientLinkId) {
+    const link = await prisma.practicePatientLink.findFirst({
+      where: {
+        id: String(body.practicePatientLinkId),
+        practiceProfileId: practiceId,
+      },
+      select: { id: true, patientUserId: true },
+    });
+    if (!link) throw new Error("link_not_found");
+    practicePatientLinkId = link.id;
+    patientUserId = link.patientUserId;
+  }
+
   const settings = await getPracticeVideoSettings(practiceId);
   const providerType = String(body.providerType || settings.providerType || "sandbox");
   const adapter = getVideoAdapter(providerType);
@@ -166,8 +186,8 @@ export async function createPracticeSession(actorUserId, practiceId, body, ctx =
   const session = await prisma.telemedicineSession.create({
     data: {
       practiceProfileId: practiceId,
-      practicePatientLinkId: body.practicePatientLinkId || null,
-      patientUserId: body.patientUserId || null,
+      practicePatientLinkId,
+      patientUserId,
       appointmentId: body.appointmentId || null,
       providerType,
       status: "planned",
