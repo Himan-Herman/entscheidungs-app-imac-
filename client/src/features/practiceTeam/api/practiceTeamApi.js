@@ -65,6 +65,27 @@ export async function revokePracticeTeamMember(practiceId, membershipId) {
   return { res, data };
 }
 
+/**
+ * Clinical role lifecycle. The clinical role is held IN ADDITION to the
+ * organizational one; the organizational membership is never changed by this.
+ *
+ * @param {string} practiceId
+ * @param {string} membershipId
+ * @param {"request"|"approve"|"reject"|"revoke"} action
+ */
+export async function changePracticeClinicalRole(practiceId, membershipId, action) {
+  const res = await authFetch(
+    `/api/practice/team/${encodeURIComponent(membershipId)}/clinical-role/${encodeURIComponent(action)}?${qs(practiceId)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    },
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function fetchPracticeTeamAiSummary(practiceId, body) {
   const res = await authFetch(`/api/practice/team/ai-permission-summary?${qs(practiceId)}`, {
     method: "POST",

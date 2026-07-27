@@ -6,6 +6,7 @@ import { authFetch } from "../../../api/authFetch.js";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   acceptPracticeTeamInvite,
+  changePracticeClinicalRole,
   fetchPendingTeamInvites,
   fetchPracticeTeam,
   fetchPracticeTeamAiSummary,
@@ -94,6 +95,24 @@ export default function PracticeTeamPage() {
           getMessages(language).practiceOrganization?.rolePracticeManager,
       };
       return map[role] || role;
+    },
+    [t],
+  );
+
+  const clinicalRoleLabel = useCallback(
+    (role) => (role === "doctor" ? t.clinicalRoleDoctor : role || ""),
+    [t],
+  );
+
+  const clinicalStatusLabel = useCallback(
+    (status) => {
+      const map = {
+        pending: t.clinicalStatusPending,
+        active: t.clinicalStatusActive,
+        rejected: t.clinicalStatusRejected,
+        revoked: t.clinicalStatusRevoked,
+      };
+      return map[status] || status;
     },
     [t],
   );
@@ -234,6 +253,29 @@ export default function PracticeTeamPage() {
       const { res, data } = await patchPracticeTeamRole(practiceId, membershipId, role);
       if (!res.ok || !data.ok) throw new Error(data.error || "role_failed");
       setStatusMsg(t.roleChangeSuccess);
+      await loadTeam();
+    } catch (err) {
+      setStatusMsg(errText(err?.message));
+    }
+  };
+
+  /**
+   * Clinical role lifecycle. Which actions are offered comes from the
+   * server-computed `capabilities` on each row, so a self-approval control can
+   * never be rendered even if the client were tampered with — the server
+   * refuses it independently.
+   *
+   * @param {string} membershipId
+   * @param {"request"|"approve"|"reject"|"revoke"} action
+   */
+  const onClinicalRoleAction = async (membershipId, action) => {
+    if (!practiceId) return;
+    if (action === "revoke" && !window.confirm(t.clinicalRevokeConfirm)) return;
+    setStatusMsg("");
+    try {
+      const { res, data } = await changePracticeClinicalRole(practiceId, membershipId, action);
+      if (!res.ok || !data.ok) throw new Error(data.error || "clinical_role_failed");
+      setStatusMsg(t[`clinicalSuccess_${action}`] || t.clinicalSuccess_request);
       await loadTeam();
     } catch (err) {
       setStatusMsg(errText(err?.message));
@@ -489,6 +531,9 @@ export default function PracticeTeamPage() {
         <p className="practice-dashboard__muted">{t.loading}</p>
       ) : (
         <>
+        <p className="practice-team__clinical-hint" role="note">
+          {t.clinicalHint}
+        </p>
         <div className="practice-team__table-wrap practice-patients__table-wrap">
           <table className="practice-team__table">
             <caption className="practice-team__sr-only">{t.heading}</caption>
@@ -496,7 +541,8 @@ export default function PracticeTeamPage() {
               <tr>
                 <th scope="col">{t.colName}</th>
                 <th scope="col">{t.colEmail}</th>
-                <th scope="col">{t.colRole}</th>
+                <th scope="col">{t.colOrganizationalRole}</th>
+                <th scope="col">{t.colClinicalRole}</th>
                 <th scope="col">{t.colStatus}</th>
                 {canManage ? <th scope="col">{t.colActions}</th> : null}
               </tr>
@@ -504,7 +550,7 @@ export default function PracticeTeamPage() {
             <tbody>
               {filteredMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={canManage ? 5 : 4}>{t.membersEmpty}</td>
+                  <td colSpan={canManage ? 6 : 5}>{t.membersEmpty}</td>
                 </tr>
               ) : (
                 filteredMembers.map((m) => {
@@ -535,6 +581,73 @@ export default function PracticeTeamPage() {
                         ) : (
                           <span>{roleLabel(m.role)}</span>
                         )}
+                      </td>
+                      <td>
+                        {/*
+                          Clinical role — separate from the organizational one.
+                          The available actions come from the server so a
+                          self-approval control is never rendered.
+                        */}
+                        {m.clinicalRoleStatus ? (
+                          <>
+                            <span className="practice-team__clinical-role">
+                              {clinicalRoleLabel(m.clinicalRole)}
+                            </span>
+                            <span
+                              className={`practice-team__status-pill practice-team__status-pill--clinical-${m.clinicalRoleStatus}`}
+                            >
+                              {clinicalStatusLabel(m.clinicalRoleStatus)}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="practice-team__meta">{t.clinicalRoleNone}</span>
+                        )}
+                        <div className="practice-team__clinical-actions">
+                          {m.capabilities?.canRequest &&
+                          (!m.clinicalRoleStatus ||
+                            ["rejected", "revoked"].includes(m.clinicalRoleStatus)) ? (
+                            <button
+                              type="button"
+                              onClick={() => void onClinicalRoleAction(m.id, "request")}
+                              aria-label={`${t.clinicalActionRequest} — ${displayName}`}
+                            >
+                              {t.clinicalActionRequest}
+                            </button>
+                          ) : null}
+                          {m.clinicalRoleStatus === "pending" && m.capabilities?.canApprove ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => void onClinicalRoleAction(m.id, "approve")}
+                                aria-label={`${t.clinicalActionApprove} — ${displayName}`}
+                              >
+                                {t.clinicalActionApprove}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void onClinicalRoleAction(m.id, "reject")}
+                                aria-label={`${t.clinicalActionReject} — ${displayName}`}
+                              >
+                                {t.clinicalActionReject}
+                              </button>
+                            </>
+                          ) : null}
+                          {m.clinicalRoleStatus === "pending" && !m.capabilities?.canApprove ? (
+                            <span className="practice-team__meta" role="note">
+                              {t.clinicalAwaitingApproval}
+                            </span>
+                          ) : null}
+                          {m.clinicalRoleStatus === "active" && m.capabilities?.canRevoke ? (
+                            <button
+                              type="button"
+                              className="practice-team__danger"
+                              onClick={() => void onClinicalRoleAction(m.id, "revoke")}
+                              aria-label={`${t.clinicalActionRevoke} — ${displayName}`}
+                            >
+                              {t.clinicalActionRevoke}
+                            </button>
+                          ) : null}
+                        </div>
                       </td>
                       <td>
                         <span

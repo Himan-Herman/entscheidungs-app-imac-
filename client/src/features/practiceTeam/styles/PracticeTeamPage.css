@@ -296,3 +296,118 @@
   font-size: 0.85rem;
   margin: 0;
 }
+
+/* ---------------------------------------------------------------------------
+   Clinical role — shown separately from the organisational role so it is never
+   confused with it. Status is conveyed by text, not by colour alone.
+   Theme-aware; the older pills above still use fixed colours (pre-existing).
+   --------------------------------------------------------------------------- */
+
+.practice-team__clinical-role {
+  display: block;
+  font-weight: 600;
+  color: var(--text-strong, #202124);
+}
+
+.practice-team__status-pill--clinical-pending,
+.practice-team__status-pill--clinical-active,
+.practice-team__status-pill--clinical-rejected,
+.practice-team__status-pill--clinical-revoked {
+  margin-top: 0.25rem;
+  border: 1px solid transparent;
+}
+
+.practice-team__status-pill--clinical-pending {
+  background: var(--warning-surface, #fef7e0);
+  color: var(--warning-text, #7a5d00);
+  border-color: var(--warning-border, #e8d08a);
+}
+
+.practice-team__status-pill--clinical-active {
+  background: var(--success-surface, #e6f4ea);
+  color: var(--success-text, #10632c);
+  border-color: var(--success-border, #9dcfae);
+}
+
+.practice-team__status-pill--clinical-rejected,
+.practice-team__status-pill--clinical-revoked {
+  background: var(--danger-surface, #fce8e6);
+  color: var(--danger-text, #b3201d);
+  border-color: var(--danger-border, #e6a9a6);
+}
+
+.practice-team__clinical-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.practice-team__clinical-actions button {
+  /* Comfortable touch target on small screens. */
+  min-height: 44px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong, #9aa0a6);
+  background: var(--surface, #fff);
+  color: var(--text-strong, #202124);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.practice-team__clinical-actions button:hover {
+  background: var(--surface-hover, #f1f3f4);
+}
+
+.practice-team__clinical-actions button:focus-visible {
+  outline: 3px solid var(--focus-ring, #1a73e8);
+  outline-offset: 2px;
+}
+
+.practice-team__clinical-hint {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 4px solid var(--accent, #1a73e8);
+  background: var(--surface-muted, #f8f9fa);
+  color: var(--text-muted, #5f6368);
+  font-size: 0.9rem;
+  border-radius: 0 8px 8px 0;
+}
+
+:root[data-theme="dark"] .practice-team__clinical-role {
+  color: var(--text-strong, #e8eaed);
+}
+
+:root[data-theme="dark"] .practice-team__status-pill--clinical-pending {
+  background: #3b2f05;
+  color: #ffd970;
+  border-color: #6b5410;
+}
+
+:root[data-theme="dark"] .practice-team__status-pill--clinical-active {
+  background: #0d2f18;
+  color: #81c995;
+  border-color: #1e5c33;
+}
+
+:root[data-theme="dark"] .practice-team__status-pill--clinical-rejected,
+:root[data-theme="dark"] .practice-team__status-pill--clinical-revoked {
+  background: #3d1512;
+  color: #f2a29e;
+  border-color: #6e2b26;
+}
+
+:root[data-theme="dark"] .practice-team__clinical-actions button {
+  background: var(--surface, #202124);
+  color: var(--text-strong, #e8eaed);
+  border-color: var(--border-strong, #5f6368);
+}
+
+:root[data-theme="dark"] .practice-team__clinical-actions button:hover {
+  background: var(--surface-hover, #2d2e31);
+}
+
+:root[data-theme="dark"] .practice-team__clinical-hint {
+  background: var(--surface-muted, #26282b);
+  color: var(--text-muted, #bdc1c6);
+}
