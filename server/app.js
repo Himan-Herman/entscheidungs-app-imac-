@@ -84,6 +84,7 @@ import practiceDeveloperRouter from "./routes/practiceDeveloper.js";
 import practiceV1Router from "./routes/practiceV1.js";
 import archiveAiRouter from "./routes/archiveAi.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
+import { isVitalsEnabled, isWearablesEnabled } from './config/featureFlags.js';
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
 import {
@@ -330,6 +331,11 @@ app.get('/api/health/config', (_req, res) =>
       frontendUrl:
         Boolean(process.env.FRONTEND_URL) || Boolean(process.env.APP_BASE_URL),
       googlePlaces: Boolean(process.env.GOOGLE_PLACES_API_KEY),
+      // Booleans only — lets us tell "feature switched off" apart from "bug" without
+      // an authenticated request. The patient UI hides the whole wearables section
+      // when the server reports feature_disabled, which looks identical to a defect.
+      vitals: isVitalsEnabled(),
+      wearables: isWearablesEnabled(),
     },
   }),
 );
