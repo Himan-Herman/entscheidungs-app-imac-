@@ -880,6 +880,42 @@ export default {
   },
 
   practiceTeam: {
+    colOrganizationalRole: "Rôle organisationnel",
+    colClinicalRole: "Rôle clinique",
+    clinicalRoleNone: "Aucun",
+    clinicalRoleDoctor: "Médecin",
+    clinicalStatusPending: "Demandé",
+    clinicalStatusActive: "Approuvé au sein de l’établissement",
+    clinicalStatusRejected: "Refusé",
+    clinicalStatusRevoked: "Retiré",
+    clinicalActionRequest: "Demander le rôle de médecin",
+    clinicalActionApprove: "Approuver",
+    clinicalActionReject: "Refuser",
+    clinicalActionRevoke: "Retirer",
+    clinicalAriaRequest: "Demander le rôle clinique de médecin pour {name}",
+    clinicalAriaApprove:
+      "Approuver le rôle clinique de médecin pour {name} au sein de cet établissement",
+    clinicalAriaReject: "Refuser la demande de rôle clinique de médecin pour {name}",
+    clinicalAriaRevoke: "Retirer le rôle clinique de médecin à {name}",
+    clinicalAwaitingApproval:
+      "En attente de l’approbation d’une autre personne autorisée. Vous ne pouvez pas approuver votre propre rôle.",
+    clinicalRevokeConfirm:
+      "Retirer le rôle clinique ? L’accès aux données de santé prend fin immédiatement.",
+    clinicalSuccess_request:
+      "Demande envoyée. Une autre personne autorisée doit l’approuver.",
+    clinicalSuccess_approve: "Rôle clinique approuvé au sein de l’établissement.",
+    clinicalSuccess_reject: "Demande refusée.",
+    clinicalSuccess_revoke: "Rôle clinique retiré.",
+    clinicalHint:
+      "Le rôle organisationnel et le rôle clinique sont distincts. Un rôle clinique est approuvé au sein de cet établissement et n’est valable qu’ici — ce n’est pas une preuve de qualification externe.",
+    overviewHeading: "Aperçu de l’équipe",
+    groupTreaters: "Soignants/médecins",
+    groupAdministration: "Administration",
+    groupSupport: "Assistance/secrétariat",
+    groupOther: "Autres",
+    groupOpenInvitations: "Invitations en attente",
+    overviewGroupEmpty: "Aucun",
+    overviewNoInvites: "Aucune invitation en attente",
     pageTitle: "Équipe et autorisations – établissement",
     heading: "Rôles et autorisations de l’équipe",
     intro:
