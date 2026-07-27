@@ -71,7 +71,7 @@ export function sanitizeAuditMetadata(value, depth = 0) {
  *   metadata?: Record<string, unknown> | null;
  * }} opts
  */
-export function writeAuditLog(opts) {
+function buildAuditRow(opts) {
   const {
     req,
     userId = null,
@@ -118,25 +118,48 @@ export function writeAuditLog(opts) {
     }
   }
 
-  void prisma.auditLog
-    .create({
-      data: {
-        userId: userId || null,
-        actorRole: actorRole || null,
-        action,
-        entityType: entityType || null,
-        entityId: entityId || null,
-        practiceProfileId,
-        patientUserId,
-        practicePatientLinkId,
-        severity,
-        visibility,
-        ipHash,
-        userAgent: ua,
-        metadata: metaJson ?? undefined,
-      },
-    })
-    .catch(() => {
-      /* silent */
-    });
+  return {
+    userId: userId || null,
+    actorRole: actorRole || null,
+    action,
+    entityType: entityType || null,
+    entityId: entityId || null,
+    practiceProfileId,
+    patientUserId,
+    practicePatientLinkId,
+    severity,
+    visibility,
+    ipHash,
+    userAgent: ua,
+    metadata: metaJson ?? undefined,
+  };
+}
+
+/**
+ * BEST EFFORT. Fire-and-forget: returns undefined (NOT a promise) and swallows
+ * write failures silently. Never `await` this and never chain `.catch()` on it.
+ *
+ * Appropriate for observational events (something was viewed, opened, listed)
+ * where losing a row is acceptable and must not fail the request.
+ * For security-relevant mutations use writeRequiredAuditLog instead.
+ */
+export function writeAuditLog(opts) {
+  void prisma.auditLog.create({ data: buildAuditRow(opts) }).catch(() => {
+    /* silent */
+  });
+}
+
+/**
+ * MANDATORY audit. Returns a promise and REJECTS if the row could not be
+ * written, so a caller can refuse to report success for a security-relevant
+ * mutation that was not recorded.
+ *
+ * Use for: issuing/cancelling a prescription, creating/activating/revoking a
+ * care link, granting/revoking consent, exporting or sharing patient data.
+ *
+ * @param {Parameters<typeof writeAuditLog>[0]} opts
+ * @returns {Promise<void>}
+ */
+export async function writeRequiredAuditLog(opts) {
+  await prisma.auditLog.create({ data: buildAuditRow(opts) });
 }
