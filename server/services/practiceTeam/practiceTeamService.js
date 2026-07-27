@@ -57,6 +57,8 @@ export function memberToJson(row, meta = {}) {
     clinicalRoleStatus: row.clinicalRoleStatus ?? null,
     clinicalRoleRequestedAt: row.clinicalRoleRequestedAt ?? null,
     clinicalRoleApprovedAt: row.clinicalRoleApprovedAt ?? null,
+    // Practice staff id of the approver — never a patient identifier.
+    clinicalRoleApprovedByUserId: row.clinicalRoleApprovedByUserId ?? null,
     // Per-viewer capabilities so the UI never renders a self-approval control.
     capabilities: meta.capabilities ?? null,
     invitedByUserId: row.invitedByUserId,
@@ -109,25 +111,36 @@ export async function buildTeamList(practiceId) {
 
   const ownerMemberRow = members.find((m) => m.userId === ownerUserId);
   if (practice.user) {
-    list.push({
+    /**
+     * The owner row goes through the SAME serializer as everyone else.
+     *
+     * It used to be assembled by hand, which silently dropped the clinical
+     * role fields: the owner never saw their own request or approval, and an
+     * approver never saw a pending owner request in the list. Spreading the
+     * real membership row first keeps those fields (and only those — the
+     * organizational identity below is still forced, because ownership comes
+     * from PracticeProfile.userId and must not depend on the membership row).
+     *
+     * Nothing clinical is derived from ownership, `specialty` or `doctorTitle`:
+     * the values come from the PracticeMember record or stay null.
+     */
+    const ownerRow = {
+      ...(ownerMemberRow ?? {}),
       id: ownerMemberRow?.id || `owner-${ownerUserId}`,
       practiceProfileId: practiceId,
       userId: ownerUserId,
+      // Organizational identity of the owner is fixed, not read from the row.
       role: "owner",
       status: "active",
       invitedByUserId: null,
       invitedAt: null,
-      acceptedAt: practice.createdAt,
+      acceptedAt: ownerMemberRow?.acceptedAt ?? practice.createdAt,
       revokedAt: null,
-      createdAt: practice.createdAt,
-      updatedAt: practice.updatedAt,
-      isPracticeOwner: true,
-      user: {
-        id: practice.user.id,
-        email: practice.user.email,
-        displayName: userDisplayName(practice.user),
-      },
-    });
+      createdAt: ownerMemberRow?.createdAt ?? practice.createdAt,
+      updatedAt: ownerMemberRow?.updatedAt ?? practice.updatedAt,
+      user: practice.user,
+    };
+    list.push(memberToJson(ownerRow, { isPracticeOwner: true }));
   }
 
   for (const m of members) {
