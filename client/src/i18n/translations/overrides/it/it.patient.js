@@ -682,6 +682,9 @@ export default {
           "iPhone/iPad: aggiungi l’app tramite « Condividi » → « Aggiungi a Home » per ricevere i promemoria.",
         enableLabel: "Attiva i promemoria su questo dispositivo",
         enabledMsg: "I promemoria sono attivi.",
+        nativeTitle: "Promemoria",
+        nativeBody: "È ora della tua assunzione.",
+        nativeChannelHint: "I promemoria vengono pianificati direttamente su questo dispositivo.",
         disabledMsg: "I promemoria sono stati disattivati.",
         savedMsg: "Orari dei promemoria salvati.",
         permissionDenied:

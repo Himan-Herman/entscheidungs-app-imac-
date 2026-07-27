@@ -20,6 +20,25 @@ const INTAKE_WINDOW_MIN = 10;
 let timer = null;
 
 /** { ymd: "YYYY-MM-DD", minutes: number } for `date` in `timeZone`. */
+/**
+ * Decides whether the SERVER may deliver this account's reminder over Web Push.
+ *
+ * The one place the dual-channel contract lives. A patient may legitimately run the
+ * native app and the PWA at the same time; without this rule both would fire and the
+ * same intake would be announced twice. The native app schedules locally and sets
+ * `nativeEnabled` + `webEnabled:false`, which silences the server for that account.
+ *
+ * A patient who deliberately wants browser notifications too keeps `webEnabled:true`,
+ * and an account with no channel row at all (pure web user) keeps working unchanged.
+ *
+ * @param {{nativeEnabled?:boolean, webEnabled?:boolean}|null|undefined} channel
+ * @returns {boolean} true when web push delivery is allowed
+ */
+export function shouldSendWebPush(channel) {
+  if (channel?.nativeEnabled && channel?.webEnabled === false) return false;
+  return true;
+}
+
 function zonedParts(date, timeZone) {
   try {
     const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -74,26 +93,46 @@ function buildPayload(reminder) {
  * @returns {Promise<{ sent: number, removed: number, checked: number }>}
  */
 export async function dispatchDueReminders(now = new Date()) {
-  if (!isWebPushConfigured()) return { sent: 0, removed: 0, checked: 0 };
+  if (!isWebPushConfigured()) return { sent: 0, removed: 0, checked: 0, skippedNative: 0 };
 
   let reminders = [];
   try {
+    // Reminders belong to the USER, not to a subscription. Everything needed to decide
+    // delivery — the user's channel state and all their web subscriptions — is loaded
+    // with them, so one reminder can reach several browsers of the same person.
     reminders = await prisma.pushReminder.findMany({
       where: { active: true },
-      include: { subscription: true },
+      include: {
+        user: {
+          select: {
+            pushChannelState: true,
+            pushSubscriptions: true,
+          },
+        },
+      },
     });
   } catch (err) {
     console.error("[push-scheduler] load failed:", err?.message ?? err);
-    return { sent: 0, removed: 0, checked: 0 };
+    return { sent: 0, removed: 0, checked: 0, skippedNative: 0 };
   }
 
   let sent = 0;
   let removed = 0;
+  let skippedNative = 0;
 
   for (const reminder of reminders) {
-    const sub = reminder.subscription;
-    if (!sub) continue;
-    const { ymd, minutes } = zonedParts(now, sub.timezone || "Europe/Berlin");
+    const channel = reminder.user?.pushChannelState;
+    const subs = reminder.user?.pushSubscriptions || [];
+
+    if (!shouldSendWebPush(channel)) {
+      skippedNative += 1;
+      continue;
+    }
+    if (subs.length === 0) continue;   // nothing to deliver to — not an error
+
+    // The reminder's own timezone wins; fall back to a subscription's, then Berlin.
+    const tz = reminder.timezone || subs[0]?.timezone || "Europe/Berlin";
+    const { ymd, minutes } = zonedParts(now, tz);
 
     let due = false;
     if (reminder.type === "intake") {
@@ -117,36 +156,37 @@ export async function dispatchDueReminders(now = new Date()) {
     }
     if (!due) continue;
 
-    const result = await sendPush(
-      { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
-      buildPayload(reminder),
-    );
-
-    try {
+    // Deliver to every browser this patient registered; a dead one is pruned, and a
+    // single failure must not stop the others.
+    let anyDelivered = false;
+    for (const sub of subs) {
+      const result = await sendPush(
+        { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
+        buildPayload(reminder),
+      );
       if (result.gone) {
-        // Subscription expired at the push service — remove it (cascade removes reminders).
-        await prisma.pushSubscription.delete({ where: { id: sub.id } });
+        // Expired at the push service. Reminders survive this now (FK is SET NULL).
+        await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
         removed += 1;
       } else if (result.ok) {
-        if (reminder.type === "refill") {
-          await prisma.pushReminder.update({
-            where: { id: reminder.id },
-            data: { lastSentOn: ymd, active: false },
-          });
-        } else {
-          await prisma.pushReminder.update({
-            where: { id: reminder.id },
-            data: { lastSentOn: ymd },
-          });
-        }
-        sent += 1;
+        anyDelivered = true;
       }
+    }
+
+    if (!anyDelivered) continue;
+
+    try {
+      await prisma.pushReminder.update({
+        where: { id: reminder.id },
+        data: reminder.type === "refill" ? { lastSentOn: ymd, active: false } : { lastSentOn: ymd },
+      });
+      sent += 1;
     } catch (err) {
       console.error("[push-scheduler] update failed:", err?.message ?? err);
     }
   }
 
-  return { sent, removed, checked: reminders.length };
+  return { sent, removed, checked: reminders.length, skippedNative };
 }
 
 /** Start the guarded interval. No-op if push is not configured or already started. */

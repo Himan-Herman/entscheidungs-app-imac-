@@ -10,6 +10,15 @@ import {
   subscribeAndSync,
   syncReminders,
 } from "../notifications/pushClient.js";
+import {
+  isNativeRemindersSupported,
+  requestNativeReminderPermission,
+  scheduleNativeReminders,
+  cancelNativeReminders,
+  pendingNativeReminderCount,
+  checkNativeReminderPermission,
+} from "../notifications/nativeReminders.js";
+import { authFetch } from "../../../api/authFetch.js";
 
 const PREFS_KEY = "medscoutx_med_reminders_v1";
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -73,6 +82,9 @@ function buildReminders(times, entries, labels) {
  */
 export default function MedicationRemindersPanel({ entries, t }) {
   const supported = isPushSupported();
+  /** In the app the OS schedules locally; Web Push is off there by design. */
+  const nativeSupported = isNativeRemindersSupported();
+
   const iosHint = isIosNeedsInstall();
 
   const [config, setConfig] = useState({ enabled: false, publicKey: "" });
@@ -86,6 +98,28 @@ export default function MedicationRemindersPanel({ entries, t }) {
     () => ({ intakeBody: t.intakeBody, refillBody: t.refillBody }),
     [t.intakeBody, t.refillBody],
   );
+
+  /**
+   * Store the reminder times server-side (channel-neutral) and plan them on this
+   * device. `channel: "native"` tells the server to stay quiet on web push, so the
+   * same reminder cannot also arrive as a browser notification.
+   */
+  const saveNativeReminders = useCallback(async (times) => {
+    const reminders = buildReminders(times, entries, labels);
+    await authFetch("/api/patient/push", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        channel: "native",
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        reminders,
+      }),
+    }).catch(() => {});
+    return scheduleNativeReminders(times, {
+      title: t.nativeTitle || t.heading,
+      body: t.nativeBody || "",
+    });
+  }, [entries, labels, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,12 +144,24 @@ export default function MedicationRemindersPanel({ entries, t }) {
           /* ignore */
         }
       }
+      if (nativeSupported) {
+        // Honest status: what this device has actually planned, not what we hope.
+        const [pending, granted] = await Promise.all([
+          pendingNativeReminderCount(),
+          checkNativeReminderPermission(),
+        ]);
+        if (!cancelled) setActive(pending > 0 && granted === "granted");
+        const { res, data } = await fetchPushStatus();
+        if (!cancelled && res.ok && Array.isArray(data.intakeTimes) && data.intakeTimes.length) {
+          setPrefs((p) => ({ ...p, times: data.intakeTimes }));
+        }
+      }
       if (!cancelled) setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [supported]);
+  }, [supported, nativeSupported]);
 
   const persist = useCallback((next) => {
     setPrefs(next);
@@ -125,6 +171,24 @@ export default function MedicationRemindersPanel({ entries, t }) {
   const doEnable = async () => {
     setBusy(true);
     setMsg({ type: "", text: "" });
+
+    // Native path: ask the OS only now — this runs from a deliberate button press.
+    if (nativeSupported) {
+      const granted = await requestNativeReminderPermission();
+      if (!granted) {
+        setBusy(false);
+        setMsg({ type: "error", text: t.permissionDenied });
+        return;
+      }
+      const res = await saveNativeReminders(prefs.times);
+      setBusy(false);
+      setActive(res.scheduled > 0);
+      setMsg(res.scheduled > 0
+        ? { type: "success", text: t.enabledMsg }
+        : { type: "error", text: t.genericError });
+      return;
+    }
+
     const reminders = buildReminders(prefs.times, entries, labels);
     const result = await subscribeAndSync({
       publicKey: config.publicKey,
@@ -145,6 +209,14 @@ export default function MedicationRemindersPanel({ entries, t }) {
   const doDisable = async () => {
     setBusy(true);
     setMsg({ type: "", text: "" });
+    if (nativeSupported) {
+      await cancelNativeReminders();
+      await authFetch("/api/patient/push", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel: "native", reminders: [] }),
+      }).catch(() => {});
+    }
     await disablePush();
     setBusy(false);
     setActive(false);
@@ -154,6 +226,15 @@ export default function MedicationRemindersPanel({ entries, t }) {
   const doSave = async () => {
     setBusy(true);
     setMsg({ type: "", text: "" });
+    // Native: re-plan on the device so a changed time takes effect immediately.
+    if (nativeSupported) {
+      const res = await saveNativeReminders(prefs.times);
+      setBusy(false);
+      setMsg(res.scheduled > 0
+        ? { type: "success", text: t.savedMsg }
+        : { type: "error", text: t.genericError });
+      return;
+    }
     const reminders = buildReminders(prefs.times, entries, labels);
     const result = await syncReminders({
       reminders,
@@ -199,21 +280,27 @@ export default function MedicationRemindersPanel({ entries, t }) {
         {t.intro}
       </p>
 
-      {!supported ? (
+      {!supported && !nativeSupported ? (
         <p className="pmed-rem__note" role="note">
           {t.unsupported}
         </p>
       ) : loading ? (
         <p className="pmed-summary__muted">{t.loading}</p>
-      ) : !config.enabled ? (
+      ) : !config.enabled && !nativeSupported ? (
         <p className="pmed-rem__note" role="note">
           {t.serverDisabled}
         </p>
       ) : (
         <>
-          {iosHint ? (
+          {iosHint && !nativeSupported ? (
             <p className="pmed-rem__ios" role="note">
               {t.iosHint}
+            </p>
+          ) : null}
+
+          {nativeSupported ? (
+            <p className="pmed-rem__note" role="note">
+              {t.nativeChannelHint}
             </p>
           ) : null}
 
@@ -298,6 +385,7 @@ export default function MedicationRemindersPanel({ entries, t }) {
                 <button
                   type="button"
                   className="pmed-btn pmed-btn--secondary"
+                  hidden={nativeSupported}
                   onClick={doTest}
                   disabled={busy}
                 >

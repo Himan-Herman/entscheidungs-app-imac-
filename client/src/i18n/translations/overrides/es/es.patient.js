@@ -682,6 +682,9 @@ export default {
           "iPhone/iPad: añada la app mediante « Compartir » → « Añadir a inicio » para recibir recordatorios.",
         enableLabel: "Activar recordatorios en este dispositivo",
         enabledMsg: "Los recordatorios están activados.",
+        nativeTitle: "Recordatorio",
+        nativeBody: "Es hora de su toma.",
+        nativeChannelHint: "Los recordatorios se programan directamente en este dispositivo.",
         disabledMsg: "Los recordatorios se han desactivado.",
         savedMsg: "Horas de recordatorio guardadas.",
         permissionDenied:

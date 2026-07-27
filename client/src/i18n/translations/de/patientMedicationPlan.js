@@ -208,6 +208,9 @@ export default {
         "iPhone/iPad: Bitte fügen Sie die App über „Teilen“ → „Zum Home-Bildschirm“ hinzu, damit Erinnerungen ankommen.",
       enableLabel: "Erinnerungen auf diesem Gerät aktivieren",
       enabledMsg: "Erinnerungen sind aktiviert.",
+      nativeTitle: "Erinnerung",
+      nativeBody: "Zeit für Ihre Einnahme.",
+      nativeChannelHint: "Erinnerungen werden direkt auf diesem Gerät geplant.",
       disabledMsg: "Erinnerungen wurden deaktiviert.",
       savedMsg: "Erinnerungszeiten gespeichert.",
       permissionDenied:

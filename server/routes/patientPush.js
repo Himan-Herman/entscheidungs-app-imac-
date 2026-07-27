@@ -86,27 +86,34 @@ router.get("/config", (req, res) => {
   });
 });
 
-/** GET / — current subscription/reminder status for this user. */
+/** GET / — this user's reminders and which notification channels are active. */
 router.get("/", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return bad(res, 401, "unauthorized", "Unauthorized.");
-  if (!isWebPushConfigured()) return res.json({ ok: true, enabled: false });
 
   try {
-    const subs = await prisma.pushSubscription.findMany({
-      where: { userId },
-      include: { reminders: true },
-    });
-    const reminders = subs.flatMap((s) => s.reminders);
+    // Reminders are user-owned, so they are readable even when web push is not
+    // configured — the native app relies on exactly this.
+    const [reminders, subs, channel] = await Promise.all([
+      prisma.pushReminder.findMany({ where: { userId } }),
+      prisma.pushSubscription.findMany({ where: { userId } }),
+      prisma.pushChannelState.findUnique({ where: { userId } }),
+    ]);
+
     return res.json({
       ok: true,
-      enabled: true,
+      // "enabled" keeps its old meaning for the existing web UI: can we deliver web push?
+      enabled: isWebPushConfigured(),
       deviceCount: subs.length,
+      channels: {
+        webConfigured: isWebPushConfigured(),
+        webSubscribed: subs.length > 0,
+        webEnabled: channel?.webEnabled !== false,
+        nativeEnabled: channel?.nativeEnabled === true,
+      },
       intakeTimes: [
         ...new Set(
-          reminders
-            .filter((r) => r.type === "intake" && r.timeOfDay)
-            .map((r) => r.timeOfDay),
+          reminders.filter((r) => r.type === "intake" && r.timeOfDay).map((r) => r.timeOfDay),
         ),
       ].sort(),
       hasRefill: reminders.some((r) => r.type === "refill" && r.active),
@@ -125,16 +132,24 @@ router.get("/", async (req, res) => {
 router.put("/", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return bad(res, 401, "unauthorized", "Unauthorized.");
-  if (!isWebPushConfigured()) return notConfigured(res);
 
   const body = req.body ?? {};
   const s = body.subscription ?? {};
   const endpoint = typeof s.endpoint === "string" ? s.endpoint : "";
   const p256dh = s.keys?.p256dh;
   const auth = s.keys?.auth;
-  if (!endpoint || !p256dh || !auth) {
+
+  // A subscription is now OPTIONAL: the native app stores the same reminder times
+  // and schedules them on the device. A half-filled subscription is still rejected.
+  const hasSubscription = Boolean(endpoint || p256dh || auth);
+  if (hasSubscription && !(endpoint && p256dh && auth)) {
     return bad(res, 400, "invalid_subscription", "Invalid subscription.");
   }
+  if (hasSubscription && !isWebPushConfigured()) return notConfigured(res);
+
+  // Which channel is the caller? The native app says so explicitly and never sends
+  // a subscription; anything else is treated as a browser.
+  const isNativeClient = body.channel === "native";
 
   const soundEnabled = body.prefs?.sound !== false;
   const vibrationEnabled = body.prefs?.vibration !== false;
@@ -144,25 +159,36 @@ router.put("/", async (req, res) => {
       : "Europe/Berlin";
 
   try {
-    const sub = await prisma.pushSubscription.upsert({
-      where: { endpoint },
-      update: { userId, p256dh, auth, soundEnabled, vibrationEnabled, timezone },
-      create: {
-        userId,
-        endpoint,
-        p256dh,
-        auth,
-        soundEnabled,
-        vibrationEnabled,
-        timezone,
-      },
-    });
+    if (hasSubscription) {
+      await prisma.pushSubscription.upsert({
+        where: { endpoint },
+        update: { userId, p256dh, auth, soundEnabled, vibrationEnabled, timezone },
+        create: { userId, endpoint, p256dh, auth, soundEnabled, vibrationEnabled, timezone },
+      });
+    }
 
-    const rows = normalizeReminders(body.reminders, userId, sub.id);
-    await prisma.pushReminder.deleteMany({ where: { subscriptionId: sub.id } });
+    // Reminders are replaced per USER, not per subscription — otherwise a patient
+    // could never remove reminders created without one.
+    const rows = normalizeReminders(body.reminders, userId, null).map((r) => ({
+      ...r,
+      timezone,
+    }));
+    await prisma.pushReminder.deleteMany({ where: { userId } });
     if (rows.length > 0) {
       await prisma.pushReminder.createMany({ data: rows });
     }
+
+    // Channel bookkeeping. The native app taking over switches web push off so the
+    // same reminder cannot arrive twice; the patient can turn it back on.
+    await prisma.pushChannelState.upsert({
+      where: { userId },
+      update: isNativeClient
+        ? { nativeEnabled: true, webEnabled: false, nativeSeenAt: new Date() }
+        : { webEnabled: true },
+      create: isNativeClient
+        ? { userId, nativeEnabled: true, webEnabled: false, nativeSeenAt: new Date() }
+        : { userId, nativeEnabled: false, webEnabled: true },
+    });
 
     return res.json({ ok: true, reminderCount: rows.length });
   } catch (err) {

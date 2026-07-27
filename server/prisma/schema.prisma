@@ -18,6 +18,7 @@ model User {
   doctors                          Doctor[]
   doctorContacts                   DoctorContact[]
   pushSubscriptions                PushSubscription[] @relation("UserPushSubscriptions")
+  pushChannelState                 PushChannelState?                @relation("UserPushChannelState")
   pushReminders                    PushReminder[]     @relation("UserPushReminders")
   preVisitSessions                 PreVisitSession[]
   preVisitCases                    PreVisitCase[]
@@ -2439,10 +2440,28 @@ model PushSubscription {
 
 /// A scheduled reminder tied to a push subscription. `label` carries a generic,
 /// client-localized message (no diagnosis/clinical wording, no medication name).
+/// Which notification channels a patient currently uses. One row per user.
+/// The native app schedules locally and must never create a PushSubscription;
+/// this row is how the server knows to stay quiet so nothing arrives twice.
+model PushChannelState {
+  userId        String   @id
+  /// The native app has reminders scheduled on this account.
+  nativeEnabled Boolean  @default(false)
+  /// Patient wants web push as well (default true; turned off automatically when
+  /// the native app takes over, and re-enablable from the account).
+  webEnabled    Boolean  @default(true)
+  nativeSeenAt  DateTime?
+  updatedAt     DateTime @updatedAt
+
+  user User @relation("UserPushChannelState", fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model PushReminder {
   id             String    @id @default(cuid())
   userId         String
-  subscriptionId String
+  /// LEGACY. Kept only so historic rows stay intact — never used as a delivery
+  /// target any more. Delivery is resolved per user across all their channels.
+  subscriptionId String?
   type           String    // "intake" (daily at timeOfDay) | "refill" (one-off at fireAt)
   timeOfDay      String?    // "HH:MM" (24h) for intake reminders
   fireAt         DateTime?  // one-off timestamp for refill reminders
@@ -2450,11 +2469,14 @@ model PushReminder {
   url            String?    // deep link opened on notification click
   active         Boolean   @default(true)
   lastSentOn     String?    // "YYYY-MM-DD" send-dedupe guard
+  /// IANA zone the reminder was created in. Needed because a reminder can now
+  /// exist without a PushSubscription (which used to carry the timezone).
+  timezone       String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   user         User             @relation("UserPushReminders", fields: [userId], references: [id], onDelete: Cascade)
-  subscription PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscription PushSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([type, active])

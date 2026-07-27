@@ -2,7 +2,18 @@ import { authFetch } from "../../../api/authFetch.js";
 
 const BASE = "/api/patient/push";
 
+import { isNativeApp } from "../../../lib/apiBase.js";
+
+/**
+ * Web Push is deliberately OFF inside the native shell.
+ *
+ * Two reasons: iOS exposes the Push API only to Safari home-screen web apps, never to a
+ * WKWebView, so it could not work anyway; and a user running both the PWA and the app
+ * would otherwise be notified twice for the same reminder. The app schedules locally
+ * instead — see nativeReminders.js.
+ */
 export function isPushSupported() {
+  if (isNativeApp()) return false;
   return (
     typeof window !== "undefined" &&
     "serviceWorker" in navigator &&

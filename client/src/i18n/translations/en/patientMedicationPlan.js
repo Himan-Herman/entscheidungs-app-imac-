@@ -205,6 +205,9 @@ export default {
         "iPhone/iPad: please add the app via “Share” → “Add to Home Screen” so reminders can arrive.",
       enableLabel: "Enable reminders on this device",
       enabledMsg: "Reminders are enabled.",
+      nativeTitle: "Reminder",
+      nativeBody: "Time for your intake.",
+      nativeChannelHint: "Reminders are scheduled directly on this device.",
       disabledMsg: "Reminders were turned off.",
       savedMsg: "Reminder times saved.",
       permissionDenied:

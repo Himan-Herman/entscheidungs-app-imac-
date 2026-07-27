@@ -682,6 +682,9 @@ export default {
           "iPhone/iPad : ajoutez l’application via « Partager » → « Sur l’écran d’accueil » pour recevoir les rappels.",
         enableLabel: "Activer les rappels sur cet appareil",
         enabledMsg: "Les rappels sont activés.",
+        nativeTitle: "Rappel",
+        nativeBody: "C'est l'heure de votre prise.",
+        nativeChannelHint: "Les rappels sont planifiés directement sur cet appareil.",
         disabledMsg: "Les rappels ont été désactivés.",
         savedMsg: "Heures de rappel enregistrées.",
         permissionDenied:
