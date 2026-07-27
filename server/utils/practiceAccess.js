@@ -1,5 +1,9 @@
 import { prisma } from "../lib/prisma.js";
-import { hasPracticePermission, permissionsForRole } from "./practicePermissions.js";
+import {
+  hasPracticePermission,
+  permissionsForRole,
+  clinicalPermissionsForRole,
+} from "./practicePermissions.js";
 
 
 export {
@@ -29,15 +33,22 @@ export {
  * `membershipRole` (from an ACTIVE PracticeMember row) is the operational /
  * occupational role and is the only source of clinical permissions.
  *
- * The two are independent, so a practice owner who also treats patients can
- * hold both. Effective permissions are the UNION of two explicit allowlists:
+ * A third, independent property is the CLINICAL role: an approved clinical
+ * standing held in addition to the organizational role, so a practice owner can
+ * also be a treating doctor without the owner membership being downgraded.
  *
- *     permissionsForRole("owner")            // only when isOwner
+ * Effective permissions are the UNION of three explicit allowlists:
+ *
+ *     permissionsForRole("owner")                  // only when isOwner
  *   ∪ permissionsForRole(activeMembershipRole)
+ *   ∪ clinicalPermissionsForRole(clinicalRole)     // only when ACTIVE
  *
  * There is no "owner may do everything" rule and no implicit grant: an owner
- * without an active membership gets exactly the owner allowlist, and an
- * `invited` or `revoked` membership contributes nothing.
+ * without an active membership gets exactly the owner allowlist, an `invited`
+ * or `revoked` membership contributes nothing, and a clinical role that is
+ * pending, rejected, revoked or unknown contributes nothing either. The
+ * clinical role only ever adds CLINICAL_* permissions, never organizational
+ * power.
  *
  * `role` is retained for backwards compatibility with existing call sites and
  * keeps its previous meaning ("owner" for the owner, otherwise the active
@@ -50,6 +61,9 @@ export {
  *   practiceId: string,
  *   userId: string,
  *   isOwner: boolean,
+ *   organizationalRole: string,
+ *   clinicalRole: string | null,
+ *   clinicalRoleStatus: string | null,
  *   membershipId: string | null,
  *   membershipStatus: string | null,
  *   membershipRole: string | null,
@@ -80,9 +94,23 @@ export async function getPracticeAccess(userId, practiceId) {
   // No organizational ownership and no active membership -> no access at all.
   if (!isOwner && !activeMembershipRole) return null;
 
+  // The clinical role is separate from the organizational one and only counts
+  // when it is ACTIVE, i.e. approved by a different eligible person. pending,
+  // rejected, revoked, null or unknown contribute nothing. It is additionally
+  // ignored unless the membership itself is active, so a revoked member cannot
+  // keep clinical rights through a stale approval.
+  const clinicalRole = member?.clinicalRole ?? null;
+  const clinicalRoleStatus = member?.clinicalRoleStatus ?? null;
+  const clinicalRoleIsActive =
+    clinicalRoleStatus === "active" && membershipStatus === "active";
+
+  const organizationalRole = isOwner ? "owner" : activeMembershipRole;
+
   const effectivePermissions = new Set([
     ...(isOwner ? permissionsForRole("owner") : []),
     ...(activeMembershipRole ? permissionsForRole(activeMembershipRole) : []),
+    // Clinical subset only — never organizational power.
+    ...(clinicalRoleIsActive ? clinicalPermissionsForRole(clinicalRole) : []),
   ]);
 
   return {
@@ -90,11 +118,14 @@ export async function getPracticeAccess(userId, practiceId) {
     practiceId,
     userId,
     isOwner,
+    organizationalRole,
+    clinicalRole,
+    clinicalRoleStatus,
     membershipId: member?.id ?? null,
     membershipStatus,
     membershipRole,
     effectivePermissions,
-    role: isOwner ? "owner" : activeMembershipRole,
+    role: organizationalRole,
   };
 }
 

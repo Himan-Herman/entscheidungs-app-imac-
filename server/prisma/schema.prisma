@@ -25,6 +25,7 @@ model User {
   practiceProfiles                 PracticeProfile[]
   practiceMemberships              PracticeMember[]
   practiceInvitesSent              PracticeMember[]                 @relation("PracticeMemberInvitedBy")
+  clinicalRolesApproved            PracticeMember[]                 @relation("PracticeMemberClinicalRoleApprovedBy")
   followUpPatientThreads           PreVisitFollowUpThread[]         @relation("FollowUpPatientUser")
   followUpCreatedThreads           PreVisitFollowUpThread[]         @relation("FollowUpCreatedByUser")
   visitMedicationEntriesAuthored   VisitMedicationEntry[]           @relation("VisitMedicationCreatedBy")
@@ -822,14 +823,29 @@ model PracticeMember {
   createdAt                   DateTime  @default(now())
   updatedAt                   DateTime  @updatedAt
 
+  /// Clinical role held IN ADDITION to the organizational `role`, so a practice
+  /// owner can also be a treating doctor without the owner membership being
+  /// downgraded. Currently only "doctor". Null means no clinical role.
+  /// Organizational roles (owner/admin/TEAM_MANAGE) never imply this.
+  clinicalRole                String?   @db.VarChar(40)
+  /// pending | active | rejected | revoked — only "active" grants permissions.
+  /// A request always starts as "pending" and must be approved by a DIFFERENT
+  /// eligible person; there is no self-approval and no self-activation.
+  clinicalRoleStatus          String?   @db.VarChar(20)
+  clinicalRoleRequestedAt     DateTime?
+  clinicalRoleApprovedAt      DateTime?
+  clinicalRoleApprovedByUserId String?
+
   practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   invitedBy       User?           @relation("PracticeMemberInvitedBy", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  clinicalRoleApprovedBy User?    @relation("PracticeMemberClinicalRoleApprovedBy", fields: [clinicalRoleApprovedByUserId], references: [id], onDelete: SetNull)
 
   @@unique([practiceProfileId, userId])
   @@index([userId])
   @@index([practiceProfileId, role])
   @@index([practiceProfileId, status])
+  @@index([practiceProfileId, clinicalRole, clinicalRoleStatus])
 }
 
 model PreVisitFollowUpThread {

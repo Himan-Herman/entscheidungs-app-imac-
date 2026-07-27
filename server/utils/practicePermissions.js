@@ -74,6 +74,13 @@ export const PERMISSIONS = {
   CLINICAL_HEALTH_HISTORY_READ: "clinical.health_history.read",
   CLINICAL_SOS_READ: "clinical.sos.read",
   CLINICAL_AI_SUMMARY_GENERATE: "clinical.ai_summary.generate",
+  /**
+   * Approve, reject or revoke someone else's CLINICAL role. Deliberately its
+   * own permission and NOT derived from TEAM_MANAGE-style reasoning at the call
+   * site: granting a clinical standing is a different decision from managing
+   * organizational team membership. Never grants the clinical role itself.
+   */
+  CLINICAL_ROLE_MANAGE: "clinical.role.manage",
   DATA_REQUESTS_MANAGE: "data_requests.manage",
   CALENDAR_READ: "calendar.read",
   CALENDAR_MANAGE: "calendar.manage",
@@ -127,6 +134,46 @@ export const REQUIRES_VERIFIED_QUALIFICATION = Object.freeze([
 ]);
 
 /**
+ * Permissions that touch patient health data. An approved CLINICAL role
+ * contributes ONLY these — never organizational power. So approving someone's
+ * clinical "doctor" role can never hand them TEAM_MANAGE, DOCUMENTS_DELETE or
+ * any other administrative right that the `doctor` allowlist happens to carry.
+ */
+export const CLINICAL_PERMISSIONS = Object.freeze([
+  PERMISSIONS.CLINICAL_VITALS_READ,
+  PERMISSIONS.CLINICAL_VACCINATIONS_READ,
+  PERMISSIONS.CLINICAL_HEALTH_HISTORY_READ,
+  PERMISSIONS.CLINICAL_SOS_READ,
+  PERMISSIONS.CLINICAL_AI_SUMMARY_GENERATE,
+]);
+
+const CLINICAL_PERMISSION_SET = new Set(CLINICAL_PERMISSIONS);
+
+/** Clinical roles that may be assigned in addition to an organizational role. */
+export const ASSIGNABLE_CLINICAL_ROLES = Object.freeze(["doctor"]);
+
+/** Clinical role lifecycle. Only "active" grants anything. */
+export const CLINICAL_ROLE_STATUSES = Object.freeze([
+  "pending",
+  "active",
+  "rejected",
+  "revoked",
+]);
+
+/**
+ * The clinical subset of a role's allowlist. An unknown or non-assignable role
+ * yields nothing, so a stray value in the column can never widen access.
+ *
+ * @param {string | null | undefined} clinicalRole
+ * @returns {string[]}
+ */
+export function clinicalPermissionsForRole(clinicalRole) {
+  const r = String(clinicalRole || "").trim();
+  if (!ASSIGNABLE_CLINICAL_ROLES.includes(r)) return [];
+  return permissionsForRole(r).filter((p) => CLINICAL_PERMISSION_SET.has(p));
+}
+
+/**
  * Explicit allowlist per role. Never derive a role from Object.values() — a new
  * permission must always be an opt-in decision per role, never something a role
  * silently inherits because it was added to the enum.
@@ -134,10 +181,9 @@ export const REQUIRES_VERIFIED_QUALIFICATION = Object.freeze([
  * `owner` is an ORGANIZATIONAL role (the account that created the practice).
  * Ownership alone does not establish a treatment relationship, so it carries
  * full administrative power but NO clinical read rights. An owner who also
- * treats patients must additionally hold a `doctor` membership — the data model
- * supports exactly that via PracticeMember, but note that getPracticeAccess()
- * short-circuits to "owner" for the practice creator, so such a combined role
- * is not currently expressible. That gap is documented, not worked around.
+ * treats patients holds an additional CLINICAL role on the same PracticeMember
+ * row (`clinicalRole` + `clinicalRoleStatus`), approved by a different eligible
+ * person — the owner membership itself is never downgraded to "doctor".
  *
  * @type {Record<string, Set<string>>}
  */
@@ -145,6 +191,7 @@ const ROLE_PERMISSIONS = {
   owner: new Set([
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.TEAM_MANAGE,
+    PERMISSIONS.CLINICAL_ROLE_MANAGE,
     PERMISSIONS.AUDIT_VIEW,
     PERMISSIONS.SECURITY_VIEW,
     PERMISSIONS.SETTINGS_MANAGE,
@@ -182,6 +229,7 @@ const ROLE_PERMISSIONS = {
   admin: new Set([
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.TEAM_MANAGE,
+    PERMISSIONS.CLINICAL_ROLE_MANAGE,
     PERMISSIONS.AUDIT_VIEW,
     PERMISSIONS.SECURITY_VIEW,
     PERMISSIONS.SETTINGS_MANAGE,
@@ -217,6 +265,7 @@ const ROLE_PERMISSIONS = {
   practice_manager: new Set([
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.TEAM_MANAGE,
+    PERMISSIONS.CLINICAL_ROLE_MANAGE,
     PERMISSIONS.AUDIT_VIEW,
     PERMISSIONS.SETTINGS_MANAGE,
     PERMISSIONS.PATIENT_LINKS_READ,

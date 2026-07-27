@@ -21,6 +21,7 @@ import {
   getPracticePermissionsPayload,
 } from "../services/practiceTeam/practiceTeamService.js";
 import { generatePracticeTeamPermissionSummary } from "../services/practiceTeam/practiceTeamAiService.js";
+import { changeClinicalRole } from "../services/practiceTeam/practiceClinicalRoleService.js";
 import {
   listPracticeDoctorsInternal,
   listPublicPracticeDoctors,
@@ -55,6 +56,22 @@ function mapError(err) {
     ].includes(msg)
   ) {
     return { status: msg.startsWith("forbidden") ? 403 : 400, error: msg };
+  }
+  // Clinical role assignment. `membership_not_found` covers both "does not
+  // exist" and "belongs to another practice", so a foreign membership cannot be
+  // probed — it must be 404, never 403.
+  if (msg === "membership_not_found") return { status: 404, error: msg };
+  if (msg === "self_approval_forbidden") return { status: 403, error: msg };
+  if (msg === "concurrent_modification") return { status: 409, error: msg };
+  if (
+    [
+      "invalid_action",
+      "invalid_clinical_role",
+      "invalid_status_transition",
+      "membership_not_active",
+    ].includes(msg)
+  ) {
+    return { status: msg === "invalid_status_transition" ? 409 : 400, error: msg };
   }
   if (msg === "forbidden" || msg === "practice_not_found") {
     return { status: msg === "forbidden" ? 403 : 404, error: msg };
@@ -185,6 +202,48 @@ router.patch("/:membershipId/revoke", async (req, res) => {
   try {
     const member = await revokePracticeTeamMember(userId, membershipId, { req });
     return res.json({ ok: true, member });
+  } catch (err) {
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/**
+ * Clinical role lifecycle — POST /api/practice/team/:membershipId/clinical-role/:action
+ *
+ * A clinical role is held IN ADDITION to the organizational role. The owner
+ * membership is never downgraded, so the existing cannot_change_practice_owner
+ * guard stays untouched.
+ *
+ * request -> pending, approve -> active, reject -> rejected, revoke -> revoked.
+ * Approval always requires a DIFFERENT eligible person.
+ */
+const CLINICAL_ROLE_ACTIONS = new Set(["request", "approve", "reject", "revoke"]);
+
+router.post("/:membershipId/clinical-role/:action", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  const action = String(req.params.action || "").trim();
+  if (!CLINICAL_ROLE_ACTIONS.has(action)) {
+    return res.status(400).json({ ok: false, error: "invalid_action" });
+  }
+
+  const membershipId = String(req.params.membershipId || "").trim();
+  // Synthetic owner rows have no membership record to act on.
+  if (!membershipId || membershipId.startsWith("owner-")) {
+    return res.status(404).json({ ok: false, error: "membership_not_found" });
+  }
+
+  try {
+    const clinicalRole = await changeClinicalRole({
+      actorUserId: userId,
+      membershipId,
+      action,
+      clinicalRole: req.body?.clinicalRole,
+      req,
+    });
+    return res.json({ ok: true, clinicalRole });
   } catch (err) {
     const mapped = mapError(err);
     return res.status(mapped.status).json({ ok: false, error: mapped.error });

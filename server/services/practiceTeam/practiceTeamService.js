@@ -1,15 +1,19 @@
 import { prisma } from "../../lib/prisma.js";
 import { writeAuditLog } from "../auditLogService.js";
 import {
+  accessHasPermission,
   canManageTeam,
   getPracticeAccess,
   hasPracticePermission,
 } from "../../utils/practiceAccess.js";
 import {
+  ASSIGNABLE_CLINICAL_ROLES,
+  CLINICAL_ROLE_STATUSES,
   getPermissionMatrix,
   PERMISSIONS,
   PRACTICE_ROLES,
 } from "../../utils/practicePermissions.js";
+import { clinicalRoleCapabilities } from "./practiceClinicalRoleService.js";
 import { memberProfileExtras } from "../../utils/practiceOrganizationJson.js";
 
 
@@ -44,8 +48,17 @@ export function memberToJson(row, meta = {}) {
     id: row.id,
     practiceProfileId: row.practiceProfileId,
     userId: row.userId,
+    // Organizational role — kept under `role` for API compatibility.
     role: row.role,
+    organizationalRole: row.role,
     status: row.status,
+    // Clinical role held in addition; null when none was ever requested.
+    clinicalRole: row.clinicalRole ?? null,
+    clinicalRoleStatus: row.clinicalRoleStatus ?? null,
+    clinicalRoleRequestedAt: row.clinicalRoleRequestedAt ?? null,
+    clinicalRoleApprovedAt: row.clinicalRoleApprovedAt ?? null,
+    // Per-viewer capabilities so the UI never renders a self-approval control.
+    capabilities: meta.capabilities ?? null,
     invitedByUserId: row.invitedByUserId,
     invitedAt: row.invitedAt,
     acceptedAt: row.acceptedAt,
@@ -150,15 +163,29 @@ export async function listPracticeTeam(actorUserId, practiceId, ctx = {}) {
     metadata: { memberCount: built.members.length },
   });
 
+  // Per-row capabilities are computed for THIS viewer, so the client never has
+  // to decide who may approve — and can never render a self-approval control.
+  const members = built.members.map((m) => ({
+    ...m,
+    capabilities: clinicalRoleCapabilities(access, m),
+  }));
+
   return {
     practiceId,
     practiceName: built.practice.practiceName,
     role: access.role,
+    organizationalRole: access.organizationalRole ?? access.role,
+    isOwner: Boolean(access.isOwner),
+    clinicalRole: access.clinicalRole ?? null,
+    clinicalRoleStatus: access.clinicalRoleStatus ?? null,
     canManage: canManageTeam(access.role),
+    canManageClinicalRoles: accessHasPermission(access, PERMISSIONS.CLINICAL_ROLE_MANAGE),
     canViewAudit: hasPracticePermission(access.role, PERMISSIONS.AUDIT_VIEW),
-    members: built.members,
+    members,
     roles: PRACTICE_ROLES,
     statuses: [...MEMBER_STATUSES],
+    clinicalRoles: [...ASSIGNABLE_CLINICAL_ROLES],
+    clinicalRoleStatuses: [...CLINICAL_ROLE_STATUSES],
   };
 }
 
