@@ -1,0 +1,81 @@
+/* Origin badge for one medical record.
+   Status is never carried by colour alone — each variant also has its own text
+   ("Ihre eigenen Daten" / "Praxisbezug: …" / "Praxisbezug nicht verfügbar"). */
+
+.provenance-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.provenance-badge__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.provenance-badge--own {
+  background: #e4f3ef;
+  color: #0d5044;
+  border-color: #a9d5ca;
+}
+
+.provenance-badge--practice {
+  background: #e7eefb;
+  color: #17356e;
+  border-color: #adc4ea;
+}
+
+.provenance-badge--unknown {
+  background: #fbeee0;
+  color: #6f4200;
+  border-color: #dfbd8e;
+}
+
+:root[data-theme="dark"] .provenance-badge--own {
+  background: #0f2f29;
+  color: #86ddca;
+  border-color: #2c5c52;
+}
+
+:root[data-theme="dark"] .provenance-badge--practice {
+  background: #16233e;
+  color: #a8c8f7;
+  border-color: #35507e;
+}
+
+:root[data-theme="dark"] .provenance-badge--unknown {
+  background: #3a2b13;
+  color: #f2cb92;
+  border-color: #6d5424;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .provenance-badge--own {
+    background: #0f2f29;
+    color: #86ddca;
+    border-color: #2c5c52;
+  }
+  :root:not([data-theme="light"]) .provenance-badge--practice {
+    background: #16233e;
+    color: #a8c8f7;
+    border-color: #35507e;
+  }
+  :root:not([data-theme="light"]) .provenance-badge--unknown {
+    background: #3a2b13;
+    color: #f2cb92;
+    border-color: #6d5424;
+  }
+}

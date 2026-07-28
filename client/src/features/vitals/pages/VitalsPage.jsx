@@ -8,6 +8,8 @@ import VitalCard from "../components/VitalCard.jsx";
 import VitalChart from "../components/VitalChart.jsx";
 import VitalForm from "../components/VitalForm.jsx";
 import WearableConnectPanel from "../components/WearableConnectPanel.jsx";
+import ProvenanceBadge from "../../patientPractices/components/ProvenanceBadge.jsx";
+import { usePracticeContextIndex } from "../../patientPractices/hooks/usePracticeContextIndex.js";
 import "../styles/Vitals.css";
 
 const ALL_TYPES = ["blood_pressure", "heart_rate", "glucose", "weight", "oxygen", "temperature"];
@@ -18,6 +20,13 @@ export default function VitalsPage() {
     const msgs = getMessages(language);
     return msgs.vitals || getMessages("en").vitals;
   }, [language]);
+
+  const tProv = useMemo(() => {
+    const msgs = getMessages(language);
+    return msgs.patientPractices || getMessages("en").patientPractices;
+  }, [language]);
+  // Resolves a reading's care context to a practice the patient actually holds.
+  const { resolve } = usePracticeContextIndex();
 
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -196,6 +205,15 @@ export default function VitalsPage() {
               lang={language}
               onEdit={openEdit}
               onDelete={handleDelete}
+              provenance={
+                <ProvenanceBadge
+                  dataScope={entry.dataScope}
+                  contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                  source={entry.source}
+                  resolve={resolve}
+                  t={tProv}
+                />
+              }
             />
           ))}
         </div>

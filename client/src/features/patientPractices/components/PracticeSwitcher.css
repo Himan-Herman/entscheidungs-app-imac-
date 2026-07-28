@@ -1,0 +1,108 @@
+/* Practice navigation.
+   Wraps instead of scrolling sideways, so a phone never cuts a practice name
+   off. Selection is carried by a check mark, weight and border — not by colour
+   alone. Touch targets are at least 44px high. */
+
+.practice-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.practice-switcher__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid #c9d2dd;
+  background: #ffffff;
+  color: #2b3646;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  max-width: 100%;
+  text-align: left;
+}
+
+.practice-switcher__tab:hover {
+  border-color: #0f766e;
+}
+
+.practice-switcher__tab:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+
+.practice-switcher__tab--active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.practice-switcher__check {
+  display: inline-block;
+  min-width: 0.85rem;
+  font-weight: 700;
+}
+
+.practice-switcher__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.practice-switcher__specialty {
+  font-size: 0.8rem;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.practice-switcher__tab--active .practice-switcher__specialty {
+  opacity: 0.95;
+}
+
+:root[data-theme="dark"] .practice-switcher__tab {
+  background: #172029;
+  border-color: #3a4653;
+  color: #dfe6ee;
+}
+
+:root[data-theme="dark"] .practice-switcher__tab:hover {
+  border-color: #5eead4;
+}
+
+:root[data-theme="dark"] .practice-switcher__tab:focus-visible {
+  outline-color: #5eead4;
+}
+
+:root[data-theme="dark"] .practice-switcher__tab--active {
+  background: #14b8a6;
+  border-color: #14b8a6;
+  color: #06231f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .practice-switcher__tab {
+    background: #172029;
+    border-color: #3a4653;
+    color: #dfe6ee;
+  }
+  :root:not([data-theme="light"]) .practice-switcher__tab:focus-visible {
+    outline-color: #5eead4;
+  }
+  :root:not([data-theme="light"]) .practice-switcher__tab--active {
+    background: #14b8a6;
+    border-color: #14b8a6;
+    color: #06231f;
+  }
+}
+
+@media (max-width: 480px) {
+  .practice-switcher__tab {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+}

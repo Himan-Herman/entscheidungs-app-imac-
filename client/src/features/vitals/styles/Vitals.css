@@ -756,3 +756,8 @@
   .wearables__actions-row { width: 100%; }
   .wearables__actions-row .wearables__btn { flex: 1; justify-content: center; }
 }
+
+/* Origin of a reading (own data vs. a named care relationship). */
+.vital-card__provenance {
+  margin: 0.4rem 0 0;
+}

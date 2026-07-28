@@ -708,3 +708,11 @@
     justify-content: center;
   }
 }
+
+/* Card plus its origin badge ("your own data" / "practice context: …"). */
+.vacc-pass__entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}

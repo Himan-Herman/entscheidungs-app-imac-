@@ -90,6 +90,7 @@ const AccountHealthProfilePage = lazy(() =>
 const AccountProfilesPage = lazy(() => import("./pages/account/AccountProfilesPage.jsx"));
 const AccountDataPage = lazy(() => import("./pages/account/AccountDataPage.jsx"));
 const PatientHubPage = lazy(() => import("./pages/PatientHubPage.jsx"));
+const PatientDataByPracticePage = lazy(() => import("./features/patientPractices/pages/PatientDataByPracticePage.jsx"));
 const PatientPracticeHubPage = lazy(() =>
   import("./pages/PatientPracticeHubPage.jsx"),
 );
@@ -483,6 +484,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PatientPracticeLinksPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/patient/my-data"
+                  element={
+                    <ProtectedRoute>
+                      <PatientDataByPracticePage />
                     </ProtectedRoute>
                   }
                 />

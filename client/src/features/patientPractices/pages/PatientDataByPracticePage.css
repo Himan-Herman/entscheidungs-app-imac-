@@ -1,0 +1,200 @@
+.patient-data-practice {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+  color: #1f2933;
+}
+
+.patient-data-practice__heading {
+  font-size: 1.6rem;
+  margin: 0 0 0.4rem;
+}
+
+.patient-data-practice__intro {
+  margin: 0 0 1.25rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.patient-data-practice__status {
+  min-height: 1.25rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.patient-data-practice__error {
+  border: 1px solid #b42318;
+  background: #fdecea;
+  color: #7a271a;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.patient-data-practice__error button {
+  min-height: 44px;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #7a271a;
+  background: transparent;
+  color: #7a271a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.patient-data-practice__section {
+  border: 1px solid #dbe1e8;
+  border-radius: 14px;
+  padding: 1rem 1.1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: #ffffff;
+}
+
+.patient-data-practice__section h2 {
+  font-size: 1.2rem;
+  margin: 0 0 0.35rem;
+}
+
+.patient-data-practice__section-intro {
+  margin: 0 0 1rem;
+  color: #4b5563;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.patient-data-practice__group {
+  margin-top: 1.1rem;
+}
+
+.patient-data-practice__group h3,
+.patient-data-practice__group h4 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.patient-data-practice__practice-name {
+  font-size: 1.05rem;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.patient-data-practice__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.patient-data-practice__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #e3e8ee;
+  border-radius: 10px;
+  background: #fbfcfd;
+}
+
+.patient-data-practice__record {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.patient-data-practice__empty {
+  margin: 0;
+  color: #52606d;
+  font-size: 0.9rem;
+}
+
+.patient-data-practice__panel:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+.patient-data-practice__inactive {
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dbe1e8;
+}
+
+.patient-data-practice__inactive-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.patient-data-practice__inactive-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed #c9d2dd;
+  border-radius: 10px;
+}
+
+.patient-data-practice__inactive-status {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #52606d;
+}
+
+/* ------------------------------------------------------------------- dark */
+
+:root[data-theme="dark"] .patient-data-practice { color: #e6ebf1; }
+:root[data-theme="dark"] .patient-data-practice__intro,
+:root[data-theme="dark"] .patient-data-practice__section-intro,
+:root[data-theme="dark"] .patient-data-practice__status,
+:root[data-theme="dark"] .patient-data-practice__empty { color: #b6c2ce; }
+:root[data-theme="dark"] .patient-data-practice__section {
+  background: #131a21;
+  border-color: #2f3a45;
+}
+:root[data-theme="dark"] .patient-data-practice__item {
+  background: #182129;
+  border-color: #2f3a45;
+}
+:root[data-theme="dark"] .patient-data-practice__inactive { border-top-color: #2f3a45; }
+:root[data-theme="dark"] .patient-data-practice__inactive-list li { border-color: #3a4653; }
+:root[data-theme="dark"] .patient-data-practice__inactive-status { color: #b6c2ce; }
+:root[data-theme="dark"] .patient-data-practice__error {
+  background: #3a1613;
+  border-color: #f0857c;
+  color: #ffc9c2;
+}
+:root[data-theme="dark"] .patient-data-practice__error button {
+  border-color: #ffc9c2;
+  color: #ffc9c2;
+}
+:root[data-theme="dark"] .patient-data-practice__panel:focus-visible {
+  outline-color: #5eead4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .patient-data-practice { color: #e6ebf1; }
+  :root:not([data-theme="light"]) .patient-data-practice__intro,
+  :root:not([data-theme="light"]) .patient-data-practice__section-intro,
+  :root:not([data-theme="light"]) .patient-data-practice__status,
+  :root:not([data-theme="light"]) .patient-data-practice__empty { color: #b6c2ce; }
+  :root:not([data-theme="light"]) .patient-data-practice__section {
+    background: #131a21;
+    border-color: #2f3a45;
+  }
+  :root:not([data-theme="light"]) .patient-data-practice__item {
+    background: #182129;
+    border-color: #2f3a45;
+  }
+}
+
+@media (max-width: 480px) {
+  .patient-data-practice { padding: 1rem 0.75rem 2.5rem; }
+  .patient-data-practice__item { flex-direction: column; align-items: flex-start; }
+}

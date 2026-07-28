@@ -12,10 +12,17 @@ import {
 } from "../api/vaccinationsApi.js";
 import VaccinationEntryCard from "../components/VaccinationEntryCard.jsx";
 import VaccinationEntryForm from "../components/VaccinationEntryForm.jsx";
+import ProvenanceBadge from "../../patientPractices/components/ProvenanceBadge.jsx";
+import { usePracticeContextIndex } from "../../patientPractices/hooks/usePracticeContextIndex.js";
 import "../styles/VaccinationPass.css";
 
 export default function VaccinationPassPage() {
   const { language } = useLanguage();
+  const tProv = useMemo(() => {
+    const msgs = getMessages(language);
+    return msgs.patientPractices || getMessages("en").patientPractices;
+  }, [language]);
+  const { resolve } = usePracticeContextIndex();
   const t = useMemo(() => {
     const msgs = getMessages(language);
     return msgs.vaccinations || getMessages("en").vaccinations;
@@ -186,14 +193,21 @@ export default function VaccinationPassPage() {
         <section key={disease} className="vacc-pass__group" aria-label={disease}>
           <h2 className="vacc-pass__group-title">{disease}</h2>
           {group.map(entry => (
-            <VaccinationEntryCard
-              key={entry.id}
-              entry={entry}
-              t={t}
-              lang={language}
-              onEdit={openEdit}
-              onDelete={handleDelete}
-            />
+            <div key={entry.id} className="vacc-pass__entry">
+              <VaccinationEntryCard
+                entry={entry}
+                t={t}
+                lang={language}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+              />
+              <ProvenanceBadge
+                dataScope={entry.dataScope}
+                contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                resolve={resolve}
+                t={tProv}
+              />
+            </div>
           ))}
         </section>
       ))}

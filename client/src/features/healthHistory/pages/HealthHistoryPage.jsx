@@ -16,11 +16,18 @@ import AllergyCard from "../components/AllergyCard.jsx";
 import AllergyForm from "../components/AllergyForm.jsx";
 import DiagnosisCard from "../components/DiagnosisCard.jsx";
 import DiagnosisForm from "../components/DiagnosisForm.jsx";
+import ProvenanceBadge from "../../patientPractices/components/ProvenanceBadge.jsx";
+import { usePracticeContextIndex } from "../../patientPractices/hooks/usePracticeContextIndex.js";
 import "../styles/HealthHistory.css";
 
 export default function HealthHistoryPage() {
   const { language } = useLanguage();
   const t = useMemo(() => getHealthHistoryMessages(language), [language]);
+  const tProv = useMemo(() => {
+    const msgs = getMessages(language);
+    return msgs.patientPractices || getMessages("en").patientPractices;
+  }, [language]);
+  const { resolve } = usePracticeContextIndex();
   const allergyCopy = useMemo(
     () => withHealthHistoryAiLoading(t.allergy, t.aiLoading),
     [t],
@@ -245,14 +252,21 @@ export default function HealthHistoryPage() {
         ) : (
           <div className="hh-cards">
             {allergies.map((entry) => (
-              <AllergyCard
-                key={entry.id}
-                entry={entry}
-                t={t.allergy}
-                language={language}
-                onEdit={openEditAllergy}
-                onDelete={handleAllergyDelete}
-              />
+              <div key={entry.id} className="hh-card-wrap">
+                <AllergyCard
+                  entry={entry}
+                  t={t.allergy}
+                  language={language}
+                  onEdit={openEditAllergy}
+                  onDelete={handleAllergyDelete}
+                />
+                <ProvenanceBadge
+                  dataScope={entry.dataScope}
+                  contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                  resolve={resolve}
+                  t={tProv}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -285,14 +299,21 @@ export default function HealthHistoryPage() {
         ) : (
           <div className="hh-cards">
             {diagnoses.map((entry) => (
-              <DiagnosisCard
-                key={entry.id}
-                entry={entry}
-                t={t.diagnosis}
-                language={language}
-                onEdit={openEditDiagnosis}
-                onDelete={handleDiagnosisDelete}
-              />
+              <div key={entry.id} className="hh-card-wrap">
+                <DiagnosisCard
+                  entry={entry}
+                  t={t.diagnosis}
+                  language={language}
+                  onEdit={openEditDiagnosis}
+                  onDelete={handleDiagnosisDelete}
+                />
+                <ProvenanceBadge
+                  dataScope={entry.dataScope}
+                  contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                  resolve={resolve}
+                  t={tProv}
+                />
+              </div>
             ))}
           </div>
         )}

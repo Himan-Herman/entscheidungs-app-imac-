@@ -47,7 +47,7 @@ function getStatus(entry) {
 }
 
 function formatValue(entry) {
-  const { type, valuePrimary, valueSecondary, unit } = entry;
+  const { type, valuePrimary, valueSecondary } = entry;
   if (type === "blood_pressure") {
     return `${Math.round(valuePrimary)} / ${Math.round(valueSecondary)}`;
   }
@@ -55,7 +55,7 @@ function formatValue(entry) {
   return String(val);
 }
 
-export default function VitalCard({ entry, t, lang, onEdit, onDelete, readOnly = false }) {
+export default function VitalCard({ entry, t, lang, onEdit, onDelete, readOnly = false, provenance = null }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -99,6 +99,9 @@ export default function VitalCard({ entry, t, lang, onEdit, onDelete, readOnly =
         {entry.notes && (
           <p className="vital-card__notes">{entry.notes}</p>
         )}
+        {/* Where this reading came from. Rendered only when the page supplies
+            it, so the practice-facing card is unchanged. */}
+        {provenance ? <p className="vital-card__provenance">{provenance}</p> : null}
       </div>
 
       {!readOnly && (

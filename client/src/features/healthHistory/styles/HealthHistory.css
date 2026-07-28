@@ -752,3 +752,10 @@
     scrollbar-width: none;
   }
 }
+
+/* Card plus its origin badge ("your own data" / "practice context: …"). */
+.hh-card-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
