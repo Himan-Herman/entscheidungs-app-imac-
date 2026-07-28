@@ -89,9 +89,20 @@ function connectionToJson(row) {
   };
 }
 
-/** GET /api/patient/wearables/providers — static catalog (no user data). */
+/**
+ * GET /api/patient/wearables/providers — static catalog (no user data).
+ *
+ * Only providers that can actually be connected today are served. Withings, Fitbit
+ * and Garmin have no direct OAuth integration, and listing them as "coming soon"
+ * advertised a capability that does not exist. Their measurements still reach
+ * MedScoutX whenever the manufacturer's own app writes them into Apple Health or
+ * Health Connect — that path needs no card of its own.
+ *
+ * They remain in the registry so isKnownProvider() keeps recognising historic rows.
+ */
 router.get("/providers", requireFeature, (_req, res) => {
-  return res.json({ ok: true, providers: WEARABLE_PROVIDERS });
+  const connectable = WEARABLE_PROVIDERS.filter((p) => isConnectableProvider(p.id));
+  return res.json({ ok: true, providers: connectable });
 });
 
 /** GET /api/patient/wearables/connections — this patient's connections. */

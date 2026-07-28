@@ -94,13 +94,19 @@ export default function WearableConnectPanel({ t, locale }) {
   }, [connections]);
 
   /**
-   * Never offer a platform the device cannot use: Apple Health only on iOS,
-   * Health Connect only on Android. On web both are hidden and an explanatory
-   * hint is shown instead. Cloud providers ("planned") stay visible everywhere.
+   * Never offer something that cannot work here.
+   *
+   * Apple Health only on iOS, Health Connect only on Android — on web both are
+   * hidden and the hint below explains that the app is required. Providers without
+   * a real integration are dropped entirely rather than shown as "coming soon";
+   * the server already filters them, this is the second line of defence against a
+   * stale cached response.
    */
   const visibleProviders = useMemo(() => {
     const NATIVE = new Set(["apple_health", "health_connect"]);
-    return providers.filter((p) => !NATIVE.has(p.id) || p.id === nativeProvider);
+    return providers.filter(
+      (p) => p.availability === "app" && (!NATIVE.has(p.id) || p.id === nativeProvider),
+    );
   }, [providers, nativeProvider]);
 
   function providerLabel(id) {
@@ -229,21 +235,29 @@ export default function WearableConnectPanel({ t, locale }) {
         </div>
       </div>
 
-      {/* On web the native stores are unreachable — say so plainly instead of
-          offering a button that cannot work. */}
-      {nativeProvider ? (
-        healthAvailable ? null : (
-          <p className="wearables__app-hint">
-            {nativeProvider === "health_connect" ? c.healthConnectMissing : c.healthUnavailable}
-          </p>
-        )
+      {/* Exactly one statement per platform. On web the native stores are simply
+          unreachable — say so instead of offering a button that cannot work. */}
+      {nativeProvider === "apple_health" ? (
+        <p className="wearables__app-hint">{c.appleHealthScope}</p>
+      ) : nativeProvider === "health_connect" ? (
+        <p className="wearables__app-hint">{c.healthConnectScope}</p>
       ) : (
         <p className="wearables__app-hint">
           <Smartphone size={15} aria-hidden="true" /> {c.webOnlyHint}
         </p>
       )}
 
-      <p className="wearables__app-hint">{c.appHint}</p>
+      {/* The store exists for this platform but the OS says it is unusable
+          (Health Connect not installed, or HealthKit unavailable on an iPad). */}
+      {nativeProvider && !healthAvailable ? (
+        <p className="wearables__app-hint">
+          {nativeProvider === "health_connect" ? c.healthConnectMissing : c.healthUnavailable}
+        </p>
+      ) : null}
+
+      {/* Withings, Fitbit and Garmin have no direct integration. Say where their
+          data can still come from instead of pretending a card is coming. */}
+      <p className="wearables__app-hint">{c.vendorViaPlatform}</p>
 
       {loadError && <p className="wearables__error" role="alert">{loadError}</p>}
       {actionError && <p className="wearables__error" role="alert">{actionError}</p>}
@@ -258,7 +272,6 @@ export default function WearableConnectPanel({ t, locale }) {
           {visibleProviders.map((p) => {
             const conn = connByProvider.get(p.id);
             const isConnected = conn && conn.status === "connected";
-            const isPlanned = p.availability !== "app";
             const busy = busyProvider === p.id;
             const inConsent = consentProvider === p.id;
 
@@ -271,9 +284,6 @@ export default function WearableConnectPanel({ t, locale }) {
                       <span className="wearables__badge wearables__badge--connected">
                         <Check size={13} aria-hidden="true" /> {c.connected}
                       </span>
-                    )}
-                    {isPlanned && (
-                      <span className="wearables__badge wearables__badge--planned">{c.planned}</span>
                     )}
                     <span className="wearables__provider-types">
                       {p.supportedTypes.map(typeLabel).join(" · ")}
@@ -299,11 +309,7 @@ export default function WearableConnectPanel({ t, locale }) {
                   </div>
 
                   <div className="wearables__item-action">
-                    {isPlanned ? (
-                      <button type="button" className="wearables__btn" disabled aria-disabled="true">
-                        {c.comingSoon}
-                      </button>
-                    ) : isConnected ? (
+                    {isConnected ? (
                       <div className="wearables__actions-row">
                         {p.id === nativeProvider && healthAvailable && (
                           <button
