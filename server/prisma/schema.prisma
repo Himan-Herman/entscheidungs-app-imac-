@@ -48,6 +48,7 @@ model User {
   practiceDocumentSharesSharedBy   PracticeDocumentShare[]          @relation("PracticeDocumentShareBy")
   documentShareGrants              PracticeDocumentShareGrant[]     @relation("DocumentShareGrantPatient")
   documentShareGrantsGranted       PracticeDocumentShareGrant[]     @relation("DocumentShareGrantGrantedBy")
+  archivedPracticeContexts         ArchivedPracticePatientContext[] @relation("ArchivedPracticeContextPatient")
   practiceDocumentsDeleted         PracticeDocument[]               @relation("PracticeDocumentDeletedBy")
   practiceDocumentAuditEntries     PracticeDocumentAuditEntry[]
   documentOcrJobsCreated           DocumentOcrJob[]                 @relation("DocumentOcrJobCreatedBy")
@@ -1532,6 +1533,56 @@ model PracticeDocumentShareGrant {
   @@index([documentId, status])
 }
 
+/// Why a practice context was archived. Only a real hard deletion produces one;
+/// revoking a link is a status change and archives nothing.
+enum PracticeContextArchiveReason {
+  practice_deleted
+  owner_account_deleted
+}
+
+/// The frozen origin of medical records whose practice no longer exists.
+///
+/// A patient's contextual record must survive the deletion of the practice it
+/// was recorded at, without being re-labelled as the patient's own global data
+/// and without keeping a foreign key to a row that is gone. The record's live
+/// link is therefore replaced by one of these, immediately before — and inside
+/// the same transaction as — the hard deletion.
+///
+/// It holds no medical content whatsoever: no measurement, allergy, vaccine,
+/// diagnosis, document title, file name or staff identity. Only who the patient
+/// was, what the practice was called at the time, and why the context ended.
+///
+/// originalPracticePatientLinkId and originalPracticeProfileId are historical
+/// references, deliberately WITHOUT foreign keys: the rows they name no longer
+/// exist. They are internal and are never serialised to any API.
+model ArchivedPracticePatientContext {
+  id String @id @default(cuid())
+
+  patientUserId String
+  patient       User   @relation("ArchivedPracticeContextPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  /// One archive per former link — makes archiving idempotent and lets a
+  /// repeated deletion attempt reuse the context instead of duplicating it.
+  originalPracticePatientLinkId String @unique
+  originalPracticeProfileId     String
+
+  /// What the patient knew the practice as. Nullable because a practice may
+  /// have carried no display name or specialty.
+  practiceDisplayNameSnapshot String? @db.VarChar(200)
+  practiceSpecialtySnapshot   String? @db.VarChar(160)
+
+  archiveReason PracticeContextArchiveReason
+  archivedAt    DateTime                     @default(now())
+
+  vitalEntries       VitalEntry[]       @relation("VitalEntryArchivedContext")
+  vaccinationEntries VaccinationEntry[] @relation("VaccinationEntryArchivedContext")
+  allergyEntries     AllergyEntry[]     @relation("AllergyEntryArchivedContext")
+  diagnosisEntries   DiagnosisEntry[]   @relation("DiagnosisEntryArchivedContext")
+
+  @@index([patientUserId, archivedAt])
+  @@index([originalPracticeProfileId])
+}
+
 /**
  * Operational audit for practice documents — metadata only, no clinical content.
  */
@@ -1877,12 +1928,19 @@ model VaccinationEntry {
   /// never silently lose its origin. Links are revoked via their status in
   /// the normal lifecycle, not hard-deleted.
   contextPracticePatientLinkId String?
-  contextPracticePatientLink   PracticePatientLink? @relation("VaccinationEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  contextPracticePatientLink   PracticePatientLink?            @relation("VaccinationEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  /// Set instead of the live link once the practice has been deleted. The
+  /// scope stays practice_contextual — the record still belongs to a care
+  /// relationship, that relationship simply no longer exists. Restrict: an
+  /// archive context may never be removed while records still point at it.
+  archivedPracticeContextId    String?
+  archivedPracticeContext      ArchivedPracticePatientContext? @relation("VaccinationEntryArchivedContext", fields: [archivedPracticeContextId], references: [id], onDelete: Restrict)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([contextPracticePatientLinkId])
   @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
+  @@index([archivedPracticeContextId])
   @@index([userId, vaccinationDate])
   @@index([userId, deletedAt])
 }
@@ -1924,13 +1982,20 @@ model VitalEntry {
   /// never silently lose its origin. Links are revoked via their status in
   /// the normal lifecycle, not hard-deleted.
   contextPracticePatientLinkId String?
-  contextPracticePatientLink   PracticePatientLink? @relation("VitalEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  contextPracticePatientLink   PracticePatientLink?            @relation("VitalEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  /// Set instead of the live link once the practice has been deleted. The
+  /// scope stays practice_contextual — the record still belongs to a care
+  /// relationship, that relationship simply no longer exists. Restrict: an
+  /// archive context may never be removed while records still point at it.
+  archivedPracticeContextId    String?
+  archivedPracticeContext      ArchivedPracticePatientContext? @relation("VitalEntryArchivedContext", fields: [archivedPracticeContextId], references: [id], onDelete: Restrict)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, sourceProvider, externalId])
   @@index([contextPracticePatientLinkId])
   @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
+  @@index([archivedPracticeContextId])
   @@index([userId, type, measuredAt])
   @@index([userId, deletedAt])
 }
@@ -2026,12 +2091,19 @@ model AllergyEntry {
   /// never silently lose its origin. Links are revoked via their status in
   /// the normal lifecycle, not hard-deleted.
   contextPracticePatientLinkId String?
-  contextPracticePatientLink   PracticePatientLink? @relation("AllergyEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  contextPracticePatientLink   PracticePatientLink?            @relation("AllergyEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  /// Set instead of the live link once the practice has been deleted. The
+  /// scope stays practice_contextual — the record still belongs to a care
+  /// relationship, that relationship simply no longer exists. Restrict: an
+  /// archive context may never be removed while records still point at it.
+  archivedPracticeContextId    String?
+  archivedPracticeContext      ArchivedPracticePatientContext? @relation("AllergyEntryArchivedContext", fields: [archivedPracticeContextId], references: [id], onDelete: Restrict)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([contextPracticePatientLinkId])
   @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
+  @@index([archivedPracticeContextId])
   @@index([userId, status])
   @@index([userId, deletedAt])
 }
@@ -2063,12 +2135,19 @@ model DiagnosisEntry {
   /// never silently lose its origin. Links are revoked via their status in
   /// the normal lifecycle, not hard-deleted.
   contextPracticePatientLinkId String?
-  contextPracticePatientLink   PracticePatientLink? @relation("DiagnosisEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  contextPracticePatientLink   PracticePatientLink?            @relation("DiagnosisEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+  /// Set instead of the live link once the practice has been deleted. The
+  /// scope stays practice_contextual — the record still belongs to a care
+  /// relationship, that relationship simply no longer exists. Restrict: an
+  /// archive context may never be removed while records still point at it.
+  archivedPracticeContextId    String?
+  archivedPracticeContext      ArchivedPracticePatientContext? @relation("DiagnosisEntryArchivedContext", fields: [archivedPracticeContextId], references: [id], onDelete: Restrict)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([contextPracticePatientLinkId])
   @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
+  @@index([archivedPracticeContextId])
   @@index([userId, status])
   @@index([userId, deletedAt])
 }
