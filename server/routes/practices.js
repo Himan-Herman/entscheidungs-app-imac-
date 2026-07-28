@@ -28,8 +28,22 @@ import {
   ensureDemoPracticeProfileForUser,
   isPracticeDemoProfileEnabled,
 } from "../services/practiceDemoProfileService.js";
+import {
+  ARCHIVE_CONFLICT,
+  ARCHIVE_INCOMPLETE,
+  ARCHIVE_REASONS,
+  archiveContextualPatientDataForLinks,
+  releaseDocumentShareGrantsForPractice,
+} from "../services/dataLifecycle/archivePracticePatientContext.js";
 
 const router = express.Router();
+
+/**
+ * Deleting a practice is irreversible and now moves other people's medical
+ * records to an archive on the way. It requires the same kind of explicit
+ * confirmation the account erasure does.
+ */
+const PRACTICE_DELETE_CONFIRM = "DELETE_THIS_PRACTICE";
 
 const TARGET_TYPES = new Set([
   "practice",
@@ -338,32 +352,74 @@ router.delete("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
   const access = await resolvePracticeAccess(userId, req.params.id);
-  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!access) return res.status(404).json({ ok: false, error: "practice_not_found" });
   if (access.role !== "owner") {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
-  // Deleting a practice cascades to its PracticePatientLinks. A link that still
-  // anchors a contextual medical record must not be removed, so check before
-  // touching anything: without this the delete fails deep in the database on an
-  // ON DELETE RESTRICT foreign key and surfaces as an opaque 500.
+  if (String(req.body?.confirmation ?? "").trim() !== PRACTICE_DELETE_CONFIRM) {
+    return res.status(400).json({ ok: false, error: "confirmation_required" });
+  }
+
+  // Deleting a practice cascades to its PracticePatientLinks, and every
+  // contextual medical record holds an ON DELETE RESTRICT key to its link. The
+  // records are not the practice's to delete — they belong to the patient — so
+  // they are moved to an immutable archive context first, inside this same
+  // transaction. Document share grants hold three RESTRICT keys of their own
+  // and are released here too.
   //
-  // Preflight and delete run in one transaction so a record inserted in between
-  // cannot slip through. The foreign key stays the last line of defence and
-  // rolls the transaction back if it does.
+  // Everything happens in one transaction: an archive that committed without
+  // the deletion would leave records detached from a practice that still
+  // exists, and a deletion without the archive is what the database refuses.
+  let summary;
   try {
-    const result = await prisma.$transaction(async (tx) => {
+    summary = await prisma.$transaction(async (tx) => {
+      // Lock the practice against a concurrent deletion, and read the links in
+      // a fixed order so two runs cannot deadlock on each other.
+      const practiceRows = await tx.$queryRaw`
+        SELECT "id" FROM "PracticeProfile" WHERE "id" = ${req.params.id} FOR UPDATE
+      `;
+      if (practiceRows.length === 0) {
+        throw new Error("practice_not_found");
+      }
+
+      const links = await tx.practicePatientLink.findMany({
+        where: { practiceProfileId: req.params.id },
+        select: { id: true },
+        orderBy: { id: "asc" },
+      });
+      const linkIds = links.map((l) => l.id);
+
+      const archived = await archiveContextualPatientDataForLinks({
+        transaction: tx,
+        linkIds,
+        archiveReason: ARCHIVE_REASONS.PRACTICE_DELETED,
+        expectedPracticeProfileId: req.params.id,
+      });
+
+      const grants = await releaseDocumentShareGrantsForPractice({
+        transaction: tx,
+        practiceProfileId: req.params.id,
+      });
+
+      // The existing guard stays, now as a postcondition: if anything the
+      // archiving did not cover still blocks the deletion, the whole
+      // transaction is rolled back rather than failing deep in the database.
       const blockers = await checkPracticeDeletionBlockers(req.params.id, tx);
       if (blockers.blocked) {
         const err = new Error(CONTEXTUAL_DATA_BLOCKED);
         err.blockerReport = blockers;
         throw err;
       }
-      return tx.practiceProfile.deleteMany({ where: { id: req.params.id } });
-    });
 
-    if (result.count === 0) return res.status(404).json({ ok: false, error: "not_found" });
-    return res.json({ ok: true, deleted: true });
+      const deleted = await tx.practiceProfile.deleteMany({ where: { id: req.params.id } });
+      if (deleted.count === 0) throw new Error("practice_not_found");
+
+      return { archived, grants };
+    });
   } catch (err) {
+    if (err?.message === "practice_not_found") {
+      return res.status(404).json({ ok: false, error: "practice_not_found" });
+    }
     if (err?.message === CONTEXTUAL_DATA_BLOCKED) {
       // Aggregate-only trace; a failing audit must not turn a blocked deletion
       // into a completed one.
@@ -378,11 +434,67 @@ router.delete("/:id", async (req, res) => {
         metadata: blockerAuditMetadata(err.blockerReport),
       });
       // Stable code only — no counts, categories or ids leave the server.
-      return res.status(409).json({ ok: false, error: CONTEXTUAL_DATA_BLOCKED });
+      return res.status(409).json({ ok: false, error: "practice_deletion_blocked" });
+    }
+    if (err?.message === ARCHIVE_CONFLICT || err?.message === ARCHIVE_INCOMPLETE) {
+      // The internal detail explains WHICH invariant failed; it stays in the
+      // log, never in the response.
+      console.error("[practices/delete] archive", err.message, err.archiveDetail ?? "");
+      return res.status(409).json({ ok: false, error: err.message });
     }
     console.error("[practices/delete]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "server_error" });
   }
+
+  // Audit after the commit, from aggregate counts only: how many links were
+  // archived, how many records per model moved, how many grants and tokens
+  // ended. No patient, no link, no medical content.
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_patient_context_archived",
+    entityType: "PracticeProfile",
+    entityId: req.params.id,
+    practiceProfileId: req.params.id,
+    metadata: {
+      archiveReason: ARCHIVE_REASONS.PRACTICE_DELETED,
+      archivedLinks: summary.archived.archivedLinks,
+      movedTotal: summary.archived.movedTotal,
+      movedByModel: summary.archived.movedByModel,
+    },
+  });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "document_share_grants_revoked_for_deletion",
+    entityType: "PracticeProfile",
+    entityId: req.params.id,
+    practiceProfileId: req.params.id,
+    metadata: {
+      reason: ARCHIVE_REASONS.PRACTICE_DELETED,
+      grantsTouched: summary.grants.grantsTouched,
+      grantsAsSource: summary.grants.grantsAsSource,
+      grantsAsTarget: summary.grants.grantsAsTarget,
+      grantsRevoked: summary.grants.grantsRevoked,
+      grantsRemoved: summary.grants.grantsRemoved,
+      tokensRevoked: summary.grants.tokensRevoked,
+    },
+  });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_deletion_completed",
+    entityType: "PracticeProfile",
+    entityId: req.params.id,
+    practiceProfileId: req.params.id,
+    metadata: { archivedLinks: summary.archived.archivedLinks },
+  });
+
+  // No patient ids, no link ids, no counts of medical records.
+  return res.json({ ok: true, deleted: true });
 });
 
 router.get("/:id/qr-targets", async (req, res) => {
