@@ -48,6 +48,7 @@ import patientInboxRouter from "./routes/patientInbox.js";
 import patientThreadsRouter from "./routes/patientThreads.js";
 import patientMedicationPlansRouter from "./routes/patientMedicationPlans.js";
 import patientPracticeDocumentsRouter from "./routes/patientPracticeDocuments.js";
+import patientDocumentShareGrantsRouter from "./routes/patientDocumentShareGrants.js";
 import patientVaccinationsRouter from "./routes/patientVaccinations.js";
 import patientVitalsRouter from "./routes/patientVitals.js";
 import patientWearablesRouter from "./routes/patientWearables.js";
@@ -213,6 +214,9 @@ app.use("/api/patient/threads", requireAuth, patientThreadsRouter);
 app.use("/api/patient/messages", requireAuth, patientThreadsRouter);
 app.use("/api/patient/medication-plans", requireAuth, patientMedicationPlansRouter);
 app.use("/api/patient/push", requireAuth, patientPushRouter);
+// Mounted before the practice-documents router so
+// /practice-documents/:documentId/share-grants is matched here.
+app.use("/api/patient", requireAuth, patientDocumentShareGrantsRouter);
 app.use("/api/patient/practice-documents", requireAuth, patientPracticeDocumentsRouter);
 app.use("/api/patient/vaccinations", requireAuth, patientVaccinationsRouter);
 app.use("/api/patient/vitals", requireAuth, patientVitalsRouter);

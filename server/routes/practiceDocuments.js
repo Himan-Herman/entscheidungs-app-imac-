@@ -12,8 +12,12 @@ import {
 import { uploadPracticeDocument } from "../middleware/uploadPracticeDocument.js";
 import {
   getPracticeAccess,
+  // accessHasPermission takes the resolved access object and honours the
+  // owner / membership / clinical-role union. The can* helpers take a ROLE
+  // STRING: passing the object stringified it to "[object Object]", which
+  // matches no role, so every such check denied every user.
+  accessHasPermission,
   canReadPracticePatientLinks,
-  canWritePracticePatientLinks,
   canPracticeSoftDelete,
   canPracticeRestoreFromArchive,
 } from "../utils/practiceAccess.js";
@@ -151,7 +155,7 @@ async function requirePracticeAccess(req) {
 router.get("/", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canReadPracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_READ)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -159,7 +163,11 @@ router.get("/", async (req, res) => {
     const documents = await listDocumentsForPracticePatient(
       req.params.linkId,
       ctx.practiceId,
-      { includeArchived: parseIncludeArchived(req) },
+      {
+        includeArchived: parseIncludeArchived(req),
+        // Lets the service audit documents reached through a patient's grant.
+        ctx: { actorUserId: ctx.userId, actorRole: "practice", req },
+      },
     );
     return res.json({ ok: true, documents });
   } catch (err) {
@@ -173,7 +181,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -210,7 +218,7 @@ router.post("/", async (req, res) => {
 router.post("/ai-title-draft", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -327,6 +335,7 @@ router.get("/:documentId/download", async (req, res) => {
       fileId,
       req.params.linkId,
       ctx.practiceId,
+      { actorUserId: ctx.userId, actorRole: "practice", req },
     );
 
     const document = await getDocumentForPractice(
@@ -603,7 +612,7 @@ router.patch("/:documentId/ocr/discard", requireDocumentOcrFeature, async (req, 
 router.get("/:documentId", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canReadPracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_READ)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -612,6 +621,7 @@ router.get("/:documentId", async (req, res) => {
       req.params.documentId,
       req.params.linkId,
       ctx.practiceId,
+      { actorUserId: ctx.userId, actorRole: "practice", req },
     );
     return res.json({ ok: true, document });
   } catch (err) {
@@ -638,7 +648,7 @@ router.post(
   async (req, res) => {
     const ctx = await requirePracticeAccess(req);
     if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-    if (!canWritePracticePatientLinks(ctx.access)) {
+    if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_WRITE)) {
       return res.status(403).json({ ok: false, error: "forbidden" });
     }
     if (!req.file?.buffer?.length) {
@@ -678,7 +688,7 @@ router.post(
 router.post("/:documentId/share", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -711,7 +721,7 @@ router.post("/:documentId/share", async (req, res) => {
 router.patch("/:documentId/revoke", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -742,7 +752,7 @@ router.patch("/:documentId/revoke", async (req, res) => {
 router.patch("/:documentId/archive", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -842,7 +852,7 @@ router.patch("/:documentId/delete", async (req, res) => {
 router.patch("/:documentId", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.PATIENT_LINKS_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 

@@ -5,6 +5,7 @@ import {
   getDocumentFileForPractice,
   getSharedDocumentFileForPatient,
   loadSharedDocumentForPatient,
+  loadDocumentForPracticeRead,
 } from "./practiceDocumentService.js";
 import { assertLinkForPractice } from "./practiceDocumentService.js";
 import { writeAuditLog } from "../auditLogService.js";
@@ -13,6 +14,9 @@ const storage = getPracticeDocumentStorage();
 
 const DEFAULT_TTL_MINUTES = 15;
 const MAX_TTL_MINUTES = 60;
+
+/** Link states in which a practice may still act. Mirrors practiceDocumentService. */
+const PRACTICE_LINK_USABLE = new Set(["invited", "active"]);
 
 export function hashSecureDocumentToken(raw) {
   return crypto.createHash("sha256").update(String(raw), "utf8").digest("hex");
@@ -128,6 +132,28 @@ export async function streamSecureDocumentDownload(rawToken, ctx = {}) {
 
   if (row.audience === "patient") {
     await loadSharedDocumentForPatient(row.documentId, row.document.patientUserId);
+  }
+
+  // A token is not a standing permission. Revoking a share grant already
+  // invalidates the target practice's tokens, but the status is re-checked here
+  // as well: the two mechanisms fail in different ways, and a token that
+  // outlives the permission it was issued under is the failure mode that
+  // matters. This also catches a link revoked after the token was created.
+  if (row.audience === "practice") {
+    if (!row.practicePatientLinkId || !row.practiceProfileId) throw new Error("link_revoked");
+    const link = await prisma.practicePatientLink.findFirst({
+      where: { id: row.practicePatientLinkId, practiceProfileId: row.practiceProfileId },
+      select: { id: true, patientUserId: true, status: true },
+    });
+    if (!link || !PRACTICE_LINK_USABLE.has(link.status)) throw new Error("link_revoked");
+    try {
+      await loadDocumentForPracticeRead(row.documentId, link, row.practiceProfileId);
+    } catch {
+      // The document is no longer reachable for this practice — the grant was
+      // revoked or expired. Reported as a revoked link, not as "not found":
+      // the practice legitimately saw this document before.
+      throw new Error("link_revoked");
+    }
   }
 
   const buffer = await storage.getObject(row.file.storageKey);
@@ -274,11 +300,9 @@ export async function createPracticeDocumentDownloadLink(
     actorRole,
     req,
   });
-  const doc = await prisma.practiceDocument.findFirst({
-    where: { id: documentId, practicePatientLinkId: linkId, practiceProfileId },
-  });
-  if (!doc) throw new Error("document_not_found");
-  if (doc.status === "deleted") throw new Error("document_unavailable");
+  // Same gate as list, detail and download: the practice's own document, or one
+  // the patient released to this link.
+  await loadDocumentForPracticeRead(documentId, link, practiceProfileId);
 
   return createSecureDocumentDownloadLink(
     {
@@ -294,14 +318,11 @@ export async function createPracticeDocumentDownloadLink(
   );
 }
 
-export async function practiceDirectDownload(documentId, fileId, linkId, practiceProfileId) {
+export async function practiceDirectDownload(documentId, fileId, linkId, practiceProfileId, ctx = {}) {
   if (!fileId) throw new Error("validation_required");
-  const doc = await prisma.practiceDocument.findFirst({
-    where: { id: documentId, practicePatientLinkId: linkId, practiceProfileId },
-  });
-  if (!doc) throw new Error("document_not_found");
-  if (doc.status === "deleted") throw new Error("document_unavailable");
-  return getDocumentFileForPractice(documentId, fileId, linkId, practiceProfileId);
+  const link = await assertLinkForPractice(linkId, practiceProfileId);
+  await loadDocumentForPracticeRead(documentId, link, practiceProfileId);
+  return getDocumentFileForPractice(documentId, fileId, linkId, practiceProfileId, ctx);
 }
 
 export { getSharedDocumentFileForPatient, getDocumentFileForPractice };

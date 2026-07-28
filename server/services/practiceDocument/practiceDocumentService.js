@@ -8,6 +8,11 @@ import {
   PRACTICE_BRANDING_SELECT,
   practiceBrandingJson,
 } from "../../utils/practiceBranding.js";
+import {
+  practiceDocumentAccessWhere,
+  isOriginPractice,
+  auditSharedDocumentAccess,
+} from "./documentShareGrantService.js";
 
 const storage = getPracticeDocumentStorage();
 
@@ -109,6 +114,11 @@ export async function assertLinkForPractice(linkId, practiceProfileId, ctx = {})
   return link;
 }
 
+/**
+ * Origin-practice loader. Used by every WRITE path — share, revoke, archive,
+ * restore, delete, edit, upload — and deliberately NOT widened for share
+ * grants: a grant is read access, and nothing else.
+ */
 async function loadDocumentForPractice(documentId, linkId, practiceProfileId) {
   const doc = await prisma.practiceDocument.findFirst({
     where: {
@@ -121,6 +131,76 @@ async function loadDocumentForPractice(documentId, linkId, practiceProfileId) {
   if (!doc) throw new Error("document_not_found");
   if (doc.status === "deleted") throw new Error("document_unavailable");
   return doc;
+}
+
+/**
+ * Read loader: the practice's own document on its own link, OR a document the
+ * patient has released to this link with an effective grant.
+ *
+ * The filter is built into the query. A foreign document never reaches the
+ * process, so there is nothing to accidentally serialise.
+ *
+ * @param {string} documentId
+ * @param {{ id: string, patientUserId: string }} link the already-authorized link
+ * @param {string} practiceProfileId
+ */
+export async function loadDocumentForPracticeRead(documentId, link, practiceProfileId) {
+  const doc = await prisma.practiceDocument.findFirst({
+    where: {
+      id: documentId,
+      ...practiceDocumentAccessWhere({ link, practiceProfileId }),
+    },
+    include: docInclude,
+  });
+  if (!doc) throw new Error("document_not_found");
+  if (doc.status === "deleted") throw new Error("document_unavailable");
+  return doc;
+}
+
+/**
+ * Practice-facing shape of a document reached through a patient's share grant.
+ *
+ * The reading practice is NOT the origin practice, so it gets only what the
+ * read workflow needs. Withheld on purpose:
+ *   - patientUserId          — it already knows the patient through its own link
+ *   - practicePatientLinkId  — that is the ORIGIN practice's internal link id
+ *   - createdByUserId        — staff of another practice
+ * The origin practice's NAME is kept: a document that arrived from cardiology
+ * is only interpretable if the GP can see where it came from.
+ */
+function sharedDocumentToJson(row) {
+  return {
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    description: row.description,
+    status: row.status,
+    sharedAt: row.sharedAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    practiceName: row.practiceProfile?.practiceName ?? null,
+    practice: row.practiceProfile ? practiceBrandingJson(row.practiceProfile) : null,
+    /// Provenance for the UI: this is not our document, the patient released it.
+    accessVia: "patient_share_grant",
+    readOnly: true,
+    files: (row.files || []).map((f) => ({
+      id: f.id,
+      originalFileName: f.originalFileName,
+      mimeType: f.mimeType,
+      sizeBytes: f.sizeBytes,
+      createdAt: f.createdAt,
+    })),
+  };
+}
+
+/**
+ * Serialises according to how the practice reached the document.
+ * @param {{ id: string, patientUserId: string }} link
+ */
+function documentForPracticeJson(row, link, practiceProfileId) {
+  return isOriginPractice(row, link, practiceProfileId)
+    ? documentToJson(row)
+    : sharedDocumentToJson(row);
 }
 
 /**
@@ -250,17 +330,28 @@ export async function listDocumentsForPracticePatient(
   practiceProfileId,
   opts = {},
 ) {
-  await assertLinkForPractice(linkId, practiceProfileId);
+  const link = await assertLinkForPractice(linkId, practiceProfileId);
+  // Own documents plus the ones the patient released to THIS link. Another
+  // practice's documents and revoked or expired grants match neither branch.
   const rows = await prisma.practiceDocument.findMany({
     where: {
-      practicePatientLinkId: linkId,
-      practiceProfileId,
+      ...practiceDocumentAccessWhere({ link, practiceProfileId }),
       ...practiceResourceStatusWhere({ includeArchived: opts.includeArchived }),
     },
     include: docInclude,
     orderBy: { createdAt: "desc" },
   });
-  return rows.map((r) => documentToJson(r));
+  // Mandatory audit for the documents this practice only reaches through a
+  // patient's grant. Its own documents are covered by the existing audit.
+  auditSharedDocumentAccess({
+    ...(opts.ctx ?? {}),
+    action: "shared_document_viewed",
+    documentIds: rows.filter((r) => !isOriginPractice(r, link, practiceProfileId)).map((r) => r.id),
+    link,
+    practiceProfileId,
+  });
+
+  return rows.map((r) => documentForPracticeJson(r, link, practiceProfileId));
 }
 
 /**
@@ -268,10 +359,16 @@ export async function listDocumentsForPracticePatient(
  * @param {string} linkId
  * @param {string} practiceProfileId
  */
-export async function getDocumentForPractice(documentId, linkId, practiceProfileId) {
-  await assertLinkForPractice(linkId, practiceProfileId);
-  const doc = await loadDocumentForPractice(documentId, linkId, practiceProfileId);
-  return documentToJson(doc);
+export async function getDocumentForPractice(documentId, linkId, practiceProfileId, ctx = {}) {
+  const link = await assertLinkForPractice(linkId, practiceProfileId);
+  const doc = await loadDocumentForPracticeRead(documentId, link, practiceProfileId);
+  if (!isOriginPractice(doc, link, practiceProfileId)) {
+    auditSharedDocumentAccess({
+      ...ctx, action: "shared_document_viewed",
+      documentIds: [doc.id], link, practiceProfileId,
+    });
+  }
+  return documentForPracticeJson(doc, link, practiceProfileId);
 }
 
 /**
@@ -595,8 +692,17 @@ export async function getDocumentFileForPractice(
   fileId,
   linkId,
   practiceProfileId,
+  ctx = {},
 ) {
-  await loadDocumentForPractice(documentId, linkId, practiceProfileId);
+  // Same gate as list and detail: origin practice, or an effective grant.
+  const link = await assertLinkForPractice(linkId, practiceProfileId);
+  const doc = await loadDocumentForPracticeRead(documentId, link, practiceProfileId);
+  if (!isOriginPractice(doc, link, practiceProfileId)) {
+    auditSharedDocumentAccess({
+      ...ctx, action: "shared_document_downloaded",
+      documentIds: [doc.id], link, practiceProfileId,
+    });
+  }
   const fileRow = await prisma.practiceDocumentFile.findFirst({
     where: { id: fileId, documentId },
   });
