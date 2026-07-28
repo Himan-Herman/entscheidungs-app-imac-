@@ -13,7 +13,12 @@ import webpush from "web-push";
 
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || "";
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:support@medscout.app";
+/**
+ * Contact point sent to the push services (FCM, Mozilla, Apple) in the JWT `sub`
+ * claim — it is how they reach us if this sender causes problems. It must be a
+ * mailbox that is actually read; a dead address defeats the purpose.
+ */
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:contact@medscoutx.com";
 
 let configured = false;
 try {
