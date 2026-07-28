@@ -6,7 +6,7 @@ import {
 import {
   assertLinkForPractice,
   getDocumentFileForPractice,
-  getDocumentForPractice,
+  getOwnDocumentForPractice,
 } from "./practiceDocumentService.js";
 import { getPracticeDocumentStorage } from "./storage/index.js";
 import { getDocumentOcrEngine, resolveOcrEngine } from "./documentOcrEngineAdapter.js";
@@ -112,7 +112,9 @@ export async function startDocumentOcr(
     actorRole: ctx.access?.role,
   });
 
-  const document = await getDocumentForPractice(documentId, linkId, practiceProfileId);
+  // Origin practice only: a patient's share grant is READ access, so a target
+  // practice must not be able to start OCR on a document it merely reads.
+  const document = await getOwnDocumentForPractice(documentId, linkId, practiceProfileId);
   const { file } = await getDocumentFileForPractice(
     documentId,
     fileId,

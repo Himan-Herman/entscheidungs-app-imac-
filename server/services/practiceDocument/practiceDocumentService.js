@@ -359,6 +359,23 @@ export async function listDocumentsForPracticePatient(
  * @param {string} linkId
  * @param {string} practiceProfileId
  */
+/**
+ * Origin-practice accessor for callers that do more than read: starting OCR,
+ * or sending document metadata to an external AI processor. A patient's share
+ * grant is READ access, so neither may run on a document that arrived through
+ * one — that would let practice A submit practice B's document for processing
+ * under A's own consent.
+ *
+ * @param {string} documentId
+ * @param {string} linkId
+ * @param {string} practiceProfileId
+ */
+export async function getOwnDocumentForPractice(documentId, linkId, practiceProfileId) {
+  await assertLinkForPractice(linkId, practiceProfileId);
+  const doc = await loadDocumentForPractice(documentId, linkId, practiceProfileId);
+  return documentToJson(doc);
+}
+
 export async function getDocumentForPractice(documentId, linkId, practiceProfileId, ctx = {}) {
   const link = await assertLinkForPractice(linkId, practiceProfileId);
   const doc = await loadDocumentForPracticeRead(documentId, link, practiceProfileId);

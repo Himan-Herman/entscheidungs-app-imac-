@@ -28,6 +28,7 @@ import {
   softDeletePracticeDocument,
   createPracticeDocumentDraft,
   getDocumentForPractice,
+  getOwnDocumentForPractice,
   getDocumentFileForPractice,
   listDocumentsForPracticePatient,
   revokeDocumentShare,
@@ -389,7 +390,8 @@ router.post("/:documentId/ocr/start", requireDocumentOcrFeature, async (req, res
   }
 
   try {
-    const doc = await getDocumentForPractice(
+    // Origin practice only — OCR is processing, not the read a share grant gives.
+    const doc = await getOwnDocumentForPractice(
       req.params.documentId,
       req.params.linkId,
       ctx.practiceId,
@@ -539,7 +541,8 @@ router.post("/:documentId/ocr/share", requireDocumentOcrFeature, async (req, res
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
 
   try {
-    const doc = await getDocumentForPractice(
+    // Origin practice only — releasing an OCR result is the origin practice's act.
+    const doc = await getOwnDocumentForPractice(
       req.params.documentId,
       req.params.linkId,
       ctx.practiceId,

@@ -533,6 +533,28 @@ test("16. the target practice cannot edit, archive, delete or re-share", async (
   assert.equal(doc.status, "shared");
 });
 
+test("16b. the target practice cannot start OCR or AI processing on a shared document", async () => {
+  await share(P, D_B, LINK.A);
+  const {
+    getOwnDocumentForPractice,
+    getDocumentForPractice,
+  } = await import("../services/practiceDocument/practiceDocumentService.js");
+
+  // Reading is allowed …
+  const read = await getDocumentForPractice(D_B, LINK.A, PR.A);
+  assert.equal(read.accessVia, "patient_share_grant");
+
+  // … processing is not. OCR and the external AI path use the origin-only
+  // accessor, so a document that arrived through a grant is out of reach.
+  await assert.rejects(
+    () => getOwnDocumentForPractice(D_B, LINK.A, PR.A),
+    /document_not_found/,
+    "a grant must not enable OCR or AI processing by the target practice",
+  );
+  // The origin practice keeps both.
+  assert.ok(await getOwnDocumentForPractice(D_B, LINK.B, PR.B));
+});
+
 test("17. the target practice cannot pass the document on to practice C", async () => {
   await share(P, D_B, LINK.A);
   // There is no practice-facing grant route at all; the patient route requires

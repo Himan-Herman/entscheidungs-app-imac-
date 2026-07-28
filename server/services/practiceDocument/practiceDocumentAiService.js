@@ -6,7 +6,7 @@ import {
 } from "../../config/aiSafetyPolicy.js";
 import { sanitizeAiOutput, shouldRegenerateUnsafeOutput } from "../aiSafetySanitizer.js";
 import {
-  getDocumentForPractice,
+  getOwnDocumentForPractice,
 } from "./practiceDocumentService.js";
 
 /**
@@ -93,7 +93,10 @@ function metadataContext(doc, locale) {
  * @param {{ linkId: string, practiceProfileId: string, documentId: string, locale?: string }} input
  */
 export async function generatePracticeDocumentAiOrganize(input) {
-  const doc = await getDocumentForPractice(
+  // Origin practice only: sending a document that arrived through a patient's
+  // share grant to an external AI processor is a separate purpose, not the
+  // read workflow the patient released it for.
+  const doc = await getOwnDocumentForPractice(
     input.documentId,
     input.linkId,
     input.practiceProfileId,
