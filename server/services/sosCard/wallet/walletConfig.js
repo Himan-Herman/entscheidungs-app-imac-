@@ -24,12 +24,29 @@ export const APPLE_WALLET_ENV = [
   "APPLE_WALLET_WWDR_PEM", // Apple WWDR intermediate certificate (PEM)
 ];
 
-/** Required env vars for Google Wallet (Generic pass + signed Add-to-Wallet JWT). */
+/**
+ * Required env vars for Google Wallet (Generic pass + signed Add-to-Wallet JWT).
+ * GOOGLE_WALLET_CLASS_ID is OPTIONAL: when unset it is derived from the issuer id and the class
+ * is auto-created via the save JWT (no manual Google Wallet Console step needed).
+ */
 export const GOOGLE_WALLET_ENV = [
   "GOOGLE_WALLET_ISSUER_ID",
   "GOOGLE_WALLET_SERVICE_ACCOUNT_JSON", // service account credentials JSON — server only
-  "GOOGLE_WALLET_CLASS_ID", // generic pass class id
 ];
+
+/** Default class suffix when GOOGLE_WALLET_CLASS_ID is not provided. */
+const GOOGLE_CLASS_SUFFIX = "medscoutx_sos";
+
+/**
+ * Full Generic class id. Uses GOOGLE_WALLET_CLASS_ID when set, otherwise derives
+ * `<issuerId>.medscoutx_sos`. Empty string if the issuer id is missing.
+ */
+export function getGoogleClassId() {
+  const explicit = (process.env.GOOGLE_WALLET_CLASS_ID || "").trim();
+  if (explicit) return explicit;
+  const issuerId = (process.env.GOOGLE_WALLET_ISSUER_ID || "").trim();
+  return issuerId ? `${issuerId}.${GOOGLE_CLASS_SUFFIX}` : "";
+}
 
 export function appleWalletConfig() {
   const missing = APPLE_WALLET_ENV.filter((n) => !present(n));

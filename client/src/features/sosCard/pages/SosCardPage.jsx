@@ -159,7 +159,10 @@ export default function SosCardPage() {
     try {
       const { res, data } = await requestGoogleWalletLink();
       if (res.ok && data.ok && data.saveUrl) {
-        window.open(data.saveUrl, "_blank", "noopener,noreferrer");
+        // Same-tab navigation: window.open() after an await loses the user-gesture context and is
+        // blocked by mobile popup blockers (Android/Samsung), so the Google Wallet save flow never
+        // opens. Navigating the current tab to the save URL works reliably on mobile and desktop.
+        window.location.assign(data.saveUrl);
       } else {
         setWalletMsg(t?.wallet?.preparing || "");
       }

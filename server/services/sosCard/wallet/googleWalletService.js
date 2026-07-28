@@ -19,6 +19,7 @@ import {
   googleWalletConfig,
   parseGoogleServiceAccount,
   getEmergencyBaseUrl,
+  getGoogleClassId,
 } from "./walletConfig.js";
 
 // Conservative default: do NOT render blood type (or any medical data) on the wallet face.
@@ -53,8 +54,13 @@ export async function buildGoogleSaveLink(walletPayload) {
   }
 
   const issuerId = (process.env.GOOGLE_WALLET_ISSUER_ID || "").trim();
-  const classId = (process.env.GOOGLE_WALLET_CLASS_ID || "").trim();
+  const classId = getGoogleClassId();
   const objectId = `${issuerId}.sos-${normalizeIdPart(walletPayload?.subjectId)}`;
+
+  // Minimal Generic class. Embedded in the save JWT so Google auto-creates it on first save when
+  // it does not yet exist — no manual Google Wallet Console step required (mirrors Apple's
+  // self-contained .pkpass). If the class already exists, Google keeps the existing one.
+  const genericClass = { id: classId };
 
   // Generic pass object — minimal, no medical data on the visible face.
   const genericObject = {
@@ -93,7 +99,8 @@ export async function buildGoogleSaveLink(walletPayload) {
     aud: "google",
     typ: "savetowallet",
     origins,
-    payload: { genericObjects: [genericObject] },
+    // Include the class so Google creates it if missing, plus the object to save.
+    payload: { genericClasses: [genericClass], genericObjects: [genericObject] },
   };
 
   // RS256 signature with the service account private key (server-side only).
