@@ -13,6 +13,8 @@ import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBa
 import PatientStructuredDocumentSection from "../components/PatientStructuredDocumentSection.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
+import ShareDocumentDialog from "../../patientPractices/components/ShareDocumentDialog.jsx";
+import { usePracticeContextIndex } from "../../patientPractices/hooks/usePracticeContextIndex.js";
 import "../styles/PracticeDocuments.css";
 
 function fmt(iso, lang) {
@@ -63,6 +65,20 @@ export default function PatientPracticeDocumentDetailPage() {
   const [unavailable, setUnavailable] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const tShare = useMemo(
+    () => getMessages(language).documentSharing || getMessages("en").documentSharing,
+    [language],
+  );
+  const { activeLinks } = usePracticeContextIndex();
+  // Every active connection except the practice this document came from. The
+  // origin practice already has it; offering it would create a second, weaker
+  // path to its own data, and the server rejects it anyway.
+  const shareCandidates = useMemo(
+    () => activeLinks.filter((l) => l.practice?.id && l.practice.id !== doc?.practice?.id),
+    [activeLinks, doc?.practice?.id],
+  );
 
   const load = useCallback(async () => {
     if (!documentId) return;
@@ -220,6 +236,21 @@ export default function PatientPracticeDocumentDetailPage() {
           >
             {t.askQuestion}
           </button>
+          {/* Sharing is offered only when there is somewhere to share TO: an
+              active connection that is not the practice the document came
+              from. Otherwise the reason is stated instead of a dead button. */}
+          {shareCandidates.length > 0 ? (
+            <button
+              type="button"
+              className="patient-inbox__btn patient-inbox__btn--secondary"
+              onClick={() => setShareOpen(true)}
+              disabled={busy}
+            >
+              {tShare.share.action}
+            </button>
+          ) : (
+            <p className="practice-documents__share-hint">{tShare.share.noOtherPractice}</p>
+          )}
           <Link
             className="patient-inbox__btn patient-inbox__btn--secondary"
             to="/patient/messages"
@@ -277,6 +308,19 @@ export default function PatientPracticeDocumentDetailPage() {
           </ul>
         </section>
       ) : null}
+
+      <ShareDocumentDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        onShared={() => setStatusMsg(tShare.share.success)}
+        document={{
+          id: doc?.id,
+          title: doc?.title,
+          practiceName: practiceDisplayLabel(doc?.practice),
+        }}
+        candidates={shareCandidates}
+        t={tShare}
+      />
     </div>
   );
 }

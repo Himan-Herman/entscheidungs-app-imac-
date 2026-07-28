@@ -183,3 +183,49 @@
   border-color: rgba(148, 163, 184, 0.25);
   color: #f1f5f9;
 }
+
+/* Explains why sharing is unavailable instead of showing a dead button. */
+.practice-documents__share-hint {
+  margin: 0;
+  align-self: center;
+  font-size: 0.9rem;
+  color: #52606d;
+}
+
+:root[data-theme="dark"] .practice-documents__share-hint { color: #b6c2ce; }
+
+/* A document that belongs to another practice and was released by the patient.
+   Marked by text, not only by colour. */
+.practice-documents__shared-flag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #e7eefb;
+  color: #17356e;
+  border: 1px solid #adc4ea;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.practice-documents__shared-banner {
+  border-left: 3px solid #17356e;
+  background: #f2f6fd;
+  color: #17356e;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0 8px 8px 0;
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+:root[data-theme="dark"] .practice-documents__shared-flag {
+  background: #16233e;
+  color: #a8c8f7;
+  border-color: #35507e;
+}
+
+:root[data-theme="dark"] .practice-documents__shared-banner {
+  background: #141f33;
+  border-left-color: #7ba8ee;
+  color: #b9d1f8;
+}

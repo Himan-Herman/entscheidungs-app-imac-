@@ -1,0 +1,189 @@
+.shared-data {
+  border: 1px solid #dbe1e8;
+  border-radius: 14px;
+  padding: 1rem 1.1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  background: #ffffff;
+  color: #1f2933;
+}
+
+.shared-data h2 {
+  font-size: 1.2rem;
+  margin: 0 0 0.35rem;
+}
+
+.shared-data__intro {
+  margin: 0 0 0.75rem;
+  color: #4b5563;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.shared-data__status {
+  min-height: 1.25rem;
+  font-size: 0.9rem;
+  color: #305c55;
+  font-weight: 600;
+}
+
+.shared-data__empty {
+  margin: 0;
+  color: #52606d;
+  font-size: 0.92rem;
+}
+
+.shared-data__error {
+  border: 1px solid #b42318;
+  background: #fdecea;
+  color: #7a271a;
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+}
+
+.shared-data__error button {
+  min-height: 44px;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #7a271a;
+  background: transparent;
+  color: #7a271a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shared-data__list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.shared-data__item {
+  border: 1px solid #e3e8ee;
+  border-radius: 12px;
+  padding: 0.85rem 0.95rem;
+  background: #fbfcfd;
+}
+
+.shared-data__doc {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.shared-data__meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.shared-data__meta div {
+  min-width: 0;
+}
+
+.shared-data__meta dt {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #52606d;
+  margin: 0;
+}
+
+.shared-data__meta dd {
+  margin: 0.1rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.shared-data__pill {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.shared-data__pill--active {
+  background: #e4f3ef;
+  color: #0d5044;
+  border-color: #a9d5ca;
+}
+
+.shared-data__pill--revoked {
+  background: #f2e6e5;
+  color: #7b241c;
+  border-color: #dcb2ad;
+}
+
+.shared-data__pill--expired {
+  background: #eceef1;
+  color: #45505c;
+  border-color: #c4cbd3;
+}
+
+.shared-data__revoke {
+  margin-top: 0.85rem;
+  min-height: 44px;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid #a4231b;
+  background: transparent;
+  color: #8c1d16;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shared-data__revoke:focus-visible {
+  outline: 3px solid #a4231b;
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------- dark */
+
+:root[data-theme="dark"] .shared-data {
+  background: #131a21;
+  border-color: #2f3a45;
+  color: #e6ebf1;
+}
+:root[data-theme="dark"] .shared-data__intro,
+:root[data-theme="dark"] .shared-data__empty { color: #b6c2ce; }
+:root[data-theme="dark"] .shared-data__status { color: #7fd8c6; }
+:root[data-theme="dark"] .shared-data__item {
+  background: #182129;
+  border-color: #2f3a45;
+}
+:root[data-theme="dark"] .shared-data__meta dt { color: #b6c2ce; }
+:root[data-theme="dark"] .shared-data__pill--active {
+  background: #0f2f29; color: #86ddca; border-color: #2c5c52;
+}
+:root[data-theme="dark"] .shared-data__pill--revoked {
+  background: #341715; color: #f6a9a1; border-color: #6c3630;
+}
+:root[data-theme="dark"] .shared-data__pill--expired {
+  background: #232b33; color: #c3ccd6; border-color: #47525e;
+}
+:root[data-theme="dark"] .shared-data__revoke {
+  border-color: #f4776c;
+  color: #ffb3ab;
+}
+:root[data-theme="dark"] .shared-data__revoke:focus-visible { outline-color: #f4776c; }
+:root[data-theme="dark"] .shared-data__error {
+  background: #3a1613; border-color: #f0857c; color: #ffc9c2;
+}
+:root[data-theme="dark"] .shared-data__error button {
+  border-color: #ffc9c2; color: #ffc9c2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shared-data {
+    background: #131a21; border-color: #2f3a45; color: #e6ebf1;
+  }
+  :root:not([data-theme="light"]) .shared-data__item {
+    background: #182129; border-color: #2f3a45;
+  }
+  :root:not([data-theme="light"]) .shared-data__intro,
+  :root:not([data-theme="light"]) .shared-data__empty { color: #b6c2ce; }
+}

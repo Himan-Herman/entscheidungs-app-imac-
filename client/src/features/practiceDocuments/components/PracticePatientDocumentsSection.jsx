@@ -23,6 +23,7 @@ import {
 } from "../api/practiceDocumentsApi.js";
 import DeleteDocumentDialog from "./DeleteDocumentDialog.jsx";
 import PracticeDocumentOcrSection from "./PracticeDocumentOcrSection.jsx";
+import FocusModal from "../../patientPractices/components/FocusModal.jsx";
 import LifecycleConfirmDialog from "../../../components/lifecycle/LifecycleConfirmDialog.jsx";
 import LifecycleStatusBadge from "../../../components/lifecycle/LifecycleStatusBadge.jsx";
 import "../../../styles/PatientThreadsPage.css";
@@ -96,6 +97,10 @@ export default function PracticePatientDocumentsSection({
     () => getMessages(language).archiveLifecycle || getMessages("en").archiveLifecycle,
     [language],
   );
+  const tShare = useMemo(
+    () => getMessages(language).documentSharing || getMessages("en").documentSharing,
+    [language],
+  );
 
   const fileInputRef = useRef(null);
   const [documents, setDocuments] = useState([]);
@@ -121,6 +126,12 @@ export default function PracticePatientDocumentsSection({
 
   const isDraft = activeDoc?.status === "draft";
   const isShared = activeDoc?.status === "shared";
+  /**
+   * The document does not belong to this practice — the patient released it
+   * from another practice. The backend already refuses every write, OCR and AI
+   * path for it; the UI must not offer them either.
+   */
+  const isSharedByPatient = activeDoc?.accessVia === "patient_share_grant";
   const isDeleted = activeDoc?.status === "deleted";
 
   const loadList = useCallback(async () => {
@@ -586,6 +597,11 @@ export default function PracticePatientDocumentsSection({
                   aria-label={`${doc.title}, ${t.statusAria.replace("{status}", st)}`}
                 >
                   {doc.title} · {typeLabel(doc.type, t)} · {st}
+                  {doc.accessVia === "patient_share_grant" ? (
+                    <span className="practice-documents__shared-flag">
+                      {tShare.practiceView.sharedByPatient}
+                    </span>
+                  ) : null}
                 </button>
                 <span className="medication-plan__status">{fmt(doc.updatedAt, language)}</span>
               </li>
@@ -641,6 +657,16 @@ export default function PracticePatientDocumentsSection({
 
           {activeDoc ? (
             <>
+              {isSharedByPatient ? (
+                <p className="practice-documents__shared-banner" role="note">
+                  <strong>{tShare.practiceView.sharedByPatient}</strong>
+                  {activeDoc.practiceName
+                    ? ` · ${tShare.practiceView.origin.replace("{practice}", activeDoc.practiceName)}`
+                    : ""}
+                  <br />
+                  {tShare.practiceView.readOnlyHint}
+                </p>
+              ) : null}
               {isDeleted ? (
                 <p className="practice-dashboard__muted" role="note">
                   {t.deletedReadOnly}
@@ -805,7 +831,7 @@ export default function PracticePatientDocumentsSection({
                 </p>
               ) : null}
 
-              {activeId && activeDoc?.files?.length > 0 && !isDeleted ? (
+              {activeId && activeDoc?.files?.length > 0 && !isDeleted && !isSharedByPatient ? (
                 <PracticeDocumentOcrSection
                   linkId={linkId}
                   practiceId={practiceId}
@@ -834,7 +860,7 @@ export default function PracticePatientDocumentsSection({
                 </div>
               ) : null}
 
-              {!readOnly ? (
+              {!readOnly && !isSharedByPatient ? (
                 <div className="medication-plan__actions">
                   <button
                     type="button"
@@ -873,7 +899,7 @@ export default function PracticePatientDocumentsSection({
               ) : null}
 
               <div className="medication-plan__actions">
-                {isDraft ? (
+                {isDraft && !isSharedByPatient ? (
                   <button
                     type="button"
                     className="patient-threads__btn patient-threads__btn--primary"
@@ -883,7 +909,7 @@ export default function PracticePatientDocumentsSection({
                     {t.share}
                   </button>
                 ) : null}
-                {isShared ? (
+                {isShared && !isSharedByPatient ? (
                   <button
                     type="button"
                     className="patient-threads__btn patient-threads__btn--secondary"
@@ -893,17 +919,29 @@ export default function PracticePatientDocumentsSection({
                     {t.revoke}
                   </button>
                 ) : null}
-                {!isDeleted && activeDoc.status !== "archived" ? (
+                {!isDeleted && !isSharedByPatient && activeDoc.status !== "archived" ? (
                   <button
                     type="button"
                     className="patient-threads__btn patient-threads__btn--secondary"
-                    onClick={handleArchive}
+                    onClick={openArchiveDialog}
                     disabled={busy}
                   >
                     {t.archive}
                   </button>
                 ) : null}
-                {!isDeleted ? (
+                {/* Restore was implemented but never offered, so an archived
+                    document could not be brought back from this panel. */}
+                {!isDeleted && !isSharedByPatient && activeDoc.status === "archived" ? (
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    onClick={() => void handleRestore()}
+                    disabled={busy}
+                  >
+                    {lt.restore}
+                  </button>
+                ) : null}
+                {!isDeleted && !isSharedByPatient ? (
                   <button
                     type="button"
                     className="patient-threads__btn practice-documents__btn--delete-outline"
@@ -918,6 +956,39 @@ export default function PracticePatientDocumentsSection({
           ) : null}
         </div>
       )}
+
+      {/* The two-step archive confirmation existed in state and handlers but was
+          never rendered, and the button pointed at a function that does not
+          exist — so opening a document crashed the panel. Reachable only since
+          the documents module stopped denying every user. */}
+      <FocusModal
+        open={archiveOpen}
+        onClose={busy ? () => {} : closeArchiveDialog}
+        titleId="pd-archive-dialog-title"
+        title={archiveStep === 1 ? lt.archiveConfirmTitle1 : lt.archiveConfirmTitle2}
+      >
+        <div className="focus-modal__body">
+          <p>{archiveStep === 1 ? lt.archiveConfirmBody1 : lt.archiveConfirmBody2}</p>
+          <div className="focus-modal__actions">
+            <button
+              type="button"
+              className="focus-modal__btn focus-modal__btn--primary"
+              onClick={() => (archiveStep === 1 ? setArchiveStep(2) : void handleArchiveConfirm())}
+              disabled={busy}
+            >
+              {lt.archiveConfirmAction}
+            </button>
+            <button
+              type="button"
+              className="focus-modal__btn focus-modal__btn--secondary"
+              onClick={closeArchiveDialog}
+              disabled={busy}
+            >
+              {lt.cancel ?? t.cancel ?? "Abbrechen"}
+            </button>
+          </div>
+        </div>
+      </FocusModal>
 
       <DeleteDocumentDialog
         open={deleteOpen}

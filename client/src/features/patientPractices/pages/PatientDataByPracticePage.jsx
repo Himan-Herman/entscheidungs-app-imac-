@@ -9,6 +9,7 @@ import { usePracticeContextIndex } from "../hooks/usePracticeContextIndex.js";
 import { splitByProvenance, recordsForLink } from "../lib/splitByProvenance.js";
 import ProvenanceBadge from "../components/ProvenanceBadge.jsx";
 import PracticeSwitcher from "../components/PracticeSwitcher.jsx";
+import SharedDataSection from "../components/SharedDataSection.jsx";
 import "./PatientDataByPracticePage.css";
 
 /** The four patient-owned record types that carry a data scope. */
@@ -33,6 +34,10 @@ export default function PatientDataByPracticePage() {
     const msgs = getMessages(language);
     return msgs.patientPractices || getMessages("en").patientPractices;
   }, [language]);
+  const tShare = useMemo(
+    () => getMessages(language).documentSharing || getMessages("en").documentSharing,
+    [language],
+  );
 
   const { activeLinks, inactiveLinks, resolve, loading: linksLoading, error: linksError, reload } =
     usePracticeContextIndex();
@@ -218,6 +223,9 @@ export default function PatientDataByPracticePage() {
           </section>
         )}
       </section>
+
+      {/* ------------------------------------------------------- C. shared data */}
+      <SharedDataSection t={tShare} language={language} />
     </main>
   );
 }

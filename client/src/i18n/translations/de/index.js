@@ -43,6 +43,7 @@ import practiceInbox from "./practiceInbox.js";
 import practicePatientProfile from "./practicePatientProfile.js";
 import patientActivity from "./patientActivity.js";
 import patientPractices from "./patientPractices.js";
+import documentSharing from "./documentSharing.js";
 import practiceAudit from "./practiceAudit.js";
 import practiceTeam from "./practiceTeam.js";
 import archiveLifecycle from "./archiveLifecycle.js";
@@ -128,6 +129,7 @@ export default {
   practicePatientProfile,
   patientActivity,
   patientPractices,
+  documentSharing,
   practiceAudit,
   practiceTeam,
   archiveLifecycle,
