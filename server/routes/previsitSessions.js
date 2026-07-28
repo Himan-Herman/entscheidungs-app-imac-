@@ -188,10 +188,6 @@ router.post("/", async (req, res) => {
   const ans = validateAnswers(answers, true);
   if (!ans.ok) return res.status(400).json({ ok: false, error: ans.error });
 
-  // Optional patient-attached measurements. The client's payload only signals consent;
-  // the values themselves are rebuilt from this user's stored readings, so a tampered
-  // client can neither invent numbers nor smuggle extra fields into the practice's view.
-  const safeAnswers = await withServerDerivedSnapshot(answers, userId);
 
   const st = normalizeStatus(status, "draft");
   if (!st.ok) return res.status(400).json({ ok: false, error: st.error });
@@ -219,6 +215,20 @@ router.post("/", async (req, res) => {
     pdfDownloaded = true;
   }
   const practiceContext = await resolvePracticeContextFromAnswers(answers);
+
+  // Optional patient-attached measurements. The client's payload only signals
+  // consent; the values themselves are rebuilt from this user's stored
+  // readings, so a tampered client can neither invent numbers nor smuggle extra
+  // fields into the practice's view.
+  //
+  // Built only once the practice is known, and scoped to it: a reading recorded
+  // in another care relationship must not travel to this practice through a
+  // pre-visit form. With no practice context the snapshot is global-only.
+  const safeAnswers = await withServerDerivedSnapshot(
+    answers,
+    userId,
+    practiceContext?.practiceProfileId ?? null,
+  );
 
   let preVisitCaseIdValue;
   let includePreVisitCaseId = false;
@@ -375,8 +385,15 @@ router.put("/:id", async (req, res) => {
     if (Object.prototype.hasOwnProperty.call(body, "answers")) {
       const ans = validateAnswers(body.answers, true);
       if (!ans.ok) return res.status(400).json({ ok: false, error: ans.error });
-      data.answers = await withServerDerivedSnapshot(body.answers, userId);
       const practiceContext = await resolvePracticeContextFromAnswers(body.answers);
+      // A new context in the body wins if it resolved; otherwise the session's
+      // existing practice applies. Either way the snapshot is built for the
+      // practice that will actually read it.
+      data.answers = await withServerDerivedSnapshot(
+        body.answers,
+        userId,
+        practiceContext?.practiceProfileId ?? existing.practiceProfileId ?? null,
+      );
       if (practiceContext) {
         data.practiceProfileId = practiceContext.practiceProfileId;
         data.practiceQrTargetId = practiceContext.practiceQrTargetId;

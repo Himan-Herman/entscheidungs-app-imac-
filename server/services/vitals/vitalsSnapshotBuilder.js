@@ -17,6 +17,9 @@
 import { prisma } from "../../lib/prisma.js";
 import { VALID_TYPES } from "./vitalConstants.js";
 
+/** Link states in which a practice may act on a patient's data at all. */
+const LINK_USABLE = ["invited", "active"];
+
 /** Only readings from this window are relevant for an upcoming appointment. */
 export const SNAPSHOT_MAX_AGE_DAYS = 90;
 
@@ -34,11 +37,24 @@ const ALLOWED_SOURCE_DEVICES = new Set([
  * Build the snapshot from what is actually stored for this user.
  *
  * @param {string} userId
- * @param {{now?: number, maxAgeDays?: number}} [options]
+ * @param {{now?: number, maxAgeDays?: number, practiceProfileId?: string|null}} [options]
  * @returns {Promise<object|null>} null when the user has no usable recent readings
  */
 export async function buildSnapshotForUser(userId, options = {}) {
   if (typeof userId !== "string" || !userId) return null;
+
+  // Which of this patient's readings may go to THIS practice.
+  //
+  // Global readings always may — the patient is attaching them deliberately.
+  // Contextual readings may only travel back to the care relationship they were
+  // recorded in: a value from cardiology must not reach the GP through a
+  // pre-visit form the patient filled in for the GP.
+  //
+  // When the session has no practice context (a walk-in QR that resolved to
+  // nothing, or a preparation the patient does for themselves), the snapshot is
+  // global-only. The practice is never guessed from a date, an appointment or a
+  // specialty.
+  const contextWhere = await buildSnapshotContextWhere(userId, options.practiceProfileId);
 
   const now = Number.isFinite(options.now) ? options.now : Date.now();
   const maxAgeDays = Number.isFinite(options.maxAgeDays) && options.maxAgeDays > 0
@@ -54,6 +70,7 @@ export async function buildSnapshotForUser(userId, options = {}) {
         deletedAt: null,
         type: { in: VALID_TYPES },
         measuredAt: { gte: since, lte: new Date(now) },
+        ...contextWhere,
       },
       orderBy: { measuredAt: "desc" },
       select: {
@@ -98,6 +115,47 @@ export async function buildSnapshotForUser(userId, options = {}) {
 }
 
 /**
+ * The scope filter for one snapshot, resolved from the patient's OWN link to
+ * the target practice.
+ *
+ * Returns the two shapes a practice may ever receive:
+ *   patient_global      + no context      — the patient's own readings
+ *   practice_contextual + this link only  — recorded in this care relationship
+ *
+ * Deny by default: with no practice, or no link to it, only global readings
+ * match. Unclassified legacy rows match neither branch, exactly as on the
+ * practice read paths.
+ *
+ * @param {string} userId
+ * @param {string|null|undefined} practiceProfileId
+ */
+async function buildSnapshotContextWhere(userId, practiceProfileId) {
+  const globalOnly = { dataScope: "patient_global", contextPracticePatientLinkId: null };
+  const pid = String(practiceProfileId || "").trim();
+  if (!pid) return globalOnly;
+
+  let link = null;
+  try {
+    link = await prisma.practicePatientLink.findFirst({
+      where: { practiceProfileId: pid, patientUserId: userId, status: { in: LINK_USABLE } },
+      select: { id: true },
+    });
+  } catch (err) {
+    // A failed lookup must narrow, never widen.
+    console.error("[vitals-snapshot] link lookup failed", err?.code || err?.message || "error");
+    return globalOnly;
+  }
+  if (!link) return globalOnly;
+
+  return {
+    OR: [
+      globalOnly,
+      { dataScope: "practice_contextual", contextPracticePatientLinkId: link.id },
+    ],
+  };
+}
+
+/**
  * Replace any client-supplied `answers.vitalsSnapshot` with a server-derived one.
  * Absent key → answers pass through untouched (no consent, no snapshot).
  *
@@ -105,12 +163,12 @@ export async function buildSnapshotForUser(userId, options = {}) {
  * @param {string} userId
  * @returns {Promise<unknown>}
  */
-export async function withServerDerivedSnapshot(answers, userId) {
+export async function withServerDerivedSnapshot(answers, userId, practiceProfileId = null) {
   if (!answers || typeof answers !== "object" || Array.isArray(answers)) return answers;
   if (!("vitalsSnapshot" in answers)) return answers;
 
   // The presence of the key is the consent signal; its contents are discarded.
-  const snapshot = await buildSnapshotForUser(userId);
+  const snapshot = await buildSnapshotForUser(userId, { practiceProfileId });
   const next = { ...answers };
   if (snapshot) next.vitalsSnapshot = snapshot;
   else delete next.vitalsSnapshot;
