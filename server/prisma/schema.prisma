@@ -46,6 +46,8 @@ model User {
   practiceDocumentsCreated         PracticeDocument[]               @relation("PracticeDocumentCreatedBy")
   practiceDocumentShares           PracticeDocumentShare[]          @relation("PracticeDocumentSharePatient")
   practiceDocumentSharesSharedBy   PracticeDocumentShare[]          @relation("PracticeDocumentShareBy")
+  documentShareGrants              PracticeDocumentShareGrant[]     @relation("DocumentShareGrantPatient")
+  documentShareGrantsGranted       PracticeDocumentShareGrant[]     @relation("DocumentShareGrantGrantedBy")
   practiceDocumentsDeleted         PracticeDocument[]               @relation("PracticeDocumentDeletedBy")
   practiceDocumentAuditEntries     PracticeDocumentAuditEntry[]
   documentOcrJobsCreated           DocumentOcrJob[]                 @relation("DocumentOcrJobCreatedBy")
@@ -353,44 +355,46 @@ model PracticeProfile {
   /// Enables the Praxis-Anamnese module for this practice (verified practices only).
   anamnesisEnabled              Boolean  @default(false)
 
-  user                       User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  qrTargets                  PracticeQrTarget[]
-  members                    PracticeMember[]
-  preVisitSessions           PreVisitSession[]
-  followUpThreads            PreVisitFollowUpThread[]
-  visitMedicationEntries     VisitMedicationEntry[]
-  practicePatientLinks       PracticePatientLink[]
-  patientInboxItems          PatientInboxItem[]
-  practicePatientThreads     PracticePatientThread[]
-  medicationPlans            MedicationPlan[]
-  practiceDocuments          PracticeDocument[]
-  patientDataRequests        PatientDataRequest[]
-  practiceInboxItems         PracticeInboxItem[]
-  integrationSettings        PracticeIntegrationSettings?
-  secureDocumentDeliveries   SecureDocumentDelivery[]
-  secureDocumentAccessTokens SecureDocumentAccessToken[]
-  webhookEvents              PracticeWebhookEvent[]
-  integrationConnections     IntegrationConnection[]
-  integrationJobs            IntegrationJob[]
-  integrationMappings        IntegrationMapping[]
-  externalResourceReferences ExternalResourceReference[]
-  appointmentTypes           AppointmentType[]
-  practiceAvailabilities     PracticeAvailability[]
-  practiceAppointments       PracticeAppointment[]
-  telemedicineSettings       PracticeTelemedicineSettings?
-  telemedicineSessions       TelemedicineSession[]
-  documentOcrJobs            DocumentOcrJob[]
-  apiClients                 PracticeApiClient[]
-  webhookEndpoints           PracticeWebhookEndpoint[]
-  webhookDeliveries          PracticeWebhookDelivery[]
-  apiAuditEvents             PracticeApiAuditEvent[]
-  interpreterInvites         PracticeInterpreterInvite[]
-  interpreterSessionLinks    PracticeInterpreterSessionLink[]
-  medaSessions               PracticeMedaSession[]
-  anamnesisTemplates         PracticeAnamnesisTemplate[]
-  anamnesisLinks             PracticeAnamnesisLink[]
-  anamnesisSubmissions       PracticeAnamnesisSubmission[]
-  bookingSettings            PracticeBookingSettings?
+  user                        User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  qrTargets                   PracticeQrTarget[]
+  members                     PracticeMember[]
+  preVisitSessions            PreVisitSession[]
+  followUpThreads             PreVisitFollowUpThread[]
+  visitMedicationEntries      VisitMedicationEntry[]
+  practicePatientLinks        PracticePatientLink[]
+  patientInboxItems           PatientInboxItem[]
+  practicePatientThreads      PracticePatientThread[]
+  medicationPlans             MedicationPlan[]
+  practiceDocuments           PracticeDocument[]
+  patientDataRequests         PatientDataRequest[]
+  practiceInboxItems          PracticeInboxItem[]
+  integrationSettings         PracticeIntegrationSettings?
+  secureDocumentDeliveries    SecureDocumentDelivery[]
+  secureDocumentAccessTokens  SecureDocumentAccessToken[]
+  webhookEvents               PracticeWebhookEvent[]
+  integrationConnections      IntegrationConnection[]
+  integrationJobs             IntegrationJob[]
+  integrationMappings         IntegrationMapping[]
+  externalResourceReferences  ExternalResourceReference[]
+  appointmentTypes            AppointmentType[]
+  practiceAvailabilities      PracticeAvailability[]
+  practiceAppointments        PracticeAppointment[]
+  telemedicineSettings        PracticeTelemedicineSettings?
+  telemedicineSessions        TelemedicineSession[]
+  documentOcrJobs             DocumentOcrJob[]
+  apiClients                  PracticeApiClient[]
+  webhookEndpoints            PracticeWebhookEndpoint[]
+  webhookDeliveries           PracticeWebhookDelivery[]
+  apiAuditEvents              PracticeApiAuditEvent[]
+  interpreterInvites          PracticeInterpreterInvite[]
+  interpreterSessionLinks     PracticeInterpreterSessionLink[]
+  medaSessions                PracticeMedaSession[]
+  anamnesisTemplates          PracticeAnamnesisTemplate[]
+  anamnesisLinks              PracticeAnamnesisLink[]
+  anamnesisSubmissions        PracticeAnamnesisSubmission[]
+  bookingSettings             PracticeBookingSettings?
+  documentShareGrantsAsSource PracticeDocumentShareGrant[]     @relation("DocumentShareGrantSourcePractice")
+  documentShareGrantsAsTarget PracticeDocumentShareGrant[]     @relation("DocumentShareGrantTargetPractice")
 
   @@index([userId])
 }
@@ -923,30 +927,32 @@ model PracticePatientLink {
   createdAt                    DateTime  @default(now())
   updatedAt                    DateTime  @updatedAt
 
-  practiceProfile            PracticeProfile             @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser                User                        @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
-  profileAccessGrantedBy     User?                       @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
-  assignedDoctor             User?                       @relation("PracticeLinkAssignedDoctor", fields: [assignedDoctorUserId], references: [id], onDelete: SetNull)
-  assignedTeamMember         User?                       @relation("PracticeLinkAssignedTeam", fields: [assignedTeamMemberUserId], references: [id], onDelete: SetNull)
-  assignedBy                 User?                       @relation("PracticeLinkAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
-  patientSelectedDoctor      User?                       @relation("PracticeLinkPatientSelectedDoctor", fields: [patientSelectedDoctorUserId], references: [id], onDelete: SetNull)
-  patientProfile             PatientProfile?             @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
-  assignments                PracticePatientAssignment[]
-  inboxItems                 PatientInboxItem[]
-  threads                    PracticePatientThread[]
-  medicationPlans            MedicationPlan[]
-  practiceDocuments          PracticeDocument[]
-  dataRequests               PatientDataRequest[]
-  practiceInboxItems         PracticeInboxItem[]
-  secureDocumentAccessTokens SecureDocumentAccessToken[]
-  appointments               PracticeAppointment[]
-  telemedicineSessions       TelemedicineSession[]
-  documentOcrJobs            DocumentOcrJob[]
-  medaSessions               PracticeMedaSession[]
-  contextVitalEntries        VitalEntry[]                @relation("VitalEntryContextLink")
-  contextVaccinationEntries  VaccinationEntry[]          @relation("VaccinationEntryContextLink")
-  contextAllergyEntries      AllergyEntry[]              @relation("AllergyEntryContextLink")
-  contextDiagnosisEntries    DiagnosisEntry[]            @relation("DiagnosisEntryContextLink")
+  practiceProfile             PracticeProfile              @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser                 User                         @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
+  profileAccessGrantedBy      User?                        @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
+  assignedDoctor              User?                        @relation("PracticeLinkAssignedDoctor", fields: [assignedDoctorUserId], references: [id], onDelete: SetNull)
+  assignedTeamMember          User?                        @relation("PracticeLinkAssignedTeam", fields: [assignedTeamMemberUserId], references: [id], onDelete: SetNull)
+  assignedBy                  User?                        @relation("PracticeLinkAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+  patientSelectedDoctor       User?                        @relation("PracticeLinkPatientSelectedDoctor", fields: [patientSelectedDoctorUserId], references: [id], onDelete: SetNull)
+  patientProfile              PatientProfile?              @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+  assignments                 PracticePatientAssignment[]
+  inboxItems                  PatientInboxItem[]
+  threads                     PracticePatientThread[]
+  medicationPlans             MedicationPlan[]
+  practiceDocuments           PracticeDocument[]
+  documentShareGrantsAsSource PracticeDocumentShareGrant[] @relation("DocumentShareGrantSourceLink")
+  documentShareGrantsAsTarget PracticeDocumentShareGrant[] @relation("DocumentShareGrantTargetLink")
+  dataRequests                PatientDataRequest[]
+  practiceInboxItems          PracticeInboxItem[]
+  secureDocumentAccessTokens  SecureDocumentAccessToken[]
+  appointments                PracticeAppointment[]
+  telemedicineSessions        TelemedicineSession[]
+  documentOcrJobs             DocumentOcrJob[]
+  medaSessions                PracticeMedaSession[]
+  contextVitalEntries         VitalEntry[]                 @relation("VitalEntryContextLink")
+  contextVaccinationEntries   VaccinationEntry[]           @relation("VaccinationEntryContextLink")
+  contextAllergyEntries       AllergyEntry[]               @relation("AllergyEntryContextLink")
+  contextDiagnosisEntries     DiagnosisEntry[]             @relation("DiagnosisEntryContextLink")
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
@@ -1203,13 +1209,14 @@ model PracticeDocument {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  practicePatientLink  PracticePatientLink?        @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
-  practiceProfile      PracticeProfile             @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser          User?                       @relation("PracticeDocumentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
-  createdBy            User?                       @relation("PracticeDocumentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
-  deletedBy            User?                       @relation("PracticeDocumentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
+  practicePatientLink  PracticePatientLink?         @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile      PracticeProfile              @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser          User?                        @relation("PracticeDocumentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+  createdBy            User?                        @relation("PracticeDocumentCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  deletedBy            User?                        @relation("PracticeDocumentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
   files                PracticeDocumentFile[]
   shares               PracticeDocumentShare[]
+  shareGrants          PracticeDocumentShareGrant[] @relation("DocumentShareGrantDocument")
   secureAccessTokens   SecureDocumentAccessToken[]
   ocrJobs              DocumentOcrJob[]
   ocrResults           DocumentOcrResult[]
@@ -1459,6 +1466,70 @@ model PracticeDocumentShare {
 
   @@index([documentId, status])
   @@index([patientUserId, status])
+}
+
+/// Patient-controlled release of ONE practice document to ONE other connected
+/// practice.
+///
+/// Deliberately separate from PracticeDocumentShare, which means something
+/// else: that model is the origin practice releasing a draft TO ITS PATIENT.
+/// It has no target practice, and shareDocumentWithPatient revokes every
+/// active row for the document before creating a new one — reusing it here
+/// would silently revoke a patient's cross-practice grants whenever the origin
+/// practice re-shares, and would make listSharedDocumentsForPatient treat a
+/// patient-to-practice grant as a practice-to-patient release.
+///
+/// One original, one relation. Nothing is copied. A grant is READ only.
+model PracticeDocumentShareGrant {
+  id String @id @default(cuid())
+
+  /// The single document being released. Restrict: a released document must
+  /// never be hard-deleted out from under an audit trail.
+  documentId String
+  document   PracticeDocument @relation("DocumentShareGrantDocument", fields: [documentId], references: [id], onDelete: Restrict)
+
+  /// The patient the document belongs to. Equal to grantedByUserId — only the
+  /// patient may release their own document; enforced by a CHECK constraint.
+  patientUserId String
+  patient       User   @relation("DocumentShareGrantPatient", fields: [patientUserId], references: [id], onDelete: Restrict)
+
+  /// Where the document came from. Redundant to the document's own fields on
+  /// purpose: the grant records the state that was verified when it was
+  /// granted, and a CHECK keeps source and target apart.
+  sourcePracticeProfileId     String
+  sourcePracticeProfile       PracticeProfile     @relation("DocumentShareGrantSourcePractice", fields: [sourcePracticeProfileId], references: [id], onDelete: Restrict)
+  sourcePracticePatientLinkId String
+  sourcePracticePatientLink   PracticePatientLink @relation("DocumentShareGrantSourceLink", fields: [sourcePracticePatientLinkId], references: [id], onDelete: Restrict)
+
+  /// Who may now read it. The target link is the anchor for every practice-side
+  /// check; the practice id alone never grants access.
+  targetPracticeProfileId     String
+  targetPracticeProfile       PracticeProfile     @relation("DocumentShareGrantTargetPractice", fields: [targetPracticeProfileId], references: [id], onDelete: Restrict)
+  targetPracticePatientLinkId String
+  targetPracticePatientLink   PracticePatientLink @relation("DocumentShareGrantTargetLink", fields: [targetPracticePatientLinkId], references: [id], onDelete: Restrict)
+
+  /// active | revoked | expired. Only "active" grants access.
+  status String
+
+  /// The patient who granted it. Always equal to patientUserId.
+  grantedByUserId String
+  grantedByUser   User   @relation("DocumentShareGrantGrantedBy", fields: [grantedByUserId], references: [id], onDelete: Restrict)
+
+  grantedAt DateTime
+  revokedAt DateTime?
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  /// Uniqueness of the ACTIVE grant is a partial index created in the
+  /// migration (WHERE status = 'active'), which Prisma cannot express. A full
+  /// unique would block re-granting after a revoke, and a revoked grant is
+  /// kept, never overwritten.
+  @@index([documentId, targetPracticePatientLinkId])
+  @@index([targetPracticePatientLinkId, status])
+  @@index([patientUserId, status])
+  @@index([documentId, status])
 }
 
 /**
