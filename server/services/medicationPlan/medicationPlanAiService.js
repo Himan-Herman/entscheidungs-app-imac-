@@ -102,10 +102,13 @@ function planContextLines(plan, locale) {
  * @param {{ linkId: string, practiceProfileId: string, planId: string, locale?: string }} input
  */
 export async function generatePracticeMedicationPlanAiFormat(input) {
+  // (linkId, practiceProfileId, planId) — the first and third arguments were
+  // swapped, so this always resolved the plan id as a link and threw
+  // link_not_found. The AI format route could therefore never succeed.
   const plan = await getMedicationPlanByLink(
-    input.planId,
-    input.practiceProfileId,
     input.linkId,
+    input.practiceProfileId,
+    input.planId,
   );
   const locale = input.locale || "de";
   const isEn = langCode(locale) === "en";

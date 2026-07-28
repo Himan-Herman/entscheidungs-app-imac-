@@ -6,10 +6,12 @@ import express from "express";
 import { requireMedicationPlanV2Feature } from "../middleware/requireMedicationPlanV2.js";
 import {
   getPracticeAccess,
-  canReadPracticePatientLinks,
-  canWritePracticePatientLinks,
-  canPracticeSoftDelete,
-  canPracticeRestoreFromArchive,
+  // accessHasPermission takes the resolved access object and honours the
+  // owner / membership / clinical-role union. The can* helpers take a ROLE
+  // STRING: passing the object stringified it to "[object Object]", which
+  // matches no role, so every check in this router denied every user.
+  accessHasPermission,
+  PERMISSIONS,
 } from "../utils/practiceAccess.js";
 import { parseIncludeArchived } from "../utils/lifecycleStatus.js";
 import {
@@ -68,6 +70,12 @@ function mapError(err) {
   ) {
     return { status: 409, error: msg };
   }
+  // Reachable only since the permission checks stopped denying everyone: a
+  // link without medication_plan_access consent threw consent_required and
+  // fell through to a 500, hiding a deliberate denial behind a server error.
+  if (msg === "forbidden" || msg === "consent_required") {
+    return { status: 403, error: msg };
+  }
   return { status: 500, error: "request_failed" };
 }
 
@@ -97,7 +105,7 @@ async function requirePracticeAccess(req) {
 router.get("/", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canReadPracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.MEDICATION_READ)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -119,7 +127,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.MEDICATION_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -156,7 +164,7 @@ router.post("/", async (req, res) => {
 router.get("/:planId", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canReadPracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.MEDICATION_READ)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -178,7 +186,7 @@ router.get("/:planId", async (req, res) => {
 router.put("/:planId", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.MEDICATION_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -215,7 +223,9 @@ router.put("/:planId", async (req, res) => {
 router.post("/:planId/publish", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  // Publishing puts a plan in front of the patient and is a separate
+  // permission in the matrix: a practice manager may draft but not publish.
+  if (!accessHasPermission(ctx.access, PERMISSIONS.MEDICATION_PUBLISH)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -247,7 +257,7 @@ router.post("/:planId/publish", async (req, res) => {
 router.patch("/:planId/archive", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.MEDICATION_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -279,7 +289,7 @@ router.patch("/:planId/archive", async (req, res) => {
 router.patch("/:planId/restore", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canPracticeRestoreFromArchive(ctx.access.role)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.SETTINGS_MANAGE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -311,7 +321,7 @@ router.patch("/:planId/restore", async (req, res) => {
 router.patch("/:planId/delete", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canPracticeSoftDelete(ctx.access.role)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.DOCUMENTS_DELETE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -344,7 +354,7 @@ router.patch("/:planId/delete", async (req, res) => {
 router.post("/:planId/ai-format", async (req, res) => {
   const ctx = await requirePracticeAccess(req);
   if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
-  if (!canWritePracticePatientLinks(ctx.access)) {
+  if (!accessHasPermission(ctx.access, PERMISSIONS.MEDICATION_WRITE)) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
 
@@ -356,10 +366,13 @@ router.post("/:planId/ai-format", async (req, res) => {
       locale: req.body?.locale || req.headers["accept-language"],
     });
 
+    // Argument order is (linkId, practiceProfileId, planId) — it was reversed
+    // here, so the route looked the plan id up as a link and always failed with
+    // link_not_found. Unreachable while the module denied every user.
     const plan = await getMedicationPlanByLink(
-      req.params.planId,
-      ctx.practiceId,
       req.params.linkId,
+      ctx.practiceId,
+      req.params.planId,
     );
 
     await writeAuditLog({

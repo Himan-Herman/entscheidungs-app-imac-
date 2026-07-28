@@ -73,12 +73,13 @@ function planToJson(row) {
     id: row.id,
     practicePatientLinkId: row.practicePatientLinkId,
     practiceProfileId: row.practiceProfileId,
-    patientUserId: row.patientUserId,
+    // The global patient id is deliberately absent: the practice already
+    // identifies the patient through its own link, so returning it would only
+    // hand out an identifier that is meaningful across every other practice.
     status: row.status,
     version: row.version,
     title: row.title,
     note: row.note,
-    createdByUserId: row.createdByUserId,
     publishedAt: row.publishedAt,
     archivedAt: row.archivedAt,
     deletedAt: row.deletedAt,
@@ -127,7 +128,7 @@ async function nextVersionForLink(practicePatientLinkId) {
  * @param {string} linkId
  * @param {string} practiceProfileId
  * @param {string} createdByUserId
- * @param {{ title?: string, items?: unknown[] }} [payload]
+ * @param {{ title?: string, note?: string, items?: unknown[] }} [payload]
  */
 export async function createDraftMedicationPlan(
   linkId,
@@ -138,6 +139,10 @@ export async function createDraftMedicationPlan(
   const link = await assertLinkForPractice(linkId, practiceProfileId);
   const items = normalizeItems(payload.items || []);
   const title = trimText(payload.title, MAX_TITLE_LEN);
+  // The route has always passed a note; the variable was simply never
+  // declared, so creating a draft threw ReferenceError: note is not defined.
+  // Unreachable until the permission checks stopped denying every user.
+  const note = trimText(payload.note, MAX_NOTE_LEN);
   const version = await nextVersionForLink(linkId);
 
   const plan = await prisma.$transaction(async (tx) => {
