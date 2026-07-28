@@ -8,8 +8,28 @@ import { prisma } from "../lib/prisma.js";
 import { isVitalsEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { VALID_TYPES, DEFAULT_UNITS, validateVital } from "../services/vitals/vitalConstants.js";
+import {
+  CONTEXT_INPUT_FIELD,
+  assertAllowedFields,
+  assertNoContextChange,
+  assertNoProvenanceOverride,
+  contextErrorResponse,
+  provenanceJson,
+  resolvePatientDataContextForWrite,
+} from "../services/patientData/patientDataContextService.js";
 
 const router = express.Router();
+
+const CREATE_FIELDS = [
+  "type",
+  "valuePrimary",
+  "valueSecondary",
+  "unit",
+  "measuredAt",
+  "notes",
+  CONTEXT_INPUT_FIELD,
+];
+
 
 function userId(req) {
   const id = req.user?.userId;
@@ -25,6 +45,7 @@ const validateEntry = validateVital;
 
 function entryToJson(row) {
   return {
+    ...provenanceJson(row),
     id: row.id,
     type: row.type,
     valuePrimary: row.valuePrimary,
@@ -72,10 +93,31 @@ router.post("/", requireFeature, async (req, res) => {
   const err = validateEntry(req.body || {});
   if (err) return res.status(400).json({ ok: false, error: err });
 
+  // Explicit allowlist: a client may describe the record and, optionally, name
+  // ONE care relationship. Anything else — including any provenance field — is
+  // refused rather than silently dropped.
+  //
+  // The context itself is decided by the server from that link alone; no
+  // practiceId, dataScope or user id from the request influences it.
+  let context;
+  try {
+    assertAllowedFields(req.body, CREATE_FIELDS);
+    assertNoProvenanceOverride(req.body);
+    context = await resolvePatientDataContextForWrite({
+      patientUserId: uid,
+      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
+    });
+  } catch (e) {
+    const mapped = contextErrorResponse(e);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
+    throw e;
+  }
+
   try {
     const entry = await prisma.vitalEntry.create({
       data: {
         userId: uid,
+        ...context,
         type,
         valuePrimary: Number(valuePrimary),
         valueSecondary: type === "blood_pressure" ? Number(valueSecondary) : null,
@@ -97,6 +139,17 @@ router.post("/", requireFeature, async (req, res) => {
 router.patch("/:id", requireFeature, async (req, res) => {
   const uid = userId(req);
   if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  // Provenance is immutable: no ordinary update may move a record between
+  // scopes or between care relationships. A controlled correction would need
+  // its own audited, administrative process.
+  try {
+    assertNoContextChange(req.body);
+  } catch (e) {
+    const mapped = contextErrorResponse(e);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
+    throw e;
+  }
 
   const existing = await prisma.vitalEntry.findFirst({
     where: { id: req.params.id, userId: uid, deletedAt: null },

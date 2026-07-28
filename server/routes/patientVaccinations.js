@@ -8,8 +8,30 @@ import { prisma } from "../lib/prisma.js";
 import multer from "multer";
 import { isVaccinationPassEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import {
+  CONTEXT_INPUT_FIELD,
+  assertAllowedFields,
+  assertNoContextChange,
+  assertNoProvenanceOverride,
+  contextErrorResponse,
+  provenanceJson,
+  resolvePatientDataContextForWrite,
+} from "../services/patientData/patientDataContextService.js";
 
 const router = express.Router();
+
+const CREATE_FIELDS = [
+  "vaccineName",
+  "disease",
+  "vaccinationDate",
+  "doseLabel",
+  "lotNumber",
+  "location",
+  "nextDueDate",
+  "notes",
+  CONTEXT_INPUT_FIELD,
+];
+
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -43,6 +65,7 @@ function mapError(err) {
 
 function entryToJson(row) {
   return {
+    ...provenanceJson(row),
     id: row.id,
     vaccineName: row.vaccineName,
     disease: row.disease,
@@ -95,10 +118,31 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ ok: false, error: "date_invalid" });
   }
 
+  // Explicit allowlist: a client may describe the record and, optionally, name
+  // ONE care relationship. Anything else — including any provenance field — is
+  // refused rather than silently dropped.
+  //
+  // The context itself is decided by the server from that link alone; no
+  // practiceId, dataScope or user id from the request influences it.
+  let context;
+  try {
+    assertAllowedFields(req.body, CREATE_FIELDS);
+    assertNoProvenanceOverride(req.body);
+    context = await resolvePatientDataContextForWrite({
+      patientUserId: userId,
+      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
+    });
+  } catch (e) {
+    const mapped = contextErrorResponse(e);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
+    throw e;
+  }
+
   try {
     const entry = await prisma.vaccinationEntry.create({
       data: {
         userId,
+        ...context,
         vaccineName: String(vaccineName).trim().slice(0, 200),
         disease: String(disease).trim().slice(0, 200),
         vaccinationDate: vaccDate,
@@ -131,6 +175,17 @@ router.post("/", async (req, res) => {
 router.patch("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  // Provenance is immutable: no ordinary update may move a record between
+  // scopes or between care relationships. A controlled correction would need
+  // its own audited, administrative process.
+  try {
+    assertNoContextChange(req.body);
+  } catch (e) {
+    const mapped = contextErrorResponse(e);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
+    throw e;
+  }
 
   try {
     const existing = await prisma.vaccinationEntry.findFirst({

@@ -7,6 +7,7 @@
 
 import { prisma } from "../../lib/prisma.js";
 import { DEFAULT_UNITS, validateVital } from "../vitals/vitalConstants.js";
+import { personalImportContext } from "../patientData/patientDataContextService.js";
 
 /** Hard cap per import call — protects the DB and keeps requests bounded. */
 export const MAX_IMPORT_BATCH = 200;
@@ -84,7 +85,11 @@ export async function importVitalEntries({ userId, provider, allowedTypes, entri
         continue;
       }
 
-      await prisma.vitalEntry.create({ data });
+      // Personal device import: always patient-owned. An import carries no
+      // server-verified care relationship, and there is deliberately no
+      // implicit fallback to one — a caller that has a link must go through
+      // resolvePatientDataContextForWrite instead.
+      await prisma.vitalEntry.create({ data: { ...data, ...personalImportContext() } });
       imported++;
     } catch (err) {
       // Unique-constraint race (concurrent import of same externalId) → treat as duplicate.

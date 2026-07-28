@@ -7,8 +7,29 @@ import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { isHealthHistoryEnabled } from "../config/featureFlags.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import {
+  CONTEXT_INPUT_FIELD,
+  assertAllowedFields,
+  assertNoContextChange,
+  assertNoProvenanceOverride,
+  contextErrorResponse,
+  provenanceJson,
+  resolvePatientDataContextForWrite,
+} from "../services/patientData/patientDataContextService.js";
 
 const router = express.Router();
+
+const CREATE_FIELDS = [
+  "allergen",
+  "allergyType",
+  "severity",
+  "reaction",
+  "diagnosedDate",
+  "status",
+  "notes",
+  CONTEXT_INPUT_FIELD,
+];
+
 
 const VALID_TYPES = ["medication", "food", "environmental", "insect", "contact", "other"];
 const VALID_SEVERITIES = ["mild", "moderate", "severe", "life_threatening"];
@@ -36,6 +57,7 @@ function validate(body) {
 
 function toJson(row) {
   return {
+    ...provenanceJson(row),
     id: row.id,
     allergen: row.allergen,
     allergyType: row.allergyType,
@@ -72,11 +94,32 @@ router.post("/", requireFeature, async (req, res) => {
   const err = validate(req.body || {});
   if (err) return res.status(400).json({ ok: false, error: err });
 
+  // Explicit allowlist: a client may describe the record and, optionally, name
+  // ONE care relationship. Anything else — including any provenance field — is
+  // refused rather than silently dropped.
+  //
+  // The context itself is decided by the server from that link alone; no
+  // practiceId, dataScope or user id from the request influences it.
+  let context;
+  try {
+    assertAllowedFields(req.body, CREATE_FIELDS);
+    assertNoProvenanceOverride(req.body);
+    context = await resolvePatientDataContextForWrite({
+      patientUserId: userId,
+      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
+    });
+  } catch (e) {
+    const mapped = contextErrorResponse(e);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
+    throw e;
+  }
+
   const { allergen, allergyType, severity, reaction, diagnosedDate, status, notes } = req.body;
   try {
     const entry = await prisma.allergyEntry.create({
       data: {
         userId,
+        ...context,
         allergen: allergen.trim().slice(0, 200),
         allergyType,
         severity,
@@ -86,7 +129,7 @@ router.post("/", requireFeature, async (req, res) => {
         notes: notes?.trim().slice(0, 2000) || null,
       },
     });
-    await writeAuditLog({ userId, action: "allergy_create", meta: { entryId: entry.id, allergen: entry.allergen } }).catch(() => {});
+    writeAuditLog({ userId, action: "allergy_create", meta: { entryId: entry.id, allergen: entry.allergen } });
     return res.status(201).json({ ok: true, entry: toJson(entry) });
   } catch (err) {
     console.error("[allergies] POST", err?.message);
@@ -98,6 +141,17 @@ router.post("/", requireFeature, async (req, res) => {
 router.patch("/:id", requireFeature, async (req, res) => {
   const userId = uid(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  // Provenance is immutable: no ordinary update may move a record between
+  // scopes or between care relationships. A controlled correction would need
+  // its own audited, administrative process.
+  try {
+    assertNoContextChange(req.body);
+  } catch (e) {
+    const mapped = contextErrorResponse(e);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
+    throw e;
+  }
 
   const existing = await prisma.allergyEntry.findFirst({ where: { id: req.params.id, userId, deletedAt: null } }).catch(() => null);
   if (!existing) return res.status(404).json({ ok: false, error: "not_found" });
@@ -119,7 +173,7 @@ router.patch("/:id", requireFeature, async (req, res) => {
         notes: notes?.trim().slice(0, 2000) || null,
       },
     });
-    await writeAuditLog({ userId, action: "allergy_update", meta: { entryId: updated.id } }).catch(() => {});
+    writeAuditLog({ userId, action: "allergy_update", meta: { entryId: updated.id } });
     return res.json({ ok: true, entry: toJson(updated) });
   } catch (err) {
     console.error("[allergies] PATCH", err?.message);
@@ -137,7 +191,7 @@ router.delete("/:id", requireFeature, async (req, res) => {
 
   try {
     await prisma.allergyEntry.update({ where: { id: existing.id }, data: { deletedAt: new Date() } });
-    await writeAuditLog({ userId, action: "allergy_delete", meta: { entryId: existing.id } }).catch(() => {});
+    writeAuditLog({ userId, action: "allergy_delete", meta: { entryId: existing.id } });
     return res.json({ ok: true });
   } catch (err) {
     console.error("[allergies] DELETE", err?.message);
