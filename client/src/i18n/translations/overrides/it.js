@@ -21,6 +21,7 @@ import { itPracticeBillingPlausibility, itPracticeIntegrationsVendors } from "./
 import { itPatientBillingExplain } from "./it/it.patientBillingExplain.js";
 import { itPracticeDirectory } from "./it/it.practiceDirectory.js";
 import { itTelemedicine } from "./it/it.telemedicine.js";
+import { itPatientPractices, itDocumentSharing } from "./it/it.patientPractices.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
@@ -299,4 +300,7 @@ const itComposed = deepMerge(
   ),
 );
 
-export default deepMerge(itComposed, itTelemedicine);
+export default deepMerge(
+  deepMerge(itComposed, itTelemedicine),
+  { patientPractices: itPatientPractices, documentSharing: itDocumentSharing },
+);

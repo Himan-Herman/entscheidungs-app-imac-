@@ -63,7 +63,9 @@
   min-height: 44px;
   padding: 0.5rem 0.65rem;
   border-radius: 8px;
-  border: 1px solid #9aa5b1;
+  /* 3.41:1 against the field background — a form control border must be
+     distinguishable, not merely present. */
+  border: 1px solid #828c99;
   background: #ffffff;
   color: #1f2933;
   font-size: 1rem;

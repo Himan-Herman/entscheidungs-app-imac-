@@ -20,6 +20,7 @@ import { frPracticeBillingPlausibility, frPracticeIntegrationsVendors } from "./
 import { frPatientBillingExplain } from "./fr/fr.patientBillingExplain.js";
 import { frPracticeDirectory } from "./fr/fr.practiceDirectory.js";
 import { frTelemedicine } from "./fr/fr.telemedicine.js";
+import { frPatientPractices, frDocumentSharing } from "./fr/fr.patientPractices.js";
 
 const frBase = {
   roleEntry: {
@@ -297,4 +298,7 @@ const frComposed = deepMerge(
   ),
 );
 
-export default deepMerge(frComposed, frTelemedicine);
+export default deepMerge(
+  deepMerge(frComposed, frTelemedicine),
+  { patientPractices: frPatientPractices, documentSharing: frDocumentSharing },
+);
