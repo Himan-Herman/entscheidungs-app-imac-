@@ -22,6 +22,11 @@ import {
   accountExportLimiter,
 } from "../middleware/ipRateLimit.js";
 import { getBillingPlausibilityExportForUser } from "../services/billingPlausibility/billingPlausibilityService.js";
+import {
+  CONTEXTUAL_DATA_BLOCKED,
+  blockerAuditMetadata,
+  checkUserDeletionBlockers,
+} from "../services/dataLifecycle/contextualPatientDataDeletionGuard.js";
 
 const router = express.Router();
 
@@ -286,6 +291,17 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
 
   try {
     await prisma.$transaction(async (tx) => {
+      // Preflight INSIDE the transaction: a PracticePatientLink that still
+      // anchors a contextual medical record must not be hard-deleted, and the
+      // check must see the same snapshot the deletes will act on. Throwing here
+      // rolls the whole erasure back — there is no partially deleted account.
+      const blockers = await checkUserDeletionBlockers(userId, tx);
+      if (blockers.blocked) {
+        const err = new Error(CONTEXTUAL_DATA_BLOCKED);
+        err.blockerReport = blockers;
+        throw err;
+      }
+
       await tx.preVisitSession.deleteMany({ where: { userId } });
       await tx.preVisitCase.deleteMany({ where: { userId } });
       await tx.doctorContact.deleteMany({ where: { userId } });
@@ -385,6 +401,23 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
 
     return res.json({ ok: true, deleted: true, scope: "full_account_erasure" });
   } catch (err) {
+    // Blocked by contextual medical records: the transaction rolled back, the
+    // account is untouched. Report a stable code and nothing else — no counts,
+    // no link ids, no categories reach the client.
+    if (err?.message === CONTEXTUAL_DATA_BLOCKED) {
+      // Aggregate-only trace. A failing audit must never turn a blocked
+      // deletion into a completed one, hence fire-and-forget.
+      writeAuditLog({
+        req,
+        userId,
+        action: "account_delete_blocked",
+        metadata: blockerAuditMetadata(err.blockerReport),
+      });
+      return sendSafeJsonError(
+        res, 409, CONTEXTUAL_DATA_BLOCKED,
+        "Deletion is blocked while contextual patient data still references this account.",
+      );
+    }
     logServerError("account/delete", err);
     return sendSafeJsonError(res, 500, "server_error", "Deletion could not be completed.");
   }

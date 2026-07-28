@@ -3,6 +3,11 @@ import crypto from "crypto";
 import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import {
+  CONTEXTUAL_DATA_BLOCKED,
+  blockerAuditMetadata,
+  checkPracticeDeletionBlockers,
+} from "../services/dataLifecycle/contextualPatientDataDeletionGuard.js";
+import {
   canManageIntegrations,
   canViewIntegrationSettings,
   getPracticeAccess,
@@ -337,11 +342,47 @@ router.delete("/:id", async (req, res) => {
   if (access.role !== "owner") {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
-  const result = await prisma.practiceProfile.deleteMany({
-    where: { id: req.params.id },
-  });
-  if (result.count === 0) return res.status(404).json({ ok: false, error: "not_found" });
-  return res.json({ ok: true, deleted: true });
+  // Deleting a practice cascades to its PracticePatientLinks. A link that still
+  // anchors a contextual medical record must not be removed, so check before
+  // touching anything: without this the delete fails deep in the database on an
+  // ON DELETE RESTRICT foreign key and surfaces as an opaque 500.
+  //
+  // Preflight and delete run in one transaction so a record inserted in between
+  // cannot slip through. The foreign key stays the last line of defence and
+  // rolls the transaction back if it does.
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const blockers = await checkPracticeDeletionBlockers(req.params.id, tx);
+      if (blockers.blocked) {
+        const err = new Error(CONTEXTUAL_DATA_BLOCKED);
+        err.blockerReport = blockers;
+        throw err;
+      }
+      return tx.practiceProfile.deleteMany({ where: { id: req.params.id } });
+    });
+
+    if (result.count === 0) return res.status(404).json({ ok: false, error: "not_found" });
+    return res.json({ ok: true, deleted: true });
+  } catch (err) {
+    if (err?.message === CONTEXTUAL_DATA_BLOCKED) {
+      // Aggregate-only trace; a failing audit must not turn a blocked deletion
+      // into a completed one.
+      writeAuditLog({
+        req,
+        userId,
+        actorRole: access.role,
+        action: "practice_delete_blocked",
+        entityType: "PracticeProfile",
+        entityId: req.params.id,
+        practiceProfileId: req.params.id,
+        metadata: blockerAuditMetadata(err.blockerReport),
+      });
+      // Stable code only — no counts, categories or ids leave the server.
+      return res.status(409).json({ ok: false, error: CONTEXTUAL_DATA_BLOCKED });
+    }
+    console.error("[practices/delete]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "server_error" });
+  }
 });
 
 router.get("/:id/qr-targets", async (req, res) => {
