@@ -6,6 +6,8 @@ dist
 # Playwright artifacts
 playwright-report/
 test-results/
+# Screenshot written by the vitals E2E run — evidence, not source.
+e2e-*.png
 server/storage/
 .cursor/
 .claude/
