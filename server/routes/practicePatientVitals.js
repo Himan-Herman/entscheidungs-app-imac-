@@ -14,6 +14,7 @@ import { isVitalsEnabled } from "../config/featureFlags.js";
 import { requirePracticePatientLinkAccess } from "../services/authorization/practicePatientLinkAuthorization.js";
 import { PERMISSIONS } from "../utils/practicePermissions.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { buildPatientDataContextReadWhere, practiceProvenanceJson } from "../services/patientData/patientDataContextReadService.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -26,6 +27,8 @@ function requireFeature(_req, res, next) {
 
 function entryToJson(row) {
   return {
+    // Origin type only — never the link id, never the patient id.
+    ...practiceProvenanceJson(row),
     id: row.id,
     type: row.type,
     valuePrimary: row.valuePrimary,
@@ -50,8 +53,15 @@ router.get("/", requireFeature, requirePracticePatientLinkAccess({
   const { linkId } = req.params;
 
   const { type, limit: rawLimit } = req.query;
-  const where = { userId: link.patientUserId, deletedAt: null };
-  if (type && VALID_TYPES.includes(type)) where.type = type;
+  // Both ids come from the authorized link, never from the request. The filter
+  // matches this patient's global records and the ones recorded inside THIS
+  // care relationship — another link's data and unclassified legacy rows match
+  // neither branch and are excluded in the database, not afterwards.
+  const where = buildPatientDataContextReadWhere({
+    patientUserId: link.patientUserId,
+    practicePatientLinkId: link.id,
+    extraWhere: type && VALID_TYPES.includes(type) ? { type } : {},
+  });
   const limit = Math.min(500, Math.max(1, parseInt(rawLimit, 10) || 200));
 
   try {

@@ -16,6 +16,7 @@ import { PERMISSIONS } from "../utils/practicePermissions.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 import { getOpenAiChatModel } from "../config/openAiModels.js";
 import { logServerError } from "../utils/safeApiError.js";
+import { buildPatientDataContextReadWhere, practiceProvenanceJson } from "../services/patientData/patientDataContextReadService.js";
 
 const router = express.Router({ mergeParams: true });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -50,13 +51,19 @@ router.get("/", requireFeature, requireHealthHistoryAccess, async (req, res) => 
   const { link, actorUserId } = req.linkAccess;
 
   try {
+    // Global records plus the ones recorded inside THIS care relationship.
+    // Another link's data and unclassified legacy rows never match.
+    const contextWhere = buildPatientDataContextReadWhere({
+      patientUserId: link.patientUserId,
+      practicePatientLinkId: link.id,
+    });
     const [allergies, diagnoses] = await Promise.all([
       prisma.allergyEntry.findMany({
-        where: { userId: link.patientUserId, deletedAt: null },
+        where: contextWhere,
         orderBy: [{ severity: "asc" }, { allergen: "asc" }],
       }),
       prisma.diagnosisEntry.findMany({
-        where: { userId: link.patientUserId, deletedAt: null },
+        where: contextWhere,
         orderBy: [{ status: "asc" }, { conditionName: "asc" }],
       }),
     ]);
@@ -70,11 +77,14 @@ router.get("/", requireFeature, requireHealthHistoryAccess, async (req, res) => 
     return res.json({
       ok: true,
       allergies: allergies.map(r => ({
+        // Origin type only — never the link id, never the patient id.
+        ...practiceProvenanceJson(r),
         id: r.id, allergen: r.allergen, allergyType: r.allergyType,
         severity: r.severity, reaction: r.reaction, diagnosedDate: r.diagnosedDate,
         status: r.status, notes: r.notes, createdAt: r.createdAt,
       })),
       diagnoses: diagnoses.map(r => ({
+        ...practiceProvenanceJson(r),
         id: r.id, conditionName: r.conditionName, icdCode: r.icdCode,
         diagnosedDate: r.diagnosedDate, status: r.status,
         treatingDoctor: r.treatingDoctor, notes: r.notes, createdAt: r.createdAt,
@@ -96,9 +106,18 @@ router.post("/ai-summary", requireFeature, requireAiSummaryAccess, async (req, r
   const { locale = "de" } = req.body || {};
 
   try {
+    // Same context filter as the read path. The route is unreachable today —
+    // CLINICAL_AI_SUMMARY_GENERATE is granted to no role — but if it is ever
+    // enabled it must not process another practice's records either.
+    const contextWhere = buildPatientDataContextReadWhere({
+      patientUserId: link.patientUserId,
+      practicePatientLinkId: link.id,
+    });
     const [allergies, diagnoses] = await Promise.all([
-      prisma.allergyEntry.findMany({ where: { userId: link.patientUserId, deletedAt: null, status: { not: "inactive" } } }),
-      prisma.diagnosisEntry.findMany({ where: { userId: link.patientUserId, deletedAt: null } }),
+      prisma.allergyEntry.findMany({
+        where: { ...contextWhere, status: { not: "inactive" } },
+      }),
+      prisma.diagnosisEntry.findMany({ where: contextWhere }),
     ]);
 
     if (allergies.length === 0 && diagnoses.length === 0) {

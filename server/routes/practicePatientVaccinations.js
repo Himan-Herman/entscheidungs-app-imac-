@@ -14,6 +14,7 @@ import { isVaccinationPassEnabled } from "../config/featureFlags.js";
 import { requirePracticePatientLinkAccess } from "../services/authorization/practicePatientLinkAuthorization.js";
 import { PERMISSIONS } from "../utils/practicePermissions.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { buildPatientDataContextReadWhere, practiceProvenanceJson } from "../services/patientData/patientDataContextReadService.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -26,6 +27,8 @@ function requireFeature(_req, res, next) {
 
 function entryToJson(row) {
   return {
+    // Origin type only — never the link id, never the patient id.
+    ...practiceProvenanceJson(row),
     id: row.id,
     vaccineName: row.vaccineName,
     disease: row.disease,
@@ -54,8 +57,13 @@ router.get("/", requireFeature, requirePracticePatientLinkAccess({
   const { linkId } = req.params;
 
   try {
+    // Global records plus the ones recorded inside THIS care relationship.
+    // Another link's data and unclassified legacy rows never match.
     const entries = await prisma.vaccinationEntry.findMany({
-      where: { userId: link.patientUserId, deletedAt: null },
+      where: buildPatientDataContextReadWhere({
+        patientUserId: link.patientUserId,
+        practicePatientLinkId: link.id,
+      }),
       orderBy: { vaccinationDate: "desc" },
     });
 
