@@ -78,6 +78,18 @@ function installPrismaFake() {
     };
   }
   prisma.auditLog = { create: async () => ({}) };
+
+  // The write wrapper runs an interactive transaction with an isolation level
+  // and takes a FOR SHARE row lock. The adapter runs the callback against the
+  // same in-memory state and answers the raw lock query from `links`.
+  prisma.$transaction = async (fn) => fn(prisma);
+  prisma.$queryRaw = async (strings, ...values) => {
+    const sql = Array.isArray(strings) ? strings.join("?") : String(strings);
+    if (!/FROM "PracticePatientLink"/.test(sql)) return [];
+    const [id, patientUserId] = values;
+    const row = links.find((l) => l.id === id && l.patientUserId === patientUserId);
+    return row ? [{ id: row.id, status: row.status }] : [];
+  };
 }
 
 test.beforeEach(() => installPrismaFake());
@@ -320,8 +332,12 @@ test("17) no write path relies on a database default", () => {
       fs.readFileSync(new URL(f, import.meta.url), "utf8"));
     assert.ok(src.includes("...context,"), `${f}: create must spread the resolved context`);
     assert.ok(
-      src.includes("resolvePatientDataContextForWrite"),
-      `${f}: must resolve the context server-side`,
+      src.includes("createPatientDataWithValidatedContext"),
+      `${f}: must resolve the context inside the write transaction`,
+    );
+    assert.ok(
+      !src.includes("resolvePatientDataContextForWrite"),
+      `${f}: must not resolve the context outside the transaction any more`,
     );
   }));
 });

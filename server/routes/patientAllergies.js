@@ -14,7 +14,7 @@ import {
   assertNoProvenanceOverride,
   contextErrorResponse,
   provenanceJson,
-  resolvePatientDataContextForWrite,
+  createPatientDataWithValidatedContext,
 } from "../services/patientData/patientDataContextService.js";
 
 const router = express.Router();
@@ -100,14 +100,9 @@ router.post("/", requireFeature, async (req, res) => {
   //
   // The context itself is decided by the server from that link alone; no
   // practiceId, dataScope or user id from the request influences it.
-  let context;
   try {
     assertAllowedFields(req.body, CREATE_FIELDS);
     assertNoProvenanceOverride(req.body);
-    context = await resolvePatientDataContextForWrite({
-      patientUserId: userId,
-      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
-    });
   } catch (e) {
     const mapped = contextErrorResponse(e);
     if (mapped) return res.status(mapped.status).json(mapped.body);
@@ -116,22 +111,31 @@ router.post("/", requireFeature, async (req, res) => {
 
   const { allergen, allergyType, severity, reaction, diagnosedDate, status, notes } = req.body;
   try {
-    const entry = await prisma.allergyEntry.create({
-      data: {
-        userId,
-        ...context,
-        allergen: allergen.trim().slice(0, 200),
-        allergyType,
-        severity,
-        reaction: reaction?.trim().slice(0, 2000) || null,
-        diagnosedDate: diagnosedDate ? new Date(diagnosedDate) : null,
-        status: status || "active",
-        notes: notes?.trim().slice(0, 2000) || null,
-      },
+    // Context resolution and insert share ONE serializable transaction with a
+    // row lock on the link, so a concurrent revocation cannot slip in between.
+    const entry = await createPatientDataWithValidatedContext({
+      patientUserId: userId,
+      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
+      createRecord: (tx, context) =>
+        tx.allergyEntry.create({
+          data: {
+            userId,
+            ...context,
+            allergen: allergen.trim().slice(0, 200),
+            allergyType,
+            severity,
+            reaction: reaction?.trim().slice(0, 2000) || null,
+            diagnosedDate: diagnosedDate ? new Date(diagnosedDate) : null,
+            status: status || "active",
+            notes: notes?.trim().slice(0, 2000) || null,
+          },
+        }),
     });
     writeAuditLog({ userId, action: "allergy_create", meta: { entryId: entry.id, allergen: entry.allergen } });
     return res.status(201).json({ ok: true, entry: toJson(entry) });
   } catch (err) {
+    const mapped = contextErrorResponse(err);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
     console.error("[allergies] POST", err?.message);
     return res.status(500).json({ ok: false, error: "request_failed" });
   }

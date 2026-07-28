@@ -116,6 +116,7 @@ export function assertAllowedFields(body, allowed) {
  *   patientUserId: string,
  *   requestedPracticePatientLinkId?: string | null,
  *   prismaClient?: object,
+ *   lockLink?: boolean,
  * }} input
  * @returns {Promise<{ dataScope: "patient_global"|"practice_contextual", contextPracticePatientLinkId: string | null }>}
  */
@@ -132,16 +133,111 @@ export async function resolvePatientDataContextForWrite(input) {
   }
 
   const client = input.prismaClient ?? defaultClient;
-  const link = await client.practicePatientLink.findFirst({
-    // Ownership is part of the lookup, so a foreign link is indistinguishable
-    // from a missing one.
-    where: { id: requested, patientUserId },
-    select: { id: true, status: true },
-  });
+
+  let link;
+  if (input.lockLink && typeof client.$queryRaw === "function") {
+    // Inside a write transaction: take a shared row lock. Serializable alone
+    // does NOT reliably abort this particular pattern — one transaction reads
+    // the link while another updates it, which is a single rw-dependency and
+    // not the "dangerous structure" SSI aborts on. FOR SHARE makes a concurrent
+    // revocation wait until this write has committed, which is the behaviour we
+    // actually need. Verified in the sandbox race test.
+    const rows = await client.$queryRaw`
+      SELECT "id", "status" FROM "PracticePatientLink"
+      WHERE "id" = ${requested} AND "patientUserId" = ${patientUserId}
+      FOR SHARE
+    `;
+    link = Array.isArray(rows) ? rows[0] ?? null : null;
+  } else {
+    link = await client.practicePatientLink.findFirst({
+      // Ownership is part of the lookup, so a foreign link is indistinguishable
+      // from a missing one.
+      where: { id: requested, patientUserId },
+      select: { id: true, status: true },
+    });
+  }
+
   if (!link) throw new InvalidContextError("link_not_found");
   if (!WRITABLE_LINK_STATES.has(link.status)) throw new InvalidContextError("link_not_active");
 
   return { dataScope: "practice_contextual", contextPracticePatientLinkId: link.id };
+}
+
+
+/* ------------------------------------------------------------ atomic write */
+
+/**
+ * PostgreSQL serialization failure (40001) and deadlock (40P01). Prisma
+ * surfaces both as P2034 "write conflict or deadlock"; the raw SQLSTATE can
+ * also appear in the message of an unknown-request error.
+ */
+function isSerializationConflict(err) {
+  if (!err) return false;
+  if (err.code === "P2034") return true;
+  const text = `${err.code ?? ""} ${err.message ?? ""}`;
+  return /\b40001\b|\b40P01\b|could not serialize|deadlock detected/i.test(text);
+}
+
+/** Raised when the conflict persisted after every allowed attempt. */
+export class ContextWriteConflictError extends Error {
+  constructor() {
+    super("context_write_conflict");
+    this.status = 409;
+  }
+}
+
+/** A retry beyond this is pointless and would only prolong the request. */
+export const MAX_WRITE_ATTEMPTS = 3;
+
+/**
+ * Creates a patient-owned record with its context resolved INSIDE the same
+ * transaction that writes it.
+ *
+ * Previously the link was validated in one statement and the record written in
+ * another, so a link revoked in between still produced a contextual record.
+ * Here the link is re-read and row-locked within the transaction, so a
+ * concurrent revocation must wait for this write to finish and can no longer
+ * slip in front of it.
+ *
+ * Retries cover serialization conflicts only. A validation, ownership or
+ * permission failure is never retried, and a failed attempt writes nothing, so
+ * a retry cannot produce a duplicate.
+ *
+ * @param {{
+ *   patientUserId: string,
+ *   requestedPracticePatientLinkId?: string | null,
+ *   createRecord: (tx: object, context: object) => Promise<object>,
+ *   prismaClient?: object,
+ *   maxAttempts?: number,
+ * }} input
+ */
+export async function createPatientDataWithValidatedContext(input) {
+  const client = input.prismaClient ?? defaultClient;
+  const maxAttempts = input.maxAttempts ?? MAX_WRITE_ATTEMPTS;
+  let lastConflict = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      return await client.$transaction(
+        async (tx) => {
+          const context = await resolvePatientDataContextForWrite({
+            patientUserId: input.patientUserId,
+            requestedPracticePatientLinkId: input.requestedPracticePatientLinkId,
+            prismaClient: tx,
+            lockLink: true,
+          });
+          return input.createRecord(tx, context);
+        },
+        { isolationLevel: "Serializable" },
+      );
+    } catch (err) {
+      // Only a serialization conflict may be retried. Everything else — an
+      // invalid context, a foreign link, an unknown database error — is final.
+      if (!isSerializationConflict(err)) throw err;
+      lastConflict = err;
+    }
+  }
+  throw new ContextWriteConflictError(lastConflict);
 }
 
 /**
@@ -165,6 +261,10 @@ export function contextErrorResponse(err) {
   }
   if (err instanceof InvalidContextError) {
     return { status: err.status, body: { ok: false, error: err.message } };
+  }
+  if (err instanceof ContextWriteConflictError) {
+    // No internal database code and no link id reaches the client.
+    return { status: 409, body: { ok: false, error: "context_write_conflict" } };
   }
   return null;
 }

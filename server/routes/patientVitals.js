@@ -15,7 +15,7 @@ import {
   assertNoProvenanceOverride,
   contextErrorResponse,
   provenanceJson,
-  resolvePatientDataContextForWrite,
+  createPatientDataWithValidatedContext,
 } from "../services/patientData/patientDataContextService.js";
 
 const router = express.Router();
@@ -99,14 +99,9 @@ router.post("/", requireFeature, async (req, res) => {
   //
   // The context itself is decided by the server from that link alone; no
   // practiceId, dataScope or user id from the request influences it.
-  let context;
   try {
     assertAllowedFields(req.body, CREATE_FIELDS);
     assertNoProvenanceOverride(req.body);
-    context = await resolvePatientDataContextForWrite({
-      patientUserId: uid,
-      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
-    });
   } catch (e) {
     const mapped = contextErrorResponse(e);
     if (mapped) return res.status(mapped.status).json(mapped.body);
@@ -114,22 +109,33 @@ router.post("/", requireFeature, async (req, res) => {
   }
 
   try {
-    const entry = await prisma.vitalEntry.create({
-      data: {
-        userId: uid,
-        ...context,
-        type,
-        valuePrimary: Number(valuePrimary),
-        valueSecondary: type === "blood_pressure" ? Number(valueSecondary) : null,
-        unit: (unit || DEFAULT_UNITS[type] || "").trim(),
-        measuredAt: new Date(measuredAt),
-        notes: notes?.trim() || null,
-        source: "manual",
-      },
+    // Context resolution and insert share ONE serializable transaction with a
+    // row lock on the link, so a concurrent revocation cannot slip in between.
+    const entry = await createPatientDataWithValidatedContext({
+      patientUserId: uid,
+      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
+      createRecord: (tx, context) =>
+        tx.vitalEntry.create({
+          data: {
+            userId: uid,
+            ...context,
+            type,
+            valuePrimary: Number(valuePrimary),
+            valueSecondary: type === "blood_pressure" ? Number(valueSecondary) : null,
+            unit: (unit || DEFAULT_UNITS[type] || "").trim(),
+            measuredAt: new Date(measuredAt),
+            notes: notes?.trim() || null,
+            source: "manual",
+          },
+        }),
     });
+    // Audited only after the transaction committed, so a retried attempt
+    // cannot produce a second audit entry for one record.
     writeAuditLog({ userId: uid, action: "vitals_create", meta: { type, entryId: entry.id } });
     return res.status(201).json({ ok: true, entry: entryToJson(entry) });
   } catch (err) {
+    const mapped = contextErrorResponse(err);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
     console.error("[vitals] POST error", err);
     return res.status(500).json({ ok: false, error: "request_failed" });
   }

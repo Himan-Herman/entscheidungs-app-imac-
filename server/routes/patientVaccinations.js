@@ -15,7 +15,7 @@ import {
   assertNoProvenanceOverride,
   contextErrorResponse,
   provenanceJson,
-  resolvePatientDataContextForWrite,
+  createPatientDataWithValidatedContext,
 } from "../services/patientData/patientDataContextService.js";
 
 const router = express.Router();
@@ -124,14 +124,9 @@ router.post("/", async (req, res) => {
   //
   // The context itself is decided by the server from that link alone; no
   // practiceId, dataScope or user id from the request influences it.
-  let context;
   try {
     assertAllowedFields(req.body, CREATE_FIELDS);
     assertNoProvenanceOverride(req.body);
-    context = await resolvePatientDataContextForWrite({
-      patientUserId: userId,
-      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
-    });
   } catch (e) {
     const mapped = contextErrorResponse(e);
     if (mapped) return res.status(mapped.status).json(mapped.body);
@@ -139,19 +134,26 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const entry = await prisma.vaccinationEntry.create({
-      data: {
-        userId,
-        ...context,
-        vaccineName: String(vaccineName).trim().slice(0, 200),
-        disease: String(disease).trim().slice(0, 200),
-        vaccinationDate: vaccDate,
-        doseLabel: doseLabel ? String(doseLabel).trim().slice(0, 80) : null,
-        lotNumber: lotNumber ? String(lotNumber).trim().slice(0, 80) : null,
-        location: location ? String(location).trim().slice(0, 200) : null,
-        nextDueDate: nextDueDate ? new Date(nextDueDate) : null,
-        notes: notes ? String(notes).trim().slice(0, 2000) : null,
-      },
+    // Context resolution and insert share ONE serializable transaction with a
+    // row lock on the link, so a concurrent revocation cannot slip in between.
+    const entry = await createPatientDataWithValidatedContext({
+      patientUserId: userId,
+      requestedPracticePatientLinkId: req.body?.[CONTEXT_INPUT_FIELD],
+      createRecord: (tx, context) =>
+        tx.vaccinationEntry.create({
+          data: {
+            userId,
+            ...context,
+            vaccineName: String(vaccineName).trim().slice(0, 200),
+            disease: String(disease).trim().slice(0, 200),
+            vaccinationDate: vaccDate,
+            doseLabel: doseLabel ? String(doseLabel).trim().slice(0, 80) : null,
+            lotNumber: lotNumber ? String(lotNumber).trim().slice(0, 80) : null,
+            location: location ? String(location).trim().slice(0, 200) : null,
+            nextDueDate: nextDueDate ? new Date(nextDueDate) : null,
+            notes: notes ? String(notes).trim().slice(0, 2000) : null,
+          },
+        }),
     });
 
     await writeAuditLog({
@@ -166,6 +168,8 @@ router.post("/", async (req, res) => {
 
     return res.status(201).json({ ok: true, entry: entryToJson(entry) });
   } catch (err) {
+    const mapped = contextErrorResponse(err);
+    if (mapped) return res.status(mapped.status).json(mapped.body);
     console.error("[patient/vaccinations/create]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "request_failed" });
   }
