@@ -12,11 +12,12 @@ import React, { useState } from 'react';
  * @param {object}   props
  * @param {object}   props.tx          Practice i18n messages (getPracticeChromeMessages)
  * @param {string}   props.practiceId  Practice id from the URL (may be empty)
+ * @param {string}   [props.locale]    Active UI locale for the expiry timestamp
  * @param {() => Promise<{url:string, expiresAt:string}>} props.onProvide
  *        Builds the PDF blob, uploads it, and resolves with the token link.
  *        Rejects with an Error whose `.code` may be 'feature_disabled'.
  */
-export default function PracticeMedaPdfQrCard({ tx, practiceId, onProvide }) {
+export default function PracticeMedaPdfQrCard({ tx, practiceId, locale, onProvide }) {
   const [consent,   setConsent]   = useState(false);
   const [loading,   setLoading]   = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState(/** @type {string|null} */ (null));
@@ -65,9 +66,13 @@ export default function PracticeMedaPdfQrCard({ tx, practiceId, onProvide }) {
     document.body.removeChild(a);
   }
 
+  // Formatted in the active UI locale so the expiry time matches the rest of the
+  // page (undefined → the browser/runtime default when no locale was passed in).
   function fmtTime(iso) {
     try {
-      return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      return new Date(iso).toLocaleTimeString(locale || undefined, {
+        hour: '2-digit', minute: '2-digit',
+      });
     } catch { return ''; }
   }
 

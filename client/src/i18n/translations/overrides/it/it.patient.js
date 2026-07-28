@@ -175,6 +175,15 @@ export default {
       "Registri, modifichi ed elimini le voci tu stesso; vengono documentate solo le tue informazioni, ad esempio diagnosi già note. MedScoutX non formula alcuna diagnosi, non fornisce alcuna raccomandazione terapeutica e non prende alcuna decisione di urgenza. Uno studio collegato può vedere queste informazioni solo con un collegamento attivo e la tua autorizzazione.",
     healthHistoryP3:
       "Nel test alpha puoi verificare: le allergie e le diagnosi possono essere registrate, modificate ed eliminate, il passaggio tra le sezioni funziona, e gli stati di caricamento, vuoti e di errore sono comprensibili?",
+    medaLiveButton: "Maggiori informazioni su Meda Live Translation",
+    medaLiveTitle: "Meda Live Translation",
+    medaLiveP1:
+      "Meda Live Translation supporta le conversazioni multilingue durante una visita medica tramite microfono, trascrizione e visualizzazione della traduzione.",
+    medaLiveP2:
+      "Questa funzione serve solo a sostenere la comunicazione. MedScoutX non ricava dal parlato alcuna diagnosi, raccomandazione terapeutica o valutazione dell’urgenza. Il microfono si attiva solo dopo una tua azione consapevole.",
+    medaLiveP3:
+      "Nel test alpha puoi verificare: la sessione si avvia in modo chiaro, trascrizione e traduzione sono comprensibili, e la scelta delle lingue, l’audio e i comandi della sessione sono affidabili?",
+
     myPrepButton: "Maggiori informazioni su « Le mie preparazioni »",
     myPrepTitle: "Le mie preparazioni",
     myPrepP1:

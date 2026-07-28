@@ -1172,3 +1172,120 @@
 :root[data-theme="dark"] .mlt-direction-mode__hint {
   color: #64748b;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THEME TOKENS — dark scope only
+   ───────────────────────────────────────────────────────────────────────────
+   `--ms-text-secondary`, `--ms-surface-muted`, `--ms-accent` and
+   `--ms-color-primary` are not defined anywhere in the app, so each
+   `var(--ms-…, <light literal>)` on this page resolved to its light fallback in
+   dark mode too — most visibly `.mlt-transcript__unsupported`, which rendered a
+   near-white block with grey text on a dark card.
+
+   Scoping the definitions to the dark theme leaves light mode untouched.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] .mlt-page {
+  --ms-text-secondary: var(--ms-color-text-placeholder, #94a3b8);
+  --ms-surface-muted:  rgba(148, 163, 184, 0.12);
+  --ms-accent:         #2dd4bf;  /* teal-400 — 8.2:1 on #0f172a (teal-600 fails AA) */
+  --ms-color-primary:  #3b82f6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE — remaining contrast gaps
+   Hardcoded light-mode colours that had no dark counterpart. Reds and teals are
+   lifted to the 300/400 range so body text clears WCAG AA (4.5:1) on dark.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] .mlt-transcript__unsupported { color: #cbd5e1; }
+:root[data-theme="dark"] .mlt-translation__error {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.12);
+}
+:root[data-theme="dark"] .mlt-error {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.12);
+}
+:root[data-theme="dark"] .mlt-audio__unsupported { color: #94a3b8; }
+:root[data-theme="dark"] .mlt-audio__btn--stop {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.45);
+}
+:root[data-theme="dark"] .mlt-audio__btn--stop:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.12);
+}
+:root[data-theme="dark"] .mlt-btn--stop { background: #f87171; color: #1a0505; }
+:root[data-theme="dark"] .mlt-btn--stop:hover { background: #fca5a5; }
+:root[data-theme="dark"] .mlt-btn--start { color: #04201d; }
+:root[data-theme="dark"] .mlt-btn--start:hover { background: #14b8a6; }
+:root[data-theme="dark"] .mlt-back:focus-visible { outline-color: #2dd4bf; }
+:root[data-theme="dark"] .mlt-message { background: rgba(148, 163, 184, 0.08); }
+:root[data-theme="dark"] .mlt-status__dot { background: #64748b; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Visible keyboard focus on every interactive control, both themes. */
+.mlt-page :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #0d9488;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+:root[data-theme="dark"] .mlt-page :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: #2dd4bf;
+}
+
+/* Comfortable pointer target for the icon-only dismiss control (WCAG 2.5.8). */
+.mlt-message__dismiss {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mlt-page :is(button, input, select, textarea):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* The audio-level meter and status dot animate continuously — hold them still
+   for users who ask for reduced motion; the numeric/SR text carries the value. */
+@media (prefers-reduced-motion: reduce) {
+  .mlt-page *,
+  .mlt-page *::before,
+  .mlt-page *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .mlt-btn--start:active,
+  .mlt-btn--stop:active { transform: none; }
+}
+
+@media (forced-colors: active) {
+  .mlt-card,
+  .mlt-message,
+  .mlt-btn {
+    border: 1px solid CanvasText;
+  }
+
+  .mlt-page :is(button, a, input, select, textarea):focus-visible {
+    outline: 3px solid Highlight;
+  }
+}
+
+/* Secondary-text contrast correction — same rationale as the MedaRealtimePage
+   block: slate-500 on the dark card measures 3.75:1, below the AA 4.5:1 needed
+   for 13px text. Placed last so it wins over the earlier same-specificity rule. */
+:root[data-theme="dark"] :is(
+  .mlt-setup__hint,
+  .mlt-transcript__empty,
+  .mlt-translation__empty,
+  .mlt-conversation__empty,
+  .mlt-audio__hint
+) {
+  color: #cbd5e1;
+}

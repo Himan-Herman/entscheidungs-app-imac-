@@ -2,7 +2,10 @@
  * Interprète médical — module patient B2C (FR).
  * Soutien à la communication uniquement ; pas de diagnostic, triage ni recommandation de traitement.
  */
+import realtimePage from "./fr.medicalInterpreterRealtime.js";
+
 export default {
+  realtimePage,
   hub: {
     title: "Traduire la consultation médicale",
     subtitle: "Traduction en direct pour patient·es et cabinets",
@@ -367,6 +370,10 @@ export default {
     legalParagraph3:
       "La transcription et la traduction automatiques peuvent être inexactes ou incomplètes.",
     sessionTitleLabel: "Titre de la conversation",
+    patientNameLabel: "Patient",
+    patientDateOfBirthLabel: "Date de naissance",
+    patientEmailLabel: "E-mail",
+    patientPhoneLabel: "Téléphone",
     generatedNote: "Généré localement sur cet appareil · MedScoutX Interprète médical",
     footerPage: "Page",
     filenamePrefix: "medscoutx-interpreter",

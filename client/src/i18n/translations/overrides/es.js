@@ -285,7 +285,10 @@ const esComposed = deepMerge(
     esPractice,
   ),
   deepMerge(
-    deepMerge(deepMerge(esPatient, esMedicalInterpreter), esPracticeModules),
+    deepMerge(
+      deepMerge(esPatient, { medicalInterpreter: esMedicalInterpreter }),
+      esPracticeModules,
+    ),
     deepMerge(
       deepMerge(deepMerge(deepMerge(deepMerge(deepMerge({ vaccinations: esVaccinations }, { vitals: esVitals }), { healthHistory: esHealthHistory }), { symptomDiary: esSymptomDiary }), { erezept: esErezept }), { sosCard: esSosCard }),
       deepMerge(

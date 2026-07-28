@@ -284,7 +284,10 @@ const frComposed = deepMerge(
     frPractice,
   ),
   deepMerge(
-    deepMerge(deepMerge(frPatient, frMedicalInterpreter), frPracticeModules),
+    deepMerge(
+      deepMerge(frPatient, { medicalInterpreter: frMedicalInterpreter }),
+      frPracticeModules,
+    ),
     deepMerge(
       deepMerge(deepMerge(deepMerge(deepMerge({ vitals: frVitals }, { healthHistory: frHealthHistory }), { symptomDiary: frSymptomDiary }), { erezept: frErezept }), { sosCard: frSosCard }),
       deepMerge(

@@ -2,7 +2,10 @@
  * Medical Interpreter — B2C patient module (DE).
  * Communication support only; no diagnosis, triage, or treatment recommendations.
  */
+import realtimePage from "./medicalInterpreterRealtime.js";
+
 export default {
+  realtimePage,
   hub: {
     title: "Arztgespräch live übersetzen",
     subtitle: "Live-Übersetzung zwischen Patient:in und Arzt/Praxis",

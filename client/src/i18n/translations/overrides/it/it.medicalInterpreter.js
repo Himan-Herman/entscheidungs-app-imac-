@@ -2,7 +2,10 @@
  * Interprete medico — modulo paziente B2C (IT).
  * Solo supporto alla comunicazione; senza diagnosi, triage né raccomandazioni terapeutiche.
  */
+import realtimePage from "./it.medicalInterpreterRealtime.js";
+
 export default {
+  realtimePage,
   hub: {
     title: "Tradurre la visita medica",
     subtitle: "Traduzione live per pazienti e studi",
@@ -367,6 +370,10 @@ export default {
     legalParagraph3:
       "Trascrizione e traduzione automatiche possono essere imprecise o incomplete.",
     sessionTitleLabel: "Titolo della conversazione",
+    patientNameLabel: "Paziente",
+    patientDateOfBirthLabel: "Data di nascita",
+    patientEmailLabel: "E-mail",
+    patientPhoneLabel: "Telefono",
     generatedNote: "Generato localmente su questo dispositivo · MedScoutX Interprete medico",
     footerPage: "Pagina",
     filenamePrefix: "medscoutx-interpreter",

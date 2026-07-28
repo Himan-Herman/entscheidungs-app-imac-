@@ -1,10 +1,12 @@
 /**
  * Practice-variant chrome strings for the Meda Realtime page.
  *
- * Scope: ONLY the practice-specific header, subtitle and status chips that are
- * new to the practice variant. The rest of the Realtime page intentionally stays
- * German (matching the existing patient page) — this file is not a full page
- * translation, only the new B2B chrome.
+ * Scope: ONLY the practice-specific header, subtitle, status chips and QR/PDF
+ * cards that are new to the practice variant. The rest of the Realtime page is
+ * translated via the shared `medicalInterpreter.realtimePage` namespace.
+ *
+ * Covers the six header-selectable UI languages (de, en, fr, it, es, ru); any
+ * other code falls back to English via getPracticeChromeMessages().
  *
  * Pattern mirrors ../medaLiveTranslation.i18n.js (inline object + getter with
  * English fallback), consumed via useLanguage() from the global LanguageContext.
@@ -184,6 +186,41 @@ const practiceChromeI18n = {
     pdfQrErrFeatureDisabled: 'Esta función no está activada actualmente.',
     pdfQrErrNoPractice:      'Seleccione primero un perfil de consulta.',
     pdfQrErrUpload:          'No se pudo crear el QR del PDF. La descarga local del PDF sigue disponible.',
+  },
+  ru: {
+    title:        'Meda Live-переводчик для клиник',
+    subtitle:     'Языковое посредничество для структурированных разговоров врача и пациента',
+    chipLocalOnly: 'Только локальная сессия',
+    chipNoAudio:   'Аудио не сохраняется',
+    chipTwoLang:   'Двуязычный режим активен',
+    qrTitle:       'QR-код для Meda клиники',
+    qrShow:        'Показать QR-код',
+    qrIntro:       'Отсканируйте этот код, чтобы открыть Meda Live-переводчик для этой клиники.',
+    qrNoData:      'QR-код не содержит ни содержания разговора, ни данных пациента.',
+    qrAuthOnly:    'Страница доступна только авторизованным сотрудникам клиники.',
+    qrCopy:        'Скопировать ссылку',
+    qrCopied:      'Ссылка скопирована',
+    qrDownload:    'Скачать QR в формате PNG',
+    qrPrint:       'Печать',
+    qrClose:       'Закрыть',
+    qrNoPractice:  'Сначала выберите профиль клиники.',
+    qrError:       'Не удалось создать QR-код.',
+    qrAlt:         'QR-код, открывающий стартовую страницу Meda для клиники.',
+    localPdfTitle: 'Скачать PDF локально',
+    localPdfHint:  'PDF создаётся и скачивается прямо на этом устройстве. Он не сохраняется автоматически на сервере.',
+    pdfQrTitle:    'Передать PDF через QR',
+    pdfQrHint:     'PDF становится доступным только после вашего согласия, на ограниченное время, по защищённой QR-ссылке.',
+    pdfQrConsent:  'Подтверждаю, что этот PDF может быть предоставлен на ограниченное время по защищённой QR-ссылке.',
+    pdfQrProvide:  'Передать PDF через QR',
+    pdfQrProviding:'Создание …',
+    pdfQrExpires:  'Эта ссылка действительна до {time}.',
+    pdfQrCopy:     'Скопировать ссылку',
+    pdfQrCopied:   'Ссылка скопирована',
+    pdfQrDownload: 'Скачать QR в формате PNG',
+    pdfQrAlt:      'QR-код для защищённой ссылки на PDF.',
+    pdfQrErrFeatureDisabled: 'Эта функция сейчас не активирована.',
+    pdfQrErrNoPractice:      'Сначала выберите профиль клиники.',
+    pdfQrErrUpload:          'Не удалось создать QR для PDF. Локальная загрузка PDF по-прежнему доступна.',
   },
 };
 

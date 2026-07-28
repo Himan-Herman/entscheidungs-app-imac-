@@ -2112,3 +2112,335 @@
 :root[data-theme="dark"] .mrt-end-reason--time_limit,
 :root[data-theme="dark"] .mrt-end-reason--inactivity        { background: #451a03; color: #fbbf24; border-color: #92400e; }
 :root[data-theme="dark"] .mrt-end-reason--connection_error  { background: #450a0a; color: #fca5a5; border-color: #991b1b; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THEME TOKENS — dark scope only
+   ───────────────────────────────────────────────────────────────────────────
+   The `--ms-*` custom properties used throughout this file were never defined
+   anywhere in the app, so every `var(--ms-…, <light literal>)` silently resolved
+   to its light fallback — including in dark mode, where e.g. `.mrt-turn-text`
+   rendered near-black text on a near-black card.
+
+   Defining them inside the dark scope only keeps light mode byte-identical to
+   before (the fallbacks still apply there) while giving every remaining var()
+   usage a readable dark value. Explicit `:root[data-theme="dark"] .mrt-*` rules
+   elsewhere in this file are later/more specific and continue to win.
+
+   Text and border track the real design-system tokens (styles/design-system.css);
+   the two surfaces stay page-local because this page's cards sit lighter than the
+   global dark page background.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] .mrt-page {
+  --ms-text-primary:   var(--ms-color-text, #f1f5f9);           /* 15.8:1 on #0f172a */
+  --ms-text-secondary: var(--ms-color-text-placeholder, #94a3b8); /* 6.1:1 on #1e293b */
+  --ms-surface:        #1e293b;
+  --ms-surface-alt:    #0f172a;
+  --ms-border:         var(--ms-color-border, #334155);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE — remaining contrast gaps
+   Every rule below had a hardcoded light-mode colour and no dark counterpart.
+   Target: WCAG 2.1 AA (4.5:1 body text, 3:1 large text / UI borders).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Status badge — deep tinted surface + light foreground per state */
+:root[data-theme="dark"] .mrt-status-badge          { border-color: transparent; }
+:root[data-theme="dark"] .mrt-status-badge--ready   { background: #052e16; color: #4ade80; border-color: #166534; }
+:root[data-theme="dark"] .mrt-status-badge--active  { background: #451a03; color: #fbbf24; border-color: #92400e; }
+:root[data-theme="dark"] .mrt-status-badge--speaking{ background: #2e1065; color: #c4b5fd; border-color: #6d28d9; }
+:root[data-theme="dark"] .mrt-status-badge--error   { background: #450a0a; color: #fca5a5; border-color: #991b1b; }
+
+/* Language row / setup labels */
+:root[data-theme="dark"] .mrt-label         { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-arrow         { color: #64748b; }
+:root[data-theme="dark"] .mrt-required-star { color: #f87171; }
+
+/* Practice collapse toggle — transparent trigger, only the hover surface shifts */
+:root[data-theme="dark"] .mrt-practice-toggle:hover { background: rgba(148, 163, 184, 0.08); }
+
+/* Buttons — keep the accent hue, lift it enough to stay legible on dark */
+:root[data-theme="dark"] .mrt-btn--start { background: #3b82f6; color: #0b1220; }
+:root[data-theme="dark"] .mrt-btn--start:not(:disabled):hover { background: #60a5fa; }
+:root[data-theme="dark"] .mrt-btn--stop  { background: #f87171; color: #1a0505; }
+:root[data-theme="dark"] .mrt-btn--stop:not(:disabled):hover  { background: #fca5a5; }
+:root[data-theme="dark"] .mrt-turn-edit-btn--save { background: #3b82f6; color: #0b1220; }
+:root[data-theme="dark"] .mrt-turn-edit-btn--save:not(:disabled):hover { background: #60a5fa; }
+
+/* Ping-pong speaker bar */
+:root[data-theme="dark"] .mrt-speaker-pill    { color: #64748b; border-color: transparent; }
+:root[data-theme="dark"] .mrt-pingpong-arrow  { color: #475569; }
+
+/* Conversation placeholders and turn meta */
+:root[data-theme="dark"] .mrt-conversation-empty        { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-conversation-empty--idle  { color: #64748b; }
+:root[data-theme="dark"] .mrt-turn--patient  .mrt-turn-role { color: #60a5fa; }
+:root[data-theme="dark"] .mrt-turn--practice .mrt-turn-role { color: #c4b5fd; }
+:root[data-theme="dark"] .mrt-turn-direction  { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-turn-lang       { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-turn-lang--translation { color: #4ade80; }
+:root[data-theme="dark"] .mrt-turn-text       { color: #e2e8f0; }
+:root[data-theme="dark"] .mrt-turn-pending    { color: #64748b; }
+:root[data-theme="dark"] .mrt-turn-cursor     { color: #94a3b8; }
+
+/* Local history */
+:root[data-theme="dark"] .mrt-archive-turns-empty  { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-archive-turn-unclear { color: #fbbf24; background: #451a03; }
+:root[data-theme="dark"] .mrt-archive-turn-edited  { color: #fbbf24; }
+
+/* Debug section */
+:root[data-theme="dark"] .mrt-debug         { border-color: #334155; }
+:root[data-theme="dark"] .mrt-debug-empty   { color: #94a3b8; }
+:root[data-theme="dark"] .mrt-export-optional { color: #64748b; }
+
+/* QR modal + PDF-QR card */
+:root[data-theme="dark"] .mrt-qr-backdrop         { background: rgba(2, 6, 23, 0.75); }
+:root[data-theme="dark"] .mrt-qr-image-placeholder{ background: #1e293b; }
+:root[data-theme="dark"] .mrt-qr-error            { color: #fca5a5; }
+/* The QR bitmap itself is rendered dark-on-white — keep a white plate behind it
+   in dark mode so scanners keep the quiet zone and contrast they need. */
+:root[data-theme="dark"] .mrt-qr-image {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+/* End-of-session reason banner base border */
+:root[data-theme="dark"] .mrt-end-reason { border-color: transparent; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Visible keyboard focus on every interactive control, both themes.
+   :focus-visible only — pointer users keep a clean UI. */
+.mrt-page :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+:root[data-theme="dark"] .mrt-page :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline-color: #93c5fd;
+}
+
+/* Checkboxes get the accent colour so checked state is unambiguous in both themes. */
+.mrt-consent-checkbox { accent-color: #2563eb; }
+:root[data-theme="dark"] .mrt-consent-checkbox { accent-color: #60a5fa; }
+
+/* Comfortable pointer targets for the small icon-only controls (WCAG 2.5.8). */
+.mrt-turn-edit-trigger,
+.mrt-turn-speak-btn,
+.mrt-qr-close {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Disabled controls must still read as text, not as noise. */
+.mrt-page :is(button, input, select, textarea):disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Respect reduced-motion: the page runs several infinite animations
+   (status pulse, timer warning, typing cursor). Freeze them in a legible
+   end state instead of removing the information they carry. */
+@media (prefers-reduced-motion: reduce) {
+  .mrt-page *,
+  .mrt-page *::before,
+  .mrt-page *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .mrt-pulse,
+  .mrt-timer--warn,
+  .mrt-turn-cursor { opacity: 1 !important; }
+}
+
+/* Windows High Contrast / forced colours: let the OS palette through. */
+@media (forced-colors: active) {
+  .mrt-status-badge,
+  .mrt-speaker-pill,
+  .mrt-turn,
+  .mrt-btn {
+    border: 1px solid CanvasText;
+  }
+
+  .mrt-page :is(button, a, input, select, textarea):focus-visible {
+    outline: 3px solid Highlight;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DARK MODE — secondary-text contrast correction
+   ───────────────────────────────────────────────────────────────────────────
+   Slate-500 (#64748b) and slate-600 (#475569) were used for hints, timestamps,
+   placeholders and optional-field markers on the dark card surfaces. Measured in
+   the browser they land at ~3.1:1 and ~2.1:1 — below the WCAG AA 4.5:1 needed
+   for text this small. Lifting them to slate-300 keeps the visual hierarchy
+   (clearly quieter than the #f1f5f9 primary) while clearing AA.
+
+   Placed last so it wins over the same-specificity rules earlier in this file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] .mrt-page {
+  --mrt-dark-secondary: #cbd5e1; /* ≈9.9:1 on #1e293b — small body text */
+  --mrt-dark-placeholder: #94a3b8; /* ≈6.5:1 on the darker #0f172a inputs */
+}
+
+:root[data-theme="dark"] :is(
+  .mrt-privacy-note,
+  .mrt-practice-toggle-hint,
+  .mrt-form-opt,
+  .mrt-form-note,
+  .mrt-end-hint,
+  .mrt-archive-privacy,
+  .mrt-archive-entry-count,
+  .mrt-turn-timestamp,
+  .mrt-turn-section-label,
+  .mrt-turn-section-label--muted,
+  .mrt-turn-pending,
+  .mrt-turn-lang,
+  .mrt-turn-direction,
+  .mrt-conversation-empty,
+  .mrt-conversation-empty--idle,
+  .mrt-session-langs,
+  .mrt-label,
+  .mrt-form-label,
+  .mrt-export-hint,
+  .mrt-export-label,
+  .mrt-export-optional,
+  .mrt-debug-toggle,
+  .mrt-debug-empty,
+  .mrt-archive-turns-empty,
+  .mrt-archive-empty,
+  .mrt-archive-turn-time,
+  .mrt-turn-edit-trigger,
+  .mrt-speaker-pill,
+  .mrt-timer
+) {
+  color: var(--mrt-dark-secondary);
+}
+
+:root[data-theme="dark"] .mrt-status-badge--idle,
+:root[data-theme="dark"] .mrt-optional-badge {
+  color: var(--mrt-dark-secondary);
+}
+
+:root[data-theme="dark"] .mrt-form-input::placeholder,
+:root[data-theme="dark"] .mrt-export-input::placeholder,
+:root[data-theme="dark"] .mrt-turn-edit-area::placeholder {
+  color: var(--mrt-dark-placeholder);
+}
+
+/* Decorative separators and arrows carry no information (they are aria-hidden),
+   but they still read as UI, so hold them at the 4.5:1 text threshold too. */
+:root[data-theme="dark"] :is(
+  .mrt-archive-entry-sep,
+  .mrt-practice-toggle-arrow,
+  .mrt-pingpong-arrow,
+  .mrt-arrow
+) {
+  color: #94a3b8;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE — secondary-text contrast correction
+   ───────────────────────────────────────────────────────────────────────────
+   Same problem as the dark block above, mirrored: gray-400 (#9ca3af) on white
+   measures 2.54:1 and the idle conversation placeholder (#c4c9d4) only 1.66:1.
+   Moving hints, notes and optional markers to gray-500/600 clears the WCAG AA
+   4.5:1 threshold while keeping them visibly secondary to the near-black body
+   text. Colour-coded states move one step darker within the same hue.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mrt-page {
+  --mrt-light-secondary: #6b7280; /* gray-500 — 4.8:1 on #fff */
+  --mrt-light-muted: #4b5563;     /* gray-600 — 7.6:1, for tinted backgrounds */
+}
+
+.mrt-privacy-note,
+.mrt-privacy-note--data,
+.mrt-form-opt,
+.mrt-form-note,
+.mrt-arrow,
+.mrt-practice-toggle-arrow,
+.mrt-conversation-empty,
+.mrt-conversation-empty--idle,
+.mrt-export-optional,
+.mrt-archive-turns-empty,
+.mrt-debug-empty {
+  color: var(--mrt-light-secondary);
+}
+
+/* Sits on a tinted (#f9fafb) surface, so it needs the darker step. */
+.mrt-debug-toggle,
+.mrt-status-badge--idle {
+  color: var(--mrt-light-muted);
+}
+
+/* Required marker and blocking hint: keep the semantic hue, deepen it. */
+.mrt-required-star { color: #dc2626; } /* red-600 — 4.8:1 on #fff */
+.mrt-consent-hint  { color: #92400e; } /* amber-800 — 6.9:1 on #fffbeb */
+
+/* Primary action: white on blue-500 is only 3.7:1 at this size/weight. */
+.mrt-btn--start { background: #1d4ed8; }
+.mrt-btn--start:not(:disabled):hover { background: #1e40af; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE — conversation, session and end-of-session states
+   ───────────────────────────────────────────────────────────────────────────
+   Measured in-browser across the live-session states (status chips, turn cards,
+   end box, local history). The 500/600-weight semantic colours sat between
+   2.3:1 and 4.4:1 on their tinted surfaces; each moves one or two steps darker
+   within the same hue so the colour coding is preserved and AA is met.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Amber family — timer warning, "someone is speaking", edited/unclear markers. */
+.mrt-timer--warn,
+.mrt-status-badge--active,
+.mrt-turn-edited-badge,
+.mrt-turn-section-label--unclear {
+  color: #92400e; /* amber-800 */
+}
+
+/* Green family — ready state and translation language chip. */
+.mrt-status-badge--ready,
+.mrt-turn-lang--translation {
+  color: #166534; /* green-800 */
+}
+
+/* Red family — connection error and inline error text. */
+.mrt-status-badge--error,
+.mrt-error {
+  color: #b91c1c; /* red-700 */
+}
+
+/* Teal actions — white on teal-600 is 3.7:1; teal-700 clears 4.5:1. */
+.mrt-mode-btn--active,
+.mrt-pdfqr-btn,
+.mrt-mode-speaker-btn--patient.mrt-mode-speaker-btn--active {
+  background: #0f766e;
+}
+.mrt-pdfqr-btn:not(:disabled):hover { background: #115e59; }
+
+/* Neutral greys — pending/detecting hints, separators, arrows.
+   The speaker pill is excluded when active: that state keeps its blue accent. */
+.mrt-turn-edit-trigger,
+.mrt-turn-section-label--muted,
+.mrt-turn-pending,
+.mrt-turn-cursor,
+.mrt-speaker-pill:not(.mrt-speaker-pill--active),
+.mrt-pingpong-arrow,
+.mrt-archive-entry-sep {
+  color: #6b7280; /* gray-500 — 4.8:1 on #fff */
+}
+
+/* Sits on the tinted turn header (#f9fafb / #eff6ff), so it needs one step more. */
+.mrt-turn-timestamp {
+  color: #4b5563; /* gray-600 */
+}

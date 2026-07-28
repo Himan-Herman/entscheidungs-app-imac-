@@ -177,6 +177,15 @@ export default {
   healthHistoryP3:
     "Im Alpha-Test können Sie prüfen: Lassen sich Allergien und Diagnosen erfassen, bearbeiten und löschen, funktioniert der Wechsel zwischen den Bereichen, und sind Lade-, Leer- und Fehlerzustände verständlich?",
 
+  medaLiveButton: "Mehr Informationen zu Meda Live Translation",
+  medaLiveTitle: "Meda Live Translation",
+  medaLiveP1:
+    "Meda Live Translation unterstützt mehrsprachige Gespräche während eines Arzttermins über Mikrofon, Transkription und Anzeige der Übersetzung.",
+  medaLiveP2:
+    "Die Funktion dient ausschließlich der Verständigung. MedScoutX leitet aus dem Gesprochenen keine Diagnose, keine Therapieempfehlung und keine Dringlichkeitsbewertung ab. Das Mikrofon startet erst nach Ihrer bewussten Handlung.",
+  medaLiveP3:
+    "Im Alpha-Test können Sie prüfen: Startet die Sitzung nachvollziehbar, sind Transkript und Übersetzung verständlich, und funktionieren Sprachauswahl, Audio und Sitzungssteuerung zuverlässig?",
+
   myPrepButton: "Mehr Informationen zu Meine Vorbereitungen",
   myPrepTitle: "Meine Vorbereitungen",
   myPrepP1:

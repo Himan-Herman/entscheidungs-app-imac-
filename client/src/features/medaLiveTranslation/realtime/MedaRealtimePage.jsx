@@ -1561,6 +1561,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 <PracticeMedaPdfQrCard
                   tx={practiceTx}
                   practiceId={practiceId}
+                  locale={uiLocale}
                   onProvide={handleProvidePdfQr}
                 />
               )}

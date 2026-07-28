@@ -1,6 +1,6 @@
 import {
   LOCALE_OPTIONS,
-  PATIENT_UI_SELECTABLE_LOCALE_CODES,
+  PRE_VISIT_SELECTABLE_LOCALE_CODES,
 } from "../../../i18n/localeConfig.js";
 
 const localeNameByCode = new Map(
@@ -8,10 +8,11 @@ const localeNameByCode = new Map(
 );
 
 /**
- * Patient-facing Pre-Visit intake follows the same selectable locale set as
- * the patient header language picker, so the language choices stay 1:1.
+ * Pre-Visit intake keeps its own, wider language list: it is the language the
+ * intake is captured/translated in for the practice, not the language of the UI
+ * chrome. It therefore does NOT shrink when the header picker does.
  */
-export const PRE_VISIT_LANGUAGE_OPTIONS = PATIENT_UI_SELECTABLE_LOCALE_CODES.map(
+export const PRE_VISIT_LANGUAGE_OPTIONS = PRE_VISIT_SELECTABLE_LOCALE_CODES.map(
   (code) => ({
     id: code,
     nativeName: localeNameByCode.get(code) || code.toUpperCase(),

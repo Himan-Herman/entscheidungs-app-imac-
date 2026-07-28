@@ -43,17 +43,35 @@ export const LOCALE_OPTIONS = [
 
 export const SUPPORTED_LANGUAGE_CODES = LOCALE_OPTIONS.map((o) => o.code);
 
+/**
+ * The six UI languages the product ships as fully selectable. Every other entry
+ * in LOCALE_OPTIONS stays visible in the picker but disabled, so users never land
+ * in a half-translated interface.
+ */
+export const UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it", "ru"];
+
 /** Header language picker: only these locales are selectable; others stay visible but disabled. */
-export const HEADER_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it"];
+export const HEADER_SELECTABLE_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
 
-/** Public landing page: full UI in DE, EN, FR, ES, or IT. */
-export const LANDING_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it"];
+/** Public landing page. */
+export const LANDING_SELECTABLE_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
 
-/** Patient workspace: full UI in DE, EN, FR, ES, IT, TR, RU, UK, PT, AR, FA, CKB, KU, EL, RO, or PL. */
-export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it", "tr", "ru", "uk", "pt", "ar", "fa", "ckb", "ku", "el", "ro", "pl"];
+/** Patient workspace. */
+export const PATIENT_UI_SELECTABLE_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
 
-/** Practice workspace: full UI in DE, EN, FR, ES, or IT. */
-export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it"];
+/** Practice workspace. */
+export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
+
+/**
+ * Pre-Visit intake target languages — deliberately NOT the UI locale set.
+ * This is the language a patient's pre-visit summary gets translated INTO for
+ * the practice, so it must keep its wide reach (incl. RTL scripts) even though
+ * the surrounding UI chrome ships in only six languages.
+ */
+export const PRE_VISIT_SELECTABLE_LOCALE_CODES = [
+  "de", "en", "fr", "es", "it", "tr", "ru", "uk", "pt",
+  "ar", "fa", "ckb", "ku", "el", "ro", "pl",
+];
 
 export function isSupportedLanguage(code) {
   return typeof code === "string" && SUPPORTED_LANGUAGE_CODES.includes(code);

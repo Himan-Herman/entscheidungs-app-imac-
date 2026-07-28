@@ -286,7 +286,10 @@ const itComposed = deepMerge(
     itPractice,
   ),
   deepMerge(
-    deepMerge(deepMerge(itPatient, itMedicalInterpreter), itPracticeModules),
+    deepMerge(
+      deepMerge(itPatient, { medicalInterpreter: itMedicalInterpreter }),
+      itPracticeModules,
+    ),
     deepMerge(
       deepMerge(deepMerge(deepMerge(deepMerge(deepMerge({ vaccinations: itVaccinations }, { vitals: itVitals }), { healthHistory: itHealthHistory }), { symptomDiary: itSymptomDiary }), { erezept: itErezept }), { sosCard: itSosCard }),
       deepMerge(

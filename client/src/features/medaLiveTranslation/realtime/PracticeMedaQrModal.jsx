@@ -23,6 +23,9 @@ export default function PracticeMedaQrModal({ practiceId, practiceName, tx, onCl
   const [copied,    setCopied]    = useState(false);
 
   const closeBtnRef = useRef(/** @type {HTMLButtonElement|null} */ (null));
+  const modalRef    = useRef(/** @type {HTMLDivElement|null} */ (null));
+  // Element that had focus before the dialog opened, so it can be restored.
+  const openerRef   = useRef(/** @type {HTMLElement|null} */ (null));
 
   // Generate the QR data URL (only when a practiceId is present).
   useEffect(() => {
@@ -43,12 +46,46 @@ export default function PracticeMedaQrModal({ practiceId, practiceName, tx, onCl
     return () => { cancelled = true; };
   }, [hasPractice, medaUrl]);
 
-  // Close on Escape; focus the close button on mount.
+  // Modal keyboard contract: focus moves in on open, Escape closes, Tab cycles
+  // inside the dialog (aria-modal alone does not stop Tab reaching the page
+  // behind it), and focus returns to whatever opened the dialog.
   useEffect(() => {
+    openerRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
     closeBtnRef.current?.focus();
-    function onKey(e) { if (e.key === 'Escape') onClose(); }
+
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const focusables = modalRef.current?.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusables?.length) return;
+
+      const first = focusables[0];
+      const last  = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      // Wrap at both ends; also pull focus back if it escaped the dialog.
+      if (e.shiftKey && (active === first || !modalRef.current.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !modalRef.current.contains(active))) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      openerRef.current?.focus();
+    };
   }, [onClose]);
 
   async function handleCopy() {
@@ -93,6 +130,7 @@ export default function PracticeMedaQrModal({ practiceId, practiceName, tx, onCl
       onMouseDown={onClose}
     >
       <div
+        ref={modalRef}
         className="mrt-qr-modal"
         role="dialog"
         aria-modal="true"
