@@ -16,7 +16,7 @@
  * Run: node scripts/verifyPatientDataScopeBackfillSandbox.mjs
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, cpSync, rmSync, mkdtempSync } from "node:fs";
+import { readFileSync, readdirSync, cpSync, rmSync, mkdtempSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
@@ -108,7 +108,16 @@ function expectSql(label, db, sql, shouldSucceed) {
 function deployWithoutBackfill(tmpRoot) {
   const tmpPrisma = join(tmpRoot, "prisma");
   cpSync(join(serverDir, "prisma"), tmpPrisma, { recursive: true });
-  rmSync(join(tmpPrisma, "migrations", BACKFILL_MIGRATION), { recursive: true, force: true });
+  // Everything from the backfill onwards, not just the backfill itself: later
+  // migrations legitimately assume the scope is already classified and NOT
+  // NULL, so leaving them in place while removing the backfill would create a
+  // state the chain never actually passes through.
+  const migrationsDir = join(tmpPrisma, "migrations");
+  for (const dir of readdirSync(migrationsDir)) {
+    if (/^\d{14}_/.test(dir) && dir >= BACKFILL_MIGRATION) {
+      rmSync(join(migrationsDir, dir), { recursive: true, force: true });
+    }
+  }
   execFileSync("npx", ["prisma", "migrate", "deploy", "--schema", join(tmpPrisma, "schema.prisma")], {
     cwd: serverDir,
     env: { ...process.env, DATABASE_URL: sandboxUrl },
