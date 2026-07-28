@@ -1797,8 +1797,10 @@ model VaccinationEntry {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  /// See enum PatientDataScope. NULL = legacy, not yet classified.
-  dataScope                    PatientDataScope?
+  /// See enum PatientDataScope. Mandatory: every record is classified as
+  /// either patient-owned or bound to one care relationship. No default —
+  /// a write path that forgets the scope must fail, not guess.
+  dataScope                    PatientDataScope
   /// Set only for practice_contextual records: the care relationship this
   /// record was created in. onDelete: Restrict — a contextual record must
   /// never silently lose its origin. Links are revoked via their status in
@@ -1842,8 +1844,10 @@ model VitalEntry {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  /// See enum PatientDataScope. NULL = legacy, not yet classified.
-  dataScope                    PatientDataScope?
+  /// See enum PatientDataScope. Mandatory: every record is classified as
+  /// either patient-owned or bound to one care relationship. No default —
+  /// a write path that forgets the scope must fail, not guess.
+  dataScope                    PatientDataScope
   /// Set only for practice_contextual records: the care relationship this
   /// record was created in. onDelete: Restrict — a contextual record must
   /// never silently lose its origin. Links are revoked via their status in
@@ -1942,8 +1946,10 @@ model AllergyEntry {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  /// See enum PatientDataScope. NULL = legacy, not yet classified.
-  dataScope                    PatientDataScope?
+  /// See enum PatientDataScope. Mandatory: every record is classified as
+  /// either patient-owned or bound to one care relationship. No default —
+  /// a write path that forgets the scope must fail, not guess.
+  dataScope                    PatientDataScope
   /// Set only for practice_contextual records: the care relationship this
   /// record was created in. onDelete: Restrict — a contextual record must
   /// never silently lose its origin. Links are revoked via their status in
@@ -1977,8 +1983,10 @@ model DiagnosisEntry {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  /// See enum PatientDataScope. NULL = legacy, not yet classified.
-  dataScope                    PatientDataScope?
+  /// See enum PatientDataScope. Mandatory: every record is classified as
+  /// either patient-owned or bound to one care relationship. No default —
+  /// a write path that forgets the scope must fail, not guess.
+  dataScope                    PatientDataScope
   /// Set only for practice_contextual records: the care relationship this
   /// record was created in. onDelete: Restrict — a contextual record must
   /// never silently lose its origin. Links are revoked via their status in

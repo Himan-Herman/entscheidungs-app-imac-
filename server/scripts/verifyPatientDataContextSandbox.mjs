@@ -111,7 +111,10 @@ const D = (id, scope, ctx) =>
   `INSERT INTO "DiagnosisEntry"(id,"userId","conditionName","dataScope","contextPracticePatientLinkId","updatedAt")
    VALUES ('${id}','u1','X',${scope},${ctx},now());`;
 
-expect("NULL / NULL erlaubt",                      D("d1", "NULL", "NULL"), true);
+// Was the transitional state while the backfill was pending. This script
+// deploys the FULL migration chain, so 20260728120000_backfill_patient_data_scope
+// has run: the scope is mandatory and the CHECK rejects an unclassified row.
+expect("NULL / NULL nach Backfill VERBOTEN",       D("d1", "NULL", "NULL"), false);
 expect("patient_global / NULL erlaubt",            D("d2", "'patient_global'", "NULL"), true);
 expect("practice_contextual / Link-ID erlaubt",    D("d3", "'practice_contextual'", "'lk1'"), true);
 expect("patient_global / Link-ID VERBOTEN",        D("d4", "'patient_global'", "'lk1'"), false);

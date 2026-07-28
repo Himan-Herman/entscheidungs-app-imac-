@@ -39,11 +39,15 @@ function modelBody(name) {
 
 /* ------------------------------------------------------------------ schema */
 
-test("1) all four models carry dataScope", () => {
+test("1) all four models carry a mandatory dataScope", () => {
   for (const model of TARGETS) {
+    // Nullable while the backfill was pending; mandatory since
+    // 20260728120000_backfill_patient_data_scope classified every legacy row.
+    // An optional scope would let a future write path produce a record that no
+    // practice can ever see.
     assert.match(
-      modelBody(model), /^\s+dataScope\s+PatientDataScope\?/m,
-      `${model}: dataScope missing or not nullable`,
+      modelBody(model), /^\s+dataScope\s+PatientDataScope$/m,
+      `${model}: dataScope missing or still optional`,
     );
   }
 });
@@ -207,7 +211,12 @@ test("the migration is ordered after the pending clinical role migration", () =>
   assert.notEqual(clinical, -1, "clinical role migration missing");
   assert.notEqual(context, -1, "context migration missing");
   assert.ok(context > clinical, "the context migration must sort after the clinical role one");
-  assert.equal(context, dirs.length - 1, "the context migration must be the newest");
+
+  // It is no longer the newest: the backfill migration follows it, and must,
+  // because it depends on the columns this one adds.
+  const backfill = dirs.indexOf("20260728120000_backfill_patient_data_scope");
+  assert.notEqual(backfill, -1, "backfill migration missing");
+  assert.ok(backfill > context, "the backfill must sort after the migration that adds the columns");
 });
 
 /* --------------------------------------------------------- diff boundary */
