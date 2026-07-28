@@ -17,9 +17,9 @@ model User {
   consent                          Consent?
   doctors                          Doctor[]
   doctorContacts                   DoctorContact[]
-  pushSubscriptions                PushSubscription[] @relation("UserPushSubscriptions")
+  pushSubscriptions                PushSubscription[]               @relation("UserPushSubscriptions")
   pushChannelState                 PushChannelState?                @relation("UserPushChannelState")
-  pushReminders                    PushReminder[]     @relation("UserPushReminders")
+  pushReminders                    PushReminder[]                   @relation("UserPushReminders")
   preVisitSessions                 PreVisitSession[]
   preVisitCases                    PreVisitCase[]
   practiceProfiles                 PracticeProfile[]
@@ -285,7 +285,7 @@ model Doctor {
  * Address book for Pre-Visit — per authenticated user (managed in Settings).
  */
 model DoctorContact {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   userId       String
   doctorName   String
   practiceName String?
@@ -296,8 +296,8 @@ model DoctorContact {
   note         String?
   isFavorite   Boolean   @default(false)
   lastUsedAt   DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -827,19 +827,19 @@ model PracticeMember {
   /// owner can also be a treating doctor without the owner membership being
   /// downgraded. Currently only "doctor". Null means no clinical role.
   /// Organizational roles (owner/admin/TEAM_MANAGE) never imply this.
-  clinicalRole                String?   @db.VarChar(40)
+  clinicalRole                 String?   @db.VarChar(40)
   /// pending | active | rejected | revoked — only "active" grants permissions.
   /// A request always starts as "pending" and must be approved by a DIFFERENT
   /// eligible person; there is no self-approval and no self-activation.
-  clinicalRoleStatus          String?   @db.VarChar(20)
-  clinicalRoleRequestedAt     DateTime?
-  clinicalRoleApprovedAt      DateTime?
+  clinicalRoleStatus           String?   @db.VarChar(20)
+  clinicalRoleRequestedAt      DateTime?
+  clinicalRoleApprovedAt       DateTime?
   clinicalRoleApprovedByUserId String?
 
-  practiceProfile PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  invitedBy       User?           @relation("PracticeMemberInvitedBy", fields: [invitedByUserId], references: [id], onDelete: SetNull)
-  clinicalRoleApprovedBy User?    @relation("PracticeMemberClinicalRoleApprovedBy", fields: [clinicalRoleApprovedByUserId], references: [id], onDelete: SetNull)
+  practiceProfile        PracticeProfile @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  user                   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitedBy              User?           @relation("PracticeMemberInvitedBy", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  clinicalRoleApprovedBy User?           @relation("PracticeMemberClinicalRoleApprovedBy", fields: [clinicalRoleApprovedByUserId], references: [id], onDelete: SetNull)
 
   @@unique([practiceProfileId, userId])
   @@index([userId])
@@ -943,6 +943,10 @@ model PracticePatientLink {
   telemedicineSessions       TelemedicineSession[]
   documentOcrJobs            DocumentOcrJob[]
   medaSessions               PracticeMedaSession[]
+  contextVitalEntries        VitalEntry[]                @relation("VitalEntryContextLink")
+  contextVaccinationEntries  VaccinationEntry[]          @relation("VaccinationEntryContextLink")
+  contextAllergyEntries      AllergyEntry[]              @relation("AllergyEntryContextLink")
+  contextDiagnosisEntries    DiagnosisEntry[]            @relation("DiagnosisEntryContextLink")
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
@@ -1793,8 +1797,19 @@ model VaccinationEntry {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  /// See enum PatientDataScope. NULL = legacy, not yet classified.
+  dataScope                    PatientDataScope?
+  /// Set only for practice_contextual records: the care relationship this
+  /// record was created in. onDelete: Restrict — a contextual record must
+  /// never silently lose its origin. Links are revoked via their status in
+  /// the normal lifecycle, not hard-deleted.
+  contextPracticePatientLinkId String?
+  contextPracticePatientLink   PracticePatientLink? @relation("VaccinationEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([contextPracticePatientLinkId])
+  @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
   @@index([userId, vaccinationDate])
   @@index([userId, deletedAt])
 }
@@ -1827,9 +1842,20 @@ model VitalEntry {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  /// See enum PatientDataScope. NULL = legacy, not yet classified.
+  dataScope                    PatientDataScope?
+  /// Set only for practice_contextual records: the care relationship this
+  /// record was created in. onDelete: Restrict — a contextual record must
+  /// never silently lose its origin. Links are revoked via their status in
+  /// the normal lifecycle, not hard-deleted.
+  contextPracticePatientLinkId String?
+  contextPracticePatientLink   PracticePatientLink? @relation("VitalEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, sourceProvider, externalId])
+  @@index([contextPracticePatientLinkId])
+  @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
   @@index([userId, type, measuredAt])
   @@index([userId, deletedAt])
 }
@@ -1840,25 +1866,25 @@ model VitalEntry {
 /// providers (later phase) keep tokens in a separate, encrypted store. Documentation/import
 /// plumbing only: no diagnosis, no triage, no interpretation.
 model WearableConnection {
-  id             String    @id @default(cuid())
-  userId         String
+  id              String    @id @default(cuid())
+  userId          String
   /// apple_health | health_connect | withings | fitbit | garmin | oura | ...
-  provider       String    @db.VarChar(40)
+  provider        String    @db.VarChar(40)
   /// connected | disconnected | error
-  status         String    @default("connected") @db.VarChar(20)
+  status          String    @default("connected") @db.VarChar(20)
   /// JSON array of allowed vital types (data minimisation — only what the patient opted into)
-  scopes         String?   @db.Text
+  scopes          String?   @db.Text
   /// When the patient granted explicit import consent (Art. 9 GDPR)
-  consentAt      DateTime?
-  lastSyncedAt   DateTime?
+  consentAt       DateTime?
+  lastSyncedAt    DateTime?
   /// Per-type resume points as JSON {"heart_rate":"<ISO>"} for types whose 30-day
   /// window held more readings than one sync imports. Cleared per type once that
   /// type has been read to the end, so nothing is ever skipped.
-  syncCheckpoints String?  @db.Text
-  lastError      String?   @db.VarChar(300)
-  disconnectedAt DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  syncCheckpoints String?   @db.Text
+  lastError       String?   @db.VarChar(300)
+  disconnectedAt  DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1916,8 +1942,19 @@ model AllergyEntry {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  /// See enum PatientDataScope. NULL = legacy, not yet classified.
+  dataScope                    PatientDataScope?
+  /// Set only for practice_contextual records: the care relationship this
+  /// record was created in. onDelete: Restrict — a contextual record must
+  /// never silently lose its origin. Links are revoked via their status in
+  /// the normal lifecycle, not hard-deleted.
+  contextPracticePatientLinkId String?
+  contextPracticePatientLink   PracticePatientLink? @relation("AllergyEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([contextPracticePatientLinkId])
+  @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
   @@index([userId, status])
   @@index([userId, deletedAt])
 }
@@ -1940,8 +1977,19 @@ model DiagnosisEntry {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  /// See enum PatientDataScope. NULL = legacy, not yet classified.
+  dataScope                    PatientDataScope?
+  /// Set only for practice_contextual records: the care relationship this
+  /// record was created in. onDelete: Restrict — a contextual record must
+  /// never silently lose its origin. Links are revoked via their status in
+  /// the normal lifecycle, not hard-deleted.
+  contextPracticePatientLinkId String?
+  contextPracticePatientLink   PracticePatientLink? @relation("DiagnosisEntryContextLink", fields: [contextPracticePatientLinkId], references: [id], onDelete: Restrict)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([contextPracticePatientLinkId])
+  @@index([userId, dataScope, contextPracticePatientLinkId, deletedAt])
   @@index([userId, status])
   @@index([userId, deletedAt])
 }
@@ -1981,6 +2029,23 @@ model ErezeptEntry {
   @@index([patientUserId, status])
   @@index([patientUserId, deletedAt])
   @@index([linkId])
+}
+
+/// Classification of where a patient-owned medical record belongs.
+///
+/// patient_global      — the patient recorded or imported it outside any
+///                       treatment context; visible to a practice only via an
+///                       explicit patient share.
+/// practice_contextual — it was created inside one concrete care relationship
+///                       and belongs to that relationship.
+///
+/// NULL means "legacy / not yet classified" and must never be treated as
+/// globally visible. There is deliberately NO default: a write path that has
+/// not been taught the context yet must leave the field unset rather than
+/// silently classify a record as global.
+enum PatientDataScope {
+  patient_global
+  practice_contextual
 }
 
 datasource db {
@@ -2460,14 +2525,14 @@ model PushSubscription {
 /// The native app schedules locally and must never create a PushSubscription;
 /// this row is how the server knows to stay quiet so nothing arrives twice.
 model PushChannelState {
-  userId        String   @id
+  userId        String    @id
   /// The native app has reminders scheduled on this account.
-  nativeEnabled Boolean  @default(false)
+  nativeEnabled Boolean   @default(false)
   /// Patient wants web push as well (default true; turned off automatically when
   /// the native app takes over, and re-enablable from the account).
-  webEnabled    Boolean  @default(true)
+  webEnabled    Boolean   @default(true)
   nativeSeenAt  DateTime?
-  updatedAt     DateTime @updatedAt
+  updatedAt     DateTime  @updatedAt
 
   user User @relation("UserPushChannelState", fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -2478,20 +2543,20 @@ model PushReminder {
   /// LEGACY. Kept only so historic rows stay intact — never used as a delivery
   /// target any more. Delivery is resolved per user across all their channels.
   subscriptionId String?
-  type           String    // "intake" (daily at timeOfDay) | "refill" (one-off at fireAt)
-  timeOfDay      String?    // "HH:MM" (24h) for intake reminders
-  fireAt         DateTime?  // one-off timestamp for refill reminders
-  label          String?    // generic, pre-localized notification body
-  url            String?    // deep link opened on notification click
+  type           String // "intake" (daily at timeOfDay) | "refill" (one-off at fireAt)
+  timeOfDay      String? // "HH:MM" (24h) for intake reminders
+  fireAt         DateTime? // one-off timestamp for refill reminders
+  label          String? // generic, pre-localized notification body
+  url            String? // deep link opened on notification click
   active         Boolean   @default(true)
-  lastSentOn     String?    // "YYYY-MM-DD" send-dedupe guard
+  lastSentOn     String? // "YYYY-MM-DD" send-dedupe guard
   /// IANA zone the reminder was created in. Needed because a reminder can now
   /// exist without a PushSubscription (which used to carry the timezone).
   timezone       String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  user         User             @relation("UserPushReminders", fields: [userId], references: [id], onDelete: Cascade)
+  user         User              @relation("UserPushReminders", fields: [userId], references: [id], onDelete: Cascade)
   subscription PushSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
   @@index([userId])
