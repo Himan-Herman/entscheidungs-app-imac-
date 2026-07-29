@@ -349,23 +349,30 @@ test("HTTP: manipulated body fields cannot forge a status, approver or permissio
     isPracticeOwner: true,
   };
 
-  // The owner requests with a hostile body: only the role is read, and only
-  // because "request" allows it. The status comes from the state machine.
+  // The contract got STRICTER with the role-escalation fix: a hostile body is
+  // no longer silently stripped, it is refused outright. Silently ignoring a
+  // forged approver would leave the caller believing it took effect.
   const requested = await call("POST", "/api/practice/team/m-owner/clinical-role/request", {
     user: OWNER, body: hostile,
   });
-  assert.equal(requested.status, 200);
-  assert.equal(requested.body.clinicalRole.clinicalRoleStatus, "pending", "never 'active'");
+  assert.equal(requested.status, 400);
+  assert.equal(requested.body.error, "unsupported_field");
 
   const stored = ownerRow();
-  assert.equal(stored.clinicalRoleStatus, "pending");
-  assert.equal(stored.clinicalRoleApprovedByUserId, null, "approver not forgeable");
-  assert.equal(stored.clinicalRoleApprovedAt, null, "approval timestamp not forgeable");
+  assert.equal(stored.clinicalRoleStatus ?? null, null, "nothing was stored");
+  assert.equal(stored.clinicalRoleApprovedByUserId ?? null, null, "approver not forgeable");
   assert.equal(stored.role, "owner", "organizational role untouched");
 
-  // Self-approval stays forbidden even with a hostile body.
+  // A CLEAN request still works and lands in pending, never active.
+  const clean = await call("POST", "/api/practice/team/m-owner/clinical-role/request", {
+    user: OWNER, body: { clinicalRole: "doctor" },
+  });
+  assert.equal(clean.status, 200);
+  assert.equal(clean.body.clinicalRole.clinicalRoleStatus, "pending", "never 'active'");
+
+  // Self-approval stays forbidden, with a clean body too.
   const selfApprove = await call("POST", "/api/practice/team/m-owner/clinical-role/approve", {
-    user: OWNER, body: hostile,
+    user: OWNER, body: {},
   });
   assert.equal(selfApprove.status, 403);
   assert.equal(selfApprove.body.error, "self_approval_forbidden");

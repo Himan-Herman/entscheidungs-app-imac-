@@ -180,7 +180,17 @@ export async function listPracticeTeam(actorUserId, practiceId, ctx = {}) {
   // to decide who may approve — and can never render a self-approval control.
   const members = built.members.map((m) => ({
     ...m,
-    capabilities: clinicalRoleCapabilities(access, m),
+    capabilities: {
+      ...clinicalRoleCapabilities(access, m),
+      // The organizational counterpart to the clinical capabilities: the UI
+      // never renders a role control the server would refuse. One's own row
+      // and the owner's row are display-only.
+      canChangeRole:
+        canManageTeam(access.role)
+        && !m.isPracticeOwner
+        && m.status !== "revoked"
+        && m.userId !== access.userId,
+    },
   }));
 
   return {
@@ -216,6 +226,30 @@ export function getPracticePermissionsPayload(role) {
  * @param {{ email?: string, userId?: string, role?: string }} input
  * @param {{ req?: import('express').Request }} ctx
  */
+/**
+ * The one rule every organizational role mutation must pass.
+ *
+ * Nobody changes their own membership — not to a higher role, not to a lower
+ * one. A self-promotion is the obvious escalation; a self-demotion can remove
+ * the last administrator, and both bypass the four-eyes principle the clinical
+ * path already enforces. The owner is protected separately: ownership is a
+ * property of the practice, not a membership role, and never changes here.
+ *
+ * Central on purpose: the team service AND the legacy member routes call this,
+ * so the rule cannot drift apart between the two write paths.
+ *
+ * @param {{ actorUserId: string, targetMember: { userId: string, practiceProfile?: { userId?: string } | null } }} input
+ */
+export function assertPracticeMemberRoleMutationAllowed({ actorUserId, targetMember }) {
+  if (!actorUserId || !targetMember) throw new Error("member_not_found");
+  if (targetMember.practiceProfile && targetMember.practiceProfile.userId === targetMember.userId) {
+    throw new Error("cannot_change_practice_owner");
+  }
+  if (targetMember.userId === actorUserId) {
+    throw new Error("self_role_change_forbidden");
+  }
+}
+
 export async function invitePracticeTeamMember(actorUserId, practiceId, input, ctx = {}) {
   const access = await getPracticeAccess(actorUserId, practiceId);
   if (!access || !canManageTeam(access.role)) throw new Error("forbidden");
@@ -237,6 +271,12 @@ export async function invitePracticeTeamMember(actorUserId, practiceId, input, c
   }
 
   if (!targetUserId) throw new Error("validation_required");
+
+  // The upsert below rewrites an existing membership's role and status.
+  // Inviting YOURSELF is therefore a self role change with extra steps —
+  // ASSIGNABLE_ROLES includes "admin", so without this a practice manager was
+  // one self-invite and one self-accept away from admin.
+  if (targetUserId === actorUserId) throw new Error("self_role_change_forbidden");
 
   const practice = await loadPractice(practiceId);
   if (!practice) throw new Error("practice_not_found");
@@ -302,9 +342,8 @@ export async function updatePracticeTeamMemberRole(actorUserId, membershipId, ro
   const allowedRoles = new Set([...ASSIGNABLE_ROLES, "admin"]);
   if (!allowedRoles.has(nextRole)) throw new Error("role_invalid");
 
-  if (existing.practiceProfile.userId === existing.userId) {
-    throw new Error("cannot_change_practice_owner");
-  }
+  // Owner protection and the self-change ban, from the one shared rule.
+  assertPracticeMemberRoleMutationAllowed({ actorUserId, targetMember: existing });
 
   if (existing.status === "revoked") throw new Error("member_revoked");
 
@@ -312,9 +351,17 @@ export async function updatePracticeTeamMemberRole(actorUserId, membershipId, ro
     throw new Error("forbidden_role_escalation");
   }
 
-  const row = await prisma.practiceMember.update({
-    where: { id: membershipId },
+  // Conditional on the state we validated: if a parallel change moved the role
+  // or status in between, zero rows match and the caller gets a conflict
+  // instead of silently overwriting the other change.
+  const result = await prisma.practiceMember.updateMany({
+    where: { id: membershipId, role: existing.role, status: existing.status },
     data: { role: nextRole },
+  });
+  if (result.count !== 1) throw new Error("role_state_conflict");
+
+  const row = await prisma.practiceMember.findUnique({
+    where: { id: membershipId },
     include: {
       user: { select: { id: true, email: true, firstName: true, lastName: true } },
     },

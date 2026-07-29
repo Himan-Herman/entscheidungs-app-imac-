@@ -37,6 +37,24 @@ function userIdFromReq(req) {
   return typeof id === "string" && id.length > 0 ? id : null;
 }
 
+/**
+ * Refuses any body key outside the endpoint's allowlist.
+ *
+ * The dangerous ones are the role-machine fields: an approver id, an approval
+ * timestamp, a status, a permission set. Silently ignoring them would leave a
+ * caller believing they took effect, and accepting them would hand the state
+ * machine to the client.
+ */
+function assertAllowedBodyFields(body, allowed) {
+  const rejected = Object.keys(body ?? {}).filter((k) => !allowed.has(k));
+  if (rejected.length > 0) throw new Error("unsupported_field");
+}
+
+const INVITE_FIELDS = new Set(["email", "userId", "role", "practiceId"]);
+const ROLE_FIELDS = new Set(["role", "practiceId"]);
+const CLINICAL_FIELDS = new Set(["clinicalRole", "practiceId"]);
+const ACCEPT_FIELDS = new Set(["practiceId"]);
+
 function mapError(err) {
   const msg = err?.message || "request_failed";
   if (
@@ -62,6 +80,10 @@ function mapError(err) {
   // probed — it must be 404, never 403.
   if (msg === "membership_not_found") return { status: 404, error: msg };
   if (msg === "self_approval_forbidden") return { status: 403, error: msg };
+  if (msg === "self_role_change_forbidden") return { status: 403, error: msg };
+  if (msg === "role_state_conflict") return { status: 409, error: msg };
+  if (msg === "unsupported_field") return { status: 400, error: msg };
+  if (msg === "member_revoked") return { status: 409, error: msg };
   if (msg === "concurrent_modification") return { status: 409, error: msg };
   if (
     [
@@ -131,6 +153,7 @@ router.post("/invite", async (req, res) => {
   if (!practiceId) return res.status(400).json({ ok: false, error: "validation_required" });
 
   try {
+    assertAllowedBodyFields(req.body, INVITE_FIELDS);
     const member = await invitePracticeTeamMember(
       userId,
       practiceId,
@@ -156,6 +179,7 @@ router.post("/accept", async (req, res) => {
   if (!practiceId) return res.status(400).json({ ok: false, error: "validation_required" });
 
   try {
+    assertAllowedBodyFields(req.body, ACCEPT_FIELDS);
     const member = await acceptPracticeTeamInvite(userId, practiceId, { req });
     return res.json({ ok: true, member });
   } catch (err) {
@@ -177,6 +201,7 @@ router.patch("/:membershipId/role", async (req, res) => {
   }
 
   try {
+    assertAllowedBodyFields(req.body, ROLE_FIELDS);
     const member = await updatePracticeTeamMemberRole(
       userId,
       membershipId,
@@ -236,6 +261,7 @@ router.post("/:membershipId/clinical-role/:action", async (req, res) => {
   }
 
   try {
+    assertAllowedBodyFields(req.body, CLINICAL_FIELDS);
     const clinicalRole = await changeClinicalRole({
       actorUserId: userId,
       membershipId,
