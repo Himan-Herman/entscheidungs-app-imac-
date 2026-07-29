@@ -60,6 +60,11 @@ function mockPrisma() {
     },
     create: async ({ data }) => { rows.push(data); return data; },
   };
+  // The import now runs the batch in one transaction and locks the user row
+  // first. $queryRaw lives on the client prototype, so it must be overridden
+  // rather than deleted — every fixture user exists.
+  prismaModule.prisma.$transaction = async (fn) => fn(prismaModule.prisma);
+  prismaModule.prisma.$queryRaw = async (_strings, ...values) => [{ id: values[0] }];
   return rows;
 }
 

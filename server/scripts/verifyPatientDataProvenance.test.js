@@ -85,6 +85,8 @@ function installPrismaFake() {
   prisma.$transaction = async (fn) => fn(prisma);
   prisma.$queryRaw = async (strings, ...values) => {
     const sql = Array.isArray(strings) ? strings.join("?") : String(strings);
+    // The write wrapper now locks the user row first; every fixture user exists.
+    if (/FROM "User"/.test(sql)) return [{ id: values[0] }];
     if (!/FROM "PracticePatientLink"/.test(sql)) return [];
     const [id, patientUserId] = values;
     const row = links.find((l) => l.id === id && l.patientUserId === patientUserId);
