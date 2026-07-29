@@ -344,6 +344,14 @@ export async function releaseDocumentShareGrantsForPractice(input) {
  * }} input
  */
 export async function deletePracticeWithArchivedContext(input) {
+  // Release gate, checked here as well as at the routes: a later internal
+  // caller cannot delete a practice by accident while the retention question
+  // is open. Tests and sandboxes enable it explicitly via the env variable,
+  // so the service stays testable in isolation.
+  const { assertDestructivePracticeDeletionEnabled } =
+    await import("../startup/destructiveDeletionGate.js");
+  assertDestructivePracticeDeletionEnabled();
+
   const tx = input?.transaction;
   const practiceProfileId = String(input?.practiceProfileId || "").trim();
   if (!tx || !practiceProfileId) {

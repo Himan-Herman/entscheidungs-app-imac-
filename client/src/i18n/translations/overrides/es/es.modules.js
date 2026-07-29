@@ -1,6 +1,8 @@
 /** Spanish — symptom check, image, body map, settings privacy, doctor contacts */
 export default {
   settingsPrivacy: {
+    deleteOwnerBlocked:
+      "Su cuenta no puede eliminarse automáticamente por el momento porque tiene una consulta vinculada. Póngase en contacto con el soporte.",
     heading: "Exportación y eliminación de datos",
     intro:
       "Exporte o elimine desde su cuenta los datos MedScoutX relacionados con Pre-Visit.",

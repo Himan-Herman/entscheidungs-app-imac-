@@ -10,6 +10,9 @@
  * No database: Prisma is replaced by an in-memory adapter, so this never
  * touches medscoutx_dev. Routes, middleware and error mapping run for real.
  */
+// Deletion is release-gated; tests enable it EXPLICITLY, as the gate requires.
+process.env.ENABLE_DESTRUCTIVE_PRACTICE_DELETION = "true";
+
 import test from "node:test";
 import assert from "node:assert/strict";
 import express from "express";

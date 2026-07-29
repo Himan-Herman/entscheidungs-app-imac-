@@ -15,6 +15,9 @@
  *
  * Run: node scripts/verifyAccountDeletionArchiveSandbox.mjs
  */
+// Deletion is release-gated; tests enable it EXPLICITLY, as the gate requires.
+process.env.ENABLE_DESTRUCTIVE_PRACTICE_DELETION = "true";
+
 import { execFileSync, spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";

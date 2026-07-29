@@ -17,6 +17,9 @@ import jwt from "jsonwebtoken";
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret-practice-deletion";
 process.env.CARE_RELATIONSHIP_ENABLED = "true";
+// Deletion is release-gated; tests enable it EXPLICITLY, as the gate requires.
+process.env.ENABLE_DESTRUCTIVE_PRACTICE_DELETION = "true";
+
 
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/requireAuth.js";
