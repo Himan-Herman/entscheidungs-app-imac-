@@ -9,21 +9,36 @@
  * to `unresolved` — never to `global`, because presenting an unclassified
  * record as "your own data" is a claim we cannot support.
  *
- * @param {Array<{ dataScope?: string|null, contextPracticePatientLinkId?: string|null }>} records
+ * @param {Array<{ practiceContextState?: string|null, dataScope?: string|null, contextPracticePatientLinkId?: string|null }>} records
  * @param {(linkId: string|null|undefined) => { resolved: boolean, label: string }} resolve
  */
 export function splitByProvenance(records, resolve) {
   const global = [];
+  const archived = [];
   const unresolved = [];
   /** @type {Map<string, Array<object>>} */
   const byLink = new Map();
 
   for (const record of Array.isArray(records) ? records : []) {
-    if (record?.dataScope === "patient_global") {
+    // The server states the context explicitly. dataScope is kept as a
+    // fallback so a response from before that field existed still sorts.
+    const state = record?.practiceContextState
+      ?? (record?.dataScope === "patient_global" ? "none" : null);
+
+    if (state === "none") {
       global.push(record);
       continue;
     }
-    if (record?.dataScope === "practice_contextual") {
+
+    // A practice that no longer exists. Its own bucket: filing it under an
+    // active practice would misrepresent a deleted one as current, and filing
+    // it under the patient's own data would erase where it came from.
+    if (state === "archived") {
+      archived.push(record);
+      continue;
+    }
+
+    if (state === "active" || record?.dataScope === "practice_contextual") {
       const linkId = record.contextPracticePatientLinkId;
       const { resolved } = resolve(linkId);
       if (resolved && linkId) {
@@ -32,11 +47,13 @@ export function splitByProvenance(records, resolve) {
         continue;
       }
     }
-    // Legacy (no scope), a foreign link, or a link the patient no longer holds.
+
+    // Legacy, a foreign link, a link the patient no longer holds, or a state
+    // the server could not classify. Never silently global.
     unresolved.push(record);
   }
 
-  return { global, byLink, unresolved };
+  return { global, byLink, archived, unresolved };
 }
 
 /**

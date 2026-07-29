@@ -270,16 +270,106 @@ export function contextErrorResponse(err) {
 }
 
 /**
+ * The Prisma selection the patient routes use to resolve an archived context.
+ *
+ * Deliberately narrow: only what the patient is shown. The archive's own id,
+ * the original link id, the original practice id, the patient id and the
+ * archive reason are internal and are never loaded, so they cannot be
+ * serialised by accident.
+ */
+export const ARCHIVED_CONTEXT_SELECT = Object.freeze({
+  select: {
+    practiceDisplayNameSnapshot: true,
+    practiceSpecialtySnapshot: true,
+    archivedAt: true,
+  },
+});
+
+/** The three states a patient's record can be in, plus a defensive fourth. */
+export const PRACTICE_CONTEXT_STATE = Object.freeze({
+  NONE: "none",
+  ACTIVE: "active",
+  ARCHIVED: "archived",
+  UNAVAILABLE: "unavailable",
+});
+
+/**
  * Provenance fields for a patient-facing response.
  *
- * dataScope is meaningful to the patient. The link id is theirs, so it may be
- * returned. No practiceProfileId and no global user id.
+ * One shape for all four models: the patient should not have to learn a
+ * different vocabulary per data type.
  *
- * @param {{ dataScope?: string|null, contextPracticePatientLinkId?: string|null }} row
+ *   patient_global      → none      the patient's own data
+ *   contextual + link   → active    a care relationship that still exists
+ *   contextual + archive→ archived  a practice that was deleted
+ *   anything else       → unavailable
+ *
+ * The last case should be unreachable — the database CHECK permits only the
+ * three shapes above — but an unclassifiable record is reported as such rather
+ * than being presented as the patient's own data, which is a claim we could
+ * not support.
+ *
+ * dataScope is meaningful to the patient, and the link id is theirs, so both
+ * may be returned. The ARCHIVE's ids are not theirs to see: they name rows that
+ * no longer exist and would only expose which practice profile was deleted.
+ *
+ * @param {{
+ *   dataScope?: string|null,
+ *   contextPracticePatientLinkId?: string|null,
+ *   archivedPracticeContextId?: string|null,
+ *   archivedPracticeContext?: {
+ *     practiceDisplayNameSnapshot?: string|null,
+ *     practiceSpecialtySnapshot?: string|null,
+ *     archivedAt?: Date|string|null,
+ *   } | null,
+ * }} row
  */
 export function provenanceJson(row) {
+  const dataScope = row?.dataScope ?? null;
+  const linkId = row?.contextPracticePatientLinkId ?? null;
+  const archive = row?.archivedPracticeContext ?? null;
+  const hasArchive = Boolean(row?.archivedPracticeContextId || archive);
+
+  if (dataScope === "patient_global" && !linkId && !hasArchive) {
+    return {
+      dataScope,
+      practiceContextState: PRACTICE_CONTEXT_STATE.NONE,
+      contextPracticePatientLinkId: null,
+      archivedPractice: null,
+    };
+  }
+
+  if (dataScope === "practice_contextual" && linkId && !hasArchive) {
+    return {
+      dataScope,
+      practiceContextState: PRACTICE_CONTEXT_STATE.ACTIVE,
+      contextPracticePatientLinkId: linkId,
+      archivedPractice: null,
+    };
+  }
+
+  if (dataScope === "practice_contextual" && !linkId && hasArchive) {
+    return {
+      dataScope,
+      practiceContextState: PRACTICE_CONTEXT_STATE.ARCHIVED,
+      // A record with an archived context has no live link, by invariant.
+      contextPracticePatientLinkId: null,
+      // Null when the relation was not selected — the state is still archived,
+      // and the UI says "former practice context" without a name.
+      archivedPractice: archive
+        ? {
+            displayName: archive.practiceDisplayNameSnapshot ?? null,
+            specialty: archive.practiceSpecialtySnapshot ?? null,
+            archivedAt: archive.archivedAt ?? null,
+          }
+        : null,
+    };
+  }
+
   return {
-    dataScope: row?.dataScope ?? null,
-    contextPracticePatientLinkId: row?.contextPracticePatientLinkId ?? null,
+    dataScope,
+    practiceContextState: PRACTICE_CONTEXT_STATE.UNAVAILABLE,
+    contextPracticePatientLinkId: null,
+    archivedPractice: null,
   };
 }

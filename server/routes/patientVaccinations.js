@@ -15,6 +15,7 @@ import {
   assertNoProvenanceOverride,
   contextErrorResponse,
   provenanceJson,
+  ARCHIVED_CONTEXT_SELECT,
   createPatientDataWithValidatedContext,
 } from "../services/patientData/patientDataContextService.js";
 
@@ -93,6 +94,9 @@ router.get("/", async (req, res) => {
   try {
     const entries = await prisma.vaccinationEntry.findMany({
       where: { userId, deletedAt: null },
+      // Only the three fields the patient is shown; the archive's own ids are
+      // never loaded, so they cannot be serialised by accident.
+      include: { archivedPracticeContext: ARCHIVED_CONTEXT_SELECT },
       orderBy: { vaccinationDate: "desc" },
     });
     return res.json({ ok: true, entries: entries.map(entryToJson) });

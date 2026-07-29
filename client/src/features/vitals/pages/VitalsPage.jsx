@@ -207,8 +207,11 @@ export default function VitalsPage() {
               onDelete={handleDelete}
               provenance={
                 <ProvenanceBadge
+                  practiceContextState={entry.practiceContextState}
                   dataScope={entry.dataScope}
                   contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                  archivedPractice={entry.archivedPractice}
+                  language={language}
                   source={entry.source}
                   resolve={resolve}
                   t={tProv}
