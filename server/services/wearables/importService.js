@@ -7,7 +7,11 @@
 
 import { prisma } from "../../lib/prisma.js";
 import { DEFAULT_UNITS, validateVital } from "../vitals/vitalConstants.js";
-import { personalImportContext } from "../patientData/patientDataContextService.js";
+import {
+  personalImportContext,
+  lockPatientForWrite,
+  InvalidContextError,
+} from "../patientData/patientDataContextService.js";
 
 /** Hard cap per import call — protects the DB and keeps requests bounded. */
 export const MAX_IMPORT_BATCH = 200;
@@ -36,6 +40,18 @@ export async function importVitalEntries({ userId, provider, allowedTypes, entri
   const skipped = [];
   let imported = 0;
   let duplicates = 0;
+
+  // The whole batch runs under ONE shared lock on the user row, taken once —
+  // not per measurement. Account erasure locks the same row FOR UPDATE, so a
+  // running import finishes before the erasure proceeds, and an import that
+  // starts during the erasure waits and then fails because the account is
+  // gone. Without this, the phone could receive "imported" for readings that
+  // were cascaded away a moment later.
+  //
+  // The import stays patient_global / no link — the classification does not
+  // change, only the serialisation with deletion does.
+  return prisma.$transaction(async (tx) => {
+    await lockPatientForWrite(tx, userId);
 
   // Guard against duplicate externalIds inside the same batch.
   const seenExternalIds = new Set();
@@ -73,7 +89,7 @@ export async function importVitalEntries({ userId, provider, allowedTypes, entri
     try {
       // Idempotent: (userId, sourceProvider, externalId) is unique. A re-sent entry
       // resolves to the existing row and is counted as a duplicate, never duplicated.
-      const existing = await prisma.vitalEntry.findUnique({
+      const existing = await tx.vitalEntry.findUnique({
         where: {
           userId_sourceProvider_externalId: { userId, sourceProvider: provider, externalId },
         },
@@ -89,7 +105,7 @@ export async function importVitalEntries({ userId, provider, allowedTypes, entri
       // server-verified care relationship, and there is deliberately no
       // implicit fallback to one — a caller that has a link must go through
       // resolvePatientDataContextForWrite instead.
-      await prisma.vitalEntry.create({ data: { ...data, ...personalImportContext() } });
+      await tx.vitalEntry.create({ data: { ...data, ...personalImportContext() } });
       imported++;
     } catch (err) {
       // Unique-constraint race (concurrent import of same externalId) → treat as duplicate.
@@ -99,4 +115,5 @@ export async function importVitalEntries({ userId, provider, allowedTypes, entri
   }
 
   return { imported, duplicates, skipped };
+  });
 }

@@ -252,6 +252,12 @@ router.post("/import", requireFeature, async (req, res) => {
     }
     return res.json({ ok: true, ...result });
   } catch (err) {
+    // The account vanished mid-import: a concurrent erasure committed. Neutral
+    // 404, and the connection's error state is not touched — the account row
+    // it belongs to is already gone or going.
+    if (err?.message === "patient_account_unavailable") {
+      return res.status(404).json({ ok: false, error: "patient_account_unavailable" });
+    }
     console.error("[wearables] POST import error", err);
     await prisma.wearableConnection
       .update({ where: { id: connection.id }, data: { status: "error", lastError: "import_failed" } })

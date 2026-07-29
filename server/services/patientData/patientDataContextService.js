@@ -48,12 +48,14 @@ export class UnsupportedFieldError extends Error {
 
 /** Thrown when a context was requested but cannot be used. */
 export class InvalidContextError extends Error {
-  /** @param {"link_not_found"|"link_not_active"} code */
+  /** @param {"link_not_found"|"link_not_active"|"patient_account_unavailable"} code */
   constructor(code) {
     super(code);
     // A link that does not exist and a link belonging to someone else are the
-    // same answer, so a patient cannot probe for other people's links.
-    this.status = code === "link_not_found" ? 404 : 409;
+    // same answer, so a patient cannot probe for other people's links. An
+    // account that vanished mid-write (a concurrent erasure committed) is 404
+    // as well: no existence hint, and the client's session is over anyway.
+    this.status = code === "link_not_active" ? 409 : 404;
   }
 }
 
@@ -164,6 +166,38 @@ export async function resolvePatientDataContextForWrite(input) {
 }
 
 
+/**
+ * Locks the authenticated patient's user row FOR SHARE inside a write
+ * transaction, and confirms the account still exists.
+ *
+ * Why: account erasure locks the same row FOR UPDATE. Without this, a GLOBAL
+ * write (no link, so nothing else to lock) could run concurrently with the
+ * erasure — the record would be cascaded away, but the patient would have
+ * received a successful response for data that no longer exists. With it, a
+ * running write finishes before the erasure proceeds, and a write that starts
+ * during the erasure waits and then fails here because the row is gone.
+ *
+ * Lock order is USER first, then link — the same order the practice and
+ * account deletions use — so the paths cannot deadlock against each other.
+ *
+ * The id comes from authentication or the trusted import process, never from a
+ * request body; this function cannot be pointed at another user's row.
+ */
+export async function lockPatientForWrite(tx, patientUserId) {
+  const uid = String(patientUserId || "").trim();
+  if (!uid) throw new InvalidContextError("patient_account_unavailable");
+  if (typeof tx.$queryRaw !== "function") return; // in-memory test fakes
+
+  const rows = await tx.$queryRaw`
+    SELECT "id" FROM "User" WHERE "id" = ${uid} FOR SHARE
+  `;
+  if (!Array.isArray(rows) || rows.length === 0) {
+    // The account is gone (or was never this patient's). Reported without an
+    // existence hint — the caller maps it to a neutral status.
+    throw new InvalidContextError("patient_account_unavailable");
+  }
+}
+
 /* ------------------------------------------------------------ atomic write */
 
 /**
@@ -220,6 +254,8 @@ export async function createPatientDataWithValidatedContext(input) {
     try {
       return await client.$transaction(
         async (tx) => {
+          // USER first, then link — the same order every deletion path takes.
+          await lockPatientForWrite(tx, input.patientUserId);
           const context = await resolvePatientDataContextForWrite({
             patientUserId: input.patientUserId,
             requestedPracticePatientLinkId: input.requestedPracticePatientLinkId,
