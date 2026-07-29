@@ -79,3 +79,30 @@
     border-color: #6d5424;
   }
 }
+
+/* A practice that no longer exists. Distinct from both "your own data" and an
+   active practice, and readable as former from the text alone. */
+.provenance-badge--archived {
+  background: #eeeaf4;
+  color: #4a3768;
+  border-color: #c4b7dc;
+}
+
+.provenance-badge__meta {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+:root[data-theme="dark"] .provenance-badge--archived {
+  background: #251d33;
+  color: #c9b8ec;
+  border-color: #4b3d68;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .provenance-badge--archived {
+    background: #251d33;
+    color: #c9b8ec;
+    border-color: #4b3d68;
+  }
+}

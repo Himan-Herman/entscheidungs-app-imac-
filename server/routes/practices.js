@@ -28,8 +28,26 @@ import {
   ensureDemoPracticeProfileForUser,
   isPracticeDemoProfileEnabled,
 } from "../services/practiceDemoProfileService.js";
+import { assertPracticeMemberRoleMutationAllowed } from "../services/practiceTeam/practiceTeamService.js";
+import {
+  isDestructivePracticeDeletionEnabled,
+  PRACTICE_DELETION_UNAVAILABLE,
+} from "../services/startup/destructiveDeletionGate.js";
+import {
+  ARCHIVE_CONFLICT,
+  ARCHIVE_INCOMPLETE,
+  ARCHIVE_REASONS,
+  deletePracticeWithArchivedContext,
+} from "../services/dataLifecycle/archivePracticePatientContext.js";
 
 const router = express.Router();
+
+/**
+ * Deleting a practice is irreversible and now moves other people's medical
+ * records to an archive on the way. It requires the same kind of explicit
+ * confirmation the account erasure does.
+ */
+const PRACTICE_DELETE_CONFIRM = "DELETE_THIS_PRACTICE";
 
 const TARGET_TYPES = new Set([
   "practice",
@@ -338,32 +356,47 @@ router.delete("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
   const access = await resolvePracticeAccess(userId, req.params.id);
-  if (!access) return res.status(404).json({ ok: false, error: "not_found" });
+  if (!access) return res.status(404).json({ ok: false, error: "practice_not_found" });
   if (access.role !== "owner") {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
-  // Deleting a practice cascades to its PracticePatientLinks. A link that still
-  // anchors a contextual medical record must not be removed, so check before
-  // touching anything: without this the delete fails deep in the database on an
-  // ON DELETE RESTRICT foreign key and surfaces as an opaque 500.
-  //
-  // Preflight and delete run in one transaction so a record inserted in between
-  // cannot slip through. The foreign key stays the last line of defence and
-  // rolls the transaction back if it does.
-  try {
-    const result = await prisma.$transaction(async (tx) => {
-      const blockers = await checkPracticeDeletionBlockers(req.params.id, tx);
-      if (blockers.blocked) {
-        const err = new Error(CONTEXTUAL_DATA_BLOCKED);
-        err.blockerReport = blockers;
-        throw err;
-      }
-      return tx.practiceProfile.deleteMany({ where: { id: req.params.id } });
-    });
+  // Release gate AFTER the neutral access check (so it discloses nothing about
+  // foreign practices) and BEFORE anything destructive. Deleting a practice
+  // still deletes its documents, and the retention question is open — see the
+  // destructiveDeletionGate module. The confirmation phrase stays required on
+  // top; the gate is not authorization.
+  if (!isDestructivePracticeDeletionEnabled()) {
+    return res.status(409).json({ ok: false, error: PRACTICE_DELETION_UNAVAILABLE });
+  }
+  if (String(req.body?.confirmation ?? "").trim() !== PRACTICE_DELETE_CONFIRM) {
+    return res.status(400).json({ ok: false, error: "confirmation_required" });
+  }
 
-    if (result.count === 0) return res.status(404).json({ ok: false, error: "not_found" });
-    return res.json({ ok: true, deleted: true });
+  // Deleting a practice cascades to its PracticePatientLinks, and every
+  // contextual medical record holds an ON DELETE RESTRICT key to its link. The
+  // records are not the practice's to delete — they belong to the patient — so
+  // they are moved to an immutable archive context first, inside this same
+  // transaction. Document share grants hold three RESTRICT keys of their own
+  // and are released here too.
+  //
+  // Everything happens in one transaction: an archive that committed without
+  // the deletion would leave records detached from a practice that still
+  // exists, and a deletion without the archive is what the database refuses.
+  let summary;
+  try {
+    // One implementation, shared with account erasure: lock, archive, release
+    // grants and tokens, run the guard as a postcondition, then delete.
+    summary = await prisma.$transaction(async (tx) =>
+      deletePracticeWithArchivedContext({
+        transaction: tx,
+        practiceProfileId: req.params.id,
+        deletionReason: ARCHIVE_REASONS.PRACTICE_DELETED,
+        deletingUserId: userId,
+      }));
   } catch (err) {
+    if (err?.message === "practice_not_found") {
+      return res.status(404).json({ ok: false, error: "practice_not_found" });
+    }
     if (err?.message === CONTEXTUAL_DATA_BLOCKED) {
       // Aggregate-only trace; a failing audit must not turn a blocked deletion
       // into a completed one.
@@ -378,11 +411,67 @@ router.delete("/:id", async (req, res) => {
         metadata: blockerAuditMetadata(err.blockerReport),
       });
       // Stable code only — no counts, categories or ids leave the server.
-      return res.status(409).json({ ok: false, error: CONTEXTUAL_DATA_BLOCKED });
+      return res.status(409).json({ ok: false, error: "practice_deletion_blocked" });
+    }
+    if (err?.message === ARCHIVE_CONFLICT || err?.message === ARCHIVE_INCOMPLETE) {
+      // The internal detail explains WHICH invariant failed; it stays in the
+      // log, never in the response.
+      console.error("[practices/delete] archive", err.message, err.archiveDetail ?? "");
+      return res.status(409).json({ ok: false, error: err.message });
     }
     console.error("[practices/delete]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "server_error" });
   }
+
+  // Audit after the commit, from aggregate counts only: how many links were
+  // archived, how many records per model moved, how many grants and tokens
+  // ended. No patient, no link, no medical content.
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_patient_context_archived",
+    entityType: "PracticeProfile",
+    entityId: req.params.id,
+    practiceProfileId: req.params.id,
+    metadata: {
+      archiveReason: ARCHIVE_REASONS.PRACTICE_DELETED,
+      archivedLinks: summary.archived.archivedLinks,
+      movedTotal: summary.archived.movedTotal,
+      movedByModel: summary.archived.movedByModel,
+    },
+  });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "document_share_grants_revoked_for_deletion",
+    entityType: "PracticeProfile",
+    entityId: req.params.id,
+    practiceProfileId: req.params.id,
+    metadata: {
+      reason: ARCHIVE_REASONS.PRACTICE_DELETED,
+      grantsTouched: summary.grants.grantsTouched,
+      grantsAsSource: summary.grants.grantsAsSource,
+      grantsAsTarget: summary.grants.grantsAsTarget,
+      grantsRevoked: summary.grants.grantsRevoked,
+      grantsRemoved: summary.grants.grantsRemoved,
+      tokensRevoked: summary.grants.tokensRevoked,
+    },
+  });
+  writeAuditLog({
+    req,
+    userId,
+    actorRole: access.role,
+    action: "practice_deletion_completed",
+    entityType: "PracticeProfile",
+    entityId: req.params.id,
+    practiceProfileId: req.params.id,
+    metadata: { archivedLinks: summary.archived.archivedLinks },
+  });
+
+  // No patient ids, no link ids, no counts of medical records.
+  return res.json({ ok: true, deleted: true });
 });
 
 router.get("/:id/qr-targets", async (req, res) => {
@@ -526,6 +615,11 @@ router.post("/:id/members", async (req, res) => {
   if (access.role !== "owner" && role === "owner") {
     return res.status(403).json({ ok: false, error: "forbidden_role_escalation" });
   }
+  // The upsert rewrites an existing membership, so the actor's own userId in
+  // the body would be a self role change through the back door.
+  if (memberUserId === userId) {
+    return res.status(403).json({ ok: false, error: "self_role_change_forbidden" });
+  }
   const userExists = await prisma.user.findUnique({ where: { id: memberUserId }, select: { id: true } });
   if (!userExists) return res.status(404).json({ ok: false, error: "user_not_found" });
   const row = await prisma.practiceMember.upsert({
@@ -579,10 +673,24 @@ router.put("/:id/members/:memberId", async (req, res) => {
   if (access.role !== "owner" && role === "owner") {
     return res.status(403).json({ ok: false, error: "forbidden_role_escalation" });
   }
-  const row = await prisma.practiceMember.update({
-    where: { id: existing.id },
+  try {
+    // The same shared rule the team service uses: no self change, owner safe.
+    assertPracticeMemberRoleMutationAllowed({
+      actorUserId: userId,
+      targetMember: { userId: existing.userId, practiceProfile: access.practice },
+    });
+  } catch (err) {
+    const code = err?.message === "self_role_change_forbidden" ? 403 : 400;
+    return res.status(code).json({ ok: false, error: err.message });
+  }
+  const conditional = await prisma.practiceMember.updateMany({
+    where: { id: existing.id, role: existing.role, status: existing.status },
     data: { role },
   });
+  if (conditional.count !== 1) {
+    return res.status(409).json({ ok: false, error: "role_state_conflict" });
+  }
+  const row = await prisma.practiceMember.findUnique({ where: { id: existing.id } });
   writeAuditLog({
     req,
     userId,
@@ -610,6 +718,10 @@ router.delete("/:id/members/:memberId", async (req, res) => {
   if (!existing) return res.status(404).json({ ok: false, error: "member_not_found" });
   if (existing.role === "owner") {
     return res.status(400).json({ ok: false, error: "owner_member_cannot_be_deleted" });
+  }
+  // Aligned with the team service: nobody revokes their own membership here.
+  if (existing.userId === userId) {
+    return res.status(403).json({ ok: false, error: "cannot_revoke_self" });
   }
   const row = await prisma.practiceMember.update({
     where: { id: existing.id },

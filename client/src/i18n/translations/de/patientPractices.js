@@ -15,6 +15,10 @@ export default {
   },
 
   practices: {
+    archivedTitle: "Ehemalige Praxen",
+    archivedDescription:
+      "Daten aus Praxen, die es nicht mehr gibt. Sie bleiben Ihnen erhalten; die Praxis hat keinen Zugriff mehr.",
+    archivedEmpty: "Sie haben keine Daten aus ehemaligen Praxen.",
     title: "Meine Praxen",
     description:
       "Jede Praxis hat einen eigenen Bereich. Einträge einer Praxis erscheinen nur dort.",
@@ -31,6 +35,9 @@ export default {
   },
 
   provenance: {
+    archived: "Ehemaliger Praxisbezug",
+    archivedWith: "Ehemalige Praxis: {practice}",
+    archivedOn: "Archiviert am {date}",
     own: "Ihre eigenen Daten",
     selfEntered: "Von Ihnen eingetragen",
     deviceImport: "Aus Ihrem Gerät importiert",

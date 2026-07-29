@@ -27,6 +27,18 @@ import {
   blockerAuditMetadata,
   checkUserDeletionBlockers,
 } from "../services/dataLifecycle/contextualPatientDataDeletionGuard.js";
+import {
+  ARCHIVE_CONFLICT,
+  ARCHIVE_INCOMPLETE,
+  ARCHIVE_REASONS,
+  deleteOwnPatientDataForUser,
+  deletePracticeWithArchivedContext,
+  releaseDocumentShareGrantsForPatient,
+} from "../services/dataLifecycle/archivePracticePatientContext.js";
+import {
+  isDestructivePracticeDeletionEnabled,
+  OWNER_ACCOUNT_DELETION_UNAVAILABLE,
+} from "../services/startup/destructiveDeletionGate.js";
 
 const router = express.Router();
 
@@ -282,6 +294,21 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
     return sendSafeJsonError(res, 400, "confirmation_required", "Confirmation phrase does not match.");
   }
 
+  // Erasing an account that OWNS a practice also deletes that practice — and
+  // with it, today, its documents. That path is gated until the retention
+  // question is answered; a plain patient's erasure is unaffected. Checked
+  // again inside the transaction, so ownership gained in between cannot slip
+  // past this early answer.
+  if (!isDestructivePracticeDeletionEnabled()) {
+    const ownedCount = await prisma.practiceProfile.count({ where: { userId } });
+    if (ownedCount > 0) {
+      return sendSafeJsonError(
+        res, 409, OWNER_ACCOUNT_DELETION_UNAVAILABLE,
+        "Account deletion is temporarily unavailable for practice owners.",
+      );
+    }
+  }
+
   writeAuditLog({
     req,
     userId,
@@ -290,17 +317,79 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
   });
 
   try {
+    // Aggregates for the audit trail. Counts only — never an id, a name or a
+    // medical value.
+    const lifecycle = {
+      practicesDeleted: 0,
+      foreignLinksArchived: 0,
+      foreignRecordsArchived: {},
+      ownRecordsRemoved: {},
+      ownRecordsRemovedTotal: 0,
+      ownArchivesRemoved: 0,
+      grantsRevoked: 0,
+      tokensRevoked: 0,
+    };
+
     await prisma.$transaction(async (tx) => {
-      // Preflight INSIDE the transaction: a PracticePatientLink that still
-      // anchors a contextual medical record must not be hard-deleted, and the
-      // check must see the same snapshot the deletes will act on. Throwing here
-      // rolls the whole erasure back — there is no partially deleted account.
-      const blockers = await checkUserDeletionBlockers(userId, tx);
-      if (blockers.blocked) {
-        const err = new Error(CONTEXTUAL_DATA_BLOCKED);
-        err.blockerReport = blockers;
-        throw err;
+      // Lock the account first. Every path below — practice deletion and the
+      // user's own data — takes its locks in the same order (user, practice,
+      // links by id), so account and practice erasure cannot deadlock.
+      const userRows = await tx.$queryRaw`
+        SELECT "id" FROM "User" WHERE "id" = ${userId} FOR UPDATE
+      `;
+      if (userRows.length === 0) throw new Error("account_not_found");
+
+      // 1. OTHER PATIENTS FIRST. Contextual records recorded at a practice this
+      //    user owns belong to those patients, not to this account. They are
+      //    archived — never deleted, never re-labelled — before the practice
+      //    that anchors them disappears. Deterministic order by id.
+      const owned = await tx.practiceProfile.findMany({
+        where: { userId },
+        select: { id: true },
+        orderBy: { id: "asc" },
+      });
+      // The authoritative gate check, under the user lock: ownership that
+      // appeared after the early check still stops the erasure, atomically.
+      if (owned.length > 0 && !isDestructivePracticeDeletionEnabled()) {
+        throw new Error(OWNER_ACCOUNT_DELETION_UNAVAILABLE);
       }
+      for (const practice of owned) {
+        const result = await deletePracticeWithArchivedContext({
+          transaction: tx,
+          practiceProfileId: practice.id,
+          deletionReason: ARCHIVE_REASONS.OWNER_ACCOUNT_DELETED,
+          deletingUserId: userId,
+        });
+        lifecycle.practicesDeleted += 1;
+        lifecycle.foreignLinksArchived += result.archived.archivedLinks;
+        for (const [model, n] of Object.entries(result.archived.movedByModel)) {
+          lifecycle.foreignRecordsArchived[model] =
+            (lifecycle.foreignRecordsArchived[model] ?? 0) + n;
+        }
+        lifecycle.grantsRevoked += result.grants.grantsRevoked;
+        lifecycle.tokensRevoked += result.grants.tokensRevoked;
+      }
+
+      // 2. The user's OWN share grants — as the patient and as the granting
+      //    user. Grants of other people that merely involve a practice this
+      //    user never owned are not touched.
+      const ownGrants = await releaseDocumentShareGrantsForPatient({
+        transaction: tx, patientUserId: userId,
+      });
+      lifecycle.grantsRevoked += ownGrants.grantsRevoked;
+      lifecycle.tokensRevoked += ownGrants.tokensRevoked;
+
+      // 3. The user's OWN medical records, in every scope and state, then the
+      //    archive contexts that nothing points at any more. This is the
+      //    patient's own data and the erasure decision applies to it; archiving
+      //    it first only to delete it a moment later would be pointless work on
+      //    medical data.
+      const own = await deleteOwnPatientDataForUser({
+        transaction: tx, patientUserId: userId,
+      });
+      lifecycle.ownRecordsRemoved = own.removedByModel;
+      lifecycle.ownRecordsRemovedTotal = own.removedTotal;
+      lifecycle.ownArchivesRemoved = own.archivesRemoved;
 
       await tx.preVisitSession.deleteMany({ where: { userId } });
       await tx.preVisitCase.deleteMany({ where: { userId } });
@@ -354,7 +443,7 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
         });
       }
 
-      await tx.practiceProfile.deleteMany({ where: { userId } });
+      // The owned practices were deleted above, through the shared service.
       await tx.practiceMember.deleteMany({ where: { userId } });
       await tx.interpreterCloudSession.deleteMany({ where: { userId } });
       await tx.interpreterCloudPreference.deleteMany({ where: { userId } });
@@ -384,6 +473,19 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
         data: { patientUserId: null },
       });
 
+      // Postconditions before the point of no return. The guard stays — it now
+      // confirms the erasure is complete rather than refusing it up front.
+      const blockers = await checkUserDeletionBlockers(userId, tx);
+      if (blockers.blocked) {
+        const err = new Error(CONTEXTUAL_DATA_BLOCKED);
+        err.blockerReport = blockers;
+        throw err;
+      }
+      const ownPracticesLeft = await tx.practiceProfile.count({ where: { userId } });
+      if (ownPracticesLeft > 0) {
+        throw new Error("account_deletion_incomplete");
+      }
+
       // Finally remove the login user row. DB-level ON DELETE CASCADE then erases all
       // patient-owned data (profile, SOS card, symptoms, allergies, diagnoses, vitals,
       // vaccinations, medication plans, e-prescriptions, pre-visit sessions/cases,
@@ -391,20 +493,62 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       await tx.user.delete({ where: { id: userId } });
     });
 
-    // Accountability trace that survives the erasure: no user/patient identifiers,
-    // no health data — only the fact that an account was deleted.
+    // Accountability trace that survives the erasure. Aggregates only: no user
+    // or patient identifier, no practice name, no medical value — the numbers
+    // are what makes the erasure auditable without recording what was erased.
+    if (lifecycle.foreignLinksArchived > 0) {
+      writeAuditLog({
+        req,
+        action: "account_deletion_context_archived",
+        metadata: {
+          archiveReason: ARCHIVE_REASONS.OWNER_ACCOUNT_DELETED,
+          archivedLinks: lifecycle.foreignLinksArchived,
+          archivedByModel: lifecycle.foreignRecordsArchived,
+        },
+      });
+    }
+    if (lifecycle.grantsRevoked > 0 || lifecycle.tokensRevoked > 0) {
+      writeAuditLog({
+        req,
+        action: "document_share_grants_revoked_for_account_deletion",
+        metadata: {
+          grantsRevoked: lifecycle.grantsRevoked,
+          tokensRevoked: lifecycle.tokensRevoked,
+        },
+      });
+    }
     writeAuditLog({
       req,
-      action: "account_deleted",
+      action: "account_deletion_patient_data_removed",
+      metadata: {
+        removedByModel: lifecycle.ownRecordsRemoved,
+        removedTotal: lifecycle.ownRecordsRemovedTotal,
+        archiveContextsRemoved: lifecycle.ownArchivesRemoved,
+      },
+    });
+    if (lifecycle.practicesDeleted > 0) {
+      writeAuditLog({
+        req,
+        action: "account_deletion_practices_removed",
+        metadata: { practicesDeleted: lifecycle.practicesDeleted },
+      });
+    }
+    writeAuditLog({
+      req,
+      action: "account_deletion_completed",
       metadata: { scope: "full_account_erasure" },
     });
 
+    // No counts and no identifiers leave the server.
     return res.json({ ok: true, deleted: true, scope: "full_account_erasure" });
   } catch (err) {
     // Blocked by contextual medical records: the transaction rolled back, the
     // account is untouched. Report a stable code and nothing else — no counts,
     // no link ids, no categories reach the client.
     if (err?.message === CONTEXTUAL_DATA_BLOCKED) {
+      // Now a postcondition failure rather than an upfront refusal: something
+      // the archiving did not cover still references this account. The
+      // transaction rolled back and the account is untouched.
       // Aggregate-only trace. A failing audit must never turn a blocked
       // deletion into a completed one, hence fire-and-forget.
       writeAuditLog({
@@ -414,8 +558,29 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
         metadata: blockerAuditMetadata(err.blockerReport),
       });
       return sendSafeJsonError(
-        res, 409, CONTEXTUAL_DATA_BLOCKED,
-        "Deletion is blocked while contextual patient data still references this account.",
+        res, 409, "account_deletion_blocked",
+        "Deletion could not be completed safely and was rolled back.",
+      );
+    }
+    if (err?.message === OWNER_ACCOUNT_DELETION_UNAVAILABLE) {
+      // Rolled back completely; nothing was archived, deleted or revoked.
+      return sendSafeJsonError(
+        res, 409, OWNER_ACCOUNT_DELETION_UNAVAILABLE,
+        "Account deletion is temporarily unavailable for practice owners.",
+      );
+    }
+    if (err?.message === "account_not_found") {
+      return sendSafeJsonError(res, 404, "account_not_found", "Account not found.");
+    }
+    // The archiving invariants failed. The internal detail names WHICH one and
+    // stays in the log; the client gets the stable code and nothing else.
+    if (err?.message === ARCHIVE_CONFLICT
+      || err?.message === ARCHIVE_INCOMPLETE
+      || err?.message === "account_deletion_incomplete") {
+      logServerError("account/delete/lifecycle", err);
+      return sendSafeJsonError(
+        res, 409, err.message,
+        "Deletion could not be completed safely and was rolled back.",
       );
     }
     logServerError("account/delete", err);

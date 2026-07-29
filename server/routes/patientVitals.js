@@ -15,6 +15,7 @@ import {
   assertNoProvenanceOverride,
   contextErrorResponse,
   provenanceJson,
+  ARCHIVED_CONTEXT_SELECT,
   createPatientDataWithValidatedContext,
 } from "../services/patientData/patientDataContextService.js";
 
@@ -74,6 +75,9 @@ router.get("/", requireFeature, async (req, res) => {
   try {
     const entries = await prisma.vitalEntry.findMany({
       where,
+      // Only the three fields the patient is shown; the archive's own ids
+      // are never loaded, so they cannot be serialised by accident.
+      include: { archivedPracticeContext: ARCHIVED_CONTEXT_SELECT },
       orderBy: { measuredAt: "desc" },
       take: limit,
     });
