@@ -35,6 +35,10 @@ import {
   deletePracticeWithArchivedContext,
   releaseDocumentShareGrantsForPatient,
 } from "../services/dataLifecycle/archivePracticePatientContext.js";
+import {
+  isDestructivePracticeDeletionEnabled,
+  OWNER_ACCOUNT_DELETION_UNAVAILABLE,
+} from "../services/startup/destructiveDeletionGate.js";
 
 const router = express.Router();
 
@@ -290,6 +294,21 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
     return sendSafeJsonError(res, 400, "confirmation_required", "Confirmation phrase does not match.");
   }
 
+  // Erasing an account that OWNS a practice also deletes that practice — and
+  // with it, today, its documents. That path is gated until the retention
+  // question is answered; a plain patient's erasure is unaffected. Checked
+  // again inside the transaction, so ownership gained in between cannot slip
+  // past this early answer.
+  if (!isDestructivePracticeDeletionEnabled()) {
+    const ownedCount = await prisma.practiceProfile.count({ where: { userId } });
+    if (ownedCount > 0) {
+      return sendSafeJsonError(
+        res, 409, OWNER_ACCOUNT_DELETION_UNAVAILABLE,
+        "Account deletion is temporarily unavailable for practice owners.",
+      );
+    }
+  }
+
   writeAuditLog({
     req,
     userId,
@@ -329,6 +348,11 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
         select: { id: true },
         orderBy: { id: "asc" },
       });
+      // The authoritative gate check, under the user lock: ownership that
+      // appeared after the early check still stops the erasure, atomically.
+      if (owned.length > 0 && !isDestructivePracticeDeletionEnabled()) {
+        throw new Error(OWNER_ACCOUNT_DELETION_UNAVAILABLE);
+      }
       for (const practice of owned) {
         const result = await deletePracticeWithArchivedContext({
           transaction: tx,
@@ -536,6 +560,13 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       return sendSafeJsonError(
         res, 409, "account_deletion_blocked",
         "Deletion could not be completed safely and was rolled back.",
+      );
+    }
+    if (err?.message === OWNER_ACCOUNT_DELETION_UNAVAILABLE) {
+      // Rolled back completely; nothing was archived, deleted or revoked.
+      return sendSafeJsonError(
+        res, 409, OWNER_ACCOUNT_DELETION_UNAVAILABLE,
+        "Account deletion is temporarily unavailable for practice owners.",
       );
     }
     if (err?.message === "account_not_found") {

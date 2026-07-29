@@ -446,6 +446,14 @@ export async function startServer() {
         `[startup] database ready: ${summary.database}/${summary.schema}, `
         + `${summary.appliedCount} migrations applied`,
       );
+      // Release-gate visibility: the boolean only, never the raw variable.
+      const { isDestructivePracticeDeletionEnabled } =
+        await import("./services/startup/destructiveDeletionGate.js");
+      const deletionEnabled = isDestructivePracticeDeletionEnabled();
+      console.log(`[startup] destructivePracticeDeletionEnabled: ${deletionEnabled}`);
+      if (!deletionEnabled && process.env.NODE_ENV === "production") {
+        console.warn("[startup] Practice deletion is disabled pending retention-policy approval.");
+      }
     } catch (err) {
       // Code and a short reason only — no connection URL, no ids, no content.
       console.error(`[startup] ${err.readinessCode ?? "startup_failed"}: ${err.readinessDetail ?? err.message}`);

@@ -30,6 +30,10 @@ import {
 } from "../services/practiceDemoProfileService.js";
 import { assertPracticeMemberRoleMutationAllowed } from "../services/practiceTeam/practiceTeamService.js";
 import {
+  isDestructivePracticeDeletionEnabled,
+  PRACTICE_DELETION_UNAVAILABLE,
+} from "../services/startup/destructiveDeletionGate.js";
+import {
   ARCHIVE_CONFLICT,
   ARCHIVE_INCOMPLETE,
   ARCHIVE_REASONS,
@@ -355,6 +359,14 @@ router.delete("/:id", async (req, res) => {
   if (!access) return res.status(404).json({ ok: false, error: "practice_not_found" });
   if (access.role !== "owner") {
     return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+  // Release gate AFTER the neutral access check (so it discloses nothing about
+  // foreign practices) and BEFORE anything destructive. Deleting a practice
+  // still deletes its documents, and the retention question is open — see the
+  // destructiveDeletionGate module. The confirmation phrase stays required on
+  // top; the gate is not authorization.
+  if (!isDestructivePracticeDeletionEnabled()) {
+    return res.status(409).json({ ok: false, error: PRACTICE_DELETION_UNAVAILABLE });
   }
   if (String(req.body?.confirmation ?? "").trim() !== PRACTICE_DELETE_CONFIRM) {
     return res.status(400).json({ ok: false, error: "confirmation_required" });
