@@ -399,13 +399,79 @@ app.use((req, res, next) => {
 app.use(httpErrorHandler);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server läuft unter http://localhost:${PORT}`);
-  // Guarded: no-op unless VAPID is configured. Isolated in try/catch so a
-  // scheduler problem can never affect server startup or other routes.
+
+/**
+ * The configured Express app, without a listening socket.
+ *
+ * Exported so tests can drive the real middleware order without starting the
+ * database guard or opening a port.
+ */
+export function createApp() {
+  return app;
+}
+
+/**
+ * Verifies the database is one this build can serve, then opens the port.
+ *
+ * Migrations run in the BUILD step, not here. A restart executes only the start
+ * command, so without this check new code can reach an old schema and fail one
+ * patient request at a time, long after the deploy reported success. The guard
+ * is read-only: it never migrates, never repairs and never writes.
+ *
+ * On failure nothing listens and the process exits non-zero — a dead instance
+ * is easier to notice, and far safer, than one serving broken endpoints.
+ */
+export async function startServer() {
+  const { assertDatabaseReadyForApplication, resolveGuardBypass } =
+    await import("./services/startup/databaseReadinessService.js");
+
+  let bypass;
   try {
-    startPushReminderScheduler();
+    bypass = resolveGuardBypass(process.env);
   } catch (err) {
-    console.error("[push-scheduler] start failed:", err?.message ?? err);
+    // A bypass requested where it is not allowed is a configuration error, not
+    // something to shrug off.
+    console.error(`[startup] ${err.readinessCode}: ${err.readinessDetail}`);
+    process.exit(1);
+    return undefined;
   }
-});
+
+  if (!bypass.skip) {
+    try {
+      const summary = await assertDatabaseReadyForApplication({
+        prismaClient: prisma,
+        migrationsDirectory: new URL("./prisma/migrations", import.meta.url).pathname,
+      });
+      console.log(
+        `[startup] database ready: ${summary.database}/${summary.schema}, `
+        + `${summary.appliedCount} migrations applied`,
+      );
+    } catch (err) {
+      // Code and a short reason only — no connection URL, no ids, no content.
+      console.error(`[startup] ${err.readinessCode ?? "startup_failed"}: ${err.readinessDetail ?? err.message}`);
+      console.error("[startup] refusing to serve traffic. Run the deployment's migration step first.");
+      process.exit(1);
+      return undefined;
+    }
+  }
+
+  return app.listen(PORT, () => {
+    console.log(`✅ Server läuft unter http://localhost:${PORT}`);
+    // Guarded: no-op unless VAPID is configured. Isolated in try/catch so a
+    // scheduler problem can never affect server startup or other routes.
+    try {
+      startPushReminderScheduler();
+    } catch (err) {
+      console.error("[push-scheduler] start failed:", err?.message ?? err);
+    }
+  });
+}
+
+// Started as a process (`node app.js`, `npm start`) — not when imported.
+const invokedDirectly = process.argv[1]
+  && new URL(`file://${process.argv[1]}`).pathname === new URL(import.meta.url).pathname;
+if (invokedDirectly) {
+  void startServer();
+}
+
+export default app;
