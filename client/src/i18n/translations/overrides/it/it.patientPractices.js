@@ -16,6 +16,10 @@ export const itPatientPractices = {
   },
 
   practices: {
+    archivedTitle: "Studi precedenti",
+    archivedDescription:
+      "Dati provenienti da studi che non esistono più. Restano tuoi; lo studio non ha più accesso.",
+    archivedEmpty: "Non hai dati provenienti da studi precedenti.",
     title: "I miei studi",
     description:
       "Ogni studio ha la propria area. Una voce legata a uno studio compare solo lì.",
@@ -32,6 +36,9 @@ export const itPatientPractices = {
   },
 
   provenance: {
+    archived: "Riferimento a uno studio precedente",
+    archivedWith: "Studio precedente: {practice}",
+    archivedOn: "Archiviato il {date}",
     own: "I tuoi dati personali",
     selfEntered: "Inserito da te",
     deviceImport: "Importato dal tuo dispositivo",

@@ -74,6 +74,9 @@ test("fr, it and es are genuinely translated, not copied from German or English"
     "patientPractices.practices.title",
     "patientPractices.provenance.own",
     "patientPractices.provenance.contextUnavailable",
+    "patientPractices.provenance.archived",
+    "patientPractices.provenance.archivedWith",
+    "patientPractices.practices.archivedTitle",
     "documentSharing.sharedData.title",
     "documentSharing.share.action",
     "documentSharing.share.readOnlyNotice",
@@ -93,6 +96,8 @@ test("fr, it and es are genuinely translated, not copied from German or English"
 test("placeholders survive translation in every language", () => {
   const withPlaceholders = {
     "patientPractices.provenance.contextWith": ["{practice}"],
+    "patientPractices.provenance.archivedWith": ["{practice}"],
+    "patientPractices.provenance.archivedOn": ["{date}"],
     "patientPractices.counts.entries": ["{count}"],
     "documentSharing.share.ariaLabel": ["{document}", "{practice}"],
     "documentSharing.revoke.ariaLabel": ["{document}", "{practice}"],
@@ -129,6 +134,10 @@ test("the required vocabulary exists in all five languages", () => {
     "patientPractices.provenance.own",           // Ihre eigenen Daten
     "patientPractices.provenance.context",       // Praxisbezug
     "patientPractices.provenance.contextUnavailable", // Praxisbezug nicht verfügbar
+    "patientPractices.provenance.archived",       // Ehemaliger Praxisbezug
+    "patientPractices.provenance.archivedWith",   // Ehemalige Praxis: {practice}
+    "patientPractices.provenance.archivedOn",     // Archiviert am {date}
+    "patientPractices.practices.archivedTitle",   // Ehemalige Praxen
     "documentSharing.share.noOtherPractice",     // keine andere aktive Praxis
     "documentSharing.share.alreadyShared",       // bereits geteilt
     "documentSharing.share.success",             // Freigabe erfolgreich

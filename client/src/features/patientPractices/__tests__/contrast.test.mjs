@@ -78,6 +78,8 @@ const PAIRS = [
   ["disabled button text",   "#5b6672", "#e3e8ee", 4.5],
   ["select border",          "#828c99", "#ffffff", 3.0],
   ["modal error",            "#8c1d16", "#ffffff", 4.5],
+  ["archived badge",         "#4a3768", "#eeeaf4", 4.5],
+  ["archived badge border",  "#c4b7dc", "#eeeaf4", 1.0],
   // --- light: practice-side marker
   ["shared flag",            "#17356e", "#e7eefb", 4.5],
 
@@ -109,6 +111,8 @@ const PAIRS = [
   ["dark secondary text",    "#cfe0f2", "#141c24", 4.5],
   ["dark disabled text",     "#97a3b0", "#26303a", 4.5],
   ["dark select border",     "#4a5765", "#1b242d", 1.0],
+  ["dark archived badge",    "#c9b8ec", "#251d33", 4.5],
+  ["dark archived border",   "#4b3d68", "#251d33", 1.0],
   ["dark shared flag",       "#a8c8f7", "#16233e", 4.5],
 ];
 
@@ -137,7 +141,7 @@ test("status is never carried by colour alone", () => {
   const section = readFileSync(join(here, "..", "components/SharedDataSection.jsx"), "utf8");
   assert.match(section, /\{t\.status\[grant\.status\]/, "the pill has a text label");
   const badge = readFileSync(join(here, "..", "components/ProvenanceBadge.jsx"), "utf8");
-  for (const key of ["p.own", "p.contextWith", "p.contextUnavailable"]) {
+  for (const key of ["p.own", "p.contextWith", "p.contextUnavailable", "p.archivedWith", "p.archived"]) {
     assert.ok(badge.includes(key), `${key} missing — the badge would rely on colour`);
   }
 });

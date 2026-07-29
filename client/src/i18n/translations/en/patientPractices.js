@@ -15,6 +15,10 @@ export default {
   },
 
   practices: {
+    archivedTitle: "Former practices",
+    archivedDescription:
+      "Data from practices that no longer exist. It stays with you; the practice no longer has access.",
+    archivedEmpty: "You have no data from former practices.",
     title: "My practices",
     description:
       "Each practice has its own area. An entry made at one practice appears only there.",
@@ -31,6 +35,9 @@ export default {
   },
 
   provenance: {
+    archived: "Former practice context",
+    archivedWith: "Former practice: {practice}",
+    archivedOn: "Archived on {date}",
     own: "Your own data",
     selfEntered: "Entered by you",
     deviceImport: "Imported from your device",

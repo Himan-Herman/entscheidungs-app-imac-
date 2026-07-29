@@ -261,8 +261,11 @@ export default function HealthHistoryPage() {
                   onDelete={handleAllergyDelete}
                 />
                 <ProvenanceBadge
+                  practiceContextState={entry.practiceContextState}
                   dataScope={entry.dataScope}
                   contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                  archivedPractice={entry.archivedPractice}
+                  language={language}
                   resolve={resolve}
                   t={tProv}
                 />
@@ -308,8 +311,11 @@ export default function HealthHistoryPage() {
                   onDelete={handleDiagnosisDelete}
                 />
                 <ProvenanceBadge
+                  practiceContextState={entry.practiceContextState}
                   dataScope={entry.dataScope}
                   contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                  archivedPractice={entry.archivedPractice}
+                  language={language}
                   resolve={resolve}
                   t={tProv}
                 />

@@ -16,6 +16,10 @@ export const esPatientPractices = {
   },
 
   practices: {
+    archivedTitle: "Consultas anteriores",
+    archivedDescription:
+      "Datos procedentes de consultas que ya no existen. Siguen siendo suyos; la consulta ya no tiene acceso.",
+    archivedEmpty: "No tiene datos de consultas anteriores.",
     title: "Mis consultas",
     description:
       "Cada consulta tiene su propia área. Una entrada vinculada a una consulta aparece únicamente allí.",
@@ -32,6 +36,9 @@ export const esPatientPractices = {
   },
 
   provenance: {
+    archived: "Vínculo con una consulta anterior",
+    archivedWith: "Consulta anterior: {practice}",
+    archivedOn: "Archivado el {date}",
     own: "Sus propios datos",
     selfEntered: "Registrado por usted",
     deviceImport: "Importado desde su dispositivo",
