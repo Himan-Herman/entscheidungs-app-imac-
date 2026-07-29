@@ -28,6 +28,7 @@ import {
   ensureDemoPracticeProfileForUser,
   isPracticeDemoProfileEnabled,
 } from "../services/practiceDemoProfileService.js";
+import { assertPracticeMemberRoleMutationAllowed } from "../services/practiceTeam/practiceTeamService.js";
 import {
   ARCHIVE_CONFLICT,
   ARCHIVE_INCOMPLETE,
@@ -602,6 +603,11 @@ router.post("/:id/members", async (req, res) => {
   if (access.role !== "owner" && role === "owner") {
     return res.status(403).json({ ok: false, error: "forbidden_role_escalation" });
   }
+  // The upsert rewrites an existing membership, so the actor's own userId in
+  // the body would be a self role change through the back door.
+  if (memberUserId === userId) {
+    return res.status(403).json({ ok: false, error: "self_role_change_forbidden" });
+  }
   const userExists = await prisma.user.findUnique({ where: { id: memberUserId }, select: { id: true } });
   if (!userExists) return res.status(404).json({ ok: false, error: "user_not_found" });
   const row = await prisma.practiceMember.upsert({
@@ -655,10 +661,24 @@ router.put("/:id/members/:memberId", async (req, res) => {
   if (access.role !== "owner" && role === "owner") {
     return res.status(403).json({ ok: false, error: "forbidden_role_escalation" });
   }
-  const row = await prisma.practiceMember.update({
-    where: { id: existing.id },
+  try {
+    // The same shared rule the team service uses: no self change, owner safe.
+    assertPracticeMemberRoleMutationAllowed({
+      actorUserId: userId,
+      targetMember: { userId: existing.userId, practiceProfile: access.practice },
+    });
+  } catch (err) {
+    const code = err?.message === "self_role_change_forbidden" ? 403 : 400;
+    return res.status(code).json({ ok: false, error: err.message });
+  }
+  const conditional = await prisma.practiceMember.updateMany({
+    where: { id: existing.id, role: existing.role, status: existing.status },
     data: { role },
   });
+  if (conditional.count !== 1) {
+    return res.status(409).json({ ok: false, error: "role_state_conflict" });
+  }
+  const row = await prisma.practiceMember.findUnique({ where: { id: existing.id } });
   writeAuditLog({
     req,
     userId,
@@ -686,6 +706,10 @@ router.delete("/:id/members/:memberId", async (req, res) => {
   if (!existing) return res.status(404).json({ ok: false, error: "member_not_found" });
   if (existing.role === "owner") {
     return res.status(400).json({ ok: false, error: "owner_member_cannot_be_deleted" });
+  }
+  // Aligned with the team service: nobody revokes their own membership here.
+  if (existing.userId === userId) {
+    return res.status(403).json({ ok: false, error: "cannot_revoke_self" });
   }
   const row = await prisma.practiceMember.update({
     where: { id: existing.id },
