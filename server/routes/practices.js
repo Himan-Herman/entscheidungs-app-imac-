@@ -32,8 +32,7 @@ import {
   ARCHIVE_CONFLICT,
   ARCHIVE_INCOMPLETE,
   ARCHIVE_REASONS,
-  archiveContextualPatientDataForLinks,
-  releaseDocumentShareGrantsForPractice,
+  deletePracticeWithArchivedContext,
 } from "../services/dataLifecycle/archivePracticePatientContext.js";
 
 const router = express.Router();
@@ -372,50 +371,15 @@ router.delete("/:id", async (req, res) => {
   // exists, and a deletion without the archive is what the database refuses.
   let summary;
   try {
-    summary = await prisma.$transaction(async (tx) => {
-      // Lock the practice against a concurrent deletion, and read the links in
-      // a fixed order so two runs cannot deadlock on each other.
-      const practiceRows = await tx.$queryRaw`
-        SELECT "id" FROM "PracticeProfile" WHERE "id" = ${req.params.id} FOR UPDATE
-      `;
-      if (practiceRows.length === 0) {
-        throw new Error("practice_not_found");
-      }
-
-      const links = await tx.practicePatientLink.findMany({
-        where: { practiceProfileId: req.params.id },
-        select: { id: true },
-        orderBy: { id: "asc" },
-      });
-      const linkIds = links.map((l) => l.id);
-
-      const archived = await archiveContextualPatientDataForLinks({
-        transaction: tx,
-        linkIds,
-        archiveReason: ARCHIVE_REASONS.PRACTICE_DELETED,
-        expectedPracticeProfileId: req.params.id,
-      });
-
-      const grants = await releaseDocumentShareGrantsForPractice({
+    // One implementation, shared with account erasure: lock, archive, release
+    // grants and tokens, run the guard as a postcondition, then delete.
+    summary = await prisma.$transaction(async (tx) =>
+      deletePracticeWithArchivedContext({
         transaction: tx,
         practiceProfileId: req.params.id,
-      });
-
-      // The existing guard stays, now as a postcondition: if anything the
-      // archiving did not cover still blocks the deletion, the whole
-      // transaction is rolled back rather than failing deep in the database.
-      const blockers = await checkPracticeDeletionBlockers(req.params.id, tx);
-      if (blockers.blocked) {
-        const err = new Error(CONTEXTUAL_DATA_BLOCKED);
-        err.blockerReport = blockers;
-        throw err;
-      }
-
-      const deleted = await tx.practiceProfile.deleteMany({ where: { id: req.params.id } });
-      if (deleted.count === 0) throw new Error("practice_not_found");
-
-      return { archived, grants };
-    });
+        deletionReason: ARCHIVE_REASONS.PRACTICE_DELETED,
+        deletingUserId: userId,
+      }));
   } catch (err) {
     if (err?.message === "practice_not_found") {
       return res.status(404).json({ ok: false, error: "practice_not_found" });

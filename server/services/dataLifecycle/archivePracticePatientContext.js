@@ -324,3 +324,166 @@ export async function releaseDocumentShareGrantsForPractice(input) {
     tokensRevoked: tokens.count,
   };
 }
+
+/**
+ * Deletes one practice, archiving the contextual records of its patients first.
+ *
+ * This is the single implementation both the practice route and the account
+ * erasure use. Neither may reimplement archiving, grant release or the guard:
+ * a second copy is how the two paths would drift apart.
+ *
+ * The caller owns the transaction. Locking order is fixed and identical in both
+ * callers — user, then practice, then links by id — so the two deletion paths
+ * cannot deadlock against each other.
+ *
+ * @param {{
+ *   transaction: any,
+ *   practiceProfileId: string,
+ *   deletionReason: string,
+ *   deletingUserId: string,
+ * }} input
+ */
+export async function deletePracticeWithArchivedContext(input) {
+  const tx = input?.transaction;
+  const practiceProfileId = String(input?.practiceProfileId || "").trim();
+  if (!tx || !practiceProfileId) {
+    throw archiveError(ARCHIVE_INCOMPLETE, "transaction and practice are required");
+  }
+
+  const practiceRows = await tx.$queryRaw`
+    SELECT "id" FROM "PracticeProfile" WHERE "id" = ${practiceProfileId} FOR UPDATE
+  `;
+  if (practiceRows.length === 0) throw new Error("practice_not_found");
+
+  const links = await tx.practicePatientLink.findMany({
+    where: { practiceProfileId },
+    select: { id: true },
+    orderBy: { id: "asc" },
+  });
+
+  const archived = await archiveContextualPatientDataForLinks({
+    transaction: tx,
+    linkIds: links.map((l) => l.id),
+    archiveReason: input.deletionReason,
+    expectedPracticeProfileId: practiceProfileId,
+  });
+
+  const grants = await releaseDocumentShareGrantsForPractice({
+    transaction: tx,
+    practiceProfileId,
+  });
+
+  // The existing guard, as a postcondition: anything the archiving did not
+  // cover rolls the transaction back instead of failing deep in the database.
+  const { checkPracticeDeletionBlockers, CONTEXTUAL_DATA_BLOCKED } =
+    await import("./contextualPatientDataDeletionGuard.js");
+  const blockers = await checkPracticeDeletionBlockers(practiceProfileId, tx);
+  if (blockers.blocked) {
+    const err = new Error(CONTEXTUAL_DATA_BLOCKED);
+    err.blockerReport = blockers;
+    throw err;
+  }
+
+  const deleted = await tx.practiceProfile.deleteMany({ where: { id: practiceProfileId } });
+  if (deleted.count === 0) throw new Error("practice_not_found");
+
+  return { archived, grants };
+}
+
+/**
+ * Ends every share grant the user is personally part of — as the patient, as
+ * the granting user, or through a link of theirs on either side — and revokes
+ * the tokens issued under them.
+ *
+ * Grants belonging to practices the user owns are handled by
+ * deletePracticeWithArchivedContext; this covers the user as a PATIENT. A grant
+ * in which neither the user nor their practices appear is never touched.
+ *
+ * @param {{ transaction: any, patientUserId: string }} input
+ */
+export async function releaseDocumentShareGrantsForPatient(input) {
+  const tx = input?.transaction;
+  const patientUserId = String(input?.patientUserId || "").trim();
+  if (!tx || !patientUserId) {
+    throw archiveError(ARCHIVE_INCOMPLETE, "transaction and patient are required");
+  }
+
+  const touching = {
+    OR: [{ patientUserId }, { grantedByUserId: patientUserId }],
+  };
+
+  const affected = await tx.practiceDocumentShareGrant.findMany({
+    where: touching,
+    select: { id: true, documentId: true, status: true },
+  });
+  if (affected.length === 0) {
+    return { grantsTouched: 0, grantsRevoked: 0, grantsRemoved: 0, tokensRevoked: 0 };
+  }
+
+  const now = new Date();
+  const revoked = await tx.practiceDocumentShareGrant.updateMany({
+    where: { ...touching, status: "active" },
+    data: { status: "revoked", revokedAt: now },
+  });
+  const tokens = await tx.secureDocumentAccessToken.updateMany({
+    where: {
+      revokedAt: null,
+      documentId: { in: [...new Set(affected.map((g) => g.documentId))] },
+    },
+    data: { revokedAt: now },
+  });
+  const removed = await tx.practiceDocumentShareGrant.deleteMany({ where: touching });
+
+  return {
+    grantsTouched: affected.length,
+    grantsRevoked: revoked.count,
+    grantsRemoved: removed.count,
+    tokensRevoked: tokens.count,
+  };
+}
+
+/**
+ * Removes the user's OWN patient-owned medical records and the archive contexts
+ * that then have nothing pointing at them.
+ *
+ * This is the patient's own data, and the product decision for account erasure
+ * is that it goes with the account. Archiving it first and deleting it a moment
+ * later would be pointless work on medical data.
+ *
+ * Nothing is read: counts, deleteMany and a verification count only. No record
+ * id and no medical value is ever loaded or logged.
+ *
+ * @param {{ transaction: any, patientUserId: string }} input
+ */
+export async function deleteOwnPatientDataForUser(input) {
+  const tx = input?.transaction;
+  const patientUserId = String(input?.patientUserId || "").trim();
+  if (!tx || !patientUserId) {
+    throw archiveError(ARCHIVE_INCOMPLETE, "transaction and patient are required");
+  }
+
+  const removedByModel = {};
+  for (const model of CONTEXTUAL_MODELS) {
+    // Every scope and state: global, live contextual, already archived, and
+    // soft-deleted. deletedAt hides a record, it does not remove it.
+    const removed = await tx[model].deleteMany({ where: { userId: patientUserId } });
+    removedByModel[model] = removed.count;
+  }
+
+  for (const model of CONTEXTUAL_MODELS) {
+    const left = await tx[model].count({ where: { userId: patientUserId } });
+    if (left > 0) {
+      throw archiveError(ARCHIVE_INCOMPLETE, `${model}: ${left} own records remain`);
+    }
+  }
+
+  // Only now can the user's own archive contexts go: the four models hold a
+  // RESTRICT to them, so this order is required, not merely tidy. Other
+  // patients' archive contexts are never touched.
+  const archivesRemoved = await tx.archivedPracticePatientContext.deleteMany({
+    where: { patientUserId },
+  });
+
+  const removedTotal = Object.values(removedByModel).reduce((a, b) => a + b, 0);
+  return { removedByModel, removedTotal, archivesRemoved: archivesRemoved.count };
+}

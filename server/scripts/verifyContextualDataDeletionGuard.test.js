@@ -63,17 +63,23 @@ function resetData() {
 }
 
 /** Adds a contextual medical record of the given kind to a link. */
-function addContextual(model, linkId, id = `${model}-1`) {
+function addContextual(model, linkId, id = `${model}-1`, userId = PATIENT) {
   records[model].push({
-    id, dataScope: "practice_contextual", contextPracticePatientLinkId: linkId,
+    // Ownership matters now: the account path deletes the user's OWN records
+    // and archives everyone else's.
+    id, userId, dataScope: "practice_contextual", contextPracticePatientLinkId: linkId,
+    archivedPracticeContextId: null,
     // A value that must never appear in any response.
     secretValue: "CONFIDENTIAL-MEDICAL-VALUE",
   });
 }
 
 /** Adds a patient-global record — must never block anything. */
-function addGlobal(model, id = `${model}-g`) {
-  records[model].push({ id, dataScope: "patient_global", contextPracticePatientLinkId: null });
+function addGlobal(model, id = `${model}-g`, userId = PATIENT) {
+  records[model].push({
+    id, userId, dataScope: "patient_global",
+    contextPracticePatientLinkId: null, archivedPracticeContextId: null,
+  });
 }
 
 function matchesCount(rows, where) {
@@ -159,6 +165,11 @@ function installPrismaFake() {
     // count and updateMany must agree exactly, or the service's own
     // before/after check reports an incomplete archive.
     prisma[model].count = async ({ where }) => records[model].filter((r) => matchesRow(r, where)).length;
+    prisma[model].deleteMany = async ({ where }) => {
+      const hit = records[model].filter((r) => matchesRow(r, where));
+      records[model] = records[model].filter((r) => !hit.includes(r));
+      return { count: hit.length };
+    };
     prisma[model].updateMany = async ({ where, data }) => {
       const hit = records[model].filter((r) => matchesRow(r, where));
       for (const r of hit) Object.assign(r, data);
@@ -166,6 +177,11 @@ function installPrismaFake() {
     };
   }
   prisma.archivedPracticePatientContext = {
+    deleteMany: async ({ where }) => {
+      const hit = archives.filter((a) => a.patientUserId === where.patientUserId);
+      archives = archives.filter((a) => !hit.includes(a));
+      return { count: hit.length };
+    },
     findUnique: async ({ where }) =>
       archives.find((a) => a.originalPracticePatientLinkId === where.originalPracticePatientLinkId) ?? null,
     create: async ({ data }) => {
@@ -180,6 +196,15 @@ function installPrismaFake() {
   };
   prisma.practiceDocumentShareGrant = { ...emptyModel };
   prisma.secureDocumentAccessToken = { ...emptyModel };
+  // The account erasure asserts no owned practice survives.
+  prisma.practiceProfile.count = async ({ where = {} }) =>
+    practices.filter((p) => (where.userId ? p.userId === where.userId : true)).length;
+  prisma.practicePatientLink.deleteMany = async ({ where }) => {
+    const hit = links.filter((l) => l.patientUserId === where.patientUserId);
+    deleted.practicePatientLink.push(...hit.map((l) => l.id));
+    links = links.filter((l) => !hit.includes(l));
+    return { count: hit.length };
+  };
   prisma.practicePatientLink.findMany = (function (original) {
     return async (args) => {
       const rows = await original(args);
@@ -189,6 +214,10 @@ function installPrismaFake() {
   })(prisma.practicePatientLink.findMany);
   prisma.$queryRaw = async (strings, ...values) => {
     const sql = Array.isArray(strings) ? strings.join("?") : String(strings);
+    if (/FROM "User"/.test(sql)) {
+      // The account erasure locks the user row first.
+      return [OWNER, PATIENT].includes(values[0]) ? [{ id: values[0] }] : [];
+    }
     if (/FROM "PracticeProfile"/.test(sql)) {
       return practices.filter((x) => x.id === values[0]).map((x) => ({ id: x.id }));
     }
@@ -377,33 +406,41 @@ test("HTTP 6+14) the success body carries no counts, ids or medical content", as
   }
 });
 
-test("HTTP 7) account deletion is blocked by an owned practice's link", async () => {
+test("HTTP 7) an owner's account deletion archives the practice's patient data", async () => {
+  // This used to be refused outright. The other patient's record is now
+  // archived — still present, still practice_contextual — and the account goes.
   addContextual("vaccinationEntry", LINK_A);
   const res = await call("DELETE", "/api/account/delete", {
     user: OWNER, body: { confirmation: DELETE_CONFIRM },
   });
-  assert.equal(res.status, 409);
-  assert.equal(res.body.error, CONTEXTUAL_DATA_BLOCKED);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
+  const row = records.vaccinationEntry[0];
+  assert.ok(row, "the other patient's record survives");
+  assert.equal(row.dataScope, "practice_contextual");
+  assert.equal(row.contextPracticePatientLinkId, null);
+  assert.ok(row.archivedPracticeContextId);
+  assert.deepEqual(deleted.user, [OWNER]);
 });
 
-test("HTTP 8) account deletion is blocked when the user is the patient", async () => {
+test("HTTP 8) a patient's own contextual data is deleted with the account", async () => {
+  // The patient's own records are theirs; erasure removes them rather than
+  // archiving them for a practice that never owned them.
   addContextual("allergyEntry", LINK_B);
   const res = await call("DELETE", "/api/account/delete", {
     user: PATIENT, body: { confirmation: DELETE_CONFIRM },
   });
-  assert.equal(res.status, 409);
-  assert.equal(res.body.error, CONTEXTUAL_DATA_BLOCKED);
+  assert.equal(res.status, 200, JSON.stringify(res.body));
+  assert.equal(records.allergyEntry.length, 0, "the patient's own record is gone");
+  assert.deepEqual(deleted.user, [PATIENT]);
 });
 
-test("HTTP 9) after a blocked account deletion nothing was deleted", async () => {
-  // Account deletion is deliberately unchanged in this step: it is still
-  // refused while a link anchors contextual data, and the refusal is total.
+test("HTTP 9) a wrong confirmation phrase still deletes nothing", async () => {
   addContextual("diagnosisEntry", LINK_A);
 
   const account = await call("DELETE", "/api/account/delete", {
-    user: OWNER, body: { confirmation: DELETE_CONFIRM },
+    user: OWNER, body: { confirmation: "nope" },
   });
-  assert.equal(account.status, 409);
+  assert.equal(account.status, 400);
 
   assert.deepEqual(deleted.practiceProfile, [], "no practice removed");
   assert.deepEqual(deleted.user, [], "no user removed");
@@ -411,6 +448,7 @@ test("HTTP 9) after a blocked account deletion nothing was deleted", async () =>
   assert.equal(practices.length, 2, "both practices still present");
   assert.equal(links.length, 2, "both links still present");
   assert.equal(records.diagnosisEntry.length, 1, "the medical record survives");
+  assert.equal(archives.length, 0, "nothing archived either");
 });
 
 test("HTTP 10) revoking a link is not archiving", async () => {
