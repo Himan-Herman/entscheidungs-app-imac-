@@ -566,7 +566,10 @@ export default function PracticeTeamPage() {
                       </td>
                       <td>{m.user?.email || "—"}</td>
                       <td>
-                        {canManage && !isOwner && m.status !== "revoked" ? (
+                        {/* Server-decided, like the clinical actions: one's own
+                            row is display-only, so a self role change is never
+                            offered. Security stays server-side regardless. */}
+                        {m.capabilities?.canChangeRole ? (
                           <select
                             value={m.role}
                             aria-label={`${t.actionChangeRole} ${displayName}`}
