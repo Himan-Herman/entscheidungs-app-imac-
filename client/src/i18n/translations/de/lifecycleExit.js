@@ -146,6 +146,13 @@ export default {
     copySubjectButton: "Betreff kopieren",
     copied: "Kopiert.",
     copyFailed: "Kopieren nicht möglich — bitte manuell übernehmen.",
+    caseStatus: {
+      recorded: "Erfasst",
+      awaiting_email_confirmation: "Warten auf Ihre E-Mail-Bestätigung",
+      in_review: "In Prüfung durch MedScoutX",
+      withdrawn: "Zurückgenommen",
+      completed: "Abgeschlossen",
+    },
     caseListTitle: "Vorgänge",
     mailSubject: "Endgültige Löschung meiner Praxis – Anfrage {requestId}",
     mailBody:

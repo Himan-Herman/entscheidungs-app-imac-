@@ -142,6 +142,13 @@ export const esLifecycleExit = {
     copySubjectButton: "Copiar asunto",
     copied: "Copiado.",
     copyFailed: "No se pudo copiar — cópielo manualmente.",
+    caseStatus: {
+      recorded: "Registrado",
+      awaiting_email_confirmation: "A la espera de su confirmación por correo",
+      in_review: "En revisión por MedScoutX",
+      withdrawn: "Retirada",
+      completed: "Completada",
+    },
     caseListTitle: "Expedientes",
     mailSubject: "Eliminación definitiva de mi consulta – solicitud {requestId}",
     mailBody:

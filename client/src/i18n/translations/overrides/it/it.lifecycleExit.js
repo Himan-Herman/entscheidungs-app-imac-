@@ -142,6 +142,13 @@ export const itLifecycleExit = {
     copySubjectButton: "Copia oggetto",
     copied: "Copiato.",
     copyFailed: "Copia non riuscita — copia manualmente.",
+    caseStatus: {
+      recorded: "Registrato",
+      awaiting_email_confirmation: "In attesa della tua conferma via e-mail",
+      in_review: "In esame da parte di MedScoutX",
+      withdrawn: "Ritirato",
+      completed: "Completato",
+    },
     caseListTitle: "Pratiche",
     mailSubject: "Cancellazione definitiva del mio studio – richiesta {requestId}",
     mailBody:

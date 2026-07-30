@@ -142,6 +142,13 @@ export const frLifecycleExit = {
     copySubjectButton: "Copier l'objet",
     copied: "Copié.",
     copyFailed: "Copie impossible — veuillez copier manuellement.",
+    caseStatus: {
+      recorded: "Enregistré",
+      awaiting_email_confirmation: "En attente de votre confirmation par e-mail",
+      in_review: "En cours d'examen par MedScoutX",
+      withdrawn: "Retiré",
+      completed: "Terminé",
+    },
     caseListTitle: "Dossiers",
     mailSubject: "Suppression définitive de mon cabinet – demande {requestId}",
     mailBody:

@@ -44,6 +44,7 @@ export default function PracticeLifecycleSection({ practiceId, practiceName, t }
       if (res.ok && data?.ok) {
         setState({
           status: data.status,
+          practiceName: data.practiceName || "",
           cases: Array.isArray(data.cases) ? data.cases : [],
           supportEmail: data.supportEmail || "contact@medscoutx.com",
           ownerEmail: data.ownerEmail || "",
@@ -82,6 +83,9 @@ export default function PracticeLifecycleSection({ practiceId, practiceName, t }
   }, []);
 
   const supportEmail = state?.supportEmail || "contact@medscoutx.com";
+  // Prefer the lifecycle endpoint's name: the settings form above cannot load
+  // it once the practice is no longer active.
+  const effectivePracticeName = state?.practiceName || practiceName || "";
   const status = state?.status || null;
 
   const openDeletionCase = useMemo(() => {
@@ -98,12 +102,12 @@ export default function PracticeLifecycleSection({ practiceId, practiceName, t }
       buildDeletionMail({
         t,
         supportEmail,
-        practiceName,
+        practiceName: effectivePracticeName,
         caseNumber: openDeletionCase,
         ownerEmail: state?.ownerEmail || "",
         ownerName,
       }),
-    [t, supportEmail, practiceName, openDeletionCase, state, ownerName],
+    [t, supportEmail, effectivePracticeName, openDeletionCase, state, ownerName],
   );
 
   async function copyText(text, key) {
@@ -348,7 +352,7 @@ export default function PracticeLifecycleSection({ practiceId, practiceName, t }
             {state.cases.map((c) => (
               <li key={c.caseNumber}>
                 <span className="lifecycle-exit__case-number">{c.caseNumber}</span>{" "}
-                — {t.status[c.status] ?? c.status}
+                — {t.caseStatus[c.status] ?? c.status}
               </li>
             ))}
           </ul>

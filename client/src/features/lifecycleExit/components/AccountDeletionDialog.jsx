@@ -27,10 +27,11 @@ import "../../../styles/LifecycleExit.css";
  *   open: boolean,
  *   onClose: () => void,
  *   onDeleted: (result: { caseNumber: string | null }) => void,
+ *   onOwnerBlocked: () => void,   // server refused: this account owns a practice
  *   t: Record<string, any>,          // lifecycleExit.patient bundle
  * }} props
  */
-export default function AccountDeletionDialog({ open, onClose, onDeleted, t }) {
+export default function AccountDeletionDialog({ open, onClose, onDeleted, onOwnerBlocked, t }) {
   const [acknowledged, setAcknowledged] = useState(false);
   const [phrase, setPhrase] = useState("");
   const [working, setWorking] = useState(false);
@@ -66,8 +67,14 @@ export default function AccountDeletionDialog({ open, onClose, onDeleted, t }) {
       // hiding this dialog entirely, but a practice acquired since the page
       // loaded must still produce the right message rather than a generic one.
       if (data?.error === "practice_owner_account_deletion_temporarily_unavailable") {
-        setError(t.errorOwnerBlocked);
-      } else if (SAFE_ROLLBACK_CODES.has(data?.error)) {
+        // Hand the decision back to the page, which replaces the deletion card
+        // with the practice-management notice. Nothing was deleted.
+        setAcknowledged(false);
+        setPhrase("");
+        onOwnerBlocked?.();
+        return;
+      }
+      if (SAFE_ROLLBACK_CODES.has(data?.error)) {
         setError(t.errorContextBlocked);
       } else {
         setError(t.errorGeneric);

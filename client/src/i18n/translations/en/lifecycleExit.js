@@ -142,6 +142,13 @@ export default {
     copySubjectButton: "Copy subject",
     copied: "Copied.",
     copyFailed: "Copying failed — please copy manually.",
+    caseStatus: {
+      recorded: "Recorded",
+      awaiting_email_confirmation: "Awaiting your e-mail confirmation",
+      in_review: "Under review by MedScoutX",
+      withdrawn: "Withdrawn",
+      completed: "Completed",
+    },
     caseListTitle: "Cases",
     mailSubject: "Permanent deletion of my practice – request {requestId}",
     mailBody:

@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations/index.js";
 import { authFetch } from "../api/authFetch.js";
-import { fetchPractices } from "../api/practicesApi.js";
 import PreVisitModuleChrome from "../features/preVisit/components/PreVisitModuleChrome.jsx";
 import AccountDeletionDialog from "../features/lifecycleExit/components/AccountDeletionDialog.jsx";
 import "../styles/SettingsPrivacyPage.css";
@@ -26,28 +25,15 @@ export default function SettingsPrivacyPage() {
   const [exportMsg, setExportMsg] = useState("");
   const [exportErr, setExportErr] = useState("");
 
-  // null = still loading; the destructive button never renders before we know
-  // whether this account owns a practice.
-  const [ownsPractice, setOwnsPractice] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deletedCase, setDeletedCase] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { res, data } = await fetchPractices();
-        if (cancelled) return;
-        const rows = res.ok && Array.isArray(data?.practices) ? data.practices : [];
-        setOwnsPractice(rows.some((p) => p.isOwner));
-      } catch {
-        if (!cancelled) setOwnsPractice(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  // Set when the SERVER refuses because this account owns a practice. There is
+  // deliberately no client-side ownership probe: the release gate in
+  // routes/account.js is the single source of truth, and asking
+  // GET /api/practices would be worse than redundant — that endpoint creates a
+  // demo practice as a side effect, which would turn every visitor of this
+  // page into a practice owner and lock them out of deletion for good.
+  const [ownerBlocked, setOwnerBlocked] = useState(false);
 
   async function handleExport() {
     setExportMsg("");
@@ -77,9 +63,6 @@ export default function SettingsPrivacyPage() {
     }
   }
 
-  // Belt and braces: the owner notice replaces the delete button, but if the
-  // list call failed or a practice was acquired since, the server still
-  // refuses with AP3's release-gate code and the dialog surfaces it.
   function handleDeleted({ caseNumber }) {
     setDialogOpen(false);
     setDeletedCase(caseNumber ?? "—");
@@ -198,8 +181,8 @@ export default function SettingsPrivacyPage() {
           <p className="lifecycle-exit__note">{tExit.exportHint}</p>
           <p className="lifecycle-exit__note">{tExit.receiptHint}</p>
 
-          {ownsPractice === true ? (
-            <div className="lifecycle-exit__warning-card" role="note">
+          {ownerBlocked ? (
+            <div className="lifecycle-exit__warning-card" role="alert">
               <p className="lifecycle-exit__warning-title">
                 <span aria-hidden="true">⚠️</span> {tExit.ownerNoticeTitle}
               </p>
@@ -213,15 +196,13 @@ export default function SettingsPrivacyPage() {
             </div>
           ) : null}
 
-          {ownsPractice === false ? (
-            <button
-              type="button"
-              className="lifecycle-exit__btn lifecycle-exit__btn--outline-danger"
-              onClick={() => setDialogOpen(true)}
-            >
-              {tExit.openDialogButton}
-            </button>
-          ) : null}
+          <button
+            type="button"
+            className="lifecycle-exit__btn lifecycle-exit__btn--outline-danger"
+            onClick={() => setDialogOpen(true)}
+          >
+            {tExit.openDialogButton}
+          </button>
 
           <p className="lifecycle-exit__support">
             {tExit.supportLabel}{" "}
@@ -233,6 +214,10 @@ export default function SettingsPrivacyPage() {
           open={dialogOpen}
           onClose={() => setDialogOpen(false)}
           onDeleted={handleDeleted}
+          onOwnerBlocked={() => {
+            setDialogOpen(false);
+            setOwnerBlocked(true);
+          }}
           t={tExit}
         />
       </div>

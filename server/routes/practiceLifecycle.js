@@ -184,6 +184,11 @@ router.get("/:id/lifecycle", async (req, res) => {
       ok: true,
       status: practiceLifecycleStatusOf(access.practice),
       changedAt: access.practice.lifecycleStatusChangedAt ?? null,
+      // The owner's own practice name. Needed because the settings API
+      // (correctly) refuses a non-active practice, so the surrounding form
+      // never loads it — without this the deletion-request mail would name no
+      // practice at all.
+      practiceName: access.practice.practiceName ?? null,
       supportEmail: getSupportEmail(),
       ownerEmail: self?.email ?? null,
       cases: cases.map(caseJson),
