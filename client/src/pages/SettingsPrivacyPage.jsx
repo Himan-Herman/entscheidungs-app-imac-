@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations/index.js";
 import { authFetch } from "../api/authFetch.js";
+import { fetchPractices } from "../api/practicesApi.js";
 import PreVisitModuleChrome from "../features/preVisit/components/PreVisitModuleChrome.jsx";
+import AccountDeletionDialog from "../features/lifecycleExit/components/AccountDeletionDialog.jsx";
 import "../styles/SettingsPrivacyPage.css";
+import "../styles/LifecycleExit.css";
 
-const CONFIRM_PHRASE = "DELETE_MY_MEDSCOUTX_DATA";
+const SUPPORT_EMAIL = "contact@medscoutx.com";
 
 export default function SettingsPrivacyPage() {
   const { language } = useLanguage();
@@ -14,15 +17,37 @@ export default function SettingsPrivacyPage() {
     const bundle = getMessages(language);
     return bundle.settingsPrivacy ?? getMessages("en").settingsPrivacy;
   }, [language]);
+  const tExit = useMemo(() => {
+    const bundle = getMessages(language);
+    return bundle.lifecycleExit?.patient ?? getMessages("en").lifecycleExit.patient;
+  }, [language]);
 
   const [exporting, setExporting] = useState(false);
   const [exportMsg, setExportMsg] = useState("");
   const [exportErr, setExportErr] = useState("");
 
-  const [confirmText, setConfirmText] = useState("");
-  const [deleting, setDeleting] = useState(false);
-  const [deleteErr, setDeleteErr] = useState("");
-  const [deleteOk, setDeleteOk] = useState(false);
+  // null = still loading; the destructive button never renders before we know
+  // whether this account owns a practice.
+  const [ownsPractice, setOwnsPractice] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deletedCase, setDeletedCase] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { res, data } = await fetchPractices();
+        if (cancelled) return;
+        const rows = res.ok && Array.isArray(data?.practices) ? data.practices : [];
+        setOwnsPractice(rows.some((p) => p.isOwner));
+      } catch {
+        if (!cancelled) setOwnsPractice(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleExport() {
     setExportMsg("");
@@ -52,40 +77,42 @@ export default function SettingsPrivacyPage() {
     }
   }
 
-  async function handleDelete(e) {
-    e.preventDefault();
-    setDeleteErr("");
-    setDeleteOk(false);
-    if (confirmText.trim() !== CONFIRM_PHRASE) {
-      setDeleteErr(t.deleteConfirmError);
-      return;
-    }
-    setDeleting(true);
-    try {
-      const res = await authFetch("/api/account/delete", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmation: CONFIRM_PHRASE }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data?.error || "delete_failed");
-      }
-      setDeleteOk(true);
-      setConfirmText("");
-    } catch (e) {
-      if (e?.message === "SESSION_EXPIRED") return;
-      // Release-gated on the server: an account that owns a practice cannot be
-      // erased automatically while the retention question is open. The message
-      // stays non-technical — no configuration, no legal claims.
-      if (e?.message === "practice_owner_account_deletion_temporarily_unavailable") {
-        setDeleteErr(t.deleteOwnerBlocked ?? t.deleteError);
-      } else {
-        setDeleteErr(t.deleteError);
-      }
-    } finally {
-      setDeleting(false);
-    }
+  // Belt and braces: the owner notice replaces the delete button, but if the
+  // list call failed or a practice was acquired since, the server still
+  // refuses with AP3's release-gate code and the dialog surfaces it.
+  function handleDeleted({ caseNumber }) {
+    setDialogOpen(false);
+    setDeletedCase(caseNumber ?? "—");
+    // The account is gone: drop the now-invalid local session.
+    localStorage.removeItem("medscout_token");
+    localStorage.removeItem("medscout_user_id");
+  }
+
+  // Post-deletion confirmation view: the rest of the page would only trigger
+  // 401s, so it is replaced entirely.
+  if (deletedCase !== null) {
+    return (
+      <div className="settings-privacy">
+        <div className="settings-privacy__inner">
+          <section className="settings-privacy__card" aria-labelledby="privacy-deleted-title">
+            <h1 id="privacy-deleted-title" className="settings-privacy__title">
+              {tExit.successTitle}
+            </h1>
+            <p className="settings-privacy__muted" role="status">
+              {tExit.successBody.replace("{caseNumber}", deletedCase)}
+            </p>
+            <p className="lifecycle-exit__note">{tExit.successEmailHint}</p>
+            <p className="lifecycle-exit__support">
+              {tExit.supportLabel}{" "}
+              <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+            </p>
+            <Link className="lifecycle-exit__btn lifecycle-exit__btn--primary" to="/">
+              MedScoutX
+            </Link>
+          </section>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -151,45 +178,63 @@ export default function SettingsPrivacyPage() {
           aria-labelledby="privacy-delete-title"
         >
           <h2 id="privacy-delete-title" className="settings-privacy__section-title">
-            {t.dangerTitle}
+            {tExit.dangerTitle}
           </h2>
-          <p className="settings-privacy__muted">{t.dangerHelp}</p>
-          <p className="settings-privacy__phrase-hint">
-            <strong>{t.dangerPhraseHint}</strong> <code>{CONFIRM_PHRASE}</code>
-          </p>
-          <form className="settings-privacy__danger-form" onSubmit={handleDelete}>
-            <label className="settings-privacy__label" htmlFor="privacy-delete-confirm">
-              {t.dangerPhraseLabel}
-            </label>
-            <input
-              id="privacy-delete-confirm"
-              className="settings-privacy__input"
-              type="text"
-              autoComplete="off"
-              spellCheck={false}
-              placeholder={t.dangerPlaceholder}
-              value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
-            />
+          <p className="settings-privacy__muted">{tExit.dangerIntro}</p>
+
+          <h3 className="lifecycle-exit__label">{tExit.whatDeletedTitle}</h3>
+          <ul className="lifecycle-exit__list">
+            {tExit.whatDeletedItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <h3 className="lifecycle-exit__label">{tExit.whatRemainsTitle}</h3>
+          <ul className="lifecycle-exit__list">
+            {tExit.whatRemainsItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <p className="lifecycle-exit__note">{tExit.whatRemainsNote}</p>
+          <p className="lifecycle-exit__note">{tExit.exportHint}</p>
+          <p className="lifecycle-exit__note">{tExit.receiptHint}</p>
+
+          {ownsPractice === true ? (
+            <div className="lifecycle-exit__warning-card" role="note">
+              <p className="lifecycle-exit__warning-title">
+                <span aria-hidden="true">⚠️</span> {tExit.ownerNoticeTitle}
+              </p>
+              <p className="lifecycle-exit__note">{tExit.ownerNotice}</p>
+              <Link
+                className="lifecycle-exit__btn lifecycle-exit__btn--primary"
+                to="/practice/settings"
+              >
+                {tExit.ownerManageButton}
+              </Link>
+            </div>
+          ) : null}
+
+          {ownsPractice === false ? (
             <button
-              type="submit"
-              className="settings-privacy__btn settings-privacy__btn--danger"
-              disabled={deleting}
+              type="button"
+              className="lifecycle-exit__btn lifecycle-exit__btn--outline-danger"
+              onClick={() => setDialogOpen(true)}
             >
-              {deleting ? t.deleting : t.deleteButton}
+              {tExit.openDialogButton}
             </button>
-          </form>
-          {deleteOk ? (
-            <p className="settings-privacy__ok" role="status">
-              {t.deleteSuccess}
-            </p>
           ) : null}
-          {deleteErr ? (
-            <p className="settings-privacy__err" role="alert">
-              {deleteErr}
-            </p>
-          ) : null}
+
+          <p className="lifecycle-exit__support">
+            {tExit.supportLabel}{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+          </p>
         </section>
+
+        <AccountDeletionDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          onDeleted={handleDeleted}
+          t={tExit}
+        />
       </div>
     </div>
   );

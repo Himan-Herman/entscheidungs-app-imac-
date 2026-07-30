@@ -12,6 +12,7 @@ import {
   uploadPracticeLogo,
 } from "../api/practiceSettingsApi.js";
 import { IDENTITY_CHANGED_EVENT } from "../../../hooks/useAccountIdentity.js";
+import PracticeLifecycleSection from "../../lifecycleExit/components/PracticeLifecycleSection.jsx";
 import "../../../styles/PracticeDashboardPage.css";
 import "../styles/PracticeSettingsPage.css";
 
@@ -55,6 +56,12 @@ export default function PracticeSettingsPage() {
   const { language } = useLanguage();
   const t = useMemo(
     () => getMessages(language).practiceSettings || getMessages("en").practiceSettings,
+    [language],
+  );
+  const tLifecycle = useMemo(
+    () =>
+      getMessages(language).lifecycleExit?.practice ||
+      getMessages("en").lifecycleExit.practice,
     [language],
   );
   const tOrg = useMemo(
@@ -756,6 +763,16 @@ export default function PracticeSettingsPage() {
               </div>
             ) : null}
           </form>
+        ) : null}
+
+        {/* Owner-only; the section self-hides when the lifecycle endpoint
+            answers 403/404, so members and non-owners never see it. */}
+        {practiceId ? (
+          <PracticeLifecycleSection
+            practiceId={practiceId}
+            practiceName={form.practiceName}
+            t={tLifecycle}
+          />
         ) : null}
       </div>
     </div>

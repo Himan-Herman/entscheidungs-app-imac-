@@ -1,0 +1,319 @@
+/* Exit / closure / deletion-request UI (patient + practice).
+   Token-driven; dark mode via :root[data-theme="dark"] (app convention).
+   All interactive targets keep >= 44px hit areas; status is always conveyed
+   by text, never by color alone. */
+
+.lifecycle-exit__list {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+  display: grid;
+  gap: 4px;
+  color: var(--ms-color-text, #111827);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.lifecycle-exit__note {
+  margin: 8px 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ms-color-text-muted, #4b5563);
+}
+
+.lifecycle-exit__warning-card {
+  border: 1px solid rgba(185, 28, 28, 0.45);
+  background: var(--ms-color-danger-bg, rgba(220, 38, 38, 0.08));
+  border-radius: var(--ms-radius-md, 12px);
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+
+.lifecycle-exit__warning-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ms-color-danger, #b91c1c);
+}
+
+.lifecycle-exit__support {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ms-color-text-muted, #4b5563);
+  word-break: break-all;
+}
+
+.lifecycle-exit__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ms-control-min-height, 48px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 120ms ease, background-color 120ms ease;
+}
+
+.lifecycle-exit__btn:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring, #0284c7);
+  outline-offset: 2px;
+}
+
+.lifecycle-exit__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lifecycle-exit__btn--danger {
+  background: var(--ms-color-danger, #b91c1c);
+  color: #ffffff;
+}
+
+.lifecycle-exit__btn--danger:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.lifecycle-exit__btn--outline {
+  background: transparent;
+  border-color: var(--ms-color-border, #d1d5db);
+  color: var(--ms-color-text, #111827);
+}
+
+.lifecycle-exit__btn--outline-danger {
+  background: transparent;
+  border-color: rgba(185, 28, 28, 0.6);
+  color: var(--ms-color-danger, #b91c1c);
+}
+
+.lifecycle-exit__btn--primary {
+  background: var(--ms-color-accent, #0f766e);
+  color: #ffffff;
+}
+
+.lifecycle-exit__btn--primary:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.lifecycle-exit__field {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.lifecycle-exit__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ms-color-text, #111827);
+}
+
+.lifecycle-exit__input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  background: var(--ms-color-surface, #ffffff);
+  color: var(--ms-color-text, #111827);
+  font-size: 15px;
+}
+
+.lifecycle-exit__input:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring, #0284c7);
+  outline-offset: 1px;
+}
+
+.lifecycle-exit__checkbox-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  border-radius: 10px;
+}
+
+.lifecycle-exit__checkbox-row input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  margin-top: 2px;
+  accent-color: var(--ms-color-danger, #b91c1c);
+}
+
+.lifecycle-exit__checkbox-row label {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ms-color-text, #111827);
+}
+
+.lifecycle-exit__phrase {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--ms-color-surface-muted, #f3f4f6);
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  user-select: all;
+}
+
+.lifecycle-exit__dialog-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.lifecycle-exit__error {
+  margin: 10px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ms-color-danger, #b91c1c);
+}
+
+.lifecycle-exit__ok {
+  margin: 10px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ms-color-success, #15803d);
+}
+
+/* ---- practice section ---- */
+
+.lifecycle-exit__status-banner {
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  border-left: 4px solid var(--ms-color-accent, #0f766e);
+  background: var(--ms-color-surface-muted, #f9fafb);
+  border-radius: var(--ms-radius-md, 12px);
+  padding: 12px 14px;
+  margin: 12px 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ms-color-text, #111827);
+}
+
+.lifecycle-exit__status-banner--danger {
+  border-left-color: var(--ms-color-danger, #b91c1c);
+}
+
+.lifecycle-exit__status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  margin: 4px 0 0;
+}
+
+.lifecycle-exit__status-value {
+  font-weight: 700;
+}
+
+.lifecycle-exit__cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 14px;
+}
+
+.lifecycle-exit__card {
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  border-radius: var(--ms-radius-md, 12px);
+  background: var(--ms-color-surface, #ffffff);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lifecycle-exit__card--danger {
+  border-color: rgba(185, 28, 28, 0.5);
+}
+
+.lifecycle-exit__card-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ms-color-text, #111827);
+}
+
+.lifecycle-exit__card--danger .lifecycle-exit__card-title {
+  color: var(--ms-color-danger, #b91c1c);
+}
+
+.lifecycle-exit__card-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ms-color-text-muted, #4b5563);
+  flex: 1 1 auto;
+}
+
+.lifecycle-exit__request-panel {
+  border: 1px solid var(--ms-color-border, #d1d5db);
+  border-radius: var(--ms-radius-md, 12px);
+  padding: 14px 16px;
+  margin-top: 14px;
+  background: var(--ms-color-surface, #ffffff);
+}
+
+.lifecycle-exit__case-number {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  user-select: all;
+}
+
+.lifecycle-exit__panel-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.lifecycle-exit__case-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ms-color-text-muted, #4b5563);
+}
+
+/* ---- dark mode ---- */
+
+:root[data-theme="dark"] .lifecycle-exit__warning-card {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.5);
+}
+
+:root[data-theme="dark"] .lifecycle-exit__warning-title,
+:root[data-theme="dark"] .lifecycle-exit__error,
+:root[data-theme="dark"] .lifecycle-exit__btn--outline-danger,
+:root[data-theme="dark"] .lifecycle-exit__card--danger .lifecycle-exit__card-title {
+  /* 4.5:1+ on dark surfaces — the light-mode red fails contrast on dark. */
+  color: #fca5a5;
+}
+
+:root[data-theme="dark"] .lifecycle-exit__btn--outline-danger {
+  border-color: rgba(252, 165, 165, 0.6);
+}
+
+:root[data-theme="dark"] .lifecycle-exit__btn--danger {
+  background: #dc2626;
+}
+
+:root[data-theme="dark"] .lifecycle-exit__ok {
+  color: #86efac;
+}
+
+:root[data-theme="dark"] .lifecycle-exit__phrase,
+:root[data-theme="dark"] .lifecycle-exit__status-banner {
+  background: rgba(255, 255, 255, 0.06);
+}

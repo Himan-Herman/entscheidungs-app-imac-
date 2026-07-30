@@ -22,6 +22,7 @@ import { itPatientBillingExplain } from "./it/it.patientBillingExplain.js";
 import { itPracticeDirectory } from "./it/it.practiceDirectory.js";
 import { itTelemedicine } from "./it/it.telemedicine.js";
 import { itPatientPractices, itDocumentSharing } from "./it/it.patientPractices.js";
+import { itLifecycleExit } from "./it/it.lifecycleExit.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
@@ -305,5 +306,5 @@ const itComposed = deepMerge(
 
 export default deepMerge(
   deepMerge(itComposed, itTelemedicine),
-  { patientPractices: itPatientPractices, documentSharing: itDocumentSharing },
+  { patientPractices: itPatientPractices, documentSharing: itDocumentSharing, lifecycleExit: itLifecycleExit },
 );
