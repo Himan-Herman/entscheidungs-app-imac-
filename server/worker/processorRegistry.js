@@ -1,5 +1,6 @@
 import {
   isWorkerExportsEnabled,
+  isWorkerLifecycleOutboxEnabled,
   isWorkerOcrEnabled,
   isWorkerRemindersEnabled,
   isWorkerTelemedicineCleanupEnabled,
@@ -14,6 +15,7 @@ import { cleanupExpiredExports } from "../services/export/exportJobService.js";
 import { runAppointmentReminderWorker } from "../services/reminders/appointmentReminderWorker.js";
 import { processTelemedicineCleanup } from "../services/telemedicine/telemedicineCleanupService.js";
 import { runWebhookWorker } from "../services/webhooks/webhookWorker.js";
+import { dispatchPendingLifecycleEmails } from "../services/practiceLifecycle/lifecycleOutboxService.js";
 
 /**
  * @typedef {object} WorkerProcessorDef
@@ -57,6 +59,13 @@ export const WORKER_PROCESSORS = [
     id: "telemedicine",
     isEnabled: isWorkerTelemedicineCleanupEnabled,
     run: (opts) => processTelemedicineCleanup(opts),
+  },
+  {
+    // Retry sweep for written lifecycle confirmations that could not be sent
+    // right after commit — a committed change never loses its receipt.
+    id: "lifecycleOutbox",
+    isEnabled: isWorkerLifecycleOutboxEnabled,
+    run: (opts) => dispatchPendingLifecycleEmails(opts),
   },
 ];
 

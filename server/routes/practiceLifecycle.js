@@ -42,6 +42,11 @@ import {
   lifecycleTransitionErrorCode,
   practiceLifecycleStatusOf,
 } from "../services/practiceLifecycle/practiceLifecycleService.js";
+import {
+  enqueueLifecycleReceiptPair,
+  kickLifecycleOutbox,
+} from "../services/practiceLifecycle/lifecycleOutboxService.js";
+import { formatLifecycleTimestamp } from "../services/practiceLifecycle/lifecycleTime.js";
 
 const router = express.Router();
 
@@ -245,6 +250,37 @@ async function runLifecycleMutation(req, res, {
         reason,
       });
 
+      // Written receipt to the owner + internal MedScoutX notice, committed in
+      // the SAME transaction as the state change (transactional outbox): a
+      // rolled-back change sends nothing, a committed one cannot lose its
+      // receipt, and the mail provider is never called inside the transaction.
+      const profile = await tx.userProfile.findUnique({
+        where: { userId: access.userId },
+        select: { preferredUiLanguage: true },
+      });
+      const locale = profile?.preferredUiLanguage || "de";
+      await enqueueLifecycleReceiptPair(tx, {
+        caseNumber: kase.caseNumber,
+        kind: caseAction,
+        recipientEmail: access.ownerEmail,
+        locale,
+        params: {
+          practiceName: access.practice.practiceName ?? "",
+          actionAt: formatLifecycleTimestamp(new Date(), locale),
+        },
+        internalStatus: kase.status,
+      });
+      writeAuditLog({
+        req,
+        userId: access.userId,
+        actorRole: "owner",
+        action: "lifecycle_receipt_queued",
+        entityType: "PracticeProfile",
+        entityId: access.practiceId,
+        practiceProfileId: access.practiceId,
+        metadata: { caseNumber: kase.caseNumber },
+      });
+
       await writeRequiredAuditLog(
         {
           req,
@@ -266,12 +302,18 @@ async function runLifecycleMutation(req, res, {
       return kase;
     });
 
+    // Post-commit, outside any transaction: attempt delivery now; failures
+    // stay queued and are retried by the lifecycleOutbox worker.
+    kickLifecycleOutbox();
+
     return res.json({
       ok: true,
       status: LIFECYCLE_TRANSITIONS[action].to,
       caseNumber: lifecycleCase.caseNumber,
       caseStatus: lifecycleCase.status,
       supportEmail: getSupportEmail(),
+      // Queued, NOT proven delivered.
+      emailStatus: "email_delivery_pending",
     });
   } catch (err) {
     if (err instanceof LifecycleHttpError) {

@@ -157,9 +157,15 @@ export function writeAuditLog(opts) {
  * Use for: issuing/cancelling a prescription, creating/activating/revoking a
  * care link, granting/revoking consent, exporting or sharing patient data.
  *
+ * Accepts an OPTIONAL transaction client so the audit row can be written in
+ * the same transaction as the mutation it records (exactly one entry per
+ * successful change). Existing callers pass no second argument and keep the
+ * previous behaviour unchanged.
+ *
  * @param {Parameters<typeof writeAuditLog>[0]} opts
+ * @param {import('@prisma/client').Prisma.TransactionClient | import('@prisma/client').PrismaClient} [db]
  * @returns {Promise<void>}
  */
-export async function writeRequiredAuditLog(opts) {
-  await prisma.auditLog.create({ data: buildAuditRow(opts) });
+export async function writeRequiredAuditLog(opts, db = prisma) {
+  await db.auditLog.create({ data: buildAuditRow(opts) });
 }

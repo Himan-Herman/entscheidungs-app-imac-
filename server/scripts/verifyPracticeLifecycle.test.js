@@ -50,6 +50,7 @@ const PASSWORD_HASH = await bcrypt.hash(PASSWORD, 4);
 let practices;
 let members;
 let lifecycleCases;
+let outboxRows;
 let auditRows;
 let foreignWrites; // any write to a model the lifecycle must never touch
 let caseSeq;
@@ -63,6 +64,7 @@ function resetData() {
     { practiceProfileId: PRACTICE_A, userId: ADMIN_MEMBER, role: "admin", status: "active" },
   ];
   lifecycleCases = [];
+  outboxRows = [];
   auditRows = [];
   foreignWrites = [];
   caseSeq = 0;
@@ -141,6 +143,18 @@ function installPrismaFake() {
       auditRows.push(data);
       return data;
     },
+  };
+  // Receipts are queued in the SAME transaction as the state change.
+  prisma.lifecycleOutboxEmail = {
+    create: async ({ data }) => {
+      outboxRows.push({ ...data, status: "pending" });
+      return { ...data, id: `outbox-${outboxRows.length}` };
+    },
+    findMany: async () => [],
+    updateMany: async () => ({ count: 0 }),
+  };
+  prisma.userProfile = {
+    findUnique: async () => ({ preferredUiLanguage: "de" }),
   };
   // Models a lifecycle change must NEVER touch: consents, grants, tokens.
   for (const model of [
@@ -279,6 +293,15 @@ test("HTTP: owner can suspend an active practice; case + audit are written once"
   assert.equal(statusOf(PRACTICE_A), "suspended");
   assert.equal(lifecycleCases.length, 1);
   assert.equal(auditRows.filter((a) => a.action === "lifecycle_practice_suspended").length, 1);
+  // Owner receipt + internal MedScoutX notice, queued transactionally.
+  assert.deepEqual(outboxRows.map((r) => r.kind).sort(), [
+    "medscoutx_internal_notice",
+    "practice_suspended",
+  ]);
+  assert.equal(
+    outboxRows.find((r) => r.kind === "medscoutx_internal_notice").recipientEmail,
+    "contact@medscoutx.com",
+  );
 });
 
 test("HTTP: an admin member cannot perform lifecycle actions", async () => {
@@ -289,6 +312,7 @@ test("HTTP: an admin member cannot perform lifecycle actions", async () => {
   assert.equal(res.body.error, LIFECYCLE_ERRORS.OWNER_REQUIRED);
   assert.equal(statusOf(PRACTICE_A), "active");
   assert.equal(lifecycleCases.length, 0);
+  assert.deepEqual(outboxRows, [], "a rejected action queues no receipt");
 });
 
 test("HTTP: outsiders and foreign owners resolve to 404 — no tenant enumeration", async () => {

@@ -41,6 +41,10 @@ export function isWorkerTelemedicineCleanupEnabled() {
   return isProcessorEnabled("WORKER_TELEMEDICINE_CLEANUP_ENABLED");
 }
 
+export function isWorkerLifecycleOutboxEnabled() {
+  return isProcessorEnabled("WORKER_LIFECYCLE_OUTBOX_ENABLED");
+}
+
 /** Safe snapshot for status responses (no secrets). */
 export function getWorkerFlagsSnapshot() {
   return {

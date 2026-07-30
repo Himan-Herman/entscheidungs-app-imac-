@@ -138,11 +138,35 @@ function installPrismaFake() {
     deleteMany: async () => ({ count: 0 }),
   };
   prisma.user = {
+    findUnique: async ({ where }) => ({
+      id: where.id,
+      email: `${where.id}@example.invalid`,
+      profile: null,
+    }),
     delete: async ({ where }) => {
       deleted.user.push(where.id);
       return { id: where.id };
     },
   };
+  // Written lifecycle proof + transactional outbox (account-safety layer).
+  let lifecycleSeq = 0;
+  prisma.lifecycleCase = {
+    create: async ({ data }) => {
+      lifecycleSeq += 1;
+      return { ...data, id: `case-${lifecycleSeq}`, seq: lifecycleSeq, createdAt: new Date() };
+    },
+    update: async ({ where, data }) => ({ id: where.id, ...data }),
+    updateMany: async () => ({ count: 0 }),
+    findFirst: async () => null,
+    findMany: async () => [],
+  };
+  prisma.lifecycleOutboxEmail = {
+    create: async ({ data }) => ({ ...data, id: `outbox-${lifecycleSeq}` }),
+    findMany: async () => [],
+    updateMany: async () => ({ count: 0 }),
+  };
+  prisma.userProfile = { findUnique: async () => null };
+
   prisma.auditLog = {
     create: async ({ data }) => {
       auditRows.push(data);

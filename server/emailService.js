@@ -50,8 +50,12 @@ async function sendResendWithRetry(sendFn, eventName) {
 
 /**
  * Generische Mail senden (Resend)
+ *
+ * @param {{ replyTo?: string }} [opts] optionale Reply-To-Adresse (z.B. Support).
+ *   Additiv und rückwärtskompatibel: bestehende Aufrufer mit vier Argumenten
+ *   verhalten sich unverändert. Resend >= 6 kennt `replyTo`.
  */
-export async function sendMail(to, subject, text, html) {
+export async function sendMail(to, subject, text, html, opts = {}) {
   if (!resend) {
     throw new Error("Resend ist nicht initialisiert (RESEND_API_KEY fehlt).");
   }
@@ -62,6 +66,7 @@ export async function sendMail(to, subject, text, html) {
     subject,
     text: text ?? "",
     html: html ?? `<p>${text ?? ""}</p>`,
+    ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
   };
 
   await sendResendWithRetry(() => resend.emails.send(message), "transactional_email");

@@ -39,6 +39,12 @@ import {
   isDestructivePracticeDeletionEnabled,
   OWNER_ACCOUNT_DELETION_UNAVAILABLE,
 } from "../services/startup/destructiveDeletionGate.js";
+import { createLifecycleCase } from "../services/practiceLifecycle/practiceLifecycleService.js";
+import {
+  enqueueLifecycleReceiptPair,
+  kickLifecycleOutbox,
+} from "../services/practiceLifecycle/lifecycleOutboxService.js";
+import { formatLifecycleTimestamp } from "../services/practiceLifecycle/lifecycleTime.js";
 
 const router = express.Router();
 
@@ -316,6 +322,9 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
     metadata: { scope: "previsit_and_related" },
   });
 
+  let lifecycleCase = null;
+  let receiptEmail = null;
+  let receiptLocale = "de";
   try {
     // Aggregates for the audit trail. Counts only — never an id, a name or a
     // medical value.
@@ -338,6 +347,16 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
         SELECT "id" FROM "User" WHERE "id" = ${userId} FOR UPDATE
       `;
       if (userRows.length === 0) throw new Error("account_not_found");
+
+      // Read the registered address WHILE the row is locked and still exists.
+      // After the erasure there is nothing left to address the written
+      // confirmation to. Nothing is sent from inside the transaction.
+      const holder = await tx.user.findUnique({
+        where: { id: userId },
+        select: { email: true, profile: { select: { preferredUiLanguage: true } } },
+      });
+      receiptEmail = holder?.email ?? null;
+      receiptLocale = holder?.profile?.preferredUiLanguage || "de";
 
       // 1. OTHER PATIENTS FIRST. Contextual records recorded at a practice this
       //    user owns belong to those patients, not to this account. They are
@@ -472,6 +491,12 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
         where: { patientUserId: userId },
         data: { patientUserId: null },
       });
+      // Lifecycle cases keep their case number and action as written proof but
+      // lose the internal user reference (plain scalar, no cascade).
+      await tx.lifecycleCase.updateMany({
+        where: { requestedByUserId: userId },
+        data: { requestedByUserId: null },
+      });
 
       // Postconditions before the point of no return. The guard stays — it now
       // confirms the erasure is complete rather than refusing it up front.
@@ -491,7 +516,28 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       // vaccinations, medication plans, e-prescriptions, pre-visit sessions/cases,
       // consent records, patient documents/shares, data requests, export jobs, …).
       await tx.user.delete({ where: { id: userId } });
+
+      // Written proof and its confirmation, committed with the erasure itself:
+      // a rollback leaves neither a case nor a queued mail, so a failed
+      // deletion can never produce a success confirmation. The case row holds
+      // no user id — only that an account was deleted, and when.
+      lifecycleCase = await createLifecycleCase(tx, {
+        action: "account_deleted",
+        entityType: "user_account",
+        status: "completed",
+      });
+      await enqueueLifecycleReceiptPair(tx, {
+        caseNumber: lifecycleCase.caseNumber,
+        kind: "patient_account_deleted",
+        recipientEmail: receiptEmail,
+        locale: receiptLocale,
+        params: { actionAt: formatLifecycleTimestamp(new Date(), receiptLocale) },
+        internalStatus: "completed",
+      });
     });
+
+    // Post-commit only. Failures stay queued for the lifecycleOutbox worker.
+    kickLifecycleOutbox();
 
     // Accountability trace that survives the erasure. Aggregates only: no user
     // or patient identifier, no practice name, no medical value — the numbers
@@ -535,12 +581,25 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
     }
     writeAuditLog({
       req,
+      action: "lifecycle_receipt_queued",
+      metadata: { caseNumber: lifecycleCase?.caseNumber },
+    });
+    writeAuditLog({
+      req,
       action: "account_deletion_completed",
-      metadata: { scope: "full_account_erasure" },
+      metadata: { scope: "full_account_erasure", caseNumber: lifecycleCase?.caseNumber },
     });
 
-    // No counts and no identifiers leave the server.
-    return res.json({ ok: true, deleted: true, scope: "full_account_erasure" });
+    // No counts and no identifiers leave the server. The case number is a
+    // deliberate exception: a public, non-medical reference the user needs to
+    // quote, and the only id the written confirmation carries.
+    return res.json({
+      ok: true,
+      deleted: true,
+      scope: "full_account_erasure",
+      caseNumber: lifecycleCase?.caseNumber ?? null,
+      emailStatus: "email_delivery_pending",
+    });
   } catch (err) {
     // Blocked by contextual medical records: the transaction rolled back, the
     // account is untouched. Report a stable code and nothing else — no counts,
