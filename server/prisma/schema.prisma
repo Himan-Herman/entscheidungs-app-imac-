@@ -355,6 +355,19 @@ model PracticeProfile {
   preferredInterpreterLanguages String?
   /// Enables the Praxis-Anamnese module for this practice (verified practices only).
   anamnesisEnabled              Boolean  @default(false)
+  /// Tenant membership lifecycle — NOT a deletion state.
+  ///
+  /// active | suspended | closed | reactivation_requested | deletion_requested.
+  /// Anything other than "active" removes all OPERATIVE access (enforced
+  /// centrally in getPracticeAccess); the practice row, its data and its
+  /// archived contexts stay exactly as they are.
+  ///
+  /// Deliberately distinct from the archive lifecycle: a closed practice still
+  /// exists as a PracticeProfile, whereas an ArchivedPracticePatientContext is
+  /// the frozen snapshot of a practice that was physically deleted. There is
+  /// no "deleted" value here — a deleted practice has no row.
+  lifecycleStatus               String   @default("active")
+  lifecycleStatusChangedAt      DateTime?
 
   user                        User                             @relation(fields: [userId], references: [id], onDelete: Cascade)
   qrTargets                   PracticeQrTarget[]
@@ -2719,4 +2732,80 @@ model PushReminder {
 
   @@index([userId])
   @@index([type, active])
+}
+
+/// Written, data-minimal record of every account/practice lifecycle action
+/// (suspend, close, reactivation request, deletion request, account erasure).
+///
+/// Deliberately has NO relations: the row must survive the erasure of the user
+/// or the practice it documents (accountability, GDPR Art. 5(2)). That is also
+/// why practiceProfileId and requestedByUserId are plain scalars — like
+/// ArchivedPracticePatientContext, they name rows that may no longer exist.
+///
+/// Never store medical content, permission sets or tokens here. `reason` is
+/// owner-supplied free text that the UI labels as strictly non-medical and the
+/// server truncates.
+model LifecycleCase {
+  id         String   @id @default(cuid())
+  /// Monotonic sequence backing the human-readable case number.
+  seq        Int      @unique @default(autoincrement())
+  /// Public reference shown to the user, e.g. "PD-2026-000123".
+  caseNumber String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  /// practice_suspended | practice_reactivated | practice_closed |
+  /// practice_reactivation_requested | practice_deletion_requested |
+  /// account_deleted
+  action String
+  /// recorded | awaiting_email_confirmation | in_review | withdrawn | completed
+  status String @default("recorded")
+
+  /// practice_profile | user_account
+  entityType String
+  practiceProfileId String?
+  /// Display-safe practice name snapshot, so correspondence still works after
+  /// the practice row is gone. Mirrors the archive snapshot approach.
+  practiceName String?
+  requestedByUserId String?
+  reason String?
+  /// pending | sent | failed | skipped — receipt e-mail delivery state.
+  emailStatus String @default("pending")
+
+  @@index([practiceProfileId, createdAt])
+  @@index([action, status])
+}
+
+/// Transactional outbox for lifecycle receipt e-mails.
+///
+/// Rows are written in the SAME transaction as the state change they confirm,
+/// so a rolled-back deletion can never produce a confirmation and a committed
+/// change can never lose its receipt. A dispatcher sends them strictly AFTER
+/// commit and retries failures, which also keeps the mail provider out of the
+/// long deletion transaction and its row locks.
+///
+/// paramsJson carries template parameters only — never medical data, never an
+/// internal user, patient or link id.
+model LifecycleOutboxEmail {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  caseNumber String
+  /// patient_account_deleted | practice_suspended | practice_closed |
+  /// practice_reactivated | practice_reactivation_requested |
+  /// practice_deletion_requested | medscoutx_internal_notice
+  kind           String
+  recipientEmail String
+  locale         String  @default("de")
+  paramsJson     String?
+
+  /// pending | sending | sent | failed
+  status    String    @default("pending")
+  attempts  Int       @default(0)
+  lastError String?
+  sentAt    DateTime?
+
+  @@index([status, createdAt])
+  @@index([caseNumber])
 }

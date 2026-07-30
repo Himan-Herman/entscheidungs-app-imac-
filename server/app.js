@@ -20,6 +20,7 @@ import previsitSessionsRouter from "./routes/previsitSessions.js";
 import previsitCasesRouter from "./routes/previsitCases.js";
 import doctorContactsRouter from "./routes/doctorContacts.js";
 import practicesRouter from "./routes/practices.js";
+import practiceLifecycleRouter from "./routes/practiceLifecycle.js";
 import publicPrevisitQrRouter from "./routes/publicPrevisitQr.js";
 import practiceDashboardRouter from "./routes/practiceDashboard.js";
 import practiceOverviewDashboardRouter from "./routes/practiceOverviewDashboard.js";
@@ -201,6 +202,9 @@ app.use("/api/tts", ttsRouter);
 app.use("/api/ki", kiRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
 app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
+// Lifecycle router first: its /:id/lifecycle* paths must match before the
+// generic /:id routes of the practices router.
+app.use("/api/practices", requireAuth, practiceLifecycleRouter);
 app.use("/api/practices", requireAuth, practicesRouter);
 /** Care relationships (Phase 1) — mount before /api/practice catch-alls; flag-gated */
 app.use("/api/practice/patients", requireAuth, practicePatientsRouter);

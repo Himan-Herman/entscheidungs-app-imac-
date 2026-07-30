@@ -10,6 +10,7 @@ export const PRACTICE_BRANDING_SELECT = {
   accentColor: true,
   patientIntroText: true,
   specialty: true,
+  lifecycleStatus: true,
 };
 
 /**
@@ -57,6 +58,10 @@ export function practiceBrandingJson(row) {
     accentColor: normalizeAccentColor(row.accentColor),
     patientHint: row.patientIntroText ? String(row.patientIntroText).trim().slice(0, 1200) : null,
     specialty: row.specialty ? String(row.specialty).trim().slice(0, 160) : null,
+    // Patients may see that a practice is paused or closed — nothing more.
+    // A CLOSED practice still exists; that is different from an archived
+    // context, which is the snapshot of a physically deleted practice.
+    lifecycleStatus: row.lifecycleStatus || "active",
   };
 }
 

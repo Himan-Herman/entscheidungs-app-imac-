@@ -11,6 +11,7 @@ import {
   canManageIntegrations,
   canViewIntegrationSettings,
   getPracticeAccess,
+  resolvePracticeOwnerForControlledDeletion,
 } from "../utils/practiceAccess.js";
 import { practiceLogoUrl } from "../utils/practiceBranding.js";
 import {
@@ -118,6 +119,7 @@ function profileJson(row) {
     preferredDoctorLanguage: row.preferredDoctorLanguage,
     patientIntroText: row.patientIntroText,
     isActive: row.isActive,
+    lifecycleStatus: row.lifecycleStatus || "active",
   };
 }
 
@@ -201,7 +203,16 @@ router.get("/", async (req, res) => {
     },
     orderBy: { updatedAt: "desc" },
   });
-  return res.json({ ok: true, practices: rows.map(profileJson) });
+  // A non-active tenant is not an active practice: team members must not see
+  // it in any switcher. The OWNER keeps it — flagged with its lifecycle status
+  // — so the lifecycle administration stays reachable.
+  const visible = rows.filter(
+    (p) => (p.lifecycleStatus || "active") === "active" || p.userId === userId,
+  );
+  return res.json({
+    ok: true,
+    practices: visible.map((p) => ({ ...profileJson(p), isOwner: p.userId === userId })),
+  });
 });
 
 router.post("/ensure-demo", async (req, res) => {
@@ -298,9 +309,18 @@ router.post("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const access = await resolvePracticeAccess(userId, req.params.id);
+  // Read-only detail stays reachable for the OWNER of a non-active practice —
+  // the lifecycle section needs the practice name. Members still get 404.
+  const access = await getPracticeAccess(userId, req.params.id, {
+    allowInactiveLifecycle: true,
+  });
   if (!access) return res.status(404).json({ ok: false, error: "not_found" });
-  return res.json({ ok: true, practice: profileJson(access.practice), role: access.role });
+  return res.json({
+    ok: true,
+    practice: profileJson(access.practice),
+    role: access.role,
+    isOwner: access.isOwner,
+  });
 });
 
 router.put("/:id", async (req, res) => {
@@ -355,9 +375,16 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
-  const access = await resolvePracticeAccess(userId, req.params.id);
+  // Ownership is resolved independently of the MEMBERSHIP lifecycle: once an
+  // owner has requested deletion the practice sits in `deletion_requested` and
+  // has no operative access left, yet the reviewed deletion run must still
+  // reach it. Same three outcomes as before (unknown or unrelated -> 404,
+  // active member -> 403, owner -> through); no operative permissions are
+  // computed, and the lenient allowInactiveLifecycle flag is deliberately NOT
+  // used on this path.
+  const access = await resolvePracticeOwnerForControlledDeletion(userId, req.params.id);
   if (!access) return res.status(404).json({ ok: false, error: "practice_not_found" });
-  if (access.role !== "owner") {
+  if (!access.isOwner) {
     return res.status(403).json({ ok: false, error: "forbidden" });
   }
   // Release gate AFTER the neutral access check (so it discloses nothing about

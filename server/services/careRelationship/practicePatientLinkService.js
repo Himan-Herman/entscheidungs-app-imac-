@@ -188,6 +188,12 @@ export async function createPracticePatientLink(input) {
     where: { id: practiceProfileId },
   });
   if (!practice) throw new Error("practice_not_found");
+  // A suspended or closed practice accepts no NEW patient connections, no
+  // matter which entry path (connect code, invite, direct link) leads here.
+  // Existing links are untouched — this is a membership state, not a deletion.
+  if ((practice.lifecycleStatus || "active") !== "active") {
+    throw new Error("practice_not_operative");
+  }
 
   const duplicate = await findActiveDuplicate(
     practiceProfileId,

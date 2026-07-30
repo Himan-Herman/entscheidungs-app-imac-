@@ -108,9 +108,23 @@ test("6) the migration is additive — nothing is archived, changed or deleted",
   assert.deepEqual(drops, TARGETS.map((t) => `${t}_dataScope_context_check`).sort());
 });
 
-test("7) the migration sorts after every existing one", () => {
+test("7) the migration sorts after every migration that predates it", () => {
+  // Originally asserted "…is the last one", which held while this was the
+  // newest migration. Later migrations may now follow it (the practice
+  // membership lifecycle does), so the invariant is stated the way it was
+  // always meant: nothing that existed when the archive was introduced sorts
+  // after it, and the archive never moves to the front.
   const dirs = readdirSync(join(prismaDir, "migrations")).filter((d) => /^\d{14}_/.test(d)).sort();
-  assert.equal(dirs[dirs.length - 1], MIGRATION);
+  const index = dirs.indexOf(MIGRATION);
+  assert.notEqual(index, -1, "the archive migration must exist");
+  const stampOf = (d) => d.slice(0, 14);
+  for (const dir of dirs.slice(0, index)) {
+    assert.ok(stampOf(dir) < stampOf(MIGRATION), `${dir} must predate the archive migration`);
+  }
+  // Anything after it was added deliberately later and must be strictly newer.
+  for (const dir of dirs.slice(index + 1)) {
+    assert.ok(stampOf(dir) > stampOf(MIGRATION), `${dir} must postdate the archive migration`);
+  }
 });
 
 test("8) four restricted foreign keys to the archive, one per model", () => {

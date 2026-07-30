@@ -166,6 +166,13 @@ export const accountExportLimiter = createIpRateLimiter({
   windowMs: ONE_HOUR_MS,
 });
 
+/** POST /api/practices/:id/lifecycle/* — owner lifecycle mutations (re-auth guarded) */
+export const practiceLifecycleLimiter = createIpRateLimiter({
+  max: 15,
+  keyPrefix: 'practice:lifecycle',
+  windowMs: ONE_HOUR_MS,
+});
+
 /** DELETE /api/account/delete — destructive GDPR wipe */
 export const accountDeleteLimiter = createIpRateLimiter({
   max: 4,

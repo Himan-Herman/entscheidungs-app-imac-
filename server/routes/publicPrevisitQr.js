@@ -41,7 +41,11 @@ router.get("/qr/:qrToken", async (req, res) => {
       targetSpecialty: target.specialty,
       preferredDoctorLanguage:
         target.preferredDoctorLanguage || practice.preferredDoctorLanguage || "de",
-      isActive: Boolean(practice.isActive && target.isActive),
+      isActive: Boolean(
+        practice.isActive
+          && target.isActive
+          && (practice.lifecycleStatus || "active") === "active",
+      ),
     },
   });
 });

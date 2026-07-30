@@ -108,7 +108,7 @@ async function assertSchemaInvariants(prisma) {
     SELECT table_name, column_name, is_nullable
     FROM information_schema.columns
     WHERE table_schema = 'public'
-      AND table_name = ANY(${[...CONTEXT_MODELS, "ArchivedPracticePatientContext", "PracticeDocumentShareGrant"]})
+      AND table_name = ANY(${[...CONTEXT_MODELS, "ArchivedPracticePatientContext", "PracticeDocumentShareGrant", "PracticeProfile", "LifecycleCase", "LifecycleOutboxEmail"]})
   `;
   const has = (table, column) =>
     columns.some((c) => c.table_name === table && c.column_name === column);
@@ -134,6 +134,25 @@ async function assertSchemaInvariants(prisma) {
     if (!has("PracticeDocumentShareGrant", column)) {
       missing.push(`PracticeDocumentShareGrant.${column}`);
     }
+  }
+  // Membership lifecycle. A missing or nullable lifecycleStatus would make
+  // every practice read as non-active and lock the whole tenant base out, so
+  // this is a startup-blocking invariant rather than a runtime surprise.
+  if (!has("PracticeProfile", "lifecycleStatus")) {
+    missing.push("PracticeProfile.lifecycleStatus");
+  } else {
+    const status = columns.find(
+      (c) => c.table_name === "PracticeProfile" && c.column_name === "lifecycleStatus",
+    );
+    if (status && status.is_nullable !== "NO") {
+      missing.push("PracticeProfile.lifecycleStatus must be NOT NULL");
+    }
+  }
+  for (const column of ["caseNumber", "action", "status", "entityType"]) {
+    if (!has("LifecycleCase", column)) missing.push(`LifecycleCase.${column}`);
+  }
+  for (const column of ["caseNumber", "kind", "recipientEmail", "status", "attempts"]) {
+    if (!has("LifecycleOutboxEmail", column)) missing.push(`LifecycleOutboxEmail.${column}`);
   }
   if (missing.length > 0) {
     throw readinessError(READINESS_ERRORS.SCHEMA, `${missing.length} missing, first: ${missing[0]}`);

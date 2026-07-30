@@ -92,7 +92,9 @@ export async function searchMedScoutXPractices({ q, specialty, city, bookingOnly
   const languageTerms = normaliseLanguages(languages);
 
   // Base: only active practices
-  const where = { isActive: true };
+  // Suspended/closed tenants are not active practices: they never appear in
+  // the public finder and accept no new patient connections.
+  const where = { isActive: true, lifecycleStatus: "active" };
 
   // Text search: name, specialty, specialtiesJson (stored as JSON string), city
   if (qTerm) {
