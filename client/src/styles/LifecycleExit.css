@@ -290,7 +290,10 @@
 
 :root[data-theme="dark"] .lifecycle-exit__warning-card {
   background: rgba(248, 113, 113, 0.12);
-  border-color: rgba(248, 113, 113, 0.5);
+  /* 0.5 measured only 2.39:1 against the tinted card; the warning container is
+     told apart from the surrounding surface by 1.4:1 alone, so its border has
+     to carry the distinction and clear 3:1. 0.7 measures 3.41:1. */
+  border-color: rgba(248, 113, 113, 0.7);
 }
 
 :root[data-theme="dark"] .lifecycle-exit__warning-title,
@@ -305,12 +308,31 @@
   border-color: rgba(252, 165, 165, 0.6);
 }
 
+/* The dark accent (#14b8a6) is a bright teal: white on it measures 2.49:1.
+   The page background token is the readable counterpart at 8.1:1 — same
+   inversion FocusModal.css uses for its primary button. */
+:root[data-theme="dark"] .lifecycle-exit__btn--primary {
+  color: var(--ms-color-bg);
+}
+
 :root[data-theme="dark"] .lifecycle-exit__btn--danger {
   background: #dc2626;
 }
 
 :root[data-theme="dark"] .lifecycle-exit__ok {
   color: #86efac;
+}
+
+/* Form-control boundaries (WCAG 1.4.11 non-text contrast, 3:1). On dark
+   surfaces --ms-color-border measures 1.68:1 and --ms-color-border-strong only
+   2.26:1, so the input, the acknowledgement row and the outline button would
+   have no perceivable edge. --ms-color-text-placeholder is the existing token
+   whose value clears it: 6.71:1 on the dialog, 6.96:1 on a card. Light mode is
+   deliberately left as it is. */
+:root[data-theme="dark"] .lifecycle-exit__input,
+:root[data-theme="dark"] .lifecycle-exit__checkbox-row,
+:root[data-theme="dark"] .lifecycle-exit__btn--outline {
+  border-color: var(--ms-color-text-placeholder);
 }
 
 :root[data-theme="dark"] .lifecycle-exit__phrase,

@@ -133,7 +133,77 @@
   color: #b42c2c;
 }
 
+/* ------------------------------------------------------------------- dark
+   The app switches themes with a data-theme attribute on <html> (ThemeMode),
+   but this file only ever had a prefers-color-scheme rule. The result was a
+   half-themed page: --ms-muted DID flip to a light grey, while the card kept
+   its `var(--ms-surface, #fff)` fallback because --ms-surface is not defined
+   anywhere — light text on a white card, measured at 1.10–1.48:1.
+
+   Everything below reads from the design-system tokens, which already carry
+   correct dark values; the light theme is untouched. Same dual pattern as
+   FocusModal.css: the explicit attribute wins, the media query covers users
+   who never touched the toggle. */
+
+:root[data-theme="dark"] .settings-privacy__card {
+  background: var(--ms-color-surface);
+  border-color: var(--ms-color-border);
+  color: var(--ms-color-text);
+}
+
+:root[data-theme="dark"] .settings-privacy__card--danger {
+  /* No danger-border token exists; this is --ms-color-danger at reduced alpha.
+     0.55 measured: 3.65:1 against the card, 3.72:1 against the page — the
+     surfaces themselves differ by only 1.13:1, so this border is what marks
+     the destructive area and has to clear 3:1 on its own. */
+  border-color: rgba(252, 165, 165, 0.55);
+}
+
+:root[data-theme="dark"] .settings-privacy__title,
+:root[data-theme="dark"] .settings-privacy__section-title {
+  color: var(--ms-color-text);
+}
+
+:root[data-theme="dark"] .settings-privacy__intro,
+:root[data-theme="dark"] .settings-privacy__muted {
+  color: var(--ms-color-text-muted);
+}
+
+:root[data-theme="dark"] .settings-privacy__ok {
+  color: var(--ms-color-success);
+}
+
+:root[data-theme="dark"] .settings-privacy__err {
+  color: var(--ms-color-danger);
+}
+
+:root[data-theme="dark"] .settings-privacy__phrase-hint code {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 @media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .settings-privacy__card {
+    background: var(--ms-color-surface);
+    border-color: var(--ms-color-border);
+    color: var(--ms-color-text);
+  }
+  :root:not([data-theme="light"]) .settings-privacy__card--danger {
+    border-color: rgba(252, 165, 165, 0.55);
+  }
+  :root:not([data-theme="light"]) .settings-privacy__title,
+  :root:not([data-theme="light"]) .settings-privacy__section-title {
+    color: var(--ms-color-text);
+  }
+  :root:not([data-theme="light"]) .settings-privacy__intro,
+  :root:not([data-theme="light"]) .settings-privacy__muted {
+    color: var(--ms-color-text-muted);
+  }
+  :root:not([data-theme="light"]) .settings-privacy__ok {
+    color: var(--ms-color-success);
+  }
+  :root:not([data-theme="light"]) .settings-privacy__err {
+    color: var(--ms-color-danger);
+  }
   .settings-privacy__phrase-hint code {
     background: rgba(255, 255, 255, 0.08);
   }
