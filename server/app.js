@@ -22,6 +22,9 @@ import doctorContactsRouter from "./routes/doctorContacts.js";
 import practicesRouter from "./routes/practices.js";
 import publicPrevisitQrRouter from "./routes/publicPrevisitQr.js";
 import practiceDashboardRouter from "./routes/practiceDashboard.js";
+import visitMedicationsRouter, {
+  patientVisitMedicationsRouter,
+} from "./routes/visitMedications.js";
 import practiceOverviewDashboardRouter from "./routes/practiceOverviewDashboard.js";
 import patientExportsRouter from "./routes/patientExports.js";
 import patientConsentsRouter from "./routes/patientConsents.js";
@@ -261,12 +264,16 @@ app.use("/api/practice/developer", requireAuth, practiceDeveloperRouter);
 app.use("/api/v1/practice", practiceV1Router);
 app.use("/api/archive", requireAuth, archiveAiRouter);
 app.use("/api/practice-dashboard", requireAuth, practiceDashboardRouter);
+/** Post-visit medications — practice write side (shares the /api/practice-dashboard base). */
+app.use("/api/practice-dashboard", requireAuth, visitMedicationsRouter);
 app.use("/api/practice/follow-ups", requireAuth, practiceFollowUpsRouter);
 app.use("/api/previsit/follow-ups", requireAuth, previsitFollowUpsRouter);
 /** Pre-Visit cases / timelines — JWT required; mount before generic /api/previsit. */
 app.use("/api/previsit/cases", requireAuth, previsitCasesRouter);
 /** Saved Pre-Visit sessions (DB): JWT required; mount before /api/previsit so paths are not swallowed. */
 app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
+/** Post-visit medications — patient read side; mount before /api/previsit so paths are not swallowed. */
+app.use("/api/previsit/visit-medications", requireAuth, patientVisitMedicationsRouter);
 app.use("/api/previsit", previsitRouter);
 app.use("/api/public/previsit", publicPrevisitQrLimiter, publicPrevisitQrRouter);
 app.use("/api/public/anamnesis", publicAnamnesisLimiter, publicAnamnesisRouter);
