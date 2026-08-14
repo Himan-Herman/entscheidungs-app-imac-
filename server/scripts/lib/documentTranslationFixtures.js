@@ -196,6 +196,71 @@ export async function tabularPdf(rows = 6) {
 }
 
 /**
+ * A PDF whose body is a repeated two-column medication list.
+ *
+ * Only two columns, so the general table rule (which needs three) does not
+ * apply, and the block sits in the middle of the page so the full-height column
+ * rule does not either. Reading it across instead of down attaches a schedule
+ * to the wrong drug.
+ *
+ * @returns {Promise<Buffer>}
+ */
+export async function twoColumnMedicationPdf(rows = 5) {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const page = doc.addPage([595, 842]);
+
+  page.drawText("Sehr geehrte Kollegin, sehr geehrter Kollege,", { x: 60, y: 790, size: 10, font });
+  page.drawText("wir berichten ueber die ambulante Vorstellung.", { x: 60, y: 774, size: 10, font });
+  page.drawText("Dauermedikation:", { x: 60, y: 740, size: 10, font });
+
+  const drugs = [
+    ["Ramipril 5 mg", "1-0-0"],
+    ["Metoprolol 47,5 mg", "1-0-1"],
+    ["ASS 100 mg", "0-1-0"],
+    ["Pantoprazol 40 mg", "1-0-0"],
+    ["Atorvastatin 20 mg", "0-0-1"],
+  ];
+
+  for (let i = 0; i < Math.min(rows, drugs.length); i += 1) {
+    const y = 715 - i * 20;
+    page.drawText(drugs[i][0], { x: 60, y, size: 10, font });
+    page.drawText(drugs[i][1], { x: 300, y, size: 10, font });
+  }
+
+  page.drawText("Mit freundlichen kollegialen Gruessen", { x: 60, y: 560, size: 10, font });
+  return Buffer.from(await doc.save());
+}
+
+/**
+ * A letter whose only two-column row is a right-aligned date in the header.
+ * Must stay ACCEPTED — the date is not clinical data.
+ *
+ * @returns {Promise<Buffer>}
+ */
+export async function letterheadDatePdf() {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const page = doc.addPage([595, 842]);
+
+  page.drawText("Praxis Dr. Muster", { x: 60, y: 800, size: 10, font });
+  page.drawText("12.08.2026", { x: 430, y: 800, size: 10, font });
+
+  const body = [
+    "Sehr geehrte Kollegin, sehr geehrter Kollege,",
+    "wir berichten ueber die ambulante Vorstellung der Patientin.",
+    "Der Verlauf war regelrecht und komplikationslos.",
+    "Eine Kontrolle wurde vereinbart und dokumentiert.",
+    "Mit freundlichen kollegialen Gruessen",
+  ];
+  body.forEach((line, i) => {
+    page.drawText(line, { x: 60, y: 750 - i * 20, size: 10, font });
+  });
+
+  return Buffer.from(await doc.save());
+}
+
+/**
  * A syntactically valid PDF header followed by many object markers.
  * Small on disk, large in declared structure.
  *
@@ -229,33 +294,40 @@ export function pdfWithDeepNesting(depth) {
  * @param {{ name: string, compressedSize: number, uncompressedSize: number }[]} entries
  * @returns {Buffer}
  */
-export function syntheticZip(entries) {
+export function syntheticZip(entries, options = {}) {
   const central = [];
   const locals = [];
   let offset = 0;
 
-  for (const entry of entries) {
+  entries.forEach((entry, index) => {
     const nameBuf = Buffer.from(entry.name, "utf8");
+    const forged = options.forge?.index === index ? options.forge : null;
 
-    // Minimal stored local header; its payload is irrelevant to the preflight,
-    // which reads the central directory only.
-    const local = Buffer.alloc(30 + nameBuf.length);
+    // Local header + the declared number of stored bytes. Compressed sizes in
+    // fixtures stay small; it is the UNCOMPRESSED size that is inflated, and
+    // that costs nothing on disk — which is exactly why a preflight must not
+    // trust it.
+    const local = Buffer.alloc(30 + nameBuf.length + entry.compressedSize);
     local.writeUInt32LE(0x04034b50, 0);
+    if (forged?.flags !== undefined) local.writeUInt16LE(forged.flags, 6);
+    local.writeUInt32LE((forged?.localCompressed ?? entry.compressedSize) >>> 0, 18);
+    local.writeUInt32LE((forged?.localUncompressed ?? entry.uncompressedSize) >>> 0, 22);
     local.writeUInt16LE(nameBuf.length, 26);
-    nameBuf.copy(local, 30);
+    Buffer.from(forged?.localName ?? entry.name, "utf8").copy(local, 30);
     locals.push(local);
 
     const centralEntry = Buffer.alloc(46 + nameBuf.length);
     centralEntry.writeUInt32LE(0x02014b50, 0);
+    if (forged?.centralFlags !== undefined) centralEntry.writeUInt16LE(forged.centralFlags, 8);
     centralEntry.writeUInt32LE(entry.compressedSize >>> 0, 20);
     centralEntry.writeUInt32LE(entry.uncompressedSize >>> 0, 24);
     centralEntry.writeUInt16LE(nameBuf.length, 28);
-    centralEntry.writeUInt32LE(offset, 42);
+    centralEntry.writeUInt32LE((forged?.localOffset ?? offset) >>> 0, 42);
     nameBuf.copy(centralEntry, 46);
     central.push(centralEntry);
 
     offset += local.length;
-  }
+  });
 
   const localBlock = Buffer.concat(locals);
   const centralBlock = Buffer.concat(central);
@@ -279,6 +351,9 @@ export function docxEntryList(extra = []) {
     ...extra,
   ];
 }
+
+/** General-purpose flag bit 3 — sizes deferred to a trailing data descriptor. */
+export const ZIP_FLAG_DATA_DESCRIPTOR = 0x0008;
 
 /** A .doc (legacy binary) — supported by nothing here, on purpose. */
 export function legacyDoc() {

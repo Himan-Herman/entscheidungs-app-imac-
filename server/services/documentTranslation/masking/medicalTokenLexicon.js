@@ -126,6 +126,83 @@ export const INN_MIN_LENGTH = 6;
  */
 export const STRENGTH_UNITS = ["mg", "µg", "mcg", "ng", "ml", "IE", "IU", "mmol", "g"];
 
+/**
+ * Structured direct identifiers.
+ *
+ * A practice letter routinely carries an insurance number in the header, a
+ * practice email in the footer, and sometimes a patient or case number in the
+ * subject line. None of that needs translating, and all of it is exactly the
+ * material that should not travel to an external processor when it does not
+ * have to.
+ *
+ * Masking them is data minimisation, not anonymisation, and is described as
+ * such: a name and a date of birth in running prose are NOT covered by these
+ * patterns and are not claimed to be. What is covered is the set of formats
+ * that can be recognised structurally with no guessing.
+ *
+ * Ordering note: these run early because most contain digits and would
+ * otherwise be shredded by the numeric passes — the same failure that broke
+ * "HbA1c" before Phase 2A.1.
+ */
+export const IDENTIFIER_PATTERNS = [
+  {
+    kind: "EMAIL",
+    source: String.raw`(?<![\w.@-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w.-])`,
+  },
+  {
+    kind: "URL",
+    source: String.raw`(?<![\w/])(?:https?:\/\/|www\.)[^\s<>"']{3,200}`,
+  },
+  {
+    kind: "IBAN",
+    // Groups of four with a possibly shorter final group — a German IBAN ends
+    // in a two-character group, which a strict multiple-of-four pattern would
+    // leave dangling for the numeric pass to pick up separately.
+    source: String.raw`(?<![\w])[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,3})?(?![\w])`,
+  },
+  {
+    kind: "INSURANCE",
+    // German Krankenversichertennummer: one letter followed by nine digits.
+    // Masked before the ICD pattern, which would otherwise claim its first
+    // three characters and leave the rest to the numeric pass.
+    source: String.raw`(?<![\w-])[A-Z]\d{9}(?![\w-])`,
+  },
+  {
+    kind: "CASENO",
+    // Labelled case, patient or invoice numbers. Only the VALUE is masked —
+    // the label stays translatable, so the reader still sees what the number
+    // refers to. A bare number carries no such label and is masked as a number.
+    source: String.raw`(?<=(?:Fall|Patienten|Pat\.|Rechnungs|Vorgangs)[-\s]?(?:Nr\.?|Nummer|ID)[:\s]{1,3})[A-Za-z0-9][A-Za-z0-9\/-]{2,30}(?![\w])`,
+  },
+  {
+    kind: "PHONE",
+    // Requires at least seven digits and at least one separator, so a dosing
+    // schedule ("1-0-0") and a reference range ("70 - 110") cannot match.
+    // Runs after DATE/TIME so an ISO date is not read as a phone number.
+    // The optional "+" sits before the digit-count lookahead so an
+    // international prefix is part of the token rather than left behind.
+    source:
+      String.raw`(?<![\w+])\+?(?=(?:[ \/-]*\d){7})\d{1,6}(?:[ \/-]\d{2,10}){1,4}(?![\w])`,
+  },
+];
+
+/**
+ * Marker kinds must be letters only.
+ *
+ * The marker grammar is ⟦KIND_ORDINAL⟧ with KIND matched as [A-Z]+, so a kind
+ * containing an underscore produces a marker the unmasker cannot parse — it
+ * survives masking but never comes back. That was a real bug in an earlier
+ * draft of this file ("INSURANCE_ID"), caught only because a round-trip test
+ * compared the restored text byte for byte.
+ */
+export function assertKindNamesAreParsable(kinds) {
+  for (const kind of kinds) {
+    if (!/^[A-Z]+$/.test(kind)) {
+      throw new Error(`marker kind "${kind}" must match [A-Z]+ or it cannot be unmasked`);
+    }
+  }
+}
+
 /** Escapes a literal for safe inclusion in a regular expression. */
 function escapeForRegex(literal) {
   return String(literal).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

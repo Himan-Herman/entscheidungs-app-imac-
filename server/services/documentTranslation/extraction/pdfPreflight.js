@@ -9,15 +9,11 @@
  * parsing, no allocation proportional to the content — and reject the obvious
  * shapes of that attack up front.
  *
- * ── Honest limits ───────────────────────────────────────────────────────────
- * These are cheap filters, not a sandbox. Real containment for a hostile
- * parser input means running it in a worker with `resourceLimits` and killing
- * it on breach. That is deliberately NOT built here: there is no route yet, so
- * the isolation would be speculative, and it changes the deployment shape.
- *
- * Tracked as `document_translation_parser_isolation` in
- * docs/architecture/DOCUMENT_TRANSLATION_TECHNICAL_DEBT.md — to be built
- * together with the Phase 2B endpoint, before the path is reachable by a user.
+ * These are cheap filters, not a sandbox — and they are no longer the only
+ * defence. The parse itself now runs in a terminable, memory-bounded worker
+ * (isolatedParser.js), so a file that gets past these checks still cannot take
+ * the host process with it. The preflight remains because rejecting an obvious
+ * bomb should not cost a thread spawn.
  *
  * ── Layout analysis ─────────────────────────────────────────────────────────
  * A PDF can have a perfect text layer and still extract in the wrong reading
@@ -31,6 +27,7 @@ import {
   DocumentTranslationError,
   TRANSLATION_ERRORS,
 } from "../documentTranslationPolicy.js";
+import { containsClinicalToken } from "../masking/criticalTokenMasking.js";
 
 export const PDF_LIMITS = Object.freeze({
   /** Mirrors the practice-document upload cap. */
@@ -57,6 +54,11 @@ export const LAYOUT_LIMITS = Object.freeze({
   /** Rows and columns from which a page counts as tabular. */
   TABLE_MIN_ROWS: 3,
   TABLE_MIN_COLUMNS: 3,
+  /**
+   * Two-column rows carrying clinical data. Lower than TABLE_MIN_ROWS is not
+   * needed — the point is a REPEATED structure, not a single labelled line.
+   */
+  CLINICAL_PAIR_MIN_ROWS: 3,
   /** Horizontal gap that separates two cells rather than two words. */
   TABLE_MIN_COLUMN_GAP: 40,
   /** Items closer than this vertically belong to the same visual row. */
@@ -97,31 +99,6 @@ export function assertSafePdfContainer(buffer) {
   }
 
   return { bytes: buffer.length, objectCount, objectStreams, nesting };
-}
-
-/**
- * Run a parsing step under a wall-clock ceiling.
- *
- * Caveat worth stating plainly: pdf.js yields between async steps, so this
- * bounds the common slow case, but a synchronous hot loop inside the parser
- * would block the event loop and the timer with it. Only process or worker
- * isolation removes that.
- *
- * @template T
- * @param {Promise<T>} work
- * @param {number} [ms]
- * @returns {Promise<T>}
- */
-export async function withParseTimeout(work, ms = PDF_LIMITS.PARSE_TIMEOUT_MS) {
-  let timer;
-  const timeout = new Promise((_resolve, reject) => {
-    timer = setTimeout(() => reject(tooLarge("pdf_parse_timeout", { ms })), ms);
-  });
-  try {
-    return await Promise.race([work, timeout]);
-  } finally {
-    clearTimeout(timer);
-  }
 }
 
 /**
@@ -166,6 +143,12 @@ export function analysePageLayout(items, page) {
   Object.assign(metrics, table.metrics);
   if (table.detected) {
     return { complex: true, reason: "tabular_layout", metrics };
+  }
+
+  const clinicalPairs = detectTwoColumnClinicalRows(real);
+  Object.assign(metrics, clinicalPairs.metrics);
+  if (clinicalPairs.detected) {
+    return { complex: true, reason: "two_column_clinical_data", metrics };
   }
 
   return { complex: false, reason: null, metrics };
@@ -245,12 +228,7 @@ function detectReadingOrderJumps(items) {
  * can end up under the wrong drug.
  */
 function detectTabularLayout(items) {
-  const rows = new Map();
-  for (const item of items) {
-    const key = Math.round(item.y / LAYOUT_LIMITS.ROW_TOLERANCE);
-    if (!rows.has(key)) rows.set(key, []);
-    rows.get(key).push(item);
-  }
+  const rows = groupIntoRows(items);
 
   let tabularRows = 0;
   for (const row of rows.values()) {
@@ -271,7 +249,57 @@ function detectTabularLayout(items) {
   };
 }
 
+/**
+ * Two-column rows that carry clinical data.
+ *
+ * The general table rule needs three columns, because a two-column pair usually
+ * survives linearisation with its meaning intact. That reasoning does not hold
+ * for a medication or results block: "Ramipril 5 mg | 1-0-0" repeated down the
+ * page linearises into a stream where a schedule can end up beside the wrong
+ * drug, and nothing in the resulting text shows that it happened.
+ *
+ * So a REPEATED two-column structure whose cells contain medications, doses,
+ * schedules, reference ranges or lab abbreviations is refused. A letterhead
+ * with a right-aligned date is not: DATE and TIME are not clinical tokens, so
+ * a single such row carries no clinical content and the repetition floor is
+ * never reached either.
+ */
+function detectTwoColumnClinicalRows(items) {
+  const rows = groupIntoRows(items);
+  let clinicalPairRows = 0;
+
+  for (const row of rows.values()) {
+    if (row.length !== 2) continue;
+
+    const sorted = [...row].sort((a, b) => a.x - b.x);
+    const gap = sorted[1].x - (sorted[0].x + sorted[0].width);
+    if (gap < LAYOUT_LIMITS.TABLE_MIN_COLUMN_GAP) continue;
+
+    const anyClinical = sorted.some((item) => containsClinicalToken(item.str));
+    if (anyClinical) clinicalPairRows += 1;
+  }
+
+  return {
+    detected: clinicalPairRows >= LAYOUT_LIMITS.CLINICAL_PAIR_MIN_ROWS,
+    metrics: { clinicalPairRows },
+  };
+}
+
 /* ------------------------------------------------------------- internals */
+
+/**
+ * Group items into visual rows by rounded y position.
+ * @param {TextItem[]} items
+ */
+function groupIntoRows(items) {
+  const rows = new Map();
+  for (const item of items) {
+    const key = Math.round(item.y / LAYOUT_LIMITS.ROW_TOLERANCE);
+    if (!rows.has(key)) rows.set(key, []);
+    rows.get(key).push(item);
+  }
+  return rows;
+}
 
 function verticalSpan(items) {
   let min = Infinity;

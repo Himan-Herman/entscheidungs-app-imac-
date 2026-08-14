@@ -62,30 +62,54 @@ is actually built.
 
 ---
 
-## `document_translation_parser_isolation`
+## ~~`document_translation_parser_isolation`~~ — CLOSED in Phase 2A.2
 
-**What.** `unpdf`/pdf.js and `mammoth` run in the main Node process. Byte-level
-preflights (`pdfPreflight.js`, `zipPreflight.js`) reject the obvious resource
-exhaustion shapes before parsing, and a wall-clock timeout bounds the common
-slow case.
+**Was.** `unpdf`/pdf.js and `mammoth` ran in the main Node process, bounded only
+by byte-level preflights and an in-process `Promise.race` timeout. That timeout
+depended on the parser yielding; a synchronous hot loop would have blocked the
+event loop and the timer with it. Memory was not bounded at all.
 
-**Residual risk, stated plainly.** A preflight reads declared structure; a
-crafted file can still be expensive in ways the declaration does not reveal.
-The timeout depends on the parser yielding to the event loop — a synchronous hot
-loop inside pdf.js would block the timer along with everything else. Memory is
-not bounded at all.
+**Now.** `extraction/isolatedParser.js` runs every parse in a `worker_threads`
+worker with `resourceLimits` (256 MB old generation, 32 MB young, 4 MB stack)
+and a wall-clock deadline enforced by `terminate()`. Byte-level preflight still
+runs in the host first, so an obvious bomb is rejected without a thread spawn.
 
-**Proper fix.** Run extraction in a `worker_threads` worker with
-`resourceLimits.maxOldGenerationSizeMb` and terminate it on breach. This gives
-real memory bounding and a kill switch that does not depend on cooperation.
+Proven by test against a deliberately hostile worker
+(`scripts/lib/hostileParserWorkerFixture.js`):
 
-**Why it is deferred.** There is no route yet, so the isolation would be
-speculative, and it changes the deployment shape (worker bundling, message
-passing, buffer transfer). It should be built together with the Phase 2B
-endpoint, before the feature is reachable by a real user.
+- a synchronous infinite loop is terminated at the deadline;
+- the main event loop keeps ticking while it runs;
+- a runaway allocation trips `ERR_WORKER_OUT_OF_MEMORY` and surfaces as
+  `document_too_large` / `parse_out_of_memory`.
 
-**Risk while open.** Moderate, but currently unreachable: no route exposes the
-extraction path, and `ENABLE_DOCUMENT_TRANSLATION` defaults to false.
+**Residual risk.** A parse still costs a thread and up to the configured heap
+for its duration; concurrency limiting belongs with the Phase 2B route, not
+here. Worker startup adds roughly 40–80 ms per document.
+
+---
+
+## `document_translation_medication_refusal_rate` — new in Phase 2A.2
+
+**What.** A medication context whose product name cannot be protected locally
+now refuses the whole document (`document_medication_unverifiable`) instead of
+translating it. This closes the Phase 2A.1 known limits (`Quensyl → Resochin`,
+`warfarin → heparin`) the only way that is honest without a drug database.
+
+**The cost.** Some legitimate letters will be refused — for instance one naming
+an unusual preparation without a strength. The safe-word list in
+`medicationContextGuard.js` (grammar, dosage forms, frequencies, routes, drug
+classes) keeps that proportionate, but the direction is deliberate: a refused
+document leaves the patient with the unaltered original, whereas a silently
+renamed medication reads as authoritative.
+
+**What would reduce it.** A licensed substance index (e.g. an ATC or national
+medicinal-product list) would let the guard recognise rather than refuse. That
+is a procurement and licensing decision, not a code change, and no such data is
+bundled here.
+
+**Open question for the product owner.** Whether the refusal rate on real
+practice documents is acceptable can only be answered by measuring it against a
+real corpus. Until then the rate is unknown, and it is not claimed to be low.
 
 ---
 

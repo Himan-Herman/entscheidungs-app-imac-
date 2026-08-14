@@ -133,6 +133,11 @@ export const TRANSLATION_ERRORS = Object.freeze({
   STRUCTURE_UNSUPPORTED: "document_structure_unsupported",
   UNSUPPORTED_FILE_TYPE: "document_file_type_unsupported",
   INTEGRITY_FAILED: "integrity_failed",
+  /**
+   * A medication context contains a product name that local masking cannot
+   * protect. Refusing beats translating it and risking a silent rename.
+   */
+  MEDICATION_UNVERIFIABLE: "document_medication_unverifiable",
 });
 
 /**

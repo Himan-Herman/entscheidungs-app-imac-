@@ -34,11 +34,8 @@ import {
   TRANSLATION_ERRORS,
   TRANSLATION_LIMITS,
 } from "../documentTranslationPolicy.js";
-import {
-  analysePageLayout,
-  assertSafePdfContainer,
-  withParseTimeout,
-} from "./pdfPreflight.js";
+import { analysePageLayout, assertSafePdfContainer } from "./pdfPreflight.js";
+import { parseInIsolation } from "./isolatedParser.js";
 
 /**
  * @param {Buffer} buffer
@@ -51,15 +48,22 @@ import {
  * }>}
  */
 export async function extractPdf(buffer) {
-  // Raw-byte checks first: nothing below should run on a file that already
-  // looks like a parser bomb.
+  // Raw-byte checks first, in the host: they are cheap, need no parser, and
+  // rejecting an obvious bomb should not cost a worker spawn.
   assertSafePdfContainer(buffer);
 
-  return withParseTimeout(readPdf(buffer));
+  // The actual parse runs in a terminable, memory-bounded worker.
+  return parseInIsolation("pdf", buffer);
 }
 
-/** @param {Buffer} buffer */
-async function readPdf(buffer) {
+/**
+ * The raw parse. Runs INSIDE the worker — see parserWorker.js.
+ * Exported separately so the isolation boundary is explicit rather than
+ * something a caller could bypass by accident.
+ *
+ * @param {Buffer} buffer
+ */
+export async function parsePdfBuffer(buffer) {
   let doc;
   try {
     doc = await getDocumentProxy(new Uint8Array(buffer));

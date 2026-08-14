@@ -23,6 +23,7 @@ import {
   TRANSLATION_ERRORS,
 } from "../documentTranslationPolicy.js";
 import { assertSafeDocxContainer } from "./zipPreflight.js";
+import { parseInIsolation } from "./isolatedParser.js";
 
 /** Joins table cells into a single translatable line while keeping the split. */
 export const TABLE_CELL_SEPARATOR = " | ";
@@ -38,11 +39,23 @@ export const TABLE_CELL_SEPARATOR = " | ";
  * }>}
  */
 export async function extractDocx(buffer) {
-  // Container checks BEFORE decompression: a 25 MB upload cap says nothing
-  // about what the archive expands to, and the character budgets downstream
-  // only apply to text that already exists.
+  // Container checks BEFORE decompression, in the host: a 25 MB upload cap says
+  // nothing about what the archive expands to, and the character budgets
+  // downstream only apply to text that already exists.
   assertSafeDocxContainer(buffer);
 
+  // The actual parse runs in a terminable, memory-bounded worker.
+  return parseInIsolation("docx", buffer);
+}
+
+/**
+ * The raw parse. Runs INSIDE the worker — see parserWorker.js.
+ * Exported separately so the isolation boundary is explicit rather than
+ * something a caller could bypass by accident.
+ *
+ * @param {Buffer} buffer
+ */
+export async function parseDocxBuffer(buffer) {
   let model = null;
 
   try {

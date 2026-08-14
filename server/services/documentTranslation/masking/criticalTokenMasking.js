@@ -49,6 +49,8 @@
 
 import {
   ABBREVIATION_PATTERN_SOURCE,
+  assertKindNamesAreParsable,
+  IDENTIFIER_PATTERNS,
   INN_STEM_PATTERN_SOURCE,
   STRENGTH_UNIT_PATTERN_SOURCE,
   SUBSTANCE_NAME_PATTERN_SOURCE,
@@ -138,6 +140,13 @@ const MEDICATION_NAME = String.raw`[A-ZÄÖÜ][A-Za-z0-9ÄÖÜäöüß-]{1,40}`;
  *   PERCENT before NUM    : "50 %" must stay one atomic unit
  */
 const TOKEN_KINDS = [
+  // Structured direct identifiers first: most contain digits and would
+  // otherwise be shredded by the numeric passes, and none of them needs to
+  // reach an external processor at all.
+  ...IDENTIFIER_PATTERNS.filter((p) => p.kind !== "PHONE").map((p) => ({
+    kind: p.kind,
+    re: new RegExp(p.source, "g"),
+  })),
   {
     kind: "MEDICATION",
     // "Ramipril 5 mg" · "ASS 100 mg 1-0-0" · "L-Thyroxin 75 µg"
@@ -192,6 +201,16 @@ const TOKEN_KINDS = [
     re: new RegExp(String.raw`\b\d{1,2}:\d{2}(?::\d{2})?(?:\s*Uhr)?`, "g"),
   },
   {
+    // After DATE and TIME so an ISO date is not read as a phone number, and
+    // before SCHEDULE/REFRANGE for real phone shapes. Its seven-digit floor
+    // keeps "1-0-0" and "70 - 110" out.
+    kind: "PHONE",
+    re: new RegExp(
+      IDENTIFIER_PATTERNS.find((p) => p.kind === "PHONE").source,
+      "g",
+    ),
+  },
+  {
     kind: "SCHEDULE",
     // 1-0-0 · 1-1-1-1 · 0,5-0-0,5
     // Requires three or four parts, so a two-part reference range cannot match.
@@ -224,6 +243,10 @@ const TOKEN_KINDS = [
     re: new RegExp(String.raw`\d+(?:[.,]\d+)*`, "g"),
   },
 ];
+
+// Fails at import time rather than silently producing markers that cannot be
+// parsed back. A kind containing an underscore breaks the marker grammar.
+assertKindNamesAreParsable(TOKEN_KINDS.map((t) => t.kind));
 
 /**
  * @typedef {object} MaskToken
@@ -337,6 +360,38 @@ export function findMarkers(text) {
 export function stripMarkers(text) {
   MARKER_PATTERN.lastIndex = 0;
   return String(text).replace(MARKER_PATTERN, " ");
+}
+
+/**
+ * Token kinds that mark a piece of text as clinical data rather than prose.
+ *
+ * Used by the PDF layout rules: a two-column structure carrying these is a
+ * medication or results table, where reading across instead of down moves a
+ * value to the wrong row. DATE and TIME are deliberately absent — a letterhead
+ * with a right-aligned date is not clinical data.
+ */
+export const CLINICAL_TOKEN_KINDS = Object.freeze([
+  "MEDICATION",
+  "DOSE",
+  "REFRANGE",
+  "SCHEDULE",
+  "SUBSTANCE",
+  "INN",
+  "ABBREV",
+]);
+
+/**
+ * Whether a piece of text contains clinical data, decided by running the real
+ * masking rules rather than by a second, divergent pattern set.
+ *
+ * @param {string} text
+ * @param {readonly string[]} [kinds]
+ * @returns {boolean}
+ */
+export function containsClinicalToken(text, kinds = CLINICAL_TOKEN_KINDS) {
+  const wanted = new Set(kinds);
+  const { tokens } = maskSegments([{ index: 0, kind: "probe", text: String(text ?? "") }]);
+  return tokens.some((t) => wanted.has(t.kind));
 }
 
 /**
