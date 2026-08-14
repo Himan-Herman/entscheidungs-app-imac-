@@ -766,6 +766,8 @@ export default {
       viewOriginal: "Afficher l'original",
       downloadPdf: "Télécharger en PDF",
       pdfUnavailableForLanguage: "L'export PDF n'est pas encore disponible pour cette langue.",
+      pdfExportFailed:
+        "Le PDF n'a pas pu être créé. Veuillez réessayer. Le document original reste disponible et inchangé.",
       pdfTitle: "Traduction d'un document de cabinet",
       pdfFileNameSuffix: "traduction",
 

@@ -144,7 +144,11 @@ async function post(body, { userId = PATIENT, documentId = DOC, auth = true } = 
     },
     body: JSON.stringify(body),
   });
-  return { status: res.status, body: await res.json().catch(() => ({})) };
+  return {
+    status: res.status,
+    headers: res.headers,
+    body: await res.json().catch(() => ({})),
+  };
 }
 
 const VALID_BODY = {
@@ -271,6 +275,33 @@ test("the feature flag closes the endpoint", async () => {
 // behaviour is not asserted here; the limit that actually matters — one
 // transformation at a time per patient — is covered in the service suite.
 process.env.DOCUMENT_TRANSLATION_IP_MAX = "500";
+  }
+});
+
+test("every response forbids caching, whatever its status", async () => {
+  // A transformed medical document must not be retained by a proxy, a disk
+  // cache or a back/forward restore. The server keeps no copy; the transport
+  // must not keep one either. Asserted across statuses because the header is
+  // set before any branch can return.
+  // The unauthenticated 401 is issued by the app-level auth middleware before
+  // this router is reached, so it is not this route's to set — and it carries
+  // no document content. Everything the route itself answers is covered.
+  const cases = [
+    await post({ ...VALID_BODY, mode: "nonsense" }), // 400
+    await post(VALID_BODY), // 503, provider gate
+    await post(VALID_BODY, { documentId: "doc-missing" }), // 404
+    await post(VALID_BODY, { userId: OTHER }), // 404, another patient
+  ];
+
+  for (const { status, headers } of cases) {
+    const cacheControl = headers.get("cache-control") ?? "";
+    assert.match(cacheControl, /no-store/, `status ${status}: ${cacheControl}`);
+    assert.match(cacheControl, /private/, `status ${status}: ${cacheControl}`);
+    assert.equal(headers.get("pragma"), "no-cache", `status ${status}`);
+    // Express adds a content-derived ETag. It is left alone deliberately:
+    // no-store already forbids storing any part of the response, and
+    // conditional revalidation applies to GET/HEAD, not to this POST. Removing
+    // it would mean overriding res.json for no gain.
   }
 });
 

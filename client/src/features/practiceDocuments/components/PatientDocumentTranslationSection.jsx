@@ -62,8 +62,24 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [errorCode, setErrorCode] = useState("");
+  const [pdfError, setPdfError] = useState(false);
 
   const abortRef = useRef(null);
+
+  /**
+   * Clear anything on screen that describes an earlier request.
+   *
+   * The controls and the result have to agree. Leaving an English translation
+   * visible while the target-language control reads "Русский" invites a patient
+   * to read the wrong document as the one they just asked for — the metadata
+   * names the language, but the form should not contradict it in the first
+   * place.
+   */
+  const clearOutput = useCallback(() => {
+    setResult(null);
+    setErrorCode("");
+    setPdfError(false);
+  }, []);
 
   const documentId = document?.id ?? "";
   const initialFileId = useMemo(() => defaultSelectedFileId(document), [document]);
@@ -74,8 +90,7 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
   // discard a result the patient is reading.
   useEffect(() => {
     setFileId(initialFileId);
-    setResult(null);
-    setErrorCode("");
+    clearOutput();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentId]);
 
@@ -96,8 +111,7 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
     abortRef.current = controller;
 
     setBusy(true);
-    setErrorCode("");
-    setResult(null);
+    clearOutput();
 
     try {
       const { res, data } = await translatePracticeDocument({
@@ -133,33 +147,42 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
       if (abortRef.current === controller) abortRef.current = null;
       setBusy(false);
     }
-  }, [documentId, fileId, mode, targetLanguage, submitState.canSubmit, files]);
+  }, [documentId, fileId, mode, targetLanguage, submitState.canSubmit, files, clearOutput]);
 
-  const downloadPdf = useCallback(() => {
+  const downloadPdf = useCallback(async () => {
     if (!result) return;
+    setPdfError(false);
     const modeName = result.mode === TRANSLATION_MODES.PLAIN ? t.modePlainName : t.modeStrictName;
-    generateTranslationPdf({
-      segments: result.segments,
-      originalFileName: result.fileName,
-      sourceLanguage: result.sourceLanguage,
-      targetLanguage: result.targetLanguage,
-      mode: result.mode,
-      generatedAt: result.generatedAt,
-      labels: {
-        documentTitle: t.pdfTitle,
-        aiNotice: result.mode === TRANSLATION_MODES.PLAIN ? t.aiNoticePlain : t.aiNoticeStrict,
-        originalFileLabel: t.resultOriginalFile,
-        modeLabel: t.resultMode,
-        modeName,
-        sourceLanguageLabel: t.resultSourceLanguage,
-        sourceLanguageName: languageName(targetLanguages, result.sourceLanguage),
-        targetLanguageLabel: t.resultTargetLanguage,
-        targetLanguageName: languageName(targetLanguages, result.targetLanguage),
-        generatedAtLabel: t.resultGeneratedAt,
-        originalAuthoritative: t.originalAuthoritative,
-        fileNameSuffix: t.pdfFileNameSuffix,
-      },
-    });
+    try {
+      // Async because the Unicode font is fetched on demand — it is only needed
+      // when a patient actually exports, so it stays out of the app bundle.
+      await generateTranslationPdf({
+        segments: result.segments,
+        originalFileName: result.fileName,
+        sourceLanguage: result.sourceLanguage,
+        targetLanguage: result.targetLanguage,
+        mode: result.mode,
+        generatedAt: result.generatedAt,
+        labels: {
+          documentTitle: t.pdfTitle,
+          aiNotice: result.mode === TRANSLATION_MODES.PLAIN ? t.aiNoticePlain : t.aiNoticeStrict,
+          originalFileLabel: t.resultOriginalFile,
+          modeLabel: t.resultMode,
+          modeName,
+          sourceLanguageLabel: t.resultSourceLanguage,
+          sourceLanguageName: languageName(targetLanguages, result.sourceLanguage),
+          targetLanguageLabel: t.resultTargetLanguage,
+          targetLanguageName: languageName(targetLanguages, result.targetLanguage),
+          generatedAtLabel: t.resultGeneratedAt,
+          originalAuthoritative: t.originalAuthoritative,
+          fileNameSuffix: t.pdfFileNameSuffix,
+        },
+      });
+    } catch {
+      // The error object is deliberately not inspected or logged: it can carry
+      // request detail, and the patient only needs to know the export failed.
+      setPdfError(true);
+    }
   }, [result, t, targetLanguages]);
 
   // Hidden entirely unless the client flag is on AND the document is the sort
@@ -199,7 +222,10 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
             className="doc-translate__select"
             value={fileId}
             disabled={busy}
-            onChange={(event) => setFileId(event.target.value)}
+            onChange={(event) => {
+              setFileId(event.target.value);
+              clearOutput();
+            }}
           >
             <option value="">{t.filePlaceholder}</option>
             {files.map((file) => (
@@ -240,7 +266,10 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
               name="doc-translate-mode"
               value={option.value}
               checked={mode === option.value}
-              onChange={() => setMode(option.value)}
+              onChange={() => {
+                setMode(option.value);
+                clearOutput();
+              }}
               className="doc-translate__mode-input"
             />
             <span className="doc-translate__mode-body">
@@ -261,7 +290,10 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
           className="doc-translate__select"
           value={targetLanguage}
           disabled={busy}
-          onChange={(event) => setTargetLanguage(event.target.value)}
+          onChange={(event) => {
+            setTargetLanguage(event.target.value);
+            clearOutput();
+          }}
         >
           <option value="">{t.targetLanguagePlaceholder}</option>
           {targetLanguages.map((option) => (
@@ -361,15 +393,29 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
             ) : null}
 
             {canExportPdfForLanguage(result.targetLanguage) ? (
-              <button type="button" className="doc-translate__secondary" onClick={downloadPdf}>
+              <button
+                type="button"
+                className="doc-translate__secondary"
+                onClick={() => void downloadPdf()}
+              >
                 {t.downloadPdf}
               </button>
             ) : (
+              /* Unreachable for the six shipped languages — the bundled font
+                 covers Latin and Cyrillic. Kept so that activating a seventh UI
+                 language cannot silently produce a PDF in a script the font
+                 does not contain. */
               <p className="doc-translate__pdf-unavailable" role="note">
                 {t.pdfUnavailableForLanguage}
               </p>
             )}
           </div>
+
+          {pdfError ? (
+            <p className="doc-translate__pdf-unavailable" role="alert">
+              {t.pdfExportFailed}
+            </p>
+          ) : null}
         </article>
       ) : null}
     </section>

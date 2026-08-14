@@ -86,6 +86,8 @@ export default {
     downloadPdf: "Als PDF herunterladen",
     pdfUnavailableForLanguage:
       "Der PDF-Export ist für diese Sprache noch nicht verfügbar.",
+    pdfExportFailed:
+      "Das PDF konnte nicht erstellt werden. Bitte versuchen Sie es erneut. Das Originaldokument bleibt unverändert verfügbar.",
     pdfTitle: "Übersetzung eines Praxisdokuments",
     pdfFileNameSuffix: "uebersetzung",
 

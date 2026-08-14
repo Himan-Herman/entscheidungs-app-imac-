@@ -84,6 +84,8 @@ export default {
     viewOriginal: "Show original",
     downloadPdf: "Download as PDF",
     pdfUnavailableForLanguage: "PDF export is not yet available for this language.",
+    pdfExportFailed:
+      "The PDF could not be created. Please try again. The original document remains available unchanged.",
     pdfTitle: "Translation of a practice document",
     pdfFileNameSuffix: "translation",
 

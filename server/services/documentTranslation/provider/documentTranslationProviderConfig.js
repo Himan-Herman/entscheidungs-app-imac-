@@ -48,6 +48,11 @@ export const PROVIDER_ENV = Object.freeze({
   MODEL_STRICT: "DOCUMENT_TRANSLATION_MODEL_STRICT",
   /** Model slot for plain-language rendering. */
   MODEL_PLAIN: "DOCUMENT_TRANSLATION_MODEL_PLAIN",
+  /**
+   * Which failure the fake adapter should simulate. Read only when the fake is
+   * selected, which cannot happen in production — see resolveProviderConfig.
+   */
+  FAKE_BEHAVIOUR: "DOCUMENT_TRANSLATION_FAKE_BEHAVIOUR",
 });
 
 /** Adapters this build knows about. */
@@ -89,6 +94,16 @@ export function resolveProviderConfig(env = process.env) {
   // and without credentials. It is a normal, fully configured provider from the
   // service's point of view — it simply never leaves the process.
   if (kind === PROVIDER_KINDS.FAKE) {
+    // In production it must be unreachable. A deployment that set it by mistake
+    // would hand patients echo-prefixed text that looks like a translation of
+    // their own medical letter, which is worse than the feature being off.
+    if (read(env, "NODE_ENV") === "production") {
+      return {
+        configured: false,
+        missing: [PROVIDER_ENV.PROVIDER],
+        reason: "fake_provider_not_allowed_in_production",
+      };
+    }
     return {
       configured: true,
       missing: [],
@@ -96,6 +111,9 @@ export function resolveProviderConfig(env = process.env) {
       models: { strict: "fake-strict", plain: "fake-plain" },
       dataRegion: "in-process",
       zeroRetention: true,
+      // Only meaningful for the double; lets a test drive a specific failure
+      // through the real route and service rather than around them.
+      fakeBehaviour: read(env, PROVIDER_ENV.FAKE_BEHAVIOUR) || undefined,
     };
   }
 

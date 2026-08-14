@@ -766,6 +766,8 @@ export default {
       viewOriginal: "Mostra originale",
       downloadPdf: "Scarica come PDF",
       pdfUnavailableForLanguage: "L'esportazione in PDF non è ancora disponibile per questa lingua.",
+      pdfExportFailed:
+        "Non è stato possibile creare il PDF. Riprova. Il documento originale resta disponibile e invariato.",
       pdfTitle: "Traduzione di un documento dello studio",
       pdfFileNameSuffix: "traduzione",
 

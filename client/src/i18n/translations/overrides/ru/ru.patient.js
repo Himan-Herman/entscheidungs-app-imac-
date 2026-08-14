@@ -680,6 +680,8 @@ export default {
       viewOriginal: "Показать оригинал",
       downloadPdf: "Скачать в PDF",
       pdfUnavailableForLanguage: "Экспорт в PDF для этого языка пока недоступен.",
+      pdfExportFailed:
+        "Не удалось создать PDF-файл. Попробуйте ещё раз. Оригинал документа остаётся доступным без изменений.",
       pdfTitle: "Перевод документа клиники",
       pdfFileNameSuffix: "perevod",
 

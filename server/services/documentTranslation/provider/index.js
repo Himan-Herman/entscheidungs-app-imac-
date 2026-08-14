@@ -52,7 +52,10 @@ export function resolveDocumentTranslationProvider(options = {}) {
   }
 
   if (config.kind === PROVIDER_KINDS.FAKE) {
-    return createFakeDocumentTranslationProvider(options.fakeOptions);
+    return createFakeDocumentTranslationProvider({
+      ...(config.fakeBehaviour ? { behaviour: config.fakeBehaviour } : {}),
+      ...options.fakeOptions,
+    });
   }
 
   return createOpenAiDocumentTranslationProvider(config);

@@ -319,6 +319,24 @@ router.get(
 );
 
 /**
+ * Forbid every layer of caching for a response on this route.
+ *
+ * A transformed medical document must not survive in a shared proxy, a browser
+ * disk cache or a back/forward restore. The server keeps no copy of the result,
+ * so a cached one would outlive its only source.
+ *
+ * Placed first in the chain so that the rate-limit rejection is covered as well
+ * as the handler's own responses. The 401 for a request with no token is issued
+ * by the app-level auth middleware before this router is reached; that response
+ * carries no document content.
+ */
+function noStore(_req, res, next) {
+  res.set("Cache-Control", "private, no-store, max-age=0");
+  res.set("Pragma", "no-cache");
+  next();
+}
+
+/**
  * POST /api/patient/practice-documents/:documentId/translate
  *
  * Transforms one already-released practice document into a target language
@@ -332,7 +350,7 @@ router.get(
  *
  * Nothing is persisted and no document content is logged.
  */
-router.post("/:documentId/translate", documentTranslationIpLimiter, async (req, res) => {
+router.post("/:documentId/translate", noStore, documentTranslationIpLimiter, async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 

@@ -532,17 +532,21 @@ test("no provider or model detail exists in the client feature", () => {
 /* 9. PDF export                                                      */
 /* ================================================================== */
 
-test("PDF export is offered only for languages the built-in font can typeset", () => {
-  assert.deepEqual([...PDF_EXPORTABLE_LANGUAGES], ["de", "en", "fr", "es", "it"]);
-  for (const code of ["de", "en", "fr", "es", "it"]) {
+test("PDF export covers every language the feature offers", () => {
+  // Phase 2C could not export Russian: jsPDF's built-in font is WinAnsi and has
+  // no Cyrillic. A licence-clean Unicode font now closes that gap, so the two
+  // lists must not drift apart again — a target language a patient can pick but
+  // cannot export is a half-delivered feature.
+  assert.deepEqual([...PDF_EXPORTABLE_LANGUAGES], ["de", "en", "fr", "es", "it", "ru"]);
+  for (const code of getTranslationTargetLanguages().map((l) => l.code)) {
     assert.equal(canExportPdfForLanguage(code), true, code);
   }
-  // Russian needs Cyrillic glyphs the built-in font lacks, and the only
-  // Unicode font in the repository has an unresolved licence.
-  assert.equal(canExportPdfForLanguage("ru"), false);
 });
 
-test("the Russian gap is communicated, not silently broken", () => {
+test("the unsupported-language message survives for a future seventh language", () => {
+  // Unreachable today, deliberately kept: the font covers Latin and Cyrillic,
+  // so a language in another script must refuse rather than emit blank boxes.
+  assert.equal(canExportPdfForLanguage("el"), false);
   for (const bundle of [de.translation, en.translation]) {
     assert.ok(
       typeof bundle.pdfUnavailableForLanguage === "string" &&
@@ -551,12 +555,12 @@ test("the Russian gap is communicated, not silently broken", () => {
   }
 });
 
-test("the export does not adopt the unlicensed font", () => {
+test("the export embeds the licence-clean font and not the unresolved one", () => {
   const pdfSource = stripComments(
     readFileSync(new URL("../pdf/generateTranslationPdf.js", import.meta.url), "utf8"),
   );
   assert.ok(!pdfSource.includes("tahoma"), "the export embeds the unresolved-licence font");
-  assert.ok(!pdfSource.includes("addFileToVFS"), "the export embeds a custom font");
+  assert.ok(pdfSource.includes("medscoutx-document-sans.ttf"), "no bundled font is embedded");
 });
 
 test("the export file name is sanitised and carries no identifiers", () => {
@@ -633,3 +637,150 @@ function escapeLikeReact(value) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
+
+/* ================================================================== */
+/* 10. Nothing about a result outlives the session                    */
+/* ================================================================== */
+
+test("the service worker cannot cache a transformation", () => {
+  const config = readFileSync(new URL("../../../../vite.config.js", import.meta.url), "utf8");
+
+  // Runtime caching is limited to images. A JSON API response has
+  // request.destination === "empty" and is therefore never matched — and
+  // Workbox strategies only handle GET in any case, while /translate is a POST.
+  const runtime = config.slice(config.indexOf("runtimeCaching"), config.indexOf("manifest:"));
+  assert.ok(runtime.includes("request.destination === 'image'"), runtime);
+  assert.ok(!/\/api/.test(runtime), "the service worker has a rule touching /api");
+  assert.ok(!/NetworkFirst|StaleWhileRevalidate/.test(runtime), runtime);
+
+  // Precaching is by file extension; no data format is among them.
+  const glob = config.match(/globPatterns:\s*\[[^\]]*\]/)?.[0] ?? "";
+  assert.ok(glob, "globPatterns disappeared");
+  for (const ext of ["json", "pdf", "docx"]) {
+    assert.ok(!glob.includes(ext), `the service worker precaches .${ext}`);
+  }
+
+  // And an /api request is never answered with the app shell.
+  assert.match(config, /navigateFallbackDenylist:\s*\[\/\^\\\/api/);
+});
+
+test("the client feature stores nothing anywhere persistent", () => {
+  const sources = [
+    "../components/PatientDocumentTranslationSection.jsx",
+    "../api/documentTranslationApi.js",
+    "../pdf/generateTranslationPdf.js",
+  ].map((rel) => stripComments(readFileSync(new URL(rel, import.meta.url), "utf8")));
+
+  for (const source of sources) {
+    for (const sink of [
+      "localStorage",
+      "sessionStorage",
+      "indexedDB",
+      "caches.",
+      "document.cookie",
+      "queryClient",
+    ]) {
+      assert.ok(!source.includes(sink), `a result could reach ${sink}`);
+    }
+  }
+});
+
+test("the client feature reports nothing to any telemetry sink", () => {
+  const sources = [
+    "../components/PatientDocumentTranslationSection.jsx",
+    "../api/documentTranslationApi.js",
+    "../pdf/generateTranslationPdf.js",
+    "../translation/documentTranslationErrors.js",
+    "../translation/documentTranslationOptions.js",
+  ].map((rel) => stripComments(readFileSync(new URL(rel, import.meta.url), "utf8")));
+
+  for (const source of sources) {
+    for (const sink of [
+      "console.log",
+      "console.error",
+      "console.warn",
+      "sendPracticeAnalyticsEvent",
+      "productAnalytics",
+      "Sentry",
+      "navigator.sendBeacon",
+      "gtag",
+    ]) {
+      assert.ok(!source.includes(sink), `document text could reach ${sink}`);
+    }
+  }
+});
+
+test("a failed export tells the patient instead of failing silently", () => {
+  const component = stripComments(
+    readFileSync(new URL("../components/PatientDocumentTranslationSection.jsx", import.meta.url), "utf8"),
+  );
+  assert.ok(component.includes("setPdfError(true)"), "an export failure is swallowed");
+  assert.ok(component.includes("t.pdfExportFailed"), "no message is shown for a failed export");
+
+  for (const bundle of [de.translation, en.translation]) {
+    assert.ok(
+      typeof bundle.pdfExportFailed === "string" && bundle.pdfExportFailed.length > 0,
+      "pdfExportFailed is missing",
+    );
+  }
+});
+
+test("every key of the German bundle exists in all six languages", () => {
+  // Error codes are covered above; this is the rest of the surface — labels,
+  // headings, buttons, notices. A missing key renders as an English island in
+  // an otherwise translated page, or as nothing at all.
+  const bundles = {
+    en: en.translation,
+    fr: frPatient.patientPracticeDocuments.translation,
+    es: esPatient.patientPracticeDocuments.translation,
+    it: itPatient.patientPracticeDocuments.translation,
+    ru: ruPatient.patientPracticeDocuments.translation,
+  };
+
+  const flatten = (obj, prefix = "") =>
+    Object.entries(obj).flatMap(([key, value]) =>
+      value && typeof value === "object"
+        ? flatten(value, `${prefix}${key}.`)
+        : [`${prefix}${key}`],
+    );
+
+  const expected = flatten(de.translation);
+  assert.ok(expected.length >= 30, `only ${expected.length} keys found`);
+
+  for (const [lang, bundle] of Object.entries(bundles)) {
+    const present = new Set(flatten(bundle));
+    const missing = expected.filter((key) => !present.has(key));
+    assert.deepEqual(missing, [], `${lang} is missing: ${missing.join(", ")}`);
+  }
+});
+
+test("no language silently ships the English string as its translation", () => {
+  const bundles = {
+    fr: frPatient.patientPracticeDocuments.translation,
+    es: esPatient.patientPracticeDocuments.translation,
+    it: itPatient.patientPracticeDocuments.translation,
+    ru: ruPatient.patientPracticeDocuments.translation,
+  };
+
+  // An override bundle that merges wrongly falls back to English without
+  // failing, which is invisible until a patient reads it. Sampled on the
+  // strings a patient cannot miss.
+  const visible = ["heading", "submit", "aiNoticeStrict", "originalAuthoritative"];
+
+  for (const [lang, bundle] of Object.entries(bundles)) {
+    for (const key of visible) {
+      const value = bundle[key];
+      assert.ok(typeof value === "string" && value.length > 0, `${lang}.${key} is absent`);
+      assert.notEqual(value, en.translation[key], `${lang}.${key} is the English string`);
+    }
+  }
+});
+
+test("Russian is written in Cyrillic, not transliterated", () => {
+  // The one language whose script the PDF font had to be added for; if it were
+  // silently falling back to English the export work would prove nothing.
+  const ru = ruPatient.patientPracticeDocuments.translation;
+  for (const key of ["heading", "submit", "aiNoticeStrict", "downloadPdf"]) {
+    assert.match(ru[key], /\p{Script=Cyrillic}/u, `ru.${key} has no Cyrillic: ${ru[key]}`);
+  }
+});
