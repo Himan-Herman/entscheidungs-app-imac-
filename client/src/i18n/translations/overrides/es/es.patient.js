@@ -722,6 +722,88 @@ export default {
   },
 
   patientPracticeDocuments: {
+    translation: {
+      heading: "Traducir y leer con más facilidad",
+      subtitle:
+        "Traduzca este documento de su consulta a otro idioma, o haga que el lenguaje médico se formule de forma más comprensible.",
+      sourceLanguageNote: "Actualmente previsto para documentos de consulta en alemán.",
+
+      fileLabel: "Archivo",
+      filePlaceholder: "Seleccionar archivo",
+
+      modeLegend: "Tipo de procesamiento",
+      modeStrictName: "Traducción fiel",
+      modeStrictDescription:
+        "Traslada el contenido del documento al idioma elegido con la mayor exactitud posible. No se añaden ni se valoran afirmaciones médicas.",
+      modePlainName: "Explicado de forma sencilla",
+      modePlainDescription:
+        "Reformula el lenguaje médico de manera más comprensible, sin añadir información médica ni recomendaciones nuevas.",
+
+      targetLanguageLabel: "Idioma de destino",
+      targetLanguagePlaceholder: "Seleccionar idioma",
+
+      hintSameLanguageStrict:
+        "Este documento ya está en alemán. Elija otro idioma o utilice «Explicado de forma sencilla».",
+
+      submit: "Crear traducción",
+      submitBusy: "Creando …",
+      statusRunning: "Procesando el documento …",
+      retry: "Intentar de nuevo",
+
+      aiNoticeStrict: "Traducción generada por IA",
+      aiNoticePlain: "Versión simplificada generada por IA",
+
+      resultOriginalFile: "Archivo original",
+      resultMode: "Procesamiento",
+      resultSourceLanguage: "Idioma de origen",
+      resultTargetLanguage: "Idioma de destino",
+      resultGeneratedAt: "Creado el",
+
+      originalAuthoritative:
+        "Esta vista se generó automáticamente a partir del documento de la consulta. El documento original sigue siendo el determinante.",
+      plainNotAdvice: "La versión simplificada no sustituye el asesoramiento médico.",
+
+      viewOriginal: "Mostrar original",
+      downloadPdf: "Descargar como PDF",
+      pdfUnavailableForLanguage: "La exportación a PDF aún no está disponible para este idioma.",
+      pdfTitle: "Traducción de un documento de consulta",
+      pdfFileNameSuffix: "traduccion",
+
+      errors: {
+        generic: "No se pudo completar el procesamiento. Inténtelo de nuevo más tarde.",
+        notAvailable: "Esta función aún no está disponible.",
+        documentNotFound: "No se encontró este documento.",
+        documentUnavailable: "Este documento ya no está disponible.",
+        linkNotActive: "La conexión con esta consulta ya no está activa.",
+        fileNotFound: "No se encontró este archivo.",
+        typeNotTranslatable: "Este tipo de documento no se puede procesar actualmente.",
+        fileTypeUnsupported: "Este tipo de archivo no es compatible actualmente.",
+        textUnavailable: "Este documento no contiene texto legible de forma fiable.",
+        structureUnsupported:
+          "La estructura de este documento no se puede procesar de forma segura actualmente.",
+        encrypted: "Este documento está protegido con contraseña y no se puede leer.",
+        corrupt: "No se pudo leer este archivo.",
+        tooLarge: "Este documento es demasiado extenso para el procesamiento automático.",
+        sourceLanguageUnsupported:
+          "Esta función solo está disponible actualmente para documentos de consulta en alemán.",
+        sourceLanguageUncertain: "No se pudo determinar con claridad el idioma de este documento.",
+        medicationUnverifiable:
+          "Este documento contiene datos de medicación que no se pueden procesar automáticamente con suficiente seguridad. Utilice el documento original.",
+        dosageUnverifiable:
+          "Este documento contiene datos de dosificación que no se pueden procesar automáticamente con suficiente seguridad. Utilice el documento original.",
+        targetLanguageUnsupported: "Este idioma de destino no es compatible.",
+        modeInvalid: "Este tipo de procesamiento no está disponible.",
+        providerUnavailable:
+          "El procesamiento no está disponible en este momento. Inténtelo de nuevo más tarde.",
+        rateLimited:
+          "Ya hay un procesamiento en curso, o se han enviado demasiadas solicitudes. Espere un momento.",
+        timeout: "El procesamiento tardó demasiado. Inténtelo de nuevo.",
+        invalidResponse:
+          "El resultado no se pudo generar de forma fiable. Utilice el documento original.",
+        integrityFailed:
+          "La traducción no se pudo generar de forma fiable. Utilice el documento original.",
+      },
+    },
     pageTitle: "Documentos del consultorio — MedScoutX",
     heading: "Documentos del consultorio",
     intro: "Documentos compartidos por su consultorio — solo a título orientativo.",

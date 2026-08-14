@@ -1,0 +1,390 @@
+/*
+ * Document translation section.
+ *
+ * Follows the DocumentOcrSection conventions this page already uses: the same
+ * --token, fallback custom-property style, dark mode via :root[data-theme],
+ * 44px minimum touch targets and a 3px focus-visible ring.
+ *
+ * Logical properties (margin-inline, padding-inline, text-align: start) are used
+ * for anything directional, so the six shipped LTR languages behave identically
+ * while the registry's RTL locales are not blocked by this feature later.
+ */
+
+.doc-translate {
+  margin-block-start: 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border, #ccc);
+  border-radius: 10px;
+  background: var(--surface-alt, #f8fafc);
+}
+
+.doc-translate__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--text, #0f172a);
+}
+
+.doc-translate__subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text, #0f172a);
+}
+
+.doc-translate__source-note,
+.doc-translate__hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-muted, #555);
+}
+
+/* ── form controls ──────────────────────────────────────────────────────── */
+
+.doc-translate__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-block-end: 0.9rem;
+}
+
+.doc-translate__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text, #0f172a);
+  text-align: start;
+}
+
+.doc-translate__select {
+  /* Full width on every breakpoint: a language name like "Русский" or
+     "Français" must never be clipped, and a wider control costs nothing. */
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border, #94a3b8);
+  border-radius: 8px;
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
+  font: inherit;
+}
+
+.doc-translate__select:focus-visible,
+.doc-translate__submit:focus-visible,
+.doc-translate__secondary:focus-visible,
+.doc-translate__retry:focus-visible,
+.doc-translate__mode-input:focus-visible + .doc-translate__mode-body {
+  outline: 3px solid var(--focus, #2563eb);
+  outline-offset: 2px;
+}
+
+.doc-translate__single-file {
+  margin: 0 0 0.9rem;
+  font-size: 0.9rem;
+  color: var(--text-muted, #555);
+}
+
+.doc-translate__single-file span {
+  color: var(--text, #0f172a);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* ── mode radio group ───────────────────────────────────────────────────── */
+
+.doc-translate__modes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0 0 0.9rem;
+  padding: 0;
+  border: 0;
+}
+
+.doc-translate__mode {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.7rem 0.8rem;
+  border: 2px solid var(--border, #cbd5e1);
+  border-radius: 10px;
+  background: var(--surface, #fff);
+  cursor: pointer;
+}
+
+/* Selection is carried by the border weight, the background AND the native
+   radio state — never by colour alone. */
+.doc-translate__mode.is-selected {
+  border-color: var(--primary, #1e40af);
+  background: var(--surface-selected, #eef2ff);
+}
+
+.doc-translate__mode-input {
+  /* Kept in the accessibility tree and operable by keyboard; only sized. */
+  margin-block-start: 0.2rem;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  accent-color: var(--primary, #1e40af);
+}
+
+.doc-translate__mode-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.doc-translate__mode-name {
+  font-weight: 600;
+  color: var(--text, #0f172a);
+}
+
+.doc-translate__mode-description {
+  font-size: 0.85rem;
+  color: var(--text-muted, #555);
+}
+
+/* ── actions ────────────────────────────────────────────────────────────── */
+
+.doc-translate__submit {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 1rem;
+  border: 2px solid var(--primary, #1e40af);
+  border-radius: 8px;
+  background: var(--primary, #1e40af);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Disabled is signalled by opacity, the not-allowed cursor AND the native
+   disabled state that assistive technology reports. */
+.doc-translate__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.doc-translate__status {
+  margin: 0.5rem 0 0;
+  min-height: 1.2em;
+  font-size: 0.9rem;
+  color: var(--text-muted, #555);
+}
+
+.doc-translate__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-block-start: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--danger-border, #fca5a5);
+  border-radius: 8px;
+  background: var(--danger-surface, #fef2f2);
+  color: var(--danger-text, #991b1b);
+  font-size: 0.9rem;
+}
+
+/* "Not available yet" is a state of the deployment, not a failure — it should
+   not look like an error the patient caused. */
+.doc-translate__error.is-neutral {
+  border-color: var(--border, #cbd5e1);
+  background: var(--surface, #fff);
+  color: var(--text-muted, #475569);
+}
+
+.doc-translate__retry,
+.doc-translate__secondary {
+  min-height: 44px;
+  padding: 0.45rem 0.9rem;
+  border: 2px solid var(--border, #94a3b8);
+  border-radius: 8px;
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── result ─────────────────────────────────────────────────────────────── */
+
+.doc-translate__result {
+  margin-block-start: 1.1rem;
+  padding: 0.9rem;
+  /* A deliberately distinct frame: the transformation must never be mistaken
+     for the practice's own document. */
+  border: 2px dashed var(--accent-border, #f59e0b);
+  border-radius: 10px;
+  background: var(--surface, #fff);
+}
+
+.doc-translate__result-heading {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  color: var(--accent-text, #b45309);
+}
+
+.doc-translate__meta {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) 1fr;
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+
+.doc-translate__meta dt {
+  color: var(--text-muted, #555);
+}
+
+.doc-translate__meta dd {
+  margin: 0;
+  color: var(--text, #0f172a);
+  overflow-wrap: anywhere;
+}
+
+.doc-translate__disclaimer {
+  margin: 0 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-muted, #555);
+}
+
+.doc-translate__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.doc-translate__segment,
+.doc-translate__segment-heading {
+  margin: 0;
+  color: var(--text, #0f172a);
+  /* Line structure from the source is preserved without interpreting the text
+     as markup. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
+.doc-translate__segment-heading {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.doc-translate__result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-block-start: 1rem;
+}
+
+.doc-translate__pdf-unavailable {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted, #555);
+}
+
+/* ── narrow viewports ───────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .doc-translate {
+    padding: 0.8rem;
+  }
+
+  .doc-translate__result-actions > * {
+    width: 100%;
+  }
+
+  .doc-translate__meta {
+    /* Below ~400px a two-column definition list forces the value into a
+       one-word-per-line column; stacking keeps it readable. */
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+
+  .doc-translate__meta dd {
+    margin-block-end: 0.4rem;
+  }
+}
+
+/* ── reduced motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-translate *,
+  .doc-translate *::before,
+  .doc-translate *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ── dark mode ──────────────────────────────────────────────────────────── */
+
+:root[data-theme="dark"] .doc-translate {
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.55);
+}
+
+:root[data-theme="dark"] .doc-translate__heading,
+:root[data-theme="dark"] .doc-translate__subtitle,
+:root[data-theme="dark"] .doc-translate__label,
+:root[data-theme="dark"] .doc-translate__mode-name,
+:root[data-theme="dark"] .doc-translate__meta dd,
+:root[data-theme="dark"] .doc-translate__segment,
+:root[data-theme="dark"] .doc-translate__segment-heading {
+  color: #e5eef8;
+}
+
+:root[data-theme="dark"] .doc-translate__source-note,
+:root[data-theme="dark"] .doc-translate__hint,
+:root[data-theme="dark"] .doc-translate__mode-description,
+:root[data-theme="dark"] .doc-translate__single-file,
+:root[data-theme="dark"] .doc-translate__status,
+:root[data-theme="dark"] .doc-translate__disclaimer,
+:root[data-theme="dark"] .doc-translate__meta dt,
+:root[data-theme="dark"] .doc-translate__pdf-unavailable {
+  color: #b6c4d6;
+}
+
+:root[data-theme="dark"] .doc-translate__select,
+:root[data-theme="dark"] .doc-translate__mode,
+:root[data-theme="dark"] .doc-translate__secondary,
+:root[data-theme="dark"] .doc-translate__retry {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.75);
+  color: #e5eef8;
+}
+
+:root[data-theme="dark"] .doc-translate__mode.is-selected {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.14);
+}
+
+:root[data-theme="dark"] .doc-translate__submit {
+  border-color: #0ea5e9;
+  background: #0ea5e9;
+  color: #04263a;
+}
+
+:root[data-theme="dark"] .doc-translate__error {
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(127, 29, 29, 0.3);
+  color: #fecaca;
+}
+
+:root[data-theme="dark"] .doc-translate__error.is-neutral {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.75);
+  color: #b6c4d6;
+}
+
+:root[data-theme="dark"] .doc-translate__result {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(15, 23, 42, 0.72);
+}
+
+:root[data-theme="dark"] .doc-translate__result-heading {
+  color: #fbbf24;
+}

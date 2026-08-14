@@ -722,6 +722,89 @@ export default {
   },
 
   patientPracticeDocuments: {
+    translation: {
+      heading: "Tradurre e leggere più facilmente",
+      subtitle:
+        "Traduci questo documento dello studio medico in un'altra lingua, oppure fai riformulare il linguaggio medico in modo più comprensibile.",
+      sourceLanguageNote: "Attualmente previsto per documenti dello studio in lingua tedesca.",
+
+      fileLabel: "File",
+      filePlaceholder: "Seleziona un file",
+
+      modeLegend: "Tipo di elaborazione",
+      modeStrictName: "Traduzione fedele",
+      modeStrictDescription:
+        "Riporta il contenuto del documento nella lingua scelta nel modo più preciso possibile. Le affermazioni mediche non vengono aggiunte né valutate.",
+      modePlainName: "Spiegato in modo semplice",
+      modePlainDescription:
+        "Riformula il linguaggio medico in modo più comprensibile, senza aggiungere nuove informazioni mediche o raccomandazioni.",
+
+      targetLanguageLabel: "Lingua di destinazione",
+      targetLanguagePlaceholder: "Seleziona una lingua",
+
+      hintSameLanguageStrict:
+        "Questo documento è già in tedesco. Scegli un'altra lingua oppure usa «Spiegato in modo semplice».",
+
+      submit: "Crea traduzione",
+      submitBusy: "Creazione in corso …",
+      statusRunning: "Elaborazione del documento …",
+      retry: "Riprova",
+
+      aiNoticeStrict: "Traduzione generata da IA",
+      aiNoticePlain: "Versione semplificata generata da IA",
+
+      resultOriginalFile: "File originale",
+      resultMode: "Elaborazione",
+      resultSourceLanguage: "Lingua di partenza",
+      resultTargetLanguage: "Lingua di destinazione",
+      resultGeneratedAt: "Creato il",
+
+      originalAuthoritative:
+        "Questa vista è stata generata automaticamente dal documento dello studio. Fa fede il documento originale.",
+      plainNotAdvice: "La versione semplificata non sostituisce una consulenza medica.",
+
+      viewOriginal: "Mostra originale",
+      downloadPdf: "Scarica come PDF",
+      pdfUnavailableForLanguage: "L'esportazione in PDF non è ancora disponibile per questa lingua.",
+      pdfTitle: "Traduzione di un documento dello studio",
+      pdfFileNameSuffix: "traduzione",
+
+      errors: {
+        generic: "Non è stato possibile completare l'elaborazione. Riprova più tardi.",
+        notAvailable: "Questa funzione non è ancora disponibile.",
+        documentNotFound: "Documento non trovato.",
+        documentUnavailable: "Questo documento non è più disponibile.",
+        linkNotActive: "Il collegamento con questo studio non è più attivo.",
+        fileNotFound: "File non trovato.",
+        typeNotTranslatable: "Questo tipo di documento non può essere elaborato al momento.",
+        fileTypeUnsupported: "Questo tipo di file non è attualmente supportato.",
+        textUnavailable: "Questo documento non contiene testo leggibile in modo affidabile.",
+        structureUnsupported:
+          "La struttura di questo documento non può essere elaborata in sicurezza al momento.",
+        encrypted: "Questo documento è protetto da password e non può essere letto.",
+        corrupt: "Non è stato possibile leggere questo file.",
+        tooLarge: "Questo documento è troppo esteso per l'elaborazione automatica.",
+        sourceLanguageUnsupported:
+          "Questa funzione è attualmente disponibile solo per documenti dello studio in lingua tedesca.",
+        sourceLanguageUncertain:
+          "Non è stato possibile determinare con certezza la lingua di questo documento.",
+        medicationUnverifiable:
+          "Questo documento contiene indicazioni sui farmaci che non possono essere elaborate automaticamente con sufficiente sicurezza. Utilizza il documento originale.",
+        dosageUnverifiable:
+          "Questo documento contiene indicazioni di dosaggio che non possono essere elaborate automaticamente con sufficiente sicurezza. Utilizza il documento originale.",
+        targetLanguageUnsupported: "Questa lingua di destinazione non è supportata.",
+        modeInvalid: "Questo tipo di elaborazione non è disponibile.",
+        providerUnavailable:
+          "L'elaborazione non è al momento raggiungibile. Riprova più tardi.",
+        rateLimited:
+          "Un'elaborazione è già in corso, oppure sono state inviate troppe richieste. Attendi un momento.",
+        timeout: "L'elaborazione ha richiesto troppo tempo. Riprova.",
+        invalidResponse:
+          "Non è stato possibile produrre il risultato in modo affidabile. Utilizza il documento originale.",
+        integrityFailed:
+          "Non è stato possibile produrre la traduzione in modo affidabile. Utilizza il documento originale.",
+      },
+    },
     pageTitle: "Documenti dello studio — MedScoutX",
     heading: "Documenti dello studio",
     intro: "Documenti condivisi dal tuo studio — solo a titolo orientativo.",

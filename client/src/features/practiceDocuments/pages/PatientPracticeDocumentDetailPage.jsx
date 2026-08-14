@@ -11,6 +11,7 @@ import {
 } from "../api/patientPracticeDocumentsApi.js";
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import PatientStructuredDocumentSection from "../components/PatientStructuredDocumentSection.jsx";
+import PatientDocumentTranslationSection from "../components/PatientDocumentTranslationSection.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 import ShareDocumentDialog from "../../patientPractices/components/ShareDocumentDialog.jsx";
@@ -267,6 +268,21 @@ export default function PatientPracticeDocumentDetailPage() {
 
       {doc && !loading && !error ? (
         <PatientStructuredDocumentSection documentId={documentId} />
+      ) : null}
+
+      {/* Translation / plain-language sits on the document's own detail page:
+          the patient has already opened a document their practice released to
+          them, so the feature never becomes a general-purpose upload tool. It
+          hides itself when the client flag is off or the document is not one
+          this feature handles. */}
+      {doc && !loading && !error ? (
+        <PatientDocumentTranslationSection
+          document={doc}
+          onViewOriginal={(fileId) => {
+            const file = (doc.files || []).find((f) => f.id === fileId) || doc.files?.[0];
+            if (file) void handleView(file);
+          }}
+        />
       ) : null}
 
       {doc && !loading && !error ? (

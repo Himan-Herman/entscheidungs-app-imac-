@@ -40,4 +40,85 @@ export default {
   questionSent: "Your question was sent to the practice.",
   questionError: "Could not send your question.",
   messagesLink: "Go to secure messages",
+  translation: {
+    heading: "Translate & read more easily",
+    subtitle:
+      "Translate this practice document into another language, or have medical terminology worded more accessibly.",
+    sourceLanguageNote: "Currently intended for German-language practice documents.",
+
+    fileLabel: "File",
+    filePlaceholder: "Select a file",
+
+    modeLegend: "Type of processing",
+    modeStrictName: "Faithful translation",
+    modeStrictDescription:
+      "Renders the document content into the selected language as accurately as possible. Medical statements are neither added nor assessed.",
+    modePlainName: "Plain language",
+    modePlainDescription:
+      "Words medical terminology more accessibly, without adding any new medical information or recommendations.",
+
+    targetLanguageLabel: "Target language",
+    targetLanguagePlaceholder: "Select a language",
+
+    hintSameLanguageStrict:
+      "This document is already in German. Choose another language, or use \u201cPlain language\u201d.",
+
+    submit: "Create translation",
+    submitBusy: "Creating …",
+    statusRunning: "Processing document …",
+    retry: "Try again",
+
+    aiNoticeStrict: "AI-generated translation",
+    aiNoticePlain: "AI-generated plain-language version",
+
+    resultOriginalFile: "Original file",
+    resultMode: "Processing",
+    resultSourceLanguage: "Source language",
+    resultTargetLanguage: "Target language",
+    resultGeneratedAt: "Created on",
+
+    originalAuthoritative:
+      "This view was generated automatically from the practice document. The original document remains authoritative.",
+    plainNotAdvice: "The plain-language version does not replace medical advice.",
+
+    viewOriginal: "Show original",
+    downloadPdf: "Download as PDF",
+    pdfUnavailableForLanguage: "PDF export is not yet available for this language.",
+    pdfTitle: "Translation of a practice document",
+    pdfFileNameSuffix: "translation",
+
+    errors: {
+      generic: "The processing could not be completed. Please try again later.",
+      notAvailable: "This function is not available yet.",
+      documentNotFound: "This document was not found.",
+      documentUnavailable: "This document is no longer available.",
+      linkNotActive: "The connection to this practice is no longer active.",
+      fileNotFound: "This file was not found.",
+      typeNotTranslatable: "This type of document cannot currently be processed.",
+      fileTypeUnsupported: "This file type is not currently supported.",
+      textUnavailable: "This document contains no reliably readable text.",
+      structureUnsupported:
+        "The structure of this document cannot currently be processed safely.",
+      encrypted: "This document is password-protected and cannot be read.",
+      corrupt: "This file could not be read.",
+      tooLarge: "This document is too large for automatic processing.",
+      sourceLanguageUnsupported:
+        "This function is currently only available for German-language practice documents.",
+      sourceLanguageUncertain: "The language of this document could not be determined clearly.",
+      medicationUnverifiable:
+        "This document contains medication details that cannot be processed automatically with sufficient certainty. Please use the original document.",
+      dosageUnverifiable:
+        "This document contains dosage details that cannot be processed automatically with sufficient certainty. Please use the original document.",
+      targetLanguageUnsupported: "This target language is not supported.",
+      modeInvalid: "This type of processing is not available.",
+      providerUnavailable: "Processing is currently unavailable. Please try again later.",
+      rateLimited:
+        "A transformation is already running, or too many requests were made. Please wait a moment.",
+      timeout: "Processing took too long. Please try again.",
+      invalidResponse:
+        "The result could not be produced reliably. Please use the original document.",
+      integrityFailed:
+        "The translation could not be produced reliably. Please use the original document.",
+    },
+  },
 };

@@ -722,6 +722,89 @@ export default {
   },
 
   patientPracticeDocuments: {
+    translation: {
+      heading: "Traduire et lire plus facilement",
+      subtitle:
+        "Traduisez ce document de votre cabinet dans une autre langue, ou faites reformuler le vocabulaire médical de manière plus accessible.",
+      sourceLanguageNote: "Actuellement prévu pour les documents de cabinet en allemand.",
+
+      fileLabel: "Fichier",
+      filePlaceholder: "Sélectionner un fichier",
+
+      modeLegend: "Type de traitement",
+      modeStrictName: "Traduction fidèle",
+      modeStrictDescription:
+        "Transpose le contenu du document dans la langue choisie avec la plus grande exactitude possible. Aucune affirmation médicale n'est ajoutée ni évaluée.",
+      modePlainName: "Expliqué simplement",
+      modePlainDescription:
+        "Reformule le vocabulaire médical de manière plus compréhensible, sans ajouter d'information médicale ni de recommandation.",
+
+      targetLanguageLabel: "Langue cible",
+      targetLanguagePlaceholder: "Choisir une langue",
+
+      hintSameLanguageStrict:
+        "Ce document est déjà en allemand. Choisissez une autre langue ou utilisez « Expliqué simplement ».",
+
+      submit: "Créer la traduction",
+      submitBusy: "Création en cours …",
+      statusRunning: "Traitement du document …",
+      retry: "Réessayer",
+
+      aiNoticeStrict: "Traduction générée par IA",
+      aiNoticePlain: "Reformulation simplifiée générée par IA",
+
+      resultOriginalFile: "Fichier d'origine",
+      resultMode: "Traitement",
+      resultSourceLanguage: "Langue source",
+      resultTargetLanguage: "Langue cible",
+      resultGeneratedAt: "Créé le",
+
+      originalAuthoritative:
+        "Cette vue a été générée automatiquement à partir du document du cabinet. Le document d'origine fait foi.",
+      plainNotAdvice: "La version simplifiée ne remplace pas un avis médical.",
+
+      viewOriginal: "Afficher l'original",
+      downloadPdf: "Télécharger en PDF",
+      pdfUnavailableForLanguage: "L'export PDF n'est pas encore disponible pour cette langue.",
+      pdfTitle: "Traduction d'un document de cabinet",
+      pdfFileNameSuffix: "traduction",
+
+      errors: {
+        generic: "Le traitement n'a pas pu être terminé. Veuillez réessayer plus tard.",
+        notAvailable: "Cette fonction n'est pas encore disponible.",
+        documentNotFound: "Ce document est introuvable.",
+        documentUnavailable: "Ce document n'est plus disponible.",
+        linkNotActive: "La connexion avec ce cabinet n'est plus active.",
+        fileNotFound: "Ce fichier est introuvable.",
+        typeNotTranslatable: "Ce type de document ne peut pas être traité actuellement.",
+        fileTypeUnsupported: "Ce type de fichier n'est pas pris en charge actuellement.",
+        textUnavailable: "Ce document ne contient aucun texte lisible de manière fiable.",
+        structureUnsupported:
+          "La structure de ce document ne peut pas être traitée de manière sûre actuellement.",
+        encrypted: "Ce document est protégé par mot de passe et ne peut pas être lu.",
+        corrupt: "Ce fichier n'a pas pu être lu.",
+        tooLarge: "Ce document est trop volumineux pour un traitement automatique.",
+        sourceLanguageUnsupported:
+          "Cette fonction n'est actuellement disponible que pour les documents de cabinet en allemand.",
+        sourceLanguageUncertain:
+          "La langue de ce document n'a pas pu être déterminée avec certitude.",
+        medicationUnverifiable:
+          "Ce document contient des informations de médication qui ne peuvent pas être traitées automatiquement avec une certitude suffisante. Veuillez utiliser le document d'origine.",
+        dosageUnverifiable:
+          "Ce document contient des informations de posologie qui ne peuvent pas être traitées automatiquement avec une certitude suffisante. Veuillez utiliser le document d'origine.",
+        targetLanguageUnsupported: "Cette langue cible n'est pas prise en charge.",
+        modeInvalid: "Ce type de traitement n'est pas disponible.",
+        providerUnavailable:
+          "Le traitement est actuellement indisponible. Veuillez réessayer plus tard.",
+        rateLimited:
+          "Un traitement est déjà en cours, ou trop de demandes ont été envoyées. Veuillez patienter un instant.",
+        timeout: "Le traitement a pris trop de temps. Veuillez réessayer.",
+        invalidResponse:
+          "Le résultat n'a pas pu être produit de manière fiable. Veuillez utiliser le document d'origine.",
+        integrityFailed:
+          "La traduction n'a pas pu être produite de manière fiable. Veuillez utiliser le document d'origine.",
+      },
+    },
     pageTitle: "Documents du cabinet — MedScoutX",
     heading: "Documents du cabinet",
     intro: "Documents partagés par votre cabinet — à titre d’orientation uniquement.",
