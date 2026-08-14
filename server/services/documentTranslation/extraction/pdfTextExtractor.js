@@ -5,24 +5,40 @@
  * bindings, no network. Nothing is sent anywhere and no OCR is attempted — a
  * scan without a text layer is refused rather than guessed at.
  *
- * ── Structure honesty ───────────────────────────────────────────────────────
- * A PDF text layer carries no semantic markup. There is no reliable way to tell
- * a heading from a bold line, or a table row from a line that happens to have
- * gaps. So this extractor never claims semantic structure: it reports
- * structureReliable=false and emits layout-derived blocks only.
+ * ── One parse, three jobs ───────────────────────────────────────────────────
+ * The page's text items carry both their string and their position, so text,
+ * page statistics and layout analysis all come from a single getTextContent()
+ * pass. An earlier version parsed twice and hit a subtle failure: pdf.js takes
+ * ownership of the array it is given and detaches the backing buffer, so the
+ * second parse saw an empty document and reported a valid file as corrupt.
  *
- * That has a deliberate consequence: document types whose meaning depends on
- * table structure (lab) cannot be sourced from PDF in V1 and are refused by the
- * extraction service. Reading a lab table as prose silently re-associates values
- * with the wrong parameters, which is worse than declining.
+ * ── Structure honesty ───────────────────────────────────────────────────────
+ * A PDF text layer carries no semantic markup, so this extractor never claims
+ * heading or table structure: structureReliable is false and segments are
+ * layout-derived blocks.
+ *
+ * It does, however, check that the content-stream order can be trusted as
+ * reading order at all. Two columns, text boxes and wide tables all extract in
+ * an order that has nothing to do with how a person reads the page, and a
+ * medication table read across instead of down moves a dose to another drug.
+ * Those pages are refused with document_structure_unsupported.
+ *
+ * Item order is never re-sorted. Sorting would replace the document's order
+ * with one this code invented, which is precisely the failure being guarded
+ * against; the page is either trustworthy as-is or refused.
  */
 
-import { extractText, getDocumentProxy } from "unpdf";
+import { getDocumentProxy } from "unpdf";
 import {
   DocumentTranslationError,
   TRANSLATION_ERRORS,
   TRANSLATION_LIMITS,
 } from "../documentTranslationPolicy.js";
+import {
+  analysePageLayout,
+  assertSafePdfContainer,
+  withParseTimeout,
+} from "./pdfPreflight.js";
 
 /**
  * @param {Buffer} buffer
@@ -35,21 +51,23 @@ import {
  * }>}
  */
 export async function extractPdf(buffer) {
-  // pdf.js takes ownership of the array it is handed and detaches the backing
-  // ArrayBuffer, so a second call on the same array sees an empty document and
-  // reports it as corrupt. Each call therefore gets its own copy.
-  const bytesFor = () => new Uint8Array(buffer);
+  // Raw-byte checks first: nothing below should run on a file that already
+  // looks like a parser bomb.
+  assertSafePdfContainer(buffer);
 
-  let pageCount;
+  return withParseTimeout(readPdf(buffer));
+}
+
+/** @param {Buffer} buffer */
+async function readPdf(buffer) {
+  let doc;
   try {
-    const proxy = await getDocumentProxy(bytesFor());
-    pageCount = proxy.numPages;
+    doc = await getDocumentProxy(new Uint8Array(buffer));
   } catch (err) {
     throw mapPdfError(err);
   }
 
-  // Refuse oversized documents before extracting anything: the page count is
-  // known from the catalogue, so there is no reason to parse 500 pages first.
+  const pageCount = doc.numPages;
   if (!Number.isFinite(pageCount) || pageCount < 1) {
     throw new DocumentTranslationError(TRANSLATION_ERRORS.CORRUPT, { reason: "no_pages" });
   }
@@ -60,19 +78,48 @@ export async function extractPdf(buffer) {
     });
   }
 
-  let pages;
-  try {
-    const result = await extractText(bytesFor(), { mergePages: false });
-    pages = Array.isArray(result?.text) ? result.text : [];
-  } catch (err) {
-    throw mapPdfError(err);
-  }
-
   const segments = [];
   const pageCharCounts = [];
 
-  pages.forEach((raw, pageIdx) => {
-    const pageText = typeof raw === "string" ? raw : "";
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+    let items;
+    let view;
+    try {
+      const page = await doc.getPage(pageNumber);
+      const content = await page.getTextContent();
+      view = page.view;
+      items = content.items || [];
+    } catch (err) {
+      throw mapPdfError(err);
+    }
+
+    const positioned = items
+      .filter((i) => i && typeof i.str === "string")
+      .map((i) => ({
+        str: i.str,
+        hasEOL: Boolean(i.hasEOL),
+        x: Number(i.transform?.[4] ?? 0),
+        y: Number(i.transform?.[5] ?? 0),
+        width: Number(i.width ?? 0),
+        height: Number(i.height ?? 0),
+      }));
+
+    const pageBox = {
+      width: Number(view?.[2] ?? 595) - Number(view?.[0] ?? 0),
+      height: Number(view?.[3] ?? 842) - Number(view?.[1] ?? 0),
+    };
+
+    const layout = analysePageLayout(positioned, pageBox);
+    if (layout.complex) {
+      throw new DocumentTranslationError(TRANSLATION_ERRORS.STRUCTURE_UNSUPPORTED, {
+        reason: layout.reason,
+        page: pageNumber,
+        // Metrics only — geometry, never document text.
+        ...layout.metrics,
+      });
+    }
+
+    const pageText = itemsToText(positioned);
     pageCharCounts.push(countMeaningfulChars(pageText));
 
     for (const block of splitIntoBlocks(pageText)) {
@@ -82,10 +129,10 @@ export async function extractPdf(buffer) {
         // it for a parsed heading or table row.
         kind: "text_block",
         text: block,
-        page: pageIdx + 1,
+        page: pageNumber,
       });
     }
-  });
+  }
 
   return {
     sourceFormat: "pdf",
@@ -94,6 +141,19 @@ export async function extractPdf(buffer) {
     pageCharCounts,
     segments,
   };
+}
+
+/**
+ * Rebuild page text from the items, in the order the document supplies them.
+ * @param {{ str: string, hasEOL: boolean }[]} items
+ */
+function itemsToText(items) {
+  let out = "";
+  for (const item of items) {
+    out += item.str;
+    if (item.hasEOL) out += "\n";
+  }
+  return out;
 }
 
 /**
@@ -134,6 +194,8 @@ function countMeaningfulChars(text) {
  * @param {unknown} err
  */
 function mapPdfError(err) {
+  if (err instanceof DocumentTranslationError) return err;
+
   const name = err && typeof err === "object" && "name" in err ? String(err.name) : "";
 
   if (name === "PasswordException") {

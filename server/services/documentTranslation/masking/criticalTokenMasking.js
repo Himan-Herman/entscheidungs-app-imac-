@@ -25,10 +25,34 @@
  * ONE reference-range token, not two numbers and a unit, so a model cannot
  * reorder or split the pieces.
  *
+ * ── Beyond numbers: names that must not change either ───────────────────────
+ * Masking only the strength is not enough. "Ramipril ⟦DOSE_AAAB⟧" leaves the
+ * drug name in the model's hands, and "Ramipril" -> "Lisinopril" would pass
+ * every marker check while changing the medication. So a name standing
+ * immediately before a strength is masked TOGETHER with it as one atomic
+ * MEDICATION token, and curated abbreviations, substance names and WHO INN
+ * stems are masked in their own right.
+ *
  * ── Honest limits ───────────────────────────────────────────────────────────
- * Numbers written as words ("fünf Milligramm") are not maskable and are not
- * claimed to be. Everything numeric is covered; spelled-out quantities are not.
+ *   • Numbers written as words ("fünf Milligramm") are not maskable.
+ *   • A drug name with NO strength nearby is protected only if it is on the
+ *     curated list or carries an INN stem. A rare or misspelled substance
+ *     written bare is NOT protected — this cannot be solved without a drug
+ *     lexicon, and none is used here.
+ *   • The MEDICATION rule requires a capitalised name, so a lowercase INN in an
+ *     English source is covered only by the INN-stem rule.
+ *   • Multi-word names ("Insulin glargin") are captured only up to the first
+ *     word, together with the strength.
+ * These are stated rather than engineered around, and each is pinned by a
+ * KNOWN LIMIT test.
  */
+
+import {
+  ABBREVIATION_PATTERN_SOURCE,
+  INN_STEM_PATTERN_SOURCE,
+  STRENGTH_UNIT_PATTERN_SOURCE,
+  SUBSTANCE_NAME_PATTERN_SOURCE,
+} from "./medicalTokenLexicon.js";
 
 /** Marker delimiters — mathematical white brackets, effectively absent from clinical prose. */
 const MARK_OPEN = "⟦";
@@ -83,11 +107,30 @@ const NUMBER = String.raw`\d+(?:[.,]\d+)?`;
 /** En dash, em dash, hyphen or " bis " — all used for ranges in German reports. */
 const RANGE_SEP = String.raw`(?:\s*[-–—]\s*|\s+bis\s+)`;
 
+/** A dosing schedule: 1-0-0, 1-1-1-1, 0,5-0-0,5. Three or four parts. */
+const SCHEDULE_BODY = String.raw`${NUMBER}(?:\s*[-–—]\s*${NUMBER}){2,3}`;
+
+/**
+ * A medication name standing immediately before a strength.
+ *
+ * Capitalised because German writes substance and trade names that way, and the
+ * rule has to stay narrow enough not to swallow ordinary sentence material.
+ * Lowercase substance names (common in English sources) are covered by the INN
+ * and curated-name rules instead — see the known limits below.
+ */
+const MEDICATION_NAME = String.raw`[A-ZÄÖÜ][A-Za-z0-9ÄÖÜäöüß-]{1,40}`;
+
 /**
  * Token kinds in match order. ORDER IS SIGNIFICANT — the first pattern that
  * matches a position wins, so more specific constructs must precede the
  * constructs they contain:
  *
+ *   MEDICATION first      : "ASS 100 mg 1-0-0" must become ONE token, so it has
+ *                           to run before ABBREV would claim "ASS" and before
+ *                           DOSE would claim "100 mg"
+ *   ABBREV before numbers : "HbA1c" and "SpO2" contain digits; the numeric
+ *                           passes would otherwise shred them into "HbA⟦NUM⟧c"
+ *   OPS before REFRANGE   : "5-820.00" would otherwise read as the range "5-820"
  *   DATE before SCHEDULE  : "2026-08-12" would otherwise read as a 1-0-0 schedule
  *   SCHEDULE before REFRANGE : "1-0-0" would otherwise read as the range "1-0"
  *   REFRANGE before DOSE  : "0,0–0,5 mg/dl" would otherwise yield only "0,5 mg/dl"
@@ -95,6 +138,46 @@ const RANGE_SEP = String.raw`(?:\s*[-–—]\s*|\s+bis\s+)`;
  *   PERCENT before NUM    : "50 %" must stay one atomic unit
  */
 const TOKEN_KINDS = [
+  {
+    kind: "MEDICATION",
+    // "Ramipril 5 mg" · "ASS 100 mg 1-0-0" · "L-Thyroxin 75 µg"
+    //
+    // Name, strength and — when it follows directly — the dosing schedule
+    // become ONE opaque token. The model therefore cannot rename the drug,
+    // change its strength, or separate the two, because it never sees either.
+    //
+    // The strength unit set excludes concentration and physical units, so
+    // "CRP 1,5 mg/dl", "Kalium 4,2 mmol/l", "Gewicht 80 kg" and
+    // "Temperatur 36,6 °C" are NOT read as medication lines.
+    re: new RegExp(
+      String.raw`${MEDICATION_NAME}\s+${NUMBER}\s*${STRENGTH_UNIT_PATTERN_SOURCE}` +
+        String.raw`(?:[\s,]+${SCHEDULE_BODY})?`,
+      "g",
+    ),
+  },
+  {
+    kind: "ABBREV",
+    // Curated clinical abbreviations. Masked so they cannot be expanded,
+    // translated or "corrected" — CRP must not become "C-reaktives Protein".
+    re: new RegExp(ABBREVIATION_PATTERN_SOURCE, "g"),
+  },
+  {
+    kind: "SUBSTANCE",
+    // Curated substance/trade names appearing WITHOUT a strength, where the
+    // structural MEDICATION rule cannot fire.
+    re: new RegExp(SUBSTANCE_NAME_PATTERN_SOURCE, "g"),
+  },
+  {
+    kind: "INN",
+    // Words carrying a WHO INN stem (-pril, -olol, -sartan, -statin, ...).
+    // Generalises past the curated list without needing a drug database.
+    re: new RegExp(INN_STEM_PATTERN_SOURCE, "g"),
+  },
+  {
+    kind: "OPS",
+    // German procedure codes: 1-100 · 5-820.00 · 8-931
+    re: new RegExp(String.raw`(?<![\w.-])\d-\d{3}(?:\.\d{1,2})?(?![\w.-])`, "g"),
+  },
   {
     kind: "DATE",
     // 12.08.2026 · 12.8.26 · 2026-08-12 · 12/08/2026

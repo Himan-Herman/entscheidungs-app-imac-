@@ -148,6 +148,138 @@ export async function docx(bodyXml) {
   return zip.generateAsync({ type: "nodebuffer" });
 }
 
+/* ------------------------------------------------- adversarial fixtures */
+
+/**
+ * A PDF whose text sits in two columns.
+ *
+ * Both bands span the same vertical range and nothing crosses the middle, which
+ * is what separates a real two-column layout from a letterhead.
+ *
+ * @returns {Promise<Buffer>}
+ */
+export async function twoColumnPdf(lines = 14) {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const page = doc.addPage([595, 842]);
+
+  for (let i = 0; i < lines; i += 1) {
+    const y = 780 - i * 20;
+    page.drawText(`Linke Spalte Zeile ${i + 1} Text`, { x: 50, y, size: 10, font });
+    page.drawText(`Rechte Spalte Zeile ${i + 1} Text`, { x: 320, y, size: 10, font });
+  }
+
+  return Buffer.from(await doc.save());
+}
+
+/**
+ * A PDF laid out as a wide table: several rows of several widely separated
+ * cells. Linearising this moves a value under the wrong column heading.
+ *
+ * @returns {Promise<Buffer>}
+ */
+export async function tabularPdf(rows = 6) {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const page = doc.addPage([595, 842]);
+  const columns = [60, 200, 340, 470];
+
+  page.drawText("Uebersicht der Werte im Verlauf", { x: 60, y: 800, size: 10, font });
+  for (let r = 0; r < rows; r += 1) {
+    const y = 760 - r * 22;
+    columns.forEach((x, c) => {
+      page.drawText(`Z${r + 1}S${c + 1}`, { x, y, size: 10, font });
+    });
+  }
+
+  return Buffer.from(await doc.save());
+}
+
+/**
+ * A syntactically valid PDF header followed by many object markers.
+ * Small on disk, large in declared structure.
+ *
+ * @param {number} objects
+ * @returns {Buffer}
+ */
+export function pdfWithManyObjects(objects) {
+  let out = "%PDF-1.4\n";
+  for (let i = 1; i <= objects; i += 1) out += `${i} 0 obj\n<< >>\nendobj\n`;
+  out += "%%EOF\n";
+  return Buffer.from(out, "latin1");
+}
+
+/**
+ * A PDF header followed by deeply nested dictionary delimiters.
+ * @param {number} depth
+ * @returns {Buffer}
+ */
+export function pdfWithDeepNesting(depth) {
+  return Buffer.from(`%PDF-1.4\n1 0 obj\n${"<<".repeat(depth)}${">>".repeat(depth)}\nendobj\n%%EOF\n`, "latin1");
+}
+
+/**
+ * Build a ZIP from scratch whose central directory DECLARES the given sizes.
+ *
+ * The declared numbers are what a preflight reads, so a few hundred bytes on
+ * disk can express "this expands to two gigabytes". That is the whole point:
+ * the zip-bomb defence is tested without ever writing, shipping or unpacking a
+ * genuinely large file, so neither CI nor a developer machine is put at risk.
+ *
+ * @param {{ name: string, compressedSize: number, uncompressedSize: number }[]} entries
+ * @returns {Buffer}
+ */
+export function syntheticZip(entries) {
+  const central = [];
+  const locals = [];
+  let offset = 0;
+
+  for (const entry of entries) {
+    const nameBuf = Buffer.from(entry.name, "utf8");
+
+    // Minimal stored local header; its payload is irrelevant to the preflight,
+    // which reads the central directory only.
+    const local = Buffer.alloc(30 + nameBuf.length);
+    local.writeUInt32LE(0x04034b50, 0);
+    local.writeUInt16LE(nameBuf.length, 26);
+    nameBuf.copy(local, 30);
+    locals.push(local);
+
+    const centralEntry = Buffer.alloc(46 + nameBuf.length);
+    centralEntry.writeUInt32LE(0x02014b50, 0);
+    centralEntry.writeUInt32LE(entry.compressedSize >>> 0, 20);
+    centralEntry.writeUInt32LE(entry.uncompressedSize >>> 0, 24);
+    centralEntry.writeUInt16LE(nameBuf.length, 28);
+    centralEntry.writeUInt32LE(offset, 42);
+    nameBuf.copy(centralEntry, 46);
+    central.push(centralEntry);
+
+    offset += local.length;
+  }
+
+  const localBlock = Buffer.concat(locals);
+  const centralBlock = Buffer.concat(central);
+
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(entries.length, 8);
+  eocd.writeUInt16LE(entries.length, 10);
+  eocd.writeUInt32LE(centralBlock.length, 12);
+  eocd.writeUInt32LE(localBlock.length, 16);
+
+  return Buffer.concat([localBlock, centralBlock, eocd]);
+}
+
+/** The entry list a well-formed minimal DOCX declares. */
+export function docxEntryList(extra = []) {
+  return [
+    { name: "[Content_Types].xml", compressedSize: 400, uncompressedSize: 1600 },
+    { name: "_rels/.rels", compressedSize: 200, uncompressedSize: 700 },
+    { name: "word/document.xml", compressedSize: 900, uncompressedSize: 4000 },
+    ...extra,
+  ];
+}
+
 /** A .doc (legacy binary) — supported by nothing here, on purpose. */
 export function legacyDoc() {
   // OLE2 compound file magic, enough to be recognisably not a zip.

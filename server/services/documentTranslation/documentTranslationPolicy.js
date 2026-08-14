@@ -31,9 +31,16 @@ export { DOCUMENT_TRANSLATION_TARGET_LOCALE_CODES, normalizeDocumentTranslationT
  *                        surface without capability.
  *   prescription_info  — highest dosage-corruption risk. Held back until the
  *                        masking chain has operating evidence.
+ *   lab                — removed from V1. A lab result's meaning lives in its
+ *                        table structure, and a PDF text layer cannot prove a
+ *                        value still belongs to its parameter. DOCX lab reports
+ *                        are not a relevant mainstream case, and the
+ *                        plain-language need is already served by the dedicated
+ *                        lab explanation path. Refusing beats risking a value
+ *                        under the wrong parameter.
  */
 export const TRANSLATABLE_DOCUMENT_TYPES = Object.freeze(
-  new Set(["report", "discharge", "referral", "lab"]),
+  new Set(["report", "discharge", "referral"]),
 );
 
 /** Translation modes. */
@@ -53,6 +60,11 @@ const MODE_VALUES = Object.freeze(new Set(Object.values(TRANSLATION_MODES)));
  * document is refused rather than flattened into prose — a lab table read as a
  * paragraph silently re-associates values with the wrong parameters, which is
  * worse than no translation at all.
+ *
+ * `lab` is currently NOT in the V1 allowlist, so this rule is unreachable
+ * today. It is kept deliberately: it is the precondition that has to hold
+ * before lab may ever be re-admitted, and deleting it would mean re-deriving
+ * the same reasoning later under time pressure.
  */
 const STRUCTURE_CRITICAL_TYPES = Object.freeze(new Set(["lab"]));
 

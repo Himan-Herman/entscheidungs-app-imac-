@@ -22,6 +22,7 @@ import {
   DocumentTranslationError,
   TRANSLATION_ERRORS,
 } from "../documentTranslationPolicy.js";
+import { assertSafeDocxContainer } from "./zipPreflight.js";
 
 /** Joins table cells into a single translatable line while keeping the split. */
 export const TABLE_CELL_SEPARATOR = " | ";
@@ -37,12 +38,22 @@ export const TABLE_CELL_SEPARATOR = " | ";
  * }>}
  */
 export async function extractDocx(buffer) {
+  // Container checks BEFORE decompression: a 25 MB upload cap says nothing
+  // about what the archive expands to, and the character budgets downstream
+  // only apply to text that already exists.
+  assertSafeDocxContainer(buffer);
+
   let model = null;
 
   try {
     await mammoth.convertToHtml(
       { buffer },
       {
+        // externalFileAccess is deliberately NOT set. Mammoth's Files helper
+        // reads external image targets from the local filesystem when that
+        // option is truthy (lib/docx/files.js), which would turn a crafted
+        // document into a local-file-read primitive. Leaving it unset makes
+        // every external read reject. Pinned by test — do not add it here.
         transformDocument: (doc) => {
           model = doc;
           return doc;

@@ -19,6 +19,10 @@
  * lives outside the repository and cannot be verified here. Until that is
  * changed, the drift test — not the module graph — is what binds the two.
  *
+ * Tracked as `i18n_single_source_deployment_constraint` in
+ * docs/architecture/DOCUMENT_TRANSLATION_TECHNICAL_DEBT.md, with the exact
+ * steps to close it.
+ *
  * Adding a language: add it to LOCALE_OPTIONS here, mirror it in the client
  * copy, and only add it to UI_SELECTABLE_LOCALE_CODES once its message bundle
  * is actually complete.

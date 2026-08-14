@@ -105,8 +105,10 @@ test("critical tokens are masked as atomic units, not as pieces", () => {
 
   const byOriginal = new Map(tokens.map((t) => [t.original, t.kind]));
 
-  assert.equal(byOriginal.get("5 mg"), "DOSE");
-  assert.equal(byOriginal.get("1-0-0"), "SCHEDULE");
+  // Name, strength AND the schedule that follows it are ONE token, so none of
+  // the three can be altered independently of the others.
+  assert.equal(byOriginal.get("Ramipril 5 mg, 1-0-0"), "MEDICATION");
+  assert.equal(byOriginal.get("CRP"), "ABBREV");
   assert.equal(byOriginal.get("1,5 mg/dl"), "DOSE");
   assert.equal(byOriginal.get("0,0–0,5 mg/dl"), "REFRANGE");
   assert.equal(byOriginal.get("50 %"), "PERCENT");

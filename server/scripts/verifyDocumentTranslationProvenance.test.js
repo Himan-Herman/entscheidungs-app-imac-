@@ -444,27 +444,36 @@ test("type 'imaging' is refused in V1", async () => {
   );
 });
 
-test("the V1 allowlist is exactly report, discharge, referral, lab", () => {
+test("the V1 allowlist is exactly report, discharge, referral", () => {
   assert.deepEqual(
     [...TRANSLATABLE_DOCUMENT_TYPES].sort(),
-    ["discharge", "lab", "referral", "report"],
+    ["discharge", "referral", "report"],
   );
 });
 
-test("lab in plain-language mode is routed to the dedicated lab path", async () => {
-  assert.equal(
-    await codeFor(
-      request({ documentId: DOC.LAB, fileId: FILE.LAB, mode: TRANSLATION_MODES.PLAIN }),
-    ),
-    TRANSLATION_ERRORS.MODE_HANDLED_ELSEWHERE,
-  );
+test("lab is refused in V1, in every mode", async () => {
+  // A lab result's meaning lives in its table structure, and a PDF text layer
+  // cannot prove a value still belongs to its parameter. The plain-language
+  // need is already served by the dedicated lab explanation path.
+  for (const mode of [TRANSLATION_MODES.STRICT, TRANSLATION_MODES.PLAIN]) {
+    assert.equal(
+      await codeFor(request({ documentId: DOC.LAB, fileId: FILE.LAB, mode })),
+      TRANSLATION_ERRORS.TYPE_NOT_TRANSLATABLE,
+      `lab was not refused in mode ${mode}`,
+    );
+  }
 });
 
-test("lab in strict mode passes the gate (extraction decides on structure)", async () => {
-  const result = await assertTranslatableDocumentForPatient(
-    request({ documentId: DOC.LAB, fileId: FILE.LAB, mode: TRANSLATION_MODES.STRICT }),
-  );
-  assert.equal(result.document.type, "lab");
+test("only the three narrative types are translatable", async () => {
+  // Positive control for the allowlist: the excluded types are refused for the
+  // type itself, not incidentally for some other reason.
+  const refused = ["other", "prescription_info", "imaging", "lab"];
+  for (const type of refused) {
+    assert.ok(!TRANSLATABLE_DOCUMENT_TYPES.has(type), `${type} must not be translatable`);
+  }
+  for (const type of ["report", "discharge", "referral"]) {
+    assert.ok(TRANSLATABLE_DOCUMENT_TYPES.has(type), `${type} must be translatable`);
+  }
 });
 
 /* ------------------------------------------------------------ file types */
