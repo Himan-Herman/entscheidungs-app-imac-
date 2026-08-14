@@ -220,3 +220,19 @@ export const bookingAssistLimiter = createIpRateLimiter({
   max: 10,
   keyPrefix: 'practice:booking:assist',
 });
+
+/**
+ * Patient document transformation.
+ *
+ * Tighter than the other AI limiters: every accepted request costs a worker
+ * thread for extraction and an external model call. Per-patient concurrency is
+ * enforced separately in the service, since an IP limit does not stop one
+ * patient firing many requests from one address.
+ */
+export const documentTranslationIpLimiter = createIpRateLimiter({
+  // Overridable so a deployment can tune it and so HTTP tests, which all
+  // originate from one loopback address, are not throttled by each other.
+  // The default is what production runs on.
+  max: Number(process.env.DOCUMENT_TRANSLATION_IP_MAX) || 20,
+  keyPrefix: "document_translation",
+});

@@ -23,7 +23,12 @@ import {
 } from "./documentTranslationPolicy.js";
 
 /** The only keys the endpoint will ever read. */
-export const ALLOWED_REQUEST_KEYS = Object.freeze(["fileId", "mode", "targetLanguage"]);
+export const ALLOWED_REQUEST_KEYS = Object.freeze([
+  "fileId",
+  "mode",
+  "sourceLanguage",
+  "targetLanguage",
+]);
 
 /**
  * Keys that must never appear. Any of these means someone is trying to supply a
@@ -59,9 +64,9 @@ const FORBIDDEN = new Set(FORBIDDEN_SOURCE_KEYS.map((k) => k.toLowerCase()));
  * Parse and validate a translation request body.
  *
  * @param {unknown} body
- * @returns {{ fileId: string, mode: unknown, targetLanguage: unknown }}
- *   mode and targetLanguage are returned unvalidated on purpose — policy owns
- *   their vocabulary (assertTranslationRequestAllowed), this owns the shape.
+ * @returns {{ fileId: string, mode: unknown, sourceLanguage: unknown, targetLanguage: unknown }}
+ *   mode and the languages are returned unvalidated on purpose — policy and the
+ *   source-language gate own their vocabulary, this owns the shape.
  */
 export function parseTranslationRequestBody(body) {
   if (body === null || typeof body !== "object" || Array.isArray(body)) {
@@ -97,5 +102,10 @@ export function parseTranslationRequestBody(body) {
     });
   }
 
-  return { fileId, mode: body.mode, targetLanguage: body.targetLanguage };
+  return {
+    fileId,
+    mode: body.mode,
+    sourceLanguage: body.sourceLanguage,
+    targetLanguage: body.targetLanguage,
+  };
 }

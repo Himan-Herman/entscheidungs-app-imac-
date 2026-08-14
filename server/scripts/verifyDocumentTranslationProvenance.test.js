@@ -553,13 +553,17 @@ test("the flag defaults to off when unset", async () => {
 
 /* --------------------------------------------------------- API scope */
 
-test("the request body accepts exactly fileId, mode and targetLanguage", () => {
+test("the request body accepts exactly fileId, mode and the two languages", () => {
   const parsed = parseTranslationRequestBody({
     fileId: FILE.OK,
     mode: TRANSLATION_MODES.STRICT,
+    sourceLanguage: "de",
     targetLanguage: "en",
   });
-  assert.deepEqual(Object.keys(parsed).sort(), ["fileId", "mode", "targetLanguage"]);
+  assert.deepEqual(
+    Object.keys(parsed).sort(),
+    ["fileId", "mode", "sourceLanguage", "targetLanguage"],
+  );
 });
 
 test("no alternative document source can be supplied", () => {

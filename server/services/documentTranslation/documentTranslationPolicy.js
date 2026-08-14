@@ -43,12 +43,18 @@ export const TRANSLATABLE_DOCUMENT_TYPES = Object.freeze(
   new Set(["report", "discharge", "referral"]),
 );
 
-/** Translation modes. */
+/**
+ * Translation modes.
+ *
+ * The wire values are spelled out rather than abbreviated: they appear in the
+ * request body, in audit records and in error detail, and "strict" alone does
+ * not say what it is strict about.
+ */
 export const TRANSLATION_MODES = Object.freeze({
   /** Mode A — faithful translation at the same technical level. */
-  STRICT: "strict",
+  STRICT: "strict_translation",
   /** Mode B — plain-language rendering, no medical reinterpretation. */
-  PLAIN: "plain",
+  PLAIN: "plain_language",
 });
 
 const MODE_VALUES = Object.freeze(new Set(Object.values(TRANSLATION_MODES)));
@@ -148,6 +154,28 @@ export const TRANSLATION_ERRORS = Object.freeze({
   SOURCE_LANGUAGE_UNSUPPORTED: "document_source_language_unsupported",
   /** The declared source language is contradicted by the document itself. */
   SOURCE_LANGUAGE_UNCERTAIN: "document_source_language_uncertain",
+
+  /* ---- provider-facing (phase 2B) ---------------------------------- */
+
+  /** Requested target language is not one the product ships. */
+  TARGET_LANGUAGE_UNSUPPORTED: "translation_target_language_unsupported",
+  /** Requested mode is not a known mode. */
+  MODE_INVALID: "translation_mode_invalid",
+  /**
+   * No translation-specific provider configuration is present. This is the
+   * fail-closed state: without it, not a single character of document content
+   * may leave the server. It is deliberately NOT satisfied by a generic
+   * OPENAI_API_KEY being available for other features.
+   */
+  PROVIDER_NOT_CONFIGURED: "document_translation_provider_not_configured",
+  /** The configured provider could not be reached or returned a transport error. */
+  PROVIDER_UNAVAILABLE: "document_translation_provider_unavailable",
+  /** The provider rate-limited us, or our own limits were exceeded. */
+  RATE_LIMITED: "document_translation_rate_limited",
+  /** The provider did not answer within the deadline, or the client went away. */
+  TIMEOUT: "document_translation_timeout",
+  /** The provider's response did not satisfy the required output schema. */
+  INVALID_RESPONSE: "document_translation_invalid_response",
 });
 
 /**

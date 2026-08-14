@@ -17,7 +17,16 @@ import { requireDocumentOcrFeature } from "../middleware/requireDocumentOcr.js";
 import { requireLabPatientExplanationFeature } from "../middleware/requireLabPatientExplanation.js";
 import { getPatientStructuredDocument } from "../services/practiceDocument/documentOcrService.js";
 import { getLabPatientExplanation } from "../services/practiceDocument/labPatientExplanationService.js";
-import { labExplanationIpLimiter } from "../middleware/ipRateLimit.js";
+import {
+  documentTranslationIpLimiter,
+  labExplanationIpLimiter,
+} from "../middleware/ipRateLimit.js";
+import { translateDocumentForPatient } from "../services/documentTranslation/documentTranslationService.js";
+import { parseTranslationRequestBody } from "../services/documentTranslation/translationRequestContract.js";
+import {
+  DocumentTranslationError,
+  TRANSLATION_ERRORS,
+} from "../services/documentTranslation/documentTranslationPolicy.js";
 
 const router = express.Router();
 
@@ -308,5 +317,105 @@ router.get(
     }
   },
 );
+
+/**
+ * POST /api/patient/practice-documents/:documentId/translate
+ *
+ * Transforms one already-released practice document into a target language
+ * (strict_translation) or into plain language (plain_language).
+ *
+ * The route deliberately does almost nothing: it checks the body shape, applies
+ * rate limits, and hands everything else to the canonical service. Assembling
+ * the security layers here would let a future edit skip one — provenance,
+ * extraction isolation, masking, the medication and dosage guards, the provider
+ * gate and the integrity checks all live behind translateDocumentForPatient().
+ *
+ * Nothing is persisted and no document content is logged.
+ */
+router.post("/:documentId/translate", documentTranslationIpLimiter, async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  let body;
+  try {
+    body = parseTranslationRequestBody(req.body);
+  } catch (err) {
+    // A rejected shape is always a client error, including the case where
+    // someone tried to supply the document itself.
+    return res.status(400).json({
+      ok: false,
+      error: err instanceof DocumentTranslationError ? err.code : "validation_failed",
+    });
+  }
+
+  // If the client goes away there is no reason to keep paying for the call.
+  const abort = new AbortController();
+  res.on("close", () => {
+    if (!res.writableEnded) abort.abort();
+  });
+
+  try {
+    const result = await translateDocumentForPatient({
+      documentId: req.params.documentId,
+      patientUserId: userId,
+      fileId: body.fileId,
+      sourceLanguage: body.sourceLanguage,
+      targetLanguage: body.targetLanguage,
+      mode: body.mode,
+      req,
+      signal: abort.signal,
+    });
+
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    const mapped = mapTranslationError(err);
+    // Message only, never the error object: a provider or parser message can
+    // echo document content.
+    console.error("[patient/practice-documents/translate]", mapped.error);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
+/**
+ * Map a stable translation error code to an HTTP status.
+ * Unknown errors collapse to a generic 500 — no provider or parser detail
+ * reaches the client.
+ */
+function mapTranslationError(err) {
+  const code = err instanceof DocumentTranslationError ? err.code : null;
+
+  const STATUS = {
+    [TRANSLATION_ERRORS.FEATURE_DISABLED]: 404,
+    [TRANSLATION_ERRORS.DOCUMENT_NOT_FOUND]: 404,
+    [TRANSLATION_ERRORS.FILE_NOT_FOUND]: 404,
+    [TRANSLATION_ERRORS.DOCUMENT_UNAVAILABLE]: 410,
+    [TRANSLATION_ERRORS.LINK_NOT_ACTIVE]: 409,
+    [TRANSLATION_ERRORS.TYPE_NOT_TRANSLATABLE]: 422,
+    [TRANSLATION_ERRORS.MODE_HANDLED_ELSEWHERE]: 422,
+    [TRANSLATION_ERRORS.UNSUPPORTED_FILE_TYPE]: 422,
+    [TRANSLATION_ERRORS.TEXT_UNAVAILABLE]: 422,
+    [TRANSLATION_ERRORS.STRUCTURE_UNSUPPORTED]: 422,
+    [TRANSLATION_ERRORS.ENCRYPTED]: 422,
+    [TRANSLATION_ERRORS.CORRUPT]: 422,
+    [TRANSLATION_ERRORS.MEDICATION_UNVERIFIABLE]: 422,
+    [TRANSLATION_ERRORS.DOSAGE_UNVERIFIABLE]: 422,
+    [TRANSLATION_ERRORS.SOURCE_LANGUAGE_UNSUPPORTED]: 422,
+    [TRANSLATION_ERRORS.SOURCE_LANGUAGE_UNCERTAIN]: 422,
+    [TRANSLATION_ERRORS.TARGET_LANGUAGE_UNSUPPORTED]: 400,
+    [TRANSLATION_ERRORS.MODE_INVALID]: 400,
+    [TRANSLATION_ERRORS.INVALID_MODE]: 400,
+    [TRANSLATION_ERRORS.INVALID_LOCALE]: 400,
+    [TRANSLATION_ERRORS.TOO_LARGE]: 413,
+    [TRANSLATION_ERRORS.RATE_LIMITED]: 429,
+    [TRANSLATION_ERRORS.TIMEOUT]: 504,
+    [TRANSLATION_ERRORS.PROVIDER_NOT_CONFIGURED]: 503,
+    [TRANSLATION_ERRORS.PROVIDER_UNAVAILABLE]: 502,
+    [TRANSLATION_ERRORS.INVALID_RESPONSE]: 502,
+    [TRANSLATION_ERRORS.INTEGRITY_FAILED]: 422,
+  };
+
+  if (code && STATUS[code]) return { status: STATUS[code], error: code };
+  return { status: 500, error: "request_failed" };
+}
 
 export default router;
