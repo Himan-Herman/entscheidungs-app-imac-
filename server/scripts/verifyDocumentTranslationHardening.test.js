@@ -192,7 +192,10 @@ test("the outbound payload carries masked text and polarity only", () => {
     "Ramipril 5 mg, 1-0-0",
     "Kein Hinweis auf einen Infekt.",
   ]);
-  const { outbound, tokenMap, stats } = prepareSegmentsForTranslation(source);
+  const { outbound, tokenMap, stats } = prepareSegmentsForTranslation({
+    segments: source,
+    sourceLanguage: "de",
+  });
 
   assert.equal(outbound.length, 3);
   assert.deepEqual(Object.keys(outbound[0]).sort(), ["index", "kind", "polarity", "text"]);
@@ -205,7 +208,11 @@ test("the outbound payload carries masked text and polarity only", () => {
 
 test("preparation fails closed on unprotectable medication", () => {
   assert.throws(
-    () => prepareSegmentsForTranslation(segmentsOf(["Gabe von Quensyl erfolgt."])),
+    () =>
+      prepareSegmentsForTranslation({
+        segments: segmentsOf(["Gabe von Quensyl erfolgt."]),
+        sourceLanguage: "de",
+      }),
     (err) => err.code === TRANSLATION_ERRORS.MEDICATION_UNVERIFIABLE,
   );
 });

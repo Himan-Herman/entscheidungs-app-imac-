@@ -66,6 +66,55 @@ export const KNOWN_SUBSTANCE_NAMES = [
   "Bisoprolol", "Metoprolol", "Amlodipin", "Torasemid", "Furosemid",
   "Simvastatin", "Atorvastatin", "Levothyroxin", "L-Thyroxin", "Euthyrox",
   "Xarelto", "Eliquis", "Clopidogrel", "Allopurinol", "Tamsulosin",
+  // Insulin analogue qualifiers. These follow "Insulin" as a separate lowercase
+  // word ("Insulin glargin"), so without them the qualifier — the part that
+  // actually distinguishes a long-acting from a rapid-acting insulin — would be
+  // the only unprotected token on the line.
+  "glargin", "glargine", "degludec", "detemir", "lispro", "aspart", "glulisin",
+  "glulisine", "isophan", "icodec",
+];
+
+/**
+ * Dosage forms and administration devices.
+ *
+ * Two jobs. As part of a medication atom they keep "Ramipril 5 mg
+ * Filmtabletten" in one piece. On their own they are a reliable signal that a
+ * segment is about a medicinal product at all — which is how "NovoRapid
+ * FlexPen" gets recognised as a medication context even though neither word is
+ * in any list and there is no strength to anchor on.
+ */
+export const DOSAGE_FORMS = [
+  // Devices — these are what make a bare trade name recognisable as a product
+  "FlexPen", "FlexTouch", "SoloStar", "KwikPen", "NovoPen", "Turbohaler",
+  "Diskus", "Respimat", "Autohaler", "Novolizer", "Handihaler", "Ellipta",
+  "Dosieraerosol", "Fertigpen", "Fertigspritze", "Autoinjektor", "Inhalator",
+  "Pen",
+  // Forms
+  "Filmtabletten", "Filmtablette", "Hartkapseln", "Hartkapsel", "Retardkapseln",
+  "Retardkapsel", "Retardtabletten", "Retardtablette", "Brausetabletten",
+  "Brausetablette", "Schmelztabletten", "Lutschtabletten", "Kautabletten",
+  "Weichkapseln", "Zäpfchen", "Suppositorien", "Trockensaft", "Augentropfen",
+  "Nasenspray", "Salbe", "Creme", "Gel", "Pflaster", "Ampullen", "Ampulle",
+];
+
+/**
+ * Trade-name suffixes that follow a substance name in Germany.
+ * "Ramipril HEXAL" and "L-Thyroxin Henning" are different products from the
+ * bare substance, so the suffix belongs inside the protected atom.
+ */
+export const MANUFACTURER_SUFFIXES = [
+  "HEXAL", "Hexal", "ratiopharm", "AbZ", "STADA", "Stada", "AL", "TAD", "Aristo",
+  "Heumann", "Henning", "beta", "Sandoz", "biomo", "dura", "acis", "Puren",
+  "Zentiva", "Winthrop", "1A", "Basics", "axcount", "Mylan", "Accord",
+];
+
+/**
+ * Modified-release and formulation qualifiers.
+ * Dropping "XR" turns a once-daily product into an immediate-release one.
+ */
+export const FORMULATION_QUALIFIERS = [
+  "XR", "XL", "ER", "SR", "MR", "LA", "HCT", "comp", "plus", "forte", "mite",
+  "retard", "akut", "N", "Depot",
 ];
 
 /**
@@ -124,7 +173,52 @@ export const INN_MIN_LENGTH = 6;
  * are not mistaken for medication lines. Ordering matters — longer
  * alternatives first.
  */
-export const STRENGTH_UNITS = ["mg", "µg", "mcg", "ng", "ml", "IE", "IU", "mmol", "g"];
+export const STRENGTH_UNITS = [
+  // Concentration-style strengths that ARE product strengths, listed before
+  // their bare forms so "100 E/ml" is one unit rather than "100 E" plus "/ml".
+  "E/ml", "IE/ml", "IU/ml", "mg/ml", "µg/ml", "mcg/ml",
+  "mg", "µg", "mcg", "ng", "ml", "IE", "IU", "mmol", "E", "g",
+];
+
+/**
+ * Quantity words and dosage-unit words used when a dose is written out.
+ *
+ * "fünf Milligramm" and "eine halbe Tablette" carry exactly the information a
+ * numeric dose does, and none of the numeric patterns can see them. They are
+ * masked as whole phrases rather than parsed into numbers — the goal is that
+ * the model cannot change them, not that we understand them.
+ */
+export const QUANTITY_WORDS = [
+  // German
+  "ein", "eine", "einen", "einem", "einer", "zwei", "drei", "vier", "fünf",
+  "fuenf", "sechs", "sieben", "acht", "neun", "zehn", "elf", "zwölf", "zwoelf",
+  "zwanzig", "halbe", "halben", "halbes", "halb", "viertel", "anderthalb",
+  "eineinhalb", "zweieinhalb", "keine", "keinen",
+  // English
+  "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+  "half", "quarter", "a", "an",
+];
+
+/** Units a written-out dose can carry. */
+export const DOSAGE_UNIT_WORDS = [
+  // German
+  "Milligramm", "Gramm", "Mikrogramm", "Milliliter", "Liter", "Einheiten",
+  "Einheit", "Tablette", "Tabletten", "Kapsel", "Kapseln", "Tropfen", "Hub",
+  "Hübe", "Huebe", "Esslöffel", "Essloeffel", "Teelöffel", "Teeloeffel",
+  "Messlöffel", "Messloeffel", "Sprühstoß", "Spruehstoss", "Beutel", "Stück",
+  "Stueck",
+  // English
+  "milligram", "milligrams", "gram", "grams", "microgram", "micrograms",
+  "millilitre", "millilitres", "milliliter", "milliliters", "unit", "units",
+  "tablet", "tablets", "capsule", "capsules", "drop", "drops", "puff", "puffs",
+  "spoonful", "teaspoon", "tablespoon",
+];
+
+/** Written-out frequency expressions. */
+export const FREQUENCY_WORDS = [
+  "einmal", "zweimal", "dreimal", "viermal", "fünfmal", "fuenfmal", "sechsmal",
+  "once", "twice", "thrice",
+];
 
 /**
  * Structured direct identifiers.
@@ -246,3 +340,31 @@ export const INN_STEM_PATTERN_SOURCE =
 /** Regex source matching a strength unit not followed by a further unit part. */
 export const STRENGTH_UNIT_PATTERN_SOURCE =
   `(?:${buildAlternation(STRENGTH_UNITS)})(?![\\w/])`;
+
+/** Dosage form or administration device, as a standalone token. */
+export const DOSAGE_FORM_PATTERN_SOURCE =
+  `(?<![\\w-])(?:${buildAlternation(DOSAGE_FORMS)})(?![\\w-])`;
+
+/** Manufacturer or formulation qualifier following a substance name. */
+export const PRODUCT_QUALIFIER_PATTERN_SOURCE = `(?:${buildAlternation([
+  ...MANUFACTURER_SUFFIXES,
+  ...FORMULATION_QUALIFIERS,
+])})`;
+
+/** A dosage unit written as a word. */
+export const DOSAGE_UNIT_WORD_PATTERN_SOURCE =
+  `(?<![\\w-])(?:${buildAlternation(DOSAGE_UNIT_WORDS)})(?![\\w-])`;
+
+/**
+ * A written-out dose: quantity word(s) followed by a dosage unit word.
+ * Allows one intervening modifier so "eine halbe Tablette" stays one phrase.
+ */
+export const WORD_DOSE_PATTERN_SOURCE =
+  `(?<![\\w-])(?:${buildAlternation(QUANTITY_WORDS)})` +
+  `(?:\\s+(?:${buildAlternation(QUANTITY_WORDS)}))?` +
+  `\\s+(?:${buildAlternation(DOSAGE_UNIT_WORDS)})(?![\\w-])`;
+
+/** A written-out frequency: "zweimal täglich", "twice daily". */
+export const WORD_FREQUENCY_PATTERN_SOURCE =
+  `(?<![\\w-])(?:${buildAlternation(FREQUENCY_WORDS)})` +
+  `(?:\\s+(?:täglich|taeglich|tägl\\.?|daily|a\\s+day|pro\\s+Tag))?(?![\\w-])`;

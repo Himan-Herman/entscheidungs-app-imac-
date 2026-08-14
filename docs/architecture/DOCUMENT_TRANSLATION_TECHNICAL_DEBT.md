@@ -95,6 +95,13 @@ now refuses the whole document (`document_medication_unverifiable`) instead of
 translating it. This closes the Phase 2A.1 known limits (`Quensyl → Resochin`,
 `warfarin → heparin`) the only way that is honest without a drug database.
 
+Phase 2A.3 extended the same principle to written-out dosages: a recognised one
+("fünf Milligramm", "eine halbe Tablette") is masked atomically, and a dosage
+unit whose quantity is *not* recognised refuses the document with
+`document_dosage_unverifiable`. A separate code rather than reusing the
+medication one — the cause and the message to the reader differ, and this error
+vocabulary is already granular.
+
 **The cost.** Some legitimate letters will be refused — for instance one naming
 an unusual preparation without a strength. The safe-word list in
 `medicationContextGuard.js` (grammar, dosage forms, frequencies, routes, drug
@@ -127,6 +134,59 @@ The structure-critical machinery in `documentTranslationPolicy.js`
 is the precondition that must hold before `lab` may ever be re-admitted.
 
 **Risk while open.** None. This is a deliberate scope reduction.
+
+---
+
+## `document_translation_source_language_scope` — new in Phase 2A.3
+
+**What.** V1 processes German source documents only
+(`SUPPORTED_DOCUMENT_SOURCE_LANGUAGES = ["de"]`). Six UI **target** languages
+does not imply six **source** languages.
+
+**Why.** Nearly every content protection is language-specific: the
+medication-context triggers ("Gabe von", "nimmt", "Therapie mit"), the
+safe-word list, the written-out dosage vocabulary, the negation cues and the
+section headings. Over a French or Russian letter none of them fire — no
+medication context is recognised, so nothing is refused, and a document nobody
+actually checked would look like one that passed.
+
+**How the language is established.** It is **declared by the caller**, never
+inferred. `PracticeDocument` has no language field; `DocumentOcrJob.locale` is
+the locale a practice *requested* for an OCR run and `DocumentOcrResult.language`
+is the stub engine echoing that request, so neither is an observation about the
+document. `PracticeProfile.preferredDoctorLanguage` is a practice preference,
+and treating it as "this document is German" would be exactly the assumption
+that must not be made.
+
+A deterministic contradiction check runs on top: non-Latin script, or another
+language's function words with none of German's, produce
+`document_source_language_uncertain`. It can only ever contradict a
+declaration, never confirm one — silence means "no evidence against", not
+"verified German". No model, no probabilistic classifier.
+
+**To widen it.** Porting the trigger phrases, safe words, dosage vocabulary and
+negation cues to the new language *and* testing them adversarially. Adding a
+code to the array is not sufficient and must not be done alone.
+
+---
+
+## `document_translation_pii_is_minimisation_not_anonymisation` — new in Phase 2A.3
+
+**What.** The patient's own known identifiers — name forms, date of birth,
+email, phone, insurance and patient number — are masked before anything could
+be transmitted, using values the database already asserts about *this* patient.
+No entity recognition, no model. Other people in the letter (treating
+physicians, relatives, contacts) are deliberately **not** masked.
+
+**The statement that must accompany it:**
+
+> PII masking reduces transmitted identifiers but does not constitute
+> anonymization.
+
+A letter can remain re-identifiable through a rare diagnosis, a named clinic, a
+procedure date, or the combination of all three. Nothing in this feature may be
+described as anonymised or pseudonymised output, and no compliance conclusion
+follows from the masking alone.
 
 ---
 

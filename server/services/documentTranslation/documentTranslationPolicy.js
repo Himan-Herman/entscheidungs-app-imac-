@@ -138,6 +138,16 @@ export const TRANSLATION_ERRORS = Object.freeze({
    * protect. Refusing beats translating it and risking a silent rename.
    */
   MEDICATION_UNVERIFIABLE: "document_medication_unverifiable",
+  /**
+   * A written-out dosage was recognised but could not be protected atomically.
+   * Separate from MEDICATION_UNVERIFIABLE because the cause and the message to
+   * the reader differ.
+   */
+  DOSAGE_UNVERIFIABLE: "document_dosage_unverifiable",
+  /** The document's source language is not one V1 can safely process. */
+  SOURCE_LANGUAGE_UNSUPPORTED: "document_source_language_unsupported",
+  /** The declared source language is contradicted by the document itself. */
+  SOURCE_LANGUAGE_UNCERTAIN: "document_source_language_uncertain",
 });
 
 /**

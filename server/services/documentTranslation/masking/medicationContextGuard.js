@@ -34,6 +34,7 @@ import {
   TRANSLATION_ERRORS,
 } from "../documentTranslationPolicy.js";
 import { stripMarkers } from "./criticalTokenMasking.js";
+import { DOSAGE_UNIT_WORD_PATTERN_SOURCE } from "./medicalTokenLexicon.js";
 
 /**
  * Section headings that put everything under them into a medication context.
@@ -154,6 +155,49 @@ export function assertMedicationContextProtected(sourceSegments, maskedSegments)
 }
 
 /**
+ * Refuse the document if any written-out dosage could not be protected.
+ *
+ * Runs on the MASKED text, so everything the WORDDOSE pass understood is
+ * already gone. What is left is a dosage unit with a quantity we could not
+ * bound atomically.
+ *
+ * Deliberately its own error code rather than reusing the medication one. The
+ * cause and the remedy differ — "we cannot protect this drug name" and "we
+ * cannot protect this dose" call for different messages to the reader — and the
+ * error vocabulary here is already granular (encrypted / corrupt / too_large /
+ * structure_unsupported). Folding them together would be the less consistent
+ * choice, not the more consistent one.
+ *
+ * @param {{ index: number, text: string }[]} maskedSegments
+ * @throws {DocumentTranslationError} document_dosage_unverifiable
+ */
+export function assertDosageProtected(maskedSegments) {
+  const findings = analyseUnprotectedDosages(maskedSegments);
+  if (findings.length === 0) return { ok: true };
+
+  throw new DocumentTranslationError(TRANSLATION_ERRORS.DOSAGE_UNVERIFIABLE, {
+    // Metadata only — the phrases themselves are document content.
+    contexts: findings.length,
+    segmentIndexes: findings.slice(0, 20).map((f) => f.segmentIndex),
+  });
+}
+
+/**
+ * @param {{ index: number, text: string }[]} maskedSegments
+ * @returns {{ segmentIndex: number, unitCount: number }[]}
+ */
+export function analyseUnprotectedDosages(maskedSegments) {
+  const findings = [];
+  for (const segment of maskedSegments || []) {
+    const leftovers = unprotectedDosageUnits(String(segment?.text ?? ""));
+    if (leftovers.length > 0) {
+      findings.push({ segmentIndex: segment.index, unitCount: leftovers.length });
+    }
+  }
+  return findings;
+}
+
+/**
  * The analysis behind the guard, exposed separately so tests can assert on WHY
  * a document was refused without catching an exception.
  *
@@ -213,7 +257,31 @@ export function analyseMedicationContexts(sourceSegments, maskedSegments) {
  * @param {string} maskedText
  */
 function isStructuredMedicationLine(maskedText) {
-  return /⟦(?:MEDICATION|SCHEDULE|DOSE)_[A-Z]{4}⟧/.test(maskedText);
+  // PRODUCT and WORDDOSE count too: "NovoRapid FlexPen" and "eine Tablette"
+  // are medication statements even though neither carries a numeric strength.
+  return /⟦(?:MEDICATION|PRODUCT|SCHEDULE|DOSE|WORDDOSE)_[A-Z]{4}⟧/.test(maskedText);
+}
+
+/**
+ * Dosage unit words left unmasked after the WORDDOSE pass.
+ *
+ * A written-out dose is masked as a whole phrase when its quantity word is
+ * recognised. What remains is a dosage unit whose quantity we did NOT
+ * understand — "dreieinhalb Tabletten", "1½ Tabletten", or a phrasing outside
+ * the curated quantity list. That is potential dosage information that cannot
+ * be protected atomically, so the document is refused rather than translated.
+ *
+ * The cost is real: a purely referential mention ("Nehmen Sie die Tablette mit
+ * Wasser ein") is refused too. That is the intended direction — a dose is the
+ * one thing in a medical letter that must never be quietly altered, and the
+ * patient keeps the unaltered original either way.
+ *
+ * @param {string} maskedText
+ */
+function unprotectedDosageUnits(maskedText) {
+  const withoutMarkers = stripMarkers(maskedText);
+  const re = new RegExp(DOSAGE_UNIT_WORD_PATTERN_SOURCE, "g");
+  return withoutMarkers.match(re) || [];
 }
 
 /**

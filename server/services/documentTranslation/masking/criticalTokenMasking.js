@@ -47,13 +47,18 @@
  * KNOWN LIMIT test.
  */
 
+import { buildPatientIdentifierPatterns } from "./patientIdentifierMasking.js";
 import {
   ABBREVIATION_PATTERN_SOURCE,
   assertKindNamesAreParsable,
+  DOSAGE_FORM_PATTERN_SOURCE,
   IDENTIFIER_PATTERNS,
   INN_STEM_PATTERN_SOURCE,
+  PRODUCT_QUALIFIER_PATTERN_SOURCE,
   STRENGTH_UNIT_PATTERN_SOURCE,
   SUBSTANCE_NAME_PATTERN_SOURCE,
+  WORD_DOSE_PATTERN_SOURCE,
+  WORD_FREQUENCY_PATTERN_SOURCE,
 } from "./medicalTokenLexicon.js";
 
 /** Marker delimiters — mathematical white brackets, effectively absent from clinical prose. */
@@ -120,7 +125,34 @@ const SCHEDULE_BODY = String.raw`${NUMBER}(?:\s*[-–—]\s*${NUMBER}){2,3}`;
  * Lowercase substance names (common in English sources) are covered by the INN
  * and curated-name rules instead — see the known limits below.
  */
-const MEDICATION_NAME = String.raw`[A-ZÄÖÜ][A-Za-z0-9ÄÖÜäöüß-]{1,40}`;
+const MEDICATION_NAME_HEAD = String.raw`[A-ZÄÖÜ][A-Za-z0-9ÄÖÜäöüß-]{1,40}`;
+
+/**
+ * Continuation tokens of a multi-part product name.
+ *
+ * Three shapes occur in German letters and each one carries meaning that must
+ * not be separable from the head:
+ *   "Insulin glargin"        lowercase INN qualifier — which insulin it is
+ *   "Ramipril HEXAL"         manufacturer suffix — a different product
+ *   "Metformin XR"           release qualifier — a different regimen
+ *   "Amoxicillin/Clavulan…"  second active substance
+ *
+ * The lowercase branch requires four or more letters so German function words
+ * ("von", "mit", "der") cannot be absorbed into a product name.
+ */
+const MEDICATION_NAME_TAIL =
+  String.raw`(?:[\s/](?:[A-ZÄÖÜ][A-Za-z0-9ÄÖÜäöüß-]{1,40}|[a-zäöü][a-zäöüß]{3,30}|` +
+  PRODUCT_QUALIFIER_PATTERN_SOURCE +
+  String.raw`))`;
+
+/** Full product name: a head plus up to two continuation tokens. */
+const MEDICATION_NAME = String.raw`${MEDICATION_NAME_HEAD}${MEDICATION_NAME_TAIL}{0,2}`;
+
+/**
+ * Composite strength: "875/125 mg", "100 E/ml", "20 IE".
+ * The slash form is one strength for a combination product, not two numbers.
+ */
+const STRENGTH = String.raw`${NUMBER}(?:\s*\/\s*${NUMBER})*\s*${STRENGTH_UNIT_PATTERN_SOURCE}`;
 
 /**
  * Token kinds in match order. ORDER IS SIGNIFICANT — the first pattern that
@@ -149,20 +181,49 @@ const TOKEN_KINDS = [
   })),
   {
     kind: "MEDICATION",
-    // "Ramipril 5 mg" · "ASS 100 mg 1-0-0" · "L-Thyroxin 75 µg"
+    // "Ramipril 5 mg" · "ASS 100 mg 1-0-0" · "Insulin glargin 20 IE"
+    // "Amoxicillin/Clavulansäure 875/125 mg" · "Ramipril HEXAL 5 mg Filmtabletten"
     //
-    // Name, strength and — when it follows directly — the dosing schedule
-    // become ONE opaque token. The model therefore cannot rename the drug,
-    // change its strength, or separate the two, because it never sees either.
+    // The whole product identity becomes ONE opaque token: name (including a
+    // second active substance, a manufacturer suffix or a release qualifier),
+    // strength, dosage form and — when it follows directly — the dosing
+    // schedule. The model cannot rename the drug, drop "XR", remove the second
+    // substance or move a schedule, because it never sees any of them.
     //
     // The strength unit set excludes concentration and physical units, so
     // "CRP 1,5 mg/dl", "Kalium 4,2 mmol/l", "Gewicht 80 kg" and
     // "Temperatur 36,6 °C" are NOT read as medication lines.
     re: new RegExp(
-      String.raw`${MEDICATION_NAME}\s+${NUMBER}\s*${STRENGTH_UNIT_PATTERN_SOURCE}` +
+      String.raw`${MEDICATION_NAME}\s+${STRENGTH}` +
+        String.raw`(?:\s+${DOSAGE_FORM_PATTERN_SOURCE})?` +
         String.raw`(?:[\s,]+${SCHEDULE_BODY})?`,
       "g",
     ),
+  },
+  {
+    kind: "PRODUCT",
+    // A product identified by its device or dosage form rather than a strength:
+    // "NovoRapid FlexPen", "Symbicort Turbohaler", "Ramipril Filmtabletten".
+    // Neither word may be in any list, but the device word makes the phrase
+    // recognisable as a medicinal product, and the name beside it is exactly
+    // what must not change.
+    re: new RegExp(
+      String.raw`${MEDICATION_NAME_HEAD}(?:[\s/][A-Za-z0-9ÄÖÜäöüß-]{2,40}){0,2}\s+${DOSAGE_FORM_PATTERN_SOURCE}`,
+      "g",
+    ),
+  },
+  {
+    kind: "WORDDOSE",
+    // "fünf Milligramm" · "eine halbe Tablette" · "half a tablet"
+    // Written-out doses carry the same information as numeric ones and no
+    // numeric pattern can see them. Masked as whole phrases — the aim is that
+    // the model cannot change them, not that we parse them into numbers.
+    re: new RegExp(WORD_DOSE_PATTERN_SOURCE, "g"),
+  },
+  {
+    kind: "WORDFREQ",
+    // "zweimal täglich" · "twice daily"
+    re: new RegExp(WORD_FREQUENCY_PATTERN_SOURCE, "g"),
   },
   {
     kind: "ABBREV",
@@ -272,15 +333,31 @@ assertKindNamesAreParsable(TOKEN_KINDS.map((t) => t.kind));
  * @param {{ index: number, kind: string, text: string }[]} segments
  * @returns {{ segments: MaskedSegment[], tokens: MaskToken[], tokenMap: Map<string, MaskToken> }}
  */
-export function maskSegments(segments) {
+export function maskSegments(segments, options = {}) {
   const tokens = [];
   const tokenMap = new Map();
   const counter = { n: 0 };
 
+  // Patient identifiers run BEFORE every generic pass. A name has to be claimed
+  // whole; once "Mustermann" has been partly consumed by another rule there is
+  // nothing left to match. They are passed in rather than looked up here so
+  // this module stays free of database access.
+  const patientPatterns = options.patientIdentity
+    ? buildPatientIdentifierPatterns(options.patientIdentity)
+    : [];
+  assertKindNamesAreParsable(patientPatterns.map((p) => p.kind));
+
   const maskedSegments = (segments || []).map((seg) => ({
     index: seg.index,
     kind: seg.kind,
-    text: maskOne(String(seg.text ?? ""), seg.index, tokens, tokenMap, counter),
+    text: maskOne(
+      String(seg.text ?? ""),
+      seg.index,
+      tokens,
+      tokenMap,
+      counter,
+      patientPatterns,
+    ),
   }));
 
   return { segments: maskedSegments, tokens, tokenMap };
@@ -293,7 +370,7 @@ export function maskSegments(segments) {
  * @param {Map<string, MaskToken>} tokenMap
  * @param {{ n: number }} counter
  */
-function maskOne(text, segmentIndex, tokens, tokenMap, counter) {
+function maskOne(text, segmentIndex, tokens, tokenMap, counter, patientPatterns = []) {
   let out = text;
 
   // Stray delimiter characters already present in the source are masked FIRST,
@@ -314,7 +391,7 @@ function maskOne(text, segmentIndex, tokens, tokenMap, counter) {
 
   out = out.replace(/[⟦⟧]/g, (match) => emit("BRACKET", match));
 
-  for (const { kind, re } of TOKEN_KINDS) {
+  for (const { kind, re } of [...patientPatterns, ...TOKEN_KINDS]) {
     re.lastIndex = 0;
     out = out.replace(re, (match) => emit(kind, match));
   }

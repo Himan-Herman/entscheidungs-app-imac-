@@ -556,34 +556,36 @@ test("a DOCX table still keeps column association", async () => {
 /* 7. Documented limits                                               */
 /* ================================================================== */
 
-test("KNOWN LIMIT: a rare bare drug name is not protected", () => {
+test("KNOWN LIMIT: masking alone cannot protect a rare bare drug name", () => {
   // No drug lexicon is used, so a substance that is neither on the curated list
-  // nor carries an INN stem, written without a strength, cannot be recognised.
-  // Stated rather than engineered around.
+  // nor carries an INN stem, written without a strength, is not maskable. The
+  // MASKING layer therefore cannot stop this — the medication guard refuses the
+  // whole document instead, which is covered in the hardening suite.
   assert.equal(tamper("Gabe von Quensyl erfolgt.", "Quensyl", "Resochin"), "accepted");
 });
 
-test("KNOWN LIMIT: a lowercase drug name without a strength is not protected", () => {
+test("KNOWN LIMIT: masking alone cannot protect a lowercase bare drug name", () => {
+  // Same shape as above: refused by the medication guard, not by masking.
   assert.equal(tamper("continued on warfarin therapy", "warfarin", "heparin"), "accepted");
 });
 
-test("KNOWN LIMIT: multi-word substance names are captured only up to the first word", () => {
+test("multi-word substance names are one atom (closed in 2A.3)", () => {
   const { tokens } = maskSegments([
     { index: 0, kind: "p", text: "Insulin glargin 20 IE" },
   ]);
-  // "glargin 20 IE" is the medication token; "Insulin" is caught separately by
-  // the curated name list rather than being part of the same atom.
-  assert.ok(tokens.length >= 1);
-  assert.ok(tokens.some((t) => t.original.includes("20 IE")));
+  assert.equal(tokens.length, 1, JSON.stringify(tokens));
+  assert.equal(tokens[0].kind, "MEDICATION");
+  assert.equal(tokens[0].original, "Insulin glargin 20 IE");
 });
 
 test("KNOWN LIMIT: an abbreviation outside the curated list is not protected", () => {
   assert.equal(tamper("PAVK bekannt", "PAVK", "KHK"), "accepted");
 });
 
-test("KNOWN LIMIT: quantities written as words are not maskable", () => {
-  assert.equal(
-    tamper("fuenf Milligramm taeglich", "fuenf", "fuenfzig"),
-    "accepted",
-  );
+test("quantities written as words are masked atomically (closed in 2A.3)", () => {
+  // Was a known limit through 2A.2: "fünf Milligramm" reached the model as
+  // ordinary words and could become "fünfzig Milligramm".
+  assert.equal(tamper("fünf Milligramm täglich", "fünf", "fünfzig"), "immune");
+  assert.equal(tamper("eine halbe Tablette", "eine halbe", "zwei"), "immune");
+  assert.equal(tamper("half a tablet", "half", "two"), "immune");
 });
