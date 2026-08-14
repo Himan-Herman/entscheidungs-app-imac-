@@ -1,3 +1,20 @@
+/**
+ * Client locale registry.
+ *
+ * The canonical registry is shared/i18n/localeConfig.js. This file is NOT free
+ * to drift from it: server/scripts/verifyLocaleSourceOfTruth.test.js compares
+ * both and fails on any divergence in the locale data below.
+ *
+ * It is a separate file rather than a re-export because the frontend is
+ * deployed with client/ as the Vercel root directory (client/vercel.json), so a
+ * repository-root path is outside the client build context. Changing that
+ * requires a deploy setting that lives outside the repository.
+ *
+ * When adding a language, change shared/i18n/localeConfig.js first, then mirror
+ * it here. LANGUAGE_STORAGE_KEY and resolveInitialLanguage stay client-only —
+ * they are browser concerns and are deliberately not part of the shared module.
+ */
+
 /** Persisted preference — keep stable for existing users. */
 export const LANGUAGE_STORAGE_KEY = "medscout_language";
 
@@ -72,6 +89,15 @@ export const PRE_VISIT_SELECTABLE_LOCALE_CODES = [
   "de", "en", "fr", "es", "it", "tr", "ru", "uk", "pt",
   "ar", "fa", "ckb", "ku", "el", "ro", "pl",
 ];
+
+/**
+ * Target languages for patient-facing document translation.
+ *
+ * DERIVED from UI_SELECTABLE_LOCALE_CODES, never hand-maintained: a language
+ * activated centrally becomes available here automatically. Restating the codes
+ * would recreate exactly the drift the shared registry exists to prevent.
+ */
+export const DOCUMENT_TRANSLATION_TARGET_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
 
 export function isSupportedLanguage(code) {
   return typeof code === "string" && SUPPORTED_LANGUAGE_CODES.includes(code);

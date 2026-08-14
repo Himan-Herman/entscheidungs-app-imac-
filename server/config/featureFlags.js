@@ -367,3 +367,24 @@ export function isBillingAiReviewEnabled() {
 export function isPatientBillingExplainEnabled() {
   return envFlag("ENABLE_PATIENT_BILLING_EXPLAIN", false);
 }
+
+/**
+ * Patient-facing translation / plain-language rendering of a practice document.
+ *
+ * Phase 2A ships the safety substrate only — provenance gate, local text
+ * extraction, segmentation, critical-token masking, output validation. There is
+ * deliberately NO model call behind this flag yet, so enabling it cannot send
+ * document text anywhere.
+ *
+ * Before this may drive an external AI call (phase 2B) the open data-protection
+ * question must be resolved: the OpenAI client sets no baseURL (US endpoint),
+ * and neither EU data residency nor zero-data-retention is configured or
+ * evidenced anywhere in this repository. Translating a document would transmit
+ * the full text of a medical record — a different category from the metadata
+ * and lab-row payloads existing AI features send.
+ *
+ * Default off.
+ */
+export function isDocumentTranslationEnabled() {
+  return envFlag("ENABLE_DOCUMENT_TRANSLATION", false);
+}
