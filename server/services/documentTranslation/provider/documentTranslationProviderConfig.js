@@ -38,11 +38,23 @@ export const PROVIDER_ENV = Object.freeze({
   PROVIDER: "DOCUMENT_TRANSLATION_PROVIDER",
   /** Dedicated credential. Deliberately NOT OPENAI_API_KEY. */
   API_KEY: "DOCUMENT_TRANSLATION_API_KEY",
-  /** Explicit endpoint. No SDK default is accepted. */
+  /**
+   * Explicit endpoint. No SDK default is accepted, and in production the host
+   * must appear in APPROVED_PROVIDER_HOSTS.
+   */
   BASE_URL: "DOCUMENT_TRANSLATION_BASE_URL",
-  /** Operator's assertion about where processing happens, e.g. "eu". */
+  /**
+   * This value records an operator assertion. It does not technically verify
+   * where the provider processes the request, and no code in this repository
+   * can. It exists so the running configuration is inspectable and the claim is
+   * attributable — not as evidence of data residency.
+   */
   DATA_REGION: "DOCUMENT_TRANSLATION_DATA_REGION",
-  /** Operator's assertion that retention is disabled. Must be exactly "true". */
+  /**
+   * This flag records an operator assertion. It does not technically verify the
+   * provider's retention configuration. Must be exactly "true" — an absent or
+   * ambiguous value must never read as "retention is off".
+   */
   ZERO_RETENTION: "DOCUMENT_TRANSLATION_ZERO_RETENTION",
   /** Model slot for faithful translation. */
   MODEL_STRICT: "DOCUMENT_TRANSLATION_MODEL_STRICT",
@@ -64,6 +76,32 @@ export const PROVIDER_KINDS = Object.freeze({
 
 /** Request deadline for a single provider call. */
 export const PROVIDER_TIMEOUT_MS = 60_000;
+
+/**
+ * Provider hosts approved for production.
+ *
+ * ── Deliberately empty ──────────────────────────────────────────────────────
+ * No host is listed because none has been confirmed yet: the regional endpoint,
+ * the data-residency arrangement and the processing agreement are all open
+ * points outside this repository. Guessing a plausible-looking host here — a
+ * name that merely reads as European, say — would be inventing exactly the
+ * assurance this feature must not fabricate.
+ *
+ * While the list is empty, production cannot be configured at all. That is the
+ * intended state, and it is the reason no additional "compliance approved"
+ * boolean was introduced: a flag an operator can set proves nothing, whereas
+ * filling this list is a code change that goes through review. Activation
+ * therefore needs a second pair of eyes by construction rather than by policy.
+ *
+ * Outside production the list is not consulted, so a local mock or a staging
+ * endpoint can be pointed at freely.
+ *
+ * Before adding an entry, complete
+ * docs/production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md.
+ *
+ * @type {readonly string[]} lowercase hostnames, no scheme, no port, no path
+ */
+export const APPROVED_PROVIDER_HOSTS = Object.freeze([]);
 
 /**
  * @typedef {object} ProviderConfig
@@ -146,6 +184,11 @@ export function resolveProviderConfig(env = process.env) {
     return { configured: false, missing: [PROVIDER_ENV.API_KEY], reason: "reused_generic_key" };
   }
 
+  const endpoint = checkBaseUrl(baseUrl, read(env, "NODE_ENV") === "production");
+  if (!endpoint.ok) {
+    return { configured: false, missing: [PROVIDER_ENV.BASE_URL], reason: endpoint.reason };
+  }
+
   return {
     configured: true,
     missing: [],
@@ -175,6 +218,44 @@ export function describeProviderConfig(config) {
     dataRegion: config.dataRegion,
     zeroRetention: config.zeroRetention,
   };
+}
+
+/**
+ * Validate the configured endpoint.
+ *
+ * Two separate concerns. The structural check applies everywhere: an endpoint
+ * that is not an absolute URL, or that would send a medical document in clear
+ * text, is refused regardless of environment. The allowlist applies only in
+ * production, where "some https URL an operator typed" is not a sufficient
+ * basis for transmitting medical documents to it.
+ *
+ * @param {string} baseUrl
+ * @param {boolean} isProduction
+ * @returns {{ ok: true, host: string } | { ok: false, reason: string }}
+ */
+export function checkBaseUrl(baseUrl, isProduction) {
+  let url;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    return { ok: false, reason: "base_url_not_absolute" };
+  }
+
+  // http would put the document on the wire in clear text. Allowed only for a
+  // local mock, and never in production.
+  const isLoopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (url.protocol !== "https:" && !(isLoopback && !isProduction)) {
+    return { ok: false, reason: "base_url_not_https" };
+  }
+
+  if (!isProduction) return { ok: true, host: url.hostname };
+
+  if (!APPROVED_PROVIDER_HOSTS.includes(url.hostname.toLowerCase())) {
+    // Expected while the list is empty. The endpoint is an external approval
+    // point, not something a deployment may decide on its own.
+    return { ok: false, reason: "base_url_host_not_approved" };
+  }
+  return { ok: true, host: url.hostname };
 }
 
 /** @param {NodeJS.ProcessEnv} env @param {string} name */

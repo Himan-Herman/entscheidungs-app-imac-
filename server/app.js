@@ -88,6 +88,10 @@ import practiceDeveloperRouter from "./routes/practiceDeveloper.js";
 import practiceV1Router from "./routes/practiceV1.js";
 import archiveAiRouter from "./routes/archiveAi.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
+import {
+  describeTranslationReadiness,
+  logDocumentTranslationReadiness,
+} from './services/documentTranslation/documentTranslationReadiness.js';
 import { isVitalsEnabled, isWearablesEnabled } from './config/featureFlags.js';
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
@@ -123,6 +127,11 @@ const app = express();
 
 // Startup checks prevent silent misconfiguration that can break auth/email/API links in production.
 validateStartupEnv();
+
+// Document translation is optional and fail-closed on its own, so an incomplete
+// configuration warns rather than stopping the API. Without this an operator who
+// enabled the feature would have no signal that it is refusing every request.
+logDocumentTranslationReadiness();
 
 // Render/Proxy setup for correct client IP handling (rate limits, audit logs).
 app.set('trust proxy', 1);
@@ -348,6 +357,21 @@ app.get('/api/health/config', (_req, res) =>
       vitals: isVitalsEnabled(),
       wearables: isWearablesEnabled(),
     },
+    // Operational readiness of the document transformation, booleans only.
+    // No provider name, no host, no region, no model, no key — those are
+    // deployment configuration, not something to publish from a health route.
+    // `ready` means technically able to call a provider; it is NOT a statement
+    // that doing so has been approved. See
+    // docs/production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md.
+    documentTranslation: (() => {
+      const state = describeTranslationReadiness();
+      return {
+        featureEnabled: state.featureEnabled,
+        providerConfigured: state.providerConfigured,
+        endpointApproved: state.endpointApproved,
+        ready: state.ready,
+      };
+    })(),
   }),
 );
 

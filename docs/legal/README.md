@@ -22,6 +22,14 @@
 > **not** modified — un-reviewed pilot text must not be published live. After legal
 > review, the approved German text can be transferred into the legal i18n structure.
 
+> **Scope note (Phase 3, document translation):** every document in this folder is
+> scoped to the **GOÄ/PKV billing plausibility pilot**. The patient-facing AI
+> **document transformation** is a separate processing operation with a different
+> data category (the text of a medical document, potentially Art. 9 data). It is
+> switched off and **not** covered by the drafts here. Its technical release gate is
+> [`../production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md`](../production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md).
+> Extending these drafts to cover it is a legal act and was deliberately not done here.
+
 **Status: draft prepared — NOT legally complete.** A signed AVV with each external
 practice, a DSGVO legal-basis determination, and (only if AI is ever enabled) OpenAI
 subprocessor disclosure remain open and are tracked in

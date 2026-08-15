@@ -29,6 +29,7 @@
     "billing:erase": "node scripts/eraseBillingPlausibilityData.js",
     "billing:purge": "node scripts/purgeBillingPlausibilitySessions.js",
     "test": "node --test scripts/*.test.js",
+    "verify:document-translation-provider": "node scripts/verifyDocumentTranslationProviderSmoke.js",
     "verify:document-translation": "node --test scripts/verifyDocumentTranslation*.test.js scripts/verifyLocaleSourceOfTruth.test.js"
   },
   "keywords": [],
