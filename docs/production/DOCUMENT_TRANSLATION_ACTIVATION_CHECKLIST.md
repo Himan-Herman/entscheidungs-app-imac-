@@ -65,31 +65,26 @@ Everything to the left of it stays on MedScoutX infrastructure.
 
 ## 3. External approval matrix
 
-Legend — **Repo?** = can this repository establish it?
-`yes` = verifiable in code · `partial` = code can enforce a configuration but
-cannot verify the underlying fact · `no` = outside the repository entirely.
+**Moved.** Since Phase 4A the live status of every requirement is tracked in
+[`DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md`](DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md),
+which uses a six-value status model (`OPEN` / `EVIDENCE_PROVIDED` / `VERIFIED` /
+`INSUFFICIENT` / `CONFLICT` / `NOT_APPLICABLE`) and records the evidence behind
+each value. Keeping two tables would have let them drift, and a compliance
+document that contradicts itself is worse than one document.
 
-| # | Requirement | Status | Evidence required | Repo? |
-|---|---|---|---|---|
-| 1 | DPA / AVV with the provider, covering medical document content | **open** | signed agreement | no |
-| 2 | Provider listed as subprocessor for *this* processing | **open** | updated subprocessor list | no |
-| 3 | EU data residency for the actual organisation/project | **open** | provider account/project confirmation | partial — only records the assertion |
-| 4 | Dedicated provider project set up | **open** | provider dashboard configuration | no |
-| 5 | Zero data retention confirmed for the project | **open** | provider confirmation | partial — only records the assertion |
-| 6 | Endpoint confirmed and added to `APPROVED_PROVIDER_HOSTS` | **open** | provider documentation + reviewed commit | yes — enforced |
-| 7 | Endpoint ZDR-compatible | **open** | provider documentation | partial |
-| 8 | Prompt/response caching behaviour of that endpoint | **open** | provider documentation | no |
-| 9 | Chosen models available in the approved region | **open** | provider documentation | no |
-| 10 | Dedicated API key, separate from `OPENAI_API_KEY` | **open** | secret configuration | yes — existence and separation enforced |
-| 11 | Key scoped to this project only | **open** | provider dashboard | no |
-| 12 | Privacy notice covers external AI processing of document content | **open** | reviewed notice | no |
-| 13 | Legal basis determined and documented | **open** | legal decision | no |
-| 14 | Patient consent model decided (see §6) | **open** | legal + product decision | no |
-| 15 | DPIA/DSFA necessity assessed | **open** | data-protection assessment | no |
-| 16 | Deletion/erasure request handling reviewed for this flow | **open** | process documentation | no |
+Summary at the time of writing — 13 provider/contract requirements and 7
+data-protection/product requirements, of which:
 
-**No row may be marked done from inside the repository except 6 and 10, and
-those only in the narrow technical sense stated.**
+| | |
+|---|---|
+| `VERIFIED` | **none** |
+| `CONFLICT` | 1 — the live privacy notice (register §6) |
+| `OPEN` | all others |
+
+**No requirement may be marked done from inside the repository**, with two
+narrow exceptions: that a dedicated key exists and is not the generic one, and
+that the endpoint host is on the approved list. Both are statements about
+configuration, not about permission.
 
 ---
 
@@ -134,17 +129,33 @@ host that merely looks regional is a guess.
 
 ## 6. Patient consent — open question
 
-The repository has a granular consent catalogue
-(`server/services/consent/consentTypes.js`). Two observations, both facts rather
-than conclusions:
+> **Corrected in Phase 4A.** The reading below originally inferred the scope of
+> `ai_organizational_assistance` from its name and legacy-scope mapping. A
+> direct audit of the enforcement sites gave a more precise picture, recorded in
+> [`DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md`](DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md) §7.
+> The conclusion — that no existing consent covers this use case — is unchanged;
+> the reasoning is not.
 
-- `ai_organizational_assistance` exists and maps to the legacy scope
-  `ai_organizational`. Its name and mapping describe **organisational** AI
-  assistance. Transforming the full text of a medical letter is not that.
-- `meda_live_translation_processing` exists as a **dedicated** consent type for
-  external realtime translation processing, flag-gated and not yet active. That
-  is the closest precedent in this codebase, and it was given its own type
-  rather than reusing the organisational one.
+The repository has a granular consent catalogue
+(`server/services/consent/consentTypes.js`). Facts from the enforcement sites,
+not conclusions:
+
+- `ai_organizational_assistance` **is** required for AI processing of a practice
+  document: `documentOcrService.js` demands it for the `ai_vision` OCR engine,
+  alongside `document_sharing`. But that engine sends nothing anywhere — it
+  parses text locally with regular expressions, and its adapter contains no HTTP
+  client at all. The consent has only ever gated local processing.
+- `meda_live_translation_processing` is **declared but never enforced**. It
+  exists in the catalogue and as a UI label; no server code references it. It is
+  an intention, not an implemented precedent.
+- **No service in this codebase that actually calls OpenAI checks any consent
+  type** — not pre-visit, not the interpreter, not this feature. External AI
+  processing is currently gated by feature flags and by the patient's own
+  action, never by a recorded consent.
+
+This feature would therefore be the first external AI processing of
+practice-released medical content, with no established consent mechanism to
+inherit.
 
 **The document transformation service currently checks no consent type at all.**
 The patient starts it deliberately, and the provenance gate already requires an
