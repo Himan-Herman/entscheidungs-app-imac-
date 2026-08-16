@@ -10,6 +10,7 @@
 
 **Go/No-Go status: `NO-GO FOR PRODUCTION ACTIVATION`**
 Baseline commit: `545444ea` · Phase 2A–2D frozen · both feature flags off
+Last evidence assessed: A1, 2026-08-17 · `VERIFIED` 1 / 21
 
 ---
 
@@ -47,7 +48,8 @@ the underlying fact) / `no`.
 
 | # | Requirement | Status | Evidence description | Date | Repo? | Reviewer | Notes |
 |---|---|---|---|---|---|---|---|
-| A1 | DPA / AVV in force with the provider, covering processing of medical document content | `OPEN` | — | — | no | — | Existing `docs/legal` AVV draft is scoped to the billing pilot and unsigned |
+| A1 | Executed DPA / AVV with the provider | **`VERIFIED – technical/documentary evidence`** | Executed OpenAI Data Processing Addendum, version `v.010126`, both parties dated 2026-08-16, DocuSign envelope with PKCS#7 seal. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Customer: Himan Khorshidi, title "Sole Proprietor". Provider entity follows from the EEA clause, see A1a. Contract text byte-identical to the public template — no customisation. |
+| A1a | Contractual scope covers **medical document content** | **`LEGAL REVIEW REQUIRED`** | Same document. Schedule 1 §5 reads *"No sensitive data is intended to be transferred unless the user includes it unexpectedly in unstructured data."* No occurrence of special categories, health, Article 9, HIPAA, prohibited or restricted data anywhere in the contract. | 2026-08-17 | no | operator | Our use case transfers health data **deliberately and systematically**. Classified `not determinable from the DPA`. Feeds into B4. **A1 being verified does not resolve this.** |
 | A2 | Dedicated provider project for document translation | `OPEN` | — | — | no | — | Must be separate from the project behind `OPENAI_API_KEY` |
 | A3 | Data residency confirmed **for that project** | `OPEN` | — | — | partial | — | `DATA_REGION` records an assertion only |
 | A4 | Zero data retention confirmed **for that project** | `OPEN` | — | — | partial | — | `ZERO_RETENTION` records an assertion only |
@@ -73,8 +75,15 @@ the underlying fact) / `no`.
 | B6 | Erasure/access request handling reviewed for this flow | `OPEN` | Data inventory compiled, 2026-08-15 | 2026-08-15 | partial | operator | Inventory in §8; the process decision is external |
 | B7 | Patient-facing information decided (what is shown before the first run) | `OPEN` | — | — | partial | — | Depends on B3/B4 |
 
-**Nothing in Block A or B is `VERIFIED`.** Three rows carry repository-side
+**One of 21 rows is `VERIFIED`: A1.** Three further rows carry repository-side
 analysis (B1, B3, B6); that analysis narrows the question, it does not close it.
+
+A1 is the clearest illustration of why the two statuses are kept apart. The
+contract demonstrably exists, is executed by both parties and covers the API —
+and the same document, in its own SCC annex, describes a transfer of sensitive
+data as *unintended*. A verified contract and an unresolved contractual scope
+are not a contradiction; they are two different questions, and only the first
+one is answered.
 
 ---
 
