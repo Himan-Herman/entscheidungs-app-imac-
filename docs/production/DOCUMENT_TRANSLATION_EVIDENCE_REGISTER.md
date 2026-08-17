@@ -10,7 +10,7 @@
 
 **Go/No-Go status: `NO-GO FOR PRODUCTION ACTIVATION`**
 Baseline commit: `545444ea` · Phase 2A–2D frozen · both feature flags off
-Last evidence assessed: A1, 2026-08-17 · `VERIFIED` 1 / 21
+Last evidence assessed: A2, 2026-08-17 · `VERIFIED` 2 / 21
 
 ---
 
@@ -50,9 +50,9 @@ the underlying fact) / `no`.
 |---|---|---|---|---|---|---|---|
 | A1 | Executed DPA / AVV with the provider | **`VERIFIED – technical/documentary evidence`** | Executed OpenAI Data Processing Addendum, version `v.010126`, both parties dated 2026-08-16, DocuSign envelope with PKCS#7 seal. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Customer: Himan Khorshidi, title "Sole Proprietor". Provider entity follows from the EEA clause, see A1a. Contract text byte-identical to the public template — no customisation. |
 | A1a | Contractual scope covers **medical document content** | **`LEGAL REVIEW REQUIRED`** | Same document. Schedule 1 §5 reads *"No sensitive data is intended to be transferred unless the user includes it unexpectedly in unstructured data."* No occurrence of special categories, health, Article 9, HIPAA, prohibited or restricted data anywhere in the contract. | 2026-08-17 | no | operator | Our use case transfers health data **deliberately and systematically**. Classified `not determinable from the DPA`. Feeds into B4. **A1 being verified does not resolve this.** |
-| A2 | Dedicated provider project for document translation | `OPEN` | — | — | no | — | Must be separate from the project behind `OPENAI_API_KEY` |
-| A3 | Data residency confirmed **for that project** | `OPEN` | — | — | partial | — | `DATA_REGION` records an assertion only |
-| A4 | Zero data retention confirmed **for that project** | `OPEN` | — | — | partial | — | `ZERO_RETENTION` records an assertion only |
+| A2 | Dedicated provider project for document translation | **`VERIFIED – account/project evidence`** | Provider console screenshots: a dedicated project named "MedScoutX Document Translation" exists, and it belongs to the same provider organization as the executed DPA. Match performed 2026-08-17. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Identifiers deliberately not recorded here. Separation from the key behind `OPENAI_API_KEY` is **not** established by this row — that is A11/A12. |
+| A3 | Data residency confirmed **for that project** | `OPEN` | OpenAI Sales request submitted and acknowledged on 2026-08-17; provider response pending. | — | partial | — | `DATA_REGION` records an assertion only |
+| A4 | Zero data retention confirmed **for that project** | `OPEN` | OpenAI Sales request submitted and acknowledged on 2026-08-17; provider response pending. | — | partial | — | `ZERO_RETENTION` records an assertion only |
 | A5 | Endpoint `/v1/chat/completions` available on the approved regional endpoint | `OPEN` | — | — | partial | — | Adapter uses this path; see §3 |
 | A6 | That endpoint supports `response_format: json_schema` as used | `OPEN` | — | — | partial | — | Structured output is load-bearing, not cosmetic |
 | A7 | Endpoint compatible with the agreed retention/ZDR configuration | `OPEN` | — | — | no | — | Separate question from A4 |
@@ -75,8 +75,14 @@ the underlying fact) / `no`.
 | B6 | Erasure/access request handling reviewed for this flow | `OPEN` | Data inventory compiled, 2026-08-15 | 2026-08-15 | partial | operator | Inventory in §8; the process decision is external |
 | B7 | Patient-facing information decided (what is shown before the first run) | `OPEN` | — | — | partial | — | Depends on B3/B4 |
 
-**One of 21 rows is `VERIFIED`: A1.** Three further rows carry repository-side
-analysis (B1, B3, B6); that analysis narrows the question, it does not close it.
+**Two of 21 rows are `VERIFIED`: A1 and A2.** Three further rows carry
+repository-side analysis (B1, B3, B6); that analysis narrows the question, it
+does not close it.
+
+A1 and A2 together close one chain: an executed contract, and a dedicated
+project inside the very organization that contract names. A dedicated project
+in a *different* organization would have been outside the agreement, which is
+why the match was checked rather than assumed.
 
 A1 is the clearest illustration of why the two statuses are kept apart. The
 contract demonstrably exists, is executed by both parties and covers the API —
@@ -84,6 +90,22 @@ and the same document, in its own SCC annex, describes a transfer of sensitive
 data as *unintended*. A verified contract and an unresolved contractual scope
 are not a contradiction; they are two different questions, and only the first
 one is answered.
+
+---
+
+## 2a. Observations parked for later requirements
+
+Noticed while verifying A2, recorded so they are not rediscovered late. **None
+is a precondition for A1 or A2, and nothing has been changed in the provider
+account.** Each is decided when its own requirement comes up.
+
+| Observation | Relevant to | Why it is parked |
+|---|---|---|
+| The provider organization carries a placeholder display name | B2 | Contractually irrelevant — the DPA binds the organization *identifier*, which matched. But a subprocessor entry naming an organization unrelated to "MedScoutX" or the contract customer reads as an inconsistency to any later reviewer. |
+| Neither individual nor business verification is completed | A9 / A10 | The console states verification is needed to access protected models. Whether the models this feature needs are affected is unknown until A9/A10 — so it is a possible dependency, not a finding. |
+| User-based API keys are enabled at organization and project level | A12 | Bears on how tightly the translation key can be scoped. Decided with A11/A12, once the provider conditions are known. |
+
+No action taken on any of these.
 
 ---
 
