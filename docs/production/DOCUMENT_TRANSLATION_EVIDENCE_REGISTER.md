@@ -10,7 +10,7 @@
 
 **Go/No-Go status: `NO-GO FOR PRODUCTION ACTIVATION`**
 Baseline commit: `545444ea` · Phase 2A–2D frozen · both feature flags off
-Last evidence assessed: A2, 2026-08-17 · `VERIFIED` 2 / 21
+Last evidence assessed: A2, 2026-08-17 · `VERIFIED` 2 / 21 · B4 legal review packet prepared
 
 ---
 
@@ -70,7 +70,7 @@ the underlying fact) / `no`.
 | B1 | Privacy notice covers this processing | `CONFLICT` | Live notice analysed from the repository, 2026-08-15 | 2026-08-15 | partial | operator | Names OpenAI **USA** for the patient's *own* inputs; see §6 |
 | B2 | Provider listed as subprocessor **for this processing** | `OPEN` | — | — | no | — | Billing-pilot entry does not cover it; scope note added in Phase 3 |
 | B3 | Consent model decided for this use case | `OPEN` | Consent architecture re-audited, 2026-08-15 | 2026-08-15 | partial | operator | No covering consent exists; see §7 — corrects a Phase 3 statement |
-| B4 | Legal basis determined and documented | `OPEN` | — | — | no | — | `LEGAL REVIEW REQUIRED`; not to be asserted from code |
+| B4 | Legal basis determined and documented | `OPEN – legal review packet prepared` | Legal review packet prepared on 2026-08-17. External legal determination pending. See [`DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md`](DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md). | 2026-08-17 | no | — | `LEGAL REVIEW REQUIRED`; not to be asserted from code. A prepared packet is preparation, **not** evidence — the status stays `OPEN` until a determination exists. |
 | B5 | DPIA/DSFA necessity assessed for this processing | `OPEN` | — | — | no | — | No assessment found in the repository |
 | B6 | Erasure/access request handling reviewed for this flow | `OPEN` | Data inventory compiled, 2026-08-15 | 2026-08-15 | partial | operator | Inventory in §8; the process decision is external |
 | B7 | Patient-facing information decided (what is shown before the first run) | `OPEN` | — | — | partial | — | Depends on B3/B4 |
