@@ -1,6 +1,8 @@
 /** Italian — symptom check, image, body map, settings privacy, doctor contacts */
 export default {
   settingsPrivacy: {
+    deleteOwnerBlocked:
+      "Al momento il tuo account non può essere eliminato automaticamente perché è collegato a uno studio. Contatta l'assistenza.",
     heading: "Esportazione ed eliminazione dati",
     intro:
       "Esporta o elimina dall’account i dati MedScoutX legati al Pre-Visit.",

@@ -20,6 +20,8 @@ export default {
   deleteConfirmError: "Die Bestätigungsphrase stimmt nicht.",
   deleteSuccess:
     "Ihre MedScoutX-Daten zu Pre-Visit wurden gelöscht. Ihr Zugang bleibt bestehen.",
+  deleteOwnerBlocked:
+    "Ihr Konto kann derzeit nicht automatisch gelöscht werden, da damit auch eine Praxis verbunden ist. Bitte wenden Sie sich an den Support.",
   deleteError: "Löschung konnte nicht abgeschlossen werden. Bitte später erneut versuchen.",
   backStart: "Zurück zur Startseite",
   legalLinksTitle: "Rechtstexte & Kontodaten",

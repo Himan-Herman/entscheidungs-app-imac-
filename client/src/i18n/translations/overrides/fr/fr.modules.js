@@ -1,6 +1,8 @@
 /** French — symptom check, image, body map, settings privacy, doctor contacts */
 export default {
   settingsPrivacy: {
+    deleteOwnerBlocked:
+      "Votre compte ne peut pas être supprimé automatiquement pour le moment, car un cabinet y est rattaché. Veuillez contacter l'assistance.",
     heading: "Export et suppression des données",
     intro:
       "Exportez ou supprimez pour votre compte les données MedScoutX liées au Pre-Visit.",

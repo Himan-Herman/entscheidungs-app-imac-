@@ -16,6 +16,10 @@ export const frPatientPractices = {
   },
 
   practices: {
+    archivedTitle: "Anciens cabinets",
+    archivedDescription:
+      "Données provenant de cabinets qui n'existent plus. Elles vous restent acquises ; le cabinet n'y a plus accès.",
+    archivedEmpty: "Vous n'avez aucune donnée provenant d'anciens cabinets.",
     title: "Mes cabinets",
     description:
       "Chaque cabinet dispose de son propre espace. Une entrée liée à un cabinet n'apparaît que dans cet espace.",
@@ -32,6 +36,9 @@ export const frPatientPractices = {
   },
 
   provenance: {
+    archived: "Ancien lien avec un cabinet",
+    archivedWith: "Ancien cabinet : {practice}",
+    archivedOn: "Archivé le {date}",
     own: "Vos propres données",
     selfEntered: "Saisi par vous",
     deviceImport: "Importé depuis votre appareil",

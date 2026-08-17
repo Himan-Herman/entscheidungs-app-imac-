@@ -75,7 +75,14 @@ export default function SettingsPrivacyPage() {
       setConfirmText("");
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
-      setDeleteErr(t.deleteError);
+      // Release-gated on the server: an account that owns a practice cannot be
+      // erased automatically while the retention question is open. The message
+      // stays non-technical — no configuration, no legal claims.
+      if (e?.message === "practice_owner_account_deletion_temporarily_unavailable") {
+        setDeleteErr(t.deleteOwnerBlocked ?? t.deleteError);
+      } else {
+        setDeleteErr(t.deleteError);
+      }
     } finally {
       setDeleting(false);
     }

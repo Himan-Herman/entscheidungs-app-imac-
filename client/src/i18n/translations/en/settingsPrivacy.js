@@ -20,6 +20,8 @@ export default {
   deleteConfirmError: "The confirmation phrase does not match.",
   deleteSuccess:
     "Your MedScoutX Pre-Visit–related data has been deleted. Your account login remains.",
+  deleteOwnerBlocked:
+    "Your account cannot be deleted automatically at the moment because a practice is linked to it. Please contact support.",
   deleteError: "Deletion could not be completed. Please try again later.",
   backStart: "Back to home",
   legalLinksTitle: "Legal documents & account tools",

@@ -48,12 +48,14 @@ export class UnsupportedFieldError extends Error {
 
 /** Thrown when a context was requested but cannot be used. */
 export class InvalidContextError extends Error {
-  /** @param {"link_not_found"|"link_not_active"} code */
+  /** @param {"link_not_found"|"link_not_active"|"patient_account_unavailable"} code */
   constructor(code) {
     super(code);
     // A link that does not exist and a link belonging to someone else are the
-    // same answer, so a patient cannot probe for other people's links.
-    this.status = code === "link_not_found" ? 404 : 409;
+    // same answer, so a patient cannot probe for other people's links. An
+    // account that vanished mid-write (a concurrent erasure committed) is 404
+    // as well: no existence hint, and the client's session is over anyway.
+    this.status = code === "link_not_active" ? 409 : 404;
   }
 }
 
@@ -164,6 +166,38 @@ export async function resolvePatientDataContextForWrite(input) {
 }
 
 
+/**
+ * Locks the authenticated patient's user row FOR SHARE inside a write
+ * transaction, and confirms the account still exists.
+ *
+ * Why: account erasure locks the same row FOR UPDATE. Without this, a GLOBAL
+ * write (no link, so nothing else to lock) could run concurrently with the
+ * erasure — the record would be cascaded away, but the patient would have
+ * received a successful response for data that no longer exists. With it, a
+ * running write finishes before the erasure proceeds, and a write that starts
+ * during the erasure waits and then fails here because the row is gone.
+ *
+ * Lock order is USER first, then link — the same order the practice and
+ * account deletions use — so the paths cannot deadlock against each other.
+ *
+ * The id comes from authentication or the trusted import process, never from a
+ * request body; this function cannot be pointed at another user's row.
+ */
+export async function lockPatientForWrite(tx, patientUserId) {
+  const uid = String(patientUserId || "").trim();
+  if (!uid) throw new InvalidContextError("patient_account_unavailable");
+  if (typeof tx.$queryRaw !== "function") return; // in-memory test fakes
+
+  const rows = await tx.$queryRaw`
+    SELECT "id" FROM "User" WHERE "id" = ${uid} FOR SHARE
+  `;
+  if (!Array.isArray(rows) || rows.length === 0) {
+    // The account is gone (or was never this patient's). Reported without an
+    // existence hint — the caller maps it to a neutral status.
+    throw new InvalidContextError("patient_account_unavailable");
+  }
+}
+
 /* ------------------------------------------------------------ atomic write */
 
 /**
@@ -220,6 +254,8 @@ export async function createPatientDataWithValidatedContext(input) {
     try {
       return await client.$transaction(
         async (tx) => {
+          // USER first, then link — the same order every deletion path takes.
+          await lockPatientForWrite(tx, input.patientUserId);
           const context = await resolvePatientDataContextForWrite({
             patientUserId: input.patientUserId,
             requestedPracticePatientLinkId: input.requestedPracticePatientLinkId,
@@ -270,16 +306,106 @@ export function contextErrorResponse(err) {
 }
 
 /**
+ * The Prisma selection the patient routes use to resolve an archived context.
+ *
+ * Deliberately narrow: only what the patient is shown. The archive's own id,
+ * the original link id, the original practice id, the patient id and the
+ * archive reason are internal and are never loaded, so they cannot be
+ * serialised by accident.
+ */
+export const ARCHIVED_CONTEXT_SELECT = Object.freeze({
+  select: {
+    practiceDisplayNameSnapshot: true,
+    practiceSpecialtySnapshot: true,
+    archivedAt: true,
+  },
+});
+
+/** The three states a patient's record can be in, plus a defensive fourth. */
+export const PRACTICE_CONTEXT_STATE = Object.freeze({
+  NONE: "none",
+  ACTIVE: "active",
+  ARCHIVED: "archived",
+  UNAVAILABLE: "unavailable",
+});
+
+/**
  * Provenance fields for a patient-facing response.
  *
- * dataScope is meaningful to the patient. The link id is theirs, so it may be
- * returned. No practiceProfileId and no global user id.
+ * One shape for all four models: the patient should not have to learn a
+ * different vocabulary per data type.
  *
- * @param {{ dataScope?: string|null, contextPracticePatientLinkId?: string|null }} row
+ *   patient_global      → none      the patient's own data
+ *   contextual + link   → active    a care relationship that still exists
+ *   contextual + archive→ archived  a practice that was deleted
+ *   anything else       → unavailable
+ *
+ * The last case should be unreachable — the database CHECK permits only the
+ * three shapes above — but an unclassifiable record is reported as such rather
+ * than being presented as the patient's own data, which is a claim we could
+ * not support.
+ *
+ * dataScope is meaningful to the patient, and the link id is theirs, so both
+ * may be returned. The ARCHIVE's ids are not theirs to see: they name rows that
+ * no longer exist and would only expose which practice profile was deleted.
+ *
+ * @param {{
+ *   dataScope?: string|null,
+ *   contextPracticePatientLinkId?: string|null,
+ *   archivedPracticeContextId?: string|null,
+ *   archivedPracticeContext?: {
+ *     practiceDisplayNameSnapshot?: string|null,
+ *     practiceSpecialtySnapshot?: string|null,
+ *     archivedAt?: Date|string|null,
+ *   } | null,
+ * }} row
  */
 export function provenanceJson(row) {
+  const dataScope = row?.dataScope ?? null;
+  const linkId = row?.contextPracticePatientLinkId ?? null;
+  const archive = row?.archivedPracticeContext ?? null;
+  const hasArchive = Boolean(row?.archivedPracticeContextId || archive);
+
+  if (dataScope === "patient_global" && !linkId && !hasArchive) {
+    return {
+      dataScope,
+      practiceContextState: PRACTICE_CONTEXT_STATE.NONE,
+      contextPracticePatientLinkId: null,
+      archivedPractice: null,
+    };
+  }
+
+  if (dataScope === "practice_contextual" && linkId && !hasArchive) {
+    return {
+      dataScope,
+      practiceContextState: PRACTICE_CONTEXT_STATE.ACTIVE,
+      contextPracticePatientLinkId: linkId,
+      archivedPractice: null,
+    };
+  }
+
+  if (dataScope === "practice_contextual" && !linkId && hasArchive) {
+    return {
+      dataScope,
+      practiceContextState: PRACTICE_CONTEXT_STATE.ARCHIVED,
+      // A record with an archived context has no live link, by invariant.
+      contextPracticePatientLinkId: null,
+      // Null when the relation was not selected — the state is still archived,
+      // and the UI says "former practice context" without a name.
+      archivedPractice: archive
+        ? {
+            displayName: archive.practiceDisplayNameSnapshot ?? null,
+            specialty: archive.practiceSpecialtySnapshot ?? null,
+            archivedAt: archive.archivedAt ?? null,
+          }
+        : null,
+    };
+  }
+
   return {
-    dataScope: row?.dataScope ?? null,
-    contextPracticePatientLinkId: row?.contextPracticePatientLinkId ?? null,
+    dataScope,
+    practiceContextState: PRACTICE_CONTEXT_STATE.UNAVAILABLE,
+    contextPracticePatientLinkId: null,
+    archivedPractice: null,
   };
 }

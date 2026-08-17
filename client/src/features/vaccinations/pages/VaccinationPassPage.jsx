@@ -202,8 +202,11 @@ export default function VaccinationPassPage() {
                 onDelete={handleDelete}
               />
               <ProvenanceBadge
+                practiceContextState={entry.practiceContextState}
                 dataScope={entry.dataScope}
                 contextPracticePatientLinkId={entry.contextPracticePatientLinkId}
+                archivedPractice={entry.archivedPractice}
+                language={language}
                 resolve={resolve}
                 t={tProv}
               />

@@ -110,9 +110,12 @@ export default function PatientDataByPracticePage() {
           <li key={record.id} className="patient-data-practice__item">
             <span className="patient-data-practice__record">{recordTitle(sectionKey, record)}</span>
             <ProvenanceBadge
+              practiceContextState={record.practiceContextState}
               dataScope={record.dataScope}
               contextPracticePatientLinkId={record.contextPracticePatientLinkId}
+              archivedPractice={record.archivedPractice}
               source={record.source}
+              language={language}
               resolve={resolve}
               t={t}
             />
@@ -221,6 +224,32 @@ export default function PatientDataByPracticePage() {
               ))}
             </ul>
           </section>
+        )}
+      </section>
+
+      {/* --------------------------------------------- B2. practices that ended */}
+      <section className="patient-data-practice__section" aria-labelledby="archived-practices-heading">
+        <h2 id="archived-practices-heading">{t.practices.archivedTitle}</h2>
+        <p className="patient-data-practice__section-intro">
+          {t.practices.archivedDescription}
+        </p>
+        {/* Deliberately a plain list, not a tab: a deleted practice is history,
+            not a workspace. Not grouped by name either — two different
+            practices can carry the same one, and the only key that would group
+            them correctly is an internal id the patient must not receive. */}
+        {SECTIONS.every((sec) => (split[sec.key]?.archived ?? []).length === 0) ? (
+          <p className="patient-data-practice__empty">{t.practices.archivedEmpty}</p>
+        ) : (
+          SECTIONS.map((sec) => {
+            const list = split[sec.key]?.archived ?? [];
+            if (list.length === 0) return null;
+            return (
+              <section key={sec.key} className="patient-data-practice__group">
+                <h3>{t.sections[sec.key]}</h3>
+                {renderList(sec.key, list)}
+              </section>
+            );
+          })
         )}
       </section>
 
