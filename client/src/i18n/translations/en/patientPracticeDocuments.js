@@ -41,29 +41,29 @@ export default {
   questionError: "Could not send your question.",
   messagesLink: "Go to secure messages",
   translation: {
-    heading: "Translate & read more easily",
+    heading: "Translate or simplify this document",
     subtitle:
-      "Translate this practice document into another language, or have medical terminology worded more accessibly.",
+      "Choose a language and a style. The original document stays unchanged.",
     sourceLanguageNote: "Currently intended for German-language practice documents.",
 
-    fileLabel: "File",
+    fileLabel: "Document file",
     filePlaceholder: "Select a file",
 
-    modeLegend: "Type of processing",
-    modeStrictName: "Faithful translation",
+    modeLegend: "Style",
+    modeStrictName: "Specialist translation",
     modeStrictDescription:
-      "Renders the document content into the selected language as accurately as possible. Medical statements are neither added nor assessed.",
+      "Medical terminology and level of detail are preserved.",
     modePlainName: "Plain language",
     modePlainDescription:
-      "Words medical terminology more accessibly, without adding any new medical information or recommendations.",
+      "Same content — clear, without unnecessary jargon.",
 
     targetLanguageLabel: "Target language",
     targetLanguagePlaceholder: "Select a language",
 
     hintSameLanguageStrict:
-      "This document is already in German. Choose another language, or use \u201cPlain language\u201d.",
+      "For a specialist translation, please choose a different language. To read the document more easily in German, choose \u201cPlain language\u201d.",
 
-    submit: "Create translation",
+    submit: "Create",
     submitBusy: "Creating …",
     statusRunning: "Processing document …",
     retry: "Try again",

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Languages } from "lucide-react";
+import { Check, ChevronDown, Languages } from "lucide-react";
 
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
@@ -211,35 +211,32 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
         {t.sourceLanguageNote}
       </p>
 
-      {/* ── File ─────────────────────────────────────────────────────────── */}
-      {files.length > 1 ? (
-        <div className="doc-translate__field">
-          <label className="doc-translate__label" htmlFor="doc-translate-file">
-            {t.fileLabel}
-          </label>
+      {/* ── Target language — first, because it applies to both modes ──── */}
+      <div className="doc-translate__field">
+        <label className="doc-translate__label" htmlFor="doc-translate-language">
+          {t.targetLanguageLabel}
+        </label>
+        <div className="doc-translate__select-wrap">
           <select
-            id="doc-translate-file"
+            id="doc-translate-language"
             className="doc-translate__select"
-            value={fileId}
+            value={targetLanguage}
             disabled={busy}
             onChange={(event) => {
-              setFileId(event.target.value);
+              setTargetLanguage(event.target.value);
               clearOutput();
             }}
           >
-            <option value="">{t.filePlaceholder}</option>
-            {files.map((file) => (
-              <option key={file.id} value={file.id}>
-                {file.originalFileName}
+            <option value="">{t.targetLanguagePlaceholder}</option>
+            {targetLanguages.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.nativeName}
               </option>
             ))}
           </select>
+          <ChevronDown className="doc-translate__select-icon" size={18} aria-hidden="true" />
         </div>
-      ) : files.length === 1 ? (
-        <p className="doc-translate__single-file">
-          {t.fileLabel}: <span>{files[0].originalFileName}</span>
-        </p>
-      ) : null}
+      </div>
 
       {/* ── Mode ─────────────────────────────────────────────────────────── */}
       <fieldset className="doc-translate__modes" disabled={busy}>
@@ -272,6 +269,12 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
               }}
               className="doc-translate__mode-input"
             />
+            {/* A drawn control rather than the native dot, so the selected
+                state can be shown by shape as well as by colour. The real
+                radio above stays in the DOM and keeps the semantics. */}
+            <span className="doc-translate__mode-marker" aria-hidden="true">
+              <Check size={14} strokeWidth={3} />
+            </span>
             <span className="doc-translate__mode-body">
               <span className="doc-translate__mode-name">{option.name}</span>
               <span className="doc-translate__mode-description">{option.description}</span>
@@ -280,29 +283,42 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
         ))}
       </fieldset>
 
-      {/* ── Target language ──────────────────────────────────────────────── */}
-      <div className="doc-translate__field">
-        <label className="doc-translate__label" htmlFor="doc-translate-language">
-          {t.targetLanguageLabel}
-        </label>
-        <select
-          id="doc-translate-language"
-          className="doc-translate__select"
-          value={targetLanguage}
-          disabled={busy}
-          onChange={(event) => {
-            setTargetLanguage(event.target.value);
-            clearOutput();
-          }}
-        >
-          <option value="">{t.targetLanguagePlaceholder}</option>
-          {targetLanguages.map((option) => (
-            <option key={option.code} value={option.code}>
-              {option.nativeName}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* ── Which file ───────────────────────────────────────────────────────
+          Only ever the files of this already-opened document. With a single
+          file this is a statement, not a choice — a dropdown with one entry
+          would imply the patient could supply something else. */}
+      {files.length > 1 ? (
+        <div className="doc-translate__field">
+          <label className="doc-translate__label" htmlFor="doc-translate-file">
+            {t.fileLabel}
+          </label>
+          <div className="doc-translate__select-wrap">
+            <select
+              id="doc-translate-file"
+              className="doc-translate__select"
+              value={fileId}
+              disabled={busy}
+              onChange={(event) => {
+                setFileId(event.target.value);
+                clearOutput();
+              }}
+            >
+              <option value="">{t.filePlaceholder}</option>
+              {files.map((file) => (
+                <option key={file.id} value={file.id}>
+                  {file.originalFileName}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="doc-translate__select-icon" size={18} aria-hidden="true" />
+          </div>
+        </div>
+      ) : files.length === 1 ? (
+        <p className="doc-translate__single-file">
+          <span className="doc-translate__single-file-label">{t.fileLabel}</span>
+          <span className="doc-translate__single-file-name">{files[0].originalFileName}</span>
+        </p>
+      ) : null}
 
       {sameLanguageStrict ? (
         <p className="doc-translate__hint" role="note">

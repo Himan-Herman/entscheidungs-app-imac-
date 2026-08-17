@@ -723,29 +723,29 @@ export default {
 
   patientPracticeDocuments: {
     translation: {
-      heading: "Traducir y leer con más facilidad",
+      heading: "Traducir o simplificar este documento",
       subtitle:
-        "Traduzca este documento de su consulta a otro idioma, o haga que el lenguaje médico se formule de forma más comprensible.",
+        "Elija un idioma y una presentación. El documento original permanece sin cambios.",
       sourceLanguageNote: "Actualmente previsto para documentos de consulta en alemán.",
 
-      fileLabel: "Archivo",
+      fileLabel: "Archivo del documento",
       filePlaceholder: "Seleccionar archivo",
 
-      modeLegend: "Tipo de procesamiento",
-      modeStrictName: "Traducción fiel",
+      modeLegend: "Presentación",
+      modeStrictName: "Traducción especializada",
       modeStrictDescription:
-        "Traslada el contenido del documento al idioma elegido con la mayor exactitud posible. No se añaden ni se valoran afirmaciones médicas.",
-      modePlainName: "Explicado de forma sencilla",
+        "Se conservan la terminología médica y el nivel de detalle.",
+      modePlainName: "Lenguaje claro",
       modePlainDescription:
-        "Reformula el lenguaje médico de manera más comprensible, sin añadir información médica ni recomendaciones nuevas.",
+        "El mismo contenido, claro y sin tecnicismos innecesarios.",
 
       targetLanguageLabel: "Idioma de destino",
       targetLanguagePlaceholder: "Seleccionar idioma",
 
       hintSameLanguageStrict:
-        "Este documento ya está en alemán. Elija otro idioma o utilice «Explicado de forma sencilla».",
+        "Para una traducción especializada, elija otro idioma. Si desea leer el documento en alemán de forma más comprensible, elija «Lenguaje claro».",
 
-      submit: "Crear traducción",
+      submit: "Crear",
       submitBusy: "Creando …",
       statusRunning: "Procesando el documento …",
       retry: "Intentar de nuevo",

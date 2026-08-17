@@ -41,30 +41,30 @@ export default {
   questionError: "Rückfrage konnte nicht gesendet werden.",
   messagesLink: "Zum sicheren Nachrichtenbereich",
   translation: {
-    heading: "Übersetzen & verständlicher lesen",
+    heading: "Dieses Dokument übersetzen oder einfacher lesen",
     subtitle:
-      "Übersetze dieses Praxisdokument in eine andere Sprache oder lasse medizinische Fachsprache verständlicher formulieren.",
+      "Wähle eine Sprache und eine Darstellung. Das Originaldokument bleibt unverändert erhalten.",
     sourceLanguageNote:
       "Derzeit für deutschsprachige Praxisdokumente vorgesehen.",
 
-    fileLabel: "Datei",
+    fileLabel: "Dokumentdatei",
     filePlaceholder: "Datei auswählen",
 
-    modeLegend: "Art der Bearbeitung",
-    modeStrictName: "Fachgetreu übersetzen",
+    modeLegend: "Darstellung",
+    modeStrictName: "Fachübersetzung",
     modeStrictDescription:
-      "Überträgt den Dokumentinhalt möglichst genau in die gewählte Sprache. Medizinische Aussagen werden nicht ergänzt oder bewertet.",
-    modePlainName: "Einfach erklärt",
+      "Medizinische Fachsprache und Detailgrad bleiben erhalten.",
+    modePlainName: "Einfache Sprache",
     modePlainDescription:
-      "Formuliert medizinische Fachsprache verständlicher, ohne neue medizinische Informationen oder Empfehlungen hinzuzufügen.",
+      "Gleicher Inhalt – verständlich und ohne unnötigen Fachjargon.",
 
     targetLanguageLabel: "Zielsprache",
     targetLanguagePlaceholder: "Sprache auswählen",
 
     hintSameLanguageStrict:
-      "Das Dokument ist bereits auf Deutsch. Wähle eine andere Sprache oder nutze „Einfach erklärt“.",
+      "Für eine Fachübersetzung wähle bitte eine andere Sprache. Wenn du das Dokument auf Deutsch verständlicher lesen möchtest, wähle „Einfache Sprache“.",
 
-    submit: "Übersetzung erstellen",
+    submit: "Erstellen",
     submitBusy: "Wird erstellt …",
     statusRunning: "Dokument wird verarbeitet …",
     retry: "Erneut versuchen",

@@ -784,3 +784,141 @@ test("Russian is written in Cyrillic, not transliterated", () => {
     assert.match(ru[key], /\p{Script=Cyrillic}/u, `ru.${key} has no Cyrillic: ${ru[key]}`);
   }
 });
+
+/* ================================================================== */
+/* 11. Naming and placement — the product surface                     */
+/* ================================================================== */
+
+const MODE_BUNDLES = () => ({
+  de: de.translation,
+  en: en.translation,
+  fr: frPatient.patientPracticeDocuments.translation,
+  es: esPatient.patientPracticeDocuments.translation,
+  it: itPatient.patientPracticeDocuments.translation,
+  ru: ruPatient.patientPracticeDocuments.translation,
+});
+
+test("the German mode names are exactly the agreed product wording", () => {
+  // Pinned literally. These two strings are what the patient reads, what the
+  // result header repeats and what the PDF prints; a drift in one place would
+  // show up as three different names for the same thing.
+  assert.equal(de.translation.modeStrictName, "Fachübersetzung");
+  assert.equal(de.translation.modePlainName, "Einfache Sprache");
+  assert.equal(
+    de.translation.modeStrictDescription,
+    "Medizinische Fachsprache und Detailgrad bleiben erhalten.",
+  );
+  assert.equal(
+    de.translation.modePlainDescription,
+    "Gleicher Inhalt – verständlich und ohne unnötigen Fachjargon.",
+  );
+  assert.equal(de.translation.submit, "Erstellen");
+});
+
+test("no language uses a belittling or developer-facing mode name", () => {
+  const forbidden = [
+    "oma", "opa", "laien", "dummy", "simplify", "easy mode", "easymode",
+    "kinder", "senior", "strict_translation", "plain_language",
+  ];
+  // Checked on the control labels only. The forbidden list is about what the
+  // two modes are *called*; "simplify this document" is ordinary product
+  // English in a heading and must not trip the guard.
+  for (const [lang, bundle] of Object.entries(MODE_BUNDLES())) {
+    for (const key of ["modeStrictName", "modePlainName", "modeLegend", "submit"]) {
+      const value = String(bundle[key] ?? "").toLowerCase();
+      assert.ok(value.length > 0, `${lang}.${key} is empty`);
+      for (const term of forbidden) {
+        assert.ok(!value.includes(term), `${lang}.${key} contains "${term}": ${bundle[key]}`);
+      }
+    }
+  }
+});
+
+test("the same-language hint names the mode it points at", () => {
+  // The hint used to quote the old label. A hint that recommends a mode by a
+  // name the interface no longer shows sends the patient looking for a control
+  // that is not there.
+  for (const [lang, bundle] of Object.entries(MODE_BUNDLES())) {
+    const hint = String(bundle.hintSameLanguageStrict ?? "");
+    assert.ok(hint.length > 0, `${lang} has no same-language hint`);
+    assert.ok(
+      hint.includes(bundle.modePlainName),
+      `${lang}: the hint does not name "${bundle.modePlainName}": ${hint}`,
+    );
+  }
+});
+
+test("the heading ties the feature to the opened document", () => {
+  // It must not read as a general translation tool — the patient can only ever
+  // transform the document already on screen.
+  for (const [lang, bundle] of Object.entries(MODE_BUNDLES())) {
+    assert.ok(
+      String(bundle.heading ?? "").length > 0,
+      `${lang} has no heading`,
+    );
+  }
+  assert.match(de.translation.heading, /Dokument/);
+  assert.match(en.translation.heading, /document/i);
+});
+
+test("the form asks for language, then style, then which file", () => {
+  // Reading order is the interaction order. The file control comes last and
+  // only when there is a genuine choice, so nothing on screen suggests the
+  // patient could supply a document of their own.
+  const source = stripComments(
+    readFileSync(new URL("../components/PatientDocumentTranslationSection.jsx", import.meta.url), "utf8"),
+  );
+  const language = source.indexOf("t.targetLanguageLabel");
+  const mode = source.indexOf("t.modeLegend");
+  const file = source.indexOf("t.fileLabel");
+  const submit = source.indexOf("t.submitBusy");
+
+  assert.ok(language > 0 && mode > 0 && file > 0 && submit > 0, "a control disappeared");
+  assert.ok(language < mode, "the language control must come before the style control");
+  assert.ok(mode < file, "the file control must come after the style control");
+  assert.ok(file < submit, "the start button must come last");
+});
+
+test("the file control appears only when there is more than one file", () => {
+  const source = stripComments(
+    readFileSync(new URL("../components/PatientDocumentTranslationSection.jsx", import.meta.url), "utf8"),
+  );
+  assert.ok(source.includes("files.length > 1"), "the single-file case is not special-cased");
+  assert.ok(
+    source.includes("doc-translate__single-file"),
+    "a single file should be stated, not offered as a choice",
+  );
+  // No upload affordance of any kind.
+  for (const term of ["type=\"file\"", "dropzone", "Dropzone", "onDrop", "FormData"]) {
+    assert.ok(!source.includes(term), `the section suggests uploading: ${term}`);
+  }
+});
+
+test("the original document is rendered before the transformation section", () => {
+  // Placement is a product decision, not styling: the original is the
+  // authoritative document and comes first for sighted and screen-reader users
+  // alike. This guards the order against a well-meant reshuffle.
+  const page = stripComments(
+    readFileSync(new URL("../pages/PatientPracticeDocumentDetailPage.jsx", import.meta.url), "utf8"),
+  );
+  const files = page.indexOf("ppd-files-heading");
+  const section = page.indexOf("<PatientDocumentTranslationSection");
+  assert.ok(files > 0 && section > 0, "the page structure changed");
+  assert.ok(files < section, "the transformation section must sit below the file list");
+});
+
+test("the visual layer uses the product design tokens, not its own palette", () => {
+  const css = readFileSync(
+    new URL("../styles/DocumentTranslationSection.css", import.meta.url),
+    "utf8",
+  );
+  // Every colour has to come from the system, so both themes and any later
+  // brand change carry through without touching this file.
+  const hardCoded = css.match(/:\s*#[0-9a-fA-F]{3,8}\b/g) ?? [];
+  assert.deepEqual(hardCoded, [], `hard-coded colours: ${hardCoded.join(", ")}`);
+  assert.ok(css.includes("var(--ms-color-accent)"), "the section does not use the product accent");
+  assert.ok(
+    css.includes("var(--ms-control-min-height)"),
+    "controls should inherit the product touch-target height",
+  );
+});

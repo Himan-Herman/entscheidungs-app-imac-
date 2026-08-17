@@ -1,390 +1,554 @@
-/*
- * Document translation section.
+/**
+ * Patient document transformation — visual layer.
  *
- * Follows the DocumentOcrSection conventions this page already uses: the same
- * --token, fallback custom-property style, dark mode via :root[data-theme],
- * 44px minimum touch targets and a 3px focus-visible ring.
+ * Built entirely on the MedScoutX design tokens (--ms-*). Nothing here defines
+ * a colour, radius, spacing step or shadow of its own, so the section inherits
+ * both themes and any later change to the system rather than drifting away from
+ * it. The earlier version used a blue accent; the product accent is teal, and
+ * an off-brand section reads as a bolted-on module.
  *
- * Logical properties (margin-inline, padding-inline, text-align: start) are used
- * for anything directional, so the six shipped LTR languages behave identically
- * while the registry's RTL locales are not blocked by this feature later.
+ * ── Design intent ───────────────────────────────────────────────────────────
+ * This is a medical document, not a chat. The visual language is deliberately
+ * quiet: one surface, generous spacing, no gradients, no glow, no "AI" styling.
+ * The result must be distinguishable from the original at a glance without
+ * looking like a conversation.
+ *
+ * ── Accessibility decisions that shape the CSS ──────────────────────────────
+ * • Every control is at least --ms-control-min-height (48px) tall, and a mode
+ *   card is far larger — the whole card is the tap target.
+ * • The selected mode is marked by a check glyph, a border weight change and a
+ *   tinted surface. Colour alone never carries the state.
+ * • Focus is a 3px ring with an offset, visible on every interactive element
+ *   including the mode cards, whose real radio input is visually hidden but
+ *   never removed from the accessibility tree.
+ * • Body copy sits at the base size. Secondary text is one step down and stays
+ *   above the muted-contrast token, never lighter.
  */
 
 .doc-translate {
-  margin-block-start: 1.25rem;
-  padding: 1rem;
-  border: 1px solid var(--border, #ccc);
-  border-radius: 10px;
-  background: var(--surface-alt, #f8fafc);
+  margin-top: var(--ms-space-6);
+  padding: var(--ms-space-5);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-color-surface);
+  box-shadow: var(--ms-shadow-sm);
+  /* Keeps line length readable on wide screens without stretching the section
+     across a 1400px viewport. */
+  max-width: 46rem;
 }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
 
 .doc-translate__heading {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.35rem;
-  font-size: 1.1rem;
-  color: var(--text, #0f172a);
+  gap: var(--ms-space-2);
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: var(--ms-leading-tight);
+  color: var(--ms-color-text);
+}
+
+.doc-translate__heading svg {
+  flex: none;
+  color: var(--ms-color-accent);
 }
 
 .doc-translate__subtitle {
-  margin: 0 0 0.5rem;
-  font-size: 0.95rem;
-  color: var(--text, #0f172a);
+  margin: var(--ms-space-2) 0 0;
+  font-size: var(--ms-text-base);
+  line-height: var(--ms-leading-normal);
+  color: var(--ms-color-text-secondary);
 }
 
-.doc-translate__source-note,
-.doc-translate__hint {
-  margin: 0 0 0.75rem;
-  font-size: 0.85rem;
-  color: var(--text-muted, #555);
+.doc-translate__source-note {
+  margin: var(--ms-space-2) 0 0;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text-muted);
 }
 
-/* ── form controls ──────────────────────────────────────────────────────── */
+/* ── Fields ──────────────────────────────────────────────────────────────── */
 
 .doc-translate__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  margin-block-end: 0.9rem;
+  margin-top: var(--ms-space-5);
 }
 
 .doc-translate__label {
-  font-size: 0.9rem;
+  display: block;
+  margin-bottom: var(--ms-space-2);
+  font-size: var(--ms-text-sm);
   font-weight: 600;
-  color: var(--text, #0f172a);
-  text-align: start;
+  color: var(--ms-color-text);
+}
+
+/* The native arrow differs per platform and is tiny on Android WebView, so the
+   control draws its own and reserves room for it. */
+.doc-translate__select-wrap {
+  position: relative;
+  /* Full width on small screens, a sane measure on desktop. */
+  max-width: 22rem;
 }
 
 .doc-translate__select {
-  /* Full width on every breakpoint: a language name like "Русский" or
-     "Français" must never be clipped, and a wider control costs nothing. */
   width: 100%;
-  min-height: 44px;
-  padding: 0.5rem 0.65rem;
-  border: 1px solid var(--border, #94a3b8);
-  border-radius: 8px;
-  background: var(--surface, #fff);
-  color: var(--text, #0f172a);
-  font: inherit;
-}
-
-.doc-translate__select:focus-visible,
-.doc-translate__submit:focus-visible,
-.doc-translate__secondary:focus-visible,
-.doc-translate__retry:focus-visible,
-.doc-translate__mode-input:focus-visible + .doc-translate__mode-body {
-  outline: 3px solid var(--focus, #2563eb);
-  outline-offset: 2px;
-}
-
-.doc-translate__single-file {
-  margin: 0 0 0.9rem;
-  font-size: 0.9rem;
-  color: var(--text-muted, #555);
-}
-
-.doc-translate__single-file span {
-  color: var(--text, #0f172a);
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-/* ── mode radio group ───────────────────────────────────────────────────── */
-
-.doc-translate__modes {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin: 0 0 0.9rem;
-  padding: 0;
-  border: 0;
-}
-
-.doc-translate__mode {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  min-height: 44px;
-  padding: 0.7rem 0.8rem;
-  border: 2px solid var(--border, #cbd5e1);
-  border-radius: 10px;
-  background: var(--surface, #fff);
+  min-height: var(--ms-control-min-height);
+  padding: 0 calc(var(--ms-space-6) + var(--ms-space-1)) 0 var(--ms-control-padding-x);
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--ms-color-border-strong);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  font-family: inherit;
+  /* 16px minimum — anything smaller makes iOS Safari zoom on focus. */
+  font-size: var(--ms-text-base);
+  line-height: var(--ms-leading-normal);
   cursor: pointer;
 }
 
-/* Selection is carried by the border weight, the background AND the native
-   radio state — never by colour alone. */
-.doc-translate__mode.is-selected {
-  border-color: var(--primary, #1e40af);
-  background: var(--surface-selected, #eef2ff);
+.doc-translate__select:hover:not(:disabled) {
+  border-color: var(--ms-color-accent);
 }
 
+.doc-translate__select-icon {
+  position: absolute;
+  top: 50%;
+  right: var(--ms-space-4);
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--ms-color-text-muted);
+}
+
+/* ── Which file ──────────────────────────────────────────────────────────── */
+
+.doc-translate__single-file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--ms-space-1) var(--ms-space-2);
+  margin: var(--ms-space-5) 0 0;
+  padding: var(--ms-space-3) var(--ms-space-4);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-bg-subtle);
+  font-size: var(--ms-text-sm);
+}
+
+.doc-translate__single-file-label {
+  color: var(--ms-color-text-muted);
+}
+
+.doc-translate__single-file-name {
+  font-weight: 600;
+  color: var(--ms-color-text);
+  /* A long practice file name must wrap, not push the card sideways. */
+  overflow-wrap: anywhere;
+}
+
+/* ── Mode cards ──────────────────────────────────────────────────────────── */
+
+.doc-translate__modes {
+  margin: var(--ms-space-5) 0 0;
+  padding: 0;
+  border: 0;
+  /* A fieldset does not accept flex reliably across browsers; a grid on the
+     fieldset itself is the portable way to lay the cards out. */
+  display: grid;
+  gap: var(--ms-space-3);
+}
+
+.doc-translate__modes > legend {
+  /* A legend is not a grid item in every engine — take it out of flow and
+     place it above by margin instead. */
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: var(--ms-space-3);
+}
+
+.doc-translate__mode {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ms-space-3);
+  padding: var(--ms-space-4);
+  border: 1px solid var(--ms-color-border-strong);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface);
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.doc-translate__mode:hover {
+  border-color: var(--ms-color-accent);
+  background: var(--ms-color-bg-subtle);
+}
+
+/* Selected: a filled marker with a check, a heavier border and a tinted
+   surface. Three signals, only one of which is colour. */
+.doc-translate__mode.is-selected {
+  border-color: var(--ms-color-accent);
+  border-width: 2px;
+  /* Compensate the extra border so the card does not shift when selected. */
+  padding: calc(var(--ms-space-4) - 1px);
+  background: color-mix(in srgb, var(--ms-color-accent) 6%, var(--ms-color-surface));
+}
+
+/* The real control: kept in the DOM and in the accessibility tree, drawn by
+   the marker beside it. Never display:none — that would remove it from the
+   tab order and from screen readers. */
 .doc-translate__mode-input {
-  /* Kept in the accessibility tree and operable by keyboard; only sized. */
-  margin-block-start: 0.2rem;
-  width: 20px;
-  height: 20px;
-  flex: 0 0 auto;
-  accent-color: var(--primary, #1e40af);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.doc-translate__mode-marker {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border: 2px solid var(--ms-color-border-strong);
+  border-radius: 50%;
+  background: var(--ms-color-surface);
+  color: transparent;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.doc-translate__mode.is-selected .doc-translate__mode-marker {
+  border-color: var(--ms-color-accent);
+  background: var(--ms-color-accent);
+  color: var(--ms-color-on-accent);
 }
 
 .doc-translate__mode-body {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: var(--ms-space-1);
+  min-width: 0;
 }
 
 .doc-translate__mode-name {
+  font-size: var(--ms-text-base);
   font-weight: 600;
-  color: var(--text, #0f172a);
+  line-height: var(--ms-leading-tight);
+  color: var(--ms-color-text);
 }
 
 .doc-translate__mode-description {
-  font-size: 0.85rem;
-  color: var(--text-muted, #555);
+  font-size: var(--ms-text-sm);
+  line-height: var(--ms-leading-normal);
+  color: var(--ms-color-text-secondary);
 }
 
-/* ── actions ────────────────────────────────────────────────────────────── */
+/* ── Hint, submit, status ────────────────────────────────────────────────── */
+
+.doc-translate__hint {
+  margin: var(--ms-space-4) 0 0;
+  padding: var(--ms-space-3) var(--ms-space-4);
+  border-left: 3px solid var(--ms-color-border-strong);
+  border-radius: var(--ms-radius-sm);
+  background: var(--ms-color-bg-subtle);
+  font-size: var(--ms-text-sm);
+  line-height: var(--ms-leading-normal);
+  color: var(--ms-color-text-secondary);
+}
 
 .doc-translate__submit {
-  width: 100%;
-  min-height: 44px;
-  padding: 0.55rem 1rem;
-  border: 2px solid var(--primary, #1e40af);
-  border-radius: 8px;
-  background: var(--primary, #1e40af);
-  color: #fff;
-  font: inherit;
+  min-height: var(--ms-control-min-height);
+  margin-top: var(--ms-space-5);
+  padding: 0 var(--ms-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-accent);
+  color: var(--ms-color-on-accent);
+  font-family: inherit;
+  font-size: var(--ms-text-base);
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 120ms ease;
 }
 
-/* Disabled is signalled by opacity, the not-allowed cursor AND the native
-   disabled state that assistive technology reports. */
+.doc-translate__submit:hover:not(:disabled) {
+  background: var(--ms-color-accent-hover);
+}
+
+.doc-translate__submit:active:not(:disabled) {
+  background: var(--ms-color-accent-active);
+}
+
 .doc-translate__submit:disabled {
-  opacity: 0.55;
+  opacity: var(--ms-disabled-opacity);
   cursor: not-allowed;
 }
 
 .doc-translate__status {
-  margin: 0.5rem 0 0;
-  min-height: 1.2em;
-  font-size: 0.9rem;
-  color: var(--text-muted, #555);
+  margin: var(--ms-space-3) 0 0;
+  min-height: 1.25rem;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text-muted);
 }
+
+.doc-translate__status:empty {
+  margin: 0;
+  min-height: 0;
+}
+
+/* ── Errors ──────────────────────────────────────────────────────────────── */
 
 .doc-translate__error {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
-  margin-block-start: 0.75rem;
-  padding: 0.7rem 0.8rem;
-  border: 1px solid var(--danger-border, #fca5a5);
-  border-radius: 8px;
-  background: var(--danger-surface, #fef2f2);
-  color: var(--danger-text, #991b1b);
-  font-size: 0.9rem;
+  gap: var(--ms-space-3);
+  margin-top: var(--ms-space-4);
+  padding: var(--ms-space-4);
+  border: 1px solid var(--ms-color-danger);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-danger-bg);
+  font-size: var(--ms-text-sm);
+  line-height: var(--ms-leading-normal);
+  color: var(--ms-color-text);
 }
 
-/* "Not available yet" is a state of the deployment, not a failure — it should
-   not look like an error the patient caused. */
+/* A switched-off feature is not a fault; it must not be dressed as one. */
 .doc-translate__error.is-neutral {
-  border-color: var(--border, #cbd5e1);
-  background: var(--surface, #fff);
-  color: var(--text-muted, #475569);
+  border-color: var(--ms-color-border-strong);
+  background: var(--ms-color-bg-subtle);
+  color: var(--ms-color-text-secondary);
 }
 
 .doc-translate__retry,
 .doc-translate__secondary {
-  min-height: 44px;
-  padding: 0.45rem 0.9rem;
-  border: 2px solid var(--border, #94a3b8);
-  border-radius: 8px;
-  background: var(--surface, #fff);
-  color: var(--text, #0f172a);
-  font: inherit;
+  min-height: var(--ms-control-min-height);
+  padding: 0 var(--ms-space-4);
+  border: 1px solid var(--ms-color-border-strong);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  font-family: inherit;
+  font-size: var(--ms-text-base);
   font-weight: 600;
   cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
 }
 
-/* ── result ─────────────────────────────────────────────────────────────── */
+.doc-translate__retry:hover,
+.doc-translate__secondary:hover {
+  border-color: var(--ms-color-accent);
+  background: var(--ms-color-bg-subtle);
+}
+
+/* ── Result ──────────────────────────────────────────────────────────────── */
 
 .doc-translate__result {
-  margin-block-start: 1.1rem;
-  padding: 0.9rem;
-  /* A deliberately distinct frame: the transformation must never be mistaken
-     for the practice's own document. */
-  border: 2px dashed var(--accent-border, #f59e0b);
-  border-radius: 10px;
-  background: var(--surface, #fff);
+  margin-top: var(--ms-space-5);
+  padding: var(--ms-space-5);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-bg-subtle);
 }
 
 .doc-translate__result-heading {
-  margin: 0 0 0.6rem;
-  font-size: 1rem;
-  color: var(--accent-text, #b45309);
+  margin: 0 0 var(--ms-space-4);
+  font-size: var(--ms-text-base);
+  font-weight: 600;
+  line-height: var(--ms-leading-tight);
+  color: var(--ms-color-text);
 }
 
 .doc-translate__meta {
   display: grid;
   grid-template-columns: minmax(7rem, auto) 1fr;
-  gap: 0.25rem 0.75rem;
-  margin: 0 0 0.75rem;
-  font-size: 0.85rem;
+  gap: var(--ms-space-2) var(--ms-space-4);
+  margin: 0 0 var(--ms-space-4);
+  font-size: var(--ms-text-sm);
 }
 
 .doc-translate__meta dt {
-  color: var(--text-muted, #555);
+  color: var(--ms-color-text-muted);
 }
 
 .doc-translate__meta dd {
   margin: 0;
-  color: var(--text, #0f172a);
+  color: var(--ms-color-text);
   overflow-wrap: anywhere;
 }
 
 .doc-translate__disclaimer {
-  margin: 0 0 0.9rem;
-  font-size: 0.85rem;
-  color: var(--text-muted, #555);
+  margin: 0 0 var(--ms-space-4);
+  padding-top: var(--ms-space-3);
+  border-top: 1px solid var(--ms-color-border);
+  font-size: var(--ms-text-sm);
+  line-height: var(--ms-leading-normal);
+  color: var(--ms-color-text-secondary);
 }
 
+/* The transformed document itself: reads as a document, not as a message. */
 .doc-translate__body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  padding: var(--ms-space-4);
+  border-radius: var(--ms-radius-sm);
+  background: var(--ms-color-surface);
 }
 
-.doc-translate__segment,
 .doc-translate__segment-heading {
-  margin: 0;
-  color: var(--text, #0f172a);
-  /* Line structure from the source is preserved without interpreting the text
-     as markup. */
-  white-space: pre-wrap;
+  margin: var(--ms-space-4) 0 var(--ms-space-2);
+  font-size: var(--ms-text-base);
+  font-weight: 600;
+  line-height: var(--ms-leading-tight);
+  color: var(--ms-color-text);
+}
+
+.doc-translate__segment-heading:first-child {
+  margin-top: 0;
+}
+
+.doc-translate__segment {
+  margin: 0 0 var(--ms-space-3);
+  font-size: var(--ms-text-base);
+  line-height: 1.65;
+  color: var(--ms-color-text);
   overflow-wrap: anywhere;
-  text-align: start;
 }
 
-.doc-translate__segment-heading {
-  font-size: 1rem;
-  font-weight: 700;
+.doc-translate__segment:last-child {
+  margin-bottom: 0;
 }
 
 .doc-translate__result-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-block-start: 1rem;
+  gap: var(--ms-space-3);
+  margin-top: var(--ms-space-4);
 }
 
 .doc-translate__pdf-unavailable {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--text-muted, #555);
+  margin: var(--ms-space-3) 0 0;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-color-text-muted);
 }
 
-/* ── narrow viewports ───────────────────────────────────────────────────── */
+/* ── Dark mode: foreground on the accent ─────────────────────────────────────
+ * The accent is deliberately brighter in dark mode (#14b8a6 rather than
+ * #0f766e). Against it, the near-white --ms-color-on-accent measures 2.4:1 —
+ * below AA for text and below 3:1 for the check glyph. Measured, not assumed.
+ *
+ * Fixed here by putting the dark background colour on top of the bright accent,
+ * which measures about 7.7:1. Scoped to this section on purpose: the same token
+ * pairing is used elsewhere in the app, and changing a shared token to fix one
+ * feature would be a change nobody asked for in a phase that is meant to be
+ * frozen. Worth raising separately.
+ */
+:root[data-theme="dark"] .doc-translate__submit {
+  color: var(--ms-color-bg);
+}
+
+:root[data-theme="dark"] .doc-translate__mode.is-selected .doc-translate__mode-marker {
+  color: var(--ms-color-bg);
+}
+
+/* ── Focus ───────────────────────────────────────────────────────────────── */
+
+.doc-translate__select:focus-visible,
+.doc-translate__submit:focus-visible,
+.doc-translate__secondary:focus-visible,
+.doc-translate__retry:focus-visible,
+.doc-translate__mode-input:focus-visible + .doc-translate__mode-marker {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* The ring belongs on the whole card, not just the marker — the card is what
+   the patient sees and clicks. */
+.doc-translate__mode:has(.doc-translate__mode-input:focus-visible) {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Disabled ────────────────────────────────────────────────────────────── */
+
+.doc-translate__modes:disabled .doc-translate__mode {
+  opacity: var(--ms-disabled-opacity);
+  cursor: not-allowed;
+}
+
+.doc-translate__select:disabled {
+  opacity: var(--ms-disabled-opacity);
+  cursor: not-allowed;
+}
+
+/* ── Small screens ───────────────────────────────────────────────────────── */
 
 @media (max-width: 480px) {
   .doc-translate {
-    padding: 0.8rem;
+    padding: var(--ms-space-4);
   }
 
-  .doc-translate__result-actions > * {
+  .doc-translate__select-wrap {
+    max-width: none;
+  }
+
+  /* Full width so the primary action is never a small target at the edge of
+     a narrow screen. */
+  .doc-translate__submit {
     width: 100%;
   }
 
-  .doc-translate__meta {
-    /* Below ~400px a two-column definition list forces the value into a
-       one-word-per-line column; stacking keeps it readable. */
-    grid-template-columns: 1fr;
-    gap: 0.1rem;
+  .doc-translate__result {
+    padding: var(--ms-space-4);
   }
 
-  .doc-translate__meta dd {
-    margin-block-end: 0.4rem;
+  .doc-translate__meta {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .doc-translate__meta dt {
+    margin-top: var(--ms-space-3);
+  }
+
+  .doc-translate__meta dt:first-child {
+    margin-top: 0;
+  }
+
+  .doc-translate__result-actions .doc-translate__secondary {
+    flex: 1 1 12rem;
   }
 }
 
-/* ── reduced motion ─────────────────────────────────────────────────────── */
+/* Very narrow devices — 320px still has to read as a finished product. */
+@media (max-width: 360px) {
+  .doc-translate__mode {
+    padding: var(--ms-space-3);
+  }
+
+  .doc-translate__mode.is-selected {
+    padding: calc(var(--ms-space-3) - 1px);
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .doc-translate *,
-  .doc-translate *::before,
-  .doc-translate *::after {
-    transition: none !important;
-    animation: none !important;
+  .doc-translate__mode,
+  .doc-translate__mode-marker,
+  .doc-translate__submit,
+  .doc-translate__secondary,
+  .doc-translate__retry {
+    transition: none;
   }
-}
-
-/* ── dark mode ──────────────────────────────────────────────────────────── */
-
-:root[data-theme="dark"] .doc-translate {
-  border-color: rgba(148, 163, 184, 0.25);
-  background: rgba(15, 23, 42, 0.55);
-}
-
-:root[data-theme="dark"] .doc-translate__heading,
-:root[data-theme="dark"] .doc-translate__subtitle,
-:root[data-theme="dark"] .doc-translate__label,
-:root[data-theme="dark"] .doc-translate__mode-name,
-:root[data-theme="dark"] .doc-translate__meta dd,
-:root[data-theme="dark"] .doc-translate__segment,
-:root[data-theme="dark"] .doc-translate__segment-heading {
-  color: #e5eef8;
-}
-
-:root[data-theme="dark"] .doc-translate__source-note,
-:root[data-theme="dark"] .doc-translate__hint,
-:root[data-theme="dark"] .doc-translate__mode-description,
-:root[data-theme="dark"] .doc-translate__single-file,
-:root[data-theme="dark"] .doc-translate__status,
-:root[data-theme="dark"] .doc-translate__disclaimer,
-:root[data-theme="dark"] .doc-translate__meta dt,
-:root[data-theme="dark"] .doc-translate__pdf-unavailable {
-  color: #b6c4d6;
-}
-
-:root[data-theme="dark"] .doc-translate__select,
-:root[data-theme="dark"] .doc-translate__mode,
-:root[data-theme="dark"] .doc-translate__secondary,
-:root[data-theme="dark"] .doc-translate__retry {
-  border-color: rgba(148, 163, 184, 0.3);
-  background: rgba(15, 23, 42, 0.75);
-  color: #e5eef8;
-}
-
-:root[data-theme="dark"] .doc-translate__mode.is-selected {
-  border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.14);
-}
-
-:root[data-theme="dark"] .doc-translate__submit {
-  border-color: #0ea5e9;
-  background: #0ea5e9;
-  color: #04263a;
-}
-
-:root[data-theme="dark"] .doc-translate__error {
-  border-color: rgba(248, 113, 113, 0.4);
-  background: rgba(127, 29, 29, 0.3);
-  color: #fecaca;
-}
-
-:root[data-theme="dark"] .doc-translate__error.is-neutral {
-  border-color: rgba(148, 163, 184, 0.3);
-  background: rgba(15, 23, 42, 0.75);
-  color: #b6c4d6;
-}
-
-:root[data-theme="dark"] .doc-translate__result {
-  border-color: rgba(245, 158, 11, 0.55);
-  background: rgba(15, 23, 42, 0.72);
-}
-
-:root[data-theme="dark"] .doc-translate__result-heading {
-  color: #fbbf24;
 }

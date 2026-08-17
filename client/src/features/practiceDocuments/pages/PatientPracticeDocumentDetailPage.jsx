@@ -270,21 +270,6 @@ export default function PatientPracticeDocumentDetailPage() {
         <PatientStructuredDocumentSection documentId={documentId} />
       ) : null}
 
-      {/* Translation / plain-language sits on the document's own detail page:
-          the patient has already opened a document their practice released to
-          them, so the feature never becomes a general-purpose upload tool. It
-          hides itself when the client flag is off or the document is not one
-          this feature handles. */}
-      {doc && !loading && !error ? (
-        <PatientDocumentTranslationSection
-          document={doc}
-          onViewOriginal={(fileId) => {
-            const file = (doc.files || []).find((f) => f.id === fileId) || doc.files?.[0];
-            if (file) void handleView(file);
-          }}
-        />
-      ) : null}
-
       {doc && !loading && !error ? (
         <section aria-labelledby="ppd-files-heading">
           <h2 id="ppd-files-heading" className="patient-inbox__title" style={{ fontSize: "1.1rem" }}>
@@ -323,6 +308,26 @@ export default function PatientPracticeDocumentDetailPage() {
             )}
           </ul>
         </section>
+      ) : null}
+
+      {/* Deliberately below the file list. The original document is the
+          authoritative one and has to come first — both in reading order and
+          for screen readers. Placing the transformation above it made the AI
+          feature look like the page's primary content, and put a file selector
+          on screen before the patient had seen that the files belong to this
+          document.
+
+          It stays on the document's own detail page, so the feature is never a
+          general-purpose upload tool. It hides itself when the client flag is
+          off or the document is not one this feature handles. */}
+      {doc && !loading && !error ? (
+        <PatientDocumentTranslationSection
+          document={doc}
+          onViewOriginal={(fileId) => {
+            const file = (doc.files || []).find((f) => f.id === fileId) || doc.files?.[0];
+            if (file) void handleView(file);
+          }}
+        />
       ) : null}
 
       <ShareDocumentDialog
