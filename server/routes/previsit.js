@@ -1,15 +1,21 @@
 import express from 'express';
-import multer from 'multer';
 import { generatePreVisitDoctorVersion } from '../services/preVisitOpenAiClient.js';
 import { generatePreVisitAssistantQuestions } from '../services/preVisitAssistantQuestionsClient.js';
 import { runSymptomsAdaptiveTurn } from '../services/preVisitIntakeAdaptiveClient.js';
 import { runAdaptiveIntakeStep } from '../services/preVisitAdaptiveIntakeClient.js';
 import { summarizePreVisitHistoryDiff } from '../services/preVisitHistoryDiffClient.js';
+import { speakPreVisitText } from '../services/preVisitVoiceOutput/preVisitVoiceOutputService.js';
 import {
-  parseSpeakRequest,
-  synthesizePreVisitSpeech,
-  transcribePreVisitAudio,
-} from '../services/preVisitAudioService.js';
+  PREVISIT_SPEECH_ERRORS,
+  PreVisitSpeechError,
+} from '../services/preVisitVoiceOutput/preVisitVoiceOutputPolicy.js';
+import { optionalAuth } from '../middleware/optionalAuth.js';
+import { uploadPreVisitVoice } from '../middleware/uploadPreVisitVoice.js';
+import { transcribePreVisitVoice } from '../services/preVisitVoice/preVisitVoiceService.js';
+import {
+  PREVISIT_VOICE_ERRORS,
+  PreVisitVoiceError,
+} from '../services/preVisitVoice/preVisitVoicePolicy.js';
 import {
   previsitAudioSpeakLimiter,
   previsitAudioTranscribeLimiter,
@@ -20,33 +26,31 @@ import {
 
 const router = express.Router();
 
-/** Allowed upload MIME types for Pre-Visit transcription (OpenAI-compatible). */
-const PREVISIT_AUDIO_MIMES = new Set([
-  'audio/webm',
-  'video/webm',
-  'audio/wav',
-  'audio/x-wav',
-  'audio/m4a',
-  'audio/x-m4a',
-  'audio/mp4',
-  'audio/mpeg',
-  'audio/ogg',
-  'audio/oga',
-]);
-
-const uploadPrevisitAudio = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter(_req, file, cb) {
-    if (file.mimetype && PREVISIT_AUDIO_MIMES.has(file.mimetype)) {
-      cb(null, true);
-      return;
-    }
-    const err = new Error('UNSUPPORTED_AUDIO_TYPE');
-    err.code = 'UNSUPPORTED_AUDIO_TYPE';
-    cb(err);
-  },
-});
+/**
+ * Maps a refusal onto a status, without disclosing anything about a provider.
+ *
+ * The codes deliberately keep the wording the client already handles, so the
+ * existing error display keeps working while the meanings behind it get
+ * narrower.
+ */
+function previsitVoiceStatus(code) {
+  if (
+    code === PREVISIT_VOICE_ERRORS.FEATURE_DISABLED ||
+    code === PREVISIT_VOICE_ERRORS.PROVIDER_NOT_CONFIGURED
+  ) {
+    return 503;
+  }
+  if (code === PREVISIT_VOICE_ERRORS.NOT_AUTHORIZED) return 403;
+  if (code === PREVISIT_VOICE_ERRORS.AUDIO_TOO_LARGE) return 413;
+  if (
+    code === PREVISIT_VOICE_ERRORS.NO_AUDIO ||
+    code === PREVISIT_VOICE_ERRORS.AUDIO_TOO_SHORT ||
+    code === PREVISIT_VOICE_ERRORS.UNSUPPORTED_AUDIO_TYPE
+  ) {
+    return 400;
+  }
+  return 502;
+}
 
 /**
  * POST /doctor-version (mounted at /api/previsit)
@@ -273,97 +277,130 @@ router.post('/history-diff', previsitHistoryDiffLimiter, async (req, res) => {
 });
 
 /**
+ * Maps a read-aloud refusal onto a status, without disclosing anything about a
+ * provider.
+ *
+ * @param {string} code
+ */
+function previsitSpeechStatus(code) {
+  switch (code) {
+    case PREVISIT_SPEECH_ERRORS.FEATURE_DISABLED:
+    case PREVISIT_SPEECH_ERRORS.PROVIDER_NOT_CONFIGURED:
+      return 503;
+    case PREVISIT_SPEECH_ERRORS.NOT_AUTHORIZED:
+      return 403;
+    case PREVISIT_SPEECH_ERRORS.TEXT_REQUIRED:
+    case PREVISIT_SPEECH_ERRORS.TEXT_TOO_LONG:
+    case PREVISIT_SPEECH_ERRORS.UNEXPECTED_FIELD:
+      return 400;
+    default:
+      return 502;
+  }
+}
+
+/**
  * POST /audio/speak (mounted at /api/previsit)
  *
- * Audio processing sends user text to OpenAI for speech generation.
+ * Reads the current preparation question back to the patient.
+ *
+ * Since this phase it is flag-gated, provider-gated with its own credential and
+ * endpoint allowlist, and it requires proof of being inside a real Pre-Visit
+ * context — which it previously did not: the mount carries no `requireAuth`, so
+ * before this the route was reachable by anyone at all and spoke any text at
+ * the deployment's expense.
+ *
+ * The guest flow is preserved deliberately, for the same reason as on the
+ * dictation route: the toolbar is rendered on a page a patient can reach
+ * through a practice's QR code without an account.
+ *
  * No audio is stored by this endpoint.
- *
- * Body JSON: { text, language? }
- *
- * Rate limit: protects OpenAI cost and availability (see ipRateLimit).
  */
-router.post('/audio/speak', previsitAudioSpeakLimiter, async (req, res) => {
-  try {
-    const params = parseSpeakRequest(req.body || {});
-    const { buffer, contentType } = await synthesizePreVisitSpeech(params);
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).send(buffer);
-  } catch (err) {
-    const status =
-      err.statusCode && Number.isInteger(err.statusCode) ? err.statusCode : 500;
-    const safe =
-      err.safeMessage ||
-      (status >= 500
-        ? 'Something went wrong. Please try again later.'
-        : 'Invalid request.');
+router.post(
+  '/audio/speak',
+  previsitAudioSpeakLimiter,
+  // The mount carries no `requireAuth` because the Pre-Visit flow is open to
+  // guests. This reads a token when there IS one, so a logged-in patient is
+  // recognised as themselves instead of having to present a QR code.
+  optionalAuth,
+  async (req, res) => {
+    try {
+      const { audio, contentType } = await speakPreVisitText({
+        userId: req.user?.userId ?? null,
+        body: req.body ?? {},
+      });
 
-    if (!err.statusCode || status >= 500) {
-      console.error('[previsit/audio/speak] failed');
+      // Our own Content-Type, from our own constant. A provider's response
+      // headers are never echoed.
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Length', String(audio.length));
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).send(audio);
+    } catch (err) {
+      const code =
+        err instanceof PreVisitSpeechError ? err.code : PREVISIT_SPEECH_ERRORS.PROVIDER_FAILED;
+      // The code and nothing else. The text that was to be spoken and
+      // everything about the provider stay out of the log.
+      console.error('[previsit/audio/speak]', code);
+      return res.status(previsitSpeechStatus(code)).json({ error: code });
     }
-
-    return res.status(status).json({ error: safe });
-  }
-});
+  },
+);
 
 /**
  * POST /audio/transcribe (mounted at /api/previsit)
  *
- * Audio processing sends user audio to OpenAI for transcription.
+ * Turns a Pre-Visit recording into text for the preparation form.
+ *
+ * Since this phase it is flag-gated, provider-gated with its own credential and
+ * endpoint allowlist, and bounded — and it requires proof of being inside a
+ * real Pre-Visit context, which it previously did not: the mount carries no
+ * `requireAuth`, so before this the route was reachable by anyone at all.
+ *
+ * The guest flow is preserved deliberately. A patient reaching the preparation
+ * through a practice's QR code has no account, and requiring one would remove
+ * the flow rather than secure it — so a QR token that resolves to an active
+ * practice target counts, and is checked against the database.
+ *
  * No audio is stored by this endpoint.
- *
- * multipart/form-data: field "audio" (file), optional field "language"
- *
- * Rate limit runs before multer: blocks abuse before large uploads; protects OpenAI cost.
  */
 router.post(
   '/audio/transcribe',
+  // The limiter runs before the upload: an abusive caller is stopped before a
+  // large body is buffered, not after.
   previsitAudioTranscribeLimiter,
+  // The mount carries no `requireAuth` because the Pre-Visit flow is open to
+  // guests. This reads a token when there IS one, so a logged-in patient is
+  // recognised as themselves instead of having to present a QR code.
+  optionalAuth,
   (req, res, next) => {
-    uploadPrevisitAudio.single('audio')(req, res, (err) => {
+    uploadPreVisitVoice.single('audio')(req, res, (err) => {
       if (!err) return next();
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ error: 'File too large.' });
+        return res.status(413).json({ error: PREVISIT_VOICE_ERRORS.AUDIO_TOO_LARGE });
       }
-      if (err.code === 'UNSUPPORTED_AUDIO_TYPE' || err.message === 'UNSUPPORTED_AUDIO_TYPE') {
-        return res.status(400).json({ error: 'Unsupported audio format.' });
-      }
-      return res.status(400).json({ error: 'Invalid audio upload.' });
+      return res.status(400).json({ error: PREVISIT_VOICE_ERRORS.UNSUPPORTED_AUDIO_TYPE });
     });
   },
   async (req, res) => {
     try {
-      if (!req.file?.buffer) {
-        return res.status(400).json({ error: 'Audio file is required.' });
-      }
-
-      const language =
-        req.body?.language != null ? String(req.body.language) : undefined;
-
-      const { text } = await transcribePreVisitAudio({
-        buffer: req.file.buffer,
-        originalname: req.file.originalname,
-        mimetype: req.file.mimetype,
-        language,
+      const result = await transcribePreVisitVoice({
+        file: req.file,
+        language: req.body?.language,
+        // Whichever of the two the caller actually has. The QR token is
+        // resolved against the database, never trusted as presented.
+        userId: req.user?.userId ?? null,
+        qrToken: req.body?.qrToken,
       });
-
-      return res.json({ text });
+      return res.json({ text: result.text });
     } catch (err) {
-      const status =
-        err.statusCode && Number.isInteger(err.statusCode) ? err.statusCode : 500;
-      const safe =
-        err.safeMessage ||
-        (status >= 500
-          ? 'Something went wrong. Please try again later.'
-          : 'Invalid request.');
-
-      if (!err.statusCode || status >= 500) {
-        console.error('[previsit/audio/transcribe] failed');
-      }
-
-      return res.status(status).json({ error: safe });
+      const code =
+        err instanceof PreVisitVoiceError ? err.code : PREVISIT_VOICE_ERRORS.PROVIDER_FAILED;
+      // The code and nothing else. The recording, the transcript and everything
+      // about the provider stay out of the log.
+      console.error('[previsit/audio/transcribe]', code);
+      return res.status(previsitVoiceStatus(code)).json({ error: code });
     }
-  }
+  },
 );
 
 export default router;

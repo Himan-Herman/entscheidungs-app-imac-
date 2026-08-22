@@ -51,7 +51,7 @@ export const previsitDoctorVersionLimiter = createIpRateLimiter({
   keyPrefix: 'previsit:doctor-version',
 });
 
-/** POST /api/previsit/audio/speak — TTS; 20 / 15 min / IP */
+/** POST /api/previsit/audio/speak — read-aloud; 20 / 15 min / IP (in addition to the flag and the participation boundary). */
 export const previsitAudioSpeakLimiter = createIpRateLimiter({
   max: 20,
   keyPrefix: 'previsit:audio:speak',
@@ -59,8 +59,21 @@ export const previsitAudioSpeakLimiter = createIpRateLimiter({
 
 /** POST /api/previsit/audio/transcribe — transcription; 10 / 15 min / IP */
 export const previsitAudioTranscribeLimiter = createIpRateLimiter({
-  max: 10,
+  max: Number(process.env.PREVISIT_VOICE_IP_MAX) || 10,
   keyPrefix: 'previsit:audio:transcribe',
+});
+
+/**
+ * POST /api/tts — symptom read-aloud; 30 / 15 min / IP.
+ *
+ * The endpoint had no limit at all. Thirty covers reading back every reply in a
+ * long symptom conversation and still bounds what one address can spend at a
+ * speech provider; the route also requires a session, so this is a second
+ * bound, not the only one.
+ */
+export const symptomSpeechLimiter = createIpRateLimiter({
+  max: Number(process.env.SYMPTOM_SPEECH_IP_MAX) || 30,
+  keyPrefix: 'symptom:speech',
 });
 
 /** POST .../doctor-contacts/:id/send-previsit-pdf — outbound email; 5 / 15 min / IP */

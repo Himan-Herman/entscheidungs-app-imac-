@@ -101,6 +101,9 @@ import {
   logDocumentTranslationReadiness,
 } from './services/documentTranslation/documentTranslationReadiness.js';
 import {
+  isPreVisitVoiceInputEnabled,
+  isPreVisitSpeechEnabled,
+  isSymptomSpeechEnabled,
   isSymptomVoiceInputEnabled,
   isVitalsEnabled,
   isWearablesEnabled,
@@ -115,6 +118,7 @@ import {
   sosWalletLimiter,
   medaPdfLinkLimiter,
   mailSendRouteLimiter,
+  symptomSpeechLimiter,
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
@@ -224,7 +228,8 @@ app.use('/api/account', requireAuth, accountPatientPortalRouter);
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api/mail', requireAuth, mailRoutes);
 }
-app.use("/api/tts", ttsRouter);
+/** Symptom read-aloud — JWT required; every caller already sits behind ProtectedRoute. */
+app.use("/api/tts", symptomSpeechLimiter, requireAuth, ttsRouter);
 app.use("/api/ki", kiRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
 app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
@@ -384,6 +389,15 @@ app.get('/api/health/config', (_req, res) =>
       // microphone when the feature is off, rather than offering a control that
       // fails — which looks identical to a defect.
       symptomVoiceInput: isSymptomVoiceInputEnabled(),
+      // Voice input in the Pre-Visit preparation. Reported for the same reason:
+      // a microphone that fails when pressed looks exactly like a defect.
+      preVisitVoiceInput: isPreVisitVoiceInputEnabled(),
+      // Reading a reply aloud, in the symptom modules and in the Pre-Visit
+      // preparation. Separate switches from the two above: recognition and
+      // synthesis are different processing, so the UI must be able to show a
+      // microphone without a speaker, or the other way round.
+      symptomVoiceOutput: isSymptomSpeechEnabled(),
+      preVisitVoiceOutput: isPreVisitSpeechEnabled(),
     },
     // Operational readiness of the document transformation, booleans only.
     // No provider name, no host, no region, no model, no key — those are

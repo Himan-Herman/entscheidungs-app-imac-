@@ -2,7 +2,7 @@ import React, { useState, useRef, useId, useMemo, useEffect } from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import StopIcon from "@mui/icons-material/Stop";
 import { authFetch } from "../api/authFetch";
-import { isSymptomVoiceInputAvailable } from "../api/symptomVoiceAvailability";
+import { isSymptomVoiceInputAvailable } from "../api/voiceFeatureAvailability";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 

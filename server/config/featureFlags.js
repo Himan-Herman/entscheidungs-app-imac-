@@ -472,3 +472,60 @@ export function isMessageSttEnabled() {
 export function isSymptomVoiceInputEnabled() {
   return envFlag("ENABLE_SYMPTOM_VOICE_INPUT", false);
 }
+
+/**
+ * Voice input in the Pre-Visit preparation.
+ *
+ * A FIFTH flag. Not because five is a good number, but because this is a fifth
+ * distinct thing being sent somewhere: a patient preparing for an appointment,
+ * speaking about their complaints, their history and their questions — often
+ * before any account exists, reached through a practice's QR code.
+ *
+ * That is not the symptom checker (a self-service tool inside one's own
+ * account), and it is not dictation into a message to a practice. It is the
+ * material a consultation will be built on, recorded by someone who may be a
+ * guest of the practice rather than a user of this product.
+ *
+ * Default off. Before this phase the same path ran whenever OPENAI_API_KEY
+ * happened to be set — on a route with no authentication at all.
+ */
+export function isPreVisitVoiceInputEnabled() {
+  return envFlag("ENABLE_PREVISIT_VOICE_INPUT", false);
+}
+
+/**
+ * Reading a symptom-module reply aloud.
+ *
+ * A SIXTH audio flag, and separate from ENABLE_SYMPTOM_VOICE_INPUT on purpose.
+ * That one approves sending a patient's recorded voice to a recognition
+ * provider; this one approves sending text about their symptoms to a synthesis
+ * provider. Same product area, opposite direction, different processing, and an
+ * operator may reasonably want one without the other. A single ENABLE_TTS
+ * covering every read-aloud in the product would be the same mistake as a
+ * single ENABLE_TRANSCRIPTION was on the input side: naming the technique
+ * instead of the feature, so that approving one data flow silently approves
+ * another.
+ *
+ * Default off. Before this phase /api/tts ran whenever OPENAI_API_KEY happened
+ * to be set, on a route with no authentication at all.
+ */
+export function isSymptomSpeechEnabled() {
+  return envFlag("ENABLE_SYMPTOM_VOICE_OUTPUT", false);
+}
+
+/**
+ * Reading a Pre-Visit preparation question aloud.
+ *
+ * A SEVENTH flag. Not the Pre-Visit input gate — recognition and synthesis are
+ * different processing and may be different companies — and not the symptom
+ * read-aloud gate either, because the people differ: that path is a signed-in
+ * patient in their own account, this one is often a guest of a practice who
+ * reached the preparation through a QR code and has no relationship with this
+ * product.
+ *
+ * Default off. Before this phase the same path ran whenever OPENAI_API_KEY
+ * happened to be set, on a router with no authentication.
+ */
+export function isPreVisitSpeechEnabled() {
+  return envFlag("ENABLE_PREVISIT_VOICE_OUTPUT", false);
+}
