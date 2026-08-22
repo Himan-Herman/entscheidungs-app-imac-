@@ -3,7 +3,6 @@ import legalAr from "../legal/ar/index.js";
 import landing from "./ar.landing.js";
 import info from "./ar.info.js";
 import preVisit from "./ar.preVisit.js";
-import startseite from "./ar.startseite.js";
 import arCore from "./ar/ar.core.js";
 import arAccount from "./ar/ar.account.js";
 import arModules from "./ar/ar.modules.js";
@@ -15,7 +14,6 @@ const arBase = {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "تخطّي إلى المحتوى",
     homeAria: "الانتقال إلى الصفحة الرئيسية",

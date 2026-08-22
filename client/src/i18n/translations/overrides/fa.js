@@ -3,7 +3,6 @@ import legalFa from "../legal/fa/index.js";
 import landing from "./fa.landing.js";
 import info from "./fa.info.js";
 import preVisit from "./fa.preVisit.js";
-import startseite from "./fa.startseite.js";
 import faCore from "./fa/fa.core.js";
 import faAccount from "./fa/fa.account.js";
 import faModules from "./fa/fa.modules.js";
@@ -15,7 +14,6 @@ const faBase = {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "رفتن به محتوا",
     homeAria: "رفتن به صفحهٔ اصلی",

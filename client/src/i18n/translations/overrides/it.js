@@ -3,7 +3,6 @@ import legalIt from "../legal/it/index.js";
 import landing from "./it.landing.js";
 import info from "./it.info.js";
 import preVisit from "./it.preVisit.js";
-import startseite from "./it.startseite.js";
 import itCore from "./it/it.core.js";
 import itAccount from "./it/it.account.js";
 import itModules from "./it/it.modules.js";
@@ -234,7 +233,6 @@ const itBase = {
     cancel: "Annulla",
     close: "Chiudi",
   },
-  startseite,
   forgotPassword: {
     title: "Reimposta password",
     text: "Inserisci l’e-mail. Ti invieremo un link di reimpostazione.",

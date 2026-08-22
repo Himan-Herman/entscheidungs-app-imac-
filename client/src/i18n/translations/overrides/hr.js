@@ -4,7 +4,6 @@ import landing from "./hr.landing.js";
 import info from "./hr.info.js";
 import preVisitHr from "./hr.preVisit.js";
 import preVisitOverlay from "./hr.preVisit.overlay.js";
-import startseite from "./hr.startseite.js";
 import hrCore from "./hr/hr.core.js";
 import hrAccount from "./hr/hr.account.js";
 import hrModules from "./hr/hr.modules.js";
@@ -16,7 +15,6 @@ const hrBase = {
   landing,
   info,
   preVisit: deepMerge(preVisitHr, preVisitOverlay),
-  startseite,
   header: {
     skip: "Prijeđi na sadržaj",
     homeAria: "Idi na početnu stranicu",

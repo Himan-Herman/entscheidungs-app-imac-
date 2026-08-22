@@ -3,7 +3,6 @@ import legalFr from "../legal/fr/index.js";
 import landing from "./fr.landing.js";
 import info from "./fr.info.js";
 import preVisit from "./fr.preVisit.js";
-import startseite from "./fr.startseite.js";
 import frCore from "./fr/fr.core.js";
 import frAccount from "./fr/fr.account.js";
 import frModules from "./fr/fr.modules.js";
@@ -231,7 +230,6 @@ const frBase = {
     cancel: "Annuler",
     close: "Fermer",
   },
-  startseite,
   forgotPassword: {
     title: "Réinitialiser le mot de passe",
     text: "Saisissez votre e-mail. Nous enverrons un lien de réinitialisation.",

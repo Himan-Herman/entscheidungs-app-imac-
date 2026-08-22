@@ -2,7 +2,6 @@ import legalRo from "../legal/ro/index.js";
 import landing from "./ro.landing.js";
 import info from "./ro.info.js";
 import preVisit from "./ro.preVisit.js";
-import startseite from "./ro.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 
@@ -11,7 +10,6 @@ export default {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "Treci la conținut",
     homeAria: "Mergi la pagina principală",

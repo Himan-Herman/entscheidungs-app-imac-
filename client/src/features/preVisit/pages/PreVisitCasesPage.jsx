@@ -10,6 +10,9 @@ export default function PreVisitCasesPage() {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const t = useMemo(() => getMessages(language).preVisit.cases, [language]);
+  // The link below now returns to the patient workspace, so it borrows that
+  // page's label rather than keeping a "start page" wording for a hub.
+  const tChrome = useMemo(() => getMessages(language).preVisit.chrome, [language]);
   const [hasToken, setHasToken] = useState(
     () => !!localStorage.getItem("medscout_token"),
   );
@@ -237,8 +240,8 @@ export default function PreVisitCasesPage() {
           <Link className="pre-visit-cases__link" to="/pre-visit/my-preparations">
             {t.linkPreparations}
           </Link>
-          <Link className="pre-visit-cases__link" to="/startseite">
-            {t.backHome}
+          <Link className="pre-visit-cases__link" to="/patient">
+            {tChrome.backPatientHub}
           </Link>
         </nav>
       </div>

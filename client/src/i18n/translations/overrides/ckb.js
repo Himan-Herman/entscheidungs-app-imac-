@@ -3,7 +3,6 @@ import legalCkb from "../legal/ckb/index.js";
 import landing from "./ckb.landing.js";
 import info from "./ckb.info.js";
 import preVisit from "./ckb.preVisit.js";
-import startseite from "./ckb.startseite.js";
 import ckbCore from "./ckb/ckb.core.js";
 import ckbAccount from "./ckb/ckb.account.js";
 import ckbModules from "./ckb/ckb.modules.js";
@@ -15,7 +14,6 @@ const ckbBase = {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "بڕۆ بۆ ناوەرۆک",
     homeAria: "بڕۆ بۆ پەڕەی سەرەکی",

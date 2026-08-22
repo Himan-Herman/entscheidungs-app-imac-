@@ -3,7 +3,6 @@ import legalRu from "../legal/ru/index.js";
 import landing from "./ru.landing.js";
 import info from "./ru.info.js";
 import preVisit from "./ru.preVisit.js";
-import startseite from "./ru.startseite.js";
 import ruCore from "./ru/ru.core.js";
 import ruAccount from "./ru/ru.account.js";
 import ruModules from "./ru/ru.modules.js";
@@ -18,7 +17,6 @@ const ruBase = {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "Перейти к содержимому",
     homeAria: "На главную",

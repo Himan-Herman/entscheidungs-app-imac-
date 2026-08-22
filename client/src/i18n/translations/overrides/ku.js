@@ -3,7 +3,6 @@ import legalKu from "../legal/ku/index.js";
 import landing from "./ku.landing.js";
 import info from "./ku.info.js";
 import preVisit from "./ku.preVisit.js";
-import startseite from "./ku.startseite.js";
 import kuCore from "./ku/ku.core.js";
 import kuAccount from "./ku/ku.account.js";
 import kuModules from "./ku/ku.modules.js";
@@ -15,7 +14,6 @@ const kuBase = {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "Derbasî naverokê bibe",
     homeAria: "Biçe ser malperê",

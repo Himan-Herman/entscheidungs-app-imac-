@@ -1,4 +1,4 @@
-import { NavLink, Outlet, Link, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { getMessages } from "../../i18n/translations/index.js";
@@ -14,7 +14,6 @@ export default function AccountPortalLayout() {
     const m = getMessages(language);
     return m.accountPortal ?? getMessages("en").accountPortal;
   }, [language]);
-  const tf = useMemo(() => getMessages(language).footer, [language]);
 
   useEffect(() => {
     setMode(readUserMode());
@@ -47,6 +46,10 @@ export default function AccountPortalLayout() {
       { to: "/account/profiles", label: t.navProfiles },
       { to: "/account/data", label: t.navData },
       { to: "/pre-visit/follow-ups", label: t.navFollowUps },
+      // Real account actions (export, deletion) — not a legal text. It used to
+      // hang below the sidebar in the legal block; the legal block is gone, the
+      // function is not.
+      { to: "/settings/privacy", label: t.navPrivacyShort },
     ];
   }, [isPractice, t]);
 
@@ -91,17 +94,6 @@ export default function AccountPortalLayout() {
               </NavLink>
             ))}
           </nav>
-          <footer className="account-portal__legal">
-            <p className="account-portal__legal-title">{t.legalSectionTitle}</p>
-            <nav className="account-portal__legal-nav" aria-label={t.legalSectionTitle}>
-              <Link to="/datenschutz">{tf.privacy}</Link>
-              <Link to="/impressum">{tf.imprint}</Link>
-              <Link to="/agb">{tf.terms}</Link>
-              <Link to="/disclaimer">{tf.disclaimer}</Link>
-              <Link to="/settings/privacy">{t.goPrivacy}</Link>
-            </nav>
-            <p className="account-portal__legal-note">{t.legalSupportNote}</p>
-          </footer>
         </aside>
         <div className="account-portal__main">
           <Outlet />

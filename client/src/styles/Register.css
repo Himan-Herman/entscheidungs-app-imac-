@@ -566,30 +566,4 @@
 }
 
 /* Icons*/
-.startseite__feature-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 14px;
-  background: var(--color-primary-soft);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--color-primary); /* Icon-Farbe */
-}
-
-.startseite__feature-icon svg {
-  width: 22px;
-  height: 22px;
-}
-.startseite__feature-title {
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--color-text);          /* IMMER aus Theme-Variable */
-}
-
-.startseite__feature-description {
-  font-size: 0.86rem;
-  color: var(--color-text-soft);     /* IMMER aus Theme-Variable */
-}
 

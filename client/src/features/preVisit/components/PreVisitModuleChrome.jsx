@@ -6,16 +6,32 @@ import { getMessages } from "../../../i18n/translations/index.js";
 import { readUserMode, USER_MODES } from "../../../utils/userMode.js";
 import "../styles/PreVisitModuleChrome.css";
 
-function resolveChromeBack(t) {
+/**
+ * Where "back" goes, per role.
+ *
+ * The previous version only named a target for a signed-in PATIENT; everyone
+ * else — including a signed-in PRACTICE user, because this chrome also sits on
+ * the shared settings pages — fell through to a single fallback. That fallback
+ * pointed at a page which no longer exists, so each role now gets its own
+ * destination and its own label.
+ *
+ * @param {object} t preVisit.chrome messages
+ * @param {string} practiceLabel preVisit.cases.backPracticeHub — already
+ *   translated everywhere, so this needs no new key in 21 language files
+ */
+function resolveChromeBack(t, practiceLabel) {
   try {
-    const loggedIn = !!localStorage.getItem("medscout_token");
-    if (loggedIn && readUserMode() === USER_MODES.PATIENT) {
-      return { to: "/patient", label: t.backPatientHub };
+    if (localStorage.getItem("medscout_token")) {
+      return readUserMode() === USER_MODES.PRACTICE
+        ? { to: "/practice", label: practiceLabel }
+        : { to: "/patient", label: t.backPatientHub };
     }
   } catch {
     /* private mode */
   }
-  return { to: "/startseite", label: t.backHome };
+  // A guest has no workspace to return to. "/" is the public start page, so the
+  // existing label is accurate for this branch and only for this branch.
+  return { to: "/", label: t.backHome };
 }
 
 /**
@@ -31,7 +47,14 @@ export default function PreVisitModuleChrome({
     () => getMessages(effectiveLanguage).preVisit.chrome,
     [effectiveLanguage]
   );
-  const back = useMemo(() => resolveChromeBack(t), [t]);
+  const practiceLabel = useMemo(
+    () => getMessages(effectiveLanguage).preVisit.cases.backPracticeHub,
+    [effectiveLanguage]
+  );
+  const back = useMemo(
+    () => resolveChromeBack(t, practiceLabel),
+    [practiceLabel, t]
+  );
   const isLibrary = variant === "library";
   const moduleLabel = isLibrary ? t.libraryModuleLabel : t.moduleLabel;
   const safety = isLibrary ? t.librarySafety : t.safety;

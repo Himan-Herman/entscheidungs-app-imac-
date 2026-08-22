@@ -63,5 +63,5 @@ export default function MedaWidget() {
 
 export function shouldShowMedaWidget(pathname, isLoggedIn) {
   if (!isLoggedIn) return false;
-  return pathname === "/patient" || pathname === "/startseite";
+  return pathname === "/patient";
 }

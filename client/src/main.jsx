@@ -26,7 +26,6 @@ import { ThemeProvider } from "./ThemeMode";
 import { LanguageProvider, useLanguage } from "./i18n/LanguageContext";
 import { getMessages } from "./i18n/translations";
 
-const Startseite = lazy(() => import("./pages/Startseite.jsx"));
 const KoerperVorderseite = lazy(() => import("./pages/KoerperVorderseite.jsx"));
 const KoerperRueckseite = lazy(() => import("./pages/KoerperRueckseite.jsx"));
 const BildUpload = lazy(() => import("./pages/BildUpload.jsx"));
@@ -367,15 +366,6 @@ void runPwaBuildMigration().then(() => {
                 <Route path="/gate" element={<Gate />} />
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/register" element={<Register />} />
-
-                <Route
-                  path="/startseite"
-                  element={
-                    <ProtectedRoute>
-                      <Startseite />
-                    </ProtectedRoute>
-                  }
-                />
 
                 <Route
                   path="/patient"

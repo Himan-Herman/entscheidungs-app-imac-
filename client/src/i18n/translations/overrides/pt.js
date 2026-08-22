@@ -2,7 +2,6 @@ import legalPt from "../legal/pt/index.js";
 import landing from "./pt.landing.js";
 import info from "./pt.info.js";
 import preVisit from "./pt.preVisit.js";
-import startseite from "./pt.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
@@ -10,7 +9,6 @@ export default {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "Ir para o conteúdo",
     homeAria: "Ir para a página inicial",

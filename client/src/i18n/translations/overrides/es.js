@@ -3,7 +3,6 @@ import legalEs from "../legal/es/index.js";
 import landing from "./es.landing.js";
 import info from "./es.info.js";
 import preVisit from "./es.preVisit.js";
-import startseite from "./es.startseite.js";
 import esCore from "./es/es.core.js";
 import esAccount from "./es/es.account.js";
 import esModules from "./es/es.modules.js";
@@ -233,7 +232,6 @@ const esBase = {
     cancel: "Cancelar",
     close: "Cerrar",
   },
-  startseite,
   forgotPassword: {
     title: "Restablecer contraseña",
     text: "Introduzca su correo. Le enviaremos un enlace.",

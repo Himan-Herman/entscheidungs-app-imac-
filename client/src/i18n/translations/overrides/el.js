@@ -4,7 +4,6 @@ import landing from "./el.landing.js";
 import info from "./el.info.js";
 import preVisitEl from "./el.preVisit.js";
 import preVisitOverlay from "./el.preVisit.overlay.js";
-import startseite from "./el.startseite.js";
 import elCore from "./el/el.core.js";
 import elAccount from "./el/el.account.js";
 import elModules from "./el/el.modules.js";
@@ -16,7 +15,6 @@ const elBase = {
   landing,
   info,
   preVisit: deepMerge(preVisitEl, preVisitOverlay),
-  startseite,
   header: {
     skip: "Μετάβαση στο περιεχόμενο",
     homeAria: "Μετάβαση στην αρχική σελίδα",
