@@ -17,7 +17,7 @@
     "analyze:dedupe": "node scripts/analyzeDuplicateConstraints.js",
     "dedupe:constraints": "node scripts/dedupeDuplicateConstraints.js --dry-run",
     "seed:inbox": "node scripts/seedPatientInboxItem.js",
-    "start": "node app.js",
+    "start": "prisma migrate deploy && node app.js",
     "verify:lab-explanation": "node scripts/verifyLabPatientExplanation.js",
     "verify:vitals": "node scripts/verifyVitals.js",
     "verify:ai-safety": "node scripts/verifyAiSafetyRegression.js",
