@@ -31,6 +31,7 @@ import visitMedications from "./visitMedications.js";
 import patientInbox from "./patientInbox.js";
 import patientCardInfo from "./patientCardInfo.js";
 import patientThreads from "./patientThreads.js";
+import practiceContext from "./practiceContext.js";
 import practiceMessages from "./practiceMessages.js";
 import practiceMedicationPlan from "./practiceMedicationPlan.js";
 import patientMedicationPlan from "./patientMedicationPlan.js";
@@ -117,6 +118,7 @@ export default {
   patientInbox,
   patientCardInfo,
   patientThreads,
+  practiceContext,
   practiceMessages,
   practiceMedicationPlan,
   patientMedicationPlan,

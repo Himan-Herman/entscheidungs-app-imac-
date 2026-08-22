@@ -52,6 +52,8 @@ export default {
       "MedScoutX se charge. Vous serez redirigé·e vers votre espace sous peu.",
   },
   voiceInput: {
+    unavailable: "La saisie vocale n'est pas disponible actuellement.",
+
     micError: "Microphone indisponible.",
     transcriptionError: "Échec de la transcription.",
     start: "Démarrer la saisie vocale",

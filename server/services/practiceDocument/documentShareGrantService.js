@@ -11,7 +11,7 @@
  */
 
 import { prisma } from "../../lib/prisma.js";
-import { writeAuditLog } from "../auditLogService.js";
+import { writeAuditLog, writeRequiredAuditLog } from "../auditLogService.js";
 
 export const GRANT_STATUS = Object.freeze({
   ACTIVE: "active",
@@ -260,6 +260,35 @@ export async function createDocumentShareGrant(input) {
           grantedAt: new Date(),
         },
       });
+      // MANDATORY audit, inside the same transaction as the grant.
+      //
+      // A share grant is the ONLY reason a document may become visible in a
+      // second practice context, so a grant that exists without an audit row
+      // would be an unexplained widening of access. Postgres decides: if this
+      // insert fails, the grant is rolled back with it.
+      //
+      // Identifiers and status only — never a title, a file name or content.
+      await writeRequiredAuditLog(
+        {
+          req: input.req,
+          userId: patientUserId,
+          actorRole: "patient",
+          action: "document_share_grant_created",
+          entityType: "document_share_grant",
+          entityId: grant.id,
+          practiceProfileId: grant.targetPracticeProfileId,
+          practicePatientLinkId: grant.targetPracticePatientLinkId,
+          metadata: {
+            grantId: grant.id,
+            documentId: grant.documentId,
+            sourcePracticeProfileId: grant.sourcePracticeProfileId,
+            targetPracticeProfileId: grant.targetPracticeProfileId,
+            status: grant.status,
+          },
+        },
+        tx,
+      );
+
       return { grant, created: true };
     },
     { isolationLevel: "Serializable" },
@@ -278,27 +307,6 @@ export async function createDocumentShareGrant(input) {
     }
     throw e;
   });
-
-  if (result.created) {
-    writeAuditLog({
-      req: input.req,
-      userId: patientUserId,
-      actorRole: "patient",
-      action: "document_share_grant_created",
-      entityType: "document_share_grant",
-      entityId: result.grant.id,
-      practiceProfileId: result.grant.targetPracticeProfileId,
-      practicePatientLinkId: result.grant.targetPracticePatientLinkId,
-      // Ids and status only — no title, no file name, no medical content.
-      metadata: {
-        grantId: result.grant.id,
-        documentId: result.grant.documentId,
-        sourcePracticeProfileId: result.grant.sourcePracticeProfileId,
-        targetPracticeProfileId: result.grant.targetPracticeProfileId,
-        status: result.grant.status,
-      },
-    });
-  }
 
   return result;
 }
@@ -327,49 +335,82 @@ export async function revokeDocumentShareGrant(input) {
     return { grant, revoked: false };
   }
 
-  const now = new Date();
-  const [updated] = await prisma.$transaction([
-    // Conditional on status: if a concurrent request revoked it first, this
-    // updates nothing rather than overwriting the earlier revocation.
-    prisma.practiceDocumentShareGrant.updateMany({
-      where: { id: grantId, patientUserId, status: GRANT_STATUS.ACTIVE },
-      data: { status: GRANT_STATUS.REVOKED, revokedAt: now },
-    }),
-    prisma.secureDocumentAccessToken.updateMany({
-      where: {
-        documentId: grant.documentId,
-        practiceProfileId: grant.targetPracticeProfileId,
-        practicePatientLinkId: grant.targetPracticePatientLinkId,
-        audience: "practice",
-        revokedAt: null,
-      },
-      data: { revokedAt: now },
-    }),
-  ]);
-
-  const fresh = await prisma.practiceDocumentShareGrant.findUnique({ where: { id: grantId } });
-
-  if (updated.count > 0) {
-    writeAuditLog({
-      req: input.req,
-      userId: patientUserId,
-      actorRole: "patient",
-      action: "document_share_grant_revoked",
-      entityType: "document_share_grant",
-      entityId: grantId,
-      practiceProfileId: grant.targetPracticeProfileId,
-      practicePatientLinkId: grant.targetPracticePatientLinkId,
-      metadata: {
-        grantId,
-        documentId: grant.documentId,
-        sourcePracticeProfileId: grant.sourcePracticeProfileId,
-        targetPracticeProfileId: grant.targetPracticeProfileId,
-        status: GRANT_STATUS.REVOKED,
-      },
-    });
-  }
+  // Interactive rather than the array form, so the mandatory audit can join the
+  // same transaction: revoking a grant withdraws access from a second practice,
+  // and that must not be able to happen unrecorded.
+  const { updated, fresh } = await prisma.$transaction((tx) =>
+    revokeGrantWithin(tx, grant, { actorUserId: patientUserId, actorRole: "patient", req: input.req }),
+  );
 
   return { grant: fresh ?? grant, revoked: updated.count > 0 };
+}
+
+/**
+ * The revocation itself, inside a caller-supplied transaction.
+ *
+ * Extracted so that flows which already own a transaction — account deletion in
+ * particular — can end a grant through THIS logic instead of reaching for a
+ * `deleteMany`. Prisma has no nested interactive transactions, so a shared body
+ * is the only way for both callers to keep one behaviour: the same conditional
+ * update, the same token invalidation, and the same mandatory audit entry in
+ * the same transaction as the change it describes.
+ *
+ * @param {object} tx an interactive transaction client
+ * @param {{ id: string, documentId: string, patientUserId: string,
+ *           sourcePracticeProfileId: string, targetPracticeProfileId: string,
+ *           targetPracticePatientLinkId: string }} grant already loaded
+ * @param {{ actorUserId: string, actorRole?: string, req?: object,
+ *           reason?: string }} ctx who is ending it, and why
+ */
+export async function revokeGrantWithin(tx, grant, ctx) {
+  const now = new Date();
+
+  // Conditional on status: if a concurrent request revoked it first, this
+  // updates nothing rather than overwriting the earlier revocation.
+  const updated = await tx.practiceDocumentShareGrant.updateMany({
+    where: { id: grant.id, patientUserId: grant.patientUserId, status: GRANT_STATUS.ACTIVE },
+    data: { status: GRANT_STATUS.REVOKED, revokedAt: now },
+  });
+
+  // A bearer token outliving the permission it was issued under is the failure
+  // mode that matters, so it dies with the grant.
+  await tx.secureDocumentAccessToken.updateMany({
+    where: {
+      documentId: grant.documentId,
+      practiceProfileId: grant.targetPracticeProfileId,
+      practicePatientLinkId: grant.targetPracticePatientLinkId,
+      audience: "practice",
+      revokedAt: null,
+    },
+    data: { revokedAt: now },
+  });
+
+  if (updated.count > 0) {
+    await writeRequiredAuditLog(
+      {
+        req: ctx.req,
+        userId: ctx.actorUserId,
+        actorRole: ctx.actorRole || "patient",
+        action: "document_share_grant_revoked",
+        entityType: "document_share_grant",
+        entityId: grant.id,
+        practiceProfileId: grant.targetPracticeProfileId,
+        practicePatientLinkId: grant.targetPracticePatientLinkId,
+        metadata: {
+          grantId: grant.id,
+          documentId: grant.documentId,
+          sourcePracticeProfileId: grant.sourcePracticeProfileId,
+          targetPracticeProfileId: grant.targetPracticeProfileId,
+          status: GRANT_STATUS.REVOKED,
+          ...(ctx.reason ? { reason: ctx.reason } : {}),
+        },
+      },
+      tx,
+    );
+  }
+
+  const fresh = await tx.practiceDocumentShareGrant.findUnique({ where: { id: grant.id } });
+  return { updated, fresh };
 }
 
 /**

@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Hostingproviders (EU): een Europese cloudprovider levert infrastructuur voor servers en databases (bijv. Render.com met EU-locatie).",
-          "AI-provider – OpenAI (VS): voor AI-verwerking van uw tekstinvoer, beeldgegevens en kaartinformatie gebruikt MedScoutX diensten van OpenAI LLC (San Francisco, VS). Inhoud wordt versleuteld naar OpenAI verzonden, daar verwerkt en na verwerking verwijderd.",
+          "AI-provider – OpenAI (VS): voor AI-verwerking van uw tekstinvoer, beeldgegevens en kaartinformatie gebruikt MedScoutX diensten van OpenAI LLC (San Francisco, VS). Inhoud wordt via een versleutelde verbinding (TLS) naar OpenAI verzonden en op de systemen van de aanbieder verwerkt. Hoe lang OpenAI verzonden inhoud bewaart, wordt bepaald door de voorwaarden van die aanbieder; verdergaande toezeggingen kunnen wij niet doen.",
           "E-mailproviders: een technische dienstverlener wordt gebruikt voor systeemberichten (bijv. verificatie-e-mails).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Om een passend beschermingsniveau te waarborgen, steunt de doorgifte op EU-standaardcontractbepalingen (art. 46 AVG) plus aanvullende technische en organisatorische maatregelen (versleuteling tijdens transport, korte verwerkingstijd, verwijdering na het AI-antwoord).",
+          "Om een passend beschermingsniveau te waarborgen, steunt de doorgifte op EU-standaardcontractbepalingen (art. 46 AVG) plus aanvullende technische en organisatorische maatregelen (versleuteling tijdens transport).",
       },
       {
         type: "p_link",

@@ -156,7 +156,7 @@ router.post("/", async (req, res) => {
         }),
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -222,7 +222,7 @@ router.patch("/:id", async (req, res) => {
       },
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -255,7 +255,7 @@ router.delete("/:id", async (req, res) => {
       data: { deletedAt: new Date() },
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -299,7 +299,7 @@ router.post("/:id/document", upload.single("file"), async (req, res) => {
       },
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",

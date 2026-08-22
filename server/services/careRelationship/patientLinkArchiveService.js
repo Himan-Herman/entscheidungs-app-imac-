@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
-import { writeAuditLog } from "../auditLogService.js";
+import { writeRequiredAuditLog } from "../auditLogService.js";
 import { normalizeConsentScopes } from "./consentScopes.js";
 import { linkToPatientJson } from "./practicePatientLinkService.js";
 import { updatePatientProfileAccess } from "./practicePatientProfileService.js";
@@ -26,35 +26,46 @@ export async function archiveLinkForPatient(linkId, patientUserId) {
   }
 
   const now = new Date();
-  const row = await prisma.practicePatientLink.update({
-    where: { id },
-    data: { status: "archived", updatedAt: now },
-    include: {
-      practiceProfile: {
-        select: {
-          id: true,
-          practiceName: true,
-          publicSlug: true,
-          specialty: true,
+
+  // Ending a care relationship must not be possible without a record of it, so
+  // the status change and its mandatory audit commit together.
+  const row = await prisma.$transaction(async (tx) => {
+    const updated = await tx.practicePatientLink.update({
+      where: { id },
+      data: { status: "archived", updatedAt: now },
+      include: {
+        practiceProfile: {
+          select: {
+            id: true,
+            practiceName: true,
+            publicSlug: true,
+            specialty: true,
+          },
+        },
+        patientProfile: {
+          select: { id: true, displayName: true, relationLabel: true },
         },
       },
-      patientProfile: {
-        select: { id: true, displayName: true, relationLabel: true },
-      },
-    },
-  });
+    });
 
-  await writeAuditLog({
-    userId: uid,
-    actorRole: "patient",
-    action: "practice_patient_link_archived",
-    entityType: "practice_patient_link",
-    entityId: row.id,
-    metadata: {
-      practiceProfileId: row.practiceProfileId,
-      patientUserId: row.patientUserId,
-      practicePatientLinkId: row.id,
-    },
+    // Identifiers and the transition only — no consent scopes, no practice name,
+    // no medical context.
+    await writeRequiredAuditLog(
+      {
+        userId: uid,
+        actorRole: "patient",
+        action: "practice_patient_link_archived",
+        entityType: "practice_patient_link",
+        entityId: updated.id,
+        practiceProfileId: updated.practiceProfileId,
+        patientUserId: updated.patientUserId,
+        practicePatientLinkId: updated.id,
+        metadata: { previousStatus: link.status, newStatus: "archived" },
+      },
+      tx,
+    );
+
+    return updated;
   });
 
   return linkToPatientJson(row);

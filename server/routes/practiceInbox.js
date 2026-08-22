@@ -141,7 +141,7 @@ router.get("/", async (req, res) => {
       offset: req.query.offset,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -172,7 +172,7 @@ router.get("/:itemId", async (req, res) => {
 
   try {
     const result = await getPracticeInboxItem(req.params.itemId, practiceId);
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -201,7 +201,7 @@ router.patch("/:itemId/read", async (req, res) => {
 
   try {
     const item = await markPracticeInboxRead(req.params.itemId, practiceId);
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -230,7 +230,7 @@ router.patch("/:itemId/done", async (req, res) => {
 
   try {
     const item = await markPracticeInboxDone(req.params.itemId, practiceId);
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -259,7 +259,7 @@ router.patch("/:itemId/archive", async (req, res) => {
 
   try {
     const item = await archivePracticeInboxItem(req.params.itemId, practiceId);
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -291,7 +291,7 @@ router.patch("/:itemId/restore", async (req, res) => {
 
   try {
     const item = await restorePracticeInboxItem(req.params.itemId, practiceId);
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -326,7 +326,7 @@ router.post("/:itemId/ai-summary", async (req, res) => {
       "summary",
       locale,
     );
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -360,7 +360,7 @@ router.post("/:itemId/ai-reply-draft", async (req, res) => {
       "reply_draft",
       locale,
     );
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,

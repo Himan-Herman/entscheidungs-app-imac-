@@ -51,6 +51,8 @@ export default {
       "MedScoutX si sta caricando. Tra qualche istante sarai reindirizzato.",
   },
   voiceInput: {
+    unavailable: "L'inserimento vocale al momento non è disponibile.",
+
     micError: "Microfono non disponibile.",
     transcriptionError: "Trascrizione non riuscita.",
     start: "Avvia ingresso vocale",

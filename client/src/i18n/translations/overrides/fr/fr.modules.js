@@ -88,8 +88,8 @@ export default {
     hintAssociated: "Souhaitez-vous ajouter le sommeil, l’activité, une fièvre… ?",
     newChat: "Nouvelle conversation",
     newChatAria: "Démarrer une nouvelle conversation",
-    clearHistory: "Effacer l’historique",
-    clearHistoryAria: "Effacer l’historique local sur cet appareil",
+    clearHistory: "Retirer de l’historique",
+    clearHistoryAria: "Retirer cette conversation de l’historique sur cet appareil",
     chatTitle: "Conversation",
     chatIntro:
       "Questions neutres puis, lorsque vous le souhaitez, un résumé structuré pour vos notes — pas d’évaluation clinique.",
@@ -221,7 +221,7 @@ export default {
       backTitle: "Dos",
       backText: "Dos, nuque, épaules, arrière bras et jambes.",
       footer:
-        "Vous pouvez changer de vue ensuite. Pour une zone, dialogue stocké localement jusqu’effacement.",
+        "Vous pouvez changer de vue plus tard. L’historique d’une région est enregistré sur cet appareil et peut être retiré ici de l’affichage.",
     },
     mapFront: {
       pageTitle: "Schéma corporel — face — MedScoutX",
@@ -270,8 +270,8 @@ export default {
         "Pour des sujets hors de cette région, utilisez plutôt le bilan symptomatique général.",
       btnNewChat: "Réinitialiser le parcours schéma",
       btnNewChatTitle: "Effacer conversation et retour départ schéma",
-      btnClearHistory: "Effacer le chat uniquement",
-      btnClearHistoryTitle: "Effacer messages locaux pour ce dialogue",
+      btnClearHistory: "Retirer de l’historique",
+      btnClearHistoryTitle: "Retirer cette conversation de l’historique sur cet appareil",
       speakAria: "Lire à voix haute",
       micNotice:
         "Enregistrement vocal uniquement après appui sur le microphone — pas d’écoute permanente.",

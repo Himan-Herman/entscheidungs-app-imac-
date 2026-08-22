@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import { patientInboxTargetUrl } from "./patientInboxTargets.js";
 import { writeAuditLog } from "../auditLogService.js";
 import { patientInboxTitleForType } from "../../constants/inboxNotificationCatalog.js";
 import {
@@ -36,6 +37,10 @@ const includePractice = {
  * @param {import("@prisma/client").PatientInboxItem & { practiceProfile?: { id: string, practiceName: string } | null }} row
  */
 export function inboxItemToJson(row) {
+  // Reconstructed rather than replayed for the kinds whose route is a function
+  // of the source id, so a notice written before a route rename still leads
+  // somewhere. See patientInboxTargets.js.
+  const targetUrl = patientInboxTargetUrl(row);
   return {
     id: row.id,
     patientUserId: row.patientUserId,
@@ -48,7 +53,7 @@ export function inboxItemToJson(row) {
     summaryKey: row.summaryKey,
     status: row.status,
     sourceLabel: row.sourceLabel,
-    targetUrl: row.targetUrl,
+    targetUrl,
     sourceRefType: row.sourceRefType,
     sourceRefId: row.sourceRefId,
     lastActivityAt: row.lastActivityAt,
@@ -343,7 +348,7 @@ export async function markInboxItemRead(itemId, patientUserId) {
     patientUserId: uid,
     practiceProfileId: row.practiceProfileId,
     metadata: { status: "read" },
-  }).catch(() => {});
+  });
 
   return inboxItemToJson(row);
 }
@@ -383,7 +388,7 @@ export async function archiveInboxItem(itemId, patientUserId) {
     patientUserId: uid,
     practiceProfileId: row.practiceProfileId,
     metadata: { status: "archived" },
-  }).catch(() => {});
+  });
 
   return inboxItemToJson(row);
 }

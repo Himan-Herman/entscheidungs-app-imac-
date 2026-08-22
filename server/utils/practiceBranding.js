@@ -10,6 +10,7 @@ export const PRACTICE_BRANDING_SELECT = {
   accentColor: true,
   patientIntroText: true,
   specialty: true,
+  city: true,
 };
 
 /**
@@ -57,6 +58,9 @@ export function practiceBrandingJson(row) {
     accentColor: normalizeAccentColor(row.accentColor),
     patientHint: row.patientIntroText ? String(row.patientIntroText).trim().slice(0, 1200) : null,
     specialty: row.specialty ? String(row.specialty).trim().slice(0, 160) : null,
+    // Public practice detail, shown next to the specialty so a patient can tell
+    // two same-named practices apart at a glance.
+    city: row.city ? String(row.city).trim().slice(0, 120) : null,
   };
 }
 

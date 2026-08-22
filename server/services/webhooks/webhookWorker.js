@@ -31,7 +31,7 @@ function auditWebhook(action, entityType, entityId, metadata = {}) {
     entityType,
     entityId,
     metadata,
-  }).catch(() => {});
+  });
 }
 
 export async function recoverStaleWebhookProcessing() {

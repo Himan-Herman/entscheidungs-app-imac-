@@ -395,6 +395,8 @@ model PracticeProfile {
   bookingSettings             PracticeBookingSettings?
   documentShareGrantsAsSource PracticeDocumentShareGrant[]     @relation("DocumentShareGrantSourcePractice")
   documentShareGrantsAsTarget PracticeDocumentShareGrant[]     @relation("DocumentShareGrantTargetPractice")
+  erezeptEntries              ErezeptEntry[]
+
 
   @@index([userId])
 }
@@ -953,6 +955,7 @@ model PracticePatientLink {
   contextVaccinationEntries   VaccinationEntry[]           @relation("VaccinationEntryContextLink")
   contextAllergyEntries       AllergyEntry[]               @relation("AllergyEntryContextLink")
   contextDiagnosisEntries     DiagnosisEntry[]             @relation("DiagnosisEntryContextLink")
+  erezeptEntries              ErezeptEntry[]
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
@@ -1093,6 +1096,17 @@ model PracticeInboxItem {
 
 /**
  * Secure messaging thread tied to a practice–patient link (no anonymous threads).
+ * CARDINALITY (Phase 2A): exactly ONE thread per PracticePatientLink — the
+ * permanent communication channel between this patient and this practice.
+ * Enforced by the database, not only by the service, so no call site and no
+ * concurrent request can create a second one.
+ * `closed` is a SHARED organizational marker, not a lock: a closed channel
+ * reopens when either side writes again. Archiving is NOT shared — it is a
+ * per-party view state (see the archive fields below). Neither ever frees the
+ * slot, so both sides always share one history.
+ * Topic/case threads remain possible later: replacing @@unique([practicePatientLinkId])
+ * with a composite unique is a non-destructive migration that keeps every
+ * existing row valid.
  */
 model PracticePatientThread {
   id                    String    @id @default(cuid())
@@ -1100,21 +1114,35 @@ model PracticePatientThread {
   practiceProfileId     String
   patientUserId         String
   subject               String?
-  /// open | closed | archived
+  /// SHARED lifecycle: open | closed. Never "archived" — archiving is per party.
   status                String    @default("open")
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
   closedAt              DateTime?
-  archivedAt            DateTime?
+
+  /// PARTY-SCOPED view state. The patient tidying their own list must never
+  /// remove the conversation from the practice's work queue, and vice versa.
+  /// Each side reads and writes only its own column; no code path may clear
+  /// both as a blanket action.
+  patientArchivedAt  DateTime?
+  practiceArchivedAt DateTime?
+
+  /// LEGACY, read-only. Holds the old shared archive timestamp for rows created
+  /// before archiving became party-scoped. It records THAT the conversation was
+  /// archived, never BY WHOM — the old model could not express that. Kept so the
+  /// migration does not have to destroy evidence in order to split the state;
+  /// no filter, counter or list reads it. Do not write to it.
+  archivedAt DateTime?
 
   practicePatientLink PracticePatientLink      @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
   practiceProfile     PracticeProfile          @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
   patientUser         User                     @relation(fields: [patientUserId], references: [id], onDelete: Cascade)
   messages            PracticePatientMessage[]
 
-  @@index([practicePatientLinkId, status])
-  @@index([patientUserId, status])
-  @@index([practiceProfileId, updatedAt])
+  /// One permanent communication channel per care relationship.
+  @@unique([practicePatientLinkId])
+  @@index([patientUserId, patientArchivedAt])
+  @@index([practiceProfileId, practiceArchivedAt, updatedAt])
 }
 
 model PracticePatientMessage {
@@ -1127,9 +1155,79 @@ model PracticePatientMessage {
   createdAt    DateTime  @default(now())
   readAt       DateTime?
 
-  thread PracticePatientThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  /// Set when the sender changed the text of THIS message. The message keeps its
+  /// id and its createdAt, so its place in the conversation never moves; only
+  /// the text differs. There is no version history behind this: the previous
+  /// text is overwritten and is not retained anywhere.
+  editedAt DateTime?
 
+  /// Set when the sender withdrew the message. The row stays — a message id
+  /// that vanished would tear a hole in an already-paginated timeline — but the
+  /// body is cleared at the same moment, so the withdrawal is a property of the
+  /// data and not of every serialiser remembering to hide it. Withdrawal is
+  /// terminal: there is no restore.
+  withdrawnAt DateTime?
+
+  /// Caller-supplied id of ONE logical send action, so a network retry of the
+  /// same action cannot persist the message twice. Scoped to the thread, which
+  /// is authorized before any insert — the same key used in two different
+  /// communication channels is two unrelated rows and can never collide across
+  /// tenants. NULL is distinct in Postgres, so senders that supply no key are
+  /// never deduplicated (and identical text under a NEW key is a new message:
+  /// deduplication is by intent, never by content).
+  clientRequestId String? @db.VarChar(64)
+
+  thread       PracticePatientThread        @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  translations PracticeMessageTranslation[]
+
+  @@unique([threadId, clientRequestId])
   @@index([threadId, createdAt])
+}
+
+/**
+ * A translation of ONE message, as it stood at ONE moment.
+ *
+ * Not a message. It is never part of the conversation, never appears in the
+ * timeline, and creating one changes nothing about the thread — it is a second
+ * way of reading something that was already said.
+ *
+ * `sourceFingerprint` binds the row to an exact state of the original: the id,
+ * the body and the edit marker hashed together. Editing the message changes the
+ * fingerprint, so every translation of the previous wording stops matching at
+ * once. There is no version table to keep in step, and no way to show a
+ * translation of text the reader can no longer see.
+ *
+ * Rows are removed when the message is edited or withdrawn. Unreachable would
+ * have been enough — the lookup refuses a withdrawn message on its own — but a
+ * copy of a withdrawn message's meaning is exactly the thing that must not sit
+ * in a table waiting for a future code path to find it.
+ */
+model PracticeMessageTranslation {
+  id        String @id @default(cuid())
+  messageId String
+  /// Scoped alongside the message so a lookup can be authorized without a join
+  /// back through the message on every read.
+  threadId  String
+
+  /// sha256 over (messageId, body, editedAt) — see messageSourceFingerprint.js.
+  sourceFingerprint String
+  /// BCP-47 code the text was translated INTO.
+  targetLanguage    String
+  /// What the provider reported the ORIGINAL to be. Informational only: nothing
+  /// is authorized or refused on the basis of it.
+  sourceLanguage    String?
+  /// Faithful translation only in this phase. Present so a second mode does not
+  /// need a migration, and so a cached entry can never be served for a mode it
+  /// was not produced for.
+  mode              String @default("normal")
+
+  translatedText String
+  createdAt      DateTime @default(now())
+
+  message PracticePatientMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, sourceFingerprint, targetLanguage, mode])
+  @@index([messageId])
 }
 
 /**
@@ -1153,8 +1251,11 @@ model MedicationPlan {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  practicePatientLink PracticePatientLink  @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
-  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  /// Restrict on both: a published plan must not vanish because a practice or
+  /// one of its care relationships was deleted. Patient account deletion is a
+  /// separate lifecycle and still cascades.
+  practicePatientLink PracticePatientLink  @relation(fields: [practicePatientLinkId], references: [id], onDelete: Restrict)
+  practiceProfile     PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Restrict)
   patientUser         User                 @relation("MedicationPlanPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
   createdBy           User?                @relation("MedicationPlanCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   items               MedicationPlanItem[]
@@ -2082,8 +2183,17 @@ model ErezeptEntry {
   patientUserId  String
   /// Practice user who issued (actor)
   issuedByUserId String
-  /// PracticePatientLink for consent + scope
+  /// PracticePatientLink for consent + scope. A real relation since Phase 2F.3B;
+  /// the column name is kept so the change stays reversible, the relation below
+  /// carries the domain name.
   linkId         String
+  /// Issuing practice. Restrict, so it cannot be removed under a prescription
+  /// that names it.
+  practiceProfileId String
+  /// The practice name as it read when this was issued. A relation says WHICH
+  /// practice; only a snapshot says what it was called then, and a later rename
+  /// must not rewrite history.
+  issuerPracticeNameAtIssue String?
 
   medicationName String    @db.VarChar(300)
   icdCode        String?   @db.VarChar(20)
@@ -2104,10 +2214,13 @@ model ErezeptEntry {
 
   patient  User @relation("PatientErezept", fields: [patientUserId], references: [id], onDelete: Cascade)
   issuedBy User @relation("PracticeErezept", fields: [issuedByUserId], references: [id], onDelete: Cascade)
+  practicePatientLink PracticePatientLink @relation(fields: [linkId], references: [id], onDelete: Restrict)
+  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Restrict)
 
   @@index([patientUserId, status])
   @@index([patientUserId, deletedAt])
   @@index([linkId])
+  @@index([practiceProfileId])
 }
 
 /// Classification of where a patient-owned medical record belongs.

@@ -25,7 +25,7 @@ router.post("/ai-summary", async (req, res) => {
       counts: req.body?.counts,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: req.body?.actorRole || "user",
       action: "archive_ai_summary_created",

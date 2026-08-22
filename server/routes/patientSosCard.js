@@ -253,7 +253,7 @@ router.put("/", async (req, res) => {
       create: { patientUserId: userId, ...data },
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       actorUserId: userId,
       actorRole: "patient",
       action: "sos_card_updated",
@@ -299,7 +299,7 @@ router.post("/generate-token", async (req, res) => {
       create: { patientUserId: userId, ...tokenData },
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       actorUserId: userId,
       actorRole: "patient",
       action: "sos_card_token_generated",
@@ -333,7 +333,7 @@ router.delete("/", async (req, res) => {
       },
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       actorUserId: userId,
       actorRole: "patient",
       action: "sos_card_deleted",
@@ -357,7 +357,7 @@ router.delete("/revoke-token", async (req, res) => {
       data: { publicToken: null, tokenGeneratedAt: null },
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       actorUserId: userId,
       actorRole: "patient",
       action: "sos_card_token_revoked",

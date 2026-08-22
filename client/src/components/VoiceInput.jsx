@@ -1,7 +1,8 @@
-import React, { useState, useRef, useId, useMemo } from "react";
+import React, { useState, useRef, useId, useMemo, useEffect } from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import StopIcon from "@mui/icons-material/Stop";
 import { authFetch } from "../api/authFetch";
+import { isSymptomVoiceInputAvailable } from "../api/symptomVoiceAvailability";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 
@@ -12,6 +13,25 @@ export default function VoiceInput({
   className = "voice-wrap",
   compact = false,
 }) {
+  /*
+   * Whether the deployment has voice input switched on at all.
+   *
+   * Starts as available so nothing flickers away on a fast connection; the
+   * answer replaces it as soon as it arrives. When the feature is off the
+   * control is not rendered — an interface that offers a microphone which then
+   * refuses is worse than one that says the feature is unavailable.
+   */
+  const [available, setAvailable] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    isSymptomVoiceInputAvailable().then((ok) => {
+      if (!cancelled) setAvailable(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [isRecording, setIsRecording] = useState(false);
   const [, setStatus] = useState("");
   const [, setAudioURL] = useState(null);
@@ -103,6 +123,18 @@ export default function VoiceInput({
   };
 
   const wrapClass = className || (compact ? "voice-wrap" : "voice-input");
+
+  // Switched off in this deployment: say so once, plainly, instead of offering
+  // a microphone that the server would refuse.
+  if (!available) {
+    return (
+      <div className={wrapClass}>
+        <p className="voice-input__notice" data-testid="voice-input-unavailable">
+          {copy.unavailable}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -58,7 +58,7 @@ export async function patchTelemedicineSettings(actorUserId, practiceId, body, c
     action: "telemedicine_settings_updated",
     practiceProfileId: practiceId,
     metadata: { fields: Object.keys(data) },
-  }).catch(() => {});
+  });
 
   return {
     videoEnabled: row.videoEnabled,

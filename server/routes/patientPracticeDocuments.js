@@ -104,7 +104,7 @@ router.get("/:documentId/structured", requireDocumentOcrFeature, async (req, res
   try {
     const out = await getPatientStructuredDocument(req.params.documentId, userId, { req });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -130,7 +130,7 @@ router.get("/:documentId", async (req, res) => {
   try {
     const document = await getSharedDocumentForPatient(req.params.documentId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "practice_document_opened",
@@ -158,7 +158,7 @@ router.post("/:documentId/question", async (req, res) => {
       userId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "practice_document_question",
@@ -253,7 +253,7 @@ router.get("/:documentId/download", async (req, res) => {
         ? "inline"
         : "attachment";
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action:

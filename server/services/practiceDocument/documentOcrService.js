@@ -157,7 +157,7 @@ export async function processDocumentOcrJob(jobId) {
     return { ok: false, reason: "not_processing" };
   }
 
-  await writeAuditLog({
+  writeAuditLog({
     actorRole: "system",
     action: "ocr_job.started",
     entityType: "document_ocr_job",
@@ -238,7 +238,7 @@ export async function processDocumentOcrJob(jobId) {
     });
 
     if (updated.count === 1) {
-      await writeAuditLog({
+      writeAuditLog({
         actorRole: "system",
         action: "ocr_job.completed",
         entityType: "document_ocr_job",
@@ -267,7 +267,7 @@ export async function processDocumentOcrJob(jobId) {
           nextRetryAt: null,
         },
       });
-      await writeAuditLog({
+      writeAuditLog({
         actorRole: "system",
         action: "ocr_job.failed",
         entityType: "document_ocr_job",

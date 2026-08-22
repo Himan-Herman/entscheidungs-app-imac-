@@ -112,7 +112,11 @@ export async function getPracticeDashboardSummary(practiceProfileId, role) {
           where: {
             senderType: "patient",
             readAt: null,
-            thread: { practiceProfileId: pid, archivedAt: null },
+            // PARTY-SCOPED (Phase 2A.2): the practice's unread counter reads the
+            // practice's own archive column. Before this, a patient archiving
+            // their personal view silently suppressed this badge and the
+            // practice lost a work signal.
+            thread: { practiceProfileId: pid, practiceArchivedAt: null },
           },
         })
       : Promise.resolve(null),

@@ -111,7 +111,7 @@ async function markSent(reminderId) {
     entityType: "AppointmentReminder",
     entityId: reminderId,
     metadata: { sentAt: now.toISOString() },
-  }).catch(() => {});
+  });
   return true;
 }
 
@@ -134,7 +134,7 @@ async function markCancelled(reminder, reason) {
     entityType: "AppointmentReminder",
     entityId: reminder.id,
     metadata: { reason },
-  }).catch(() => {});
+  });
 }
 
 /**
@@ -162,7 +162,7 @@ async function markFailedOrRetry(reminder, reason) {
       entityType: "AppointmentReminder",
       entityId: reminder.id,
       metadata: { attemptCount, reason: reason.slice(0, 80) },
-    }).catch(() => {});
+    });
     return { status: REMINDER_STATUS.FAILED };
   }
 

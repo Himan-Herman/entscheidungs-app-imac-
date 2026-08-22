@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
@@ -6,11 +6,14 @@ import {
   archivePracticeThread,
   closePracticeThread,
   createPracticeThread,
+  acknowledgePracticeThreadRead,
   fetchPracticeThread,
   fetchPracticeThreads,
   fetchPracticeThreadAiDraft,
   sendPracticeThreadMessage,
 } from "../api/practiceThreadsApi.js";
+import { hasUnreadFrom } from "../lib/threadReadState.js";
+import { newSendRequestId } from "../lib/sendRequestId.js";
 import "../../../styles/PatientThreadsPage.css";
 
 function fmt(iso, lang) {
@@ -53,6 +56,9 @@ export default function PracticePatientMessagesSection({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [subject, setSubject] = useState("");
+  // One key per logical send action; survives a retry of unknown outcome.
+  const pendingCreateIdRef = useRef(null);
+  const pendingReplyIdRef = useRef(null);
   const [newBody, setNewBody] = useState("");
   const [reply, setReply] = useState("");
   const [busy, setBusy] = useState(false);
@@ -89,7 +95,18 @@ export default function PracticePatientMessagesSection({
       setBusy(true);
       try {
         const { res, data } = await fetchPracticeThread(linkId, practiceId, threadId);
-        if (res.ok && data.ok) setActiveThread(data.thread);
+        if (!res.ok || !data.ok) return;
+        setActiveThread(data.thread);
+
+        // The server GET is read-only; acknowledge separately once the thread is
+        // actually shown. Idempotent, and a failure must never break reading, so
+        // the acknowledgement never gates rendering.
+        if (hasUnreadFrom(data.thread, "patient")) {
+          const ack = await acknowledgePracticeThreadRead(linkId, practiceId, threadId);
+          if (ack.res.ok && ack.data.ok && ack.data.thread) {
+            setActiveThread(ack.data.thread);
+          }
+        }
       } finally {
         setBusy(false);
       }
@@ -111,14 +128,18 @@ export default function PracticePatientMessagesSection({
     if (!newBody.trim()) return;
     setBusy(true);
     try {
+      if (!pendingCreateIdRef.current) pendingCreateIdRef.current = newSendRequestId();
       const { res, data } = await createPracticeThread(linkId, practiceId, {
         subject: subject.trim() || undefined,
         body: newBody.trim(),
+        clientRequestId: pendingCreateIdRef.current,
       });
+      if (res.status >= 400 && res.status < 500) pendingCreateIdRef.current = null;
       if (!res.ok || !data.ok) {
         setError(t.createError);
         return;
       }
+      pendingCreateIdRef.current = null;
       setSubject("");
       setNewBody("");
       await loadList();
@@ -133,16 +154,20 @@ export default function PracticePatientMessagesSection({
     if (!activeId || !reply.trim()) return;
     setBusy(true);
     try {
+      if (!pendingReplyIdRef.current) pendingReplyIdRef.current = newSendRequestId();
       const { res, data } = await sendPracticeThreadMessage(
         linkId,
         practiceId,
         activeId,
         reply.trim(),
+        pendingReplyIdRef.current,
       );
+      if (res.status >= 400 && res.status < 500) pendingReplyIdRef.current = null;
       if (!res.ok || !data.ok) {
         setError(t.sendError);
         return;
       }
+      pendingReplyIdRef.current = null;
       setReply("");
       setActiveThread(data.thread);
       await loadList();

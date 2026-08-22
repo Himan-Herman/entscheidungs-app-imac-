@@ -105,7 +105,7 @@ export async function generatePracticeLinkActivityAiSummary(input) {
 
   const summary = await runAi(prompt, locale);
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: input.viewerUserId,
     actorRole: "practice",
     action: "activity_feed_ai_summary_created",
@@ -136,7 +136,7 @@ export async function generatePatientActivityAiSummary(input) {
 
   const summary = await runAi(prompt, locale);
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: input.patientUserId,
     actorRole: "patient",
     action: "activity_feed_ai_summary_created",

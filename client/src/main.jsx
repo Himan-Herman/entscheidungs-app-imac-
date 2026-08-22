@@ -94,6 +94,36 @@ const PatientDataByPracticePage = lazy(() => import("./features/patientPractices
 const PatientPracticeHubPage = lazy(() =>
   import("./pages/PatientPracticeHubPage.jsx"),
 );
+const PracticeChooserPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeChooserPage.jsx"),
+);
+const PracticeScopedOutlet = lazy(() =>
+  import("./features/practiceContext/components/PracticeScopedOutlet.jsx"),
+);
+const PracticeContextHomePage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextHomePage.jsx"),
+);
+const PracticeContextMessagesPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextMessagesPage.jsx"),
+);
+const PracticeContextAppointmentsPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextAppointmentsPage.jsx"),
+);
+const PracticeContextDocumentsPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextDocumentsPage.jsx"),
+);
+const PracticeContextMedicationPlansPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextMedicationPlansPage.jsx"),
+);
+const PracticeContextErezeptPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextErezeptPage.jsx"),
+);
+const PracticeContextInboxPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextInboxPage.jsx"),
+);
+const PracticeContextTelemedicinePage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextTelemedicinePage.jsx"),
+);
 const PatientOrientationHubPage = lazy(() =>
   import("./pages/PatientOrientationHubPage.jsx"),
 );
@@ -355,14 +385,66 @@ void runPwaBuildMigration().then(() => {
                     </ProtectedRoute>
                   }
                 />
+                {/*
+                  Level 2: the practice chooser. Every practice-scoped area is
+                  entered from here.
+                */}
                 <Route
                   path="/patient/practice"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeChooserPage />
+                    </ProtectedRoute>
+                  }
+                />
+                {/*
+                  The previous tile hub, preserved.
+
+                  Its twelve tiles point at cross-practice aggregates whose APIs
+                  do not take a link yet, so they cannot move into a practice
+                  context in this phase. Retiring the route would orphan them and
+                  break the ~10 pages that link back to it, so it keeps a home of
+                  its own until each tile is migrated (see Phase 2C report).
+                */}
+                <Route
+                  path="/patient/practice-overview"
                   element={
                     <ProtectedRoute>
                       <PatientPracticeHubPage />
                     </ProtectedRoute>
                   }
                 />
+                {/*
+                  Practice-SCOPED area (Phase 2B).
+
+                  The link id sits in the URL, so refresh, deep link, browser
+                  back/forward and a second tab are deterministic without any
+                  stored selection. Everything under this path runs inside one
+                  authorized care relationship; patient-global pages stay on
+                  /patient/... and are untouched by a context switch.
+
+                  Existing routes are deliberately not moved — no URL breaks.
+                */}
+                <Route
+                  path="/patient/practice/:linkId"
+                  element={
+                    <ProtectedRoute>
+                      <PracticeScopedOutlet />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<PracticeContextHomePage />} />
+                  <Route path="messages" element={<PracticeContextMessagesPage />} />
+                  <Route path="appointments" element={<PracticeContextAppointmentsPage />} />
+                  <Route path="documents" element={<PracticeContextDocumentsPage />} />
+                  <Route
+                    path="medication-plans"
+                    element={<PracticeContextMedicationPlansPage />}
+                  />
+                  <Route path="erezept" element={<PracticeContextErezeptPage />} />
+                  <Route path="inbox" element={<PracticeContextInboxPage />} />
+                  <Route path="telemedicine" element={<PracticeContextTelemedicinePage />} />
+                </Route>
                 <Route
                   path="/patient/orientation"
                   element={

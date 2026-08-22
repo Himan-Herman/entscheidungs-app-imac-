@@ -49,6 +49,14 @@ import patientPracticeOrganizationRouter from "./routes/patientPracticeOrganizat
 import patientPracticeDirectoryRouter from "./routes/patientPracticeDirectory.js";
 import patientInboxRouter from "./routes/patientInbox.js";
 import patientThreadsRouter from "./routes/patientThreads.js";
+import patientPracticeCommunicationRouter from "./routes/patientPracticeCommunication.js";
+import patientPracticeContextsRouter from "./routes/patientPracticeContexts.js";
+import patientPracticeAppointmentsRouter from "./routes/patientPracticeAppointments.js";
+import patientPracticeScopedDocumentsRouter from "./routes/patientPracticeScopedDocuments.js";
+import patientPracticeScopedMedicationPlansRouter from "./routes/patientPracticeScopedMedicationPlans.js";
+import patientPracticeScopedErezeptRouter from "./routes/patientPracticeScopedErezept.js";
+import patientPracticeScopedInboxRouter from "./routes/patientPracticeScopedInbox.js";
+import patientPracticeScopedTelemedicineRouter from "./routes/patientPracticeScopedTelemedicine.js";
 import patientMedicationPlansRouter from "./routes/patientMedicationPlans.js";
 import patientPracticeDocumentsRouter from "./routes/patientPracticeDocuments.js";
 import patientDocumentShareGrantsRouter from "./routes/patientDocumentShareGrants.js";
@@ -92,7 +100,11 @@ import {
   describeTranslationReadiness,
   logDocumentTranslationReadiness,
 } from './services/documentTranslation/documentTranslationReadiness.js';
-import { isVitalsEnabled, isWearablesEnabled } from './config/featureFlags.js';
+import {
+  isSymptomVoiceInputEnabled,
+  isVitalsEnabled,
+  isWearablesEnabled,
+} from './config/featureFlags.js';
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
 import {
@@ -196,7 +208,10 @@ app.use(
 );
 /** Medical Interpreter (B2C + B2B practice) — flag-gated; auth required. */
 app.use('/api/interpreter', requireAuth, interpreterRouter);
-/** B2C live conversation translation (OpenAI Realtime) — flag-gated; auth required. */
+/**
+ * Voice input for the patient's own symptom modules — auth required, and since
+ * this phase also flag- and provider-gated inside the route itself.
+ */
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/i18n', i18nRouter);
@@ -224,6 +239,15 @@ app.use("/api/patient/practices", requireAuth, patientPracticeOrganizationRouter
 app.use("/api/patient/inbox", requireAuth, patientInboxRouter);
 app.use("/api/patient/threads", requireAuth, patientThreadsRouter);
 app.use("/api/patient/messages", requireAuth, patientThreadsRouter);
+// Link-scoped communication (Phase 2C) — same service, one care relationship.
+app.use("/api/patient/practice-contexts", requireAuth, patientPracticeContextsRouter);
+app.use("/api/patient/practice/:linkId/thread", requireAuth, patientPracticeCommunicationRouter);
+app.use("/api/patient/practice/:linkId/appointments", requireAuth, patientPracticeAppointmentsRouter);
+app.use("/api/patient/practice/:linkId/documents", requireAuth, patientPracticeScopedDocumentsRouter);
+app.use("/api/patient/practice/:linkId/medication-plans", requireAuth, patientPracticeScopedMedicationPlansRouter);
+app.use("/api/patient/practice/:linkId/erezept", requireAuth, patientPracticeScopedErezeptRouter);
+app.use("/api/patient/practice/:linkId/inbox", requireAuth, patientPracticeScopedInboxRouter);
+app.use("/api/patient/practice/:linkId/telemedicine", requireAuth, patientPracticeScopedTelemedicineRouter);
 app.use("/api/patient/medication-plans", requireAuth, patientMedicationPlansRouter);
 app.use("/api/patient/push", requireAuth, patientPushRouter);
 // Mounted before the practice-documents router so
@@ -356,6 +380,10 @@ app.get('/api/health/config', (_req, res) =>
       // when the server reports feature_disabled, which looks identical to a defect.
       vitals: isVitalsEnabled(),
       wearables: isWearablesEnabled(),
+      // Voice input in the symptom modules. Reported so the UI can hide the
+      // microphone when the feature is off, rather than offering a control that
+      // fails — which looks identical to a defect.
+      symptomVoiceInput: isSymptomVoiceInputEnabled(),
     },
     // Operational readiness of the document transformation, booleans only.
     // No provider name, no host, no region, no model, no key — those are

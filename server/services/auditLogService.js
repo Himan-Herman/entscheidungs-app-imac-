@@ -157,9 +157,53 @@ export function writeAuditLog(opts) {
  * Use for: issuing/cancelling a prescription, creating/activating/revoking a
  * care link, granting/revoking consent, exporting or sharing patient data.
  *
+ * ATOMICITY
+ * ---------
+ * Awaiting this AFTER the mutation has committed is not enough: the audit can
+ * fail while the change stands, leaving the request to report an error for an
+ * operation that actually happened. Pass the transaction client so the audit row
+ * and the mutation share one transaction and fail together — see
+ * `withRequiredAudit()` below, which is the intended way to do it.
+ *
+ * `client` defaults to the shared Prisma singleton, so existing callers outside
+ * a transaction keep working unchanged.
+ *
  * @param {Parameters<typeof writeAuditLog>[0]} opts
+ * @param {{ auditLog: { create: Function } }} [client] Prisma client or transaction client
  * @returns {Promise<void>}
  */
-export async function writeRequiredAuditLog(opts) {
-  await prisma.auditLog.create({ data: buildAuditRow(opts) });
+export async function writeRequiredAuditLog(opts, client = prisma) {
+  await client.auditLog.create({ data: buildAuditRow(opts) });
+}
+
+/**
+ * Runs a security-relevant mutation and its mandatory audit in ONE transaction.
+ *
+ * The invariant this exists for: an operation whose audit is mandatory must not
+ * be able to persist while its audit row does not. Postgres decides — if the
+ * audit insert fails, the mutation is rolled back with it, and the caller sees
+ * an error for something that genuinely did not happen.
+ *
+ * Follows the two conventions already in this codebase: interactive
+ * `prisma.$transaction(async (tx) => ...)` (visitMedicationService,
+ * interpreterCloudSessionRepository) and passing a Prisma-or-transaction client
+ * into a helper (contextualPatientDataDeletionGuard).
+ *
+ * The audit row is written LAST so it can describe the result — the mutation's
+ * return value is handed to `auditFor`.
+ *
+ * Side effects that cannot be rolled back — e-mail, webhooks, external calls —
+ * must stay OUTSIDE this wrapper, after it resolves.
+ *
+ * @template T
+ * @param {(tx: object) => Promise<T>} mutate runs inside the transaction
+ * @param {(result: T) => Parameters<typeof writeAuditLog>[0]} auditFor builds the audit row from the result
+ * @returns {Promise<T>}
+ */
+export async function withRequiredAudit(mutate, auditFor) {
+  return prisma.$transaction(async (tx) => {
+    const result = await mutate(tx);
+    await writeRequiredAuditLog(auditFor(result), tx);
+    return result;
+  });
 }

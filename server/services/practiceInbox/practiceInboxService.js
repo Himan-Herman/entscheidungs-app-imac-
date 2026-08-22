@@ -1,4 +1,6 @@
 import { prisma } from "../../lib/prisma.js";
+import { linkHasConsentType } from "../consent/consentRecordService.js";
+import { writeAuditLog } from "../auditLogService.js";
 
 
 export const INBOX_TYPES = new Set([
@@ -163,7 +165,7 @@ export async function upsertPracticeInboxItem(input) {
     action: "practice_inbox_item_created",
     entityType: "inbox_item",
     entityId: row.id,
-    practiceProfileId: pid,
+    practiceProfileId: row.practiceProfileId,
     patientUserId: row.patientUserId,
     practicePatientLinkId: row.practicePatientLinkId,
     metadata: { type: row.type, titleKey: row.titleKey },
@@ -319,20 +321,42 @@ export async function getPracticeInboxItem(itemId, practiceProfileId) {
       where: { id: row.sourceRefId, practiceProfileId: pid },
       include: {
         messages: { orderBy: { createdAt: "asc" }, take: 20 },
+        practicePatientLink: true,
       },
     });
+    // CONSENT GATE (C-6): this preview is a second read path to message bodies
+    // that bypassed /practice/patients/:linkId/threads entirely. Tenant scoping
+    // was already correct, but the patient's `secure_messaging` consent was
+    // never consulted here, so a withdrawn consent still left the full
+    // conversation readable through the inbox.
+    //
+    // The neutral inbox item itself stays visible — it carries no clinical
+    // content — only the conversation preview is withheld, and the caller is
+    // told why instead of silently receiving an empty thread.
     if (thread) {
-      context.thread = {
-        id: thread.id,
-        subject: thread.subject,
-        status: thread.status,
-        messages: thread.messages.map((m) => ({
-          id: m.id,
-          senderType: m.senderType,
-          createdAt: m.createdAt,
-          body: m.body,
-        })),
-      };
+      const consented = thread.practicePatientLink
+        ? await linkHasConsentType(thread.practicePatientLink, "secure_messaging")
+        : false;
+
+      if (!consented) {
+        context.thread = null;
+        context.threadUnavailable = "consent_required";
+      } else {
+        context.thread = {
+          id: thread.id,
+          subject: thread.subject,
+          // PARTY-SCOPED (Phase 2A.2): this is the PRACTICE's inbox, so it
+          // reports the practice's own archive state. The patient archiving
+          // their personal view must never surface here.
+          status: thread.practiceArchivedAt ? "archived" : thread.status,
+          messages: thread.messages.map((m) => ({
+            id: m.id,
+            senderType: m.senderType,
+            createdAt: m.createdAt,
+            body: m.body,
+          })),
+        };
+      }
     }
   }
 

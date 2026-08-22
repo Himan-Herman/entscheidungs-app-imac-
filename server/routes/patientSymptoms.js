@@ -119,7 +119,7 @@ router.post("/", requireFeature, async (req, res) => {
   try {
     const entry = await prisma.symptomEntry.create({ data: { userId, ...toData(req.body) } });
     // Audit metadata only — never the symptom content.
-    await writeAuditLog({ userId, action: "symptom_create", meta: { entryId: entry.id } }).catch(() => {});
+    writeAuditLog({ userId, action: "symptom_create", meta: { entryId: entry.id } });
     return res.status(201).json({ ok: true, entry: toJson(entry) });
   } catch (err) {
     console.error("[symptoms] POST", err?.message);
@@ -142,7 +142,7 @@ router.patch("/:id", requireFeature, async (req, res) => {
 
   try {
     const updated = await prisma.symptomEntry.update({ where: { id: existing.id }, data: toData(req.body) });
-    await writeAuditLog({ userId, action: "symptom_update", meta: { entryId: updated.id } }).catch(() => {});
+    writeAuditLog({ userId, action: "symptom_update", meta: { entryId: updated.id } });
     return res.json({ ok: true, entry: toJson(updated) });
   } catch (err) {
     console.error("[symptoms] PATCH", err?.message);
@@ -162,7 +162,7 @@ router.delete("/:id", requireFeature, async (req, res) => {
 
   try {
     await prisma.symptomEntry.update({ where: { id: existing.id }, data: { deletedAt: new Date() } });
-    await writeAuditLog({ userId, action: "symptom_delete", meta: { entryId: existing.id } }).catch(() => {});
+    writeAuditLog({ userId, action: "symptom_delete", meta: { entryId: existing.id } });
     return res.json({ ok: true });
   } catch (err) {
     console.error("[symptoms] DELETE", err?.message);

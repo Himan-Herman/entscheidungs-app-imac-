@@ -74,7 +74,7 @@ async function upsertReminder(spec) {
       subjectKind: spec.subjectKind,
       sendAt: spec.sendAt.toISOString(),
     },
-  }).catch(() => {});
+  });
 }
 
 function futureSendAt(startAt, offsetMs) {
@@ -196,7 +196,7 @@ export async function cancelAppointmentReminders(appointmentId, reason = "appoin
       entityType: "PracticeAppointment",
       entityId: appointmentId,
       metadata: { count: result.count, reason },
-    }).catch(() => {});
+    });
   }
 
   return result.count;

@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Ofrues strehimi (BE): një ofrues evropian reshu ofron infrastrukturë për servera dhe baza të dhënash (p.sh. Render.com me vendndodhje në BE).",
-          "Ofrues IA – OpenAI (SHBA): për përpunimin IA të hyrjes suaj teksti, të dhënave të imazhit dhe informacionit të hartës së trupit, MedScoutX përdor shërbimet e OpenAI LLC (San Francisco, SHBA). Përmbajtja dërgohet e fshehtëzuar te OpenAI, përpunohet atje dhe fshihet pas përpunimit.",
+          "Ofrues IA – OpenAI (SHBA): për përpunimin IA të hyrjes suaj teksti, të dhënave të imazhit dhe informacionit të hartës së trupit, MedScoutX përdor shërbimet e OpenAI LLC (San Francisco, SHBA). Përmbajtja dërgohet përmes një lidhjeje të fshehtëzuar (TLS) te OpenAI dhe përpunohet në sistemet e ofruesit. Kohëzgjatja e një ruajtjeje të mundshme te OpenAI rregullohet nga kushtet e këtij ofruesi; nuk mund të japim garanci përtej kësaj.",
           "Ofrues email-i: përdoret një ofrues teknik për dërgimin e email-eve të sistemit (p.sh. verifikimi i email-it).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Për të siguruar një nivel të përshtatshëm mbrojtjeje të dhënash, transferi bazohet në klauzola standardë kontrate të BE-së (nen 46 GDPR) plus masa shtesë teknike dhe organizative (fshehtëzim gjatë transmetimit, kohë e shkurtër përpunimi, fshirje pas përgjigjes së shërbimit IA).",
+          "Për të siguruar një nivel të përshtatshëm mbrojtjeje të dhënash, transferi bazohet në klauzola standardë kontrate të BE-së (nen 46 GDPR) plus masa shtesë teknike dhe organizative (fshehtëzim gjatë transmetimit).",
       },
       {
         type: "p_link",

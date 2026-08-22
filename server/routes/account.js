@@ -22,6 +22,7 @@ import {
   accountExportLimiter,
 } from "../middleware/ipRateLimit.js";
 import { getBillingPlausibilityExportForUser } from "../services/billingPlausibility/billingPlausibilityService.js";
+import { revokeGrantWithin } from "../services/practiceDocument/documentShareGrantService.js";
 import {
   CONTEXTUAL_DATA_BLOCKED,
   blockerAuditMetadata,
@@ -360,10 +361,44 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       await tx.interpreterCloudPreference.deleteMany({ where: { userId } });
 
       // ── Full erasure (GDPR Art. 17) ───────────────────────────────────────
-      // The only onDelete: Restrict FK to User (PracticeInterpreterInvite.createdBy)
-      // would block the user-row delete; remove those invites first — their usage
-      // rows cascade from the invite.
+      // Every ON DELETE RESTRICT foreign key to User must be cleared before the
+      // user row goes, or the delete fails deep in the database and surfaces as
+      // an opaque 500. There are three, verified against pg_constraint:
+      //
+      //   PracticeInterpreterInvite.createdByUserId
+      //   PracticeDocumentShareGrant.grantedByUserId
+      //   PracticeDocumentShareGrant.patientUserId
+      //
+      // The comment that used to stand here named only the first and was wrong
+      // from the day share grants were introduced.
+
+      // Invites: their usage rows cascade from the invite.
       await tx.practiceInterpreterInvite.deleteMany({ where: { createdByUserId: userId } });
+
+      // Share grants: a live release into another practice is a permission, not
+      // a medical record. It is ENDED rather than dropped — through the same
+      // revocation the patient's own withdrawal uses, so the access tokens it
+      // issued are invalidated and the mandatory audit entry is written in this
+      // very transaction. Only then is the row removed, because the foreign key
+      // is RESTRICT and the account is being erased.
+      const grants = await tx.practiceDocumentShareGrant.findMany({
+        where: { OR: [{ patientUserId: userId }, { grantedByUserId: userId }] },
+      });
+      for (const grant of grants) {
+        if (grant.status === "active") {
+          await revokeGrantWithin(tx, grant, {
+            actorUserId: userId,
+            actorRole: "patient",
+            req,
+            reason: "account_deletion",
+          });
+        }
+      }
+      if (grants.length > 0) {
+        await tx.practiceDocumentShareGrant.deleteMany({
+          where: { id: { in: grants.map((g) => g.id) } },
+        });
+      }
 
       // Scalar *UserId columns with NO @relation get no DB-level cascade, so the
       // patient's rows must be removed explicitly or they would be orphaned.

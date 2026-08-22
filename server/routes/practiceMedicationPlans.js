@@ -143,7 +143,7 @@ router.post("/", async (req, res) => {
       },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_created",
@@ -202,7 +202,7 @@ router.put("/:planId", async (req, res) => {
       },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_updated",
@@ -236,7 +236,7 @@ router.post("/:planId/publish", async (req, res) => {
       ctx.practiceId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_published",
@@ -268,7 +268,7 @@ router.patch("/:planId/archive", async (req, res) => {
       ctx.practiceId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_archived",
@@ -300,7 +300,7 @@ router.patch("/:planId/restore", async (req, res) => {
       ctx.practiceId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_restored",
@@ -333,7 +333,7 @@ router.patch("/:planId/delete", async (req, res) => {
       ctx.userId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_deleted",
@@ -375,7 +375,7 @@ router.post("/:planId/ai-format", async (req, res) => {
       req.params.planId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "medication_plan_ai_format",

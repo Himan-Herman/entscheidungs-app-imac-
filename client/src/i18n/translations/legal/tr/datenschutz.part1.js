@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Barındırma sağlayıcıları (AB): sunucu ve veritabanı altyapısı (ör. AB konumlu Render.com).",
-          "Yapay zekâ sağlayıcısı – OpenAI (ABD): metin, görüntü ve vücut haritası verilerinin yapay zekâ işlemesi için içerik şifreli olarak OpenAI LLC’ye (San Francisco, ABD) iletilir, işlenir ve işlemden sonra silinir.",
+          "Yapay zekâ sağlayıcısı – OpenAI (ABD): metin, görüntü ve vücut haritası verilerinin yapay zekâ işlemesi için içerik şifreli olarak OpenAI LLC’ye (San Francisco, ABD) şifreli bağlantı (TLS) üzerinden iletilir ve sağlayıcının sistemlerinde işlenir. İletilen içeriğin OpenAI nezdinde ne kadar süre saklandığı bu sağlayıcının koşullarına tabidir; bunun ötesinde bir taahhütte bulunamayız.",
           "E-posta sağlayıcıları: sistem e-postalarının gönderimi (ör. doğrulama e-postaları).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Uygun koruma düzeyini sağlamak için aktarım AB standart sözleşme maddelerine (Madde 46 GDPR) ve ek teknik ve örgütsel önlemlere (aktarımda şifreleme, kısa işlem süresi, yapay zekâ yanıtından sonra silme) dayanır.",
+          "Uygun koruma düzeyini sağlamak için aktarım AB standart sözleşme maddelerine (Madde 46 GDPR) ve ek teknik ve örgütsel önlemlere (aktarımda şifreleme) dayanır.",
       },
       {
         type: "p_link",

@@ -66,7 +66,7 @@ router.get("/:planId", async (req, res) => {
   try {
     const plan = await getMedicationPlanForPatient(req.params.planId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "medication_plan_opened",
@@ -94,7 +94,7 @@ router.post("/:planId/question", async (req, res) => {
       userId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "medication_plan_question",
@@ -123,7 +123,7 @@ router.post("/:planId/ai-simple-language", async (req, res) => {
       locale: req.body?.locale || req.headers["accept-language"],
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "medication_plan_ai_simple_language",

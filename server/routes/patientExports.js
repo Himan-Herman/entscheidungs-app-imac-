@@ -72,7 +72,7 @@ router.post("/:exportId/ai-organize", async (req, res) => {
       rowCount: 0,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -100,7 +100,7 @@ router.get("/:exportId/download", async (req, res) => {
       actorRole: "patient",
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",

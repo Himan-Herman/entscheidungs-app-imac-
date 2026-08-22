@@ -275,7 +275,12 @@
   color: #fff;
 }
 .erx-card__btn--primary:hover { background: #0f766e; border-color: #0f766e; }
-.erx-card__btn--warn { color: #d97706; border-color: #fcd34d; }
+/*
+ * Amber carries the meaning "hand this in at the pharmacy", so the hue stays.
+ * The previous #d97706 measured 3.19:1 on the light card — below AA for a 13px
+ * label — so it is one step darker; the border keeps the lighter tone.
+ */
+.erx-card__btn--warn { color: #b45309; border-color: #fcd34d; }
 .erx-card__btn--warn:hover { background: #fffbeb; }
 .erx-card__btn--danger { color: #dc2626; border-color: #fca5a5; }
 .erx-card__btn--danger:hover { background: #fef2f2; border-color: #dc2626; }
@@ -565,6 +570,36 @@
 :root[data-theme="dark"] .erx-page__disclaimer   { background: #1e3a5f; border-color: #1d4ed8; color: #bfdbfe; }
 :root[data-theme="dark"] .erx-breadcrumb__back   { color: #94a3b8; }
 :root[data-theme="dark"] .erx-breadcrumb__back:hover { color: #5eead4; }
+
+/*
+ * Dark-mode contrast corrections.
+ *
+ * The rules above use short custom properties (--ms-text-secondary,
+ * --ms-surface, ...) that the design system does not define — the tokens are
+ * named --ms-color-*. So those declarations always fall through to their
+ * hard-coded LIGHT values, which in dark mode measured 2.7:1 to 3.0:1 against
+ * the page background: below WCAG AA for body text.
+ *
+ * Corrected here, in the file's own per-element dark block, rather than by
+ * renaming tokens throughout: this touches only the dark theme, and only the
+ * elements that were actually failing. The remaining short tokens are recorded
+ * as a finding in the Phase 2F.1 report.
+ */
+:root[data-theme="dark"] .erx-page__intro { color: var(--ms-color-text-muted); }
+:root[data-theme="dark"] .erx-validity,
+:root[data-theme="dark"] .erx-validity--ok { color: var(--ms-color-text-muted); }
+:root[data-theme="dark"] .erx-token__copy { color: var(--ms-color-text-muted); }
+:root[data-theme="dark"] .erx-card__btn:not([class*="erx-card__btn--"]),
+:root[data-theme="dark"] .erx-card__btn--pdf,
+:root[data-theme="dark"] .erx-qr-toggle { color: var(--ms-color-link); }
+/*
+ * The variants set their own colour to carry meaning — amber for "hand in at
+ * the pharmacy", white on green for "redeemed", red for destructive. Only the
+ * amber one is too dark against this background; the others are left alone so
+ * the meaning survives the contrast fix.
+ */
+:root[data-theme="dark"] .erx-card__btn--warn { color: #fbbf24; border-color: #fbbf24; }
+:root[data-theme="dark"] .erx-card__btn--danger { color: #fca5a5; border-color: #fca5a5; }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {

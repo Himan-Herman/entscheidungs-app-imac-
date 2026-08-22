@@ -90,8 +90,8 @@ export default {
       "Vuoi aggiungere sonno, attività, febbre o altri elementi?",
     newChat: "Nuova conversazione",
     newChatAria: "Avvia una nuova conversazione",
-    clearHistory: "Cancella cronologia",
-    clearHistoryAria: "Cancella la cronologia salvata su questo dispositivo",
+    clearHistory: "Rimuovi dalla cronologia",
+    clearHistoryAria: "Rimuovi questa conversazione dalla cronologia su questo dispositivo",
     chatTitle: "Conversazione",
     chatIntro:
       "Domande neutre e, se utile, un riepilogo strutturato per le tue note — non è una valutazione clinica.",
@@ -232,7 +232,7 @@ export default {
       backTitle: "Schiena",
       backText: "Dorso, nuca, spalle e facce posteriori di braccia e gambe.",
       footer:
-        "Puoi cambiare vista anche dopo. La chat di una zona resta salvata sul dispositivo finché non la elimini.",
+        "Puoi cambiare vista più tardi. La cronologia di una regione viene salvata su questo dispositivo e può essere rimossa qui dalla visualizzazione.",
     },
     mapFront: {
       pageTitle: "Mappa corporea — fronte — MedScoutX",
@@ -283,8 +283,8 @@ export default {
         "Per temi che non dipendono da questa regione usa la raccolta guidata sintomi più generica.",
       btnNewChat: "Ripristina percorso mappa",
       btnNewChatTitle: "Elimina chat e torna all’introduzione mappa",
-      btnClearHistory: "Cancella solo chat",
-      btnClearHistoryTitle: "Elimina i messaggi locali di questa chat",
+      btnClearHistory: "Rimuovi dalla cronologia",
+      btnClearHistoryTitle: "Rimuovi questa conversazione dalla cronologia su questo dispositivo",
       speakAria: "Leggi ad alta voce",
       micNotice:
         "La registrazione vocale parte solo dopo il comando — nessuna ascolto continuo.",

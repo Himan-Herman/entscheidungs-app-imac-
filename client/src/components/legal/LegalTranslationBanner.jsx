@@ -26,7 +26,13 @@ export default function LegalTranslationBanner() {
     };
   }, [language]);
 
-  if (!text && !deBindingUi) return null;
+  // The notice explains that a TRANSLATION is offered for comprehension while the
+  // German wording stays authoritative. On the German page itself that statement
+  // is false and confusing, so the source language never shows it.
+  const isSourceLanguage =
+    typeof language === "string" && language.toLowerCase().startsWith("de");
+
+  if (isSourceLanguage || (!text && !deBindingUi)) return null;
 
   return (
     <div className="ms-legal-ui-notice" role="note">

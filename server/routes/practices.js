@@ -5,6 +5,7 @@ import { writeAuditLog } from "../services/auditLogService.js";
 import {
   CONTEXTUAL_DATA_BLOCKED,
   blockerAuditMetadata,
+  blockingErrorCode,
   checkPracticeDeletionBlockers,
 } from "../services/dataLifecycle/contextualPatientDataDeletionGuard.js";
 import {
@@ -352,10 +353,16 @@ router.delete("/:id", async (req, res) => {
   // rolls the transaction back if it does.
   try {
     const result = await prisma.$transaction(async (tx) => {
+      // Two independent reasons to refuse, both of which the database would
+      // otherwise raise as an opaque constraint error AFTER this preflight had
+      // reported that everything was fine: a contextual medical record, or a
+      // live document release into another practice.
       const blockers = await checkPracticeDeletionBlockers(req.params.id, tx);
-      if (blockers.blocked) {
+      const code = blockingErrorCode(blockers);
+      if (code) {
         const err = new Error(CONTEXTUAL_DATA_BLOCKED);
         err.blockerReport = blockers;
+        err.clientCode = code;
         throw err;
       }
       return tx.practiceProfile.deleteMany({ where: { id: req.params.id } });
@@ -378,7 +385,7 @@ router.delete("/:id", async (req, res) => {
         metadata: blockerAuditMetadata(err.blockerReport),
       });
       // Stable code only — no counts, categories or ids leave the server.
-      return res.status(409).json({ ok: false, error: CONTEXTUAL_DATA_BLOCKED });
+      return res.status(409).json({ ok: false, error: err.clientCode || CONTEXTUAL_DATA_BLOCKED });
     }
     console.error("[practices/delete]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "server_error" });

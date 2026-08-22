@@ -47,7 +47,7 @@ export async function generateSecurityAiSummary(input) {
         "• Review: Are exports and downloads permission-gated?",
       ];
 
-  await writeAuditLog({
+  writeAuditLog({
     req: input.req,
     userId: input.userId ?? null,
     actorRole: "practice",

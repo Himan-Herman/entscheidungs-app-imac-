@@ -49,7 +49,7 @@ export async function telemedicineInstructions(actorUserId, practiceId, input, c
     action: "telemedicine_ai_instructions",
     practiceProfileId: practiceId,
     metadata: { chars: text.length },
-  }).catch(() => {});
+  });
   return { text, aiMarked: true };
 }
 
@@ -80,6 +80,6 @@ export async function telemedicineFollowupDraft(actorUserId, practiceId, session
     action: "telemedicine_ai_followup",
     practiceProfileId: practiceId,
     metadata: { sessionId, chars: text.length },
-  }).catch(() => {});
+  });
   return { text, aiMarked: true };
 }

@@ -187,7 +187,7 @@ export async function createPracticeAppointment(actorUserId, practiceId, body, c
       practicePatientLinkId: row.practicePatientLinkId,
       patientUserId: row.patientUserId,
     },
-  }).catch(() => {});
+  });
 
   if (locationType === "video") {
     await ensureTelemedicineForAppointment(row, actorUserId, ctx).catch(() => {});
@@ -273,7 +273,7 @@ export async function patchPracticeAppointment(
     action: "appointment_updated",
     practiceProfileId: practiceId,
     metadata: { appointmentId, fields: Object.keys(data) },
-  }).catch(() => {});
+  });
 
   return appointmentToJson(row);
 }
@@ -308,7 +308,7 @@ export async function patchAppointmentStatus(
     action: status === "confirmed" ? "appointment_confirmed" : "appointment_updated",
     practiceProfileId: practiceId,
     metadata: { appointmentId, status },
-  }).catch(() => {});
+  });
 
   return appointmentToJson(row);
 }
@@ -347,7 +347,7 @@ export async function cancelPracticeAppointment(
     action: "appointment_cancelled",
     practiceProfileId: practiceId,
     metadata: { appointmentId },
-  }).catch(() => {});
+  });
 
   return appointmentToJson(row);
 }
@@ -381,12 +381,184 @@ export async function reschedulePracticeAppointment(
     action: "appointment_rescheduled",
     practiceProfileId: practiceId,
     metadata: { appointmentId },
-  }).catch(() => {});
+  });
 
   return appointmentToJson(row);
 }
 
 // ——— Patient APIs ———
+
+/**
+ * Practice details a patient sees next to an appointment. Shared by the
+ * cross-practice list and the link-scoped one so the two never drift.
+ */
+function decoratePatientAppointment(r) {
+  const p = r.practiceProfile;
+  const addressParts = [p?.street, p?.city, p?.postalCode].filter(Boolean);
+  return {
+    ...appointmentToJson(r, { includeNotes: true, includePracticeNote: false }),
+    practiceName: p?.practiceName || null,
+    practicePhone: p?.phone || null,
+    practiceEmail: p?.email || null,
+    practiceAddress: p?.address || (addressParts.length ? addressParts.join(", ") : null),
+    practiceSpecialty: p?.specialty || null,
+  };
+}
+
+/**
+ * APPOINTMENT SCOPE (Phase 2E.1)
+ * ------------------------------
+ * A patient's appointments fall into three classes, and only one of them can
+ * live inside a practice context:
+ *
+ *   A. practicePatientLinkId set   -> belongs to exactly one care relationship.
+ *                                     Patient bookings always land here, and so
+ *                                     do practice-created appointments made
+ *                                     through a link.
+ *   B. patientUserId set, link NULL -> the practice created it against a raw
+ *                                     patientUserId, or the link was later
+ *                                     removed (onDelete: SetNull). It belongs to
+ *                                     a practice but to no relationship, so no
+ *                                     context can legitimately claim it.
+ *   C. patientUserId NULL           -> external patient without an account.
+ *                                     Never in a patient view at all.
+ *
+ * Only class A is migrated into the practice context. Class B must stay
+ * reachable through the cross-practice list — silently dropping it would hide
+ * real appointments from the patient, which is worse than showing them outside
+ * a context.
+ *
+ * Resolves the care relationship for a patient-scoped appointment call.
+ * Ownership decides: a link belonging to somebody else does not match and is
+ * reported exactly like one that does not exist.
+ *
+ * @param {string} patientUserId
+ * @param {string} linkId
+ */
+async function assertPatientOwnsLink(patientUserId, linkId) {
+  const uid = String(patientUserId || "").trim();
+  const lid = String(linkId || "").trim();
+  if (!uid || !lid) throw new Error("validation_required");
+
+  const link = await prisma.practicePatientLink.findFirst({
+    where: { id: lid, patientUserId: uid },
+    select: { id: true, status: true, practiceProfileId: true },
+  });
+  if (!link) throw new Error("link_not_found");
+  return link;
+}
+
+/**
+ * Appointments of ONE care relationship, for the patient who owns it.
+ *
+ * Scoped in the database, never filtered afterwards: the query carries both the
+ * link and the patient, so an appointment of another relationship cannot be in
+ * the result set to begin with.
+ *
+ * @param {string} patientUserId
+ * @param {string} linkId
+ */
+export async function listPatientLinkAppointments(patientUserId, linkId) {
+  const link = await assertPatientOwnsLink(patientUserId, linkId);
+
+  const rows = await prisma.practiceAppointment.findMany({
+    where: { practicePatientLinkId: link.id, patientUserId },
+    include: {
+      appointmentType: true,
+      practiceProfile: {
+        select: {
+          practiceName: true,
+          phone: true,
+          email: true,
+          address: true,
+          street: true,
+          city: true,
+          postalCode: true,
+          specialty: true,
+        },
+      },
+    },
+    orderBy: { startAt: "asc" },
+    take: 200,
+  });
+
+  return rows.map((r) => decoratePatientAppointment(r));
+}
+
+/**
+ * One appointment of one care relationship.
+ *
+ * The whole chain is in the query: session patient -> owned link -> appointment
+ * on that link. A manipulated appointmentId from another relationship simply
+ * does not match, so there is no `findUnique(id)` that could be talked into
+ * returning it.
+ *
+ * @param {string} patientUserId
+ * @param {string} linkId
+ * @param {string} appointmentId
+ */
+export async function getPatientLinkAppointment(patientUserId, linkId, appointmentId) {
+  const link = await assertPatientOwnsLink(patientUserId, linkId);
+
+  const row = await prisma.practiceAppointment.findFirst({
+    where: {
+      id: String(appointmentId || "").trim(),
+      practicePatientLinkId: link.id,
+      patientUserId,
+    },
+    include: {
+      appointmentType: true,
+      practiceProfile: {
+        select: {
+          practiceName: true,
+          phone: true,
+          email: true,
+          address: true,
+          street: true,
+          city: true,
+          postalCode: true,
+          specialty: true,
+        },
+      },
+    },
+  });
+  if (!row) throw new Error("appointment_not_found");
+  return decoratePatientAppointment(row);
+}
+
+/**
+ * Confirm, inside a care relationship.
+ *
+ * Verifies appointment -> link -> patient FIRST, then delegates to the existing
+ * mutation. The patient gains no new ability: exactly the operations that were
+ * possible on the cross-practice page remain possible here, only narrower.
+ *
+ * @param {string} patientUserId
+ * @param {string} linkId
+ * @param {string} appointmentId
+ */
+export async function confirmPatientLinkAppointment(patientUserId, linkId, appointmentId, ctx = {}) {
+  await getPatientLinkAppointment(patientUserId, linkId, appointmentId);
+  return confirmPatientAppointment(patientUserId, appointmentId, ctx);
+}
+
+/**
+ * Cancel a request, inside a care relationship. Same chain, same rights.
+ *
+ * @param {string} patientUserId
+ * @param {string} linkId
+ * @param {string} appointmentId
+ */
+export async function cancelPatientLinkAppointmentRequest(
+  patientUserId,
+  linkId,
+  appointmentId,
+  body = {},
+  ctx = {},
+) {
+  await getPatientLinkAppointment(patientUserId, linkId, appointmentId);
+  return patientCancelRequest(patientUserId, appointmentId, body, ctx);
+}
 
 export async function listPatientAppointments(patientUserId) {
   const rows = await prisma.practiceAppointment.findMany({
@@ -409,18 +581,7 @@ export async function listPatientAppointments(patientUserId) {
     orderBy: { startAt: "asc" },
     take: 200,
   });
-  return rows.map((r) => {
-    const p = r.practiceProfile;
-    const addressParts = [p?.street, p?.city, p?.postalCode].filter(Boolean);
-    return {
-      ...appointmentToJson(r, { includeNotes: true, includePracticeNote: false }),
-      practiceName: p?.practiceName || null,
-      practicePhone: p?.phone || null,
-      practiceEmail: p?.email || null,
-      practiceAddress: p?.address || (addressParts.length ? addressParts.join(", ") : null),
-      practiceSpecialty: p?.specialty || null,
-    };
-  });
+  return rows.map((r) => decoratePatientAppointment(r));
 }
 
 export async function getPatientAppointment(patientUserId, appointmentId) {
@@ -518,7 +679,7 @@ export async function requestPatientAppointment(patientUserId, body, ctx = {}) {
       appointmentId: row.id,
       practicePatientLinkId: link.id,
     },
-  }).catch(() => {});
+  });
 
   return appointmentToJson(row);
 }
@@ -547,7 +708,7 @@ export async function confirmPatientAppointment(patientUserId, appointmentId, ct
     action: "appointment_confirmed",
     practiceProfileId: row.practiceProfileId,
     metadata: { appointmentId },
-  }).catch(() => {});
+  });
 
   return appointmentToJson(row);
 }
@@ -599,7 +760,7 @@ export async function patientCancelRequest(patientUserId, appointmentId, body, c
     action: "appointment_cancelled_by_patient",
     practiceProfileId: row.practiceProfileId,
     metadata: { appointmentId },
-  }).catch(() => {});
+  });
 
   return appointmentToJson(row);
 }

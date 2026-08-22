@@ -3,6 +3,7 @@ import { getPracticePatientOverview } from "../careRelationship/practicePatientR
 import { listPracticeLinkActivity } from "../activity/activityFeedService.js";
 import { listPatientActivity } from "../activity/activityFeedService.js";
 import { registryForAction } from "../activity/activityFeedRegistry.js";
+import { linkHasConsentType } from "../consent/consentRecordService.js";
 
 
 /**
@@ -192,12 +193,21 @@ async function collectPracticeExport(ctx, type, de) {
     });
     if (!link) throw new Error("link_not_found");
     const overview = await getPracticePatientOverview(linkId, pid);
-    const threads = await prisma.practicePatientThread.findMany({
-      where: { practicePatientLinkId: linkId },
-      orderBy: { updatedAt: "desc" },
-      take: 30,
-      select: { subject: true, status: true, updatedAt: true },
-    });
+
+    // The export as a whole is gated on `data_export`, but a thread subject is
+    // user-authored free text that can carry health information as directly as
+    // a message body. Consent to export a record is not consent to disclose the
+    // conversation, so the subjects sit behind the messaging consent as well.
+    // The neutral message COUNT stays — it discloses no content.
+    const mayIncludeConversation = await linkHasConsentType(link, "secure_messaging");
+    const threads = mayIncludeConversation
+      ? await prisma.practicePatientThread.findMany({
+          where: { practicePatientLinkId: linkId },
+          orderBy: { updatedAt: "desc" },
+          take: 30,
+          select: { subject: true, status: true, updatedAt: true },
+        })
+      : [];
 
     const name =
       link.patientProfile?.displayName ||
@@ -240,7 +250,16 @@ async function collectPracticeExport(ctx, type, de) {
         [de ? "— Nachrichten (Betreff)" : "— Messages (subject)"],
         ...(threadRows.length
           ? threadRows.map((r) => [r[0], `${r[1]} (${r[2]})`])
-          : [[de ? "Keine" : "None", "—"]]),
+          : [
+              mayIncludeConversation
+                ? [de ? "Keine" : "None", "—"]
+                : [
+                    de ? "Nicht enthalten" : "Not included",
+                    de
+                      ? "Keine Einwilligung für Nachrichten"
+                      : "No consent for messages",
+                  ],
+            ]),
       ],
     };
   }

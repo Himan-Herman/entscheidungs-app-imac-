@@ -167,7 +167,7 @@ export async function getLabPatientExplanation(documentId, patientUserId, ctx = 
     return { ...item, explanation: safe.text };
   });
 
-  await writeAuditLog({
+  writeAuditLog({
     req: ctx.req,
     userId: patientUserId,
     actorRole: "patient",

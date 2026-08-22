@@ -141,10 +141,18 @@ export const mailSendRouteLimiter = createIpRateLimiter({
   keyPrefix: 'mail:send',
 });
 
-/** POST /api/transcribe — Whisper audio (symptom modules); not Pre-Visit chat audio */
-export const transcribeRouteLimiter = createIpRateLimiter({
-  max: 30,
-  keyPrefix: 'transcribe:whisper',
+/**
+ * POST /api/transcribe — voice input in the symptom modules.
+ *
+ * Renamed from transcribeRouteLimiter so the limiter says which feature it
+ * bounds rather than which technique it uses. Tighter than before: every
+ * accepted request transmits a recording, and twenty per quarter hour is far
+ * more dictation than describing symptoms involves.
+ */
+export const symptomVoiceRouteLimiter = createIpRateLimiter({
+  max: Number(process.env.SYMPTOM_VOICE_IP_MAX) || 20,
+  // Named for the feature, not for the technique that happens to implement it.
+  keyPrefix: 'symptom_voice',
 });
 
 /** GET /api/public/previsit/qr/:token — unauthenticated QR resolver */
@@ -229,6 +237,34 @@ export const bookingAssistLimiter = createIpRateLimiter({
  * enforced separately in the service, since an IP limit does not stop one
  * patient firing many requests from one address.
  */
+/**
+ * POST .../messages/:messageId/translation
+ *
+ * Looser than the document limiter — one short message costs a fraction of a
+ * whole file — but present all the same. Most repeat requests never reach a
+ * provider at all: an unchanged message in the same language is served from
+ * the store, so the limiter is there for the case the cache cannot answer,
+ * which is a genuinely new translation.
+ */
+/**
+ * POST .../dictation
+ *
+ * Tighter than the text limiters, and for a different reason than cost: every
+ * accepted request transmits a recording. Twenty per quarter hour is far more
+ * dictation than composing messages to a practice involves, and it bounds how
+ * much audio one address can push outwards if something goes wrong at the other
+ * end of the microphone button.
+ */
+export const messageSttIpLimiter = createIpRateLimiter({
+  max: Number(process.env.MESSAGE_STT_IP_MAX) || 20,
+  keyPrefix: "message_stt",
+});
+
+export const messageTranslationIpLimiter = createIpRateLimiter({
+  max: Number(process.env.MESSAGE_TRANSLATION_IP_MAX) || 60,
+  keyPrefix: "message_translation",
+});
+
 export const documentTranslationIpLimiter = createIpRateLimiter({
   // Overridable so a deployment can tune it and so HTTP tests, which all
   // originate from one loopback address, are not throttled by each other.

@@ -92,8 +92,8 @@ export default {
       "¿Desea añadir sueño, actividad, fiebre u otros datos?",
     newChat: "Nueva conversación",
     newChatAria: "Iniciar una conversación nueva",
-    clearHistory: "Borrar historial",
-    clearHistoryAria: "Borrar el historial guardado en este dispositivo",
+    clearHistory: "Quitar del historial",
+    clearHistoryAria: "Quitar esta conversación del historial en este dispositivo",
     chatTitle: "Conversación",
     chatIntro:
       "Preguntas neutras y, si procede, un resumen estructurado para sus notas — no es una valoración clínica.",
@@ -233,7 +233,7 @@ export default {
       backTitle: "Espalda",
       backText: "Espalda, nuca, hombros, cara posterior de brazos y piernas.",
       footer:
-        "Puede cambiar de vista más tarde. El chat de una zona se guarda en este dispositivo hasta borrarlo.",
+        "Puede cambiar de vista más tarde. El historial de una región se guarda en este dispositivo y puede quitarse aquí de la vista.",
     },
     mapFront: {
       pageTitle: "Mapa corporal — frente — MedScoutX",
@@ -282,8 +282,8 @@ export default {
         "Para temas que no dependan de esta región, use mejor la revisión guiada general de síntomas.",
       btnNewChat: "Reiniciar flujo del mapa",
       btnNewChatTitle: "Borrar chat y volver al inicio del mapa",
-      btnClearHistory: "Borrar solo chat",
-      btnClearHistoryTitle: "Borrar mensajes locales de este chat",
+      btnClearHistory: "Quitar del historial",
+      btnClearHistoryTitle: "Quitar esta conversación del historial en este dispositivo",
       speakAria: "Leer en voz alta",
       micNotice:
         "Solo hay grabación de voz tras pulsar el micrófono — no hay escucha permanente.",

@@ -95,7 +95,7 @@ router.put("/preparations/:id/medications", async (req, res) => {
       }
     }
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: access.role,
       action: "visit_medications_saved",

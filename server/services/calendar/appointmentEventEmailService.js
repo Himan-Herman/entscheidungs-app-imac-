@@ -134,7 +134,7 @@ export async function sendAppointmentEventEmail(appt, event) {
         skipped: result.skipped ?? false,
         reason: result.reason ?? null,
       },
-    }).catch(() => {});
+    });
 
     // Practice notification when patient cancels — fire-and-forget.
     if (event === "cancelledByPatient" && practice?.email) {
@@ -157,7 +157,7 @@ export async function sendAppointmentEventEmail(appt, event) {
               skipped: r.skipped ?? false,
               reason: r.reason ?? null,
             },
-          }).catch(() => {});
+          });
         })
         .catch(() => {});
     }
@@ -171,7 +171,7 @@ export async function sendAppointmentEventEmail(appt, event) {
       entityType: "PracticeAppointment",
       entityId: appt.id,
       metadata: { emailEvent: event, reason },
-    }).catch(() => {});
+    });
     console.error(
       JSON.stringify({
         level: "error",

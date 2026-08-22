@@ -43,14 +43,28 @@ export const DENIAL_STATUS = Object.freeze({
 });
 
 /**
+ * Normalizes a "one or many required things" input to a clean list.
+ * `null`, `undefined`, `""` and blank entries all mean "nothing required", so a
+ * misspelled or absent option can never silently satisfy a requirement.
+ *
+ * @param {string | string[] | null | undefined} value
+ * @returns {string[]}
+ */
+export function normalizeRequiredList(value) {
+  if (value == null) return [];
+  const list = Array.isArray(value) ? value : [value];
+  return list.map((v) => String(v || "").trim()).filter(Boolean);
+}
+
+/**
  * Pure authorization decision — no database, no I/O, fully unit-testable.
  *
  * @param {{
  *   actorUserId?: string | null,
  *   link?: { id: string, practiceProfileId: string, patientUserId: string, status: string } | null,
  *   access?: { role: string, effectivePermissions?: Set<string>, isOwner?: boolean } | null,
- *   requiredPermission?: string | null,
- *   requiredConsentType?: string | null,
+ *   requiredPermission?: string | string[] | null,
+ *   requiredConsentType?: string | string[] | null,
  *   hasConsent?: boolean,
  *   clientPracticeId?: string | null,
  * }} input
@@ -84,8 +98,7 @@ export function evaluatePracticePatientLinkAccess(input) {
   // Checked against the EFFECTIVE permissions (owner allowlist ∪ active
   // membership allowlist), so an owner who is also an active doctor is
   // evaluated on both, while ownership alone never yields clinical rights.
-  const required = input?.requiredPermission;
-  const requiredList = required == null ? [] : Array.isArray(required) ? required : [required];
+  const requiredList = normalizeRequiredList(input?.requiredPermission);
   for (const permission of requiredList) {
     if (!accessHasPermission(access, permission)) {
       return deny("forbidden");
@@ -94,7 +107,11 @@ export function evaluatePracticePatientLinkAccess(input) {
 
   if (!LINK_USABLE_STATES.has(link.status)) return deny("link_inactive");
 
-  if (input?.requiredConsentType && input?.hasConsent !== true) {
+  // A route may demand several consents at once (e.g. the AI draft needs the
+  // messaging consent AND the separate consent to involve an external AI
+  // processor). ALL must be held — never any-of, mirroring the permission rule
+  // above. `hasConsent` is the caller's aggregated answer for the whole list.
+  if (normalizeRequiredList(input?.requiredConsentType).length > 0 && input?.hasConsent !== true) {
     return deny("consent_required");
   }
 
@@ -104,6 +121,11 @@ export function evaluatePracticePatientLinkAccess(input) {
     practiceProfileId: link.practiceProfileId,
     patientUserId: link.patientUserId,
     role: access.role,
+    // Passed on so a route can ASK about a permission it did not require —
+    // e.g. a read route deciding whether to offer a write control. Reporting a
+    // permission is not granting one; every write still goes through a guard
+    // that demands it.
+    access,
   };
 }
 
@@ -113,8 +135,8 @@ export function evaluatePracticePatientLinkAccess(input) {
  * @param {{
  *   actorUserId: string,
  *   linkId: string,
- *   requiredPermission?: string | null,
- *   requiredConsentType?: string | null,
+ *   requiredPermission?: string | string[] | null,
+ *   requiredConsentType?: string | string[] | null,
  *   clientPracticeId?: string | null,
  *   req?: import('express').Request,
  * }} params
@@ -146,9 +168,17 @@ export async function authorizePracticePatientLink(params) {
     : null;
 
   // 3) Consent is only evaluated once membership stands, to avoid needless writes.
+  //    ALL required consents must be held; the first missing one decides.
+  const requiredConsents = normalizeRequiredList(params?.requiredConsentType);
   let hasConsent = false;
-  if (link && access && params?.requiredConsentType) {
-    hasConsent = await linkHasConsentType(link, params.requiredConsentType);
+  if (link && access && requiredConsents.length > 0) {
+    hasConsent = true;
+    for (const consentType of requiredConsents) {
+      if (!(await linkHasConsentType(link, consentType))) {
+        hasConsent = false;
+        break;
+      }
+    }
   }
 
   const decision = evaluatePracticePatientLinkAccess({
@@ -194,7 +224,10 @@ export async function authorizePracticePatientLink(params) {
  * Express middleware factory. On success it populates `req.linkAccess` with the
  * authorized link, the server-derived practiceProfileId and the actor role.
  *
- * @param {{ permission?: string | null, consentType?: string | null }} [options]
+ * Both `permission` and `consentType` accept a single value or an array; when an
+ * array is given, EVERY entry must be held (never any-of).
+ *
+ * @param {{ permission?: string | string[] | null, consentType?: string | string[] | null }} [options]
  */
 export function requirePracticePatientLinkAccess(options = {}) {
   return async function practicePatientLinkAccessMiddleware(req, res, next) {
@@ -215,9 +248,13 @@ export function requirePracticePatientLinkAccess(options = {}) {
 
       req.linkAccess = {
         link: decision.link,
+        // Server-derived: the id of the link that was actually authorized, never
+        // the raw path segment. Routes must use this, not req.params.linkId.
+        linkId: decision.link.id,
         practiceProfileId: decision.practiceProfileId,
         patientUserId: decision.patientUserId,
         role: decision.role,
+        access: decision.access ?? null,
         actorUserId: req.user.userId,
       };
       return next();

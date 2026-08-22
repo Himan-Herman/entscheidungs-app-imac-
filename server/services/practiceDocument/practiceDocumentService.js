@@ -10,6 +10,7 @@ import {
 } from "../../utils/practiceBranding.js";
 import {
   practiceDocumentAccessWhere,
+  effectiveGrantWhere,
   isOriginPractice,
   auditSharedDocumentAccess,
 } from "./documentShareGrantService.js";
@@ -626,6 +627,208 @@ export async function softDeletePracticeDocument(
 /**
  * @param {string} patientUserId
  */
+/**
+ * DOCUMENT SCOPE IN A PRACTICE CONTEXT (Phase 2E.2)
+ * -------------------------------------------------
+ * A document belongs in the patient's view of ONE care relationship when either
+ * of two things is true, and never for any other reason:
+ *
+ *   A. DIRECT — it is the practice's own document on THIS link, and the practice
+ *      has actually released it to the patient (an active PracticeDocumentShare).
+ *      Without that second half the patient would see the practice's drafts.
+ *
+ *   B. SHARED — the patient released it into THIS link with a currently
+ *      effective PracticeDocumentShareGrant.
+ *
+ * Everything else — another link's documents, revoked or expired grants,
+ * another patient's documents — matches neither branch and cannot appear.
+ *
+ * `patientUserId` alone is never sufficient: two documents belonging to the same
+ * person do not authorize each other across practices. Both branches therefore
+ * carry the link, and the grant branch additionally carries the patient, so a
+ * grant can never pull one patient's document into another patient's context.
+ *
+ * The predicates are the ones the practice side already uses
+ * (`effectiveGrantWhere`), not a second implementation that could drift.
+ *
+ * @param {string} linkId
+ * @param {string} patientUserId
+ */
+function patientContextDocumentWhere(link, now = new Date()) {
+  return {
+    // Never a deleted document, whichever branch matched.
+    status: { not: "deleted" },
+    OR: [
+      // A — DIRECT: this link's own document, released to the patient.
+      {
+        practicePatientLinkId: link.id,
+        patientUserId: link.patientUserId,
+        status: "shared",
+        shares: {
+          some: {
+            patientUserId: link.patientUserId,
+            status: "active",
+            OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+          },
+        },
+      },
+      // B — SHARED: released by the patient into exactly this link.
+      {
+        patientUserId: link.patientUserId,
+        shareGrants: {
+          some: effectiveGrantWhere({
+            targetPracticePatientLinkId: link.id,
+            targetPracticeProfileId: link.practiceProfileId,
+            patientUserId: link.patientUserId,
+            now,
+          }),
+        },
+      },
+    ],
+  };
+}
+
+/**
+ * Resolves the care relationship for a patient-scoped document call.
+ *
+ * Ownership decides. A link belonging to somebody else does not match and is
+ * reported exactly like one that does not exist, so the error cannot be used to
+ * probe whose it is.
+ *
+ * @param {string} linkId
+ * @param {string} patientUserId
+ */
+async function assertPatientOwnsLink(linkId, patientUserId) {
+  const lid = String(linkId || "").trim();
+  const uid = String(patientUserId || "").trim();
+  if (!lid || !uid) throw new Error("validation_required");
+
+  const link = await prisma.practicePatientLink.findFirst({
+    where: { id: lid, patientUserId: uid },
+    select: { id: true, patientUserId: true, practiceProfileId: true, status: true },
+  });
+  if (!link) throw new Error("link_not_found");
+  return link;
+}
+
+/**
+ * Documents of ONE care relationship, for the patient who owns it.
+ *
+ * Scoped in the database, never filtered afterwards: a document outside this
+ * context cannot be in the result set to begin with.
+ *
+ * @param {string} linkId
+ * @param {string} patientUserId
+ */
+export async function listPatientLinkDocuments(linkId, patientUserId) {
+  const link = await assertPatientOwnsLink(linkId, patientUserId);
+
+  const rows = await prisma.practiceDocument.findMany({
+    where: patientContextDocumentWhere(link),
+    include: {
+      files: { orderBy: { createdAt: "asc" } },
+      shares: { orderBy: { sharedAt: "desc" } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
+    },
+    orderBy: [{ sharedAt: "desc" }, { createdAt: "desc" }],
+    take: 200,
+  });
+
+  return rows.map((row) => patientContextDocumentJson(row, link));
+}
+
+/**
+ * One document of one care relationship.
+ *
+ * The whole chain lives in the query: session patient -> owned link -> a
+ * document that is either this link's own or effectively granted into it. A
+ * manipulated documentId from another link simply does not match, so there is no
+ * `findUnique(id)` that could be talked into returning it.
+ *
+ * @param {string} linkId
+ * @param {string} documentId
+ * @param {string} patientUserId
+ */
+export async function getPatientLinkDocument(linkId, documentId, patientUserId) {
+  const link = await assertPatientOwnsLink(linkId, patientUserId);
+
+  const row = await prisma.practiceDocument.findFirst({
+    where: {
+      id: String(documentId || "").trim(),
+      ...patientContextDocumentWhere(link),
+    },
+    include: {
+      files: { orderBy: { createdAt: "asc" } },
+      shares: { orderBy: { sharedAt: "desc" } },
+      practiceProfile: { select: PRACTICE_BRANDING_SELECT },
+    },
+  });
+  if (!row) throw new Error("document_not_found");
+
+  return { link, row, json: patientContextDocumentJson(row, link) };
+}
+
+/**
+ * What the patient's practice-context list shows.
+ *
+ * Metadata only. No OCR text, no extracted values, no secure token, no grant
+ * ids — the UI needs none of them, and an id the UI does not use is an id that
+ * can leak.
+ *
+ * @param {object} row
+ * @param {{ id: string, practiceProfileId: string }} link
+ */
+function patientContextDocumentJson(row, link) {
+  const isDirect = row.practicePatientLinkId === link.id;
+  return {
+    id: row.id,
+    title: row.title,
+    type: row.type,
+    status: row.status,
+    createdAt: row.createdAt,
+    sharedAt: row.sharedAt,
+    // Why this document is in this context at all — "direct" or released here.
+    origin: isDirect ? "direct" : "shared",
+    // For a shared document, the practice it came FROM, so the patient can tell
+    // why it appears here. Never shown for a direct one: that is this practice.
+    sourcePracticeName: isDirect ? null : (row.practiceProfile?.practiceName ?? null),
+    files: (row.files ?? []).map((f) => ({
+      id: f.id,
+      fileName: f.originalFileName,
+      mimeType: f.mimeType,
+      sizeBytes: f.sizeBytes,
+    })),
+  };
+}
+
+/**
+ * A file of a document in ONE care relationship, for download.
+ *
+ * Authorization is re-derived HERE, at download time, from the current state —
+ * it is never inherited from the list the client is looking at. A grant that was
+ * revoked one second ago makes this fail even though the document was on screen:
+ * having been allowed to see something is not a standing permission to fetch it.
+ *
+ * No token is involved on this path at all. The session plus the link decide,
+ * so there is nothing to replay and nothing that can outlive a revocation.
+ *
+ * @param {string} linkId
+ * @param {string} documentId
+ * @param {string} fileId
+ * @param {string} patientUserId
+ */
+export async function getPatientLinkDocumentFile(linkId, documentId, fileId, patientUserId) {
+  const { row } = await getPatientLinkDocument(linkId, documentId, patientUserId);
+
+  const fileRow = await prisma.practiceDocumentFile.findFirst({
+    where: { id: String(fileId || "").trim(), documentId: row.id },
+  });
+  if (!fileRow) throw new Error("file_not_found");
+
+  const buffer = await storage.getObject(fileRow.storageKey);
+  return { file: fileRow, buffer };
+}
+
 export async function listSharedDocumentsForPatient(patientUserId) {
   const rows = await prisma.practiceDocument.findMany({
     where: {

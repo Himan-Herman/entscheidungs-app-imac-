@@ -22,7 +22,7 @@ function auditCleanup(action, sessionId, metadata = {}) {
     entityType: "telemedicine_session",
     entityId: sessionId,
     metadata,
-  }).catch(() => {});
+  });
 }
 
 /**
@@ -191,7 +191,7 @@ export async function processTelemedicineCleanup(opts = {}) {
     action: "telemedicine.session.cleanup_started",
     entityType: "telemedicine_cleanup",
     metadata: { batchSize: batch },
-  }).catch(() => {});
+  });
 
   const revokedCancelled = await cleanupRevokedLinks(now, batch);
   const waitingCancelled = await cleanupStaleWaiting(now, batch);

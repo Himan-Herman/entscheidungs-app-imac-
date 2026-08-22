@@ -339,7 +339,7 @@ async function loadPatientIdentity(patientUserId) {
  */
 async function audit(entry) {
   try {
-    await writeAuditLog({
+    writeAuditLog({
     req: entry.req,
     userId: entry.patientUserId,
     actorRole: "patient",
@@ -367,7 +367,7 @@ async function audit(entry) {
 
 async function auditFailure(entry) {
   try {
-    await writeAuditLog({
+    writeAuditLog({
     req: entry.req,
     userId: entry.patientUserId,
     actorRole: "patient",

@@ -101,7 +101,7 @@ router.get("/", async (req, res) => {
       offset: req.query.offset,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -128,7 +128,7 @@ router.patch("/:itemId/read", async (req, res) => {
   try {
     const item = await markInboxItemRead(req.params.itemId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -157,7 +157,7 @@ router.patch("/:itemId/archive", async (req, res) => {
   try {
     const item = await archiveInboxItem(req.params.itemId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -186,7 +186,7 @@ router.patch("/:itemId/restore", async (req, res) => {
   try {
     const item = await restoreInboxItem(req.params.itemId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",

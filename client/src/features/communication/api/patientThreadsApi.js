@@ -14,11 +14,26 @@ export async function fetchPatientThread(threadId) {
   return { res, data };
 }
 
-export async function sendPatientThreadMessage(threadId, body) {
+/**
+ * Explicit read acknowledgement.
+ *
+ * The server's GET is read-only, so fetching a thread no longer marks it read.
+ * Callers acknowledge once the conversation has actually been presented. The
+ * endpoint is idempotent, so a repeated call is harmless.
+ */
+export async function acknowledgePatientThreadRead(threadId) {
+  const res = await authFetch(`${BASE}/${encodeURIComponent(threadId)}/read`, {
+    method: "PATCH",
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+export async function sendPatientThreadMessage(threadId, body, clientRequestId) {
   const res = await authFetch(`${BASE}/${encodeURIComponent(threadId)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ body }),
+    body: JSON.stringify({ body, clientRequestId }),
   });
   const data = await res.json().catch(() => ({}));
   return { res, data };

@@ -45,7 +45,16 @@ function sessionToJson(row, { includeParticipants = false } = {}) {
     linkRevoked: Boolean(row.linkRevokedAt),
     consentGranted: Boolean(row.consentAcceptedAt),
     consentVersion: row.consentVersion,
-    providerRoomId: row.providerRoomId,
+    // `providerRoomId` is NOT serialized. For the sandbox provider the meeting
+    // URL is https://meet.jit.si/MedScoutX-<providerRoomId>, so the room id is
+    // the only thing protecting the room — a bearer secret in everything but
+    // name. Returning it in a list or a detail response let anyone holding that
+    // response reconstruct the URL and enter without passing the join endpoint,
+    // where consent, revocation and ownership are checked.
+    //
+    // Nothing reads it on the client. The meeting URL reaches a patient through
+    // patientJoinWaitingRoom() and a practice through startPracticeSession(),
+    // both of which read the Prisma row directly rather than this payload.
     hasJoinLink: Boolean(row.joinUrlHash && !row.linkRevokedAt),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -128,7 +137,7 @@ export async function ensureTelemedicineForAppointment(appointment, actorUserId,
     action: "telemedicine_session_created",
     practiceProfileId: appointment.practiceProfileId,
     metadata: { sessionId: session.id, appointmentId: appointment.id },
-  }).catch(() => {});
+  });
 
   await notifyTelemedicineEvent(session, "created");
   await notifyTelemedicineEvent(session, "link");
@@ -210,7 +219,7 @@ export async function createPracticeSession(actorUserId, practiceId, body, ctx =
     action: "telemedicine_session_created",
     practiceProfileId: practiceId,
     metadata: { sessionId: session.id },
-  }).catch(() => {});
+  });
 
   await notifyTelemedicineEvent(session, "created");
   return sessionToJson(session, { includeParticipants: true });
@@ -267,7 +276,7 @@ export async function startPracticeSession(actorUserId, practiceId, sessionId, c
     action: "telemedicine_session_started",
     practiceProfileId: practiceId,
     metadata: { sessionId },
-  }).catch(() => {});
+  });
 
   const hostUrl = getVideoAdapter(row.providerType).getHostUrl(
     { providerRoomId: row.providerRoomId },
@@ -295,7 +304,7 @@ export async function completePracticeSession(actorUserId, practiceId, sessionId
     action: "telemedicine_session_completed",
     practiceProfileId: practiceId,
     metadata: { sessionId },
-  }).catch(() => {});
+  });
 
   await notifyTelemedicineEvent(row, "completed");
   return sessionToJson(row, { includeParticipants: true });
@@ -318,7 +327,7 @@ export async function cancelPracticeSession(actorUserId, practiceId, sessionId, 
     action: "telemedicine_session_cancelled",
     practiceProfileId: practiceId,
     metadata: { sessionId },
-  }).catch(() => {});
+  });
 
   await notifyTelemedicineEvent(row, "cancelled");
   return sessionToJson(row);
@@ -341,7 +350,7 @@ export async function revokeSessionLink(actorUserId, practiceId, sessionId, ctx 
     action: "telemedicine_link_revoked",
     practiceProfileId: practiceId,
     metadata: { sessionId },
-  }).catch(() => {});
+  });
 
   return sessionToJson(row);
 }
@@ -396,7 +405,7 @@ export async function grantPatientConsent(patientUserId, sessionId, ctx = {}) {
     action: "telemedicine_consent_granted",
     practiceProfileId: row.practiceProfileId,
     metadata: { sessionId, consentVersion: version },
-  }).catch(() => {});
+  });
 
   await notifyTelemedicineEvent(updated, "consent");
   return sessionToJson(updated);
@@ -443,7 +452,7 @@ export async function patientJoinWaitingRoom(patientUserId, sessionId, body, ctx
     action: "telemedicine_patient_waiting",
     practiceProfileId: row.practiceProfileId,
     metadata: { sessionId },
-  }).catch(() => {});
+  });
 
   await notifyTelemedicineEvent(updated, "waiting");
 
@@ -459,7 +468,7 @@ export async function patientJoinWaitingRoom(patientUserId, sessionId, body, ctx
     action: "telemedicine_link_opened",
     practiceProfileId: row.practiceProfileId,
     metadata: { sessionId, opened: true },
-  }).catch(() => {});
+  });
 
   return { session: sessionToJson(updated), joinUrl };
 }

@@ -97,7 +97,7 @@ export async function generateConsentAiExplanation(input) {
         "• Revocation: available at any time; access for this area is then blocked.",
       ];
 
-  await writeAuditLog({
+  writeAuditLog({
     req: input.req,
     userId: patientUserId,
     actorRole: "patient",

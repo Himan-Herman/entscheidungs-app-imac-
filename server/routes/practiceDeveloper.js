@@ -71,7 +71,7 @@ router.post("/api-clients", async (req, res) => {
   if (!ctx) return;
   try {
     const result = await createApiClient(ctx.userId, ctx.practiceId, req.body || {});
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -93,7 +93,7 @@ router.patch("/api-clients/:clientId/revoke", async (req, res) => {
   if (!ctx) return;
   try {
     const client = await revokeApiClient(ctx.userId, ctx.practiceId, req.params.clientId);
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -124,7 +124,7 @@ router.post("/webhook-endpoints", async (req, res) => {
   if (!ctx) return;
   try {
     const result = await createWebhookEndpoint(ctx.userId, ctx.practiceId, req.body || {});
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -155,7 +155,7 @@ router.patch("/webhook-endpoints/:endpointId", async (req, res) => {
       req.params.endpointId,
       req.body || {},
     );
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -180,7 +180,7 @@ router.post("/webhook-endpoints/:endpointId/test", async (req, res) => {
       ctx.practiceId,
       req.params.endpointId,
     );
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -217,7 +217,7 @@ router.post("/ai-webhook-explanation", async (req, res) => {
     const result = await developerAiWebhookExplanation(req.body || {}, {
       locale: req.body?.locale,
     });
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,

@@ -1,9 +1,27 @@
 /**
  * Patient messaging threads — /api/patient/threads
+ *
+ * AUTHORIZATION
+ * -------------
+ * Scope comes exclusively from the authenticated user id (`req.user.userId`).
+ * A patient never supplies a patientUserId, practiceId or linkId that is used
+ * to scope a query — every service call filters on the session's own user id,
+ * so a manipulated identifier can only ever produce `thread_not_found`.
+ *
+ * CONSENT (C-2 / C-4) — deliberately asymmetric, see the policy block in
+ * services/communication/practicePatientThreadService.js:
+ *   reading  own conversation -> no consent gate (the patient is the data
+ *                                subject; this also keeps the history readable
+ *                                after the relationship ended, which is an
+ *                                access question, not a retention one),
+ *   writing  into it          -> requires the messaging consent, which
+ *                                `linkHasConsentType` denies for links that are
+ *                                no longer usable.
  */
 
 import express from "express";
 import { requireCommunicationV2Feature } from "../middleware/requireCommunicationV2.js";
+import { requireCommunicationAiDraftsFeature } from "../middleware/requireCommunicationAiDrafts.js";
 import {
   addMessageFromPatient,
   archiveThreadForPatient,
@@ -67,21 +85,28 @@ router.get("/", async (req, res) => {
   }
 });
 
-/** GET /api/patient/threads/:threadId */
+/**
+ * GET /api/patient/threads/:threadId — READ-ONLY (C-3).
+ *
+ * This used to call markThreadRead() as a side effect, so merely fetching a
+ * thread flipped its read state. Read state now changes only through the
+ * explicit `PATCH /:threadId/read` acknowledgement below — otherwise the later
+ * "edit/withdraw only while unread" rule could never be enforced, because a
+ * prefetch would already have consumed the window.
+ */
 router.get("/:threadId", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
   try {
-    await markThreadRead(req.params.threadId, "patient", { patientUserId: userId });
     const thread = await getThreadForPatientUser(req.params.threadId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
-      action: "patient_thread_read",
+      action: "patient_thread_viewed",
       entityType: "PracticePatientThread",
-      entityId: req.params.threadId,
+      entityId: thread.id,
     });
 
     return res.json({ ok: true, thread });
@@ -101,9 +126,11 @@ async function handlePatientMessagePost(req, res) {
       threadId: req.params.threadId,
       patientUserId: userId,
       body: req.body?.body,
+      // Optional idempotency key for ONE logical send action.
+      clientRequestId: req.body?.clientRequestId,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "patient_thread_message_sent",
@@ -125,7 +152,13 @@ router.post("/:threadId", handlePatientMessagePost);
 /** POST /api/patient/threads/:threadId/messages */
 router.post("/:threadId/messages", handlePatientMessagePost);
 
-/** PATCH /api/patient/threads/:threadId/read */
+/**
+ * PATCH /api/patient/threads/:threadId/read — explicit read acknowledgement.
+ *
+ * Idempotent: the underlying update is conditional on `readAt: null`, so
+ * repeating or racing this call keeps the first timestamp and changes nothing
+ * else.
+ */
 router.patch("/:threadId/read", async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
@@ -135,7 +168,7 @@ router.patch("/:threadId/read", async (req, res) => {
       patientUserId: userId,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "patient_thread_read",
@@ -159,7 +192,7 @@ router.patch("/:threadId/archive", async (req, res) => {
   try {
     const thread = await archiveThreadForPatient(req.params.threadId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "patient_thread_archived",
@@ -183,7 +216,7 @@ router.patch("/:threadId/restore", async (req, res) => {
   try {
     const thread = await restoreThreadForPatient(req.params.threadId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "patient_thread_restored",
@@ -199,8 +232,13 @@ router.patch("/:threadId/restore", async (req, res) => {
   }
 });
 
-/** POST /api/patient/messages/:threadId/ai-rewrite */
-router.post("/:threadId/ai-rewrite", async (req, res) => {
+/**
+ * POST /api/patient/messages/:threadId/ai-rewrite
+ *
+ * Off by default (COMMUNICATION_AI_DRAFTS): the only patient route here that
+ * sends conversation content to an external AI provider.
+ */
+router.post("/:threadId/ai-rewrite", requireCommunicationAiDraftsFeature, async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
@@ -213,7 +251,7 @@ router.post("/:threadId/ai-rewrite", async (req, res) => {
       draftInput: req.body?.draftInput || req.body?.body,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "patient_thread_ai_draft",

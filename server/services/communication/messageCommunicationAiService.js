@@ -109,13 +109,17 @@ function buildPromptFromThread(p) {
 }
 
 /**
- * @param {{ linkId: string, practiceProfileId: string, threadId: string, locale?: string, mode?: string, draftInput?: string }} input
+ * @param {{ linkId: string, practiceProfileId: string, threadId: string, locale?: string, mode?: string, draftInput?: string, actorUserId?: string, actorRole?: string }} input
  */
 export async function generatePracticeMessageAiDraft(input) {
+  // Loading through getThread() re-applies the tenant + messaging-consent gate
+  // at the service layer. The route additionally requires the separate
+  // `ai_organizational_assistance` consent before this is ever reached.
   const thread = await getThread(
     input.threadId,
     input.practiceProfileId,
     input.linkId,
+    { actorUserId: input.actorUserId, actorRole: input.actorRole || "practice" },
   );
   const text = await runDraft(
     buildPromptFromThread({

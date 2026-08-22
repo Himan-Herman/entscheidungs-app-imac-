@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
-import { writeAuditLog } from "../auditLogService.js";
+import { writeAuditLog, writeRequiredAuditLog } from "../auditLogService.js";
 import { logSecurityEvent } from "../security/securityEventService.js";
 import {
   CARE_CONSENT_VERSION,
@@ -72,7 +72,7 @@ export async function expireStaleConsentsForLink(linkId) {
   });
 
   for (const row of stale) {
-    await writeAuditLog({
+    writeAuditLog({
       userId: row.patientUserId,
       actorRole: "system",
       action: "consent_record_expired",
@@ -276,53 +276,69 @@ export async function grantConsentRecord(input) {
 
   const now = new Date();
 
-  await prisma.consentRecord.updateMany({
-    where: {
-      practicePatientLinkId: linkId,
-      consentType,
-      status: "granted",
-    },
-    data: { status: "revoked", revokedAt: now, revokedByUserId: uid },
-  });
-
-  const row = await prisma.consentRecord.create({
-    data: {
-      patientUserId: uid,
-      practiceProfileId: link.practiceProfileId,
-      practicePatientLinkId: linkId,
-      consentType,
-      status: "granted",
-      grantedAt: now,
-      grantedByUserId: uid,
-      expiresAt,
-      version: CARE_CONSENT_VERSION,
-    },
-  });
-
-  if (link.status === "invited") {
-    await prisma.practicePatientLink.update({
-      where: { id: linkId },
-      data: { status: "active" },
+  // Granting consent supersedes the previous record, may activate the care
+  // relationship, and MUST leave an audit row. All four steps now share one
+  // transaction: previously they ran separately, so a failure could revoke the
+  // old consent without creating the new one — and the audit could fail while
+  // the grant stood, which is the gap this phase exists to close.
+  //
+  // syncLinkScopesFromRecords() stays outside: it is derived from the records
+  // and idempotent, so it has nothing to do if the transaction rolled back.
+  const row = await prisma.$transaction(async (tx) => {
+    await tx.consentRecord.updateMany({
+      where: {
+        practicePatientLinkId: linkId,
+        consentType,
+        status: "granted",
+      },
+      data: { status: "revoked", revokedAt: now, revokedByUserId: uid },
     });
-  }
+
+    const created = await tx.consentRecord.create({
+      data: {
+        patientUserId: uid,
+        practiceProfileId: link.practiceProfileId,
+        practicePatientLinkId: linkId,
+        consentType,
+        status: "granted",
+        grantedAt: now,
+        grantedByUserId: uid,
+        expiresAt,
+        version: CARE_CONSENT_VERSION,
+      },
+    });
+
+    if (link.status === "invited") {
+      await tx.practicePatientLink.update({
+        where: { id: linkId },
+        data: { status: "active" },
+      });
+    }
+
+    // Consent type and whether it expires — never the medical purpose behind it.
+    await writeRequiredAuditLog(
+      {
+        req: input.req,
+        userId: uid,
+        actorRole: "patient",
+        action: "consent_record_granted",
+        entityType: "consent_record",
+        entityId: created.id,
+        practiceProfileId: link.practiceProfileId,
+        patientUserId: uid,
+        practicePatientLinkId: linkId,
+        metadata: {
+          consentType,
+          hasExpiry: Boolean(expiresAt),
+        },
+      },
+      tx,
+    );
+
+    return created;
+  });
 
   await syncLinkScopesFromRecords(linkId);
-
-  await writeAuditLog({
-    req: input.req,
-    userId: uid,
-    actorRole: "patient",
-    action: "consent_record_granted",
-    entityType: "consent_record",
-    entityId: row.id,
-    practiceProfileId: link.practiceProfileId,
-    patientUserId: uid,
-    practicePatientLinkId: linkId,
-    metadata: {
-      consentType,
-      hasExpiry: Boolean(expiresAt),
-    },
-  });
 
   const practice = await prisma.practiceProfile.findUnique({
     where: { id: link.practiceProfileId },
@@ -349,34 +365,46 @@ export async function revokeConsentRecord(consentId, patientUserId, ctx = {}) {
   if (row.status !== "granted") return consentRecordToJson(row);
 
   const now = new Date();
-  const updated = await prisma.consentRecord.update({
-    where: { id },
-    data: {
-      status: "revoked",
-      revokedAt: now,
-      revokedByUserId: uid,
-    },
+
+  // Withdrawing consent must never take effect unrecorded, so the state change
+  // and its audit row commit together.
+  const updated = await prisma.$transaction(async (tx) => {
+    const changed = await tx.consentRecord.update({
+      where: { id },
+      data: {
+        status: "revoked",
+        revokedAt: now,
+        revokedByUserId: uid,
+      },
+    });
+
+    await writeRequiredAuditLog(
+      {
+        req: ctx.req,
+        userId: uid,
+        actorRole: "patient",
+        action: "consent_record_revoked",
+        entityType: "consent_record",
+        entityId: id,
+        practiceProfileId: row.practiceProfileId,
+        patientUserId: uid,
+        practicePatientLinkId: row.practicePatientLinkId,
+        metadata: { consentType: row.consentType },
+      },
+      tx,
+    );
+
+    return changed;
   });
 
+  // Derived follow-ups run after the revocation is durable. Both are idempotent
+  // and both only ever narrow access, so running them late can widen nothing.
   if (row.practicePatientLinkId) {
     await syncLinkScopesFromRecords(row.practicePatientLinkId);
     if (row.consentType === "optional_secure_links" || row.consentType === "document_sharing") {
       await revokeSecureLinksForLink(row.practicePatientLinkId, row.practiceProfileId);
     }
   }
-
-  await writeAuditLog({
-    req: ctx.req,
-    userId: uid,
-    actorRole: "patient",
-    action: "consent_record_revoked",
-    entityType: "consent_record",
-    entityId: id,
-    practiceProfileId: row.practiceProfileId,
-    patientUserId: uid,
-    practicePatientLinkId: row.practicePatientLinkId,
-    metadata: { consentType: row.consentType },
-  });
 
   return consentRecordToJson(updated);
 }

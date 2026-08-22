@@ -3,7 +3,6 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
-  FolderOpen,
   Heart,
   HeartPulse,
   ImageIcon,
@@ -29,6 +28,16 @@ import {
 /** @typedef {{ to: string; key: string; subtitleKey?: string; ariaKey?: string; icon: import('react').ComponentType<{ size?: number; strokeWidth?: number }>; tileClass?: string }} PatientHubLink */
 
 /** Practice / hybrid — shown under „Meine Praxis“. */
+// Phase 2E.1: the appointments tile moved into the practice context
+// (/patient/practice/:linkId/appointments) and was removed here. Phase 2E.2 did
+// the same for documents (/patient/practice/:linkId/documents). The transitional
+// area shrinks one tile per migration; when it is empty the route goes with it.
+//
+// The cross-practice list at /patient/practice-documents still EXISTS and still
+// owns what the scoped page does not: translation, plain language and the
+// share-grant management. It stays reachable from the account documents page,
+// the data-control page and the mobile bottom navigation — only this entry point
+// is gone, so the two document views no longer compete for the same tile.
 export const PATIENT_PRACTICE_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
   { to: "/patient/inbox", key: "hubLinkInbox", subtitleKey: "hubLinkInboxSub", icon: Inbox },
   {
@@ -38,22 +47,10 @@ export const PATIENT_PRACTICE_HUB_LINKS = /** @type {PatientHubLink[]} */ ([
     icon: MessageSquare,
   },
   {
-    to: "/patient/appointments",
-    key: "hubLinkAppointments",
-    subtitleKey: "hubLinkAppointmentsSub",
-    icon: CalendarDays,
-  },
-  {
     to: "/patient/telemedicine",
     key: "hubLinkTelemedicine",
     subtitleKey: "hubLinkTelemedicineSub",
     icon: Video,
-  },
-  {
-    to: "/patient/practice-documents",
-    key: "hubLinkPracticeDocuments",
-    subtitleKey: "hubLinkPracticeDocumentsSub",
-    icon: FolderOpen,
   },
   {
     to: "/patient/erezept",

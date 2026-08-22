@@ -80,6 +80,16 @@ export const PATIENT_UI_SELECTABLE_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
 export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
 
 /**
+ * Target languages offered when translating a single chat message.
+ *
+ * Mirrors MESSAGE_TRANSLATION_TARGET_LOCALE_CODES in shared/i18n/localeConfig.js
+ * and, like it, is DERIVED — a language activated for the product appears here
+ * on its own. The server refuses anything outside the same set, so the picker
+ * cannot offer a language the request would then be rejected for.
+ */
+export const MESSAGE_TRANSLATION_TARGET_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
+
+/**
  * Pre-Visit intake target languages — deliberately NOT the UI locale set.
  * This is the language a patient's pre-visit summary gets translated INTO for
  * the practice, so it must keep its wide reach (incl. RTL scripts) even though

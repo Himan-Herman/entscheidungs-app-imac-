@@ -105,11 +105,33 @@ router.post("/", requireFeature, requirePrescriptionIssue, async (req, res) => {
   const tokenCode = generateToken();
 
   try {
+    /*
+     * Attribution comes from the authorized relationship, never from the body.
+     *
+     * A prescription outlives the relationship it was issued in, so it has to
+     * say for itself which practice issued it — and what that practice was
+     * called at the time, because a later rename must not rewrite history. Both
+     * are read here from the link the middleware authorized; accepting either
+     * from the request would let a caller attribute a prescription to a practice
+     * that never issued it.
+     */
+    const issuer = await prisma.practiceProfile.findUnique({
+      where: { id: link.practiceProfileId },
+      select: { id: true, practiceName: true, displayNameForPatients: true },
+    });
+    if (!issuer) {
+      logServerError("practiceErezept/POST", new Error("authorized link has no practice"));
+      return res.status(500).json({ ok: false, error: "request_failed" });
+    }
+
     const entry = await prisma.erezeptEntry.create({
       data: {
         patientUserId: link.patientUserId,
         issuedByUserId: actorUserId,
         linkId: link.id,
+        practiceProfileId: issuer.id,
+        issuerPracticeNameAtIssue:
+          issuer.displayNameForPatients?.trim() || issuer.practiceName?.trim() || null,
         medicationName: medicationName.trim().slice(0, 300),
         icdCode: icdCode?.trim().slice(0, 20) || null,
         dosage: dosage?.trim().slice(0, 200) || null,

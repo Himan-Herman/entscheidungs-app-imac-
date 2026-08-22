@@ -669,6 +669,29 @@ router.delete("/family-profiles/:id", async (req, res) => {
       include: { _count: { select: { sessions: true } } },
     });
     if (!existing) return res.status(404).json({ ok: false, error: "not_found" });
+
+    /*
+     * A family profile that a practice relationship points at must not be
+     * deleted.
+     *
+     * PracticePatientLink.patientProfileId is ON DELETE SET NULL, and a NULL
+     * profile is how the system says "this relationship is the account holder's
+     * own". So deleting the profile would not detach the relationship — it would
+     * silently REASSIGN it to the account holder, together with every medication
+     * plan, document and prescription hanging off it. The patient would then see
+     * a relative's records labelled as their own.
+     *
+     * Blocked rather than archived: unlike a stale pre-visit session, a practice
+     * connection is a live relationship the patient can end themselves, and
+     * saying so is more honest than quietly hiding the profile.
+     */
+    const linkedRelationships = await prisma.practicePatientLink.count({
+      where: { patientProfileId: existing.id },
+    });
+    if (linkedRelationships > 0) {
+      return res.status(409).json({ ok: false, error: "profile_linked_to_practice" });
+    }
+
     if (existing._count.sessions > 0) {
       await prisma.patientProfile.update({
         where: { id: existing.id },

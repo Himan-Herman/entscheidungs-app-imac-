@@ -116,7 +116,7 @@ router.post("/search/ai-filter-suggestion", async (req, res) => {
       activeFilters: req.body?.filters,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: access.role,
@@ -175,7 +175,7 @@ router.get("/", async (req, res) => {
     );
 
     if (hasSearchOrFilter) {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -190,7 +190,7 @@ router.get("/", async (req, res) => {
         },
       });
     } else {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -238,7 +238,7 @@ router.post("/link", async (req, res) => {
       status: req.body?.status,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: access.role,
       action: "practice_patient_link_created",
@@ -281,7 +281,7 @@ router.post("/redeem-code", async (req, res) => {
       code: req.body?.code,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: access.role,
       action: "practice_patient_link_connect_code_redeemed",
@@ -329,7 +329,7 @@ router.post("/link-request", practiceLinkRequestLimiter, async (req, res) => {
     // Audit only the meaningful action (a request was actually created); a missing account or
     // an already-existing link is NOT distinguished to the practice.
     if (result.created) {
-      await writeAuditLog({
+      writeAuditLog({
         userId,
         actorRole: access.role,
         action: "practice_patient_link_request_created",
@@ -483,7 +483,7 @@ router.get("/:linkId/search", async (req, res) => {
     );
 
     if (req.query.q) {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -626,7 +626,7 @@ router.get("/:linkId", async (req, res) => {
     const record = await getPracticePatientRecord(req.params.linkId, practiceId);
 
     if (String(req.query.fromSearch || "").toLowerCase() === "true") {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -676,7 +676,7 @@ router.patch("/:linkId/status", async (req, res) => {
       status,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: access.role,
       action: "practice_patient_link_status_updated",

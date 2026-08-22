@@ -106,7 +106,7 @@ export async function createExportJob(input) {
     },
   });
 
-  await writeAuditLog({
+  writeAuditLog({
     req: input.req,
     userId: input.requestedByUserId,
     actorRole: input.actorRole === "patient" ? "patient" : input.practiceRole || "practice",
@@ -139,7 +139,7 @@ export async function processExportJob(exportJobId) {
     return { ok: false, reason: "not_processing" };
   }
 
-  await writeAuditLog({
+  writeAuditLog({
     actorRole: "system",
     action: "export_job.started",
     entityType: "export_job",
@@ -184,7 +184,7 @@ export async function processExportJob(exportJobId) {
     });
 
     if (updated.count === 1) {
-      await writeAuditLog({
+      writeAuditLog({
         actorRole: "system",
         action: "export_job.completed",
         entityType: "export_job",
@@ -214,7 +214,7 @@ export async function processExportJob(exportJobId) {
           nextRetryAt: null,
         },
       });
-      await writeAuditLog({
+      writeAuditLog({
         actorRole: "system",
         action: "export_job.failed",
         entityType: "export_job",
@@ -262,13 +262,13 @@ export async function cleanupExpiredExports() {
     });
     if (updated.count === 1) {
       expired += 1;
-      await writeAuditLog({
+      writeAuditLog({
         actorRole: "system",
         action: "export_job.expired",
         entityType: "export_job",
         entityId: row.id,
         metadata: { type: row.type, format: row.format },
-      }).catch(() => {});
+      });
     }
   }
 
@@ -321,7 +321,7 @@ export async function getExportJobForDownload(exportId, access) {
       where: { id: row.id },
       data: { status: JOB_STATUS.EXPIRED },
     });
-    await writeAuditLog({
+    writeAuditLog({
       userId: access.userId,
       actorRole: access.actorRole,
       action: "export_job.expired",

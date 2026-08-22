@@ -21,8 +21,8 @@ export default {
   hintAssociated: "Tritt es dauerhaft oder zeitweise auf?",
   newChat: "Neues Gespräch",
   newChatAria: "Neues Gespräch starten; das aktuelle bleibt im Verlauf",
-  clearHistory: "Aktuelles Gespräch löschen",
-  clearHistoryAria: "Dieses Gespräch aus dem Verlauf entfernen",
+  clearHistory: "Aus Verlauf entfernen",
+  clearHistoryAria: "Dieses Gespräch aus dem Verlauf auf diesem Gerät entfernen",
   defaultConversationTitle: "Symptomgespräch",
   chatTitle: "Gespräch",
   chatIntro:

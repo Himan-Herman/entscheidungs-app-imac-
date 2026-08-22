@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Provider di hosting (UE): infrastruttura per server e database (es. Render.com con ubicazione UE).",
-          "Fornitore IA – OpenAI (USA): per l’elaborazione IA di testo, immagini e dati della mappa corporea i contenuti sono trasmessi in forma crittografata a OpenAI LLC (San Francisco, USA), elaborati e cancellati dopo l’elaborazione.",
+          "Fornitore IA – OpenAI (USA): per l’elaborazione IA di testo, immagini e dati della mappa corporea i contenuti sono trasmessi in forma crittografata a OpenAI LLC (San Francisco, USA), ed elaborati sui sistemi del fornitore tramite connessione crittografata (TLS). L’eventuale durata di conservazione presso OpenAI è disciplinata dalle condizioni di tale fornitore; non possiamo fornire ulteriori garanzie.",
           "Provider di posta elettronica: invio di e-mail di sistema (es. verifica account).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Per garantire un livello adeguato di protezione il trasferimento si basa sulle clausole contrattuali standard dell’UE (art. 46 GDPR) e su misure tecniche e organizzative aggiuntive (crittografia in transito, durata breve, cancellazione dopo la risposta del servizio IA).",
+          "Per garantire un livello adeguato di protezione il trasferimento si basa sulle clausole contrattuali standard dell’UE (art. 46 GDPR) e su misure tecniche e organizzative aggiuntive (crittografia in transito).",
       },
       {
         type: "p_link",

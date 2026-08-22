@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Pêşkêşkerên hostingê (YE): pêşkêşkerek cloud ê Ewropî infrastruktûra server û DB pêşkêş dike (mînak Render.com bi cihê YE).",
-          "Pêşkêşkerê AI — OpenAI (DYA): ji bo pêvajoya nivîsar, wêne û nexşeya laş bi AI, MedScoutX xizmetên OpenAI LLC (San Francisco, DYA) bikar tîne. Naverok şîfrekirî tê şandin, li wir tê pêvajo kirin û piştî bersivê tê rakirin.",
+          "Pêşkêşkerê AI — OpenAI (DYA): ji bo pêvajoya nivîsar, wêne û nexşeya laş bi AI, MedScoutX xizmetên OpenAI LLC (San Francisco, DYA) bikar tîne. Naverok bi girêdanek şîfrekirî (TLS) tê şandin û li ser pergalên pêşkêşkar tê pêvajo kirin. Dema hilgirtina gengaz li cem OpenAI bi mercên wî pêşkêşkarî ve girêdayî ye; em nikarin ji vê wêdetir garantiyekê bidin.",
           "Pêşkêşkerên e-nameyê: ji bo e-nameyên pergalê (mînak piştrastkirinê) pêşkêşkerek teknik tê bikaranîn.",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Ji bo garantîkirina asta parastinê ya guncan radestkirin li ser bendên qanûnî yên standard ên YE (madeya 46 GDPR) û tedbîrên teknik û rêxistinî yên din (şîfrekirina di demê şandina de, dema pêvajoyê ya kurt, rakirin piştî bersiva AI) tê avakirin.",
+          "Ji bo garantîkirina asta parastinê ya guncan radestkirin li ser bendên qanûnî yên standard ên YE (madeya 46 GDPR) û tedbîrên teknik û rêxistinî yên din (şîfrekirina di demê şandina de) tê avakirin.",
       },
       {
         type: "p_link",

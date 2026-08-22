@@ -111,6 +111,20 @@ export const PRE_VISIT_SELECTABLE_LOCALE_CODES = [
 export const DOCUMENT_TRANSLATION_TARGET_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
 
 /**
+ * Target languages for translating a single chat message.
+ *
+ * DERIVED for the same reason as the document set: a translated message is read
+ * inside the messaging UI, so offering a language whose interface does not
+ * exist would put a translation in a half-translated screen.
+ *
+ * The wider reach of PRE_VISIT_SELECTABLE_LOCALE_CODES — including the RTL
+ * scripts — is deliberately not used here yet. Nothing in the translation path
+ * is bound to left-to-right text, so widening this list later is a change to
+ * this line and to the UI's direction handling, not to the architecture.
+ */
+export const MESSAGE_TRANSLATION_TARGET_LOCALE_CODES = UI_SELECTABLE_LOCALE_CODES;
+
+/**
  * Full set of locales whose UI is considered complete. Kept as a union so that
  * widening any single surface widens this too.
  */

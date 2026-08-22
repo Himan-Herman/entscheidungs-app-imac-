@@ -2,6 +2,7 @@ import { prisma } from "../../lib/prisma.js";
 import { LINK_STATUSES, linkToJson } from "./practicePatientLinkService.js";
 import { enrichPracticePatientLinks } from "./practicePatientRecordService.js";
 import { registryForAction } from "../activity/activityFeedRegistry.js";
+import { linkHasConsentType } from "../consent/consentRecordService.js";
 
 
 const SORT_FIELDS = new Set(["activity", "name", "linkedAt", "status"]);
@@ -315,6 +316,17 @@ export async function searchPracticePatientRecord(linkId, practiceProfileId, q) 
   });
   if (!link) throw new Error("link_not_found");
 
+  // A thread subject is user-authored free text ("Betreff", optional). Nothing
+  // constrains it to organizational wording, so it can carry health information
+  // as directly as a message body — "HIV-Befund" is not harmless just because
+  // the body stays hidden. It therefore sits behind the SAME messaging consent
+  // as the conversation itself.
+  //
+  // The query is skipped entirely rather than blanking the label: matching on
+  // `subject` and returning a hit would be an oracle, confirming that a thread
+  // containing the searched term exists even with no text rendered.
+  const mayReadConversation = await linkHasConsentType(link, "secure_messaging");
+
   const [documents, threads, plans, auditRows] = await Promise.all([
     prisma.practiceDocument.findMany({
       where: {
@@ -325,14 +337,16 @@ export async function searchPracticePatientRecord(linkId, practiceProfileId, q) 
       select: { id: true, title: true, type: true, status: true },
       take: 20,
     }),
-    prisma.practicePatientThread.findMany({
-      where: {
-        practicePatientLinkId: lid,
-        subject: { contains: needle, mode: "insensitive" },
-      },
-      select: { id: true, subject: true, status: true },
-      take: 20,
-    }),
+    mayReadConversation
+      ? prisma.practicePatientThread.findMany({
+          where: {
+            practicePatientLinkId: lid,
+            subject: { contains: needle, mode: "insensitive" },
+          },
+          select: { id: true, subject: true, status: true },
+          take: 20,
+        })
+      : Promise.resolve([]),
     prisma.medicationPlan.findMany({
       where: {
         practicePatientLinkId: lid,

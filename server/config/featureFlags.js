@@ -29,6 +29,28 @@ export function isPatientInboxEnabled() {
   return envFlag("PATIENT_INBOX", false);
 }
 
+/**
+ * AI drafting inside practice–patient messaging (reply draft / rewrite).
+ *
+ * Gated SEPARATELY from COMMUNICATION_V2 because it is the only part of the
+ * messaging module that transmits conversation content — Art. 9 GDPR health
+ * data — to an external AI provider. The shared OpenAI client sets no baseURL
+ * (US endpoint) and neither EU data residency nor zero-data-retention is
+ * configured or evidenced in this repository; the same open question already
+ * keeps ENABLE_DOCUMENT_TRANSLATION off.
+ *
+ * Turning this off must never impair core communication: sending, reading and
+ * organising messages work exactly the same, only the optional draft-assist
+ * buttons become unavailable. AI is never a prerequisite for communication or
+ * for any authorization decision.
+ *
+ * Requires the messaging module itself. Default off.
+ */
+export function isCommunicationAiDraftsEnabled() {
+  if (!isCareRelationshipEnabled() || !isCommunicationV2Enabled()) return false;
+  return envFlag("COMMUNICATION_AI_DRAFTS", false);
+}
+
 /** Practice document sharing on care links (PR-7). */
 export function isPracticeDocumentsV2Enabled() {
   return envFlag("PRACTICE_DOCUMENTS_V2", false);
@@ -387,4 +409,66 @@ export function isPatientBillingExplainEnabled() {
  */
 export function isDocumentTranslationEnabled() {
   return envFlag("ENABLE_DOCUMENT_TRANSLATION", false);
+}
+
+/**
+ * Translating ONE chat message into another language.
+ *
+ * A separate flag from document translation on purpose. The two send different
+ * material to a provider — a finished medical document versus live
+ * correspondence between a patient and their practice — and an approval for one
+ * is not an approval for the other. Turning this on without the matching
+ * MESSAGE_TRANSLATION_* configuration still transmits nothing: the provider
+ * gate refuses independently, and its production host allowlist is empty.
+ *
+ * Default off.
+ */
+export function isMessageTranslationEnabled() {
+  return envFlag("ENABLE_MESSAGE_TRANSLATION", false);
+}
+
+/**
+ * Dictating a message: speech recognised into an editable draft.
+ *
+ * A third flag, and deliberately not one of the other two. Audio is a different
+ * category of material from text — a recording carries a voice, a background,
+ * and whatever else was audible in the room, none of which the masking chain
+ * that protects a written dose can touch. An approval to send message TEXT to a
+ * provider is not an approval to send a recording of someone speaking.
+ *
+ * There is already an ungated /api/transcribe in this codebase, built on the
+ * shared OPENAI_API_KEY. It is deliberately NOT reused here: inheriting it
+ * would make "the symptom checker has a key" mean "patient-practice dictation
+ * may be transmitted", which is exactly the inference the translation gates
+ * exist to prevent.
+ *
+ * Default off.
+ */
+export function isMessageSttEnabled() {
+  return envFlag("ENABLE_MESSAGE_STT", false);
+}
+
+/**
+ * Voice input in the patient's own symptom modules.
+ *
+ * A FOURTH flag, and the narrowest reading of what /api/transcribe is actually
+ * used for: a patient dictating their own symptom description in the symptom
+ * check, the body-region flow, or alongside an uploaded image. One data
+ * category, one actor, one purpose.
+ *
+ * It is deliberately not called ENABLE_TRANSCRIPTION. A flag named for a
+ * technique would put a patient's spoken symptoms, a practice dictation and
+ * anything added later behind one switch, and turning it on for one would turn
+ * it on for all — which is precisely the inference every gate in this codebase
+ * exists to prevent.
+ *
+ * It is also deliberately separate from ENABLE_MESSAGE_STT: that one covers
+ * dictation into a message to a practice, which is correspondence with a third
+ * party, not a note to oneself in a symptom checker.
+ *
+ * Default off. Before this phase the same path ran whenever OPENAI_API_KEY
+ * happened to be set.
+ */
+export function isSymptomVoiceInputEnabled() {
+  return envFlag("ENABLE_SYMPTOM_VOICE_INPUT", false);
 }

@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Hébergeurs (UE) : un fournisseur cloud européen fournit l’infrastructure pour serveurs et bases de données (p. ex. Render.com avec localisation UE).",
-          "Prestataire IA — OpenAI (États-Unis) : pour le traitement IA de vos textes, données d’image et informations de carte corporelle, MedScoutX utilise les services d’OpenAI LLC (San Francisco, USA). Les contenus sont transmis de façon chiffrée, traités puis supprimés après traitement.",
+          "Prestataire IA — OpenAI (États-Unis) : pour le traitement IA de vos textes, données d’image et informations de carte corporelle, MedScoutX utilise les services d’OpenAI LLC (San Francisco, USA). Les contenus sont transmis via une connexion chiffrée (TLS) et traités sur les systèmes du prestataire. La durée d’une éventuelle conservation chez OpenAI relève des conditions de ce prestataire ; nous ne pouvons donner aucune assurance au-delà.",
           "Prestataires e-mail : un prestataire technique assure l’envoi des e-mails système (p. ex. vérification).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Pour garantir un niveau de protection adéquat, le transfert repose sur les clauses contractuelles types de l’UE (art. 46 RGPD) ainsi que sur des mesures techniques et organisationnelles complémentaires (chiffrement pendant le transit, durée de traitement courte, suppression après réponse du service IA).",
+          "Pour garantir un niveau de protection adéquat, le transfert repose sur les clauses contractuelles types de l’UE (art. 46 RGPD) ainsi que sur des mesures techniques et organisationnelles complémentaires (chiffrement pendant le transit).",
       },
       {
         type: "p_link",
