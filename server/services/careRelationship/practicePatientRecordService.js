@@ -126,7 +126,30 @@ export async function enrichPracticePatientLinks(links) {
 
   const linkIds = links.map((l) => l.id);
   const practiceProfileId = links[0].practiceProfileId;
-  const userIds = [...new Set(links.map((l) => l.patientUserId))];
+
+  /*
+   * The patient account id, fetched here rather than read off the link objects.
+   *
+   * WHY: `linkToJson` deliberately withholds `patientUserId` — a practice
+   * addresses a relationship only through the practice-scoped link id, so the
+   * global account id must never reach a practice response. This enrichment
+   * still needs it internally, to look up pre-visit sessions, which are keyed
+   * by user rather than by link. Reading it off the serialized object gave
+   * `undefined`, and Prisma refused the query outright:
+   *
+   *   Invalid `prisma.preVisitSession.groupBy()` invocation:
+   *     where: { userId: { in: [ undefined ] } }
+   *
+   * Fetching it here keeps both properties: the id is available where it is
+   * needed, and it cannot escape — the map is local, never returned, never
+   * attached to a link, never logged.
+   */
+  const linkOwners = await prisma.practicePatientLink.findMany({
+    where: { id: { in: linkIds } },
+    select: { id: true, patientUserId: true },
+  });
+  const patientIdByLink = new Map(linkOwners.map((r) => [r.id, r.patientUserId]));
+  const userIds = [...new Set([...patientIdByLink.values()].filter(Boolean))];
 
   const [docCounts, threadAgg, docMax, threadMax, visitMax, medPlanLinks, openReqLinks, unreadAgg] =
     await Promise.all([
@@ -232,7 +255,7 @@ export async function enrichPracticePatientLinks(links) {
     let lastActivityAt = link.updatedAt;
     lastActivityAt = maxDate(lastActivityAt, docMaxMap[link.id]);
     lastActivityAt = maxDate(lastActivityAt, threadMaxMap[link.id]);
-    lastActivityAt = maxDate(lastActivityAt, visitMaxMap[link.patientUserId]);
+    lastActivityAt = maxDate(lastActivityAt, visitMaxMap[patientIdByLink.get(link.id)]);
 
     return {
       ...link,
@@ -249,7 +272,7 @@ export async function enrichPracticePatientLinks(links) {
         hasPublishedMedicationPlan: Boolean(medPlanMap[link.id]),
         hasOpenDataRequest: Boolean(openReqMap[link.id]),
         lastActivityAt,
-        lastVisitAt: visitMaxMap[link.patientUserId] || null,
+        lastVisitAt: visitMaxMap[patientIdByLink.get(link.id)] || null,
       },
     };
   });
