@@ -72,6 +72,7 @@ import healthHistoryAiRouter from "./routes/healthHistoryAi.js";
 import practicePatientHealthHistoryRouter from "./routes/practicePatientHealthHistory.js";
 import patientErezeptRouter from "./routes/patientErezept.js";
 import practiceErezeptRouter from "./routes/practiceErezept.js";
+import practiceInternalWorkRouter from "./routes/practiceInternalWork.js";
 import patientDataControlRouter from "./routes/patientDataControl.js";
 import patientProfileSharingRouter from "./routes/patientProfileSharing.js";
 import patientActivityRouter from "./routes/patientActivity.js";
@@ -274,6 +275,8 @@ app.use("/api/patient/health-history/ai", requireAuth, healthHistoryAiRouter);
 app.use("/api/practice/patients/:linkId/health-history", requireAuth, practicePatientHealthHistoryRouter);
 app.use("/api/patient/erezept", requireAuth, patientErezeptRouter);
 app.use("/api/practice/patients/:linkId/erezept", requireAuth, practiceErezeptRouter);
+/** Practice-internal notes and reminders on one care link — never patient-facing. */
+app.use("/api/practice/patients/:linkId", requireAuth, practiceInternalWorkRouter);
 app.use("/api/practice/documents", requireAuth, practiceSecureDocumentLinksRouter);
 app.use("/api/patient/data-control", requireAuth, patientDataControlRouter);
 app.use("/api/patient/consents", requireAuth, patientConsentsRouter);

@@ -116,6 +116,7 @@ export default {
   tabErezept: "e-Rezepte",
   tabSosCard: "Notfallausweis",
   tabMessages: "Nachrichten",
+  tabInternalWork: "Interne Notizen",
   tabActivity: "Aktivität",
   patientProvidedHint:
     "Einige Angaben wurden vom Patienten bereitgestellt.",

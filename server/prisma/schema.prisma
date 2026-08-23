@@ -396,7 +396,8 @@ model PracticeProfile {
   documentShareGrantsAsSource PracticeDocumentShareGrant[]     @relation("DocumentShareGrantSourcePractice")
   documentShareGrantsAsTarget PracticeDocumentShareGrant[]     @relation("DocumentShareGrantTargetPractice")
   erezeptEntries              ErezeptEntry[]
-
+  internalNotes               PracticePatientInternalNote[]
+  patientReminders            PracticePatientReminder[]
 
   @@index([userId])
 }
@@ -929,21 +930,23 @@ model PracticePatientLink {
   createdAt                    DateTime  @default(now())
   updatedAt                    DateTime  @updatedAt
 
-  practiceProfile             PracticeProfile              @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
-  patientUser                 User                         @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
-  profileAccessGrantedBy      User?                        @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
-  assignedDoctor              User?                        @relation("PracticeLinkAssignedDoctor", fields: [assignedDoctorUserId], references: [id], onDelete: SetNull)
-  assignedTeamMember          User?                        @relation("PracticeLinkAssignedTeam", fields: [assignedTeamMemberUserId], references: [id], onDelete: SetNull)
-  assignedBy                  User?                        @relation("PracticeLinkAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
-  patientSelectedDoctor       User?                        @relation("PracticeLinkPatientSelectedDoctor", fields: [patientSelectedDoctorUserId], references: [id], onDelete: SetNull)
-  patientProfile              PatientProfile?              @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
+  practiceProfile             PracticeProfile               @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  patientUser                 User                          @relation("PracticePatientLinks", fields: [patientUserId], references: [id], onDelete: Cascade)
+  internalNotes               PracticePatientInternalNote[]
+  reminders                   PracticePatientReminder[]
+  profileAccessGrantedBy      User?                         @relation("ProfileAccessGrantedBy", fields: [profileAccessGrantedByUserId], references: [id], onDelete: SetNull)
+  assignedDoctor              User?                         @relation("PracticeLinkAssignedDoctor", fields: [assignedDoctorUserId], references: [id], onDelete: SetNull)
+  assignedTeamMember          User?                         @relation("PracticeLinkAssignedTeam", fields: [assignedTeamMemberUserId], references: [id], onDelete: SetNull)
+  assignedBy                  User?                         @relation("PracticeLinkAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+  patientSelectedDoctor       User?                         @relation("PracticeLinkPatientSelectedDoctor", fields: [patientSelectedDoctorUserId], references: [id], onDelete: SetNull)
+  patientProfile              PatientProfile?               @relation(fields: [patientProfileId], references: [id], onDelete: SetNull)
   assignments                 PracticePatientAssignment[]
   inboxItems                  PatientInboxItem[]
   threads                     PracticePatientThread[]
   medicationPlans             MedicationPlan[]
   practiceDocuments           PracticeDocument[]
-  documentShareGrantsAsSource PracticeDocumentShareGrant[] @relation("DocumentShareGrantSourceLink")
-  documentShareGrantsAsTarget PracticeDocumentShareGrant[] @relation("DocumentShareGrantTargetLink")
+  documentShareGrantsAsSource PracticeDocumentShareGrant[]  @relation("DocumentShareGrantSourceLink")
+  documentShareGrantsAsTarget PracticeDocumentShareGrant[]  @relation("DocumentShareGrantTargetLink")
   dataRequests                PatientDataRequest[]
   practiceInboxItems          PracticeInboxItem[]
   secureDocumentAccessTokens  SecureDocumentAccessToken[]
@@ -951,10 +954,10 @@ model PracticePatientLink {
   telemedicineSessions        TelemedicineSession[]
   documentOcrJobs             DocumentOcrJob[]
   medaSessions                PracticeMedaSession[]
-  contextVitalEntries         VitalEntry[]                 @relation("VitalEntryContextLink")
-  contextVaccinationEntries   VaccinationEntry[]           @relation("VaccinationEntryContextLink")
-  contextAllergyEntries       AllergyEntry[]               @relation("AllergyEntryContextLink")
-  contextDiagnosisEntries     DiagnosisEntry[]             @relation("DiagnosisEntryContextLink")
+  contextVitalEntries         VitalEntry[]                  @relation("VitalEntryContextLink")
+  contextVaccinationEntries   VaccinationEntry[]            @relation("VaccinationEntryContextLink")
+  contextAllergyEntries       AllergyEntry[]                @relation("AllergyEntryContextLink")
+  contextDiagnosisEntries     DiagnosisEntry[]              @relation("DiagnosisEntryContextLink")
   erezeptEntries              ErezeptEntry[]
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
@@ -1054,6 +1057,124 @@ model PatientInboxItem {
   @@index([patientUserId, lastActivityAt])
   @@index([patientUserId, sourceRefType, sourceRefId])
   @@index([practiceProfileId])
+}
+
+/**
+ * A note the practice team writes about ONE patient–practice relationship,
+ * for itself.
+ * NOT A MESSAGE. It is a separate model rather than a flag on
+ * PracticePatientMessage precisely so that no patient query can reach it by
+ * accident: the patient endpoints do not name this table at all, so protecting
+ * it never depends on remembering a `WHERE type != internal`. Separation by
+ * construction, not by filter.
+ * SCOPE
+ * Exactly one PracticePatientLink — not a practice, not a patient. Two links
+ * of the same practice to the same person are two separate relationships and
+ * never see each other's notes.
+ * AUTHOR
+ * `authorUserId` is nullable and carries no foreign key, the same convention
+ * PracticePatientMessage.senderUserId uses: a staff member leaving the
+ * product must not erase the practice's own working history.
+ *
+ * LIFECYCLE: why CASCADE and not RESTRICT
+ * `contextualPatientDataDeletionGuard.js` is this repository's delete policy.
+ * It puts ON DELETE RESTRICT plus a preflight on two classes of row: patient-
+ * OWNED clinical records carrying the relationship they were created in
+ * (vitals, vaccinations, allergies, diagnoses), and clinical artifacts a
+ * practice ISSUED INTO a relationship (medication plans, prescriptions) —
+ * moved to RESTRICT in 2F.3B precisely because they used to cascade away
+ * silently. Share grants sit alongside them as permission artifacts.
+ *
+ * An internal note is none of those. It is not owned by the patient, never
+ * issued to them, and grants nobody anything: it is the practice's own working
+ * record, invisible to the patient. The exact existing analogue is
+ * PracticePatientAssignment — link-scoped, practice-internal, with its own
+ * free-text `note` — which is ON DELETE CASCADE and deliberately absent from
+ * that guard.
+ *
+ * Measured, not assumed: with a note and a reminder present, both
+ * checkPracticeDeletionBlockers() and checkPracticePatientLinkDeletionBlockers()
+ * report blocked=false, and deleting the link removes both rows — the same
+ * behaviour PracticePatientAssignment has always had.
+ *
+ * CLASSIFICATION
+ * Under the current MedScoutX lifecycle classification these are
+ * practice-internal RELATIONAL WORKING OBJECTS, so they follow the existing
+ * PracticePatientAssignment pattern with ON DELETE CASCADE. That is a technical
+ * classification of how the row is stored and removed. It states nothing about
+ * retention obligations and nothing about what anyone may request by any other
+ * route; those are not questions this schema answers.
+ *
+ * The link cascade is additionally unreachable: no route hard-deletes a
+ * PracticePatientLink; links are revoked or archived by status. Only practice
+ * deletion (routes/practices.js) and account deletion (routes/account.js) reach
+ * a cascade, and there the rows are removed together with the relational parent
+ * they belong to, leaving nothing orphaned.
+ *
+ * verifyPracticeInternalWork.test.js pins both halves of this: the guard does
+ * not cover these models, and the cascade fires. Moving them to RESTRICT later
+ * therefore fails a test rather than passing unnoticed.
+ *
+ * Should internal notes ever be classed as retention-relevant practice records,
+ * the change is the path 2F.3B already walked: RESTRICT plus an entry in that
+ * guard's model list. A policy decision, not a schema detail.
+ */
+model PracticePatientInternalNote {
+  id                    String    @id @default(cuid())
+  practicePatientLinkId String
+  /// Denormalized from the link so every query can be tenant-scoped in one
+  /// WHERE, without a join the caller could forget.
+  practiceProfileId     String
+  /// Staff author. Nullable so deleting a user keeps the note (see above).
+  authorUserId          String?
+  body                  String
+  /// Set when the author changed the text. No version history is kept.
+  editedAt              DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([practicePatientLinkId, createdAt])
+  @@index([practiceProfileId])
+}
+
+/**
+ * A practice-internal follow-up marker on ONE patient–practice relationship.
+ * "Call back tomorrow", "ask for the report on the 30th". The system stores the
+ * text and the date; it never interprets either. No clinical meaning, no
+ * urgency scoring, no automation.
+ * WHY NOT PracticeInboxItem
+ * That model is an inbox surface with its own status lifecycle
+ * (new/read/done/archived) and no due date. Putting a due date and a
+ * completion lifecycle into it would tie reminders to the notification
+ * surface and leave two sources of truth. This model owns reminders; showing
+ * due ones in the inbox stays a later, separate integration.
+ * The patient never sees a reminder, and creating one produces no
+ * PatientInboxItem, no unread count and no notification.
+ */
+model PracticePatientReminder {
+  id                    String    @id @default(cuid())
+  practicePatientLinkId String
+  /// Denormalized from the link, as above.
+  practiceProfileId     String
+  createdByUserId       String?
+  /// Optional owner. Server-verified to be an active member of THIS practice.
+  assignedToUserId      String?
+  title                 String
+  dueAt                 DateTime
+  /// Server clock, never the client's.
+  completedAt           DateTime?
+  completedByUserId     String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  practicePatientLink PracticePatientLink @relation(fields: [practicePatientLinkId], references: [id], onDelete: Cascade)
+  practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+
+  @@index([practicePatientLinkId, dueAt])
+  @@index([practiceProfileId, completedAt, dueAt])
 }
 
 /**
@@ -1186,17 +1307,14 @@ model PracticePatientMessage {
 
 /**
  * A translation of ONE message, as it stood at ONE moment.
- *
  * Not a message. It is never part of the conversation, never appears in the
  * timeline, and creating one changes nothing about the thread — it is a second
  * way of reading something that was already said.
- *
  * `sourceFingerprint` binds the row to an exact state of the original: the id,
  * the body and the edit marker hashed together. Editing the message changes the
  * fingerprint, so every translation of the previous wording stops matching at
  * once. There is no version table to keep in step, and no way to show a
  * translation of text the reader can no longer see.
- *
  * Rows are removed when the message is edited or withdrawn. Unreachable would
  * have been enough — the lookup refuses a withdrawn message on its own — but a
  * copy of a withdrawn message's meaning is exactly the thing that must not sit
@@ -1219,7 +1337,7 @@ model PracticeMessageTranslation {
   /// Faithful translation only in this phase. Present so a second mode does not
   /// need a migration, and so a cached entry can never be served for a mode it
   /// was not produced for.
-  mode              String @default("normal")
+  mode              String  @default("normal")
 
   translatedText String
   createdAt      DateTime @default(now())
@@ -2178,18 +2296,18 @@ model DiagnosisEntry {
  * Simulated e-Rezept entry — practice issues, patient redeems at pharmacy. No real TI crypto.
  */
 model ErezeptEntry {
-  id             String @id @default(cuid())
+  id                        String  @id @default(cuid())
   /// Patient user (receiver)
-  patientUserId  String
+  patientUserId             String
   /// Practice user who issued (actor)
-  issuedByUserId String
+  issuedByUserId            String
   /// PracticePatientLink for consent + scope. A real relation since Phase 2F.3B;
   /// the column name is kept so the change stays reversible, the relation below
   /// carries the domain name.
-  linkId         String
+  linkId                    String
   /// Issuing practice. Restrict, so it cannot be removed under a prescription
   /// that names it.
-  practiceProfileId String
+  practiceProfileId         String
   /// The practice name as it read when this was issued. A relation says WHICH
   /// practice; only a snapshot says what it was called then, and a later rename
   /// must not rewrite history.
@@ -2212,8 +2330,8 @@ model ErezeptEntry {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  patient  User @relation("PatientErezept", fields: [patientUserId], references: [id], onDelete: Cascade)
-  issuedBy User @relation("PracticeErezept", fields: [issuedByUserId], references: [id], onDelete: Cascade)
+  patient             User                @relation("PatientErezept", fields: [patientUserId], references: [id], onDelete: Cascade)
+  issuedBy            User                @relation("PracticeErezept", fields: [issuedByUserId], references: [id], onDelete: Cascade)
   practicePatientLink PracticePatientLink @relation(fields: [linkId], references: [id], onDelete: Restrict)
   practiceProfile     PracticeProfile     @relation(fields: [practiceProfileId], references: [id], onDelete: Restrict)
 

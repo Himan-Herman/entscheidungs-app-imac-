@@ -24,6 +24,17 @@ export const PERMISSIONS = {
   PATIENT_LINKS_WRITE: "patient_links.write",
   PATIENT_ASSIGNMENT_MANAGE: "patient_assignment.manage",
   MESSAGES_SEND: "messages.send",
+  // Practice-internal working notes on one patient relationship. Deliberately
+  // NOT folded into MESSAGES_SEND: writing to the patient and writing about the
+  // patient are different acts, and a role may plausibly be allowed one without
+  // the other. The patient never sees either of these.
+  INTERNAL_NOTES_READ: "internal_notes.read",
+  INTERNAL_NOTES_WRITE: "internal_notes.write",
+  // Practice-internal follow-up markers. Not INBOX_MANAGE: that grants the
+  // operational inbox, which every role including viewer already holds, and
+  // reusing it would hand reminder creation to a read-only observer.
+  REMINDERS_READ: "reminders.read",
+  REMINDERS_WRITE: "reminders.write",
   INBOX_MANAGE: "inbox.manage",
   DOCUMENTS_READ: "documents.read",
   DOCUMENTS_WRITE: "documents.write",
@@ -189,6 +200,10 @@ export function clinicalPermissionsForRole(clinicalRole) {
  */
 const ROLE_PERMISSIONS = {
   owner: new Set([
+    PERMISSIONS.INTERNAL_NOTES_READ,
+    PERMISSIONS.INTERNAL_NOTES_WRITE,
+    PERMISSIONS.REMINDERS_READ,
+    PERMISSIONS.REMINDERS_WRITE,
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.TEAM_MANAGE,
     PERMISSIONS.CLINICAL_ROLE_MANAGE,
@@ -227,6 +242,10 @@ const ROLE_PERMISSIONS = {
     // NO CLINICAL_* and NO PRESCRIPTION_*: ownership is not a care relationship.
   ]),
   admin: new Set([
+    PERMISSIONS.INTERNAL_NOTES_READ,
+    PERMISSIONS.INTERNAL_NOTES_WRITE,
+    PERMISSIONS.REMINDERS_READ,
+    PERMISSIONS.REMINDERS_WRITE,
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.TEAM_MANAGE,
     PERMISSIONS.CLINICAL_ROLE_MANAGE,
@@ -263,6 +282,10 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.INTERPRETER_ADMIN,
   ]),
   practice_manager: new Set([
+    PERMISSIONS.INTERNAL_NOTES_READ,
+    PERMISSIONS.INTERNAL_NOTES_WRITE,
+    PERMISSIONS.REMINDERS_READ,
+    PERMISSIONS.REMINDERS_WRITE,
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.TEAM_MANAGE,
     PERMISSIONS.CLINICAL_ROLE_MANAGE,
@@ -292,6 +315,10 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.INTERPRETER_ADMIN,
   ]),
   secretary: new Set([
+    PERMISSIONS.INTERNAL_NOTES_READ,
+    PERMISSIONS.INTERNAL_NOTES_WRITE,
+    PERMISSIONS.REMINDERS_READ,
+    PERMISSIONS.REMINDERS_WRITE,
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.PATIENT_LINKS_READ,
     PERMISSIONS.PATIENT_LINKS_WRITE,
@@ -310,6 +337,10 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.INTERPRETER_INVITE,
   ]),
   doctor: new Set([
+    PERMISSIONS.INTERNAL_NOTES_READ,
+    PERMISSIONS.INTERNAL_NOTES_WRITE,
+    PERMISSIONS.REMINDERS_READ,
+    PERMISSIONS.REMINDERS_WRITE,
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.INTEGRATIONS_EXPORT,
     PERMISSIONS.CALENDAR_READ,
@@ -343,6 +374,10 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.INTERPRETER_EXPORT,
   ]),
   assistant: new Set([
+    PERMISSIONS.INTERNAL_NOTES_READ,
+    PERMISSIONS.INTERNAL_NOTES_WRITE,
+    PERMISSIONS.REMINDERS_READ,
+    PERMISSIONS.REMINDERS_WRITE,
     PERMISSIONS.TEAM_VIEW,
     PERMISSIONS.PATIENT_LINKS_READ,
     PERMISSIONS.MESSAGES_SEND,
@@ -374,6 +409,10 @@ const ROLE_PERMISSIONS = {
     PERMISSIONS.BOOKING_READ,
     PERMISSIONS.INTERPRETER_VIEW,
     // NO CLINICAL_*: a read-only observer role has no treatment purpose.
+    // NO INTERNAL_NOTES_* / REMINDERS_*: internal notes are the team's working
+    // record about a patient and reminders are its task list. An observer has
+    // neither to write nor a need to read them. Grant deliberately if a real
+    // workflow ever requires it.
   ]),
 };
 

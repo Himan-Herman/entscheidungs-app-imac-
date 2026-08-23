@@ -116,6 +116,7 @@ export default {
   tabErezept: "e-Prescriptions",
   tabSosCard: "Emergency card",
   tabMessages: "Messages",
+  tabInternalWork: "Internal notes",
   tabActivity: "Activity",
   patientProvidedHint: "Some information was provided by the patient.",
   openDataRequestHint: "There is an open data request (e.g. deletion).",
