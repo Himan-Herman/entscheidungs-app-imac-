@@ -23,6 +23,8 @@ import {
 import { generatePracticeInboxAiAssist } from "../services/practiceInbox/practiceInboxAiService.js";
 import { generatePracticeInboxListAiSummary } from "../services/practiceInbox/practiceInboxListAiService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
+import { getPracticeNotificationSummary } from "../services/notificationCenter/notificationCenterService.js";
+import { hasPracticePermission, PERMISSIONS } from "../utils/practicePermissions.js";
 
 const router = express.Router();
 
@@ -72,6 +74,39 @@ router.get("/count", async (req, res) => {
     return res.json({ ok: true, newCount, unreadCount: newCount });
   } catch (err) {
     console.error("[practice/inbox/count]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/**
+ * GET /api/practice/inbox/notifications?practiceId=
+ *
+ * The header's central entry point for ONE practice. Same source of truth as
+ * the inbox page, same read authorization.
+ *
+ * Open follow-ups are reported alongside, but as their own number: they are
+ * work, not unread mail, so folding them into the badge would make the badge
+ * mean two different things. They are also permission-gated on their own — a
+ * reader without `reminders.read` gets no key at all, since a `0` would still
+ * confirm that follow-ups are kept here.
+ */
+router.get("/notifications", async (req, res) => {
+  const practiceId = String(req.query.practiceId || "").trim();
+  if (!practiceId) {
+    return res.status(400).json({ ok: false, error: "practiceId_required" });
+  }
+
+  const ctx = await requirePracticeRead(req, practiceId);
+  if (ctx.error) return res.status(ctx.error.status).json(ctx.error.body);
+
+  try {
+    const summary = await getPracticeNotificationSummary({
+      practiceProfileId: practiceId,
+      canReadReminders: hasPracticePermission(ctx.access.role, PERMISSIONS.REMINDERS_READ),
+    });
+    return res.json({ ok: true, ...summary });
+  } catch (err) {
+    console.error("[practice/inbox/notifications]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "request_failed" });
   }
 });

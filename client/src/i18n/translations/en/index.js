@@ -29,6 +29,7 @@ import roleEntry from "./roleEntry.js";
 import practiceFinder from "./practiceFinder.js";
 import visitMedications from "./visitMedications.js";
 import patientInbox from "./patientInbox.js";
+import notificationCenter from "./notificationCenter.js";
 import patientCardInfo from "./patientCardInfo.js";
 import patientThreads from "./patientThreads.js";
 import practiceContext from "./practiceContext.js";
@@ -116,6 +117,7 @@ export default {
   practiceFinder,
   visitMedications,
   patientInbox,
+  notificationCenter,
   patientCardInfo,
   patientThreads,
   practiceContext,

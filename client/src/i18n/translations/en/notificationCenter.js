@@ -1,0 +1,25 @@
+const notificationCenter = {
+  toggleLabel: "Inbox",
+  toggleAria: "Open inbox",
+  toggleAriaWithCount: "Open inbox, {count} unread",
+  panelTitle: "New for you",
+  panelTitlePractice: "New in the practice",
+  unreadLabel: "{count} unread",
+  newLabel: "{count} new",
+  unreadOne: "1 unread",
+  newOne: "1 new",
+  empty: "Nothing new.",
+  emptyHint: "New messages appear here and in the inbox.",
+  showAll: "Show all notifications",
+  itemUnread: "Unread",
+  loading: "Loading …",
+  error: "Could not be loaded.",
+  retry: "Try again",
+  remindersHeading: "Open follow-ups",
+  remindersCount: "{count} open",
+  remindersOne: "1 open",
+  remindersLink: "Open in the patient overview",
+  remindersNone: "No open follow-ups",
+};
+
+export default notificationCenter;
