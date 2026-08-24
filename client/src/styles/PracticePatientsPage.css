@@ -255,6 +255,49 @@
   }
 }
 
+/* Phase 5B — a usable target for the filter controls.
+ *
+ * The grid styled the container but never the controls inside it, so every
+ * select fell back to the browser default and rendered about 19px high. The
+ * chips directly below already use 2.75rem — the convention existed, the
+ * filters simply never got it.
+ *
+ * Scoped to this panel, which lives on the practice patient list and nowhere
+ * else: the shared button and filter families used by patient pages are not
+ * touched. Fixing only the control Phase 5B added would have left one filter
+ * shaped differently from its neighbours, so the panel is corrected as a whole.
+ */
+.practice-patients__filters-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.practice-patients__filters-panel select {
+  /* Same target size the chips beside them already use. */
+  min-height: 2.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 0.6rem;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  border-radius: 8px;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.practice-patients__filters-panel select:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+
+:root[data-theme="dark"] .practice-patients__filters-panel select {
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.85);
+}
+
 .practice-patients__chips {
   display: flex;
   flex-wrap: wrap;
@@ -289,6 +332,43 @@
   color: #1d4ed8;
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+/* Phase 5B — the two internal-work counts.
+ *
+ * Same pill shape as the unread badge beside them, deliberately quieter: they
+ * are the team's own bookkeeping, not a message from a patient. The text
+ * carries the meaning ("3 offen"), so the colour only reinforces it — and both
+ * light and dark values are literal, matching the neighbouring badge, because
+ * this stylesheet does not use the --ms-* tokens. */
+.practice-patients__work-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid #99f6e4;
+  background: #ccfbf1;
+  color: #115e59;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.practice-patients__work-badge--muted {
+  border-color: #e2e8f0;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+:root[data-theme="dark"] .practice-patients__work-badge {
+  border-color: rgba(45, 212, 191, 0.4);
+  background: rgba(19, 78, 74, 0.55);
+  color: #99f6e4;
+}
+
+:root[data-theme="dark"] .practice-patients__work-badge--muted {
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(148, 163, 184, 0.16);
+  color: #e2e8f0;
 }
 
 .practice-patients__ai-box {
@@ -414,4 +494,16 @@
   align-items: flex-start;
   gap: 0.75rem;
   margin-top: 1rem;
+}
+
+/* Phase 5B — the work signals on the phone layout, wrapping rather than
+ * pushing the card sideways. */
+.practice-patients__card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.35rem 0 0;
+}
+.practice-patients__card-badges > span {
+  margin-left: 0;
 }

@@ -120,8 +120,14 @@ export async function getPracticePatientActivity(linkId, practiceProfileId, quer
 
 /**
  * @param {ReturnType<typeof import('./practicePatientLinkService.js').linkToJson>[]} links
+ * @param {{ includeReminders?: boolean, includeInternalNotes?: boolean }} [visibility]
+ *   What the CALLER is allowed to be told about. Both default to false: a
+ *   counter is a statement that data exists, so a viewer without
+ *   `reminders.read` must not learn from "2 open" that reminders are there at
+ *   all. The caller passes its own permissions in; omitting them reveals
+ *   nothing rather than everything.
  */
-export async function enrichPracticePatientLinks(links) {
+export async function enrichPracticePatientLinks(links, visibility = {}) {
   if (!links.length) return links;
 
   const linkIds = links.map((l) => l.id);
@@ -214,6 +220,40 @@ export async function enrichPracticePatientLinks(links) {
     }),
   ]);
 
+  /*
+   * Phase 5B — two more grouped queries, never one per link. They run only when
+   * the caller may see the underlying data class, so a forbidden counter costs
+   * no query either.
+   */
+  const [openReminderAgg, internalNoteAgg] = await Promise.all([
+    visibility.includeReminders
+      ? prisma.practicePatientReminder.groupBy({
+          by: ["practicePatientLinkId"],
+          where: { practicePatientLinkId: { in: linkIds }, completedAt: null },
+          _count: { _all: true },
+        })
+      : Promise.resolve([]),
+    visibility.includeInternalNotes
+      ? prisma.practicePatientInternalNote.groupBy({
+          by: ["practicePatientLinkId"],
+          where: { practicePatientLinkId: { in: linkIds } },
+          // Count and latest timestamp only. No bodies: this list is rendered
+          // for a whole practice and note text has no business in it.
+          _count: { _all: true },
+          _max: { createdAt: true },
+        })
+      : Promise.resolve([]),
+  ]);
+  const openReminderMap = Object.fromEntries(
+    openReminderAgg.map((r) => [r.practicePatientLinkId, r._count._all]),
+  );
+  const internalNoteMap = Object.fromEntries(
+    internalNoteAgg.map((r) => [
+      r.practicePatientLinkId,
+      { count: r._count._all, lastAt: r._max.createdAt },
+    ]),
+  );
+
   const threadsByLink = await prisma.practicePatientThread.findMany({
     where: { practicePatientLinkId: { in: linkIds } },
     select: { id: true, practicePatientLinkId: true },
@@ -273,6 +313,20 @@ export async function enrichPracticePatientLinks(links) {
         hasOpenDataRequest: Boolean(openReqMap[link.id]),
         lastActivityAt,
         lastVisitAt: visitMaxMap[patientIdByLink.get(link.id)] || null,
+        /*
+         * Phase 5B — present ONLY when the caller may read the data class.
+         * The key is absent rather than zero: a zero would still tell a
+         * forbidden reader that the feature applies to this relationship.
+         */
+        ...(visibility.includeReminders
+          ? { openReminderCount: openReminderMap[link.id] || 0 }
+          : {}),
+        ...(visibility.includeInternalNotes
+          ? {
+              internalNoteCount: internalNoteMap[link.id]?.count || 0,
+              lastInternalNoteAt: internalNoteMap[link.id]?.lastAt || null,
+            }
+          : {}),
       },
     };
   });

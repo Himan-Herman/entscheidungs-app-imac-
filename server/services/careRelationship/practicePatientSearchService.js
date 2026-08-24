@@ -46,6 +46,7 @@ export function parsePracticePatientSearchParams(query = {}) {
     hasDocuments: parseBoolFilter(query.hasDocuments),
     hasMedicationPlan: parseBoolFilter(query.hasMedicationPlan),
     hasOpenDataRequest: parseBoolFilter(query.hasOpenDataRequest),
+    hasOpenReminders: parseBoolFilter(query.hasOpenReminders),
     sortBy,
     sortDirection,
     page,
@@ -57,9 +58,25 @@ export function parsePracticePatientSearchParams(query = {}) {
 /**
  * @param {string} q
  */
+/**
+ * Escapes the LIKE wildcards Prisma's `contains` passes through verbatim.
+ *
+ * `contains` compiles to `LIKE %value%` without escaping, so a search for "%"
+ * matched every relationship the practice holds and "_" matched any single
+ * character. That is not a leak — the practice scope still bounds the result —
+ * but it is wrong: a typed character must be searched for, not interpreted.
+ *
+ * The backslash goes first, otherwise it would escape the escapes added after.
+ *
+ * @param {string} value
+ */
+function escapeLikeWildcards(value) {
+  return value.replace(/\\/g, "\\\\").replace(/[%_]/g, (ch) => `\\${ch}`);
+}
+
 function buildTextSearchWhere(q) {
   if (!q) return {};
-  const needle = q;
+  const needle = escapeLikeWildcards(q);
   const parts = needle.split(/\s+/).filter(Boolean);
 
   /** @type {import('@prisma/client').Prisma.PracticePatientLinkWhereInput[]} */
@@ -165,6 +182,17 @@ function buildPrismaWhere(practiceProfileId, params) {
     };
   }
 
+  /*
+   * Phase 5B — "open follow-up" is an explicit product state (completedAt is
+   * null), never an interpretation of the text. The relation is scoped by the
+   * link itself, so a reminder of another relationship cannot satisfy it.
+   */
+  if (params.hasOpenReminders === true) {
+    where.reminders = { some: { completedAt: null } };
+  } else if (params.hasOpenReminders === false) {
+    where.reminders = { none: { completedAt: null } };
+  }
+
   if (params.assignmentStatus) {
     where.assignmentStatus = params.assignmentStatus;
   }
@@ -248,7 +276,14 @@ function compareLinks(a, b, params) {
  * @param {string} practiceProfileId
  * @param {import('express').Request['query']} query
  */
-export async function searchPracticePatients(practiceProfileId, query = {}) {
+/**
+ * @param {string} practiceProfileId
+ * @param {object} query
+ * @param {{ includeReminders?: boolean, includeInternalNotes?: boolean }} [visibility]
+ *   The caller's own permissions. Defaults to nothing: a caller that forgets to
+ *   pass them gets a list without internal counters rather than one with them.
+ */
+export async function searchPracticePatients(practiceProfileId, query = {}, visibility = {}) {
   const params = parsePracticePatientSearchParams(query);
   const pid = String(practiceProfileId || "").trim();
   if (!pid) throw new Error("practiceId_required");
@@ -269,7 +304,7 @@ export async function searchPracticePatients(practiceProfileId, query = {}) {
     orderBy: [{ linkedAt: "desc" }],
   });
 
-  let links = await enrichPracticePatientLinks(rows.map(linkToJson));
+  let links = await enrichPracticePatientLinks(rows.map(linkToJson), visibility);
 
   links = links.filter((link) => matchesProfileSharedFilter(link, params.profileShared));
 
@@ -292,6 +327,7 @@ export async function searchPracticePatients(practiceProfileId, query = {}) {
       hasDocuments: params.hasDocuments ?? null,
       hasMedicationPlan: params.hasMedicationPlan ?? null,
       hasOpenDataRequest: params.hasOpenDataRequest ?? null,
+      hasOpenReminders: params.hasOpenReminders ?? null,
       sortBy: params.sortBy,
       sortDirection: params.sortDirection,
     },

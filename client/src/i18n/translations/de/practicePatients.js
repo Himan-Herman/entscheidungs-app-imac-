@@ -116,6 +116,13 @@ export default {
   tabErezept: "e-Rezepte",
   tabSosCard: "Notfallausweis",
   tabMessages: "Nachrichten",
+  filterOpenReminders: "Offene Wiedervorlagen",
+  filterOpenRemindersYes: "Nur mit offenen",
+  filterOpenRemindersNo: "Nur ohne offene",
+  openRemindersBadge: "{count} offen",
+  openRemindersAria: "{count} offene Wiedervorlagen",
+  internalNotesBadge: "{count} Notizen",
+  internalNotesAria: "{count} interne Notizen des Praxisteams",
   tabInternalWork: "Interne Notizen",
   tabActivity: "Aktivität",
   patientProvidedHint:
