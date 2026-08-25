@@ -76,6 +76,8 @@ export default function NotificationCenter({ isLoggedIn, isPractice }) {
   const panelRef = useRef(null);
   const toggleRef = useRef(null);
   const generationRef = useRef(0);
+  /** Set when Escape closed the panel, so focus returns to where it came from. */
+  const restoreFocusRef = useRef(false);
   const abortRef = useRef(null);
 
   const inboxPath = isPractice ? "/practice/inbox" : "/patient/inbox";
@@ -181,8 +183,13 @@ export default function NotificationCenter({ isLoggedIn, isPractice }) {
     }
     function onKeyDown(e) {
       if (e.key !== "Escape") return;
+      // Focus is restored AFTER the panel is gone, not here. Calling focus()
+      // synchronously puts it on the toggle while the panel is still mounted;
+      // React then unmounts the panel, the browser sees focus inside a removed
+      // subtree and drops it to <body>. The keyboard user is left with no
+      // position at all, which is exactly what Escape must not do.
+      restoreFocusRef.current = true;
       setOpen(false);
-      toggleRef.current?.focus();
     }
 
     document.addEventListener("mousedown", onPointerDown);
@@ -199,6 +206,14 @@ export default function NotificationCenter({ isLoggedIn, isPractice }) {
     if (!open) return;
     panelRef.current?.querySelector("a, button")?.focus();
   }, [open, state]);
+
+  // The panel has been removed by the time this runs, so the toggle is a
+  // stable target and focus stays where a keyboard user expects it.
+  useEffect(() => {
+    if (open || !restoreFocusRef.current) return;
+    restoreFocusRef.current = false;
+    toggleRef.current?.focus();
+  }, [open]);
 
   if (!isLoggedIn || state === "unavailable") return null;
 

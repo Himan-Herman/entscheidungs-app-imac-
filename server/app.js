@@ -14,7 +14,6 @@ import mailRoutes from './routes/mail.js';
 import { sendVerificationEmail } from './emailService.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import ttsRouter from "./routes/tts.js";
-import kiRouter from "./routes/ki.js";
 import previsitRouter from "./routes/previsit.js";
 import previsitSessionsRouter from "./routes/previsitSessions.js";
 import previsitCasesRouter from "./routes/previsitCases.js";
@@ -201,7 +200,9 @@ app.use('/api/symptom', requireAuth, symptomRoute);
 app.use('/api/symptom-thread', requireAuth, symptomThreadRoute);
 app.use('/api/textsymptom', requireAuth, symptomThreadRoute);
 app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
-app.use('/api/meda', medaRouter);
+// Every route in this router already requires auth; the mount repeats it so
+// a future route added here cannot be published by omission.
+app.use('/api/meda', requireAuth, medaRouter);
 app.use('/api/meda-live-translation', requireAuth, medaLiveTranslationRouter);
 app.use('/api/meda-realtime', requireAuth, medaRealtimeRouter);
 app.use('/api/practice/meda', requireAuth, medaPdfLinkLimiter, medaPdfLinkRouter);
@@ -231,7 +232,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 /** Symptom read-aloud — JWT required; every caller already sits behind ProtectedRoute. */
 app.use("/api/tts", symptomSpeechLimiter, requireAuth, ttsRouter);
-app.use("/api/ki", kiRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
 app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
 app.use("/api/practices", requireAuth, practicesRouter);

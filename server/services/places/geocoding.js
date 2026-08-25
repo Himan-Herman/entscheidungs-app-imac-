@@ -75,7 +75,10 @@ async function geocodeViaLegacyApi(query, language, options = {}) {
   const data = await res.json();
   if (data.status !== "OK" || !data.results?.length) {
     if (data.status && data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-      console.warn("[geocode/legacy]", data.status, String(query).slice(0, 100));
+      // The query is what the user typed into a practice search — often a
+      // street address. The provider's status code is enough to diagnose a
+      // failure; the address is not, and it has no business in a log line.
+      console.warn("[geocode/legacy]", data.status);
     }
     throw new Error(data.status === "ZERO_RESULTS" ? "geocode_zero" : "geocode_failed");
   }

@@ -1,3 +1,4 @@
+import { getRateLimitConfigProblems } from '../middleware/rateLimitConfig.js';
 /**
  * Startup validation for production readiness.
  * Logs only variable names (never secret values).
@@ -28,6 +29,14 @@ export function validateStartupEnv() {
 
   /** @type {string[]} */
   const missingCritical = [];
+
+  // Rate limits are overridable so a loopback test suite is not throttled
+  // against itself. In production an out-of-band value is a configuration
+  // error, not a preference: it either disables the limit or breaks the route.
+  for (const problem of getRateLimitConfigProblems()) {
+    console.error(`[startup] rate limit misconfigured: ${problem}`);
+    missingCritical.push('RATE_LIMIT_CONFIG');
+  }
 
   for (const varName of required) {
     if (!hasValue(varName)) {

@@ -1,12 +1,11 @@
-import OpenAI from "openai";
-import { getMedaOpenAiModel, isMedaEnabled, MEDA_MAX_HISTORY_MESSAGES } from "../../config/medaEnv.js";
+import { isMedaEnabled, MEDA_MAX_HISTORY_MESSAGES } from "../../config/medaEnv.js";
+import { runMedaProvider } from "./provider/index.js";
 import { buildMedaSystemPrompt } from "./medaPrompt.js";
 import { validateMedaInput } from "./medaInputSafety.js";
 import { getMedaQuota, recordMedaQuestion } from "./medaRateLimit.js";
 import { sanitizeAiOutput } from "../aiSafetySanitizer.js";
 import { AI_MODULES } from "../../config/aiSafetyPolicy.js";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const DIAGNOSIS_REFUSAL = {
   de: "Dazu kann ich keine Diagnose stellen. Bei Beschwerden bitte medizinisches Fachpersonal kontaktieren.",
@@ -62,14 +61,14 @@ export async function runMedaChat(userId, input) {
     { role: "user", content: validated.text },
   ];
 
-  const completion = await openai.chat.completions.create({
-    model: getMedaOpenAiModel(),
-    messages,
-    max_tokens: 100,
-    temperature: 0.3,
-  });
+  // The provider resolves its own credential, endpoint and model. An
+  // unconfigured or refused provider returns here without contacting anything.
+  const provider = await runMedaProvider({ messages });
+  if (!provider.ok) {
+    return { ok: false, code: "meda_unavailable" };
+  }
 
-  const raw = completion.choices[0]?.message?.content?.trim() || "";
+  const raw = provider.text;
   const safe = sanitizeAiOutput(raw, { module: AI_MODULES.MEDA, locale });
 
   const countsTowardQuota = !safe.used_fallback;

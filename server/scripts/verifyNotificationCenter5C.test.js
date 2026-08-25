@@ -27,8 +27,10 @@ import { prisma } from "../lib/prisma.js";
 import {
   getPatientNotificationSummary,
   getPracticeNotificationSummary,
-  practiceInboxTargetUrl,
 } from "../services/notificationCenter/notificationCenterService.js";
+// Phase 6a moved this into its own module so the inbox serializer and the
+// header preview share one derivation. Same function, one home.
+import { practiceInboxTargetUrl } from "../services/practiceInbox/practiceInboxTargets.js";
 import { upsertPatientInboxItem } from "../services/patientInbox/patientInboxService.js";
 import { upsertPracticeInboxItem } from "../services/practiceInbox/practiceInboxService.js";
 import { createReminder, completeReminder } from "../services/practiceInternalWork/reminderService.js";

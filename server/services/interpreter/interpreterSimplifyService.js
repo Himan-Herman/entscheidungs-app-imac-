@@ -1,4 +1,4 @@
-import { openai } from "../../openaiClient.js";
+import { getInterpreterClient } from "./provider/interpreterClient.js";
 import {
   getInterpreterOpenAiModel,
   isInterpreterAiConfigured,
@@ -49,7 +49,7 @@ export async function simplifyInterpreterText(input) {
   ];
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await (await getInterpreterClient()).client.chat.completions.create({
       model: getInterpreterOpenAiModel(),
       messages,
       max_tokens: 450,

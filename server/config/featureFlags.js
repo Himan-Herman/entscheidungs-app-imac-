@@ -314,6 +314,19 @@ export function isSosCardEnabled() {
  * Requires explicit patient consent before any data is written.
  * Default off until MEDA_CLOUD_ARCHIVE_ENABLED is set.
  */
+/**
+ * The Meda knowledge chat.
+ *
+ * Its own switch. Until this phase the feature was "on" whenever
+ * OPENAI_API_KEY happened to be set anywhere in the environment, which made a
+ * credential configured for one purpose silently authorise another.
+ *
+ * Default off.
+ */
+export function isMedaEnabled() {
+  return envFlag("MEDA_ENABLED", false);
+}
+
 export function isMedaCloudArchiveEnabled() {
   return envFlag("MEDA_CLOUD_ARCHIVE_ENABLED", false);
 }

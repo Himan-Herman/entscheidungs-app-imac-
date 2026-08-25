@@ -1,5 +1,6 @@
 // routes/auth.js
 import express from "express";
+import { logServerError } from "../utils/safeApiError.js";
 import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -175,11 +176,10 @@ authRouter.post("/register", authRegisterLimiter, async (req, res) => {
           });
         }
       } catch (err) {
-        console.error(
-          "MAIL SEND FAILED:",
-          err?.code,
-          err?.response?.body ?? err?.message ?? err
-        );
+        // This runs on the registration path, so the provider payload here
+        // can contain the address just submitted. The error class and the
+        // provider's own code are enough to diagnose a delivery failure.
+        logServerError("auth/register-verification-mail", err, req);
         return res.status(202).json({
           ok: false,
           error: "MAIL_FAILED_CAN_RESEND",
@@ -198,7 +198,8 @@ authRouter.post("/register", authRegisterLimiter, async (req, res) => {
     if (e.code === "P2002" && e.meta?.target?.includes("email")) {
       return res.status(409).json({ ok: false, error: "EMAIL_EXISTS" });
     }
-    console.error("[/register]", e);
+    // A Prisma error here carries the submitted e-mail in its metadata.
+    logServerError("auth/register", e, req);
     return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
   }
 });
@@ -249,7 +250,7 @@ authRouter.get("/verify-email", async (req, res) => {
     // Erfolg → Login mit Erfolg-Flag
     return res.redirect(`${loginUrl}?verify=ok`);
   } catch (err) {
-    console.error("verify-email error:", err);
+    logServerError("auth/verify-email", err, req);
     // Fallback: Login mit Fehlerhinweis
     return res.redirect(`${loginUrl}?verify=error`);
   }
@@ -303,7 +304,10 @@ authRouter.post("/resend-verification", async (req, res) => {
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error("[resend-verification]", err?.response?.body ?? err);
+    // `err.response.body` is the mail provider's raw payload; it can carry
+    // the recipient address and provider-side detail. logServerError keeps
+    // only context and error class in production.
+    logServerError("auth/resend-verification", err, req);
     return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
   }
 });
@@ -354,7 +358,7 @@ authRouter.post("/request-password-reset", authPasswordResetLimiter, async (req,
     
     return res.json({ ok: true });
   } catch (err) {
-    console.error("[request-password-reset]", err);
+    logServerError("auth/request-password-reset", err, req);
     return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
   }
 });
@@ -471,7 +475,7 @@ authRouter.post("/reset-password", authResetPasswordLimiter, async (req, res) =>
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error("[reset-password]", err);
+    logServerError("auth/reset-password", err, req);
     return res
       .status(500)
       .json({ ok: false, error: "SERVER_ERROR" });

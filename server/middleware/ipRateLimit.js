@@ -1,8 +1,10 @@
 /**
  * Lightweight in-memory rate limiting by client IP (fixed windows).
- * Covers OpenAI-backed `/api/previsit/*`, `/api/ki`, outbound mail, auth, account GDPR routes.
+ * Covers OpenAI-backed `/api/previsit/*`, outbound mail, auth, account GDPR routes.
  * No request bodies or sensitive fields are logged — only per-IP counters.
  */
+
+import { rateLimitMax } from "./rateLimitConfig.js";
 
 const FIFTEEN_MIN_MS = 15 * 60 * 1000;
 
@@ -59,7 +61,12 @@ export const previsitAudioSpeakLimiter = createIpRateLimiter({
 
 /** POST /api/previsit/audio/transcribe — transcription; 10 / 15 min / IP */
 export const previsitAudioTranscribeLimiter = createIpRateLimiter({
-  max: Number(process.env.PREVISIT_VOICE_IP_MAX) || 10,
+  max: rateLimitMax("PREVISIT_VOICE_IP_MAX", {
+    fallback: 10,
+    min: 3,
+    max: 120,
+    why: "Each request uploads audio and reaches a speech provider; a wide band would make one address expensive.",
+  }),
   keyPrefix: 'previsit:audio:transcribe',
 });
 
@@ -72,7 +79,12 @@ export const previsitAudioTranscribeLimiter = createIpRateLimiter({
  * bound, not the only one.
  */
 export const symptomSpeechLimiter = createIpRateLimiter({
-  max: Number(process.env.SYMPTOM_SPEECH_IP_MAX) || 30,
+  max: rateLimitMax("SYMPTOM_SPEECH_IP_MAX", {
+    fallback: 30,
+    min: 5,
+    max: 300,
+    why: "Speech synthesis is per-request billable; the band allows a busy session, not a scraper.",
+  }),
   keyPrefix: 'symptom:speech',
 });
 
@@ -83,6 +95,29 @@ export const sendPrevisitPdfLimiter = createIpRateLimiter({
 });
 
 /** POST /api/previsit/history-diff — factual session comparison; 12 / 15 min / IP */
+/**
+ * POST /api/previsit/symptoms-followup and /api/previsit/adaptive-intake.
+ *
+ * Both reach a provider and both are deliberately usable without an account:
+ * a patient who opens Pre-Visit directly, with no QR code and no login, is a
+ * legitimate flow, so there is no session to bind to. Measured before this
+ * limiter existed, an arbitrary anonymous request produced an outbound
+ * provider call in 2.5 seconds, unbounded.
+ *
+ * The band is generous enough for a real intake conversation — each answer is
+ * one call and a session is a handful of turns — and far below what makes the
+ * endpoint worth abusing.
+ */
+export const previsitAdaptiveTurnLimiter = createIpRateLimiter({
+  max: rateLimitMax("PREVISIT_ADAPTIVE_IP_MAX", {
+    fallback: 30,
+    min: 5,
+    max: 300,
+    why: "One provider call per answered question; an intake conversation is tens of turns, not hundreds.",
+  }),
+  keyPrefix: "previsit_adaptive",
+});
+
 export const previsitHistoryDiffLimiter = createIpRateLimiter({
   max: 12,
   keyPrefix: 'previsit:history-diff',
@@ -142,12 +177,6 @@ export const authResetPasswordLimiter = createIpRateLimiter({
   keyPrefix: 'auth:reset-password',
 });
 
-/** POST /api/ki — OpenAI-backed image/chat */
-export const kiOpenAiRouteLimiter = createIpRateLimiter({
-  max: 45,
-  keyPrefix: 'ki:openai',
-});
-
 /** POST /api/mail/send — generic outbound mail */
 export const mailSendRouteLimiter = createIpRateLimiter({
   max: 25,
@@ -163,7 +192,12 @@ export const mailSendRouteLimiter = createIpRateLimiter({
  * more dictation than describing symptoms involves.
  */
 export const symptomVoiceRouteLimiter = createIpRateLimiter({
-  max: Number(process.env.SYMPTOM_VOICE_IP_MAX) || 20,
+  max: rateLimitMax("SYMPTOM_VOICE_IP_MAX", {
+    fallback: 20,
+    min: 5,
+    max: 200,
+    why: "Audio upload plus transcription; same reasoning as the pre-visit voice limit.",
+  }),
   // Named for the feature, not for the technique that happens to implement it.
   keyPrefix: 'symptom_voice',
 });
@@ -269,12 +303,22 @@ export const bookingAssistLimiter = createIpRateLimiter({
  * end of the microphone button.
  */
 export const messageSttIpLimiter = createIpRateLimiter({
-  max: Number(process.env.MESSAGE_STT_IP_MAX) || 20,
+  max: rateLimitMax("MESSAGE_STT_IP_MAX", {
+    fallback: 20,
+    min: 5,
+    max: 200,
+    why: "Dictation into a practice message; one clinician dictates far below this.",
+  }),
   keyPrefix: "message_stt",
 });
 
 export const messageTranslationIpLimiter = createIpRateLimiter({
-  max: Number(process.env.MESSAGE_TRANSLATION_IP_MAX) || 60,
+  max: rateLimitMax("MESSAGE_TRANSLATION_IP_MAX", {
+    fallback: 60,
+    min: 10,
+    max: 600,
+    why: "Text-only and cheap per call, so the band is wider — but still a band.",
+  }),
   keyPrefix: "message_translation",
 });
 
@@ -282,6 +326,11 @@ export const documentTranslationIpLimiter = createIpRateLimiter({
   // Overridable so a deployment can tune it and so HTTP tests, which all
   // originate from one loopback address, are not throttled by each other.
   // The default is what production runs on.
-  max: Number(process.env.DOCUMENT_TRANSLATION_IP_MAX) || 20,
+  max: rateLimitMax("DOCUMENT_TRANSLATION_IP_MAX", {
+    fallback: 20,
+    min: 5,
+    max: 200,
+    why: "A whole document per call; the most expensive of these paths.",
+  }),
   keyPrefix: "document_translation",
 });

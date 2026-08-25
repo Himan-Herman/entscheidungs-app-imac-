@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma.js";
 import { linkHasConsentType } from "../consent/consentRecordService.js";
 import { writeAuditLog } from "../auditLogService.js";
+import { practiceInboxTargetUrl } from "./practiceInboxTargets.js";
 
 
 export const INBOX_TYPES = new Set([
@@ -61,7 +62,10 @@ export function practiceInboxItemToJson(row) {
     priority: row.priority,
     sourceRefType: row.sourceRefType,
     sourceRefId: row.sourceRefId,
-    targetUrl: row.targetUrl,
+    // Derived, never replayed. A stored path is written once and never
+    // revisited, so a renamed route leaves a dead link and a tampered row
+    // could point off-site. Same derivation the header preview uses.
+    targetUrl: practiceInboxTargetUrl(row),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     lastActivityAt: row.lastActivityAt,

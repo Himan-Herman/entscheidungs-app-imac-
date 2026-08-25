@@ -23,6 +23,7 @@ import {
   previsitHistoryDiffLimiter,
   previsitAssistantQuestionsLimiter,
 } from '../middleware/ipRateLimit.js';
+import { previsitAdaptiveTurnLimiter } from "../middleware/ipRateLimit.js";
 
 const router = express.Router();
 
@@ -152,7 +153,7 @@ router.post('/assistant-questions', previsitAssistantQuestionsLimiter, async (re
  * POST /symptoms-followup (mounted at /api/previsit)
  * Bounded adaptive follow-ups for selected Pre-Visit intake categories.
  */
-router.post('/symptoms-followup', async (req, res) => {
+router.post('/symptoms-followup', previsitAdaptiveTurnLimiter, async (req, res) => {
   try {
     const body = req.body || {};
     const { patientLanguage, seedStatement, qaHistory, maxFollowUps, category } = body;
@@ -190,7 +191,7 @@ router.post('/symptoms-followup', async (req, res) => {
  * POST /adaptive-intake (mounted at /api/previsit)
  * Unified bounded adaptive intake (non-diagnostic, non-triage).
  */
-router.post('/adaptive-intake', async (req, res) => {
+router.post('/adaptive-intake', previsitAdaptiveTurnLimiter, async (req, res) => {
   try {
     const body = req.body || {};
     const {

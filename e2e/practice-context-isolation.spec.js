@@ -2596,6 +2596,12 @@ test.describe("practice context isolation", () => {
       await page.getByTestId("dictation-start").click();
       await page.getByTestId("dictation-stop").click();
       await expect(page.locator("#scoped-reply")).toHaveValue(/Ramipril/);
+      // The transcript arriving and the recorder returning to idle are two
+      // separate state updates. Clearing the field between them lets the second
+      // one write the transcript back over the empty value, which is what made
+      // this test flake in a full run and pass in isolation. Waiting for the
+      // start control to come back waits for the recorder to be finished.
+      await expect(page.getByTestId("dictation-start")).toBeVisible();
 
       // The speaker corrects it — which is the entire point of a draft. The
       // value is asserted before sending, so this tests what was sent and not
