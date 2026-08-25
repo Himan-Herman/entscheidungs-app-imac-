@@ -1,4 +1,5 @@
 import { deepMerge } from "../../deepMerge.js";
+import { frInternalWork } from "./fr/fr.internalWork.js";
 import legalFr from "../legal/fr/index.js";
 import landing from "./fr.landing.js";
 import info from "./fr.info.js";
@@ -300,6 +301,10 @@ const frComposed = deepMerge(
 );
 
 export default deepMerge(
+  deepMerge(
   deepMerge(frComposed, frTelemedicine),
   { patientPractices: frPatientPractices, documentSharing: frDocumentSharing },
+),
+  // Phases 5A-5C: authored here rather than falling through to English.
+  frInternalWork,
 );

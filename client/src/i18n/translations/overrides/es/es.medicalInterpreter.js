@@ -70,7 +70,7 @@ export default {
     heading: "Perfil para esta conversación",
     intro:
       "Opcional: utilizar los datos guardados de la cuenta para esta conversación (p. ej., para documentación posterior).",
-    consentLabel: "Utilizar los datos de perfil guardados para esta conversación",
+    consentLabel: "Utilizar el nombre de perfil guardado para esta conversación: {{name}}",
     consentHint:
       "Nombre, fecha de nacimiento y datos de contacto — solo si usted lo consiente. No se utilizan datos del perfil de salud.",
     accountLink: "Modificar en los ajustes de la cuenta",

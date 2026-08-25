@@ -49,6 +49,25 @@ export default function NotificationCenter({ isLoggedIn, isPractice }) {
 
   const t = useMemo(() => getMessages(language).notificationCenter ?? {}, [language]);
 
+  /**
+   * A stored notice title is written in one language and never revisited, so
+   * showing it raw puts German text into a French header. The inbox pages
+   * already solve this by preferring the translated catalogue and keeping the
+   * stored text only as a fallback; the same resolution is used here rather
+   * than a second one.
+   *
+   * The practice side has no such catalogue today — its own inbox page renders
+   * the stored title too — so a practice notice still shows what was stored.
+   */
+  const inboxTitles = useMemo(
+    () => (isPractice ? null : getMessages(language).patientInbox?.titles ?? null),
+    [language, isPractice],
+  );
+  const titleOf = useCallback(
+    (item) => inboxTitles?.[item.titleKey || item.type] || item.title,
+    [inboxTitles],
+  );
+
   const [open, setOpen] = useState(false);
   const [state, setState] = useState("idle"); // idle | loading | ready | error | unavailable
   const [summary, setSummary] = useState(null);
@@ -278,7 +297,7 @@ export default function NotificationCenter({ isLoggedIn, isPractice }) {
                     className="ms-notif__item"
                     onClick={() => go(item.targetUrl || inboxPath)}
                   >
-                    <span className="ms-notif__item-title">{item.title}</span>
+                    <span className="ms-notif__item-title">{titleOf(item)}</span>
                     {item.patientLabel && (
                       <span className="ms-notif__item-meta">{item.patientLabel}</span>
                     )}

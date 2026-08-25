@@ -1,0 +1,131 @@
+/**
+ * Карта пациента: архивирование, профиль и сообщения — русский.
+ *
+ * Оговорка «не проверено» у профиля сохранена дословно по смыслу: сведения
+ * внесены пациентом и учреждением не подтверждены. Технология помощника не
+ * называется — как и в немецком оригинале («assistiert», а не «KI»).
+ */
+export const ruPracticeRecord = {
+  archiveLifecycle: {
+    showArchive: "Показать архив",
+    hideArchive: "Скрыть архив",
+    statusActive: "Активно",
+    statusArchived: "В архиве",
+    statusDeleted: "Удалено",
+    statusRevoked: "Отозвано",
+    archive: "В архив",
+    restore: "Восстановить из архива",
+    delete: "Удалить",
+    cancel: "Отмена",
+    continue: "Далее",
+    archiveConfirmTitle1: "Отправить эту запись в архив?",
+    archiveConfirmBody1: "Запись будет убрана из активного представления.",
+    archiveConfirmTitle2: "Подтвердите архивирование",
+    archiveConfirmBody2:
+      "Запись будет убрана из активного представления, но останется сохранённой и прослеживаемой.",
+    archiveConfirmAction: "В архив",
+    deleteConfirmTitle1: "Действительно удалить эту запись?",
+    deleteConfirmBody1: "Подтвердите следующий шаг.",
+    deleteConfirmTitle2: "Подтвердите удаление",
+    deleteConfirmBody2:
+      "Это действие непросто отменить. Запись будет убрана из активного представления, а в журнал аудита будет внесена отметка.",
+    deleteConfirmAction: "Удалить",
+    archiveSuccess: "Отправлено в архив.",
+    restoreSuccess: "Восстановлено.",
+    deleteSuccess: "Удалено.",
+    archiveError: "Не удалось отправить в архив.",
+    restoreError: "Не удалось восстановить.",
+    deleteError: "Не удалось удалить.",
+    forbidden: "У вас нет прав на это действие.",
+    aiSuggestionLabel: "Автоматическое предложение — проверьте его",
+    aiDisclaimer:
+      "Помогает только организационно. Не решает вопросы медицинских или юридических обязанностей по удалению.",
+  },
+
+  practicePatientProfile: {
+    sectionTitle: "Профиль пациента",
+    sectionIntro:
+      "Только базовые сведения и данные о здоровье, открытые самим пациентом, — только для чтения, без проверки.",
+    loading: "Загрузка…",
+    loadError: "Не удалось загрузить профиль.",
+    featureDisabled: "Профиль пациента в этой среде пока не включён.",
+    notShared: "Пациент не открыл доступ к этому профилю.",
+    providedByPatient: "Указано пациентом",
+    notVerifiedNote:
+      "Медицинская проверка со стороны MedScoutX не проводилась. Эти сведения внесены пациентом и учреждением не подтверждены.",
+    fieldEmail: "Эл. почта",
+    basicHeading: "Базовые данные",
+    healthHeading: "Сведения о здоровье",
+    dependentHeading: "Подопечное лицо",
+    fieldName: "Имя",
+    fieldDateOfBirth: "Дата рождения",
+    fieldLanguage: "Язык",
+    fieldGender: "Обращение / пол",
+    fieldEmergency: "Экстренный контакт / примечание",
+    fieldInsurance: "Вид страхования",
+    fieldAllergies: "Аллергии",
+    fieldMedications: "Текущие лекарства (со слов пациента)",
+    fieldChronic: "Перенесённые и хронические заболевания",
+    fieldImportantNotes: "Важные примечания",
+    fieldRelation: "Отношение",
+    noValue: "Не указано",
+    insuranceStatutory: "Обязательное",
+    insurancePrivate: "Частное",
+    insuranceSelfPay: "Оплата пациентом",
+    insuranceOther: "Другое",
+    insurancePreferNotSay: "Не указано",
+    healthNotForDependent:
+      "Сведения о здоровье относятся к аккаунту сопровождающего лица и здесь не отображаются.",
+    aiSummaryButton: "Создать автоматическую сводку",
+    aiSummaryHeading: "Автоматическая сводка — проверьте её",
+    aiSummaryHint:
+      "Структурирует только имеющиеся сведения профиля. Без медицинской оценки.",
+    aiSummaryLoading: "Создаём сводку…",
+    aiSummaryError: "Не удалось создать сводку.",
+    aiNotConfigured: "Эта функция в данной среде недоступна.",
+  },
+
+  practiceMessages: {
+    sectionTitle: "Сообщения",
+    sectionIntro:
+      "Защищённая переписка с этим пациентом — черновик с подсказкой помогает только сформулировать текст, без диагнозов.",
+    loading: "Загрузка…",
+    loadError: "Не удалось загрузить сообщения.",
+    featureDisabled: "Сообщения в этой среде пока не включены.",
+    empty: "Сообщений пока нет.",
+    newThread: "Начать новую переписку",
+    subjectLabel: "Тема (необязательно)",
+    subjectPlaceholder: "напр. уточнение по приёму",
+    messageLabel: "Сообщение",
+    messagePlaceholder: "Нейтральное сообщение пациенту…",
+    send: "Отправить",
+    viewerReadOnly: "Доступ только для чтения — новые сообщения недоступны.",
+    open: "Открыть",
+    close: "Закрыть",
+    archive: "В архив",
+    statusOpen: "Открыта",
+    statusClosed: "Закрыта",
+    statusArchived: "В архиве",
+    statusAria: "Статус: {status}",
+    noSubject: "Сообщение",
+    createError: "Не удалось создать переписку.",
+    sendError: "Не удалось отправить сообщение.",
+    replyLabel: "Ответ",
+    youPractice: "Учреждение",
+    patientSide: "Пациент",
+    backToRecord: "Назад к карте пациента",
+    unreadBadge: "Не прочитано",
+    unreadAria: "Непрочитанные сообщения",
+    readAt: "Прочитано",
+    notReadYet: "Ещё не прочитано",
+    aiDraftLabel: "Черновик с подсказкой — проверьте его",
+    aiDisclaimer:
+      "Помогает только сформулировать и структурировать уже имеющиеся сведения. Без медицинских рекомендаций.",
+    aiReplyDraft: "Черновик ответа (с подсказкой)",
+    aiBusy: "Создаём черновик…",
+    aiError: "Не удалось создать черновик.",
+    aiNotConfigured: "Эта функция в данной среде недоступна.",
+  },
+};
+
+export default ruPracticeRecord;

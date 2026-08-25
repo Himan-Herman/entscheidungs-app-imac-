@@ -1,4 +1,21 @@
 import { deepMerge } from "../../deepMerge.js";
+import { ruInternalWork } from "./ru/ru.internalWork.js";
+import { ruPracticePatients } from "./ru/ru.practicePatients.js";
+import { ruPracticeAdmin } from "./ru/ru.practiceAdmin.js";
+import { ruPracticeGovernance } from "./ru/ru.practiceGovernance.js";
+import { ruPracticeSetup } from "./ru/ru.practiceSetup.js";
+import { ruPracticeWorkflow } from "./ru/ru.practiceWorkflow.js";
+import { ruPracticeServices } from "./ru/ru.practiceServices.js";
+import { ruPracticeTeamNs } from "./ru/ru.practiceTeam.js";
+import { ruPracticeMisc } from "./ru/ru.practiceMisc.js";
+import { ruPracticeOverview } from "./ru/ru.practiceOverview.js";
+import { ruPracticeRecord } from "./ru/ru.practiceRecord.js";
+import { ruPracticeDocsMeds } from "./ru/ru.practiceDocsMeds.js";
+import { ruPracticeDocOcrVitals } from "./ru/ru.practiceDocOcrVitals.js";
+import { ruPracticeDocuments } from "./ru/ru.practiceDocuments.js";
+import { ruPracticeIntegrations } from "./ru/ru.practiceIntegrations.js";
+import { ruPracticeAnamnesis } from "./ru/ru.practiceAnamnesis.js";
+import { ruPracticeBilling } from "./ru/ru.practiceBilling.js";
 import legalRu from "../legal/ru/index.js";
 import landing from "./ru.landing.js";
 import info from "./ru.info.js";
@@ -172,10 +189,18 @@ const ruBase = {
 
 export default deepMerge(
   deepMerge(
+  deepMerge(
     deepMerge(deepMerge(deepMerge(ruBase, ruCore), ruAccount), ruModules),
     ruPatient,
   ),
   deepMerge(deepMerge(ruPractice, { sosCard: ruSosCard }), {
     medicalInterpreter: ruMedicalInterpreter,
   }),
+),
+  // Phases 5A-5C plus the practice patient list, authored here rather than
+  // falling through to English. deepMerge takes exactly two arguments — a
+  // third would be silently ignored — so these nest.
+  // deepMerge takes exactly TWO arguments: a third would be silently
+  // dropped, so every additional bundle is folded in explicitly.
+  deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(ruInternalWork, ruPracticePatients), ruPracticeAdmin), ruPracticeGovernance), ruPracticeSetup), ruPracticeWorkflow), ruPracticeServices), ruPracticeTeamNs), ruPracticeMisc), ruPracticeOverview), ruPracticeRecord), ruPracticeDocsMeds), ruPracticeDocOcrVitals), ruPracticeDocuments), ruPracticeIntegrations), ruPracticeAnamnesis), ruPracticeBilling),
 );
