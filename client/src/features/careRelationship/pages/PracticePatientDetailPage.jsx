@@ -54,7 +54,6 @@ export default function PracticePatientDetailPage() {
   const { linkId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const practiceId = searchParams.get("practiceId") || "";
-  const fromSearch = searchParams.get("fromSearch") === "true";
   const activeTab = VALID_TABS.has(searchParams.get("tab") || "")
     ? searchParams.get("tab")
     : "overview";
@@ -107,7 +106,7 @@ export default function PracticePatientDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [linkId, practiceId, fromSearch, t.featureDisabled, t.loadDetailError]);
+  }, [linkId, practiceId, t.featureDisabled, t.loadDetailError]);
 
   useEffect(() => {
     document.title = t.recordPageTitle;

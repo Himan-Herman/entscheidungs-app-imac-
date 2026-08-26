@@ -85,7 +85,7 @@ export default function VaccinationEntryForm({ t, initial = null, onSave, onCanc
     }
     try {
       await onSave({ fields, file, keepExistingDoc });
-    } catch (err) {
+    } catch {
       setSaveError(t.form.saveError);
     }
   }

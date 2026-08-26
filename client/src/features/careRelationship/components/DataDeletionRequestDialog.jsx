@@ -48,6 +48,18 @@ export default function DataDeletionRequestDialog({
       <h3 id="data-delete-title" className="patient-data-control__dialog-title">
         {title}
       </h3>
+      {/*
+        * The practice this applies to.
+        *
+        * `practiceName` was passed by the caller and ignored, so a destructive
+        * confirmation said only "at this practice" while the export dialog
+        * beside it names one. A proper noun needs no translation, which is why
+        * it is rendered on its own rather than folded into the six copies of
+        * the body text.
+        */}
+      {practiceName ? (
+        <p className="patient-data-control__dialog-practice">{practiceName}</p>
+      ) : null}
       <p id="data-delete-desc" className="patient-data-control__dialog-body">
         {body}
       </p>

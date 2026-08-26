@@ -30,19 +30,57 @@ const CANONICAL_PATHS = Object.freeze({
 });
 
 /**
+ * A base that exists only so the URL parser has something to resolve against.
+ * Never sent anywhere; only its origin is compared.
+ */
+const SAME_ORIGIN_PROBE = "https://medscoutx.invalid";
+
+/**
  * An internal path, or null.
  *
- * Rejects anything that is not a same-origin path: absolute URLs, and
- * protocol-relative `//host` which a browser treats as external. The client
- * checks this too; doing it here as well means a bad row never leaves the
- * server in the first place.
+ * ── Why this asks the parser instead of inspecting characters ───────────────
+ * The previous version checked that the value began with `/` and not `//`.
+ * That is the obvious rule and it is not enough, because the browser rewrites
+ * the string before it resolves it. Three values passed that check and still
+ * left the origin — measured, not assumed:
+ *
+ *     "/\evil.example"     ->  https://evil.example
+ *     "/\/evil.example"    ->  https://evil.example
+ *     "/<TAB>/evil.example" ->  https://evil.example
+ *
+ * A backslash is normalised to a slash, so `/\host` becomes `//host` — the
+ * protocol-relative form the check was written to catch. This is the bypass
+ * behind CVE-2025-68470, and hand-written character rules will keep missing
+ * the next variant of it.
+ *
+ * So the question is put to the same parser the browser uses: resolve the
+ * value against a base and require the origin to be unchanged. Anything that
+ * moves the origin — absolute, protocol-relative, backslash, embedded control
+ * characters, or a normalisation nobody has thought of yet — is refused
+ * without this function needing to know why.
+ *
+ * The client repeats this check before navigating. That is defence in depth
+ * against a stale build, not a second policy: both answer the same question.
  *
  * @param {unknown} url
+ * @returns {string | null}
  */
 export function safeInternalPath(url) {
   if (typeof url !== "string") return null;
   const v = url.trim();
-  if (!v.startsWith("/") || v.startsWith("//")) return null;
+  if (!v.startsWith("/")) return null;
+
+  let resolved;
+  try {
+    resolved = new URL(v, SAME_ORIGIN_PROBE);
+  } catch {
+    return null;
+  }
+  if (resolved.origin !== SAME_ORIGIN_PROBE) return null;
+
+  // The value is returned as written, not as the parser rewrote it: the router
+  // is given exactly what was stored, and what was stored has now been shown
+  // to stay on this origin.
   return v;
 }
 

@@ -5,7 +5,6 @@ import { getMessages } from "../../../i18n/translations";
 import {
   createAnamnesisTemplate,
   fetchAnamnesisTemplate,
-  patchAnamnesisTemplate,
   putFullAnamnesisTemplate,
 } from "../api/practiceAnamnesisApi.js";
 import {

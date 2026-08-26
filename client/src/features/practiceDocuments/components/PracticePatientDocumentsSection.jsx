@@ -155,7 +155,11 @@ export default function PracticePatientDocumentsSection({
     } finally {
       setLoading(false);
     }
-  }, [linkId, practiceId, t.featureDisabled, t.loadError]);
+    // `showArchived` is read above and belongs here. Without it this
+    // callback kept its identity when the toggle flipped, the effect that
+    // depends on it never re-ran, and the archive checkbox changed nothing
+    // but its own tick mark.
+  }, [linkId, practiceId, showArchived, t.featureDisabled, t.loadError]);
 
   const loadSecureLinks = useCallback(
     async (documentId) => {

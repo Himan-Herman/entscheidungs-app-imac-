@@ -549,7 +549,6 @@ export default {
     unreadShort: "nuovi",
     unreadAria: "{count} messaggi non letti",
     unnamedPractice: "Studio",
-    retry: "Riprova",
     hubTitle: "Panoramica",
     messagesTitle: "Messaggi",
     messagesHint: "Messaggi con questo studio",

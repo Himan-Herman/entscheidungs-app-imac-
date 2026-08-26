@@ -328,8 +328,13 @@ export default function PracticeHubPage() {
     setAiError("");
   }, [loadSummary, loadActivity]);
 
-  const visibility = summary?.visibility || {};
-  const metrics = summary?.metrics || {};
+  /*
+   * Memoized because `|| {}` builds a NEW empty object on every render while
+   * `summary` is still loading, which made every useMemo downstream of these
+   * two re-run on every render for nothing.
+   */
+  const visibility = useMemo(() => summary?.visibility || {}, [summary?.visibility]);
+  const metrics = useMemo(() => summary?.metrics || {}, [summary?.metrics]);
   const quickActions = summary?.quickActions || {};
   const permissions = summary?.permissions || [];
   const showAdmin =

@@ -111,7 +111,6 @@ export default function PracticeMedaPdfQrCard({ tx, practiceId, locale, onProvid
       ) : (
         <div className="mrt-pdfqr-result">
           <div className="mrt-qr-image-wrap">
-            {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
             <img className="mrt-qr-image" src={qrDataUrl} alt={tx.pdfQrAlt} width={240} height={240} />
           </div>
           <p className="mrt-pdfqr-expires">

@@ -54,6 +54,20 @@ export default function PracticePatientProfileSection({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  /*
+   * These three were used throughout the component and never declared.
+   *
+   * `loadAiSummary` assigned to all three setters and the JSX read all three
+   * values, so rendering the section threw `ReferenceError: aiLoading is not
+   * defined` — on the ordinary successful path, where a practice member opens
+   * a patient's detail page, the profile loads, the patient has shared it, and
+   * the member is not read-only. Found by ESLint (`no-undef`), not by a test:
+   * nothing covered this component.
+   */
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [aiSummary, setAiSummary] = useState("");
+
   const load = useCallback(async () => {
     if (!linkId || !practiceId) return;
     setLoading(true);

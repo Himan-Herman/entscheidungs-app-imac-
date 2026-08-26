@@ -96,7 +96,7 @@ export default function PracticeTeamPage() {
       };
       return map[role] || role;
     },
-    [t],
+    [t, language],
   );
 
   const clinicalRoleLabel = useCallback(

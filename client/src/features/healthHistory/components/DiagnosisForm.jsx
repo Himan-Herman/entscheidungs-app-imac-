@@ -8,7 +8,7 @@ const STATUSES = ["active", "chronic", "resolved", "managed", "uncertain"];
 export default function DiagnosisForm({ initial, t, onSave, onCancel, saving }) {
   const [conditionName, setConditionName] = useState(initial?.conditionName || "");
   const [icdCode, setIcdCode] = useState(initial?.icdCode || "");
-  const [icdLabel, setIcdLabel] = useState("");
+  const [, setIcdLabel] = useState("");
   const [diagnosedDate, setDiagnosedDate] = useState(
     initial?.diagnosedDate ? initial.diagnosedDate.slice(0, 10) : ""
   );

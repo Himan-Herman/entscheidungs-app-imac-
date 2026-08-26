@@ -184,7 +184,6 @@ export default {
     unreadShort: "новых",
     unreadAria: "{count} непрочитанных сообщений",
     unnamedPractice: "Практика",
-    retry: "Повторить",
     hubTitle: "Обзор",
     messagesTitle: "Сообщения",
     messagesHint: "Сообщения с этой практикой",
@@ -1552,6 +1551,8 @@ export default {
       uploadHint: "Фото прививочной книжки или PDF — максимум 10 МБ",
       uploadChange: "Заменить файл",
       uploadRemove: "Удалить файл",
+      uploadFailed:
+        "Не удалось загрузить справку. Запись сохранена.",
       uploadSelected: "Выбрано:",
       required: "* Обязательное поле",
       consentLabel:

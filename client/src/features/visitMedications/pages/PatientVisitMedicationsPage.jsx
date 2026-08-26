@@ -63,7 +63,7 @@ export default function PatientVisitMedicationsPage() {
         setLoading(false);
       }
     },
-    [t.loadError],
+    [t.loadError, t.notFound],
   );
 
   useEffect(() => {

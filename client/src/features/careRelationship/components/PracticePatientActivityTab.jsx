@@ -62,7 +62,10 @@ export default function PracticePatientActivityTab({ linkId, practiceId }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  // Read by the query below; no control sets it yet, so it stays empty and
+  // the list is unfiltered by type. Left in place rather than removed: the
+  // server already accepts the parameter.
+  const [typeFilter] = useState("");
   const [search, setSearch] = useState("");
   const [aiSummary, setAiSummary] = useState("");
   const [aiBusy, setAiBusy] = useState(false);

@@ -1,3 +1,4 @@
+import { navigateInternal } from "../../../lib/safeNavigation.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
@@ -143,7 +144,9 @@ export default function PatientInboxPage() {
         }
       }
       if (item.targetUrl && isSafeInternalUrl(item.targetUrl)) {
-        navigate(item.targetUrl);
+        // Same rule as the notification centre: a stored destination is
+        // followed only if it stays inside this app.
+        navigateInternal(navigate, item.targetUrl);
       }
     } finally {
       setBusyId("");

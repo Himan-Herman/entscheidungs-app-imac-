@@ -5,7 +5,6 @@ import {
   fetchPracticeErezept,
   createPracticeErezept,
   updatePracticeErezept,
-  deletePracticeErezept,
 } from "../api/practiceErezeptApi.js";
 import ErezeptCard from "./ErezeptCard.jsx";
 import ErezeptForm from "./ErezeptForm.jsx";
@@ -71,16 +70,6 @@ export default function PracticePatientErezeptSection({ linkId, practiceId }) {
     }
   }
 
-  async function handleDelete(id) {
-    setSaving(true);
-    try {
-      await deletePracticeErezept(linkId, practiceId, id);
-      await load();
-    } finally {
-      setSaving(false);
-    }
-  }
-
   if (loading) {
     return (
       <div className="erx-page__loading" aria-live="polite" aria-busy="true">
@@ -134,6 +123,13 @@ export default function PracticePatientErezeptSection({ linkId, practiceId }) {
                 await load();
                 setSaving(false);
               }}
+              /*
+               * The prop is called onDelete; what it does is cancel. That is
+               * deliberate: a prescription that was issued stays in the record
+               * with status "cancelled" rather than disappearing from it. A
+               * hard-delete helper existed alongside this and was wired to
+               * nothing — removed, so nobody connects it by mistake.
+               */
               onDelete={handleCancel}
               readOnly={false}
               saving={saving}

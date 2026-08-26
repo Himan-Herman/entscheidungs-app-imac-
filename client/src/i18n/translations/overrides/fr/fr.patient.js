@@ -549,7 +549,6 @@ export default {
     unreadShort: "nouv.",
     unreadAria: "{count} messages non lus",
     unnamedPractice: "Cabinet",
-    retry: "Réessayer",
     hubTitle: "Aperçu",
     messagesTitle: "Messages",
     messagesHint: "Messages avec ce cabinet",
@@ -1448,6 +1447,8 @@ export default {
       notes: "Notes (optionnel)", notesPlaceholder: "Réactions, remarques …",
       uploadDocument: "Photo / document (optionnel)", uploadHint: "Photo ou PDF – max. 10 Mo",
       uploadChange: "Changer", uploadRemove: "Supprimer", uploadSelected: "Sélectionné :",
+      uploadFailed:
+        "Le justificatif n'a pas pu être téléversé. L'entrée a été enregistrée.",
       required: "* Obligatoire",
       consentLabel: "Je confirme les informations et consens à leur stockage sécurisé dans mon profil.",
       consentRequired: "Veuillez confirmer pour continuer.",

@@ -1,3 +1,4 @@
+import { navigateInternal } from "../../../lib/safeNavigation.js";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Inbox } from "lucide-react";
@@ -245,7 +246,11 @@ export default function NotificationCenter({ isLoggedIn, isPractice }) {
 
   function go(path) {
     setOpen(false);
-    if (path) navigate(path);
+    // The destination came from a stored row. The server already derives it
+    // same-origin; this repeats the check rather than trusting the response
+    // shape, so a stale deploy or an unknown kind cannot send the browser off
+    // this origin.
+    navigateInternal(navigate, path);
   }
 
   return (

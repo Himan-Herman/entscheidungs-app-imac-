@@ -13,6 +13,18 @@
   font-weight: 600;
 }
 
+/*
+ * The practice a deletion request applies to.
+ *
+ * Sits between the title and the body: a destructive confirmation should name
+ * what it acts on, and the body text is generic across all practices.
+ */
+.patient-data-control__dialog-practice {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  color: var(--ms-fg, #0f172a);
+}
+
 .patient-data-control__dialog-body {
   margin: 0 0 1rem;
   line-height: 1.5;

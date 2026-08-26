@@ -69,7 +69,10 @@ export default function PracticeCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
-  const [canManage, setCanManage] = useState(true);
+  // Nothing narrows this today, so every control renders enabled and the
+  // server is what actually refuses a member without calendar rights (it
+  // answers 403). That is a usability gap, not a security one.
+  const [canManage] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     title: "",

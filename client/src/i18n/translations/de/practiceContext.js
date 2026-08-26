@@ -100,7 +100,6 @@ export default {
   translating: "Wird übersetzt …",
   translationFailed: "Die Übersetzung ist fehlgeschlagen.",
   translationUnavailable: "Übersetzen steht derzeit nicht zur Verfügung.",
-  retry: "Erneut versuchen",
   targetLanguage: "Zielsprache",
   translationNote: "Maschinelle Übersetzung. Verbindlich ist der Originaltext.",
   originalLabel: "Originaltext",

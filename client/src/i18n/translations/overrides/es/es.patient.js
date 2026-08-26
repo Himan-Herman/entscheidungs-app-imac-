@@ -549,7 +549,6 @@ export default {
     unreadShort: "nuevos",
     unreadAria: "{count} mensajes sin leer",
     unnamedPractice: "Consulta",
-    retry: "Intentar de nuevo",
     hubTitle: "Resumen",
     messagesTitle: "Mensajes",
     messagesHint: "Mensajes con esta consulta",

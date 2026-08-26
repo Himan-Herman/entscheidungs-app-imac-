@@ -1,4 +1,3 @@
-/* global self, clients */
 /**
  * Push handler for MedScoutX medication reminders.
  *
@@ -11,7 +10,7 @@ self.addEventListener("push", (event) => {
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
-  } catch (e) {
+  } catch {
     data = {};
   }
 
@@ -48,7 +47,7 @@ self.addEventListener("notificationclick", (event) => {
         if ("focus" in client) {
           try {
             if ("navigate" in client) await client.navigate(targetUrl);
-          } catch (e) {
+          } catch {
             /* navigation may be blocked cross-origin — focus anyway */
           }
           return client.focus();

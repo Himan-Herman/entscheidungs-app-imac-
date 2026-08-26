@@ -100,7 +100,6 @@ export default {
   translating: "Translating …",
   translationFailed: "The translation failed.",
   translationUnavailable: "Translation is currently unavailable.",
-  retry: "Try again",
   targetLanguage: "Target language",
   translationNote: "Machine translation. The original text is what counts.",
   originalLabel: "Original text",

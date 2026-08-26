@@ -400,7 +400,7 @@ function buildAnamnesisPdfDocument(data) {
     }
   }
 
-  function drawQA(questionLabel, original, translatedText, uncertain, type) {
+  function drawQA(questionLabel, original, translatedText, uncertain) {
     // Question label
     const lhLabel = lineH(SIZE_LABEL);
     const lhBody  = lineH(SIZE_BODY);

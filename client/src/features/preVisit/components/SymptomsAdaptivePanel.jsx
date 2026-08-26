@@ -274,6 +274,10 @@ const SymptomsAdaptivePanel = forwardRef(function SymptomsAdaptivePanel(
     }
   }, [
     applyServerOrFallback,
+    // Both are read inside and were missing: without them the callback could
+    // send a category or a language the user had already moved away from.
+    categoryKey,
+    patientLanguage,
     labels.adaptiveAnswerRequired,
     labels.adaptiveSeedRequired,
     onFinished,

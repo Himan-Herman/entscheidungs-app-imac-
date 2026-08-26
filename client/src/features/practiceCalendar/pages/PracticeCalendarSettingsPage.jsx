@@ -38,7 +38,7 @@ export default function PracticeCalendarSettingsPage() {
       if (!tr.res.ok) throw new Error(tr.data.error || "load_failed");
       setTypes(tr.data.types || []);
       if (ar.res.ok) setAvailability(ar.data.availability || []);
-    } catch (e) {
+    } catch {
       setError(t.loadError);
     } finally {
       setLoading(false);
