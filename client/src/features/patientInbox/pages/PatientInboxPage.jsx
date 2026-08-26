@@ -1,4 +1,5 @@
-import { navigateInternal } from "../../../lib/safeNavigation.js";
+import { navigateInternal, safeInternalPath } from "../../../lib/safeNavigation.js";
+import { notifyUnreadChanged } from "../../../lib/notificationSignal.js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
@@ -23,12 +24,6 @@ function fmt(iso, lang, fallback) {
   } catch {
     return fallback;
   }
-}
-
-function isSafeInternalUrl(url) {
-  if (!url || typeof url !== "string") return false;
-  const v = url.trim();
-  return v.startsWith("/") && !v.startsWith("//");
 }
 
 const TYPE_FILTERS = [
@@ -141,9 +136,12 @@ export default function PatientInboxPage() {
         const { res, data } = await markPatientInboxRead(item.id);
         if (res.ok && data.ok) {
           setItems((prev) => prev.map((row) => (row.id === item.id ? data.item : row)));
+          // This side already marked the item read on open; what it never did
+          // was tell the header badge, so the count stayed stale here too.
+          notifyUnreadChanged();
         }
       }
-      if (item.targetUrl && isSafeInternalUrl(item.targetUrl)) {
+      if (item.targetUrl && safeInternalPath(item.targetUrl)) {
         // Same rule as the notification centre: a stored destination is
         // followed only if it stays inside this app.
         navigateInternal(navigate, item.targetUrl);
@@ -271,7 +269,7 @@ export default function PatientInboxPage() {
             const title = resolveTitle(item);
             const statusText = statusLabel(item.status);
             const statusAria = t.statusAria.replace("{status}", statusText);
-            const canOpen = Boolean(item.targetUrl && isSafeInternalUrl(item.targetUrl));
+            const canOpen = Boolean(item.targetUrl && safeInternalPath(item.targetUrl));
             const isBusy = busyId === item.id;
 
             return (

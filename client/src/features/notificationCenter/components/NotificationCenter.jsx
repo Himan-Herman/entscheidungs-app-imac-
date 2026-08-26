@@ -1,4 +1,5 @@
 import { navigateInternal } from "../../../lib/safeNavigation.js";
+import { onUnreadChanged } from "../../../lib/notificationSignal.js";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Inbox } from "lucide-react";
@@ -157,6 +158,21 @@ export default function NotificationCenter({ isLoggedIn, isPractice }) {
     load();
     return () => abortRef.current?.abort();
   }, [load]);
+
+  /*
+   * Re-count when something elsewhere has been read.
+   *
+   * The badge used to be fetched once — on login, and on a mode or practice
+   * switch — with no way to hear about anything in between. So a practice
+   * member could open their one unread notice, see it turn to "Gelesen", and
+   * still be looking at a red 1 until they reloaded.
+   *
+   * The number is still owned here and still comes from the server: the signal
+   * carries no count, it only says the answer may have changed. That keeps one
+   * writer for one truth, instead of a second place doing arithmetic on the
+   * badge that then has to stay in agreement with this one.
+   */
+  useEffect(() => onUnreadChanged(load), [load]);
 
   // A mode or practice switch must not leave the old panel hanging open.
   //
