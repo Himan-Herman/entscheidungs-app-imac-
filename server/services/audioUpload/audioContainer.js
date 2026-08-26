@@ -16,6 +16,7 @@
  * a paid provider. It does not decode, does not validate the stream, and proves
  * nothing about what the file contains beyond its first few bytes.
  */
+import { signatureMatches } from "../../utils/fileSignature.js";
 
 /** Containers a browser's MediaRecorder actually produces. */
 export const AUDIO_CONTAINER_MIME = Object.freeze([
@@ -25,19 +26,6 @@ export const AUDIO_CONTAINER_MIME = Object.freeze([
   "audio/mpeg",
   "audio/wav",
 ]);
-
-const CONTAINER_SIGNATURES = Object.freeze({
-  /** EBML — WebM and Matroska. */
-  "audio/webm": { offset: 0, patterns: [[0x1a, 0x45, 0xdf, 0xa3]] },
-  /** "OggS". */
-  "audio/ogg": { offset: 0, patterns: [[0x4f, 0x67, 0x67, 0x53]] },
-  /** ISO base media — "ftyp" sits after the four-byte box length. */
-  "audio/mp4": { offset: 4, patterns: [[0x66, 0x74, 0x79, 0x70]] },
-  /** An MPEG frame sync, or an ID3 tag in front of one. */
-  "audio/mpeg": { offset: 0, patterns: [[0xff, 0xfb], [0xff, 0xf3], [0x49, 0x44, 0x33]] },
-  /** "RIFF". */
-  "audio/wav": { offset: 0, patterns: [[0x52, 0x49, 0x46, 0x46]] },
-});
 
 /**
  * The container a declared type names, with codec parameters stripped.
@@ -60,12 +48,12 @@ export function normalizeAudioMime(declared) {
  * @returns {boolean} false when it does not, or when nothing is known about it
  */
 export function audioContainerMatches(buffer, mime) {
-  const signature = CONTAINER_SIGNATURES[mime];
-  if (!signature) return false;
-
-  const { offset, patterns } = signature;
-  return patterns.some((bytes) => {
-    if (!buffer || buffer.length < offset + bytes.length) return false;
-    return bytes.every((byte, i) => buffer[offset + i] === byte);
-  });
+  // The byte patterns used to live here. They now live in one table shared with
+  // every other upload path — utils/fileSignature.js — because four separate
+  // copies of "what a file looks like" is four chances for them to drift apart,
+  // and because the paths with NO copy stayed invisible while each feature kept
+  // its own. What stays here is the audio-specific part: only a container this
+  // feature accepts counts, whatever else the shared table happens to know.
+  if (!AUDIO_CONTAINER_MIME.includes(mime)) return false;
+  return signatureMatches(buffer, mime);
 }

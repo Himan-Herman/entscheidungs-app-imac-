@@ -115,6 +115,11 @@ router.get("/:documentId/files/:fileId/download", async (req, res) => {
       "Content-Disposition",
       `attachment; filename="${encodeURIComponent(file.originalFileName || "document")}"`,
     );
+    // The upload path trusts the client's declared MIME type, so a file may not
+    // be what it says. attachment already stops the browser rendering it;
+    // nosniff stops it from deciding otherwise on its own. The secure-link
+    // route has always sent this — the patient route had not.
+    res.setHeader("X-Content-Type-Options", "nosniff");
     // Medical content must not sit in a shared cache.
     res.setHeader("Cache-Control", "no-store, private");
     return res.send(buffer);

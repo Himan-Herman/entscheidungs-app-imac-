@@ -1,3 +1,4 @@
+import { assertPatientOwnsLink as assertPatientOwnsLinkShared } from "../careRelationship/patientLinkAccess.js";
 import { prisma } from "../../lib/prisma.js";
 import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { canManageCalendar, canReadCalendar } from "../../utils/practicePermissions.js";
@@ -406,47 +407,18 @@ function decoratePatientAppointment(r) {
 }
 
 /**
- * APPOINTMENT SCOPE (Phase 2E.1)
- * ------------------------------
- * A patient's appointments fall into three classes, and only one of them can
- * live inside a practice context:
+ * This module calls with (patientUserId, linkId); the shared guard takes them
+ * the other way round. Kept as a one-line adapter rather than reordering every
+ * call site, so this consolidation changes no behaviour anywhere.
  *
- *   A. practicePatientLinkId set   -> belongs to exactly one care relationship.
- *                                     Patient bookings always land here, and so
- *                                     do practice-created appointments made
- *                                     through a link.
- *   B. patientUserId set, link NULL -> the practice created it against a raw
- *                                     patientUserId, or the link was later
- *                                     removed (onDelete: SetNull). It belongs to
- *                                     a practice but to no relationship, so no
- *                                     context can legitimately claim it.
- *   C. patientUserId NULL           -> external patient without an account.
- *                                     Never in a patient view at all.
- *
- * Only class A is migrated into the practice context. Class B must stay
- * reachable through the cross-practice list — silently dropping it would hide
- * real appointments from the patient, which is worse than showing them outside
- * a context.
- *
- * Resolves the care relationship for a patient-scoped appointment call.
- * Ownership decides: a link belonging to somebody else does not match and is
- * reported exactly like one that does not exist.
+ * The revoked-relationship policy the guard carries is documented in
+ * patientLinkAccess.js.
  *
  * @param {string} patientUserId
  * @param {string} linkId
  */
-async function assertPatientOwnsLink(patientUserId, linkId) {
-  const uid = String(patientUserId || "").trim();
-  const lid = String(linkId || "").trim();
-  if (!uid || !lid) throw new Error("validation_required");
-
-  const link = await prisma.practicePatientLink.findFirst({
-    where: { id: lid, patientUserId: uid },
-    select: { id: true, status: true, practiceProfileId: true },
-  });
-  if (!link) throw new Error("link_not_found");
-  return link;
-}
+const assertPatientOwnsLink = (patientUserId, linkId) =>
+  assertPatientOwnsLinkShared(linkId, patientUserId);
 
 /**
  * Appointments of ONE care relationship, for the patient who owns it.

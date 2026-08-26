@@ -89,6 +89,10 @@ const TELE_A2 = "A2_TELE_MARKER";
 const TELE_LINKLESS = "A_TELE_LINKLESS";
 const ROOM_SECRET = "msx-roomsecret";
 
+/** Exactly what the dictation double transcribes — see fakeMessageSttProvider.js. */
+const DICTATION_TRANSCRIPT =
+  "Ich soll Ramipril 5 mg morgens nicht mehr einnehmen, richtig? Termin am 14:30.";
+
 const IN_A = "A_INBOX_MARKER";
 const IN_A_DOC = "A_INBOX_DOC_MARKER";
 const IN_B = "B_INBOX_MARKER";
@@ -2595,12 +2599,19 @@ test.describe("practice context isolation", () => {
 
       await page.getByTestId("dictation-start").click();
       await page.getByTestId("dictation-stop").click();
-      await expect(page.locator("#scoped-reply")).toHaveValue(/Ramipril/);
-      // The transcript arriving and the recorder returning to idle are two
-      // separate state updates. Clearing the field between them lets the second
-      // one write the transcript back over the empty value, which is what made
-      // this test flake in a full run and pass in isolation. Waiting for the
-      // start control to come back waits for the recorder to be finished.
+      // The WHOLE transcript, not a fragment of it.
+      //
+      // `/Ramipril/` is satisfied by the first words, and under load the field
+      // is still being written when it matches. The test then cleared a field
+      // that had not finished filling, and the remainder of the transcript
+      // landed on top of the empty value — which is why this failed in a full
+      // run and passed on its own, twice, with a different fix each time.
+      //
+      // Waiting for the exact text the dictation produces is a stronger
+      // assertion than waiting for one word of it, and it cannot be satisfied
+      // early. Waiting for the start control as well means the recorder has
+      // also finished, so there is no later update left to arrive.
+      await expect(page.locator("#scoped-reply")).toHaveValue(DICTATION_TRANSCRIPT);
       await expect(page.getByTestId("dictation-start")).toBeVisible();
 
       // The speaker corrects it — which is the entire point of a draft. The

@@ -3,6 +3,18 @@
  * Self-reported entries only. Not an official medical record.
  */
 
+import crypto from "node:crypto";
+import {
+  isStoredVaccinationKey,
+  VACCINATION_DOCUMENT_MAX_BYTES,
+  VACCINATION_DOCUMENT_MIME,
+  vaccinationDocumentStorage,
+} from "../services/vaccination/vaccinationDocumentStorage.js";
+import {
+  assertDeclaredTypeMatchesBytes,
+  normalizeMime,
+  safeDisplayFilename,
+} from "../utils/fileSignature.js";
 import express from "express";
 import { prisma } from "../lib/prisma.js";
 import multer from "multer";
@@ -60,6 +72,12 @@ function mapError(err) {
   if (msg === "forbidden") return { status: 403, error: msg };
   if (msg === "validation_required") return { status: 400, error: msg };
   if (msg === "file_type_invalid") return { status: 400, error: msg };
+  // A payload that is not what it claims is a bad request, not a server fault.
+  // Both codes answer the same way: telling the sender WHICH check they failed
+  // would say how close they came, and a real client knows what it uploaded.
+  if (msg === "file_type_not_allowed" || msg === "file_type_mismatch") {
+    return { status: 400, error: "file_type_invalid" };
+  }
   return { status: 500, error: "request_failed" };
 }
 
@@ -75,7 +93,15 @@ function entryToJson(row) {
     location: row.location,
     nextDueDate: row.nextDueDate,
     notes: row.notes,
-    hasDocument: Boolean(row.documentKey),
+    // Only a key this server actually wrote a file for counts as a document.
+    //
+    // Rows written before vaccination storage existed carry a key that names
+    // nothing: the buffer was discarded and no route could ever have fetched
+    // it. Reporting those as `true` is what told patients their certificate was
+    // attached when it was not, so the prefix — not the mere presence of a
+    // string — is what this asks about. No migration needed; the old rows
+    // simply stop claiming something they cannot back up.
+    hasDocument: isStoredVaccinationKey(row.documentKey),
     documentName: row.documentName,
     documentMime: row.documentMime,
     createdAt: row.createdAt,
@@ -272,6 +298,28 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+
+/**
+ * Sends a stored certificate with the headers a medical document needs.
+ *
+ * `attachment` so nothing renders in the page's own origin; `nosniff` so the
+ * browser does not override that on its own; `no-store, private` so a shared
+ * cache never keeps a copy. The filename is the sanitised display name, which
+ * by construction carries no separators.
+ *
+ * @param {import("express").Response} res
+ * @param {{ documentName: string | null, documentMime: string | null }} entry
+ * @param {Buffer} buffer
+ */
+function sendVaccinationDocument(res, entry, buffer) {
+  const filename = safeDisplayFilename(entry.documentName, "impfnachweis");
+  res.setHeader("Content-Type", entry.documentMime || "application/octet-stream");
+  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(filename)}"`);
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "no-store, private");
+  return res.send(buffer);
+}
+
 /** POST /api/patient/vaccinations/:id/document */
 router.post("/:id/document", upload.single("file"), async (req, res) => {
   const userId = userIdFromReq(req);
@@ -285,19 +333,60 @@ router.post("/:id/document", upload.single("file"), async (req, res) => {
     });
     if (!existing) throw new Error("not_found");
 
-    const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-    if (!allowed.includes(req.file.mimetype)) throw new Error("file_type_invalid");
+    // Declared type first, then the bytes: the Content-Type on a multipart part
+    // is written by the client, so on its own it is a statement of intent.
+    assertDeclaredTypeMatchesBytes(
+      req.file.buffer,
+      req.file.mimetype,
+      VACCINATION_DOCUMENT_MIME,
+    );
 
-    const key = `vaccinations/${userId}/${existing.id}_${Date.now()}_${req.file.originalname.slice(0, 60)}`;
+    if (req.file.buffer.length > VACCINATION_DOCUMENT_MAX_BYTES) {
+      throw new Error("validation_file_too_large");
+    }
 
-    const updated = await prisma.vaccinationEntry.update({
-      where: { id: existing.id },
-      data: {
-        documentKey: key,
-        documentName: req.file.originalname.slice(0, 200),
-        documentMime: req.file.mimetype,
-      },
+    /*
+     * The file is written FIRST, and the row only afterwards.
+     *
+     * There is no transaction spanning a filesystem and a database, so one of
+     * the two orderings has to be chosen deliberately. This one can leave a
+     * file that no row points at — invisible, harmless, and reclaimable. The
+     * other ordering leaves a row claiming a document that does not exist,
+     * which is the exact defect being fixed here: the patient is told their
+     * vaccination certificate is attached when nothing was ever stored.
+     *
+     * If the row update then fails, the orphan is removed straight away, so
+     * the leak needs a crash between the two lines to happen at all.
+     */
+    const previousKey = existing.documentKey;
+    const key = await vaccinationDocumentStorage.putDocument({
+      userId,
+      buffer: req.file.buffer,
+      mimeType: normalizeMime(req.file.mimetype),
     });
+
+    let updated;
+    try {
+      updated = await prisma.vaccinationEntry.update({
+        where: { id: existing.id },
+        data: {
+          documentKey: key,
+          // Kept for display only, with separators and control characters gone.
+          documentName: safeDisplayFilename(req.file.originalname).slice(0, 200),
+          documentMime: normalizeMime(req.file.mimetype),
+        },
+      });
+    } catch (err) {
+      await vaccinationDocumentStorage.deleteDocument(key);
+      throw err;
+    }
+
+    // Replacing a document leaves the old file behind otherwise. Done after the
+    // row is committed, so a failure here costs a stale file and never the new
+    // one the patient just uploaded.
+    if (previousKey && previousKey !== key) {
+      await vaccinationDocumentStorage.deleteDocument(previousKey);
+    }
 
     writeAuditLog({
       req,
@@ -317,6 +406,36 @@ router.post("/:id/document", upload.single("file"), async (req, res) => {
   }
 });
 
+/**
+ * GET /api/patient/vaccinations/:id/document
+ *
+ * The route that did not exist. Without it, uploading was a one-way trip: the
+ * patient was shown "Dokument" against their entry and had no way to ever see
+ * it again — which is part of why nobody noticed the file was never stored.
+ *
+ * Authorization is re-derived here from the token, not carried over from the
+ * upload: `userId` scopes the lookup, so one patient's certificate is not
+ * reachable with another patient's session and a guessed entry id.
+ */
+router.get("/:id/document", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const entry = await prisma.vaccinationEntry.findFirst({
+      where: { id: req.params.id, userId, deletedAt: null },
+    });
+    if (!entry || !isStoredVaccinationKey(entry.documentKey)) throw new Error("not_found");
+
+    const buffer = await vaccinationDocumentStorage.getDocument(entry.documentKey);
+    return sendVaccinationDocument(res, entry, buffer);
+  } catch (err) {
+    console.error("[patient/vaccinations/document-get]", err?.message ?? err);
+    const mapped = mapError(err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
+
 /** DELETE /api/patient/vaccinations/:id/document */
 router.delete("/:id/document", async (req, res) => {
   const userId = userIdFromReq(req);
@@ -328,10 +447,15 @@ router.delete("/:id/document", async (req, res) => {
     });
     if (!existing) throw new Error("not_found");
 
+    // The row is cleared first: after this the document is unreachable through
+    // any route, which is what the patient asked for. The file is then removed.
+    // Failing in between leaves an orphan nobody can reach, never a reachable
+    // document the patient believes they deleted.
     await prisma.vaccinationEntry.update({
       where: { id: existing.id },
       data: { documentKey: null, documentName: null, documentMime: null },
     });
+    await vaccinationDocumentStorage.deleteDocument(existing.documentKey);
 
     return res.json({ ok: true });
   } catch (err) {

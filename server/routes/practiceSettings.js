@@ -11,6 +11,7 @@
 
 import express from "express";
 import { uploadPracticeLogo } from "../middleware/uploadPracticeLogo.js";
+import { signatureMatches } from "../utils/fileSignature.js";
 import {
   deletePracticeLogo,
   getPatientPracticeBranding,
@@ -91,6 +92,12 @@ router.post("/logo", uploadPracticeLogo.single("logo"), async (req, res) => {
   if (!practiceId) return res.status(400).json({ ok: false, error: "practiceId_required" });
   if (!req.file?.buffer) {
     return res.status(400).json({ ok: false, error: "logo_missing" });
+  }
+  // The multer filter checked the type the client DECLARED. A logo is served
+  // back to every patient who sees this practice, so what it actually is
+  // matters more than what it says.
+  if (!signatureMatches(req.file.buffer, req.file.mimetype)) {
+    return res.status(400).json({ ok: false, error: "logo_type_invalid" });
   }
   try {
     const settings = await uploadLogoService(

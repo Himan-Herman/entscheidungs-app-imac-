@@ -1,4 +1,9 @@
+// The patient-side link guard, and the revoked-relationship policy it
+// carries, live in ONE place: see patientLinkAccess.js. This file used to
+// hold a byte-identical private copy.
+import { assertPatientOwnsLink } from "../careRelationship/patientLinkAccess.js";
 import crypto from "crypto";
+import { signatureMatches } from "../../utils/fileSignature.js";
 import { prisma } from "../../lib/prisma.js";
 import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { getPracticeDocumentStorage } from "./storage/index.js";
@@ -295,6 +300,14 @@ export async function uploadPracticeDocumentFile(
   if (!ALLOWED_MIME.has(mimeType)) throw new Error("validation_invalid_file_type");
   if (!file.buffer?.length) throw new Error("validation_required");
   if (file.buffer.length > MAX_FILE_BYTES) throw new Error("validation_file_too_large");
+
+  // The declared type came from the uploading client and nothing has checked it
+  // against the bytes yet. A document is stored, shared with a patient, handed
+  // to OCR and served back for download, so a payload that is not what it says
+  // it is has a long way to travel before anyone notices.
+  if (!signatureMatches(file.buffer, mimeType)) {
+    throw new Error("validation_invalid_file_type");
+  }
 
   const count = await prisma.practiceDocumentFile.count({ where: { documentId } });
   if (count >= MAX_FILES_PER_DOCUMENT) throw new Error("validation_too_many_files");
@@ -688,28 +701,6 @@ function patientContextDocumentWhere(link, now = new Date()) {
   };
 }
 
-/**
- * Resolves the care relationship for a patient-scoped document call.
- *
- * Ownership decides. A link belonging to somebody else does not match and is
- * reported exactly like one that does not exist, so the error cannot be used to
- * probe whose it is.
- *
- * @param {string} linkId
- * @param {string} patientUserId
- */
-async function assertPatientOwnsLink(linkId, patientUserId) {
-  const lid = String(linkId || "").trim();
-  const uid = String(patientUserId || "").trim();
-  if (!lid || !uid) throw new Error("validation_required");
-
-  const link = await prisma.practicePatientLink.findFirst({
-    where: { id: lid, patientUserId: uid },
-    select: { id: true, patientUserId: true, practiceProfileId: true, status: true },
-  });
-  if (!link) throw new Error("link_not_found");
-  return link;
-}
 
 /**
  * Documents of ONE care relationship, for the patient who owns it.

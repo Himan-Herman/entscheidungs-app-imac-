@@ -3,6 +3,10 @@
  * Identity: req.user.userId only; never trust client body user ids.
  */
 
+import {
+  assertDeclaredTypeMatchesBytes,
+  normalizeMime,
+} from "../utils/fileSignature.js";
 import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
@@ -26,27 +30,8 @@ function avatarUrlForProfile(profile) {
   return `/api/account/avatar-file?v=${shortVersion(profile.avatarStorageKey)}`;
 }
 
-/**
- * Lightweight content sniff so a renamed/spoofed file can't pass as an image.
- * @param {Buffer} buf
- * @returns {"image/png"|"image/jpeg"|"image/webp"|null}
- */
-function sniffImageMime(buf) {
-  if (!buf || buf.length < 12) return null;
-  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) {
-    return "image/png";
-  }
-  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
-    return "image/jpeg";
-  }
-  if (
-    buf.toString("ascii", 0, 4) === "RIFF" &&
-    buf.toString("ascii", 8, 12) === "WEBP"
-  ) {
-    return "image/webp";
-  }
-  return null;
-}
+/** The image types an avatar may be. */
+const AVATAR_MIME = Object.freeze(["image/png", "image/jpeg", "image/webp"]);
 
 const DELETE_PREVISIT_CONFIRM = "DELETE_MY_PREVISIT_DATA";
 
@@ -414,11 +399,18 @@ router.post("/avatar", receiveAvatarUpload, async (req, res) => {
     return res.status(400).json({ ok: false, error: "avatar_missing" });
   }
 
-  const declaredMime = req.file.mimetype;
-  const sniffed = sniffImageMime(req.file.buffer);
-  if (!sniffed || sniffed !== declaredMime) {
+  // This route had its own three-format sniff. It agreed with the audio check,
+  // the PDF check and the translation preflight by coincidence rather than by
+  // construction, so the format facts now come from one place — see
+  // utils/fileSignature.js. The behaviour is unchanged: the declared type must
+  // be an image type we accept AND the bytes must agree with it.
+  const declaredMime = normalizeMime(req.file.mimetype);
+  try {
+    assertDeclaredTypeMatchesBytes(req.file.buffer, declaredMime, AVATAR_MIME);
+  } catch {
     return res.status(400).json({ ok: false, error: "avatar_type_invalid" });
   }
+  const sniffed = declaredMime;
 
   try {
     const existing = await prisma.userProfile.findUnique({

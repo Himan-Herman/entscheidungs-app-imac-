@@ -1,10 +1,8 @@
+import { STORAGE_AREAS, storageAreaRoot } from "../../config/storageRoot.js";
 import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_ROOT = path.resolve(__dirname, "../../storage/user-avatars");
 
 /**
  * Disk storage for patient profile pictures.
@@ -12,7 +10,7 @@ const DEFAULT_ROOT = path.resolve(__dirname, "../../storage/user-avatars");
  * original/unsafe filename is ever used and only the storage key lives in the DB.
  */
 export class UserAvatarStorage {
-  constructor(rootDir = process.env.USER_AVATAR_STORAGE_DIR || DEFAULT_ROOT) {
+  constructor(rootDir = storageAreaRoot(STORAGE_AREAS.USER_AVATARS, process.env.USER_AVATAR_STORAGE_DIR)) {
     this.rootDir = rootDir;
   }
 

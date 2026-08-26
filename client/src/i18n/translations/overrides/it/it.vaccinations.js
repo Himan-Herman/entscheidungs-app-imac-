@@ -39,6 +39,7 @@ export default {
     uploadHint: "Foto del libretto o PDF – max. 10 MB",
     uploadChange: "Cambia file",
     uploadRemove: "Rimuovi file",
+    uploadFailed: "Il certificato non è stato caricato. La voce è stata salvata.",
     uploadSelected: "Selezionato:",
     required: "* Campo obbligatorio",
     consentLabel:

@@ -39,6 +39,7 @@ export default {
     uploadHint: "Foto de la cartilla o PDF – máx. 10 MB",
     uploadChange: "Cambiar archivo",
     uploadRemove: "Eliminar archivo",
+    uploadFailed: "No se pudo subir el certificado. La entrada se ha guardado.",
     uploadSelected: "Seleccionado:",
     required: "* Campo obligatorio",
     consentLabel:

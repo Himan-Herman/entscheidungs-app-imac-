@@ -1,6 +1,7 @@
 // routes/auth.js
 import express from "express";
 import { logServerError } from "../utils/safeApiError.js";
+import { hashAuthToken, findUserByAuthToken } from "../utils/authTokenHash.js";
 import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -79,7 +80,7 @@ authRouter.post("/register", authRegisterLimiter, async (req, res) => {
         await prisma.user.update({
           where: { id: existing.id },
           data: {
-            verifyToken: tokenPlain,
+            verifyToken: hashAuthToken(tokenPlain),
             verifyTokenExpires: expires,
           },
         });
@@ -146,14 +147,14 @@ authRouter.post("/register", authRegisterLimiter, async (req, res) => {
     });
 
     if (!skipEmailVerification) {
-      // Verifikations-Token setzen (Plain in verifyToken)
+      // The plaintext goes in the mail; only its hash is stored.
       const tokenPlain = crypto.randomBytes(32).toString("hex");
       const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       await prisma.user.update({
         where: { id: created.id },
         data: {
-          verifyToken: tokenPlain,
+          verifyToken: hashAuthToken(tokenPlain),
           verifyTokenExpires: expires,
         },
       });
@@ -223,13 +224,9 @@ authRouter.get("/verify-email", async (req, res) => {
     }
 
     // User mit gültigem Token suchen
-    const user = await prisma.user.findFirst({
-      where: {
-        verifyToken: token,
-        verifyTokenExpires: {
-          gt: new Date(), // noch gültig
-        },
-      },
+    const user = await findUserByAuthToken(prisma, token, {
+      tokenField: "verifyToken",
+      expiryField: "verifyTokenExpires",
     });
 
     if (!user) {
@@ -284,7 +281,7 @@ authRouter.post("/resend-verification", async (req, res) => {
 
     await prisma.user.update({
       where: { id: u.id },
-      data: { verifyToken: tokenPlain, verifyTokenExpires: expires },
+      data: { verifyToken: hashAuthToken(tokenPlain), verifyTokenExpires: expires },
     });
 
     const apiBase = (
@@ -336,7 +333,7 @@ authRouter.post("/request-password-reset", authPasswordResetLimiter, async (req,
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        passwordResetToken: token,
+        passwordResetToken: hashAuthToken(token),
         passwordResetExpires: expires,
       },
     });
@@ -444,13 +441,9 @@ authRouter.post("/reset-password", authResetPasswordLimiter, async (req, res) =>
     }
 
     // passenden User zum Token finden (Token noch gültig?)
-    const user = await prisma.user.findFirst({
-      where: {
-        passwordResetToken: token,
-        passwordResetExpires: {
-          gt: new Date(), // Ablaufzeit > jetzt
-        },
-      },
+    const user = await findUserByAuthToken(prisma, token, {
+      tokenField: "passwordResetToken",
+      expiryField: "passwordResetExpires",
     });
 
     if (!user) {

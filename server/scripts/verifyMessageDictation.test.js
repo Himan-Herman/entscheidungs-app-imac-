@@ -198,7 +198,12 @@ test("every accepted container type is recognised by its signature", { skip: fal
     "audio/webm": [0x1a, 0x45, 0xdf, 0xa3],
     "audio/ogg": [0x4f, 0x67, 0x67, 0x53],
     "audio/mpeg": [0x49, 0x44, 0x33],
-    "audio/wav": [0x52, 0x49, 0x46, 0x46],
+    // RIFF alone says nothing: WAV, WebP and AVI all start with those four
+    // bytes and are told apart by the tag at offset 8. The sample here used to
+    // stop at "RIFF", which meant this test would have accepted a WebP image as
+    // a recording. A real WAV — the only thing a MediaRecorder produces — has
+    // "WAVE" there, so the stricter check costs a legitimate upload nothing.
+    "audio/wav": [0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x41, 0x56, 0x45],
   };
   for (const [mime, sig] of Object.entries(samples)) {
     const buf = Buffer.concat([Buffer.from(sig), Buffer.alloc(1024)]);
@@ -214,6 +219,16 @@ test("every accepted container type is recognised by its signature", { skip: fal
   assert.deepEqual([...ALLOWED_AUDIO_MIME].sort(), [
     "audio/mp4", "audio/mpeg", "audio/ogg", "audio/wav", "audio/webm",
   ]);
+
+  // A RIFF header with the WEBP tag is an image, and must not pass as audio
+  // however it is labelled. This is the case the four-byte sample above could
+  // not distinguish.
+  const webp = Buffer.concat([Buffer.from("RIFF"), Buffer.alloc(4), Buffer.from("WEBP"), Buffer.alloc(1024)]);
+  assert.throws(
+    () => assertContainerMatches(webp, "audio/wav"),
+    /audio_malformed/,
+    "a WebP image must not pass as a recording",
+  );
 });
 
 test("a type nothing records is refused", { skip: false }, () => {

@@ -28,6 +28,10 @@
  * reimplemented — they carry the consent gate, the revocation check and the
  * audit trail that joining a consultation requires.
  */
+// The patient-side link guard, and the revoked-relationship policy it
+// carries, live in ONE place: see patientLinkAccess.js. This file used to
+// hold a byte-identical private copy.
+import { assertPatientOwnsLink } from "../careRelationship/patientLinkAccess.js";
 import { prisma } from "../../lib/prisma.js";
 import {
   grantPatientConsent,
@@ -35,23 +39,6 @@ import {
   patientLeaveSession,
 } from "./telemedicineService.js";
 
-/**
- * The link, only if it belongs to the session patient.
- *
- * A missing link and someone else's link both raise `link_not_found`.
- */
-async function assertPatientOwnsLink(linkId, patientUserId) {
-  const lid = String(linkId || "").trim();
-  const uid = String(patientUserId || "").trim();
-  if (!lid || !uid) throw new Error("validation_required");
-
-  const link = await prisma.practicePatientLink.findFirst({
-    where: { id: lid, patientUserId: uid },
-    select: { id: true, patientUserId: true, practiceProfileId: true, status: true },
-  });
-  if (!link) throw new Error("link_not_found");
-  return link;
-}
 
 /** The one scope clause. */
 function contextWhere(link) {

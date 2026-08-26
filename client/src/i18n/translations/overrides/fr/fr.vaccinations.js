@@ -38,6 +38,7 @@ export default {
     uploadHint: "Photo de votre carnet ou PDF – max. 10 Mo",
     uploadChange: "Changer le fichier",
     uploadRemove: "Supprimer le fichier",
+    uploadFailed: "Le justificatif n'a pas pu être téléversé. L'entrée a été enregistrée.",
     uploadSelected: "Sélectionné :",
     required: "* Champ obligatoire",
     consentLabel:

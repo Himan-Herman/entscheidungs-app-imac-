@@ -96,6 +96,7 @@ import practiceDeveloperRouter from "./routes/practiceDeveloper.js";
 import practiceV1Router from "./routes/practiceV1.js";
 import archiveAiRouter from "./routes/archiveAi.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
+import { isPersistentStorageConfigured } from './config/storageRoot.js';
 import {
   describeTranslationReadiness,
   logDocumentTranslationReadiness,
@@ -383,6 +384,12 @@ app.get('/api/health/config', (_req, res) =>
       frontendUrl:
         Boolean(process.env.FRONTEND_URL) || Boolean(process.env.APP_BASE_URL),
       googlePlaces: Boolean(process.env.GOOGLE_PLACES_API_KEY),
+      // Whether files written by this deploy will outlive it. A boolean, never
+      // the path: a storage root is not a secret, but an absolute internal
+      // filesystem path is infrastructure detail that an unauthenticated
+      // endpoint has no reason to hand out. The question worth answering here
+      // is "is this deploy configured to keep files", and that is yes or no.
+      persistentStorage: isPersistentStorageConfigured(),
       // Booleans only — lets us tell "feature switched off" apart from "bug" without
       // an authenticated request. The patient UI hides the whole wearables section
       // when the server reports feature_disabled, which looks identical to a defect.

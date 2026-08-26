@@ -8,6 +8,10 @@
  *  - Patient consent scope "vaccinations" (consent type "vaccinations_access")
  */
 
+import {
+  isStoredVaccinationKey,
+  vaccinationDocumentStorage,
+} from "../services/vaccination/vaccinationDocumentStorage.js";
 import express from "express";
 import { prisma } from "../lib/prisma.js";
 import { isVaccinationPassEnabled } from "../config/featureFlags.js";
@@ -38,7 +42,9 @@ function entryToJson(row) {
     location: row.location,
     nextDueDate: row.nextDueDate,
     notes: row.notes,
-    hasDocument: Boolean(row.documentKey),
+    // Same rule as the patient side, and for the same reason: a practice must
+    // not be told a certificate is on file when nothing was ever stored.
+    hasDocument: isStoredVaccinationKey(row.documentKey),
     documentName: row.documentName,
     documentMime: row.documentMime,
     createdAt: row.createdAt,
@@ -83,5 +89,70 @@ router.get("/", requireFeature, requirePracticePatientLinkAccess({
     return res.status(500).json({ ok: false, error: "request_failed" });
   }
 });
+
+/**
+ * GET /api/practice/patients/:linkId/vaccinations/:id/document
+ *
+ * The practice side of the same document, on exactly the same terms as the
+ * list it appears in: the same permission, the same consent, and — the part
+ * that matters — the same `where`.
+ *
+ * Reusing `buildPatientDataContextReadWhere` rather than looking the entry up
+ * by id and checking afterwards is deliberate. A post-hoc check is a second
+ * place to be wrong; a shared `where` means a certificate recorded inside
+ * another care relationship is not found at all, and the boundary here cannot
+ * drift away from the boundary on the list.
+ */
+router.get(
+  "/:id/document",
+  requireFeature,
+  requirePracticePatientLinkAccess({
+    permission: PERMISSIONS.CLINICAL_VACCINATIONS_READ,
+    consentType: "vaccinations_access",
+  }),
+  async (req, res) => {
+    const { link, actorUserId } = req.linkAccess;
+
+    try {
+      const entry = await prisma.vaccinationEntry.findFirst({
+        where: {
+          id: req.params.id,
+          ...buildPatientDataContextReadWhere({
+            patientUserId: link.patientUserId,
+            practicePatientLinkId: link.id,
+          }),
+        },
+      });
+      if (!entry || !isStoredVaccinationKey(entry.documentKey)) {
+        return res.status(404).json({ ok: false, error: "not_found" });
+      }
+
+      const buffer = await vaccinationDocumentStorage.getDocument(entry.documentKey);
+
+      writeAuditLog({
+        req,
+        userId: actorUserId,
+        actorRole: "practice",
+        action: "practice_vaccination_document_downloaded",
+        entityType: "vaccination_entry",
+        entityId: entry.id,
+        metadata: { linkId: link.id },
+      });
+
+      const filename = String(entry.documentName || "impfnachweis").slice(0, 200);
+      res.setHeader("Content-Type", entry.documentMime || "application/octet-stream");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${encodeURIComponent(filename)}"`,
+      );
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader("Cache-Control", "no-store, private");
+      return res.send(buffer);
+    } catch (err) {
+      console.error("[practice/vaccinations/document]", err?.message ?? err);
+      return res.status(404).json({ ok: false, error: "not_found" });
+    }
+  },
+);
 
 export default router;

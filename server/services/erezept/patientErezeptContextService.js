@@ -20,6 +20,10 @@
  * This deliberately does NOT reuse the cross-practice patient list, which is
  * scoped by `patientUserId` alone and spans every practice.
  */
+// The patient-side link guard, and the revoked-relationship policy it
+// carries, live in ONE place: see patientLinkAccess.js. This file used to
+// hold a byte-identical private copy.
+import { assertPatientOwnsLink } from "../careRelationship/patientLinkAccess.js";
 import { prisma } from "../../lib/prisma.js";
 
 /** What a patient may set. Unchanged from the cross-practice route. */
@@ -28,24 +32,6 @@ export const PATIENT_ALLOWED_STATUSES = new Set(["at_pharmacy", "redeemed"]);
 /** Statuses nothing may move away from. Unchanged from the cross-practice route. */
 const FINAL_STATUSES = new Set(["redeemed", "expired", "cancelled"]);
 
-/**
- * The link, only if it belongs to the session patient.
- *
- * A missing link and someone else's link both raise `link_not_found`, so
- * neither can be used to probe what exists.
- */
-async function assertPatientOwnsLink(linkId, patientUserId) {
-  const lid = String(linkId || "").trim();
-  const uid = String(patientUserId || "").trim();
-  if (!lid || !uid) throw new Error("validation_required");
-
-  const link = await prisma.practicePatientLink.findFirst({
-    where: { id: lid, patientUserId: uid },
-    select: { id: true, patientUserId: true, practiceProfileId: true, status: true },
-  });
-  if (!link) throw new Error("link_not_found");
-  return link;
-}
 
 /**
  * The one scope clause. Both conditions are load-bearing and fail
