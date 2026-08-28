@@ -135,24 +135,35 @@ export async function linkHasConsentType(link, consentType) {
   if (!link || !LINK_ACTIVE.has(link.status)) return false;
   await expireStaleConsentsForLink(link.id);
 
-  const active = await prisma.consentRecord.findFirst({
+  // ConsentRecord is the ONLY authority. It used to be one of two, and the
+  // second one failed open.
+  //
+  // The removed fallback read `link.consentScopes`, and treated an EMPTY array
+  // as "the original three scopes" — profile, medication, messages. That is
+  // exactly the state a full withdrawal produces: revokeConsentRecord() ->
+  // syncLinkScopesFromRecords() empties consentScopes, while consentAcceptedAt
+  // keeps its historical value because nothing ever clears it and the link
+  // stays `active`. So withdrawing every consent RESTORED the three original
+  // ones. The fallback existed for links predating the ConsentRecord model,
+  // whose consent lived only in that denormalised array; it could not tell
+  // "never migrated" from "deliberately withdrawn", and answered both with yes.
+  //
+  // consentScopes is no longer a source in any case — syncLinkScopesFromRecords
+  // derives it FROM these records, so consulting it was asking the mirror.
+  //
+  // The NEWEST record for the type decides, rather than "any granted row
+  // anywhere": a withdrawal must not be outvoted by a stale grant that an
+  // interrupted supersede left behind. Ordering by id breaks a createdAt tie
+  // deterministically; the write path cannot produce one.
+  const latest = await prisma.consentRecord.findFirst({
     where: {
       practicePatientLinkId: link.id,
       consentType,
-      status: "granted",
     },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
   });
-  if (active) return true;
 
-  const legacyScope = CONSENT_TYPE_TO_LEGACY_SCOPE[consentType];
-  if (!legacyScope) return false;
-
-  const scopes = Array.isArray(link.consentScopes) ? link.consentScopes : [];
-  if (!link.consentAcceptedAt) return false;
-  if (scopes.length === 0) {
-    return ["profile", "medication", "messages"].includes(legacyScope);
-  }
-  return scopes.includes(legacyScope);
+  return latest?.status === "granted";
 }
 
 /**
@@ -188,17 +199,30 @@ export async function assertConsentForLink(link, consentType, ctx = {}) {
 export async function backfillConsentRecordsFromLink(link) {
   if (!link.consentAcceptedAt) return;
   const scopes = Array.isArray(link.consentScopes) ? link.consentScopes : [];
-  const types =
-    scopes.length > 0
-      ? scopes.map((s) => LEGACY_SCOPE_TO_CONSENT_TYPE[s]).filter(Boolean)
-      : ["profile_access", "medication_plan_access", "secure_messaging"];
+
+  // An empty scopes array is not a licence. The old code read it as "the three
+  // original scopes" and wrote GRANTED records for them, which turned a
+  // withdrawal into a grant. There is nothing here to migrate: no recorded
+  // scope means no consent to carry forward.
+  if (scopes.length === 0) return;
+
+  const types = scopes.map((s) => LEGACY_SCOPE_TO_CONSENT_TYPE[s]).filter(Boolean);
 
   for (const consentType of types) {
     const existing = await prisma.consentRecord.findFirst({
       where: { practicePatientLinkId: link.id, consentType },
-      orderBy: { createdAt: "desc" },
+      select: { id: true },
     });
-    if (existing && existing.status === "granted") continue;
+
+    // ANY record — granted, revoked or expired — means this consent type
+    // already has a history, and history is not this function's business. The
+    // previous guard skipped only `granted` rows, so a revoked one was treated
+    // as "not yet migrated" and overwritten with a fresh grant.
+    //
+    // The distinction is exact, not a guess: a record exists if and only if the
+    // type has been through the ConsentRecord lifecycle. Nothing is inferred
+    // from consentAcceptedAt or from the scopes array.
+    if (existing) continue;
 
     await prisma.consentRecord.create({
       data: {
@@ -227,8 +251,11 @@ export async function listPatientConsents(patientUserId) {
     include: { practiceProfile: { select: PRACTICE_BRANDING_SELECT } },
   });
 
+  // No backfill here. Reading one's own consent overview must not WRITE a
+  // consent — the grant it used to create was attributed to the patient
+  // (grantedByUserId = patientUserId) although the patient had done nothing but
+  // open a page. Expiry stays: it only ever withdraws, never grants.
   for (const link of links) {
-    await backfillConsentRecordsFromLink(link);
     await expireStaleConsentsForLink(link.id);
   }
 
@@ -439,7 +466,9 @@ export async function listPracticeLinkConsents(linkId, practiceProfileId) {
   });
   if (!link) throw new Error("link_not_found");
 
-  await backfillConsentRecordsFromLink(link);
+  // No backfill here either, and least of all here: this is the PRACTICE
+  // looking at the relationship, so the write it used to trigger recorded a
+  // consent in the patient's name on the practice's request.
   await expireStaleConsentsForLink(lid);
 
   const rows = await prisma.consentRecord.findMany({

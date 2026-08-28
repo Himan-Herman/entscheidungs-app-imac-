@@ -78,8 +78,12 @@ async function buildFixture() {
   const practiceA = await practice(ownerA, "PraxisA");
   const practiceB = await practice(ownerB, "PraxisB");
 
-  const link = async (pr, pat, profileId = null) =>
-    prisma.practicePatientLink.create({
+  // The consent gate reads ConsentRecord, and only ConsentRecord. It used to
+  // fall back to the denormalised `consentScopes` array when no record existed,
+  // which is what this fixture relied on; that fallback is gone, so the grant
+  // has to be recorded the way the application records it.
+  const link = async (pr, pat, profileId = null) => {
+    const row = await prisma.practicePatientLink.create({
       data: {
         practiceProfileId: pr.id,
         patientUserId: pat.id,
@@ -89,6 +93,17 @@ async function buildFixture() {
         consentAcceptedAt: new Date(),
       },
     });
+    await prisma.consentRecord.create({
+      data: {
+        patientUserId: pat.id,
+        practiceProfileId: pr.id,
+        practicePatientLinkId: row.id,
+        consentType: "medication_plan_access",
+        status: "granted",
+      },
+    });
+    return row;
+  };
 
   const linkA = await link(practiceA, patient);
   const linkB = await link(practiceB, patient);

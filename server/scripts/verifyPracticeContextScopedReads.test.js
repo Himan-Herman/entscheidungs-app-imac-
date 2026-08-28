@@ -114,10 +114,13 @@ function installPrismaFake() {
   prisma.consentRecord = {
     findMany: async () => [],
     updateMany: async () => ({ count: 0 }),
+    // `status` is optional: the consent gate now asks for the NEWEST record of
+    // a type and reads its status, rather than asking only for granted ones.
     findFirst: async ({ where }) =>
       consents.find(
         (c) => c.practicePatientLinkId === where.practicePatientLinkId &&
-          c.consentType === where.consentType && c.status === where.status,
+          c.consentType === where.consentType &&
+          (where.status === undefined || c.status === where.status),
       ) ?? null,
   };
   for (const model of MODELS) {
