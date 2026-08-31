@@ -211,6 +211,21 @@ const SCHEMA_ONLY = [
   ["secure download tokens", "secureDocumentAccessToken"],
   ["OCR jobs", "documentOcrJob"],
   ["Meda sessions", "practiceMedaSession"],
+  /*
+   * The practice-local patient record, and the one entry here that is not a
+   * patient-data domain at all.
+   *
+   * It points AT a link from the practice side rather than holding rows inside
+   * one: it exists before any account does, its link column stays null until an
+   * invitation is redeemed, and nothing is ever read out of it through a
+   * link-scoped route. There is no A1/A2 leak to probe for, because there is
+   * nothing in it that belongs to a patient.
+   *
+   * It is listed rather than omitted so the completeness guard passes because
+   * this case was considered. Its own rules — one entry per link, linkedAt
+   * surviving SetNull, tenant isolation by FK — are DB invariants.
+   */
+  ["practice-local patient entries", "practicePatientEntry"],
 ];
 
 /**
@@ -300,6 +315,69 @@ test("no domain binds to a link without this file knowing about it", { skip }, a
     [],
     `these models bind to a care relationship but are not in this matrix:\n  ${unaccounted.join("\n  ")}\n` +
       `Add each one to DOMAINS (with a read/write probe) or to SCHEMA_ONLY, with a reason.`,
+  );
+});
+
+/*
+ * Deliberately NOT gated on `skip`: this reads the schema file, not the
+ * database, so it has to hold even where no database is reachable.
+ */
+test("a care relationship always names a real account", () => {
+  /*
+   * `patientUserId` being required is what makes every other guarantee in this
+   * file mean something. A link is the anchor the whole authorization chain
+   * hangs from — `authorizePracticePatientLink` derives practiceProfileId AND
+   * patientUserId from it, and roughly a hundred call sites read the result
+   * without ever asking whether a patient is actually there.
+   *
+   * Making the column nullable would not break a single one of them loudly. It
+   * would let a link exist for nobody, and every "is this row yours?" check
+   * downstream would start comparing against null. That is the failure this
+   * test exists to make impossible.
+   *
+   * It also has to survive the CONSISTENT mutation. Loosening only the scalar
+   * is caught by Prisma itself ("the relation field must be optional as well"),
+   * so a half-done change never reaches here. Loosening both sides is a valid
+   * schema, and until this test existed, nothing in the suite objected to it.
+   *
+   * Practice-local patients — people the practice knows before they have an
+   * account — live in PracticePatientEntry precisely so that this column never
+   * has to bend.
+   */
+  const schema = readFileSync(new URL("../prisma/schema.prisma", import.meta.url), "utf8");
+
+  const model = [...schema.matchAll(/^model (\w+) \{([\s\S]*?)^\}/gm)].find(
+    (m) => m[1] === "PracticePatientLink",
+  );
+  assert.ok(model, "PracticePatientLink is missing from schema.prisma");
+  const body = model[2];
+
+  /*
+   * The whole type token is captured and compared with strict equality, never
+   * matched with a pattern: `/patientUserId\s+String/` also matches
+   * `patientUserId String?`, which would make this guard silently useless.
+   * `"String?" === "String"` is false, so the optional marker cannot slip past.
+   *
+   * `\s` after the field name keeps `patientUser` from matching the
+   * `patientUserId` line.
+   */
+  const declaredType = (field) => {
+    const m = body.match(new RegExp(String.raw`^\s+${field}\s+(\S+)`, "m"));
+    return m ? m[1] : null;
+  };
+
+  assert.equal(
+    declaredType("patientUserId"),
+    "String",
+    "PracticePatientLink.patientUserId must stay required. A link without an " +
+      "account is not a care relationship — pre-account patients belong in " +
+      "PracticePatientEntry.",
+  );
+  assert.equal(
+    declaredType("patientUser"),
+    "User",
+    "The patientUser relation must stay required too, otherwise the scalar " +
+      "above can be loosened along with it and this guard is the only thing left.",
   );
 });
 

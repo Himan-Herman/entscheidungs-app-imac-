@@ -89,6 +89,10 @@ model User {
   erezeptEntries                   ErezeptEntry[]                   @relation("PatientErezept")
   issuedErezeptEntries             ErezeptEntry[]                   @relation("PracticeErezept")
   sosCard                          SosCard?
+  practicePatientEntriesCreated    PracticePatientEntry[]           @relation("PracticePatientEntryCreatedBy")
+  practiceInvitationsCreated       PracticePatientInvitation[]      @relation("PracticeInvitationCreatedBy")
+  practiceInvitationsRedeemed      PracticePatientInvitation[]      @relation("PracticeInvitationRedeemedBy")
+  practiceInvitationsRevoked       PracticePatientInvitation[]      @relation("PracticeInvitationRevokedBy")
 }
 
 /**
@@ -398,6 +402,8 @@ model PracticeProfile {
   erezeptEntries              ErezeptEntry[]
   internalNotes               PracticePatientInternalNote[]
   patientReminders            PracticePatientReminder[]
+  patientEntries              PracticePatientEntry[]
+  patientInvitations          PracticePatientInvitation[]
 
   @@index([userId])
 }
@@ -959,6 +965,10 @@ model PracticePatientLink {
   contextAllergyEntries       AllergyEntry[]                @relation("AllergyEntryContextLink")
   contextDiagnosisEntries     DiagnosisEntry[]              @relation("DiagnosisEntryContextLink")
   erezeptEntries              ErezeptEntry[]
+  /// Back-relation only — the foreign key lives on PracticePatientEntry, so this
+  /// adds no column here. patientUserId stays NOT NULL: a link is still created
+  /// only once a real account exists.
+  practicePatientEntry        PracticePatientEntry?         @relation("PracticePatientEntryLink")
 
   @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
@@ -967,6 +977,115 @@ model PracticePatientLink {
   @@index([practiceProfileId, assignmentStatus])
   @@index([practiceProfileId, assignedDoctorUserId])
   @@index([practiceProfileId, assignedTeamMemberUserId])
+}
+
+/// Practice-local patient record. Exists BEFORE the person has a MedScoutX
+/// account and is owned entirely by the practice. It carries no account
+/// reference until an invitation has been redeemed, and it is never an
+/// authorization subject: nothing in this table grants access to anything.
+/// Patient data continues to be reached only through PracticePatientLink.
+model PracticePatientEntry {
+  id                    String    @id @default(cuid())
+  practiceProfileId     String
+
+  givenName             String    @db.VarChar(120)
+  familyName            String    @db.VarChar(120)
+  /// Local disambiguation signal ONLY — never an identity proof.
+  dateOfBirth           DateTime?
+  /// Delivery channel only. NOT an identifier, NOT unique, never used for
+  /// lookup or matching — an entry has to work without it.
+  email                 String?   @db.VarChar(255)
+  phone                 String?   @db.VarChar(40)
+  /// The practice's own chart number. Practice-internal, never cross-tenant.
+  practiceRecordNumber  String?   @db.VarChar(64)
+
+  /// draft | invited | linked | archived
+  status                String    @default("draft") @db.VarChar(20)
+
+  /// Set once on a successful claim and NEVER cleared. Self-contained proof
+  /// that a care relationship existed here, which is what the retention rule
+  /// needs: a hard delete is refused while this is not null — even after the
+  /// link row itself disappeared with the patient's account.
+  linkedAt              DateTime?
+  practicePatientLinkId String?   @unique
+
+  archivedAt            DateTime?
+  createdByUserId       String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  practiceProfile       PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  practicePatientLink   PracticePatientLink? @relation("PracticePatientEntryLink", fields: [practicePatientLinkId], references: [id], onDelete: SetNull)
+  createdBy             User?                @relation("PracticePatientEntryCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  invitations           PracticePatientInvitation[]
+
+  @@index([practiceProfileId, status])
+  @@index([practiceProfileId, familyName, givenName])
+  @@index([practiceProfileId, createdAt])
+}
+
+/// Temporary proof that lets whoever holds it bind THEIR account to one
+/// practice-local entry. It carries no account reference and no personal data:
+/// the practice never learns whether an account exists, and a leaked credential
+/// discloses nothing about the patient.
+///
+/// Two credentials, two lifetimes, one invitation:
+///   link / QR    -> tokenHash,      valid for the invitation's own 7 days
+///   manual code  -> manualCodeHash, valid 60 minutes, optional, rotatable
+///
+/// The manual code is a short on-site fallback, never a second long-lived
+/// credential. Its expiry never shortens the invitation, and rotating it never
+/// creates a new invitation.
+///
+/// `expired` is DERIVED from expiresAt / manualCodeExpiresAt and is never
+/// written: a stored expiry status would need either a job or a write on a read
+/// path, and a derived one cannot drift.
+model PracticePatientInvitation {
+  id                     String    @id @default(cuid())
+  practicePatientEntryId String
+  /// Denormalised so tenant-scoped queries and indexes stay on one table.
+  practiceProfileId      String
+
+  /// SHA-256 of the link/QR token (>= 128 bit of entropy). Plaintext is
+  /// returned exactly once and never stored.
+  tokenHash              String    @unique @db.VarChar(64)
+  tokenPrefix            String?   @db.VarChar(12)
+
+  /// SHA-256 of the short typeable code (~60 bit). NULL until the practice asks
+  /// for one. Rotating it overwrites this column, and that overwrite is exactly
+  /// what invalidates the previous code — no extra bookkeeping needed.
+  /// There is deliberately no prefix column: revealing 4 of 12 characters would
+  /// give away roughly 20 bits of an already short credential.
+  manualCodeHash         String?   @unique @db.VarChar(64)
+  /// Independent of expiresAt. The code expiring never expires the invitation.
+  manualCodeExpiresAt    DateTime?
+
+  /// pending | redeemed | revoked | superseded
+  status                 String    @default("pending") @db.VarChar(20)
+  /// The invitation's own life. A manual code expiring does not touch it.
+  expiresAt              DateTime
+
+  redeemedAt             DateTime?
+  redeemedByUserId       String?
+  revokedAt              DateTime?
+  revokedByUserId        String?
+  supersededAt           DateTime?
+
+  /// email | onsite | link — what the practice chose, for audit only.
+  deliveryChannel        String?   @db.VarChar(20)
+  createdByUserId        String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  practicePatientEntry   PracticePatientEntry @relation(fields: [practicePatientEntryId], references: [id], onDelete: Cascade)
+  practiceProfile        PracticeProfile      @relation(fields: [practiceProfileId], references: [id], onDelete: Cascade)
+  createdBy              User?                @relation("PracticeInvitationCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  redeemedBy             User?                @relation("PracticeInvitationRedeemedBy", fields: [redeemedByUserId], references: [id], onDelete: SetNull)
+  revokedBy              User?                @relation("PracticeInvitationRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([practicePatientEntryId, status])
+  @@index([practiceProfileId, status])
+  @@index([status, expiresAt])
 }
 
 /// Patient-generated, short-lived, single-use code that lets a practice create an
