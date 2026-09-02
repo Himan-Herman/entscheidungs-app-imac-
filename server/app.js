@@ -43,6 +43,8 @@ import practiceApiDataRouter from "./routes/practiceApiData.js";
 import placesRouter from "./routes/places.js";
 import practiceFinderRouter from "./routes/practiceFinder.js";
 import practicePatientsRouter from "./routes/practicePatients.js";
+import practicePatientEntriesRouter from "./routes/practicePatientEntries.js";
+import practicePatientInvitationsRouter from "./routes/practicePatientInvitations.js";
 import patientCareLinksRouter from "./routes/patientCareLinks.js";
 import patientPracticeOrganizationRouter from "./routes/patientPracticeOrganization.js";
 import patientPracticeDirectoryRouter from "./routes/patientPracticeDirectory.js";
@@ -137,6 +139,7 @@ import publicEmergencyRouter from "./routes/publicEmergency.js";
 import practiceSosCardRouter from "./routes/practiceSosCard.js";
 import sosWalletRouter from "./routes/sosWallet.js";
 import publicAnamnesisRouter from "./routes/publicAnamnesis.js";
+import publicPatientInvitationsRouter from "./routes/publicPatientInvitations.js";
 import practiceBillingPlausibilityRouter from "./routes/practiceBillingPlausibility.js";
 import patientBillingExplainerRouter from "./routes/patientBillingExplainer.js";
 
@@ -238,6 +241,13 @@ app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
 app.use("/api/practices", requireAuth, practicesRouter);
 /** Care relationships (Phase 1) — mount before /api/practice catch-alls; flag-gated */
 app.use("/api/practice/patients", requireAuth, practicePatientsRouter);
+/**
+ * Practice-initiated patient onboarding — own flag (PATIENT_ONBOARDING_V2).
+ * Mounted BEFORE the `/api/practice/patients/:linkId` families below, and on
+ * distinct path segments, so no id pattern can ever swallow these.
+ */
+app.use("/api/practice/patient-entries", requireAuth, practicePatientEntriesRouter);
+app.use("/api/practice/patient-invitations", requireAuth, practicePatientInvitationsRouter);
 app.use("/api/patient/links", requireAuth, patientCareLinksRouter);
 /** Alias for PR-8 patient practice-link APIs */
 app.use("/api/patient/practice-links", requireAuth, patientCareLinksRouter);
@@ -319,6 +329,8 @@ app.use("/api/previsit/visit-medications", requireAuth, patientVisitMedicationsR
 app.use("/api/previsit", previsitRouter);
 app.use("/api/public/previsit", publicPrevisitQrLimiter, publicPrevisitQrRouter);
 app.use("/api/public/anamnesis", publicAnamnesisLimiter, publicAnamnesisRouter);
+/** Public invitation preview — read-only; per-route limiters live in the router. */
+app.use("/api/public/patient-invitations", publicPatientInvitationsRouter);
 app.use("/api/public/emergency", publicEmergencyLimiter, publicEmergencyRouter);
 app.use("/api/public/documents", publicSecureDocumentsLimiter, publicDocumentsRouter);
 app.use(

@@ -542,3 +542,22 @@ export function isSymptomSpeechEnabled() {
 export function isPreVisitSpeechEnabled() {
   return envFlag("ENABLE_PREVISIT_VOICE_OUTPUT", false);
 }
+
+/**
+ * Practice-initiated patient onboarding (practice-local entries + invitations).
+ *
+ * OWN gate, not folded into CARE_RELATIONSHIP_ENABLED, because it is the only
+ * path where a practice may record a person's name and date of birth BEFORE any
+ * account of that person exists and therefore before that person could have
+ * agreed to anything. That is a distinct legal situation from managing a link
+ * the patient already accepted, so it gets its own switch and can be closed
+ * without taking the existing care-relationship features down with it.
+ *
+ * The flag governs the practice-side management endpoints AND the public
+ * invitation preview. It does not govern claim/redeem, which does not exist yet.
+ *
+ * Default off.
+ */
+export function isPatientOnboardingV2Enabled() {
+  return envFlag("PATIENT_ONBOARDING_V2", false);
+}

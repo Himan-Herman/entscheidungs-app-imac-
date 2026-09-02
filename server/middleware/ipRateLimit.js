@@ -334,3 +334,62 @@ export const documentTranslationIpLimiter = createIpRateLimiter({
   }),
   keyPrefix: "document_translation",
 });
+
+/**
+ * PUBLIC invitation preview by link token.
+ *
+ * This is the only unauthenticated endpoint of the onboarding module, so it is
+ * also the only one an outsider can point a script at. Guessing the token is not
+ * the threat — 256 bits does not fall to brute force — the threat is using the
+ * endpoint as an oracle at volume. The limit is generous enough that a real
+ * person following a link, reloading, and switching between devices never
+ * notices, and small enough that scripted enumeration is pointless.
+ *
+ * Deliberately NOT overridable towards zero: the band's floor keeps a
+ * misconfiguration from locking out ordinary patients.
+ */
+export const invitationPreviewLimiter = createIpRateLimiter({
+  max: rateLimitMax("INVITATION_PREVIEW_IP_MAX", {
+    fallback: 60,
+    min: 20,
+    max: 600,
+    why: "A patient reloading a link must never be blocked; scripted probing must be.",
+  }),
+  keyPrefix: "invitation:preview",
+});
+
+/**
+ * PUBLIC check of a typed on-site code.
+ *
+ * Much tighter than the link preview, because the credential is much shorter:
+ * ~60 bits typed by hand versus 256 bits in a URL. Nobody types a code sixty
+ * times; a script would. The 60-minute lifetime and this ceiling together mean
+ * the reachable fraction of the code space stays negligible.
+ */
+export const invitationManualCodeLimiter = createIpRateLimiter({
+  max: rateLimitMax("INVITATION_MANUAL_CODE_IP_MAX", {
+    fallback: 10,
+    min: 5,
+    max: 100,
+    why: "A short typed credential; the window must stay far too small to search.",
+  }),
+  keyPrefix: "invitation:manual-code",
+});
+
+/**
+ * AUTHENTICATED practice-side issuing of invitations and codes.
+ *
+ * Not an anti-guessing measure — the caller is already a known member of a known
+ * practice — but a ceiling on how fast one practice can produce credentials and
+ * on how much a stolen practice session could generate before anyone notices.
+ * A day of normal reception work sits far below this.
+ */
+export const invitationIssueLimiter = createIpRateLimiter({
+  max: rateLimitMax("INVITATION_ISSUE_IP_MAX", {
+    fallback: 60,
+    min: 20,
+    max: 600,
+    why: "A busy reception desk must fit comfortably; a runaway script must not.",
+  }),
+  keyPrefix: "invitation:issue",
+});
