@@ -163,6 +163,30 @@ prisma.practicePatientInvitation = {
   },
 };
 prisma.auditLog = { create: async ({ data }) => { auditRows.push(data); return data; } };
+/*
+ * The writers take a row lock on the entry as their first statement (L1 of the
+ * shared lock order). There is nothing to lock in memory, but the statement is
+ * not decoration: it also resolves the entry tenant-scoped and refuses a foreign
+ * one, so the fake has to answer it — and answer it the same way the database
+ * would, or the tenant tests here would stop meaning anything.
+ *
+ * Called as a tagged template, so the interpolated values arrive as arguments:
+ * [entryId, practiceProfileId].
+ */
+prisma.$queryRaw = async (_strings, entryId, practiceProfileId) => {
+  const row = entries.find(
+    (e) => e.id === entryId && e.practiceProfileId === practiceProfileId,
+  );
+  return row
+    ? [{
+        id: row.id,
+        status: row.status,
+        linkedAt: row.linkedAt,
+        practicePatientLinkId: row.practicePatientLinkId,
+        practiceProfileId: row.practiceProfileId,
+      }]
+    : [];
+};
 // The fake runs the callback against itself. That is enough to exercise the
 // route contract; it deliberately does NOT model rollback, which is why the
 // atomicity claims are proved against a real database elsewhere.

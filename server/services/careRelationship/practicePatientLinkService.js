@@ -196,16 +196,37 @@ export async function createPracticePatientLink(input) {
   if (duplicate) throw new Error("link_already_exists");
 
   const now = new Date();
-  const row = await prisma.practicePatientLink.create({
-    data: {
-      practiceProfileId,
-      patientUserId,
-      patientProfileId,
-      status,
-      linkedAt: now,
-    },
-    include: includePatient,
-  });
+  let row;
+  try {
+    row = await prisma.practicePatientLink.create({
+      data: {
+        practiceProfileId,
+        patientUserId,
+        patientProfileId,
+        status,
+        linkedAt: now,
+      },
+      include: includePatient,
+    });
+  } catch (err) {
+    /*
+     * The duplicate check above is a read followed by a write, so a concurrent
+     * caller can slip between them. Two partial unique indexes are the actual
+     * guarantee, and this turns their rejection into the same domain error the
+     * check-then-insert path already raises — so a caller handles one outcome,
+     * not two.
+     *
+     * Matching on the model and the code only: Prisma reports `meta.target` as
+     * column names, never the index name, and the message is a library detail
+     * that could change. The primary key is the only other unique on this
+     * model, and a cuid collision is not a real event, so any P2002 here IS a
+     * relationship collision.
+     */
+    if (err?.code === "P2002" && err?.meta?.modelName === "PracticePatientLink") {
+      throw new Error("link_already_exists");
+    }
+    throw err;
+  }
 
   return linkToJson(row);
 }

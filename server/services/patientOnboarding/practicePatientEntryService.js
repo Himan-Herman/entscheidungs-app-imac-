@@ -22,6 +22,44 @@
 import { prisma } from "../../lib/prisma.js";
 import { writeRequiredAuditLog } from "../auditLogService.js";
 
+/**
+ * THE LOCK ORDER, and the only place it is written down.
+ *
+ *   L1  PracticePatientEntry          SELECT ... FOR UPDATE   (this function)
+ *   L2  PracticePatientInvitation     conditional updateMany
+ *   L3  the relationship slot         pg_advisory_xact_lock   (claim only)
+ *   L4  PracticePatientLink           INSERT / reuse          (claim only)
+ *
+ * Every writer takes a PREFIX of that order, never a different sequence, so no
+ * two transactions can hold locks in opposite order and no cycle is possible.
+ * Invitation writers stop after L2; only the claim goes on to L3 and L4.
+ *
+ * Locking the entry first is what serialises claim against issue, revoke,
+ * rotate and archive — they all touch the same entry, so they all queue behind
+ * whoever got there first, and each then re-reads the state it depends on
+ * INSIDE the transaction rather than trusting a read from before the lock.
+ *
+ * @param {object} tx transaction client
+ * @param {string} entryId
+ * @param {string} practiceProfileId scopes the lock to the authorised tenant
+ * @returns {Promise<{ id: string, status: string, linkedAt: Date|null,
+ *                     practicePatientLinkId: string|null,
+ *                     practiceProfileId: string }>}
+ */
+export async function lockEntryForUpdate(tx, entryId, practiceProfileId) {
+  const rows = await tx.$queryRaw`
+    SELECT "id", "status", "linkedAt", "practicePatientLinkId", "practiceProfileId"
+      FROM "PracticePatientEntry"
+     WHERE "id" = ${String(entryId)}
+       AND "practiceProfileId" = ${String(practiceProfileId)}
+     FOR UPDATE
+  `;
+  const row = Array.isArray(rows) ? rows[0] ?? null : null;
+  // Missing and not-yours stay the same answer, exactly as everywhere else.
+  if (!row) throw new Error("entry_not_found");
+  return row;
+}
+
 /** Practice-local entry states. */
 export const ENTRY_STATUSES = new Set(["draft", "invited", "linked", "archived"]);
 
@@ -387,6 +425,9 @@ export async function archivePracticePatientEntry(input) {
   if (!id || !pid) throw new Error("validation_required");
 
   return prisma.$transaction(async (tx) => {
+    // L1 first, so a concurrent claim/issue/revoke on this entry queues behind
+    // us instead of interleaving with the invitation revocation below.
+    await lockEntryForUpdate(tx, id, pid);
     const existing = await tx.practicePatientEntry.findFirst({
       where: { id, practiceProfileId: pid },
     });

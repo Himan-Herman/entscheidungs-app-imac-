@@ -970,7 +970,6 @@ model PracticePatientLink {
   /// only once a real account exists.
   practicePatientEntry        PracticePatientEntry?         @relation("PracticePatientEntryLink")
 
-  @@unique([practiceProfileId, patientUserId, patientProfileId])
   @@index([practiceProfileId, status])
   @@index([patientUserId, status])
   @@index([linkedAt])

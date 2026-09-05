@@ -174,6 +174,11 @@ export async function redeemConnectCode({ practiceProfileId, code }) {
     });
     linkId = created.id;
   } catch (err) {
+    // Two causes reach this branch now: the check-then-insert duplicate guard,
+    // and a lost race against a concurrent writer, which the partial unique
+    // indexes reject and createPracticePatientLink maps to the same error. Both
+    // mean the same thing here — somebody else already made the link — so the
+    // reuse below is the correct answer to either.
     if (err?.message !== "link_already_exists") throw err;
     const existing = await prisma.practicePatientLink.findFirst({
       where: {

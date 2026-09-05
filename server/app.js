@@ -140,6 +140,7 @@ import practiceSosCardRouter from "./routes/practiceSosCard.js";
 import sosWalletRouter from "./routes/sosWallet.js";
 import publicAnamnesisRouter from "./routes/publicAnamnesis.js";
 import publicPatientInvitationsRouter from "./routes/publicPatientInvitations.js";
+import patientInvitationClaimRouter from "./routes/patientInvitationClaim.js";
 import practiceBillingPlausibilityRouter from "./routes/practiceBillingPlausibility.js";
 import patientBillingExplainerRouter from "./routes/patientBillingExplainer.js";
 
@@ -249,6 +250,8 @@ app.use("/api/practice/patients", requireAuth, practicePatientsRouter);
 app.use("/api/practice/patient-entries", requireAuth, practicePatientEntriesRouter);
 app.use("/api/practice/patient-invitations", requireAuth, practicePatientInvitationsRouter);
 app.use("/api/patient/links", requireAuth, patientCareLinksRouter);
+/** Patient claim of a practice invitation — same PATIENT_ONBOARDING_V2 gate. */
+app.use("/api/patient/invitations", requireAuth, patientInvitationClaimRouter);
 /** Alias for PR-8 patient practice-link APIs */
 app.use("/api/patient/practice-links", requireAuth, patientCareLinksRouter);
 app.use("/api/patient/practices/directory", requireAuth, patientPracticeDirectoryRouter);

@@ -21,16 +21,24 @@ export function getClientIp(req) {
 }
 
 /**
- * @param {{ max: number; keyPrefix: string; windowMs?: number }} opts
+ * `keyOf` decides WHAT is being limited. It defaults to the client IP, so every
+ * existing caller behaves exactly as before; passing another function limits per
+ * user, per practice, or per anything else the request identifies. A limiter
+ * keyed on the authenticated user must be mounted AFTER requireAuth, or every
+ * request would share the same undefined key.
+ *
+ * @param {{ max: number; keyPrefix: string; windowMs?: number;
+ *           keyOf?: (req: import('express').Request) => string }} opts
  * @returns {import('express').RequestHandler}
  */
-export function createIpRateLimiter({ max, keyPrefix, windowMs = FIFTEEN_MIN_MS }) {
+export function createIpRateLimiter({
+  max, keyPrefix, windowMs = FIFTEEN_MIN_MS, keyOf = getClientIp,
+}) {
   /** @type {Map<string, { count: number; windowStart: number }>} */
   const store = new Map();
 
   return function ipRateLimit(req, res, next) {
-    const ip = getClientIp(req);
-    const key = `${keyPrefix}:${ip}`;
+    const key = `${keyPrefix}:${keyOf(req) || "unknown"}`;
     const now = Date.now();
     let entry = store.get(key);
     if (!entry || now - entry.windowStart >= windowMs) {
@@ -392,4 +400,38 @@ export const invitationIssueLimiter = createIpRateLimiter({
     why: "A busy reception desk must fit comfortably; a runaway script must not.",
   }),
   keyPrefix: "invitation:issue",
+});
+
+/**
+ * POST /api/patient/invitations/claim — two limiters, mounted together.
+ *
+ * The claim is authenticated, so the IP limit is not an anti-guessing measure:
+ * it bounds one network location, and the user limit bounds one account. A
+ * stolen session is caught by the second even when it moves between addresses.
+ *
+ * Both are process-local, like every limiter in this file. With N server
+ * instances the effective ceiling is roughly N x the value; that is acceptable
+ * here because the credential-guessing surface sits on the PUBLIC manual-code
+ * endpoint, which is limited far more tightly.
+ */
+export const invitationClaimIpLimiter = createIpRateLimiter({
+  max: rateLimitMax("INVITATION_CLAIM_IP_MAX", {
+    fallback: 20,
+    min: 5,
+    max: 200,
+    why: "A household or clinic behind one address may legitimately claim a few times.",
+  }),
+  keyPrefix: "invitation:claim:ip",
+});
+
+export const invitationClaimUserLimiter = createIpRateLimiter({
+  max: rateLimitMax("INVITATION_CLAIM_USER_MAX", {
+    fallback: 10,
+    min: 3,
+    max: 100,
+    why: "One person redeems few invitations; this caps what a stolen session can bind.",
+  }),
+  keyPrefix: "invitation:claim:user",
+  // Mounted after requireAuth, so req.user is populated.
+  keyOf: (req) => (typeof req.user?.userId === "string" ? req.user.userId : ""),
 });

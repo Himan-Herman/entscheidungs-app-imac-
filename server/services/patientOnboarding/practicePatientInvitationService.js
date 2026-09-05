@@ -12,7 +12,7 @@
 import { prisma } from "../../lib/prisma.js";
 import { writeRequiredAuditLog } from "../auditLogService.js";
 import { practiceDisplayName } from "../../utils/practiceBranding.js";
-import { INVITABLE_ENTRY_STATUSES } from "./practicePatientEntryService.js";
+import { INVITABLE_ENTRY_STATUSES, lockEntryForUpdate } from "./practicePatientEntryService.js";
 import {
   MANUAL_CODE_TTL_MINUTES,
   INVITATION_TTL_DAYS,
@@ -160,6 +160,9 @@ export async function createInvitationForEntry(input) {
   const now = new Date();
 
   const result = await prisma.$transaction(async (tx) => {
+    // L1. Everything below re-reads state under this lock, so a claim, a
+    // revoke or a rotation running at the same moment queues behind us.
+    await lockEntryForUpdate(tx, entryId, practiceProfileId);
     const entry = await tx.practicePatientEntry.findFirst({
       where: { id: entryId, practiceProfileId },
     });
@@ -274,7 +277,18 @@ export async function revokeInvitation(input) {
 
   const now = new Date();
 
+  // A NON-AUTHORITATIVE locator read: it only tells us which entry to lock.
+  // Everything it says is re-checked inside the transaction, because anything
+  // can change between this line and the lock.
+  const locator = await prisma.practicePatientInvitation.findFirst({
+    where: { id, practiceProfileId },
+    select: { practicePatientEntryId: true },
+  });
+  if (!locator) throw new Error("invitation_not_found");
+
   return prisma.$transaction(async (tx) => {
+    await lockEntryForUpdate(tx, locator.practicePatientEntryId, practiceProfileId); // L1
+
     const existing = await tx.practicePatientInvitation.findFirst({
       where: { id, practiceProfileId },
     });
@@ -289,8 +303,15 @@ export async function revokeInvitation(input) {
     }
     if (existing.status !== "pending") throw new Error("invitation_not_pending");
 
-    const row = await tx.practicePatientInvitation.update({
-      where: { id },
+    /*
+     * L2, and CONDITIONAL. An unconditional update by id was a lost-update
+     * waiting to happen: read pending, let a claim commit `redeemed` in
+     * between, then write `revoked` over it — leaving a live link whose
+     * invitation claims it was withdrawn. The status condition makes the
+     * database refuse that, and count tells us whether we won.
+     */
+    const updated = await tx.practicePatientInvitation.updateMany({
+      where: { id, practiceProfileId, status: "pending" },
       data: {
         status: "revoked",
         revokedAt: now,
@@ -298,6 +319,8 @@ export async function revokeInvitation(input) {
         updatedAt: now,
       },
     });
+    if (updated.count !== 1) throw new Error("invitation_not_pending");
+    const row = await tx.practicePatientInvitation.findUnique({ where: { id } });
 
     await writeRequiredAuditLog(
       {
@@ -342,7 +365,15 @@ export async function rotateManualCode(input) {
 
   const now = new Date();
 
+  const locator = await prisma.practicePatientInvitation.findFirst({
+    where: { id, practiceProfileId },
+    select: { practicePatientEntryId: true },
+  });
+  if (!locator) throw new Error("invitation_not_found");
+
   const result = await prisma.$transaction(async (tx) => {
+    await lockEntryForUpdate(tx, locator.practicePatientEntryId, practiceProfileId); // L1
+
     const existing = await tx.practicePatientInvitation.findFirst({
       where: { id, practiceProfileId },
     });
