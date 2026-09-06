@@ -23,6 +23,10 @@ import { requirePatientOnboardingFeature } from "../middleware/requirePatientOnb
 import { getPracticeAccess, accessHasPermission } from "../utils/practiceAccess.js";
 import { invitationIssueLimiter } from "../middleware/ipRateLimit.js";
 import {
+  loadDeliverableEntry,
+  sendInvitationEmail,
+} from "../services/patientOnboarding/invitationDeliveryService.js";
+import {
   createPracticePatientEntry,
   getPracticePatientEntry,
   listPracticePatientEntries,
@@ -58,10 +62,15 @@ function mapError(err) {
     msg === "entry_already_archived" ||
     msg === "entry_archived" ||
     msg === "entry_not_invitable" ||
+    msg === "entry_not_claimable" ||
+    msg === "entry_already_linked" ||
     msg === "practice_inactive"
   ) {
     return { status: 409, error: msg };
   }
+  // The practice can fix this one itself by adding an address to the entry, so
+  // it is worth naming instead of hiding behind a generic failure.
+  if (msg === "entry_has_no_email") return { status: 409, error: msg };
   // Everything else, including a unique-constraint violation from a lost race,
   // is reported as one opaque failure. The database's own message would name
   // tables, columns and index predicates.
@@ -226,5 +235,61 @@ async function issueInvitation(req, res) {
 
 router.post("/:entryId/invitations", invitationIssueLimiter, issueInvitation);
 router.post("/:entryId/invitations/regenerate", invitationIssueLimiter, issueInvitation);
+
+/**
+ * Issue an invitation AND email it to the address on the entry.
+ *
+ * One request, not two, and deliberately so: the plaintext token exists for the
+ * length of a single response. A "create, then send what you got back" pair
+ * would mean the practice's browser holds a live credential and hands it back to
+ * the server over the network — a second exposure that buys nothing. Here the
+ * token is created and delivered inside one call and never leaves the process.
+ *
+ * The response therefore does NOT carry the token. A practice that wants the
+ * link on screen uses the plain issue endpoint above; this one is for sending.
+ */
+router.post("/:entryId/invitations/send-email", invitationIssueLimiter, async (req, res) => {
+  const ctx = await requirePracticeCapability(req, res, PERMISSIONS.PATIENT_LINKS_WRITE);
+  if (!ctx) return undefined;
+
+  try {
+    // Refuse before issuing. Creating first would supersede the invitation the
+    // entry already had, and an entry with no address would lose a working one
+    // in exchange for a failure.
+    await loadDeliverableEntry({
+      entryId: req.params.entryId,
+      practiceProfileId: ctx.practiceProfileId,
+    });
+
+    const created = await createInvitationForEntry({
+      req,
+      entryId: req.params.entryId,
+      practiceProfileId: ctx.practiceProfileId,
+      createdByUserId: ctx.userId,
+    });
+
+    const delivery = await sendInvitationEmail({
+      entryId: req.params.entryId,
+      practiceProfileId: ctx.practiceProfileId,
+      token: created.token,
+      locale: req.body?.locale,
+    });
+
+    return res.status(201).json({
+      ok: true,
+      invitation: created.invitation,
+      supersededCount: created.supersededCount,
+      deliveredTo: delivery.deliveredTo,
+    });
+  } catch (err) {
+    const mapped = mapError(err);
+    if (mapped.status === 500) {
+      // Message only — an error object from the mail provider can carry the
+      // recipient and the rendered body.
+      console.error("[practice/patient-entries:send-email]", err?.message ?? err);
+    }
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
 
 export default router;

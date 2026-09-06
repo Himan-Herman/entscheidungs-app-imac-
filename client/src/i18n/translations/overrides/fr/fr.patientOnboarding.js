@@ -39,7 +39,7 @@ export const frPatientOnboarding = {
       redeemed: "Utilisée", revoked: "Révoquée", superseded: "Remplacée",
     },
     actions: {
-      invite: "Créer une invitation", regenerate: "Renouveler l'invitation", revoke: "Révoquer l'invitation",
+      invite: "Créer une invitation", regenerate: "Renouveler l'invitation", sendEmail: "Envoyer par e-mail", revoke: "Révoquer l'invitation",
       copyLink: "Copier le lien", showQr: "Afficher le code QR", manualCode: "Code sur place",
       newManualCode: "Générer un nouveau code", archive: "Archiver la fiche", close: "Fermer",
     },
@@ -47,6 +47,12 @@ export const frPatientOnboarding = {
       created: "Invitation créée.",
       regenerated: "Nouvelle invitation créée. La précédente ne fonctionne plus.",
       revoked: "Invitation révoquée.",
+      emailSent:
+        "Invitation envoyée à {address}. Pour des raisons de sécurité, le lien n'est pas affiché ici.",
+      emailMissing:
+        "Aucune adresse e-mail n'est enregistrée pour cette fiche. Ajoutez-en une, ou utilisez le lien ou le code.",
+      emailFailed:
+        "L'e-mail n'a pas pu être envoyé. Réessayez plus tard, ou utilisez le lien ou le code.",
       linkLabel: "Lien d'invitation",
       linkHint: "Valable 7 jours. Le lien n'est affiché qu'une fois — transmettez-le maintenant.",
       linkGone: "Le lien ne peut plus être affiché. Créez une nouvelle invitation pour en obtenir un autre.",

@@ -72,6 +72,7 @@ test("the placeholders a translator must keep are present in every language", ()
   const withPlaceholders = [
     ["practice.duplicate.many", "{count}"],
     ["patient.success.body", "{practice}"],
+    ["practice.invitation.emailSent", "{address}"],
   ];
   for (const lang of LANGS) {
     const ns = getMessages(lang).patientOnboarding;

@@ -39,7 +39,7 @@ export const itPatientOnboarding = {
       redeemed: "Utilizzato", revoked: "Revocato", superseded: "Sostituito",
     },
     actions: {
-      invite: "Crea invito", regenerate: "Rinnova invito", revoke: "Revoca invito",
+      invite: "Crea invito", regenerate: "Rinnova invito", sendEmail: "Invia per e-mail", revoke: "Revoca invito",
       copyLink: "Copia link", showQr: "Mostra codice QR", manualCode: "Codice in sede",
       newManualCode: "Genera un nuovo codice", archive: "Archivia scheda", close: "Chiudi",
     },
@@ -47,6 +47,12 @@ export const itPatientOnboarding = {
       created: "Invito creato.",
       regenerated: "Nuovo invito creato. Il precedente non funziona più.",
       revoked: "Invito revocato.",
+      emailSent:
+        "Invito inviato a {address}. Per sicurezza il link non viene mostrato qui.",
+      emailMissing:
+        "Per questa scheda non è memorizzato alcun indirizzo e-mail. Ne aggiunga uno, oppure usi il link o il codice.",
+      emailFailed:
+        "Non è stato possibile inviare l'e-mail. Riprovi più tardi, oppure usi il link o il codice.",
       linkLabel: "Link di invito",
       linkHint: "Valido 7 giorni. Il link viene mostrato una sola volta: lo consegni ora.",
       linkGone: "Il link non può più essere mostrato. Crei un nuovo invito per ottenerne un altro.",

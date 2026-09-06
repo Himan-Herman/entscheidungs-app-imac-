@@ -71,6 +71,7 @@ export default {
     actions: {
       invite: "Create invitation",
       regenerate: "Renew invitation",
+      sendEmail: "Send by email",
       revoke: "Revoke invitation",
       copyLink: "Copy link",
       showQr: "Show QR code",
@@ -83,6 +84,12 @@ export default {
       created: "Invitation created.",
       regenerated: "New invitation created. The previous one no longer works.",
       revoked: "Invitation revoked.",
+      emailSent:
+        "Invitation sent to {address}. For security the link is not shown here.",
+      emailMissing:
+        "No email address is stored for this entry. Add one, or use the link or code instead.",
+      emailFailed:
+        "The email could not be sent. Please try again later, or use the link or code instead.",
       linkLabel: "Invitation link",
       linkHint:
         "Valid for 7 days. The link is shown once — please pass it on now.",

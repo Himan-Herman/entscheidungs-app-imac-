@@ -72,6 +72,7 @@ export default {
     actions: {
       invite: "Einladung erstellen",
       regenerate: "Einladung erneuern",
+      sendEmail: "Per E-Mail senden",
       revoke: "Einladung widerrufen",
       copyLink: "Link kopieren",
       showQr: "QR-Code anzeigen",
@@ -85,6 +86,12 @@ export default {
       regenerated:
         "Neue Einladung erstellt. Die vorherige funktioniert ab sofort nicht mehr.",
       revoked: "Einladung widerrufen.",
+      emailSent:
+        "Einladung an {address} gesendet. Der Link ist aus Sicherheitsgründen hier nicht sichtbar.",
+      emailMissing:
+        "Für diesen Eintrag ist keine E-Mail-Adresse hinterlegt. Bitte Adresse ergänzen oder Link bzw. Code verwenden.",
+      emailFailed:
+        "Die E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen oder Link bzw. Code verwenden.",
       linkLabel: "Einladungslink",
       linkHint:
         "Gültig für 7 Tage. Der Link ist nur einmal sichtbar — bitte jetzt weitergeben.",

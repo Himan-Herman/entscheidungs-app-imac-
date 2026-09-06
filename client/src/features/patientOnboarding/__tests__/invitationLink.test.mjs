@@ -147,6 +147,21 @@ test("garbage in the stash is treated as no stash", async () => {
   assert.equal(readStashedInvitation(), null);
 });
 
+test("every channel encodes the SAME fragment link — QR included", async () => {
+  // The QR image, the copy button and the email all encode whatever
+  // buildInvitationLink returns. If one of them ever built its own URL, this is
+  // where the divergence would show: there is exactly one builder.
+  const { buildInvitationLink } = await load();
+  const link = buildInvitationLink("qr-token-1");
+
+  const url = new URL(link);
+  assert.equal(url.hash, "#token=qr-token-1");
+  assert.equal(url.search, "", "a query-string variant exists");
+  assert.equal(url.pathname.includes("qr-token-1"), false, "a path variant exists");
+  assert.equal(link.includes("?token="), false);
+  assert.equal(link.includes("/token/"), false);
+});
+
 test("the login return path carries no credential", async () => {
   const { loginReturnPath } = await load();
   const path = loginReturnPath();

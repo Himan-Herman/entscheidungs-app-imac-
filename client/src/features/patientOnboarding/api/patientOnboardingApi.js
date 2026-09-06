@@ -80,6 +80,27 @@ export async function createInvitation(practiceId, entryId) {
   ));
 }
 
+/**
+ * Issue an invitation and have the SERVER email it to the address on the entry.
+ *
+ * Deliberately not "create, then send the token back": the plaintext credential
+ * never reaches this browser at all. The response carries only a masked address,
+ * so the practice can confirm where it went without the token ever existing on
+ * the client.
+ *
+ * @param {string} practiceId @param {string} entryId @param {string} locale
+ */
+export async function sendInvitationEmail(practiceId, entryId, locale) {
+  return unwrap(await authFetch(
+    `/api/practice/patient-entries/${encodeURIComponent(entryId)}/invitations/send-email`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ practiceId, locale }),
+    },
+  ));
+}
+
 /** @param {string} practiceId @param {string} invitationId */
 export async function revokeInvitation(practiceId, invitationId) {
   return unwrap(await authFetch(

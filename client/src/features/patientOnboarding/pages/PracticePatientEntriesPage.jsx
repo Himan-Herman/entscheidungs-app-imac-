@@ -11,6 +11,7 @@ import {
   fetchPatientEntries,
   revokeInvitation,
   rotateManualCode,
+  sendInvitationEmail,
 } from "../api/patientOnboardingApi.js";
 import { buildInvitationLink } from "../invitationLink.js";
 import AddPatientEntryDialog from "../components/AddPatientEntryDialog.jsx";
@@ -143,6 +144,33 @@ export default function PracticePatientEntriesPage() {
       text: regenerate ? tx.invitation.regenerated : tx.invitation.created,
     });
     await load();
+  });
+
+  /**
+   * Issue and email in one server call.
+   *
+   * No link and no code are shown afterwards: the token never came to this
+   * browser. Showing a stale one from a previous issue would be worse than
+   * showing none, because superseding just made it dead.
+   */
+  const handleSendEmail = (entry) => withBusy(entry.id, async () => {
+    try {
+      const res = await sendInvitationEmail(practiceId, entry.id, language);
+      setFreshLink((m) => ({ ...m, [entry.id]: null }));
+      setFreshCode((m) => ({ ...m, [entry.id]: null }));
+      setNotice({
+        kind: "ok",
+        text: tx.invitation.emailSent.replace("{address}", res.deliveredTo || ""),
+      });
+      await load();
+    } catch (err) {
+      setNotice({
+        kind: "error",
+        text: err?.code === "entry_has_no_email"
+          ? tx.invitation.emailMissing
+          : tx.invitation.emailFailed,
+      });
+    }
   });
 
   const handleRevoke = (entry) => {
@@ -331,6 +359,14 @@ export default function PracticePatientEntriesPage() {
                     onClick={() => handleInvite(entry, livePending)}
                   >
                     {livePending ? tx.actions.regenerate : tx.actions.invite}
+                  </button>
+                )}
+                {entry.status !== "archived" && !entry.isLinked && entry.email && (
+                  <button
+                    type="button" className="onboarding-btn onboarding-btn--ghost"
+                    disabled={busy} onClick={() => handleSendEmail(entry)}
+                  >
+                    {tx.actions.sendEmail}
                   </button>
                 )}
                 {livePending && (

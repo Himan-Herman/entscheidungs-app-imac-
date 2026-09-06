@@ -170,7 +170,11 @@ export default function PatientPracticeLinksPage() {
     setLoading(true);
     setError("");
     try {
-      const { res, data } = await fetchPatientPracticeLinks({ status: "active" });
+      // No status filter: the server honours one, and asking for "active" alone
+      // hid every freshly claimed link — those arrive as "invited" and are
+      // exactly what the incoming-requests section below is for. The narrowing
+      // happens client-side, where both sections need their own slice.
+      const { res, data } = await fetchPatientPracticeLinks();
       if (res.status === 404 && data.error === "feature_disabled") {
         setLinks([]);
         setError(t.featureDisabled);
