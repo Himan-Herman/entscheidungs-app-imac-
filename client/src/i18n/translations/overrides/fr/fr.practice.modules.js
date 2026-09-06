@@ -47,6 +47,7 @@ export default {
 
     cardInbox: "Boîte de réception",
     cardPatients: "Patients",
+    cardPatientOnboarding: "Enregistrer des patients",
     cardMessages: "Messages",
     cardDocuments: "Documents et résultats",
     cardMedication: "Plans de médication",

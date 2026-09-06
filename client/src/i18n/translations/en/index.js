@@ -18,6 +18,7 @@ import practiceConsents from "./practiceConsents.js";
 import practicePreVisit from "./practicePreVisit.js";
 import practiceAnalytics from "./practiceAnalytics.js";
 import practicePatients from "./practicePatients.js";
+import patientOnboarding from "./patientOnboarding.js";
 import practiceInternalWork from "./practiceInternalWork.js";
 import settingsPrivacy from "./settingsPrivacy.js";
 import accountPortal from "./accountPortal.js";
@@ -106,6 +107,7 @@ export default {
   practicePreVisit,
   practiceAnalytics,
   practicePatients,
+  patientOnboarding,
   practiceInternalWork,
   settingsPrivacy,
   accountPortal,

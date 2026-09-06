@@ -1,4 +1,4 @@
-import { getAuthHeaders } from "./authHeaders";
+import { getAuthHeaders } from "./authHeaders.js";
 import { resolveApiUrl } from "../lib/apiBase.js";
 
 /**

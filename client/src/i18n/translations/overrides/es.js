@@ -22,6 +22,7 @@ import { esPatientBillingExplain } from "./es/es.patientBillingExplain.js";
 import { esPracticeDirectory } from "./es/es.practiceDirectory.js";
 import { esTelemedicine } from "./es/es.telemedicine.js";
 import { esPatientPractices, esDocumentSharing } from "./es/es.patientPractices.js";
+import { esPatientOnboarding } from "./es/es.patientOnboarding.js";
 
 /** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
 const esBase = {
@@ -303,9 +304,14 @@ const esComposed = deepMerge(
 
 export default deepMerge(
   deepMerge(
+  deepMerge(
   deepMerge(esComposed, esTelemedicine),
   { patientPractices: esPatientPractices, documentSharing: esDocumentSharing },
 ),
   // Phases 5A-5C: authored here rather than falling through to English.
   esInternalWork,
+),
+  // Patient onboarding (practice invitation + patient claim). Authored here
+  // rather than falling through to English.
+  { patientOnboarding: esPatientOnboarding },
 );

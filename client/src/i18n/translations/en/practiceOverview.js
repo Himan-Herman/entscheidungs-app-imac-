@@ -40,6 +40,7 @@ export default {
 
   cardInbox: "Inbox",
   cardPatients: "Patients",
+  cardPatientOnboarding: "Add patients",
   cardMessages: "Messages",
   cardDocuments: "Documents & findings",
   cardMedication: "Medication plans",

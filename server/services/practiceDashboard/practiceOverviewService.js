@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma.js";
 import {
   isMedicalInterpreterB2bEnabled,
+  isPatientOnboardingV2Enabled,
   isPracticeAnamnesisEnabled,
   isPracticeBookingEnabled,
   isTelemedicineUiEnabled,
@@ -65,6 +66,13 @@ function metricsVisibilityForRole(role) {
     telemedicine:
       isTelemedicineUiEnabled() &&
       hasPracticePermission(role, PERMISSIONS.TELEMEDICINE_READ),
+    // Practice-initiated patient onboarding. The route gate answers 404 while the
+    // flag is off precisely so the module looks absent; the hub has to agree, or
+    // every practice would see a tile that leads nowhere. WRITE, not READ: the
+    // page exists to create entries and issue invitations.
+    patientOnboarding:
+      isPatientOnboardingV2Enabled() &&
+      hasPracticePermission(role, PERMISSIONS.PATIENT_LINKS_WRITE),
   };
 }
 

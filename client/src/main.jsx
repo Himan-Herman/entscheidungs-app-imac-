@@ -30,6 +30,12 @@ const KoerperVorderseite = lazy(() => import("./pages/KoerperVorderseite.jsx"));
 const KoerperRueckseite = lazy(() => import("./pages/KoerperRueckseite.jsx"));
 const BildUpload = lazy(() => import("./pages/BildUpload.jsx"));
 const SymptomChat = lazy(() => import("./pages/SymptomChat.jsx"));
+const PracticePatientEntriesPage = lazy(
+  () => import("./features/patientOnboarding/pages/PracticePatientEntriesPage.jsx"),
+);
+const PatientInvitationPage = lazy(
+  () => import("./features/patientOnboarding/pages/PatientInvitationPage.jsx"),
+);
 const KoerperregionStart = lazy(() => import("./pages/KoerperregionStart.jsx"));
 const KoerperSymptomChat = lazy(() => import("./pages/KoerperSymptomChat.jsx"));
 
@@ -366,6 +372,14 @@ void runPwaBuildMigration().then(() => {
                 <Route path="/gate" element={<Gate />} />
                 <Route path="/intro" element={<Intro />} />
                 <Route path="/register" element={<Register />} />
+                {/*
+                  Deliberately PUBLIC: the patient must be able to see who is
+                  inviting them before deciding whether to create an account.
+                  The page previews only; the claim inside it is authenticated.
+                  The credential rides in the URL fragment, which never reaches
+                  the server.
+                */}
+                <Route path="/patient-invitation" element={<PatientInvitationPage />} />
 
                 <Route
                   path="/patient"
@@ -580,6 +594,14 @@ void runPwaBuildMigration().then(() => {
                   element={
                     <ProtectedRoute>
                       <PracticeTeamPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/practice/patient-entries"
+                  element={
+                    <ProtectedRoute>
+                      <PracticePatientEntriesPage />
                     </ProtectedRoute>
                   }
                 />

@@ -27,6 +27,7 @@ import ruMedicalInterpreter from "./ru/ru.medicalInterpreter.js";
 import ruPatient from "./ru/ru.patient.js";
 import ruPractice from "./ru/ru.practice.js";
 import ruSosCard from "./ru/ru.sosCard.js";
+import { ruPatientOnboarding } from "./ru/ru.patientOnboarding.js";
 
 /** Russian — base bundle merged with layered overrides (ru → en → de per key). */
 const ruBase = {
@@ -190,6 +191,7 @@ const ruBase = {
 export default deepMerge(
   deepMerge(
   deepMerge(
+  deepMerge(
     deepMerge(deepMerge(deepMerge(ruBase, ruCore), ruAccount), ruModules),
     ruPatient,
   ),
@@ -203,4 +205,8 @@ export default deepMerge(
   // deepMerge takes exactly TWO arguments: a third would be silently
   // dropped, so every additional bundle is folded in explicitly.
   deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(deepMerge(ruInternalWork, ruPracticePatients), ruPracticeAdmin), ruPracticeGovernance), ruPracticeSetup), ruPracticeWorkflow), ruPracticeServices), ruPracticeTeamNs), ruPracticeMisc), ruPracticeOverview), ruPracticeRecord), ruPracticeDocsMeds), ruPracticeDocOcrVitals), ruPracticeDocuments), ruPracticeIntegrations), ruPracticeAnamnesis), ruPracticeBilling),
+),
+  // Patient onboarding (practice invitation + patient claim). Authored here
+  // rather than falling through to English.
+  { patientOnboarding: ruPatientOnboarding },
 );

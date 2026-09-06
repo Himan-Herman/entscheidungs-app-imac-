@@ -22,6 +22,7 @@ import { itPatientBillingExplain } from "./it/it.patientBillingExplain.js";
 import { itPracticeDirectory } from "./it/it.practiceDirectory.js";
 import { itTelemedicine } from "./it/it.telemedicine.js";
 import { itPatientPractices, itDocumentSharing } from "./it/it.patientPractices.js";
+import { itPatientOnboarding } from "./it/it.patientOnboarding.js";
 
 /** Base Italian overrides — extended layers merged below */
 const itBase = {
@@ -304,9 +305,14 @@ const itComposed = deepMerge(
 
 export default deepMerge(
   deepMerge(
+  deepMerge(
   deepMerge(itComposed, itTelemedicine),
   { patientPractices: itPatientPractices, documentSharing: itDocumentSharing },
 ),
   // Phases 5A-5C: authored here rather than falling through to English.
   itInternalWork,
+),
+  // Patient onboarding (practice invitation + patient claim). Authored here
+  // rather than falling through to English.
+  { patientOnboarding: itPatientOnboarding },
 );

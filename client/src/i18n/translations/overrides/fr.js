@@ -21,6 +21,7 @@ import { frPatientBillingExplain } from "./fr/fr.patientBillingExplain.js";
 import { frPracticeDirectory } from "./fr/fr.practiceDirectory.js";
 import { frTelemedicine } from "./fr/fr.telemedicine.js";
 import { frPatientPractices, frDocumentSharing } from "./fr/fr.patientPractices.js";
+import { frPatientOnboarding } from "./fr/fr.patientOnboarding.js";
 
 const frBase = {
   roleEntry: {
@@ -302,9 +303,14 @@ const frComposed = deepMerge(
 
 export default deepMerge(
   deepMerge(
+  deepMerge(
   deepMerge(frComposed, frTelemedicine),
   { patientPractices: frPatientPractices, documentSharing: frDocumentSharing },
 ),
   // Phases 5A-5C: authored here rather than falling through to English.
   frInternalWork,
+),
+  // Patient onboarding (practice invitation + patient claim). Authored here
+  // rather than falling through to English.
+  { patientOnboarding: frPatientOnboarding },
 );

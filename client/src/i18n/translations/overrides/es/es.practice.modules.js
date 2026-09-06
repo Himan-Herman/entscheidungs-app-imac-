@@ -41,6 +41,7 @@ export default {
     notProvided: "no indicado",
     cardInbox: "Bandeja de entrada",
     cardPatients: "Pacientes",
+    cardPatientOnboarding: "Registrar pacientes",
     cardMessages: "Mensajes",
     cardDocuments: "Documentos y resultados",
     cardMedication: "Planes de medicación",

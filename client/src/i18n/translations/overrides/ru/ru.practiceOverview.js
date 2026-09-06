@@ -53,6 +53,7 @@ export const ruPracticeOverview = {
 
     cardInbox: "Почта",
     cardPatients: "Пациенты",
+    cardPatientOnboarding: "Регистрация пациентов",
     cardMessages: "Сообщения",
     cardDocuments: "Документы и заключения",
     cardMedication: "Планы лечения",

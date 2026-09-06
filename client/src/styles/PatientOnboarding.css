@@ -1,0 +1,294 @@
+/*
+ * Patient onboarding — practice invitation and patient claim.
+ *
+ * Built on the existing MedScoutX tokens rather than a new palette. Every status
+ * carries a word as well as a colour, touch targets clear 44px, and focus stays
+ * visible: this flow is used at a reception desk and on a phone in a waiting
+ * room, often by someone in a hurry.
+ */
+
+.onboarding-page {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+.onboarding-page--narrow { max-width: 40rem; }
+
+.onboarding-page__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.onboarding-page__title {
+  margin: 0 0 .35rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.onboarding-page__intro {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--ms-text-muted, #475569);
+  line-height: 1.6;
+}
+
+.onboarding-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+/* ------------------------------------------------------------------ fields */
+
+.onboarding-field { display: block; margin-bottom: 1rem; }
+.onboarding-field--inline { margin-bottom: 0; min-width: 16rem; flex: 1 1 16rem; }
+.onboarding-field__label {
+  display: block;
+  margin-bottom: .35rem;
+  font-weight: 600;
+  font-size: .9rem;
+}
+.onboarding-field__input {
+  width: 100%;
+  min-height: 2.75rem;                 /* comfortable touch target */
+  padding: .55rem .7rem;
+  border: 1px solid var(--ms-border, #cbd5e1);
+  border-radius: .5rem;
+  background: var(--ms-surface, #fff);
+  color: inherit;
+  font: inherit;
+  box-sizing: border-box;
+}
+.onboarding-field__input:focus-visible {
+  outline: 2px solid var(--ms-accent, #0f766e);
+  outline-offset: 2px;
+}
+.onboarding-field__hint {
+  display: block;
+  margin-top: .3rem;
+  font-size: .82rem;
+  color: var(--ms-text-muted, #64748b);
+  line-height: 1.5;
+}
+
+.onboarding-grid {
+  display: grid;
+  gap: 0 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.onboarding-checkbox,
+.onboarding-radio {
+  display: flex;
+  gap: .6rem;
+  align-items: flex-start;
+  padding: .6rem .25rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+.onboarding-radio span { display: block; }
+.onboarding-radio input,
+.onboarding-checkbox input { margin-top: .2rem; width: 1.15rem; height: 1.15rem; }
+.onboarding-radio input:focus-visible,
+.onboarding-checkbox input:focus-visible {
+  outline: 2px solid var(--ms-accent, #0f766e);
+  outline-offset: 2px;
+}
+
+.onboarding-fieldset {
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: .75rem;
+  padding: 1rem;
+  margin: 0 0 1.25rem;
+}
+
+/* ----------------------------------------------------------------- buttons */
+
+.onboarding-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 2.75rem;
+  padding: .6rem 1.1rem;
+  border: 1px solid var(--ms-accent, #0f766e);
+  border-radius: 999px;
+  background: var(--ms-accent, #0f766e);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.onboarding-btn:focus-visible {
+  outline: 2px solid var(--ms-accent, #0f766e);
+  outline-offset: 3px;
+}
+.onboarding-btn[disabled] { opacity: .55; cursor: not-allowed; }
+.onboarding-btn--ghost {
+  background: transparent;
+  color: var(--ms-accent, #0f766e);
+}
+.onboarding-btn--danger {
+  background: transparent;
+  border-color: var(--ms-danger, #b91c1c);
+  color: var(--ms-danger, #b91c1c);
+}
+
+/* ------------------------------------------------------------------- cards */
+
+.onboarding-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.onboarding-card {
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: .85rem;
+  padding: 1rem 1.1rem;
+  background: var(--ms-surface, #fff);
+}
+.onboarding-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.onboarding-card__name { margin: 0; font-size: 1.05rem; }
+.onboarding-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem 2rem;
+  margin: .75rem 0 0;
+}
+.onboarding-card__meta dt {
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ms-text-muted, #64748b);
+}
+.onboarding-card__meta dd { margin: 0; font-variant-numeric: tabular-nums; }
+.onboarding-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  margin-top: 1rem;
+}
+
+/* A badge always carries its word; colour only reinforces it. */
+.onboarding-badge {
+  display: inline-block;
+  padding: .2rem .6rem;
+  border-radius: 999px;
+  border: 1px solid var(--ms-border, #cbd5e1);
+  font-size: .8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.onboarding-badge--linked { border-color: #15803d; color: #15803d; }
+.onboarding-badge--invited { border-color: #b45309; color: #b45309; }
+.onboarding-badge--archived { color: var(--ms-text-muted, #64748b); }
+
+/* -------------------------------------------------------------- credential */
+
+.onboarding-credential {
+  margin-top: 1rem;
+  padding: .85rem;
+  border: 1px dashed var(--ms-border, #cbd5e1);
+  border-radius: .65rem;
+}
+.onboarding-code {
+  display: block;
+  padding: .6rem .75rem;
+  border: 1px solid var(--ms-border, #cbd5e1);
+  border-radius: .5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.35rem;
+  letter-spacing: .12em;
+  word-break: break-all;
+}
+
+.onboarding-practice {
+  border: 1px solid var(--ms-border, #e2e8f0);
+  border-radius: .85rem;
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.onboarding-practice__label {
+  margin: 0 0 .25rem;
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ms-text-muted, #64748b);
+}
+.onboarding-practice__name { margin: 0; font-size: 1.2rem; font-weight: 700; }
+.onboarding-practice__meta { margin: .25rem 0 0; color: var(--ms-text-muted, #64748b); }
+
+/* ------------------------------------------------------------------ alerts */
+
+.onboarding-alert {
+  margin: 1rem 0;
+  padding: .75rem .9rem;
+  border-radius: .6rem;
+  border: 1px solid var(--ms-border, #cbd5e1);
+  border-left-width: 4px;
+  line-height: 1.55;
+}
+.onboarding-alert p { margin: .35rem 0 0; }
+.onboarding-alert--ok { border-left-color: #15803d; }
+.onboarding-alert--warn { border-left-color: #b45309; }
+.onboarding-alert--error { border-left-color: #b91c1c; }
+
+/* ------------------------------------------------------------------ modals */
+
+.onboarding-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(15 23 42 / 55%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+.onboarding-modal {
+  width: min(38rem, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--ms-surface, #fff);
+  border-radius: .9rem;
+  padding: 1.25rem;
+}
+.onboarding-modal__title { margin: 0 0 .5rem; font-size: 1.2rem; }
+.onboarding-modal__hint {
+  margin: 0 0 1rem;
+  color: var(--ms-text-muted, #64748b);
+  line-height: 1.55;
+}
+.onboarding-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+.onboarding-qr__image {
+  display: block;
+  margin: 0 auto 1rem;
+  width: min(320px, 100%);
+  height: auto;
+  background: #fff;
+  border-radius: .5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-btn { transition: none; }
+}
+
+@media (max-width: 40rem) {
+  .onboarding-page__head { flex-direction: column; align-items: stretch; }
+  .onboarding-page__head .onboarding-btn { width: 100%; }
+  .onboarding-card__actions .onboarding-btn { flex: 1 1 12rem; }
+}

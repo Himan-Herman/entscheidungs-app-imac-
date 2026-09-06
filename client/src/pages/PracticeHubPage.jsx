@@ -66,6 +66,20 @@ const CARD_DEFS = [
     Icon: UsersRound,
   },
   {
+    // Hidden unless the server says so: `visibility.patientOnboarding` is false
+    // whenever the feature flag is off, so no practice sees a dead tile.
+    id: "patientOnboarding",
+    visibilityKey: "patientOnboarding",
+    // Opt-IN, not opt-out: the shared filter below shows a card whose key is
+    // merely absent. For a flag-gated module that is the wrong default — an
+    // older server that does not send the key would expose it.
+    requireVisible: true,
+    labelKey: "cardPatientOnboarding",
+    to: (practiceId) =>
+      `/practice/patient-entries?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: UserPlus,
+  },
+  {
     id: "messages",
     visibilityKey: "messages",
     metricKey: "openMessages",
@@ -393,7 +407,12 @@ export default function PracticeHubPage() {
   })();
 
   const visibleCards = useMemo(
-    () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
+    () =>
+      CARD_DEFS.filter((c) =>
+        c.requireVisible
+          ? visibility[c.visibilityKey] === true
+          : visibility[c.visibilityKey] !== false,
+      ),
     [visibility],
   );
 
