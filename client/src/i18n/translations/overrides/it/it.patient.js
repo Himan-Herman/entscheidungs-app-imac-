@@ -1045,12 +1045,12 @@ export default {
       created: "Codice di collegamento generato.",
       revoked: "Codice di collegamento revocato.",
     },
-    requestsHeading: "Richieste di collegamento in arrivo",
+    requestsHeading: "Condivisione dei dati con il tuo studio",
     requestsIntro:
-      "Uno studio vuole collegarsi al tuo account MedScoutX. I dati vengono condivisi solo dopo il tuo consenso.",
-    requestFrom: "{practice} vuole collegarsi al tuo account.",
+      "Il collegamento è attivo. Finora non è stato condiviso alcun dato. Scegli quali ambiti vuoi condividere con questo studio.",
+    requestFrom: "{practice} attende che tu scelga cosa condividere.",
     acceptScopesHint:
-      "Accettando, condividi gli ambiti selezionati qui sotto in «Quali ambiti vuoi condividere?» (predefiniti: profilo + messaggi).",
+      "Condividi esattamente ciò che selezioni qui sotto in «Quali ambiti vuoi condividere?». Nulla è preselezionato.",
     acceptButton: "Accetta",
     declineButton: "Rifiuta",
     acceptedMsg: "Collegamento attivato.",

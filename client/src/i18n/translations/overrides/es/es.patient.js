@@ -1044,12 +1044,12 @@ export default {
       created: "Código de conexión generado.",
       revoked: "Código de conexión revocado.",
     },
-    requestsHeading: "Solicitudes de conexión entrantes",
+    requestsHeading: "Compartir datos con su consulta",
     requestsIntro:
-      "Una consulta desea conectarse a su cuenta de MedScoutX. Los datos solo se comparten tras su consentimiento.",
-    requestFrom: "{practice} desea conectarse a su cuenta.",
+      "La conexión ya existe. Todavía no se ha compartido ningún dato. Elija qué ámbitos desea compartir con esta consulta.",
+    requestFrom: "{practice} espera a que elija qué desea compartir.",
     acceptScopesHint:
-      "Al aceptar, comparte los ámbitos seleccionados más abajo en «¿Qué ámbitos desea compartir?» (predeterminado: perfil + mensajes).",
+      "Comparte exactamente lo que marque más abajo en «¿Qué ámbitos desea compartir?». No hay nada preseleccionado.",
     acceptButton: "Aceptar",
     declineButton: "Rechazar",
     acceptedMsg: "Conexión activada.",

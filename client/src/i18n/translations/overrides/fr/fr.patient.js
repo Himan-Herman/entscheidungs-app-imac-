@@ -1045,12 +1045,12 @@ export default {
       created: "Code de connexion généré.",
       revoked: "Code de connexion révoqué.",
     },
-    requestsHeading: "Demandes de connexion entrantes",
+    requestsHeading: "Partage de données avec votre cabinet",
     requestsIntro:
-      "Un cabinet souhaite se connecter à votre compte MedScoutX. Les données ne sont partagées qu’après votre accord.",
-    requestFrom: "{practice} souhaite se connecter à votre compte.",
+      "La connexion est établie. Aucune donnée n’a encore été partagée. Choisissez les domaines que vous souhaitez partager avec ce cabinet.",
+    requestFrom: "{practice} attend que vous choisissiez ce que vous partagez.",
     acceptScopesHint:
-      "En acceptant, vous partagez les domaines sélectionnés ci-dessous sous « Quels domaines souhaitez-vous partager ? » (par défaut : profil + messages).",
+      "Vous partagez exactement ce que vous cochez ci-dessous sous « Quels domaines souhaitez-vous partager ? ». Rien n’est présélectionné.",
     acceptButton: "Accepter",
     declineButton: "Refuser",
     acceptedMsg: "Connexion activée.",

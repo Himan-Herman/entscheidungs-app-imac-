@@ -42,8 +42,17 @@ const CONNECT_SCOPE_OPTIONS = [
   { scope: "prescriptions", typeKey: "prescriptions_access" },
 ];
 
-/** Conservative default — deliberately NOT a full release (patient stays in control). */
-const DEFAULT_CONNECT_SCOPES = ["profile", "messages"];
+/**
+ * NOTHING is pre-selected.
+ *
+ * A pre-ticked box is an answer the patient never gave. Even a conservative
+ * default would mean the common path — accept without reading — releases areas
+ * nobody actively chose. So the list starts empty and both submit buttons stay
+ * disabled until the patient ticks something. There is deliberately no
+ * "select all" and no silent fallback at submit time: the scopes that reach the
+ * server are exactly the ones that were ticked on screen.
+ */
+const DEFAULT_CONNECT_SCOPES = [];
 
 export default function PatientPracticeLinksPage() {
   const { language } = useLanguage();
@@ -307,7 +316,7 @@ export default function PatientPracticeLinksPage() {
                     <button
                       type="button"
                       className="patient-threads__btn patient-threads__btn--primary"
-                      disabled={busyId === link.id}
+                      disabled={busyId === link.id || scopes.length === 0}
                       onClick={() => void handleAcceptRequest(link)}
                     >
                       {t.acceptButton}
@@ -365,7 +374,7 @@ export default function PatientPracticeLinksPage() {
           className="patient-threads__btn patient-threads__btn--primary"
           style={{ marginTop: "0.75rem" }}
           onClick={() => void handleGenerateCode()}
-          disabled={ccBusy}
+          disabled={ccBusy || scopes.length === 0}
           aria-busy={ccBusy}
         >
           {activeCode ? tc.regenerateButton : tc.generateButton}

@@ -51,12 +51,12 @@ export default {
     created: "Connection code generated.",
     revoked: "Connection code revoked.",
   },
-  requestsHeading: "Incoming connection requests",
+  requestsHeading: "Data sharing with your practice",
   requestsIntro:
-    "A practice would like to connect to your MedScoutX account. Data is shared only after your approval.",
-  requestFrom: "{practice} would like to connect to your account.",
+    "The connection exists. Nothing has been shared yet. Choose which areas you want to share with this practice.",
+  requestFrom: "{practice} is waiting for you to choose what to share.",
   acceptScopesHint:
-    "When you accept, you share the areas selected below under “Which areas would you like to share?” (default: profile + messages).",
+    "You share exactly what you tick below under “Which areas would you like to share?”. Nothing is preselected.",
   acceptButton: "Accept",
   declineButton: "Decline",
   acceptedMsg: "Connection activated.",
