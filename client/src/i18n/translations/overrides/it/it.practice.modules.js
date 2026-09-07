@@ -164,12 +164,16 @@ export default {
       "I risultati sono solo orientativi — nessuna verifica di fatturazione vincolante, nessuna consulenza legale o fiscale, nessuna garanzia di rimborso e nessuna decisione automatica su pagamento o fatturazione. Questa scheda è interna allo studio; il « Capire la fattura » lato paziente è una funzione separata e indipendente, senza flusso di dati condiviso.",
     cardBillingPlausibilityInfoAlpha:
       "Nel test alpha puoi verificare: è possibile creare una verifica con codici, compaiono le corrispondenze del catalogo e gli avvisi, funzionano gli stati (aperta/verificata/respinta) e l’export, si applicano il blocco della funzione e l’autorizzazione, e il carattere puramente indicativo senza decisione vincolante resta chiaramente riconoscibile?",
+    cardPatientOnboardingInfoButton: "Maggiori informazioni su Registra pazienti",
+    cardPatientOnboardingInfoTitle: "Registra pazienti",
+    cardPatientOnboardingInfoIntro:
+      "Registri nuovi pazienti nel suo studio e li inviti a collegarsi tramite link, codice QR, codice o e-mail.",
     cardPatientsInfoButton: "Maggiori informazioni sui pazienti",
     cardPatientsInfoTitle: "Pazienti",
     cardPatientsInfoIntro:
       "L’elenco dei pazienti mostra gli account paziente MedScoutX collegati al tuo studio.",
     cardPatientsInfoConnection:
-      "Il collegamento avviene esclusivamente tramite un codice di collegamento volontario che il paziente genera e ti comunica — senza questa azione consapevole non è possibile alcun collegamento.",
+      "Il collegamento nasce da un codice che il paziente genera da sé oppure da un invito che lei crea in «Registra pazienti» — in entrambi i casi solo dopo una conferma consapevole del paziente.",
     cardPatientsInfoExternal:
       "I pazienti esterni sono supportati modulo per modulo, ma non sono gestiti come collegamento completo dell’account in questo elenco.",
     cardPatientsInfoControl:

@@ -45,6 +45,12 @@ export const CARD_INFO = {
       "cardPatientsInfoAlpha",
     ],
   },
+  patientOnboarding: {
+    titleId: "practice-card-info-patient-onboarding-title",
+    buttonKey: "cardPatientOnboardingInfoButton",
+    titleKey: "cardPatientOnboardingInfoTitle",
+    paragraphKeys: ["cardPatientOnboardingInfoIntro"],
+  },
   messages: {
     titleId: "practice-card-info-messages-title",
     buttonKey: "cardMessagesInfoButton",

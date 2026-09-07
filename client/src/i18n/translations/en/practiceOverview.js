@@ -172,12 +172,16 @@ export default {
     "You can schedule video consultations and link a patient, start the session, see the waiting room and granted consent, and complete, cancel or revoke the access link.",
   cardTelemedicineInfoPrivacy:
     "Patients only join after giving explicit consent. No conversations are recorded.",
+  cardPatientOnboardingInfoButton: "More information about adding patients",
+  cardPatientOnboardingInfoTitle: "Add patients",
+  cardPatientOnboardingInfoIntro:
+    "Add new patients to your practice and invite them to connect by link, QR code, code, or email.",
   cardPatientsInfoButton: "More information about patients",
   cardPatientsInfoTitle: "Patients",
   cardPatientsInfoIntro:
     "The patient list shows the MedScoutX patient accounts linked to your practice.",
   cardPatientsInfoConnection:
-    "Linking happens solely via a voluntary connection code that the patient generates and shares with you — without this deliberate action no link can be created.",
+    "A link is created either through a connection code the patient generates themselves, or through an invitation you issue under “Add patients” — in both cases only once the patient deliberately confirms it.",
   cardPatientsInfoExternal:
     "External patients are supported on a per-module basis but are not kept as a full account link in this list.",
   cardPatientsInfoControl:

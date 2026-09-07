@@ -172,12 +172,16 @@ export default {
     "Sie können Videosprechstunden anlegen und eine:n Patient:in verknüpfen, die Sitzung starten, den Warteraum und die erteilte Einwilligung sehen sowie Sitzungen abschließen, absagen oder den Zugangslink widerrufen.",
   cardTelemedicineInfoPrivacy:
     "Patient:innen treten erst nach ausdrücklicher Einwilligung bei. Es werden keine Gespräche aufgezeichnet.",
+  cardPatientOnboardingInfoButton: "Mehr Informationen zu Patient:innen aufnehmen",
+  cardPatientOnboardingInfoTitle: "Patient:innen aufnehmen",
+  cardPatientOnboardingInfoIntro:
+    "Neue Patient:innen in Ihrer Praxis anlegen und per Link, QR-Code, Code oder E-Mail zur Verbindung einladen.",
   cardPatientsInfoButton: "Mehr Informationen zu Patient:innen",
   cardPatientsInfoTitle: "Patient:innen",
   cardPatientsInfoIntro:
     "Die Patient:innenliste zeigt die mit MedScoutX verknüpften Patient:innenkonten Ihrer Praxis.",
   cardPatientsInfoConnection:
-    "Die Verknüpfung erfolgt ausschließlich über einen freiwilligen Verbindungscode, den die Patient:in selbst erzeugt und Ihnen mitteilt – ohne diese bewusste Aktion ist keine Verknüpfung möglich.",
+    "Die Verknüpfung entsteht entweder über einen Verbindungscode, den die Patient:in selbst erzeugt, oder über eine Einladung, die Sie unter „Patient:innen aufnehmen“ erstellen – in beiden Fällen erst durch eine bewusste Bestätigung der Patient:in.",
   cardPatientsInfoExternal:
     "Externe Patient:innen werden modulweise unterstützt, aber nicht als vollständige Kontoverknüpfung in dieser Liste geführt.",
   cardPatientsInfoControl:

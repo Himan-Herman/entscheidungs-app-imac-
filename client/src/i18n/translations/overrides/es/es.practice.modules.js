@@ -164,12 +164,16 @@ export default {
       "Los resultados son solo orientativos — ninguna verificación de facturación vinculante, ningún asesoramiento legal o fiscal, ninguna garantía de reembolso y ninguna decisión automática sobre el pago o la facturación. Esta tarjeta es interna de la consulta; el « Entender la factura » del lado del paciente es una función separada e independiente, sin flujo de datos compartido.",
     cardBillingPlausibilityInfoAlpha:
       "En la prueba alfa puede comprobar: ¿se puede crear una verificación con códigos, aparecen las coincidencias del catálogo y las advertencias, funcionan los estados (abierta/verificada/descartada) y la exportación, se aplican el bloqueo de la función y el permiso, y permanece claramente reconocible el carácter puramente orientativo sin decisión vinculante?",
+    cardPatientOnboardingInfoButton: "Más información sobre Registrar pacientes",
+    cardPatientOnboardingInfoTitle: "Registrar pacientes",
+    cardPatientOnboardingInfoIntro:
+      "Registre nuevos pacientes en su consulta e invítelos a conectarse mediante enlace, código QR, código o correo electrónico.",
     cardPatientsInfoButton: "Más información sobre los pacientes",
     cardPatientsInfoTitle: "Pacientes",
     cardPatientsInfoIntro:
       "La lista de pacientes muestra las cuentas de paciente de MedScoutX vinculadas a su consulta.",
     cardPatientsInfoConnection:
-      "La vinculación se realiza exclusivamente mediante un código de conexión voluntario que el paciente genera y le comunica — sin esa acción consciente no es posible ninguna vinculación.",
+      "La vinculación surge de un código de conexión que el paciente genera por sí mismo o de una invitación que usted crea en «Registrar pacientes» — en ambos casos solo tras una confirmación consciente del paciente.",
     cardPatientsInfoExternal:
       "Los pacientes externos se admiten módulo a módulo, pero no se gestionan como una vinculación de cuenta completa en esta lista.",
     cardPatientsInfoControl:
