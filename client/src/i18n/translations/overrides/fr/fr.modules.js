@@ -135,7 +135,7 @@ export default {
     emergencyNote:
       "Pour symptômes aigus ou vitaux immédiatement menaçants, contactez sans délai les secours ou un professionnel de santé.",
     storageNote:
-      "L’aperçu d’image reste sur cet appareil pendant la session. Discussions possibles en local jusqu’effacement. Conservation durable seulement si vous l’explicitiez.",
+      "L’aperçu de l’image reste sur cet appareil pour l’utilisation en cours. L’historique peut être enregistré sur cet appareil et retiré ici. L’image est traitée pour établir la description.",
     consentTitle: "Avant téléversement",
     consentCheckbox:
       "Je confirme que l’image peut être traitée pour produire une description structurée (envoi aux serveurs MedScoutX et prestataires d’IA, voir Politique de confidentialité).",
@@ -158,8 +158,8 @@ export default {
       "Résumés basés sur l’image et informations que vous ajoutez — pas un diagnostic médical.",
     newChat: "Tout réinitialiser",
     newChatAria: "Effacer image, chat et identifiant de fil sur cet appareil",
-    clearHistory: "Effacer le chat uniquement",
-    clearHistoryAria: "Effacer le texte conservé localement",
+    clearHistory: "Retirer de l’historique",
+    clearHistoryAria: "Retirer l’historique de la conversation de l’affichage sur cet appareil",
     chatTitle: "Conversation",
     chatIntro:
       "Ajoutez du contexte. Les réponses sont des notes neutres pour le rendez-vous — sans interprétation clinique autonome.",

@@ -140,7 +140,7 @@ export default {
     consentCheckbox:
       "Quiero guardar esta sesión localmente en este navegador para poder consultarla después.",
     consentExpl:
-      "La sesión se guarda solo localmente en este navegador. No se envían datos a MedScoutX.",
+      "El guardado que ha elegido aquí se realiza en este navegador. El guardado en su cuenta de MedScoutX se hace por separado.",
     saveLocal: "Guardar sesión localmente",
     saveSuccess: "La sesión se guardó localmente.",
     archiveNote:

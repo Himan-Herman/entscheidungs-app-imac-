@@ -10,7 +10,7 @@ export default {
   emergencyNote:
     "Bei akuten oder lebensbedrohlichen Beschwerden wenden Sie sich bitte sofort an den Notruf oder medizinisches Fachpersonal.",
   storageNote:
-    "Die Bildvorschau bleibt auf diesem Gerät für die aktuelle Nutzung. Der Chat kann lokal gespeichert werden, bis Sie ihn löschen. Das Bild wird nicht dauerhaft gespeichert, sofern Sie es nicht ausdrücklich anderweitig speichern.",
+    "Die Bildvorschau bleibt für die aktuelle Nutzung auf diesem Gerät. Der Verlauf kann auf diesem Gerät gespeichert und hier entfernt werden. Das Bild wird zur Erstellung der Beschreibung verarbeitet.",
   consentTitle: "Vor dem Hochladen",
   consentCheckbox:
     "Ich bestätige, dass das Bild zur Erstellung einer strukturierten Beschreibung verarbeitet werden darf (einschließlich Übermittlung an MedScoutX-Server und Verarbeitungsdienstleister gemäß Datenschutzerklärung).",
@@ -33,8 +33,8 @@ export default {
     "Diese Beschreibung basiert nur auf dem hochgeladenen Bild und den Angaben des Nutzers. Sie ist keine Diagnose.",
   newChat: "Alles zurücksetzen",
   newChatAria: "Bild, Chat und Kontext auf diesem Gerät löschen",
-  clearHistory: "Nur Chat löschen",
-  clearHistoryAria: "Gespeicherten Gesprächsverlauf lokal entfernen",
+  clearHistory: "Aus Verlauf entfernen",
+  clearHistoryAria: "Gesprächsverlauf aus der Ansicht auf diesem Gerät entfernen",
   chatTitle: "Gespräch",
   chatIntro:
     "Stellen Sie neutrale Fragen zum Sichtbaren oder ergänzen Sie Kontext. Antworten sind strukturierte Notizen für den Termin — keine klinische Auswertung.",

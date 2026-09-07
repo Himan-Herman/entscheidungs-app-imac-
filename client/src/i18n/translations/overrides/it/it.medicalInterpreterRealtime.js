@@ -189,7 +189,7 @@ export default {
   history: {
     title: "Cronologia locale",
     privacy:
-      "La cronologia viene salvata solo localmente su questo dispositivo. Nulla viene inviato a MedScoutX o a uno studio medico.",
+      "La cronologia viene salvata su questo dispositivo e può essere rimossa qui. La cronologia salvata non viene messa a disposizione di uno studio collegato tramite questa funzione.",
     empty: "Nessuna conversazione salvata su questo dispositivo.",
     patientLanguage: "Lingua del paziente",
     practiceLanguage: "Lingua dello studio",

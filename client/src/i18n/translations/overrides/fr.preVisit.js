@@ -140,7 +140,7 @@ export default {
     consentCheckbox:
       "Je souhaite enregistrer cette session localement dans ce navigateur pour pouvoir la consulter plus tard.",
     consentExpl:
-      "La session est stockée uniquement localement dans ce navigateur. Aucune donnée n’est envoyée à MedScoutX.",
+      "L’enregistrement choisi ici a lieu dans ce navigateur. L’enregistrement dans votre compte MedScoutX se fait séparément.",
     saveLocal: "Enregistrer la session localement",
     saveSuccess: "La session a été enregistrée localement.",
     archiveNote:

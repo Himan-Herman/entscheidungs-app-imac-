@@ -32,7 +32,7 @@ export default {
     "I agree that my location may be used to search for nearby medical practices.",
   locationConsentRequired: "Please confirm location use before continuing.",
   locationDenied: "Location access was denied or is unavailable.",
-  locationSuccess: "Location applied for this search only (not stored).",
+  locationSuccess: "Your location is used for this search.",
   searchButton: "Search practices",
   searching: "Searching…",
   loadMore: "Load more results",

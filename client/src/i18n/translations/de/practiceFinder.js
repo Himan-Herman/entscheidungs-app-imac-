@@ -34,7 +34,7 @@ export default {
     "Bitte bestätigen Sie die Standortnutzung, bevor Sie fortfahren.",
   locationDenied: "Standortzugriff wurde abgelehnt oder ist nicht verfügbar.",
   locationSuccess:
-    "Standort nur für diese Suche verwendet (wird nicht gespeichert).",
+    "Ihr Standort wird für diese Suche verwendet.",
   searchButton: "Praxen suchen",
   searching: "Suche läuft…",
   loadMore: "Weitere Ergebnisse laden",

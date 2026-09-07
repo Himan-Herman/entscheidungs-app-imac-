@@ -189,7 +189,7 @@ export default {
   history: {
     title: "Historial local",
     privacy:
-      "El historial se guarda únicamente de forma local en este dispositivo. No se envía nada a MedScoutX ni a una consulta.",
+      "El historial se guarda en este dispositivo y puede quitarse aquí. El historial guardado no se pone a disposición de una consulta conectada a través de esta función.",
     empty: "Todavía no hay conversaciones guardadas en este dispositivo.",
     patientLanguage: "Idioma del paciente",
     practiceLanguage: "Idioma de la consulta",

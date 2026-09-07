@@ -317,7 +317,7 @@ export default {
   history: {
     heading: "Documentazione conversazioni su questo dispositivo",
     privacyNote:
-      "Fase 1: le conversazioni sono archiviate solo su questo dispositivo — non sui server MedScoutX. Non vengono conservate registrazioni audio né del microfono. È documentazione orientativa e di comunicazione, non una cartella clinica. Puoi eliminare conversazioni singolarmente o cancellare tutta la cronologia sotto in qualsiasi momento.",
+      "Le conversazioni vengono salvate su questo dispositivo. I contenuti parlati e il testo riconosciuto vengono elaborati per la traduzione. Qui può rimuovere singole conversazioni o l’intera cronologia.",
     fallbackTitle: "Conversazione del {{date}}",
     statusDraft: "Bozza",
     statusActive: "Attiva",

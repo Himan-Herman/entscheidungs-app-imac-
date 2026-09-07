@@ -1528,7 +1528,7 @@ export default {
       "Accetto che la mia posizione venga usata per cercare studi nelle vicinanze.",
     locationConsentRequired: "Conferma l’uso della posizione prima di continuare.",
     locationDenied: "Accesso alla posizione negato o non disponibile.",
-    locationSuccess: "Posizione applicata solo per questa ricerca (non salvata).",
+    locationSuccess: "La sua posizione viene utilizzata per questa ricerca.",
     searchButton: "Cerca studi",
     searching: "Ricerca…",
     loadMore: "Carica altri risultati",

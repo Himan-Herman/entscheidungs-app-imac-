@@ -3,6 +3,7 @@ export default {
   title: "MedScoutX — wird geladen",
   skip: "Intro überspringen",
   heading: "MedScoutX wird gestartet",
-  status:
-    "MedScoutX wird geladen. Sie werden gleich in den gewählten Bereich weitergeleitet.",
+  tagline: "Vorbereitung fürs Arztgespräch",
+  status: "Gleich wählen Sie Ihren Bereich.",
+  continue: "Weiter",
 };

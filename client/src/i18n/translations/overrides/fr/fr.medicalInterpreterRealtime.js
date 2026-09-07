@@ -190,7 +190,7 @@ export default {
   history: {
     title: "Historique local",
     privacy:
-      "L'historique est enregistré uniquement en local sur cet appareil. Rien n'est transmis à MedScoutX ni à un cabinet.",
+      "L’historique est enregistré sur cet appareil et peut être retiré ici. L’historique enregistré n’est pas mis à disposition d’un cabinet connecté via cette fonction.",
     empty: "Aucune conversation enregistrée sur cet appareil pour l'instant.",
     patientLanguage: "Langue du patient",
     practiceLanguage: "Langue du cabinet",

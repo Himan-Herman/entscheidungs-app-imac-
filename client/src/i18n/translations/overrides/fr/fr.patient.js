@@ -1578,7 +1578,7 @@ export default {
       "J’accepte que ma position soit utilisée pour rechercher des cabinets à proximité.",
     locationConsentRequired: "Veuillez confirmer l’utilisation de la position avant de continuer.",
     locationDenied: "Accès à la position refusé ou indisponible.",
-    locationSuccess: "Position appliquée pour cette recherche uniquement (non enregistrée).",
+    locationSuccess: "Votre position est utilisée pour cette recherche.",
     searchButton: "Rechercher des cabinets",
     searching: "Recherche…",
     loadMore: "Charger plus de résultats",

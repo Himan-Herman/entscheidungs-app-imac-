@@ -10,7 +10,7 @@ export default {
   emergencyNote:
     "For acute or life-threatening symptoms, please contact emergency services or medical professionals immediately.",
   storageNote:
-    "The image preview stays on this device for your session. Chat text may be saved locally until you clear it. The image is not permanently stored unless you explicitly keep it (e.g. export or save elsewhere).",
+    "The image preview stays on this device for the current use. The history can be stored on this device and removed here. The image is processed to create the description.",
   consentTitle: "Before you upload",
   consentCheckbox:
     "I confirm that the image may be processed to create a structured description (including sending it to MedScoutX servers and AI providers as described in the Privacy Policy).",
@@ -33,8 +33,8 @@ export default {
     "This description is based only on the uploaded image and user-provided information. It is not a diagnosis.",
   newChat: "Reset all",
   newChatAria: "Clear image, chat, and thread context on this device",
-  clearHistory: "Clear chat only",
-  clearHistoryAria: "Clear conversation text stored locally",
+  clearHistory: "Remove from history",
+  clearHistoryAria: "Remove the conversation history from the view on this device",
   chatTitle: "Conversation",
   chatIntro:
     "Ask neutral questions about what you see or add context. Replies are structured notes for your appointment — not clinical interpretation.",

@@ -1527,7 +1527,7 @@ export default {
       "Acepto que se utilice mi ubicación para buscar consultorios cercanos.",
     locationConsentRequired: "Confirme el uso de la ubicación antes de continuar.",
     locationDenied: "Acceso a la ubicación denegado o no disponible.",
-    locationSuccess: "Ubicación aplicada solo para esta búsqueda (no guardada).",
+    locationSuccess: "Su ubicación se usa para esta búsqueda.",
     searchButton: "Buscar consultorios",
     searching: "Buscando…",
     loadMore: "Cargar más resultados",

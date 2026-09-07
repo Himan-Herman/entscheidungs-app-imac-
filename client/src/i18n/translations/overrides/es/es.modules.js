@@ -141,7 +141,7 @@ export default {
     emergencyNote:
       "Ante síntomas agudos o situaciones potencialmente graves, contacte de inmediato con emergencias o un profesional sanitario.",
     storageNote:
-      "La vista previa permanece en este dispositivo durante la sesión. El chat puede guardarse localmente hasta que lo borre. La imagen no se conserva de forma permanente salvo que usted lo decida explícitamente.",
+      "La vista previa de la imagen permanece en este dispositivo para el uso actual. El historial puede guardarse en este dispositivo y quitarse aquí. La imagen se trata para elaborar la descripción.",
     consentTitle: "Antes de subir la imagen",
     consentCheckbox:
       "Confirmo que la imagen puede tratarse para generar una descripción estructurada (incluido el envío a servidores MedScoutX y proveedores de IA, según la Política de privacidad).",
@@ -164,8 +164,8 @@ export default {
       "Las descripciones se basan en la imagen y en lo que usted indica — no constituyen diagnóstico.",
     newChat: "Restablecer todo",
     newChatAria: "Borrar imagen, chat e hilo local en este dispositivo",
-    clearHistory: "Borrar solo el chat",
-    clearHistoryAria: "Borrar texto guardado solo en este dispositivo",
+    clearHistory: "Quitar del historial",
+    clearHistoryAria: "Quitar el historial de la conversación de la vista en este dispositivo",
     chatTitle: "Conversación",
     chatIntro:
       "Añada contexto en tono neutro. Las respuestas son apuntes para la consulta, sin interpretación clínica autónoma.",
