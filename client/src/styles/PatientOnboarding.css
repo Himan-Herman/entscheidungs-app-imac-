@@ -109,6 +109,42 @@
 
 /* ----------------------------------------------------------------- buttons */
 
+/*
+ * The outline needs its OWN accent, because the accent is now carrying text.
+ * #0f766e reads well on white and only ~3:1 on the dark ground — below AA — so
+ * dark mode gets a lighter teal. Three states, as everywhere in this app: the
+ * bare :root is light; the media query covers the default "system" setting and
+ * is guarded so an explicit light choice still wins; the [data-theme] rule lets
+ * the toggle win the other way.
+ */
+:root {
+  --onboarding-accent: var(--ms-accent, #0f766e);
+  --onboarding-danger: var(--ms-danger, #b91c1c);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --onboarding-accent: #2dd4bf;
+    --onboarding-danger: #fca5a5;
+  }
+}
+:root[data-theme="dark"] {
+  --onboarding-accent: #2dd4bf;
+  --onboarding-danger: #fca5a5;
+}
+
+/*
+ * ONE button look for this whole flow: an outline pill.
+ *
+ * The filled variant put white on #0f766e — a dark teal that reads as a murky
+ * block rather than a button, and it made two side-by-side choices ("Anmelden"
+ * / "Konto erstellen") look like different KINDS of action when they are simply
+ * two ways in. Outline is legible on both grounds and treats them as equals.
+ *
+ * The surface is `transparent`, not a literal white: on a light page that is
+ * white, and on a dark one it stays on the dark ground instead of punching a
+ * white hole through it. `--ms-surface` is deliberately not used here — it is
+ * undefined app-wide and would resolve to #fff in dark mode too.
+ */
 .onboarding-btn {
   display: inline-flex;
   align-items: center;
@@ -116,28 +152,38 @@
   gap: .5rem;
   min-height: 2.75rem;
   padding: .6rem 1.1rem;
-  border: 1px solid var(--ms-accent, #0f766e);
+  border: 1px solid var(--onboarding-accent);
   border-radius: 999px;
-  background: var(--ms-accent, #0f766e);
-  color: #fff;
+  background: transparent;
+  color: var(--onboarding-accent);
   font: inherit;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
 }
+.onboarding-btn:hover {
+  /* A tint of the accent itself, so the hover reads on either ground. */
+  background: color-mix(in srgb, var(--onboarding-accent) 12%, transparent);
+}
 .onboarding-btn:focus-visible {
-  outline: 2px solid var(--ms-accent, #0f766e);
+  outline: 2px solid var(--onboarding-accent);
   outline-offset: 3px;
 }
 .onboarding-btn[disabled] { opacity: .55; cursor: not-allowed; }
+.onboarding-btn[disabled]:hover { background: transparent; }
+/* Kept as an alias: the markup still says --ghost in places, and it must not
+   silently become a different button than the one beside it. */
 .onboarding-btn--ghost {
   background: transparent;
-  color: var(--ms-accent, #0f766e);
+  color: var(--onboarding-accent);
 }
 .onboarding-btn--danger {
   background: transparent;
-  border-color: var(--ms-danger, #b91c1c);
-  color: var(--ms-danger, #b91c1c);
+  border-color: var(--onboarding-danger);
+  color: var(--onboarding-danger);
+}
+.onboarding-btn--danger:hover {
+  background: color-mix(in srgb, var(--onboarding-danger) 12%, transparent);
 }
 
 /* ------------------------------------------------------------------- cards */

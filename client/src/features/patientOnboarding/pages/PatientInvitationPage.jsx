@@ -243,8 +243,9 @@ export default function PatientInvitationPage() {
               <p className="onboarding-page__intro">{tx.auth.body}</p>
               <div className="onboarding-card__actions">
                 {/* No credential in either URL — it is already stashed per tab. */}
+                {/* Both routes in are equal choices, so both look the same. */}
                 <Link
-                  className="onboarding-btn"
+                  className="onboarding-btn onboarding-btn--ghost"
                   to={`/login?next=${encodeURIComponent(loginReturnPath())}`}
                 >
                   {tx.auth.login}
