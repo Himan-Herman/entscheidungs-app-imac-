@@ -118,6 +118,15 @@ export default {
     },
     linked: {
       badge: "Connected",
+      badgeInvited: "Connected — sharing pending",
+      hintInvited:
+        "The account is connected. The person has not yet decided which areas to share.",
+      badgeDeclined: "Declined by the person",
+      hintDeclined:
+        "The person declined the connection. No relationship exists; a new invitation is needed to try again.",
+      badgeEnded: "Relationship ended",
+      hintEnded:
+        "This relationship no longer exists. A new invitation is needed to connect again.",
       hint: "The person redeemed the invitation and connected their account.",
       linkStatusInvited: "Permissions still pending",
       linkStatusActive: "Permissions granted",

@@ -76,6 +76,15 @@ export const itPatientOnboarding = {
     },
     linked: {
       badge: "Collegata",
+      badgeInvited: "Collegata — condivisione in attesa",
+      hintInvited:
+        "L’account è collegato. La persona non ha ancora deciso quali ambiti condividere.",
+      badgeDeclined: "Rifiutata dalla persona",
+      hintDeclined:
+        "La persona ha rifiutato il collegamento. Non esiste alcuna relazione; serve un nuovo invito.",
+      badgeEnded: "Relazione terminata",
+      hintEnded:
+        "Questa relazione non esiste più. Per ricollegarsi serve un nuovo invito.",
       hint: "La persona ha utilizzato l'invito e collegato il proprio account.",
       linkStatusInvited: "Autorizzazioni ancora da definire",
       linkStatusActive: "Autorizzazioni concesse",

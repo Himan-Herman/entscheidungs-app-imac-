@@ -120,6 +120,15 @@ export default {
     },
     linked: {
       badge: "Verbunden",
+      badgeInvited: "Verbunden – Freigabe steht aus",
+      hintInvited:
+        "Das Konto ist verbunden. Die Person hat noch nicht entschieden, welche Bereiche sie freigibt.",
+      badgeDeclined: "Von der Person abgelehnt",
+      hintDeclined:
+        "Die Person hat die Verbindung abgelehnt. Es besteht keine Beziehung; für einen neuen Versuch ist eine neue Einladung nötig.",
+      badgeEnded: "Beziehung beendet",
+      hintEnded:
+        "Diese Beziehung besteht nicht mehr. Für eine erneute Verbindung ist eine neue Einladung nötig.",
       hint: "Die Person hat die Einladung eingelöst und ihr Konto verbunden.",
       linkStatusInvited: "Freigaben stehen noch aus",
       linkStatusActive: "Freigaben erteilt",

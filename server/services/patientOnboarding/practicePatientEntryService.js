@@ -240,6 +240,20 @@ export function entryToJson(row) {
     // The link id is deliberately absent: a practice reaches patient data
     // through the existing authorization chain, never through this record.
     isLinked: Boolean(row.linkedAt),
+    /*
+     * The CURRENT state of the relationship, not merely that a claim once
+     * happened.
+     *
+     * `linkedAt` is set once and never cleared — that is deliberate, it is the
+     * retention proof that a care relationship existed here. But it made the
+     * practice read "connected" forever, including after the patient declined
+     * or the relationship was ended. The practice then believes it has a
+     * patient who, on their own screen, has no such practice.
+     *
+     * null when the row was read without the relationship joined, so callers
+     * that do not need it pay nothing.
+     */
+    linkStatus: row.practicePatientLink ? row.practicePatientLink.status : null,
   };
 }
 
@@ -358,6 +372,8 @@ export async function getPracticePatientEntry(entryId, practiceProfileId) {
 
   const row = await prisma.practicePatientEntry.findFirst({
     where: { id, practiceProfileId: pid },
+    // Status only — never the patient behind it.
+    include: { practicePatientLink: { select: { status: true } } },
   });
   if (!row) throw new Error("entry_not_found");
   return entryToJson(row);
@@ -396,6 +412,8 @@ export async function listPracticePatientEntries(practiceProfileId, opts = {}) {
       orderBy: [{ createdAt: "desc" }],
       take: limit,
       skip: offset,
+      // One join, not one query per row: the list must stay O(1) in queries.
+      include: { practicePatientLink: { select: { status: true } } },
     }),
     prisma.practicePatientEntry.count({ where }),
   ]);

@@ -76,6 +76,15 @@ export const frPatientOnboarding = {
     },
     linked: {
       badge: "Connectée",
+      badgeInvited: "Connectée — partage en attente",
+      hintInvited:
+        "Le compte est connecté. La personne n’a pas encore choisi les domaines qu’elle partage.",
+      badgeDeclined: "Refusée par la personne",
+      hintDeclined:
+        "La personne a refusé la connexion. Aucune relation n’existe ; une nouvelle invitation est nécessaire.",
+      badgeEnded: "Relation terminée",
+      hintEnded:
+        "Cette relation n’existe plus. Une nouvelle invitation est nécessaire pour se reconnecter.",
       hint: "La personne a utilisé l'invitation et connecté son compte.",
       linkStatusInvited: "Autorisations en attente",
       linkStatusActive: "Autorisations accordées",

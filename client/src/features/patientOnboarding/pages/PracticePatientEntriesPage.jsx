@@ -313,11 +313,28 @@ export default function PracticePatientEntriesPage() {
                 </div>
               </dl>
 
-              {entry.isLinked && (
-                <p className="onboarding-alert onboarding-alert--ok">
-                  <strong>{tx.linked.badge}</strong> {tx.linked.hint}
-                </p>
-              )}
+              {entry.isLinked && (() => {
+                /*
+                 * What the relationship IS now, not that a claim once happened.
+                 * `isLinked` never goes back to false — it is the retention
+                 * proof — so on its own it made this read "Verbunden" even
+                 * after the patient declined, and the practice would be looking
+                 * at a patient who has no such practice on their own screen.
+                 */
+                const state = {
+                  active: ["ok", tx.linked.badge, tx.linked.hint],
+                  invited: ["warn", tx.linked.badgeInvited, tx.linked.hintInvited],
+                  declined: ["warn", tx.linked.badgeDeclined, tx.linked.hintDeclined],
+                  revoked: ["warn", tx.linked.badgeEnded, tx.linked.hintEnded],
+                  archived: ["warn", tx.linked.badgeEnded, tx.linked.hintEnded],
+                }[entry.linkStatus] ?? ["ok", tx.linked.badge, tx.linked.hint];
+                const [tone, badge, hint] = state;
+                return (
+                  <p className={`onboarding-alert onboarding-alert--${tone}`}>
+                    <strong>{badge}</strong> {hint}
+                  </p>
+                );
+              })()}
 
               {link && (
                 <div className="onboarding-credential">

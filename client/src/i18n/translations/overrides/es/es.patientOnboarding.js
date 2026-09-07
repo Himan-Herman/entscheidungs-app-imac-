@@ -76,6 +76,15 @@ export const esPatientOnboarding = {
     },
     linked: {
       badge: "Conectada",
+      badgeInvited: "Conectada — falta la autorización",
+      hintInvited:
+        "La cuenta está conectada. La persona aún no ha decidido qué ámbitos comparte.",
+      badgeDeclined: "Rechazada por la persona",
+      hintDeclined:
+        "La persona rechazó la conexión. No existe ninguna relación; hace falta una nueva invitación.",
+      badgeEnded: "Relación finalizada",
+      hintEnded:
+        "Esta relación ya no existe. Para volver a conectar hace falta una nueva invitación.",
       hint: "La persona canjeó la invitación y conectó su cuenta.",
       linkStatusInvited: "Permisos pendientes",
       linkStatusActive: "Permisos concedidos",

@@ -71,6 +71,7 @@ let claimSvc = null;
 let invSvc = null;
 let entrySvc = null;
 let linkSvc = null;
+let dirSvc = null;
 let deliverySvc = null;
 let emailCopy = null;
 
@@ -80,6 +81,7 @@ if (!skip) {
     "practiceProfile", "practicePatientEntry", "practicePatientInvitation",
     "practicePatientLink", "patientProfile", "auditLog", "user", "practiceMember",
     "patientPracticeConnectCode", "consentRecord",
+    "practicePatientThread", "practicePatientMessage",
   ]) {
     prisma[key] = db[key];
   }
@@ -91,6 +93,7 @@ if (!skip) {
   invSvc = await import("../services/patientOnboarding/practicePatientInvitationService.js");
   entrySvc = await import("../services/patientOnboarding/practicePatientEntryService.js");
   linkSvc = await import("../services/careRelationship/practicePatientLinkService.js");
+  dirSvc = await import("../services/careRelationship/patientPracticeDirectoryService.js");
   deliverySvc = await import("../services/patientOnboarding/invitationDeliveryService.js");
   emailCopy = await import("../services/patientOnboarding/invitationEmailCopy.js");
 }
@@ -692,4 +695,124 @@ test("EMAIL: the address is masked when echoed back to the practice", { skip }, 
   assert.equal(deliverySvc.maskEmail("ab@example.com"), "a…@example.com");
   assert.equal(deliverySvc.maskEmail("not-an-address"), "");
   assert.equal(deliverySvc.maskEmail(null), "");
+});
+
+/* ====================================================================
+ * "Meine Praxen" — the chooser the patient actually opens
+ * ==================================================================== */
+
+test("CHOOSER: a claimed practice appears immediately, as invited", { skip }, async () => {
+  const s = await scene();
+  const claimed = await claimSvc.claimInvitation({
+    token: s.inv.token, userId: s.patient.id, subject: SELF,
+  });
+
+  // No consent yet — the practice must already be listed, or the patient is
+  // told "no connected practice" while the practice says they are connected.
+  const { contexts } = await dirSvc.listPatientPracticeContexts(s.patient.id);
+  assert.equal(contexts.length, 1, "the claimed practice is missing from the chooser");
+  assert.equal(contexts[0].linkId, claimed.link.id);
+  assert.equal(contexts[0].status, "invited");
+  assert.equal(contexts[0].isActive, true, "an invited relationship must read as live");
+  assert.equal(contexts[0].practice.displayName, s.practice.practiceName);
+  // A relationship with no conversation yet must still be listed.
+  assert.equal(contexts[0].hasChannel, false);
+});
+
+test("CHOOSER: consent flips the entry to active, still one row", { skip }, async () => {
+  const s = await scene();
+  const claimed = await claimSvc.claimInvitation({
+    token: s.inv.token, userId: s.patient.id, subject: SELF,
+  });
+  await giveConsent(claimed.link.id, s.patient.id);
+
+  const { contexts } = await dirSvc.listPatientPracticeContexts(s.patient.id);
+  assert.equal(contexts.length, 1, "consent duplicated the relationship");
+  assert.equal(contexts[0].status, "active");
+  assert.equal(contexts[0].isActive, true);
+});
+
+test("CHOOSER: two practices appear side by side, neither overwriting", { skip }, async () => {
+  const patient = await user("multi");
+
+  const ownerA = await user("ownerA");
+  const A = await practice(ownerA, "Praxis Nord");
+  const a = await entryWithInvitation(A, ownerA);
+
+  const ownerB = await user("ownerB");
+  const B = await practice(ownerB, "Praxis Dr. Müller");
+  const b = await entryWithInvitation(B, ownerB);
+
+  const linkA = await claimSvc.claimInvitation({
+    token: a.inv.token, userId: patient.id, subject: SELF,
+  });
+  await giveConsent(linkA.link.id, patient.id);
+
+  // The SECOND practice connects afterwards — the case that would show a
+  // last-one-wins bug.
+  const linkB = await claimSvc.claimInvitation({
+    token: b.inv.token, userId: patient.id, subject: SELF,
+  });
+
+  const { contexts } = await dirSvc.listPatientPracticeContexts(patient.id);
+  assert.equal(contexts.length, 2, `expected both practices, got ${contexts.length}`);
+
+  const byName = Object.fromEntries(contexts.map((c) => [c.practice.displayName, c]));
+  assert.ok(byName["Praxis Nord"], "the first practice disappeared when the second connected");
+  assert.ok(byName["Praxis Dr. Müller"], "the second practice is missing");
+
+  // Separate links, separate states — consenting to one did not touch the other.
+  assert.equal(byName["Praxis Nord"].linkId, linkA.link.id);
+  assert.equal(byName["Praxis Dr. Müller"].linkId, linkB.link.id);
+  assert.notEqual(byName["Praxis Nord"].linkId, byName["Praxis Dr. Müller"].linkId);
+  assert.equal(byName["Praxis Nord"].status, "active");
+  assert.equal(byName["Praxis Dr. Müller"].status, "invited");
+
+  // And the scopes stayed with their own relationship.
+  const rowA = await db.practicePatientLink.findUnique({ where: { id: linkA.link.id } });
+  const rowB = await db.practicePatientLink.findUnique({ where: { id: linkB.link.id } });
+  assert.deepEqual([...rowA.consentScopes], SCOPES);
+  assert.deepEqual(rowB.consentScopes ?? [], []);
+});
+
+test("CHOOSER: a declined relationship disappears — and the practice is told", { skip }, async () => {
+  const s = await scene();
+  const claimed = await claimSvc.claimInvitation({
+    token: s.inv.token, userId: s.patient.id, subject: SELF,
+  });
+
+  await linkSvc.declinePracticePatientLink(claimed.link.id, s.patient.id);
+
+  // The patient refused, so it is gone from their chooser. That is correct.
+  const { contexts } = await dirSvc.listPatientPracticeContexts(s.patient.id);
+  assert.equal(contexts.length, 0, "a declined relationship still shows as a practice");
+
+  /*
+   * And the practice must NOT still read "connected". `linkedAt` stays set for
+   * retention, so the entry alone cannot answer this — the DTO has to carry the
+   * real relationship state, or the two sides disagree about whether a care
+   * relationship exists.
+   */
+  const dto = entrySvc.entryToJson(
+    await db.practicePatientEntry.findFirst({
+      where: { id: s.entry.id },
+      include: { practicePatientLink: { select: { status: true } } },
+    }),
+  );
+  assert.equal(dto.isLinked, true, "the retention marker must survive");
+  assert.equal(dto.linkStatus, "declined", "the practice cannot see that the person declined");
+});
+
+test("CHOOSER: a revoked relationship is shown as not live", { skip }, async () => {
+  const s = await scene();
+  const claimed = await claimSvc.claimInvitation({
+    token: s.inv.token, userId: s.patient.id, subject: SELF,
+  });
+  await giveConsent(claimed.link.id, s.patient.id);
+  await linkSvc.revokeLink(claimed.link.id, s.practice.id);
+
+  const { contexts } = await dirSvc.listPatientPracticeContexts(s.patient.id);
+  assert.equal(contexts.length, 1, "the ended relationship vanished without a trace");
+  assert.equal(contexts[0].status, "revoked");
+  assert.equal(contexts[0].isActive, false, "a revoked relationship must not read as live");
 });
