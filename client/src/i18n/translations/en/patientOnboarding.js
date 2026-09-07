@@ -98,10 +98,10 @@ export default {
       copied: "Copied to the clipboard.",
       copyFailed: "Copying failed. Please select the link and copy it manually.",
       codeLabel: "Code to read out",
-      codeHint: "Valid for 60 minutes. Shown once.",
+      codeHint: "Valid for 24 hours. Shown once.",
       codeCreated: "New code generated. The previous one no longer works.",
       expiresIn7Days: "Expires in 7 days",
-      codeExpiresIn60Min: "Expires in 60 minutes",
+      codeExpiresIn: "Expires in 24 hours",
       error: "The action could not be completed.",
       confirmRevoke:
         "Revoke this invitation? The link and the code will stop working.",
@@ -139,7 +139,7 @@ export default {
     },
     manualCode: {
       label: "Enter code",
-      hint: "You received this code at your practice. It is valid for 60 minutes.",
+      hint: "You received this code at your practice. It is valid for 24 hours.",
       placeholder: "ABCD-EFGH-JKLM",
       submit: "Check code",
       checking: "Checking…",

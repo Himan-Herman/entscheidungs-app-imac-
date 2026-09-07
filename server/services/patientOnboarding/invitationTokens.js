@@ -8,7 +8,7 @@
  * ONE invitation, TWO credentials, TWO lifetimes:
  *
  *   link / QR    tokenHash        valid for the invitation's own 7 days
- *   manual code  manualCodeHash   valid 60 minutes, optional, rotatable
+ *   manual code  manualCodeHash   valid 24 hours, optional, rotatable
  *
  * The manual code is a short on-site fallback for someone who cannot open a
  * link, never a second long-lived credential. Its expiry never shortens the
@@ -29,7 +29,16 @@ import {
 /** The invitation itself. */
 export const INVITATION_TTL_DAYS = 7;
 /** The optional typed code living inside it. */
-export const MANUAL_CODE_TTL_MINUTES = 60;
+/*
+ * 24 hours. Long enough that a code handed over at the reception desk still
+ * works when the patient sits down at home that evening — the one-hour window
+ * expired while people were still on their way out of the building.
+ *
+ * What keeps the longer window safe is not its length: the code is single-use,
+ * dies the moment it is rotated or the invitation is revoked, and every attempt
+ * to redeem one is rate limited per IP and per account.
+ */
+export const MANUAL_CODE_TTL_MINUTES = 24 * 60;
 
 /** Stored lifecycle states. `expired` is DERIVED, never written — see isRedeemable. */
 export const INVITATION_STATUSES = Object.freeze([

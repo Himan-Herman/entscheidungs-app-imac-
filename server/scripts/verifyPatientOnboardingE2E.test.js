@@ -317,13 +317,37 @@ test("FLOW 3c: rotating a code does NOT extend the invitation's own expiry", { s
   );
 });
 
+test("FLOW 3e: the code lifetime is 24 hours, and the invitation is unaffected", { skip }, async () => {
+  const { MANUAL_CODE_TTL_MINUTES } = await import("../services/patientOnboarding/invitationTokens.js");
+  assert.equal(MANUAL_CODE_TTL_MINUTES, 24 * 60, "the on-site code lifetime changed");
+
+  const s = await scene();
+  const before = await db.practicePatientInvitation.findUnique({
+    where: { id: s.inv.invitation.id },
+  });
+  const rotated = await invSvc.rotateManualCode({
+    invitationId: s.inv.invitation.id, practiceProfileId: s.practice.id,
+  });
+  const after = await db.practicePatientInvitation.findUnique({
+    where: { id: s.inv.invitation.id },
+  });
+
+  // Roughly a day out, and the seven-day invitation window did not move.
+  assert.ok(rotated.manualCode, "no code was issued");
+  assert.ok(after.manualCodeExpiresAt > new Date(Date.now() + 23 * 3_600_000), "the code expires too soon");
+  assert.ok(after.manualCodeExpiresAt < new Date(Date.now() + 25 * 3_600_000), "the code lives too long");
+  assert.equal(after.expiresAt.getTime(), before.expiresAt.getTime(), "the invitation window moved");
+  // The short clock must still die well before the long one.
+  assert.ok(after.manualCodeExpiresAt < after.expiresAt, "the code can outlive its invitation");
+});
+
 test("FLOW 3d: an expired code is refused, while its invitation stays alive", { skip }, async () => {
   const s = await scene();
   const code = await invSvc.rotateManualCode({
     invitationId: s.inv.invitation.id, practiceProfileId: s.practice.id,
   });
 
-  // Age the code past its 60 minutes without touching the invitation.
+  // Age the code past its lifetime without touching the invitation.
   await db.practicePatientInvitation.update({
     where: { id: s.inv.invitation.id },
     data: { manualCodeExpiresAt: new Date(Date.now() - 60_000) },

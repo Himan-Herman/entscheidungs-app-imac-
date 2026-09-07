@@ -97,9 +97,9 @@ test("a manual code hash is not a link token hash", () => {
 
 test("the two lifetimes are the frozen ones and are independent", () => {
   assert.equal(INVITATION_TTL_DAYS, 7);
-  assert.equal(MANUAL_CODE_TTL_MINUTES, 60);
+  assert.equal(MANUAL_CODE_TTL_MINUTES, 24 * 60);
   assert.equal(invitationExpiry(NOW).getTime() - NOW.getTime(), 7 * 24 * 60 * 60 * 1000);
-  assert.equal(manualCodeExpiry(NOW).getTime() - NOW.getTime(), 60 * 60 * 1000);
+  assert.equal(manualCodeExpiry(NOW).getTime() - NOW.getTime(), 24 * 60 * 60 * 1000);
   // The short clock must never be able to outlive the long one.
   assert.ok(manualCodeExpiry(NOW) < invitationExpiry(NOW));
 });

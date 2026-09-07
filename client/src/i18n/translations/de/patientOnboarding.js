@@ -100,10 +100,10 @@ export default {
       copied: "In die Zwischenablage kopiert.",
       copyFailed: "Kopieren nicht möglich. Bitte den Link markieren und kopieren.",
       codeLabel: "Code zum Vorlesen",
-      codeHint: "Gültig für 60 Minuten. Nur einmal sichtbar.",
+      codeHint: "Gültig für 24 Stunden. Nur einmal sichtbar.",
       codeCreated: "Neuer Code erzeugt. Der vorherige gilt nicht mehr.",
       expiresIn7Days: "Läuft in 7 Tagen ab",
-      codeExpiresIn60Min: "Läuft in 60 Minuten ab",
+      codeExpiresIn: "Läuft in 24 Stunden ab",
       error: "Die Aktion konnte nicht ausgeführt werden.",
       confirmRevoke:
         "Einladung widerrufen? Der Link und der Code funktionieren danach nicht mehr.",
@@ -141,7 +141,7 @@ export default {
     },
     manualCode: {
       label: "Code eingeben",
-      hint: "Den Code haben Sie in Ihrer Praxis erhalten. Er ist 60 Minuten gültig.",
+      hint: "Den Code haben Sie in Ihrer Praxis erhalten. Er ist 24 Stunden gültig.",
       placeholder: "ABCD-EFGH-JKLM",
       submit: "Code prüfen",
       checking: "Wird geprüft…",

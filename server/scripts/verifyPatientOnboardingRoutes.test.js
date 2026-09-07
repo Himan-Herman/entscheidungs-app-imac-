@@ -29,7 +29,11 @@ process.env.INVITATION_MANUAL_CODE_IP_MAX = "5000";
 
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/requireAuth.js";
-import { hashInvitationToken, hashManualCode } from "../services/patientOnboarding/invitationTokens.js";
+import {
+  hashInvitationToken,
+  hashManualCode,
+  MANUAL_CODE_TTL_MINUTES,
+} from "../services/patientOnboarding/invitationTokens.js";
 
 /* ------------------------------------------------------------------ actors */
 
@@ -627,7 +631,10 @@ test("rotating a code replaces the old one without touching the invitation", asy
   assert.equal(inv.manualCodeHash, hashManualCode(code1));
 
   const minutes = (new Date(inv.manualCodeExpiresAt) - Date.now()) / 60_000;
-  assert.ok(minutes > 59 && minutes <= 60, `expected a 60-minute code, got ${minutes}`);
+  assert.ok(
+    minutes > MANUAL_CODE_TTL_MINUTES - 1 && minutes <= MANUAL_CODE_TTL_MINUTES,
+    `expected a ${MANUAL_CODE_TTL_MINUTES}-minute code, got ${minutes}`,
+  );
 
   const second = await call("POST", `/api/practice/patient-invitations/${inv.id}/manual-code`,
     { body: { practiceId: PRACTICE_A } });
