@@ -201,7 +201,15 @@ export default function PatientDocumentTranslationSection({ document, onViewOrig
   const canRetry = errorCode ? isRetryableError(errorCode) : false;
 
   return (
-    <section className="doc-translate" aria-labelledby="doc-translate-heading">
+    // aria-busy marks the whole section while a transformation runs. The polite
+    // status line below announces the change, but a transformation takes tens of
+    // seconds: without aria-busy a screen reader presents the stale controls and
+    // the previous result as current for that whole time.
+    <section
+      className="doc-translate"
+      aria-labelledby="doc-translate-heading"
+      aria-busy={busy || undefined}
+    >
       <h2 id="doc-translate-heading" className="doc-translate__heading">
         <Languages size={18} strokeWidth={2} aria-hidden="true" />
         {t.heading}

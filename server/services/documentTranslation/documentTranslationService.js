@@ -342,6 +342,14 @@ async function audit(entry) {
     writeAuditLog({
     req: entry.req,
     userId: entry.patientUserId,
+    // Set in ADDITION to userId, and not as a duplicate of it. AuditLog indexes
+    // patientUserId separately, and a data-subject access request gathers
+    // "everything about this patient" through that column. A row that carried
+    // only userId would be deleted correctly on account deletion — the cascade
+    // hangs off userId — but would be missed when the patient asks what was
+    // processed about them. Every other patient-actor audit in this codebase
+    // sets both.
+    patientUserId: entry.patientUserId,
     actorRole: "patient",
     action: "document_translation.completed",
     entityType: "practice_document",
@@ -370,6 +378,9 @@ async function auditFailure(entry) {
     writeAuditLog({
     req: entry.req,
     userId: entry.patientUserId,
+    // Same reason as the success path. A refused transformation is just as much
+    // a processing event about this patient as a completed one.
+    patientUserId: entry.patientUserId,
     actorRole: "patient",
     action: "document_translation.failed",
     entityType: "practice_document",
