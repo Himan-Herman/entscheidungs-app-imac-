@@ -6,7 +6,15 @@
 > code. Nothing in this file constitutes a data-protection assessment.
 
 **Status: NOT APPROVED FOR ACTIVATION.**
-Code complete through Phase 2D; external approval open.
+
+**Technical implementation completed 2026-09-18. Production provider activation
+deferred pending future provider and legal review.**
+
+The provider request of 2026-08-17 for regional data residency and zero data
+retention was never answered. Rather than record silence as anything, both
+points were deferred until the enterprise process is resumed at greater usage —
+see A3/A4 in the evidence register. Nothing about the feature's own readiness
+changed; what is missing is external confirmation, and it is still missing.
 
 | | |
 |---|---|
@@ -72,14 +80,15 @@ which uses a six-value status model (`OPEN` / `EVIDENCE_PROVIDED` / `VERIFIED` /
 each value. Keeping two tables would have let them drift, and a compliance
 document that contradicts itself is worse than one document.
 
-Summary at the time of writing — 13 provider/contract requirements and 7
-data-protection/product requirements, of which:
+Summary as of 2026-09-18 — 14 provider/contract rows and 7
+data-protection/product rows, of which:
 
 | | |
 |---|---|
-| `VERIFIED` | **none** |
+| `VERIFIED` | 2 — the executed provider DPA (A1) and the dedicated project (A2) |
+| `LEGAL REVIEW REQUIRED` | 2 — the contract's health-data scope (A1a) and the legal basis (B4) |
 | `CONFLICT` | 1 — the live privacy notice (register §6) |
-| `OPEN` | all others |
+| `OPEN` | all others, including A3/A4 which are deferred |
 
 **No requirement may be marked done from inside the repository**, with two
 narrow exceptions: that a dedicated key exists and is not the generic one, and
