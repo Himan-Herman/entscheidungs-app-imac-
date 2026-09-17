@@ -108,9 +108,20 @@ test("6) the migration is additive — nothing is archived, changed or deleted",
   assert.deepEqual(drops, TARGETS.map((t) => `${t}_dataScope_context_check`).sort());
 });
 
-test("7) the migration sorts after every existing one", () => {
+test("7) the migration sorts after everything it builds on, with a unique stamp", () => {
+  // When this migration was written it closed the chain; the repository has
+  // since gained later migrations, which is fine — deploy applies unapplied
+  // migrations in name order regardless. What must hold forever: it sorts
+  // AFTER the context and backfill migrations whose columns it rewrites, and
+  // no other migration shares its timestamp.
   const dirs = readdirSync(join(prismaDir, "migrations")).filter((d) => /^\d{14}_/.test(d)).sort();
-  assert.equal(dirs[dirs.length - 1], MIGRATION);
+  const at = dirs.indexOf(MIGRATION);
+  assert.ok(at >= 0, "migration directory exists");
+  for (const dep of ["20260728090000_add_patient_data_context", "20260728120000_backfill_patient_data_scope"]) {
+    assert.ok(dirs.indexOf(dep) >= 0 && dirs.indexOf(dep) < at, `sorts after ${dep}`);
+  }
+  const stamp = MIGRATION.slice(0, 14);
+  assert.equal(dirs.filter((d) => d.startsWith(stamp)).length, 1, "timestamp is unique");
 });
 
 test("8) four restricted foreign keys to the archive, one per model", () => {

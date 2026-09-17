@@ -195,10 +195,15 @@ function installPrismaFake() {
   };
   const emptyModel = {
     findMany: async () => [], updateMany: async () => ({ count: 0 }),
-    deleteMany: async () => ({ count: 0 }),
+    deleteMany: async () => ({ count: 0 }), count: async () => 0,
   };
   prisma.practiceDocumentShareGrant = { ...emptyModel };
   prisma.secureDocumentAccessToken = { ...emptyModel };
+  // The guard now also counts issued clinical documents (medication plans and
+  // prescriptions block a deletion outright). These fixtures issue none, so
+  // the counts stay zero — the blocker itself has its own tests.
+  prisma.medicationPlan = { ...emptyModel };
+  prisma.erezeptEntry = { ...emptyModel };
   // The account erasure asserts no owned practice survives.
   prisma.practiceProfile.count = async ({ where = {} }) =>
     practices.filter((p) => (where.userId ? p.userId === where.userId : true)).length;
