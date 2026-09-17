@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Furnizori de găzduire (UE): un furnizor european de cloud furnizează infrastructura pentru servere și baze de date (de ex. Render.com cu locație în UE).",
-          "Furnizor IA – OpenAI (SUA): pentru prelucrarea asistată de IA a intrării dumneavoastră text, a datelor imagine și a informațiilor despre harta corpului, MedScoutX utilizează serviciile OpenAI LLC (San Francisco, SUA). Conținutul este transmis criptat către OpenAI, prelucrat acolo și șters după prelucrare.",
+          "Furnizor IA – OpenAI (SUA): pentru prelucrarea asistată de IA a intrării dumneavoastră text, a datelor imagine și a informațiilor despre harta corpului, MedScoutX utilizează serviciile OpenAI LLC (San Francisco, SUA). Conținutul este transmis printr-o conexiune criptată (TLS) către OpenAI și prelucrat pe sistemele furnizorului. Durata unei eventuale stocări la OpenAI este guvernată de condițiile acestui furnizor; nu putem oferi asigurări suplimentare.",
           "Furnizori de e-mail: se utilizează un furnizor tehnic pentru livrarea e-mailurilor de sistem (de ex. e-mailuri de verificare).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Pentru a asigura un nivel adecvat de protecție a datelor, transferul se bazează pe clauze contractuale standard ale UE (art. 46 GDPR) plus măsuri tehnice și organizatorice suplimentare (criptare în tranzit, durată scurtă de prelucrare, ștergere după răspunsul serviciului IA).",
+          "Pentru a asigura un nivel adecvat de protecție a datelor, transferul se bazează pe clauze contractuale standard ale UE (art. 46 GDPR) plus măsuri tehnice și organizatorice suplimentare (criptare în tranzit).",
       },
       {
         type: "p_link",

@@ -3,7 +3,6 @@ import legalTr from "../legal/tr/index.js";
 import landing from "./tr.landing.js";
 import info from "./tr.info.js";
 import preVisit from "./tr.preVisit.js";
-import startseite from "./tr.startseite.js";
 import trCore from "./tr/tr.core.js";
 import trAccount from "./tr/tr.account.js";
 import trModules from "./tr/tr.modules.js";
@@ -15,7 +14,6 @@ const trBase = {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "İçeriğe geç",
     homeAria: "Ana sayfaya git",

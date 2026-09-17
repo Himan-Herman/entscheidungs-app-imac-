@@ -40,6 +40,7 @@ export default {
     uploadHint: "Photo of your vaccination booklet or PDF – max. 10 MB",
     uploadChange: "Change file",
     uploadRemove: "Remove file",
+    uploadFailed: "The certificate could not be uploaded. The entry was saved.",
     uploadSelected: "Selected:",
     required: "* Required field",
     consentLabel:

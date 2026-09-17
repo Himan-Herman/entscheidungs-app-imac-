@@ -4,7 +4,6 @@ import landing from "./sr.landing.js";
 import info from "./sr.info.js";
 import preVisitSr from "./sr.preVisit.js";
 import preVisitOverlay from "./sr.preVisit.overlay.js";
-import startseite from "./sr.startseite.js";
 import srCore from "./sr/sr.core.js";
 import srAccount from "./sr/sr.account.js";
 import srModules from "./sr/sr.modules.js";
@@ -16,7 +15,6 @@ const srBase = {
   landing,
   info,
   preVisit: deepMerge(preVisitSr, preVisitOverlay),
-  startseite,
   header: {
     skip: "Pređi na sadržaj",
     homeAria: "Idi na početnu stranicu",

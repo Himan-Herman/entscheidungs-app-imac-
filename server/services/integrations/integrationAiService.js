@@ -52,7 +52,7 @@ async function runIntegrationAi(actorUserId, practiceId, userPrompt, action, ctx
     action,
     practiceProfileId: practiceId,
     metadata: { chars: text.length },
-  }).catch(() => {});
+  });
 
   return {
     text,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
@@ -46,6 +46,7 @@ const EMPTY_FILTERS = {
   hasDocuments: "",
   hasMedicationPlan: "",
   hasOpenDataRequest: "",
+  hasOpenReminders: "",
 };
 
 export default function PracticePatientsListPage() {
@@ -75,9 +76,14 @@ export default function PracticePatientsListPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQ, setSearchQ] = useState("");
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  // Seeded FROM the URL, so a refreshed or shared link reopens the same view.
+  const [searchInput, setSearchInput] = useState(() => searchParams.get("q") || "");
+  const [searchQ, setSearchQ] = useState(() => searchParams.get("q") || "");
+  const [filters, setFilters] = useState(() => ({
+    ...EMPTY_FILTERS,
+    ...(searchParams.get("filter") === "unread" ? { hasUnreadMessages: "yes" } : {}),
+    ...(searchParams.get("filter") === "reminders" ? { hasOpenReminders: "yes" } : {}),
+  }));
   const [sortBy, setSortBy] = useState("activity");
   const [sortDirection, setSortDirection] = useState("desc");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -132,13 +138,39 @@ export default function PracticePatientsListPage() {
       if (filters.hasMedicationPlan === "no") opts.hasMedicationPlan = false;
       if (filters.hasOpenDataRequest === "yes") opts.hasOpenDataRequest = true;
       if (filters.hasOpenDataRequest === "no") opts.hasOpenDataRequest = false;
+      if (filters.hasOpenReminders === "yes") opts.hasOpenReminders = true;
+      if (filters.hasOpenReminders === "no") opts.hasOpenReminders = false;
       return opts;
     },
     [searchQ, filters, sortBy, sortDirection],
   );
 
+  /*
+   * Only the newest request may write state.
+   *
+   * Two races matter here and both were reachable: typing "M" then "Mu" and
+   * having the slower "M" answer land last, and switching practice while a
+   * request for the previous one is still in flight — which would paint one
+   * practice's patients under another practice's heading. A monotonic counter
+   * settles both: every response checks whether it is still the current one,
+   * and a stale answer is dropped rather than rendered.
+   */
+  const requestRef = useRef(0);
+
+  /*
+   * Whether this user may see the internal-work numbers.
+   *
+   * Read off the response: the server omits the keys entirely for a caller
+   * without the permission, so their presence IS the permission. The browser
+   * never decides this for itself. The note badge needs no separate flag — it
+   * renders on the key being there at all.
+   */
+  const remindersVisible = links.some((l) => l.summary?.openReminderCount !== undefined);
+
   const loadLinks = useCallback(
     async (append = false) => {
+      const generation = (requestRef.current += 1);
+      const isCurrent = () => requestRef.current === generation;
       if (!practiceId) {
         setLinks([]);
         setLoading(false);
@@ -150,6 +182,7 @@ export default function PracticePatientsListPage() {
       setError("");
       try {
         const { res, data } = await fetchPracticePatients(practiceId, buildFetchOpts(pageNum));
+        if (!isCurrent()) return;
         if (res.status === 404 && data.error === "feature_disabled") {
           setLinks([]);
           setError(t.featureDisabled);
@@ -163,11 +196,15 @@ export default function PracticePatientsListPage() {
         setPage(pageNum);
       } catch (e) {
         if (e?.message === "SESSION_EXPIRED") return;
+        if (!isCurrent()) return;
         if (!append) setLinks([]);
         setError(t.loadError);
       } finally {
-        setLoading(false);
-        setLoadingMore(false);
+        // A superseded request must not clear the spinner the current one set.
+        if (isCurrent()) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
     },
     [practiceId, page, buildFetchOpts, t.featureDisabled, t.loadError],
@@ -181,13 +218,33 @@ export default function PracticePatientsListPage() {
     loadPractices().catch(() => setPractices([]));
   }, [loadPractices]);
 
+  /*
+   * The URL carries the view: practice, query and the active work filter.
+   * Refresh, back and forward therefore restore what the user was looking at,
+   * and a link pasted to a colleague opens the same list. `replace` keeps
+   * typing from filling the history with one entry per keystroke.
+   */
   useEffect(() => {
-    if (practiceId && searchParams.get("practiceId") !== practiceId) {
-      const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(searchParams);
+    let changed = false;
+
+    if (practiceId && next.get("practiceId") !== practiceId) {
       next.set("practiceId", practiceId);
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
-  }, [practiceId, searchParams, setSearchParams]);
+    const q = searchQ.trim();
+    if (q && next.get("q") !== q) { next.set("q", q); changed = true; }
+    if (!q && next.has("q")) { next.delete("q"); changed = true; }
+
+    const activeFilter =
+      filters.hasOpenReminders === "yes" ? "reminders"
+      : filters.hasUnreadMessages === "yes" ? "unread"
+      : "";
+    if (activeFilter && next.get("filter") !== activeFilter) { next.set("filter", activeFilter); changed = true; }
+    if (!activeFilter && next.has("filter")) { next.delete("filter"); changed = true; }
+
+    if (changed) setSearchParams(next, { replace: true });
+  }, [practiceId, searchQ, filters, searchParams, setSearchParams]);
 
   useEffect(() => {
     const timer = setTimeout(() => setSearchQ(searchInput), 400);
@@ -377,6 +434,26 @@ export default function PracticePatientsListPage() {
               {t.unreadBadge}
             </span>
           ) : null}
+          {/* Phase 5B — the two internal-work counts, each rendered only when
+              the server sent it, i.e. only when this user may know it exists.
+              Written out as words so the meaning does not depend on colour. */}
+          {summary.openReminderCount > 0 ? (
+            <span
+              className="practice-patients__work-badge"
+              role="status"
+              aria-label={t.openRemindersAria.replace("{count}", summary.openReminderCount)}
+            >
+              {t.openRemindersBadge.replace("{count}", summary.openReminderCount)}
+            </span>
+          ) : null}
+          {summary.internalNoteCount > 0 ? (
+            <span
+              className="practice-patients__work-badge practice-patients__work-badge--muted"
+              aria-label={t.internalNotesAria.replace("{count}", summary.internalNoteCount)}
+            >
+              {t.internalNotesBadge.replace("{count}", summary.internalNoteCount)}
+            </span>
+          ) : null}
         </td>
         <td>{email}</td>
         <td>
@@ -404,6 +481,7 @@ export default function PracticePatientsListPage() {
     const name = patientDisplayName(row, t.patientFallback);
     const email = row.patient?.email?.trim() || t.emailMissing;
     const statusText = statusLabel(row.status, t);
+    const summary = row.summary || {};
 
     return (
       <article key={row.id} className="practice-patients__card-item">
@@ -416,6 +494,34 @@ export default function PracticePatientsListPage() {
           </span>
         </div>
         <p className="practice-patients__card-meta">{email}</p>
+        {/* The same work signals as the table row. The phone layout is not a
+            reduced view of the desk: the same decision is made on it. */}
+        {summary.hasUnreadMessages || summary.openReminderCount > 0 || summary.internalNoteCount > 0 ? (
+          <p className="practice-patients__card-badges">
+            {summary.hasUnreadMessages ? (
+              <span className="practice-patients__unread-badge" role="status">
+                {t.unreadBadge}
+              </span>
+            ) : null}
+            {summary.openReminderCount > 0 ? (
+              <span
+                className="practice-patients__work-badge"
+                role="status"
+                aria-label={t.openRemindersAria.replace("{count}", summary.openReminderCount)}
+              >
+                {t.openRemindersBadge.replace("{count}", summary.openReminderCount)}
+              </span>
+            ) : null}
+            {summary.internalNoteCount > 0 ? (
+              <span
+                className="practice-patients__work-badge practice-patients__work-badge--muted"
+                aria-label={t.internalNotesAria.replace("{count}", summary.internalNoteCount)}
+              >
+                {t.internalNotesBadge.replace("{count}", summary.internalNoteCount)}
+              </span>
+            ) : null}
+          </p>
+        ) : null}
         <Link className="practice-dashboard__link-btn" to={detailPath(row.id)}>
           {t.openRecord}
         </Link>
@@ -588,6 +694,24 @@ export default function PracticePatientsListPage() {
                       <option value="no">{t.filterUnreadNo}</option>
                     </select>
                   </label>
+                  {/* Only offered when the server would answer it. A caller
+                      without reminders.read gets 403 on the filter, so showing
+                      the control would promise something that cannot work. */}
+                  {remindersVisible ? (
+                    <label>
+                      <span>{t.filterOpenReminders}</span>
+                      <select
+                        value={filters.hasOpenReminders}
+                        onChange={(e) =>
+                          setFilters((f) => ({ ...f, hasOpenReminders: e.target.value }))
+                        }
+                      >
+                        <option value="">—</option>
+                        <option value="yes">{t.filterOpenRemindersYes}</option>
+                        <option value="no">{t.filterOpenRemindersNo}</option>
+                      </select>
+                    </label>
+                  ) : null}
                   <label>
                     <span>{t.filterDocuments}</span>
                     <select

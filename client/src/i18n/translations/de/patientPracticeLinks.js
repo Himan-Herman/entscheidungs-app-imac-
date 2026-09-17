@@ -51,12 +51,12 @@ export default {
     created: "Verbindungscode wurde erzeugt.",
     revoked: "Verbindungscode wurde widerrufen.",
   },
-  requestsHeading: "Eingehende Verknüpfungsanfragen",
+  requestsHeading: "Datenfreigabe für Ihre Praxis",
   requestsIntro:
-    "Eine Praxis möchte sich mit Ihrem MedScoutX-Konto verbinden. Daten werden erst nach Ihrer Zustimmung ausgetauscht.",
-  requestFrom: "{practice} möchte sich mit Ihrem Konto verbinden.",
+    "Die Verbindung besteht. Bisher wurden keine Daten freigegeben. Wählen Sie aus, welche Bereiche Sie für diese Praxis freigeben möchten.",
+  requestFrom: "{practice} wartet auf Ihre Datenfreigabe.",
   acceptScopesHint:
-    "Beim Annehmen geben Sie die unten unter „Welche Bereiche möchten Sie freigeben?“ gewählten Bereiche frei (Standard: Profil + Nachrichten).",
+    "Freigegeben wird genau das, was Sie unten unter „Welche Bereiche möchten Sie freigeben?“ ankreuzen. Nichts ist vorausgewählt.",
   acceptButton: "Annehmen",
   declineButton: "Ablehnen",
   acceptedMsg: "Verbindung aktiviert.",

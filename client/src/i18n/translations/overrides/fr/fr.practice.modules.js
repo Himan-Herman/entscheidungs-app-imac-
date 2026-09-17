@@ -47,6 +47,7 @@ export default {
 
     cardInbox: "Boîte de réception",
     cardPatients: "Patients",
+    cardPatientOnboarding: "Enregistrer des patients",
     cardMessages: "Messages",
     cardDocuments: "Documents et résultats",
     cardMedication: "Plans de médication",
@@ -169,12 +170,16 @@ export default {
       "Les résultats ne sont qu’une orientation — pas une vérification de facturation contraignante, aucun conseil juridique ou fiscal, aucune garantie de remboursement et aucune décision automatique concernant le paiement ou la facturation. Cette tuile est interne à l’établissement ; le « Comprendre la facture » côté patient est une fonction distincte et indépendante, sans flux de données commun.",
     cardBillingPlausibilityInfoAlpha:
       "Lors du test alpha, vous pouvez vérifier : peut-on créer une vérification avec des codes, les correspondances du catalogue et les avertissements apparaissent-ils, les statuts (ouverte/vérifiée/rejetée) et l’export fonctionnent-ils, le verrou de fonctionnalité et l’autorisation s’appliquent-ils, et le caractère purement indicatif sans décision contraignante reste-t-il clairement reconnaissable ?",
+    cardPatientOnboardingInfoButton: "Plus d’informations sur Enregistrer des patients",
+    cardPatientOnboardingInfoTitle: "Enregistrer des patients",
+    cardPatientOnboardingInfoIntro:
+      "Enregistrez de nouveaux patients dans votre cabinet et invitez-les à se connecter par lien, code QR, code ou e-mail.",
     cardPatientsInfoButton: "Plus d’informations sur les patients",
     cardPatientsInfoTitle: "Patients",
     cardPatientsInfoIntro:
       "La liste des patients affiche les comptes patients MedScoutX liés à votre cabinet.",
     cardPatientsInfoConnection:
-      "La liaison se fait uniquement via un code de connexion volontaire que le patient génère et vous communique — sans cette action délibérée, aucune liaison n’est possible.",
+      "La liaison naît soit d’un code de connexion que le patient génère lui-même, soit d’une invitation que vous créez sous « Enregistrer des patients » — dans les deux cas uniquement après une confirmation délibérée du patient.",
     cardPatientsInfoExternal:
       "Les patients externes sont pris en charge module par module, mais ne sont pas conservés comme liaison de compte complète dans cette liste.",
     cardPatientsInfoControl:
@@ -300,12 +305,12 @@ export default {
     sortLinkedNewest: "Relation la plus récente",
     sortStatus: "Statut",
     chipRemove: "Retirer le filtre : {label}",
-    aiFilterButton: "Suggestion de filtre IA",
-    aiFilterLabel: "Suggestion IA – à vérifier",
+    aiFilterButton: "Suggestion automatique de filtre",
+    aiFilterLabel: "Suggestion automatique – à vérifier",
     aiFilterHint:
-      "L’IA ne soutient que la recherche et le filtrage organisationnels. Elle n’évalue pas le contenu médical.",
-    aiFilterLoading: "Génération de la suggestion IA…",
-    aiFilterError: "Échec de la suggestion IA.",
+      "Aide uniquement à la recherche et au filtrage organisationnels. Elle n’évalue pas le contenu médical.",
+    aiFilterLoading: "Génération de la suggestion…",
+    aiFilterError: "Échec de la suggestion.",
     recordSearchLabel: "Rechercher dans le dossier",
     recordSearchPlaceholder: "Titre, objet, activité…",
     recordSearchEmpty: "Aucune correspondance dans ce dossier.",

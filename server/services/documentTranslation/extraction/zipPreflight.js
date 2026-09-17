@@ -1,0 +1,307 @@
+/**
+ * DOCX container preflight — runs BEFORE any decompression.
+ *
+ * A DOCX is a ZIP, and a 25 MB upload cap says nothing about what it expands
+ * to. A few hundred kilobytes of highly compressible zeroes can decompress to
+ * gigabytes and exhaust the process before any of the character or page limits
+ * downstream ever get a chance to apply.
+ *
+ * So the central directory is parsed by hand here — it declares the compressed
+ * and uncompressed size of every entry without unpacking any of them — and the
+ * container is rejected on the declared numbers alone.
+ *
+ * Own parser rather than jszip: jszip is a transitive dependency of mammoth and
+ * could disappear on an upgrade, and a security precondition should not rest on
+ * something we do not depend on directly. It is ~80 lines of well-specified
+ * format reading.
+ *
+ * A malicious archive can of course LIE in its central directory. The declared
+ * sizes are therefore a cheap first filter, not the whole defence; the
+ * character and segment budgets in documentTextExtractionService still apply to
+ * whatever actually comes out.
+ */
+
+import {
+  DocumentTranslationError,
+  TRANSLATION_ERRORS,
+} from "../documentTranslationPolicy.js";
+
+/** Limits sized for a medical letter, not for an arbitrary archive. */
+export const ZIP_LIMITS = Object.freeze({
+  /** A normal DOCX has 10–30 parts; images push that up, never past this. */
+  MAX_ENTRIES: 256,
+  /** Total declared uncompressed bytes across all entries. */
+  MAX_TOTAL_UNCOMPRESSED: 80 * 1024 * 1024,
+  /** No single part of a letter is legitimately larger than this. */
+  MAX_ENTRY_UNCOMPRESSED: 40 * 1024 * 1024,
+  /**
+   * Office XML compresses roughly 10–20x. 150x is far outside anything a real
+   * document produces and squarely inside zip-bomb territory.
+   */
+  MAX_COMPRESSION_RATIO: 150,
+  /** Ratio is only meaningful once an entry is big enough to matter. */
+  RATIO_CHECK_MIN_UNCOMPRESSED: 64 * 1024,
+  MAX_ENTRY_NAME_LENGTH: 180,
+});
+
+/** The part every DOCX must contain. */
+const REQUIRED_ENTRY = "word/document.xml";
+
+/**
+ * Parts that must not be present.
+ *
+ * Macros and embedded OLE objects are active content. Mammoth does not execute
+ * them, but a document carrying them is not the plain clinical letter this
+ * feature is scoped to, and refusing is cheaper than reasoning about every
+ * parser that may touch the bytes later.
+ */
+const FORBIDDEN_ENTRY_PATTERNS = [
+  { re: /(^|\/)vbaProject\.bin$/i, reason: "macro_project" },
+  { re: /(^|\/)vbaData\.xml$/i, reason: "macro_data" },
+  { re: /^word\/embeddings\//i, reason: "embedded_object" },
+  { re: /oleObject\d*\.bin$/i, reason: "ole_object" },
+  { re: /\.(exe|dll|js|vbs|bat|cmd|sh|scr)$/i, reason: "executable_part" },
+];
+
+const SIG_EOCD = 0x06054b50;
+const SIG_CENTRAL = 0x02014b50;
+const SIG_LOCAL = 0x04034b50;
+const SIG_ZIP64_LOCATOR = 0x07064b50;
+const EOCD_MIN_SIZE = 22;
+const MAX_COMMENT_SIZE = 0xffff;
+
+/**
+ * Validate a DOCX container.
+ *
+ * @param {Buffer} buffer
+ * @returns {{ entryCount: number, totalUncompressed: number, totalCompressed: number, names: string[] }}
+ * @throws {DocumentTranslationError}
+ */
+export function assertSafeDocxContainer(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < EOCD_MIN_SIZE) {
+    throw corrupt("too_small");
+  }
+
+  const eocd = findEndOfCentralDirectory(buffer);
+
+  // ZIP64 is not something a legitimate clinical letter needs, and it is the
+  // standard way to hide real sizes behind 0xFFFFFFFF placeholders.
+  if (hasZip64Locator(buffer, eocd.offset)) throw corrupt("zip64_unsupported");
+
+  const totalEntries = buffer.readUInt16LE(eocd.offset + 10);
+  const centralSize = buffer.readUInt32LE(eocd.offset + 12);
+  const centralOffset = buffer.readUInt32LE(eocd.offset + 16);
+
+  if (totalEntries === 0xffff || centralSize === 0xffffffff || centralOffset === 0xffffffff) {
+    throw corrupt("zip64_unsupported");
+  }
+  if (totalEntries > ZIP_LIMITS.MAX_ENTRIES) {
+    throw tooLarge("zip_entry_count", { entries: totalEntries });
+  }
+  if (centralOffset + centralSize > buffer.length) throw corrupt("central_directory_out_of_bounds");
+
+  const names = [];
+  const entries = [];
+  let totalUncompressed = 0;
+  let totalCompressed = 0;
+  let cursor = centralOffset;
+
+  for (let i = 0; i < totalEntries; i += 1) {
+    if (cursor + 46 > buffer.length) throw corrupt("central_directory_truncated");
+    if (buffer.readUInt32LE(cursor) !== SIG_CENTRAL) throw corrupt("central_directory_signature");
+
+    const flags = buffer.readUInt16LE(cursor + 8);
+    const compressed = buffer.readUInt32LE(cursor + 20);
+    const uncompressed = buffer.readUInt32LE(cursor + 24);
+    const nameLength = buffer.readUInt16LE(cursor + 28);
+    const extraLength = buffer.readUInt16LE(cursor + 30);
+    const commentLength = buffer.readUInt16LE(cursor + 32);
+    const localOffset = buffer.readUInt32LE(cursor + 42);
+
+    if (compressed === 0xffffffff || uncompressed === 0xffffffff || localOffset === 0xffffffff) {
+      throw corrupt("zip64_unsupported");
+    }
+    if (nameLength > ZIP_LIMITS.MAX_ENTRY_NAME_LENGTH) {
+      throw corrupt("entry_name_too_long");
+    }
+
+    const nameEnd = cursor + 46 + nameLength;
+    if (nameEnd > buffer.length) throw corrupt("central_directory_truncated");
+    const name = buffer.toString("utf8", cursor + 46, nameEnd);
+
+    assertSafeEntryName(name);
+
+    // Bit 3 means the real sizes follow the data instead of preceding it, so
+    // the central directory becomes the only size source — precisely the value
+    // an attacker controls. No writer we support emits this for a DOCX.
+    if (flags & 0x0008) throw corrupt("data_descriptor_unsupported");
+
+    if (uncompressed > ZIP_LIMITS.MAX_ENTRY_UNCOMPRESSED) {
+      throw tooLarge("zip_entry_size", { name, uncompressed });
+    }
+    if (
+      uncompressed >= ZIP_LIMITS.RATIO_CHECK_MIN_UNCOMPRESSED &&
+      compressed > 0 &&
+      uncompressed / compressed > ZIP_LIMITS.MAX_COMPRESSION_RATIO
+    ) {
+      throw tooLarge("zip_compression_ratio", {
+        name,
+        ratio: Math.round(uncompressed / compressed),
+      });
+    }
+
+    names.push(name);
+    entries.push({ name, compressed, uncompressed, localOffset });
+    totalUncompressed += uncompressed;
+    totalCompressed += compressed;
+
+    if (totalUncompressed > ZIP_LIMITS.MAX_TOTAL_UNCOMPRESSED) {
+      throw tooLarge("zip_total_uncompressed", { totalUncompressed });
+    }
+
+    cursor = nameEnd + extraLength + commentLength;
+  }
+
+  assertNoDuplicateNames(names);
+  assertLocalHeadersAgree(buffer, entries, centralOffset);
+
+  if (
+    totalCompressed > 0 &&
+    totalUncompressed / totalCompressed > ZIP_LIMITS.MAX_COMPRESSION_RATIO
+  ) {
+    throw tooLarge("zip_total_compression_ratio", {
+      ratio: Math.round(totalUncompressed / totalCompressed),
+    });
+  }
+
+  if (!names.some((n) => n.toLowerCase() === REQUIRED_ENTRY)) {
+    throw corrupt("not_a_docx");
+  }
+
+  for (const name of names) {
+    for (const { re, reason } of FORBIDDEN_ENTRY_PATTERNS) {
+      if (re.test(name)) {
+        throw new DocumentTranslationError(TRANSLATION_ERRORS.STRUCTURE_UNSUPPORTED, {
+          reason,
+        });
+      }
+    }
+  }
+
+  return { entryCount: totalEntries, totalUncompressed, totalCompressed, names };
+}
+
+/* ------------------------------------------------------------- internals */
+
+/**
+ * Two entries with the same name make "which one is word/document.xml?" a
+ * question about the reader's implementation. One parser takes the first, one
+ * the last, and a preflight that inspected the harmless copy proves nothing
+ * about the one that actually gets parsed.
+ *
+ * @param {string[]} names
+ */
+function assertNoDuplicateNames(names) {
+  const seen = new Set();
+  for (const name of names) {
+    const key = name.toLowerCase();
+    if (seen.has(key)) throw corrupt("duplicate_entry_name");
+    seen.add(key);
+  }
+}
+
+/**
+ * Verify every entry against its own local header.
+ *
+ * The central directory is metadata that can be written to say anything. The
+ * local header sits immediately before the actual bytes, so disagreement
+ * between the two means at least one of them is lying — and a preflight that
+ * only reads the central directory would be validating the wrong numbers.
+ *
+ * Also checks that entry data regions stay inside the file and do not overlap
+ * each other: overlapping regions let one entry's bytes be reinterpreted as
+ * another's, which is a way to show a parser something the preflight never saw.
+ *
+ * @param {Buffer} buffer
+ * @param {{ name: string, compressed: number, uncompressed: number, localOffset: number }[]} entries
+ * @param {number} centralOffset
+ */
+function assertLocalHeadersAgree(buffer, entries, centralOffset) {
+  const regions = [];
+
+  for (const entry of entries) {
+    const at = entry.localOffset;
+    if (at + 30 > centralOffset) throw corrupt("local_header_out_of_bounds");
+    if (buffer.readUInt32LE(at) !== SIG_LOCAL) throw corrupt("local_header_signature");
+
+    const flags = buffer.readUInt16LE(at + 6);
+    if (flags & 0x0008) throw corrupt("data_descriptor_unsupported");
+
+    const localCompressed = buffer.readUInt32LE(at + 18);
+    const localUncompressed = buffer.readUInt32LE(at + 22);
+    const nameLength = buffer.readUInt16LE(at + 26);
+    const extraLength = buffer.readUInt16LE(at + 28);
+
+    const nameEnd = at + 30 + nameLength;
+    if (nameEnd > centralOffset) throw corrupt("local_header_out_of_bounds");
+    const localName = buffer.toString("utf8", at + 30, nameEnd);
+
+    if (localName !== entry.name) throw corrupt("local_central_name_mismatch");
+    if (localCompressed !== entry.compressed || localUncompressed !== entry.uncompressed) {
+      throw corrupt("local_central_size_mismatch");
+    }
+
+    const dataStart = nameEnd + extraLength;
+    const dataEnd = dataStart + entry.compressed;
+    if (dataEnd > centralOffset) throw corrupt("entry_data_out_of_bounds");
+
+    regions.push({ start: at, end: dataEnd });
+  }
+
+  regions.sort((a, b) => a.start - b.start);
+  for (let i = 1; i < regions.length; i += 1) {
+    if (regions[i].start < regions[i - 1].end) throw corrupt("overlapping_entry_regions");
+  }
+}
+
+/** @param {string} name */
+function assertSafeEntryName(name) {
+  if (
+    name.includes("..") ||
+    name.startsWith("/") ||
+    name.includes("\\") ||
+    /[ -]/.test(name)
+  ) {
+    // Nothing here writes an entry to disk, so this is not a zip-slip fix. It
+    // is a signal: a clinical letter has no reason to carry such a path, and a
+    // container that does is not the thing this feature is scoped to.
+    throw corrupt("unsafe_entry_name");
+  }
+}
+
+/**
+ * Locate the end-of-central-directory record by scanning backwards.
+ * @param {Buffer} buffer
+ */
+function findEndOfCentralDirectory(buffer) {
+  const earliest = Math.max(0, buffer.length - EOCD_MIN_SIZE - MAX_COMMENT_SIZE);
+  for (let offset = buffer.length - EOCD_MIN_SIZE; offset >= earliest; offset -= 1) {
+    if (buffer.readUInt32LE(offset) === SIG_EOCD) return { offset };
+  }
+  throw corrupt("no_end_of_central_directory");
+}
+
+/** @param {Buffer} buffer @param {number} eocdOffset */
+function hasZip64Locator(buffer, eocdOffset) {
+  const locatorOffset = eocdOffset - 20;
+  if (locatorOffset < 0) return false;
+  return buffer.readUInt32LE(locatorOffset) === SIG_ZIP64_LOCATOR;
+}
+
+function corrupt(reason) {
+  return new DocumentTranslationError(TRANSLATION_ERRORS.CORRUPT, { reason });
+}
+
+function tooLarge(reason, detail = {}) {
+  return new DocumentTranslationError(TRANSLATION_ERRORS.TOO_LARGE, { reason, ...detail });
+}

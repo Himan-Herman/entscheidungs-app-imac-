@@ -184,7 +184,7 @@ export async function acceptBookingRequest(
     action: "booking_request_accepted",
     practiceProfileId: practiceId,
     metadata: { appointmentId, startAt: row.startAt },
-  }).catch(() => {});
+  });
 
   return requestToJson(row, { includeNotes: true });
 }
@@ -236,7 +236,7 @@ export async function declineBookingRequest(
     action: "booking_request_declined",
     practiceProfileId: practiceId,
     metadata: { appointmentId },
-  }).catch(() => {});
+  });
 
   return requestToJson(row, { includeNotes: true });
 }

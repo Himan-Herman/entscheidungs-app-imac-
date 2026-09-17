@@ -120,13 +120,42 @@ export async function getPracticePatientActivity(linkId, practiceProfileId, quer
 
 /**
  * @param {ReturnType<typeof import('./practicePatientLinkService.js').linkToJson>[]} links
+ * @param {{ includeReminders?: boolean, includeInternalNotes?: boolean }} [visibility]
+ *   What the CALLER is allowed to be told about. Both default to false: a
+ *   counter is a statement that data exists, so a viewer without
+ *   `reminders.read` must not learn from "2 open" that reminders are there at
+ *   all. The caller passes its own permissions in; omitting them reveals
+ *   nothing rather than everything.
  */
-export async function enrichPracticePatientLinks(links) {
+export async function enrichPracticePatientLinks(links, visibility = {}) {
   if (!links.length) return links;
 
   const linkIds = links.map((l) => l.id);
   const practiceProfileId = links[0].practiceProfileId;
-  const userIds = [...new Set(links.map((l) => l.patientUserId))];
+
+  /*
+   * The patient account id, fetched here rather than read off the link objects.
+   *
+   * WHY: `linkToJson` deliberately withholds `patientUserId` — a practice
+   * addresses a relationship only through the practice-scoped link id, so the
+   * global account id must never reach a practice response. This enrichment
+   * still needs it internally, to look up pre-visit sessions, which are keyed
+   * by user rather than by link. Reading it off the serialized object gave
+   * `undefined`, and Prisma refused the query outright:
+   *
+   *   Invalid `prisma.preVisitSession.groupBy()` invocation:
+   *     where: { userId: { in: [ undefined ] } }
+   *
+   * Fetching it here keeps both properties: the id is available where it is
+   * needed, and it cannot escape — the map is local, never returned, never
+   * attached to a link, never logged.
+   */
+  const linkOwners = await prisma.practicePatientLink.findMany({
+    where: { id: { in: linkIds } },
+    select: { id: true, patientUserId: true },
+  });
+  const patientIdByLink = new Map(linkOwners.map((r) => [r.id, r.patientUserId]));
+  const userIds = [...new Set([...patientIdByLink.values()].filter(Boolean))];
 
   const [docCounts, threadAgg, docMax, threadMax, visitMax, medPlanLinks, openReqLinks, unreadAgg] =
     await Promise.all([
@@ -191,6 +220,40 @@ export async function enrichPracticePatientLinks(links) {
     }),
   ]);
 
+  /*
+   * Phase 5B — two more grouped queries, never one per link. They run only when
+   * the caller may see the underlying data class, so a forbidden counter costs
+   * no query either.
+   */
+  const [openReminderAgg, internalNoteAgg] = await Promise.all([
+    visibility.includeReminders
+      ? prisma.practicePatientReminder.groupBy({
+          by: ["practicePatientLinkId"],
+          where: { practicePatientLinkId: { in: linkIds }, completedAt: null },
+          _count: { _all: true },
+        })
+      : Promise.resolve([]),
+    visibility.includeInternalNotes
+      ? prisma.practicePatientInternalNote.groupBy({
+          by: ["practicePatientLinkId"],
+          where: { practicePatientLinkId: { in: linkIds } },
+          // Count and latest timestamp only. No bodies: this list is rendered
+          // for a whole practice and note text has no business in it.
+          _count: { _all: true },
+          _max: { createdAt: true },
+        })
+      : Promise.resolve([]),
+  ]);
+  const openReminderMap = Object.fromEntries(
+    openReminderAgg.map((r) => [r.practicePatientLinkId, r._count._all]),
+  );
+  const internalNoteMap = Object.fromEntries(
+    internalNoteAgg.map((r) => [
+      r.practicePatientLinkId,
+      { count: r._count._all, lastAt: r._max.createdAt },
+    ]),
+  );
+
   const threadsByLink = await prisma.practicePatientThread.findMany({
     where: { practicePatientLinkId: { in: linkIds } },
     select: { id: true, practicePatientLinkId: true },
@@ -232,7 +295,7 @@ export async function enrichPracticePatientLinks(links) {
     let lastActivityAt = link.updatedAt;
     lastActivityAt = maxDate(lastActivityAt, docMaxMap[link.id]);
     lastActivityAt = maxDate(lastActivityAt, threadMaxMap[link.id]);
-    lastActivityAt = maxDate(lastActivityAt, visitMaxMap[link.patientUserId]);
+    lastActivityAt = maxDate(lastActivityAt, visitMaxMap[patientIdByLink.get(link.id)]);
 
     return {
       ...link,
@@ -249,7 +312,21 @@ export async function enrichPracticePatientLinks(links) {
         hasPublishedMedicationPlan: Boolean(medPlanMap[link.id]),
         hasOpenDataRequest: Boolean(openReqMap[link.id]),
         lastActivityAt,
-        lastVisitAt: visitMaxMap[link.patientUserId] || null,
+        lastVisitAt: visitMaxMap[patientIdByLink.get(link.id)] || null,
+        /*
+         * Phase 5B — present ONLY when the caller may read the data class.
+         * The key is absent rather than zero: a zero would still tell a
+         * forbidden reader that the feature applies to this relationship.
+         */
+        ...(visibility.includeReminders
+          ? { openReminderCount: openReminderMap[link.id] || 0 }
+          : {}),
+        ...(visibility.includeInternalNotes
+          ? {
+              internalNoteCount: internalNoteMap[link.id]?.count || 0,
+              lastInternalNoteAt: internalNoteMap[link.id]?.lastAt || null,
+            }
+          : {}),
       },
     };
   });

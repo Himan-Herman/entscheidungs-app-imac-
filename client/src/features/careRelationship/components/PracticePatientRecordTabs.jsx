@@ -12,6 +12,7 @@ const TABS = [
   { id: "erezept", labelKey: "tabErezept" },
   { id: "sosCard", labelKey: "tabSosCard" },
   { id: "messages", labelKey: "tabMessages" },
+  { id: "internalWork", labelKey: "tabInternalWork" },
   { id: "activity", labelKey: "tabActivity" },
 ];
 

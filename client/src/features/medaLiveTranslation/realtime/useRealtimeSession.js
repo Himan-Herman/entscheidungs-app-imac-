@@ -99,13 +99,15 @@ export function useRealtimeSession() {
       dcRef.current.onmessage = null;
       dcRef.current.onopen    = null;
       dcRef.current.onclose   = null;
-      try { dcRef.current.close(); } catch (_) {}
+      // Closing an already-closed channel throws; that is the ordinary case
+      // during teardown, not a failure worth reporting.
+      try { dcRef.current.close(); } catch { /* already closed */ }
       dcRef.current = null;
     }
     if (pcRef.current) {
       pcRef.current.ontrack = null;
       pcRef.current.oniceconnectionstatechange = null;
-      try { pcRef.current.close(); } catch (_) {}
+      try { pcRef.current.close(); } catch { /* already closed */ }
       pcRef.current = null;
     }
     clearTimeout(audioWatchdogRef.current);
@@ -118,7 +120,7 @@ export function useRealtimeSession() {
       streamRef.current = null;
     }
     if (audioElRef.current) {
-      try { audioElRef.current.pause(); } catch (_) {}
+      try { audioElRef.current.pause(); } catch { /* nothing was playing */ }
       audioElRef.current.srcObject = null;
     }
     speakerLockRef.current = false;
@@ -616,7 +618,14 @@ export function useRealtimeSession() {
           const parsed = JSON.parse(msg.data);
           setEvents(prev => [...prev, parsed]);
           _handleEvent(parsed);
-        } catch (_) {}
+        } catch (err) {
+          // Not swallowed. Throwing here would tear down the data channel in
+          // the middle of a live conversation, so the frame is still dropped —
+          // but a malformed frame, or a bug in _handleEvent, used to leave no
+          // trace at all. The message text is deliberately not logged: it
+          // carries what the two people are saying to each other.
+          console.warn('[realtime] unhandled event frame', err?.name ?? 'Error');
+        }
       };
 
       // ── 5. SDP offer ────────────────────────────────────────────────────────

@@ -70,7 +70,7 @@ export default {
     heading: "Profil pour cette conversation",
     intro:
       "Facultatif : utiliser les données enregistrées du compte pour cette conversation (p. ex. pour une documentation ultérieure).",
-    consentLabel: "Utiliser les données de profil enregistrées pour cette conversation",
+    consentLabel: "Utiliser le nom de profil enregistré pour cette conversation : {{name}}",
     consentHint:
       "Nom, date de naissance et coordonnées — uniquement si vous y consentez. Aucune donnée de profil de santé n'est utilisée.",
     accountLink: "Modifier dans les paramètres du compte",
@@ -317,7 +317,7 @@ export default {
   history: {
     heading: "Documentation des conversations sur cet appareil",
     privacyNote:
-      "Phase 1 : les conversations sont stockées uniquement sur cet appareil — pas sur les serveurs MedScoutX. Aucun enregistrement audio ni microphone n'est conservé. Il s'agit d'une documentation d'orientation et de communication, pas d'un dossier médical. Vous pouvez supprimer des conversations individuellement ou effacer tout l'historique ci-dessous à tout moment.",
+      "Les conversations sont enregistrées sur cet appareil. Les contenus parlés et le texte reconnu sont traités pour la traduction. Vous pouvez retirer ici des conversations individuelles ou l’ensemble de l’historique.",
     fallbackTitle: "Conversation du {{date}}",
     statusDraft: "Brouillon",
     statusActive: "Active",

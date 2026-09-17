@@ -189,7 +189,7 @@ export default {
   history: {
     title: "Lokaler Verlauf",
     privacy:
-      "Der Verlauf wird ausschließlich lokal auf diesem Gerät gespeichert. Es werden keine Daten an MedScoutX oder eine Praxis übertragen.",
+      "Der Verlauf wird auf diesem Gerät gespeichert und kann hier entfernt werden. Der gespeicherte Verlauf wird einer verbundenen Praxis über diese Funktion nicht bereitgestellt.",
     empty: "Noch keine gespeicherten Gespräche auf diesem Gerät.",
     patientLanguage: "Sprache Patient",
     practiceLanguage: "Sprache Praxis",

@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   archivePatientThread,
+  acknowledgePatientThreadRead,
   fetchPatientThread,
   fetchPatientThreadAiRewrite,
   sendPatientThreadMessage,
 } from "../api/patientThreadsApi.js";
+import { hasUnreadFrom } from "../lib/threadReadState.js";
+import { newSendRequestId } from "../lib/sendRequestId.js";
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
@@ -47,6 +50,7 @@ export default function PatientThreadDetailPage() {
   const [busy, setBusy] = useState(false);
   const [aiBusy, setAiBusy] = useState(false);
   const [aiHintVisible, setAiHintVisible] = useState(false);
+  const pendingSendIdRef = useRef(null);
 
   const load = useCallback(async () => {
     if (!threadId) return;
@@ -61,6 +65,17 @@ export default function PatientThreadDetailPage() {
       }
       if (!res.ok || !data.ok || !data.thread) throw new Error("load_failed");
       setThread(data.thread);
+
+      // The server GET is read-only; acknowledge separately once the thread is
+      // actually shown. Idempotent, and a failure here must never break reading,
+      // so the result is intentionally not awaited into the render path.
+      if (hasUnreadFrom(data.thread, "practice")) {
+        acknowledgePatientThreadRead(threadId)
+          .then(({ res: ackRes, data: ackData }) => {
+            if (ackRes.ok && ackData.ok && ackData.thread) setThread(ackData.thread);
+          })
+          .catch(() => {});
+      }
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
       setThread(null);
@@ -85,8 +100,21 @@ export default function PatientThreadDetailPage() {
     if (!canReply || !reply.trim()) return;
     setBusy(true);
     setSendError("");
+    // One key per logical send. It survives a retry whose outcome is unknown
+    // (network loss, 5xx) so the server can recognise the repeat, and is dropped
+    // as soon as the outcome is known either way.
+    if (!pendingSendIdRef.current) pendingSendIdRef.current = newSendRequestId();
     try {
-      const { res, data } = await sendPatientThreadMessage(threadId, reply.trim());
+      const { res, data } = await sendPatientThreadMessage(
+        threadId,
+        reply.trim(),
+        pendingSendIdRef.current,
+      );
+      if (res.status >= 400 && res.status < 500) {
+        // The server answered and did not persist anything — the next attempt
+        // is a new action, not a retry.
+        pendingSendIdRef.current = null;
+      }
       if (res.status === 403 && data.error === "consent_required") {
         setSendError(t.consentRequired);
         return;
@@ -100,6 +128,7 @@ export default function PatientThreadDetailPage() {
         return;
       }
       if (!res.ok || !data.ok) throw new Error("send_failed");
+      pendingSendIdRef.current = null;
       setReply("");
       setAiHintVisible(false);
       setThread(data.thread);

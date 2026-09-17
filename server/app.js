@@ -14,7 +14,6 @@ import mailRoutes from './routes/mail.js';
 import { sendVerificationEmail } from './emailService.js';
 import { requireAuth } from './middleware/requireAuth.js';
 import ttsRouter from "./routes/tts.js";
-import kiRouter from "./routes/ki.js";
 import previsitRouter from "./routes/previsit.js";
 import previsitSessionsRouter from "./routes/previsitSessions.js";
 import previsitCasesRouter from "./routes/previsitCases.js";
@@ -23,6 +22,9 @@ import practicesRouter from "./routes/practices.js";
 import practiceLifecycleRouter from "./routes/practiceLifecycle.js";
 import publicPrevisitQrRouter from "./routes/publicPrevisitQr.js";
 import practiceDashboardRouter from "./routes/practiceDashboard.js";
+import visitMedicationsRouter, {
+  patientVisitMedicationsRouter,
+} from "./routes/visitMedications.js";
 import practiceOverviewDashboardRouter from "./routes/practiceOverviewDashboard.js";
 import patientExportsRouter from "./routes/patientExports.js";
 import patientConsentsRouter from "./routes/patientConsents.js";
@@ -42,11 +44,21 @@ import practiceApiDataRouter from "./routes/practiceApiData.js";
 import placesRouter from "./routes/places.js";
 import practiceFinderRouter from "./routes/practiceFinder.js";
 import practicePatientsRouter from "./routes/practicePatients.js";
+import practicePatientEntriesRouter from "./routes/practicePatientEntries.js";
+import practicePatientInvitationsRouter from "./routes/practicePatientInvitations.js";
 import patientCareLinksRouter from "./routes/patientCareLinks.js";
 import patientPracticeOrganizationRouter from "./routes/patientPracticeOrganization.js";
 import patientPracticeDirectoryRouter from "./routes/patientPracticeDirectory.js";
 import patientInboxRouter from "./routes/patientInbox.js";
 import patientThreadsRouter from "./routes/patientThreads.js";
+import patientPracticeCommunicationRouter from "./routes/patientPracticeCommunication.js";
+import patientPracticeContextsRouter from "./routes/patientPracticeContexts.js";
+import patientPracticeAppointmentsRouter from "./routes/patientPracticeAppointments.js";
+import patientPracticeScopedDocumentsRouter from "./routes/patientPracticeScopedDocuments.js";
+import patientPracticeScopedMedicationPlansRouter from "./routes/patientPracticeScopedMedicationPlans.js";
+import patientPracticeScopedErezeptRouter from "./routes/patientPracticeScopedErezept.js";
+import patientPracticeScopedInboxRouter from "./routes/patientPracticeScopedInbox.js";
+import patientPracticeScopedTelemedicineRouter from "./routes/patientPracticeScopedTelemedicine.js";
 import patientMedicationPlansRouter from "./routes/patientMedicationPlans.js";
 import patientPracticeDocumentsRouter from "./routes/patientPracticeDocuments.js";
 import patientDocumentShareGrantsRouter from "./routes/patientDocumentShareGrants.js";
@@ -62,6 +74,7 @@ import healthHistoryAiRouter from "./routes/healthHistoryAi.js";
 import practicePatientHealthHistoryRouter from "./routes/practicePatientHealthHistory.js";
 import patientErezeptRouter from "./routes/patientErezept.js";
 import practiceErezeptRouter from "./routes/practiceErezept.js";
+import practiceInternalWorkRouter from "./routes/practiceInternalWork.js";
 import patientDataControlRouter from "./routes/patientDataControl.js";
 import patientProfileSharingRouter from "./routes/patientProfileSharing.js";
 import patientActivityRouter from "./routes/patientActivity.js";
@@ -86,7 +99,19 @@ import practiceDeveloperRouter from "./routes/practiceDeveloper.js";
 import practiceV1Router from "./routes/practiceV1.js";
 import archiveAiRouter from "./routes/archiveAi.js";
 import { validateStartupEnv } from './utils/startupEnvValidation.js';
-import { isVitalsEnabled, isWearablesEnabled } from './config/featureFlags.js';
+import { isPersistentStorageConfigured } from './config/storageRoot.js';
+import {
+  describeTranslationReadiness,
+  logDocumentTranslationReadiness,
+} from './services/documentTranslation/documentTranslationReadiness.js';
+import {
+  isPreVisitVoiceInputEnabled,
+  isPreVisitSpeechEnabled,
+  isSymptomSpeechEnabled,
+  isSymptomVoiceInputEnabled,
+  isVitalsEnabled,
+  isWearablesEnabled,
+} from './config/featureFlags.js';
 import { requestContextMiddleware } from "./middleware/requestContext.js";
 import { httpErrorHandler } from "./middleware/httpErrorHandler.js";
 import {
@@ -97,6 +122,7 @@ import {
   sosWalletLimiter,
   medaPdfLinkLimiter,
   mailSendRouteLimiter,
+  symptomSpeechLimiter,
 } from "./middleware/ipRateLimit.js";
 import internalRemindersRouter from "./routes/internalReminders.js";
 import internalWorkerRouter from "./routes/internalWorker.js";
@@ -114,6 +140,8 @@ import publicEmergencyRouter from "./routes/publicEmergency.js";
 import practiceSosCardRouter from "./routes/practiceSosCard.js";
 import sosWalletRouter from "./routes/sosWallet.js";
 import publicAnamnesisRouter from "./routes/publicAnamnesis.js";
+import publicPatientInvitationsRouter from "./routes/publicPatientInvitations.js";
+import patientInvitationClaimRouter from "./routes/patientInvitationClaim.js";
 import practiceBillingPlausibilityRouter from "./routes/practiceBillingPlausibility.js";
 import patientBillingExplainerRouter from "./routes/patientBillingExplainer.js";
 
@@ -121,6 +149,11 @@ const app = express();
 
 // Startup checks prevent silent misconfiguration that can break auth/email/API links in production.
 validateStartupEnv();
+
+// Document translation is optional and fail-closed on its own, so an incomplete
+// configuration warns rather than stopping the API. Without this an operator who
+// enabled the feature would have no signal that it is refusing every request.
+logDocumentTranslationReadiness();
 
 // Render/Proxy setup for correct client IP handling (rate limits, audit logs).
 app.set('trust proxy', 1);
@@ -173,7 +206,9 @@ app.use('/api/symptom', requireAuth, symptomRoute);
 app.use('/api/symptom-thread', requireAuth, symptomThreadRoute);
 app.use('/api/textsymptom', requireAuth, symptomThreadRoute);
 app.use('/api/koerpersymptomthread', requireAuth, koerpersymptomThread);
-app.use('/api/meda', medaRouter);
+// Every route in this router already requires auth; the mount repeats it so
+// a future route added here cannot be published by omission.
+app.use('/api/meda', requireAuth, medaRouter);
 app.use('/api/meda-live-translation', requireAuth, medaLiveTranslationRouter);
 app.use('/api/meda-realtime', requireAuth, medaRealtimeRouter);
 app.use('/api/practice/meda', requireAuth, medaPdfLinkLimiter, medaPdfLinkRouter);
@@ -185,7 +220,10 @@ app.use(
 );
 /** Medical Interpreter (B2C + B2B practice) — flag-gated; auth required. */
 app.use('/api/interpreter', requireAuth, interpreterRouter);
-/** B2C live conversation translation (OpenAI Realtime) — flag-gated; auth required. */
+/**
+ * Voice input for the patient's own symptom modules — auth required, and since
+ * this phase also flag- and provider-gated inside the route itself.
+ */
 app.use('/api/transcribe', requireAuth, transcribeRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/i18n', i18nRouter);
@@ -198,8 +236,8 @@ app.use('/api/account', requireAuth, accountPatientPortalRouter);
 if (process.env.NODE_ENV !== 'production') {
   app.use('/api/mail', requireAuth, mailRoutes);
 }
-app.use("/api/tts", ttsRouter);
-app.use("/api/ki", kiRouter);
+/** Symptom read-aloud — JWT required; every caller already sits behind ProtectedRoute. */
+app.use("/api/tts", symptomSpeechLimiter, requireAuth, ttsRouter);
 /** Doctor contacts (Ärztebuch) — JWT required */
 app.use("/api/user/doctor-contacts", requireAuth, doctorContactsRouter);
 // Lifecycle router first: its /:id/lifecycle* paths must match before the
@@ -208,7 +246,16 @@ app.use("/api/practices", requireAuth, practiceLifecycleRouter);
 app.use("/api/practices", requireAuth, practicesRouter);
 /** Care relationships (Phase 1) — mount before /api/practice catch-alls; flag-gated */
 app.use("/api/practice/patients", requireAuth, practicePatientsRouter);
+/**
+ * Practice-initiated patient onboarding — own flag (PATIENT_ONBOARDING_V2).
+ * Mounted BEFORE the `/api/practice/patients/:linkId` families below, and on
+ * distinct path segments, so no id pattern can ever swallow these.
+ */
+app.use("/api/practice/patient-entries", requireAuth, practicePatientEntriesRouter);
+app.use("/api/practice/patient-invitations", requireAuth, practicePatientInvitationsRouter);
 app.use("/api/patient/links", requireAuth, patientCareLinksRouter);
+/** Patient claim of a practice invitation — same PATIENT_ONBOARDING_V2 gate. */
+app.use("/api/patient/invitations", requireAuth, patientInvitationClaimRouter);
 /** Alias for PR-8 patient practice-link APIs */
 app.use("/api/patient/practice-links", requireAuth, patientCareLinksRouter);
 app.use("/api/patient/practices/directory", requireAuth, patientPracticeDirectoryRouter);
@@ -216,6 +263,15 @@ app.use("/api/patient/practices", requireAuth, patientPracticeOrganizationRouter
 app.use("/api/patient/inbox", requireAuth, patientInboxRouter);
 app.use("/api/patient/threads", requireAuth, patientThreadsRouter);
 app.use("/api/patient/messages", requireAuth, patientThreadsRouter);
+// Link-scoped communication (Phase 2C) — same service, one care relationship.
+app.use("/api/patient/practice-contexts", requireAuth, patientPracticeContextsRouter);
+app.use("/api/patient/practice/:linkId/thread", requireAuth, patientPracticeCommunicationRouter);
+app.use("/api/patient/practice/:linkId/appointments", requireAuth, patientPracticeAppointmentsRouter);
+app.use("/api/patient/practice/:linkId/documents", requireAuth, patientPracticeScopedDocumentsRouter);
+app.use("/api/patient/practice/:linkId/medication-plans", requireAuth, patientPracticeScopedMedicationPlansRouter);
+app.use("/api/patient/practice/:linkId/erezept", requireAuth, patientPracticeScopedErezeptRouter);
+app.use("/api/patient/practice/:linkId/inbox", requireAuth, patientPracticeScopedInboxRouter);
+app.use("/api/patient/practice/:linkId/telemedicine", requireAuth, patientPracticeScopedTelemedicineRouter);
 app.use("/api/patient/medication-plans", requireAuth, patientMedicationPlansRouter);
 app.use("/api/patient/push", requireAuth, patientPushRouter);
 // Mounted before the practice-documents router so
@@ -237,6 +293,8 @@ app.use("/api/patient/health-history/ai", requireAuth, healthHistoryAiRouter);
 app.use("/api/practice/patients/:linkId/health-history", requireAuth, practicePatientHealthHistoryRouter);
 app.use("/api/patient/erezept", requireAuth, patientErezeptRouter);
 app.use("/api/practice/patients/:linkId/erezept", requireAuth, practiceErezeptRouter);
+/** Practice-internal notes and reminders on one care link — never patient-facing. */
+app.use("/api/practice/patients/:linkId", requireAuth, practiceInternalWorkRouter);
 app.use("/api/practice/documents", requireAuth, practiceSecureDocumentLinksRouter);
 app.use("/api/patient/data-control", requireAuth, patientDataControlRouter);
 app.use("/api/patient/consents", requireAuth, patientConsentsRouter);
@@ -265,15 +323,21 @@ app.use("/api/practice/developer", requireAuth, practiceDeveloperRouter);
 app.use("/api/v1/practice", practiceV1Router);
 app.use("/api/archive", requireAuth, archiveAiRouter);
 app.use("/api/practice-dashboard", requireAuth, practiceDashboardRouter);
+/** Post-visit medications — practice write side (shares the /api/practice-dashboard base). */
+app.use("/api/practice-dashboard", requireAuth, visitMedicationsRouter);
 app.use("/api/practice/follow-ups", requireAuth, practiceFollowUpsRouter);
 app.use("/api/previsit/follow-ups", requireAuth, previsitFollowUpsRouter);
 /** Pre-Visit cases / timelines — JWT required; mount before generic /api/previsit. */
 app.use("/api/previsit/cases", requireAuth, previsitCasesRouter);
 /** Saved Pre-Visit sessions (DB): JWT required; mount before /api/previsit so paths are not swallowed. */
 app.use("/api/previsit/sessions", requireAuth, previsitSessionsRouter);
+/** Post-visit medications — patient read side; mount before /api/previsit so paths are not swallowed. */
+app.use("/api/previsit/visit-medications", requireAuth, patientVisitMedicationsRouter);
 app.use("/api/previsit", previsitRouter);
 app.use("/api/public/previsit", publicPrevisitQrLimiter, publicPrevisitQrRouter);
 app.use("/api/public/anamnesis", publicAnamnesisLimiter, publicAnamnesisRouter);
+/** Public invitation preview — read-only; per-route limiters live in the router. */
+app.use("/api/public/patient-invitations", publicPatientInvitationsRouter);
 app.use("/api/public/emergency", publicEmergencyLimiter, publicEmergencyRouter);
 app.use("/api/public/documents", publicSecureDocumentsLimiter, publicDocumentsRouter);
 app.use(
@@ -339,12 +403,46 @@ app.get('/api/health/config', (_req, res) =>
       frontendUrl:
         Boolean(process.env.FRONTEND_URL) || Boolean(process.env.APP_BASE_URL),
       googlePlaces: Boolean(process.env.GOOGLE_PLACES_API_KEY),
+      // Whether files written by this deploy will outlive it. A boolean, never
+      // the path: a storage root is not a secret, but an absolute internal
+      // filesystem path is infrastructure detail that an unauthenticated
+      // endpoint has no reason to hand out. The question worth answering here
+      // is "is this deploy configured to keep files", and that is yes or no.
+      persistentStorage: isPersistentStorageConfigured(),
       // Booleans only — lets us tell "feature switched off" apart from "bug" without
       // an authenticated request. The patient UI hides the whole wearables section
       // when the server reports feature_disabled, which looks identical to a defect.
       vitals: isVitalsEnabled(),
       wearables: isWearablesEnabled(),
+      // Voice input in the symptom modules. Reported so the UI can hide the
+      // microphone when the feature is off, rather than offering a control that
+      // fails — which looks identical to a defect.
+      symptomVoiceInput: isSymptomVoiceInputEnabled(),
+      // Voice input in the Pre-Visit preparation. Reported for the same reason:
+      // a microphone that fails when pressed looks exactly like a defect.
+      preVisitVoiceInput: isPreVisitVoiceInputEnabled(),
+      // Reading a reply aloud, in the symptom modules and in the Pre-Visit
+      // preparation. Separate switches from the two above: recognition and
+      // synthesis are different processing, so the UI must be able to show a
+      // microphone without a speaker, or the other way round.
+      symptomVoiceOutput: isSymptomSpeechEnabled(),
+      preVisitVoiceOutput: isPreVisitSpeechEnabled(),
     },
+    // Operational readiness of the document transformation, booleans only.
+    // No provider name, no host, no region, no model, no key — those are
+    // deployment configuration, not something to publish from a health route.
+    // `ready` means technically able to call a provider; it is NOT a statement
+    // that doing so has been approved. See
+    // docs/production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md.
+    documentTranslation: (() => {
+      const state = describeTranslationReadiness();
+      return {
+        featureEnabled: state.featureEnabled,
+        providerConfigured: state.providerConfigured,
+        endpointApproved: state.endpointApproved,
+        ready: state.ready,
+      };
+    })(),
   }),
 );
 

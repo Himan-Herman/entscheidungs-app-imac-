@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Pružaoci hostinga (EU): evropski cloud pružalac osigurava infrastrukturu za servere i baze podataka (npr. Render.com s lokacijom u EU).",
-          "AI pružalac – OpenAI (SAD): za AI obradu vašeg teksta, podataka slika i informacija sa karte tijela MedScoutX koristi usluge OpenAI LLC (San Francisco, SAD). Sadržaj se šifrovano prenosi OpenAI-u, obrađuje tamo i briše nakon obrade.",
+          "AI pružalac – OpenAI (SAD): za AI obradu vašeg teksta, podataka slika i informacija sa karte tijela MedScoutX koristi usluge OpenAI LLC (San Francisco, SAD). Sadržaj se prenosi putem šifrirane veze (TLS) i obrađuje na sistemima pružatelja usluge. Trajanje eventualnog pohranjivanja kod OpenAI-a uređeno je uvjetima tog pružatelja; dalja jamstva ne možemo dati.",
           "Pružaoci e-pošte: koristi se tehnički pružalac za slanje sistemskih e-poruka (npr. poruka za verifikaciju).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Radi osiguranja odgovarajuće zaštite podataka prijenos se zasniva na standardnim ugovornim klauzulama EU (čl. 46 GDPR) uz dodatne tehničke i organizacione mjere (šifrovanje u prijenosu, kratko trajanje obrade, brisanje nakon odgovora AI usluge).",
+          "Radi osiguranja odgovarajuće zaštite podataka prijenos se zasniva na standardnim ugovornim klauzulama EU (čl. 46 GDPR) uz dodatne tehničke i organizacione mjere (šifrovanje u prijenosu).",
       },
       {
         type: "p_link",

@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Hosting providers (EU): a European cloud provider supplies infrastructure for servers and databases (for example Render.com with EU location).",
-          "AI provider – OpenAI (USA): for AI-based processing of your text input, image data and body-map information, MedScoutX uses services of OpenAI LLC (San Francisco, USA). Content is transmitted encrypted to OpenAI, processed there and deleted after processing.",
+          "AI provider – OpenAI (USA): for AI-based processing of your text input, image data and body-map information, MedScoutX uses services of OpenAI LLC (San Francisco, USA). Transmission is encrypted in transit (TLS) and processing takes place on the provider’s systems. How long OpenAI retains transmitted content is governed by that provider’s terms; we cannot give any assurance beyond this.",
           "Email providers: a technical service provider is used to deliver system emails (for example verification emails).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "To ensure an adequate level of data protection, transfer is based on EU standard contractual clauses (Art. 46 GDPR) plus additional technical and organisational measures (encryption in transit, short processing duration, deletion after the AI service responds).",
+          "To ensure an adequate level of data protection, transfer is based on EU standard contractual clauses (Art. 46 GDPR) plus additional technical and organisational measures (encryption in transit).",
       },
       {
         type: "p_link",

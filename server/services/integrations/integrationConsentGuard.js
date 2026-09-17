@@ -71,7 +71,7 @@ export async function assertIntegrationExportAllowed(ctx) {
         practicePatientLinkId: linkId,
         reason: "missing_data_export_consent",
       },
-    }).catch(() => {});
+    });
     throw new Error("integration_consent_missing");
   }
 

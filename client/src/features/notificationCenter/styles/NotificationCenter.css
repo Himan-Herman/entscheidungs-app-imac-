@@ -1,0 +1,223 @@
+/*
+ * Header notification entry.
+ *
+ * Only tokens that actually exist are used (--ms-fg, --ms-muted, --ms-panel,
+ * --ms-border, --ms-accent, --ms-focus from Header.css). Two section-scoped
+ * tokens are defined here where the shared ones do not reach AA against this
+ * panel's background; they are local on purpose and change nothing elsewhere.
+ */
+
+.ms-notif {
+  position: relative;
+  display: inline-flex;
+  --ms-notif-muted: #4a5568;
+  --ms-notif-badge-bg: #b3261e;
+  --ms-notif-link: var(--ms-accent);
+  /* --ms-bg is translucent (0.94–0.97). Good enough for a menu of labels, not
+     for a panel of sentences: page text ghosted through the first draft. This
+     is the same hue, made fully opaque, and it applies to nothing else. */
+  --ms-notif-bg: #f5f8fb;
+}
+
+:root[data-theme="dark"] .ms-notif {
+  --ms-notif-muted: #b8c2cf;
+  --ms-notif-badge-bg: #f2b8b5;
+  /* --ms-accent is a dark teal; on the dark panel it measures 3.26, which is
+     below AA for text this size. Lightened here only, for this section. */
+  --ms-notif-link: #5eead4;
+  --ms-notif-bg: #0a1120;
+}
+
+.ms-notif__toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Touch target, not decoration: 44px in every variant. */
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--ms-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ms-fg);
+  cursor: pointer;
+}
+
+.ms-notif__toggle:hover,
+.ms-notif__toggle.is-open {
+  background: var(--ms-panel);
+}
+
+.ms-notif__toggle:focus-visible {
+  outline: 2px solid var(--ms-focus);
+  outline-offset: 2px;
+}
+
+.ms-notif__badge {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  min-width: 1.15rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--ms-notif-badge-bg);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.15rem;
+  text-align: center;
+}
+
+:root[data-theme="dark"] .ms-notif__badge {
+  color: #3b0907;
+}
+
+.ms-notif__panel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  /* Same stacking level as the account menu — a dropdown that page content can
+     paint over or shine through is not readable. */
+  z-index: 1100;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 0.75rem;
+  border: 1px solid var(--ms-border);
+  border-radius: 0.9rem;
+  /* --ms-bg, not --ms-panel: the panel token is translucent by design and the
+     account menu already uses the opaque one for exactly this reason. */
+  background-color: var(--ms-notif-bg);
+  background-image: var(--ms-bg);
+  color: var(--ms-fg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.ms-notif__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ms-notif__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.ms-notif__count {
+  font-size: 0.8rem;
+  color: var(--ms-notif-muted);
+}
+
+.ms-notif__msg {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--ms-notif-muted);
+}
+
+.ms-notif__hint {
+  font-size: 0.8rem;
+}
+
+.ms-notif__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ms-notif__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--ms-fg);
+  text-align: start;
+  cursor: pointer;
+}
+
+.ms-notif__item:hover {
+  background: color-mix(in srgb, var(--ms-accent) 10%, transparent);
+}
+
+.ms-notif__item:focus-visible {
+  outline: 2px solid var(--ms-focus);
+  outline-offset: -2px;
+}
+
+.ms-notif__item-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.ms-notif__item-meta,
+.ms-notif__item-state {
+  font-size: 0.75rem;
+  color: var(--ms-notif-muted);
+}
+
+/* Unread is said in words, not only shown in a colour. */
+.ms-notif__item-state {
+  font-weight: 700;
+}
+
+.ms-notif__all,
+.ms-notif__linkbtn {
+  min-height: 2.75rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--ms-notif-link);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ms-notif__all {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.ms-notif__all:hover,
+.ms-notif__linkbtn:hover {
+  text-decoration: underline;
+}
+
+.ms-notif__all:focus-visible,
+.ms-notif__linkbtn:focus-visible {
+  outline: 2px solid var(--ms-focus);
+  outline-offset: 2px;
+}
+
+.ms-notif__reminders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--ms-border);
+}
+
+.ms-notif__reminders-head {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ms-notif__reminders-count {
+  font-size: 0.8rem;
+  color: var(--ms-notif-muted);
+}

@@ -58,7 +58,7 @@ export async function practiceScheduleSummary(actorUserId, practiceId, input, ct
     action: "appointment_ai_summary",
     practiceProfileId: practiceId,
     metadata: { chars: text.length },
-  }).catch(() => {});
+  });
   return { text, aiMarked: true, locale };
 }
 
@@ -94,7 +94,7 @@ export async function practiceReplyDraft(actorUserId, practiceId, input, ctx = {
     action: "appointment_ai_reply_draft",
     practiceProfileId: practiceId,
     metadata: { chars: text.length },
-  }).catch(() => {});
+  });
   return { text, aiMarked: true, locale };
 }
 
@@ -124,6 +124,6 @@ export async function patientRequestDraft(patientUserId, input, ctx = {}) {
     actorRole: "patient",
     action: "appointment_ai_request_draft",
     metadata: { chars: text.length },
-  }).catch(() => {});
+  });
   return { text, aiMarked: true, locale };
 }

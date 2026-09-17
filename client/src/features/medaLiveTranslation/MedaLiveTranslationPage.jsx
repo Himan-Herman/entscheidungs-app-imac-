@@ -577,7 +577,6 @@ export default function MedaLiveTranslationPage() {
                 <span className="mlt-conversation__empty">{t.emptyConversationLabel}</span>
               ) : (
                 conversation.map((entry) => {
-                  const targetRoleLabel = entry.targetRole === "patient" ? t.patientRoleLabel : t.practiceRoleLabel;
                   const roleFlow = entry.speakerRole === "patient"
                     ? t.patientToPracticeLabel
                     : t.practiceToPatientLabel;

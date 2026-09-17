@@ -1,4 +1,4 @@
-import { openai } from "../../openaiClient.js";
+import { getInterpreterClient } from "./provider/interpreterClient.js";
 import { isInterpreterAiConfigured } from "../../config/interpreterEnv.js";
 
 import { getOpenAiTtsModel } from "../../config/openAiModels.js";
@@ -106,7 +106,7 @@ export async function synthesizeInterpreterSpeech(params) {
 
   try {
     const createSpeech = async (voiceName, speechInstructions) => {
-      const speech = await openai.audio.speech.create({
+      const speech = await (await getInterpreterClient()).client.audio.speech.create({
         model,
         voice: voiceName,
         input: params.text,

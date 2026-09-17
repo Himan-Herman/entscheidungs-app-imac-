@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma.js";
 import { practiceResourceStatusWhere } from "../../utils/lifecycleStatus.js";
 import { notifyPatientInboxOfMedicationPlan } from "./inboxNotify.js";
+import { notifyPracticeInboxOfMedicationQuestion } from "../practiceInbox/practiceInboxNotify.js";
 import {
   PRACTICE_BRANDING_SELECT,
   practiceBrandingJson,
@@ -443,4 +444,187 @@ export async function getMedicationPlanForPatient(planId, patientUserId) {
   });
   if (!plan) throw new Error("plan_not_found");
   return planToJson(plan);
+}
+
+/* ========================================================================
+ * Practice context (Phase 2E.3)
+ *
+ * The scope is the PracticePatientLink, never the patient account and never
+ * the practice. `MedicationPlan.practicePatientLinkId` is NOT NULL, so every
+ * plan already belongs to exactly one care relationship — the boundary exists
+ * in the data and only has to be honoured in the query.
+ *
+ * This deliberately does NOT reuse listMedicationPlansForPatient(), which is
+ * scoped by patientUserId alone and therefore spans every practice the patient
+ * is linked to. Filtering that result down in the client would mean the other
+ * practices' plans were transmitted first.
+ * ===================================================================== */
+
+/**
+ * The link, only if it belongs to the session patient.
+ *
+ * A link that does not exist and a link belonging to someone else both raise
+ * `link_not_found`, so neither can be used to probe what exists.
+ *
+ * @param {string} linkId
+ * @param {string} patientUserId
+ */
+async function assertPatientOwnsMedicationLink(linkId, patientUserId) {
+  const lid = String(linkId || "").trim();
+  const uid = String(patientUserId || "").trim();
+  if (!lid || !uid) throw new Error("validation_required");
+
+  const link = await prisma.practicePatientLink.findFirst({
+    where: { id: lid, patientUserId: uid },
+    select: { id: true, patientUserId: true, practiceProfileId: true, status: true },
+  });
+  if (!link) throw new Error("link_not_found");
+  return link;
+}
+
+/**
+ * What a patient may see inside ONE care relationship.
+ *
+ * `practicePatientLinkId` is the boundary. `patientUserId` is asserted as well,
+ * even though link ownership already implies it: the two conditions fail
+ * independently, and a plan whose link and patient disagree is a data fault
+ * that must not be readable either way.
+ *
+ * `status: "published"` mirrors the existing patient-side rule — drafts,
+ * archived and deleted plans were never patient-visible and do not become so
+ * here.
+ *
+ * @param {{ id: string, patientUserId: string }} link
+ */
+function patientContextPlanWhere(link) {
+  return {
+    practicePatientLinkId: link.id,
+    patientUserId: link.patientUserId,
+    status: "published",
+  };
+}
+
+/**
+ * Response for the context page — deliberately narrower than planToJson().
+ *
+ * Omitted on purpose: `practiceProfileId` and `practicePatientLinkId` (the URL
+ * already carries the context and the ids say nothing the page can use),
+ * `practiceName` (the context bar shows it), and `deletedAt`/`archivedAt`
+ * (only published plans reach this point, so both are always null).
+ *
+ * Item fields are passed through verbatim. Dosage, strength, unit, frequency
+ * and intake times are medical content: they are rendered as they were entered
+ * and are never reformatted or normalised here.
+ */
+function patientContextPlanJson(row) {
+  return {
+    id: row.id,
+    status: row.status,
+    version: row.version,
+    title: row.title,
+    note: row.note,
+    publishedAt: row.publishedAt,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    items: (row.items || []).map((item) => ({
+      id: item.id,
+      medicationName: item.medicationName,
+      dosage: item.dosage,
+      frequency: item.frequency,
+      route: item.route,
+      schedule: item.schedule,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      instructions: item.instructions,
+      sortOrder: item.sortOrder,
+    })),
+  };
+}
+
+/**
+ * Published plans of ONE care relationship.
+ *
+ * Two queries in total regardless of how many plans or items exist: the link
+ * lookup and one findMany that loads the items with the plans.
+ *
+ * Ordering is the existing one — newest publication first. The model has no
+ * "current plan" flag and none is invented here; several published plans may
+ * coexist for one link, because publishing does not archive its predecessor.
+ *
+ * @param {string} linkId
+ * @param {string} patientUserId
+ */
+export async function listPatientLinkMedicationPlans(linkId, patientUserId) {
+  const link = await assertPatientOwnsMedicationLink(linkId, patientUserId);
+
+  const rows = await prisma.medicationPlan.findMany({
+    where: patientContextPlanWhere(link),
+    include: { items: { orderBy: { sortOrder: "asc" } } },
+    orderBy: [{ publishedAt: "desc" }, { version: "desc" }],
+  });
+
+  return rows.map(patientContextPlanJson);
+}
+
+/**
+ * One plan, but only if it lives in THIS context.
+ *
+ * The scope is part of the query, not a check performed on a plan that was
+ * already loaded by id: a `findUnique({ id })` followed by a comparison would
+ * still have read the foreign row, and the comparison is the kind of thing a
+ * later refactor drops.
+ *
+ * @param {string} linkId
+ * @param {string} planId
+ * @param {string} patientUserId
+ */
+export async function getPatientLinkMedicationPlan(linkId, planId, patientUserId) {
+  const link = await assertPatientOwnsMedicationLink(linkId, patientUserId);
+  const pid = String(planId || "").trim();
+  if (!pid) throw new Error("validation_required");
+
+  const row = await prisma.medicationPlan.findFirst({
+    where: { id: pid, ...patientContextPlanWhere(link) },
+    include: { items: { orderBy: { sortOrder: "asc" } } },
+  });
+  if (!row) throw new Error("plan_not_found");
+
+  return { link, row, json: patientContextPlanJson(row) };
+}
+
+/**
+ * The patient asks the practice about a plan of THIS context.
+ *
+ * Same right as the cross-practice page already grants — no new capability, and
+ * no AI. The question text is not stored in the inbox title or in audit
+ * metadata; only the fact that a question was raised travels.
+ *
+ * The plan is resolved through the context first, so a planId from another
+ * relationship cannot address another practice's inbox.
+ *
+ * @param {string} linkId
+ * @param {string} planId
+ * @param {string} patientUserId
+ */
+export async function submitPatientLinkMedicationPlanQuestion(
+  linkId,
+  planId,
+  patientUserId,
+) {
+  const { link, row } = await getPatientLinkMedicationPlan(linkId, planId, patientUserId);
+
+  // Same liveness rule as the existing question path: a relationship that is
+  // over can still be read, but nothing new is sent into it.
+  if (!["active", "invited"].includes(link.status)) {
+    throw new Error("link_not_active");
+  }
+
+  await notifyPracticeInboxOfMedicationQuestion({
+    id: row.id,
+    practiceProfileId: link.practiceProfileId,
+    practicePatientLinkId: link.id,
+    patientUserId: link.patientUserId,
+  });
+
+  return { ok: true, planId: row.id };
 }

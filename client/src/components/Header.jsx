@@ -18,6 +18,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { useTheme } from "../ThemeMode";
 import GlobalLanguageSelector from "./language/GlobalLanguageSelector";
 import AccountAvatar from "./account/AccountAvatar.jsx";
+import NotificationCenter from "../features/notificationCenter/components/NotificationCenter.jsx";
 import {
   HEADER_SELECTABLE_LOCALE_CODES,
   PATIENT_UI_SELECTABLE_LOCALE_CODES,
@@ -151,6 +152,10 @@ export default function Header() {
           </button>
 
           <div className="ms-header__controls">
+            {/* The one central entry. Patient mode and practice mode each get
+                only their own side's data; the component never loads both. */}
+            <NotificationCenter isLoggedIn={isLoggedIn} isPractice={isPractice} />
+
             <button
               type="button"
               className="ms-theme-toggle"

@@ -1,9 +1,9 @@
 import { deepMerge } from "../../deepMerge.js";
+import { esInternalWork } from "./es/es.internalWork.js";
 import legalEs from "../legal/es/index.js";
 import landing from "./es.landing.js";
 import info from "./es.info.js";
 import preVisit from "./es.preVisit.js";
-import startseite from "./es.startseite.js";
 import esCore from "./es/es.core.js";
 import esAccount from "./es/es.account.js";
 import esModules from "./es/es.modules.js";
@@ -22,6 +22,7 @@ import { esPatientBillingExplain } from "./es/es.patientBillingExplain.js";
 import { esPracticeDirectory } from "./es/es.practiceDirectory.js";
 import { esTelemedicine } from "./es/es.telemedicine.js";
 import { esPatientPractices, esDocumentSharing } from "./es/es.patientPractices.js";
+import { esPatientOnboarding } from "./es/es.patientOnboarding.js";
 import { esLifecycleExit } from "./es/es.lifecycleExit.js";
 
 /** Base Spanish overrides — extended layers merged below; missing keys use EN→DE fallback at runtime */
@@ -234,7 +235,6 @@ const esBase = {
     cancel: "Cancelar",
     close: "Cerrar",
   },
-  startseite,
   forgotPassword: {
     title: "Restablecer contraseña",
     text: "Introduzca su correo. Le enviaremos un enlace.",
@@ -304,6 +304,15 @@ const esComposed = deepMerge(
 );
 
 export default deepMerge(
+  deepMerge(
+  deepMerge(
   deepMerge(esComposed, esTelemedicine),
   { patientPractices: esPatientPractices, documentSharing: esDocumentSharing, lifecycleExit: esLifecycleExit },
+),
+  // Phases 5A-5C: authored here rather than falling through to English.
+  esInternalWork,
+),
+  // Patient onboarding (practice invitation + patient claim). Authored here
+  // rather than falling through to English.
+  { patientOnboarding: esPatientOnboarding },
 );

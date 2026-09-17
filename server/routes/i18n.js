@@ -5,6 +5,7 @@
 import express from "express";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { listLocalesMetadata, validateUiLocale } from "../services/i18n/i18nLocaleService.js";
+import { UI_FULLY_SUPPORTED_LOCALE_CODES } from "../services/i18n/localeMetadata.js";
 import { translateOrganizationalText } from "../services/i18n/i18nAiTranslationService.js";
 import { prisma } from "../lib/prisma.js";
 import { writeAuditLog } from "../services/auditLogService.js";
@@ -22,7 +23,9 @@ router.get("/locales", (_req, res) => {
     ok: true,
     locales: listLocalesMetadata(),
     defaultLocale: "en",
-    activeLocales: ["de", "en"],
+    // Derived, not restated: this used to be a hardcoded ["de","en"] that had
+    // fallen four languages behind what the product actually ships.
+    activeLocales: UI_FULLY_SUPPORTED_LOCALE_CODES,
   });
 });
 

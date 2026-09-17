@@ -136,6 +136,11 @@ function installFake() {
   prisma.archivedPracticePatientContext = modelApi(archives);
   prisma.practiceDocumentShareGrant = modelApi(grants);
   prisma.secureDocumentAccessToken = modelApi(tokens);
+  // Issued clinical artifacts: the deletion guard counts these too since
+  // ISSUED_CLINICAL_MODELS was introduced. Neither fixture issues any, so an
+  // empty delegate keeps the scenarios exactly as they were written.
+  prisma.medicationPlan = modelApi([]);
+  prisma.erezeptEntry = modelApi([]);
   prisma.auditLog = { create: async ({ data }) => { audits.push(data); return data; } };
 
   prisma.$queryRaw = async (strings, ...values) => {

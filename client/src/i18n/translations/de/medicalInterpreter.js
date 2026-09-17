@@ -369,7 +369,7 @@ export default {
   history: {
     heading: "Gesprächsdokumentation auf diesem Gerät",
     privacyNote:
-      "Phase 1: Gespräche werden nur auf diesem Gerät gespeichert — nicht auf MedScoutX-Servern. Es werden keine Audio- oder Mikrofonaufnahmen gespeichert. Dies ist Orientierungs- und Kommunikationsdokumentation, kein medizinischer Datensatz. Sie können einzelne Gespräche jederzeit löschen oder unten den gesamten Verlauf entfernen.",
+      "Gespräche werden auf diesem Gerät gespeichert. Für die Übersetzung werden gesprochene Inhalte und erkannter Text verarbeitet. Einzelne Gespräche oder den gesamten Verlauf können Sie hier entfernen.",
     fallbackTitle: "Gespräch {{date}}",
     statusDraft: "Entwurf",
     statusActive: "Aktiv",

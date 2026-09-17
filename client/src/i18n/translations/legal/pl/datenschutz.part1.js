@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Dostawcy hostingu (UE): europejski dostawca chmury zapewnia infrastrukturę serwerów i baz danych (np. Render.com z lokalizacją w UE).",
-          "Dostawca AI – OpenAI (USA): do przetwarzania tekstu, danych obrazu i informacji z mapy ciała z wykorzystaniem AI MedScoutX korzysta z usług OpenAI LLC (San Francisco, USA). Treść jest przesyłana szyfrowana do OpenAI, tam przetwarzana i usuwana po zakończeniu przetwarzania.",
+          "Dostawca AI – OpenAI (USA): do przetwarzania tekstu, danych obrazu i informacji z mapy ciała z wykorzystaniem AI MedScoutX korzysta z usług OpenAI LLC (San Francisco, USA). Treść jest przesyłana szyfrowanym połączeniem (TLS) do OpenAI i przetwarzana w systemach dostawcy. Okres ewentualnego przechowywania w OpenAI zależy od warunków tego dostawcy; nie możemy złożyć dalej idących zapewnień.",
           "Dostawcy poczty e-mail: wykorzystywany jest dostawca techniczny do wysyłki wiadomości systemowych (np. weryfikacja e-mail).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Aby zapewnić odpowiedni poziom ochrony danych, transfer opiera się na standardowych klauzulach umownych UE (art. 46 RODO) oraz dodatkowych środkach technicznych i organizacyjnych (szyfrowanie podczas transmisji, krótki czas przetwarzania, usunięcie po odpowiedzi usługi AI).",
+          "Aby zapewnić odpowiedni poziom ochrony danych, transfer opiera się na standardowych klauzulach umownych UE (art. 46 RODO) oraz dodatkowych środkach technicznych i organizacyjnych (szyfrowanie podczas transmisji).",
       },
       {
         type: "p_link",

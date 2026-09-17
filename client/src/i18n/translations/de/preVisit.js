@@ -172,7 +172,7 @@ export default {
     consentCheckbox:
       "Ich möchte diese Sitzung lokal im Browser speichern, um sie später erneut ansehen zu können.",
     consentExpl:
-      "Die Speicherung erfolgt nur lokal in diesem Browser. Es werden keine Daten an MedScoutX übertragen.",
+      "Die hier gewählte Speicherung erfolgt in diesem Browser. Das Speichern in Ihrem MedScoutX-Konto erfolgt separat.",
     saveLocal: "Sitzung lokal speichern",
     saveSuccess: "Die Sitzung wurde lokal gespeichert.",
     archiveNote:

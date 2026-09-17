@@ -4,7 +4,6 @@ import landing from "./bs.landing.js";
 import info from "./bs.info.js";
 import preVisitBs from "./bs.preVisit.js";
 import preVisitOverlay from "./bs.preVisit.overlay.js";
-import startseite from "./bs.startseite.js";
 import bsCore from "./bs/bs.core.js";
 import bsAccount from "./bs/bs.account.js";
 import bsModules from "./bs/bs.modules.js";
@@ -16,7 +15,6 @@ const bsBase = {
   landing,
   info,
   preVisit: deepMerge(preVisitBs, preVisitOverlay),
-  startseite,
   header: {
     skip: "Pređi na sadržaj",
     homeAria: "Idi na početnu stranicu",

@@ -73,7 +73,7 @@ export async function runSandboxHl7Parse(actorUserId, practiceId, hl7Raw, ctx = 
       ok: parsed.ok,
       messageType: parsed.ok ? parsed.messageType?.message : null,
     },
-  }).catch(() => {});
+  });
 
   return {
     parsed,

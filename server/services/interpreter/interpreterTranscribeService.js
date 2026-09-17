@@ -1,5 +1,5 @@
 import { toFile } from "openai";
-import { openai } from "../../openaiClient.js";
+import { getInterpreterClient } from "./provider/interpreterClient.js";
 import { isInterpreterAiConfigured } from "../../config/interpreterEnv.js";
 import {
   normalizeTranscribeLanguageHint,
@@ -54,7 +54,7 @@ export async function transcribeInterpreterAudio(params) {
     };
     if (langHint) createParams.language = langHint;
 
-    const transcription = await openai.audio.transcriptions.create(createParams);
+    const transcription = await (await getInterpreterClient()).client.audio.transcriptions.create(createParams);
     const rawTranscript =
       transcription.text != null ? String(transcription.text).trim() : "";
     const safe = validateTranscriptOutput(rawTranscript);

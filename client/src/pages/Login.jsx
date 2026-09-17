@@ -406,30 +406,6 @@ export default function Login() {
               {copy.register}
             </Link>
           </span>
-
-          <span>
-            <Link
-              to="/impressum"
-              style={{
-                color: p.linkMuted,
-                textDecoration: "none",
-                marginRight: 8,
-              }}
-            >
-              {copy.imprint}
-            </Link>
-            |
-            <Link
-              to="/datenschutz"
-              style={{
-                color: p.linkMuted,
-                textDecoration: "none",
-                marginLeft: 8,
-              }}
-            >
-              {copy.privacy}
-            </Link>
-          </span>
         </div>
       </div>
     </main>

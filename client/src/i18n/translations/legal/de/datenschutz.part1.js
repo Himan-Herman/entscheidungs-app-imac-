@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Hosting-Anbieter (EU): Ein europäischer Cloud-Anbieter stellt die Infrastruktur für Server und Datenbank bereit (z. B. Render.com mit EU-Standort).",
-          "Verarbeitungsdienstleister – OpenAI (USA): Für die automatisierte Verarbeitung deiner Texteingaben, Bilddaten und Body-Map-Angaben nutzt MedScoutX Dienste der OpenAI LLC (San Francisco, USA). Dabei werden die Inhalte verschlüsselt an OpenAI übermittelt, dort maschinell verarbeitet und nach der Verarbeitung gelöscht.",
+          "Verarbeitungsdienstleister – OpenAI (USA): Für die automatisierte Verarbeitung deiner Texteingaben, Bilddaten und Body-Map-Angaben nutzt MedScoutX Dienste der OpenAI LLC (San Francisco, USA). Die Übermittlung erfolgt transportverschlüsselt (TLS); die Verarbeitung findet auf Systemen des Anbieters statt. Wie lange OpenAI übermittelte Inhalte speichert, richtet sich nach den Bedingungen dieses Anbieters; eine darüber hinausgehende Zusage können wir nicht machen.",
           "E-Mail-Dienstleister: Für die Zustellung von System-E-Mails (z. B. Verifizierungs-E-Mails) wird ein technischer Dienstleister eingesetzt.",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Um ein angemessenes Datenschutzniveau sicherzustellen, erfolgt die Übermittlung auf Grundlage der EU-Standardvertragsklauseln (Art. 46 DSGVO) sowie zusätzlicher technischer und organisatorischer Maßnahmen (Verschlüsselung während der Übermittlung, kurze Verarbeitungsdauer, Löschung der Daten nach der Verarbeitung).",
+          "Um ein angemessenes Datenschutzniveau sicherzustellen, erfolgt die Übermittlung auf Grundlage der EU-Standardvertragsklauseln (Art. 46 DSGVO) sowie zusätzlicher technischer und organisatorischer Maßnahmen (Verschlüsselung während der Übermittlung).",
       },
       {
         type: "p_link",

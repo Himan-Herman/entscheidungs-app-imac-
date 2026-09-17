@@ -198,7 +198,7 @@ router.post("/", async (req, res) => {
       },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_created",
@@ -233,7 +233,7 @@ router.post("/ai-title-draft", async (req, res) => {
       locale: req.body?.locale || req.headers["accept-language"],
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_ai_title_draft",
@@ -351,7 +351,7 @@ router.get("/:documentId/download", async (req, res) => {
         ? "inline"
         : "attachment";
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -409,7 +409,7 @@ router.post("/:documentId/ocr/start", requireDocumentOcrFeature, async (req, res
       { req, access: ctx.access },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -432,7 +432,7 @@ router.post("/:documentId/ocr/start", requireDocumentOcrFeature, async (req, res
     console.error("[practice/documents/ocr/start]", err?.message ?? err);
     const mapped = mapError(err);
     if (mapped.error === "ocr_unavailable" || mapped.error === "ocr_disabled") {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId: ctx.userId,
         actorRole: ctx.access.role,
@@ -444,7 +444,7 @@ router.post("/:documentId/ocr/start", requireDocumentOcrFeature, async (req, res
           practiceProfileId: ctx.practiceId,
           errorCode: mapped.error,
         },
-      }).catch(() => {});
+      });
     }
     return res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
@@ -480,7 +480,7 @@ router.get("/:documentId/ocr/result", requireDocumentOcrFeature, async (req, res
       { access: ctx.access },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -492,7 +492,7 @@ router.get("/:documentId/ocr/result", requireDocumentOcrFeature, async (req, res
         practiceProfileId: ctx.practiceId,
         practicePatientLinkId: req.params.linkId,
       },
-    }).catch(() => {});
+    });
 
     return res.json({ ok: true, ...out });
   } catch (err) {
@@ -515,7 +515,7 @@ router.patch("/:documentId/ocr/result", requireDocumentOcrFeature, async (req, r
       { req, access: ctx.access },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -555,7 +555,7 @@ router.post("/:documentId/ocr/share", requireDocumentOcrFeature, async (req, res
       { req, access: ctx.access },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -590,7 +590,7 @@ router.patch("/:documentId/ocr/discard", requireDocumentOcrFeature, async (req, 
       { req, access: ctx.access },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId: ctx.userId,
       actorRole: ctx.access.role,
@@ -670,7 +670,7 @@ router.post(
         },
       );
 
-      await writeAuditLog({
+      writeAuditLog({
         userId: ctx.userId,
         actorRole: ctx.access.role,
         action: "practice_document_file_uploaded",
@@ -703,7 +703,7 @@ router.post("/:documentId/share", async (req, res) => {
       ctx.userId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_shared",
@@ -735,7 +735,7 @@ router.patch("/:documentId/revoke", async (req, res) => {
       ctx.practiceId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_share_revoked",
@@ -767,7 +767,7 @@ router.patch("/:documentId/archive", async (req, res) => {
       ctx.userId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_archived",
@@ -800,7 +800,7 @@ router.patch("/:documentId/restore", async (req, res) => {
       ctx.userId,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_restored",
@@ -834,7 +834,7 @@ router.patch("/:documentId/delete", async (req, res) => {
       req.body?.reason,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_deleted",
@@ -871,7 +871,7 @@ router.patch("/:documentId", async (req, res) => {
       },
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId: ctx.userId,
       actorRole: ctx.access.role,
       action: "practice_document_updated",

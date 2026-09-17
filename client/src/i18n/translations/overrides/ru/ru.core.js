@@ -55,10 +55,13 @@ export default {
     title: "MedScoutX — загрузка",
     skip: "Пропустить заставку",
     heading: "Запуск MedScoutX",
-    status:
-      "MedScoutX загружается; через несколько секунд вы попадёте в рабочую область.",
+    tagline: "Подготовка к приёму врача",
+    status: "Сейчас вы сможете выбрать свой раздел.",
+    continue: "Продолжить",
   },
   voiceInput: {
+    unavailable: "Голосовой ввод сейчас недоступен.",
+
     micError: "Микрофон недоступен.",
     transcriptionError: "Не удалось преобразовать речь в текст.",
     start: "Начать голосовой ввод",
@@ -129,7 +132,7 @@ export default {
     },
     hubLinkFindPractices: "Найти клиники по всему миру",
     hubLinkFindPracticesSub: "Искать клиники и запросить подключение",
-    hubLinkMyPractice: "Моя клиника",
+    hubLinkMyPractice: "Мои практики",
     hubLinkMyPracticeSub:
       "Сообщения, записи на приём, документы и данные клиники",
     hubLinkMyPracticeAria:

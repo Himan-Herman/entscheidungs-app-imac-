@@ -383,10 +383,14 @@ export async function deletePracticeWithArchivedContext(input) {
 
   // The existing guard, as a postcondition: anything the archiving did not
   // cover rolls the transaction back instead of failing deep in the database.
-  const { checkPracticeDeletionBlockers, CONTEXTUAL_DATA_BLOCKED } =
+  const { checkPracticeDeletionBlockers, blockingErrorCode, CONTEXTUAL_DATA_BLOCKED } =
     await import("./contextualPatientDataDeletionGuard.js");
   const blockers = await checkPracticeDeletionBlockers(practiceProfileId, tx);
-  if (blockers.blocked) {
+  // `blocked` covers contextual medical records. requiresGrantCleanup was added
+  // later for live document releases; both must roll this transaction back here
+  // rather than fail deep in the database on a RESTRICT key. The thrown message
+  // stays CONTEXTUAL_DATA_BLOCKED so the route's stable client code is unchanged.
+  if (blockingErrorCode(blockers)) {
     const err = new Error(CONTEXTUAL_DATA_BLOCKED);
     err.blockerReport = blockers;
     throw err;

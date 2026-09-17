@@ -1,3 +1,91 @@
+/* ---------------------------------------------------------------------------
+ * Shared colour tokens.
+ *
+ * These lived in Startseite.css, which was only ever loaded once that page had
+ * been visited — so seven other stylesheets (AccountPortal, PracticeFinder,
+ * PracticeBooking, the anamnesis pages, PracticeDirectory, Info) depended on a
+ * lazily-loaded route for their colours. Removing that page would have left
+ * them undefined for good, so the definitions moved here, to a stylesheet the
+ * Layout always loads. Values are unchanged.
+ * ------------------------------------------------------------------------- */
+:root {
+  /* Farben – Light Mode */
+  --color-bg: #f3f4f6;
+  --color-bg-elevated: #ffffff;
+  --color-bg-soft: #e5e7eb;
+  --color-text: #0f172a;
+  --color-text-soft: #4b5563;
+  --color-text-muted: #6b7280;
+
+  --color-primary: #2563eb;      /* Blau – Hauptfarbe */
+  --color-primary-soft: #dbeafe;
+  --color-secondary: #16a34a;    /* Grün für positive Akzente */
+  --color-accent: #f97316;       /* Orange für Highlights */
+
+  --color-border-subtle: rgba(15, 23, 42, 0.06);
+  --color-border-strong: rgba(15, 23, 42, 0.18);
+
+  --color-focus: #fbbf24;        /* gut sichtbare Fokusfarbe */
+
+  --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.12);
+  --shadow-light: 0 10px 25px rgba(15, 23, 42, 0.08);
+
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", Roboto, sans-serif;
+
+  --transition-fast: 160ms ease-out;
+  --transition-med: 220ms ease-out;
+
+  --max-width: 960px;
+}
+
+/* Dark Mode via data-theme="dark" auf <html> */
+:root[data-theme="dark"] {
+  --color-bg: #020617;
+  --color-bg-elevated: rgba(15, 23, 42, 0.9);
+  --color-bg-soft: rgba(15, 23, 42, 0.8);
+  --color-text: #e5e7eb;
+  --color-text-soft: #cbd5f5;
+  --color-text-muted: #9ca3af;
+
+  --color-primary: #60a5fa;
+  --color-primary-soft: rgba(37, 99, 235, 0.18);
+  --color-secondary: #22c55e;
+  --color-accent: #fbbf24;
+
+  --color-border-subtle: rgba(148, 163, 184, 0.24);
+  --color-border-strong: rgba(148, 163, 184, 0.45);
+
+  --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.9);
+  --shadow-light: 0 18px 40px rgba(15, 23, 42, 0.75);
+}
+
+/* System-Dark-Mode als Fallback, wenn kein data-theme gesetzt ist */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #020617;
+    --color-bg-elevated: rgba(15, 23, 42, 0.9);
+    --color-bg-soft: rgba(15, 23, 42, 0.8);
+    --color-text: #e5e7eb;
+    --color-text-soft: #cbd5f5;
+    --color-text-muted: #9ca3af;
+
+    --color-primary: #60a5fa;
+    --color-primary-soft: rgba(37, 99, 235, 0.18);
+    --color-secondary: #22c55e;
+    --color-accent: #fbbf24;
+
+    --color-border-subtle: rgba(148, 163, 184, 0.24);
+    --color-border-strong: rgba(148, 163, 184, 0.45);
+
+    --shadow-soft: 0 24px 60px rgba(15, 23, 42, 0.9);
+    --shadow-light: 0 18px 40px rgba(15, 23, 42, 0.75);
+  }
+}
+
 
 :root {
   --container: 1100px;

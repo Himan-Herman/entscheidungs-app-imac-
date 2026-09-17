@@ -118,7 +118,9 @@ export default function PracticeMedaQrModal({ practiceId, practiceName, tx, onCl
       `<style>body{font-family:system-ui,sans-serif;text-align:center;padding:24px;color:#0f172a}` +
       `img{width:320px;height:320px}p{font-size:12px;color:#475569;word-break:break-all}</style></head>` +
       `<body><h2>${safeTitle}</h2><img src="${qrDataUrl}" alt=""><p>${medaUrl}</p>` +
-      `<script>window.onload=function(){window.print();}<\/script></body></html>`
+      // Split so the string cannot terminate the surrounding script tag when
+      // this markup is written into the print window.
+      `<script>window.onload=function(){window.print();}<` + `/script></body></html>`
     );
     w.document.close();
   }
@@ -160,7 +162,6 @@ export default function PracticeMedaQrModal({ practiceId, practiceName, tx, onCl
               {qrFailed ? (
                 <p className="mrt-qr-error" role="alert">{tx.qrError}</p>
               ) : qrDataUrl ? (
-                // eslint-disable-next-line jsx-a11y/img-redundant-alt
                 <img className="mrt-qr-image" src={qrDataUrl} alt={tx.qrAlt} width={320} height={320} />
               ) : (
                 <div className="mrt-qr-image-placeholder" aria-hidden="true" />

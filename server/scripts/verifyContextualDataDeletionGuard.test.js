@@ -220,7 +220,14 @@ function installPrismaFake() {
   const emptyModel = {
     findMany: async () => [], updateMany: async () => ({ count: 0 }),
     deleteMany: async () => ({ count: 0 }),
+    // The deletion guard counts grants and issued artifacts as well.
+    count: async () => 0,
   };
+  // Issued clinical artifacts, counted by the guard since ISSUED_CLINICAL_MODELS
+  // was added. This fixture issues none; without the delegates the guard falls
+  // through to the real Prisma client and every deletion answers 500.
+  prisma.medicationPlan = { ...emptyModel };
+  prisma.erezeptEntry = { ...emptyModel };
   prisma.practiceDocumentShareGrant = { ...emptyModel };
   prisma.secureDocumentAccessToken = { ...emptyModel };
   // The account erasure asserts no owned practice survives.

@@ -114,7 +114,7 @@ export async function generatePatientDataRequestAiSummary(input) {
 
   const summary = await runAi(prompt, locale);
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: input.patientUserId,
     actorRole: "patient",
     action: "patient_data_request_ai_summary_created",

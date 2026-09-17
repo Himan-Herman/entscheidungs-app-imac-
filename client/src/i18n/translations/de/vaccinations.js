@@ -39,6 +39,7 @@ export default {
     uploadHint: "Foto des Impfausweises oder PDF – max. 10 MB",
     uploadChange: "Datei ändern",
     uploadRemove: "Datei entfernen",
+    uploadFailed: "Der Nachweis konnte nicht hochgeladen werden. Der Eintrag wurde gespeichert.",
     uploadSelected: "Ausgewählt:",
     required: "* Pflichtfeld",
     consentLabel:

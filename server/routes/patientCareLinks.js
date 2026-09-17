@@ -59,7 +59,7 @@ router.post("/connect-code", async (req, res) => {
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
   try {
     const result = await createConnectCode({ patientUserId: userId, scopes: req.body?.scopes });
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       action: "patient_connect_code_created",
       entityType: "PatientPracticeConnectCode",
@@ -94,7 +94,7 @@ router.delete("/connect-code/:id", async (req, res) => {
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
   try {
     const code = await revokeConnectCode({ patientUserId: userId, codeId: req.params.id });
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       action: "patient_connect_code_revoked",
       entityType: "PatientPracticeConnectCode",
@@ -160,7 +160,7 @@ router.post("/:linkId/consent", async (req, res) => {
       scopes: req.body?.scopes,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: "patient",
       action: "practice_patient_link_consent_accepted",
@@ -201,14 +201,8 @@ router.patch("/:linkId/decline", async (req, res) => {
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
   try {
-    const link = await declinePracticePatientLink(req.params.linkId, userId);
-    await writeAuditLog({
-      userId,
-      actorRole: "patient",
-      action: "practice_patient_link_declined",
-      entityType: "PracticePatientLink",
-      entityId: link.id,
-    });
+    const link = await declinePracticePatientLink(req.params.linkId, userId, { req });
+
     return res.json({ ok: true, link });
   } catch (err) {
     console.error("[patient/links/decline]", err?.message ?? err);

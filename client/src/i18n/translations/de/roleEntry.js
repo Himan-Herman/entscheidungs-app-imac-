@@ -133,10 +133,10 @@ export default {
   },
   hubLinkFindPractices: "Arztpraxis weltweit finden",
   hubLinkFindPracticesSub: "Praxen suchen und Verbindung anfragen",
-  hubLinkMyPractice: "Meine Praxis",
-  hubLinkMyPracticeSub: "Nachrichten, Termine, Dokumente und Praxisdaten",
+  hubLinkMyPractice: "Meine Praxen",
+  hubLinkMyPracticeSub: "Ihre verbundenen Praxen — Nachrichten, Termine und Unterlagen",
   hubLinkMyPracticeAria:
-    "Meine Praxis öffnen — Nachrichten, Termine, Dokumente und Praxisdaten",
+    "Meine Praxen öffnen — Ihre verbundenen Praxen mit Nachrichten, Terminen und Unterlagen",
   hubLinkOrientation: "Beschwerden erfassen",
   hubLinkOrientationSub: "Symptom Check, Bildanalyse und Körperkarte",
   hubLinkOrientationAria:

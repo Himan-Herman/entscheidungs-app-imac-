@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import { PATIENT_UI_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useLanguage } from "../i18n/LanguageContext";
@@ -13,6 +14,7 @@ export default function CheckEmail() {
   const p = useAuthFlowPalette();
 
   const copy = useMemo(() => getMessages(language).checkEmail, [language]);
+  const legal = useMemo(() => getMessages(language).footer, [language]);
   const navCopy = useMemo(() => getMessages(language).header, [language]);
 
   async function resend() {
@@ -192,6 +194,38 @@ export default function CheckEmail() {
         >
           {copy.footer}
         </p>
+
+        <nav
+          aria-label={legal.ariaLabel}
+          style={{
+            marginTop: 24,
+            fontSize: 12,
+            textAlign: "center",
+            lineHeight: 1.6,
+          }}
+        >
+          <Link
+            to="/impressum"
+            style={{
+              color: p.linkMuted,
+              textDecoration: "none",
+              marginRight: 8,
+            }}
+          >
+            {legal.imprint}
+          </Link>
+          |
+          <Link
+            to="/datenschutz"
+            style={{
+              color: p.linkMuted,
+              textDecoration: "none",
+              marginLeft: 8,
+            }}
+          >
+            {legal.privacy}
+          </Link>
+        </nav>
       </div>
     </main>
   );

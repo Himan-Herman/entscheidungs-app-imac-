@@ -172,7 +172,7 @@ export function detectLanguage(text, langA, langB) {
 
   // Same script (Latin, Cyrillic, or Arabic) → word fingerprints
   const words  = clean.toLowerCase()
-    .split(/[\s.,!?;:()\-"'«»„""‚'​ ]+/)
+    .split(/[\s.,!?;:()\-"'«»„""‚'\u200b\u00a0]+/)
     .filter(w => w.length > 1);
 
   if (words.length < 2) return null; // too short for reliable detection
@@ -214,7 +214,7 @@ export function isDefinitelyThirdLanguage(text, langA, langB) {
 
   // Same-script (Latin, etc.) — use fingerprints
   const words  = clean.toLowerCase()
-    .split(/[\s.,!?;:()\-"'«»„""‚'​ ]+/)
+    .split(/[\s.,!?;:()\-"'«»„""‚'\u200b ]+/)
     .filter(w => w.length > 1);
   if (words.length < 3) return false; // too short for reliable cross-language detection
 

@@ -48,8 +48,11 @@ export function isAllowedConsentVersion(version) {
 export function linkHasConsentScope(link, scope) {
   if (!link?.consentAcceptedAt) return false;
   const scopes = Array.isArray(link.consentScopes) ? link.consentScopes : [];
-  if (scopes.length === 0) {
-    return ["profile", "medication", "messages"].includes(scope);
-  }
+
+  // An empty array means empty. It used to mean "profile, medication and
+  // messages", which made a fully withdrawn link look like a freshly accepted
+  // one — consentScopes is emptied on withdrawal while consentAcceptedAt keeps
+  // its historical value, so that branch reported access the patient had just
+  // taken away.
   return scopes.includes(scope);
 }

@@ -8,9 +8,10 @@ export function getMedaOpenAiModel() {
   return typeof model === "string" && model.trim() ? model.trim() : getOpenAiChatModel();
 }
 
-export function isMedaEnabled() {
-  return Boolean(process.env.OPENAI_API_KEY?.trim());
-}
+// isMedaEnabled moved to config/featureFlags.js in Phase 6a.2. It used to be
+// Boolean(process.env.OPENAI_API_KEY) — the presence of somebody else's
+// credential is not a decision to enable this feature.
+export { isMedaEnabled } from "./featureFlags.js";
 
 export const MEDA_MAX_INPUT_CHARS = 400;
 export const MEDA_MAX_HISTORY_MESSAGES = 4;

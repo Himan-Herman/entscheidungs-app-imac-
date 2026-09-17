@@ -1,3 +1,5 @@
+import { getRateLimitConfigProblems } from '../middleware/rateLimitConfig.js';
+import { getStorageConfigProblems, STORAGE_ROOT_ENV } from '../config/storageRoot.js';
 /**
  * Startup validation for production readiness.
  * Logs only variable names (never secret values).
@@ -28,6 +30,24 @@ export function validateStartupEnv() {
 
   /** @type {string[]} */
   const missingCritical = [];
+
+  // Rate limits are overridable so a loopback test suite is not throttled
+  // against itself. In production an out-of-band value is a configuration
+  // error, not a preference: it either disables the limit or breaks the route.
+  for (const problem of getRateLimitConfigProblems()) {
+    console.error(`[startup] rate limit misconfigured: ${problem}`);
+    missingCritical.push('RATE_LIMIT_CONFIG');
+  }
+
+  // Files that must outlive a deploy. Same shape as the rate-limit check above,
+  // and the same reason: in production an unset value is not a preference, it
+  // is a configuration error — here one that would write patient documents,
+  // account exports and avatars into a directory the next release replaces.
+  // Nothing would fail at the time; the files would simply not be there later.
+  for (const problem of getStorageConfigProblems()) {
+    console.error(`[startup] storage misconfigured: ${problem}`);
+    missingCritical.push(STORAGE_ROOT_ENV);
+  }
 
   for (const varName of required) {
     if (!hasValue(varName)) {

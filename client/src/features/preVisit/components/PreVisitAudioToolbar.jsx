@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic, Volume2 } from "lucide-react";
 
 import { detectDeviceType, sendPracticeAnalyticsEvent } from "../../../api/productAnalytics.js";
+import {
+  isPreVisitVoiceInputAvailable,
+  isPreVisitVoiceOutputAvailable,
+} from "../../../api/voiceFeatureAvailability.js";
 import { appFetch } from "../../../lib/apiBase.js";
 
 const MAX_SPEAK_CHARS = 1200;
@@ -20,6 +24,32 @@ export default function PreVisitAudioToolbar({
   const [speakPhase, setSpeakPhase] = useState("idle");
   const [recordPhase, setRecordPhase] = useState("idle");
   const [audioError, setAudioError] = useState("");
+  /*
+   * Whether the deployment has Pre-Visit voice input switched on.
+   *
+   * Starts available so nothing flickers away on a fast connection. When it is
+   * off the microphone is not rendered at all — offering one that then refuses
+   * looks like a defect, and a patient preparing for an appointment should not
+   * be left wondering whether the app is broken.
+   *
+   * Reading aloud has its own switch, asked separately just below: recognition
+   * and synthesis are approved independently, so a deployment can have one
+   * without the other and the toolbar has to be able to show that.
+   */
+  const [dictationAvailable, setDictationAvailable] = useState(true);
+  const [speakAvailable, setSpeakAvailable] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    isPreVisitVoiceInputAvailable().then((ok) => {
+      if (!cancelled) setDictationAvailable(ok);
+    });
+    isPreVisitVoiceOutputAvailable().then((ok) => {
+      if (!cancelled) setSpeakAvailable(ok);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const audioRef = useRef(null);
   const objectUrlRef = useRef(null);
   const speakAbortRef = useRef(null);
@@ -75,19 +105,20 @@ export default function PreVisitAudioToolbar({
         body: JSON.stringify({
           text,
           language: patientLanguage || "de",
+          // A guest reaching the preparation through a practice's QR code has
+          // no account, so the token is what proves they are inside a real
+          // Pre-Visit context. The server resolves it against the database;
+          // sending it is not the same as being believed.
+          ...(qrToken ? { qrToken } : {}),
         }),
         signal: ac.signal,
       });
 
       if (!res.ok) {
-        let msg = labels.audioErrorGeneric;
-        try {
-          const j = await res.json();
-          if (j?.error && typeof j.error === "string") msg = j.error;
-        } catch {
-          /* ignore */
-        }
-        throw new Error(msg);
+        // Deliberately not the server's message: what comes back now is an
+        // internal error code, and a patient should read a sentence rather
+        // than "previsit_speech_provider_not_configured".
+        throw new Error(labels.audioErrorGeneric);
       }
 
       const blob = await res.blob();
@@ -183,15 +214,20 @@ export default function PreVisitAudioToolbar({
         const fd = new FormData();
         fd.append("audio", blob, "previsit-recording.webm");
         if (patientLanguage) fd.append("language", patientLanguage);
+        // A guest reaching the preparation through a practice's QR code has no
+        // account, so the token is what proves they are inside a real Pre-Visit
+        // context. The server resolves it against the database; sending it is
+        // not the same as being believed.
+        if (qrToken) fd.append("qrToken", qrToken);
         const res = await appFetch("/api/previsit/audio/transcribe", {
           method: "POST",
           body: fd,
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          throw new Error(
-            typeof data?.error === "string" ? data.error : labels.audioErrorGeneric
-          );
+          // The server answers with an error code, not a sentence. Showing it
+          // raw would put internal vocabulary in front of a patient.
+          throw new Error(labels.audioErrorGeneric);
         }
         const t = data?.text != null ? String(data.text).trim() : "";
         if (t) {
@@ -300,6 +336,7 @@ export default function PreVisitAudioToolbar({
       <div className="pre-visit-audio__row">
         <p className="pre-visit-audio__hint">{labels.audioHint}</p>
         <div className="pre-visit-audio__btns">
+          {speakAvailable ? (
           <button
             type="button"
             className={`pre-visit-audio__icon-btn${speakBusy ? " pre-visit-audio__icon-btn--teal" : ""}`}
@@ -312,6 +349,8 @@ export default function PreVisitAudioToolbar({
           >
             <Volume2 size={26} strokeWidth={2} aria-hidden />
           </button>
+          ) : null}
+          {dictationAvailable ? (
           <button
             type="button"
             className={`pre-visit-audio__icon-btn${isRecording ? " pre-visit-audio__icon-btn--rec" : ""}${micBusy ? " pre-visit-audio__icon-btn--teal" : ""}`}
@@ -324,6 +363,7 @@ export default function PreVisitAudioToolbar({
           >
             <Mic size={26} strokeWidth={2} aria-hidden />
           </button>
+          ) : null}
         </div>
       </div>
       {audioLiveStatus ? (

@@ -28,7 +28,7 @@ export async function translateOrganizationalText(input) {
 
   const de = !String(input.targetLocale || "de").toLowerCase().startsWith("en");
 
-  await writeAuditLog({
+  writeAuditLog({
     req: input.req,
     userId: input.userId ?? null,
     actorRole: "user",

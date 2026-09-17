@@ -62,7 +62,7 @@ export async function createAvailability(actorUserId, practiceId, body, ctx = {}
     action: "availability_created",
     practiceProfileId: practiceId,
     metadata: { availabilityId: row.id, weekday },
-  }).catch(() => {});
+  });
   return availabilityToJson(row);
 }
 
@@ -100,7 +100,7 @@ export async function patchAvailability(actorUserId, practiceId, availabilityId,
     action: "availability_updated",
     practiceProfileId: practiceId,
     metadata: { availabilityId },
-  }).catch(() => {});
+  });
   return availabilityToJson(row);
 }
 
@@ -119,6 +119,6 @@ export async function deleteAvailability(actorUserId, practiceId, availabilityId
     action: "availability_deleted",
     practiceProfileId: practiceId,
     metadata: { availabilityId },
-  }).catch(() => {});
+  });
   return { ok: true };
 }

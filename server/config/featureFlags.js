@@ -29,6 +29,28 @@ export function isPatientInboxEnabled() {
   return envFlag("PATIENT_INBOX", false);
 }
 
+/**
+ * AI drafting inside practice–patient messaging (reply draft / rewrite).
+ *
+ * Gated SEPARATELY from COMMUNICATION_V2 because it is the only part of the
+ * messaging module that transmits conversation content — Art. 9 GDPR health
+ * data — to an external AI provider. The shared OpenAI client sets no baseURL
+ * (US endpoint) and neither EU data residency nor zero-data-retention is
+ * configured or evidenced in this repository; the same open question already
+ * keeps ENABLE_DOCUMENT_TRANSLATION off.
+ *
+ * Turning this off must never impair core communication: sending, reading and
+ * organising messages work exactly the same, only the optional draft-assist
+ * buttons become unavailable. AI is never a prerequisite for communication or
+ * for any authorization decision.
+ *
+ * Requires the messaging module itself. Default off.
+ */
+export function isCommunicationAiDraftsEnabled() {
+  if (!isCareRelationshipEnabled() || !isCommunicationV2Enabled()) return false;
+  return envFlag("COMMUNICATION_AI_DRAFTS", false);
+}
+
 /** Practice document sharing on care links (PR-7). */
 export function isPracticeDocumentsV2Enabled() {
   return envFlag("PRACTICE_DOCUMENTS_V2", false);
@@ -292,6 +314,19 @@ export function isSosCardEnabled() {
  * Requires explicit patient consent before any data is written.
  * Default off until MEDA_CLOUD_ARCHIVE_ENABLED is set.
  */
+/**
+ * The Meda knowledge chat.
+ *
+ * Its own switch. Until this phase the feature was "on" whenever
+ * OPENAI_API_KEY happened to be set anywhere in the environment, which made a
+ * credential configured for one purpose silently authorise another.
+ *
+ * Default off.
+ */
+export function isMedaEnabled() {
+  return envFlag("MEDA_ENABLED", false);
+}
+
 export function isMedaCloudArchiveEnabled() {
   return envFlag("MEDA_CLOUD_ARCHIVE_ENABLED", false);
 }
@@ -366,4 +401,163 @@ export function isBillingAiReviewEnabled() {
  */
 export function isPatientBillingExplainEnabled() {
   return envFlag("ENABLE_PATIENT_BILLING_EXPLAIN", false);
+}
+
+/**
+ * Patient-facing translation / plain-language rendering of a practice document.
+ *
+ * Phase 2A ships the safety substrate only — provenance gate, local text
+ * extraction, segmentation, critical-token masking, output validation. There is
+ * deliberately NO model call behind this flag yet, so enabling it cannot send
+ * document text anywhere.
+ *
+ * Before this may drive an external AI call (phase 2B) the open data-protection
+ * question must be resolved: the OpenAI client sets no baseURL (US endpoint),
+ * and neither EU data residency nor zero-data-retention is configured or
+ * evidenced anywhere in this repository. Translating a document would transmit
+ * the full text of a medical record — a different category from the metadata
+ * and lab-row payloads existing AI features send.
+ *
+ * Default off.
+ */
+export function isDocumentTranslationEnabled() {
+  return envFlag("ENABLE_DOCUMENT_TRANSLATION", false);
+}
+
+/**
+ * Translating ONE chat message into another language.
+ *
+ * A separate flag from document translation on purpose. The two send different
+ * material to a provider — a finished medical document versus live
+ * correspondence between a patient and their practice — and an approval for one
+ * is not an approval for the other. Turning this on without the matching
+ * MESSAGE_TRANSLATION_* configuration still transmits nothing: the provider
+ * gate refuses independently, and its production host allowlist is empty.
+ *
+ * Default off.
+ */
+export function isMessageTranslationEnabled() {
+  return envFlag("ENABLE_MESSAGE_TRANSLATION", false);
+}
+
+/**
+ * Dictating a message: speech recognised into an editable draft.
+ *
+ * A third flag, and deliberately not one of the other two. Audio is a different
+ * category of material from text — a recording carries a voice, a background,
+ * and whatever else was audible in the room, none of which the masking chain
+ * that protects a written dose can touch. An approval to send message TEXT to a
+ * provider is not an approval to send a recording of someone speaking.
+ *
+ * There is already an ungated /api/transcribe in this codebase, built on the
+ * shared OPENAI_API_KEY. It is deliberately NOT reused here: inheriting it
+ * would make "the symptom checker has a key" mean "patient-practice dictation
+ * may be transmitted", which is exactly the inference the translation gates
+ * exist to prevent.
+ *
+ * Default off.
+ */
+export function isMessageSttEnabled() {
+  return envFlag("ENABLE_MESSAGE_STT", false);
+}
+
+/**
+ * Voice input in the patient's own symptom modules.
+ *
+ * A FOURTH flag, and the narrowest reading of what /api/transcribe is actually
+ * used for: a patient dictating their own symptom description in the symptom
+ * check, the body-region flow, or alongside an uploaded image. One data
+ * category, one actor, one purpose.
+ *
+ * It is deliberately not called ENABLE_TRANSCRIPTION. A flag named for a
+ * technique would put a patient's spoken symptoms, a practice dictation and
+ * anything added later behind one switch, and turning it on for one would turn
+ * it on for all — which is precisely the inference every gate in this codebase
+ * exists to prevent.
+ *
+ * It is also deliberately separate from ENABLE_MESSAGE_STT: that one covers
+ * dictation into a message to a practice, which is correspondence with a third
+ * party, not a note to oneself in a symptom checker.
+ *
+ * Default off. Before this phase the same path ran whenever OPENAI_API_KEY
+ * happened to be set.
+ */
+export function isSymptomVoiceInputEnabled() {
+  return envFlag("ENABLE_SYMPTOM_VOICE_INPUT", false);
+}
+
+/**
+ * Voice input in the Pre-Visit preparation.
+ *
+ * A FIFTH flag. Not because five is a good number, but because this is a fifth
+ * distinct thing being sent somewhere: a patient preparing for an appointment,
+ * speaking about their complaints, their history and their questions — often
+ * before any account exists, reached through a practice's QR code.
+ *
+ * That is not the symptom checker (a self-service tool inside one's own
+ * account), and it is not dictation into a message to a practice. It is the
+ * material a consultation will be built on, recorded by someone who may be a
+ * guest of the practice rather than a user of this product.
+ *
+ * Default off. Before this phase the same path ran whenever OPENAI_API_KEY
+ * happened to be set — on a route with no authentication at all.
+ */
+export function isPreVisitVoiceInputEnabled() {
+  return envFlag("ENABLE_PREVISIT_VOICE_INPUT", false);
+}
+
+/**
+ * Reading a symptom-module reply aloud.
+ *
+ * A SIXTH audio flag, and separate from ENABLE_SYMPTOM_VOICE_INPUT on purpose.
+ * That one approves sending a patient's recorded voice to a recognition
+ * provider; this one approves sending text about their symptoms to a synthesis
+ * provider. Same product area, opposite direction, different processing, and an
+ * operator may reasonably want one without the other. A single ENABLE_TTS
+ * covering every read-aloud in the product would be the same mistake as a
+ * single ENABLE_TRANSCRIPTION was on the input side: naming the technique
+ * instead of the feature, so that approving one data flow silently approves
+ * another.
+ *
+ * Default off. Before this phase /api/tts ran whenever OPENAI_API_KEY happened
+ * to be set, on a route with no authentication at all.
+ */
+export function isSymptomSpeechEnabled() {
+  return envFlag("ENABLE_SYMPTOM_VOICE_OUTPUT", false);
+}
+
+/**
+ * Reading a Pre-Visit preparation question aloud.
+ *
+ * A SEVENTH flag. Not the Pre-Visit input gate — recognition and synthesis are
+ * different processing and may be different companies — and not the symptom
+ * read-aloud gate either, because the people differ: that path is a signed-in
+ * patient in their own account, this one is often a guest of a practice who
+ * reached the preparation through a QR code and has no relationship with this
+ * product.
+ *
+ * Default off. Before this phase the same path ran whenever OPENAI_API_KEY
+ * happened to be set, on a router with no authentication.
+ */
+export function isPreVisitSpeechEnabled() {
+  return envFlag("ENABLE_PREVISIT_VOICE_OUTPUT", false);
+}
+
+/**
+ * Practice-initiated patient onboarding (practice-local entries + invitations).
+ *
+ * OWN gate, not folded into CARE_RELATIONSHIP_ENABLED, because it is the only
+ * path where a practice may record a person's name and date of birth BEFORE any
+ * account of that person exists and therefore before that person could have
+ * agreed to anything. That is a distinct legal situation from managing a link
+ * the patient already accepted, so it gets its own switch and can be closed
+ * without taking the existing care-relationship features down with it.
+ *
+ * The flag governs the practice-side management endpoints AND the public
+ * invitation preview. It does not govern claim/redeem, which does not exist yet.
+ *
+ * Default off.
+ */
+export function isPatientOnboardingV2Enabled() {
+  return envFlag("PATIENT_ONBOARDING_V2", false);
 }

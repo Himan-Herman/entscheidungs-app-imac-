@@ -1,0 +1,107 @@
+/**
+ * Документы и заключения учреждения — русский.
+ *
+ * Оговорка сохранена: MedScoutX не интерпретирует заключения. Формулировки
+ * описывают функцию, а не технологию, как и немецкий оригинал
+ * («автоматически», а не «ИИ»).
+ *
+ * Плейсхолдеры {size}, {status}, {date} сохранены.
+ */
+export const ruPracticeDocuments = {
+  practiceDocuments: {
+    sectionTitle: "Документы и заключения",
+    sectionIntro:
+      "Защищённая передача документов учреждения — без интерпретации заключений со стороны MedScoutX.",
+    loading: "Загрузка…",
+    loadError: "Не удалось загрузить документы.",
+    featureDisabled: "Документы учреждения в этой среде пока не включены.",
+    empty: "Документов пока нет.",
+    newDocument: "Новый документ",
+    documentListCaption: "Документы",
+    typeLabel: "Тип документа",
+    typeReport: "Заключение / выписка",
+    typeLab: "Лаборатория",
+    typeImaging: "Визуализация",
+    typeReferral: "Направление",
+    typeDischarge: "Выписной эпикриз",
+    typePrescriptionInfo: "Сведения о рецепте",
+    typeOther: "Прочее",
+    titleLabel: "Название",
+    titlePlaceholder: "напр. лаборатория от 12.05.",
+    descriptionLabel: "Описание (необязательно)",
+    descriptionPlaceholder: "Краткое нейтральное описание…",
+    saveDraft: "Сохранить черновик",
+    uploadFile: "Загрузить файл",
+    uploadHint: "PDF, JPEG, PNG или Word (не более 25 МБ)",
+    chooseFile: "Выбрать файл",
+    filesAttached: "Прикреплённые файлы",
+    fileSize: "{size}",
+    share: "Открыть пациенту",
+    revoke: "Отозвать доступ",
+    archive: "В архив",
+    statusDraft: "Черновик",
+    statusShared: "Открыт",
+    statusArchived: "В архиве",
+    statusDeleted: "Удалён",
+    statusAria: "Статус: {status}",
+    saved: "Черновик сохранён.",
+    uploaded: "Файл загружен.",
+    shared: "Документ открыт. Пациент получит нейтральное уведомление.",
+    revoked: "Доступ отозван.",
+    archived: "Документ отправлен в архив.",
+    saveError: "Не удалось сохранить.",
+    uploadError: "Не удалось загрузить файл.",
+    shareError: "Не удалось открыть доступ.",
+    revokeError: "Не удалось отозвать доступ.",
+    archiveError: "Не удалось отправить в архив.",
+    createError: "Не удалось создать документ.",
+    validationTitle: "Введите название.",
+    validationFile: "Для открытия доступа нужен хотя бы один файл.",
+    readOnlyHint:
+      "Открытые и архивные документы здесь редактировать нельзя.",
+    viewDocument: "Посмотреть документ",
+    download: "Скачать",
+    createSecureLink: "Создать защищённую ссылку",
+    secureLinkHint:
+      "Защищённые ссылки действуют ограниченное время и могут быть отозваны.",
+    secureLinkCreated: "Защищённая ссылка создана (действует 15 мин.).",
+    secureLinkCopy: "Скопировать ссылку",
+    revokeLink: "Отозвать ссылку",
+    linkRevoked: "Ссылка отозвана.",
+    linkError: "Не удалось выполнить действие со ссылкой.",
+    downloadError: "Не удалось скачать.",
+    permissionDenied: "Нет прав на этот документ.",
+    notAvailable: "Этот документ больше недоступен.",
+    activeLinks: "Активные защищённые ссылки",
+    linkExpires: "Истекает: {date}",
+    linkUsed: "Уже использована",
+    aiDownloadNote: "Автоматическое примечание к загрузке",
+    aiDownloadNoteBusy: "Создаём примечание…",
+    sharedAt: "Открыт {date}",
+    deleteDocument: "Удалить документ",
+    deleteConfirmTitle1: "Удалить документ?",
+    deleteConfirmBody1: "Действительно удалить этот документ?",
+    deleteContinue: "Далее",
+    deleteConfirmTitle2: "Удалить окончательно?",
+    deleteConfirmBody2:
+      "Это действие нельзя отменить. Документ станет недоступен пациентам. В журнал аудита будет внесена отметка.",
+    deleteConfirmAction: "Удалить документ",
+    deleteCancel: "Отмена",
+    deleted: "Документ удалён.",
+    deleteError: "Не удалось удалить.",
+    deletedReadOnly:
+      "Этот документ удалён и больше недоступен пациентам.",
+    fileTooLarge: "Файл слишком большой.",
+    fileTypeNotAllowed: "Этот тип файла не разрешён.",
+    aiOrganize: "Организовать автоматически",
+    aiTitleDraft: "Автоматические варианты названия",
+    aiBusy: "Создаём…",
+    aiError: "Не удалось создать.",
+    aiNotConfigured: "Эта функция в данной среде недоступна.",
+    aiDraftLabel: "Автоматический черновик — проверьте его",
+    aiDisclaimer:
+      "Помогает только со структурой, формулировкой и организацией уже имеющихся сведений о документах. Заключения не интерпретируются.",
+  },
+};
+
+export default ruPracticeDocuments;

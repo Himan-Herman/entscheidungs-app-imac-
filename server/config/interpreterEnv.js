@@ -3,6 +3,7 @@
  * Model default: gpt-5.4 via openAiModels (override INTERPRETER_OPENAI_MODEL).
  */
 import { getOpenAiChatModel } from "./openAiModels.js";
+import { isInterpreterProviderConfigured } from "../services/interpreter/provider/interpreterProviderConfig.js";
 
 /** @type {Set<string>} */
 export const INTERPRETER_SUPPORTED_LANGUAGE_CODES = new Set([
@@ -35,8 +36,16 @@ export function getInterpreterOpenAiModel() {
   return typeof model === "string" && model.trim() ? model.trim() : getOpenAiChatModel();
 }
 
+/**
+ * Whether the interpreter has somewhere of its own to send material.
+ *
+ * Was `Boolean(process.env.OPENAI_API_KEY)` until Phase 6a.2: a key configured
+ * for any other feature made a live consultation transmissible. The question
+ * is now answered by the interpreter's own provider configuration, which
+ * refuses the shared key even if it is pasted into INTERPRETER_API_KEY.
+ */
 export function isInterpreterAiConfigured() {
-  return Boolean(process.env.OPENAI_API_KEY?.trim());
+  return isInterpreterProviderConfigured();
 }
 
 /** One confirmed turn — no session history on the wire. */

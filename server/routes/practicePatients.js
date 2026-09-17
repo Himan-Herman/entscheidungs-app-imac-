@@ -5,6 +5,7 @@
  */
 
 import express from "express";
+import { PERMISSIONS, hasPracticePermission } from "../utils/practicePermissions.js";
 import { requireCareRelationshipFeature } from "../middleware/requireCareRelationship.js";
 import {
   getPracticeAccess,
@@ -116,7 +117,7 @@ router.post("/search/ai-filter-suggestion", async (req, res) => {
       activeFilters: req.body?.filters,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: access.role,
@@ -157,12 +158,29 @@ router.get("/", async (req, res) => {
     return res.status(400).json({ ok: false, error: "validation_invalid_status" });
   }
 
+  /*
+   * Phase 5B — what this caller may be TOLD ABOUT, derived from the role the
+   * server resolved, never from the request. A counter is a statement that data
+   * exists, so the same permission that guards the detail endpoint guards the
+   * number here.
+   */
+  const visibility = {
+    includeReminders: hasPracticePermission(access.role, PERMISSIONS.REMINDERS_READ),
+    includeInternalNotes: hasPracticePermission(access.role, PERMISSIONS.INTERNAL_NOTES_READ),
+  };
+
+  // Filtering by a data class one may not read would leak the same fact through
+  // the result set instead of through a number.
+  if (req.query.hasOpenReminders != null && !visibility.includeReminders) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
   try {
     const searchQuery = { ...req.query };
     if (searchQuery.assignmentFilter === "assigned_to_me") {
       searchQuery.assignedToUserId = userId;
     }
-    const result = await searchPracticePatients(practiceId, searchQuery);
+    const result = await searchPracticePatients(practiceId, searchQuery, visibility);
 
     const hasSearchOrFilter = Boolean(
       req.query.q ||
@@ -171,11 +189,12 @@ router.get("/", async (req, res) => {
         req.query.hasUnreadMessages != null ||
         req.query.hasDocuments != null ||
         req.query.hasMedicationPlan != null ||
-        req.query.hasOpenDataRequest != null,
+        req.query.hasOpenDataRequest != null ||
+        req.query.hasOpenReminders != null,
     );
 
     if (hasSearchOrFilter) {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -190,7 +209,7 @@ router.get("/", async (req, res) => {
         },
       });
     } else {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -238,7 +257,7 @@ router.post("/link", async (req, res) => {
       status: req.body?.status,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: access.role,
       action: "practice_patient_link_created",
@@ -281,7 +300,7 @@ router.post("/redeem-code", async (req, res) => {
       code: req.body?.code,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: access.role,
       action: "practice_patient_link_connect_code_redeemed",
@@ -329,7 +348,7 @@ router.post("/link-request", practiceLinkRequestLimiter, async (req, res) => {
     // Audit only the meaningful action (a request was actually created); a missing account or
     // an already-existing link is NOT distinguished to the practice.
     if (result.created) {
-      await writeAuditLog({
+      writeAuditLog({
         userId,
         actorRole: access.role,
         action: "practice_patient_link_request_created",
@@ -483,7 +502,7 @@ router.get("/:linkId/search", async (req, res) => {
     );
 
     if (req.query.q) {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -626,7 +645,7 @@ router.get("/:linkId", async (req, res) => {
     const record = await getPracticePatientRecord(req.params.linkId, practiceId);
 
     if (String(req.query.fromSearch || "").toLowerCase() === "true") {
-      await writeAuditLog({
+      writeAuditLog({
         req,
         userId,
         actorRole: access.role,
@@ -676,7 +695,7 @@ router.patch("/:linkId/status", async (req, res) => {
       status,
     );
 
-    await writeAuditLog({
+    writeAuditLog({
       userId,
       actorRole: access.role,
       action: "practice_patient_link_status_updated",

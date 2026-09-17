@@ -1,4 +1,344 @@
-/* Screenreader-Utility (falls nicht global vorhanden) */
+/* MedScoutX splash.
+   Deliberately built from the same palette and gradient as the role chooser it
+   hands over to (RoleEntryPage.css), so the two screens read as one moment
+   rather than two pages. The patient blue and practice teal appear here only as
+   ambient light and in the progress bar — a quiet hint at the choice that comes
+   next, without putting two buttons on a screen that has no decision to make. */
+
+.intro {
+  --intro-patient: #0ea5e9;
+  --intro-practice: #0d9488;
+  --intro-fg: #0f172a;
+  --intro-fg-soft: rgba(15, 23, 42, 0.62);
+  --intro-tile: rgba(255, 255, 255, 0.72);
+  --intro-tile-ring: rgba(15, 23, 42, 0.08);
+  --intro-tile-shadow: 0 32px 68px -24px rgba(15, 23, 42, 0.42);
+  --intro-track: rgba(15, 23, 42, 0.1);
+  --intro-cta-fg: rgba(15, 23, 42, 0.72);
+  --intro-cta-ring: rgba(15, 23, 42, 0.14);
+  --intro-cta-hover: rgba(15, 23, 42, 0.05);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  /* svh keeps the iOS toolbars from cropping the layout. */
+  min-height: 100svh;
+  width: 100%;
+  padding: calc(env(safe-area-inset-top, 0px) + 1.5rem)
+    calc(env(safe-area-inset-right, 0px) + 1.25rem)
+    calc(env(safe-area-inset-bottom, 0px) + 1.75rem)
+    calc(env(safe-area-inset-left, 0px) + 1.25rem);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 38%, #eef6f8 100%);
+  color: var(--intro-fg);
+
+  transition: opacity 380ms ease;
+}
+
+.intro[data-theme="dark"] {
+  --intro-patient: #38bdf8;
+  --intro-practice: #2dd4bf;
+  --intro-fg: #f1f5f9;
+  --intro-fg-soft: rgba(226, 232, 240, 0.68);
+  --intro-tile: rgba(255, 255, 255, 0.06);
+  --intro-tile-ring: rgba(255, 255, 255, 0.12);
+  --intro-tile-shadow: 0 34px 74px -22px rgba(2, 6, 23, 0.92);
+  --intro-track: rgba(255, 255, 255, 0.14);
+  --intro-cta-fg: rgba(226, 232, 240, 0.82);
+  --intro-cta-ring: rgba(255, 255, 255, 0.18);
+  --intro-cta-hover: rgba(255, 255, 255, 0.08);
+
+  background: linear-gradient(165deg, #0b1220 0%, #0f172a 45%, #0c1829 100%);
+}
+
+.intro.is-leaving {
+  opacity: 0;
+}
+
+/* -------------------------------------------------- ambient light */
+
+.intro__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.intro__orb {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(72px);
+  opacity: 0.5;
+}
+
+.intro__orb--patient {
+  width: min(46vw, 30rem);
+  aspect-ratio: 1;
+  top: -14%;
+  left: -12%;
+  background: var(--intro-patient);
+  animation: intro-drift-a 24s ease-in-out infinite;
+}
+
+.intro__orb--practice {
+  width: min(52vw, 34rem);
+  aspect-ratio: 1;
+  right: -16%;
+  bottom: -18%;
+  background: var(--intro-practice);
+  animation: intro-drift-b 29s ease-in-out infinite;
+}
+
+.intro[data-theme="dark"] .intro__orb {
+  opacity: 0.34;
+}
+
+@keyframes intro-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(34px, 26px, 0); }
+}
+
+@keyframes intro-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(-30px, -22px, 0); }
+}
+
+/* -------------------------------------------------- content column */
+
+.intro__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  width: 100%;
+  max-width: 26rem;
+  margin: 0 auto;
+}
+
+/* -------------------------------------------------- app-icon tile */
+
+.intro__mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(7.5rem, 30vw, 10.5rem);
+  aspect-ratio: 1;
+  padding: clamp(0.55rem, 2vw, 0.85rem);
+  border-radius: clamp(1.75rem, 7vw, 2.5rem);
+  background: var(--intro-tile);
+  box-shadow:
+    0 0 0 1px var(--intro-tile-ring),
+    var(--intro-tile-shadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: intro-rise 900ms cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+/* Soft coloured halo behind the tile — the brand accents, barely there. */
+.intro__mark-glow {
+  position: absolute;
+  inset: -22%;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 210deg,
+    var(--intro-patient),
+    var(--intro-practice),
+    var(--intro-patient)
+  );
+  filter: blur(34px);
+  opacity: 0.3;
+  animation: intro-halo 7s ease-in-out infinite;
+}
+
+.intro[data-theme="dark"] .intro__mark-glow {
+  opacity: 0.42;
+}
+
+.intro__logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: clamp(1.25rem, 5vw, 1.85rem);
+  display: block;
+}
+
+@keyframes intro-rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes intro-halo {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%      { opacity: 0.46; transform: scale(1.06); }
+}
+
+/* -------------------------------------------------- type */
+
+.intro__wordmark {
+  margin: clamp(1.1rem, 4vw, 1.6rem) 0 0;
+  font-size: clamp(1.5rem, 6vw, 2.05rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--intro-fg);
+  animation: intro-rise 900ms cubic-bezier(0.19, 1, 0.22, 1) 90ms both;
+}
+
+.intro__tagline {
+  margin: 0.4rem 0 0;
+  font-size: clamp(0.9rem, 3.4vw, 1rem);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--intro-fg-soft);
+  max-width: 22rem;
+  text-wrap: balance;
+  animation: intro-rise 900ms cubic-bezier(0.19, 1, 0.22, 1) 160ms both;
+}
+
+/* -------------------------------------------------- progress */
+
+.intro__progress {
+  width: min(11rem, 60%);
+  height: 3px;
+  margin: clamp(1.5rem, 5vw, 2rem) 0 0;
+  border-radius: 999px;
+  background: var(--intro-track);
+  overflow: hidden;
+  animation: intro-rise 900ms cubic-bezier(0.19, 1, 0.22, 1) 230ms both;
+}
+
+/* Determinate and honest: it runs for exactly as long as the splash holds. */
+.intro__progress-bar {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  transform-origin: left center;
+  background: linear-gradient(
+    90deg,
+    var(--intro-patient),
+    var(--intro-practice)
+  );
+  animation: intro-fill var(--intro-hold, 2600ms) linear both;
+}
+
+@keyframes intro-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.intro__status {
+  margin: 0.85rem 0 0;
+  font-size: clamp(0.82rem, 3.1vw, 0.9rem);
+  line-height: 1.5;
+  color: var(--intro-fg-soft);
+  max-width: 22rem;
+  text-wrap: balance;
+  animation: intro-rise 900ms cubic-bezier(0.19, 1, 0.22, 1) 300ms both;
+}
+
+/* -------------------------------------------------- skip */
+
+.intro__cta {
+  margin: clamp(1.35rem, 5vw, 1.85rem) 0 0;
+  min-height: 44px; /* iOS/Android touch target */
+  padding: 0.62rem 1.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--intro-cta-ring);
+  color: var(--intro-cta-fg);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+  animation: intro-rise 900ms cubic-bezier(0.19, 1, 0.22, 1) 370ms both;
+}
+
+@media (hover: hover) {
+  .intro__cta:hover {
+    background: var(--intro-cta-hover);
+    box-shadow: inset 0 0 0 1px var(--intro-patient);
+  }
+}
+
+.intro__cta:active {
+  transform: scale(0.98);
+}
+
+.intro__cta:focus-visible {
+  outline: 2px solid var(--intro-patient);
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------- short viewports
+   Landscape phones and small windows: shrink the tile and drop the halo
+   rather than letting the column scroll. */
+
+@media (max-height: 600px) {
+  .intro__mark { width: clamp(5.5rem, 18vh, 7rem); }
+  .intro__wordmark { margin-top: 0.9rem; font-size: clamp(1.25rem, 4.5vh, 1.6rem); }
+  .intro__progress { margin-top: 1rem; }
+  .intro__cta { margin-top: 1rem; }
+  .intro__mark-glow { display: none; }
+}
+
+@media (max-height: 460px) {
+  .intro__tagline,
+  .intro__status { display: none; }
+}
+
+/* -------------------------------------------------- large screens */
+
+@media (min-width: 768px) {
+  .intro__content { max-width: 30rem; }
+}
+
+/* -------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .intro__orb,
+  .intro__mark,
+  .intro__mark-glow,
+  .intro__wordmark,
+  .intro__tagline,
+  .intro__progress,
+  .intro__cta {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1;
+    transform: none !important;
+  }
+
+  .intro.is-leaving { opacity: 1; }
+
+  /* The bar still fills, just without easing theatrics — it is the only
+     signal that something is happening at all. */
+  .intro__progress-bar {
+    animation: intro-fill var(--intro-hold, 900ms) linear both;
+  }
+}
+
+/* -------------------------------------------------- screenreader utility
+   Kept local because this page can render before the global sheet applies. */
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -22,112 +362,6 @@
   white-space: normal;
   border-radius: 999px;
   font-size: 0.85rem;
-  background: rgba(37, 99, 235, 0.12);
-  color: #1d4ed8;
-}
-
-/* Vollflächig + iPhone-kompatible Höhe */
-.intro-container {
-  min-height: 100svh; /* iOS-freundlich */
-  width: 100%;
-  padding:
-    calc(env(safe-area-inset-top, 0) + 0.75rem)
-    1.5rem
-    calc(env(safe-area-inset-bottom, 0) + 1.25rem);
-
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-
-  background:
-    radial-gradient(circle at 0% 0%, rgba(37, 99, 235, 0.18), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.16), transparent 55%),
-    #020617;
-
-  color: #f9fafb;
-}
-
-.intro-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center; /* ganz wichtig -> mittig */
-  text-align: center;
-  max-width: 540px;
-  margin: 0 auto;
-}
-
-
-.intro-logo-wrapper {
-  width: min(260px, 70vw);
-  border-radius: 32px;
-  padding: 1.4rem 1.2rem;
-  background: radial-gradient(
-      circle at 30% 0%,
-      rgba(248, 250, 252, 0.32),
-      transparent 60%
-    ),
-    rgba(15, 23, 42, 0.85);
-  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.intro-logo {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.intro-status-text {
-  margin-top: 1.1rem;
-  font-size: 0.9rem;
-  color: rgba(226, 232, 240, 0.9);
-  max-width: 22rem;
-}
-
-/* Animationen */
-.fade-in {
-  opacity: 0;
-  transform: translateY(18px) scale(0.98);
-  animation: introFadeIn 0.9s cubic-bezier(0.19, 1, 0.22, 1) forwards;
-}
-
-.fade-out {
-  animation: introFadeOut 0.9s ease-in forwards;
-}
-
-@keyframes introFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(18px) scale(0.98);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes introFadeOut {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-16px) scale(0.97);
-  }
-}
-
-/* Bewegungsreduktion */
-@media (prefers-reduced-motion: reduce) {
-  .intro-logo,
-  .fade-in,
-  .fade-out {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
+  background: var(--intro-cta-hover);
+  color: var(--intro-fg);
 }

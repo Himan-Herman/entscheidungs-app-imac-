@@ -16,6 +16,7 @@ import {
   INBOX_TYPES,
 } from "../services/patientInbox/patientInboxService.js";
 import { generatePatientInboxAiSummary } from "../services/patientInbox/patientInboxAiService.js";
+import { getPatientNotificationSummary } from "../services/notificationCenter/notificationCenterService.js";
 import { writeAuditLog } from "../services/auditLogService.js";
 
 const router = express.Router();
@@ -55,6 +56,27 @@ router.get("/count", async (req, res) => {
     return res.json({ ok: true, unreadCount });
   } catch (err) {
     console.error("[patient/inbox/count]", err?.message ?? err);
+    return res.status(500).json({ ok: false, error: "request_failed" });
+  }
+});
+
+/**
+ * GET /api/patient/inbox/notifications
+ *
+ * The header's central entry point. Same source of truth as the inbox page,
+ * same authorization; only the count and the newest few unread items. This is
+ * the PATIENT endpoint — it never reads practice-side data, so a patient can
+ * never be shown a practice badge, not even an empty one.
+ */
+router.get("/notifications", async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const summary = await getPatientNotificationSummary(userId);
+    return res.json({ ok: true, ...summary });
+  } catch (err) {
+    console.error("[patient/inbox/notifications]", err?.message ?? err);
     return res.status(500).json({ ok: false, error: "request_failed" });
   }
 });
@@ -101,7 +123,7 @@ router.get("/", async (req, res) => {
       offset: req.query.offset,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -128,7 +150,7 @@ router.patch("/:itemId/read", async (req, res) => {
   try {
     const item = await markInboxItemRead(req.params.itemId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -157,7 +179,7 @@ router.patch("/:itemId/archive", async (req, res) => {
   try {
     const item = await archiveInboxItem(req.params.itemId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",
@@ -186,7 +208,7 @@ router.patch("/:itemId/restore", async (req, res) => {
   try {
     const item = await restoreInboxItem(req.params.itemId, userId);
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: "patient",

@@ -11,6 +11,7 @@ import {
 } from "../api/patientPracticeDocumentsApi.js";
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import PatientStructuredDocumentSection from "../components/PatientStructuredDocumentSection.jsx";
+import PatientDocumentTranslationSection from "../components/PatientDocumentTranslationSection.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
 import ShareDocumentDialog from "../../patientPractices/components/ShareDocumentDialog.jsx";
@@ -307,6 +308,26 @@ export default function PatientPracticeDocumentDetailPage() {
             )}
           </ul>
         </section>
+      ) : null}
+
+      {/* Deliberately below the file list. The original document is the
+          authoritative one and has to come first — both in reading order and
+          for screen readers. Placing the transformation above it made the AI
+          feature look like the page's primary content, and put a file selector
+          on screen before the patient had seen that the files belong to this
+          document.
+
+          It stays on the document's own detail page, so the feature is never a
+          general-purpose upload tool. It hides itself when the client flag is
+          off or the document is not one this feature handles. */}
+      {doc && !loading && !error ? (
+        <PatientDocumentTranslationSection
+          document={doc}
+          onViewOriginal={(fileId) => {
+            const file = (doc.files || []).find((f) => f.id === fileId) || doc.files?.[0];
+            if (file) void handleView(file);
+          }}
+        />
       ) : null}
 
       <ShareDocumentDialog

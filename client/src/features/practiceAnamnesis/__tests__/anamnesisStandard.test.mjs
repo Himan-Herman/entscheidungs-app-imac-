@@ -23,7 +23,6 @@ const moduleSrc = src
 
 let STANDARD_QUESTION_CATALOG, emptyLangMap, newDraftQuestion, questionFromCatalog;
 try {
-  // eslint-disable-next-line no-new-func
   const fn = new Function(moduleSrc + "\nreturn { STANDARD_QUESTION_CATALOG, emptyLangMap, newDraftQuestion, questionFromCatalog };");
   ({ STANDARD_QUESTION_CATALOG, emptyLangMap, newDraftQuestion, questionFromCatalog } = fn());
 } catch (e) {

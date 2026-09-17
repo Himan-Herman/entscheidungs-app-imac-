@@ -1,9 +1,9 @@
 import { deepMerge } from "../../deepMerge.js";
+import { frInternalWork } from "./fr/fr.internalWork.js";
 import legalFr from "../legal/fr/index.js";
 import landing from "./fr.landing.js";
 import info from "./fr.info.js";
 import preVisit from "./fr.preVisit.js";
-import startseite from "./fr.startseite.js";
 import frCore from "./fr/fr.core.js";
 import frAccount from "./fr/fr.account.js";
 import frModules from "./fr/fr.modules.js";
@@ -21,6 +21,7 @@ import { frPatientBillingExplain } from "./fr/fr.patientBillingExplain.js";
 import { frPracticeDirectory } from "./fr/fr.practiceDirectory.js";
 import { frTelemedicine } from "./fr/fr.telemedicine.js";
 import { frPatientPractices, frDocumentSharing } from "./fr/fr.patientPractices.js";
+import { frPatientOnboarding } from "./fr/fr.patientOnboarding.js";
 import { frLifecycleExit } from "./fr/fr.lifecycleExit.js";
 
 const frBase = {
@@ -232,7 +233,6 @@ const frBase = {
     cancel: "Annuler",
     close: "Fermer",
   },
-  startseite,
   forgotPassword: {
     title: "Réinitialiser le mot de passe",
     text: "Saisissez votre e-mail. Nous enverrons un lien de réinitialisation.",
@@ -303,6 +303,15 @@ const frComposed = deepMerge(
 );
 
 export default deepMerge(
+  deepMerge(
+  deepMerge(
   deepMerge(frComposed, frTelemedicine),
   { patientPractices: frPatientPractices, documentSharing: frDocumentSharing, lifecycleExit: frLifecycleExit },
+),
+  // Phases 5A-5C: authored here rather than falling through to English.
+  frInternalWork,
+),
+  // Patient onboarding (practice invitation + patient claim). Authored here
+  // rather than falling through to English.
+  { patientOnboarding: frPatientOnboarding },
 );

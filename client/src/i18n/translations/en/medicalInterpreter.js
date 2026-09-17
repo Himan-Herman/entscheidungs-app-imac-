@@ -351,7 +351,7 @@ export default {
   history: {
     heading: "Conversation documentation on this device",
     privacyNote:
-      "Phase 1: conversations are stored only on this device — not on MedScoutX servers. No audio or microphone recordings are kept. This is orientation and communication documentation, not a medical record. You can delete individual conversations or clear all history below at any time.",
+      "Conversations are stored on this device. Spoken content and recognised text are processed for the translation. You can remove individual conversations or the entire history here.",
     fallbackTitle: "Conversation {{date}}",
     statusDraft: "Draft",
     statusActive: "Active",
@@ -934,7 +934,7 @@ export default {
     history: {
       title: "Local history",
       privacy:
-        "History is stored only locally on this device. Nothing is sent to MedScoutX or a practice.",
+        "The history is stored on this device and can be removed here. The stored history is not made available to a connected practice through this function.",
       empty: "No saved conversations on this device yet.",
       patientLanguage: "Patient language",
       practiceLanguage: "Practice language",

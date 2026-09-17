@@ -141,7 +141,7 @@ export async function patchBookingSettings(actorUserId, practiceId, body, ctx = 
     action: "booking_settings_updated",
     practiceProfileId: practiceId,
     metadata: { fields: Object.keys(data) },
-  }).catch(() => {});
+  });
 
   return settingsToJson(row, access);
 }

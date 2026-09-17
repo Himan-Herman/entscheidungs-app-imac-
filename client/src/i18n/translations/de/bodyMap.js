@@ -26,7 +26,7 @@ export default {
     backTitle: "Rückseite",
     backText: "Rücken, Nacken, Schultern, Arme und Beine hinten.",
     footer:
-      "Sie können die Ansicht später wechseln. Der Chat zu einer Region bleibt auf diesem Gerät, bis Sie ihn löschen.",
+      "Sie können die Ansicht später wechseln. Der Verlauf zu einer Region wird auf diesem Gerät gespeichert und kann hier aus der Ansicht entfernt werden.",
   },
   mapFront: {
     pageTitle: "Körperkarte — Vorderseite — MedScoutX",
@@ -78,8 +78,8 @@ export default {
       "Für andere Beschwerden nutzen Sie den Symptom-Check.",
     btnNewChat: "Neues Gespräch",
     btnNewChatTitle: "Neues leeres Gespräch starten; das aktuelle bleibt im Verlauf",
-    btnClearHistory: "Aktuelles Gespräch löschen",
-    btnClearHistoryTitle: "Dieses Gespräch aus dem Verlauf entfernen",
+    btnClearHistory: "Aus Verlauf entfernen",
+    btnClearHistoryTitle: "Dieses Gespräch aus dem Verlauf auf diesem Gerät entfernen",
     defaultRegionConversation: "Körperregion",
     btnFinish: "Zusammenfassung erstellen",
     btnFinishTitle: "Neutrale Zusammenfassung für den Arzttermin erstellen",

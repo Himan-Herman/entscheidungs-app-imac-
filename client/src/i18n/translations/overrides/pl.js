@@ -4,7 +4,6 @@ import landing from "./pl.landing.js";
 import info from "./pl.info.js";
 import preVisitPl from "./pl.preVisit.js";
 import preVisitOverlay from "./pl.preVisit.overlay.js";
-import startseite from "./pl.startseite.js";
 import plCore from "./pl/pl.core.js";
 import plAccount from "./pl/pl.account.js";
 import plModules from "./pl/pl.modules.js";
@@ -16,7 +15,6 @@ const plBase = {
   landing,
   info,
   preVisit: deepMerge(preVisitPl, preVisitOverlay),
-  startseite,
   header: {
     skip: "Przejdź do treści",
     homeAria: "Przejdź do strony głównej",

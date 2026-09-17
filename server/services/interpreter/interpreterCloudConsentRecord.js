@@ -68,7 +68,7 @@ export async function recordInterpreterCloudConsentGranted(userId, req, meta = {
     },
   });
 
-  await writeAuditLog({
+  writeAuditLog({
     req,
     userId: uid,
     actorRole: "patient",
@@ -113,7 +113,7 @@ export async function recordInterpreterCloudConsentRevoked(userId, req, meta = {
     },
   });
 
-  await writeAuditLog({
+  writeAuditLog({
     req,
     userId: uid,
     actorRole: "patient",

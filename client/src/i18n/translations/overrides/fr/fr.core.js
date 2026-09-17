@@ -48,10 +48,13 @@ export default {
     title: "MedScoutX — chargement",
     skip: "Passer l’introduction",
     heading: "MedScoutX démarre",
-    status:
-      "MedScoutX se charge. Vous serez redirigé·e vers votre espace sous peu.",
+    tagline: "Préparation à la consultation",
+    status: "Vous allez choisir votre espace dans un instant.",
+    continue: "Continuer",
   },
   voiceInput: {
+    unavailable: "La saisie vocale n'est pas disponible actuellement.",
+
     micError: "Microphone indisponible.",
     transcriptionError: "Échec de la transcription.",
     start: "Démarrer la saisie vocale",

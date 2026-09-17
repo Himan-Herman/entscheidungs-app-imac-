@@ -2,7 +2,6 @@ import legalNl from "../legal/nl/index.js";
 import landing from "./nl.landing.js";
 import info from "./nl.info.js";
 import preVisit from "./nl.preVisit.js";
-import startseite from "./nl.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 
@@ -11,7 +10,6 @@ export default {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "Naar inhoud",
     homeAria: "Naar startpagina",

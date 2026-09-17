@@ -64,7 +64,7 @@ export default function PatientChatHistoryPanel({
     return labels.statusDraft;
   };
 
-  const pendingSession = sessions.find((s) => s.id === pendingDeleteId);
+  const _pendingSession = sessions.find((s) => s.id === pendingDeleteId);
 
   return (
     <section

@@ -42,6 +42,33 @@
 
 ---
 
+## 2a. Technischer Hinweis — Dokumentübersetzung (KI) ist NICHT von diesem Dokument abgedeckt
+
+> **Technischer Review-Hinweis, keine juristische Bewertung und keine Freigabe.**
+> Ergänzt in Phase 3 der Dokumentübersetzung, damit der Umfang dieses Dokuments
+> nicht überschätzt wird. Der bestehende Text oben wurde inhaltlich nicht geändert.
+
+Seit Phase 2 existiert im Code eine **zweite, davon unabhängige** KI-Verarbeitung:
+die patientenseitige **Dokumenttransformation** (Übersetzung bzw. verständliche
+Formulierung freigegebener Praxisdokumente).
+
+- Sie ist **deaktiviert** (`ENABLE_DOCUMENT_TRANSLATION=false`, eigener
+  Provider-Gate, kein Provider konfiguriert). Es werden derzeit **keine** Daten
+  übermittelt.
+- Sie ist **nicht** dasselbe wie das KI-Review in §2: Dort werden Abrechnungsfelder
+  und maximal 500 Zeichen Kontext übermittelt. Hier wäre es der **Textinhalt eines
+  medizinischen Dokuments** — potenziell Gesundheitsdaten nach Art. 9 DSGVO.
+- Die Prüfpunkte aus §2 decken diesen Verarbeitungszweck folglich **nicht** ab.
+  Eine Aktivierung erfordert eine eigene Aufnahme als Subprozessor, eine eigene
+  Zweck-/Datenarten-Beschreibung und eine eigene Rechtsgrundlagenprüfung.
+
+Der technische Freigabestand wird geführt in
+[`../production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md`](../production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md).
+Dort ist auch dokumentiert, was der Code prüfen kann und was ausschließlich
+außerhalb des Repositorys nachgewiesen werden kann.
+
+---
+
 ## 3. Verfahren bei Änderung von Subprozessoren
 
 - Der Auftragsverarbeiter informiert den Verantwortlichen **vor** Hinzunahme oder

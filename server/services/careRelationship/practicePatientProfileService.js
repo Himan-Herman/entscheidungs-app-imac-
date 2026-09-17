@@ -86,7 +86,7 @@ export async function getPatientProfileForPractice(
 
   const profile = user.profile;
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: viewerUserId,
     actorRole: "practice",
     action: "patient_profile_viewed",
@@ -192,7 +192,7 @@ export async function updatePatientProfileAccess(linkId, patientUserId, granted,
     },
   });
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: uid,
     actorRole: "patient",
     action: granted ? "patient_profile_access_granted" : "patient_profile_access_revoked",

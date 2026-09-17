@@ -97,7 +97,13 @@ export default function VaccinationPassPage() {
       }
 
       if (file && result?.id) {
-        await uploadVaccinationDocument(result.id, file).catch(() => {});
+        // Not swallowed. A failed upload used to disappear here silently, so
+        // the entry saved, the dialog closed, and the patient had no way to
+        // know their certificate had not been attached. The entry itself is
+        // already saved at this point, so the failure is reported without
+        // discarding what did work.
+        const { res: docRes, data: docData } = await uploadVaccinationDocument(result.id, file);
+        if (!docRes.ok || !docData.ok) setLoadError(t.form.uploadFailed);
       }
 
       await load();

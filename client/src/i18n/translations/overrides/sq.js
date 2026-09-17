@@ -2,7 +2,6 @@ import legalSq from "../legal/sq/index.js";
 import landing from "./sq.landing.js";
 import info from "./sq.info.js";
 import preVisit from "./sq.preVisit.js";
-import startseite from "./sq.startseite.js";
 
 /** Shqip — partial overrides merged onto English — missing keys fall back to EN. */
 export default {
@@ -10,7 +9,6 @@ export default {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "Kalo te përmbajtja",
     homeAria: "Shko te faqja kryesore",

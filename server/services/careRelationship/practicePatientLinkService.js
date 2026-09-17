@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import { writeRequiredAuditLog } from "../auditLogService.js";
 import { PRACTICE_BRANDING_SELECT, practiceBrandingJson } from "../../utils/practiceBranding.js";
 import {
   CARE_CONSENT_VERSION,
@@ -85,12 +86,10 @@ const includePatient = {
 
 const includePatientPortal = {
   practiceProfile: {
-    select: {
-      id: true,
-      practiceName: true,
-      publicSlug: true,
-      specialty: true,
-    },
+    // Uses the shared branding select so the practice a patient sees here is
+    // described exactly as it is everywhere else — same name resolution, same
+    // logo, same specialty and city.
+    select: PRACTICE_BRANDING_SELECT,
   },
   patientProfile: {
     select: { id: true, displayName: true, relationLabel: true },
@@ -203,16 +202,37 @@ export async function createPracticePatientLink(input) {
   if (duplicate) throw new Error("link_already_exists");
 
   const now = new Date();
-  const row = await prisma.practicePatientLink.create({
-    data: {
-      practiceProfileId,
-      patientUserId,
-      patientProfileId,
-      status,
-      linkedAt: now,
-    },
-    include: includePatient,
-  });
+  let row;
+  try {
+    row = await prisma.practicePatientLink.create({
+      data: {
+        practiceProfileId,
+        patientUserId,
+        patientProfileId,
+        status,
+        linkedAt: now,
+      },
+      include: includePatient,
+    });
+  } catch (err) {
+    /*
+     * The duplicate check above is a read followed by a write, so a concurrent
+     * caller can slip between them. Two partial unique indexes are the actual
+     * guarantee, and this turns their rejection into the same domain error the
+     * check-then-insert path already raises — so a caller handles one outcome,
+     * not two.
+     *
+     * Matching on the model and the code only: Prisma reports `meta.target` as
+     * column names, never the index name, and the message is a library detail
+     * that could change. The primary key is the only other unique on this
+     * model, and a cuid collision is not a real event, so any P2002 here IS a
+     * relationship collision.
+     */
+    if (err?.code === "P2002" && err?.meta?.modelName === "PracticePatientLink") {
+      throw new Error("link_already_exists");
+    }
+    throw err;
+  }
 
   return linkToJson(row);
 }
@@ -424,7 +444,7 @@ export async function requestLinkByEmail(input) {
  * @param {string} linkId
  * @param {string} patientUserId
  */
-export async function declinePracticePatientLink(linkId, patientUserId) {
+export async function declinePracticePatientLink(linkId, patientUserId, ctx = {}) {
   const id = String(linkId || "").trim();
   const uid = String(patientUserId || "").trim();
   if (!id || !uid) throw new Error("validation_required");
@@ -435,11 +455,35 @@ export async function declinePracticePatientLink(linkId, patientUserId) {
   if (!existing) throw new Error("link_not_found");
   if (existing.status !== "invited") throw new Error("link_not_invited");
 
-  const row = await prisma.practicePatientLink.update({
-    where: { id },
-    data: { status: "declined", updatedAt: new Date() },
-    include: includePatientPortal,
+  // The audit lives HERE, not in the route: only inside the service can it share
+  // a transaction with the state change. A declined relationship that left no
+  // record would be indistinguishable from one that was never offered.
+  const row = await prisma.$transaction(async (tx) => {
+    const updated = await tx.practicePatientLink.update({
+      where: { id },
+      data: { status: "declined", updatedAt: new Date() },
+      include: includePatientPortal,
+    });
+
+    await writeRequiredAuditLog(
+      {
+        req: ctx.req,
+        userId: uid,
+        actorRole: "patient",
+        action: "practice_patient_link_declined",
+        entityType: "PracticePatientLink",
+        entityId: id,
+        practiceProfileId: existing.practiceProfileId,
+        patientUserId: uid,
+        practicePatientLinkId: id,
+        metadata: { previousStatus: existing.status, newStatus: "declined" },
+      },
+      tx,
+    );
+
+    return updated;
   });
+
   return linkToPatientJson(row);
 }
 

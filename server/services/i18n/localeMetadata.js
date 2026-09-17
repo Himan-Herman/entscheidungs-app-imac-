@@ -1,53 +1,33 @@
-/** Server copy of client locale registry — keep in sync with client/src/i18n/localeConfig.js */
+/**
+ * Server-side locale registry — re-export facade.
+ *
+ * This file used to be a hand-maintained "server copy" of the client registry.
+ * It had drifted: it was missing `he` and `ur`, listed only three RTL scripts,
+ * exposed just ["de","en"] as header-selectable, and omitted `ru` from the
+ * patient/practice UI sets — so a server-side locale check would have rejected
+ * Russian even though the product ships it.
+ *
+ * The registry now lives in shared/i18n/localeConfig.js and is imported rather
+ * than copied. The exports below are kept byte-for-byte identical in NAME so
+ * every existing import site keeps working unchanged; only their values are now
+ * correct.
+ *
+ * Do not add locale data to this file. Add it to the shared module.
+ */
 
-export const RTL_LANGUAGE_CODES = ["ar", "fa", "ckb"];
-
-export const LOCALE_OPTIONS = [
-  { code: "de", nativeName: "Deutsch" },
-  { code: "en", nativeName: "English" },
-  { code: "fr", nativeName: "Français" },
-  { code: "es", nativeName: "Español" },
-  { code: "it", nativeName: "Italiano" },
-  { code: "ru", nativeName: "Русский" },
-  { code: "uk", nativeName: "Українська" },
-  { code: "tr", nativeName: "Türkçe" },
-  { code: "pt", nativeName: "Português" },
-  { code: "ar", nativeName: "العربية" },
-  { code: "fa", nativeName: "فارسی" },
-  { code: "pl", nativeName: "Polski" },
-  { code: "ro", nativeName: "Română" },
-  { code: "nl", nativeName: "Nederlands" },
-  { code: "ckb", nativeName: "کوردی (سۆرانی)" },
-  { code: "ku", nativeName: "Kurdî (Kurmancî)" },
-  { code: "el", nativeName: "Ελληνικά" },
-  { code: "sq", nativeName: "Shqip" },
-  { code: "hr", nativeName: "Hrvatski" },
-  { code: "bs", nativeName: "Bosanski" },
-  { code: "sr", nativeName: "Srpski" },
-];
-
-export const HEADER_SELECTABLE_LOCALE_CODES = ["de", "en"];
-
-/** Patient workspace UI — keep in sync with client PATIENT_UI_SELECTABLE_LOCALE_CODES */
-export const PATIENT_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it"];
-
-/** Practice workspace UI — keep in sync with client PRACTICE_UI_SELECTABLE_LOCALE_CODES */
-export const PRACTICE_UI_SELECTABLE_LOCALE_CODES = ["de", "en", "fr", "es", "it"];
-
-export const UI_FULLY_SUPPORTED_LOCALE_CODES = [
-  ...new Set([
-    ...HEADER_SELECTABLE_LOCALE_CODES,
-    ...PATIENT_UI_SELECTABLE_LOCALE_CODES,
-    ...PRACTICE_UI_SELECTABLE_LOCALE_CODES,
-  ]),
-];
-
-const SUPPORTED = new Set(LOCALE_OPTIONS.map((o) => o.code));
-
-export function isRtlLanguage(code) {
-  return typeof code === "string" && RTL_LANGUAGE_CODES.includes(code.toLowerCase());
-}
-
-export function isSupportedLanguage(code) {
-  return typeof code === "string" && SUPPORTED.has(code.toLowerCase());
-}
+export {
+  DOCUMENT_TRANSLATION_TARGET_LOCALE_CODES,
+  HEADER_SELECTABLE_LOCALE_CODES,
+  LANDING_SELECTABLE_LOCALE_CODES,
+  LOCALE_OPTIONS,
+  PATIENT_UI_SELECTABLE_LOCALE_CODES,
+  PRACTICE_UI_SELECTABLE_LOCALE_CODES,
+  PRE_VISIT_SELECTABLE_LOCALE_CODES,
+  RTL_LANGUAGE_CODES,
+  SUPPORTED_LANGUAGE_CODES,
+  UI_FULLY_SUPPORTED_LOCALE_CODES,
+  UI_SELECTABLE_LOCALE_CODES,
+  isRtlLanguage,
+  isSupportedLanguage,
+  normalizeDocumentTranslationTarget,
+} from "../../../shared/i18n/localeConfig.js";

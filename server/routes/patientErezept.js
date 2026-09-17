@@ -107,11 +107,17 @@ router.patch("/:id", requireFeature, async (req, res) => {
         redeemedAt: status === "redeemed" ? new Date() : existing.redeemedAt,
       },
     });
-    await writeAuditLog({
+    writeAuditLog({
       userId,
+      actorRole: "patient",
       action: "erezept_status_updated",
-      meta: { entryId: updated.id, status },
-    }).catch(() => {});
+      entityType: "erezept_entry",
+      entityId: updated.id,
+      // `meta` was silently discarded: buildAuditRow reads `metadata`, so this
+      // status change used to be recorded without saying which prescription or
+      // which status.
+      metadata: { entryId: updated.id, status },
+    });
     return res.json({ ok: true, entry: toJson(updated) });
   } catch (err) {
     logServerError("patientErezept/PATCH", err);

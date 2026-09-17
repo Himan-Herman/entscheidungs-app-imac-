@@ -1,7 +1,6 @@
 import header from "./header.js";
 import login from "./login.js";
 import register from "./register.js";
-import startseite from "./startseite.js";
 import footer from "./footer.js";
 import common from "./common.js";
 import forgotPassword from "./forgotPassword.js";
@@ -19,6 +18,8 @@ import practiceConsents from "./practiceConsents.js";
 import practicePreVisit from "./practicePreVisit.js";
 import practiceAnalytics from "./practiceAnalytics.js";
 import practicePatients from "./practicePatients.js";
+import patientOnboarding from "./patientOnboarding.js";
+import practiceInternalWork from "./practiceInternalWork.js";
 import settingsPrivacy from "./settingsPrivacy.js";
 import accountPortal from "./accountPortal.js";
 import appShell from "./appShell.js";
@@ -29,8 +30,10 @@ import roleEntry from "./roleEntry.js";
 import practiceFinder from "./practiceFinder.js";
 import visitMedications from "./visitMedications.js";
 import patientInbox from "./patientInbox.js";
+import notificationCenter from "./notificationCenter.js";
 import patientCardInfo from "./patientCardInfo.js";
 import patientThreads from "./patientThreads.js";
+import practiceContext from "./practiceContext.js";
 import practiceMessages from "./practiceMessages.js";
 import practiceMedicationPlan from "./practiceMedicationPlan.js";
 import patientMedicationPlan from "./patientMedicationPlan.js";
@@ -88,7 +91,6 @@ export default {
   header,
   login,
   register,
-  startseite,
   footer,
   common,
   forgotPassword,
@@ -106,6 +108,8 @@ export default {
   practicePreVisit,
   practiceAnalytics,
   practicePatients,
+  patientOnboarding,
+  practiceInternalWork,
   settingsPrivacy,
   accountPortal,
   appShell,
@@ -116,8 +120,10 @@ export default {
   practiceFinder,
   visitMedications,
   patientInbox,
+  notificationCenter,
   patientCardInfo,
   patientThreads,
+  practiceContext,
   practiceMessages,
   practiceMedicationPlan,
   patientMedicationPlan,

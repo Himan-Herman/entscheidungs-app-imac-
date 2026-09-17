@@ -5,7 +5,6 @@ import { writeAuditLog } from "../services/auditLogService.js";
 import {
   CONTEXTUAL_DATA_BLOCKED,
   blockerAuditMetadata,
-  checkPracticeDeletionBlockers,
 } from "../services/dataLifecycle/contextualPatientDataDeletionGuard.js";
 import {
   canManageIntegrations,

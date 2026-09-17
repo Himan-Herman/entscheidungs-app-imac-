@@ -125,7 +125,7 @@ export async function generatePracticePatientProfileAiSummary(input) {
 
   const summary = await runAi(prompt, locale);
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: input.viewerUserId,
     actorRole: "practice",
     action: "patient_profile_ai_summary_created",

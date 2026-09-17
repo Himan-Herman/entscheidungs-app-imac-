@@ -70,7 +70,7 @@ export default {
     heading: "Profilo per questa conversazione",
     intro:
       "Facoltativo: usa i dati salvati dell’account per questa conversazione (es. per documentazione successiva).",
-    consentLabel: "Usa i dati profilo salvati per questa conversazione",
+    consentLabel: "Usa il nome del profilo salvato per questa conversazione: {{name}}",
     consentHint:
       "Nome, data di nascita e contatti — solo se acconsenti. Non vengono usati dati del profilo salute.",
     accountLink: "Modifica nelle impostazioni account",
@@ -317,7 +317,7 @@ export default {
   history: {
     heading: "Documentazione conversazioni su questo dispositivo",
     privacyNote:
-      "Fase 1: le conversazioni sono archiviate solo su questo dispositivo — non sui server MedScoutX. Non vengono conservate registrazioni audio né del microfono. È documentazione orientativa e di comunicazione, non una cartella clinica. Puoi eliminare conversazioni singolarmente o cancellare tutta la cronologia sotto in qualsiasi momento.",
+      "Le conversazioni vengono salvate su questo dispositivo. I contenuti parlati e il testo riconosciuto vengono elaborati per la traduzione. Qui può rimuovere singole conversazioni o l’intera cronologia.",
     fallbackTitle: "Conversazione del {{date}}",
     statusDraft: "Bozza",
     statusActive: "Attiva",

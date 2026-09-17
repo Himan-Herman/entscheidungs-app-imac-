@@ -72,7 +72,7 @@ export async function createAppointmentType(actorUserId, practiceId, body, ctx =
     action: "appointment_type_created",
     practiceProfileId: practiceId,
     metadata: { appointmentTypeId: row.id },
-  }).catch(() => {});
+  });
   return typeToJson(row);
 }
 
@@ -102,7 +102,7 @@ export async function patchAppointmentType(actorUserId, practiceId, typeId, body
     action: "appointment_type_updated",
     practiceProfileId: practiceId,
     metadata: { appointmentTypeId: typeId },
-  }).catch(() => {});
+  });
   return typeToJson(row);
 }
 
@@ -122,6 +122,6 @@ export async function archiveAppointmentType(actorUserId, practiceId, typeId, ct
     action: "appointment_type_archived",
     practiceProfileId: practiceId,
     metadata: { appointmentTypeId: typeId },
-  }).catch(() => {});
+  });
   return { ok: true };
 }

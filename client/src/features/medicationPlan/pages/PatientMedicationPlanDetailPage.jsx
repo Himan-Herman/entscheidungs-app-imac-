@@ -70,7 +70,7 @@ export default function PatientMedicationPlanDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [planId, t.featureDisabled, t.loadError]);
+  }, [planId, t.featureDisabled, t.loadError, t.planNotFound]);
 
   useEffect(() => {
     load();

@@ -53,7 +53,7 @@ export async function fhirPreview(actorUserId, practiceId, body, ctx = {}) {
     action: "integration_fhir_preview",
     practiceProfileId: practiceId,
     metadata: { resourceType: resource.resourceType, bytes: size },
-  }).catch(() => {});
+  });
 
   return { resource, sandbox: !isFhirIntegrationEnabled() || isPvsSandboxEnabled() };
 }
@@ -89,7 +89,7 @@ export async function hl7Parse(actorUserId, practiceId, body, ctx = {}) {
     action: "integration_hl7_parse_test",
     practiceProfileId: practiceId,
     metadata: { ok: parsed.ok, message: parsed.ok ? parsed.messageType?.message : null },
-  }).catch(() => {});
+  });
 
   return {
     parsed,

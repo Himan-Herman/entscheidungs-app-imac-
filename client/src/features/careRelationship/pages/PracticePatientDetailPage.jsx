@@ -20,6 +20,7 @@ import PracticePatientErezeptSection from "../../erezept/components/PracticePati
 import PracticePatientSosCardSection from "../../sosCard/components/PracticePatientSosCardSection.jsx";
 import PracticePatientProfileSection from "../components/PracticePatientProfileSection.jsx";
 import PracticePatientAssignmentSection from "../components/PracticePatientAssignmentSection.jsx";
+import PracticePatientInternalWorkSection from "../../practiceInternalWork/components/PracticePatientInternalWorkSection.jsx";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
 
@@ -45,6 +46,7 @@ const VALID_TABS = new Set([
   "erezept",
   "sosCard",
   "messages",
+  "internalWork",
   "activity",
 ]);
 
@@ -52,7 +54,6 @@ export default function PracticePatientDetailPage() {
   const { linkId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const practiceId = searchParams.get("practiceId") || "";
-  const fromSearch = searchParams.get("fromSearch") === "true";
   const activeTab = VALID_TABS.has(searchParams.get("tab") || "")
     ? searchParams.get("tab")
     : "overview";
@@ -105,7 +106,7 @@ export default function PracticePatientDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [linkId, practiceId, fromSearch, t.featureDisabled, t.loadDetailError]);
+  }, [linkId, practiceId, t.featureDisabled, t.loadDetailError]);
 
   useEffect(() => {
     document.title = t.recordPageTitle;
@@ -284,6 +285,16 @@ export default function PracticePatientDetailPage() {
 
           {activeTab === "messages" && practiceId && linkId ? (
             <PracticePatientMessagesSection
+              linkId={linkId}
+              practiceId={practiceId}
+              readOnly={readOnly}
+            />
+          ) : null}
+
+          {/* The team's own notes and follow-ups. A separate tab, never mixed
+              into the patient conversation above. */}
+          {activeTab === "internalWork" && practiceId && linkId ? (
+            <PracticePatientInternalWorkSection
               linkId={linkId}
               practiceId={practiceId}
               readOnly={readOnly}

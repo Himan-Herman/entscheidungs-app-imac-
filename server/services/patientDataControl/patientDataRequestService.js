@@ -98,7 +98,7 @@ export async function getPracticeDataRequest(requestId, practiceProfileId, viewe
   });
   if (!row) throw new Error("request_not_found");
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: uid,
     actorRole: "practice",
     action: "patient_data_request_viewed",
@@ -193,7 +193,7 @@ export async function createPatientDataRequest(input) {
       ? "patient_data_export_request_submitted"
       : "patient_data_request_submitted";
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: patientUserId,
     actorRole: "patient",
     action,
@@ -321,7 +321,7 @@ export async function updatePracticeDataRequestStatus(input) {
     data,
   });
 
-  await writeAuditLog({
+  writeAuditLog({
     userId: handlerId,
     actorRole: "practice",
     action: "patient_data_request_status_changed",

@@ -11,6 +11,8 @@ import {
   postPracticeInboxAiReplyDraft,
   postPracticeInboxAiSummary,
 } from "../api/practiceInboxApi.js";
+import { safeInternalPath } from "../../../lib/safeNavigation.js";
+import { notifyUnreadChanged } from "../../../lib/notificationSignal.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
 import "../../../styles/PatientInboxPage.css";
@@ -35,10 +37,6 @@ function patientName(item, fallback) {
     [p.firstName, p.lastName].filter(Boolean).join(" ") ||
     fallback
   );
-}
-
-function isSafeInternalUrl(url) {
-  return typeof url === "string" && url.startsWith("/") && !url.startsWith("//");
 }
 
 export default function PracticeInboxDetailPage() {
@@ -95,6 +93,52 @@ export default function PracticeInboxDetailPage() {
     load();
   }, [load]);
 
+  /*
+   * Opening the item is what marks it read.
+   *
+   * Reaching this page means the user clicked "Öffnen" on one specific notice —
+   * merely visiting the inbox list leaves everything unread, which is the
+   * behaviour we want and already had. What was missing is this half: the list
+   * link navigated here and nothing ever recorded that the item had been
+   * looked at, so the header badge kept showing a count that no longer matched
+   * what the user had seen.
+   *
+   * `new` only. The server is idempotent either way, but there is no reason to
+   * send a request for an item that is already read, done or archived — and
+   * archived items are refused there, which would surface as a pointless
+   * error.
+   */
+  useEffect(() => {
+    if (!item || item.status !== "new" || !itemId || !practiceId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { res, data } = await patchPracticeInboxRead(itemId, practiceId);
+        if (cancelled) return;
+        if (!res.ok || !data?.ok || !data.item) {
+          // Not marked read, so the badge is still telling the truth. Nothing
+          // is claimed here that the server did not confirm; the user can
+          // still use the explicit "mark read" control.
+          return;
+        }
+        setItem(data.item);
+        // Confirmed by the server, so the count really has moved.
+        notifyUnreadChanged();
+      } catch (err) {
+        if (err?.message === "SESSION_EXPIRED") return;
+        // Deliberately not surfaced: the page loaded and shows the notice,
+        // which is what the user asked for. Swallowing it silently would be
+        // wrong, so it is at least visible to a developer.
+        console.warn("[practice-inbox] could not mark item read:", err?.message ?? err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [item, itemId, practiceId]);
+
   async function runAction(fn) {
     setBusy(true);
     setStatusMsg("");
@@ -105,6 +149,10 @@ export default function PracticeInboxDetailPage() {
         return;
       }
       if (data.item) setItem(data.item);
+      // Marking read, done or archived all change how many notices are still
+      // unread, and the badge is fetched, not computed here — so it is told to
+      // ask again rather than being handed a number by a second writer.
+      notifyUnreadChanged();
       setStatusMsg(t.actionSuccess);
     } finally {
       setBusy(false);
@@ -257,7 +305,7 @@ export default function PracticeInboxDetailPage() {
               {t.openRecord}
             </Link>
           ) : null}
-          {isSafeInternalUrl(item.targetUrl) ? (
+          {safeInternalPath(item.targetUrl) ? (
             <Link className="practice-dashboard__link-btn" to={item.targetUrl}>
               {item.type === "message" ? t.replyInMessages : t.openTarget}
             </Link>

@@ -14,11 +14,12 @@ import {
   suppressCardNavigation,
 } from "../practiceCardInfo.js";
 
-test("all 14 designated practice-hub cards expose an info button", () => {
+test("all 15 designated practice-hub cards expose an info button", () => {
   assert.deepEqual(INFO_CARD_IDS, [
     "telemedicine",
     "inbox",
     "patients",
+    "patientOnboarding",
     "messages",
     "documents",
     "medication",
@@ -34,6 +35,7 @@ test("all 14 designated practice-hub cards expose an info button", () => {
   assert.equal(hasCardInfo("telemedicine"), true);
   assert.equal(hasCardInfo("inbox"), true);
   assert.equal(hasCardInfo("patients"), true);
+  assert.equal(hasCardInfo("patientOnboarding"), true);
   assert.equal(hasCardInfo("messages"), true);
   assert.equal(hasCardInfo("documents"), true);
   assert.equal(hasCardInfo("medication"), true);

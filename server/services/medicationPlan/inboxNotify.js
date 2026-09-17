@@ -10,7 +10,12 @@ export async function notifyPatientInboxOfMedicationPlan(plan) {
     practicePatientLinkId: plan.practicePatientLinkId,
     type: "medication",
     titleKey: "medication",
-    targetUrl: `/patient/medication-plans/${plan.id}`,
+    // The canonical patient route. It used to be
+    // `/patient/medication-plans/${plan.id}`, which matches NO route: the
+    // patient-facing detail page has always lived under `/practice/:planId`.
+    // Every notice written before this fix therefore led nowhere — see
+    // patientInboxTargetUrl(), which repairs those at read time.
+    targetUrl: `/patient/medication-plans/practice/${plan.id}`,
     sourceRefType: "medication_plan",
     sourceRefId: plan.id,
   });

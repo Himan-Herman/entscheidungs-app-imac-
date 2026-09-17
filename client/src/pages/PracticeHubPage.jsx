@@ -66,6 +66,20 @@ const CARD_DEFS = [
     Icon: UsersRound,
   },
   {
+    // Hidden unless the server says so: `visibility.patientOnboarding` is false
+    // whenever the feature flag is off, so no practice sees a dead tile.
+    id: "patientOnboarding",
+    visibilityKey: "patientOnboarding",
+    // Opt-IN, not opt-out: the shared filter below shows a card whose key is
+    // merely absent. For a flag-gated module that is the wrong default — an
+    // older server that does not send the key would expose it.
+    requireVisible: true,
+    labelKey: "cardPatientOnboarding",
+    to: (practiceId) =>
+      `/practice/patient-entries?practiceId=${encodeURIComponent(practiceId)}`,
+    Icon: UserPlus,
+  },
+  {
     id: "messages",
     visibilityKey: "messages",
     metricKey: "openMessages",
@@ -328,8 +342,13 @@ export default function PracticeHubPage() {
     setAiError("");
   }, [loadSummary, loadActivity]);
 
-  const visibility = summary?.visibility || {};
-  const metrics = summary?.metrics || {};
+  /*
+   * Memoized because `|| {}` builds a NEW empty object on every render while
+   * `summary` is still loading, which made every useMemo downstream of these
+   * two re-run on every render for nothing.
+   */
+  const visibility = useMemo(() => summary?.visibility || {}, [summary?.visibility]);
+  const metrics = useMemo(() => summary?.metrics || {}, [summary?.metrics]);
   const quickActions = summary?.quickActions || {};
   const permissions = summary?.permissions || [];
   const showAdmin =
@@ -388,7 +407,12 @@ export default function PracticeHubPage() {
   })();
 
   const visibleCards = useMemo(
-    () => CARD_DEFS.filter((c) => visibility[c.visibilityKey] !== false),
+    () =>
+      CARD_DEFS.filter((c) =>
+        c.requireVisible
+          ? visibility[c.visibilityKey] === true
+          : visibility[c.visibilityKey] !== false,
+      ),
     [visibility],
   );
 

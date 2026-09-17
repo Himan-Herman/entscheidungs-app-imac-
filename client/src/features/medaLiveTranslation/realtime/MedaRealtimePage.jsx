@@ -658,7 +658,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   return (
     <div className={`mrt-page${isPractice ? ' mrt-page--practice' : ''}`}>
       {/* Hidden audio element — receives remote WebRTC audio track */}
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      {/* The playback sink for translated speech: live audio, so there is no
+          track to caption, and it is display:none — out of the a11y tree. The
+          transcript beside it is what a screen reader follows. */}
       <audio ref={audioElRef} autoPlay style={{ display: 'none' }} />
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
@@ -1394,7 +1396,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                       value={editDraft}
                       onChange={e => setEditDraft(e.target.value)}
                       rows={3}
-                      // eslint-disable-next-line jsx-a11y/no-autofocus
+                      // Focused deliberately: this field only exists because
+                      // the user just chose to edit this turn, so focus follows
+                      // the action they took.
                       autoFocus
                       onKeyDown={e => {
                         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && editDraft.trim()) handleEditSave(turn.key);

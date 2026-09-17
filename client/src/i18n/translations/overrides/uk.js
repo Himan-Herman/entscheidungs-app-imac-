@@ -2,7 +2,6 @@ import legalUk from "../legal/uk/index.js";
 import landing from "./uk.landing.js";
 import info from "./uk.info.js";
 import preVisit from "./uk.preVisit.js";
-import startseite from "./uk.startseite.js";
 
 /** Partial overrides merged onto English — missing keys fall back to EN. */
 export default {
@@ -10,7 +9,6 @@ export default {
   landing,
   info,
   preVisit,
-  startseite,
   header: {
     skip: "Перейти до вмісту",
     homeAria: "На головну",

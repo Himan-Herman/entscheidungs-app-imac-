@@ -182,7 +182,7 @@ export async function createIntegrationConnection(actorUserId, practiceId, body,
     action: "integration_connection_created",
     practiceProfileId: practiceId,
     metadata: { connectionId: row.id, type, connectorKey, status },
-  }).catch(() => {});
+  });
 
   return connectionToJson(row, { canManage: true });
 }
@@ -240,7 +240,7 @@ export async function patchIntegrationConnection(
     action: "integration_connection_updated",
     practiceProfileId: practiceId,
     metadata: { connectionId, fields: Object.keys(data) },
-  }).catch(() => {});
+  });
 
   return connectionToJson(row, { canManage: true });
 }
@@ -263,7 +263,7 @@ export async function disableIntegrationConnection(actorUserId, practiceId, conn
     action: "integration_connection_disabled",
     practiceProfileId: practiceId,
     metadata: { connectionId },
-  }).catch(() => {});
+  });
 
   return { ok: true };
 }
@@ -291,7 +291,7 @@ export async function testIntegrationConnection(actorUserId, practiceId, connect
     action: "integration_connection_tested",
     practiceProfileId: practiceId,
     metadata: { connectionId, ok: Boolean(result?.ok) },
-  }).catch(() => {});
+  });
 
   return { ok: Boolean(result?.ok), result, sandbox: !isPvsProductionEnabled() };
 }
@@ -389,7 +389,7 @@ export async function createIntegrationJob(actorUserId, practiceId, connectionId
     action: "integration_job_started",
     practiceProfileId: practiceId,
     metadata: { jobId: job.id, connectionId, type: jobType, direction },
-  }).catch(() => {});
+  });
 
   let errorCode = null;
   let finalStatus = "completed";
@@ -424,7 +424,7 @@ export async function createIntegrationJob(actorUserId, practiceId, connectionId
     action: finalStatus === "completed" ? "integration_job_completed" : "integration_job_failed",
     practiceProfileId: practiceId,
     metadata: { jobId: job.id, status: finalStatus, errorCode },
-  }).catch(() => {});
+  });
 
   return jobToJson(completed);
 }

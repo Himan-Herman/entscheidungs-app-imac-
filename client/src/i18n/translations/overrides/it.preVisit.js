@@ -179,7 +179,7 @@ export default {
     consentCheckbox:
       "Voglio salvare questa sessione localmente in questo browser per consultarla dopo.",
     consentExpl:
-      "La sessione resta solo localmente in questo browser. Nessun invio a MedScoutX.",
+      "Il salvataggio scelto qui avviene in questo browser. Il salvataggio nel suo account MedScoutX avviene separatamente.",
     saveLocal: "Salva sessione in locale",
     saveSuccess: "Sessione salvata in locale.",
     archiveNote:

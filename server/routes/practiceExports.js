@@ -100,7 +100,7 @@ router.post("/:exportId/ai-organize", async (req, res) => {
       format: row.format,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: access.role,
@@ -138,7 +138,7 @@ router.get("/:exportId/download", async (req, res) => {
       practiceProfileId: practiceId,
     });
 
-    await writeAuditLog({
+    writeAuditLog({
       req,
       userId,
       actorRole: access.role,

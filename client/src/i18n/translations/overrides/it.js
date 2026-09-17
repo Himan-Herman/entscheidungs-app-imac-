@@ -1,9 +1,9 @@
 import { deepMerge } from "../../deepMerge.js";
+import { itInternalWork } from "./it/it.internalWork.js";
 import legalIt from "../legal/it/index.js";
 import landing from "./it.landing.js";
 import info from "./it.info.js";
 import preVisit from "./it.preVisit.js";
-import startseite from "./it.startseite.js";
 import itCore from "./it/it.core.js";
 import itAccount from "./it/it.account.js";
 import itModules from "./it/it.modules.js";
@@ -22,6 +22,7 @@ import { itPatientBillingExplain } from "./it/it.patientBillingExplain.js";
 import { itPracticeDirectory } from "./it/it.practiceDirectory.js";
 import { itTelemedicine } from "./it/it.telemedicine.js";
 import { itPatientPractices, itDocumentSharing } from "./it/it.patientPractices.js";
+import { itPatientOnboarding } from "./it/it.patientOnboarding.js";
 import { itLifecycleExit } from "./it/it.lifecycleExit.js";
 
 /** Base Italian overrides — extended layers merged below */
@@ -235,7 +236,6 @@ const itBase = {
     cancel: "Annulla",
     close: "Chiudi",
   },
-  startseite,
   forgotPassword: {
     title: "Reimposta password",
     text: "Inserisci l’e-mail. Ti invieremo un link di reimpostazione.",
@@ -305,6 +305,15 @@ const itComposed = deepMerge(
 );
 
 export default deepMerge(
+  deepMerge(
+  deepMerge(
   deepMerge(itComposed, itTelemedicine),
   { patientPractices: itPatientPractices, documentSharing: itDocumentSharing, lifecycleExit: itLifecycleExit },
+),
+  // Phases 5A-5C: authored here rather than falling through to English.
+  itInternalWork,
+),
+  // Patient onboarding (practice invitation + patient claim). Authored here
+  // rather than falling through to English.
+  { patientOnboarding: itPatientOnboarding },
 );

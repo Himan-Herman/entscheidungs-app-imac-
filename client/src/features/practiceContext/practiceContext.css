@@ -1,0 +1,836 @@
+/*
+ * Practice context surfaces (Phase 2D).
+ *
+ * Tokens only — no literal colours, so light and dark both follow the app.
+ * Nothing here introduces a new visual language: the card, badge and dialog
+ * shapes reuse the radii, spacing and surfaces the patient area already uses.
+ */
+
+.practice-chooser {
+  padding: 1rem;
+  max-width: 44rem;
+  margin: 0 auto;
+}
+.practice-chooser__title {
+  font-size: 1.375rem;
+  color: var(--ms-color-text);
+  margin: 0 0 0.25rem;
+}
+.practice-chooser__intro,
+.practice-chooser__section-hint {
+  color: var(--ms-color-text-secondary);
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+}
+.practice-chooser__search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+.practice-chooser__search input {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--ms-radius-md);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+}
+.practice-chooser__retry {
+  min-height: var(--ms-control-min-height, 44px);
+  margin-top: 0.5rem;
+}
+.practice-chooser__empty {
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg);
+  padding: 1.25rem;
+  color: var(--ms-color-text-secondary);
+  background: var(--ms-color-surface);
+}
+.practice-chooser__empty-title {
+  color: var(--ms-color-text);
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+.practice-chooser__former {
+  margin-top: 2rem;
+}
+.practice-chooser__section-title {
+  font-size: 1rem;
+  color: var(--ms-color-text);
+  margin: 0 0 0.25rem;
+}
+
+/* ---------------------------------------------------------------- cards */
+
+.practice-card__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.practice-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  /* One large target: comfortably above the 44px minimum on touch. */
+  min-height: 72px;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  text-decoration: none;
+}
+.practice-card:hover {
+  border-color: var(--ms-color-border-strong);
+}
+.practice-card:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-card--former {
+  /* Distinguished by its own status line as well, never by opacity alone. */
+  opacity: 0.85;
+}
+.practice-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+.practice-card__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.practice-card__details,
+.practice-card__status {
+  color: var(--ms-color-text-secondary);
+  font-size: 0.875rem;
+}
+
+/*
+ * Who the relationship is for.
+ *
+ * Ranked above specialty and city on purpose: when two cards show the same
+ * practice, this line is the only thing that distinguishes them, so it sits
+ * directly under the name and carries the primary text colour rather than the
+ * secondary one. A long profile name wraps instead of being clipped — a
+ * truncated name is exactly the failure this line exists to prevent.
+ */
+.practice-card__for {
+  color: var(--ms-color-text);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.practice-card__badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--ms-radius-pill);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- avatar */
+
+.practice-avatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--ms-radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Neutral surface for every practice — no per-practice colour, which would
+     read as an identity the practice never chose. */
+  background: var(--ms-color-surface-elevated);
+  border: 1px solid var(--ms-color-border);
+  color: var(--ms-color-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.practice-avatar--logo {
+  object-fit: contain;
+  background: var(--ms-color-surface);
+}
+
+/* --------------------------------------------------------- context bar */
+
+.practice-context-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface);
+}
+.practice-context-bar__identity {
+  flex: 1;
+  min-width: 0;
+}
+.practice-context-bar__name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ms-color-text);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.practice-context-bar__name:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-context-bar__details,
+.practice-context-bar__status {
+  margin: 0;
+  color: var(--ms-color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* Same reasoning as .practice-card__for: orientation, not a detail. */
+.practice-context-bar__for {
+  margin: 0;
+  color: var(--ms-color-text);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.practice-context-bar__switch {
+  flex-shrink: 0;
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--ms-radius-md);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+  cursor: pointer;
+}
+.practice-context-bar__switch:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ switcher */
+
+.practice-switcher__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.practice-switcher__option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 60px;
+  padding: 0.75rem;
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  text-align: start;
+  cursor: pointer;
+}
+.practice-switcher__option:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-switcher__option--current {
+  border-color: var(--ms-color-border-strong);
+}
+.practice-switcher__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 0;
+}
+.practice-switcher__current-label {
+  color: var(--ms-color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+/* ------------------------------------------------------------- hub list */
+
+.practice-hub__list {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.practice-hub__entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-height: 60px;
+  justify-content: center;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  text-decoration: none;
+}
+.practice-hub__entry:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-hub__entry-name {
+  font-weight: 600;
+}
+.practice-hub__entry-hint {
+  color: var(--ms-color-text-secondary);
+  font-size: 0.875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .practice-card,
+  .practice-switcher__option {
+    transition: none;
+  }
+}
+
+/* Page heading inside a practice context: the bar above already carries the
+   identity, so the page title stays a heading, not a banner. */
+.practice-context .practice-context__title {
+  font-size: var(--ms-text-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--ms-color-text);
+  margin: var(--ms-space-4) 0 var(--ms-space-2);
+}
+.practice-context {
+  padding: var(--ms-space-4);
+}
+
+/* --------------------------------------------------- appointments (2E.1) */
+
+.patient-appt__list {
+  list-style: none;
+  margin: var(--ms-space-3) 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-3);
+}
+.practice-appt__item {
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-color-surface);
+  padding: var(--ms-space-4);
+}
+.practice-appt__item-title {
+  font-size: var(--ms-text-base);
+  font-weight: 600;
+  color: var(--ms-color-text);
+  margin: 0 0 var(--ms-space-1);
+  overflow-wrap: anywhere;
+}
+.practice-appt__when {
+  margin: 0 0 var(--ms-space-1);
+  color: var(--ms-color-text-secondary);
+  font-size: var(--ms-text-sm);
+}
+.practice-appt__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ms-space-2);
+  margin-top: var(--ms-space-3);
+}
+.practice-appt__actions button {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-4);
+  border-radius: var(--ms-radius-md);
+  border: 1px solid var(--ms-color-border);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+  cursor: pointer;
+}
+.practice-appt__actions button:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-appt__actions button[disabled] {
+  opacity: var(--ms-disabled-opacity, 0.6);
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------- Medication plan (Phase 2E.3) */
+
+/*
+ * The signpost to the patient's own, device-local medication record.
+ *
+ * Not a plain text link: the app strips underlines from every link inside #main
+ * (see the global `#main a:not(...)` rule), so a link sitting in a paragraph
+ * would be set apart by colour alone. Rather than carve out a one-page
+ * exception to an app-wide convention, the signpost gets the outlined control
+ * shape the practice area already uses — a border and padding carry the
+ * affordance, and colour stops being the only cue.
+ */
+.practice-context__own-medication-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-4);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+}
+.practice-context__own-medication-link:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------- Message timeline (Phase 3A) */
+
+.practice-context__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-3);
+}
+
+/*
+ * The control that loads older history.
+ *
+ * It sits above the oldest message, where the history it loads will appear, so
+ * the direction of the action is visible before it is taken. Outlined rather
+ * than filled: this is a secondary action next to writing a message.
+ */
+.practice-context__load-older {
+  align-self: center;
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-4);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+  font-size: 0.875rem;
+}
+.practice-context__load-older:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-context__load-older:disabled {
+  opacity: var(--ms-disabled-opacity, 0.6);
+  cursor: progress;
+}
+
+/* The end of the history, stated rather than left to be guessed at. */
+.practice-context__timeline-start {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--ms-color-text-muted);
+}
+
+/*
+ * The list itself.
+ *
+ * An <ol> is right — a conversation IS ordered, and screen readers should say
+ * so — but its numbers must not show. They would read as stable positions while
+ * being anything but: loading a page of history renumbers every message on
+ * screen, so "message 41" would silently become "message 55".
+ */
+.practice-context__messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.practice-context__message {
+  padding: var(--ms-space-3) 0;
+  border-bottom: 1px solid var(--ms-color-border);
+  color: var(--ms-color-text);
+}
+.practice-context__message:last-child {
+  border-bottom: 0;
+}
+.practice-context__messages .practice-context__meta {
+  margin: 0 0 var(--ms-space-1);
+  font-size: 0.8125rem;
+  color: var(--ms-color-text-muted);
+}
+
+.practice-context__message-body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The per-message state of one's OWN message.
+ *
+ * Sent and read are told apart by their words, not by their colour — the two
+ * tones only reinforce a distinction the text already carries, so the state
+ * survives greyscale, dark mode and colour blindness. No checkmarks: the
+ * channel has no delivery signal, and a borrowed messenger glyph would claim
+ * one.
+ */
+.practice-context__message-status {
+  margin: var(--ms-space-1) 0 0;
+  font-size: 0.8125rem;
+  color: var(--ms-color-text-muted);
+}
+.practice-context__message-status--read {
+  color: var(--ms-color-text);
+}
+
+/*
+ * Locally defined: the app's .sr-only lives in Intro.css, which is imported by
+ * one page rather than globally, so relying on it here would work only by
+ * accident of load order.
+ */
+.practice-context__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* -------------------------- Editing and withdrawing (Phase 3B) */
+
+/*
+ * The actions on one's own message.
+ *
+ * The trigger is quiet by design: it sits under every message the sender can
+ * still change, and a loud control there would compete with the conversation
+ * itself. It becomes an ordinary, clearly focusable button on keyboard focus.
+ */
+.practice-context__message-actions {
+  position: relative;
+  margin-top: var(--ms-space-1);
+}
+.practice-context__message-actions-trigger {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--ms-radius-sm);
+  background: none;
+  color: var(--ms-color-text-muted);
+  font-size: 0.8125rem;
+}
+.practice-context__message-actions-trigger:hover {
+  border-color: var(--ms-color-border);
+  color: var(--ms-color-text);
+}
+.practice-context__message-actions-trigger:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.practice-context__message-menu {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 12rem;
+  padding: var(--ms-space-1);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 18%);
+}
+.practice-context__message-menu button {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-3);
+  border: 0;
+  border-radius: var(--ms-radius-sm);
+  background: none;
+  color: var(--ms-color-text);
+  font-size: 0.9375rem;
+  text-align: left;
+}
+.practice-context__message-menu button:hover {
+  background: var(--ms-color-surface);
+}
+.practice-context__message-menu button:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: -2px;
+}
+
+.practice-context__message-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-2);
+  margin: var(--ms-space-1) 0;
+}
+.practice-context__message-editor textarea {
+  width: 100%;
+  padding: var(--ms-space-2);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  font: inherit;
+}
+.practice-context__message-editor textarea:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 1px;
+}
+.practice-context__message-editor-actions,
+.practice-context__confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ms-space-2);
+}
+.practice-context__message-editor-actions button,
+.practice-context__confirm-actions button {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-4);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+}
+.practice-context__message-editor-actions button:focus-visible,
+.practice-context__confirm-actions button:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-context__message-editor-actions button:disabled {
+  opacity: var(--ms-disabled-opacity, 0.6);
+  cursor: not-allowed;
+}
+
+/*
+ * A withdrawn message and an edited one both say so in words. Italics and a
+ * muted tone set the tombstone apart from what was actually said, but the
+ * sentence carries the meaning on its own — nothing here depends on seeing a
+ * colour or a shape.
+ */
+.practice-context__message-withdrawn {
+  margin: 0;
+  font-style: italic;
+  color: var(--ms-color-text-muted);
+}
+.practice-context__message-edited {
+  margin: var(--ms-space-1) 0 0;
+  font-size: 0.8125rem;
+  color: var(--ms-color-text-muted);
+}
+
+/* ---------------------------- Original and translation (Phase 4A) */
+
+/*
+ * The target language, chosen once for the conversation rather than once per
+ * message. Sits above the timeline, where a setting belongs, and out of the way
+ * of the reading itself.
+ */
+.practice-context__translation-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ms-space-2);
+  margin-bottom: var(--ms-space-3);
+  font-size: 0.875rem;
+  color: var(--ms-color-text-muted);
+}
+.practice-context__translation-bar select {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-2);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+  font: inherit;
+}
+.practice-context__translation-bar select:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/*
+ * The translation sits below the original, indented and set off by a rule.
+ * The indent is what makes "this belongs to the message above" visible at a
+ * glance; the heading above it is what says so in words, for everyone whom the
+ * indent tells nothing.
+ */
+.practice-context__translation {
+  margin-top: var(--ms-space-2);
+  padding-left: var(--ms-space-3);
+  border-left: 3px solid var(--ms-color-border);
+}
+.practice-context__translation-heading {
+  margin: var(--ms-space-1) 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ms-color-text-muted);
+}
+.practice-context__translation-lang {
+  font-weight: 400;
+}
+.practice-context__translation-text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ms-color-text);
+}
+/*
+ * Said plainly, every time. A machine translation of a clinical message can be
+ * wrong in ways the reader cannot detect, and the original is the text that
+ * counts — so that is stated, not implied by a subtle style.
+ */
+.practice-context__translation-note {
+  margin: var(--ms-space-1) 0 0;
+  font-size: 0.8125rem;
+  color: var(--ms-color-text-muted);
+}
+.practice-context__translation-state {
+  margin: var(--ms-space-2) 0 0;
+  font-size: 0.875rem;
+  color: var(--ms-color-text-muted);
+}
+.practice-context__translation-state button {
+  min-height: var(--ms-control-min-height, 44px);
+  margin-top: var(--ms-space-1);
+  padding: 0 var(--ms-space-3);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+}
+.practice-context__translation-state button:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* -------------------------------- Composer (finding from Phase 3B) */
+
+/*
+ * The reply box was unstyled on this page.
+ *
+ * Its rules live in styles/PatientThreadsPage.css, which the scoped messaging
+ * pages never import — so the label sat inline against a default-sized textarea
+ * and the send button was squeezed beside it. Phase 3A fixed the message list
+ * the same way; this completes it.
+ *
+ * Defined here rather than by importing the legacy stylesheet: that file is
+ * written against a different token set (--text-primary, --border) and pulling
+ * it in would restyle more of this page than the composer.
+ */
+.practice-context__composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-2);
+  margin-top: var(--ms-space-4);
+  padding-top: var(--ms-space-4);
+  border-top: 1px solid var(--ms-color-border);
+}
+.practice-context__composer label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ms-color-text);
+}
+.practice-context__composer textarea {
+  width: 100%;
+  padding: var(--ms-space-2);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text);
+  font: inherit;
+  resize: vertical;
+}
+.practice-context__composer textarea:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 1px;
+}
+.practice-context__composer button[type="submit"] {
+  align-self: flex-start;
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-5, 1.25rem);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+  font-weight: 600;
+}
+.practice-context__composer button[type="submit"]:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-context__composer button[type="submit"]:disabled {
+  opacity: var(--ms-disabled-opacity, 0.6);
+  cursor: not-allowed;
+}
+
+/* -------------------------------- Dictation and reading aloud (Phase 4C) */
+
+/*
+ * Dictation sits under the composer, where drafts are written.
+ *
+ * The recording control changes its LABEL, not just its colour: "Diktieren"
+ * becomes "Aufnahme stoppen", so what the button will do is readable without
+ * interpreting a shape. The outline shift is reinforcement, never the message.
+ */
+.practice-context__dictation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ms-space-2);
+}
+.practice-context__dictation-btn {
+  min-height: var(--ms-control-min-height, 44px);
+  padding: 0 var(--ms-space-4);
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-md);
+  background: var(--ms-color-surface-elevated);
+  color: var(--ms-color-text);
+  font-size: 0.9375rem;
+}
+.practice-context__dictation-btn--recording {
+  border-width: 2px;
+  border-color: var(--ms-color-text);
+  font-weight: 600;
+}
+.practice-context__dictation-btn:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+.practice-context__dictation-btn:disabled {
+  opacity: var(--ms-disabled-opacity, 0.6);
+  cursor: not-allowed;
+}
+
+/*
+ * The recorder's state, in words. Empty most of the time, which is why it is
+ * a live region rather than something that appears and disappears: a screen
+ * reader announces the change without the layout jumping.
+ */
+.practice-context__dictation-state:empty {
+  display: none;
+}
+.practice-context__dictation-state {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ms-color-text);
+}
+.practice-context__dictation-hint {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ms-color-text-muted);
+}
+
+/* A message being read aloud says so, in words, next to itself. */
+.practice-context__speaking {
+  margin: var(--ms-space-1) 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--ms-color-text);
+}

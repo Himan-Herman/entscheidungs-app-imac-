@@ -125,7 +125,7 @@ export default [
         type: "ul",
         items: [
           "Fornecedores de alojamento (UE): infraestrutura para servidores e bases de dados (por exemplo Render.com com localização na UE).",
-          "Fornecedor de IA – OpenAI (EUA): para processamento baseado em IA do texto, imagens e informação do mapa corporal, o conteúdo é transmitido de forma encriptada à OpenAI LLC (San Francisco, EUA), processado e eliminado após o processamento.",
+          "Fornecedor de IA – OpenAI (EUA): para processamento baseado em IA do texto, imagens e informação do mapa corporal, o conteúdo é transmitido de forma encriptada à OpenAI LLC (San Francisco, EUA), processado nos sistemas do fornecedor através de uma ligação encriptada (TLS). A eventual duração de conservação na OpenAI rege-se pelas condições desse fornecedor; não podemos prestar qualquer garantia adicional.",
           "Fornecedores de correio eletrónico: envio de e-mails do sistema (por exemplo verificação de conta).",
         ],
       },
@@ -148,7 +148,7 @@ export default [
       {
         type: "p",
         text:
-          "Para garantir um nível adequado de proteção, a transferência baseia-se nas cláusulas contratuais-tipo da UE (art.º 46.º GDPR) e em medidas técnicas e organizacionais adicionais (encriptação em trânsito, duração curta do processamento, eliminação após a resposta do serviço de IA).",
+          "Para garantir um nível adequado de proteção, a transferência baseia-se nas cláusulas contratuais-tipo da UE (art.º 46.º GDPR) e em medidas técnicas e organizacionais adicionais (encriptação em trânsito).",
       },
       {
         type: "p_link",
