@@ -8,9 +8,12 @@
 > Contracts and account screenshots stay outside the repository; only the fact
 > that they were checked is recorded here.
 
+**Technical implementation: COMPLETE** (closed 2026-09-18)
+**Production provider activation: DEFERRED — NOT APPROVED**
 **Go/No-Go status: `NO-GO FOR PRODUCTION ACTIVATION`**
 Baseline commit: `545444ea` · Phase 2A–2D frozen · both feature flags off
 Last evidence assessed: A2, 2026-08-17 · `VERIFIED` 2 / 21 · B4 legal review packet prepared
+A3/A4 deferred 2026-09-18 — no provider response obtained
 
 ---
 
@@ -27,6 +30,11 @@ Last evidence assessed: A2, 2026-08-17 · `VERIFIED` 2 / 21 · B4 legal review p
 
 `VERIFIED` requires a concrete piece of evidence. It is never awarded because
 something is likely, standard, or documented as available in general.
+
+**Deferral is not a status.** Where a requirement is parked, it stays `OPEN` and
+the deferral is written into the evidence column. A row is never nearer to
+`VERIFIED` for having been postponed, and silence from a third party is not
+evidence of anything.
 
 Two further qualifiers are used where a requirement is partly technical:
 
@@ -51,8 +59,8 @@ the underlying fact) / `no`.
 | A1 | Executed DPA / AVV with the provider | **`VERIFIED – technical/documentary evidence`** | Executed OpenAI Data Processing Addendum, version `v.010126`, both parties dated 2026-08-16, DocuSign envelope with PKCS#7 seal. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Customer: Himan Khorshidi, title "Sole Proprietor". Provider entity follows from the EEA clause, see A1a. Contract text byte-identical to the public template — no customisation. |
 | A1a | Contractual scope covers **medical document content** | **`LEGAL REVIEW REQUIRED`** | Same document. Schedule 1 §5 reads *"No sensitive data is intended to be transferred unless the user includes it unexpectedly in unstructured data."* No occurrence of special categories, health, Article 9, HIPAA, prohibited or restricted data anywhere in the contract. | 2026-08-17 | no | operator | Our use case transfers health data **deliberately and systematically**. Classified `not determinable from the DPA`. Feeds into B4. **A1 being verified does not resolve this.** |
 | A2 | Dedicated provider project for document translation | **`VERIFIED – account/project evidence`** | Provider console screenshots: a dedicated project named "MedScoutX Document Translation" exists, and it belongs to the same provider organization as the executed DPA. Match performed 2026-08-17. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Identifiers deliberately not recorded here. Separation from the key behind `OPENAI_API_KEY` is **not** established by this row — that is A11/A12. |
-| A3 | Data residency confirmed **for that project** | `OPEN` | OpenAI Sales request submitted and acknowledged on 2026-08-17; provider response pending. | — | partial | — | `DATA_REGION` records an assertion only |
-| A4 | Zero data retention confirmed **for that project** | `OPEN` | OpenAI Sales request submitted and acknowledged on 2026-08-17; provider response pending. | — | partial | — | `ZERO_RETENTION` records an assertion only |
+| A3 | Data residency confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18 until the enterprise/sales process is resumed at greater usage. | 2026-09-18 | partial | operator | `DATA_REGION` records an assertion only |
+| A4 | Zero data retention confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18 until the enterprise/sales process is resumed at greater usage. | 2026-09-18 | partial | operator | `ZERO_RETENTION` records an assertion only |
 | A5 | Endpoint `/v1/chat/completions` available on the approved regional endpoint | `OPEN` | — | — | partial | — | Adapter uses this path; see §3 |
 | A6 | That endpoint supports `response_format: json_schema` as used | `OPEN` | — | — | partial | — | Structured output is load-bearing, not cosmetic |
 | A7 | Endpoint compatible with the agreed retention/ZDR configuration | `OPEN` | — | — | no | — | Separate question from A4 |
