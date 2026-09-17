@@ -39,7 +39,8 @@ const ACTIVE = { de, en, fr, es, it, ru };
  */
 const ACTIVE_PRACTICE_NAMESPACES = Object.freeze([
   "archiveLifecycle", "documentOcr", "documentSharing", "erezept", "exports",
-  "healthHistory", "medicalInterpreter", "patientActivity", "patientMedicationPlan",
+  "healthHistory", "lifecycleExit", "medicalInterpreter", "patientActivity",
+  "patientMedicationPlan",
   "practiceAnalytics", "practiceAnamnesis", "practiceAudit", "practiceBillingPlausibility",
   "practiceBooking", "practiceCalendar", "practiceConsents", "practiceDashboard",
   "practiceDataRequests", "practiceDocuments", "practiceInbox", "practiceIntegrations",

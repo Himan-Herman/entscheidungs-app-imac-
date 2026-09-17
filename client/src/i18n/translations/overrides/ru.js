@@ -27,6 +27,7 @@ import ruMedicalInterpreter from "./ru/ru.medicalInterpreter.js";
 import ruPatient from "./ru/ru.patient.js";
 import ruPractice from "./ru/ru.practice.js";
 import ruSosCard from "./ru/ru.sosCard.js";
+import { ruLifecycleExit } from "./ru/ru.lifecycleExit.js";
 import { ruPatientOnboarding } from "./ru/ru.patientOnboarding.js";
 
 /** Russian — base bundle merged with layered overrides (ru → en → de per key). */
@@ -208,5 +209,9 @@ export default deepMerge(
 ),
   // Patient onboarding (practice invitation + patient claim). Authored here
   // rather than falling through to English.
-  { patientOnboarding: ruPatientOnboarding },
+  deepMerge(
+    { patientOnboarding: ruPatientOnboarding },
+    // Exit workflows (pause / close / reactivate / deletion request).
+    { lifecycleExit: ruLifecycleExit },
+  ),
 );
