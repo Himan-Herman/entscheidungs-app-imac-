@@ -12,7 +12,7 @@
 **Production provider activation: DEFERRED — NOT APPROVED**
 **Go/No-Go status: `NO-GO FOR PRODUCTION ACTIVATION`**
 Baseline commit: `545444ea` · Phase 2A–2D frozen · both feature flags off
-Last evidence assessed: A2, 2026-08-17 · `VERIFIED` 2 / 21 · B4 legal review packet prepared
+Last evidence assessed: A5–A13 reclassified, 2026-09-18 · `VERIFIED` 5 / 21 · B4 legal review packet prepared
 A3/A4 deferred 2026-09-18 — no provider response obtained
 Legal readiness prepared 2026-09-18 — decision matrix, DPIA draft, data-subject-rights runbook (§11)
 
@@ -60,17 +60,17 @@ the underlying fact) / `no`.
 | A1 | Executed DPA / AVV with the provider | **`VERIFIED – technical/documentary evidence`** | Executed OpenAI Data Processing Addendum, version `v.010126`, both parties dated 2026-08-16, DocuSign envelope with PKCS#7 seal. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Customer: Himan Khorshidi, title "Sole Proprietor". Provider entity follows from the EEA clause, see A1a. Contract text byte-identical to the public template — no customisation. |
 | A1a | Contractual scope covers **medical document content** | **`LEGAL REVIEW REQUIRED`** | Same document. Schedule 1 §5 reads *"No sensitive data is intended to be transferred unless the user includes it unexpectedly in unstructured data."* No occurrence of special categories, health, Article 9, HIPAA, prohibited or restricted data anywhere in the contract. | 2026-08-17 | no | operator | Our use case transfers health data **deliberately and systematically**. Classified `not determinable from the DPA`. Feeds into B4. **A1 being verified does not resolve this.** One-page question for external review prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) §6. |
 | A2 | Dedicated provider project for document translation | **`VERIFIED – account/project evidence`** | Provider console screenshots: a dedicated project named "MedScoutX Document Translation" exists, and it belongs to the same provider organization as the executed DPA. Match performed 2026-08-17. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Identifiers deliberately not recorded here. Separation from the key behind `OPENAI_API_KEY` is **not** established by this row — that is A11/A12. |
-| A3 | Data residency confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18 until the enterprise/sales process is resumed at greater usage. | 2026-09-18 | partial | operator | `DATA_REGION` records an assertion only |
-| A4 | Zero data retention confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18 until the enterprise/sales process is resumed at greater usage. | 2026-09-18 | partial | operator | `ZERO_RETENTION` records an assertion only |
-| A5 | Endpoint `/v1/chat/completions` available on the approved regional endpoint | `OPEN` | — | — | partial | — | Adapter uses this path; see §3 |
-| A6 | That endpoint supports `response_format: json_schema` as used | `OPEN` | — | — | partial | — | Structured output is load-bearing, not cosmetic |
-| A7 | Endpoint compatible with the agreed retention/ZDR configuration | `OPEN` | — | — | no | — | Separate question from A4 |
-| A8 | Prompt/response caching behaviour of that endpoint understood | `OPEN` | — | — | no | — | Phase 3 marked this explicitly unverified; see §4 |
-| A9 | `MODEL_STRICT` available in the approved project and region | `OPEN` | — | — | no | — | No silent fallback exists; unavailable ⇒ feature stays off |
-| A10 | `MODEL_PLAIN` available in the approved project and region | `OPEN` | — | — | no | — | Unavailable ⇒ deliberate decision required, not a fallback |
-| A11 | Dedicated API key exists for the approved project | `OPEN` | — | — | yes (existence only) | — | Never sent in chat or committed; `yes/no` is sufficient |
-| A12 | Key scoped to that project only, rotatable | `OPEN` | — | — | no | — | Provider dashboard question |
-| A13 | Confirmed regional host, to be added to `APPROVED_PROVIDER_HOSTS` | `OPEN` | — | — | yes (enforced) | — | Code change deferred to Phase 4B; see §5 |
+| A3 | Data residency confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18. The *path* is now documented, which the deferral did not change: data residency is *"configured per-project within your API Organization"*, the region is selected *"from the dropdown"* when creating a project, and *"To use data residency with any region other than the United States, you must be approved for abuse monitoring controls, and execute a Modified Retention amendment."* | 2026-09-18 | partial | operator | `DATA_REGION` records an assertion only. **Three named prerequisites** now replace "ask sales": (1) abuse-monitoring approval, (2) an executed Modified Retention amendment — a contract act that belongs beside A1a, (3) a project in the Europe region. Whether the **existing** dedicated project (A2) can be moved to a region or must be recreated is **not established by the documentation** and is account evidence. |
+| A4 | Zero data retention confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18. Documented path: ZDR *"requires prior approval"*; once approved it is configured by the customer under *"Settings → Organization → Data controls"* at organisation or project level. | 2026-09-18 | partial | operator | `ZERO_RETENTION` records an assertion only. Approval is genuinely a provider decision — this is one of the few rows where that is true. Once granted, the setting is **visible in our own console** and becomes account evidence rather than a sales question. |
+| A5 | Endpoint `/v1/chat/completions` available on the approved regional endpoint | **`VERIFIED – public provider documentation`** *(general support only)* | API reference documents `POST /v1/chat/completions` as current with no deprecation notice on the endpoint. The data-controls guide lists it among the endpoints covered by data residency **and** among the ZDR-eligible endpoints. | 2026-09-18 | yes (documentation) | operator | Establishes that the path exists, is supported and is in scope for both programmes. Does **not** establish that our project reaches it in a given region — that is A13 + A3. |
+| A6 | That endpoint supports `response_format: json_schema` as used | **`VERIFIED – public provider documentation`** | The Chat Completions API reference documents `response_format` and states that setting `{ "type": "json_schema", "json_schema": {...} }` *"enables Structured Outputs which ensures the model will match your supplied JSON schema"*. | 2026-09-18 | yes (documentation) | operator | Structured output is load-bearing, not cosmetic. **Directional note:** the Structured Outputs *guide* is now written around the Responses API and the provider recommends Responses for new projects while stating Chat Completions remains supported. Not a blocker; a reason to keep the adapter's endpoint choice under review. Model-side support is A9/A10. |
+| A7 | Endpoint compatible with the agreed retention/ZDR configuration | **`VERIFIED – public provider documentation`** *(endpoint eligibility only)* | The data-controls guide lists `/v1/chat/completions` among the ZDR-eligible endpoints and states that under ZDR *"the `store` parameter for `/v1/responses` and `v1/chat/completions` will always be treated as `false`, even if the request attempts to set the value to `true`"*. | 2026-09-18 | yes (documentation) | operator | The endpoint is **capable** of running under a ZDR arrangement. Whether ZDR is active for our organisation/project is **A4 and stays open**. The adapter sets no `store` parameter either way. |
+| A8 | Prompt/response caching behaviour of that endpoint understood | **`EVIDENCE_PROVIDED`** | Prompt-caching guide: caching *"is enabled by default for supported OpenAI models"*; it caches *"the model's full rendered context including OpenAI-provided instructions, developer messages, tool definitions, and conversation history"*; cached data sits *"on individual machines"* inside the organisation's processing region; *"Caches are not shared across organizations and cannot be reused across regional processing boundaries"*; lifetime 30 minutes after last use for the newest models, with a `prompt_cache_retention` option of `"24h"` on earlier ones. The data-controls guide adds that caching *"may store encrypted key/value tensors in GPU-local storage as application state"*. **No parameter to disable caching entirely is documented.** | 2026-09-18 | yes (documentation) | operator | The behaviour is now documented rather than assumed, which is what this row asked for. **Assessment deliberately not complete:** the exact lifetime and controls depend on the model chosen (A9/A10), and whether default-on caching of medical document text is acceptable is a legal question, not a technical one. **The inference "ZDR therefore no caching" remains refused** — the provider documents them as separate mechanisms. |
+| A9 | `MODEL_STRICT` available in the approved project and region | `OPEN – account evidence required` | **No model name exists anywhere in this repository.** Both slots are pure environment variables with no default; the configuration is refused if either is absent. Documentation establishes only the floor: `response_format: json_schema` requires the `gpt-4o-mini` / `gpt-4o-2024-08-06` snapshots or later. | 2026-09-18 | no | — | Availability is account- and region-specific and cannot be established from here. No silent fallback exists; unavailable ⇒ feature stays off. |
+| A10 | `MODEL_PLAIN` available in the approved project and region | `OPEN – account evidence required` | As A9. The two slots are independent and may hold different models. | 2026-09-18 | no | — | Unavailable ⇒ deliberate decision required, not a fallback. Note: the provider console previously indicated that organisation verification may gate access to some models — see §2a. |
+| A11 | Dedicated API key exists for the approved project | `OPEN – account action` | Not a provider approval question. The provider documents both user-owned project keys and project **service-account** keys, scoped to a single project. The code already enforces the hard part: a configuration whose key equals `OPENAI_API_KEY` is refused with `reused_generic_key`. | 2026-09-18 | yes (existence only) | — | Executable without asking anyone — see the activation step in the decision matrix §7.3. Never sent in chat or committed; `yes/no` is sufficient evidence. |
+| A12 | Key scoped to that project only, rotatable | `OPEN – account action` | Provider guidance: *"We strongly recommend setting an expiration date when you create a project API key and establishing a regular key rotation process."* Administrators can *"allow only service-account keys, allow only user-owned project keys, or disable all new API key creation"*; organisation-level restrictions take precedence over project settings. | 2026-09-18 | no | — | A service-account key is the better fit here: it is not bound to a person and survives staff changes. Console configuration, not a sales matter. |
+| A13 | Confirmed regional host, to be added to `APPROVED_PROVIDER_HOSTS` | `OPEN` *(host documented, project enablement not)* | The data-controls guide documents a per-region domain prefix and names `eu.api.openai.com` for Europe, to be added *"to each request"*; `/v1/chat/completions` is listed among the covered endpoints. | 2026-09-18 | yes (enforced) | operator | **The host being documented is not the same statement as our project being enabled for that region.** The row stays `OPEN` on purpose: it asks for a *confirmed* host for *our* configuration, which presupposes A3. Code change still deferred; see §5. |
 
 ### Block B — data protection and product
 
@@ -84,7 +84,9 @@ the underlying fact) / `no`.
 | B6 | Erasure/access request handling reviewed for this flow | `OPEN` | Data inventory compiled 2026-08-15. Operational runbook prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md`](DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md): access, rectification, erasure, restriction, revocation, portability, third parties in the document. | 2026-09-18 | partial | operator | Inventory in §8; the process decision is external. Eight points must close before activation, incl. audit retention (`LEGAL DECISION REQUIRED`) and backup reach (`UNKNOWN`). |
 | B7 | Patient-facing information decided (what is shown before the first run) | `OPEN` | German draft prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) Annex A. Legal-basis line deliberately left as a marked variant. | 2026-09-18 | partial | operator | Depends on B3/B4. The UI has **no slot** for pre-run information today — that is a contained follow-up change (one element, one i18n key × 6 languages) once the text is approved. Translations only after the German text is signed off. |
 
-**Two of 21 rows are `VERIFIED`: A1 and A2.** Three further rows carry
+**Five of 21 rows are `VERIFIED`: A1, A2, A5, A6 and A7** (the last three on public provider documentation, and only for the general technical statement each makes — see the reclassification in §12).
+
+*Previously two.* Three further rows carry
 repository-side analysis (B1, B3, B6); that analysis narrows the question, it
 does not close it.
 
@@ -372,6 +374,81 @@ decision, once taken, can be applied without further groundwork.
 [`DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md`](DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md)
 remains the long-form statement of facts; the decision matrix is its compact
 counterpart. Where both cover the same ground, the packet is the source.
+
+---
+
+## 12. Reclassification of A3–A13 — what actually needs the provider
+
+Assessed 2026-09-18 against current **official provider documentation** only. No
+third-party summaries were used where first-party documentation exists. Nothing
+was configured, activated or purchased.
+
+The previous shorthand — *"A3–A13 all need sales"* — was wrong. Of eleven rows,
+**three close on documentation**, **four are our own account actions**, **two
+genuinely need a provider decision**, and **two carry a legal component**.
+
+### 12.1 Evidence type per row
+
+| # | Requirement | Evidence source | Evidence type | Assessment | Status | Remaining gap |
+|---|---|---|---|---|---|---|
+| A3 | Data residency for the project | data-controls guide; residency announcement | public documentation **+** provider approval **+** contract | Path documented: per-project region at creation, abuse-monitoring approval, Modified Retention amendment | `OPEN – deferred` | Approval, amendment, and an EU-region project. Whether the existing project can change region: **UNKNOWN** |
+| A4 | Zero data retention for the project | data-controls guide | public documentation **+** provider approval | Requires prior approval; afterwards self-serve in our console | `OPEN – deferred` | The approval itself |
+| A5 | Endpoint available | API reference; data-controls guide | **public documentation** | Current, not deprecated, in scope for residency and ZDR | **`VERIFIED`** *(general)* | Reaching it in a region depends on A13/A3 |
+| A6 | `response_format: json_schema` | Chat Completions API reference | **public documentation** | Parameter documented as enabling Structured Outputs | **`VERIFIED`** | Model-side support is A9/A10 |
+| A7 | Endpoint compatible with ZDR | data-controls guide | **public documentation** | Endpoint is ZDR-eligible; `store` forced to `false` under ZDR | **`VERIFIED`** *(eligibility only)* | Our ZDR status = A4 |
+| A8 | Caching behaviour understood | prompt-caching guide; data-controls guide | **public documentation** | On by default, caches full context, in-region, org-isolated, 30 min–24 h, **no documented way to disable** | `EVIDENCE_PROVIDED` | Model-specific controls (A9/A10) and a legal assessment of default-on caching for health data |
+| A9 | `MODEL_STRICT` available | our repository; structured-outputs guide | **account evidence** | No model is named anywhere in this repository; both slots are env-only | `OPEN – account evidence required` | Which model, and is it available in the chosen project/region |
+| A10 | `MODEL_PLAIN` available | as A9 | **account evidence** | as A9 | `OPEN – account evidence required` | as A9 |
+| A11 | Dedicated key exists | our account; production-best-practices guide | **account action** | Key types documented; the code already refuses a reused generic key | `OPEN – account action` | Create the key. Nobody needs to approve this |
+| A12 | Key project-scoped and rotatable | production-best-practices guide | **account action** | Expiry and rotation recommended; admins can require service-account keys | `OPEN – account action` | Choose the key type and set expiry/rotation |
+| A13 | Confirmed regional host | data-controls guide | **public documentation** *(host)* **+ account evidence** *(enablement)* | `eu.api.openai.com` is documented as the Europe prefix, covering this endpoint | `OPEN` | **The host being documented is not our project being enabled.** Depends on A3 |
+
+### 12.2 What this means operationally
+
+| CAN CLOSE NOW *(closed above)* |
+|---|
+| **A5** — endpoint current, documented, in scope for residency and ZDR |
+| **A6** — `json_schema` structured output documented on this endpoint |
+| **A7** — endpoint is ZDR-eligible; `store` is forced to `false` under ZDR |
+| **A8** — caching behaviour documented instead of assumed *(status `EVIDENCE_PROVIDED`; the legal read is separate)* |
+
+| ACCOUNT ACTION NEEDED — executable by us, no provider decision |
+|---|
+| **A11** — create a dedicated key for the translation project |
+| **A12** — make it project-scoped, prefer a service-account key, set expiry and a rotation rule |
+| **A9 / A10** — choose the models and record their availability in the chosen project and region |
+| **A13** *(partly)* — record the host once the project's region is settled |
+
+| PROVIDER APPROVAL NEEDED — genuinely a third-party decision |
+|---|
+| **A3** — abuse-monitoring approval for a non-US region |
+| **A4** — zero-data-retention approval |
+
+| LEGAL DECISION NEEDED |
+|---|
+| **A3** *(partly)* — the **Modified Retention amendment** is a contract act, and it belongs next to A1a rather than being treated as paperwork |
+| **A8** *(partly)* — is default-on caching of medical document text acceptable, given it cannot be switched off |
+| **A1a** — unchanged: `LEGAL REVIEW REQUIRED`. Neither provider capability nor ZDR answers whether our contract covers deliberate processing of health data |
+
+### 12.3 What did not change
+
+- **No** provider was configured, activated, contacted or paid.
+- **No** code, flag, key, host or model was changed. `APPROVED_PROVIDER_HOSTS`
+  is still empty and both feature flags are still off.
+- **A3 and A4 remain deferred.** Documentation of a *path* is not an approval,
+  and a documented regional host is not our project being in that region.
+- **`NO-GO FOR PRODUCTION ACTIVATION`** stands.
+
+### 12.4 Sources
+
+Official provider documentation, retrieved 2026-09-18:
+
+- [Data controls in the OpenAI platform](https://developers.openai.com/api/docs/guides/your-data) — retention, ZDR eligibility and behaviour, data-residency configuration and regional domain prefixes, caching as application state
+- [Chat Completions API reference](https://developers.openai.com/api/docs/api-reference/chat/create) — endpoint status, `response_format` incl. `json_schema`
+- [Prompt caching guide](https://developers.openai.com/api/docs/guides/prompt-caching) — default-on behaviour, what is cached, lifetimes, isolation
+- [Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs) — model floor for `response_format: json_schema`
+- [Production best practices](https://developers.openai.com/api/docs/guides/production-best-practices) — key types, scoping, expiry and rotation
+- [Introducing data residency in Europe](https://openai.com/index/introducing-data-residency-in-europe/) and [Data residency for the OpenAI API](https://help.openai.com/en/articles/10503543-data-residency-for-the-openai-api) — regional availability *(referenced; the data-controls guide is the first-party source used for every statement above)*
 
 ---
 

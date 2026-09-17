@@ -7,6 +7,8 @@
 >
 > **Enthält keine Patientendaten, keine Zugangsdaten, keine Schlüssel.**
 
+**Letzte Aktualisierung:** 2026-09-18 — A3–A13 neu klassifiziert (§7).
+
 **Technischer Stand:** `TECHNICAL IMPLEMENTATION = COMPLETE` ·
 `INTERNAL ENGINEERING GAPS = NONE` · beide Feature-Flags aus ·
 `APPROVED_PROVIDER_HOSTS` leer · **`NO-GO FOR PRODUCTION ACTIVATION`**
@@ -355,36 +357,72 @@ Reichweite ist eine andere Frage.
 
 ---
 
-## 7. A3–A13 — Provider- und Vertragsmatrix
+## 7. A3–A13 — neu klassifiziert
 
-Keine Anbieterwahl und keine Providerkonfiguration wurde geändert.
+**Korrektur vom 2026-09-18.** Die frühere Fassung dieses Abschnitts behandelte
+alle elf Zeilen gleich und bezeichnete sie sämtlich als zwingend extern. Das war
+zu grob. Nach Prüfung der **offiziellen Providerdokumentation** schließen drei
+Zeilen sofort, vier sind unsere eigenen Account-Schritte, zwei brauchen
+tatsächlich eine Anbieterentscheidung, und zwei tragen einen Rechtsanteil.
 
-| # | Anforderung | Fehlende Evidenz | Art | Zwingend für Aktivierung? | Denkbare Alternative |
-|---|---|---|---|---|---|
-| A3 | Datenresidenz für das Projekt | schriftliche Bestätigung der Region | vertraglich/organisatorisch | **ja** | Anbieter mit vertraglich zugesicherter EU-Verarbeitung; oder Verzicht auf externe Verarbeitung |
-| A4 | Zero Data Retention für das Projekt | schriftliche Bestätigung | vertraglich | **ja** | vertragliche ZDR-Zusage eines anderen Anbieters; selbst betriebenes Modell |
-| A5 | `/v1/chat/completions` am freigegebenen regionalen Endpunkt | Endpunktbestätigung | technisch | **ja** | Adapter auf eine andere Schnittstelle umstellen — Code-Änderung |
-| A6 | `response_format: json_schema` an diesem Endpunkt | Funktionsbestätigung | technisch | **ja** | tragend, nicht kosmetisch: das Schema ermöglicht die Integritätsprüfung. Ohne strukturierte Ausgabe ändert sich das Sicherheitsprofil, nicht nur der Parser |
-| A7 | Endpunkt kompatibel mit der ZDR-Konfiguration | Bestätigung | vertraglich/technisch | **ja** | — |
-| A8 | Caching-Verhalten des Endpunkts | Beschreibung: ob, was, wie lange, wo | technisch/vertraglich | **ja** | **Nicht** aus A4 ableitbar. „ZDR, also kein Caching" ist eine Schlussfolgerung über ein konkretes Anbieter-Feature und braucht eigene Evidenz |
-| A9 | `MODEL_STRICT` in Projekt und Region verfügbar | Verfügbarkeitsbestätigung | technisch | **ja** | kein stiller Fallback vorhanden — nicht verfügbar heißt: Funktion bleibt aus |
-| A10 | `MODEL_PLAIN` in Projekt und Region verfügbar | Verfügbarkeitsbestätigung | technisch | **ja** | nicht verfügbar erfordert eine **bewusste Entscheidung**, keinen automatischen Ersatz |
-| A11 | Dedizierter API-Schlüssel für das Projekt | Existenzaussage (`ja`/`nein` genügt) | organisatorisch | **ja** | Der Code erzwingt bereits, dass er **nicht** `OPENAI_API_KEY` sein darf |
-| A12 | Schlüssel auf das Projekt beschränkt, rotierbar | Konfigurationsbestätigung | organisatorisch | **ja** | Organisations- und Projekteinstellung erlauben nutzerbasierte Schlüssel — bei A11/A12 zu bewerten |
-| A13 | Bestätigter regionaler Host für `APPROVED_PROVIDER_HOSTS` | Hostname mit Beleg | technisch/vertraglich | **ja** | — |
+Die vollständige Zeile-für-Zeile-Bewertung mit Evidenzart, Bewertung, Status,
+verbleibender Lücke und Quellenangaben steht im
+[Evidence Register §12](DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md) und wird
+hier **nicht wiederholt**. Kurzfassung:
 
-**Beobachtungen aus der A2-Prüfung, weiterhin offen und nicht bewertet:** der
-Anzeigename der Anbieterorganisation ist ein Platzhalter (relevant für B2, weil
-ein Subprozessoreintrag mit unpassendem Namen für spätere Prüfer inkonsistent
-wirkt); Verifizierung der Organisation ist nicht abgeschlossen (mögliche
-Abhängigkeit für A9/A10).
+| | Zeilen |
+|---|---|
+| **Jetzt geschlossen** (öffentliche Providerdokumentation) | A5 Endpunkt · A6 `json_schema` · A7 ZDR-Eignung des Endpunkts · A8 Caching-Verhalten dokumentiert (`EVIDENCE_PROVIDED`) |
+| **Eigene Account-Schritte** | A11 Schlüssel anlegen · A12 projektgebunden, Ablauf und Rotation · A9/A10 Modelle wählen und Verfügbarkeit belegen · A13 Host festhalten, sobald die Projektregion feststeht |
+| **Echte Anbieterentscheidung** | A3 Freigabe für Abuse-Monitoring-Kontrollen · A4 Zero-Data-Retention-Freigabe |
+| **Rechtsanteil** | A3 *Modified Retention Amendment* (Vertragsakt, gehört neben A1a) · A8 Zulässigkeit standardmäßig aktiven Cachings für Gesundheitsdaten · A1a unverändert |
 
-**Zu A3/A4 ausdrücklich:** Die Anfrage vom 2026-08-17 wurde bestätigt und **nie
-beantwortet**. Sie ist bis zur Wiederaufnahme des Anbieterprozesses bei höherem
-Nutzungsvolumen zurückgestellt. Eine Zurückstellung ist kein Status und bringt
-keine Zeile näher an `VERIFIED`.
+### 7.1 Drei Befunde, die die Lage verändern
 
----
+1. **Datenresidenz ist eine Projekteinstellung, kein Support-Ticket.** Die Region
+   wird laut Dokumentation *beim Anlegen* eines Projekts gewählt. Ob das
+   bestehende dedizierte Projekt (A2) umgestellt werden kann oder neu angelegt
+   werden muss, sagt die Dokumentation **nicht** — das ist Account-Evidenz und
+   als `UNKNOWN` geführt.
+2. **EU-Residenz verlangt einen Vertragszusatz.** *„To use data residency with
+   any region other than the United States, you must be approved for abuse
+   monitoring controls, and execute a Modified Retention amendment."* Damit ist
+   ein Teil von A3 ein **Vertragsakt** — dieselbe Kategorie wie A1a, und
+   zweckmäßigerweise im selben Vorgang zu behandeln.
+3. **Prompt Caching lässt sich nicht abschalten.** Es ist standardmäßig aktiv,
+   speichert den vollständigen gerenderten Kontext auf Maschinen innerhalb der
+   Verarbeitungsregion, ist organisationsisoliert und überschreitet keine
+   Regionsgrenze; Lebensdauer 30 Minuten bis 24 Stunden je nach Modell. Ein
+   Parameter zum vollständigen Deaktivieren ist **nicht dokumentiert**. Damit ist
+   A8 nicht mehr unbekannt — aber es ist jetzt eine Frage an Legal statt an die
+   Technik. **Die Schlussfolgerung „ZDR, also kein Caching" bleibt abgelehnt:**
+   der Anbieter beschreibt beides als getrennte Mechanismen.
+
+### 7.2 Was die Dokumentation ausdrücklich **nicht** belegt
+
+- dass **unsere** Organisation oder **unser** Projekt für EU-Residenz freigegeben
+  ist (A3)
+- dass **für uns** Zero Data Retention aktiv ist (A4)
+- dass die benötigten Modelle **in unserem Projekt und unserer Region** verfügbar
+  sind (A9/A10)
+
+Ein dokumentierter regionaler Host ist nicht dasselbe wie ein freigeschaltetes
+Projekt. Diese Trennung wird bewusst durchgehalten.
+
+### 7.3 Ausführbare Account-Schritte
+
+Vorzubereiten, **nicht auszuführen**, solange `NO-GO` gilt. Keiner davon benötigt
+eine Anbieterantwort, und keiner erzeugt hier ein Geheimnis.
+
+| # | Schritt | Ergebnis als Evidenz |
+|---|---|---|
+| 1 | Projekt für die Dokumenttransformation in der Zielregion sicherstellen — vorhandenes umstellen, falls möglich, sonst neu anlegen | Projektname und Region, Screenshot ohne Kennungen |
+| 2 | Dedizierten Schlüssel **für dieses Projekt** anlegen; Service-Account bevorzugt, weil er nicht an eine Person gebunden ist | der Satz „Key exists for approved translation project: yes" genügt |
+| 3 | Ablaufdatum setzen und eine Rotationsregel festhalten | Konfigurationsbestätigung |
+| 4 | Modelle für beide Slots festlegen und ihre Verfügbarkeit im Projekt prüfen | Modellliste des Projekts, Kennungen geschwärzt |
+| 5 | Wenn 1 steht: den Host in `APPROVED_PROVIDER_HOSTS` eintragen | geprüfter Commit — das ist das Vier-Augen-Prinzip, kein Schalter |
+
+**Kein Schlüssel wird hier erzeugt, angezeigt, gekürzt oder beschrieben.**
 
 ## 8. Regel für öffentliche Kommunikation
 

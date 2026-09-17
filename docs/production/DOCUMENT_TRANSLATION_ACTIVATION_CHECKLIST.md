@@ -85,10 +85,18 @@ data-protection/product rows, of which:
 
 | | |
 |---|---|
-| `VERIFIED` | 2 — the executed provider DPA (A1) and the dedicated project (A2) |
+| `VERIFIED` | 5 — the executed provider DPA (A1), the dedicated project (A2), and, on public provider documentation, the endpoint (A5), its `json_schema` structured output (A6) and its ZDR eligibility (A7) |
+| `EVIDENCE_PROVIDED` | 1 — prompt-caching behaviour (A8), now documented rather than assumed; the legal read of it is separate |
 | `LEGAL REVIEW REQUIRED` | 2 — the contract's health-data scope (A1a) and the legal basis (B4) |
 | `CONFLICT` | 1 — the live privacy notice (register §6) |
 | `OPEN` | all others, including A3/A4 which are deferred |
+
+A5–A13 were reclassified on 2026-09-18 by evidence type: three rows close on
+public documentation, four are our own account actions, two genuinely need a
+provider decision (A3, A4), and two carry a legal component. Full assessment in
+[`DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md`](DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md) §12.
+**A documented regional host is not an enabled project**, and none of this moves
+the gate.
 
 **No requirement may be marked done from inside the repository**, with two
 narrow exceptions: that a dedicated key exists and is not the generic one, and
