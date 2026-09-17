@@ -22,6 +22,10 @@ process.env.ENABLE_DOCUMENT_TRANSLATION = "true";
 // behaviour is not asserted here; the limit that actually matters — one
 // transformation at a time per patient — is covered in the service suite.
 process.env.DOCUMENT_TRANSLATION_IP_MAX = "500";
+// Same reason: one case here sends eleven rejected bodies in a row to prove the
+// request contract. The per-user daily cap has its own test in the E2E suite,
+// where the default value is the one under assertion.
+process.env.DOCUMENT_TRANSLATION_DAILY_MAX = "500";
 // Deliberately NOT configuring a translation provider: the default state of the
 // deployment is what this suite asserts against.
 delete process.env.DOCUMENT_TRANSLATION_PROVIDER;
@@ -115,9 +119,17 @@ prisma.practiceDocumentFile = {
 prisma.user = { findUnique: async () => null };
 prisma.auditLog = { create: async () => ({}) };
 
-const { default: patientPracticeDocumentsRouter } = await import(
+const { default: patientPracticeDocumentsRouter, __resetTranslationDailyLimit } = await import(
   "../routes/patientPracticeDocuments.js"
 );
+
+/*
+ * Every case acts as the same patient, and the route caps that patient per day.
+ * Clearing the counter per case keeps each test asserting what it is about; the
+ * cap itself is exercised in verifyDocumentTranslationE2E.test.js, where it is
+ * deliberately NOT cleared mid-way.
+ */
+test.beforeEach(() => __resetTranslationDailyLimit());
 
 /* ---------------------------------------------------------------- harness */
 

@@ -21,6 +21,7 @@ import {
   documentTranslationIpLimiter,
   labExplanationIpLimiter,
 } from "../middleware/ipRateLimit.js";
+import { rateLimitMax } from "../middleware/rateLimitConfig.js";
 import { translateDocumentForPatient } from "../services/documentTranslation/documentTranslationService.js";
 import { parseTranslationRequestBody } from "../services/documentTranslation/translationRequestContract.js";
 import {
@@ -47,6 +48,48 @@ function checkLabExplainDailyLimit(userId) {
   entry.count += 1;
   labExplainDailyStore.set(userId, entry);
   return entry.count <= LAB_EXPLAIN_DAILY_MAX;
+}
+
+/**
+ * Per-user daily cap for document transformation.
+ *
+ * The IP limiter beside it is not a substitute. It counts addresses, and an
+ * address is neither stable nor exclusive: a patient on mobile data moves
+ * between addresses within one session, while a household or a practice waiting
+ * room shares one. So the IP limit alone both under-counts the heaviest single
+ * user and over-counts unrelated people sitting behind the same NAT.
+ *
+ * The concurrency lock in the service is not a substitute either — it stops two
+ * transformations at once, not two hundred in a row.
+ *
+ * This is the most expensive call in the product and the only one that sends
+ * medical document text outside the server, so it gets the same shape of cap
+ * the lab explanation beside it already has, and a tighter number.
+ */
+const TRANSLATION_DAILY_MAX = rateLimitMax("DOCUMENT_TRANSLATION_DAILY_MAX", {
+  fallback: 5,
+  min: 1,
+  max: 50,
+  why: "A patient reads a handful of letters a day; a hundred is not a patient.",
+});
+/** @type {Map<string, { count: number; date: string }>} */
+const translationDailyStore = new Map();
+
+function checkTranslationDailyLimit(userId) {
+  const today = new Date().toISOString().slice(0, 10);
+  const entry = translationDailyStore.get(userId);
+  if (!entry || entry.date !== today) {
+    translationDailyStore.set(userId, { count: 1, date: today });
+    return true;
+  }
+  entry.count += 1;
+  translationDailyStore.set(userId, entry);
+  return entry.count <= TRANSLATION_DAILY_MAX;
+}
+
+/** Test seam: the counter is module state and would leak between cases. */
+export function __resetTranslationDailyLimit() {
+  translationDailyStore.clear();
 }
 
 function userIdFromReq(req) {
@@ -353,6 +396,12 @@ function noStore(_req, res, next) {
 router.post("/:documentId/translate", noStore, documentTranslationIpLimiter, async (req, res) => {
   const userId = userIdFromReq(req);
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  // Before the body is even parsed: a caller past the cap gets the same answer
+  // whatever they sent, so a rejected request costs nothing and reveals nothing.
+  if (!checkTranslationDailyLimit(userId)) {
+    return res.status(429).json({ ok: false, error: "daily_limit_exceeded" });
+  }
 
   let body;
   try {

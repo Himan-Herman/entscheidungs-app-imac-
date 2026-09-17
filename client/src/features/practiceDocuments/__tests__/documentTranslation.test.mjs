@@ -922,3 +922,22 @@ test("the visual layer uses the product design tokens, not its own palette", () 
     "controls should inherit the product touch-target height",
   );
 });
+
+test("the section reports its busy state to assistive technology", () => {
+  // A transformation runs for tens of seconds. The polite status line announces
+  // that it started, but without aria-busy a screen reader keeps presenting the
+  // controls and any previous result as current for the whole time.
+  assert.match(
+    COMPONENT_SOURCE,
+    /aria-busy=\{busy/,
+    "the section does not mark itself busy while a transformation runs",
+  );
+  assert.ok(
+    COMPONENT_SOURCE.includes('aria-live="polite"'),
+    "the running status is not announced",
+  );
+  assert.ok(
+    COMPONENT_SOURCE.includes('role="alert"'),
+    "an error is not announced assertively",
+  );
+});

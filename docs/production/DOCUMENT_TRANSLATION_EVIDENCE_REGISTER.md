@@ -268,8 +268,8 @@ Compiled from the code, 2026-08-15. Relevant to B6.
 
 | Data | Where | Notes |
 |---|---|---|
-| `AuditLog` row | database | one per transformation, success and failure |
-| ├ `userId`, `patientUserId` | | links the row to the patient |
+| `AuditLog` row | database | one per transformation that reached the document — completed **or** refused. A request rejected on its shape alone (unsupported target language, invalid mode, feature off, a second concurrent run) writes **no** row: it never touched a document, an identity or a provider, so recording a patient and a timestamp for it would create personal data about a non-event. Boundary asserted in `verifyDocumentTranslationE2E.test.js`. |
+| ├ `userId`, `patientUserId` | | links the row to the patient. Both are set: `userId` carries the deletion cascade, `patientUserId` carries the index an access request is answered from. |
 | ├ `entityId` (documentId), `practiceProfileId` | | which document, which practice |
 | ├ `metadata`: `fileId`, `mode`, `targetLanguage`, `outcome`, `segmentCount`, `attempts`, `promptVersion`, `providerKind`, `model`, `durationMs` | | metadata only |
 | ├ `ipHash` | | hashed, not the address |

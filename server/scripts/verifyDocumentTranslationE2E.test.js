@@ -22,6 +22,10 @@ import jwt from "jsonwebtoken";
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret-2d";
 process.env.ENABLE_DOCUMENT_TRANSLATION = "true";
 process.env.DOCUMENT_TRANSLATION_PROVIDER = "fake";
+// Every request here comes from one loopback address. Without this the suite
+// would throttle itself on the IP limiter rather than test the endpoint; the
+// per-user daily cap is asserted explicitly below, and that one is not raised.
+process.env.DOCUMENT_TRANSLATION_IP_MAX = "500";
 
 import { prisma } from "../lib/prisma.js";
 import { getPracticeDocumentStorage } from "../services/practiceDocument/storage/index.js";
@@ -132,7 +136,14 @@ prisma.user = {
         }
       : null,
 };
-prisma.auditLog = { create: async () => ({}) };
+/** Captured rather than discarded: the audit shape is asserted below. */
+const auditRows = [];
+prisma.auditLog = {
+  create: async ({ data }) => {
+    auditRows.push(data);
+    return data;
+  },
+};
 
 /** Serve the DOCX fixture instead of touching the filesystem. */
 const docxBuffer = await docx(LETTER_LINES.map((line) => para(line)).join(""));
@@ -140,9 +151,21 @@ getPracticeDocumentStorage().getObject = async () => docxBuffer;
 
 /* ---------------------------------------------------------------- harness */
 
-const { default: patientPracticeDocumentsRouter } = await import(
+const { default: patientPracticeDocumentsRouter, __resetTranslationDailyLimit } = await import(
   "../routes/patientPracticeDocuments.js"
 );
+
+/*
+ * Every case here acts as the same patient, and the route caps that patient at
+ * five transformations per day. Without this the suite would start failing at
+ * the sixth test for a reason that has nothing to do with what it asserts — so
+ * the counter is cleared per case, and the cap gets one test of its own that
+ * deliberately does not clear it mid-way.
+ */
+test.beforeEach(() => {
+  __resetTranslationDailyLimit();
+  auditRows.length = 0;
+});
 
 function requireAuth(req, res, next) {
   const header = req.headers.authorization ?? "";
@@ -430,4 +453,114 @@ test("outside production the fake is fully configured and stays in process", () 
   assert.equal(config.configured, true);
   assert.equal(config.dataRegion, "in-process");
   assert.equal(config.zeroRetention, true);
+});
+
+/* ------------------------------------------------- audit shape and retention */
+
+test("an audit row names the patient in BOTH columns a request can be answered from", async () => {
+  const { status } = await translate();
+  assert.equal(status, 200);
+
+  const row = auditRows.find((r) => r.action === "document_translation.completed");
+  assert.ok(row, "a completed transformation was not audited");
+
+  // userId carries the deletion cascade; patientUserId carries the index a
+  // data-subject access request reads. A row with only the first is erased
+  // correctly and found by nobody.
+  assert.equal(row.userId, PATIENT);
+  assert.equal(row.patientUserId, PATIENT);
+  assert.equal(row.actorRole, "patient");
+  assert.equal(row.entityType, "practice_document");
+  assert.equal(row.entityId, DOC);
+  assert.equal(row.practiceProfileId, PRACTICE);
+});
+
+test("a refused transformation is audited the same way", async () => {
+  // A refusal that happens once the request has reached the document — here an
+  // id that resolves to nothing. This is a processing attempt against a
+  // patient's records and is recorded as one.
+  const { status } = await translate({}, { documentId: "doc-does-not-exist" });
+  assert.equal(status, 404);
+
+  const row = auditRows.find((r) => r.action === "document_translation.failed");
+  assert.ok(row, "a refused transformation was not audited");
+  assert.equal(row.userId, PATIENT);
+  assert.equal(row.patientUserId, PATIENT);
+  assert.ok(row.metadata.errorCode, "the failure carries no stable code");
+});
+
+test("a request rejected on its shape alone writes no audit row", async () => {
+  // The boundary the register has to state accurately: an unsupported target
+  // language is refused before any document, any identity and any provider is
+  // touched. Writing a personal-data row for it would record a patient and a
+  // timestamp for something that was never processing of their health data.
+  const { status } = await translate({ targetLanguage: "zz" });
+  assert.equal(status, 400);
+  assert.equal(auditRows.length, 0, "a shape rejection produced an audit row");
+
+  // Same for the concurrency refusal and for the disabled feature: neither
+  // reaches the document either.
+  const { status: modeStatus } = await translate({ mode: "not_a_mode" });
+  assert.equal(modeStatus, 400);
+  assert.equal(auditRows.length, 0);
+});
+
+test("no document content, no name and no credential reaches an audit row", async () => {
+  await translate();
+  await translate({ targetLanguage: "zz" });
+
+  const dump = JSON.stringify(auditRows);
+  for (const secret of [
+    "Mustermann", "Ramipril", "Hypertonie", "HbA1c", "12.08.1980",
+    "max.mustermann@example.de", "+49 171 1234567", "Sehr geehrte",
+  ]) {
+    assert.equal(dump.includes(secret), false, `the audit log leaked "${secret}"`);
+  }
+  // Metadata only — the allowed keys, and nothing beyond them.
+  for (const row of auditRows) {
+    for (const key of Object.keys(row.metadata ?? {})) {
+      assert.ok(
+        [
+          "fileId", "mode", "targetLanguage", "outcome", "segmentCount",
+          "attempts", "promptVersion", "providerKind", "model", "durationMs",
+          "errorCode", "errorDetail",
+        ].includes(key),
+        `unexpected audit metadata key: ${key}`,
+      );
+    }
+  }
+});
+
+/* ------------------------------------------------------- per-user daily cap */
+
+test("one patient cannot run the feature an unlimited number of times", async () => {
+  // Five succeed, the sixth is refused — for the user, not for the address, so
+  // moving to another network does not reset it.
+  for (let i = 1; i <= 5; i += 1) {
+    const { status } = await translate();
+    assert.equal(status, 200, `request ${i} should still be allowed`);
+  }
+
+  const capped = await translate();
+  assert.equal(capped.status, 429);
+  assert.equal(capped.body.error, "daily_limit_exceeded");
+});
+
+test("the cap is applied before the body is read, so a refusal reveals nothing", async () => {
+  for (let i = 1; i <= 5; i += 1) await translate();
+
+  // A malformed body would normally be a 400. Past the cap it is a 429 like any
+  // other — the caller learns nothing about what the endpoint accepts.
+  const nonsense = await fetch(`${base}/api/patient/practice-documents/${DOC}/translate`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${jwt.sign({ userId: PATIENT }, process.env.JWT_SECRET, {
+        expiresIn: "10m",
+      })}`,
+    },
+    body: JSON.stringify({ document: "the whole letter", mode: "strict_translation" }),
+  });
+  assert.equal(nonsense.status, 429);
+  assert.equal((await nonsense.json()).error, "daily_limit_exceeded");
 });
