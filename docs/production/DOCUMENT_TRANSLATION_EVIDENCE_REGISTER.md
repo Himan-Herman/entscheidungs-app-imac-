@@ -14,6 +14,7 @@
 Baseline commit: `545444ea` · Phase 2A–2D frozen · both feature flags off
 Last evidence assessed: A2, 2026-08-17 · `VERIFIED` 2 / 21 · B4 legal review packet prepared
 A3/A4 deferred 2026-09-18 — no provider response obtained
+Legal readiness prepared 2026-09-18 — decision matrix, DPIA draft, data-subject-rights runbook (§11)
 
 ---
 
@@ -57,7 +58,7 @@ the underlying fact) / `no`.
 | # | Requirement | Status | Evidence description | Date | Repo? | Reviewer | Notes |
 |---|---|---|---|---|---|---|---|
 | A1 | Executed DPA / AVV with the provider | **`VERIFIED – technical/documentary evidence`** | Executed OpenAI Data Processing Addendum, version `v.010126`, both parties dated 2026-08-16, DocuSign envelope with PKCS#7 seal. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Customer: Himan Khorshidi, title "Sole Proprietor". Provider entity follows from the EEA clause, see A1a. Contract text byte-identical to the public template — no customisation. |
-| A1a | Contractual scope covers **medical document content** | **`LEGAL REVIEW REQUIRED`** | Same document. Schedule 1 §5 reads *"No sensitive data is intended to be transferred unless the user includes it unexpectedly in unstructured data."* No occurrence of special categories, health, Article 9, HIPAA, prohibited or restricted data anywhere in the contract. | 2026-08-17 | no | operator | Our use case transfers health data **deliberately and systematically**. Classified `not determinable from the DPA`. Feeds into B4. **A1 being verified does not resolve this.** |
+| A1a | Contractual scope covers **medical document content** | **`LEGAL REVIEW REQUIRED`** | Same document. Schedule 1 §5 reads *"No sensitive data is intended to be transferred unless the user includes it unexpectedly in unstructured data."* No occurrence of special categories, health, Article 9, HIPAA, prohibited or restricted data anywhere in the contract. | 2026-08-17 | no | operator | Our use case transfers health data **deliberately and systematically**. Classified `not determinable from the DPA`. Feeds into B4. **A1 being verified does not resolve this.** One-page question for external review prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) §6. |
 | A2 | Dedicated provider project for document translation | **`VERIFIED – account/project evidence`** | Provider console screenshots: a dedicated project named "MedScoutX Document Translation" exists, and it belongs to the same provider organization as the executed DPA. Match performed 2026-08-17. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Identifiers deliberately not recorded here. Separation from the key behind `OPENAI_API_KEY` is **not** established by this row — that is A11/A12. |
 | A3 | Data residency confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18 until the enterprise/sales process is resumed at greater usage. | 2026-09-18 | partial | operator | `DATA_REGION` records an assertion only |
 | A4 | Zero data retention confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18 until the enterprise/sales process is resumed at greater usage. | 2026-09-18 | partial | operator | `ZERO_RETENTION` records an assertion only |
@@ -76,12 +77,12 @@ the underlying fact) / `no`.
 | # | Requirement | Status | Evidence description | Date | Repo? | Reviewer | Notes |
 |---|---|---|---|---|---|---|---|
 | B1 | Privacy notice covers this processing | `CONFLICT` | Live notice analysed from the repository, 2026-08-15 | 2026-08-15 | partial | operator | Names OpenAI **USA** for the patient's *own* inputs; see §6 |
-| B2 | Provider listed as subprocessor **for this processing** | `OPEN` | — | — | no | — | Billing-pilot entry does not cover it; scope note added in Phase 3 |
-| B3 | Consent model decided for this use case | `OPEN` | Consent architecture re-audited, 2026-08-15 | 2026-08-15 | partial | operator | No covering consent exists; see §7 — corrects a Phase 3 statement |
+| B2 | Provider listed as subprocessor **for this processing** | `OPEN` | Change matrix prepared 2026-09-18 — see [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) §3. Ten concrete additions identified across AVV, subprocessor list and TOM; text blocks drafted for those that do not depend on a decision. | 2026-09-18 | partial | operator | Billing-pilot entry does not cover it; scope note added in Phase 3. The role assignment itself is `LEGAL DECISION REQUIRED`, and the subprocessor row cannot be filled before A3/A13. |
+| B3 | Consent model decided for this use case | `OPEN` | Consent architecture re-audited 2026-08-15. Both implementation variants fully specified 2026-09-18 — see [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) §4 (UI, server enforcement, revocation, audit, versioning, effect on existing consents, effect on B1/B7). | 2026-09-18 | partial | operator | No covering consent exists; see §7 — corrects a Phase 3 statement. **Neither variant is implemented.** |
 | B4 | Legal basis determined and documented | `OPEN – legal review packet prepared` | Legal review packet prepared on 2026-08-17. External legal determination pending. See [`DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md`](DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md). | 2026-08-17 | no | — | `LEGAL REVIEW REQUIRED`; not to be asserted from code. A prepared packet is preparation, **not** evidence — the status stays `OPEN` until a determination exists. |
-| B5 | DPIA/DSFA necessity assessed for this processing | `OPEN` | — | — | no | — | No assessment found in the repository |
-| B6 | Erasure/access request handling reviewed for this flow | `OPEN` | Data inventory compiled, 2026-08-15 | 2026-08-15 | partial | operator | Inventory in §8; the process decision is external |
-| B7 | Patient-facing information decided (what is shown before the first run) | `OPEN` | — | — | partial | — | Depends on B3/B4 |
+| B5 | DPIA/DSFA necessity assessed for this processing | **`OPEN – DPIA draft prepared`** | Full DPIA draft prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_DPIA_DRAFT.md`](DOCUMENT_TRANSLATION_DPIA_DRAFT.md). Processing, purposes, data categories, data subjects, recipients, steps, necessity, 14 named risks, safeguards. | 2026-09-18 | partial | operator | The repository contained no DPIA and no template before this. **Residual-risk assessment and the sign-off field are deliberately left empty**, and whether a DPIA is required at all is itself an open question — a prepared draft is preparation, not evidence. |
+| B6 | Erasure/access request handling reviewed for this flow | `OPEN` | Data inventory compiled 2026-08-15. Operational runbook prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md`](DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md): access, rectification, erasure, restriction, revocation, portability, third parties in the document. | 2026-09-18 | partial | operator | Inventory in §8; the process decision is external. Eight points must close before activation, incl. audit retention (`LEGAL DECISION REQUIRED`) and backup reach (`UNKNOWN`). |
+| B7 | Patient-facing information decided (what is shown before the first run) | `OPEN` | German draft prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) Annex A. Legal-basis line deliberately left as a marked variant. | 2026-09-18 | partial | operator | Depends on B3/B4. The UI has **no slot** for pre-run information today — that is a contained follow-up change (one element, one i18n key × 6 languages) once the text is approved. Translations only after the German text is signed off. |
 
 **Two of 21 rows are `VERIFIED`: A1 and A2.** Three further rows carry
 repository-side analysis (B1, B3, B6); that analysis narrows the question, it
@@ -354,6 +355,23 @@ a DPA is in force.
 
 **Release rule: every mandatory row `VERIFIED`, or `NO-GO`.** There is no
 majority, no "almost everything is in place", and no partial activation.
+
+---
+
+## 11. Companion documents
+
+Prepared 2026-09-18. None of them decides anything; each exists so that a
+decision, once taken, can be applied without further groundwork.
+
+| Document | What it holds |
+|---|---|
+| [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) | Ten decision blocks (question / technical reality / options / dependents), the B2 change matrix with drafted text blocks, both consent variants in full, the B1 change matrix split into always-required / legal-dependent / provider-dependent, the A1a one-pager, the A3–A13 provider matrix, the public-communication rule with its documented exceptions, and the B7 patient-information draft |
+| [`DOCUMENT_TRANSLATION_DPIA_DRAFT.md`](DOCUMENT_TRANSLATION_DPIA_DRAFT.md) | Full DPIA draft. Risk assessment, residual risk and sign-off deliberately empty |
+| [`DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md`](DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md) | What actually happens when a patient exercises a right, as a MedScoutX process rather than a list of articles |
+
+[`DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md`](DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md)
+remains the long-form statement of facts; the decision matrix is its compact
+counterpart. Where both cover the same ground, the packet is the source.
 
 ---
 

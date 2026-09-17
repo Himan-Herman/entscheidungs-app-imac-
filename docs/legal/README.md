@@ -29,6 +29,13 @@
 > switched off and **not** covered by the drafts here. Its technical release gate is
 > [`../production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md`](../production/DOCUMENT_TRANSLATION_ACTIVATION_CHECKLIST.md).
 > Extending these drafts to cover it is a legal act and was deliberately not done here.
+>
+> **Update 2026-09-18:** what would have to be added to the AVV, the TOM appendix
+> and the subprocessor list — ten concrete points, with drafted text for those
+> that do not depend on a decision — is now recorded in
+> [`../production/DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](../production/DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) §3.
+> **The documents in this folder are still unchanged**, because the role
+> assignment they would depend on is an open legal question.
 
 **Status: draft prepared — NOT legally complete.** A signed AVV with each external
 practice, a DSGVO legal-basis determination, and (only if AI is ever enabled) OpenAI

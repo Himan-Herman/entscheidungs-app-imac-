@@ -372,6 +372,26 @@ requests is zero.
 
 ---
 
+## Legal readiness — prepared 2026-09-18
+
+Everything that could be prepared internally has been, so that after each
+external decision only the matching variant has to be inserted. None of these
+documents approves anything.
+
+- [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md)
+  — ten decision blocks, the B2/B1 change matrices, both consent variants, the
+  A1a one-pager, the A3–A13 provider matrix, the public-communication rule, and
+  the B7 patient-information draft
+- [`DOCUMENT_TRANSLATION_DPIA_DRAFT.md`](DOCUMENT_TRANSLATION_DPIA_DRAFT.md)
+  — `B5 = OPEN – DPIA draft prepared`; residual risk and sign-off left empty
+- [`DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md`](DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md)
+  — `B6 = OPEN`; eight points to close before activation
+
+The gate below is unchanged by any of this. A prepared document moves no row to
+`VERIFIED`.
+
+---
+
 *Related: [`../legal/README.md`](../legal/README.md) ·
 [`../billing-plausibility-compliance-checklist.md`](../billing-plausibility-compliance-checklist.md)
 (separate feature, separate approval)*
