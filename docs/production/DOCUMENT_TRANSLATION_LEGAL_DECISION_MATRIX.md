@@ -545,6 +545,9 @@ lesen lässt
   Maßgeblich ist immer das Original deiner Praxis.
 - **Was verarbeitet wird.** Der Textinhalt dieses Dokuments. Dazu gehören auch
   gesundheitsbezogene Angaben. Die Datei selbst wird nicht weitergegeben.
+- **Wer den Text verarbeitet.** Für die Umformung werden die vorbereiteten
+  Textabschnitte an einen externen Dienstleister übermittelt, der sie in unserem
+  Auftrag verarbeitet. Wie lange er sie vorhält: `«OFFEN — A4»`.
 - **Warum.** `«VARIANTE A: weil du dieser Verarbeitung ausdrücklich zustimmst.»`
   `«VARIANTE B: «Rechtsgrundlage — offen, B4».»` — **nicht ausfüllen, bevor B4
   entschieden ist.**
@@ -559,9 +562,16 @@ lesen lässt
 - **Das Ergebnis ist eine sprachliche Umformung.** Es kann sich vom Original
   unterscheiden. Es ist keine medizinische Beratung und ersetzt kein Gespräch mit
   deiner Ärztin oder deinem Arzt.
+- **Es kann Fehler enthalten.** Begriffe können ungenau übertragen, Zusammenhänge
+  verkürzt oder Feinheiten verloren gehen. Wir prüfen das Ergebnis automatisch auf
+  erfundene Zahlen und Anweisungen und zeigen es im Zweifel nicht an. Das fängt
+  aber nicht jeden Fehler ab. Vergleiche wichtige Angaben mit dem Original und
+  frag bei Unklarheiten deine Praxis.
 - **Was gespeichert wird.** Das Ergebnis wird nicht gespeichert — weder bei uns
-  noch in deinem Gerät. Gespeichert wird ein technischer Protokolleintrag
-  darüber, dass und wann du die Funktion für dieses Dokument genutzt hast.
+  noch automatisch auf deinem Gerät. Wenn du es als PDF herunterlädst, liegt diese
+  Datei nur bei dir; wir erhalten keine Kopie. Gespeichert wird ein technischer
+  Protokolleintrag darüber, dass und wann du die Funktion für dieses Dokument
+  genutzt hast.
 - **Deine Rechte.** Du kannst Auskunft über die zu dir gespeicherten Daten
   verlangen, ihre Löschung oder Einschränkung beantragen und Beschwerde bei einer
   Aufsichtsbehörde einlegen. `«VARIANTE A: Du kannst deine Zustimmung jederzeit
@@ -570,6 +580,9 @@ lesen lässt
   Verarbeitung widersprechen — Weg abhängig von B4.»`
 - **Wie du die Funktion nicht nutzt.** Starte sie einfach nicht. Es gibt keinen
   Nachteil und keine Erinnerung.
+- **Mehr zum Datenschutz.** Verantwortlichen, Rechtsgrundlage, Empfänger,
+  Speicherdauer und deine Rechte im Einzelnen findest du in unserer
+  Datenschutzerklärung: `«Link»`.
 
 `LEGAL DISCLOSURE REQUIRED` — *falls die Nennung des konkreten Empfängers und der
 Verarbeitungsregion an dieser Stelle rechtlich erforderlich ist, gehört sie

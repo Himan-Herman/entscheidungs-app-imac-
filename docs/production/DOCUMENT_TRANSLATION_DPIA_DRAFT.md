@@ -3,16 +3,18 @@
 > ⚠️ **ENTWURF. Keine abgeschlossene DSFA, keine Rechtsberatung, keine Freigabe.**
 >
 > Dieses Dokument beschreibt die Verarbeitung vollständig und benennt die
-> Risiken. Es trifft **keine** Aussage darüber, ob eine DSFA erforderlich ist, ob
-> die Verarbeitung zulässig ist oder ob ein Restrisiko akzeptabel ist. Diese
-> Bewertungen sind ausdrücklich offen gelassen und mit `OFFEN` markiert.
+> Risiken. Es trifft **keine abschließende** Aussage darüber, ob eine DSFA
+> erforderlich ist, ob die Verarbeitung zulässig ist oder ob ein Restrisiko
+> akzeptabel ist. Diese Bewertungen sind ausdrücklich offen gelassen und mit
+> `OFFEN` markiert. Zur Erforderlichkeit gibt es eine **interne, nicht bindende**
+> Vorprüfung (§0a).
 >
 > **Enthält keine Patientendaten, keine Zugangsdaten, keine Schlüssel.**
 
 | | |
 |---|---|
 | **Gegenstand** | Sprachliche Transformation von der Praxis freigegebener medizinischer Dokumente |
-| **Status** | `B5 = OPEN – DPIA draft prepared` |
+| **Status** | `B5 = DPIA DRAFT COMPLETE / FINAL APPROVAL PENDING` |
 | **Verarbeitung aktiv?** | **Nein.** Beide Feature-Flags aus, kein Provider konfiguriert, `APPROVED_PROVIDER_HOSTS` leer. Es werden derzeit **keine** Daten übermittelt. |
 | **Technischer Stand** | `TECHNICAL IMPLEMENTATION = COMPLETE`, Referenzstand `18884e03` |
 | **Erstellt** | 2026-09-18 |
@@ -23,6 +25,23 @@
 Vorher prüfen: Im Repository existierte **keine** DSFA und keine DSFA-Vorlage
 (Stand 2026-09-18, geprüft über `docs/legal/`, `docs/production/` und den
 gesamten Baum). Dies ist die erste.
+
+---
+
+## 0a. Erforderlichkeit — interne Vorprüfung
+
+Nicht bindend. Die Feststellung trifft der Verantwortliche (§14, Freigabebogen
+Feld 8). Begründung und Quellen:
+[Vorprüfungsmemo §6](DOCUMENT_TRANSLATION_LEGAL_ASSESSMENT.md).
+
+| Maßstab | Befund |
+|---|---|
+| Art. 35 Abs. 1 DSGVO | voraussichtlich hohes Risiko: Gesundheitsdaten, externer Verarbeiter, Re-Identifikation, Daten Dritter |
+| WP248 rev.01 (vom EDPB übernommen): bei zwei von neun Kriterien *„in most cases"* DSFA | erfüllt: **4** sensible Daten, **7** schutzbedürftige Betroffene (Patienten), **8** innovative Technologie · offen: **5** Umfang · nicht erfüllt: 1, 2, 3, 6, 9 |
+| DSK-Muss-Liste, Version 1.1 vom 17.10.2018 | Nr. 11 und Nr. 17 nicht unmittelbar einschlägig; die Liste ist nicht abschließend |
+
+**Einschätzung: `LIKELY REQUIRED`.** Dieser Entwurf wird deshalb so geführt, als
+sei die DSFA erforderlich.
 
 ---
 
@@ -99,6 +118,11 @@ und bei Ablehnung. Eine Anfrage, die bereits an ihrer Form scheitert, erzeugt
 **Dieser Datensatz ist personenbezogen.** Er belegt, dass eine bestimmte Person zu
 einem bestimmten Zeitpunkt ein bestimmtes Dokument transformieren ließ. Er
 enthält keinen Dokumenttext, keine Diagnose, keine Medikation und kein Ergebnis.
+
+**PDF-Export.** Auf eigenen Klick erzeugt der Browser des Patienten ein PDF des
+Ergebnisses. Die Datei entsteht nur auf dem Gerät des Patienten, MedScoutX erhält
+keine Kopie. Das PDF trägt die Kennzeichnung als maschinell erzeugte Umformung und
+den Hinweis, dass das Original maßgeblich ist.
 
 ---
 
@@ -248,13 +272,16 @@ Benannt, nicht bewertet. Eintrittswahrscheinlichkeit und Schwere sind bewusst
 | R5 | Drittlandverarbeitung ohne tragfähige Garantie | Patient | Host-Allowlist leer, Produktion nicht konfigurierbar | `OFFEN` — A3, A13 |
 | R6 | Vertragsrahmen deckt Gesundheitsdaten nicht | Patient | DPA existiert | **erkannt und offen** — A1a; der Vertrag nennt sensible Daten *unbeabsichtigt* |
 | R7 | Inhaltliche Verfälschung (Dosierung, Medikament, Verneinung) | Patient | atomare Maskierung, Integritätsprüfung, Ablehnung statt Rateversuch, Negationsprüfung | gemindert; Anzeige weist auf den Vorrang des Originals hin |
-| R8 | Fehlinterpretation des Ergebnisses als medizinische Aussage | Patient | Hinweise „ersetzt keine Beratung" und „Original maßgeblich" | `OFFEN` — Wirksamkeit nicht gemessen |
+| R8 | Fehlinterpretation des Ergebnisses als medizinische Aussage | Patient | Hinweise „ersetzt keine Beratung" und „Original maßgeblich", auch im PDF-Export | `OFFEN` — Wirksamkeit nicht gemessen |
 | R9 | Ablehnungsquote: berechtigte Dokumente werden nicht übersetzt | Patient | bewusst in Kauf genommen | **Quote unbekannt** — nur an einem echten Korpus messbar; sie wird nicht als niedrig behauptet |
 | R10 | Audit-Metadaten offenbaren Verhalten | Patient | nur Metadaten, IP gehasht | **bleibt** — der Datensatz belegt Zeitpunkt und Dokument |
 | R11 | Keine Frist für Audit-Daten | Patient | Löschung per Kaskade bei Kontolöschung | `OFFEN` — 2.9 der Entscheidungsmatrix |
 | R12 | Aufbewahrung in Backups | Patient | keine | **`UNKNOWN`** — im Repository ist keine Backup-Retention dokumentiert |
 | R13 | Praxis erfährt nichts von der Weiterverarbeitung | Praxis, Patient | keine | `OFFEN` — 2.7 |
 | R14 | Versehentliche Aktivierung | Patient | zwei Flags aus, Provider-Gate, leere Host-Allowlist, Fake-Anbieter in Produktion gesperrt | gering; mehrere unabhängige Sperren |
+| R15 | **Gesundheitsdaten Angehöriger** (Familienanamnese) werden übermittelt | Dritte | keine | **ungemindert** — eine Einwilligung des Patienten erfasst sie nicht; Rechtsgrundlage `OFFEN` (Freigabebogen Feld 12) |
+| R16 | Berufsgeheimnisse verlassen die Verpflichtungskette nach § 203 StGB | Patient | keine Weitergabe durch die Praxis; Auslösung durch den Patienten | `OFFEN` — relevant, falls MedScoutX im Auftrag der Praxis handelt (Feld 1, Memo §2.3) |
+| R17 | Die Zweckbestimmung verschiebt sich durch Produkt-, Hilfe- oder Marketingtexte in Richtung medizinischer Aussage | Patient | Funktion auf sprachliche Transformation begrenzt; erfundene Anweisungen führen zur Ablehnung; Kennzeichnung am Ergebnis | `OFFEN` — Zusatzfragen Z1 (MDR) und Z2 (AI Act) |
 
 ---
 
@@ -282,9 +309,10 @@ aus dem realen System erhoben, nicht geschätzt:
 |---|---|
 | §1 Beschreibung · §2 Zwecke · §3 Datenkategorien · §4 Betroffene · §5 Empfänger · §6 Ablauf | **ja** |
 | §7 Erforderlichkeit und Verhältnismäßigkeit | Sachverhalt ja; die **Bewertung**, ob ein milderes Mittel genügt, ist `EXTERNAL / RESPONSIBLE-PARTY DECISION REQUIRED` |
-| §8 Technische Maßnahmen | **ja** — 18 Maßnahmen, durch Tests belegt |
+| §0a Erforderlichkeit | interne Vorprüfung vorhanden (WP248, DSK-Liste); Feststellung `EXTERNAL / RESPONSIBLE-PARTY DECISION REQUIRED` |
+| §8 Technische Maßnahmen | **ja** — 20 Maßnahmen, durch Tests belegt |
 | §9 Organisatorische Maßnahmen | drei Zeilen `OFFEN`: Schulung, Meldeprozess für diesen Ablauf, Überprüfungskadenz. **Das sind interne organisatorische Festlegungen, keine externen** |
-| §10 Risiken | **ja** — 14 benannt. Eintrittswahrscheinlichkeit und Schwere bewusst offen |
+| §10 Risiken | **ja** — 17 benannt (R15–R17 ergänzt am 2026-09-18: Gesundheitsdaten Dritter, § 203 StGB, Zweckbestimmung). Eintrittswahrscheinlichkeit und Schwere bewusst offen |
 | §11 Restrisiko · §13 Konsultation · §14 Freigabe · §15 Überprüfung | `EXTERNAL / RESPONSIBLE-PARTY DECISION REQUIRED` |
 
 Zwei Abhängigkeiten von außen bleiben inhaltlich bestehen und sind als solche
@@ -317,6 +345,12 @@ Kurzfassung:
 9. Löschung oder Aufbewahrung der Audit-Metadaten
 10. Bewertung der internationalen Verarbeitung und der Empfängernennung
 11. Umgang mit den Rechten Dritter, die im Dokument genannt sind (R3)
+12. Rechtsgrundlage für Gesundheitsdaten Angehöriger (R15)
+13. Verpflichtungskette nach § 203 StGB (R16)
+14. Medizinprodukt-Abgrenzung und AI-Act-Transparenz (R17)
+
+Interne Vorprüfung zu allen Punkten:
+[Vorprüfungsmemo](DOCUMENT_TRANSLATION_LEGAL_ASSESSMENT.md).
 
 ---
 
@@ -354,7 +388,7 @@ Kurzfassung:
 | Datum | `__________` |
 | Unterschrift | `__________` |
 
-**Solange dieses Feld leer ist, gilt: `B5 = OPEN – DPIA draft prepared`.**
+**Solange dieses Feld leer ist, gilt: `B5 = DPIA DRAFT COMPLETE / FINAL APPROVAL PENDING`.**
 Ein vorbereiteter Entwurf ist Vorbereitung, kein Nachweis.
 
 ---
@@ -369,5 +403,5 @@ Ein vorbereiteter Entwurf ist Vorbereitung, kein Nachweis.
 
 ---
 
-*Status: **ENTWURF — nicht abgeschlossen, nicht freigegeben.** Verarbeitung
-nicht aktiv.*
+*Status: **ENTWURF — Sachverhalt vollständig, Bewertung und Freigabe ausstehend.**
+`B5 = DPIA DRAFT COMPLETE / FINAL APPROVAL PENDING`. Verarbeitung nicht aktiv.*

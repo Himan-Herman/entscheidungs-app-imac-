@@ -87,7 +87,9 @@ data-protection/product rows, of which:
 |---|---|
 | `VERIFIED` | 6 — the executed provider DPA (A1), the dedicated project (A2), and, on public provider documentation, the endpoint (A5), its `json_schema` structured output (A6), its ZDR eligibility (A7) and its caching controls (A8, conditional on a `gpt-5.6`+ model) |
 | `READY FOR ACCOUNT ACTION` | 2 — the dedicated service-account key (A11) and its scoping, expiry and rotation (A12). Executable today; creating a key activates nothing |
-| `LEGAL REVIEW REQUIRED` | 2 — the contract's health-data scope (A1a) and the legal basis (B4) |
+| `LEGAL REVIEW REQUIRED` | 1 — the contract's health-data scope (A1a) |
+| `PENDING EXTERNAL LEGAL DETERMINATION` | 1 — the legal basis (B4); internal pre-assessment complete |
+| `DPIA DRAFT COMPLETE / FINAL APPROVAL PENDING` | 1 — the DPIA (B5) |
 | `CONFLICT` | 1 — the live privacy notice (register §6) |
 | `OPEN` | all others, including A3/A4 (`OPEN – approval required`; combined request prepared 2026-09-18, register §12.5) |
 
@@ -389,13 +391,18 @@ external decision only the matching variant has to be inserted. None of these
 documents approves anything.
 
 - [`DOCUMENT_TRANSLATION_LEGAL_SIGNOFF.md`](DOCUMENT_TRANSLATION_LEGAL_SIGNOFF.md)
-  — **the sheet to hand to a reviewer**: facts, then 13 decision fields and a signature block
+  — **the sheet to hand to a reviewer**: sections A–L — facts, data flow, safeguards,
+  13 decision fields plus MDR and AI Act questions, conditions, a four-option overall
+  decision and the signature block
+- [`DOCUMENT_TRANSLATION_LEGAL_ASSESSMENT.md`](DOCUMENT_TRANSLATION_LEGAL_ASSESSMENT.md)
+  — internal legal pre-assessment with primary sources; `LEGAL PACKAGE = COMPLETE`,
+  `LEGAL SIGN-OFF = PENDING EXTERNAL REVIEW`
 - [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md)
   — ten decision blocks, the B2/B1 change matrices, both consent variants, the
   A1a one-pager, the A3–A13 provider matrix, the public-communication rule, and
   the B7 patient-information draft
 - [`DOCUMENT_TRANSLATION_DPIA_DRAFT.md`](DOCUMENT_TRANSLATION_DPIA_DRAFT.md)
-  — `B5 = OPEN – DPIA draft prepared`; residual risk and sign-off left empty
+  — `B5 = DPIA DRAFT COMPLETE / FINAL APPROVAL PENDING`; residual risk and sign-off left empty
 - [`DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md`](DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md)
   — `B6 = OPEN`; eight points to close before activation
 

@@ -1,300 +1,245 @@
 # Dokumenttransformation — Entscheidungs- und Freigabebogen
 
-> **Für die datenschutzrechtliche Prüfung.** Dieses Dokument ist so gebaut, dass
-> es **allein** bearbeitet werden kann. Die Anhänge vertiefen, sie sind nicht
-> Voraussetzung.
->
-> Es enthält keine Rechtsauffassung von uns, keine Vorentscheidung und keine
-> Freigabe. Die Felder sind leer, weil sie leer sein müssen.
->
-> **Keine Patientendaten, keine Zugangsdaten, keine Schlüssel.**
+> **Für die externe Prüfung (Datenschutz-, IT-, Medizinprodukterecht).** A–L sind
+> allein bearbeitbar. Die **Vorprüfung** je Feld ist intern und nicht bindend;
+> Begründung und Quellen stehen im [Vorprüfungsmemo](DOCUMENT_TRANSLATION_LEGAL_ASSESSMENT.md).
+> **Kein Kästchen ist vorausgefüllt.** Keine Patientendaten, Zugangsdaten, Schlüssel.
 
 | | |
 |---|---|
-| **Gegenstand** | Sprachliche Transformation von Praxisdokumenten für Patienten |
-| **Stand** | Technisch fertig, **nicht aktiv**. Beide Schalter aus, kein Dienstleister konfiguriert, es werden derzeit **keine** Daten übermittelt |
-| **Was hier entschieden wird** | 13 Felder. Danach ist die Verarbeitung entweder freigegeben oder begründet abgelehnt |
-| **Datum der Vorlage** | 2026-09-18 |
-| **Status** | `LEGAL SIGN-OFF = PENDING EXTERNAL REVIEW` |
-| **Verantwortliche Stelle (Anbieter der App)** | Himan Khorshidi, Einzelunternehmer — MedScoutX |
-| **KI-Dienstleister** | OpenAI. Vertragspartei ist für Kunden im EWR laut Vertragsklausel **OpenAI Ireland Ltd.**; im Unterschriftenblock ist die Gesellschaft nicht ausgeschrieben |
+| **Gegenstand** | Übersetzung oder Einfache Sprache für Dokumente, die eine Praxis ihrem Patienten freigegeben hat. Technisch fertig, **nicht aktiv**, keine Datenübermittlung |
+| **Verantwortliche Stelle** | Himan Khorshidi, Einzelunternehmer — MedScoutX |
+| **KI-Dienstleister** | OpenAI; im EWR laut Vertragsklausel OpenAI Ireland Ltd. (im Unterschriftenblock nicht ausgeschrieben) |
+| **Vorlage · Status** | 2026-09-18 · `LEGAL PACKAGE = COMPLETE` · `LEGAL SIGN-OFF = PENDING EXTERNAL REVIEW` |
+| **Offene Einzelpunkte** | `A1a = LEGAL REVIEW REQUIRED` · `B4 = PENDING EXTERNAL LEGAL DETERMINATION` · `B5 = DPIA DRAFT COMPLETE / FINAL APPROVAL PENDING` |
 
 ---
 
-## Teil 1 — Sachverhalt in einer halben Seite
-
-Eine Praxis gibt einem Patienten ein Dokument frei — einen Arztbrief, einen
-Entlassungsbericht oder eine Überweisung. Der Patient öffnet es in der App und
-kann **ausdrücklich** eine von zwei Umformungen starten: eine Übersetzung in eine
-andere Sprache, oder eine allgemeinverständliche Fassung in derselben Sprache.
-
-Dazu wird der Text serverseitig aus der Datei gelesen, es werden die dem System
-bekannten Angaben zur Person sowie Medikamente, Dosierungen, Messwerte und Daten
-durch Platzhalter ersetzt, und die so vorbereiteten Textabschnitte werden an
-einen externen KI-Dienstleister gesendet. Dessen Antwort wird auf erfundene Werte
-und verlorene Platzhalter geprüft, die Platzhalter werden zurückgesetzt, das
-Ergebnis wird angezeigt — und **nicht gespeichert**.
-
-**Was übermittelt wird:** der Textinhalt eines medizinischen Dokuments. Also
-Diagnosen, Befunde, Behandlungsverläufe — **besondere Kategorien nach Art. 9
-Abs. 1 DSGVO**, und zwar **absichtlich und planmäßig**, nicht als Nebenwirkung.
-
-**Was nicht übermittelt wird:** die Datei selbst, Kennungen von Dokument, Praxis
-oder Patient, Kontodaten, Metadaten mit Personenbezug.
-
-**Was gespeichert wird:** ein technischer Protokolleintrag pro Vorgang —
-Zeitpunkt, welches Dokument, welche Praxis, Modus, Zielsprache, Ergebnis,
-gehashte IP-Adresse. **Kein Dokumenttext, kein Ergebnis.** Dieser Eintrag ist
-personenbezogen.
-
-**Freiwilligkeit:** Es gibt keinen Automatismus. Ohne Klick passiert nichts. Das
-Original bleibt unverändert und auch ohne die Funktion vollständig lesbar.
-
-**Eine Einschränkung, die wir ausdrücklich nennen:** Die Maskierung ist **keine
-Anonymisierung**. Sie verringert, was von einer Person erkennbar bleibt, aber ein
-medizinischer Text bleibt über Kontext, Formulierung, genannte Einrichtungen oder
-seltene Sachverhalte re-identifizierbar. Nichts an dieser Funktion darf als
-anonym oder pseudonymisiert beschrieben werden.
-
-**Zwei Punkte, die wir selbst als ungeklärt vorlegen, statt sie zu glätten:**
-
-1. Unsere Live-Datenschutzerklärung nennt uns **Verantwortlichen** für die App.
-   Der Auftragsverarbeitungsvertrag mit Praxen nennt uns **Auftragsverarbeiter**
-   — und er gilt ausdrücklich nur für ein anderes Modul (Abrechnungsprüfung).
-   Für Praxisdokumente ist bislang **gar keine Rolle beschrieben**.
-2. Der Vertrag mit dem KI-Dienstleister bezeichnet die Übermittlung sensibler
-   Daten in seinem eigenen Anhang als *nicht beabsichtigt*. Unser Anwendungsfall
-   überträgt sie planmäßig.
-
----
-
-## Teil 2 — Die 13 Entscheidungsfelder
-
-Je Feld: die technische Realität, die uns erkennbaren Optionen, das
-Entscheidungsfeld. **Die Option ist ein Vorschlag zur Auswahl, keine Empfehlung
-von uns.**
-
-### 1 — Rollenverteilung
-
-**Realität.** Den Inhalt erstellt und veröffentlicht die Praxis. Ausgelöst wird
-die Verarbeitung vom Patienten. Über Mittel und Zweck der Transformation
-(Dienstleister, Modell, Maskierung, Prompt) entscheidet MedScoutX; die Praxis ist
-nicht beteiligt und erfährt heute nichts davon.
-
-☐ MedScoutX eigener Verantwortlicher  ☐ Auftragsverarbeiter der Praxis
-☐ gemeinsame Verantwortlichkeit (Art. 26)  ☐ andere: `__________`
-
-Auflage / Kommentar: `________________________________________________`
-
-### 2 — Rechtsgrundlage Art. 6
-
-**Realität.** Ausdrückliche Auslösung durch den Patienten; die Funktion ist
-optional und das Original ohne sie vollständig nutzbar.
-
-☐ Art. 6 (1)(a) Einwilligung  ☐ (b) Vertrag  ☐ (f) berechtigtes Interesse
-☐ andere: `__________`
-
-Auflage / Kommentar: `________________________________________________`
-
-### 3 — Rechtsgrundlage Art. 9
-
-**Realität.** Übermittelt werden Gesundheitsdaten, absichtlich. Die Maskierung
-ändert daran nichts.
-
-☐ Art. 9 (2)(a) ausdrückliche Einwilligung  ☐ (h) Gesundheitsversorgung
-☐ andere: `__________`  ☐ keine tragfähige Ausnahme → Verarbeitung unzulässig
-
-Auflage / Kommentar: `________________________________________________`
-
-### 4 — Einwilligung erforderlich?
-
-**Realität.** Die Einwilligungsinfrastruktur existiert vollständig (Erteilen,
-Widerrufen, Versionierung, Protokollierung) und wird von dieser Funktion heute
-**nicht** genutzt. Kein bestehender Einwilligungstyp deckt den Fall ab.
-
-☐ **ja** → weiter mit Feld 5  ☐ **nein** → bewusste Auslösung plus
-Vorabinformation genügt
-
-Auflage / Kommentar: `________________________________________________`
-
-### 5 — Falls ja: Granularität
-
-**Realität.** Beides ist ohne Umbau umsetzbar.
-
-☐ einmalig für den Dienst  ☐ je Dokument / je Vorgang  ☐ andere: `__________`
-
-Widerruf soll bewirken: ☐ nur Sperre für die Zukunft
-☐ zusätzlich Löschung der Protokolleinträge (siehe Feld 11)
-
-### 6 — Deckt der bestehende Vertragsrahmen absichtliche Gesundheitsdaten?
-
-**Realität.** Beidseitig unterzeichnetes *Data Processing Addendum* mit
-OpenAI (EWR: OpenAI Ireland Ltd.), Fassung `v.010126`, vom 2026-08-16,
-unverhandelt — Text identisch mit der öffentlichen Vorlage. OpenAI ist darin
-als *Data Processor* eingeordnet. Schedule 1
-Nr. 5 beschreibt die Übermittlung sensibler Daten als *nicht beabsichtigt, es sei
-denn, der Nutzer fügt sie unerwartet in unstrukturierte Daten ein*. Die Begriffe
-„besondere Kategorien", „Gesundheitsdaten" und „Artikel 9" kommen im Vertrag
-nicht vor.
-
-☐ **ja, ausreichend**  ☐ **nein** → weiter mit Feld 7
-
-Auflage / Kommentar: `________________________________________________`
-
-### 7 — Falls nein: erforderliche Ergänzung
-
-☐ Addendum zum bestehenden Vertrag  ☐ gesonderte Vereinbarung
-☐ anderer Dienstleister erforderlich  ☐ Verarbeitung so nicht zulässig
-☐ andere: `__________`
-
-**Hinweis von uns:** Eine europäische Datenverarbeitung beim Dienstleister
-verlangt laut dessen Dokumentation ohnehin einen gesonderten Vertragszusatz
-(*Modified Retention amendment*). Falls Feld 7 zum Tragen kommt, lässt sich
-beides sinnvollerweise in einem Vorgang behandeln.
-
-### 8 — Datenschutz-Folgenabschätzung
-
-**Realität.** Ein vollständiger Entwurf liegt vor (Verarbeitung, Zwecke,
-Datenkategorien, Betroffene, Empfänger, Ablauf, Erforderlichkeit, 18 technische
-und 9 organisatorische Maßnahmen, 14 benannte Risiken). **Risikobewertung,
-Restrisiko und Freigabe sind leer** — sie sind nicht unsere Entscheidung.
-
-☐ DSFA erforderlich  ☐ nicht erforderlich, Begründung: `__________`
-
-Falls erforderlich — wer bewertet und zeichnet:
-☐ Verantwortlicher intern  ☐ Datenschutzbeauftragte:r  ☐ externe Beratung
-
-Vorherige Konsultation der Aufsichtsbehörde (Art. 36)? ☐ ja ☐ nein
-
-### 9 — Information oder Zustimmung der Praxis
-
-**Realität.** Die Praxis erfährt heute nichts. Es gibt keine Anzeige, keine
-Benachrichtigung und keinen Zustimmungsweg auf Praxisseite — eine solche
-Oberfläche existiert nicht und müsste gebaut werden.
-
-☐ keine Information nötig  ☐ Information genügt  ☐ Zustimmung/Opt-in nötig
-
-Auflage / Kommentar: `________________________________________________`
-
-### 10 — Patienteninformation vor dem ersten Start
-
-**Realität.** Heute zeigt die Oberfläche vorab **nicht**, was mit dem Dokument
-geschieht. Ein deutscher Entwurf liegt vor (Anhang, Abschnitt „B7") — mit
-markierter Lücke genau dort, wo die Rechtsgrundlage stehen müsste.
-
-☐ Entwurf inhaltlich freigegeben  ☐ freigegeben mit Änderungen (siehe Kommentar)
-☐ Neufassung erforderlich
-
-Muss der konkrete Empfänger namentlich genannt werden, und wo?
-☐ in der Funktion selbst  ☐ in der Datenschutzerklärung  ☐ beides ☐ nein
-
-Auflage / Kommentar: `________________________________________________`
-
-### 11 — Aufbewahrung der Protokolleinträge
-
-**Realität.** Ein Eintrag je Vorgang, der das Dokument erreicht hat — bei Erfolg
-und bei Ablehnung. Reine Formfehler erzeugen keinen. Bei Kontolöschung werden die
-Einträge automatisch mitgelöscht. **Eine eigene Frist ist nicht definiert.**
-
-☐ auf Verlangen löschbar  ☐ Aufbewahrung aus Rechenschaftspflicht (Art. 5 Abs. 2)
-☐ feste Frist: `______` Monate
-
-**Offen und für uns nicht feststellbar:** ob und wie lange Sicherungskopien
-bestehen und ob eine Löschung sie erreicht. Wir haben das als `UNKNOWN`
-markiert statt eine Zusage zu machen, die wir nicht halten können.
-
-Auflage / Kommentar: `________________________________________________`
-
-### 12 — Personenbezogene Daten Dritter im Dokument
-
-**Realität.** Ein Arztbrief nennt regelmäßig andere Personen — überweisende
-Ärztinnen, Unterzeichner, gelegentlich Angehörige. Diese werden **nicht
-maskiert**, erfahren von der Verarbeitung nichts und können ihre Rechte
-praktisch nicht ausüben. Über sie wird nichts gespeichert; ihre Namen standen im
-übermittelten Text.
-
-☐ hinnehmbar, keine Maßnahme  ☐ zusätzliche Maßnahme erforderlich: `__________`
-☐ Verarbeitung so nicht zulässig
-
-Auflage / Kommentar: `________________________________________________`
-
-### 13 — Internationale Verarbeitung und Empfängertransparenz
-
-**Realität.** Heute wird **nichts** übermittelt. Eine Aktivierung ist technisch
-nur möglich, wenn ein geprüfter Endpunkt eingetragen wird — die Liste ist leer,
-und das Eintragen ist ein reviewter Codeänderungsschritt. Der Dienstleister
-dokumentiert einen europäischen Endpunkt; ob **unser** Projekt dafür
-freigeschaltet ist, ist offen. Unsere Live-Datenschutzerklärung nennt für andere
-Datenarten (eigene Eingaben des Patienten) derzeit OpenAI LLC, USA, mit
-Transfer unter Standardvertragsklauseln — bei europäischer Verarbeitung dieser
-Funktion entstünde dort ein direkter Widerspruch.
-
-☐ nur Verarbeitung in der EU/EWR zulässig
-☐ Drittland zulässig unter: `__________`
-☐ Entscheidung erst nach Vorlage der Bestätigung des Dienstleisters
-
-Empfänger in der Datenschutzerklärung namentlich zu nennen? ☐ ja ☐ nein
-
-Auflage / Kommentar: `________________________________________________`
-
----
-
-## Teil 3 — Gesamtergebnis
-
-☐ **Verarbeitung freigegeben** unter den oben eingetragenen Auflagen
-☐ **Freigegeben nach Erfüllung von:** `__________________________________`
-☐ **Nicht freigegeben.** Begründung: `__________________________________`
+## A — Sachverhalt
+
+Eine Praxis gibt ihrem Patienten einen Befund, einen Entlassungsbericht oder eine
+Überweisung frei. Der Patient kann **ausdrücklich** eine Übersetzung oder eine
+Fassung in Einfacher Sprache starten. Ohne diesen Klick passiert nichts. Das
+Original bleibt unverändert und ist auch ohne die Funktion lesbar.
+
+**Übermittelt** werden Diagnosen, Befunde und Verläufe, also **Gesundheitsdaten
+nach Art. 9 Abs. 1 DSGVO**, **absichtlich und planmäßig**. Datei, Kennungen und
+Kontodaten werden nicht übermittelt. MedScoutX speichert keinen Text und kein
+Ergebnis, sondern je Vorgang einen personenbezogenen Protokolleintrag. Der Patient
+kann das Ergebnis selbst als PDF auf seinem Gerät sichern.
+
+**Vier Punkte legen wir selbst als ungeklärt vor:**
+
+1. Für Praxisdokumente ist **keine Rolle beschrieben**. Die Datenschutzerklärung
+   nennt MedScoutX Verantwortlichen, der AVV nennt MedScoutX Auftragsverarbeiter,
+   gilt aber nur für die Abrechnungsprüfung.
+2. Der **Vertrag mit dem Dienstleister** nennt sensible Daten *nicht
+   beabsichtigt*. Die Funktion überträgt sie planmäßig.
+3. Die **Maskierung ist keine Anonymisierung**. Über den Kontext bleibt der Text
+   re-identifizierbar.
+4. **Daten Dritter** werden nicht maskiert, auch nicht die Gesundheitsdaten
+   Angehöriger in der Familienanamnese.
+
+## B — Datenfluss
+
+```
+Praxis ──gibt frei──► MedScoutX ◄──startet ausdrücklich── Patient
+MedScoutX: Text lokal extrahieren → maskieren → in Abschnitte teilen
+MedScoutX ──nur maskierte Abschnitte──► Dienstleister   (Region offen, A3)
+MedScoutX ◄──Antwort────────────────── Dienstleister
+MedScoutX: prüfen (erfundene Werte/Anweisungen → Ablehnung) → Platzhalter zurück
+MedScoutX ──Anzeige, nicht gespeichert──► Patient   (auf Klick: PDF im Browser)
+MedScoutX: Protokolleintrag ohne Text
+```
+
+| Ort | Was bleibt, wie lange |
+|---|---|
+| MedScoutX | Protokolleintrag ohne Frist, Löschung mit dem Konto · Sicherungskopien **UNKNOWN** |
+| Gerät des Patienten | nichts automatisch · PDF nur auf eigenen Klick, MedScoutX erhält keine Kopie |
+| Dienstleister | laut Dienstleister bis 30 Tage Missbrauchskontrolle, solange keine Null-Speicherung bestätigt ist (A4 offen) · Unterauftragsverarbeiter **UNKNOWN** |
+
+## C — Schutzmaßnahmen
+
+**Umgesetzt (327 funktionsspezifische Servertests):** nur freigegebene Dokumente,
+drei Typen, PDF/DOCX, kein OCR · aktive Verknüpfung · Tageslimit · Datei bleibt auf
+dem Server · deterministische Maskierung · Abschnitte ohne Kennungen, Historie,
+Werkzeuge · Integritätsprüfung mit Ablehnung · keine Speicherung · Schalter aus,
+leere Endpunkt-Allowlist, fail-closed. **Nicht geleistet:** Anonymisierung,
+Maskierung Dritter, Kontrolle der Speicherung beim Dienstleister (A4) · DSFA §8–§9.
+
+## D — Entscheidungsfelder
+
+Je Feld: Frage, Fakt · **Vorprüfung** (nicht bindend) · **E** Optionen (Auswahl,
+keine Empfehlung) · **F** Kommentar.
+
+**1 — Rolle.** Wer verantwortet die patienteninitiierte Transformation? *Die Praxis
+ist nicht beteiligt; die wesentlichen Mittel bestimmt MedScoutX.*
+- **Vorprüfung:** eigener Verantwortlicher (EDPB 07/2020 Rn. 40); Art. 28 Abs. 10
+  gegenüber der Praxis offenlegen · Memo §2
+- **E** ☐ MedScoutX eigener Verantwortlicher ☐ Auftragsverarbeiter der Praxis
+  ☐ gemeinsame Verantwortlichkeit (Art. 26) ☐ andere `__________`
+- **F** `______________________________________________`
+
+**2 — Art. 6.** Welche Rechtsgrundlage gilt? *Die Funktion ist optional, das
+Original ist ohne sie nutzbar.*
+- **Vorprüfung:** lit. a oder lit. b; lit. f ist schwach. Die Wahl muss zu Feld 3/4
+  passen, ein späterer Wechsel ist unzulässig (EDPB 05/2020 Rn. 121–123) · Memo §3
+- **E** ☐ (1)(a) ☐ (1)(b) ☐ (1)(f) ☐ andere `__________`
+- **F** `______________________________________________`
+
+**3 — Art. 9.** Welche Ausnahme trägt? *MedScoutX ist kein Gesundheitsberuf.*
+- **Vorprüfung:** als eigener Verantwortlicher nur lit. a erkennbar; lit. h nur bei
+  Auftragsverarbeitung (Art. 9 Abs. 3, § 22 BDSG, § 203 StGB) · Memo §4
+- **E** ☐ (2)(a) ausdrückliche Einwilligung ☐ (2)(h) ☐ andere `__________`
+  ☐ keine tragfähige Ausnahme
+- **F** `______________________________________________`
+
+**4 — Einwilligung als Rechtsgrundlage?** *Die Einwilligungsinfrastruktur
+existiert, ist aber nicht angebunden.*
+- **Vorprüfung:** Die Antwort folgt aus Feld 3. Ein Einwilligungsdialog ohne
+  Einwilligungsfunktion scheidet aus (EDPB 05/2020 Rn. 122) · Memo §5
+- **Empfohlene Prüffrage:** *Trägt für die von MedScoutX als eigene Leistung
+  erbrachte, patienteninitiierte Transformation eine andere Ausnahme als Art. 9
+  Abs. 2 lit. a? Falls nein: Genügt eine einmalige ausdrückliche Einwilligung, oder
+  sind Einwilligungen je Modus oder je Vorgang erforderlich?*
+- **E** ☐ ja, ausdrückliche Einwilligung (→ Feld 5) ☐ nein, aktive Auslösung mit
+  Vorabinformation, **ohne** Einwilligungsdialog
+- **F** `______________________________________________`
+
+**5 — Granularität und Widerruf** (nur falls Feld 4 = ja). *Jede Variante ist
+ohne Umbau umsetzbar.*
+- **E** ☐ einmalig ☐ getrennt je Modus ☐ je Vorgang · Widerruf: ☐ Sperre für die
+  Zukunft ☐ zusätzlich Löschung der Protokolleinträge
+- **F** `______________________________________________`
+
+**6 — Vertrag und Gesundheitsdaten (A1a).** *DPA `v.010126`, gezeichnet
+2026-08-16, unverhandelt. Schedule 1 Nr. 5: sensible Daten „nicht beabsichtigt, es
+sei denn, der Nutzer fügt sie unerwartet ein". „Gesundheit" und „Art. 9" kommen
+nicht vor.*
+- **Vorprüfung:** drei Lesarten vertretbar, keine gesichert; Art. 28 Abs. 3
+  verlangt die Festlegung der Datenart · Memo §7
+- **E** ☐ ausreichend ☐ nur mit schriftlicher Bestätigung des Dienstleisters
+  ☐ nicht ausreichend (→ Feld 7)
+- **F** `______________________________________________`
+
+**7 — Ergänzung** (nur falls nicht ausreichend). *Für die EU-Verarbeitung ist
+ohnehin ein Modified Retention amendment zu zeichnen.*
+- **E** ☐ Addendum ☐ angepasste Transferbeschreibung ☐ gesonderte Vereinbarung
+  ☐ anderer Dienstleister ☐ so nicht zulässig
+- **F** `______________________________________________`
+
+**8 — DSFA (B5).** *Entwurf vollständig (17 Risiken, 29 Maßnahmen); Bewertung,
+Restrisiko und Freigabe leer.*
+- **Vorprüfung:** WP248-Kriterien 4, 7, 8 erfüllt, 5 offen; DSK-Liste nicht
+  unmittelbar einschlägig. **Voraussichtlich erforderlich** · Memo §6
+- **E** ☐ erforderlich ☐ nicht erforderlich, weil `__________` · Zeichnung durch
+  ☐ Verantwortlichen ☐ DSB ☐ extern · Art. 36: ☐ ja ☐ nein
+- **F** `______________________________________________`
+
+**9 — Praxis und AVV.** *Die Praxis erfährt nichts. Der AVV deckt nur die
+Abrechnung ab und hat weder eine § 203-StGB-Klausel noch eine Drittlandregel.*
+- **Vorprüfung:** Die Änderungsliste nach Art. 28 Abs. 3 liegt vor; die
+  Rollenformulierung folgt aus Feld 1 · Memo §8
+- **E** ☐ keine Information ☐ Information ☐ Zustimmung / Opt-in · AVV:
+  ☐ nach Änderungsliste ☐ mit Abweichungen ☐ keine Anpassung
+- **F** `______________________________________________`
+
+**10 — Patienteninformation und Datenschutzerklärung (B7, B1).** *Heute keine
+Vorabinformation; Datenschutzerklärung `CONFLICT`; kein Art. 22, kein Profiling.*
+- **Vorprüfung:** Entwurf B7 und Änderungsmatrix liegen vor; Nennung des
+  Dienstleisters `LEGAL DISCLOSURE REQUIRED` · Memo §9–§10
+- **E** B7: ☐ frei ☐ mit Änderungen ☐ neu · Datenschutzerklärung: ☐ Matrix frei
+  ☐ mit Änderungen · Dienstleister nennen: ☐ in der Funktion ☐ in der
+  Datenschutzerklärung ☐ beides
+- **F** `______________________________________________`
+
+**11 — Protokolleinträge.** *Es gibt keine eigene Frist und keine eigene
+Rechtsgrundlage; die Löschung erfolgt mit dem Konto. Sicherungskopien sind
+**UNKNOWN**.*
+- **E** ☐ auf Verlangen löschbar ☐ Rechenschaft (Art. 5 Abs. 2) ☐ Frist
+  `____` Monate · Rechtsgrundlage `__________`
+- **F** `______________________________________________`
+
+**12 — Dritte im Dokument.** *Ärztinnen, Ärzte und Angehörige werden nicht
+maskiert, Familienanamnesen enthalten **Gesundheitsdaten Angehöriger**.*
+- **Vorprüfung:** Die Einwilligung des Patienten erfasst nur seine Daten; für
+  Angehörige ist keine Grundlage erkennbar — **die gewichtigste offene Frage**.
+  Information nach Art. 14 Abs. 5 lit. b plausibel; zusätzliche Maskierung
+  möglich, nicht umgesetzt · Memo §11
+- **E** ☐ hinnehmbar mit öffentlicher Information ☐ zusätzliche Maßnahme
+  `__________` ☐ so nicht zulässig
+- **F** `______________________________________________`
+
+**13 — International (A3).** *EU-Endpunkt dokumentiert, für unser Projekt nicht
+freigeschaltet; Unterauftragsverarbeiter **UNKNOWN**.*
+- **Vorprüfung:** EU-Datenresidenz schließt Drittlandverarbeitung von Support- oder
+  Missbrauchsdaten nicht aus; TIA offen · Memo §13
+- **E** ☐ nur EU/EWR ☐ Drittland unter `__________` ☐ erst nach Bestätigung des
+  Dienstleisters
+- **F** `______________________________________________`
+
+**Z1 — MDR** (Zusatzfrage). Bleibt die Zweckbestimmung (sprachliche Transformation
+ohne Diagnose, Therapie, Prognose, Empfehlung) außerhalb Art. 2 Nr. 1 MDR? Welche
+Formulierungen in Produkt, Hilfe, Marketing sind auszuschließen (Art. 2 Nr. 12)?
+*Keine eigene Einstufung* · Memo §14
+- **E** ☐ keine medizinische Zweckbestimmung, mit Textauflagen ☐ Einfache Sprache
+  gesondert prüfen ☐ Regulatory-Prüfung erforderlich
+- **F** `______________________________________________`
+
+**Z2 — AI Act, Art. 50** (Zusatzfrage). Ist MedScoutX Anbieter, und greift die
+Ausnahme für Ausgaben ohne wesentliche Änderung der Semantik für beide Modi? *Das
+Ergebnis ist menschenlesbar gekennzeichnet, maschinenlesbar nicht* · Memo §15
+- **E** ☐ nicht anwendbar ☐ Ausnahme für beide Modi ☐ nur für die Übersetzung
+  ☐ maschinenlesbare Markierung erforderlich
+- **F** `______________________________________________`
+
+## G — Auflagen
+
+| Nr. | Auflage | Feld | vor Aktivierung? |
+|---|---|---|---|
+| 1 | `____________________` | `__` | ☐ ja ☐ nein |
+| 2 | `____________________` | `__` | ☐ ja ☐ nein |
+| 3 | `____________________` | `__` | ☐ ja ☐ nein |
+| 4 | `____________________` | `__` | ☐ ja ☐ nein |
+
+## H — Gesamtentscheidung
+
+- ☐ **Freigabe ohne Auflagen**
+- ☐ **Freigabe mit Auflagen** (G)
+- ☐ **keine Freigabe**. Begründung: `______________________________`
+- ☐ **weitere Informationen erforderlich**: `______________________________`
+
+Eine Freigabe aktiviert nichts. Dafür müssen außerdem A3 (EU-Verarbeitung) und A4
+(Null-Speicherung) beim Dienstleister nachgewiesen sein.
+
+## I–L — Zeichnung
 
 | | |
 |---|---|
-| Name | `__________________________` |
-| Funktion / Rolle | `__________________________` |
-| Organisation | `__________________________` |
-| Datum | `__________________________` |
-| Unterschrift bzw. schriftliche Bestätigung | `__________________________` |
+| **I** Name | `______________________________` |
+| **J** Funktion und Organisation | `______________________________` |
+| **K** Datum | `______________________________` |
+| **L** Unterschrift / schriftl. Bestätigung | `______________________________` |
 
-> Eine schriftliche Bestätigung per E-Mail genügt, sofern sie eindeutig auf
-> dieses Dokument und sein Datum Bezug nimmt.
-
----
-
-## Teil 4 — Was nach der Freigabe passiert
-
-Damit erkennbar ist, dass hier keine offene Liste bearbeitet wird, sondern eine
-abschließbare:
-
-| Feld | Technische Folge | Aufwand |
-|---|---|---|
-| 1, 2, 3 | Datenschutzerklärung: Zweck, Datenkategorie, Rechtsgrundlage, Empfänger | Textersetzung im deutschen Original, 21 Sprachfassungen abgeleitet |
-| 4, 5 | Einwilligung an- oder abwählen | **zwei Zeilen Server-Code** plus ein Eintrag im Einwilligungskatalog; Oberfläche zum Erteilen und Widerrufen existiert bereits |
-| 6, 7 | Vertragsergänzung mit dem Dienstleister | außerhalb des Systems |
-| 8 | DSFA finalisieren und zeichnen | Entwurf liegt vollständig vor |
-| 9 | Praxisinformation | Oberfläche existiert nicht und wäre zu bauen — **der einzige größere Punkt** |
-| 10 | Hinweis vor dem ersten Start | ein Element plus ein Textschlüssel in sechs Sprachen |
-| 11 | Löschregel für Protokolleinträge | Abfrage existiert, Regel fehlt |
-| 12 | je nach Entscheidung | offen |
-| 13 | Endpunkt eintragen | eine Zeile, als reviewter Commit |
+Eine E-Mail genügt, wenn sie eindeutig auf dieses Dokument und sein Vorlagedatum
+verweist.
 
 ---
 
-## Anhänge
+## Anhänge (nur Verweise)
 
-Nur bei Bedarf. Der Bogen oben ist ohne sie vollständig bearbeitbar.
-Bei externer Weitergabe werden die Anhänge als eigene Dateien mitgeliefert;
-die Verweise unten benennen genau diese Dateien. Der unterzeichnete Vertrag
-selbst liegt außerhalb dieses Pakets und wird auf Anforderung gesondert
+Die Anhänge werden bei externer Weitergabe als eigene Dateien mitgeliefert. Der
+gezeichnete Vertrag mit dem Dienstleister wird auf Anforderung gesondert
 übergeben.
 
 | Anhang | Inhalt |
 |---|---|
-| [Legal Review Packet](DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md) | ausführliche Sachverhaltsdarstellung, Datenflussgrenze, Vertragslage |
-| [Entscheidungsmatrix](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) | technische Realität je Frage; Textbausteine für AVV, Datenschutzerklärung und Patienteninformation; beide Einwilligungsvarianten vollständig |
-| [DSFA-Entwurf](DOCUMENT_TRANSLATION_DPIA_DRAFT.md) | gehört zu Feld 8 |
-| [Betroffenenrechte-Runbook](DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md) | gehört zu Feld 11 und 12 |
-| [Evidence Register](DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md) | Nachweisstand je Anforderung, inkl. was der Dienstleister noch bestätigen muss |
+| [Vorprüfungsmemo](DOCUMENT_TRANSLATION_LEGAL_ASSESSMENT.md) | Begründung jeder Vorprüfung, Quellen mit Standdatum, Risikomatrix, Folgen der Entscheidungen (§18) |
+| [Legal Review Packet](DOCUMENT_TRANSLATION_LEGAL_REVIEW_PACKET.md) | ausführlicher Sachverhalt, Datenflussgrenze, Vertragslage |
+| [Entscheidungsmatrix](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) | Textbausteine für AVV, Datenschutzerklärung und Patienteninformation (Anhang A = B7), beide Einwilligungsvarianten |
+| [DSFA-Entwurf](DOCUMENT_TRANSLATION_DPIA_DRAFT.md) | zu Feld 8 |
+| [Betroffenenrechte-Runbook](DOCUMENT_TRANSLATION_DATA_SUBJECT_RIGHTS_RUNBOOK.md) | zu Feld 11 und 12 |
+| [Evidence Register](DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md) | Nachweisstand je Anforderung, einschließlich A3/A4 |
 
----
-
-*Solange dieser Bogen nicht gezeichnet ist, bleibt die Funktion abgeschaltet.
-Das ist kein Vorbehalt, sondern der tatsächliche Systemzustand: ohne
+*Solange dieser Bogen nicht gezeichnet ist, bleibt die Funktion abgeschaltet. Ohne
 eingetragenen Endpunkt kann sie technisch nicht laufen.*
