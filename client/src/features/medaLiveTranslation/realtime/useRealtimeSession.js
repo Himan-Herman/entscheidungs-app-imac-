@@ -133,6 +133,16 @@ export function useRealtimeSession() {
 
     // ── Per-event helpers (defined here to access refs without stale closures) ──
 
+    // Resolve response → turn NOW, synchronously. The setTurns updaters below
+    // run later (React batches updates from the data channel); by then
+    // response.done has already deleted the mapping, and the fallback would
+    // write this response into whichever turn is still pending — typically the
+    // next speaker's turn when two people speak in quick succession.
+    const latchedKey = (() => {
+      const rid = ev.response_id ?? ev.response?.id;
+      return rid ? responseTurnMapRef.current.get(rid) : undefined;
+    })();
+
     /**
      * Find the turn index to write response output to.
      * Primary: look up the response_id in responseTurnMapRef.
@@ -141,12 +151,14 @@ export function useRealtimeSession() {
      * new turn is created before the previous response finishes.
      */
     const _targetIdx = (prev, responseId) => {
-      if (responseId) {
-        const key = responseTurnMapRef.current.get(responseId);
-        if (key !== undefined) {
-          const i = prev.findIndex(t => t.key === key);
-          if (i >= 0) return i;
-        }
+      // Prefer the mapping as it was when THIS event arrived (see latchedKey),
+      // then the live mapping (response.created sets it inside an updater).
+      const key = latchedKey !== undefined
+        ? latchedKey
+        : (responseId ? responseTurnMapRef.current.get(responseId) : undefined);
+      if (key !== undefined) {
+        const i = prev.findIndex(t => t.key === key);
+        if (i >= 0) return i;
       }
       // Fallback: rightmost non-done, non-unclear turn
       for (let i = prev.length - 1; i >= 0; i--) {
