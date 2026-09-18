@@ -93,6 +93,20 @@ export default function PracticeContextHomePage() {
             <span className="practice-hub__entry-hint">{t.erezeptHint}</span>
           </Link>
         </li>
+        {/* What this practice may see and what it did — the patient's own
+            control and transparency, for this practice only. */}
+        <li>
+          <Link className="practice-hub__entry" to={`/patient/practice/${linkId}/data-control`}>
+            <span className="practice-hub__entry-name">{t.dataControlTitle}</span>
+            <span className="practice-hub__entry-hint">{t.dataControlHint}</span>
+          </Link>
+        </li>
+        <li>
+          <Link className="practice-hub__entry" to={`/patient/practice/${linkId}/activity`}>
+            <span className="practice-hub__entry-name">{t.activityTitle}</span>
+            <span className="practice-hub__entry-hint">{t.activityHint}</span>
+          </Link>
+        </li>
       </ul>
 
       <Link className="patient-inbox__back" to="/patient/practice">

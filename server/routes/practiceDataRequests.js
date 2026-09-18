@@ -60,7 +60,10 @@ router.get("/", async (req, res) => {
   if (!access) return res.status(403).json({ ok: false, error: "forbidden" });
 
   try {
-    const requests = await listPracticeDataRequests(practiceId);
+    // Optional: one patient relationship only (the per-patient record tab).
+    const requests = await listPracticeDataRequests(practiceId, {
+      linkId: typeof req.query.linkId === "string" ? req.query.linkId : null,
+    });
     return res.json({ ok: true, requests });
   } catch (err) {
     console.error("[practice/data-requests]", err?.message ?? err);

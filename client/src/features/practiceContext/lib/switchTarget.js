@@ -17,6 +17,8 @@ const PORTABLE_SUBPATHS = [
   "erezept",
   "inbox",
   "telemedicine",
+  "data-control",
+  "activity",
 ];
 
 /**

@@ -95,13 +95,17 @@ async function buildControlItem(link) {
 
 /**
  * @param {string} patientUserId
+ * @param {{ linkId?: string|null }} [opts] one practice relationship only — the
+ *   practice-scoped "Meine Daten & Freigaben". Bound to the patient in the same
+ *   where-clause, so a link id that is not theirs yields an empty result.
  */
-export async function getPatientDataControl(patientUserId) {
+export async function getPatientDataControl(patientUserId, opts = {}) {
   const uid = String(patientUserId || "").trim();
   if (!uid) throw new Error("validation_required");
+  const linkId = String(opts.linkId || "").trim();
 
   const links = await prisma.practicePatientLink.findMany({
-    where: { patientUserId: uid },
+    where: { patientUserId: uid, ...(linkId ? { id: linkId } : {}) },
     include: {
       practiceProfile: {
         select: {
@@ -120,7 +124,7 @@ export async function getPatientDataControl(patientUserId) {
 
   const [practices, requests] = await Promise.all([
     Promise.all(links.map((l) => buildControlItem(l))),
-    listPatientDataRequests(uid),
+    listPatientDataRequests(uid, { linkId }),
   ]);
   return { practices, requests };
 }

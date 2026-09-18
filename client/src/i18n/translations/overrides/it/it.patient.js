@@ -432,6 +432,11 @@ export default {
   },
 
   practiceContext: {
+    backToHub: "Torna alla panoramica di questo studio",
+    dataControlTitle: "I miei dati e permessi",
+    dataControlHint: "Permessi, archiviazione, richieste di cancellazione",
+    activityTitle: "La mia attività",
+    activityHint: "Trasparenza sugli eventi dello studio",
      dictate: "Detta",
      dictationRecording: "Registrazione in corso",
      dictationStop: "Interrompi la registrazione",
@@ -1067,6 +1072,14 @@ export default {
   },
 
   patientDataControl: {
+    introScoped: "Che cosa può vedere questo studio, le sue richieste a questo studio e come gestire il collegamento.",
+    responseNoteLabel: "Risposta dello studio",
+    consentSummaryTitle: "Permessi per questo studio",
+    consentSummaryIntro: "Attualmente concesso:",
+    consentSummaryNone: "Al momento non ha concesso nulla a questo studio.",
+    consentSummaryManage: "Modifica i permessi",
+    consentSummarySet: "Imposta i permessi",
+    consentSummaryLoadError: "Non è stato possibile caricare i permessi.",
     pageTitle: "I miei dati e permessi — MedScoutX",
     heading: "I miei dati e permessi",
     intro:

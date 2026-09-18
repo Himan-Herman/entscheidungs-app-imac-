@@ -4,8 +4,10 @@ const CONTROL_BASE = "/api/patient/data-control";
 const REQUESTS_BASE = "/api/patient/data-requests";
 const LINKS_BASE = "/api/patient/practice-links";
 
-export async function fetchPatientDataControl() {
-  const res = await authFetch(CONTROL_BASE);
+/** @param {{ linkId?: string }} [opts] one practice relationship only */
+export async function fetchPatientDataControl({ linkId } = {}) {
+  const q = linkId ? `?${new URLSearchParams({ linkId })}` : "";
+  const res = await authFetch(`${CONTROL_BASE}${q}`);
   const data = await res.json().catch(() => ({}));
   return { res, data };
 }
@@ -72,8 +74,9 @@ export async function patchPatientProfileAccess(linkId, granted) {
   return { res, data };
 }
 
-export async function fetchPracticeDataRequests(practiceId) {
-  const q = new URLSearchParams({ practiceId });
+/** @param {{ linkId?: string }} [opts] one patient relationship only */
+export async function fetchPracticeDataRequests(practiceId, { linkId } = {}) {
+  const q = new URLSearchParams({ practiceId, ...(linkId ? { linkId } : {}) });
   const res = await authFetch(`/api/practice/data-requests?${q}`);
   const data = await res.json().catch(() => ({}));
   return { res, data };

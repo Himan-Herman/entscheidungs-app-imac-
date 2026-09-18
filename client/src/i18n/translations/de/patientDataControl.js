@@ -1,4 +1,12 @@
 export default {
+  introScoped: "Was diese Praxis sehen darf, Ihre Anfragen an diese Praxis und wie Sie die Verbindung steuern.",
+  responseNoteLabel: "Antwort der Praxis",
+  consentSummaryTitle: "Freigaben für diese Praxis",
+  consentSummaryIntro: "Derzeit freigegeben:",
+  consentSummaryNone: "Sie haben dieser Praxis derzeit nichts freigegeben.",
+  consentSummaryManage: "Freigaben ändern",
+  consentSummarySet: "Freigaben festlegen",
+  consentSummaryLoadError: "Die Freigaben konnten nicht geladen werden.",
   pageTitle: "Meine Daten & Freigaben – MedScoutX",
   heading: "Meine Daten & Freigaben",
   intro:

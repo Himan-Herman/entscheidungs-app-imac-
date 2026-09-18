@@ -7,6 +7,7 @@ import RevokeProfileSharingDialog from "../components/RevokeProfileSharingDialog
 import ArchiveRelationshipDialog from "../components/ArchiveRelationshipDialog.jsx";
 import ExportRequestDialog from "../components/ExportRequestDialog.jsx";
 import PatientPracticeDoctorSelect from "../components/PatientPracticeDoctorSelect.jsx";
+import ScopedConsentSummary from "../components/ScopedConsentSummary.jsx";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   fetchPatientDataControl,
@@ -70,8 +71,22 @@ function hasOpenType(link, type) {
   return open.some((r) => r.type === type);
 }
 
-export default function PatientDataControlPage() {
+/**
+ * "Meine Daten & Freigaben".
+ *
+ * Two homes, one page: across all practices at /patient/data-control, and for
+ * ONE practice inside its own area (/patient/practice/:linkId/data-control,
+ * `scopedLinkId` set). Scoped, the server itself returns only that
+ * relationship and its requests, and every link on the page stays inside the
+ * practice's area instead of jumping to the cross-practice lists.
+ *
+ * @param {{ scopedLinkId?: string }} props
+ */
+export default function PatientDataControlPage({ scopedLinkId = "" } = {}) {
   const { language } = useLanguage();
+  const scoped = Boolean(scopedLinkId);
+  const scopedBase = scoped ? `/patient/practice/${encodeURIComponent(scopedLinkId)}` : "";
+  const tContext = getMessages(language).practiceContext || getMessages("en").practiceContext;
   const [searchParams] = useSearchParams();
   const focusLinkId = searchParams.get("linkId")?.trim() || "";
   const t = useMemo(
@@ -114,7 +129,9 @@ export default function PatientDataControlPage() {
     setLoading(true);
     setError("");
     try {
-      const { res, data } = await fetchPatientDataControl();
+      const { res, data } = await fetchPatientDataControl(
+        scopedLinkId ? { linkId: scopedLinkId } : {},
+      );
       if (res.status === 404 && data.error === "feature_disabled") {
         setPractices([]);
         setRequests([]);
@@ -132,7 +149,7 @@ export default function PatientDataControlPage() {
     } finally {
       setLoading(false);
     }
-  }, [t.featureDisabled, t.loadError]);
+  }, [scopedLinkId, t.featureDisabled, t.loadError]);
 
   useEffect(() => {
     document.title = t.pageTitle;
@@ -341,27 +358,38 @@ export default function PatientDataControlPage() {
 
   return (
     <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient/practice">
-        {t.backHub}
+      <Link className="patient-inbox__back" to={scoped ? scopedBase : "/patient/practice"}>
+        {scoped ? tContext.backToHub : t.backHub}
       </Link>
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{t.heading}</h1>
-        <p className="patient-inbox__intro">{t.intro}</p>
+        <p className="patient-inbox__intro">{scoped ? t.introScoped : t.intro}</p>
         <p className="patient-data-control__privacy" role="note">
           {t.privacyNotice}
         </p>
         <p style={{ marginTop: "0.75rem", display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-          <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/activity">
+          <Link
+            className="patient-threads__btn patient-threads__btn--secondary"
+            to={scoped ? `${scopedBase}/activity` : "/patient/activity"}
+          >
             {t.openActivity}
           </Link>
           <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/exports">
             {(getMessages(language).exports || getMessages("en").exports).headingPatient}
           </Link>
-          <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/consents">
-            {t.openConsents}
-          </Link>
+          {scoped ? null : (
+            <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/consents">
+              {t.openConsents}
+            </Link>
+          )}
         </p>
       </header>
+
+      {/* Scoped: what THIS practice may see, first — that is the question a
+          patient opening "my data at this practice" has. */}
+      {scoped && !loading && !error && practices[0] ? (
+        <ScopedConsentSummary link={practices[0]} language={language} />
+      ) : null}
 
       {loading ? <p className="patient-inbox__muted">{t.loading}</p> : null}
       {error ? (
@@ -391,6 +419,14 @@ export default function PatientDataControlPage() {
                   <p className="patient-inbox__item-meta">
                     {requestStatusLabel(req.status, t)} · {fmtActivity(req.createdAt, language, t.notProvided)}
                   </p>
+                  {/* The practice's answer, verbatim — it is written for the
+                      patient, and without it a "rejected" says nothing. */}
+                  {req.responseNote ? (
+                    <div className="patient-data-control__response">
+                      <p className="patient-data-control__response-label">{t.responseNoteLabel}</p>
+                      <p className="patient-data-control__response-text">{req.responseNote}</p>
+                    </div>
+                  ) : null}
                   <button
                     type="button"
                     className="patient-threads__btn patient-threads__btn--secondary"
@@ -492,19 +528,19 @@ export default function PatientDataControlPage() {
                 <div className="patient-data-control__actions">
                   <Link
                     className="patient-threads__btn patient-threads__btn--secondary"
-                    to="/patient/medication-plans"
+                    to={scoped ? `${scopedBase}/medication-plans` : "/patient/medication-plans"}
                   >
                     {t.openMedicationPlans}
                   </Link>
                   <Link
                     className="patient-threads__btn patient-threads__btn--secondary"
-                    to="/patient/practice-documents"
+                    to={scoped ? `${scopedBase}/documents` : "/patient/practice-documents"}
                   >
                     {t.openDocuments}
                   </Link>
                   <Link
                     className="patient-threads__btn patient-threads__btn--secondary"
-                    to="/patient/messages"
+                    to={scoped ? `${scopedBase}/messages` : "/patient/messages"}
                   >
                     {t.openMessages}
                   </Link>

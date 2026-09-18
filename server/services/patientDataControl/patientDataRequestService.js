@@ -19,6 +19,23 @@ const MAX_REASON_LEN = 1000;
 const MAX_RESPONSE_NOTE_LEN = 2000;
 
 /**
+ * The PRACTICE's view of a request: everything but the patient's global account
+ * id. A practice knows its patients by the relationship (practicePatientLinkId)
+ * only — the same rule linkToJson follows for the link itself.
+ *
+ * @param {import("@prisma/client").PatientDataRequest} row
+ */
+function practiceRequestToJson(row) {
+  const { patientUserId: _omit, ...rest } = requestToJson(row);
+  return rest;
+}
+
+/** Name only — never the account id — for the practice-facing shapes. */
+function practicePatientName(user) {
+  return user ? { firstName: user.firstName, lastName: user.lastName } : null;
+}
+
+/**
  * @param {import("@prisma/client").PatientDataRequest} row
  */
 function requestToJson(row) {
@@ -113,14 +130,8 @@ export async function getPracticeDataRequest(requestId, practiceProfileId, viewe
   });
 
   return {
-    ...requestToJson(row),
-    patient: row.patientUser
-      ? {
-          id: row.patientUser.id,
-          firstName: row.patientUser.firstName,
-          lastName: row.patientUser.lastName,
-        }
-      : null,
+    ...practiceRequestToJson(row),
+    patient: practicePatientName(row.patientUser),
     link: row.practicePatientLink
       ? {
           id: row.practicePatientLink.id,
@@ -211,13 +222,17 @@ export async function createPatientDataRequest(input) {
 
 /**
  * @param {string} patientUserId
+ * @param {{ linkId?: string|null }} [opts] only the requests to ONE practice
+ *   relationship. Always additionally bound to the patient, so a foreign link id
+ *   simply matches nothing.
  */
-export async function listPatientDataRequests(patientUserId) {
+export async function listPatientDataRequests(patientUserId, opts = {}) {
   const uid = String(patientUserId || "").trim();
   if (!uid) throw new Error("validation_required");
+  const linkId = String(opts.linkId || "").trim();
 
   const rows = await prisma.patientDataRequest.findMany({
-    where: { patientUserId: uid },
+    where: { patientUserId: uid, ...(linkId ? { practicePatientLinkId: linkId } : {}) },
     orderBy: { createdAt: "desc" },
     take: 50,
     include: {
@@ -237,13 +252,17 @@ export async function listPatientDataRequests(patientUserId) {
 
 /**
  * @param {string} practiceProfileId
+ * @param {{ linkId?: string|null }} [opts] only ONE patient relationship of this
+ *   practice (the per-patient record). Always additionally bound to the
+ *   practice, so another practice's link id matches nothing.
  */
-export async function listPracticeDataRequests(practiceProfileId) {
+export async function listPracticeDataRequests(practiceProfileId, opts = {}) {
   const pid = String(practiceProfileId || "").trim();
   if (!pid) throw new Error("validation_required");
+  const linkId = String(opts.linkId || "").trim();
 
   const rows = await prisma.patientDataRequest.findMany({
-    where: { practiceProfileId: pid },
+    where: { practiceProfileId: pid, ...(linkId ? { practicePatientLinkId: linkId } : {}) },
     orderBy: { createdAt: "desc" },
     take: 100,
     include: {
@@ -257,14 +276,8 @@ export async function listPracticeDataRequests(practiceProfileId) {
   });
 
   return rows.map((row) => ({
-    ...requestToJson(row),
-    patient: row.patientUser
-      ? {
-          id: row.patientUser.id,
-          firstName: row.patientUser.firstName,
-          lastName: row.patientUser.lastName,
-        }
-      : null,
+    ...practiceRequestToJson(row),
+    patient: practicePatientName(row.patientUser),
     link: row.practicePatientLink
       ? { id: row.practicePatientLink.id, status: row.practicePatientLink.status }
       : null,
@@ -341,5 +354,5 @@ export async function updatePracticeDataRequestStatus(input) {
     await notifyPatientInboxOfDataRequestStatus(updated, row.status);
   }
 
-  return requestToJson(updated);
+  return practiceRequestToJson(updated);
 }

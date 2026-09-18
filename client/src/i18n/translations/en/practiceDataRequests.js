@@ -25,7 +25,7 @@ export default {
   detailTitle: "Request details",
   detailClose: "Close",
   detailReason: "Patient note",
-  detailResponseNote: "Practice note (organizational)",
+  detailResponseNote: "Answer to the patient (visible to the patient)",
   detailNoReason: "No note",
   updateStatus: "Update status",
   saveStatus: "Save status",

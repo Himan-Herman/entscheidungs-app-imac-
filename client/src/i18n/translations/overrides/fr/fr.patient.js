@@ -432,6 +432,11 @@ export default {
   },
 
   practiceContext: {
+    backToHub: "Retour à l’aperçu de ce cabinet",
+    dataControlTitle: "Mes données et partages",
+    dataControlHint: "Partages, archivage, demandes de suppression",
+    activityTitle: "Mon activité",
+    activityHint: "Transparence sur les événements liés au cabinet",
      dictate: "Dicter",
      dictationRecording: "Enregistrement en cours",
      dictationStop: "Arrêter l'enregistrement",
@@ -1067,6 +1072,14 @@ export default {
   },
 
   patientDataControl: {
+    introScoped: "Ce que ce cabinet peut voir, vos demandes à ce cabinet et la façon dont vous gérez la connexion.",
+    responseNoteLabel: "Réponse du cabinet",
+    consentSummaryTitle: "Partages avec ce cabinet",
+    consentSummaryIntro: "Actuellement accordé :",
+    consentSummaryNone: "Vous n’avez actuellement rien partagé avec ce cabinet.",
+    consentSummaryManage: "Modifier les partages",
+    consentSummarySet: "Définir les partages",
+    consentSummaryLoadError: "Les partages n’ont pas pu être chargés.",
     pageTitle: "Mes données et autorisations — MedScoutX",
     heading: "Mes données et autorisations",
     intro:

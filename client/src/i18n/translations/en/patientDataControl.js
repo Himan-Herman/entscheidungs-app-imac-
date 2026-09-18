@@ -1,4 +1,12 @@
 export default {
+  introScoped: "What this practice may see, your requests to this practice, and how you control the connection.",
+  responseNoteLabel: "The practice's answer",
+  consentSummaryTitle: "Permissions for this practice",
+  consentSummaryIntro: "Currently granted:",
+  consentSummaryNone: "You have not granted this practice anything at the moment.",
+  consentSummaryManage: "Change permissions",
+  consentSummarySet: "Set permissions",
+  consentSummaryLoadError: "Permissions could not be loaded.",
   pageTitle: "My data & permissions – MedScoutX",
   heading: "My data & permissions",
   intro:

@@ -182,6 +182,15 @@ test("a migrated sub-page IS carried across (Phase 2E.1 / 2E.2 / 2E.3)", () => {
     switchTargetPath("/patient/practice/link-a/telemedicine", "link-b"),
     "/patient/practice/link-b/telemedicine",
   );
+  // "Meine Daten & Freigaben" and "Meine Aktivität" exist in every context too.
+  assert.equal(
+    switchTargetPath("/patient/practice/link-a/data-control", "link-b"),
+    "/patient/practice/link-b/data-control",
+  );
+  assert.equal(
+    switchTargetPath("/patient/practice/link-a/activity", "link-b"),
+    "/patient/practice/link-b/activity",
+  );
 });
 
 test("a sub-page that does NOT exist in every context falls back to the home", () => {

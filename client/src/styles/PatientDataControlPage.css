@@ -362,3 +362,32 @@
     align-items: stretch;
   }
 }
+
+/* The practice's answer to a data request, and the scoped consent summary. */
+.patient-data-control__response {
+  margin-top: .5rem;
+  padding: .55rem .75rem;
+  border-left: 3px solid var(--ms-color-border-strong, #cbd5e1);
+}
+.patient-data-control__response-label {
+  margin: 0;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--ms-color-text-muted, #475569);
+}
+.patient-data-control__response-text {
+  margin: .2rem 0 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.patient-data-control__consents {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ms-color-border, #e2e8f0);
+  border-radius: .75rem;
+}
+.patient-data-control__consent-list {
+  margin: .4rem 0 .9rem;
+  padding-left: 1.2rem;
+  line-height: 1.7;
+}

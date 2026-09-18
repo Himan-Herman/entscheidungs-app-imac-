@@ -1,4 +1,9 @@
 export default {
+  backToHub: "Back to this practice's overview",
+  dataControlTitle: "My data & permissions",
+  dataControlHint: "Permissions, archive, deletion requests",
+  activityTitle: "My activity",
+  activityHint: "Transparency about practice events",
   loading: "Loading practice area …",
   notFoundTitle: "Area unavailable",
   notFoundBody:

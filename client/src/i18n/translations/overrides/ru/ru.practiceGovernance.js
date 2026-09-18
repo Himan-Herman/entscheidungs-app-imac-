@@ -35,7 +35,7 @@ export const ruPracticeGovernance = {
     detailTitle: "Детали запроса",
     detailClose: "Закрыть",
     detailReason: "Примечание пациента",
-    detailResponseNote: "Заметка учреждения (организационная)",
+    detailResponseNote: "Ответ пациенту (виден пациенту)",
     detailNoReason: "Примечания нет",
     updateStatus: "Обновить статус",
     saveStatus: "Сохранить статус",
