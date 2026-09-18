@@ -36,8 +36,9 @@ const OWNER = {
 const PRACTICE_ID = process.env.E2E_INVITE_PRACTICE_ID;
 const PASSWORD = "Sandbox2026!";
 // German, as the people this flow is for would see it. Every context gets it
-// explicitly: browser.newContext() does not inherit test.use() options.
-const DE = { locale: "de-DE" };
+// explicitly: browser.newContext() does not inherit test.use() options. The
+// time zone is pinned too — the first-visit language follows the location.
+const DE = { locale: "de-DE", timezoneId: "Europe/Berlin" };
 
 const isLocal = (u) => /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(String(u));
 

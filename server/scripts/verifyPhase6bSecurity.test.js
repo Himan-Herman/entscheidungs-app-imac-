@@ -179,6 +179,9 @@ test("browser storage holds no medical content and no capability tokens", () => 
   // read. Everything else here is an id, a flag or UI state.
   const ALLOWED = new Set([
     "medscout_token", "medscout_user_id", "medscout_theme", "medscout_language",
+    // "manual" when the user picked the language in the header; absent while
+    // the language follows the device time zone. No location is stored.
+    "medscout_language_source",
     "medscoutx_user_mode", "medscoutx_pending_mode",
     "pending_verification_user_id", "pending_verification_email", "email_verified",
     "koerperSeite", "lastMapRoute",

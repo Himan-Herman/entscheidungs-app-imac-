@@ -13,10 +13,24 @@
  * When adding a language, change shared/i18n/localeConfig.js first, then mirror
  * it here. LANGUAGE_STORAGE_KEY and resolveInitialLanguage stay client-only —
  * they are browser concerns and are deliberately not part of the shared module.
+ *
+ * Activating a language in UI_SELECTABLE_LOCALE_CODES also makes it the
+ * automatic first-visit language for its countries — see
+ * ./location/countryLanguages.js. Its code must match the one used there.
  */
+
+import { detectLocationLanguage } from "./location/detectLocationLanguage.js";
 
 /** Persisted preference — keep stable for existing users. */
 export const LANGUAGE_STORAGE_KEY = "medscout_language";
+
+/**
+ * Written next to LANGUAGE_STORAGE_KEY, with the value "manual", only when the
+ * user chose the language themselves. Without it the language follows the
+ * visitor's location and nothing is stored.
+ */
+export const LANGUAGE_SOURCE_STORAGE_KEY = "medscout_language_source";
+export const LANGUAGE_SOURCE_MANUAL = "manual";
 
 /**
  * Right-to-left UI scripts — `dir` on `<html>` set in LanguageProvider.
@@ -114,14 +128,54 @@ export function isSupportedLanguage(code) {
 }
 
 /**
- * Restore saved locale, else browser language if supported, else English
- * (neutral default for international visitors; message fallback is en → de).
+ * What the app stored ON ITS OWN before location detection existed: the
+ * browser language if it was any registry code, else English. A stored value
+ * that differs from this can only have come from the header picker.
  */
-export function resolveInitialLanguage(stored, navigatorLang) {
-  if (isSupportedLanguage(stored)) return stored;
-  const prefix = String(navigatorLang || "")
+function legacyAutoLanguage(navigatorLanguage) {
+  const prefix = String(navigatorLanguage || "")
     .split("-")[0]
     .toLowerCase();
-  if (isSupportedLanguage(prefix)) return prefix;
-  return "en";
+  return isSupportedLanguage(prefix) ? prefix : "en";
+}
+
+/**
+ * Startup language.
+ *
+ * A language the user picked in the header (source "manual") always wins and
+ * follows them to any location. Otherwise the language comes from where they
+ * are (detectLocationLanguage) and is re-detected on every visit, so it is
+ * never persisted.
+ *
+ * Values saved before `medscout_language_source` existed carry no marker. The
+ * old code wrote the browser language automatically, so such a value only
+ * counts as a real choice when it differs from what the old code would have
+ * written — that keeps earlier header choices without freezing old guesses.
+ *
+ * @returns {{ language: string, source: "manual"|"location"|"browser"|"default" }}
+ */
+export function resolveInitialLanguage({
+  stored,
+  storedSource,
+  timeZone,
+  navigatorLanguage,
+  navigatorLanguages,
+}) {
+  if (HEADER_SELECTABLE_LOCALE_CODES.includes(stored)) {
+    if (storedSource === LANGUAGE_SOURCE_MANUAL) {
+      return { language: stored, source: LANGUAGE_SOURCE_MANUAL };
+    }
+    if (storedSource == null && stored !== legacyAutoLanguage(navigatorLanguage)) {
+      return { language: stored, source: LANGUAGE_SOURCE_MANUAL };
+    }
+  }
+  const browserLanguages = [
+    ...(Array.isArray(navigatorLanguages) ? navigatorLanguages : []),
+    navigatorLanguage,
+  ].filter(Boolean);
+  return detectLocationLanguage({
+    timeZone,
+    browserLanguages,
+    selectableCodes: HEADER_SELECTABLE_LOCALE_CODES,
+  });
 }
