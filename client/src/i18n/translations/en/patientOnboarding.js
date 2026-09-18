@@ -91,6 +91,8 @@ export default {
         "No email address is stored for this entry. Add one, or use the link or code instead.",
       emailFailed:
         "The email could not be sent. Please try again later, or use the link or code instead.",
+      emailIsTeam:
+        "This email address belongs to an account on your practice team, and that account can’t accept the invitation. Please create an entry with the patient’s own address – or hand over the link or code directly.",
       linkLabel: "Invitation link",
       linkHint:
         "Valid for 7 days. The link is shown once — please pass it on now.",
@@ -143,9 +145,13 @@ export default {
       title: "This invitation is no longer valid",
       body:
         "The link or code has expired, was already used, or was withdrawn. Please ask your practice for a new invitation.",
-      memberHint:
-        "Does this account belong to the team of the practice that sent the invitation? Then it cannot accept it. Please open the link with the patient's own account.",
       toStart: "Go to the start page",
+    },
+    team: {
+      title: "This account can’t accept the invitation",
+      body:
+        "This account belongs to the team at {practice}. Someone who works at a practice can’t connect to it as a patient. The invitation is still valid – please sign in with the patient’s own account.",
+      action: "Sign in with another account",
     },
     noCredential: {
       title: "No invitation found",

@@ -21,6 +21,10 @@ import { getPracticeAccess } from "../../utils/practiceAccess.js";
 import { practiceDisplayName } from "../../utils/practiceBranding.js";
 import { lockEntryForUpdate } from "./practicePatientEntryService.js";
 import {
+  previewInvitationByManualCode,
+  previewInvitationByToken,
+} from "./practicePatientInvitationService.js";
+import {
   evaluateInvitationRedeemable,
   evaluateManualCodeUsable,
   hashInvitationToken,
@@ -40,10 +44,83 @@ const ACTIVE_LIKE = new Set(["invited", "active"]);
 
 /**
  * Every credential failure collapses to this. Unknown, expired, spent, revoked,
- * replaced, belonging to a switched-off practice, or presented by somebody who
- * works at the issuing practice — one answer, so none of them can be told apart.
+ * replaced, or belonging to a switched-off practice — one answer, so none of
+ * them can be told apart.
  */
 export const GENERIC_CLAIM_ERROR = "invalid_or_expired_invitation";
+
+/**
+ * A VALID invitation presented by somebody who works at the issuing practice.
+ *
+ * Named, not folded into the generic answer, because the generic answer is
+ * false here ("no longer valid" — it is valid, just not for this account) and
+ * sends the practice team hunting for a fault that does not exist.
+ *
+ * It discloses nothing new. It is only ever returned for a credential the
+ * PUBLIC preview would accept right now, and that preview already names the
+ * practice to anyone holding the string; the only extra fact is that the
+ * caller belongs to that practice's team, which the caller knows. A credential
+ * that is expired, spent or revoked still gets the generic answer, whoever
+ * presents it.
+ */
+export const CLAIMER_IS_PRACTICE_TEAM = "claimer_is_practice_team";
+
+/**
+ * Would the PUBLIC preview accept this credential right now? Reuses the preview
+ * itself rather than restating its rules, so the two can never drift apart.
+ *
+ * @param {string} token
+ * @param {string} code
+ */
+async function isPubliclyPreviewable(token, code) {
+  try {
+    if (token) await previewInvitationByToken(token);
+    else await previewInvitationByManualCode(code);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Before the patient taps "connect": may THIS account redeem this credential?
+ *
+ * Read-only. Answers only for a credential the public preview accepts; every
+ * other credential gets the generic error, exactly as the preview would. The
+ * one thing it adds is the separation-of-duties check below, so the page can
+ * say so up front instead of after a failed tap.
+ *
+ * @param {{ token?: string|null, code?: string|null, userId: string }} input
+ * @returns {Promise<{ practice: object, eligible: boolean, reason: string|null }>}
+ */
+export async function checkClaimEligibility(input) {
+  const userId = String(input.userId || "").trim();
+  if (!userId) throw new Error("validation_required");
+
+  const token = String(input.token ?? "").trim();
+  const code = String(input.code ?? "").trim();
+  if (Boolean(token) === Boolean(code)) throw new Error("validation_credential_required");
+
+  let preview;
+  try {
+    preview = token
+      ? await previewInvitationByToken(token)
+      : await previewInvitationByManualCode(code);
+  } catch {
+    throw new Error(GENERIC_CLAIM_ERROR);
+  }
+
+  const locator = await prisma.practicePatientInvitation.findUnique({
+    where: token ? { tokenHash: hashInvitationToken(token) } : { manualCodeHash: hashManualCode(code) },
+    select: { practiceProfileId: true },
+  });
+  if (!locator) throw new Error(GENERIC_CLAIM_ERROR);
+
+  const access = await getPracticeAccess(userId, locator.practiceProfileId);
+  return access
+    ? { practice: preview.practice, eligible: false, reason: CLAIMER_IS_PRACTICE_TEAM }
+    : { practice: preview.practice, eligible: true, reason: null };
+}
 
 /**
  * Normalise and validate the subject.
@@ -153,7 +230,13 @@ export async function claimInvitation(input) {
    * patient of every other practice.
    */
   const access = await getPracticeAccess(userId, locator.practiceProfileId);
-  if (access) throw new Error(GENERIC_CLAIM_ERROR);
+  if (access) {
+    // Named only for a credential the public preview would accept anyway — see
+    // CLAIMER_IS_PRACTICE_TEAM. A dead credential stays generic for everyone.
+    throw new Error(
+      (await isPubliclyPreviewable(token, code)) ? CLAIMER_IS_PRACTICE_TEAM : GENERIC_CLAIM_ERROR,
+    );
+  }
 
   /*
    * A LOST RACE IS RETRIED ONCE, and only a lost race.

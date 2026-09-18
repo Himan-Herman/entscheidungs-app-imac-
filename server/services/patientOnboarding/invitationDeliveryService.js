@@ -23,6 +23,7 @@ import { prisma } from "../../lib/prisma.js";
 import { INVITATION_TTL_DAYS } from "./invitationTokens.js";
 import { buildInvitationEmail } from "./invitationEmailCopy.js";
 import { practiceDisplayName } from "../../utils/practiceBranding.js";
+import { getPracticeAccess } from "../../utils/practiceAccess.js";
 
 /**
  * Where the patient-facing app lives. The invitation link points at the
@@ -77,8 +78,36 @@ export async function loadDeliverableEntry({ entryId, practiceProfileId }) {
   if (entry.archivedAt) throw new Error("entry_not_claimable");
   if (entry.linkedAt) throw new Error("entry_already_linked");
   if (!String(entry.email || "").trim()) throw new Error("entry_has_no_email");
+  if (await emailBelongsToPracticeTeam(entry.email, practiceProfileId)) {
+    throw new Error("entry_email_is_practice_team");
+  }
 
   return entry;
+}
+
+/**
+ * Is this address the login of somebody on THIS practice's team?
+ *
+ * Such an invitation can never be redeemed — the claim refuses anyone who works
+ * at the issuing practice — so sending it only produces a dead mail and a
+ * confused colleague. Refused before anything is issued.
+ *
+ * Scoped to the practice's own team on purpose: whether an address belongs to
+ * any other MedScoutX account is never answered, so this cannot be used to
+ * look people up.
+ *
+ * @param {string} email
+ * @param {string} practiceProfileId
+ */
+export async function emailBelongsToPracticeTeam(email, practiceProfileId) {
+  const normalized = String(email || "").trim().toLowerCase();
+  if (!normalized || !practiceProfileId) return false;
+  const user = await prisma.user.findFirst({
+    where: { email: { equals: normalized, mode: "insensitive" } },
+    select: { id: true },
+  });
+  if (!user) return false;
+  return Boolean(await getPracticeAccess(user.id, practiceProfileId));
 }
 
 /**

@@ -166,9 +166,10 @@ export default function PracticePatientEntriesPage() {
     } catch (err) {
       setNotice({
         kind: "error",
-        text: err?.code === "entry_has_no_email"
-          ? tx.invitation.emailMissing
-          : tx.invitation.emailFailed,
+        text: {
+          entry_has_no_email: tx.invitation.emailMissing,
+          entry_email_is_practice_team: tx.invitation.emailIsTeam,
+        }[err?.code] || tx.invitation.emailFailed,
       });
     }
   });

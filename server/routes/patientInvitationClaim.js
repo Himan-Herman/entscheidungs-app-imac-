@@ -13,9 +13,13 @@ import { requirePatientOnboardingFeature } from "../middleware/requirePatientOnb
 import {
   invitationClaimIpLimiter,
   invitationClaimUserLimiter,
+  invitationManualCodeLimiter,
+  invitationPreviewLimiter,
 } from "../middleware/ipRateLimit.js";
 import {
+  checkClaimEligibility,
   claimInvitation,
+  CLAIMER_IS_PRACTICE_TEAM,
   GENERIC_CLAIM_ERROR,
 } from "../services/patientOnboarding/practicePatientClaimService.js";
 
@@ -35,6 +39,8 @@ function userIdFromReq(req) {
 function mapError(err) {
   const msg = err?.message || "request_failed";
   if (msg === GENERIC_CLAIM_ERROR) return { status: 404, error: GENERIC_CLAIM_ERROR };
+  // Valid credential, wrong account: the caller works at the issuing practice.
+  if (msg === CLAIMER_IS_PRACTICE_TEAM) return { status: 403, error: msg };
   if (msg === "validation_credential_required"
       || msg === "validation_subject_required"
       || msg === "validation_subject_invalid"
@@ -49,6 +55,43 @@ function mapError(err) {
   if (msg === "link_already_exists") return { status: 409, error: msg };
   return { status: 500, error: "request_failed" };
 }
+
+/**
+ * The same IP budget as the public check of the same credential kind. Without
+ * this, the authenticated eligibility check would be a second, looser way to
+ * test hand-typed codes.
+ */
+function credentialLimiter(req, res, next) {
+  const limiter = req.body?.code ? invitationManualCodeLimiter : invitationPreviewLimiter;
+  return limiter(req, res, next);
+}
+
+/**
+ * POST /api/patient/invitations/eligibility
+ *
+ * Body: exactly one of `token` or `code`. Read-only — it changes nothing and
+ * binds nothing. Answers, before the patient taps "connect", whether THIS
+ * account may redeem the credential at all, so a practice team account is told
+ * up front instead of after a failed attempt. A credential the public preview
+ * rejects is rejected here with the same generic answer.
+ */
+router.post("/eligibility", credentialLimiter, async (req, res) => {
+  const userId = userIdFromReq(req);
+  if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
+
+  try {
+    const result = await checkClaimEligibility({
+      userId,
+      token: req.body?.token ?? null,
+      code: req.body?.code ?? null,
+    });
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    const mapped = mapError(err);
+    if (mapped.status === 500) console.error("[patient/invitations:eligibility]", err?.message ?? err);
+    return res.status(mapped.status).json({ ok: false, error: mapped.error });
+  }
+});
 
 /**
  * POST /api/patient/invitations/claim

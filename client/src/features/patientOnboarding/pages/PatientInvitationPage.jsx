@@ -5,6 +5,7 @@ import { getMessages } from "../../../i18n/translations";
 import { authFetch } from "../../../api/authFetch.js";
 import { endSession } from "../../../lib/session.js";
 import {
+  checkInvitationEligibility,
   claimInvitation,
   fetchFamilyProfiles,
   previewInvitation,
@@ -55,7 +56,10 @@ export default function PatientInvitationPage() {
   const [error, setError] = useState(null);
 
   const [account, setAccount] = useState(null); // { name, email } of the signed-in account
-  const [isPracticeMember, setIsPracticeMember] = useState(false);
+  // True when the signed-in account works at the inviting practice. Such an
+  // account can never redeem the invitation, so the page says so BEFORE the
+  // button instead of after a failed tap.
+  const [isPracticeTeam, setIsPracticeTeam] = useState(false);
   const [profiles, setProfiles] = useState([]);
   const [subject, setSubject] = useState("self");
   const [claiming, setClaiming] = useState(false);
@@ -136,24 +140,16 @@ export default function PatientInvitationPage() {
       .then((res) => { if (!cancelled) setProfiles(res.profiles || []); })
       .catch(() => { if (!cancelled) setError(tx.subject.loadError); });
 
-    return () => { cancelled = true; };
-  }, [state, isAuthed, tx.subject.loadError]);
-
-  // Refused while signed in: does this account work at a practice? Only the
-  // account's OWN memberships are read — the server's answer about the
-  // invitation stays one identical "invalid", so nothing is learnt about the
-  // credential. The hint below is worded to be true whatever the real reason.
-  useEffect(() => {
-    if (state !== "invalid" || !isAuthed) return undefined;
-    let cancelled = false;
-    authFetch("/api/practices")
-      .then((res) => (res.ok ? res.json() : { practices: [] }))
-      .then((data) => {
-        if (!cancelled) setIsPracticeMember(Array.isArray(data?.practices) && data.practices.length > 0);
+    // Orientation only: the claim enforces the same rule on the server, so a
+    // failed check simply leaves the button where it is.
+    checkInvitationEligibility(credential)
+      .then((res) => {
+        if (!cancelled) setIsPracticeTeam(res?.eligible === false && res?.reason === "claimer_is_practice_team");
       })
       .catch(() => {});
+
     return () => { cancelled = true; };
-  }, [state, isAuthed]);
+  }, [state, isAuthed, credential, tx.subject.loadError]);
 
   // Every state change is announced: focus moves to the new heading, so a
   // screen reader hears what happened and a keyboard user starts from the top.
@@ -208,6 +204,10 @@ export default function PatientInvitationPage() {
       if (err?.code === "invalid_or_expired_invitation") {
         clearStashedInvitation();
         setState("invalid");
+      } else if (err?.code === "claimer_is_practice_team") {
+        // The invitation is still good — just not for this account. Keep it
+        // stashed so switching account lands straight back here.
+        setIsPracticeTeam(true);
       } else {
         setError(byCode[err?.code] || tx.errors.generic);
       }
@@ -251,11 +251,6 @@ export default function PatientInvitationPage() {
           {tx.invalid.title}
         </h1>
         <p className="onboarding-page__intro">{tx.invalid.body}</p>
-        {isAuthed && isPracticeMember ? (
-          <div className="onboarding-alert onboarding-alert--warn" role="note">
-            {tx.invalid.memberHint}
-          </div>
-        ) : null}
         <div className="onboarding-invite__actions">
           {isAuthed ? (
             <button
@@ -451,22 +446,41 @@ export default function PatientInvitationPage() {
                 <p className="onboarding-alert onboarding-alert--error" role="alert">{error}</p>
               )}
 
-              {/* Locked while in flight: a double tap must not attempt two claims. */}
-              <button
-                type="button"
-                className="onboarding-btn onboarding-btn--primary onboarding-btn--block onboarding-btn--large"
-                onClick={connect}
-                disabled={claiming || switching}
-                aria-busy={claiming}
-              >
-                {claiming ? tx.connect.working : tx.connect.button}
-              </button>
-              <p className="onboarding-invite__reassure">
-                <svg className="onboarding-invite__lock" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-                  <path d="M7 10V8a5 5 0 0110 0v2m-11 0h12v10H6z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-                </svg>
-                {tx.connect.hint}
-              </p>
+              {isPracticeTeam ? (
+                <div className="onboarding-team" role="alert" data-testid="invitation-team-account">
+                  <p className="onboarding-team__title">{tx.team.title}</p>
+                  <p className="onboarding-team__body">
+                    {tx.team.body.replace("{practice}", practice.displayName)}
+                  </p>
+                  <button
+                    type="button"
+                    className="onboarding-btn onboarding-btn--primary onboarding-btn--block onboarding-btn--large"
+                    onClick={switchAccount}
+                    disabled={switching}
+                  >
+                    {tx.team.action}
+                  </button>
+                </div>
+              ) : (
+                /* Locked while in flight: a double tap must not attempt two claims. */
+                <button
+                  type="button"
+                  className="onboarding-btn onboarding-btn--primary onboarding-btn--block onboarding-btn--large"
+                  onClick={connect}
+                  disabled={claiming || switching}
+                  aria-busy={claiming}
+                >
+                  {claiming ? tx.connect.working : tx.connect.button}
+                </button>
+              )}
+              {isPracticeTeam ? null : (
+                <p className="onboarding-invite__reassure">
+                  <svg className="onboarding-invite__lock" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                    <path d="M7 10V8a5 5 0 0110 0v2m-11 0h12v10H6z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                  </svg>
+                  {tx.connect.hint}
+                </p>
+              )}
             </>
           )}
         </>

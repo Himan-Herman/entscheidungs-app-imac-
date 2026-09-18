@@ -54,6 +54,8 @@ export const itPatientOnboarding = {
         "Per questa scheda non è memorizzato alcun indirizzo e-mail. Ne aggiunga uno, oppure usi il link o il codice.",
       emailFailed:
         "Non è stato possibile inviare l'e-mail. Riprovi più tardi, oppure usi il link o il codice.",
+      emailIsTeam:
+        "Questo indirizzo e-mail appartiene a un account del team del suo studio, che non può accettare l’invito. Crei una scheda con l’indirizzo personale della paziente o del paziente – oppure consegni direttamente il link o il codice.",
       linkLabel: "Link di invito",
       linkHint: "Valido 7 giorni. Il link viene mostrato una sola volta: lo consegni ora.",
       linkGone: "Il link non può più essere mostrato. Crei un nuovo invito per ottenerne un altro.",
@@ -99,8 +101,13 @@ export const itPatientOnboarding = {
     invalid: {
       title: "Questo invito non è più valido",
       body: "Il link o il codice è scaduto, è già stato usato oppure è stato ritirato. Chieda al suo studio un nuovo invito.",
-      memberHint: "Questo account fa parte del team dello studio che ha inviato l'invito? In tal caso non può accettarlo. Apra il link con l'account della paziente o del paziente.",
       toStart: "Vai alla pagina iniziale",
+    },
+    team: {
+      title: "Con questo account non è possibile accettare l’invito",
+      body:
+        "Questo account fa parte del team di {practice}. Chi lavora in uno studio non può collegarsi come paziente allo stesso studio. L’invito resta valido – acceda con l’account della paziente o del paziente.",
+      action: "Accedi con un altro account",
     },
     noCredential: {
       title: "Nessun invito rilevato",

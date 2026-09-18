@@ -582,3 +582,26 @@
   line-height: 1.55;
   color: var(--ms-color-text-secondary, #334155);
 }
+
+/*
+ * Signed in with an account of the inviting practice's own team. Not an error
+ * in the invitation — the invitation stays valid — so it is stated plainly,
+ * with the one way forward as the only button.
+ */
+.onboarding-team {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--ms-color-border, #cbd5e1);
+  border-left: 4px solid #b45309;
+  border-radius: .6rem;
+}
+.onboarding-team__title {
+  margin: 0 0 .35rem;
+  font-weight: 650;
+  font-size: 1.02rem;
+}
+.onboarding-team__body {
+  margin: 0 0 1rem;
+  line-height: 1.55;
+  color: var(--ms-color-text-secondary, #334155);
+}

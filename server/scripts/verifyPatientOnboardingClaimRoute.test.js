@@ -113,6 +113,31 @@ test("the response never carries an identifier the caller did not need", async (
   }
 });
 
+async function eligibility(body, { auth = true } = {}) {
+  const res = await fetch(`${base}/api/patient/invitations/eligibility`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      ...(auth ? { authorization: `Bearer ${token("user-eligibility")}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  return { status: res.status, body: await res.json().catch(() => ({})) };
+}
+
+test("the eligibility check needs an account and discloses no more than the preview", async () => {
+  const anon = await eligibility({ token: "x".repeat(43) }, { auth: false });
+  assert.equal(anon.status, 401);
+
+  const unknown = await eligibility({ token: "x".repeat(43) });
+  assert.equal(unknown.status, 404);
+  assert.deepEqual(unknown.body, { ok: false, error: "invalid_or_expired_invitation" });
+
+  const both = await eligibility({ token: "a", code: "b" });
+  assert.equal(both.status, 400);
+  assert.equal(both.body.error, "validation_credential_required");
+});
+
 test("with the flag off the route is absent, not forbidden", async () => {
   const previous = process.env.PATIENT_ONBOARDING_V2;
   delete process.env.PATIENT_ONBOARDING_V2;

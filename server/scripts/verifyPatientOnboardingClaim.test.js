@@ -297,10 +297,11 @@ test("an expired typed code fails while its link token still works", { skip }, a
 /* -------------------------------------------------- separation of duties */
 
 test("whoever can issue the credential may not redeem it", { skip }, async () => {
-  // The owner.
+  // The owner. The refusal is named: the credential is valid (the public
+  // preview says as much), it is the account that may not use it.
   let s = await scene();
   await assert.rejects(() => claim({ token: s.inv.token, userId: s.owner.id }),
-    /invalid_or_expired_invitation/);
+    /claimer_is_practice_team/);
 
   // An ACTIVE member of the same practice.
   s = await scene();
@@ -309,7 +310,7 @@ test("whoever can issue the credential may not redeem it", { skip }, async () =>
     data: { practiceProfileId: s.practice.id, userId: staff.id, role: "assistant", status: "active" },
   });
   await assert.rejects(() => claim({ token: s.inv.token, userId: staff.id }),
-    /invalid_or_expired_invitation/);
+    /claimer_is_practice_team/);
   // Nothing was consumed by either refusal.
   const inv = await db.practicePatientInvitation.findUnique({ where: { id: s.inv.invitation.id } });
   assert.equal(inv.status, "pending");

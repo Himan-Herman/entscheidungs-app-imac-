@@ -52,6 +52,23 @@ export async function previewInvitation({ token = null, code = null }) {
 }
 
 /**
+ * May the SIGNED-IN account redeem this credential? Read-only, changes nothing.
+ *
+ * Answers `{ eligible, reason }` for a credential the public preview accepts;
+ * the one refusal it names is `claimer_is_practice_team` — the account works at
+ * the inviting practice. Anything else fails exactly like the preview.
+ *
+ * @param {{ token?: string|null, code?: string|null }} credential
+ */
+export async function checkInvitationEligibility({ token = null, code = null }) {
+  return unwrap(await authFetch("/api/patient/invitations/eligibility", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(token ? { token } : { code }),
+  }));
+}
+
+/**
  * Bind the account to the practice.
  *
  * Authenticated, deliberate, and the only mutating call in this flow. It creates

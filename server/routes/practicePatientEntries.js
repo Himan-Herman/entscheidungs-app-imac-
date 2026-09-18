@@ -72,6 +72,8 @@ function mapError(err) {
   // The practice can fix this one itself by adding an address to the entry, so
   // it is worth naming instead of hiding behind a generic failure.
   if (msg === "entry_has_no_email") return { status: 409, error: msg };
+  // Same: the address is a colleague's login, which can never redeem it.
+  if (msg === "entry_email_is_practice_team") return { status: 409, error: msg };
   // Everything else, including a unique-constraint violation from a lost race,
   // is reported as one opaque failure. The database's own message would name
   // tables, columns and index predicates.

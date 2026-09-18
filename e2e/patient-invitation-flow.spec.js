@@ -287,6 +287,49 @@ test("signed in as the wrong account: the page says so, and switching keeps the 
   await practiceContext.close();
 });
 
+test("the practice's own team account: told before the button, and the invitation survives", async ({ browser, request }) => {
+  const email = unique("team.check");
+  await createVerifiedPatient(request, email, "Team");
+  const { mail, practicePage, practiceContext } = await practiceInvites(browser, request, {
+    given: "Team", family: `Probe${TAG}`, dob: "1958-08-09", email,
+  });
+  const invite = linkIn(mail, /http:\/\/localhost:5173\/patient-invitation#token=[A-Za-z0-9_-]+/);
+
+  // The practice owner opens the invitation in their own, signed-in browser.
+  await practicePage.goto(invite);
+  const notice = practicePage.getByTestId("invitation-team-account");
+  await expect(notice).toContainText("Mit diesem Konto können Sie die Einladung nicht annehmen");
+  await expect(notice).toContainText("Die Einladung bleibt gültig");
+  await expect(practicePage.getByRole("button", { name: "Verbinden", exact: true })).toHaveCount(0);
+
+  // The practice cannot even mail an invitation to its own login.
+  await practicePage.goto(`${APP}/practice/patient-entries?practiceId=${PRACTICE_ID}`);
+  await practicePage.getByRole("button", { name: "Patient hinzufügen" }).click();
+  const dialog = practicePage.getByRole("dialog");
+  await dialog.getByLabel(/^Vorname/).fill("Eigenes");
+  await dialog.getByLabel(/^Nachname/).fill(`Konto${TAG}`);
+  await dialog.getByLabel(/^Geburtsdatum/).fill("1970-01-01");
+  await dialog.getByLabel(/^E-Mail/).fill(OWNER.email.toUpperCase());
+  await dialog.getByRole("button", { name: "Eintrag anlegen" }).click();
+  await expect(dialog).toBeHidden();
+  const own = practicePage.locator(".onboarding-card").filter({ hasText: `Eigenes Konto${TAG}` });
+  await own.getByRole("button", { name: "Per E-Mail senden" }).click();
+  await expect(practicePage.getByText(/gehört zu einem Konto in Ihrem Praxisteam/)).toBeVisible();
+  await expect(own).toContainText("Keine Einladung");
+
+  // The same link still works for the patient it was meant for.
+  const ctx = await browser.newContext(DE);
+  const page = await ctx.newPage();
+  await page.goto(`${APP}/login`);
+  await signIn(page, email, PASSWORD);
+  await page.waitForURL((u) => !u.pathname.startsWith("/login"));
+  await page.goto(invite);
+  await page.getByRole("button", { name: "Verbinden", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Sie sind jetzt verbunden" })).toBeVisible();
+  await ctx.close();
+  await practiceContext.close();
+});
+
 test("consent: the practice's request has its own checkboxes, nothing ticked, nothing borrowed", async ({ browser, request }) => {
   const email = unique("consent.check");
   await createVerifiedPatient(request, email, "Frei");

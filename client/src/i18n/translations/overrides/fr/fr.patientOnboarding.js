@@ -54,6 +54,8 @@ export const frPatientOnboarding = {
         "Aucune adresse e-mail n'est enregistrée pour cette fiche. Ajoutez-en une, ou utilisez le lien ou le code.",
       emailFailed:
         "L'e-mail n'a pas pu être envoyé. Réessayez plus tard, ou utilisez le lien ou le code.",
+      emailIsTeam:
+        "Cette adresse e-mail appartient à un compte de l’équipe de votre cabinet, qui ne peut pas accepter l’invitation. Créez une fiche avec l’adresse personnelle de la patiente ou du patient – ou transmettez directement le lien ou le code.",
       linkLabel: "Lien d'invitation",
       linkHint: "Valable 7 jours. Le lien n'est affiché qu'une fois — transmettez-le maintenant.",
       linkGone: "Le lien ne peut plus être affiché. Créez une nouvelle invitation pour en obtenir un autre.",
@@ -99,8 +101,13 @@ export const frPatientOnboarding = {
     invalid: {
       title: "Cette invitation n'est plus valable",
       body: "Le lien ou le code a expiré, a déjà été utilisé ou a été retiré. Demandez une nouvelle invitation à votre cabinet.",
-      memberHint: "Ce compte fait-il partie de l'équipe du cabinet qui a envoyé l'invitation ? Dans ce cas, il ne peut pas l'accepter. Ouvrez le lien avec le compte de la patiente ou du patient.",
       toStart: "Aller à l'accueil",
+    },
+    team: {
+      title: "Ce compte ne peut pas accepter l’invitation",
+      body:
+        "Ce compte fait partie de l’équipe de {practice}. Une personne qui travaille dans un cabinet ne peut pas s’y connecter en tant que patient. L’invitation reste valable – connectez-vous avec le compte de la patiente ou du patient.",
+      action: "Se connecter avec un autre compte",
     },
     noCredential: {
       title: "Aucune invitation détectée",

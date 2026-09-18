@@ -54,6 +54,8 @@ export const esPatientOnboarding = {
         "No hay ninguna dirección de correo guardada para esta ficha. Añada una, o use el enlace o el código.",
       emailFailed:
         "No se pudo enviar el correo. Inténtelo más tarde, o use el enlace o el código.",
+      emailIsTeam:
+        "Esta dirección de correo pertenece a una cuenta del equipo de su consulta, que no puede aceptar la invitación. Cree una ficha con la dirección personal de la paciente o del paciente – o entregue directamente el enlace o el código.",
       linkLabel: "Enlace de invitación",
       linkHint: "Válido 7 días. El enlace se muestra una sola vez: entréguelo ahora.",
       linkGone: "El enlace ya no se puede mostrar. Cree una invitación nueva para obtener otro.",
@@ -99,8 +101,13 @@ export const esPatientOnboarding = {
     invalid: {
       title: "Esta invitación ya no es válida",
       body: "El enlace o el código ha caducado, ya se usó o fue retirado. Pida a su consulta una nueva invitación.",
-      memberHint: "¿Esta cuenta pertenece al equipo de la consulta que envió la invitación? En ese caso no puede aceptarla. Abra el enlace con la cuenta de la paciente o del paciente.",
       toStart: "Ir a la página de inicio",
+    },
+    team: {
+      title: "Con esta cuenta no se puede aceptar la invitación",
+      body:
+        "Esta cuenta pertenece al equipo de {practice}. Quien trabaja en una consulta no puede conectarse a ella como paciente. La invitación sigue siendo válida – inicie sesión con la cuenta de la paciente o del paciente.",
+      action: "Iniciar sesión con otra cuenta",
     },
     noCredential: {
       title: "No se ha detectado ninguna invitación",

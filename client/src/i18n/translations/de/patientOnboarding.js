@@ -93,6 +93,8 @@ export default {
         "Für diesen Eintrag ist keine E-Mail-Adresse hinterlegt. Bitte Adresse ergänzen oder Link bzw. Code verwenden.",
       emailFailed:
         "Die E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen oder Link bzw. Code verwenden.",
+      emailIsTeam:
+        "Diese E-Mail-Adresse gehört zu einem Konto in Ihrem Praxisteam. Mit diesem Konto kann die Einladung nicht angenommen werden. Legen Sie bitte einen Eintrag mit der privaten Adresse der Patientin oder des Patienten an – oder geben Sie Link bzw. Code direkt weiter.",
       linkLabel: "Einladungslink",
       linkHint:
         "Gültig für 7 Tage. Der Link ist nur einmal sichtbar — bitte jetzt weitergeben.",
@@ -145,9 +147,13 @@ export default {
       title: "Diese Einladung ist nicht mehr gültig",
       body:
         "Der Link oder Code ist abgelaufen, wurde bereits verwendet oder zurückgezogen. Bitte wenden Sie sich an Ihre Praxis für eine neue Einladung.",
-      memberHint:
-        "Gehört dieses Konto zum Team der einladenden Praxis? Dann kann es die Einladung nicht annehmen. Öffnen Sie den Link bitte mit dem Konto der Patientin oder des Patienten.",
       toStart: "Zur Startseite",
+    },
+    team: {
+      title: "Mit diesem Konto können Sie die Einladung nicht annehmen",
+      body:
+        "Dieses Konto gehört zum Team von {practice}. Wer in einer Praxis arbeitet, kann sich dort nicht selbst als Patientin oder Patient verbinden. Die Einladung bleibt gültig – melden Sie sich bitte mit dem Konto der Patientin oder des Patienten an.",
+      action: "Mit anderem Konto anmelden",
     },
     noCredential: {
       title: "Keine Einladung erkannt",

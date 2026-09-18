@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import DateField from "../../../components/forms/DateField.jsx";
 
 /**
  * Create one practice-local patient record.
@@ -105,16 +106,24 @@ export default function AddPatientEntryDialog({ tx, onCancel, onCreate }) {
                 value={form.familyName} onChange={set("familyName")} autoComplete="off"
               />
             </label>
-            <label className="onboarding-field">
-              <span className="onboarding-field__label">{tx.form.dateOfBirth} *</span>
-              <input
-                className="onboarding-field__input" type="date" required aria-required="true"
-                min="1900-01-01" max={todayIso()}
-                value={form.dateOfBirth} onChange={set("dateOfBirth")}
-                aria-describedby="dob-hint"
+            <div className="onboarding-field">
+              <label className="onboarding-field__label" htmlFor="entry-dob">{tx.form.dateOfBirth} *</label>
+              {/* Opens on the year: a birth date is three taps, not decades of
+                  "previous month". Typing "11091999" works just as well. */}
+              <DateField
+                id="entry-dob"
+                inputClassName="onboarding-field__input"
+                required
+                min="1900-01-01"
+                max={todayIso()}
+                startView="year"
+                defaultViewDate={defaultBirthViewDate()}
+                value={form.dateOfBirth}
+                onChange={(v) => setForm((f) => ({ ...f, dateOfBirth: v }))}
+                describedBy="dob-hint"
               />
               <span className="onboarding-field__hint" id="dob-hint">{tx.form.dateOfBirthHint}</span>
-            </label>
+            </div>
             <label className="onboarding-field">
               <span className="onboarding-field__label">{tx.form.email}</span>
               <input
@@ -162,6 +171,15 @@ export default function AddPatientEntryDialog({ tx, onCancel, onCreate }) {
       </div>
     </div>
   );
+}
+
+/**
+ * Where the year list starts when no date is chosen yet: 40 years back, so the
+ * common adult range is on screen and both ends are one short scroll away.
+ */
+function defaultBirthViewDate() {
+  const d = new Date();
+  return `${d.getFullYear() - 40}-01-01`;
 }
 
 /** Today as YYYY-MM-DD in local time — the `max` a birth date may take. */

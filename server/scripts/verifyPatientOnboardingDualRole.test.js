@@ -134,6 +134,7 @@ async function entryWithInvitation(p, staffUserId, over = {}) {
 
 const SELF = { type: "self" };
 const GENERIC = "invalid_or_expired_invitation";
+const TEAM = "claimer_is_practice_team";
 const giveConsent = (linkId, patientUserId, scopes) =>
   linkSvc.acceptPracticePatientLinkConsent({ linkId, patientUserId, scopes });
 
@@ -221,9 +222,11 @@ test("DUAL_USER cannot claim an invitation issued by their OWN practice", { skip
   const w = await world();
   const { entry, inv } = await entryWithInvitation(w.A, w.ownerA.id);
 
+  // Named, not generic: the invitation IS valid (the public preview says so to
+  // anyone holding it), just not for an account of the practice's own team.
   await assert.rejects(
     () => claimSvc.claimInvitation({ token: inv.token, userId: w.DUAL.id, subject: SELF }),
-    (err) => err.message === GENERIC,
+    (err) => err.message === TEAM,
     "practice A's own staff redeemed practice A's invitation",
   );
 
@@ -239,17 +242,102 @@ test("DUAL_USER cannot claim an invitation issued by their OWN practice", { skip
     await db.consentRecord.count({ where: { patientUserId: w.DUAL.id } }), 0,
   );
 
-  // The refusal is byte-identical to a nonsense credential: no oracle.
+  // A nonsense credential still gets the one generic answer — the team refusal
+  // is only ever given for a credential the public preview accepts.
   const nonsense = await claimSvc
     .claimInvitation({ token: "definitely-not-a-token", userId: w.DUAL.id, subject: SELF })
     .catch((e) => e.message);
-  assert.equal(nonsense, GENERIC, "a wrong credential answers differently than a blocked one");
+  assert.equal(nonsense, GENERIC, "a nonsense credential was answered with more than the generic error");
 
   // The invitation is NOT burnt: a real patient can still use it.
   const ok = await claimSvc.claimInvitation({
     token: inv.token, userId: w.USER_2.id, subject: SELF,
   });
   assert.equal(ok.link.status, "invited");
+});
+
+test("a DEAD invitation stays generic for the practice's own staff too", { skip }, async () => {
+  const w = await world();
+  const { entry, inv } = await entryWithInvitation(w.A, w.ownerA.id);
+  await db.practicePatientInvitation.updateMany({
+    where: { practicePatientEntryId: entry.id },
+    data: { expiresAt: new Date(Date.now() - 60_000) },
+  });
+
+  // Expired: the public preview refuses it, so the team answer must not
+  // reveal that it once belonged to this practice.
+  const claimed = await claimSvc
+    .claimInvitation({ token: inv.token, userId: w.DUAL.id, subject: SELF })
+    .catch((e) => e.message);
+  assert.equal(claimed, GENERIC, "an expired invitation told staff it was theirs");
+
+  const checked = await claimSvc
+    .checkClaimEligibility({ token: inv.token, userId: w.DUAL.id })
+    .catch((e) => e.message);
+  assert.equal(checked, GENERIC, "the eligibility check said more than the preview would");
+});
+
+test("eligibility is answered up front, and changes nothing", { skip }, async () => {
+  const w = await world();
+  const { entry, inv } = await entryWithInvitation(w.A, w.ownerA.id);
+
+  const staff = await claimSvc.checkClaimEligibility({ token: inv.token, userId: w.DUAL.id });
+  assert.equal(staff.eligible, false);
+  assert.equal(staff.reason, TEAM);
+  assert.equal(staff.practice.displayName, "Praxis A");
+
+  const owner = await claimSvc.checkClaimEligibility({ token: inv.token, userId: w.ownerA.id });
+  assert.equal(owner.eligible, false, "the practice owner was told they may redeem their own invitation");
+
+  const patient = await claimSvc.checkClaimEligibility({ token: inv.token, userId: w.USER_2.id });
+  assert.equal(patient.eligible, true);
+  assert.equal(patient.reason, null);
+
+  // Staff at ANOTHER practice is an ordinary patient here.
+  const outsider = await claimSvc.checkClaimEligibility({ token: inv.token, userId: w.USER_3.id });
+  assert.equal(outsider.eligible, true, "staff of practice B was blocked from A's invitation");
+
+  await assert.rejects(
+    () => claimSvc.checkClaimEligibility({ token: "definitely-not-a-token", userId: w.USER_2.id }),
+    (e) => e.message === GENERIC,
+  );
+  await assert.rejects(
+    () => claimSvc.checkClaimEligibility({ token: inv.token, code: "ABCD", userId: w.USER_2.id }),
+    (e) => e.message === "validation_credential_required",
+  );
+
+  // Read-only: nothing was linked, nothing was spent.
+  assert.equal(await db.practicePatientLink.count({ where: { practiceProfileId: w.A.id } }), 0);
+  const after = await db.practicePatientEntry.findUnique({ where: { id: entry.id } });
+  assert.equal(after.status, "invited");
+  const ok = await claimSvc.claimInvitation({ token: inv.token, userId: w.USER_2.id, subject: SELF });
+  assert.equal(ok.link.status, "invited", "the eligibility check burnt the invitation");
+});
+
+test("the practice cannot mail an invitation to its own team's login", { skip }, async () => {
+  const w = await world();
+  const delivery = await import("../services/patientOnboarding/invitationDeliveryService.js");
+
+  assert.equal(await delivery.emailBelongsToPracticeTeam(w.DUAL.email, w.A.id), true);
+  assert.equal(
+    await delivery.emailBelongsToPracticeTeam(`  ${w.DUAL.email.toUpperCase()} `, w.A.id), true,
+    "case or whitespace let a team address through",
+  );
+  assert.equal(await delivery.emailBelongsToPracticeTeam(w.ownerA.email, w.A.id), true,
+    "the owner's own address was not recognised as team");
+  // Scoped to THIS practice's team — never a lookup of other accounts.
+  assert.equal(await delivery.emailBelongsToPracticeTeam(w.DUAL.email, w.B.id), false);
+  assert.equal(await delivery.emailBelongsToPracticeTeam(w.USER_2.email, w.A.id), false);
+  assert.equal(await delivery.emailBelongsToPracticeTeam("nobody@test.invalid", w.A.id), false);
+
+  const { entry } = await entrySvc.createPracticePatientEntry({
+    practiceProfileId: w.A.id, createdByUserId: w.ownerA.id,
+    givenName: "Team", familyName: "Mate", email: w.DUAL.email,
+  });
+  await assert.rejects(
+    () => delivery.loadDeliverableEntry({ entryId: entry.id, practiceProfileId: w.A.id }),
+    (e) => e.message === "entry_email_is_practice_team",
+  );
 });
 
 test("the block follows the membership, not the person", { skip }, async () => {
@@ -659,7 +747,7 @@ test("the on-site code works for DUAL_USER at B and is still blocked at A", { sk
   });
   await assert.rejects(
     () => claimSvc.claimInvitation({ code: codeA.manualCode, userId: w.DUAL.id, subject: SELF }),
-    (e) => e.message === GENERIC,
+    (e) => e.message === TEAM,
     "the code channel bypassed separation of duties",
   );
 });

@@ -1,0 +1,222 @@
+/*
+ * DateField — a quiet, precise date control.
+ *
+ * Deliberately plain: one surface, one hairline border, one accent used only
+ * for the chosen date. No pills, no tinted icon tiles, no ornament — the grid
+ * of numbers is the design, and it should read like a well-set timetable.
+ *
+ * Own tokens, with explicit dark values for all three theme states (system
+ * dark, forced dark, forced light), as elsewhere in the app. The shared
+ * `--ms-*` tokens are used only where they are defined for both themes.
+ */
+:root {
+  --datefield-surface: #ffffff;
+  --datefield-ink: #0f172a;
+  --datefield-muted: #64748b;
+  --datefield-line: #e2e8f0;
+  --datefield-hover: #f1f5f9;
+  --datefield-accent: #0f766e;
+  --datefield-on-accent: #ffffff;
+  --datefield-shadow: 0 12px 32px rgb(15 23 42 / 14%), 0 2px 6px rgb(15 23 42 / 6%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --datefield-surface: #111a2e;
+    --datefield-ink: #f1f5f9;
+    --datefield-muted: #94a3b8;
+    --datefield-line: rgb(148 163 184 / 24%);
+    --datefield-hover: rgb(148 163 184 / 12%);
+    --datefield-accent: #2dd4bf;
+    --datefield-on-accent: #042f2e;
+    --datefield-shadow: 0 16px 40px rgb(0 0 0 / 45%);
+  }
+}
+:root[data-theme="dark"] {
+  --datefield-surface: #111a2e;
+  --datefield-ink: #f1f5f9;
+  --datefield-muted: #94a3b8;
+  --datefield-line: rgb(148 163 184 / 24%);
+  --datefield-hover: rgb(148 163 184 / 12%);
+  --datefield-accent: #2dd4bf;
+  --datefield-on-accent: #042f2e;
+  --datefield-shadow: 0 16px 40px rgb(0 0 0 / 45%);
+}
+
+/* ------------------------------------------------------------------ field */
+
+.datefield {
+  position: relative;
+  display: block;
+}
+.datefield__input {
+  width: 100%;
+  padding-right: 2.9rem !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+}
+.datefield__input[aria-invalid="true"] {
+  border-color: var(--onboarding-danger, #b91c1c);
+}
+.datefield__toggle {
+  position: absolute;
+  top: 50%;
+  right: .35rem;
+  transform: translateY(-50%);
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: .4rem;
+  background: transparent;
+  color: var(--datefield-muted);
+  cursor: pointer;
+}
+.datefield__toggle:hover,
+.datefield__toggle[aria-expanded="true"] {
+  color: var(--datefield-accent);
+  background: var(--datefield-hover);
+}
+.datefield__toggle:focus-visible {
+  outline: 2px solid var(--datefield-accent);
+  outline-offset: 1px;
+}
+
+/* ---------------------------------------------------------------- popover */
+
+.datefield__popover {
+  position: fixed;
+  z-index: 1100; /* above app dialogs (1000) */
+  width: min(18.75rem, calc(100vw - 1rem));
+  box-sizing: border-box;
+  padding: .75rem .75rem .6rem;
+  border: 1px solid var(--datefield-line);
+  border-radius: .75rem;
+  background: var(--datefield-surface);
+  color: var(--datefield-ink);
+  box-shadow: var(--datefield-shadow);
+  font-size: .9rem;
+  animation: datefield-in 120ms ease-out;
+}
+@keyframes datefield-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .datefield__popover { animation: none; }
+}
+
+.datefield__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  min-height: 2.25rem;
+  margin-bottom: .45rem;
+  padding: 0 .1rem .5rem;
+  border-bottom: 1px solid var(--datefield-line);
+}
+.datefield__title {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .35rem .5rem;
+  margin-left: -.5rem;
+  border: 0;
+  border-radius: .4rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  font-size: .95rem;
+  cursor: pointer;
+}
+.datefield__title:hover { background: var(--datefield-hover); }
+.datefield__title--static { cursor: default; margin-left: 0; padding-left: 0; }
+.datefield__title--static:hover { background: transparent; }
+.datefield__chevron { color: var(--datefield-muted); }
+
+.datefield__nav { display: inline-flex; gap: .15rem; }
+.datefield__arrow {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: .4rem;
+  background: transparent;
+  color: var(--datefield-ink);
+  cursor: pointer;
+}
+.datefield__arrow:hover:not(:disabled) { background: var(--datefield-hover); }
+.datefield__arrow:disabled { color: var(--datefield-muted); opacity: .4; cursor: default; }
+
+/* ------------------------------------------------------------------ cells */
+
+.datefield__cell {
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: .4rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.datefield__cell:hover:not(:disabled):not(.is-selected) { background: var(--datefield-hover); }
+.datefield__cell:focus-visible {
+  outline: 2px solid var(--datefield-accent);
+  outline-offset: 1px;
+}
+.datefield__cell:disabled { opacity: .3; cursor: default; }
+.datefield__cell.is-selected {
+  background: var(--datefield-accent);
+  color: var(--datefield-on-accent);
+  font-weight: 650;
+}
+
+/* Days */
+.datefield__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.datefield__grid td { padding: 1px; text-align: center; }
+.datefield__weekday {
+  padding: .15rem 0 .35rem;
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--datefield-muted);
+  text-align: center;
+}
+.datefield__day {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 2.4rem;
+}
+.datefield__day.is-today:not(.is-selected) {
+  box-shadow: inset 0 0 0 1px var(--datefield-accent);
+  color: var(--datefield-accent);
+  font-weight: 650;
+}
+
+/* Months and years */
+.datefield__months,
+.datefield__years {
+  display: grid;
+  gap: .25rem;
+}
+.datefield__months { grid-template-columns: repeat(3, 1fr); }
+.datefield__years {
+  position: relative; /* offsetTop reference for scrolling to the focused year */
+  grid-template-columns: repeat(4, 1fr);
+  max-height: 15.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding-right: .15rem;
+}
+.datefield__cell--wide { height: 2.6rem; }
