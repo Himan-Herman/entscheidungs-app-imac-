@@ -51,6 +51,7 @@ function mapError(err) {
   if (
     msg === "validation_required" ||
     msg === "validation_name_required" ||
+    msg === "validation_date_of_birth_required" ||
     msg === "validation_invalid_date" ||
     msg === "validation_invalid_email"
   ) {
@@ -108,6 +109,34 @@ async function requirePracticeCapability(req, res, permission) {
 router.post("/", async (req, res) => {
   const ctx = await requirePracticeCapability(req, res, PERMISSIONS.PATIENT_LINKS_WRITE);
   if (!ctx) return undefined;
+
+  /*
+   * THE DATE OF BIRTH IS REQUIRED HERE, on the practice's own entry point.
+   *
+   * A name alone does not say who somebody is: two "Maria Müller" are routine in
+   * any practice, and the entry list is what staff look at to decide which
+   * record an invitation, a message or a document belongs to. Every practice
+   * already holds the date of birth (it is on the insurance card), so asking for
+   * it costs nothing and removes the one mix-up the list cannot resolve.
+   *
+   * Enforced at the route, not the service: the service also serves internal
+   * callers and the claim flow, where an entry may legitimately exist without
+   * one, and the schema column stays nullable for every record made before this.
+   * It remains a disambiguation signal, never an identity proof.
+   */
+  const rawDob = String(req.body?.dateOfBirth ?? "").trim();
+  if (!rawDob) {
+    const nameMissing = !String(req.body?.givenName ?? "").trim()
+      || !String(req.body?.familyName ?? "").trim();
+    return res.status(400).json({
+      ok: false,
+      error: nameMissing ? "validation_name_required" : "validation_date_of_birth_required",
+    });
+  }
+  const dob = new Date(rawDob);
+  if (Number.isNaN(dob.getTime()) || dob.getTime() > Date.now() || dob.getUTCFullYear() < 1900) {
+    return res.status(400).json({ ok: false, error: "validation_invalid_date" });
+  }
 
   try {
     const result = await createPracticePatientEntry({

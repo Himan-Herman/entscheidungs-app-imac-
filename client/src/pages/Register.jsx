@@ -1,16 +1,30 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import "../styles/Register.css";
 import { appFetch } from "../lib/apiBase.js";
+import { safeInternalPath } from "../lib/safeNavigation.js";
+import {
+  INVITATION_PATH,
+  readStashedInvitation,
+} from "../features/patientOnboarding/invitationLink.js";
 
 const pwdRule =
   /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_\-+=[{\]}:;,.?~]{8,}$/;
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { language } = useLanguage();
+
+  // Same rule as the login page: an internal path, or nothing.
+  const next = useMemo(
+    () => safeInternalPath(new URLSearchParams(location.search).get("next")),
+    [location.search],
+  );
+  const forInvitation = next === INVITATION_PATH;
+  const nextQuery = next ? `?next=${encodeURIComponent(next)}` : "";
 
   const [form, setForm] = useState({
     email: "",
@@ -29,6 +43,11 @@ export default function Register() {
   const [err, setErr] = useState("");
 
   const copy = useMemo(() => getMessages(language).register, [language]);
+  const inviteCopy = useMemo(
+    () => getMessages(language).patientOnboarding?.patient?.authReturn
+      || getMessages("de").patientOnboarding.patient.authReturn,
+    [language],
+  );
 
   function setField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -109,6 +128,15 @@ export default function Register() {
         },
       };
 
+      // Registering from an invitation: send its token along so the e-mail
+      // confirmation — which opens in a new tab — can bring the person back to
+      // it. Only the link token travels; a hand-typed code is short and on
+      // paper, and is simply entered again. The server checks and may drop it.
+      if (forInvitation) {
+        const stashed = readStashedInvitation();
+        if (stashed?.token) payload.invitation = { token: stashed.token };
+      }
+
       const res = await appFetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -130,13 +158,13 @@ export default function Register() {
 
       // Preview/Dev: Backend kann skip_verification liefern — dann keine „Check E-Mail“-Seite.
       if (data.skip_verification) {
-        navigate("/login", { replace: true });
+        navigate(`/login${nextQuery}`, { replace: true });
         return;
       }
 
       localStorage.setItem("pending_verification_email", payload.user.email);
       localStorage.setItem("pending_verification_user_id", data.user_id);
-      navigate("/check-email", { replace: true });
+      navigate(`/check-email${nextQuery}`, { replace: true });
     } catch (e2) {
       setErr(e2.message ?? copy.requestError);
     } finally {
@@ -157,6 +185,14 @@ export default function Register() {
         <h1 id="register-heading" className="h1">
           {copy.title}
         </h1>
+
+        {forInvitation && (
+          <div className="register-invitation-note" role="note" data-testid="register-invitation-note">
+            <strong>{inviteCopy.registerTitle}</strong>
+            <span>{inviteCopy.registerBody}</span>
+            <Link to={`/login${nextQuery}`}>{inviteCopy.haveAccount}</Link>
+          </div>
+        )}
 
         <p className="register-page__subtitle">{copy.subtitle}</p>
 
@@ -350,7 +386,7 @@ export default function Register() {
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => navigate("/")}
+              onClick={() => navigate(forInvitation ? INVITATION_PATH : "/")}
             >
               {copy.cancel}
             </button>

@@ -6,6 +6,7 @@
  *   - a neutral statement that an invitation exists
  *   - the secure link
  *   - when it expires
+ *   - how to accept it, in three plain steps
  *
  * WHAT IT MUST NEVER CONTAIN: any medical content, any diagnosis or reason for
  * treatment, the date of birth, the patient's name, the practice-internal chart
@@ -20,8 +21,15 @@
  * is visible without opening it — on a lock screen, in a notification, in a
  * shared mailbox list, over someone's shoulder. For a specialist practice the
  * name alone can imply a health condition, which is exactly the inference this
- * whole design avoids everywhere else. So the subject is neutral and the
- * practice is named in the body, one step further in.
+ * whole design avoids everywhere else. So the subject says only that "your
+ * practice" invites you, via MedScoutX — recognisable as genuine, and the same
+ * for every practice — and the practice is named in the body, one step further
+ * in.
+ *
+ * THE ADDRESS STAYS VISIBLE. The button is there because a patient on a phone
+ * should not have to aim at a long string; the full URL is printed right below
+ * it, so where the link goes can still be read before tapping — a button alone
+ * would be indistinguishable from phishing.
  *
  * The link carries the token in the FRAGMENT (`#token=`). A fragment is never
  * sent to a server, so the credential stays out of web-server logs, out of
@@ -32,11 +40,19 @@
 
 const COPY = {
   de: {
-    subject: () => "Ihre Einladung",
+    subject: () => "Einladung Ihrer Praxis über MedScoutX",
     greeting: "Guten Tag,",
     body: (practice) =>
       `${practice} möchte Sie über MedScoutX mit der Praxis verbinden.`,
+    button: "Einladung öffnen",
     action: "Einladung öffnen:",
+    linkFallback: "Falls der Knopf nicht funktioniert, öffnen Sie diese Adresse:",
+    stepsTitle: "So einfach geht es:",
+    steps: [
+      "Tippen Sie auf „Einladung öffnen“.",
+      "Melden Sie sich an – oder erstellen Sie ein Konto.",
+      "Tippen Sie auf „Verbinden“. Fertig.",
+    ],
     expiry: (days) =>
       `Der Link ist ${days} Tage gültig. Danach benötigen Sie eine neue Einladung Ihrer Praxis.`,
     control:
@@ -48,11 +64,19 @@ const COPY = {
     noReply: "Diese Nachricht wurde automatisch versendet. Bitte antworten Sie nicht darauf.",
   },
   en: {
-    subject: () => "Your invitation",
+    subject: () => "An invitation from your practice via MedScoutX",
     greeting: "Hello,",
     body: (practice) =>
       `${practice} would like to connect with you through MedScoutX.`,
+    button: "Open invitation",
     action: "Open the invitation:",
+    linkFallback: "If the button does not work, open this address:",
+    stepsTitle: "It only takes a moment:",
+    steps: [
+      "Tap “Open invitation”.",
+      "Sign in – or create an account.",
+      "Tap “Connect”. That's it.",
+    ],
     expiry: (days) =>
       `The link is valid for ${days} days. After that you will need a new invitation from your practice.`,
     control:
@@ -64,11 +88,19 @@ const COPY = {
     noReply: "This message was sent automatically. Please do not reply to it.",
   },
   fr: {
-    subject: () => "Votre invitation",
+    subject: () => "Invitation de votre cabinet via MedScoutX",
     greeting: "Bonjour,",
     body: (practice) =>
       `${practice} souhaite se connecter avec vous via MedScoutX.`,
+    button: "Ouvrir l'invitation",
     action: "Ouvrir l'invitation :",
+    linkFallback: "Si le bouton ne fonctionne pas, ouvrez cette adresse :",
+    stepsTitle: "C'est très simple :",
+    steps: [
+      "Touchez « Ouvrir l'invitation ».",
+      "Connectez-vous – ou créez un compte.",
+      "Touchez « Connecter ». C'est tout.",
+    ],
     expiry: (days) =>
       `Le lien est valable ${days} jours. Passé ce délai, vous aurez besoin d'une nouvelle invitation de votre cabinet.`,
     control:
@@ -80,11 +112,19 @@ const COPY = {
     noReply: "Ce message a été envoyé automatiquement. Merci de ne pas y répondre.",
   },
   it: {
-    subject: () => "Il suo invito",
+    subject: () => "Invito del suo studio tramite MedScoutX",
     greeting: "Buongiorno,",
     body: (practice) =>
       `${practice} desidera collegarsi con lei tramite MedScoutX.`,
+    button: "Apri l'invito",
     action: "Apra l'invito:",
+    linkFallback: "Se il pulsante non funziona, apra questo indirizzo:",
+    stepsTitle: "È semplicissimo:",
+    steps: [
+      "Tocchi «Apri l'invito».",
+      "Acceda – oppure crei un account.",
+      "Tocchi «Collega». Fatto.",
+    ],
     expiry: (days) =>
       `Il link è valido ${days} giorni. Successivamente le servirà un nuovo invito dal suo studio.`,
     control:
@@ -96,11 +136,19 @@ const COPY = {
     noReply: "Questo messaggio è stato inviato automaticamente. La preghiamo di non rispondere.",
   },
   es: {
-    subject: () => "Su invitación",
+    subject: () => "Invitación de su consulta a través de MedScoutX",
     greeting: "Hola:",
     body: (practice) =>
       `${practice} desea conectarse con usted a través de MedScoutX.`,
+    button: "Abrir la invitación",
     action: "Abrir la invitación:",
+    linkFallback: "Si el botón no funciona, abra esta dirección:",
+    stepsTitle: "Es muy sencillo:",
+    steps: [
+      "Toque «Abrir la invitación».",
+      "Inicie sesión o cree una cuenta.",
+      "Toque «Conectar». Listo.",
+    ],
     expiry: (days) =>
       `El enlace es válido durante ${days} días. Después necesitará una nueva invitación de su consulta.`,
     control:
@@ -112,11 +160,19 @@ const COPY = {
     noReply: "Este mensaje se ha enviado automáticamente. Por favor, no responda.",
   },
   ru: {
-    subject: () => "Ваше приглашение",
+    subject: () => "Приглашение от вашей практики через MedScoutX",
     greeting: "Здравствуйте,",
     body: (practice) =>
       `${practice} хочет установить с вами связь через MedScoutX.`,
+    button: "Открыть приглашение",
     action: "Открыть приглашение:",
+    linkFallback: "Если кнопка не работает, откройте этот адрес:",
+    stepsTitle: "Это очень просто:",
+    steps: [
+      "Нажмите «Открыть приглашение».",
+      "Войдите в систему или создайте учётную запись.",
+      "Нажмите «Подключить». Готово.",
+    ],
     expiry: (days) =>
       `Ссылка действительна ${days} дней. После этого вам понадобится новое приглашение от вашей практики.`,
     control:
@@ -141,14 +197,94 @@ function esc(value) {
     .replaceAll("'", "&#39;");
 }
 
+/*
+ * The HTML is table-based with inline styles: that is what renders the same in
+ * Outlook, Gmail and the iOS mail app. The colour pair (#0f766e on white, white
+ * on #0f766e) clears WCAG AA at body size. No images: a blocked image must not
+ * hide the only way in, and a remote image would be a read receipt.
+ */
+const C = {
+  page: "#f1f5f9",
+  card: "#ffffff",
+  text: "#0f172a",
+  muted: "#475569",
+  accent: "#0f766e",
+  line: "#e2e8f0",
+};
+const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+
+function renderHtml({ t, practice, link, expiresInDays, lang }) {
+  const steps = t.steps
+    .map(
+      (step, i) => `<tr>
+                  <td valign="top" style="padding:0 10px 8px 0;width:26px;">
+                    <div style="width:24px;height:24px;border-radius:12px;background:${C.accent};color:#ffffff;font:600 13px/24px ${FONT};text-align:center;">${i + 1}</div>
+                  </td>
+                  <td valign="top" style="padding:2px 0 8px 0;font:15px/1.5 ${FONT};color:${C.text};">${esc(step)}</td>
+                </tr>`,
+    )
+    .join("\n");
+
+  return `<!DOCTYPE html>
+<html lang="${esc(lang)}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${esc(t.subject())}</title>
+  </head>
+  <body style="margin:0;padding:0;background:${C.page};">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${C.page};padding:24px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:${C.card};border-radius:16px;border:1px solid ${C.line};">
+            <tr>
+              <td style="padding:20px 28px;border-bottom:1px solid ${C.line};font:700 18px/1.2 ${FONT};color:${C.accent};letter-spacing:.01em;">MedScoutX</td>
+            </tr>
+            <tr>
+              <td style="padding:28px 28px 8px 28px;font:16px/1.6 ${FONT};color:${C.text};">
+                <p style="margin:0 0 12px 0;">${esc(t.greeting)}</p>
+                <p style="margin:0 0 24px 0;font-size:18px;line-height:1.45;"><strong>${esc(t.body(practice))}</strong></p>
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 20px 0;">
+                  <tr>
+                    <td style="border-radius:999px;background:${C.accent};">
+                      <a href="${esc(link)}" style="display:inline-block;padding:14px 28px;font:600 17px/1.2 ${FONT};color:#ffffff;text-decoration:none;border-radius:999px;">${esc(t.button)}</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 4px 0;font-size:13px;color:${C.muted};">${esc(t.linkFallback)}</p>
+                <p style="margin:0 0 24px 0;font-size:13px;word-break:break-all;"><a href="${esc(link)}" style="color:${C.accent};">${esc(link)}</a></p>
+                <p style="margin:0 0 10px 0;font-weight:600;">${esc(t.stepsTitle)}</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 16px 0;">
+${steps}
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:16px 28px 24px 28px;border-top:1px solid ${C.line};font:14px/1.55 ${FONT};color:${C.muted};">
+                <p style="margin:0 0 8px 0;">${esc(t.expiry(expiresInDays))}</p>
+                <p style="margin:0 0 8px 0;">${esc(t.control)}</p>
+                <p style="margin:0 0 8px 0;">${esc(t.consent)}</p>
+                <p style="margin:0 0 8px 0;">${esc(t.ignore)}</p>
+                <p style="margin:12px 0 0 0;font-size:12px;">${esc(t.noReply)}</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
+}
+
 /**
  * @param {{ practiceName: string, link: string, expiresInDays: number,
  *           locale?: string|null }} args
  * @returns {{ subject: string, text: string, html: string }}
  */
 export function buildInvitationEmail({ practiceName, link, expiresInDays, locale }) {
-  const lang = String(locale || "").slice(0, 2).toLowerCase();
-  const t = COPY[lang] || COPY[FALLBACK];
+  const requested = String(locale || "").slice(0, 2).toLowerCase();
+  const lang = COPY[requested] ? requested : FALLBACK;
+  const t = COPY[lang];
   const practice = String(practiceName || "").trim();
 
   const lines = [
@@ -159,6 +295,9 @@ export function buildInvitationEmail({ practiceName, link, expiresInDays, locale
     t.action,
     link,
     "",
+    t.stepsTitle,
+    ...t.steps.map((step, i) => `${i + 1}. ${step}`),
+    "",
     t.expiry(expiresInDays),
     t.control,
     t.consent,
@@ -167,20 +306,11 @@ export function buildInvitationEmail({ practiceName, link, expiresInDays, locale
     t.noReply,
   ];
 
-  const html = [
-    `<p>${esc(t.greeting)}</p>`,
-    `<p>${esc(t.body(practice))}</p>`,
-    // The link text is the URL itself: a patient can read where it goes before
-    // clicking, and a masked label would be indistinguishable from phishing.
-    `<p>${esc(t.action)}<br><a href="${esc(link)}">${esc(link)}</a></p>`,
-    `<p>${esc(t.expiry(expiresInDays))}</p>`,
-    `<p>${esc(t.control)}</p>`,
-    `<p>${esc(t.consent)}</p>`,
-    `<p>${esc(t.ignore)}</p>`,
-    `<p><small>${esc(t.noReply)}</small></p>`,
-  ].join("\n");
-
-  return { subject: t.subject(), text: lines.join("\n"), html };
+  return {
+    subject: t.subject(),
+    text: lines.join("\n"),
+    html: renderHtml({ t, practice, link, expiresInDays, lang }),
+  };
 }
 
 /** Exposed so tests can assert every language is present and complete. */

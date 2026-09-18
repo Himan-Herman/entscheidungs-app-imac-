@@ -41,7 +41,11 @@ export default function AddPatientEntryDialog({ tx, onCancel, onCreate }) {
     const givenName = form.givenName.trim();
     const familyName = form.familyName.trim();
     if (!givenName || !familyName) { setError(tx.form.required); return; }
-    if (form.dateOfBirth && Number.isNaN(new Date(form.dateOfBirth).getTime())) {
+    // Required: two patients with the same name are routine, and the list is
+    // where staff decide which record an invitation belongs to.
+    if (!form.dateOfBirth) { setError(tx.form.dateOfBirthRequired); return; }
+    const dob = new Date(form.dateOfBirth);
+    if (Number.isNaN(dob.getTime()) || form.dateOfBirth > todayIso() || form.dateOfBirth < "1900-01-01") {
       setError(tx.form.invalidDate); return;
     }
     if (form.email && !form.email.includes("@")) { setError(tx.form.invalidEmail); return; }
@@ -52,7 +56,7 @@ export default function AddPatientEntryDialog({ tx, onCancel, onCreate }) {
       await onCreate({
         givenName,
         familyName,
-        dateOfBirth: form.dateOfBirth || null,
+        dateOfBirth: form.dateOfBirth,
         email: form.email.trim() || null,
         phone: form.phone.trim() || null,
         practiceRecordNumber: form.practiceRecordNumber.trim() || null,
@@ -62,6 +66,7 @@ export default function AddPatientEntryDialog({ tx, onCancel, onCreate }) {
       // already has; anything unexpected stays generic rather than leaking.
       const byCode = {
         validation_name_required: tx.form.required,
+        validation_date_of_birth_required: tx.form.dateOfBirthRequired,
         validation_invalid_date: tx.form.invalidDate,
         validation_invalid_email: tx.form.invalidEmail,
       };
@@ -101,9 +106,10 @@ export default function AddPatientEntryDialog({ tx, onCancel, onCreate }) {
               />
             </label>
             <label className="onboarding-field">
-              <span className="onboarding-field__label">{tx.form.dateOfBirth}</span>
+              <span className="onboarding-field__label">{tx.form.dateOfBirth} *</span>
               <input
-                className="onboarding-field__input" type="date"
+                className="onboarding-field__input" type="date" required aria-required="true"
+                min="1900-01-01" max={todayIso()}
                 value={form.dateOfBirth} onChange={set("dateOfBirth")}
                 aria-describedby="dob-hint"
               />
@@ -156,4 +162,11 @@ export default function AddPatientEntryDialog({ tx, onCancel, onCreate }) {
       </div>
     </div>
   );
+}
+
+/** Today as YYYY-MM-DD in local time — the `max` a birth date may take. */
+function todayIso() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }

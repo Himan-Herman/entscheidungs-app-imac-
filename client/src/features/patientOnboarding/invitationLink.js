@@ -33,6 +33,28 @@ export function readTokenFromHash(hash = window.location.hash) {
 }
 
 /**
+ * The invitation carried back through the e-mail confirmation, if any.
+ *
+ * Registering from an invitation sends a confirmation link that opens in a NEW
+ * tab, where the sessionStorage stash below does not exist. The server puts the
+ * token into that link's fragment (`#invitation=...`), the browser keeps it
+ * across the verify redirect, and the login page picks it up here. Same rule as
+ * above: fragment only, never a query parameter.
+ *
+ * @param {string} [hash]
+ * @returns {string|null}
+ */
+export function readCarriedInvitationFromHash(hash = window.location.hash) {
+  const raw = String(hash || "").replace(/^#/, "");
+  if (!raw) return null;
+  const token = new URLSearchParams(raw).get("invitation");
+  return token && token.trim() ? token.trim() : null;
+}
+
+/** Where the invitation page lives; the one place the auth pages return to. */
+export const INVITATION_PATH = "/patient-invitation";
+
+/**
  * Remove the fragment from the address bar without adding a history entry.
  *
  * Called once the token is held in memory, so it stops being visible on screen,

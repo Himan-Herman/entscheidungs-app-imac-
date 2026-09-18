@@ -345,3 +345,115 @@
     width: 100%;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Consent requests from a practice ("what may this practice see?").
+ *
+ * Each request carries its own checkboxes, each with the purpose spelled out
+ * beneath it — the one place a patient decides what a practice may see, so it
+ * has to be readable at arm's length. Nothing is pre-ticked (see the page).
+ * ------------------------------------------------------------------------- */
+.consent-request__list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.consent-request {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg, 16px);
+  background: var(--ms-color-surface);
+  scroll-margin-top: 5rem;
+}
+.consent-request--focused {
+  border-color: var(--ms-color-link);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ms-color-link) 18%, transparent);
+}
+.consent-request__title {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ms-color-text);
+}
+.consent-request__title:focus { outline: none; }
+.consent-request__title:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.consent-request__scopes {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  border: 0;
+}
+.consent-request__legend {
+  padding: 0;
+  font-weight: 600;
+  color: var(--ms-color-text);
+}
+.consent-request__hint {
+  margin: 0.25rem 0 0.5rem;
+  color: var(--ms-color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.consent-request__options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+@media (min-width: 40rem) {
+  .consent-request__options { grid-template-columns: 1fr 1fr; column-gap: 1rem; }
+}
+.consent-request__option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-height: 44px;
+  padding: 0.5rem 0.4rem;
+  border-radius: var(--ms-radius-md, 12px);
+  cursor: pointer;
+}
+.consent-request__option:hover {
+  background: color-mix(in srgb, var(--ms-color-link) 7%, transparent);
+}
+.consent-request__option input {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0.1rem 0 0;
+  accent-color: var(--ms-color-link);
+}
+.consent-request__option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.consent-request__option-name {
+  font-weight: 600;
+  color: var(--ms-color-text);
+}
+.consent-request__option-purpose {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--ms-color-text-muted);
+}
+.consent-request__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+.consent-request__done {
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--ms-color-success, #15803d);
+  border-radius: var(--ms-radius-md, 12px);
+  background: var(--ms-color-success-bg, rgba(22, 163, 74, 0.1));
+  color: var(--ms-color-text);
+}

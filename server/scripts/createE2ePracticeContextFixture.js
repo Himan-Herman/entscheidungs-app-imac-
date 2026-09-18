@@ -498,11 +498,18 @@ async function upsertErezeptWithMarker(linkId, patientUserId, issuedByUserId, na
     });
   }
 
+  // Required since the erezept_practice_attribution migration: every entry
+  // names its issuing practice, taken from the relationship it belongs to.
+  const { practiceProfileId } = await prisma.practicePatientLink.findUniqueOrThrow({
+    where: { id: linkId },
+    select: { practiceProfileId: true },
+  });
   return prisma.erezeptEntry.create({
     data: {
       patientUserId,
       issuedByUserId,
       linkId,
+      practiceProfileId,
       medicationName: name,
       tokenCode: `ERZ-${name}`,
       status: "issued",

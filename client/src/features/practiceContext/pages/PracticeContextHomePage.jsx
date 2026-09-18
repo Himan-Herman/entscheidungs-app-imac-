@@ -11,13 +11,35 @@ import { getMessages } from "../../../i18n/translations";
  * listed; the remaining practice-scoped areas move in as they are migrated.
  */
 export default function PracticeContextHomePage() {
-  const { linkId, isActiveRelationship } = usePracticeContext();
+  const { linkId, isActiveRelationship, relationshipStatus, practice } = usePracticeContext();
   const { language } = useLanguage();
   const t = getMessages(language).practiceContext || getMessages("en").practiceContext;
+
+  // Connected but nothing shared: every area below exists, but the practice
+  // cannot send anything into it yet. Said first, with the one action that
+  // changes it — otherwise each area just looks empty and nobody knows why.
+  const consentPending = relationshipStatus === "invited";
 
   return (
     <div className="practice-context">
       <h1 className="practice-context__title">{t.hubTitle}</h1>
+
+      {consentPending ? (
+        <section className="practice-context__pending" aria-labelledby="consent-pending-title">
+          <h2 id="consent-pending-title" className="practice-context__pending-title">
+            {t.consentPendingTitle}
+          </h2>
+          <p className="practice-context__pending-body">
+            {t.consentPendingBody.replace("{practice}", practice?.displayName || "")}
+          </p>
+          <Link
+            className="practice-context__pending-action"
+            to={`/patient/practice-links?request=${encodeURIComponent(linkId)}`}
+          >
+            {t.consentPendingAction}
+          </Link>
+        </section>
+      ) : null}
 
       {!isActiveRelationship ? (
         <p className="practice-context__notice" role="status">

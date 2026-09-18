@@ -18,6 +18,10 @@ import { patientContextLabel } from "../lib/patientContextLabel.js";
  */
 export default function PracticeCard({ context, t, href }) {
   const { practice, unreadCount, isActive } = context;
+  // Connected, but nothing shared yet: the practice cannot write to the patient
+  // until they choose what it may see. Said on the card, so the next step is
+  // visible from the list — not only once somebody opens the practice.
+  const consentPending = context.status === "invited";
   const name = practice?.displayName || t.unnamedPractice;
 
   const details = [practice?.specialty, practice?.city].filter(Boolean).join(" · ");
@@ -34,6 +38,7 @@ export default function PracticeCard({ context, t, href }) {
     practice?.specialty,
     practice?.city,
     unreadCount > 0 ? t.unreadAria.replace("{count}", String(unreadCount)) : null,
+    consentPending ? t.statusConsentPending : null,
     !isActive ? t.statusFormer : null,
   ]
     .filter(Boolean)
@@ -52,6 +57,11 @@ export default function PracticeCard({ context, t, href }) {
           <span className="practice-card__name">{name}</span>
           <span className="practice-card__for">{forWhom}</span>
           {details ? <span className="practice-card__details">{details}</span> : null}
+          {consentPending ? (
+            <span className="practice-card__status practice-card__status--pending">
+              {t.statusConsentPending}
+            </span>
+          ) : null}
           {!isActive ? (
             <span className="practice-card__status">{t.statusFormer}</span>
           ) : null}

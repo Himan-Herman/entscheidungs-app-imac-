@@ -834,3 +834,90 @@
   font-weight: 600;
   color: var(--ms-color-text);
 }
+
+/* ------------------------------------------------ page width (all scoped) */
+
+/* The context bar stays a full-width band; its content lines up with the page
+   below it instead of hugging the window edge. */
+.practice-context-bar {
+  padding-inline: max(1rem, calc((100% - 56rem) / 2 + 1rem));
+}
+.practice-scoped__body {
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+/* --------------------------------------------- loading / not found / error */
+
+.practice-context__state {
+  max-width: 40rem;
+  margin: 2.5rem auto;
+  padding: 1.5rem;
+  border: 1px solid var(--ms-color-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-color-surface);
+  color: var(--ms-color-text-secondary);
+  line-height: 1.55;
+}
+.practice-context__state-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--ms-color-text);
+}
+.practice-context__state p { margin: 0; }
+.practice-context__state-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--ms-color-link);
+}
+.practice-context__state-back:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------- connected, nothing shared yet */
+
+.practice-context__pending {
+  margin: var(--ms-space-4) 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ms-color-border);
+  border-left: 4px solid var(--ms-color-link);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-color-surface);
+}
+.practice-context__pending-title {
+  margin: 0 0 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ms-color-text);
+}
+.practice-context__pending-body {
+  margin: 0 0 0.85rem;
+  color: var(--ms-color-text-secondary);
+  line-height: 1.55;
+}
+/* An action, so it looks like one: a pill, not a line of blue text. The global
+   link colour does not reach it (see design-system.css), so it sets its own. */
+.practice-context__pending-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--ms-radius-pill, 999px);
+  background: var(--ms-color-link);
+  color: var(--ms-color-surface);
+  font-weight: 600;
+}
+.practice-context__pending-action:focus-visible {
+  outline: 3px solid var(--ms-color-focus-ring);
+  outline-offset: 2px;
+}
+
+.practice-card__status--pending {
+  color: var(--ms-color-link);
+  font-weight: 600;
+}

@@ -56,8 +56,10 @@ export default {
     "The connection exists. Nothing has been shared yet. Choose which areas you want to share with this practice.",
   requestFrom: "{practice} is waiting for you to choose what to share.",
   acceptScopesHint:
-    "You share exactly what you tick below under “Which areas would you like to share?”. Nothing is preselected.",
-  acceptButton: "Accept",
+    "Tick what the practice may see. Nothing is pre-selected, and you can withdraw a permission at any time.",
+  acceptButton: "Grant permission",
+  requestScopesLegend: "What may {practice} see?",
+  openPractice: "Go to practice",
   declineButton: "Decline",
   acceptedMsg: "Connection activated.",
   declinedMsg: "Request declined.",

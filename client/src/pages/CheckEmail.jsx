@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import GlobalLanguageSelector from "../components/language/GlobalLanguageSelector";
 import { PATIENT_UI_SELECTABLE_LOCALE_CODES } from "../i18n/localeConfig";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getMessages } from "../i18n/translations";
 import { useAuthFlowPalette } from "../ThemeMode";
 import { appFetch } from "../lib/apiBase.js";
+import { INVITATION_PATH } from "../features/patientOnboarding/invitationLink.js";
 
 export default function CheckEmail() {
   const [msg, setMsg] = useState("");
@@ -16,6 +17,16 @@ export default function CheckEmail() {
   const copy = useMemo(() => getMessages(language).checkEmail, [language]);
   const legal = useMemo(() => getMessages(language).footer, [language]);
   const navCopy = useMemo(() => getMessages(language).header, [language]);
+  const inviteCopy = useMemo(
+    () => getMessages(language).patientOnboarding?.patient?.authReturn
+      || getMessages("de").patientOnboarding.patient.authReturn,
+    [language],
+  );
+  const location = useLocation();
+  // Only a flag for the wording below; nothing navigates on it here. The way
+  // back is carried by the confirmation link itself (see invitationCarry.js).
+  const forInvitation =
+    new URLSearchParams(location.search).get("next") === INVITATION_PATH;
 
   async function resend() {
     const email = localStorage.getItem("pending_verification_email");
@@ -146,6 +157,25 @@ export default function CheckEmail() {
         >
           <strong>{copy.tip}</strong> {copy.tipText}
         </div>
+
+        {forInvitation && (
+          <div
+            role="note"
+            data-testid="check-email-invitation-note"
+            style={{
+              marginBottom: 18,
+              padding: "10px 12px",
+              borderRadius: 12,
+              border: `1px solid ${p.linkAccent}`,
+              fontSize: "13px",
+              lineHeight: 1.6,
+              color: p.subtitle,
+            }}
+          >
+            <strong style={{ color: p.title }}>{inviteCopy.checkEmailTitle}</strong>{" "}
+            {inviteCopy.checkEmailBody}
+          </div>
+        )}
 
         <button
           type="button"

@@ -35,17 +35,24 @@ test("there is no select-all shortcut", () => {
     "a select-all path exists — consent must stay item by item");
 });
 
-test("both submit paths refuse an empty selection", () => {
-  // Two places send scopes: accepting a practice's link, and minting a connect
-  // code. Both must refuse, and both must refuse in the handler — a disabled
-  // button alone is a hint, not a guarantee.
-  const guards = PAGE.match(/if \(scopes\.length === 0\) \{/g) || [];
-  assert.equal(guards.length, 2, `expected a guard in both handlers, found ${guards.length}`);
+/*
+ * Two paths send scopes, and since the request path got its own checkboxes they
+ * no longer share one variable:
+ *   - accepting a practice's request: `chosen`, that request's own selection
+ *     (`requestScopes[link.id]`);
+ *   - minting a connect code: `scopes`.
+ * Each is asserted on its own terms, and neither may be weaker than before.
+ */
+
+test("both submit paths refuse an empty selection — in the handler", () => {
+  // A disabled button alone is a hint, not a guarantee.
+  assert.match(PAGE, /if \(chosen\.length === 0\) \{/, "accepting a request has no empty-selection guard");
+  assert.match(PAGE, /if \(scopes\.length === 0\) \{/, "minting a code has no empty-selection guard");
 });
 
 test("both submit buttons are disabled while nothing is selected", () => {
   assert.match(
-    PAGE, /disabled=\{busyId === link\.id \|\| scopes\.length === 0\}/,
+    PAGE, /disabled=\{busy \|\| chosen\.length === 0\}/,
     "the accept button can be pressed with no scope selected",
   );
   assert.match(
@@ -55,14 +62,39 @@ test("both submit buttons are disabled while nothing is selected", () => {
 });
 
 test("the submitted scopes are the state, never a substituted default", () => {
-  // `scopes` goes to the server verbatim. A `scopes.length ? scopes : SOMETHING`
-  // anywhere on these calls would reintroduce an unchosen consent.
-  assert.match(PAGE, /acceptPatientLinkRequest\(link\.id, scopes\)/);
+  assert.match(PAGE, /acceptPatientLinkRequest\(link\.id, chosen\)/);
   assert.match(PAGE, /createPatientConnectCode\(scopes\)/);
+  // The ONLY fallback allowed for a request's selection is the empty list —
+  // which the guard above then refuses. Anything else would be a consent
+  // nobody gave.
+  const reads = PAGE.match(/requestScopes\[link\.id\]\s*\|\|\s*[^;\n]+/g) || [];
+  assert.ok(reads.length >= 1, "the request selection is no longer read where expected");
+  for (const r of reads) {
+    assert.match(r, /\|\|\s*\[\]\s*$/, `a request selection falls back to something other than []: ${r}`);
+  }
   assert.equal(
-    /scopes\.length\s*(\?|\|\|)\s*[A-Za-z[]/.test(PAGE), false,
+    /(scopes|chosen)\.length\s*(\?|\|\|)\s*[A-Za-z[]/.test(PAGE), false,
     "a fallback substitutes scopes at submit time",
   );
+});
+
+test("each request starts with nothing ticked, and never borrows another selection", () => {
+  // The per-request map starts empty: no request has any scope until the
+  // patient ticks one ON THAT CARD.
+  assert.match(PAGE, /const \[requestScopes, setRequestScopes\] = useState\(\{\}\);/);
+  // Accepting reads the request's own selection, not the connect-code one.
+  const handler = PAGE.slice(PAGE.indexOf("async function handleAcceptRequest"));
+  const body = handler.slice(0, handler.indexOf("async function handleDeclineRequest"));
+  assert.equal(/\bscopes\b/.test(body.replace(/requestScopes|setRequestScopes/g, "")), false,
+    "accepting a request still reads the connect-code selection");
+});
+
+test("a request's toggle adds and removes one scope at a time", () => {
+  const toggle = PAGE.slice(PAGE.indexOf("function toggleRequestScope"));
+  const body = toggle.slice(0, toggle.indexOf("\n  }\n") + 4);
+  assert.ok(body.includes("current.includes(scope)"), "toggle no longer inspects the current selection");
+  assert.ok(body.includes("filter") && body.includes("[...current, scope]"),
+    "toggle should remove on second click and append exactly one on first");
 });
 
 test("toggling adds and removes one scope at a time", () => {

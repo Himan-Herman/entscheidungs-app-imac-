@@ -9,6 +9,13 @@ import {
   USER_MODES,
 } from "../utils/userMode.js";
 import { appFetch } from "../lib/apiBase.js";
+import { safeInternalPath } from "../lib/safeNavigation.js";
+import {
+  INVITATION_PATH,
+  clearTokenFromHash,
+  readCarriedInvitationFromHash,
+  stashInvitation,
+} from "../features/patientOnboarding/invitationLink.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -24,6 +31,32 @@ export default function Login() {
   const [resetStatus, setResetStatus] = useState(null);
 
   const copy = useMemo(() => getMessages(language).login, [language]);
+  const inviteCopy = useMemo(
+    () => getMessages(language).patientOnboarding?.patient?.authReturn
+      || getMessages("de").patientOnboarding.patient.authReturn,
+    [language],
+  );
+
+  /*
+   * Where to continue after signing in. Only an internal path is honoured —
+   * anything else (another origin, `//host`, `javascript:`) is dropped, so this
+   * parameter cannot turn the login page into a redirect to somewhere else.
+   * Without it, the page keeps its old behaviour.
+   */
+  const next = useMemo(
+    () => safeInternalPath(new URLSearchParams(location.search).get("next")),
+    [location.search],
+  );
+  const forInvitation = next === INVITATION_PATH;
+
+  // An invitation carried back through the e-mail confirmation (see
+  // invitationLink.js). Held per tab, and out of the address bar at once.
+  useEffect(() => {
+    const carried = readCarriedInvitationFromHash();
+    if (!carried) return;
+    stashInvitation({ token: carried, code: null });
+    clearTokenFromHash();
+  }, []);
 
   const [sessionExpiredBanner, setSessionExpiredBanner] = useState(false);
 
@@ -57,7 +90,7 @@ export default function Login() {
           email.trim().toLowerCase()
         );
         setError(copy.emailFirst);
-        navigate("/check-email");
+        navigate(next ? `/check-email?next=${encodeURIComponent(next)}` : "/check-email");
         return;
       }
 
@@ -80,7 +113,11 @@ export default function Login() {
         /* ignore */
       }
 
-      navigate("/intro", { replace: true });
+      // Accepting an invitation is something a patient does; the header and
+      // the pages after it should already speak to them as one.
+      if (forInvitation) writeUserMode(USER_MODES.PATIENT);
+
+      navigate(next || "/intro", { replace: true });
     } catch (err) {
       setError(err.message || copy.loginError);
     } finally {
@@ -261,6 +298,29 @@ export default function Login() {
           {copy.subtitle}
         </p>
 
+        {forInvitation && (
+          // Why the person is here at all: they came from an invitation, and it
+          // will be waiting for them. Without this the page reads like any
+          // other login and the invitation seems to have vanished.
+          <div
+            role="note"
+            data-testid="login-invitation-note"
+            style={{
+              margin: "0 0 14px 0",
+              padding: "12px 14px",
+              borderRadius: 14,
+              border: `1px solid ${p.linkAccent}`,
+              backgroundColor: p.badgeBg,
+              color: p.title,
+            }}
+          >
+            <strong style={{ display: "block", fontSize: 14, marginBottom: 2 }}>
+              {inviteCopy.loginTitle}
+            </strong>
+            <span style={{ fontSize: 13, color: p.subtitle }}>{inviteCopy.loginBody}</span>
+          </div>
+        )}
+
         {renderVerifyMessage()}
         {renderResetMessage()}
         {renderSessionExpiredMessage()}
@@ -282,6 +342,7 @@ export default function Login() {
 
         <form onSubmit={handleLogin} style={{ marginTop: 8 }}>
           <label
+            htmlFor="login-email"
             style={{
               display: "block",
               fontSize: 13,
@@ -293,7 +354,9 @@ export default function Login() {
             {copy.email}
           </label>
           <input
+            id="login-email"
             type="email"
+            autoComplete="email"
             placeholder={copy.emailPlaceholder}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -313,6 +376,7 @@ export default function Login() {
           />
 
           <label
+            htmlFor="login-password"
             style={{
               display: "block",
               fontSize: 13,
@@ -324,7 +388,9 @@ export default function Login() {
             {copy.password}
           </label>
           <input
+            id="login-password"
             type="password"
+            autoComplete="current-password"
             placeholder={copy.passwordPlaceholder}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -400,7 +466,7 @@ export default function Login() {
           <span>
             {copy.noAccount}{" "}
             <Link
-              to="/register"
+              to={next ? `/register?next=${encodeURIComponent(next)}` : "/register"}
               style={{ color: p.linkAccent, textDecoration: "none" }}
             >
               {copy.register}

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { formatUiDateTime } from "../../../i18n/intlLocale.js";
@@ -15,6 +15,10 @@ import {
 import PracticeBrandingBar from "../../../components/practice/PracticeBrandingBar.jsx";
 import { practiceDisplayLabel } from "../../../utils/groupByPracticeBranding.js";
 import "../../../styles/PatientInboxPage.css";
+// The patient-threads__btn buttons live here. Every other page that uses them
+// imports it; this one did not, so its buttons were only styled if the
+// messages page happened to have been opened first in the same session.
+import "../../../styles/PatientThreadsPage.css";
 
 function statusLabel(status, t) {
   const map = {
@@ -73,6 +77,20 @@ export default function PatientPracticeLinksPage() {
   const [error, setError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
   const [busyId, setBusyId] = useState("");
+
+  // --- Incoming practice requests (Fall A) ---
+  // Each request has ITS OWN selection. It used to borrow the connect-code
+  // checkboxes further down the page, so "accept" stayed disabled until the
+  // patient ticked boxes in an unrelated section they had no reason to find.
+  // Nothing is pre-selected here either, for the reason given above.
+  const [requestScopes, setRequestScopes] = useState({}); // linkId -> string[]
+  const [requestFeedback, setRequestFeedback] = useState(null); // { linkId, kind, text }
+  const location = useLocation();
+  const focusRequestId = useMemo(
+    () => new URLSearchParams(location.search).get("request") || "",
+    [location.search],
+  );
+  const focusedRef = useRef(null);
 
   // --- Patient-generated connection code (Phase 2) ---
   const [scopes, setScopes] = useState(DEFAULT_CONNECT_SCOPES);
@@ -233,25 +251,47 @@ export default function PatientPracticeLinksPage() {
   }
 
   // Fall A — incoming practice-initiated link requests (status "invited").
+  function toggleRequestScope(linkId, scope) {
+    setRequestScopes((prev) => {
+      const current = prev[linkId] || [];
+      return {
+        ...prev,
+        [linkId]: current.includes(scope)
+          ? current.filter((s) => s !== scope)
+          : [...current, scope],
+      };
+    });
+  }
+
   async function handleAcceptRequest(link) {
     setError("");
     setStatusMsg("");
-    if (scopes.length === 0) {
-      setError(tc.noScopeError);
+    setRequestFeedback(null);
+    // Exactly what was ticked on THIS card reaches the server — no default, no
+    // fallback. The button is disabled with nothing ticked; this is the guard
+    // behind it.
+    const chosen = requestScopes[link.id] || [];
+    if (chosen.length === 0) {
+      setRequestFeedback({ linkId: link.id, kind: "error", text: tc.noScopeError });
       return;
     }
     setBusyId(link.id);
     try {
-      const { res, data } = await acceptPatientLinkRequest(link.id, scopes);
+      const { res, data } = await acceptPatientLinkRequest(link.id, chosen);
       if (!res.ok || !data.ok) {
-        setError(t.acceptError);
+        setRequestFeedback({ linkId: link.id, kind: "error", text: t.acceptError });
         return;
       }
-      setStatusMsg(t.acceptedMsg);
+      setRequestFeedback({ linkId: link.id, kind: "ok", text: t.acceptedMsg });
+      setRequestScopes((prev) => {
+        const next = { ...prev };
+        delete next[link.id];
+        return next;
+      });
       await load();
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
-      setError(t.acceptError);
+      setRequestFeedback({ linkId: link.id, kind: "error", text: t.acceptError });
     } finally {
       setBusyId("");
     }
@@ -280,6 +320,17 @@ export default function PatientPracticeLinksPage() {
   const incomingRequests = links.filter((l) => l.status === "invited");
   const activeLinks = links.filter((l) => l.status === "active");
 
+  // Arriving from "Choose permissions" for one practice: bring that request
+  // into view and put focus on it, instead of leaving the patient to scroll.
+  useEffect(() => {
+    if (!focusRequestId || loading) return;
+    const el = focusedRef.current;
+    if (!el) return;
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    el.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+    el.focus({ preventScroll: true });
+  }, [focusRequestId, loading, incomingRequests.length]);
+
   return (
     <div className="patient-inbox">
       <Link className="patient-inbox__back" to="/patient">
@@ -300,23 +351,71 @@ export default function PatientPracticeLinksPage() {
             {t.requestsHeading}
           </h2>
           <p className="patient-inbox__muted">{t.requestsIntro}</p>
-          <ul className="patient-inbox__list" style={{ listStyle: "none", padding: 0, margin: "0.75rem 0 0" }}>
+          <ul className="consent-request__list">
             {incomingRequests.map((link) => {
               const practiceName = practiceDisplayLabel(link.practice) || t.notProvided;
+              const chosen = requestScopes[link.id] || [];
+              const busy = busyId === link.id;
+              const isFocused = link.id === focusRequestId;
+              const headingId = `consent-request-${link.id}`;
               return (
-                <li key={link.id} className="patient-inbox__item" style={{ padding: "0.75rem", marginTop: "0.5rem" }}>
+                <li key={link.id} className={`consent-request${isFocused ? " consent-request--focused" : ""}`}>
                   <PracticeBrandingBar branding={link.practice} compact />
-                  <p className="patient-inbox__item-title">
+                  <h3
+                    id={headingId}
+                    className="consent-request__title"
+                    tabIndex={-1}
+                    ref={isFocused ? focusedRef : undefined}
+                  >
                     {t.requestFrom.replace("{practice}", practiceName)}
-                  </p>
-                  <p className="patient-inbox__muted" style={{ marginTop: "0.25rem" }}>
-                    {t.acceptScopesHint}
-                  </p>
-                  <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                  </h3>
+                  <fieldset className="consent-request__scopes" aria-describedby={`${headingId}-hint`}>
+                    <legend className="consent-request__legend">
+                      {t.requestScopesLegend.replace("{practice}", practiceName)}
+                    </legend>
+                    <p className="consent-request__hint" id={`${headingId}-hint`}>{t.acceptScopesHint}</p>
+                    <ul className="consent-request__options">
+                      {CONNECT_SCOPE_OPTIONS.map((option) => {
+                        const inputId = `${headingId}-${option.scope}`;
+                        const purpose = tConsents.purposes?.[option.typeKey];
+                        return (
+                          <li key={option.scope}>
+                            <label className="consent-request__option" htmlFor={inputId}>
+                              <input
+                                id={inputId}
+                                type="checkbox"
+                                checked={chosen.includes(option.scope)}
+                                onChange={() => toggleRequestScope(link.id, option.scope)}
+                                disabled={busy}
+                              />
+                              <span className="consent-request__option-text">
+                                <span className="consent-request__option-name">{scopeLabel(option)}</span>
+                                {purpose ? (
+                                  <span className="consent-request__option-purpose">{purpose}</span>
+                                ) : null}
+                              </span>
+                            </label>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </fieldset>
+
+                  {requestFeedback?.linkId === link.id ? (
+                    <p
+                      className={requestFeedback.kind === "error" ? "patient-inbox__error" : "patient-inbox__muted"}
+                      role={requestFeedback.kind === "error" ? "alert" : "status"}
+                    >
+                      {requestFeedback.text}
+                    </p>
+                  ) : null}
+
+                  <div className="consent-request__actions">
                     <button
                       type="button"
                       className="patient-threads__btn patient-threads__btn--primary"
-                      disabled={busyId === link.id || scopes.length === 0}
+                      disabled={busy || chosen.length === 0}
+                      aria-busy={busy}
                       onClick={() => void handleAcceptRequest(link)}
                     >
                       {t.acceptButton}
@@ -324,7 +423,7 @@ export default function PatientPracticeLinksPage() {
                     <button
                       type="button"
                       className="patient-threads__btn patient-threads__btn--secondary"
-                      disabled={busyId === link.id}
+                      disabled={busy}
                       onClick={() => void handleDeclineRequest(link)}
                     >
                       {t.declineButton}
@@ -335,6 +434,17 @@ export default function PatientPracticeLinksPage() {
             })}
           </ul>
         </section>
+      ) : null}
+
+      {/* Accepted a moment ago: the request has moved down into the active
+          list, so the confirmation stays up here where the patient's eyes are. */}
+      {requestFeedback?.kind === "ok" && !incomingRequests.some((l) => l.id === requestFeedback.linkId) ? (
+        <p className="consent-request__done" role="status">
+          {requestFeedback.text}{" "}
+          <Link to={`/patient/practice/${encodeURIComponent(requestFeedback.linkId)}`}>
+            {t.openPractice}
+          </Link>
+        </p>
       ) : null}
 
       <section

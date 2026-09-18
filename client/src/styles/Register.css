@@ -567,3 +567,53 @@
 
 /* Icons*/
 
+
+/* ========== Einladungshinweis ==========
+   Shown only when the person arrived from a practice invitation: why they are
+   registering, that the invitation will be waiting, and the way back for
+   somebody who already has an account. Teal, not the red of the alert bar —
+   this is orientation, not a warning. */
+.register-page .register-invitation-note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0 0 1.4rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(45, 212, 191, 0.45);
+  background: rgba(20, 184, 166, 0.1);
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.register-page .register-invitation-note strong {
+  color: #f8fafc;
+  font-size: 0.95rem;
+}
+.register-page .register-invitation-note a {
+  align-self: flex-start;
+  margin-top: 0.2rem;
+  color: #5eead4;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.register-page .register-invitation-note a:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+:root[data-theme="light"] .register-page .register-invitation-note {
+  border-color: rgba(15, 118, 110, 0.35);
+  background: rgba(15, 118, 110, 0.07);
+  color: #334155;
+}
+:root[data-theme="light"] .register-page .register-invitation-note strong {
+  color: #0f172a;
+}
+:root[data-theme="light"] .register-page .register-invitation-note a {
+  color: #0f766e;
+}
+:root[data-theme="light"] .register-page .register-invitation-note a:focus-visible {
+  outline-color: #0f766e;
+}

@@ -33,7 +33,8 @@ export default {
       givenName: "Vorname",
       familyName: "Nachname",
       dateOfBirth: "Geburtsdatum",
-      dateOfBirthHint: "Optional. Hilft nur, Verwechslungen zu vermeiden.",
+      dateOfBirthHint: "Hilft, Verwechslungen bei gleichem Namen zu vermeiden.",
+      dateOfBirthRequired: "Bitte geben Sie das Geburtsdatum an.",
       email: "E-Mail",
       emailHint: "Optional. Nur für den Versand, keine Identitätsprüfung.",
       phone: "Telefon",
@@ -137,16 +138,21 @@ export default {
 
   patient: {
     title: "Einladung Ihrer Praxis",
+    heading: "{practice} möchte sich mit Ihnen verbinden",
     loading: "Einladung wird geprüft…",
     invitedBy: "Sie wurden eingeladen von",
     invalid: {
       title: "Diese Einladung ist nicht mehr gültig",
       body:
         "Der Link oder Code ist abgelaufen, wurde bereits verwendet oder zurückgezogen. Bitte wenden Sie sich an Ihre Praxis für eine neue Einladung.",
+      memberHint:
+        "Gehört dieses Konto zum Team der einladenden Praxis? Dann kann es die Einladung nicht annehmen. Öffnen Sie den Link bitte mit dem Konto der Patientin oder des Patienten.",
+      toStart: "Zur Startseite",
     },
     noCredential: {
       title: "Keine Einladung erkannt",
-      body: "Öffnen Sie den Link Ihrer Praxis, oder geben Sie den Code ein, den Sie erhalten haben.",
+      body:
+        "Öffnen Sie den Link aus der E-Mail Ihrer Praxis noch einmal – oder geben Sie den Code ein, den Sie in der Praxis erhalten haben.",
     },
     manualCode: {
       label: "Code eingeben",
@@ -156,38 +162,54 @@ export default {
       checking: "Wird geprüft…",
     },
     auth: {
-      title: "Melden Sie sich an, um fortzufahren",
-      body:
-        "Zum Verbinden brauchen Sie ein MedScoutX-Konto. Ihre Einladung bleibt in diesem Browser-Tab erhalten.",
+      title: "Wie möchten Sie fortfahren?",
+      body: "Nach der Anmeldung kommen Sie automatisch hierher zurück.",
+      loginLead: "Ich habe schon ein MedScoutX-Konto",
       login: "Anmelden",
+      registerLead: "Ich bin neu bei MedScoutX",
       register: "Konto erstellen",
     },
+    account: {
+      label: "Sie verbinden als",
+      loading: "Konto wird geladen…",
+      switch: "Anderes Konto verwenden",
+    },
     subject: {
-      title: "Wen möchten Sie mit dieser Praxis verbinden?",
+      title: "Für wen gilt die Verbindung?",
       hint: "Sie können die Verbindung für sich selbst oder für eine von Ihnen betreute Person herstellen.",
       self: "Mich selbst",
       selfHint: "Die Verbindung gilt für Ihr eigenes Konto.",
       profileGroup: "Von mir betreute Personen",
-      noProfiles:
-        "Sie haben noch keine weiteren Personen angelegt. Die Verbindung gilt daher für Sie selbst.",
       loadError: "Ihre Profile konnten nicht geladen werden.",
     },
     connect: {
-      button: "Mit Praxis verbinden",
+      button: "Verbinden",
       working: "Wird verbunden…",
       hint:
-        "Damit stellen Sie nur die Verbindung her. Welche Daten die Praxis sehen darf, entscheiden Sie danach.",
+        "Die Praxis sieht dadurch noch keine Ihrer Gesundheitsdaten. Was sie sehen darf, entscheiden Sie im nächsten Schritt.",
     },
     success: {
-      title: "Verbindung hergestellt",
-      body: "Ihr Konto ist jetzt mit {practice} verbunden.",
-      consentNext: "Als Nächstes: Freigaben festlegen",
+      title: "Sie sind jetzt verbunden",
+      body: "{practice} finden Sie ab sofort unter „Meine Praxen“.",
+      consentNext: "Nächster Schritt: Freigaben festlegen",
       consentHint:
-        "Bisher wurden keine Daten freigegeben. Legen Sie jetzt fest, was die Praxis sehen darf.",
+        "Bisher haben Sie nichts freigegeben. Legen Sie fest, was die Praxis sehen darf – zum Beispiel Nachrichten. Das können Sie auch später tun.",
       toConsent: "Freigaben festlegen",
       alreadyActive:
         "Für diese Praxis bestehen bereits Freigaben. Sie können sie jederzeit ändern.",
       toPractice: "Zur Praxis",
+      toOverview: "Meine Praxen",
+    },
+    authReturn: {
+      loginTitle: "Einladung Ihrer Praxis",
+      loginBody: "Melden Sie sich an. Danach geht es direkt zurück zu Ihrer Einladung.",
+      registerTitle: "Einladung Ihrer Praxis",
+      registerBody:
+        "Erstellen Sie Ihr Konto. Sobald Sie Ihre E-Mail-Adresse bestätigt haben, geht es direkt mit Ihrer Einladung weiter.",
+      haveAccount: "Sie haben schon ein Konto? Anmelden",
+      checkEmailTitle: "Ihre Einladung wartet.",
+      checkEmailBody:
+        "Tippen Sie auf den Link in der E-Mail und melden Sie sich an – danach geht es direkt mit Ihrer Einladung weiter.",
     },
     errors: {
       subjectMismatch:

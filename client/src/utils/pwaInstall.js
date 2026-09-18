@@ -110,3 +110,25 @@ export function shouldShowInstallHint() {
 
   return true;
 }
+
+/**
+ * Is the person in the middle of accepting a practice invitation?
+ *
+ * That is a one-time, focused task — often done on a phone, by somebody who
+ * rarely uses apps — and the install hint is a dialog that slides over the
+ * page's only button and takes the keyboard focus. On this path it waits.
+ * It is postponed, not dismissed: nothing is written, and it can appear on any
+ * later page as before.
+ *
+ * The sign-in, registration and check-your-inbox pages count only while they
+ * are part of the invitation (`next=/patient-invitation`); anywhere else they
+ * behave exactly as they always did.
+ *
+ * @param {string} pathname
+ * @param {string} [search]
+ */
+export function isInvitationTaskRoute(pathname, search = "") {
+  if (pathname === "/patient-invitation") return true;
+  if (!["/login", "/register", "/check-email"].includes(pathname)) return false;
+  return new URLSearchParams(search).get("next") === "/patient-invitation";
+}

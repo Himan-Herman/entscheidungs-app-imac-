@@ -401,6 +401,33 @@ test("create writes an entry and nothing else", async () => {
   assert.equal("practicePatientLinkId" in body.entry, false);
 });
 
+test("an entry without a date of birth is refused, and says so", async () => {
+  // Two "Anna Müller" are routine; the date of birth is what tells staff apart
+  // which record an invitation belongs to. Every practice holds it already.
+  for (const dateOfBirth of [undefined, null, "", "   "]) {
+    const res = await call("POST", "/api/practice/patient-entries",
+      { body: { givenName: "Anna", familyName: "Müller", dateOfBirth, practiceId: PRACTICE_A } });
+    assert.equal(res.status, 400);
+    assert.equal(res.body.error, "validation_date_of_birth_required");
+  }
+  // A missing name is still reported as the missing name, not as the date.
+  const nameless = await call("POST", "/api/practice/patient-entries",
+    { body: { givenName: "Anna", practiceId: PRACTICE_A } });
+  assert.equal(nameless.body.error, "validation_name_required");
+  assert.equal(entries.length, 0, "a refused entry was stored");
+});
+
+test("an impossible date of birth is refused", async () => {
+  const tomorrow = new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  for (const dateOfBirth of [tomorrow, "1850-01-01", "not-a-date"]) {
+    const res = await call("POST", "/api/practice/patient-entries",
+      { body: { givenName: "Anna", familyName: "Müller", dateOfBirth, practiceId: PRACTICE_A } });
+    assert.equal(res.status, 400, `accepted ${dateOfBirth}`);
+    assert.equal(res.body.error, "validation_invalid_date");
+  }
+  assert.equal(entries.length, 0);
+});
+
 test("a nameless entry is refused", async () => {
   for (const body of [{}, { givenName: "Anna" }, { familyName: "Müller" }, { givenName: " ", familyName: " " }]) {
     const res = await call("POST", "/api/practice/patient-entries",

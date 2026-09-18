@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import OfflineBanner from "./components/OfflineBanner.jsx";
 import PwaInstallHint from "./components/PwaInstallHint.jsx";
+import { isInvitationTaskRoute } from "./utils/pwaInstall.js";
 import AppBottomNav, { shouldShowMobileAppNav } from "./components/AppBottomNav.jsx";
 import MedaWidget, { shouldShowMedaWidget } from "./features/meda/components/MedaWidget.jsx";
 import "./styles/layout.css";
@@ -42,7 +43,12 @@ export default function Layout() {
     >
       {!hideHeader && <Header />}
       {!hideHeader && <OfflineBanner />}
-      {!hideHeader && <PwaInstallHint hasBottomNav={showMobileShell} />}
+      {!hideHeader && (
+        <PwaInstallHint
+          hasBottomNav={showMobileShell}
+          suspended={isInvitationTaskRoute(pathname, search)}
+        />
+      )}
       <main
         id="main"
         className={`layout-main ${

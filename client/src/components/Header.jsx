@@ -25,7 +25,7 @@ import {
   PRACTICE_UI_SELECTABLE_LOCALE_CODES,
 } from "../i18n/localeConfig";
 import { getMessages } from "../i18n/translations";
-import { authFetch } from "../api/authFetch.js";
+import { endSession } from "../lib/session.js";
 import { readUserMode, writeUserMode, USER_MODES } from "../utils/userMode.js";
 import { useAccountIdentity } from "../hooks/useAccountIdentity.js";
 import "../styles/Header.css";
@@ -116,16 +116,9 @@ export default function Header() {
   }
 
   async function handleLogout() {
-    try {
-      await authFetch("/api/auth/logout", { method: "POST" });
-    } catch {
-      /* still clear local session */
-    }
-    localStorage.removeItem("medscout_token");
-    localStorage.removeItem("medscout_user_id");
-    localStorage.removeItem("symptom_thread_id");
-    localStorage.removeItem("koerper_thread_id");
-    localStorage.removeItem("textsymptom_thread_id");
+    // Shared with "use a different account" on the invitation page, so both
+    // clear exactly the same things (see lib/session.js).
+    await endSession();
     setOpen(false);
     navigate("/login", { replace: true });
   }

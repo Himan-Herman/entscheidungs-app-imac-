@@ -1,4 +1,4 @@
-import { Outlet, useParams } from "react-router-dom";
+import { Link, Outlet, useParams } from "react-router-dom";
 import { PracticeContextProvider } from "../PracticeContext.jsx";
 import { usePracticeContext } from "../usePracticeContext.js";
 import { CONTEXT_STATE } from "../lib/contextIdentity.js";
@@ -45,6 +45,10 @@ function ScopedGate() {
       <div className="practice-context__state" role="alert">
         <h1 className="practice-context__state-title">{t.notFoundTitle}</h1>
         <p>{t.notFoundBody}</p>
+        {/* A dead end is the one thing this state must not be. */}
+        <Link className="practice-context__state-back" to="/patient/practice">
+          {t.backToChooser}
+        </Link>
       </div>
     );
   }
@@ -54,6 +58,9 @@ function ScopedGate() {
       <div className="practice-context__state" role="alert">
         <h1 className="practice-context__state-title">{t.errorTitle}</h1>
         <p>{t.errorBody}</p>
+        <Link className="practice-context__state-back" to="/patient/practice">
+          {t.backToChooser}
+        </Link>
       </div>
     );
   }
@@ -63,7 +70,11 @@ function ScopedGate() {
   return (
     <>
       <PracticeContextBar />
-      <Outlet />
+      {/* One reading width for every practice-scoped page, instead of each page
+          stretching edge to edge on a desktop screen. */}
+      <div className="practice-scoped__body">
+        <Outlet />
+      </div>
     </>
   );
 }

@@ -613,7 +613,10 @@ test("EMAIL: the body says who invited and nothing about the patient", { skip },
   // The subject must NOT name the practice: it is readable without opening the
   // mail, and a specialist practice's name is a health inference on its own.
   assert.equal(subject.includes("Praxis Nord"), false, "the subject named the practice");
-  assert.equal(subject.trim(), "Ihre Einladung");
+  // Neutral and the same for every practice, but recognisable: it says the
+  // sender is "your practice", via MedScoutX, which a vague "Ihre Einladung"
+  // did not — and that read as spam to exactly the people it was meant for.
+  assert.equal(subject.trim(), "Einladung Ihrer Praxis über MedScoutX");
   assert.match(text, /Praxis Nord/, "the body must still say who is inviting");
   assert.match(text, /7 Tage/);
   assert.match(text, /#token=tok-1/);
@@ -637,13 +640,18 @@ test("EMAIL: the practice name is escaped, not injected as markup", { skip }, ()
 });
 
 test("EMAIL: every product language is present and complete", { skip }, () => {
+  // A name that cannot occur by coincidence. The old fixture was the single
+  // letter "P", which only worked while no subject contained a capital P — the
+  // word "Praxis" was enough to fail it without leaking anything.
+  const NAME = "Zentrum Qwxyz";
   for (const locale of ["de", "en", "fr", "it", "es", "ru"]) {
     const m = emailCopy.buildInvitationEmail({
-      practiceName: "P", link: "https://x/y#token=t", expiresInDays: 7, locale,
+      practiceName: NAME, link: "https://x/y#token=t", expiresInDays: 7, locale,
     });
     assert.ok(m.subject.trim(), `${locale}: empty subject`);
-    assert.equal(m.subject.includes("P"), false, `${locale}: the subject leaked the practice name`);
-    assert.ok(m.text.includes("P"), `${locale}: the body lost the practice name`);
+    assert.equal(m.subject.includes(NAME), false, `${locale}: the subject leaked the practice name`);
+    assert.equal(m.subject.includes("Qwxyz"), false, `${locale}: the subject leaked part of the name`);
+    assert.ok(m.text.includes(NAME), `${locale}: the body lost the practice name`);
     assert.ok(m.text.includes("#token=t"), `${locale}: lost the link`);
     assert.ok(m.text.includes("7"), `${locale}: lost the expiry`);
   }
@@ -652,6 +660,33 @@ test("EMAIL: every product language is present and complete", { skip }, () => {
     practiceName: "P", link: "https://x/y#token=t", expiresInDays: 7, locale: "zz",
   });
   assert.ok(fallback.subject.trim());
+});
+
+test("EMAIL: a button to tap, and the address still readable beside it", { skip }, () => {
+  const link = "https://app.example/patient-invitation#token=tok-9";
+  for (const locale of ["de", "en", "fr", "it", "es", "ru"]) {
+    const { html, text } = emailCopy.buildInvitationEmail({
+      practiceName: "Zentrum Qwxyz", link, expiresInDays: 7, locale,
+    });
+    // Two anchors to the same place: the button, and the printed address. The
+    // address is what lets a patient see where a tap goes — a button alone
+    // would look exactly like phishing.
+    const anchors = html.match(/<a href="([^"]+)"/g) || [];
+    assert.equal(anchors.length, 2, `${locale}: expected the button and the visible address`);
+    assert.ok(html.includes(`>${link}</a>`), `${locale}: the address is no longer readable`);
+    // Three plain steps, in the text part too — some clients show only that.
+    assert.match(text, /\n1\. .+\n2\. .+\n3\. .+/, `${locale}: the steps are missing from the text part`);
+    assert.equal(html.includes(`lang="${locale}"`), true, `${locale}: the document language is wrong`);
+  }
+});
+
+test("EMAIL: no images, no remote resources — nothing that reports the open", { skip }, () => {
+  const { html } = emailCopy.buildInvitationEmail({
+    practiceName: "Zentrum Qwxyz", link: "https://x/y#token=t", expiresInDays: 7, locale: "de",
+  });
+  assert.equal(/<img/i.test(html), false, "an image would be a read receipt");
+  assert.equal(/url\(/i.test(html), false, "a CSS background is a remote load too");
+  assert.equal(/<link /i.test(html), false);
 });
 
 test("EMAIL: an entry with no address is refused before anything is issued", { skip }, async () => {

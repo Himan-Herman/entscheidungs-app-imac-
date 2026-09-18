@@ -16,8 +16,9 @@ const MANUAL_SHOW_DELAY_MS = 2800;
 /**
  * @param {object} props
  * @param {boolean} [props.hasBottomNav]
+ * @param {boolean} [props.suspended] kept out of the way for now (see isInvitationTaskRoute)
  */
-export default function PwaInstallHint({ hasBottomNav }) {
+export default function PwaInstallHint({ hasBottomNav, suspended = false }) {
   const { language } = useLanguage();
   const t = useMemo(() => {
     const m = getMessages(language);
@@ -98,7 +99,8 @@ export default function PwaInstallHint({ hasBottomNav }) {
   }, [hide]);
 
   useEffect(() => {
-    if (!visible) return undefined;
+    // Never take the focus while suspended — that is the whole point of it.
+    if (!visible || suspended) return undefined;
     const onKey = (e) => {
       if (e.key === "Escape") handleLater();
     };
@@ -114,9 +116,9 @@ export default function PwaInstallHint({ hasBottomNav }) {
       window.removeEventListener("keydown", onKey);
       window.cancelAnimationFrame(id);
     };
-  }, [visible, handleLater]);
+  }, [visible, suspended, handleLater]);
 
-  if (!visible) return null;
+  if (!visible || suspended) return null;
 
   const showNativeInstall = mode === "native" && deferredRef.current;
 

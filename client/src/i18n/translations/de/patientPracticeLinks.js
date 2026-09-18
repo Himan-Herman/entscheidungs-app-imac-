@@ -56,8 +56,10 @@ export default {
     "Die Verbindung besteht. Bisher wurden keine Daten freigegeben. Wählen Sie aus, welche Bereiche Sie für diese Praxis freigeben möchten.",
   requestFrom: "{practice} wartet auf Ihre Datenfreigabe.",
   acceptScopesHint:
-    "Freigegeben wird genau das, was Sie unten unter „Welche Bereiche möchten Sie freigeben?“ ankreuzen. Nichts ist vorausgewählt.",
-  acceptButton: "Annehmen",
+    "Kreuzen Sie an, was die Praxis sehen darf. Nichts ist vorausgewählt, und Sie können eine Freigabe jederzeit widerrufen.",
+  acceptButton: "Freigabe erteilen",
+  requestScopesLegend: "Was darf {practice} sehen?",
+  openPractice: "Zur Praxis",
   declineButton: "Ablehnen",
   acceptedMsg: "Verbindung aktiviert.",
   declinedMsg: "Anfrage abgelehnt.",

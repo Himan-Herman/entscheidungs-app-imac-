@@ -6,6 +6,11 @@ import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { sendVerificationEmail, sendMail, sendPasswordResetEmail } from "../emailService.js";
+import {
+  buildVerifyLink,
+  buildVerifyRedirect,
+  resolveCarriedInvitation,
+} from "../services/patientOnboarding/invitationCarry.js";
 
 
 import jwt from "jsonwebtoken";
@@ -49,6 +54,10 @@ authRouter.post("/register", authRegisterLimiter, async (req, res) => {
 
     const emailNorm = user.email.trim().toLowerCase();
 
+    // A practice invitation the person opened before registering. Only used to
+    // bring them back to it after confirming their e-mail; see invitationCarry.js.
+    const carriedInvitation = await resolveCarriedInvitation(req.body?.invitation?.token);
+
     // existiert?
     const existing = await prisma.user.findUnique({
       where: { email: emailNorm },
@@ -85,12 +94,11 @@ authRouter.post("/register", authRegisterLimiter, async (req, res) => {
           },
         });
 
-        const apiBase = (
-          process.env.API_BASE_URL ?? "http://localhost:3000"
-        ).replace(/\/+$/, "");
-        const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(
-          tokenPlain
-        )}`;
+        const verifyLink = buildVerifyLink({
+          apiBase: process.env.API_BASE_URL ?? "http://localhost:3000",
+          mailToken: tokenPlain,
+          invitationToken: carriedInvitation,
+        });
 
         // WICHTIG: token mitgeben
         await sendVerificationEmail({
@@ -159,12 +167,11 @@ authRouter.post("/register", authRegisterLimiter, async (req, res) => {
         },
       });
 
-      const apiBase = (
-        process.env.API_BASE_URL ?? "http://localhost:3000"
-      ).replace(/\/+$/, "");
-      const verifyLink = `${apiBase}/api/auth/verify-email?token=${encodeURIComponent(
-        tokenPlain
-      )}`;
+      const verifyLink = buildVerifyLink({
+        apiBase: process.env.API_BASE_URL ?? "http://localhost:3000",
+        mailToken: tokenPlain,
+        invitationToken: carriedInvitation,
+      });
 
       try {
         if (process.env.EMAIL_ENABLED !== "false") {
@@ -214,13 +221,17 @@ authRouter.get("/verify-email", async (req, res) => {
     "https://medscoutx.app";
 
   const loginUrl = `${frontendBase.replace(/\/+$/, "")}/login`;
+  // Where to continue after signing in. Allowlisted — see invitationCarry.js.
+  // Kept on EVERY outcome: a link clicked twice answers "invalid", and that
+  // person is already verified and should still land back at their invitation.
+  const to = (status) => buildVerifyRedirect({ loginUrl, status, next: req.query?.next });
 
   try {
     const { token } = req.query;
 
     if (!token || typeof token !== "string") {
       // Kein / kaputter Token → direkt Login mit Info
-      return res.redirect(`${loginUrl}?verify=missing`);
+      return res.redirect(to("missing"));
     }
 
     // User mit gültigem Token suchen
@@ -231,7 +242,7 @@ authRouter.get("/verify-email", async (req, res) => {
 
     if (!user) {
       // Token ungültig / abgelaufen → Login mit info
-      return res.redirect(`${loginUrl}?verify=invalid`);
+      return res.redirect(to("invalid"));
     }
 
     // User verifizieren & Token löschen
@@ -245,11 +256,11 @@ authRouter.get("/verify-email", async (req, res) => {
     });
 
     // Erfolg → Login mit Erfolg-Flag
-    return res.redirect(`${loginUrl}?verify=ok`);
+    return res.redirect(to("ok"));
   } catch (err) {
     logServerError("auth/verify-email", err, req);
     // Fallback: Login mit Fehlerhinweis
-    return res.redirect(`${loginUrl}?verify=error`);
+    return res.redirect(to("error"));
   }
 });
 

@@ -33,7 +33,8 @@ export default {
       givenName: "First name",
       familyName: "Last name",
       dateOfBirth: "Date of birth",
-      dateOfBirthHint: "Optional. Only helps avoid mix-ups.",
+      dateOfBirthHint: "Helps to avoid mix-ups between people with the same name.",
+      dateOfBirthRequired: "Please enter the date of birth.",
       email: "Email",
       emailHint: "Optional. For delivery only, never an identity check.",
       phone: "Phone",
@@ -135,16 +136,21 @@ export default {
 
   patient: {
     title: "Your practice's invitation",
+    heading: "{practice} would like to connect with you",
     loading: "Checking the invitation…",
     invitedBy: "You have been invited by",
     invalid: {
       title: "This invitation is no longer valid",
       body:
         "The link or code has expired, was already used, or was withdrawn. Please ask your practice for a new invitation.",
+      memberHint:
+        "Does this account belong to the team of the practice that sent the invitation? Then it cannot accept it. Please open the link with the patient's own account.",
+      toStart: "Go to the start page",
     },
     noCredential: {
       title: "No invitation found",
-      body: "Open the link from your practice, or enter the code you were given.",
+      body:
+        "Open the link from your practice's email again – or enter the code you were given at the practice.",
     },
     manualCode: {
       label: "Enter code",
@@ -154,38 +160,54 @@ export default {
       checking: "Checking…",
     },
     auth: {
-      title: "Sign in to continue",
-      body:
-        "You need a MedScoutX account to connect. Your invitation stays in this browser tab.",
+      title: "How would you like to continue?",
+      body: "After signing in, you will come straight back here.",
+      loginLead: "I already have a MedScoutX account",
       login: "Sign in",
+      registerLead: "I'm new to MedScoutX",
       register: "Create account",
     },
+    account: {
+      label: "Connecting as",
+      loading: "Loading your account…",
+      switch: "Use a different account",
+    },
     subject: {
-      title: "Who would you like to connect with this practice?",
+      title: "Who is the connection for?",
       hint: "You can connect for yourself or for someone in your care.",
       self: "Myself",
       selfHint: "The connection applies to your own account.",
       profileGroup: "People in my care",
-      noProfiles:
-        "You have not added anyone else yet, so the connection applies to you.",
       loadError: "Your profiles could not be loaded.",
     },
     connect: {
-      button: "Connect with practice",
+      button: "Connect",
       working: "Connecting…",
       hint:
-        "This only establishes the connection. You decide afterwards what the practice may see.",
+        "The practice does not see any of your health data yet. You decide what it may see in the next step.",
     },
     success: {
-      title: "Connected",
-      body: "Your account is now connected to {practice}.",
-      consentNext: "Next: choose what to share",
+      title: "You are now connected",
+      body: "From now on you will find {practice} under “My practices”.",
+      consentNext: "Next step: choose what to share",
       consentHint:
-        "Nothing has been shared yet. Decide now what the practice may see.",
+        "You have not shared anything yet. Decide what the practice may see – messages, for example. You can also do this later.",
       toConsent: "Choose permissions",
       alreadyActive:
         "Permissions already exist for this practice. You can change them at any time.",
       toPractice: "Go to practice",
+      toOverview: "My practices",
+    },
+    authReturn: {
+      loginTitle: "Your practice's invitation",
+      loginBody: "Sign in, and you will go straight back to your invitation.",
+      registerTitle: "Your practice's invitation",
+      registerBody:
+        "Create your account. As soon as you have confirmed your email address, you will continue straight to your invitation.",
+      haveAccount: "Already have an account? Sign in",
+      checkEmailTitle: "Your invitation is waiting.",
+      checkEmailBody:
+        "Tap the link in the email and sign in – you will then continue straight to your invitation.",
     },
     errors: {
       subjectMismatch:
