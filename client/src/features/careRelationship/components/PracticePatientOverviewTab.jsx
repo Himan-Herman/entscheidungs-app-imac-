@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 
 function fmt(iso, lang) {
@@ -30,7 +29,6 @@ function statusLabel(status, t) {
  *   language: string;
  *   t: Record<string, string>;
  *   statusAria: string;
- *   practiceId: string;
  *   onNavigateTab: (tab: string) => void;
  * }} props
  */
@@ -40,7 +38,6 @@ export default function PracticePatientOverviewTab({
   language,
   t,
   statusAria,
-  practiceId,
   onNavigateTab,
 }) {
   const name =
@@ -145,12 +142,15 @@ export default function PracticePatientOverviewTab({
         >
           {t.openPreVisits} ({overview?.preVisitCount ?? 0})
         </button>
-        <Link
+        {/* This patient's requests live in their own record now; the
+            practice-wide list stays one click further inside that tab. */}
+        <button
+          type="button"
           className="practice-dashboard__link-btn"
-          to={`/practice/data-requests?practiceId=${encodeURIComponent(practiceId)}`}
+          onClick={() => onNavigateTab("dataConsent")}
         >
           {t.openDataRequests}
-        </Link>
+        </button>
       </nav>
     </section>
   );

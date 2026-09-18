@@ -9,6 +9,7 @@ import PracticePatientRecordSearch from "../components/PracticePatientRecordSear
 import ExportsPanel from "../../exports/components/ExportsPanel.jsx";
 import PracticePatientOverviewTab from "../components/PracticePatientOverviewTab.jsx";
 import PracticePatientActivityTab from "../components/PracticePatientActivityTab.jsx";
+import PracticePatientDataConsentTab from "../components/PracticePatientDataConsentTab.jsx";
 import PracticePatientPreVisitsTab from "../components/PracticePatientPreVisitsTab.jsx";
 import PracticePatientMessagesSection from "../../communication/components/PracticePatientMessagesSection.jsx";
 import PracticePatientMedicationPlanSection from "../../medicationPlan/components/PracticePatientMedicationPlanSection.jsx";
@@ -47,6 +48,7 @@ const VALID_TABS = new Set([
   "sosCard",
   "messages",
   "internalWork",
+  "dataConsent",
   "activity",
 ]);
 
@@ -295,6 +297,16 @@ export default function PracticePatientDetailPage() {
               into the patient conversation above. */}
           {activeTab === "internalWork" && practiceId && linkId ? (
             <PracticePatientInternalWorkSection
+              linkId={linkId}
+              practiceId={practiceId}
+              readOnly={readOnly}
+            />
+          ) : null}
+
+          {/* What the patient granted, and their data requests with the
+              practice's answer — which goes back to the patient. */}
+          {activeTab === "dataConsent" && practiceId && linkId ? (
+            <PracticePatientDataConsentTab
               linkId={linkId}
               practiceId={practiceId}
               readOnly={readOnly}

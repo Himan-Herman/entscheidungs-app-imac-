@@ -109,6 +109,16 @@ export async function fetchPracticePatientLink(linkId, practiceId, opts = {}) {
   return { res, data };
 }
 
+/** What the patient has granted this practice for this relationship (read-only). */
+export async function fetchPracticePatientConsents(linkId, practiceId) {
+  const q = new URLSearchParams({ practiceId });
+  const res = await authFetch(
+    `/api/practice/patients/${encodeURIComponent(linkId)}/consents?${q.toString()}`,
+  );
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
 export async function fetchPracticePatientActivity(linkId, practiceId, params = {}) {
   const q = new URLSearchParams({ practiceId });
   if (params.type) q.set("type", params.type);

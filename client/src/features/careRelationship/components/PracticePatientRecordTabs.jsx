@@ -13,6 +13,7 @@ const TABS = [
   { id: "sosCard", labelKey: "tabSosCard" },
   { id: "messages", labelKey: "tabMessages" },
   { id: "internalWork", labelKey: "tabInternalWork" },
+  { id: "dataConsent", labelKey: "tabDataConsent" },
   { id: "activity", labelKey: "tabActivity" },
 ];
 

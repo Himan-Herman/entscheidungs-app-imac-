@@ -432,6 +432,11 @@ export default {
   },
 
   practiceContext: {
+    backToHub: "Volver al resumen de esta consulta",
+    dataControlTitle: "Mis datos y permisos",
+    dataControlHint: "Permisos, archivado, solicitudes de supresión",
+    activityTitle: "Mi actividad",
+    activityHint: "Transparencia sobre los eventos de esta consulta",
      dictate: "Dictar",
      dictationRecording: "Grabación en curso",
      dictationStop: "Detener la grabación",
@@ -1066,6 +1071,14 @@ export default {
   },
 
   patientDataControl: {
+    introScoped: "Lo que esta consulta puede ver, sus solicitudes a esta consulta y cómo controla la conexión.",
+    responseNoteLabel: "Respuesta de la consulta",
+    consentSummaryTitle: "Permisos para esta consulta",
+    consentSummaryIntro: "Concedido actualmente:",
+    consentSummaryNone: "Actualmente no ha concedido nada a esta consulta.",
+    consentSummaryManage: "Cambiar permisos",
+    consentSummarySet: "Establecer permisos",
+    consentSummaryLoadError: "No se pudieron cargar los permisos.",
     pageTitle: "Mis datos y permisos — MedScoutX",
     heading: "Mis datos y permisos",
     intro:

@@ -25,7 +25,7 @@ export default {
   detailTitle: "Anfragedetails",
   detailClose: "Schließen",
   detailReason: "Anmerkung der Patientin / des Patienten",
-  detailResponseNote: "Praxisnotiz (organisatorisch)",
+  detailResponseNote: "Antwort an die Patientin / den Patienten (für sie bzw. ihn sichtbar)",
   detailNoReason: "Keine Anmerkung",
   updateStatus: "Status aktualisieren",
   saveStatus: "Status speichern",

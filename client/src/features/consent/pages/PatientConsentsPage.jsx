@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../../../i18n/LanguageContext";
 import { getIntlLocaleChain } from "../../../i18n/intlLocale.js";
 import { getMessages } from "../../../i18n/translations";
@@ -176,7 +176,11 @@ export default function PatientConsentsPage() {
   const [links, setLinks] = useState([]);
   const [consentTypes, setConsentTypes] = useState([]);
 
-  const [grantLinkId, setGrantLinkId] = useState("");
+  // ?linkId= narrows the page to ONE practice (opened from that practice's
+  // "Meine Daten & Freigaben"). The server list is the patient's own either way.
+  const [searchParams] = useSearchParams();
+  const onlyLinkId = searchParams.get("linkId")?.trim() || "";
+  const [grantLinkId, setGrantLinkId] = useState(onlyLinkId);
   const [grantType, setGrantType] = useState("profile_access");
   const [grantExpiry, setGrantExpiry] = useState("");
   const [grantBusy, setGrantBusy] = useState(false);
@@ -235,8 +239,9 @@ export default function PatientConsentsPage() {
         map.set(key, row);
       }
     }
-    return [...map.values()];
-  }, [consents]);
+    const all = [...map.values()];
+    return onlyLinkId ? all.filter((r) => r.practicePatientLinkId === onlyLinkId) : all;
+  }, [consents, onlyLinkId]);
 
   const active = latestByKey.filter((r) => r.status === "granted");
   const revoked = latestByKey.filter((r) => r.status === "revoked");
@@ -336,7 +341,12 @@ export default function PatientConsentsPage() {
 
   return (
     <div className="patient-inbox">
-      <Link className="patient-inbox__back" to="/patient/data-control">
+      <Link
+        className="patient-inbox__back"
+        to={onlyLinkId
+          ? `/patient/practice/${encodeURIComponent(onlyLinkId)}/data-control`
+          : "/patient/data-control"}
+      >
         {t.backDataControl}
       </Link>
       <header className="patient-inbox__header">
@@ -371,7 +381,7 @@ export default function PatientConsentsPage() {
               aria-required="true"
             >
               <option value="">{t.notProvided}</option>
-              {links.map((l) => (
+              {(onlyLinkId ? links.filter((l) => l.id === onlyLinkId) : links).map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.practice?.practiceName || l.id}
                 </option>

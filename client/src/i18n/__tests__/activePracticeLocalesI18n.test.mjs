@@ -63,16 +63,16 @@ const FLAG_OFF_NAMESPACES = Object.freeze([
  * the count of keys that language still lacks in that namespace.
  */
 const KNOWN_GAPS = {
-  fr: { medicalInterpreter: 73, practiceBillingPlausibility: 29, practiceConsents: 42,
+  fr: { medicalInterpreter: 73, practiceBillingPlausibility: 29, practiceConsents: 23,
         practicePreVisit: 31, practiceAnalytics: 26, documentOcr: 12, preVisit: 241,
         practiceOrganization: 2, practiceAnamnesis: 9, practiceDashboard: 1,
         practicePatientProfile: 0, vitals: 7, vaccinations: 4, erezept: 4,
         patientMedicationPlan: 1, practiceOverview: 1 },
-  es: { medicalInterpreter: 73, practiceBillingPlausibility: 29, practiceConsents: 42,
+  es: { medicalInterpreter: 73, practiceBillingPlausibility: 29, practiceConsents: 23,
         practicePreVisit: 31, practiceAnalytics: 26, documentOcr: 12, preVisit: 241,
         practiceOrganization: 2, practiceAnamnesis: 9, practiceDashboard: 1,
         vitals: 7, erezept: 4, patientMedicationPlan: 1, practiceOverview: 1 },
-  it: { medicalInterpreter: 73, practiceBillingPlausibility: 29, practiceConsents: 42,
+  it: { medicalInterpreter: 73, practiceBillingPlausibility: 29, practiceConsents: 23,
         practicePreVisit: 31, practiceAnalytics: 26, documentOcr: 12, preVisit: 66,
         practiceOrganization: 2, practiceAnamnesis: 9, practiceDashboard: 1,
         vitals: 7, erezept: 4, patientMedicationPlan: 1, practiceOverview: 1 },

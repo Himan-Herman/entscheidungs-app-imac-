@@ -369,3 +369,59 @@ test("consent: the practice's request has its own checkboxes, nothing ticked, no
   await expect(entry).not.toContainText("Freigabe steht aus");
   await practiceContext.close();
 });
+
+test("data & permissions: both sides, one practice — a request answered by the practice reaches the patient", async ({ browser, request }) => {
+  const email = unique("daten.freigaben");
+  await createVerifiedPatient(request, email, "Daten");
+  const { mail, practicePage, practiceContext } = await practiceInvites(browser, request, {
+    given: "Daten", family: `Freigabe${TAG}`, dob: "1961-04-05", email,
+  });
+  const invite = linkIn(mail, /http:\/\/localhost:5173\/patient-invitation#token=[A-Za-z0-9_-]+/);
+
+  const ctx = await browser.newContext(DE);
+  const page = await ctx.newPage();
+  await page.goto(invite);
+  await page.getByRole("link", { name: /Anmelden/ }).click();
+  await signIn(page, email, PASSWORD);
+  await page.getByRole("button", { name: "Verbinden", exact: true }).click();
+  await page.getByRole("link", { name: "Zur Praxis", exact: true }).click();
+  const linkId = new URL(page.url()).pathname.split("/")[3];
+
+  // Patient: the practice's own "Meine Daten & Freigaben" — this practice only.
+  await page.getByRole("link", { name: /Meine Daten & Freigaben/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/patient/practice/${linkId}/data-control$`));
+  await expect(page.getByRole("heading", { name: "Freigaben für diese Praxis" })).toBeVisible();
+  await expect(page.getByText("Sie haben dieser Praxis derzeit nichts freigegeben.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Datenexport anfragen" }).click();
+  const dialog = page.locator("dialog.patient-data-control__dialog");
+  await dialog.getByRole("button", { name: "Weiter" }).click();
+  await dialog.getByRole("button", { name: "Export anfragen" }).click();
+  await expect(page.locator(".patient-data-control__requests-panel")).toContainText("Eingereicht");
+
+  // Practice: the same request in the patient's record, answered there.
+  await practicePage.goto(`${APP}/practice/patients/${linkId}?practiceId=${PRACTICE_ID}&tab=dataConsent`);
+  const req = practicePage.locator(".practice-dataconsent__request").first();
+  await expect(req).toContainText("Export");
+  await req.getByLabel("Neuer Status").selectOption("completed");
+  await req.getByLabel("Antwort an die Patientin / den Patienten").fill(`Export liegt bereit ${TAG}.`);
+  await req.getByRole("button", { name: "Status und Antwort speichern" }).click();
+  await expect(req).toContainText("Status und Antwort sind jetzt im Patientenbereich dieser Praxis sichtbar.");
+
+  // Patient: status and the practice's answer, in that practice's area.
+  await page.reload();
+  const panel = page.locator(".patient-data-control__requests-panel");
+  await expect(panel).toContainText("Abgeschlossen");
+  await expect(panel).toContainText("Antwort der Praxis");
+  await expect(panel).toContainText(`Export liegt bereit ${TAG}.`);
+
+  // …and in "Meine Aktivität" of this practice, without a practice picker.
+  await page.goto(`${APP}/patient/practice/${linkId}`);
+  await page.getByRole("link", { name: /Meine Aktivität/ }).click();
+  await expect(page).toHaveURL(new RegExp(`/patient/practice/${linkId}/activity$`));
+  await expect(page.getByText("Datenanfrage bearbeitet").last()).toBeVisible();
+  await expect(page.getByLabel("Praxis", { exact: true })).toHaveCount(0);
+
+  await ctx.close();
+  await practiceContext.close();
+});

@@ -129,6 +129,12 @@ const PracticeContextInboxPage = lazy(() =>
 const PracticeContextTelemedicinePage = lazy(() =>
   import("./features/practiceContext/pages/PracticeContextTelemedicinePage.jsx"),
 );
+const PracticeContextDataControlPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextDataControlPage.jsx"),
+);
+const PracticeContextActivityPage = lazy(() =>
+  import("./features/practiceContext/pages/PracticeContextActivityPage.jsx"),
+);
 const PatientOrientationHubPage = lazy(() =>
   import("./pages/PatientOrientationHubPage.jsx"),
 );
@@ -448,6 +454,8 @@ void runPwaBuildMigration().then(() => {
                   <Route path="erezept" element={<PracticeContextErezeptPage />} />
                   <Route path="inbox" element={<PracticeContextInboxPage />} />
                   <Route path="telemedicine" element={<PracticeContextTelemedicinePage />} />
+                  <Route path="data-control" element={<PracticeContextDataControlPage />} />
+                  <Route path="activity" element={<PracticeContextActivityPage />} />
                 </Route>
                 <Route
                   path="/patient/orientation"

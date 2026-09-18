@@ -507,3 +507,94 @@
 .practice-patients__card-badges > span {
   margin-left: 0;
 }
+
+/* ------------------------------------------- record tab: Daten & Freigaben */
+
+.practice-dataconsent {
+  display: grid;
+  gap: 1rem;
+}
+.practice-dataconsent__empty {
+  margin: .5rem 0 0;
+  color: var(--ms-color-text-muted, #475569);
+}
+.practice-dataconsent__consents,
+.practice-dataconsent__requests {
+  list-style: none;
+  margin: .75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: .5rem;
+}
+.practice-dataconsent__consents li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .25rem 1rem;
+  padding: .6rem .8rem;
+  border: 1px solid var(--ms-color-border, #e2e8f0);
+  border-radius: .5rem;
+}
+.practice-dataconsent__consent-name { font-weight: 600; }
+.practice-dataconsent__consent-meta,
+.practice-dataconsent__date {
+  color: var(--ms-color-text-muted, #475569);
+  font-size: .9rem;
+}
+.practice-dataconsent__request {
+  padding: .85rem 1rem;
+  border: 1px solid var(--ms-color-border, #e2e8f0);
+  border-radius: .6rem;
+}
+.practice-dataconsent__request-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .35rem .75rem;
+}
+.practice-dataconsent__status {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--ms-color-text-secondary, #334155);
+}
+.practice-dataconsent__status--submitted,
+.practice-dataconsent__status--in_review { color: #b45309; }
+.practice-dataconsent__status--completed { color: #15803d; }
+:root[data-theme="dark"] .practice-dataconsent__status--submitted,
+:root[data-theme="dark"] .practice-dataconsent__status--in_review { color: #fbbf24; }
+:root[data-theme="dark"] .practice-dataconsent__status--completed { color: #4ade80; }
+.practice-dataconsent__text {
+  margin: .6rem 0 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.practice-dataconsent__label {
+  display: block;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--ms-color-text-muted, #475569);
+}
+.practice-dataconsent__form {
+  display: grid;
+  gap: .6rem;
+  margin-top: .8rem;
+  padding-top: .8rem;
+  border-top: 1px solid var(--ms-color-border, #e2e8f0);
+}
+.practice-dataconsent__form label {
+  display: grid;
+  gap: .3rem;
+}
+.practice-dataconsent__form label > span:first-child { font-weight: 600; font-size: .9rem; }
+.practice-dataconsent__form select,
+.practice-dataconsent__form textarea {
+  font: inherit;
+  padding: .5rem .6rem;
+  border: 1px solid var(--ms-color-border-strong, #cbd5e1);
+  border-radius: .45rem;
+  background: var(--ms-color-surface, #fff);
+  color: inherit;
+  max-width: 34rem;
+}
+.practice-dataconsent__form button { justify-self: start; }
+.practice-dataconsent__all { margin: .9rem 0 0; }

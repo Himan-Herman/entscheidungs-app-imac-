@@ -67,6 +67,11 @@ export default {
     },
   },
   practiceContext: {
+    backToHub: "Назад к обзору этой практики",
+    dataControlTitle: "Мои данные и разрешения",
+    dataControlHint: "Разрешения, архив, запросы на удаление",
+    activityTitle: "Моя активность",
+    activityHint: "Прозрачность по событиям этой практики",
     dictate: "Диктовать",
     dictationRecording: "Идёт запись",
     dictationStop: "Остановить запись",
@@ -910,6 +915,14 @@ export default {
     messagesLink: "Перейти к защищённым сообщениям",
   },
   patientDataControl: {
+    introScoped: "Что может видеть эта практика, ваши запросы к ней и как вы управляете связью.",
+    responseNoteLabel: "Ответ практики",
+    consentSummaryTitle: "Разрешения для этой практики",
+    consentSummaryIntro: "Сейчас разрешено:",
+    consentSummaryNone: "Сейчас вы ничего не разрешили этой практике.",
+    consentSummaryManage: "Изменить разрешения",
+    consentSummarySet: "Задать разрешения",
+    consentSummaryLoadError: "Не удалось загрузить разрешения.",
     pageTitle: "Мои данные и разрешения — MedScoutX",
     heading: "Мои данные и разрешения",
     intro:

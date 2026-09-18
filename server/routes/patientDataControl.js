@@ -27,7 +27,9 @@ router.get("/", async (req, res) => {
   if (!userId) return res.status(401).json({ ok: false, error: "unauthorized" });
 
   try {
-    const result = await getPatientDataControl(userId);
+    const result = await getPatientDataControl(userId, {
+      linkId: typeof req.query.linkId === "string" ? req.query.linkId : null,
+    });
     return res.json({ ok: true, ...result });
   } catch (err) {
     console.error("[patient/data-control]", err?.message ?? err);

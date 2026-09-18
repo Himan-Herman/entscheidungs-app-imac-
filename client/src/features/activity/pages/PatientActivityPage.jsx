@@ -30,13 +30,23 @@ function typeLabel(type, t) {
   return t[key] || t.notAvailable;
 }
 
-export default function PatientActivityPage() {
+/**
+ * "Meine Aktivität" — across all practices at /patient/activity, or for ONE
+ * practice inside its own area (/patient/practice/:linkId/activity,
+ * `scopedLinkId` set). Scoped, the practice filter is fixed and hidden: the
+ * page is about that practice, and offering the others would leave its area.
+ *
+ * @param {{ scopedLinkId?: string }} props
+ */
+export default function PatientActivityPage({ scopedLinkId = "" } = {}) {
   const { language } = useLanguage();
   const [searchParams] = useSearchParams();
   const t = useMemo(
     () => getMessages(language).patientActivity || getMessages("en").patientActivity,
     [language],
   );
+  const tContext = getMessages(language).practiceContext || getMessages("en").practiceContext;
+  const scopedBase = scopedLinkId ? `/patient/practice/${encodeURIComponent(scopedLinkId)}` : "";
 
   const typeOptions = useMemo(
     () =>
@@ -54,13 +64,13 @@ export default function PatientActivityPage() {
   const [search, setSearch] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [linkId, setLinkId] = useState("");
+  const [linkId, setLinkId] = useState(scopedLinkId);
   const [filters, setFilters] = useState({
     type: "",
     search: "",
     from: "",
     to: "",
-    linkId: "",
+    linkId: scopedLinkId,
   });
   const [practices, setPractices] = useState([]);
   const [aiSummary, setAiSummary] = useState("");
@@ -108,12 +118,13 @@ export default function PatientActivityPage() {
   }, [t.pageTitle]);
 
   useEffect(() => {
+    if (scopedLinkId) return;
     const lid = searchParams.get("linkId")?.trim();
     if (lid) {
       setLinkId(lid);
       setFilters((prev) => ({ ...prev, linkId: lid }));
     }
-  }, [searchParams]);
+  }, [searchParams, scopedLinkId]);
 
   useEffect(() => {
     load();
@@ -161,12 +172,25 @@ export default function PatientActivityPage() {
   return (
     <div className="patient-inbox">
       <nav className="patient-activity__nav" aria-label={t.backHub}>
-        <Link className="patient-inbox__back" to="/patient/practice">
-          {t.backHub}
-        </Link>
-        <Link className="patient-inbox__back" to="/patient/data-control">
-          {t.backDataControl}
-        </Link>
+        {scopedLinkId ? (
+          <>
+            <Link className="patient-inbox__back" to={scopedBase}>
+              {tContext.backToHub}
+            </Link>
+            <Link className="patient-inbox__back" to={`${scopedBase}/data-control`}>
+              {t.backDataControl}
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link className="patient-inbox__back" to="/patient/practice">
+              {t.backHub}
+            </Link>
+            <Link className="patient-inbox__back" to="/patient/data-control">
+              {t.backDataControl}
+            </Link>
+          </>
+        )}
       </nav>
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{t.heading}</h1>
@@ -185,7 +209,7 @@ export default function PatientActivityPage() {
             ))}
           </select>
         </label>
-        {practices.length > 0 ? (
+        {practices.length > 0 && !scopedLinkId ? (
           <label>
             <span>{t.filterPractice}</span>
             <select
