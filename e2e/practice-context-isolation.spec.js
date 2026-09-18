@@ -1841,6 +1841,13 @@ test.describe("practice context isolation", () => {
       await own.getByTestId("message-edit-save").click();
 
       await expect(messageWith(page, `${TL_OWN_SENT} (edited)`)).toBeVisible();
+      // The text alone also matches the editor that stays open after a REFUSED
+      // save — which is how this test stayed green while every edit on A2 was
+      // refused at the consent gate. The marker appears only once the server
+      // has actually applied the change.
+      await expect(
+        messageWith(page, `${TL_OWN_SENT} (edited)`).getByTestId("message-edited"),
+      ).toBeVisible();
       // The history is still there: the answer replaced one message, it did not
       // replace the timeline.
       await expect(page.getByTestId("scoped-message-list")).toContainText(TL_OLDEST);

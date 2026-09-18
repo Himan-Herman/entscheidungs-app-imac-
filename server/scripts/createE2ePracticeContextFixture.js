@@ -23,6 +23,8 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { grantConsentRecord } from "../services/consent/consentRecordService.js";
+import { LEGACY_SCOPE_TO_CONSENT_TYPE } from "../services/consent/consentTypes.js";
 
 const prisma = new PrismaClient();
 
@@ -71,6 +73,15 @@ const TELE_MARKER_LINKLESS = "A_TELE_LINKLESS";
 const MARKER_B = "B_ONLY_MARKER";
 
 const CONSENT_SCOPES = ["messages", "profile"];
+/**
+ * A2 needs messaging as well as medication: its timeline contains the
+ * patient's OWN sent messages, which no real relationship can hold without
+ * messaging consent, and the spec uses A2 as a second WRITABLE relationship
+ * with the same practice ("the actor really is the sender, only the
+ * conversation is the wrong one"). With medication alone, those requests were
+ * refused at the consent gate before the boundary under test was reached.
+ */
+const A2_CONSENT_SCOPES = ["medication", "messages"];
 const CONSENT_VERSION = "phase1-care-v1";
 
 async function upsertUser(email, firstName, lastName) {
@@ -426,6 +437,36 @@ async function upsertMedicationPlanWithMarker(link, title) {
 }
 
 /**
+ * Consent, recorded the way the product records it.
+ *
+ * Since the fail-closed consent fix, a ConsentRecord is the ONLY authority for
+ * what a relationship may do; `link.consentScopes` is a mirror derived from
+ * those records. This fixture used to write only the mirror, so every send,
+ * edit and withdraw in the messaging tests was refused with 403
+ * `consent_required` — the product doing exactly what it should, against a
+ * fixture state it can no longer produce.
+ *
+ * Granting goes through grantConsentRecord(), the call the patient's own
+ * consent screen makes, so records, audit rows and the mirror all end up as a
+ * real grant leaves them. Each run supersedes the previous grant, so the newest
+ * record is always `granted`: a known state, not merely "a record exists".
+ *
+ * @param {{ id: string, patientUserId: string }} link
+ * @param {string[]} scopes legacy scope names, e.g. ["messages", "profile"]
+ */
+async function grantFixtureConsents(link, scopes) {
+  for (const scope of scopes) {
+    const consentType = LEGACY_SCOPE_TO_CONSENT_TYPE[scope];
+    if (!consentType) throw new Error(`fixture: unknown consent scope ${scope}`);
+    await grantConsentRecord({
+      patientUserId: link.patientUserId,
+      practicePatientLinkId: link.id,
+      consentType,
+    });
+  }
+}
+
+/**
  * A SECOND link between the same patient and practice A.
  *
  * Permitted because the uniqueness key is
@@ -460,7 +501,7 @@ async function upsertSecondLinkToPracticeA(practiceA, patient) {
       patientUserId: patient.id,
       patientProfileId: profile.id,
       status: "active",
-      consentScopes: ["medication"],
+      consentScopes: A2_CONSENT_SCOPES,
       consentAcceptedAt: new Date(),
     },
   });
@@ -646,6 +687,8 @@ async function main() {
 
   const linkA = await upsertLink(practiceA.id, patient.id);
   const linkB = await upsertLink(practiceB.id, patient.id);
+  await grantFixtureConsents(linkA, CONSENT_SCOPES);
+  await grantFixtureConsents(linkB, CONSENT_SCOPES);
 
   const channelA = await upsertChannelWithMarker(linkA, ownerA.id, MARKER_A);
   // Re-runs start from an unread state so badges and read-acknowledge are
@@ -671,6 +714,7 @@ async function main() {
   await upsertMedicationPlanWithMarker(linkA, MED_MARKER_A);
   await upsertMedicationPlanWithMarker(linkB, MED_MARKER_B);
   const linkA2 = await upsertSecondLinkToPracticeA(practiceA, patient);
+  await grantFixtureConsents(linkA2, A2_CONSENT_SCOPES);
   await upsertMedicationPlanWithMarker(linkA2, MED_MARKER_A2);
   await upsertLongTimeline(linkA2, ownerA.id);
 
