@@ -372,7 +372,7 @@ hier **nicht wiederholt**. Kurzfassung:
 
 | | Zeilen |
 |---|---|
-| **Jetzt geschlossen** (öffentliche Providerdokumentation) | A5 Endpunkt · A6 `json_schema` · A7 ZDR-Eignung des Endpunkts · A8 Caching-Verhalten dokumentiert (`EVIDENCE_PROVIDED`) |
+| **Jetzt geschlossen** (öffentliche Providerdokumentation) | A5 Endpunkt · A6 `json_schema` · A7 ZDR-Eignung des Endpunkts · A8 Caching-Verhalten und -Steuerung für unseren Endpunkt, bedingt auf die Modellklasse |
 | **Eigene Account-Schritte** | A11 Schlüssel anlegen · A12 projektgebunden, Ablauf und Rotation · A9/A10 Modelle wählen und Verfügbarkeit belegen · A13 Host festhalten, sobald die Projektregion feststeht |
 | **Echte Anbieterentscheidung** | A3 Freigabe für Abuse-Monitoring-Kontrollen · A4 Zero-Data-Retention-Freigabe |
 | **Rechtsanteil** | A3 *Modified Retention Amendment* (Vertragsakt, gehört neben A1a) · A8 Zulässigkeit standardmäßig aktiven Cachings für Gesundheitsdaten · A1a unverändert |
@@ -389,14 +389,19 @@ hier **nicht wiederholt**. Kurzfassung:
    monitoring controls, and execute a Modified Retention amendment."* Damit ist
    ein Teil von A3 ein **Vertragsakt** — dieselbe Kategorie wie A1a, und
    zweckmäßigerweise im selben Vorgang zu behandeln.
-3. **Prompt Caching lässt sich nicht abschalten.** Es ist standardmäßig aktiv,
-   speichert den vollständigen gerenderten Kontext auf Maschinen innerhalb der
-   Verarbeitungsregion, ist organisationsisoliert und überschreitet keine
-   Regionsgrenze; Lebensdauer 30 Minuten bis 24 Stunden je nach Modell. Ein
-   Parameter zum vollständigen Deaktivieren ist **nicht dokumentiert**. Damit ist
-   A8 nicht mehr unbekannt — aber es ist jetzt eine Frage an Legal statt an die
-   Technik. **Die Schlussfolgerung „ZDR, also kein Caching" bleibt abgelehnt:**
-   der Anbieter beschreibt beides als getrennte Mechanismen.
+3. **Prompt Caching ist steuerbar — Korrektur.** Die erste Fassung dieses
+   Abschnitts sagte, Caching sei nicht abschaltbar. Das stammte aus dem
+   Caching-*Guide*, der um die Responses API herum geschrieben ist. Die
+   **API-Referenz unseres eigenen Endpunkts** dokumentiert `prompt_cache_key`,
+   `prompt_cache_options` (`mode: implicit|explicit`, `ttl: "30m"`, ab
+   `gpt-5.6`) und das veraltete `prompt_cache_retention` (`in_memory|24h`). Mit
+   `mode: "explicit"` und ohne gesetzte Breakpoints *„does not use prompt
+   caching"*. Caches sind organisationsisoliert und überschreiten keine
+   Regionsgrenze; unter ZDR ist die Voreinstellung `in_memory`. Damit ist A8 für
+   unseren Pfad beantwortet — **unter der Bedingung, dass A9/A10 ein Modell der
+   `gpt-5.6`-Klasse oder neuer wählen.** **Die Schlussfolgerung „ZDR, also kein
+   Caching" bleibt dennoch abgelehnt:** ZDR verkürzt die Aufbewahrung, es
+   schaltet den Mechanismus nicht ab.
 
 ### 7.2 Was die Dokumentation ausdrücklich **nicht** belegt
 
@@ -423,6 +428,78 @@ eine Anbieterantwort, und keiner erzeugt hier ein Geheimnis.
 | 5 | Wenn 1 steht: den Host in `APPROVED_PROVIDER_HOSTS` eintragen | geprüfter Commit — das ist das Vier-Augen-Prinzip, kein Schalter |
 
 **Kein Schlüssel wird hier erzeugt, angezeigt, gekürzt oder beschrieben.**
+
+Schritte 2 und 3 sind **`READY FOR ACCOUNT ACTION`**: sie lassen sich heute
+ausführen, ohne irgendetwas zu aktivieren. Ein Schlüssel, der existiert, aber in
+keiner laufenden Umgebung hinterlegt ist, bewirkt nichts. Die Freigabe für die
+Aktivierung bleibt davon unberührt.
+
+Konkret für die spätere Produktion:
+
+```
+Dediziertes Translation-Projekt (Zielregion)
+  └─ eigener Service Account          ← nicht an eine Person gebunden
+       └─ eigener Project API Key     ← ausschließlich dieses Projekt
+            ├─ Scopes: nur was der Adapter ruft — Chat Completions.
+            │          Keine Datei-, Batch-, Fine-Tuning- oder
+            │          Admin-Rechte; Default ist read+write auf alle
+            │          Projektressourcen und wird eingeschränkt
+            ├─ Ablaufdatum gesetzt
+            ├─ Rotation: Nachfolger anlegen → Umgebung umstellen →
+            │            alten Schlüssel erst nach Verifikation widerrufen
+            ├─ getrennt von OPENAI_API_KEY — der Code lehnt Gleichheit ab
+            └─ ausschließlich serverseitige Secret-Verwaltung,
+               nie im Repository, nie im Client, nie in einem Log
+```
+
+### 7.4 Modellmatrix (A9/A10)
+
+Interne technische Auswahl. **Diese Namen erscheinen in keinem Produkt- oder
+Marketingtext** — sie stehen hier, weil ohne sie keine Evidenz möglich ist.
+Ausgangslage: **im gesamten Repository existiert kein Modellname.** Beide Slots
+sind reine Umgebungsvariablen ohne Default.
+
+| Kriterium | `gpt-5.6-terra` *(Primär)* | `gpt-5.6-sol` *(Ersatzkandidat)* |
+|---|---|---|
+| Chat Completions | dokumentiert unterstützt | dokumentiert unterstützt |
+| Structured Outputs / `json_schema` | dokumentiert unterstützt | dokumentiert unterstützt |
+| Kontextfenster | 1.050.000 Token | 1.050.000 Token |
+| Max. Ausgabe | 128.000 Token | 128.000 Token |
+| `prompt_cache_options` (A8-Steuerung) | ja — `gpt-5.6`-Klasse | ja |
+| Preis Eingabe / gecacht / Ausgabe | $2 / $0,20 / $12 je 1 Mio. | $4 / — / $20 je 1 Mio. |
+| Eignung | „high-volume, routine tasks" | „complex professional work" |
+| Regionale Eignung | **unbelegt** — projekt-/regionsabhängig | **unbelegt** |
+| Verfügbarkeit in unserem Projekt | **unbelegt** | **unbelegt** |
+
+**Warum Terra als Primäroption.** Der Kontextbedarf ist unkritisch: ein Arztbrief
+liegt um Größenordnungen unter 1 Mio. Token, das Fenster entscheidet also nichts.
+Entscheidend ist etwas anderes — **das Modell ist in dieser Architektur keine
+Sicherheitsgrenze.** Kritische Werte sind maskiert, bevor es sie sieht, und
+erfundene Zahlen scheitern an der Integritätsprüfung. Die Modellwahl betrifft
+damit Sprachqualität und Kosten, nicht Patientensicherheit. Bei einem ganzen
+Dokument je Aufruf ist Terra die verhältnismäßige Wahl, und der gecachte
+Eingabepreis wirkt genau auf den unveränderlichen System-Prompt.
+
+**Warum Sol als Ersatzkandidat.** Falls die Sprachqualität — insbesondere bei
+„Einfache Sprache" — sich an echten Dokumenten als unzureichend erweist. Das ist
+eine Messung an einem echten Korpus, die es noch nicht gibt.
+
+**Warum nicht `gpt-5.6-luna`.** Billiger, aber als „cost-sensitive, high-volume"
+positioniert. Für die faktengetreue Umformung medizinischer Texte liegt dazu
+keine Evidenz vor, und wir behaupten sie nicht.
+
+**Warum nicht `gpt-6-astra`.** Fünffacher Preis für eine Aufgabe, die kein
+tiefes Schlussfolgern ist. Bliebe eine Option, wenn die Messung das umkehrt.
+
+> **Ausdrücklich: kein automatischer Fallback.** Im Produkt gibt es keinen
+> Modell- oder Anbieterwechsel zur Laufzeit und es wird keiner gebaut. Ein
+> automatischer Wechsel wäre eine selbstgewählte Änderung des Sicherheitsprofils
+> — genau das, was diese Architektur nicht tun darf. Der „Ersatzkandidat" ist
+> ein Eintrag in diesem Dokument, den ein Mensch bewusst setzt.
+
+A9/A10 bleiben **`OPEN`**, bis die Verfügbarkeit im gewählten Projekt und in der
+gewählten Region belegt ist. Eine dokumentierte Modelleignung ist keine
+Verfügbarkeitszusage für unser Konto.
 
 ## 8. Regel für öffentliche Kommunikation
 

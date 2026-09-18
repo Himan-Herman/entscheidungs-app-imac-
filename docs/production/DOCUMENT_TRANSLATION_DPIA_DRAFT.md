@@ -273,6 +273,31 @@ Behauptung ohne Grundlage.
 
 ---
 
+## 11a. Technische Vollständigkeit dieses Entwurfs
+
+Geprüft 2026-09-18. Was eine DSFA an **Sachverhalt** braucht, steht drin und ist
+aus dem realen System erhoben, nicht geschätzt:
+
+| Abschnitt | Vollständig? |
+|---|---|
+| §1 Beschreibung · §2 Zwecke · §3 Datenkategorien · §4 Betroffene · §5 Empfänger · §6 Ablauf | **ja** |
+| §7 Erforderlichkeit und Verhältnismäßigkeit | Sachverhalt ja; die **Bewertung**, ob ein milderes Mittel genügt, ist `EXTERNAL / RESPONSIBLE-PARTY DECISION REQUIRED` |
+| §8 Technische Maßnahmen | **ja** — 18 Maßnahmen, durch Tests belegt |
+| §9 Organisatorische Maßnahmen | drei Zeilen `OFFEN`: Schulung, Meldeprozess für diesen Ablauf, Überprüfungskadenz. **Das sind interne organisatorische Festlegungen, keine externen** |
+| §10 Risiken | **ja** — 14 benannt. Eintrittswahrscheinlichkeit und Schwere bewusst offen |
+| §11 Restrisiko · §13 Konsultation · §14 Freigabe · §15 Überprüfung | `EXTERNAL / RESPONSIBLE-PARTY DECISION REQUIRED` |
+
+Zwei Abhängigkeiten von außen bleiben inhaltlich bestehen und sind als solche
+markiert: **R4** (was der Dienstleister speichert — A4/A7) und **R12**
+(Sicherungskopien — `UNKNOWN`). Beide lassen sich nicht durch Nachdenken
+schließen.
+
+**Kein Feld wurde mit einer erfundenen Bewertung gefüllt.** Ein Entwurf, der
+„Restrisiko akzeptabel" behauptet, ohne dass das jemand entschieden hat, wäre
+schlechter als ein leeres Feld.
+
+---
+
 ## 12. Offene Rechtsfragen
 
 Vollständig in der
@@ -309,6 +334,14 @@ Kurzfassung:
 ## 14. Freigabe
 
 > Nicht ausfüllen, solange §11 offen ist.
+>
+> **`EXTERNAL / RESPONSIBLE-PARTY DECISION REQUIRED`** — und zwar
+> organisatorisch, nicht zwingend juristisch. Eine DSFA muss **nicht** von einer
+> Anwältin erstellt werden; sie ist Aufgabe des Verantwortlichen, der sich
+> beraten lassen kann. Wer sie hier zeichnet, ist Feld 8 des
+> [Freigabebogens](DOCUMENT_TRANSLATION_LEGAL_SIGNOFF.md). Was noch fehlt, sind
+> **Bewertungen**, keine weiteren Erhebungen: der Sachverhalt in §1–§10 ist
+> vollständig und aus dem laufenden System belegt.
 
 | Feld | Eintrag |
 |---|---|
