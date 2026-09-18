@@ -38,7 +38,7 @@ Drei Markierungen, und sie bedeuten verschiedene Dinge:
 
 **Schweigen ist keine Zustimmung.** Die Provider-Anfrage vom 2026-08-17 zu
 Datenresidenz und Zero Retention wurde nie beantwortet. Diese Punkte sind
-deshalb *deferred*, nicht *erledigt* — siehe §7.
+deshalb offen, nicht *erledigt*. Seit 2026-09-18 als `OPEN – approval required` mit einer gemeinsamen, neu formulierten Anfrage geführt — siehe §7 und [Evidence Register §12.5](DOCUMENT_TRANSLATION_EVIDENCE_REGISTER.md).
 
 ---
 

@@ -15,6 +15,9 @@
 | **Stand** | Technisch fertig, **nicht aktiv**. Beide Schalter aus, kein Dienstleister konfiguriert, es werden derzeit **keine** Daten übermittelt |
 | **Was hier entschieden wird** | 13 Felder. Danach ist die Verarbeitung entweder freigegeben oder begründet abgelehnt |
 | **Datum der Vorlage** | 2026-09-18 |
+| **Status** | `LEGAL SIGN-OFF = PENDING EXTERNAL REVIEW` |
+| **Verantwortliche Stelle (Anbieter der App)** | Himan Khorshidi, Einzelunternehmer — MedScoutX |
+| **KI-Dienstleister** | OpenAI. Vertragspartei ist für Kunden im EWR laut Vertragsklausel **OpenAI Ireland Ltd.**; im Unterschriftenblock ist die Gesellschaft nicht ausgeschrieben |
 
 ---
 
@@ -125,8 +128,10 @@ Widerruf soll bewirken: ☐ nur Sperre für die Zukunft
 
 ### 6 — Deckt der bestehende Vertragsrahmen absichtliche Gesundheitsdaten?
 
-**Realität.** Beidseitig unterzeichneter Auftragsverarbeitungszusatz mit dem
-KI-Dienstleister, Fassung `v.010126`, vom 2026-08-16, unverhandelt. Schedule 1
+**Realität.** Beidseitig unterzeichnetes *Data Processing Addendum* mit
+OpenAI (EWR: OpenAI Ireland Ltd.), Fassung `v.010126`, vom 2026-08-16,
+unverhandelt — Text identisch mit der öffentlichen Vorlage. OpenAI ist darin
+als *Data Processor* eingeordnet. Schedule 1
 Nr. 5 beschreibt die Übermittlung sensibler Daten als *nicht beabsichtigt, es sei
 denn, der Nutzer fügt sie unerwartet in unstrukturierte Daten ein*. Die Begriffe
 „besondere Kategorien", „Gesundheitsdaten" und „Artikel 9" kommen im Vertrag
@@ -219,9 +224,10 @@ Auflage / Kommentar: `________________________________________________`
 nur möglich, wenn ein geprüfter Endpunkt eingetragen wird — die Liste ist leer,
 und das Eintragen ist ein reviewter Codeänderungsschritt. Der Dienstleister
 dokumentiert einen europäischen Endpunkt; ob **unser** Projekt dafür
-freigeschaltet ist, ist offen. Unsere Live-Datenschutzerklärung beschreibt für
-andere Datenarten derzeit einen Transfer in die USA — bei europäischer
-Verarbeitung entstünde dort ein direkter Widerspruch.
+freigeschaltet ist, ist offen. Unsere Live-Datenschutzerklärung nennt für andere
+Datenarten (eigene Eingaben des Patienten) derzeit OpenAI LLC, USA, mit
+Transfer unter Standardvertragsklauseln — bei europäischer Verarbeitung dieser
+Funktion entstünde dort ein direkter Widerspruch.
 
 ☐ nur Verarbeitung in der EU/EWR zulässig
 ☐ Drittland zulässig unter: `__________`
@@ -274,6 +280,10 @@ abschließbare:
 ## Anhänge
 
 Nur bei Bedarf. Der Bogen oben ist ohne sie vollständig bearbeitbar.
+Bei externer Weitergabe werden die Anhänge als eigene Dateien mitgeliefert;
+die Verweise unten benennen genau diese Dateien. Der unterzeichnete Vertrag
+selbst liegt außerhalb dieses Pakets und wird auf Anforderung gesondert
+übergeben.
 
 | Anhang | Inhalt |
 |---|---|

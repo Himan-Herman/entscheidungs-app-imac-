@@ -89,7 +89,7 @@ data-protection/product rows, of which:
 | `READY FOR ACCOUNT ACTION` | 2 — the dedicated service-account key (A11) and its scoping, expiry and rotation (A12). Executable today; creating a key activates nothing |
 | `LEGAL REVIEW REQUIRED` | 2 — the contract's health-data scope (A1a) and the legal basis (B4) |
 | `CONFLICT` | 1 — the live privacy notice (register §6) |
-| `OPEN` | all others, including A3/A4 which are deferred |
+| `OPEN` | all others, including A3/A4 (`OPEN – approval required`; combined request prepared 2026-09-18, register §12.5) |
 
 A5–A13 were reclassified on 2026-09-18 by evidence type: four rows close on
 public documentation, four are our own account actions, **two** genuinely need a

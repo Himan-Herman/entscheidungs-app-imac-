@@ -13,8 +13,9 @@
 **Go/No-Go status: `NO-GO FOR PRODUCTION ACTIVATION`**
 Baseline commit: `545444ea` · Phase 2A–2D frozen · both feature flags off
 Last evidence assessed: A5–A13 reclassified + A8 corrected, 2026-09-18 · `VERIFIED` 6 / 21 · legal sign-off sheet prepared
-A3/A4 deferred 2026-09-18 — no provider response obtained
+A3/A4 deferred 2026-09-18 (no provider response), re-opened the same day as `OPEN – approval required` with a combined request
 Legal readiness prepared 2026-09-18 — decision matrix, DPIA draft, data-subject-rights runbook (§11)
+Legal sign-off: `PENDING EXTERNAL REVIEW` · A3/A4: `OPEN – approval required`, combined request prepared 2026-09-18 (§12.5)
 
 ---
 
@@ -60,8 +61,8 @@ the underlying fact) / `no`.
 | A1 | Executed DPA / AVV with the provider | **`VERIFIED – technical/documentary evidence`** | Executed OpenAI Data Processing Addendum, version `v.010126`, both parties dated 2026-08-16, DocuSign envelope with PKCS#7 seal. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Customer: Himan Khorshidi, title "Sole Proprietor". Provider entity follows from the EEA clause, see A1a. Contract text byte-identical to the public template — no customisation. |
 | A1a | Contractual scope covers **medical document content** | **`LEGAL REVIEW REQUIRED`** | Same document. Schedule 1 §5 reads *"No sensitive data is intended to be transferred unless the user includes it unexpectedly in unstructured data."* No occurrence of special categories, health, Article 9, HIPAA, prohibited or restricted data anywhere in the contract. | 2026-08-17 | no | operator | Our use case transfers health data **deliberately and systematically**. Classified `not determinable from the DPA`. Feeds into B4. **A1 being verified does not resolve this.** One-page question for external review prepared 2026-09-18 — [`DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md`](DOCUMENT_TRANSLATION_LEGAL_DECISION_MATRIX.md) §6. |
 | A2 | Dedicated provider project for document translation | **`VERIFIED – account/project evidence`** | Provider console screenshots: a dedicated project named "MedScoutX Document Translation" exists, and it belongs to the same provider organization as the executed DPA. Match performed 2026-08-17. Evidence checked on 2026-08-17 – source stored externally. | 2026-08-17 | no | operator | Identifiers deliberately not recorded here. Separation from the key behind `OPENAI_API_KEY` is **not** established by this row — that is A11/A12. |
-| A3 | Data residency confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18. The *path* is now documented, which the deferral did not change: data residency is *"configured per-project within your API Organization"*, the region is selected *"from the dropdown"* when creating a project, and *"To use data residency with any region other than the United States, you must be approved for abuse monitoring controls, and execute a Modified Retention amendment."* | 2026-09-18 | partial | operator | `DATA_REGION` records an assertion only. **Three named prerequisites** now replace "ask sales": (1) abuse-monitoring approval, (2) an executed Modified Retention amendment — a contract act that belongs beside A1a, (3) a project in the Europe region. Whether the **existing** dedicated project (A2) can be moved to a region or must be recreated is **not established by the documentation** and is account evidence. |
-| A4 | Zero data retention confirmed **for that project** | `OPEN – deferred until future provider review` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18. Documented path: ZDR *"requires prior approval"*; once approved it is configured by the customer under *"Settings → Organization → Data controls"* at organisation or project level. | 2026-09-18 | partial | operator | `ZERO_RETENTION` records an assertion only. Approval is genuinely a provider decision — this is one of the few rows where that is true. Once granted, the setting is **visible in our own console** and becomes account evidence rather than a sales question. |
+| A3 | Data residency confirmed **for that project** | `OPEN – approval required` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18. The *path* is now documented, which the deferral did not change: data residency is *"configured per-project within your API Organization"*, the region is selected *"from the dropdown"* when creating a project, and *"To use data residency with any region other than the United States, you must be approved for abuse monitoring controls, and execute a Modified Retention amendment."* | 2026-09-18 | partial | operator | `DATA_REGION` records an assertion only. **Three named prerequisites** now replace "ask sales": (1) abuse-monitoring approval, (2) an executed Modified Retention amendment — a contract act that belongs beside A1a, (3) a project in the Europe region. Whether the **existing** dedicated project (A2) can be moved to a region or must be recreated is **not established by the documentation** and is account evidence. |
+| A4 | Zero data retention confirmed **for that project** | `OPEN – approval required` | Provider request submitted and acknowledged 2026-08-17. **No provider response was ever received.** Deliberately deferred 2026-09-18. Documented path: ZDR *"requires prior approval"*; once approved it is configured by the customer under *"Settings → Organization → Data controls"* at organisation or project level. | 2026-09-18 | partial | operator | `ZERO_RETENTION` records an assertion only. Approval is genuinely a provider decision — this is one of the few rows where that is true. Once granted, the setting is **visible in our own console** and becomes account evidence rather than a sales question. |
 | A5 | Endpoint `/v1/chat/completions` available on the approved regional endpoint | **`VERIFIED – public provider documentation`** *(general support only)* | API reference documents `POST /v1/chat/completions` as current with no deprecation notice on the endpoint. The data-controls guide lists it among the endpoints covered by data residency **and** among the ZDR-eligible endpoints. | 2026-09-18 | yes (documentation) | operator | Establishes that the path exists, is supported and is in scope for both programmes. Does **not** establish that our project reaches it in a given region — that is A13 + A3. |
 | A6 | That endpoint supports `response_format: json_schema` as used | **`VERIFIED – public provider documentation`** | The Chat Completions API reference documents `response_format` and states that setting `{ "type": "json_schema", "json_schema": {...} }` *"enables Structured Outputs which ensures the model will match your supplied JSON schema"*. | 2026-09-18 | yes (documentation) | operator | Structured output is load-bearing, not cosmetic. **Directional note:** the Structured Outputs *guide* is now written around the Responses API and the provider recommends Responses for new projects while stating Chat Completions remains supported. Not a blocker; a reason to keep the adapter's endpoint choice under review. Model-side support is A9/A10. |
 | A7 | Endpoint compatible with the agreed retention/ZDR configuration | **`VERIFIED – public provider documentation`** *(endpoint eligibility only)* | The data-controls guide lists `/v1/chat/completions` among the ZDR-eligible endpoints and states that under ZDR *"the `store` parameter for `/v1/responses` and `v1/chat/completions` will always be treated as `false`, even if the request attempts to set the value to `true`"*. | 2026-09-18 | yes (documentation) | operator | The endpoint is **capable** of running under a ZDR arrangement. Whether ZDR is active for our organisation/project is **A4 and stays open**. The adapter sets no `store` parameter either way. |
@@ -392,8 +393,8 @@ genuinely need a provider decision**, and **two carry a legal component**.
 
 | # | Requirement | Evidence source | Evidence type | Assessment | Status | Remaining gap |
 |---|---|---|---|---|---|---|
-| A3 | Data residency for the project | data-controls guide; residency announcement | public documentation **+** provider approval **+** contract | Path documented: per-project region at creation, abuse-monitoring approval, Modified Retention amendment | `OPEN – deferred` | Approval, amendment, and an EU-region project. Whether the existing project can change region: **UNKNOWN** |
-| A4 | Zero data retention for the project | data-controls guide | public documentation **+** provider approval | Requires prior approval; afterwards self-serve in our console | `OPEN – deferred` | The approval itself |
+| A3 | Data residency for the project | data-controls guide; residency announcement | public documentation **+** provider approval **+** contract | Path documented: per-project region at creation, abuse-monitoring approval, Modified Retention amendment | `OPEN – approval required` | Approval, amendment, and an EU-region project. Whether the existing project can change region: **UNKNOWN** |
+| A4 | Zero data retention for the project | data-controls guide | public documentation **+** provider approval | Requires prior approval; afterwards self-serve in our console | `OPEN – approval required` | The approval itself |
 | A5 | Endpoint available | API reference; data-controls guide | **public documentation** | Current, not deprecated, in scope for residency and ZDR | **`VERIFIED`** *(general)* | Reaching it in a region depends on A13/A3 |
 | A6 | `response_format: json_schema` | Chat Completions API reference | **public documentation** | Parameter documented as enabling Structured Outputs | **`VERIFIED`** | Model-side support is A9/A10 |
 | A7 | Endpoint compatible with ZDR | data-controls guide | **public documentation** | Endpoint is ZDR-eligible; `store` forced to `false` under ZDR | **`VERIFIED`** *(eligibility only)* | Our ZDR status = A4 |
@@ -435,7 +436,7 @@ genuinely need a provider decision**, and **two carry a legal component**.
 - **No** provider was configured, activated, contacted or paid.
 - **No** code, flag, key, host or model was changed. `APPROVED_PROVIDER_HOSTS`
   is still empty and both feature flags are still off.
-- **A3 and A4 remain deferred.** Documentation of a *path* is not an approval,
+- **A3 and A4 remain open (`OPEN – approval required`).** Documentation of a *path* is not an approval,
   and a documented regional host is not our project being in that region.
 - **`NO-GO FOR PRODUCTION ACTIVATION`** stands.
 
@@ -456,6 +457,80 @@ because it was simply wrong about our endpoint.
 - [Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs) — model floor for `response_format: json_schema`
 - [Production best practices](https://developers.openai.com/api/docs/guides/production-best-practices) — key types, scoping, expiry and rotation
 - [Introducing data residency in Europe](https://openai.com/index/introducing-data-residency-in-europe/) and [Data residency for the OpenAI API](https://help.openai.com/en/articles/10503543-data-residency-for-the-openai-api) — regional availability *(referenced; the data-controls guide is the first-party source used for every statement above)*
+
+---
+
+### 12.5 Combined A3/A4 provider request — prepared 2026-09-18
+
+Re-checked against the data-controls guide the same day. Relevant, and
+unchanged from §12.1: non-US residency requires approval for abuse-monitoring
+controls (Zero Data Retention **or** Modified Abuse Monitoring) **and** an
+executed Modified Retention amendment; the region is chosen from a dropdown
+**when a project is created**; ZDR and residency are **separate** controls;
+`/v1/chat/completions` is listed for both. The documentation names one channel:
+the sales team, via <https://openai.com/contact-sales>.
+
+**Status of this request: prepared, not yet submitted.** Submission is the
+operator's act. Two fields are filled in at submission and deliberately not
+recorded here: the organization ID and the reply address.
+
+> **Subject:** Zero Data Retention and Europe Data Residency — healthcare use case (Germany)
+>
+> Hello,
+>
+> We operate MedScoutX, healthcare software based in Germany. We are requesting
+> Zero Data Retention and Europe Data Residency for our API organization. We sent
+> a similar request on 2026-08-17; it was acknowledged but not answered, so this
+> message restates it in full.
+>
+> **Use case.** A patient can have a medical document that their doctor's practice
+> has released to them translated into another language or rewritten in plain
+> language. It runs only when the patient starts it. Before any request, our
+> servers replace known personal identifiers, medications, dosages and measured
+> values with placeholders, and send text segments only — never files and never
+> our internal identifiers. We call `/v1/chat/completions` with Structured Outputs
+> (`response_format: json_schema`); no tools, no file uploads, no conversation
+> state, and `store` is not set. The content is special-category health data under
+> Art. 9 GDPR and is processed deliberately. Masking reduces identifiers; it does
+> not anonymise the text.
+>
+> **Current status.** We have an executed Data Processing Addendum with OpenAI
+> (version v.010126, signed 2026-08-16). A dedicated API project for this feature
+> already exists in our organization. The feature is built but switched off: no
+> document content has been sent to OpenAI, and none will be until these points
+> are approved and our own legal review is complete.
+>
+> **We are asking for:**
+> 1. Zero Data Retention approval for our organization, applied to the dedicated project.
+> 2. Eligibility for Europe Data Residency, including approval of the required
+>    abuse monitoring controls and the Modified Retention amendment.
+> 3. Confirmation that `/v1/chat/completions` with Structured Outputs is supported
+>    for our project under both Zero Data Retention and Europe Data Residency.
+> 4. The exact next steps to set up the Europe-region project — in particular,
+>    whether our existing project can be moved to the Europe region or a new
+>    project must be created.
+>
+> Please tell us which documents or details you need from us.
+>
+> Organization ID: `[add at submission]`
+>
+> Kind regards,
+> Himan Khorshidi — MedScoutX
+> `[reply address, add at submission]`
+
+**Evidence expected back** — each recorded here only as *"Evidence checked on
+YYYY-MM-DD – stored externally"*:
+
+| For | Evidence |
+|---|---|
+| A4 | written ZDR approval; console view of *Settings → Organization → Data controls* showing ZDR active for the organization or the project, identifiers blacked out |
+| A3 | written approval of abuse-monitoring controls for our organization; the **executed** Modified Retention amendment; console view of the project showing region *Europe*, identifiers blacked out |
+| A3/A4 | the provider's answer on moving the existing project vs. creating a new one |
+| A5–A7 (confirmation) | the provider's statement that `/v1/chat/completions` with Structured Outputs works for our project under both controls |
+| A13 (follows) | once A3 holds: the project answers on `eu.api.openai.com` — then, and only then, the reviewed one-line commit to `APPROVED_PROVIDER_HOSTS` |
+
+Silence is still not evidence. An automated acknowledgement confirms receipt,
+not approval.
 
 ---
 
