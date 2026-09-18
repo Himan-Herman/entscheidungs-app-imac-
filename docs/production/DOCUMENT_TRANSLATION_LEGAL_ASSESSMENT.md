@@ -331,7 +331,7 @@ Standardvertragsklauseln.
 | Art. 9 | **OPEN** — Feld 3 |
 | Datenkategorien | geklärt (Dokumentinhalt, Protokoll) |
 | Empfänger | geklärt: OpenAI — Gesellschaft und Region hängen an A3 |
-| Konkreter Dienstleister | **Nennung erforderlich** (Art. 13 Abs. 1 lit. e bzw. Art. 14 Abs. 1 lit. e) — `LEGAL DISCLOSURE REQUIRED` |
+| Konkreter Dienstleister | **OPEN.** Art. 13 Abs. 1 lit. e bzw. Art. 14 Abs. 1 lit. e verlangen *„gegebenenfalls die Empfänger oder Kategorien von Empfängern"* (FACT). Ob der Dienstleister namentlich oder als Kategorie zu nennen ist, entscheidet die Prüfung; `LEGAL DISCLOSURE REQUIRED` markiert die Stelle, damit er nicht stillschweigend fehlt |
 | Drittland / Region | **OPEN** — A3, §13 |
 | Rechtsgrundlage Transfer | **OPEN** — §13 |
 | Speicherfristen | teilweise — Protokoll **OPEN** (Feld 11), Anbieter **UNKNOWN** |
