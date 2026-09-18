@@ -420,33 +420,32 @@ router.delete("/delete", accountDeleteLimiter, async (req, res) => {
       // ── Billing plausibility cleanup (Phase D2 — GDPR Art. 17 erasure) ──────
       // BillingPlausibilitySession.practiceProfileId and .createdByUserId are
       // SCALAR foreign keys (no Prisma @relation to User/PracticeProfile), so
-      // there is NO database-level cascade when the user or their practice
-      // profiles are deleted below. Without this explicit step, billing
-      // sessions (which may contain contextText, resultSummaryJson and staff
-      // user IDs) would be orphaned after account deletion.
+      // there is NO database-level cascade when the user or their practices go.
+      // Without explicit deletion, billing sessions (which may contain
+      // contextText, resultSummaryJson and staff user IDs) would be orphaned.
       //
-      // Sessions in scope = those created by this user OR owned by any practice
-      // profile this user owns. We resolve the practice IDs BEFORE deleting the
-      // practice profiles further down, so ordering matters.
+      // Two scopes, handled in two places, and the split is deliberate:
+      //
+      //   Sessions of practices this user OWNS — deleted in step 1 above, by
+      //   deletePracticeWithArchivedContext, immediately before each practice
+      //   row. That is the one function every practice deletion goes through,
+      //   so the practice route gets the same cleanup.
+      //
+      //   Sessions this user CREATED at practices they do NOT own (as a staff
+      //   member) — deleted here. Those practices keep existing, so nothing
+      //   else would ever remove the rows this user authored.
+      //
+      // This block used to resolve owned practices itself, with a note that the
+      // lookup had to run before the practices were deleted "further down". Once
+      // practice deletion moved to step 1, that lookup always came back empty and
+      // every session created by another member of an owned practice survived the
+      // owner's erasure. Resolving it here again would repeat that mistake.
       //
       // Item and AuditLog rows DO cascade from their session
       // (onDelete: Cascade), but we delete them explicitly in dependency order
       // for defense-in-depth and to keep the erasure intent self-evident.
-      const ownedPractices = await tx.practiceProfile.findMany({
-        where: { userId },
-        select: { id: true },
-      });
-      const ownedPracticeIds = ownedPractices.map((p) => p.id);
-
       const billingSessions = await tx.billingPlausibilitySession.findMany({
-        where: {
-          OR: [
-            { createdByUserId: userId },
-            ...(ownedPracticeIds.length
-              ? [{ practiceProfileId: { in: ownedPracticeIds } }]
-              : []),
-          ],
-        },
+        where: { createdByUserId: userId },
         select: { id: true },
       });
       const billingSessionIds = billingSessions.map((s) => s.id);

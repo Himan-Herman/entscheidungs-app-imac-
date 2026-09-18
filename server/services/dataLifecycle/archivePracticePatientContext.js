@@ -396,10 +396,43 @@ export async function deletePracticeWithArchivedContext(input) {
     throw err;
   }
 
+  // Billing plausibility data of this practice (GDPR Art. 17). It MUST go here,
+  // before the practice row, and it must go here rather than at each caller.
+  //
+  // BillingPlausibilitySession.practiceProfileId is a scalar key with no Prisma
+  // relation and no database foreign key, so deleting the practice cascades to
+  // nothing: every session of the practice — including those created by staff
+  // members, not the owner — would survive as an orphan holding the practice's
+  // submitted billing data and staff user ids. Both deletion paths (the practice
+  // route and account erasure) run through this function; cleaning up at one of
+  // them only is exactly how the other one came to orphan everything.
+  //
+  // Items and audit rows cascade from their session, but are deleted explicitly
+  // in dependency order so the erasure is self-evident and does not rest on a
+  // cascade nobody reads.
+  const billingSessions = await tx.billingPlausibilitySession.findMany({
+    where: { practiceProfileId },
+    select: { id: true },
+  });
+  const billingSessionIds = billingSessions.map((s) => s.id);
+  let billingSessionsDeleted = 0;
+  if (billingSessionIds.length > 0) {
+    await tx.billingPlausibilityAuditLog.deleteMany({
+      where: { sessionId: { in: billingSessionIds } },
+    });
+    await tx.billingPlausibilityItem.deleteMany({
+      where: { sessionId: { in: billingSessionIds } },
+    });
+    const removed = await tx.billingPlausibilitySession.deleteMany({
+      where: { id: { in: billingSessionIds } },
+    });
+    billingSessionsDeleted = removed.count;
+  }
+
   const deleted = await tx.practiceProfile.deleteMany({ where: { id: practiceProfileId } });
   if (deleted.count === 0) throw new Error("practice_not_found");
 
-  return { archived, grants };
+  return { archived, grants, billing: { sessionsDeleted: billingSessionsDeleted } };
 }
 
 /**

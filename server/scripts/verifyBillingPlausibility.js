@@ -874,14 +874,61 @@ assert(
   !REPORT_SERVICE.includes('from "openai"') && !REPORT_SERVICE.includes("openai.chat"),
 );
 
-// ─── 16. Account deletion — billing plausibility cleanup (Phase D2) ───────────
+// ─── 16. Practice and account deletion — billing plausibility cleanup (Phase D2) ─
 // BillingPlausibilitySession uses scalar FKs (no @relation to User/PracticeProfile)
-// so there is no DB cascade. The account-deletion transaction MUST delete billing
-// sessions (and their items/audit logs) explicitly, ordered before practiceProfile
-// deletion, or rows are orphaned (GDPR Art. 17 erasure gap).
+// so there is no DB cascade. Every path that deletes a practice MUST delete that
+// practice's billing sessions (and their items/audit logs) explicitly, before the
+// practiceProfile row, or rows are orphaned (GDPR Art. 17 erasure gap).
+//
+// Since the lifecycle work, a practice is deleted in exactly ONE place —
+// deletePracticeWithArchivedContext — which both the practice route and account
+// erasure call. The ordering invariant is therefore checked THERE, where the
+// practiceProfile.deleteMany actually runs. It used to be checked in account.js,
+// and when the deletion moved into the shared service that check could no longer
+// find it; the account route meanwhile kept resolving "owned practices" after
+// they were already gone and orphaned every session created by another member.
+// Both halves are asserted below, plus a guard against that exact regression.
 {
   const ACCOUNT_ROUTE = read("server/routes/account.js");
+  const PRACTICE_DELETION = read("server/services/dataLifecycle/archivePracticePatientContext.js");
 
+  // ── (a) the shared practice deletion: the original invariant, at its real home
+  const fnStart = PRACTICE_DELETION.indexOf("export async function deletePracticeWithArchivedContext");
+  const fnEnd = PRACTICE_DELETION.indexOf("\nexport ", fnStart + 1);
+  const PRACTICE_FN = fnStart === -1 ? "" : PRACTICE_DELETION.slice(fnStart, fnEnd === -1 ? undefined : fnEnd);
+
+  assert(
+    "practice deletion: deletePracticeWithArchivedContext exists",
+    PRACTICE_FN.length > 0,
+  );
+  assert(
+    "practice deletion: selects the practice's billing sessions by practiceProfileId",
+    /billingPlausibilitySession\.findMany\(\{\s*where:\s*\{\s*practiceProfileId\s*\}/.test(PRACTICE_FN),
+  );
+
+  const pAuditPos = PRACTICE_FN.indexOf("tx.billingPlausibilityAuditLog.deleteMany");
+  const pItemPos = PRACTICE_FN.indexOf("tx.billingPlausibilityItem.deleteMany");
+  const pSessionPos = PRACTICE_FN.indexOf("tx.billingPlausibilitySession.deleteMany");
+  const pPracticePos = PRACTICE_FN.indexOf("tx.practiceProfile.deleteMany");
+  assert(
+    "practice deletion: audit-log deletion precedes item deletion (dependency order)",
+    pAuditPos !== -1 && pItemPos !== -1 && pAuditPos < pItemPos,
+  );
+  assert(
+    "practice deletion: item deletion precedes session deletion (dependency order)",
+    pItemPos !== -1 && pSessionPos !== -1 && pItemPos < pSessionPos,
+  );
+  assert(
+    "practice deletion: billing session deletion precedes practiceProfile deletion",
+    pSessionPos !== -1 && pPracticePos !== -1 && pSessionPos < pPracticePos,
+  );
+
+  // ── (b) account erasure: owned practices go through (a), authored sessions here
+  const svcCallPos = ACCOUNT_ROUTE.indexOf("deletePracticeWithArchivedContext(");
+  assert(
+    "account delete: owned practices are deleted through deletePracticeWithArchivedContext",
+    svcCallPos !== -1,
+  );
   assert(
     "account delete: references billingPlausibilitySession cleanup",
     ACCOUNT_ROUTE.includes("billingPlausibilitySession"),
@@ -895,25 +942,17 @@ assert(
     ACCOUNT_ROUTE.includes("billingPlausibilityAuditLog.deleteMany"),
   );
   assert(
-    "account delete: scopes sessions by createdByUserId",
-    ACCOUNT_ROUTE.includes("createdByUserId"),
-  );
-  assert(
-    "account delete: scopes sessions by owned practiceProfileId",
-    ACCOUNT_ROUTE.includes("practiceProfileId"),
+    "account delete: scopes authored sessions by createdByUserId",
+    /billingPlausibilitySession\.findMany\(\{\s*where:\s*\{\s*createdByUserId:\s*userId\s*\}/.test(ACCOUNT_ROUTE),
   );
   assert(
     "account delete: billing cleanup runs inside the prisma transaction",
     ACCOUNT_ROUTE.includes("tx.billingPlausibilitySession.deleteMany"),
   );
 
-  // Ordering: audit log + item + session deletions must all precede the
-  // practiceProfile.deleteMany call so practice IDs are still resolvable and
-  // no orphan remains.
   const sessionDelPos = ACCOUNT_ROUTE.indexOf("tx.billingPlausibilitySession.deleteMany");
   const auditDelPos = ACCOUNT_ROUTE.indexOf("tx.billingPlausibilityAuditLog.deleteMany");
   const itemDelPos = ACCOUNT_ROUTE.indexOf("tx.billingPlausibilityItem.deleteMany");
-  const practiceDelPos = ACCOUNT_ROUTE.indexOf("tx.practiceProfile.deleteMany");
   assert(
     "account delete: audit-log deletion precedes item deletion (dependency order)",
     auditDelPos !== -1 && itemDelPos !== -1 && auditDelPos < itemDelPos,
@@ -922,9 +961,14 @@ assert(
     "account delete: item deletion precedes session deletion (dependency order)",
     itemDelPos !== -1 && sessionDelPos !== -1 && itemDelPos < sessionDelPos,
   );
+
+  // ── (c) the regression guard. After the owned practices have been deleted,
+  // looking them up again always returns nothing — that is how the orphan came
+  // about. No practiceProfile lookup may follow the shared deletion call.
+  const afterDeletion = svcCallPos === -1 ? "" : ACCOUNT_ROUTE.slice(svcCallPos);
   assert(
-    "account delete: billing session deletion precedes practiceProfile deletion",
-    sessionDelPos !== -1 && practiceDelPos !== -1 && sessionDelPos < practiceDelPos,
+    "account delete: no practiceProfile lookup after the practices are deleted",
+    svcCallPos !== -1 && !afterDeletion.includes("tx.practiceProfile.findMany"),
   );
 }
 
