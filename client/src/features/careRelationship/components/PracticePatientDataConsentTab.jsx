@@ -4,6 +4,7 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { fetchPracticePatientConsents } from "../api/practicePatientsApi.js";
+import RequestStatus from "./RequestStatus.jsx";
 import {
   fetchPracticeDataRequests,
   patchPracticeDataRequestStatus,
@@ -135,13 +136,24 @@ export default function PracticePatientDataConsentTab({ linkId, practiceId, read
     <div className="practice-dataconsent">
       {error ? <p className="practice-dashboard__error" role="alert">{error}</p> : null}
 
-      <section className="practice-dashboard__card" aria-labelledby="dataconsent-consents">
-        <h2 id="dataconsent-consents" className="practice-dashboard__analytics-heading">
-          {t.dataConsentConsentsTitle}
-        </h2>
-        <p className="practice-dashboard__muted">{t.dataConsentConsentsIntro}</p>
+      {/* READ-ONLY: what the patient granted. Deliberately not a card with
+          controls — nothing here can be changed by the practice. */}
+      <section className="practice-dataconsent__readonly" aria-labelledby="dataconsent-consents">
+        <div className="practice-dataconsent__head">
+          <h2 id="dataconsent-consents" className="practice-dataconsent__title">
+            {t.dataConsentConsentsTitle}
+          </h2>
+          <span className="practice-dataconsent__readonly-tag">
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+              <path d="M5 7V5.2a3 3 0 0 1 6 0V7M4.2 7h7.6v6.3H4.2z" fill="none" stroke="currentColor"
+                strokeWidth="1.4" strokeLinejoin="round" />
+            </svg>
+            {t.dataConsentReadOnly}
+          </span>
+        </div>
+        <p className="practice-dataconsent__intro">{t.dataConsentConsentsIntro}</p>
         {consents === null && !error ? (
-          <p className="practice-dashboard__muted" role="status">{t.loading}</p>
+          <p className="practice-dataconsent__intro" role="status">{t.loading}</p>
         ) : null}
         {consents !== null && granted.length === 0 ? (
           <p className="practice-dataconsent__empty">{t.dataConsentConsentsNone}</p>
@@ -163,11 +175,12 @@ export default function PracticePatientDataConsentTab({ linkId, practiceId, read
         ) : null}
       </section>
 
-      <section className="practice-dashboard__card" aria-labelledby="dataconsent-requests">
-        <h2 id="dataconsent-requests" className="practice-dashboard__analytics-heading">
+      {/* WORK AREA: the patient's data requests, answered here. */}
+      <section className="practice-dataconsent__work" aria-labelledby="dataconsent-requests">
+        <h2 id="dataconsent-requests" className="practice-dataconsent__title">
           {t.dataConsentRequestsTitle}
         </h2>
-        <p className="practice-dashboard__muted">{t.dataConsentRequestsIntro}</p>
+        <p className="practice-dataconsent__intro">{t.dataConsentRequestsIntro}</p>
         {readOnly ? <p className="practice-record__viewer-note">{tReq.viewerReadOnly}</p> : null}
 
         {requests !== null && requests.length === 0 ? (
@@ -179,74 +192,85 @@ export default function PracticePatientDataConsentTab({ linkId, practiceId, read
             {requests.map((req) => {
               const draft = draftOf(req);
               const open = OPEN.has(req.status);
+              const busy = busyId === req.id;
               return (
                 <li key={req.id} className="practice-dataconsent__request">
                   <div className="practice-dataconsent__request-head">
-                    <strong>{typeLabel(req.type)}</strong>
-                    <span className={`practice-dataconsent__status practice-dataconsent__status--${req.status}`}>
-                      {statusLabel(req.status)}
-                    </span>
-                    <span className="practice-dataconsent__date">{fmt(req.createdAt, language)}</span>
+                    <h3 className="practice-dataconsent__request-title">{typeLabel(req.type)}</h3>
+                    <RequestStatus status={req.status} label={statusLabel(req.status)} />
                   </div>
+                  <p className="practice-dataconsent__date">
+                    {t.dataConsentReceivedOn.replace("{date}", fmt(req.createdAt, language))}
+                  </p>
 
                   {req.reason ? (
-                    <p className="practice-dataconsent__text">
-                      <span className="practice-dataconsent__label">{t.dataConsentPatientReason}</span>
-                      {req.reason}
-                    </p>
+                    <div className="practice-dataconsent__text">
+                      <p className="practice-dataconsent__label">{t.dataConsentPatientReason}</p>
+                      <p className="practice-dataconsent__body">{req.reason}</p>
+                    </div>
                   ) : null}
+
                   {req.responseNote ? (
-                    <p className="practice-dataconsent__text">
-                      <span className="practice-dataconsent__label">{t.dataConsentResponseSent}</span>
-                      {req.responseNote}
-                    </p>
+                    <figure className="practice-dataconsent__answer">
+                      <figcaption className="practice-dataconsent__label">
+                        {t.dataConsentResponseSent}
+                        <span className="practice-dataconsent__visible"> · {t.dataConsentVisibleToPatient}</span>
+                      </figcaption>
+                      <blockquote className="practice-dataconsent__body">{req.responseNote}</blockquote>
+                    </figure>
                   ) : null}
 
                   {canEdit && open ? (
                     <div className="practice-dataconsent__form">
-                      <label>
-                        <span>{t.dataConsentStatusLabel}</span>
+                      <div className="practice-dataconsent__field">
+                        <label htmlFor={`dc-status-${req.id}`}>{t.dataConsentStatusLabel}</label>
                         <select
+                          id={`dc-status-${req.id}`}
                           value={draft.status}
                           onChange={(e) => setDraft(req, { status: e.target.value })}
-                          disabled={busyId === req.id}
+                          disabled={busy}
+                          aria-describedby={req.type === "deletion" ? `dc-del-${req.id}` : undefined}
                         >
-                          {optionsFor(req).map((s) => (
-                            <option key={s} value={s}>{statusLabel(s)}</option>
+                          {optionsFor(req).map((st) => (
+                            <option key={st} value={st}>{statusLabel(st)}</option>
                           ))}
                         </select>
-                      </label>
-                      {req.type === "deletion" ? (
-                        <p className="practice-dashboard__muted">{t.dataConsentDeletionManual}</p>
-                      ) : null}
-                      <label>
-                        <span>{t.dataConsentResponseLabel}</span>
+                        {req.type === "deletion" ? (
+                          <p className="practice-dataconsent__hint" id={`dc-del-${req.id}`}>
+                            {t.dataConsentDeletionManual}
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="practice-dataconsent__field">
+                        <label htmlFor={`dc-note-${req.id}`}>{t.dataConsentResponseLabel}</label>
                         <textarea
-                          rows={3}
+                          id={`dc-note-${req.id}`}
+                          rows={4}
                           maxLength={2000}
                           value={draft.note}
                           onChange={(e) => setDraft(req, { note: e.target.value })}
-                          disabled={busyId === req.id}
-                          aria-describedby={`dataconsent-note-hint-${req.id}`}
+                          disabled={busy}
+                          aria-describedby={`dc-note-hint-${req.id}`}
                         />
-                        <span className="practice-dashboard__muted" id={`dataconsent-note-hint-${req.id}`}>
+                        <p className="practice-dataconsent__hint" id={`dc-note-hint-${req.id}`}>
                           {t.dataConsentResponseHint}
-                        </span>
-                      </label>
+                        </p>
+                      </div>
                       <button
                         type="button"
-                        className="patient-threads__btn"
+                        className="practice-dataconsent__save"
                         onClick={() => save(req)}
-                        disabled={busyId === req.id}
+                        disabled={busy}
+                        aria-busy={busy || undefined}
                       >
-                        {busyId === req.id ? t.dataConsentSaving : t.dataConsentSave}
+                        {busy ? t.dataConsentSaving : t.dataConsentSave}
                       </button>
                     </div>
                   ) : null}
 
                   {notice?.id === req.id ? (
                     <p
-                      className={notice.kind === "ok" ? "practice-dashboard__muted" : "practice-dashboard__error"}
+                      className={`practice-dataconsent__notice practice-dataconsent__notice--${notice.kind}`}
                       role={notice.kind === "ok" ? "status" : "alert"}
                     >
                       {notice.text}

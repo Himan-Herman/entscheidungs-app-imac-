@@ -27,7 +27,9 @@ function fmt(iso, lang, fallback) {
 
 function typeLabel(type, t) {
   const key = `type_${type}`;
-  return t[key] || t.notAvailable;
+  // An event this page has no words for is still an event: say so plainly
+  // rather than showing a fallback like "not available".
+  return t[key] || t.type_fallback || t.notAvailable;
 }
 
 /**
@@ -51,7 +53,7 @@ export default function PatientActivityPage({ scopedLinkId = "" } = {}) {
   const typeOptions = useMemo(
     () =>
       Object.keys(t)
-        .filter((k) => k.startsWith("type_"))
+        .filter((k) => k.startsWith("type_") && k !== "type_fallback")
         .map((k) => k.slice(5))
         .sort(),
     [t],
@@ -169,6 +171,67 @@ export default function PatientActivityPage({ scopedLinkId = "" } = {}) {
     }
   }
 
+  const filterForm = (
+    <form className="patient-data-control__filters" onSubmit={applyFilters}>
+      <label>
+        <span>{t.filterType}</span>
+        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+          <option value="">{t.filterTypeAll}</option>
+          {typeOptions.map((opt) => (
+            <option key={opt} value={opt}>
+              {typeLabel(opt, t)}
+            </option>
+          ))}
+        </select>
+      </label>
+      {practices.length > 0 && !scopedLinkId ? (
+        <label>
+          <span>{t.filterPractice}</span>
+          <select
+            value={linkId}
+            onChange={(e) => onPracticeFilterChange(e.target.value)}
+            aria-label={t.filterPractice}
+          >
+            <option value="">{t.allPractices}</option>
+            {practices.map((p) => (
+              <option key={p.linkId} value={p.linkId}>
+                {p.practice?.practiceName || t.practiceUnknown}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      <label>
+        <span>{t.filterSearch}</span>
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t.filterSearchPlaceholder}
+        />
+      </label>
+      <label>
+        <span>{t.filterFrom}</span>
+        <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+      </label>
+      <label>
+        <span>{t.filterTo}</span>
+        <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+      </label>
+      <button type="submit" className="patient-threads__btn patient-threads__btn--secondary">
+        {t.applyFilters}
+      </button>
+      <button
+        type="button"
+        className="patient-threads__btn patient-threads__btn--secondary"
+        disabled={aiBusy}
+        onClick={loadAi}
+      >
+        {aiBusy ? t.aiSummaryLoading : t.aiSummaryButton}
+      </button>
+    </form>
+  );
+
   return (
     <div className="patient-inbox">
       <nav className="patient-activity__nav" aria-label={t.backHub}>
@@ -178,7 +241,7 @@ export default function PatientActivityPage({ scopedLinkId = "" } = {}) {
               {tContext.backToHub}
             </Link>
             <Link className="patient-inbox__back" to={`${scopedBase}/data-control`}>
-              {t.backDataControl}
+              {tContext.dataControlTitle}
             </Link>
           </>
         ) : (
@@ -194,67 +257,18 @@ export default function PatientActivityPage({ scopedLinkId = "" } = {}) {
       </nav>
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{t.heading}</h1>
-        <p className="patient-inbox__intro">{t.intro}</p>
+        <p className="patient-inbox__intro">{scopedLinkId ? t.introScoped : t.intro}</p>
       </header>
 
-      <form className="patient-data-control__filters" onSubmit={applyFilters}>
-        <label>
-          <span>{t.filterType}</span>
-          <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-            <option value="">{t.filterTypeAll}</option>
-            {typeOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {typeLabel(opt, t)}
-              </option>
-            ))}
-          </select>
-        </label>
-        {practices.length > 0 && !scopedLinkId ? (
-          <label>
-            <span>{t.filterPractice}</span>
-            <select
-              value={linkId}
-              onChange={(e) => onPracticeFilterChange(e.target.value)}
-              aria-label={t.filterPractice}
-            >
-              <option value="">{t.allPractices}</option>
-              {practices.map((p) => (
-                <option key={p.linkId} value={p.linkId}>
-                  {p.practice?.practiceName || t.practiceUnknown}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-        <label>
-          <span>{t.filterSearch}</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={t.filterSearchPlaceholder}
-          />
-        </label>
-        <label>
-          <span>{t.filterFrom}</span>
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-        </label>
-        <label>
-          <span>{t.filterTo}</span>
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-        </label>
-        <button type="submit" className="patient-threads__btn patient-threads__btn--secondary">
-          {t.applyFilters}
-        </button>
-        <button
-          type="button"
-          className="patient-threads__btn patient-threads__btn--secondary"
-          disabled={aiBusy}
-          onClick={loadAi}
-        >
-          {aiBusy ? t.aiSummaryLoading : t.aiSummaryButton}
-        </button>
-      </form>
+      {scopedLinkId ? (
+        // One practice has few events: the list comes first, the tools fold away.
+        <details className="patient-activity__tools">
+          <summary className="patient-activity__tools-summary">{t.filtersToggle}</summary>
+          {filterForm}
+        </details>
+      ) : (
+        filterForm
+      )}
 
       {aiSummary ? (
         <aside className="patient-data-control__ai-box" aria-labelledby="patient-act-ai">
@@ -298,7 +312,7 @@ export default function PatientActivityPage({ scopedLinkId = "" } = {}) {
                     <span className="practice-record__activity-type">
                       {typeLabel(ev.type, t)}
                     </span>
-                    {practiceName ? (
+                    {practiceName && !scopedLinkId ? (
                       <span className="practice-record__activity-practice">{practiceName}</span>
                     ) : null}
                   </div>

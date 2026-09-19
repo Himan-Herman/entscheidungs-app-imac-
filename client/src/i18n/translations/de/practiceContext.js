@@ -1,9 +1,10 @@
 export default {
+  yourDataHeading: "Ihre Daten bei dieser Praxis",
   backToHub: "Zurück zur Übersicht dieser Praxis",
   dataControlTitle: "Meine Daten & Freigaben",
-  dataControlHint: "Freigaben, Archiv, Löschanfragen",
+  dataControlHint: "Was diese Praxis sehen darf – und Ihre Anfragen",
   activityTitle: "Meine Aktivität",
-  activityHint: "Transparenz zu Praxisereignissen",
+  activityHint: "Was zwischen Ihnen und dieser Praxis geschehen ist",
   loading: "Praxis-Bereich wird geladen …",
   notFoundTitle: "Bereich nicht verfügbar",
   notFoundBody:

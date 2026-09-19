@@ -8,6 +8,7 @@ import ArchiveRelationshipDialog from "../components/ArchiveRelationshipDialog.j
 import ExportRequestDialog from "../components/ExportRequestDialog.jsx";
 import PatientPracticeDoctorSelect from "../components/PatientPracticeDoctorSelect.jsx";
 import ScopedConsentSummary from "../components/ScopedConsentSummary.jsx";
+import RequestStatus from "../components/RequestStatus.jsx";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   fetchPatientDataControl,
@@ -57,6 +58,15 @@ function fmtActivity(iso, lang, fallback) {
       dateStyle: "medium",
       timeStyle: "short",
     });
+  } catch {
+    return fallback;
+  }
+}
+
+function fmtDate(iso, lang, fallback) {
+  if (!iso) return fallback;
+  try {
+    return new Date(iso).toLocaleDateString(getPrimaryIntlLocale(lang), { dateStyle: "medium" });
   } catch {
     return fallback;
   }
@@ -356,40 +366,81 @@ export default function PatientDataControlPage({ scopedLinkId = "" } = {}) {
     }
   }
 
-  return (
-    <div className="patient-inbox">
-      <Link className="patient-inbox__back" to={scoped ? scopedBase : "/patient/practice"}>
-        {scoped ? tContext.backToHub : t.backHub}
+  /**
+   * One data request, as the patient reads it: what was asked, where it
+   * stands, and — set apart — what the practice answered.
+   */
+  function renderRequest(req, withPractice) {
+    const explaining = aiSummaryBusy && aiSummaryId === req.id;
+    return (
+      <li key={req.id} className="dc-request">
+        <div className="dc-request__head">
+          <h3 className="dc-request__title">{requestTypeLabel(req.type, t)}</h3>
+          <RequestStatus status={req.status} label={requestStatusLabel(req.status, t)} />
+        </div>
+        <p className="dc-request__meta">
+          {withPractice && req.practice?.practiceName ? `${req.practice.practiceName} · ` : ""}
+          {t.requestedOn.replace("{date}", fmtDate(req.createdAt, language, t.notProvided))}
+        </p>
+        {req.reason ? (
+          <p className="dc-request__note">
+            <span className="dc-request__note-label">{t.yourNoteLabel}</span>
+            {req.reason}
+          </p>
+        ) : null}
+        {/* The practice's answer, verbatim — written for the patient, and
+            without it a "rejected" says nothing. Set apart as a reply. */}
+        {req.responseNote ? (
+          <figure className="dc-answer">
+            <figcaption className="dc-answer__label">{t.responseNoteLabel}</figcaption>
+            <blockquote className="dc-answer__text">{req.responseNote}</blockquote>
+          </figure>
+        ) : null}
+        <button
+          type="button"
+          className="dc-request__explain"
+          disabled={explaining}
+          aria-busy={explaining || undefined}
+          onClick={() => explainRequest(req.id)}
+        >
+          {explaining ? t.aiSummaryLoading : t.aiSummaryButton}
+        </button>
+        {aiSummaryId === req.id && aiSummaryText ? (
+          <aside className="patient-data-control__ai-box" aria-labelledby={`ai-sum-${req.id}`}>
+            <h4 id={`ai-sum-${req.id}`} className="dc-request__note-label">
+              {t.aiSummaryHeading}
+            </h4>
+            <p className="patient-data-control__ai-hint">{t.aiHint}</p>
+            <p style={{ whiteSpace: "pre-wrap", margin: "0.35rem 0 0" }}>{aiSummaryText}</p>
+          </aside>
+        ) : null}
+      </li>
+    );
+  }
+
+  const crossView = (
+    <>
+      <Link className="patient-inbox__back" to="/patient/practice">
+        {t.backHub}
       </Link>
       <header className="patient-inbox__header">
         <h1 className="patient-inbox__title">{t.heading}</h1>
-        <p className="patient-inbox__intro">{scoped ? t.introScoped : t.intro}</p>
+        <p className="patient-inbox__intro">{t.intro}</p>
         <p className="patient-data-control__privacy" role="note">
           {t.privacyNotice}
         </p>
         <p style={{ marginTop: "0.75rem", display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-          <Link
-            className="patient-threads__btn patient-threads__btn--secondary"
-            to={scoped ? `${scopedBase}/activity` : "/patient/activity"}
-          >
+          <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/activity">
             {t.openActivity}
           </Link>
           <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/exports">
             {(getMessages(language).exports || getMessages("en").exports).headingPatient}
           </Link>
-          {scoped ? null : (
-            <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/consents">
-              {t.openConsents}
-            </Link>
-          )}
+          <Link className="patient-threads__btn patient-threads__btn--secondary" to="/patient/consents">
+            {t.openConsents}
+          </Link>
         </p>
       </header>
-
-      {/* Scoped: what THIS practice may see, first — that is the question a
-          patient opening "my data at this practice" has. */}
-      {scoped && !loading && !error && practices[0] ? (
-        <ScopedConsentSummary link={practices[0]} language={language} />
-      ) : null}
 
       {loading ? <p className="patient-inbox__muted">{t.loading}</p> : null}
       {error ? (
@@ -410,43 +461,8 @@ export default function PatientDataControlPage({ scopedLinkId = "" } = {}) {
           </h2>
           <p className="patient-inbox__muted">{t.requestsSectionIntro}</p>
           {requests.length > 0 ? (
-            <ul className="patient-inbox__list">
-              {requests.map((req) => (
-                <li key={req.id} className="patient-inbox__item" style={{ padding: "0.75rem 1rem" }}>
-                  <p className="patient-inbox__item-title">
-                    {req.practice?.practiceName || t.notProvided} — {requestTypeLabel(req.type, t)}
-                  </p>
-                  <p className="patient-inbox__item-meta">
-                    {requestStatusLabel(req.status, t)} · {fmtActivity(req.createdAt, language, t.notProvided)}
-                  </p>
-                  {/* The practice's answer, verbatim — it is written for the
-                      patient, and without it a "rejected" says nothing. */}
-                  {req.responseNote ? (
-                    <div className="patient-data-control__response">
-                      <p className="patient-data-control__response-label">{t.responseNoteLabel}</p>
-                      <p className="patient-data-control__response-text">{req.responseNote}</p>
-                    </div>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="patient-threads__btn patient-threads__btn--secondary"
-                    style={{ marginTop: "0.5rem" }}
-                    disabled={aiSummaryBusy && aiSummaryId === req.id}
-                    onClick={() => explainRequest(req.id)}
-                  >
-                    {aiSummaryBusy && aiSummaryId === req.id ? t.aiSummaryLoading : t.aiSummaryButton}
-                  </button>
-                  {aiSummaryId === req.id && aiSummaryText ? (
-                    <aside className="patient-data-control__ai-box" aria-labelledby={`ai-sum-${req.id}`}>
-                      <h3 id={`ai-sum-${req.id}`} className="patient-inbox__item-meta" style={{ fontWeight: 600 }}>
-                        {t.aiSummaryHeading}
-                      </h3>
-                      <p className="patient-data-control__ai-hint">{t.aiHint}</p>
-                      <p style={{ whiteSpace: "pre-wrap", margin: "0.35rem 0 0" }}>{aiSummaryText}</p>
-                    </aside>
-                  ) : null}
-                </li>
-              ))}
+            <ul className="dc-requests">
+              {requests.map((req) => renderRequest(req, true))}
             </ul>
           ) : (
             <p className="patient-inbox__muted">{t.requestsEmpty}</p>
@@ -528,19 +544,19 @@ export default function PatientDataControlPage({ scopedLinkId = "" } = {}) {
                 <div className="patient-data-control__actions">
                   <Link
                     className="patient-threads__btn patient-threads__btn--secondary"
-                    to={scoped ? `${scopedBase}/medication-plans` : "/patient/medication-plans"}
+                    to="/patient/medication-plans"
                   >
                     {t.openMedicationPlans}
                   </Link>
                   <Link
                     className="patient-threads__btn patient-threads__btn--secondary"
-                    to={scoped ? `${scopedBase}/documents` : "/patient/practice-documents"}
+                    to="/patient/practice-documents"
                   >
                     {t.openDocuments}
                   </Link>
                   <Link
                     className="patient-threads__btn patient-threads__btn--secondary"
-                    to={scoped ? `${scopedBase}/messages` : "/patient/messages"}
+                    to="/patient/messages"
                   >
                     {t.openMessages}
                   </Link>
@@ -629,6 +645,143 @@ export default function PatientDataControlPage({ scopedLinkId = "" } = {}) {
           })}
         </ul>
       ) : null}
+    </>
+  );
+
+  /*
+   * ONE practice. Ordered by what a patient opening "my data at this
+   * practice" wants to know: what may it see → what did I ask → what did it
+   * answer → the relationship itself. Same handlers and dialogs as the
+   * cross-practice view; only the arrangement differs.
+   */
+  const link = practices[0] || null;
+  const linkManageable = Boolean(link) && (link.status === "active" || link.status === "invited");
+  const scopedPendingDeletion = link
+    ? hasOpenType(link, "deletion") || hasOpenType(link, "access_restriction")
+    : false;
+  const scopedPendingExport = link ? hasOpenType(link, "export") : false;
+  const profileGranted = Boolean(link?.profileAccessGranted);
+
+  const scopedView = (
+    <>
+      <Link className="patient-inbox__back" to={scopedBase}>
+        {tContext.backToHub}
+      </Link>
+      <header className="patient-inbox__header">
+        <h1 className="patient-inbox__title">{t.heading}</h1>
+        <p className="patient-inbox__intro">{t.introScoped}</p>
+      </header>
+
+      {loading ? <p className="patient-inbox__muted" role="status">{t.loading}</p> : null}
+      {error ? <p className="patient-inbox__error" role="alert">{error}</p> : null}
+      {statusMsg ? <p className="dc-status-msg" role="status">{statusMsg}</p> : null}
+
+      {!loading && !error && link ? (
+        <>
+          <ScopedConsentSummary link={link} language={language}>
+            {linkManageable ? (
+              <div className="dc-profile">
+                <div className="dc-profile__text">
+                  <h3 className="dc-profile__title">{t.profileScopedTitle}</h3>
+                  <p className="dc-profile__state" aria-live="polite">
+                    {profileGranted ? t.profileScopedOn : t.profileScopedOff}
+                  </p>
+                </div>
+                {!profileGranted ? (
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    disabled={busyId === link.id}
+                    onClick={() => grantProfile(link)}
+                  >
+                    {t.grantProfile}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-data-control__btn--muted-danger"
+                    disabled={busyId === link.id}
+                    onClick={() => openRevokeDialog(link)}
+                  >
+                    {t.revokeProfile}
+                  </button>
+                )}
+              </div>
+            ) : null}
+          </ScopedConsentSummary>
+
+          <section className="dc-section" aria-labelledby="dc-requests-title">
+            <h2 id="dc-requests-title" className="dc-section__title">{t.requestsScopedTitle}</h2>
+            <p className="dc-section__intro">{t.requestsScopedIntro}</p>
+            {requests.length > 0 ? (
+              <ul className="dc-requests">
+                {requests.map((req) => renderRequest(req, false))}
+              </ul>
+            ) : (
+              <p className="dc-empty">{t.requestsScopedEmpty}</p>
+            )}
+
+            {linkManageable && (!scopedPendingExport || !scopedPendingDeletion) ? (
+              <div className="dc-actions">
+                {!scopedPendingExport ? (
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    disabled={busyId === link.id}
+                    onClick={() => openExportDialog(link)}
+                  >
+                    {t.requestExport}
+                  </button>
+                ) : null}
+                {!scopedPendingDeletion ? (
+                  <button
+                    type="button"
+                    className="patient-threads__btn patient-threads__btn--secondary"
+                    disabled={busyId === link.id}
+                    onClick={() => openDeleteDialog(link)}
+                  >
+                    {t.requestDeletion}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+            <p className="dc-footnote">{t.deletionNoteScoped}</p>
+          </section>
+
+          <section className="dc-section dc-section--quiet" aria-labelledby="dc-connection-title">
+            <h2 id="dc-connection-title" className="dc-section__title">{t.connectionTitle}</h2>
+            <p className="dc-connection__line">
+              {statusLabel(link.status, t)}
+              {link.linkedAt
+                ? ` · ${t.linkedSince} ${fmtDate(link.linkedAt, language, t.notProvided)}`
+                : ""}
+            </p>
+            {linkManageable && link.practice?.id ? (
+              <PatientPracticeDoctorSelect
+                practiceId={link.practice.id}
+                currentDoctorUserId={link.assignment?.patientSelectedDoctorUserId}
+                onUpdated={load}
+              />
+            ) : null}
+            {linkManageable ? (
+              <button
+                type="button"
+                className="dc-connection__archive"
+                disabled={busyId === link.id}
+                onClick={() => openArchiveDialog(link)}
+              >
+                {t.archiveLink}
+              </button>
+            ) : null}
+          </section>
+        </>
+      ) : null}
+    </>
+  );
+
+  return (
+    <div className={`patient-inbox${scoped ? " dc-scoped" : ""}`}>
+      {scoped ? scopedView : crossView}
 
       <DataDeletionRequestDialog
         open={Boolean(deleteTarget)}

@@ -397,20 +397,20 @@ test("data & permissions: both sides, one practice — a request answered by the
   const dialog = page.locator("dialog.patient-data-control__dialog");
   await dialog.getByRole("button", { name: "Weiter" }).click();
   await dialog.getByRole("button", { name: "Export anfragen" }).click();
-  await expect(page.locator(".patient-data-control__requests-panel")).toContainText("Eingereicht");
+  await expect(page.locator(".dc-requests")).toContainText("Eingereicht");
 
   // Practice: the same request in the patient's record, answered there.
   await practicePage.goto(`${APP}/practice/patients/${linkId}?practiceId=${PRACTICE_ID}&tab=dataConsent`);
   const req = practicePage.locator(".practice-dataconsent__request").first();
-  await expect(req).toContainText("Export");
+  await expect(req).toContainText("Datenexport");
   await req.getByLabel("Neuer Status").selectOption("completed");
-  await req.getByLabel("Antwort an die Patientin / den Patienten").fill(`Export liegt bereit ${TAG}.`);
+  await req.getByLabel("Antwort an Patient:in").fill(`Export liegt bereit ${TAG}.`);
   await req.getByRole("button", { name: "Status und Antwort speichern" }).click();
-  await expect(req).toContainText("Status und Antwort sind jetzt im Patientenbereich dieser Praxis sichtbar.");
+  await expect(req).toContainText("Status und Antwort sind für Patient:in jetzt sichtbar.");
 
   // Patient: status and the practice's answer, in that practice's area.
   await page.reload();
-  const panel = page.locator(".patient-data-control__requests-panel");
+  const panel = page.locator(".dc-requests");
   await expect(panel).toContainText("Abgeschlossen");
   await expect(panel).toContainText("Antwort der Praxis");
   await expect(panel).toContainText(`Export liegt bereit ${TAG}.`);
@@ -419,7 +419,7 @@ test("data & permissions: both sides, one practice — a request answered by the
   await page.goto(`${APP}/patient/practice/${linkId}`);
   await page.getByRole("link", { name: /Meine Aktivität/ }).click();
   await expect(page).toHaveURL(new RegExp(`/patient/practice/${linkId}/activity$`));
-  await expect(page.getByText("Datenanfrage bearbeitet").last()).toBeVisible();
+  await expect(page.getByText("Datenanfrage: Status geändert").last()).toBeVisible();
   await expect(page.getByLabel("Praxis", { exact: true })).toHaveCount(0);
 
   await ctx.close();

@@ -11,9 +11,12 @@ import { fetchPatientConsents } from "../../consent/api/patientConsentsApi.js";
  * list cannot claim more (or less) than is actually in force. Only the latest
  * record per consent type counts; a revoked or expired one is not listed.
  *
- * @param {{ link: { id: string, status: string }, language: string }} props
+ * `children` (the profile-sharing control) sits inside the same block: it
+ * answers the same question — what may this practice see.
+ *
+ * @param {{ link: { id: string, status: string }, language: string, children?: import("react").ReactNode }} props
  */
-export default function ScopedConsentSummary({ link, language }) {
+export default function ScopedConsentSummary({ link, language, children }) {
   const t = getMessages(language).patientDataControl || getMessages("en").patientDataControl;
   const tc = getMessages(language).patientConsents || getMessages("en").patientConsents;
 
@@ -51,33 +54,41 @@ export default function ScopedConsentSummary({ link, language }) {
   const canManage = link.status === "invited" || link.status === "active";
 
   return (
-    <section className="patient-data-control__consents" aria-labelledby="scoped-consents-title">
-      <h2 id="scoped-consents-title" className="patient-inbox__item-title">
+    <section className="dc-section dc-section--consents" aria-labelledby="scoped-consents-title">
+      <h2 id="scoped-consents-title" className="dc-section__title">
         {t.consentSummaryTitle}
       </h2>
 
       {error ? (
         <p className="patient-inbox__error" role="alert">{t.consentSummaryLoadError}</p>
       ) : rows === null ? (
-        <p className="patient-inbox__muted" role="status">{t.loading}</p>
+        <p className="dc-empty" role="status">{t.loading}</p>
       ) : granted.length === 0 ? (
-        <p className="patient-inbox__muted">{t.consentSummaryNone}</p>
+        <p className="dc-empty">{t.consentSummaryNone}</p>
       ) : (
         <>
-          <p className="patient-inbox__muted">{t.consentSummaryIntro}</p>
-          <ul className="patient-data-control__consent-list">
+          <p className="dc-section__intro">{t.consentSummaryIntro}</p>
+          <ul className="dc-consents">
             {granted.map((r) => (
-              <li key={r.id}>{tc.types?.[r.consentType] || r.consentType}</li>
+              <li key={r.id}>
+                <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+                  <path d="M3.5 8.4l3 3 6-6.4" fill="none" stroke="currentColor" strokeWidth="1.8"
+                    strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {tc.types?.[r.consentType] || r.consentType}
+              </li>
             ))}
           </ul>
         </>
       )}
 
       {canManage ? (
-        <Link className="patient-threads__btn patient-threads__btn--secondary" to={manageTo}>
+        <Link className="patient-threads__btn patient-threads__btn--secondary dc-consents__manage" to={manageTo}>
           {granted.length === 0 && link.status === "invited" ? t.consentSummarySet : t.consentSummaryManage}
         </Link>
       ) : null}
+
+      {children}
     </section>
   );
 }

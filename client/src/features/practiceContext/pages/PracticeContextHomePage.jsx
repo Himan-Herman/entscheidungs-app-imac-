@@ -93,8 +93,12 @@ export default function PracticeContextHomePage() {
             <span className="practice-hub__entry-hint">{t.erezeptHint}</span>
           </Link>
         </li>
-        {/* What this practice may see and what it did — the patient's own
-            control and transparency, for this practice only. */}
+      </ul>
+
+      {/* What this practice may see and what happened — the patient's own
+          control and transparency, set apart from what the practice offers. */}
+      <h2 className="practice-hub__group-title">{t.yourDataHeading}</h2>
+      <ul className="practice-hub__list">
         <li>
           <Link className="practice-hub__entry" to={`/patient/practice/${linkId}/data-control`}>
             <span className="practice-hub__entry-name">{t.dataControlTitle}</span>

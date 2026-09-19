@@ -336,7 +336,9 @@ export default function PracticeDataRequestsPage() {
                   <label className="practice-dashboard__filter">
                     <span>{t.updateStatus}</span>
                     <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                      {STATUS_OPTIONS.map((s) => (
+                      {/* A deletion request cannot be reported "completed" (no
+                          practice-scoped erasure exists), so it is not offered. */}
+                      {STATUS_OPTIONS.filter((s) => !(detail?.type === "deletion" && s === "completed")).map((s) => (
                         <option key={s} value={s}>
                           {statusLabel(s, t)}
                         </option>

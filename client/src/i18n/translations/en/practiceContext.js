@@ -1,9 +1,10 @@
 export default {
+  yourDataHeading: "Your data with this practice",
   backToHub: "Back to this practice's overview",
   dataControlTitle: "My data & permissions",
-  dataControlHint: "Permissions, archive, deletion requests",
+  dataControlHint: "What this practice may see – and your requests",
   activityTitle: "My activity",
-  activityHint: "Transparency about practice events",
+  activityHint: "What has happened between you and this practice",
   loading: "Loading practice area …",
   notFoundTitle: "Area unavailable",
   notFoundBody:

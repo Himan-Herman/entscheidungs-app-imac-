@@ -921,3 +921,43 @@
   color: var(--ms-color-link);
   font-weight: 600;
 }
+
+/* ------------------------------------------- hub: "Ihre Daten" group title */
+
+/* A quiet label, not a second page heading: it only says that the two
+   entries below are about the relationship, not services of the practice. */
+.practice-hub__group-title {
+  margin: 1.75rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ms-color-text-secondary);
+}
+.practice-hub__group-title + .practice-hub__list { margin-top: 0.6rem; }
+
+/* ------------------------------------- context bar: long names on phones */
+
+/* Break long practice names between words, not mid-word — and give the name
+   the full row on a phone by letting the switch button wrap below it. */
+.practice-context-bar__name {
+  overflow-wrap: break-word;
+}
+@media (max-width: 520px) {
+  .practice-context-bar {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+  .practice-context-bar__identity {
+    flex: 1 1 calc(100% - 3.5rem);
+  }
+  .practice-context-bar__switch {
+    margin-left: auto;
+  }
+}
+
+/* Back links inside a practice area are full touch targets (44px), not a
+   24px line of text — on a phone they are the main way out of a page. */
+.practice-scoped__body .patient-inbox__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--ms-control-min-height, 44px);
+}
