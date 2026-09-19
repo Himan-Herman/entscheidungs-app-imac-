@@ -209,6 +209,13 @@ export default {
     translationForPractice: "Traduzione per lo studio",
     editedBadge: "Testo originale corretto manualmente",
   },
+  // Live notice when a segment is kept out of the conversation (language
+  // check). Never shows the words.
+  gate: {
+    aria: "Avviso sul riconoscimento vocale",
+    foreign_language: "Rilevata un’altra lingua – non acquisita",
+    unclear: "Non comprensibile – ripeti",
+  },
   debug: {
     toggle: "Eventi di debug ({{count}})",
     empty: "Nessun evento.",

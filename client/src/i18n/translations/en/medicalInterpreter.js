@@ -954,6 +954,13 @@ export default {
       translationForPractice: "Translation for practice",
       editedBadge: "Original text corrected manually",
     },
+    // Live notice when a segment is kept out of the conversation (language
+    // check). Never shows the words.
+    gate: {
+      aria: "Speech recognition notice",
+      foreign_language: "Another language detected – not taken over",
+      unclear: "Not understandable – please repeat",
+    },
     debug: {
       toggle: "Debug events ({{count}})",
       empty: "No events.",

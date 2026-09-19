@@ -1024,6 +1024,13 @@ export default {
       translationForPractice: "Перевод для клиники",
       editedBadge: "Исходный текст исправлен вручную",
     },
+    // Live notice when a segment is kept out of the conversation (language
+    // check). Never shows the words.
+    gate: {
+      aria: "Уведомление о распознавании речи",
+      foreign_language: "Обнаружен другой язык – не учтено",
+      unclear: "Неразборчиво – повторите, пожалуйста",
+    },
     debug: {
       toggle: "События отладки ({{count}})",
       empty: "Событий нет.",

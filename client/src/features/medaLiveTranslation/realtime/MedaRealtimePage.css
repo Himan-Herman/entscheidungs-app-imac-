@@ -2444,3 +2444,40 @@
 .mrt-turn-timestamp {
   color: #4b5563; /* gray-600 */
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Gate notice — a segment was kept out of the conversation (language check).
+   Amber family as the other "unclear" markers: amber-800 on amber-50 is
+   6.9:1 (light), amber-400 on #1c1300 well above 7:1 (dark).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.mrt-gate-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  animation: mrt-gate-fade-in 0.2s ease-out;
+}
+
+.mrt-gate-notice-icon { font-size: 0.9rem; }
+
+:root[data-theme="dark"] .mrt-gate-notice {
+  background: #1c1300;
+  border-color: #78350f;
+  color: #fbbf24;
+}
+
+@keyframes mrt-gate-fade-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mrt-gate-notice { animation: none; }
+}

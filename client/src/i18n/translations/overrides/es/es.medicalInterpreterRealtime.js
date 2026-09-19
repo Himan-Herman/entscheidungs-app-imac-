@@ -209,6 +209,13 @@ export default {
     translationForPractice: "Traducción para la consulta",
     editedBadge: "Texto original corregido manualmente",
   },
+  // Live notice when a segment is kept out of the conversation (language
+  // check). Never shows the words.
+  gate: {
+    aria: "Aviso de reconocimiento de voz",
+    foreign_language: "Otro idioma detectado – no se incorpora",
+    unclear: "No se entiende – repita, por favor",
+  },
   debug: {
     toggle: "Eventos de depuración ({{count}})",
     empty: "Sin eventos.",

@@ -210,6 +210,13 @@ export default {
     translationForPractice: "Traduction pour le cabinet",
     editedBadge: "Texte original corrigé manuellement",
   },
+  // Live notice when a segment is kept out of the conversation (language
+  // check). Never shows the words.
+  gate: {
+    aria: "Avis de reconnaissance vocale",
+    foreign_language: "Autre langue détectée – non reprise",
+    unclear: "Incompréhensible – veuillez répéter",
+  },
   debug: {
     toggle: "Événements de débogage ({{count}})",
     empty: "Aucun événement.",

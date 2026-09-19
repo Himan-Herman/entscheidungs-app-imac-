@@ -7,15 +7,15 @@ import {
   getLiveTranslationVadSilenceMs,
 } from '../config/openAiModels.js';
 import { createInterpreterIpRateLimiter } from '../middleware/interpreterRateLimit.js';
+import {
+  parseMedaSessionRequest,
+  buildMedaRealtimeSession,
+} from '../services/medaRealtime/medaRealtimeSessionConfig.js';
 
 const router = express.Router();
 
-// All ISO 639-1 codes accepted by gpt-4o-transcribe (Whisper-based).
-// Any pair of two different languages from this set is allowed.
-const SUPPORTED_LANGUAGES = new Set([
-  'de', 'en', 'fr', 'es', 'it', 'pt', 'nl', 'pl', 'ru',
-  'ar', 'tr', 'ro', 'hr', 'uk', 'vi', 'zh', 'fa', 'sr', 'cs', 'sk',
-]);
+// Supported language codes and request validation live in
+// services/medaRealtime/medaRealtimeSessionConfig.js (single source).
 
 const LANGUAGE_NAMES = {
   de: 'Deutsch',
@@ -194,24 +194,21 @@ Output:
  * Creates an OpenAI Realtime ephemeral session and returns the client secret.
  * The API key is never exposed — only the short-lived client_secret.value is returned.
  *
- * Body: { patientLanguage: "de", practiceLanguage: "en" }
- * Response: { clientSecret, sessionId, expiresAt, initialInputLang, patientLanguage, practiceLanguage }
+ * Body: { patientLanguage: "de", practiceLanguage: "en", clientGating?: true }
+ * Response: { clientSecret, sessionId, expiresAt, initialInputLang, patientLanguage, practiceLanguage, responseGating }
  */
 router.post('/session', realtimeSessionLimiter, async (req, res) => {
   try {
-    const { patientLanguage, practiceLanguage } = req.body ?? {};
-
-    if (typeof patientLanguage !== 'string' || typeof practiceLanguage !== 'string') {
-      return res.status(400).json({ error: 'Ungültige Eingabe.' });
+    const parsed = parseMedaSessionRequest(req.body);
+    if (!parsed.ok) {
+      const message = {
+        invalid_input: 'Ungültige Eingabe.',
+        unsupported_language: 'Nicht unterstützte Sprache.',
+        interpretation_requires_two_languages: 'Patientensprache und Praxissprache müssen verschieden sein.',
+      }[parsed.error] ?? 'Ungültige Eingabe.';
+      return res.status(400).json({ error: message, code: parsed.error });
     }
-
-    if (!SUPPORTED_LANGUAGES.has(patientLanguage) || !SUPPORTED_LANGUAGES.has(practiceLanguage)) {
-      return res.status(400).json({ error: 'Nicht unterstützte Sprache.' });
-    }
-
-    if (patientLanguage === practiceLanguage) {
-      return res.status(400).json({ error: 'Patientensprache und Praxissprache müssen verschieden sein.' });
-    }
+    const { patientLanguage, practiceLanguage, clientGating } = parsed;
 
     const model              = getMedaRealtimeModel();
     const transcriptionModel = getMedaRealtimeTranscriptionModel();
@@ -220,33 +217,18 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
     const instructions       = buildInstructions(patientLanguage, practiceLanguage);
 
     // GA endpoint: POST /v1/realtime/client_secrets
-    // Schema: audio.input.{transcription, turn_detection}, audio.output.{voice, format}
+    // Schema: audio.input.{transcription, turn_detection}, audio.output.{voice}
+    const { session, responseGating } = buildMedaRealtimeSession({
+      clientGating,
+      instructions,
+      model,
+      transcriptionModel,
+      voice,
+      silenceMs,
+    });
     const sessionData = await openai.realtime.clientSecrets.create({
       expires_after: { anchor: 'created_at', seconds: 600 },
-      session: {
-        type: 'realtime',
-        model,
-        instructions,
-        max_output_tokens: 'inf',
-        output_modalities: ['audio'],
-        audio: {
-          input: {
-            // Auto language detection — no fixed language; model selects via system prompt
-            transcription: { model: transcriptionModel },
-            turn_detection: {
-              type: 'server_vad',
-              threshold: 0.5,
-              prefix_padding_ms: 200,
-              silence_duration_ms: silenceMs,
-              create_response: true,
-              interrupt_response: true,
-            },
-          },
-          output: {
-            voice,
-          },
-        },
-      },
+      session,
     });
 
     const clientSecret = sessionData.value;
@@ -265,6 +247,9 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
       initialInputLang: patientLanguage,
       patientLanguage,
       practiceLanguage,
+      // 'client' → the client sends response.create after its checks pass;
+      // 'server' → old client or rollback, the model answers on its own.
+      responseGating,
     });
   } catch (err) {
     // Log technical error details — never log patient content, audio, or API keys

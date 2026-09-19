@@ -1,8 +1,18 @@
 import { useState, useRef, useCallback } from 'react';
 import { authFetch } from '../../../api/authFetch.js';
 import { detectLanguage, isDefinitelyThirdLanguage } from './realtimeLanguages.js';
+import {
+  REJECT_REASONS,
+  decideUtterance,
+  isInterpreterRefusal,
+  redactEventForDebug,
+} from './utteranceGate.js';
 
 const OPENAI_REALTIME_CALLS = 'https://api.openai.com/v1/realtime/calls';
+
+function nowMs() {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
+}
 
 /**
  * @typedef {'idle'|'connecting'|'connected'|'disconnecting'|'error'} ConnectionState
@@ -36,6 +46,14 @@ const OPENAI_REALTIME_CALLS = 'https://api.openai.com/v1/realtime/calls';
  *  - speakerLockRef still blocks mic processing during Meda audio playback (echo guard).
  *  - audioWatchdogRef provides a fallback if output_audio_buffer.stopped is late/missing.
  *  - sessionActiveRef guards all async steps and event handlers against stale updates.
+ *
+ * Client-gated responses (server answered responseGating 'client'):
+ *  - The model does not answer on its own. Each segment is checked first
+ *    (utteranceGate.js) and only an accepted one gets a response.create.
+ *  - A segment clearly in a third language gets no card, no translation and
+ *    is removed from the model's context (conversation.item.delete).
+ *  - Old servers / the rollback switch answer 'server' → the flow below the
+ *    gated handler runs exactly as before.
  */
 export function useRealtimeSession() {
   const [connectionState,    setConnectionState]    = useState(/** @type {ConnectionState} */ ('idle'));
@@ -79,6 +97,28 @@ export function useRealtimeSession() {
   // Pause guard: when true, new audio input/transcription events are discarded.
   // Track.enabled is also set to false so OpenAI receives only silence.
   const isPausedRef = useRef(false);
+
+  // ── Client-gated responses ────────────────────────────────────────────────
+  // 'client' → we send response.create after the gate passes; 'server' → the
+  // pre-gating flow, untouched.
+  const gatingRef = useRef(/** @type {'client'|'server'} */ ('server'));
+  // item_id → speaker selection at SPEECH START (manual mode), so a quick
+  // hand-over between two people cannot re-label a segment already under way.
+  const segmentsRef = useRef(/** @type {Map<string, {manual:boolean, boundRole:'patient'|'practice'}>} */ (new Map()));
+  // item_id → turn slot; only segments that got one (not echo, not paused).
+  const itemTurnRef = useRef(/** @type {Map<string, {key:number, committedAt:number}>} */ (new Map()));
+  // Only one model response at a time. A segment accepted while another is
+  // still being translated waits here instead of being refused.
+  const activeRequestKeyRef = useRef(/** @type {number|null} */ (null));
+  const responseQueueRef    = useRef(/** @type {number[]} */ ([]));
+  const responseRequestedAtRef = useRef(/** @type {Map<number, number>} */ (new Map()));
+  // Accepted turns without a speaker → item_id; dropped if the interpreter refuses them.
+  const uncertainTurnsRef   = useRef(/** @type {Map<number, string|null>} */ (new Map()));
+  const retriedResponseKeysRef = useRef(/** @type {Set<number>} */ (new Set()));
+  const clientEventSeqRef   = useRef(0);
+  // Short live notice that a segment was kept out — never its words.
+  const [gateNotice, setGateNotice] = useState(/** @type {{reason:string, at:number}|null} */ (null));
+  const [ignoredCount, setIgnoredCount] = useState(0);
 
   /** Send a Realtime client event over the DataChannel (safe to call anytime). */
   const _sendDc = useCallback((payload) => {
@@ -124,6 +164,13 @@ export function useRealtimeSession() {
       audioElRef.current.srcObject = null;
     }
     speakerLockRef.current = false;
+    segmentsRef.current.clear();
+    itemTurnRef.current.clear();
+    activeRequestKeyRef.current = null;
+    responseQueueRef.current = [];
+    responseRequestedAtRef.current.clear();
+    uncertainTurnsRef.current.clear();
+    retriedResponseKeysRef.current.clear();
     setSessionStatus('idle');
   }, []);
 
@@ -187,11 +234,139 @@ export function useRealtimeSession() {
       return false;
     };
 
+    // ── Client-gated flow ──────────────────────────────────────────────────
+    // Only reached when the server confirmed responseGating 'client'.
+
+    const _nextEventId = (prefix) => {
+      clientEventSeqRef.current += 1;
+      return `meda-${prefix}-${clientEventSeqRef.current}`;
+    };
+
+    /** Remove an item from the model's context so it cannot colour later turns. */
+    const _forgetItem = (itemId) => {
+      if (!itemId) return;
+      _sendDc({ type: 'conversation.item.delete', event_id: _nextEventId('del'), item_id: itemId });
+    };
+
+    /** Ask the model for exactly one translation; queue if one is running. */
+    const _requestResponse = (key) => {
+      if (activeRequestKeyRef.current !== null) {
+        if (!responseQueueRef.current.includes(key)) responseQueueRef.current.push(key);
+        return;
+      }
+      activeRequestKeyRef.current = key;
+      responseRequestedAtRef.current.set(key, nowMs());
+      _sendDc({
+        type: 'response.create',
+        event_id: `meda-resp-${key}-${_nextEventId('r')}`,
+        response: { metadata: { turn_key: String(key) } },
+      });
+    };
+
+    const _pumpQueue = () => {
+      activeRequestKeyRef.current = null;
+      const next = responseQueueRef.current.shift();
+      if (next !== undefined) _requestResponse(next);
+    };
+
+    const _notice = (reason) => {
+      if (!reason || reason === REJECT_REASONS.EMPTY) return;
+      setGateNotice({ reason, at: Date.now() });
+      setIgnoredCount(c => c + 1);
+    };
+
+    /** Keep a segment out of the conversation: no card, no translation, no context. */
+    const _rejectSegment = (itemId, reason) => {
+      const mapped = itemTurnRef.current.get(itemId);
+      itemTurnRef.current.delete(itemId);
+      segmentsRef.current.delete(itemId);
+      if (mapped) setTurns(prev => prev.filter(t => t.key !== mapped.key));
+      _forgetItem(itemId);
+      _notice(reason);
+      setSessionStatus(s => (s === 'processing' ? 'ready' : s));
+      // The reason only — never the words.
+      setEvents(prev => [...prev, { type: 'meda.gate.rejected', reason: reason ?? null, ts: Date.now() }]);
+    };
+
+    const _handleGatedTranscript = () => {
+      const itemId = ev.item_id;
+      const mapped = itemId ? itemTurnRef.current.get(itemId) : undefined;
+      if (!mapped) {
+        // No turn slot: audio captured while Meda was speaking (echo), while
+        // paused, or before a reconnect. Never shown; also dropped from context.
+        segmentsRef.current.delete(itemId);
+        _forgetItem(itemId);
+        return;
+      }
+      if (isPausedRef.current) {
+        _rejectSegment(itemId, null);
+        return;
+      }
+
+      const seg = segmentsRef.current.get(itemId);
+      segmentsRef.current.delete(itemId);
+
+      const transcript = ev.transcript ?? '';
+      const decision = decideUtterance({
+        transcript,
+        patientLanguage:  patientLangRef.current,
+        practiceLanguage: practiceLangRef.current,
+        manualMode:       seg ? seg.manual : manualModeRef.current,
+        boundRole:        seg ? seg.boundRole : manualSpeakerRef.current,
+      });
+
+      // A later segment already committed means the model's context holds
+      // more than this one utterance when we ask it to translate.
+      let laterCommitted = 0;
+      for (const other of itemTurnRef.current.values()) {
+        if (other.key > mapped.key) laterCommitted += 1;
+      }
+      // Numbers only — never the words — so the debug view cannot leak a bystander.
+      setEvents(prev => [...prev, {
+        type:           'meda.gate',
+        decision:       decision.accept ? 'accepted' : 'rejected',
+        reason:         decision.reason,
+        speakerCertain: decision.speakerCertain,
+        laterCommitted,
+        transcriptMs:   Math.round(nowMs() - mapped.committedAt),
+        ts:             Date.now(),
+      }]);
+
+      if (!decision.accept) {
+        _rejectSegment(itemId, decision.reason);
+        return;
+      }
+
+      itemTurnRef.current.delete(itemId);
+      if (decision.speakerRole) setCurrentSpeakerRole(decision.speakerRole);
+      if (!decision.speakerCertain) uncertainTurnsRef.current.set(mapped.key, itemId);
+
+      setTurns(prev => prev.map(t => t.key === mapped.key ? {
+        ...t,
+        originalText: transcript,
+        ...(decision.speakerRole ? {
+          speakerRole:    decision.speakerRole,
+          targetRole:     decision.targetRole,
+          sourceLanguage: decision.sourceLanguage,
+          targetLanguage: decision.targetLanguage,
+        } : {}),
+      } : t));
+
+      _requestResponse(mapped.key);
+    };
+
     switch (ev.type) {
 
       // ── VAD ─────────────────────────────────────────────────────────────────
       case 'input_audio_buffer.speech_started':
         if (!speakerLockRef.current && !isPausedRef.current) setSessionStatus('speech_active');
+        if (gatingRef.current === 'client' && ev.item_id) {
+          // Bind the segment to whoever is selected NOW, at speech start.
+          segmentsRef.current.set(ev.item_id, {
+            manual:    manualModeRef.current,
+            boundRole: manualSpeakerRef.current,
+          });
+        }
         break;
 
       case 'input_audio_buffer.speech_stopped':
@@ -203,6 +378,9 @@ export function useRealtimeSession() {
         if (speakerLockRef.current) break; // echo during Meda playback — discard
         if (isPausedRef.current) break;    // paused — discard any buffered input
         turnCounterRef.current += 1;
+        if (gatingRef.current === 'client' && ev.item_id) {
+          itemTurnRef.current.set(ev.item_id, { key: turnCounterRef.current, committedAt: nowMs() });
+        }
         setTurns(prev => [...prev, {
           key:             turnCounterRef.current,
           inputItemId:     ev.item_id ?? null,
@@ -225,6 +403,11 @@ export function useRealtimeSession() {
       // Auto mode:   detectLanguage() on the transcript text.
       // Manual mode: use manualSpeakerRef directly — no language detection.
       case 'conversation.item.input_audio_transcription.completed': {
+        if (gatingRef.current === 'client') {
+          _handleGatedTranscript();
+          break;
+        }
+        // ── Server-driven flow (unchanged) ───────────────────────────────────
         // Paused — discard any transcription that arrived after pause was set
         if (isPausedRef.current) break;
 
@@ -337,11 +520,33 @@ export function useRealtimeSession() {
         break;
       }
 
+      case 'conversation.item.input_audio_transcription.failed':
+        // Unintelligible audio: never guess — keep it out and say so.
+        if (gatingRef.current === 'client' && ev.item_id) {
+          _rejectSegment(ev.item_id, REJECT_REASONS.UNCLEAR);
+        }
+        break;
+
       // ── Response ─────────────────────────────────────────────────────────────
       case 'response.created': {
         const rId = ev.response?.id;
         setSessionStatus('translating');
-        if (rId) {
+        if (rId && gatingRef.current === 'client') {
+          // We named the turn ourselves in response.create; only one request
+          // is ever open, so the active key is the fallback.
+          const metaKey = Number(ev.response?.metadata?.turn_key);
+          const key = Number.isFinite(metaKey) && metaKey > 0 ? metaKey : activeRequestKeyRef.current;
+          if (key !== null) {
+            responseTurnMapRef.current.set(rId, key);
+            const requestedAt = responseRequestedAtRef.current.get(key);
+            if (requestedAt != null) {
+              setEvents(prev => [...prev, {
+                type: 'meda.latency', stage: 'response_created',
+                ms: Math.round(nowMs() - requestedAt), ts: Date.now(),
+              }]);
+            }
+          }
+        } else if (rId) {
           // Latch: map this response_id → the turn it belongs to.
           // Find the last turn that has been transcribed but not yet completed.
           // This ensures all subsequent delta/done events for this response_id
@@ -485,6 +690,29 @@ export function useRealtimeSession() {
           }
         }
 
+        if (gatingRef.current === 'client') {
+          const doneKey = latchedKey;
+          if (doneKey !== undefined) {
+            responseRequestedAtRef.current.delete(doneKey);
+            // A segment we could not attribute, which the interpreter then
+            // refused (third language, unintelligible): it never was part of
+            // the conversation — remove it rather than show a foreign fragment.
+            if (uncertainTurnsRef.current.has(doneKey)) {
+              const itemId = uncertainTurnsRef.current.get(doneKey);
+              uncertainTurnsRef.current.delete(doneKey);
+              const part = ev.response?.output?.[0]?.content?.[0];
+              const outText = part?.transcript ?? part?.text ?? '';
+              if (respStatus === 'completed' && isInterpreterRefusal(outText)) {
+                setTurns(prev => prev.filter(t => t.key !== doneKey));
+                _forgetItem(itemId);
+                _forgetItem(ev.response?.output?.[0]?.id);
+                _notice(REJECT_REASONS.FOREIGN_LANGUAGE);
+              }
+            }
+          }
+          _pumpQueue();
+        }
+
         // Always clean up the response→turn mapping entry.
         if (responseId) responseTurnMapRef.current.delete(responseId);
         break;
@@ -517,15 +745,37 @@ export function useRealtimeSession() {
         break;
 
       // ── Error ────────────────────────────────────────────────────────────────
-      case 'error':
+      case 'error': {
+        const failedEventId = String(ev.error?.event_id ?? '');
+        if (gatingRef.current === 'client' && failedEventId.startsWith('meda-')) {
+          // Bookkeeping calls of the gated flow (forgetting an item the server
+          // already dropped, a response request racing another) are recoverable
+          // and must never end a live consultation.
+          setEvents(prev => [...prev, { type: 'meda.client_event_error', code: ev.error?.code ?? null, ts: Date.now() }]);
+          if (failedEventId.startsWith('meda-resp-')) {
+            const key = Number(failedEventId.split('-')[2]);
+            if (Number.isFinite(key)) {
+              if (!retriedResponseKeysRef.current.has(key)) {
+                retriedResponseKeysRef.current.add(key);
+                responseQueueRef.current.unshift(key);
+              } else {
+                // Second failure: close the turn with its original text only.
+                setTurns(prev => prev.map(t => t.key === key && !t.isDone ? { ...t, isDone: true } : t));
+              }
+            }
+            _pumpQueue();
+          }
+          break;
+        }
         setError(ev.error?.message ?? 'Realtime-Fehler');
         setSessionStatus('idle');
         break;
+      }
 
       default:
         break;
     }
-  }, []); // all accessed values are refs or stable state setters
+  }, [_sendDc]); // all other accessed values are refs or stable state setters
 
   const connect = useCallback(async ({ patientLanguage, practiceLanguage }, opts = {}) => {
     if (connectionState === 'connecting' || connectionState === 'connected') return;
@@ -552,13 +802,24 @@ export function useRealtimeSession() {
     sessionActiveRef.current = true; // arm the guard
     responseTurnMapRef.current.clear(); // stale response_ids from the old connection
     isPausedRef.current      = false;
+    // Gated-flow bookkeeping from a previous connection is meaningless now.
+    gatingRef.current        = 'server';
+    segmentsRef.current.clear();
+    itemTurnRef.current.clear();
+    activeRequestKeyRef.current = null;
+    responseQueueRef.current = [];
+    uncertainTurnsRef.current.clear();
+    setGateNotice(null);
+    if (!keepHistory) setIgnoredCount(0);
 
     try {
       // ── 1. Ephemeral token ──────────────────────────────────────────────────
       const tokenRes = await authFetch('/api/meda-realtime/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ patientLanguage, practiceLanguage }),
+        // clientGating: this client sends response.create itself after its
+        // checks pass. Older clients omit it and keep the server-driven flow.
+        body: JSON.stringify({ patientLanguage, practiceLanguage, clientGating: true }),
       });
 
       if (!sessionActiveRef.current) return;
@@ -567,8 +828,11 @@ export function useRealtimeSession() {
         const body = await tokenRes.json().catch(() => ({}));
         throw new Error(body?.error ?? `Token-Fehler ${tokenRes.status}`);
       }
-      const { clientSecret, model: sessionModel } = await tokenRes.json();
+      const { clientSecret, model: sessionModel, responseGating } = await tokenRes.json();
       if (!sessionActiveRef.current) return;
+      // A server that predates the gate answers without responseGating: keep
+      // the server-driven flow, exactly as before.
+      gatingRef.current = responseGating === 'client' ? 'client' : 'server';
 
       // ── 2. Microphone ───────────────────────────────────────────────────────
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -628,7 +892,7 @@ export function useRealtimeSession() {
         if (!sessionActiveRef.current) return;
         try {
           const parsed = JSON.parse(msg.data);
-          setEvents(prev => [...prev, parsed]);
+          setEvents(prev => [...prev, redactEventForDebug(parsed)]);
           _handleEvent(parsed);
         } catch (err) {
           // Not swallowed. Throwing here would tear down the data channel in
@@ -751,6 +1015,8 @@ export function useRealtimeSession() {
     sendEvent,
     updateTurnOriginalText,
     setManualMode,
+    gateNotice,
+    ignoredCount,
     connectionState,
     sessionStatus,
     currentSpeakerRole,

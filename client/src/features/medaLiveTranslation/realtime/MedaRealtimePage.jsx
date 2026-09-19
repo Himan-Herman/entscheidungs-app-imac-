@@ -134,6 +134,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     audioElRef,
     updateTurnOriginalText,
     setManualMode,
+    gateNotice,
   } = useRealtimeSession();
 
   // ── Language selection ─────────────────────────────────────────────────────
@@ -142,6 +143,8 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [showDebug,        setShowDebug]        = useState(false);
+  // Live notice that a segment was kept out of the conversation (never its words)
+  const [visibleNotice,    setVisibleNotice]    = useState(/** @type {{reason:string, at:number}|null} */ (null));
   const [remainingSeconds, setRemainingSeconds] = useState(SESSION_MAX_SECONDS);
   const [sessionExpired,   setSessionExpired]   = useState(false);
 
@@ -262,6 +265,14 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   useEffect(() => {
     setManualMode(mode === 'manual', manualSpeaker);
   }, [mode, manualSpeaker, setManualMode]);
+
+  // ── Gate notice: show briefly, then clear ──────────────────────────────────
+  useEffect(() => {
+    if (!gateNotice) return undefined;
+    setVisibleNotice(gateNotice);
+    const t = setTimeout(() => setVisibleNotice(null), 5000);
+    return () => clearTimeout(t);
+  }, [gateNotice]);
 
   // ── Unmount cleanup ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1316,6 +1327,15 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* ── Gate notice — a segment was kept out of the conversation ───────── */}
+      {isConnected && visibleNotice && rt.gate?.[visibleNotice.reason] && (
+        <p key={visibleNotice.at} className="mrt-gate-notice" role="status">
+          <span className="mrt-gate-notice-icon" aria-hidden="true">⊘</span>
+          <span className="visually-hidden">{rt.gate.aria}: </span>
+          {rt.gate[visibleNotice.reason]}
+        </p>
       )}
 
       {/* ── Speaker bar — highlights last detected speaker ──────────────────── */}
