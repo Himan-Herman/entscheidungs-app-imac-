@@ -9,6 +9,7 @@
  */
 export const ruPracticeGovernance = {
   practiceDataRequests: {
+    statusAnswered: "Ответ отправлен",
     pageTitle: "Запросы по данным — учреждение",
     heading: "Запросы пациентов по данным",
     intro:

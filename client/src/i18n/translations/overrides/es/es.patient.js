@@ -1072,6 +1072,9 @@ export default {
   },
 
   patientDataControl: {
+    answeredRightsNote: "Si su solicitud no se ha atendido, o solo en parte, puede presentar una reclamación ante una autoridad de control de protección de datos o acudir a los tribunales.",
+    answeredOn: "Respondida el {date}",
+    statusAnswered: "Respondida",
     connectionTitle: "Su conexión con esta consulta",
     deletionNoteScoped: "La documentación médica está sujeta a plazos legales de conservación; por eso la supresión no siempre es posible, o no de inmediato.",
     yourNoteLabel: "Su nota",

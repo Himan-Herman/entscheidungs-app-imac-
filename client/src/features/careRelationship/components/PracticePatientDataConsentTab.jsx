@@ -4,11 +4,10 @@ import { useLanguage } from "../../../i18n/LanguageContext";
 import { getMessages } from "../../../i18n/translations";
 import { getPrimaryIntlLocale } from "../../../i18n/intlLocale.js";
 import { fetchPracticePatientConsents } from "../api/practicePatientsApi.js";
+import { fetchPracticeDataRequests } from "../api/patientDataControlApi.js";
 import RequestStatus from "./RequestStatus.jsx";
-import {
-  fetchPracticeDataRequests,
-  patchPracticeDataRequestStatus,
-} from "../api/patientDataControlApi.js";
+import PracticeDataRequestActions from "./PracticeDataRequestActions.jsx";
+import { statusLabel as dataRequestStatusLabel } from "../lib/dataRequestStatus.js";
 
 function fmt(iso, lang) {
   if (!iso) return "—";
@@ -19,23 +18,17 @@ function fmt(iso, lang) {
   }
 }
 
-const OPEN = new Set(["submitted", "in_review"]);
-
 /**
  * "Daten & Freigaben" — the practice's side of one patient relationship.
  *
  * TWO THINGS, EACH IN ONE DIRECTION:
- *   Freigaben    — what the PATIENT has granted this practice. Read-only here:
- *                  only the patient grants or withdraws; the practice sees the
- *                  state it is checked against, nothing more.
- *   Datenanfragen — what the patient asked of this practice (export, deletion,
- *                  restriction), and the practice's answer. The answer and the
- *                  status go to the patient: into their inbox, their activity
- *                  log and their "Meine Daten & Freigaben" for this practice.
+ *   Freigaben     — what the PATIENT has granted this practice. Read-only here:
+ *                   only the patient grants or withdraws.
+ *   Datenanfragen — what the patient asked of this practice, and the
+ *                   practice's answer, which goes back to the patient.
  *
- * The status options respect the server's honesty rule: a deletion request
- * cannot be reported "completed" until a real erasure exists, so the option is
- * not offered rather than offered and refused.
+ * A request ends as "Beantwortet": the practice has replied, nothing more.
+ * Who may triage and who may answer comes from the server (`capabilities`).
  *
  * @param {{ linkId: string, practiceId: string, readOnly: boolean }} props
  */
@@ -47,11 +40,8 @@ export default function PracticePatientDataConsentTab({ linkId, practiceId, read
 
   const [consents, setConsents] = useState(null);
   const [requests, setRequests] = useState(null);
+  const [capabilities, setCapabilities] = useState(null);
   const [error, setError] = useState("");
-  const [drafts, setDrafts] = useState({}); // requestId -> { status, note }
-  const [busyId, setBusyId] = useState("");
-  const [notice, setNotice] = useState(null); // { id, kind, text }
-  const [forbidden, setForbidden] = useState(false);
 
   const load = useCallback(async () => {
     setError("");
@@ -63,11 +53,12 @@ export default function PracticePatientDataConsentTab({ linkId, practiceId, read
       if (!c.res.ok || !c.data.ok || !r.res.ok || !r.data.ok) throw new Error("load_failed");
       setConsents(Array.isArray(c.data.consents) ? c.data.consents : []);
       setRequests(Array.isArray(r.data.requests) ? r.data.requests : []);
+      setCapabilities(readOnly ? null : r.data.capabilities || null);
     } catch (e) {
       if (e?.message === "SESSION_EXPIRED") return;
       setError(t.dataConsentLoadError);
     }
-  }, [linkId, practiceId, t.dataConsentLoadError]);
+  }, [linkId, practiceId, readOnly, t.dataConsentLoadError]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -81,56 +72,6 @@ export default function PracticePatientDataConsentTab({ linkId, practiceId, read
     access_restriction: tReq.typeAccessRestriction,
     export: tReq.typeExport,
   }[type] || type);
-
-  const statusLabel = (status) => ({
-    submitted: tReq.statusSubmitted,
-    in_review: tReq.statusInReview,
-    completed: tReq.statusCompleted,
-    rejected: tReq.statusRejected,
-  }[status] || status);
-
-  const optionsFor = (req) =>
-    req.type === "deletion" ? ["in_review", "rejected"] : ["in_review", "completed", "rejected"];
-
-  function draftOf(req) {
-    return drafts[req.id] || { status: OPEN.has(req.status) ? optionsFor(req)[0] : req.status, note: "" };
-  }
-
-  function setDraft(req, patch) {
-    setDrafts((d) => ({ ...d, [req.id]: { ...draftOf(req), ...patch } }));
-  }
-
-  async function save(req) {
-    const draft = draftOf(req);
-    setBusyId(req.id);
-    setNotice(null);
-    try {
-      const { res, data } = await patchPracticeDataRequestStatus(practiceId, req.id, {
-        status: draft.status,
-        responseNote: draft.note.trim() || undefined,
-      });
-      if (res.status === 403) {
-        setForbidden(true);
-        setNotice({ id: req.id, kind: "error", text: t.dataConsentForbidden });
-        return;
-      }
-      if (data?.error === "deletion_requires_manual_erasure") {
-        setNotice({ id: req.id, kind: "error", text: t.dataConsentDeletionManual });
-        return;
-      }
-      if (!res.ok || !data.ok) {
-        setNotice({ id: req.id, kind: "error", text: t.dataConsentSaveError });
-        return;
-      }
-      setDrafts((d) => { const next = { ...d }; delete next[req.id]; return next; });
-      setNotice({ id: req.id, kind: "ok", text: t.dataConsentSaved });
-      await load();
-    } finally {
-      setBusyId("");
-    }
-  }
-
-  const canEdit = !readOnly && !forbidden;
 
   return (
     <div className="practice-dataconsent">
@@ -189,96 +130,46 @@ export default function PracticePatientDataConsentTab({ linkId, practiceId, read
 
         {requests && requests.length > 0 ? (
           <ul className="practice-dataconsent__requests">
-            {requests.map((req) => {
-              const draft = draftOf(req);
-              const open = OPEN.has(req.status);
-              const busy = busyId === req.id;
-              return (
-                <li key={req.id} className="practice-dataconsent__request">
-                  <div className="practice-dataconsent__request-head">
-                    <h3 className="practice-dataconsent__request-title">{typeLabel(req.type)}</h3>
-                    <RequestStatus status={req.status} label={statusLabel(req.status)} />
+            {requests.map((req) => (
+              <li key={req.id} className="practice-dataconsent__request">
+                <div className="practice-dataconsent__request-head">
+                  <h3 className="practice-dataconsent__request-title">{typeLabel(req.type)}</h3>
+                  <RequestStatus status={req.status} label={dataRequestStatusLabel(req.status, tReq)} />
+                </div>
+                <p className="practice-dataconsent__date">
+                  {t.dataConsentReceivedOn.replace("{date}", fmt(req.createdAt, language))}
+                  {req.completedAt
+                    ? ` · ${t.dataConsentAnsweredOn.replace("{date}", fmt(req.completedAt, language))}`
+                    : ""}
+                </p>
+
+                {req.reason ? (
+                  <div className="practice-dataconsent__text">
+                    <p className="practice-dataconsent__label">{t.dataConsentPatientReason}</p>
+                    <p className="practice-dataconsent__body">{req.reason}</p>
                   </div>
-                  <p className="practice-dataconsent__date">
-                    {t.dataConsentReceivedOn.replace("{date}", fmt(req.createdAt, language))}
-                  </p>
+                ) : null}
 
-                  {req.reason ? (
-                    <div className="practice-dataconsent__text">
-                      <p className="practice-dataconsent__label">{t.dataConsentPatientReason}</p>
-                      <p className="practice-dataconsent__body">{req.reason}</p>
-                    </div>
-                  ) : null}
+                {req.responseNote ? (
+                  <figure className="practice-dataconsent__answer">
+                    <figcaption className="practice-dataconsent__label">
+                      {t.dataConsentResponseSent}
+                      <span className="practice-dataconsent__visible"> · {t.dataConsentVisibleToPatient}</span>
+                    </figcaption>
+                    <blockquote className="practice-dataconsent__body">{req.responseNote}</blockquote>
+                  </figure>
+                ) : null}
 
-                  {req.responseNote ? (
-                    <figure className="practice-dataconsent__answer">
-                      <figcaption className="practice-dataconsent__label">
-                        {t.dataConsentResponseSent}
-                        <span className="practice-dataconsent__visible"> · {t.dataConsentVisibleToPatient}</span>
-                      </figcaption>
-                      <blockquote className="practice-dataconsent__body">{req.responseNote}</blockquote>
-                    </figure>
-                  ) : null}
-
-                  {canEdit && open ? (
-                    <div className="practice-dataconsent__form">
-                      <div className="practice-dataconsent__field">
-                        <label htmlFor={`dc-status-${req.id}`}>{t.dataConsentStatusLabel}</label>
-                        <select
-                          id={`dc-status-${req.id}`}
-                          value={draft.status}
-                          onChange={(e) => setDraft(req, { status: e.target.value })}
-                          disabled={busy}
-                          aria-describedby={req.type === "deletion" ? `dc-del-${req.id}` : undefined}
-                        >
-                          {optionsFor(req).map((st) => (
-                            <option key={st} value={st}>{statusLabel(st)}</option>
-                          ))}
-                        </select>
-                        {req.type === "deletion" ? (
-                          <p className="practice-dataconsent__hint" id={`dc-del-${req.id}`}>
-                            {t.dataConsentDeletionManual}
-                          </p>
-                        ) : null}
-                      </div>
-                      <div className="practice-dataconsent__field">
-                        <label htmlFor={`dc-note-${req.id}`}>{t.dataConsentResponseLabel}</label>
-                        <textarea
-                          id={`dc-note-${req.id}`}
-                          rows={4}
-                          maxLength={2000}
-                          value={draft.note}
-                          onChange={(e) => setDraft(req, { note: e.target.value })}
-                          disabled={busy}
-                          aria-describedby={`dc-note-hint-${req.id}`}
-                        />
-                        <p className="practice-dataconsent__hint" id={`dc-note-hint-${req.id}`}>
-                          {t.dataConsentResponseHint}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        className="practice-dataconsent__save"
-                        onClick={() => save(req)}
-                        disabled={busy}
-                        aria-busy={busy || undefined}
-                      >
-                        {busy ? t.dataConsentSaving : t.dataConsentSave}
-                      </button>
-                    </div>
-                  ) : null}
-
-                  {notice?.id === req.id ? (
-                    <p
-                      className={`practice-dataconsent__notice practice-dataconsent__notice--${notice.kind}`}
-                      role={notice.kind === "ok" ? "status" : "alert"}
-                    >
-                      {notice.text}
-                    </p>
-                  ) : null}
-                </li>
-              );
-            })}
+                <PracticeDataRequestActions
+                  practiceId={practiceId}
+                  request={req}
+                  capabilities={capabilities}
+                  onSaved={load}
+                  t={t}
+                  idPrefix="dc"
+                />
+              </li>
+            ))}
           </ul>
         ) : null}
 

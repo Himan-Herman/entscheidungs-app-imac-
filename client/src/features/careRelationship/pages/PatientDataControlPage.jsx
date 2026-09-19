@@ -9,6 +9,7 @@ import ExportRequestDialog from "../components/ExportRequestDialog.jsx";
 import PatientPracticeDoctorSelect from "../components/PatientPracticeDoctorSelect.jsx";
 import ScopedConsentSummary from "../components/ScopedConsentSummary.jsx";
 import RequestStatus from "../components/RequestStatus.jsx";
+import { statusLabel as dataRequestStatusLabel, TERMINAL_STATUSES } from "../lib/dataRequestStatus.js";
 import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   fetchPatientDataControl,
@@ -42,13 +43,7 @@ function requestTypeLabel(type, t) {
 }
 
 function requestStatusLabel(status, t) {
-  const map = {
-    submitted: t.statusSubmitted,
-    in_review: t.statusInReview,
-    completed: t.statusCompleted,
-    rejected: t.statusRejected,
-  };
-  return map[status] || t.notProvided;
+  return dataRequestStatusLabel(status, t);
 }
 
 function fmtActivity(iso, lang, fallback) {
@@ -381,6 +376,9 @@ export default function PatientDataControlPage({ scopedLinkId = "" } = {}) {
         <p className="dc-request__meta">
           {withPractice && req.practice?.practiceName ? `${req.practice.practiceName} · ` : ""}
           {t.requestedOn.replace("{date}", fmtDate(req.createdAt, language, t.notProvided))}
+          {TERMINAL_STATUSES.has(req.status) && req.completedAt
+            ? ` · ${t.answeredOn.replace("{date}", fmtDate(req.completedAt, language, t.notProvided))}`
+            : ""}
         </p>
         {req.reason ? (
           <p className="dc-request__note">
@@ -395,6 +393,12 @@ export default function PatientDataControlPage({ scopedLinkId = "" } = {}) {
             <figcaption className="dc-answer__label">{t.responseNoteLabel}</figcaption>
             <blockquote className="dc-answer__text">{req.responseNote}</blockquote>
           </figure>
+        ) : null}
+        {/* Art. 12(4) GDPR: where a request is not (fully) met, the patient
+            must learn of the right to complain and to a judicial remedy.
+            Worded conditionally, so it is true whatever the answer says. */}
+        {TERMINAL_STATUSES.has(req.status) ? (
+          <p className="dc-request__rights">{t.answeredRightsNote}</p>
         ) : null}
         <button
           type="button"

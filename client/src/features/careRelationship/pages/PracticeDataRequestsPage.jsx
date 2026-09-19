@@ -7,8 +7,10 @@ import { getPrimaryIntlLocale } from '../../../i18n/intlLocale.js';
 import {
   fetchPracticeDataRequests,
   fetchPracticeDataRequest,
-  patchPracticeDataRequestStatus,
 } from "../api/patientDataControlApi.js";
+import PracticeDataRequestActions from "../components/PracticeDataRequestActions.jsx";
+import RequestStatus from "../components/RequestStatus.jsx";
+import { statusLabel } from "../lib/dataRequestStatus.js";
 import "../../../styles/PracticeDashboardPage.css";
 import "../../../styles/PracticePatientsPage.css";
 import "../../../styles/PatientDataControlPage.css";
@@ -35,24 +37,12 @@ function typeLabel(type, t) {
   return map[type] || type;
 }
 
-function statusLabel(status, t) {
-  const map = {
-    submitted: t.statusSubmitted,
-    in_review: t.statusInReview,
-    completed: t.statusCompleted,
-    rejected: t.statusRejected,
-  };
-  return map[status] || status;
-}
-
 function patientName(row) {
   const p = row.patient;
   if (!p) return "—";
   const parts = [p.firstName, p.lastName].filter(Boolean);
   return parts.length ? parts.join(" ") : "—";
 }
-
-const STATUS_OPTIONS = ["submitted", "in_review", "completed", "rejected"];
 
 export default function PracticeDataRequestsPage() {
   const { language } = useLanguage();
@@ -62,6 +52,8 @@ export default function PracticeDataRequestsPage() {
       getMessages("en").practiceDataRequests,
     [language],
   );
+  // The action texts live with the patient record, where the same actions sit.
+  const tPatients = getMessages(language).practicePatients || getMessages("en").practicePatients;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [practices, setPractices] = useState([]);
@@ -69,14 +61,11 @@ export default function PracticeDataRequestsPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [statusMsg, setStatusMsg] = useState("");
 
   const [selectedId, setSelectedId] = useState("");
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [newStatus, setNewStatus] = useState("submitted");
-  const [responseNote, setResponseNote] = useState("");
-  const [saveBusy, setSaveBusy] = useState(false);
+  const [capabilities, setCapabilities] = useState(null);
   const [readOnly, setReadOnly] = useState(false);
 
   const loadPractices = useCallback(async () => {
@@ -124,8 +113,7 @@ export default function PracticeDataRequestsPage() {
         }
         if (!res.ok || !data.ok) throw new Error("load_failed");
         setDetail(data.request);
-        setNewStatus(data.request.status);
-        setResponseNote(data.request.responseNote || "");
+        setCapabilities(data.capabilities || null);
       } catch {
         setError(t.loadError);
       } finally {
@@ -158,31 +146,10 @@ export default function PracticeDataRequestsPage() {
     if (selectedId) loadDetail(selectedId);
   }, [selectedId, loadDetail]);
 
-  async function saveStatus() {
-    if (!selectedId || !practiceId) return;
-    setSaveBusy(true);
-    setError("");
-    setStatusMsg("");
-    try {
-      const { res, data } = await patchPracticeDataRequestStatus(practiceId, selectedId, {
-        status: newStatus,
-        responseNote: responseNote.trim() || undefined,
-      });
-      if (res.status === 403) {
-        setReadOnly(true);
-        setError(t.viewerReadOnly);
-        return;
-      }
-      if (!res.ok || !data.ok) {
-        setError(t.saveError);
-        return;
-      }
-      setStatusMsg(t.saveSuccess);
-      setDetail(data.request);
-      await loadRequests();
-    } finally {
-      setSaveBusy(false);
-    }
+  /** After an action: refresh the list and the open detail. */
+  async function afterAction() {
+    await loadRequests();
+    if (selectedId) await loadDetail(selectedId);
   }
 
   return (
@@ -212,11 +179,6 @@ export default function PracticeDataRequestsPage() {
       {error ? (
         <p className="practice-dashboard__error" role="alert">
           {error}
-        </p>
-      ) : null}
-      {statusMsg ? (
-        <p className="practice-dashboard__muted" role="status">
-          {statusMsg}
         </p>
       ) : null}
 
@@ -317,7 +279,8 @@ export default function PracticeDataRequestsPage() {
                 {patientName(detail)} — {typeLabel(detail.type, t)}
               </p>
               <p className="practice-dashboard__muted">
-                {statusLabel(detail.status, t)} · {fmt(detail.createdAt, language)}
+                <RequestStatus status={detail.status} label={statusLabel(detail.status, t)} />
+                {" · "}{fmt(detail.createdAt, language)}
               </p>
               <p>
                 <strong>{t.detailReason}:</strong> {detail.reason?.trim() || t.detailNoReason}
@@ -331,40 +294,20 @@ export default function PracticeDataRequestsPage() {
                   </Link>
                 </p>
               ) : null}
-              {!readOnly ? (
-                <div style={{ marginTop: "1rem" }}>
-                  <label className="practice-dashboard__filter">
-                    <span>{t.updateStatus}</span>
-                    <select value={newStatus} onChange={(e) => setNewStatus(e.target.value)}>
-                      {/* A deletion request cannot be reported "completed" (no
-                          practice-scoped erasure exists), so it is not offered. */}
-                      {STATUS_OPTIONS.filter((s) => !(detail?.type === "deletion" && s === "completed")).map((s) => (
-                        <option key={s} value={s}>
-                          {statusLabel(s, t)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="patient-data-control__reason-label" style={{ display: "block", marginTop: "0.75rem" }}>
-                    <span>{t.detailResponseNote}</span>
-                    <textarea
-                      className="patient-data-control__reason-input"
-                      rows={3}
-                      value={responseNote}
-                      onChange={(e) => setResponseNote(e.target.value)}
-                      maxLength={2000}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="patient-threads__btn patient-threads__btn--secondary"
-                    style={{ marginTop: "0.75rem" }}
-                    disabled={saveBusy}
-                    onClick={saveStatus}
-                  >
-                    {t.saveStatus}
-                  </button>
-                </div>
+              {detail.responseNote ? (
+                <p style={{ marginTop: "0.75rem", whiteSpace: "pre-wrap" }}>
+                  <strong>{t.detailResponseNote}:</strong> {detail.responseNote}
+                </p>
+              ) : null}
+              {!readOnly && (capabilities?.triage || capabilities?.answer) ? (
+                <PracticeDataRequestActions
+                  practiceId={practiceId}
+                  request={detail}
+                  capabilities={capabilities}
+                  onSaved={afterAction}
+                  t={tPatients}
+                  idPrefix="pdr"
+                />
               ) : (
                 <p className="practice-dashboard__muted" role="note">
                   {t.viewerReadOnly}

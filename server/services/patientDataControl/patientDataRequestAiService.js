@@ -6,7 +6,7 @@ import {
 } from "../../config/aiSafetyPolicy.js";
 import { sanitizeAiOutput, shouldRegenerateUnsafeOutput } from "../aiSafetySanitizer.js";
 import { writeAuditLog } from "../auditLogService.js";
-import { getPatientDataRequest } from "./patientDataRequestService.js";
+import { getPatientDataRequest, TERMINAL_STATUSES } from "./patientDataRequestService.js";
 
 /**
  * @param {string} locale
@@ -101,16 +101,22 @@ export async function generatePatientDataRequestAiSummary(input) {
   const isEn = langCode(locale) === "en";
   const np = isEn ? "not provided" : "nicht angegeben";
 
+  // A closed request is only ever "answered": the status never says whether
+  // data were deleted or exported — the practice's own answer does.
+  const status = TERMINAL_STATUSES.has(row.status) ? "answered" : row.status;
   const context = [
     `${isEn ? "Type" : "Typ"}: ${row.type}`,
-    `${isEn ? "Status" : "Status"}: ${row.status}`,
+    `${isEn ? "Status" : "Status"}: ${status}`,
     `${isEn ? "Created" : "Erstellt"}: ${row.createdAt}`,
     `${isEn ? "Practice link" : "Praxisbezug"}: ${row.practicePatientLinkId || np}`,
   ].join("\n");
 
+  const guard = isEn
+    ? "\"answered\" only means the practice has replied. Never state or imply that data were deleted, removed or exported, or that the request was granted; point the patient to the practice's answer instead."
+    : "\"answered\" bedeutet nur, dass die Praxis geantwortet hat. Behaupten oder andeuten Sie niemals, dass Daten gelöscht, entfernt oder exportiert wurden oder dass der Anfrage entsprochen wurde; verweisen Sie stattdessen auf die Antwort der Praxis.";
   const prompt = isEn
-    ? `Explain this data request status in simple organizational language for the patient. No legal or medical advice.\n\n${context}`
-    : `Erklären Sie diesen Datenanfrage-Status in einfacher organisatorischer Sprache für die Patientin / den Patienten. Keine Rechts- oder medizinische Beratung.\n\n${context}`;
+    ? `Explain this data request status in simple organizational language for the patient. No legal or medical advice. ${guard}\n\n${context}`
+    : `Erklären Sie diesen Datenanfrage-Status in einfacher organisatorischer Sprache für die Patientin / den Patienten. Keine Rechts- oder medizinische Beratung. ${guard}\n\n${context}`;
 
   const summary = await runAi(prompt, locale);
 

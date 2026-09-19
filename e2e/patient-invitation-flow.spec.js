@@ -403,17 +403,22 @@ test("data & permissions: both sides, one practice — a request answered by the
   await practicePage.goto(`${APP}/practice/patients/${linkId}?practiceId=${PRACTICE_ID}&tab=dataConsent`);
   const req = practicePage.locator(".practice-dataconsent__request").first();
   await expect(req).toContainText("Datenexport");
-  await req.getByLabel("Neuer Status").selectOption("completed");
+  await expect(req).toContainText("Neu");
+  // Owner = an answering role: write the answer, send it, request is answered.
   await req.getByLabel("Antwort an Patient:in").fill(`Export liegt bereit ${TAG}.`);
-  await req.getByRole("button", { name: "Status und Antwort speichern" }).click();
-  await expect(req).toContainText("Status und Antwort sind für Patient:in jetzt sichtbar.");
+  await req.getByRole("button", { name: "Antwort senden und als beantwortet markieren" }).click();
+  await expect(req).toContainText("Antwort gesendet. Die Anfrage ist als beantwortet markiert.");
+  await expect(req).toContainText("Beantwortet");
 
-  // Patient: status and the practice's answer, in that practice's area.
+  // Patient: "Beantwortet", the practice's answer, the rights note — and no
+  // claim of any outcome beyond what the practice wrote.
   await page.reload();
   const panel = page.locator(".dc-requests");
-  await expect(panel).toContainText("Abgeschlossen");
+  await expect(panel).toContainText("Beantwortet");
   await expect(panel).toContainText("Antwort der Praxis");
   await expect(panel).toContainText(`Export liegt bereit ${TAG}.`);
+  await expect(panel).toContainText("Datenschutz-Aufsichtsbehörde");
+  await expect(panel).not.toContainText(/gelöscht|Löschung erfolgreich|Abgeschlossen/);
 
   // …and in "Meine Aktivität" of this practice, without a practice picker.
   await page.goto(`${APP}/patient/practice/${linkId}`);

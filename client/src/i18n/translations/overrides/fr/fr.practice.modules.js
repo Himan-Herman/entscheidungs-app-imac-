@@ -288,6 +288,17 @@ export default {
   },
 
   practicePatients: {
+    dataRequestSaveError: "Impossible d’enregistrer. Veuillez réessayer.",
+    dataRequestAlreadyAnswered: "Cette demande a déjà reçu une réponse.",
+    dataRequestForbidden: "Votre rôle ne permet pas cette action.",
+    dataRequestAnswerRequired: "Veuillez d’abord rédiger votre réponse au patient.",
+    dataRequestPartialHint: "Si vous ne donnez pas suite à la demande, ou seulement en partie, indiquez-en les raisons. Le patient voit en outre une mention de ses possibilités de réclamation et de recours.",
+    dataRequestAnswerRoleInfo: "La réponse au patient est rédigée par un rôle habilité du cabinet, par exemple un médecin ou la direction du cabinet.",
+    dataRequestAnswered: "Réponse envoyée. La demande est marquée comme répondue.",
+    dataRequestSendAnswer: "Envoyer la réponse et marquer comme répondue",
+    dataRequestMarkedInReview: "Marquée « En cours de traitement ».",
+    dataRequestMarkInReview: "Marquer « En cours de traitement »",
+    dataConsentAnsweredOn: "Réponse envoyée le {date}",
     dataConsentReceivedOn: "Reçue le {date}",
     dataConsentVisibleToPatient: "visible par le patient",
     dataConsentReadOnly: "Lecture seule",
@@ -302,15 +313,9 @@ export default {
     dataConsentRequestsNone: "Aucune demande.",
     dataConsentPatientReason: "Remarque du patient",
     dataConsentResponseSent: "Votre réponse",
-    dataConsentStatusLabel: "Nouveau statut",
     dataConsentResponseLabel: "Réponse au patient",
     dataConsentResponseHint: "Cette réponse est visible par le patient.",
-    dataConsentSave: "Enregistrer le statut et la réponse",
     dataConsentSaving: "Enregistrement …",
-    dataConsentSaved: "Enregistré. Le statut et votre réponse sont maintenant visibles par le patient.",
-    dataConsentSaveError: "Impossible d’enregistrer. Veuillez réessayer.",
-    dataConsentForbidden: "Votre rôle ne permet pas de traiter les demandes relatives aux données.",
-    dataConsentDeletionManual: "Les demandes de suppression ne peuvent pas encore être marquées comme terminées ici. Laissez la demande « En cours de traitement » et indiquez le résultat dans votre réponse.",
     dataConsentLoadError: "Impossible de charger les données et autorisations.",
     dataConsentOpenAll: "Toutes les demandes du cabinet",
     pageTitle: "MedScoutX — Patients",
@@ -741,6 +746,7 @@ export default {
   },
 
   practiceDataRequests: {
+    statusAnswered: "Réponse envoyée",
     pageTitle: "Demandes de données – Établissement",
     heading: "Demandes de données patient",
     intro:

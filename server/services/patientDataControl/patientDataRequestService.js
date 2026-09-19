@@ -7,12 +7,30 @@ import { notifyPatientInboxOfDataRequestStatus } from "../patientInbox/patientIn
 
 
 export const REQUEST_TYPES = new Set(["deletion", "access_restriction", "export"]);
+/**
+ * Every status a stored request can carry. "answered" is the one terminal
+ * status written today; "completed" and "rejected" remain valid for rows
+ * written before it and are read — and shown — as answered.
+ */
 export const REQUEST_STATUSES = new Set([
   "submitted",
   "in_review",
+  "answered",
   "completed",
   "rejected",
 ]);
+
+/**
+ * What a practice may SET. Deliberately neutral:
+ *   in_review — the practice is working on it (organisational, e.g. reception);
+ *   answered  — the practice has sent its answer, nothing more. It does NOT
+ *               mean data were deleted, an export was delivered or the
+ *               request was granted; the answer text says what happened.
+ */
+export const PRACTICE_SETTABLE_STATUSES = new Set(["in_review", "answered"]);
+
+/** Statuses after which a request is closed. */
+export const TERMINAL_STATUSES = new Set(["answered", "completed", "rejected"]);
 
 const OPEN_STATUSES = ["submitted", "in_review"];
 const MAX_REASON_LEN = 1000;
@@ -285,55 +303,69 @@ export async function listPracticeDataRequests(practiceProfileId, opts = {}) {
 }
 
 /**
- * @param {{ requestId: string, practiceProfileId: string, handlerUserId: string, status: string, responseNote?: string }} input
+ * Move a request forward — two steps, two levels of authority:
+ *
+ *   in_review  may be set by anyone who may triage (e.g. reception): it says
+ *              "we are on it" and carries no content for the patient;
+ *   answered   may be set only by a role that may manage data requests, and
+ *              only together with a written answer: the answer IS the reply.
+ *
+ * Who may do what is decided by the caller from the practice's permission
+ * model (`permissions.triage` / `permissions.answer`) and enforced here again,
+ * so no route can grant more than the service allows.
+ *
+ * Closed requests stay closed: an answer is not silently rewritten later.
+ *
+ * @param {{ requestId: string, practiceProfileId: string, handlerUserId: string,
+ *           handlerRole?: string|null, status: string, responseNote?: string,
+ *           permissions: { triage: boolean, answer: boolean } }} input
  */
 export async function updatePracticeDataRequestStatus(input) {
   const id = String(input.requestId || "").trim();
   const pid = String(input.practiceProfileId || "").trim();
   const handlerId = String(input.handlerUserId || "").trim();
   const status = String(input.status || "").trim();
+  const canTriage = Boolean(input.permissions?.triage);
+  const canAnswer = Boolean(input.permissions?.answer);
 
   if (!id || !pid || !handlerId) throw new Error("validation_required");
-  if (!REQUEST_STATUSES.has(status)) throw new Error("validation_invalid_status");
+  if (!PRACTICE_SETTABLE_STATUSES.has(status)) throw new Error("validation_invalid_status");
+  if (!canTriage && !canAnswer) throw new Error("forbidden");
+
+  const responseNote = input.responseNote
+    ? String(input.responseNote).trim().slice(0, MAX_RESPONSE_NOTE_LEN) || null
+    : null;
+
+  // The answer to the patient is content; only an answering role writes it.
+  if (responseNote && !canAnswer) throw new Error("forbidden_answer");
+  if (status === "answered") {
+    if (!canAnswer) throw new Error("forbidden_answer");
+    // "Beantwortet" must never be shown without an answer to read.
+    if (!responseNote) throw new Error("validation_answer_required");
+  }
 
   const row = await prisma.patientDataRequest.findFirst({
     where: { id, practiceProfileId: pid },
   });
   if (!row) throw new Error("request_not_found");
-
-  // GDPR honesty guard (Art. 17): a "deletion" request must not be marked
-  // "completed" unless a real erasure was actually executed. There is no automated
-  // practice-scoped erasure yet, and K4's account-wide eraseUser is deliberately NOT
-  // reused here — it would delete the patient's entire account and data at EVERY
-  // practice, far beyond this single practice's request scope (and may conflict with
-  // medical-record retention duties). Until a dedicated practice-scoped erasure
-  // exists, a deletion request stays in manual review: the practice may set
-  // "in_review" or "rejected" (with a reason), but cannot silently report "completed".
-  if (row.type === "deletion" && status === "completed") {
-    throw new Error("deletion_requires_manual_erasure");
-  }
-
-  const responseNote = input.responseNote
-    ? String(input.responseNote).trim().slice(0, MAX_RESPONSE_NOTE_LEN) || null
-    : null;
+  if (!OPEN_STATUSES.includes(row.status)) throw new Error("request_already_answered");
 
   const now = new Date();
   const data = {
     status,
     updatedAt: now,
     handledByUserId: handlerId,
-    responseNote: responseNote ?? row.responseNote,
   };
-
-  if (status === "completed" || status === "rejected") {
-    data.completedAt = now;
-  }
+  if (responseNote) data.responseNote = responseNote;
+  if (status === "answered") data.completedAt = now;
 
   const updated = await prisma.patientDataRequest.update({
     where: { id },
     data,
   });
 
+  // Who (user + practice role), when (the row's time) and which status — never
+  // the answer text itself: it is already stored once, with the request.
   writeAuditLog({
     userId: handlerId,
     actorRole: "practice",
@@ -347,6 +379,8 @@ export async function updatePracticeDataRequestStatus(input) {
       requestType: updated.type,
       previousStatus: row.status,
       newStatus: status,
+      practiceRole: input.handlerRole || null,
+      answerSent: Boolean(responseNote),
     },
   });
 

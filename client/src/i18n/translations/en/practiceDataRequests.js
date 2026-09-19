@@ -1,4 +1,5 @@
 export default {
+  statusAnswered: "Answered",
   pageTitle: "Data requests – Practice",
   heading: "Patient data requests",
   intro:

@@ -523,7 +523,6 @@
   white-space: nowrap;
 }
 .dc-status svg { flex: none; }
-.dc-status--completed { color: var(--dc-accent); }
 
 /* The practice's answer — a reply, not a system line */
 .dc-answer {
@@ -638,4 +637,12 @@
 .patient-activity__tools .patient-data-control__filters {
   margin: 0;
   padding: 1rem;
+}
+
+/* Art. 12(4) note under an answered request: small, calm, always readable */
+.dc-request__rights {
+  margin: .6rem 0 0;
+  font-size: .88rem;
+  line-height: 1.5;
+  color: var(--dc-muted);
 }

@@ -1,4 +1,5 @@
 export default {
+  statusAnswered: "Beantwortet",
   pageTitle: "Datenanfragen – Praxis",
   heading: "Patienten-Datenanfragen",
   intro:

@@ -1073,6 +1073,9 @@ export default {
   },
 
   patientDataControl: {
+    answeredRightsNote: "Se la sua richiesta non è stata accolta, o lo è stata solo in parte, può presentare reclamo a un’autorità di controllo per la protezione dei dati o proporre ricorso giurisdizionale.",
+    answeredOn: "Risposta il {date}",
+    statusAnswered: "Risposta ricevuta",
     connectionTitle: "Il suo collegamento con questo studio",
     deletionNoteScoped: "La documentazione medica è soggetta a obblighi di conservazione previsti dalla legge; la cancellazione quindi non è sempre possibile, o non subito.",
     yourNoteLabel: "La sua nota",

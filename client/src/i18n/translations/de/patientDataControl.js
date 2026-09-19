@@ -1,4 +1,7 @@
 export default {
+  answeredRightsNote: "Wurde Ihrem Anliegen nicht oder nur teilweise entsprochen, können Sie sich bei einer Datenschutz-Aufsichtsbehörde beschweren oder gerichtlich dagegen vorgehen.",
+  answeredOn: "Beantwortet am {date}",
+  statusAnswered: "Beantwortet",
   connectionTitle: "Ihre Verbindung zu dieser Praxis",
   deletionNoteScoped: "Für ärztliche Unterlagen gelten gesetzliche Aufbewahrungsfristen. Eine Löschung ist deshalb nicht immer oder nicht sofort möglich.",
   yourNoteLabel: "Ihre Anmerkung",

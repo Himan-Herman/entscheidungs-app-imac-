@@ -44,7 +44,11 @@ function metricsVisibilityForRole(role) {
   return {
     inbox: hasPracticePermission(role, PERMISSIONS.INBOX_MANAGE),
     messages: hasPracticePermission(role, PERMISSIONS.MESSAGES_SEND),
-    dataRequests: hasPracticePermission(role, PERMISSIONS.DATA_REQUESTS_MANAGE),
+    // Reception triages data requests (marks them "in progress"); answering
+    // them stays with DATA_REQUESTS_MANAGE, enforced by the requests API.
+    dataRequests:
+      hasPracticePermission(role, PERMISSIONS.DATA_REQUESTS_MANAGE)
+      || hasPracticePermission(role, PERMISSIONS.PATIENT_LINKS_WRITE),
     patients: hasPracticePermission(role, PERMISSIONS.PATIENT_LINKS_READ),
     documents: hasPracticePermission(role, PERMISSIONS.DOCUMENTS_READ),
     medication: hasPracticePermission(role, PERMISSIONS.MEDICATION_READ),

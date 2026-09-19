@@ -1073,6 +1073,9 @@ export default {
   },
 
   patientDataControl: {
+    answeredRightsNote: "Si votre demande n’a pas été satisfaite, ou seulement en partie, vous pouvez introduire une réclamation auprès d’une autorité de contrôle de la protection des données ou former un recours juridictionnel.",
+    answeredOn: "Réponse le {date}",
+    statusAnswered: "Réponse reçue",
     connectionTitle: "Votre lien avec ce cabinet",
     deletionNoteScoped: "Les dossiers médicaux sont soumis à des durées légales de conservation ; une suppression n’est donc pas toujours possible, ou pas immédiatement.",
     yourNoteLabel: "Votre remarque",

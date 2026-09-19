@@ -1,4 +1,7 @@
 export default {
+  answeredRightsNote: "If your request was not met, or only in part, you can complain to a data protection supervisory authority or seek a remedy in court.",
+  answeredOn: "Answered on {date}",
+  statusAnswered: "Answered",
   connectionTitle: "Your connection to this practice",
   deletionNoteScoped: "Medical records are subject to statutory retention periods, so deletion is not always possible, or not immediately.",
   yourNoteLabel: "Your note",
