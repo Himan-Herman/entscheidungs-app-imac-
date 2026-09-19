@@ -528,3 +528,196 @@ test.describe("Meda Live — strict language lock", () => {
     expect(text).not.toContain("Praxis / Arzt");
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Live transcription: same language on both sides → no translation, no
+// response.create, speaker from the selection at speech start, 60-minute
+// maximum, silence never ends it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Server stub that answers like the real route: mode from the request. */
+const MODE_AWARE = {
+  sessionResponse: (body) => (body.mode === "transcription"
+    ? { mode: "transcription", responseGating: "none" }
+    : { mode: "interpretation", responseGating: "client" }),
+};
+
+async function startTranscription(page, { doctor = "Dr. Heinrich" } = {}) {
+  await page.getByRole("radio", { name: /Live-Transkription/ }).click();
+  await expect(page.locator("#mrt-transcription-lang")).toHaveValue("de");
+  await page.fill("#mrt-doctor-name-display", doctor);
+  await startSession(page);
+}
+
+async function readTranscript(page) {
+  return page.locator(".mrt-conversation .mrt-tx-turn").evaluateAll((rows) => rows.map((r) => ({
+    speaker: r.querySelector(".mrt-tx-speaker")?.textContent?.trim() ?? null,
+    text: r.querySelector(".mrt-tx-text")?.textContent?.trim() ?? null,
+    time: r.querySelector(".mrt-tx-time")?.textContent?.trim() ?? null,
+    unassigned: r.classList.contains("mrt-tx-turn--unassigned"),
+  })));
+}
+
+test.describe("Meda Live — live transcription (same language)", () => {
+  test("DE→DE: transcript with speakers from the form, no translation, no response.create", async ({ page }) => {
+    let body = null;
+    await openMeda(page, { ...MODE_AWARE, onSessionRequest: (b) => { body = b; } });
+    await startTranscription(page);
+
+    expect(body).toMatchObject({ patientLanguage: "de", practiceLanguage: "de", mode: "transcription", clientGating: true });
+    await expect(page.locator(".mrt-title")).toHaveText("Live-Transkription");
+    await expect(page.locator(".mrt-subtitle")).toHaveText("Keine Übersetzung – Gespräch wird dokumentiert");
+    // Interpreting controls are not offered: no auto/manual bar, no language ping-pong.
+    await expect(page.locator(".mrt-mode-bar")).toHaveCount(0);
+    await expect(page.locator(".mrt-pingpong-bar")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Dr. Heinrich" }).click();
+    await speak(page, "item_a", "Was führt Sie heute zu mir?");
+    await page.getByRole("button", { name: "Anna Schmidt" }).click();
+    await speak(page, "item_b", "Ich habe seit gestern Fieber");
+
+    await expect.poll(async () => (await readTranscript(page)).map((t) => [t.speaker, t.text])).toEqual([
+      ["Dr. Heinrich", "Was führt Sie heute zu mir?"],
+      ["Anna Schmidt", "Ich habe seit gestern Fieber"],
+    ]);
+    const [first] = await readTranscript(page);
+    expect(first.time).toMatch(/^\d{2}:\d{2}:\d{2}$/);
+    await expect(page.locator(".mrt-turn-text--translation, .mrt-turn-translation")).toHaveCount(0);
+    expect(await sent(page, "response.create")).toEqual([]);
+  });
+
+  test("the speaker is bound at speech start; without a selection it stays unassigned", async ({ page }) => {
+    await openMeda(page, MODE_AWARE);
+    await startTranscription(page);
+
+    // No selection yet.
+    await speak(page, "item_a", "Guten Morgen");
+    // Selected practice, speech starts, THEN the selection switches to the patient.
+    await page.getByRole("button", { name: "Dr. Heinrich" }).click();
+    await emit(page, { type: "input_audio_buffer.speech_started", item_id: "item_b", audio_start_ms: 0 });
+    await page.getByRole("button", { name: "Anna Schmidt" }).click();
+    for (const ev of [
+      { type: "input_audio_buffer.speech_stopped", item_id: "item_b", audio_end_ms: 900 },
+      { type: "input_audio_buffer.committed", item_id: "item_b" },
+      { type: "conversation.item.input_audio_transcription.completed", item_id: "item_b", transcript: "Bitte legen Sie sich hin" },
+    ]) await emit(page, ev);
+
+    await expect.poll(async () => (await readTranscript(page)).map((t) => [t.speaker, t.unassigned])).toEqual([
+      ["Nicht zugeordnet", true],
+      ["Dr. Heinrich", false],
+    ]);
+  });
+
+  test("short answers stay; another language is kept out with a notice", async ({ page }) => {
+    await openMeda(page, MODE_AWARE);
+    await startTranscription(page);
+    await page.getByRole("button", { name: "Anna Schmidt" }).click();
+
+    await speak(page, "item_a", "Ja");
+    await speak(page, "item_b", "Paracetamol 500");
+    await speak(page, "item_x", "How long have you had the pain here?");
+
+    await expect.poll(async () => (await readTranscript(page)).map((t) => t.text)).toEqual(["Ja", "Paracetamol 500"]);
+    await expect(page.locator(".mrt-gate-notice")).toContainText("Andere Sprache erkannt");
+    await expect(page.locator(".mrt-conversation")).not.toContainText("How long");
+    expect(await sent(page, "response.create")).toEqual([]);
+  });
+
+  test("silence never ends it: 30 s nothing, a hint after 3 min, speech clears the hint", async ({ page }) => {
+    await page.clock.install();
+    await openMeda(page, MODE_AWARE);
+    await startTranscription(page);
+
+    await page.clock.fastForward("00:31");
+    await expect(page.locator(".mrt-session-bar")).toBeVisible();
+    await expect(page.locator(".mrt-silence-hint")).toHaveCount(0);
+
+    await page.clock.fastForward("03:00");
+    await expect(page.locator(".mrt-silence-hint")).toContainText("Transkription läuft weiter");
+    await expect(page.locator(".mrt-session-bar")).toBeVisible();
+
+    await emit(page, { type: "input_audio_buffer.speech_started", item_id: "item_a", audio_start_ms: 0 });
+    await expect(page.locator(".mrt-silence-hint")).toHaveCount(0);
+  });
+
+  test("switching tabs does not end a transcription", async ({ page }) => {
+    await openMeda(page, MODE_AWARE);
+    await startTranscription(page);
+    await page.evaluate(() => {
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(page.locator(".mrt-session-bar")).toBeVisible();
+  });
+
+  test("ends at the 60-minute maximum, not before", async ({ page }) => {
+    await page.clock.install();
+    await openMeda(page, MODE_AWARE);
+    await startTranscription(page);
+    await expect(page.locator(".mrt-timer")).toHaveText(/^(60:00|59:5\d)$/);
+
+    await page.clock.fastForward("58:00");
+    await expect(page.locator(".mrt-session-bar")).toBeVisible();
+    await expect(page.locator(".mrt-timeout-warning")).toBeVisible();
+
+    await page.clock.fastForward("02:05");
+    await expect(page.locator(".mrt-session-bar")).toHaveCount(0);
+    await expect(page.locator(".mrt-end-reason--time_limit")).toBeVisible();
+  });
+
+  test("after the session: speaker correction, PDF and local history show the transcript without translation", async ({ page }) => {
+    await openMeda(page, MODE_AWARE);
+    await startTranscription(page);
+    await page.getByRole("button", { name: "Dr. Heinrich" }).click();
+    await speak(page, "item_a", "Wo tut es weh?");
+    await page.getByRole("button", { name: "Dr. Heinrich" }).click(); // deselect
+    await speak(page, "item_b", "Links im Knie");
+    await expect.poll(async () => (await readTranscript(page)).length).toBe(2);
+
+    await page.click(".mrt-btn--stop");
+    // The unassigned answer is corrected by hand after the session.
+    await page.locator(".mrt-tx-turn").nth(1).locator(".mrt-tx-reassign").selectOption("patient");
+    await expect.poll(async () => (await readTranscript(page)).map((t) => t.speaker)).toEqual(["Dr. Heinrich", "Anna Schmidt"]);
+    await expect(page.locator(".mrt-tx-turn").nth(1)).toContainText("Sprecher manuell zugeordnet");
+
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.locator(".mrt-localpdf-btn, .mrt-end-actions .mrt-btn--pdf").first().click(),
+    ]);
+    const text = pdfText(await download.path());
+    expect(text).toContain("Live-Transkription");
+    expect(text).toContain("Dr. Heinrich");
+    expect(text).toContain("Anna Schmidt");
+    expect(text).toContain("Links im Knie");
+    expect(text).not.toMatch(/Übersetzung für (Praxis|Patient)/);
+
+    await page.locator(".mrt-btn--archive-save").first().click();
+    await page.locator(".mrt-btn--archive-view").first().click();
+    const archived = page.locator(".mrt-archive-turn");
+    await expect(archived).toHaveCount(2);
+    await expect(archived.nth(0).locator(".mrt-archive-turn-role")).toHaveText("Dr. Heinrich");
+    await expect(archived.nth(1).locator(".mrt-archive-turn-role")).toHaveText("Anna Schmidt");
+    await expect(page.locator(".mrt-archive-turn-section--translation")).toHaveCount(0);
+  });
+
+  test("interpreting keeps its tab rule: switching tabs still ends the live link", async ({ page }) => {
+    await openMeda(page, MODE_AWARE);
+    await startSession(page);
+    await page.evaluate(() => {
+      Object.defineProperty(document, "visibilityState", { configurable: true, get: () => "hidden" });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await expect(page.locator(".mrt-session-bar")).toHaveCount(0);
+  });
+
+  test("interpreting keeps its limits: 5-minute timer, 30 s of silence ends it", async ({ page }) => {
+    await page.clock.install();
+    await openMeda(page, MODE_AWARE);
+    await startSession(page);
+    await expect(page.locator(".mrt-timer")).toHaveText(/^(05:00|04:5\d)$/);
+
+    await page.clock.fastForward("00:31");
+    await expect(page.locator(".mrt-session-bar")).toHaveCount(0);
+    await expect(page.locator(".mrt-end-reason--inactivity")).toBeVisible();
+  });
+});

@@ -1,0 +1,277 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Meda Live — live transcription (same language, no translation): session
+   kind switch, speaker selection, single-column transcript, session hints.
+
+   Scoped under .mrt-page. Light first, dark under :root[data-theme="dark"].
+   Colour roles (both themes checked against WCAG 2.1 AA in the browser):
+     practitioner  indigo    patient  teal    unassigned  neutral, dashed
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mrt-page {
+  --mw-surface: #ffffff;
+  --mw-surface-soft: #f8fafc;
+  --mw-border: #e2e8f0;
+  --mw-border-strong: #cbd5e1;
+  --mw-text: #0f172a;
+  --mw-text-soft: #475569;
+  --mw-accent: #0f766e;
+  --mw-accent-soft: #f0fdfa;
+  --mw-accent-border: #99f6e4;
+  --mw-practitioner: #4338ca;
+  --mw-practitioner-soft: #eef2ff;
+  --mw-practitioner-border: #c7d2fe;
+  --mw-patient: #0f766e;
+  --mw-patient-soft: #f0fdfa;
+  --mw-patient-border: #99f6e4;
+  --mw-unassigned: #4b5563;
+  --mw-warn: #92400e;
+  --mw-warn-soft: #fffbeb;
+  --mw-warn-border: #fde68a;
+  --mw-radius: 12px;
+}
+
+:root[data-theme="dark"] .mrt-page {
+  --mw-surface: #1e293b;
+  --mw-surface-soft: #0f172a;
+  --mw-border: #334155;
+  --mw-border-strong: #475569;
+  --mw-text: #f1f5f9;
+  --mw-text-soft: #cbd5e1;
+  --mw-accent: #2dd4bf;
+  --mw-accent-soft: #042f2e;
+  --mw-accent-border: #115e59;
+  --mw-practitioner: #a5b4fc;
+  --mw-practitioner-soft: #1e1b4b;
+  --mw-practitioner-border: #3730a3;
+  --mw-patient: #5eead4;
+  --mw-patient-soft: #042f2e;
+  --mw-patient-border: #115e59;
+  --mw-unassigned: #cbd5e1;
+  --mw-warn: #fbbf24;
+  --mw-warn-soft: #451a03;
+  --mw-warn-border: #92400e;
+}
+
+
+/* ── Setup: session kind ──────────────────────────────────────────────────── */
+.mrt-kind-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
+  margin: 0.25rem 0 1rem;
+}
+
+.mrt-kind-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  min-height: 44px;
+  padding: 0.75rem 0.875rem;
+  border: 1.5px solid var(--mw-border);
+  border-radius: var(--mw-radius);
+  background: var(--mw-surface);
+  color: var(--mw-text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+
+.mrt-kind-option:hover:not(:disabled) { border-color: var(--mw-border-strong); }
+
+.mrt-kind-option--active {
+  border-color: var(--mw-accent);
+  background: var(--mw-accent-soft);
+  box-shadow: 0 0 0 1px var(--mw-accent) inset;
+}
+
+.mrt-kind-title { font-weight: 700; font-size: 0.9375rem; }
+.mrt-kind-hint  { font-size: 0.8125rem; color: var(--mw-text-soft); line-height: 1.35; }
+
+.mrt-field--single { max-width: 22rem; }
+
+.mrt-subtitle--transcription { color: var(--mw-accent); font-weight: 600; }
+
+
+/* ── Live: speaker selection (transcription) ─────────────────────────────── */
+.mrt-speaker-select {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--mw-border);
+  border-radius: var(--mw-radius);
+  background: var(--mw-surface);
+}
+
+.mrt-speaker-select-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mw-text-soft);
+}
+
+.mrt-speaker-select-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
+}
+
+.mrt-speaker-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 52px;
+  padding: 0.625rem 0.875rem;
+  border: 1.5px solid var(--mw-border);
+  border-radius: var(--mw-radius);
+  background: var(--mw-surface-soft);
+  color: var(--mw-text);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.mrt-speaker-choice-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--mw-border-strong);
+}
+
+.mrt-speaker-choice--practice .mrt-speaker-choice-dot { background: var(--mw-practitioner); }
+.mrt-speaker-choice--patient  .mrt-speaker-choice-dot { background: var(--mw-patient); }
+
+.mrt-speaker-choice--practice.mrt-speaker-choice--active {
+  border-color: var(--mw-practitioner);
+  background: var(--mw-practitioner-soft);
+  color: var(--mw-practitioner);
+  box-shadow: 0 0 0 1px var(--mw-practitioner) inset;
+}
+
+.mrt-speaker-choice--patient.mrt-speaker-choice--active {
+  border-color: var(--mw-patient);
+  background: var(--mw-patient-soft);
+  color: var(--mw-patient);
+  box-shadow: 0 0 0 1px var(--mw-patient) inset;
+}
+
+.mrt-speaker-select-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--mw-text-soft);
+  line-height: 1.4;
+}
+
+/* ── Transcript (single column) ───────────────────────────────────────────── */
+.mrt-tx-turn {
+  position: relative;
+  padding: 0.75rem 1rem 0.875rem 1.125rem;
+  border: 1px solid var(--mw-border);
+  border-radius: var(--mw-radius);
+  background: var(--mw-surface);
+  color: var(--mw-text);
+}
+
+.mrt-tx-turn::before {
+  content: "";
+  position: absolute;
+  inset: 0.625rem auto 0.625rem 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--mw-border-strong);
+}
+
+.mrt-tx-turn--practice::before { background: var(--mw-practitioner); }
+.mrt-tx-turn--patient::before  { background: var(--mw-patient); }
+.mrt-tx-turn--unassigned        { border-style: dashed; }
+
+.mrt-tx-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.625rem;
+  margin-bottom: 0.25rem;
+}
+
+.mrt-tx-speaker {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.mrt-tx-turn--practice   .mrt-tx-speaker { color: var(--mw-practitioner); }
+.mrt-tx-turn--patient    .mrt-tx-speaker { color: var(--mw-patient); }
+.mrt-tx-turn--unassigned .mrt-tx-speaker { color: var(--mw-unassigned); font-style: italic; }
+
+.mrt-tx-time {
+  font-size: 0.8125rem;
+  color: var(--mw-text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.mrt-tx-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.mrt-tx-reassign {
+  min-height: 36px;
+  max-width: 12rem;
+  padding: 0.25rem 1.75rem 0.25rem 0.5rem;
+  border: 1px solid var(--mw-border);
+  border-radius: 8px;
+  background-color: var(--mw-surface-soft);
+  color: var(--mw-text);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.mrt-tx-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+
+/* ── Live: session hints (limit, shared microphone, long silence) ─────────── */
+.mrt-tx-hints {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--mw-border);
+  border-radius: var(--mw-radius);
+  background: var(--mw-surface-soft);
+  color: var(--mw-text-soft);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.mrt-tx-hints p { margin: 0; }
+
+.mrt-silence-hint {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--mw-warn-border);
+  border-radius: 10px;
+  background: var(--mw-warn-soft);
+  color: var(--mw-warn);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .mrt-kind-switch,
+  .mrt-speaker-select-buttons { grid-template-columns: 1fr; }
+}

@@ -5,6 +5,14 @@
  * gating decision are testable without a network or a credential. The route
  * stays the only place that talks to the provider.
  *
+ * ── Two session modes ───────────────────────────────────────────────────────
+ *  interpretation  patientLanguage !== practiceLanguage — the live
+ *                  interpreter. Unchanged instructions, voice and VAD.
+ *  transcription   patientLanguage === practiceLanguage — no translation at
+ *                  all. The model never answers and never speaks; only the
+ *                  transcription model runs. Derived from the language pair,
+ *                  never hardcoded to one language.
+ *
  * ── Why responses can be client-gated ───────────────────────────────────────
  * With `create_response: true` the model answers — out loud — the moment VAD
  * closes a segment, before anyone has looked at what was said. A neighbour's
@@ -37,21 +45,34 @@ export const SUPPORTED_REALTIME_LANGUAGES = Object.freeze([
 
 const SUPPORTED_SET = new Set(SUPPORTED_REALTIME_LANGUAGES);
 
+export const MEDA_SESSION_MODES = Object.freeze({
+  INTERPRETATION: 'interpretation',
+  TRANSCRIPTION: 'transcription',
+});
+
 /** Who decides when the model answers. */
 export const RESPONSE_GATING = Object.freeze({
   /** The client sends response.create after its checks pass. */
   CLIENT: 'client',
   /** Server VAD answers immediately — the pre-gating behaviour. */
   SERVER: 'server',
+  /** Nobody: the session never answers (transcription). */
+  NONE: 'none',
 });
 
 /**
- * @param {{ patientLanguage?: unknown, practiceLanguage?: unknown, clientGating?: unknown }} body
- * @returns {{ ok: true, patientLanguage: string, practiceLanguage: string, clientGating: boolean }
+ * Validates the request and derives the session mode from the language pair.
+ * The mode is never taken on the client's word alone: a transcription request
+ * with two different languages, or an interpretation request with the same
+ * language twice, is refused rather than silently reinterpreted. An old client
+ * that sends no mode keeps its old answer for the same language twice.
+ *
+ * @param {{ patientLanguage?: unknown, practiceLanguage?: unknown, mode?: unknown, clientGating?: unknown }} body
+ * @returns {{ ok: true, mode: string, patientLanguage: string, practiceLanguage: string, clientGating: boolean }
  *          | { ok: false, error: string }}
  */
 export function parseMedaSessionRequest(body) {
-  const { patientLanguage, practiceLanguage } = body ?? {};
+  const { patientLanguage, practiceLanguage, mode } = body ?? {};
   // Strict boolean: only a client that knows how to send response.create opts in.
   const clientGating = body?.clientGating === true;
 
@@ -61,10 +82,21 @@ export function parseMedaSessionRequest(body) {
   if (!SUPPORTED_SET.has(patientLanguage) || !SUPPORTED_SET.has(practiceLanguage)) {
     return { ok: false, error: 'unsupported_language' };
   }
-  if (patientLanguage === practiceLanguage) {
-    return { ok: false, error: 'interpretation_requires_two_languages' };
+
+  const sameLanguage = patientLanguage === practiceLanguage;
+  const requested = mode === undefined || mode === null || mode === ''
+    ? MEDA_SESSION_MODES.INTERPRETATION
+    : mode;
+
+  if (requested === MEDA_SESSION_MODES.TRANSCRIPTION) {
+    if (!sameLanguage) return { ok: false, error: 'transcription_requires_same_language' };
+    return { ok: true, mode: MEDA_SESSION_MODES.TRANSCRIPTION, patientLanguage, practiceLanguage, clientGating };
   }
-  return { ok: true, patientLanguage, practiceLanguage, clientGating };
+  if (requested === MEDA_SESSION_MODES.INTERPRETATION) {
+    if (sameLanguage) return { ok: false, error: 'interpretation_requires_two_languages' };
+    return { ok: true, mode: MEDA_SESSION_MODES.INTERPRETATION, patientLanguage, practiceLanguage, clientGating };
+  }
+  return { ok: false, error: 'invalid_mode' };
 }
 
 /**
@@ -76,10 +108,16 @@ export function isClientResponseGatingEnabled(env = process.env) {
   return !(raw === 'false' || raw === '0');
 }
 
+/** Instructions for a transcription session — a guard, not a feature. */
+export const TRANSCRIPTION_SESSION_INSTRUCTIONS =
+  'Diese Sitzung dient ausschließlich der Live-Transkription. ' +
+  'Erzeuge niemals eine Antwort, Übersetzung, Zusammenfassung oder Sprachausgabe.';
+
 /**
  * Builds the `session` object for client_secrets.create.
  *
  * @param {{
+ *   mode?: string,
  *   clientGating?: boolean,
  *   instructions: string,
  *   model: string,
@@ -91,6 +129,7 @@ export function isClientResponseGatingEnabled(env = process.env) {
  * @returns {{ session: object, responseGating: string }}
  */
 export function buildMedaRealtimeSession({
+  mode = MEDA_SESSION_MODES.INTERPRETATION,
   clientGating = false,
   instructions,
   model,
@@ -99,16 +138,21 @@ export function buildMedaRealtimeSession({
   silenceMs,
   env = process.env,
 }) {
-  const responseGating = clientGating && isClientResponseGatingEnabled(env)
-    ? RESPONSE_GATING.CLIENT
-    : RESPONSE_GATING.SERVER;
+  const isTranscription = mode === MEDA_SESSION_MODES.TRANSCRIPTION;
+  // Transcription ignores the rollback switch: it must never produce a response.
+  const responseGating = isTranscription
+    ? RESPONSE_GATING.NONE
+    : (clientGating && isClientResponseGatingEnabled(env)
+      ? RESPONSE_GATING.CLIENT
+      : RESPONSE_GATING.SERVER);
 
   const session = {
     type: 'realtime',
     model,
-    instructions,
+    instructions: isTranscription ? TRANSCRIPTION_SESSION_INSTRUCTIONS : instructions,
     max_output_tokens: 'inf',
-    output_modalities: ['audio'],
+    // Text only for transcription: even a stray response could never be spoken.
+    output_modalities: isTranscription ? ['text'] : ['audio'],
     audio: {
       input: {
         // No fixed input language on purpose: forcing one would make the
@@ -121,7 +165,7 @@ export function buildMedaRealtimeSession({
           prefix_padding_ms: 200,
           silence_duration_ms: silenceMs,
           create_response: responseGating === RESPONSE_GATING.SERVER,
-          interrupt_response: true,
+          interrupt_response: !isTranscription,
         },
       },
       output: { voice },

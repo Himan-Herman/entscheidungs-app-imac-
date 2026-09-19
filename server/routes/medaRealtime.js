@@ -194,8 +194,8 @@ Output:
  * Creates an OpenAI Realtime ephemeral session and returns the client secret.
  * The API key is never exposed — only the short-lived client_secret.value is returned.
  *
- * Body: { patientLanguage: "de", practiceLanguage: "en", clientGating?: true }
- * Response: { clientSecret, sessionId, expiresAt, initialInputLang, patientLanguage, practiceLanguage, responseGating }
+ * Body: { patientLanguage: "de", practiceLanguage: "en", mode?: "interpretation"|"transcription", clientGating?: true }
+ * Response: { clientSecret, sessionId, expiresAt, initialInputLang, patientLanguage, practiceLanguage, mode, responseGating }
  */
 router.post('/session', realtimeSessionLimiter, async (req, res) => {
   try {
@@ -205,10 +205,12 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
         invalid_input: 'Ungültige Eingabe.',
         unsupported_language: 'Nicht unterstützte Sprache.',
         interpretation_requires_two_languages: 'Patientensprache und Praxissprache müssen verschieden sein.',
+        transcription_requires_same_language: 'Für die Live-Transkription muss genau eine Sprache gewählt sein.',
+        invalid_mode: 'Ungültiger Sitzungsmodus.',
       }[parsed.error] ?? 'Ungültige Eingabe.';
       return res.status(400).json({ error: message, code: parsed.error });
     }
-    const { patientLanguage, practiceLanguage, clientGating } = parsed;
+    const { mode, patientLanguage, practiceLanguage, clientGating } = parsed;
 
     const model              = getMedaRealtimeModel();
     const transcriptionModel = getMedaRealtimeTranscriptionModel();
@@ -219,6 +221,7 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
     // GA endpoint: POST /v1/realtime/client_secrets
     // Schema: audio.input.{transcription, turn_detection}, audio.output.{voice}
     const { session, responseGating } = buildMedaRealtimeSession({
+      mode,
       clientGating,
       instructions,
       model,
@@ -247,8 +250,10 @@ router.post('/session', realtimeSessionLimiter, async (req, res) => {
       initialInputLang: patientLanguage,
       patientLanguage,
       practiceLanguage,
+      mode,
       // 'client' → the client sends response.create after its checks pass;
-      // 'server' → old client or rollback, the model answers on its own.
+      // 'server' → old client or rollback, the model answers on its own;
+      // 'none'   → transcription, the model never answers.
       responseGating,
     });
   } catch (err) {

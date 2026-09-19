@@ -52,6 +52,7 @@ export function buildArchiveEntry({
   patientLanguage,
   practiceLanguage,
   sessionStartedAt,
+  mode = 'interpretation',
 }) {
   const cleanTurns = (turns ?? [])
     .filter(t => t.isDone && (t.originalText || t.translatedText))
@@ -65,6 +66,10 @@ export function buildArchiveEntry({
       isUnclear:      t.isUnclear      ?? false,
       originalEdited: t.originalEdited ?? false,
       timestamp:      t.timestamp      ?? null,
+      // Live transcription: who said it is part of the record, including
+      // whether it was corrected by hand.
+      mode:           t.mode           ?? mode,
+      speakerEdited:  t.speakerEdited  ?? false,
     }));
 
   return {
@@ -77,6 +82,9 @@ export function buildArchiveEntry({
     doctorName:         String(practiceInfo?.doctorName ?? '').trim() || null,
     patientLanguage:  patientLanguage  ?? null,
     practiceLanguage: practiceLanguage ?? null,
+    // Optional since live transcription — older entries lack it and render
+    // as interpreting sessions.
+    mode,
     patientInfo:      patientInfo  ?? {},
     practiceInfo:     practiceInfo ?? {},
     turns:            cleanTurns,

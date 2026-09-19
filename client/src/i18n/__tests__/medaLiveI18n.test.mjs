@@ -25,6 +25,10 @@ import { getMessages } from "../translations/index.js";
 import { UI_SELECTABLE_LOCALE_CODES } from "../localeConfig.js";
 import { getPracticeChromeMessages } from "../../features/medaLiveTranslation/realtime/medaRealtimePractice.i18n.js";
 import { getMltMessages } from "../../features/medaLiveTranslation/medaLiveTranslation.i18n.js";
+import {
+  getMedaTranscriptionMessages,
+  __transcriptionI18nForTests as transcriptionI18n,
+} from "../../features/medaLiveTranslation/realtime/medaTranscription.i18n.js";
 
 const LANGS = ["de", "en", "fr", "it", "es", "ru"];
 
@@ -141,6 +145,13 @@ test("practice-only Meda chrome covers every selectable language", () => {
 
 test("Meda Live Translation page covers every selectable language", () => {
   assertTranslated("medaLiveTranslation", (l) => getMltMessages(l));
+});
+
+test("live transcription strings cover every selectable language", () => {
+  assertTranslated("medaTranscription", (l) => getMedaTranscriptionMessages(l));
+  for (const lang of LANGS) {
+    assert.ok(transcriptionI18n[lang], `medaTranscription: [${lang}] has its own entry`);
+  }
 });
 
 test("practice chrome does not silently fall back for a selectable language", () => {

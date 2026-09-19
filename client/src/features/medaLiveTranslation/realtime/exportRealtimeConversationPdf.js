@@ -208,6 +208,9 @@ function fitLogoInBox(natW, natH, maxW, maxH) {
  *   sessionStartedAt: string|null,
  *   messages?:        Record<string, any>,
  *   locale?:          string,
+ *   mode?:            'interpretation'|'transcription',
+ *   speakerNames?:    { patientName?: string, practitionerName?: string },
+ *   transcriptionText?: Record<string, string>|null,
  * }} params
  * @param {{ returnBlob?: boolean }} [options]
  * @returns {Promise<Blob|void>} a Blob when options.returnBlob is true, otherwise void
@@ -220,7 +223,14 @@ export async function exportRealtimeConversationPdf({
   sessionStartedAt = null,
   messages = {},
   locale = 'de-DE',
+  // Optional — added with live transcription. Omitted (older callers,
+  // archive entries without a mode), the PDF is exactly as before.
+  mode = 'interpretation',
+  speakerNames = {},
+  transcriptionText = null,
 }, options = {}) {
+  const isTranscription = mode === 'transcription';
+  const tx = transcriptionText ?? {};
   const { dataUrl: logoDataUrl, natW: logoNatW, natH: logoNatH } = await loadLogoData(logo6Url);
   const { w: logoW, h: logoH } = fitLogoInBox(logoNatW, logoNatH, LOGO_BOX_W, LOGO_BOX_H);
 
@@ -466,7 +476,7 @@ export async function exportRealtimeConversationPdf({
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
   doc.setTextColor(...COL.teal);
-  doc.text(pdfText.documentTitle, titleX, y + 5);
+  doc.text(isTranscription && tx.transcriptionTitle ? tx.transcriptionTitle : pdfText.documentTitle, titleX, y + 5);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
@@ -547,11 +557,17 @@ export async function exportRealtimeConversationPdf({
 
   // ── Session / languages box ─────────────────────────────────────────────────
 
-  labeledInfoBox(pdfText.sessionBoxTitle, [
-    [pdfText.patientLanguageLabel, patientLangLabel],
-    [pdfText.practiceLanguageLabel, practiceLangLabel],
-    [pdfText.startedLabel, formatDate(sessionStartedAt, locale)],
-  ]);
+  labeledInfoBox(pdfText.sessionBoxTitle, isTranscription
+    ? [
+      [tx.languageLabel ?? pdfText.patientLanguageLabel, patientLangLabel],
+      [tx.modeGroupAria ?? 'Mode', [tx.modeTranscription ?? 'Live transcription', tx.transcriptionSubtitle].filter(Boolean).join(' – ')],
+      [pdfText.startedLabel, formatDate(sessionStartedAt, locale)],
+    ]
+    : [
+      [pdfText.patientLanguageLabel, patientLangLabel],
+      [pdfText.practiceLanguageLabel, practiceLangLabel],
+      [pdfText.startedLabel, formatDate(sessionStartedAt, locale)],
+    ]);
 
   // ── Conversation turns ──────────────────────────────────────────────────────
 
@@ -577,12 +593,21 @@ export async function exportRealtimeConversationPdf({
     const accentColor = role === null ? COL.uncertainAccent : isPatient ? COL.patientAccent : COL.practiceAccent;
     const turnBg      = role === null ? COL.boxBg     : isPatient ? COL.patientBg     : COL.practiceBg;
     const turnBorder  = role === null ? COL.boxBorder : isPatient ? COL.patientBorder : COL.practiceBorder;
-    const roleLabel   = role === null ? pdfText.roleUncertain : isPatient ? pdfText.rolePatient : pdfText.rolePractice;
+    const roleLabel   = isTranscription
+      // Names only from system data (session form / practice profile).
+      ? (role === 'patient'
+        ? (String(speakerNames.patientName ?? '').trim() || tx.speakerPatientFallback || pdfText.rolePatient)
+        : role === 'practice'
+          ? (String(speakerNames.practitionerName ?? '').trim() || tx.speakerPractitionerFallback || pdfText.rolePractice)
+          : (tx.speakerUnassigned ?? pdfText.roleUncertain))
+      : role === null ? pdfText.roleUncertain : isPatient ? pdfText.rolePatient : pdfText.rolePractice;
     const transLabel  = role === null ? pdfText.translationLabel
       : isPatient ? pdfText.translationForPractice : pdfText.translationForPatient;
     const srcLabel    = formatLanguageLabel(turn.sourceLanguage, locale);
     const tgtLabel    = formatLanguageLabel(turn.targetLanguage, locale);
-    const timeStr     = formatTime(turn.timestamp, locale);
+    const timeStr     = isTranscription && turn.timestamp
+      ? new Date(turn.timestamp).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      : formatTime(turn.timestamp, locale);
     const origText    = sanitize(turn.originalText   ?? '');
     const transText   = sanitize(turn.translatedText ?? '');
 
@@ -661,6 +686,12 @@ export async function exportRealtimeConversationPdf({
       needSpace(lh(7.5) + 1);
       doc.text(`[${pdfText.editedBadge}]`, MARGIN + 6, y);
       y += lh(7.5) + 1.5;
+    }
+
+    if (isTranscription) {
+      // One language, nothing translated: the transcript is the record.
+      gap(8);
+      continue;
     }
 
     gap(4);

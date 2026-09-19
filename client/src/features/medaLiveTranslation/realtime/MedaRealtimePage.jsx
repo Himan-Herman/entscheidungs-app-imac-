@@ -11,6 +11,8 @@ import { createMedaPdfLink } from './medaPdfQrApi.js';
 import { REALTIME_LANGUAGES, REALTIME_LANGUAGE_MAP } from './realtimeLanguages.js';
 import { exportRealtimeConversationPdf } from './exportRealtimeConversationPdf.js';
 import { speakTranslation, cancelSpeech } from './realtimeSpeechPlayback.js';
+import { SESSION_MODES, speakerLabel } from './utteranceGate.js';
+import { getMedaTranscriptionMessages } from './medaTranscription.i18n.js';
 import {
   usePatientProfilePrefill,
   EMPTY_PATIENT_INFO,
@@ -24,6 +26,7 @@ import {
   clearArchivedConversations,
 } from './realtimeConversationArchive.js';
 import './MedaRealtimePage.css';
+import './MedaTranscription.css';
 
 /**
  * Maximum session duration in seconds — the single source for the time limit.
@@ -36,6 +39,31 @@ const SESSION_WARN_SECONDS = 60;
 
 /** Inactivity cutoff: stop the live link after this many seconds with no speech. */
 const INACTIVITY_TIMEOUT_SECONDS = 30;
+
+/**
+ * Live transcription (same language, no translation) documents a whole
+ * consultation, examination pauses included — so it has its own limits:
+ * a 60-minute maximum, and silence never ends it (only a hint after a while).
+ * Only an explicit stop, a technical abort or the maximum end the session.
+ */
+const TRANSCRIPTION_MAX_SECONDS = 60 * 60;
+const TRANSCRIPTION_WARN_SECONDS = 5 * 60;
+const TRANSCRIPTION_SILENCE_HINT_SECONDS = 3 * 60;
+
+/**
+ * Languages offered for live transcription in the UI. The engine and server
+ * are language-generic (same language on both sides = transcription); the
+ * visible rollout starts with German. Add a code here to offer it.
+ */
+const TRANSCRIPTION_LANGUAGES = ['de'];
+
+/** Wall-clock time with seconds, e.g. "14:32:18" — transcript entries. */
+function formatClock(isoString, locale) {
+  if (!isoString) return '';
+  return new Date(isoString).toLocaleTimeString(locale, {
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  });
+}
 
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
@@ -90,6 +118,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   const isPractice = variant === 'practice';
   const { language } = useLanguage();
   const practiceTx = useMemo(() => getPracticeChromeMessages(language), [language]);
+  const txTx = useMemo(() => getMedaTranscriptionMessages(language), [language]);
   const interpreterTx = useMemo(() => {
     const fallback = getMessages('en').medicalInterpreter ?? {};
     return getMessages(language).medicalInterpreter ?? fallback;
@@ -134,12 +163,25 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     audioElRef,
     updateTurnOriginalText,
     setManualMode,
+    setActiveSpeaker,
+    updateTurnSpeaker,
+    sessionMode,
     gateNotice,
   } = useRealtimeSession();
 
   // ── Language selection ─────────────────────────────────────────────────────
   const [patientLang,  setPatientLang]  = useState('de');
   const [practiceLang, setPracticeLang] = useState('en');
+
+  // ── Practice: interpreting (two languages) or live transcription (one) ──────
+  // The patient variant always interprets.
+  const [sessionKind, setSessionKind] = useState(SESSION_MODES.INTERPRETATION);
+  const interpretationPairRef = useRef({ patient: 'de', practice: 'en' });
+  // Transcription: who is speaking right now — null = nobody selected, so a
+  // segment stays unassigned instead of being attributed on a guess.
+  const [activeSpeaker, setActiveSpeakerState] = useState(/** @type {'patient'|'practice'|null} */ (null));
+  // Transcription: shown after a longer silence; never ends the session.
+  const [silenceHint, setSilenceHint] = useState(false);
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [showDebug,        setShowDebug]        = useState(false);
@@ -266,6 +308,11 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     setManualMode(mode === 'manual', manualSpeaker);
   }, [mode, manualSpeaker, setManualMode]);
 
+  // ── Transcription: hand the current speaker selection to the engine ────────
+  useEffect(() => {
+    setActiveSpeaker(activeSpeaker);
+  }, [activeSpeaker, setActiveSpeaker]);
+
   // ── Gate notice: show briefly, then clear ──────────────────────────────────
   useEffect(() => {
     if (!gateNotice) return undefined;
@@ -287,15 +334,18 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   }, []);
 
   // ── Tab-hidden protection ───────────────────────────────────────────────────
+  // Live transcription keeps running: the practice may switch to its PVS or
+  // another tab during the consultation; only stop, abort or the maximum end it.
   useEffect(() => {
     function onVisibilityChange() {
-      if (document.visibilityState === 'hidden' && connectionState === 'connected') {
+      if (document.visibilityState === 'hidden' && connectionState === 'connected'
+        && sessionMode !== SESSION_MODES.TRANSCRIPTION) {
         disconnect();
       }
     }
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, [connectionState, disconnect]);
+  }, [connectionState, disconnect, sessionMode]);
 
   // ── Hard timeout + countdown ────────────────────────────────────────────────
   // Effect A: Initialise timer values on connect; reset pause state on disconnect.
@@ -308,7 +358,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         sessionStartedAtRef.current = new Date().toISOString();
       }
       isContinuingRef.current = false;
-      setRemainingSeconds(SESSION_MAX_SECONDS);
+      setRemainingSeconds(sessionMode === SESSION_MODES.TRANSCRIPTION ? TRANSCRIPTION_MAX_SECONDS : SESSION_MAX_SECONDS);
       setSessionExpired(false);
       setIsPaused(false);
       pausedAtRef.current = null;
@@ -317,17 +367,20 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       setIsPaused(false);
       pausedAtRef.current = null;
     }
-  }, [connectionState]);
+    // sessionMode is set by the hook before the connection opens, so it is
+    // already final when connectionState turns 'connected'.
+  }, [connectionState, sessionMode]);
 
   // Effect B: Manage the countdown interval.  Stops when paused; restarts on resume.
   // handleResume() shifts sessionStartRef forward by pause duration before setIsPaused(false),
   // so the remaining-seconds calculation is correct when the interval restarts.
   useEffect(() => {
     if (connectionState !== 'connected' || isPaused) return;
+    const maxSeconds = sessionMode === SESSION_MODES.TRANSCRIPTION ? TRANSCRIPTION_MAX_SECONDS : SESSION_MAX_SECONDS;
 
     timerIntervalRef.current = setInterval(() => {
       const elapsed   = Math.floor((Date.now() - sessionStartRef.current) / 1000);
-      const remaining = Math.max(0, SESSION_MAX_SECONDS - elapsed);
+      const remaining = Math.max(0, maxSeconds - elapsed);
       setRemainingSeconds(remaining);
 
       if (remaining <= 0) {
@@ -346,21 +399,28 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         timerIntervalRef.current = null;
       }
     };
-  }, [connectionState, isPaused]);
+  }, [connectionState, isPaused, sessionMode]);
 
   // Effect C: Inactivity watchdog. Armed only while the session is connected and
   // genuinely idle ('ready' = waiting for a speaker), and never while paused.
   // sessionStatus changes (speech_active/processing/translating/speaking) re-run
   // this effect and reset the window, so it counts only continuous silence and can
   // never fire while Meda is speaking/translating.
+  // Live transcription: silence never ends the session (an examination pause is
+  // normal) — after a longer silence it only shows a hint, cleared by speech.
   useEffect(() => {
     if (connectionState !== 'connected' || isPaused || sessionStatus !== 'ready') return;
+    const isTranscription = sessionMode === SESSION_MODES.TRANSCRIPTION;
 
     inactivityTimerRef.current = setTimeout(() => {
+      if (isTranscription) {
+        setSilenceHint(true);
+        return;
+      }
       setEndReason('inactivity');
       cancelSpeech();
       disconnectRef.current();
-    }, INACTIVITY_TIMEOUT_SECONDS * 1000);
+    }, (isTranscription ? TRANSCRIPTION_SILENCE_HINT_SECONDS : INACTIVITY_TIMEOUT_SECONDS) * 1000);
 
     return () => {
       if (inactivityTimerRef.current) {
@@ -368,7 +428,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         inactivityTimerRef.current = null;
       }
     };
-  }, [connectionState, sessionStatus, isPaused]);
+  }, [connectionState, sessionStatus, isPaused, sessionMode]);
+
+  // Speech (or leaving the live state) clears the silence hint.
+  useEffect(() => {
+    if (sessionStatus !== 'ready' || connectionState !== 'connected') setSilenceHint(false);
+  }, [sessionStatus, connectionState]);
 
   // Effect D: Surface a real connection drop as the end reason (only when it was
   // not already ended for a more specific reason that produces an 'idle' state).
@@ -398,8 +463,24 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
   const isConnected  = connectionState === 'connected';
   const isConnecting = connectionState === 'connecting';
   const isBusy       = isConnecting || connectionState === 'disconnecting';
-  const langMismatch = patientLang === practiceLang;
-  const showWarning  = isConnected && remainingSeconds <= SESSION_WARN_SECONDS && remainingSeconds > 0;
+  const isTranscriptionSetup = isPractice && sessionKind === SESSION_MODES.TRANSCRIPTION;
+  // Same language twice is only valid for transcription.
+  const langMismatch = !isTranscriptionSetup && patientLang === practiceLang;
+  // What the server actually granted for the running / finished session.
+  const isTranscriptionLive = sessionMode === SESSION_MODES.TRANSCRIPTION;
+  const isTranscriptionView = (isConnected || sessionHasStarted) ? isTranscriptionLive : isTranscriptionSetup;
+  const warnSeconds  = isTranscriptionLive ? TRANSCRIPTION_WARN_SECONDS : SESSION_WARN_SECONDS;
+  const showWarning  = isConnected && remainingSeconds <= warnSeconds && remainingSeconds > 0;
+  // Speaker names from the session form / practice profile only — never from audio.
+  const speakerNames = useMemo(() => ({
+    patientName:      patientInfo.name,
+    practitionerName: practiceInfo.doctorName,
+  }), [patientInfo.name, practiceInfo.doctorName]);
+  const speakerFallbacks = useMemo(() => ({
+    patient:    txTx.speakerPatientFallback,
+    practice:   txTx.speakerPractitionerFallback,
+    unassigned: txTx.speakerUnassigned,
+  }), [txTx]);
   const allConsents  = consentAudio && consentContext && consentMedical && patientConsentConfirmed;
   const hasName      = patientInfo.name.trim() !== '';
   const canStart     = !isBusy && !langMismatch && allConsents && hasName;
@@ -490,13 +571,17 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         sessionStartedAt: sessionStartedAtRef.current,
         messages: interpreterTx,
         locale: uiLocale,
+        mode: sessionMode,
+        speakerNames,
+        transcriptionText: txTx,
       });
     } catch (err) {
       console.error('[MedaRealtimePage] PDF export failed:', err?.message);
     } finally {
       setPdfLoading(false);
     }
-  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, interpreterTx, uiLocale]);
+  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, interpreterTx, uiLocale,
+    sessionMode, speakerNames, txTx]);
 
   // Practice PDF-QR: build the PDF blob and upload it for a secure token link.
   // Runs ONLY on explicit user action inside the practice variant — never on the
@@ -511,6 +596,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       sessionStartedAt: sessionStartedAtRef.current,
       messages: interpreterTx,
       locale: uiLocale,
+      mode: sessionMode,
+      speakerNames,
+      transcriptionText: txTx,
     }, { returnBlob: true });
 
     const datePart = (sessionStartedAtRef.current || '').slice(0, 10) || 'session';
@@ -522,7 +610,8 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       patientLanguage:  patientLang,
       practiceLanguage: practiceLang,
     });
-  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, practiceId, interpreterTx, uiLocale, pdfFilePrefix]);
+  }, [turns, patientInfo, practiceInfo, forSelf, patientLang, practiceLang, practiceId, interpreterTx, uiLocale, pdfFilePrefix,
+    sessionMode, speakerNames, txTx]);
 
   function handleEditStart(turn) {
     setEditingKey(turn.key);
@@ -548,7 +637,32 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     setIsPaused(false);
     pausedAtRef.current = null;
     setEndReason(null);
-    connect({ patientLanguage: patientLang, practiceLanguage: practiceLang });
+    connect({
+      patientLanguage:  patientLang,
+      practiceLanguage: practiceLang,
+      mode: isTranscriptionSetup ? SESSION_MODES.TRANSCRIPTION : SESSION_MODES.INTERPRETATION,
+    });
+  }
+
+  // Practice setup: switch between interpreting and live transcription. The
+  // interpreting pair is remembered so switching back restores it.
+  function handleSessionKind(kind) {
+    if (kind === sessionKind) return;
+    if (kind === SESSION_MODES.TRANSCRIPTION) {
+      interpretationPairRef.current = { patient: patientLang, practice: practiceLang };
+      const lang = TRANSCRIPTION_LANGUAGES.includes(practiceLang) ? practiceLang : TRANSCRIPTION_LANGUAGES[0];
+      setPatientLang(lang);
+      setPracticeLang(lang);
+    } else {
+      setPatientLang(interpretationPairRef.current.patient);
+      setPracticeLang(interpretationPairRef.current.practice);
+    }
+    setSessionKind(kind);
+  }
+
+  function handleTranscriptionLanguage(code) {
+    setPatientLang(code);
+    setPracticeLang(code);
   }
 
   // Manual end — clearly distinguished from time-limit / inactivity / error stops.
@@ -568,7 +682,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     setEndReason(null);
     isContinuingRef.current = true; // keep original sessionStartedAt for the PDF
     connect(
-      { patientLanguage: patientLang, practiceLanguage: practiceLang },
+      { patientLanguage: patientLang, practiceLanguage: practiceLang, mode: sessionMode },
       { keepHistory: true },
     );
   }
@@ -600,6 +714,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
     setEndReason(null);
     setMode('auto');
     setManualSpeaker('patient');
+    setActiveSpeakerState(null);
   }
 
   function handleSaveToArchive() {
@@ -610,6 +725,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       patientLanguage:  patientLang,
       practiceLanguage: practiceLang,
       sessionStartedAt: sessionStartedAtRef.current,
+      mode:             sessionMode,
     });
     saveArchivedConversation(entry);
     setArchivedConversations(getArchivedConversations());
@@ -641,6 +757,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         sessionStartedAt: entry.sessionStartedAt,
         messages: interpreterTx,
         locale: uiLocale,
+        mode: entry.mode ?? SESSION_MODES.INTERPRETATION,
+        speakerNames: { patientName: entry.patientName ?? '', practitionerName: entry.doctorName ?? '' },
+        transcriptionText: txTx,
       });
     } catch (err) {
       console.error('[MedaRealtimePage] Archiv-PDF-Export fehlgeschlagen:', err?.message);
@@ -678,16 +797,18 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       <header className={`mrt-header${isPractice ? ' mrt-header--practice' : ''}`}>
         <div className="mrt-header-titles">
           <h1 className="mrt-title">
-            {isPractice ? practiceTx.title : rt.title}
+            {isTranscriptionView ? txTx.transcriptionTitle : (isPractice ? practiceTx.title : rt.title)}
           </h1>
-          {(isPractice || rt.subtitle) && (
+          {isTranscriptionView ? (
+            <p className="mrt-subtitle mrt-subtitle--transcription">{txTx.transcriptionSubtitle}</p>
+          ) : (isPractice || rt.subtitle) && (
             <p className="mrt-subtitle">{isPractice ? practiceTx.subtitle : rt.subtitle}</p>
           )}
         </div>
         <div className="mrt-header-right">
           {isConnected && (
             <div
-              className={`mrt-timer${remainingSeconds <= SESSION_WARN_SECONDS ? ' mrt-timer--warn' : ''}`}
+              className={`mrt-timer${remainingSeconds <= warnSeconds ? ' mrt-timer--warn' : ''}`}
               aria-label={interpolate(rt.timerAria, { time: formatTime(remainingSeconds) })}
             >
               {formatTime(remainingSeconds)}
@@ -711,10 +832,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
             <span className="mrt-practice-chip-dot" aria-hidden="true" />
             {practiceTx.chipNoAudio}
           </span>
-          <span className="mrt-practice-chip" role="listitem">
-            <span className="mrt-practice-chip-dot" aria-hidden="true" />
-            {practiceTx.chipTwoLang}
-          </span>
+          {!isTranscriptionView && (
+            <span className="mrt-practice-chip" role="listitem">
+              <span className="mrt-practice-chip-dot" aria-hidden="true" />
+              {practiceTx.chipTwoLang}
+            </span>
+          )}
         </div>
       )}
 
@@ -763,6 +886,44 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
           {/* ── 1. Sprachauswahl ──────────────────────────────────────────────── */}
           <div className="mrt-setup-section">
             <h2 className="mrt-setup-section-title">{rt.setup.languagesTitle}</h2>
+            {/* Practice only: interpreting (two languages) or live transcription (one). */}
+            {isPractice && (
+              <div className="mrt-kind-switch" role="radiogroup" aria-label={txTx.modeGroupAria}>
+                {[
+                  [SESSION_MODES.INTERPRETATION, txTx.modeInterpretation, txTx.modeInterpretationHint],
+                  [SESSION_MODES.TRANSCRIPTION, txTx.modeTranscription, txTx.modeTranscriptionHint],
+                ].map(([kind, title, hint]) => (
+                  <button
+                    key={kind}
+                    type="button"
+                    role="radio"
+                    aria-checked={sessionKind === kind}
+                    className={`mrt-kind-option${sessionKind === kind ? ' mrt-kind-option--active' : ''}`}
+                    onClick={() => handleSessionKind(kind)}
+                    disabled={isBusy}
+                  >
+                    <span className="mrt-kind-title">{title}</span>
+                    <span className="mrt-kind-hint">{hint}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {isTranscriptionSetup ? (
+              <div className="mrt-field mrt-field--single">
+                <label className="mrt-label" htmlFor="mrt-transcription-lang">{txTx.transcriptionLanguageLabel}</label>
+                <select
+                  id="mrt-transcription-lang"
+                  className="mrt-select"
+                  value={practiceLang}
+                  onChange={e => handleTranscriptionLanguage(e.target.value)}
+                  disabled={isBusy}
+                >
+                  {TRANSCRIPTION_LANGUAGES.map(code => (
+                    <option key={code} value={code}>{getLanguageName(code)}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
             <div className="mrt-lang-row">
               <div className="mrt-field">
                 <label className="mrt-label" htmlFor="mrt-patient-lang">{rt.setup.patientSpeaks}</label>
@@ -796,7 +957,35 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 </select>
               </div>
             </div>
+            )}
           </div>
+
+          {/* ── Transcription: participants for the speaker labels ─────────────── */}
+          {isTranscriptionSetup && (
+            <div className="mrt-setup-section">
+              <h2 className="mrt-setup-section-title">{txTx.participantsTitle}</h2>
+              <p className="mrt-privacy-note">{txTx.participantsHint}</p>
+              <div className="mrt-form-grid">
+                <div className="mrt-form-field mrt-form-field--full">
+                  <label className="mrt-form-label" htmlFor="mrt-doctor-name-display">{txTx.doctorNameLabel}</label>
+                  <input
+                    id="mrt-doctor-name-display"
+                    className="mrt-form-input"
+                    type="text"
+                    placeholder={rt.setup.doctorNamePlaceholder}
+                    value={practiceInfo.doctorName}
+                    onChange={e => handlePracticeInfo('doctorName', e.target.value)}
+                    disabled={isBusy}
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+              <div className="mrt-tx-hints">
+                <p>{txTx.limitHint}</p>
+                <p>{txTx.sharedMicHint}</p>
+              </div>
+            </div>
+          )}
 
           {/* ── 2. Angaben zur Person ─────────────────────────────────────────── */}
           <div className="mrt-setup-section">
@@ -1164,7 +1353,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-audio" className="mrt-consent-label">
-                {rt.setup.consentAudio}
+                {isTranscriptionSetup ? txTx.consentAudioTranscription : rt.setup.consentAudio}
               </label>
             </div>
 
@@ -1192,7 +1381,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-medical" className="mrt-consent-label">
-                {rt.setup.consentMedical}
+                {isTranscriptionSetup ? txTx.consentMedicalTranscription : rt.setup.consentMedical}
               </label>
             </div>
 
@@ -1206,7 +1395,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                 disabled={isBusy}
               />
               <label htmlFor="mrt-consent-patient" className="mrt-consent-label">
-                {rt.setup.consentPatient}
+                {isTranscriptionSetup ? txTx.consentPatientTranscription : rt.setup.consentPatient}
               </label>
             </div>
           </div>
@@ -1243,11 +1432,17 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       {/* ── Active session bar — compact summary + pause + stop button ─────── */}
       {isConnected && (
         <div className="mrt-session-bar">
-          <span className="mrt-session-langs">
-            {rt.sessionBar.patientLabel}: <strong>{patientLangLabel}</strong>
-            <span className="mrt-session-sep" aria-hidden="true"> · </span>
-            {rt.sessionBar.practiceLabel}: <strong>{practiceLangLabel}</strong>
-          </span>
+          {isTranscriptionLive ? (
+            <span className="mrt-session-langs">
+              {txTx.languageLabel}: <strong>{patientLangLabel}</strong>
+            </span>
+          ) : (
+            <span className="mrt-session-langs">
+              {rt.sessionBar.patientLabel}: <strong>{patientLangLabel}</strong>
+              <span className="mrt-session-sep" aria-hidden="true"> · </span>
+              {rt.sessionBar.practiceLabel}: <strong>{practiceLangLabel}</strong>
+            </span>
+          )}
           <div className="mrt-session-controls">
             <button
               className={`mrt-btn mrt-btn--pause mrt-btn--compact${isPaused ? ' mrt-btn--pause-active' : ''}`}
@@ -1268,8 +1463,33 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         </div>
       )}
 
+      {/* ── Transcription: who is speaking now (bound at speech start) ──────── */}
+      {isConnected && isTranscriptionLive && (
+        <div className="mrt-speaker-select" role="group" aria-labelledby="mrt-who-speaks">
+          <span id="mrt-who-speaks" className="mrt-speaker-select-label">{txTx.whoSpeaks}</span>
+          <div className="mrt-speaker-select-buttons">
+            {['practice', 'patient'].map(role => (
+              <button
+                key={role}
+                type="button"
+                className={`mrt-speaker-choice mrt-speaker-choice--${role}${activeSpeaker === role ? ' mrt-speaker-choice--active' : ''}`}
+                aria-pressed={activeSpeaker === role}
+                onClick={() => setActiveSpeakerState(prev => (prev === role ? null : role))}
+              >
+                <span className="mrt-speaker-choice-dot" aria-hidden="true" />
+                {speakerLabel(role, speakerNames, speakerFallbacks)}
+              </button>
+            ))}
+          </div>
+          <p className="mrt-speaker-select-hint">{txTx.whoSpeaksHint}</p>
+        </div>
+      )}
+      {isConnected && isTranscriptionLive && silenceHint && (
+        <p className="mrt-silence-hint" role="status">{txTx.silenceHint}</p>
+      )}
+
       {/* ── Mode bar — auto / manual speaker detection toggle ───────────────── */}
-      {isConnected && (
+      {isConnected && !isTranscriptionLive && (
         <div className="mrt-mode-bar">
           {/* Segmented control: Automatisch / Manuell */}
           <div
@@ -1339,7 +1559,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
       )}
 
       {/* ── Speaker bar — highlights last detected speaker ──────────────────── */}
-      {isConnected && (
+      {isConnected && !isTranscriptionLive && (
         <div className="mrt-pingpong-bar" aria-live="polite" aria-label={rt.mode.detectedSpeakerAria}>
           <div className={`mrt-speaker-pill${currentSpeakerRole === 'patient' ? ' mrt-speaker-pill--active' : ''}`}>
             {rt.sessionBar.patientLabel} · {patientLangLabel}
@@ -1353,7 +1573,10 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
 
       {/* ── Conversation turns ───────────────────────────────────────────────── */}
       <section className="mrt-conversation" aria-label={rt.conversation.aria}>
-        {turns.length === 0 && isConnected && (
+        {turns.length === 0 && isConnected && isTranscriptionLive && (
+          <p className="mrt-conversation-empty">{txTx.transcriptWaiting}</p>
+        )}
+        {turns.length === 0 && isConnected && !isTranscriptionLive && (
           <p className="mrt-conversation-empty">
             {mode === 'manual'
               ? (manualSpeaker === 'patient'
@@ -1369,6 +1592,88 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
         )}
 
         {turns.map(turn => {
+          // Same-language session: one transcript, no translation column.
+          if (turn.mode === SESSION_MODES.TRANSCRIPTION) {
+            const role = turn.speakerRole === 'patient' || turn.speakerRole === 'practice' ? turn.speakerRole : null;
+            return (
+              <article key={turn.key} className={`mrt-tx-turn mrt-tx-turn--${role ?? 'unassigned'}`}>
+                <header className="mrt-tx-head">
+                  <span className="mrt-tx-speaker">{speakerLabel(role, speakerNames, speakerFallbacks)}</span>
+                  <time className="mrt-tx-time" dateTime={turn.timestamp}>{formatClock(turn.timestamp, uiLocale)}</time>
+                  {turn.isDone && (
+                    <span className="mrt-tx-tools">
+                      {/* Correcting the speaker belongs to the review after the
+                          session; live, the view stays on speaker, text, time. */}
+                      {!isConnected && (
+                        <select
+                          className="mrt-tx-reassign"
+                          value={role ?? ''}
+                          onChange={e => updateTurnSpeaker(turn.key, e.target.value || null)}
+                          aria-label={txTx.reassignSpeakerAria}
+                        >
+                          <option value="practice">{speakerLabel('practice', speakerNames, speakerFallbacks)}</option>
+                          <option value="patient">{speakerLabel('patient', speakerNames, speakerFallbacks)}</option>
+                          <option value="">{txTx.speakerUnassigned}</option>
+                        </select>
+                      )}
+                      {editingKey !== turn.key && (
+                        <button
+                          type="button"
+                          className="mrt-turn-edit-trigger"
+                          onClick={() => handleEditStart(turn)}
+                          aria-label={rt.conversation.editOriginalAria}
+                          title={rt.conversation.editOriginalTitle}
+                        >
+                          ✎
+                        </button>
+                      )}
+                    </span>
+                  )}
+                </header>
+                {editingKey === turn.key ? (
+                  <div className="mrt-turn-edit">
+                    <textarea
+                      className="mrt-turn-edit-area"
+                      value={editDraft}
+                      onChange={e => setEditDraft(e.target.value)}
+                      rows={3}
+                      // Focused deliberately: this field only exists because
+                      // the user just chose to edit this turn.
+                      autoFocus
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && editDraft.trim()) handleEditSave(turn.key);
+                        if (e.key === 'Escape') handleEditCancel();
+                      }}
+                    />
+                    <div className="mrt-turn-edit-actions">
+                      <button
+                        className="mrt-turn-edit-btn mrt-turn-edit-btn--save"
+                        onClick={() => handleEditSave(turn.key)}
+                        disabled={!editDraft.trim()}
+                      >
+                        {rt.conversation.save}
+                      </button>
+                      <button className="mrt-turn-edit-btn mrt-turn-edit-btn--cancel" onClick={handleEditCancel}>
+                        {rt.conversation.cancel}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mrt-tx-text">
+                    {turn.originalText !== null
+                      ? turn.originalText
+                      : <span className="mrt-turn-pending">{rt.conversation.pendingTranscription}</span>}
+                  </p>
+                )}
+                {editingKey !== turn.key && (turn.originalEdited || turn.speakerEdited) && (
+                  <span className="mrt-turn-edited-badge">
+                    {turn.originalEdited ? rt.conversation.editedBadge : txTx.speakerEdited}
+                  </span>
+                )}
+              </article>
+            );
+          }
+
           const roleLabel =
             turn.speakerRole === 'patient' ? rt.conversation.rolePatient :
             turn.speakerRole === 'practice' ? rt.conversation.rolePractice :
@@ -1723,8 +2028,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                       // No stored speaker = not reliably assigned — never shown as practice.
                       const role       = t.speakerRole === 'patient' || t.speakerRole === 'practice' ? t.speakerRole : null;
                       const isPatient  = role === 'patient';
-                      const roleLabel  = role === null ? rt.conversation.roleUncertain
-                        : isPatient ? rt.conversation.rolePatient : rt.conversation.rolePractice;
+                      // Transcription: names from the stored session data, one text, no translation.
+                      const isTx       = (t.mode ?? entry.mode) === SESSION_MODES.TRANSCRIPTION;
+                      const roleLabel  = isTx
+                        ? speakerLabel(role, { patientName: entry.patientName ?? '', practitionerName: entry.doctorName ?? '' }, speakerFallbacks)
+                        : role === null ? rt.conversation.roleUncertain
+                          : isPatient ? rt.conversation.rolePatient : rt.conversation.rolePractice;
                       const srcLabel   = t.sourceLanguage ? getLanguageName(t.sourceLanguage) : '—';
                       const tgtLabel   = t.targetLanguage ? getLanguageName(t.targetLanguage) : '—';
                       const transLabel = role === null ? rt.conversation.translationGeneric
@@ -1737,7 +2046,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                           <div className="mrt-archive-turn-header">
                             <span className="mrt-archive-turn-role">{roleLabel}</span>
                             {t.timestamp && (
-                              <span className="mrt-archive-turn-time">{formatTurnTime(t.timestamp, uiLocale)}</span>
+                              <span className="mrt-archive-turn-time">
+                                {isTx ? formatClock(t.timestamp, uiLocale) : formatTurnTime(t.timestamp, uiLocale)}
+                              </span>
                             )}
                             {t.isUnclear && (
                               <span className="mrt-archive-turn-unclear">{rt.history.unclear}</span>
@@ -1751,10 +2062,12 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                                 <span className="mrt-archive-turn-edited">{rt.history.editedBadge}</span>
                               )}
                             </div>
-                            <div className="mrt-archive-turn-section mrt-archive-turn-section--translation">
-                              <span className="mrt-archive-turn-label">{transLabel} ({tgtLabel})</span>
-                              <p className="mrt-archive-turn-text">{t.translatedText || '—'}</p>
-                            </div>
+                            {!isTx && (
+                              <div className="mrt-archive-turn-section mrt-archive-turn-section--translation">
+                                <span className="mrt-archive-turn-label">{transLabel} ({tgtLabel})</span>
+                                <p className="mrt-archive-turn-text">{t.translatedText || '—'}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );

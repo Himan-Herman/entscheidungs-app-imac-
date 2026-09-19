@@ -3,8 +3,9 @@
  *
  * Decides, for each closed speech segment of a client-gated session, whether
  * it may reach the interpreter model at all, who said it, and in which
- * direction it is translated. Kept free of WebRTC so every case can be tested
- * in Node.
+ * direction it is translated — or, in a same-language session, whether it
+ * belongs in the transcript and who said it. Kept free of WebRTC so every case
+ * can be tested in Node.
  *
  * Order — deterministic, no extra model anywhere:
  *   1. empty transcript   → nothing was said
@@ -22,6 +23,24 @@
  */
 
 import { classifyUtteranceLanguage } from './realtimeLanguages.js';
+
+export const SESSION_MODES = Object.freeze({
+  INTERPRETATION: 'interpretation',
+  TRANSCRIPTION: 'transcription',
+});
+
+/**
+ * The single rule for the mode: the same language on both sides means there is
+ * nothing to translate. Not specific to German.
+ *
+ * @param {string} patientLanguage
+ * @param {string} practiceLanguage
+ */
+export function resolveSessionMode(patientLanguage, practiceLanguage) {
+  return patientLanguage && patientLanguage === practiceLanguage
+    ? SESSION_MODES.TRANSCRIPTION
+    : SESSION_MODES.INTERPRETATION;
+}
 
 /** Why a segment was kept out of the conversation. */
 export const REJECT_REASONS = Object.freeze({
@@ -51,6 +70,7 @@ function otherRole(role) {
 /**
  * @param {{
  *   transcript: string,
+ *   mode?: string,
  *   patientLanguage: string,
  *   practiceLanguage: string,
  *   manualMode?: boolean,
@@ -60,6 +80,7 @@ function otherRole(role) {
  */
 export function decideUtterance({
   transcript,
+  mode = SESSION_MODES.INTERPRETATION,
   patientLanguage,
   practiceLanguage,
   manualMode = false,
@@ -101,10 +122,28 @@ export function decideUtterance({
   // 1. Nothing recognisable — noise, a cough, a door.
   if (!text) return reject(REJECT_REASONS.EMPTY);
 
-  // 2. The session's two languages are binding. Only CLEAR evidence rejects.
-  const lang = classifyUtteranceLanguage(text, [patientLanguage, practiceLanguage]);
+  // 2. The session's languages are binding. Only CLEAR evidence rejects.
+  const isTranscription = mode === SESSION_MODES.TRANSCRIPTION;
+  const allowed = isTranscription ? [patientLanguage] : [patientLanguage, practiceLanguage];
+  const lang = classifyUtteranceLanguage(text, allowed);
   if (lang.verdict === 'empty') return reject(REJECT_REASONS.EMPTY);
   if (lang.verdict === 'foreign') return reject(REJECT_REASONS.FOREIGN_LANGUAGE);
+
+  if (isTranscription) {
+    // One language, so the language says nothing about who spoke. The only
+    // deterministic source is the person selected in the UI when this segment
+    // STARTED; without a selection the segment stays unassigned.
+    const role = boundRole === 'patient' || boundRole === 'practice' ? boundRole : null;
+    return {
+      accept: true,
+      reason: null,
+      speakerRole: role,
+      targetRole: null,
+      sourceLanguage: patientLanguage,
+      targetLanguage: patientLanguage,
+      speakerCertain: role !== null,
+    };
+  }
 
   // 3a. Manual: the speaker selected when this segment STARTED decides.
   if (manualMode && (boundRole === 'patient' || boundRole === 'practice')) {
@@ -154,6 +193,20 @@ export function isInterpreterRefusal(text) {
   const t = String(text ?? '').toLowerCase();
   if (!t.trim()) return false;
   return REFUSAL_MARKERS.some((m) => t.includes(m));
+}
+
+/**
+ * Speaker label from system data only — the session form or the practice
+ * profile — never derived from what was said.
+ *
+ * @param {'patient'|'practice'|null} role
+ * @param {{ patientName?: string, practitionerName?: string }} names
+ * @param {{ patient: string, practice: string, unassigned: string }} fallbacks
+ */
+export function speakerLabel(role, names, fallbacks) {
+  if (role === 'patient') return String(names?.patientName ?? '').trim() || fallbacks.patient;
+  if (role === 'practice') return String(names?.practitionerName ?? '').trim() || fallbacks.practice;
+  return fallbacks.unassigned;
 }
 
 /**

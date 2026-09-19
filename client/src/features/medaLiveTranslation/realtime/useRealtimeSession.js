@@ -3,17 +3,22 @@ import { authFetch } from '../../../api/authFetch.js';
 import { detectLanguage, isDefinitelyThirdLanguage } from './realtimeLanguages.js';
 import {
   REJECT_REASONS,
+  SESSION_MODES,
   decideUtterance,
   isInterpreterRefusal,
   isOutsideSessionLanguages,
   redactEventForDebug,
 } from './utteranceGate.js';
+import { createSpeechLevelMeter } from './speechLevelMeter.js';
 
 const OPENAI_REALTIME_CALLS = 'https://api.openai.com/v1/realtime/calls';
 
 function nowMs() {
   return typeof performance !== 'undefined' ? performance.now() : Date.now();
 }
+
+/** Rough upper bound for a segment whose stop event never arrived (level window). */
+const DEFAULT_SEGMENT_MS = 6000;
 
 /**
  * @typedef {'idle'|'connecting'|'connected'|'disconnecting'|'error'} ConnectionState
@@ -33,6 +38,8 @@ function nowMs() {
  *   sourceLanguage: string|null,
  *   targetLanguage: string|null,
  *   speakerUncertain?: boolean,
+ *   mode?: 'interpretation'|'transcription',
+ *   speakerEdited?: boolean,
  *   timestamp: string,
  * }} Turn
  */
@@ -56,6 +63,13 @@ function nowMs() {
  *    is removed from the model's context (conversation.item.delete).
  *  - Old servers / the rollback switch answer 'server' → the flow below the
  *    gated handler runs exactly as before.
+ *
+ * Live transcription (same language on both sides, responseGating 'none'):
+ *  - No translation and no response.create at all — the transcript is the
+ *    record. The speaker is the person selected in the UI when a segment
+ *    STARTED (setActiveSpeaker); without a selection it stays unassigned.
+ *  - A local level meter measures each segment for analysis only; nothing is
+ *    rejected for being quiet.
  */
 export function useRealtimeSession() {
   const [connectionState,    setConnectionState]    = useState(/** @type {ConnectionState} */ ('idle'));
@@ -102,11 +116,17 @@ export function useRealtimeSession() {
 
   // ── Client-gated responses ────────────────────────────────────────────────
   // 'client' → we send response.create after the gate passes; 'server' → the
-  // pre-gating flow, untouched.
-  const gatingRef = useRef(/** @type {'client'|'server'} */ ('server'));
-  // item_id → speaker selection at SPEECH START (manual mode), so a quick
-  // hand-over between two people cannot re-label a segment already under way.
-  const segmentsRef = useRef(/** @type {Map<string, {manual:boolean, boundRole:'patient'|'practice'}>} */ (new Map()));
+  // pre-gating flow, untouched; 'none' → transcription, no answers at all.
+  const gatingRef = useRef(/** @type {'client'|'server'|'none'} */ ('server'));
+  // 'interpretation' | 'transcription' — fixed per session, as granted by the server.
+  const sessionModeRef = useRef(SESSION_MODES.INTERPRETATION);
+  const [sessionMode, setSessionMode] = useState(SESSION_MODES.INTERPRETATION);
+  // Transcription: who is selected right now. null = nobody → unassigned, not guessed.
+  const activeSpeakerRef = useRef(/** @type {'patient'|'practice'|null} */ (null));
+  const levelMeterRef = useRef(/** @type {ReturnType<typeof createSpeechLevelMeter>|null} */ (null));
+  // item_id → speaker selection at SPEECH START, so a quick hand-over between
+  // two people cannot re-label a segment already under way; plus its timing.
+  const segmentsRef = useRef(/** @type {Map<string, {manual:boolean, boundRole:'patient'|'practice'|null, startedAt:number, startedIso:string, audioStartMs:number|null, durationMs:number|null}>} */ (new Map()));
   // item_id → turn slot; only segments that got one (not echo, not paused).
   const itemTurnRef = useRef(/** @type {Map<string, {key:number, committedAt:number}>} */ (new Map()));
   // Only one model response at a time. A segment accepted while another is
@@ -166,6 +186,10 @@ export function useRealtimeSession() {
       audioElRef.current.srcObject = null;
     }
     speakerLockRef.current = false;
+    if (levelMeterRef.current) {
+      levelMeterRef.current.stop();
+      levelMeterRef.current = null;
+    }
     segmentsRef.current.clear();
     itemTurnRef.current.clear();
     activeRequestKeyRef.current = null;
@@ -311,14 +335,29 @@ export function useRealtimeSession() {
 
       const seg = segmentsRef.current.get(itemId);
       segmentsRef.current.delete(itemId);
+      const isTranscription = sessionModeRef.current === SESSION_MODES.TRANSCRIPTION;
+
+      // Measurement only — the level never decides anything (see speechLevelMeter.js).
+      let level = null;
+      if (levelMeterRef.current && seg) {
+        // speech_started arrives shortly AFTER speech began (VAD + network), so
+        // reach back a little — but not so far that the previous speaker's
+        // tail falls into this window.
+        const start = seg.startedAt - 250;
+        const end = seg.startedAt + (seg.durationMs ?? DEFAULT_SEGMENT_MS) + 150;
+        level = levelMeterRef.current.segmentLevel(start, end);
+      }
 
       const transcript = ev.transcript ?? '';
       const decision = decideUtterance({
         transcript,
+        mode:             sessionModeRef.current,
         patientLanguage:  patientLangRef.current,
         practiceLanguage: practiceLangRef.current,
         manualMode:       seg ? seg.manual : manualModeRef.current,
-        boundRole:        seg ? seg.boundRole : manualSpeakerRef.current,
+        boundRole:        seg
+          ? seg.boundRole
+          : (isTranscription ? activeSpeakerRef.current : manualSpeakerRef.current),
       });
 
       // A later segment already committed means the model's context holds
@@ -335,6 +374,8 @@ export function useRealtimeSession() {
         speakerCertain: decision.speakerCertain,
         laterCommitted,
         transcriptMs:   Math.round(nowMs() - mapped.committedAt),
+        levelDb:        level ? Math.round(level.speechDb) : null,
+        noiseFloorDb:   level && level.noiseFloorDb != null ? Math.round(level.noiseFloorDb) : null,
         ts:             Date.now(),
       }]);
 
@@ -345,6 +386,27 @@ export function useRealtimeSession() {
 
       itemTurnRef.current.delete(itemId);
       if (decision.speakerRole) setCurrentSpeakerRole(decision.speakerRole);
+
+      if (isTranscription) {
+        // Same language on both sides: the transcript IS the record. No
+        // translation, no response.create, nothing spoken back.
+        setTurns(prev => prev.map(t => t.key === mapped.key ? {
+          ...t,
+          originalText:     transcript,
+          translatedText:   '',
+          isDone:           true,
+          mode:             SESSION_MODES.TRANSCRIPTION,
+          speakerRole:      decision.speakerRole,
+          sourceLanguage:   decision.sourceLanguage,
+          targetLanguage:   decision.targetLanguage,
+          speakerUncertain: !decision.speakerCertain,
+          // When the person started speaking, not when the pause closed it.
+          timestamp:        seg?.startedIso ?? t.timestamp,
+        } : t));
+        setSessionStatus(s => (s === 'processing' ? 'ready' : s));
+        return;
+      }
+
       if (!decision.speakerCertain) uncertainTurnsRef.current.set(mapped.key, itemId);
 
       setTurns(prev => prev.map(t => t.key === mapped.key ? {
@@ -370,17 +432,28 @@ export function useRealtimeSession() {
       // ── VAD ─────────────────────────────────────────────────────────────────
       case 'input_audio_buffer.speech_started':
         if (!speakerLockRef.current && !isPausedRef.current) setSessionStatus('speech_active');
-        if (gatingRef.current === 'client' && ev.item_id) {
+        if (gatingRef.current !== 'server' && ev.item_id) {
           // Bind the segment to whoever is selected NOW, at speech start.
+          const isTranscription = sessionModeRef.current === SESSION_MODES.TRANSCRIPTION;
           segmentsRef.current.set(ev.item_id, {
-            manual:    manualModeRef.current,
-            boundRole: manualSpeakerRef.current,
+            manual:       !isTranscription && manualModeRef.current,
+            boundRole:    isTranscription ? activeSpeakerRef.current : manualSpeakerRef.current,
+            startedAt:    nowMs(),
+            startedIso:   new Date().toISOString(),
+            audioStartMs: typeof ev.audio_start_ms === 'number' ? ev.audio_start_ms : null,
+            durationMs:   null,
           });
         }
         break;
 
       case 'input_audio_buffer.speech_stopped':
         if (!speakerLockRef.current && !isPausedRef.current) setSessionStatus('processing');
+        if (gatingRef.current !== 'server' && ev.item_id) {
+          const seg = segmentsRef.current.get(ev.item_id);
+          if (seg && typeof ev.audio_end_ms === 'number' && typeof seg.audioStartMs === 'number') {
+            seg.durationMs = Math.max(0, ev.audio_end_ms - seg.audioStartMs);
+          }
+        }
         break;
 
       // Create a turn slot; speaker role is unknown until transcription completes
@@ -388,7 +461,7 @@ export function useRealtimeSession() {
         if (speakerLockRef.current) break; // echo during Meda playback — discard
         if (isPausedRef.current) break;    // paused — discard any buffered input
         turnCounterRef.current += 1;
-        if (gatingRef.current === 'client' && ev.item_id) {
+        if (gatingRef.current !== 'server' && ev.item_id) {
           itemTurnRef.current.set(ev.item_id, { key: turnCounterRef.current, committedAt: nowMs() });
         }
         setTurns(prev => [...prev, {
@@ -405,6 +478,8 @@ export function useRealtimeSession() {
           sourceLanguage:  null,
           targetLanguage:  null,
           timestamp:       new Date().toISOString(),
+          // Transcription: rendered as a transcript entry from the start.
+          ...(sessionModeRef.current === SESSION_MODES.TRANSCRIPTION ? { mode: SESSION_MODES.TRANSCRIPTION } : {}),
         }]);
         break;
 
@@ -413,7 +488,7 @@ export function useRealtimeSession() {
       // Auto mode:   detectLanguage() on the transcript text.
       // Manual mode: use manualSpeakerRef directly — no language detection.
       case 'conversation.item.input_audio_transcription.completed': {
-        if (gatingRef.current === 'client') {
+        if (gatingRef.current !== 'server') {
           _handleGatedTranscript();
           break;
         }
@@ -532,7 +607,7 @@ export function useRealtimeSession() {
 
       case 'conversation.item.input_audio_transcription.failed':
         // Unintelligible audio: never guess — keep it out and say so.
-        if (gatingRef.current === 'client' && ev.item_id) {
+        if (gatingRef.current !== 'server' && ev.item_id) {
           _rejectSegment(ev.item_id, REJECT_REASONS.UNCLEAR);
         }
         break;
@@ -757,7 +832,7 @@ export function useRealtimeSession() {
       // ── Error ────────────────────────────────────────────────────────────────
       case 'error': {
         const failedEventId = String(ev.error?.event_id ?? '');
-        if (gatingRef.current === 'client' && failedEventId.startsWith('meda-')) {
+        if (gatingRef.current !== 'server' && failedEventId.startsWith('meda-')) {
           // Bookkeeping calls of the gated flow (forgetting an item the server
           // already dropped, a response request racing another) are recoverable
           // and must never end a live consultation.
@@ -787,7 +862,7 @@ export function useRealtimeSession() {
     }
   }, [_sendDc]); // all other accessed values are refs or stable state setters
 
-  const connect = useCallback(async ({ patientLanguage, practiceLanguage }, opts = {}) => {
+  const connect = useCallback(async ({ patientLanguage, practiceLanguage, mode }, opts = {}) => {
     if (connectionState === 'connecting' || connectionState === 'connected') return;
 
     // keepHistory = true → "continue conversation" after a technical stop: a fresh
@@ -814,6 +889,10 @@ export function useRealtimeSession() {
     isPausedRef.current      = false;
     // Gated-flow bookkeeping from a previous connection is meaningless now.
     gatingRef.current        = 'server';
+    // Same language on both sides = transcription; never taken from anywhere else.
+    const requestedMode = mode === SESSION_MODES.TRANSCRIPTION && patientLanguage === practiceLanguage
+      ? SESSION_MODES.TRANSCRIPTION
+      : SESSION_MODES.INTERPRETATION;
     segmentsRef.current.clear();
     itemTurnRef.current.clear();
     activeRequestKeyRef.current = null;
@@ -829,7 +908,7 @@ export function useRealtimeSession() {
         headers: { 'Content-Type': 'application/json' },
         // clientGating: this client sends response.create itself after its
         // checks pass. Older clients omit it and keep the server-driven flow.
-        body: JSON.stringify({ patientLanguage, practiceLanguage, clientGating: true }),
+        body: JSON.stringify({ patientLanguage, practiceLanguage, mode: requestedMode, clientGating: true }),
       });
 
       if (!sessionActiveRef.current) return;
@@ -838,11 +917,23 @@ export function useRealtimeSession() {
         const body = await tokenRes.json().catch(() => ({}));
         throw new Error(body?.error ?? `Token-Fehler ${tokenRes.status}`);
       }
-      const { clientSecret, model: sessionModel, responseGating } = await tokenRes.json();
+      const {
+        clientSecret,
+        model: sessionModel,
+        responseGating,
+        mode: grantedMode,
+      } = await tokenRes.json();
       if (!sessionActiveRef.current) return;
       // A server that predates the gate answers without responseGating: keep
       // the server-driven flow, exactly as before.
-      gatingRef.current = responseGating === 'client' ? 'client' : 'server';
+      gatingRef.current = responseGating === 'client' || responseGating === 'none'
+        ? responseGating
+        : 'server';
+      const effectiveMode = grantedMode === SESSION_MODES.TRANSCRIPTION && responseGating === 'none'
+        ? SESSION_MODES.TRANSCRIPTION
+        : SESSION_MODES.INTERPRETATION;
+      sessionModeRef.current = effectiveMode;
+      setSessionMode(effectiveMode);
 
       // ── 2. Microphone ───────────────────────────────────────────────────────
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -858,6 +949,11 @@ export function useRealtimeSession() {
         return;
       }
       streamRef.current = stream;
+      // Loudness per segment, for analysis only (gated sessions). Reads the same
+      // stream; keeps numbers, never audio.
+      if (gatingRef.current !== 'server') {
+        levelMeterRef.current = createSpeechLevelMeter(stream);
+      }
 
       // ── 3. RTCPeerConnection ────────────────────────────────────────────────
       const pc = new RTCPeerConnection();
@@ -996,6 +1092,29 @@ export function useRealtimeSession() {
   }, []);
 
   /**
+   * Transcription: who is speaking now. Read at SPEECH START of each segment.
+   * null = nobody selected → segments stay unassigned instead of being
+   * attributed on a guess.
+   * @param {'patient'|'practice'|null} role
+   */
+  const setActiveSpeaker = useCallback((role) => {
+    activeSpeakerRef.current = role === 'patient' || role === 'practice' ? role : null;
+  }, []);
+
+  /**
+   * Correct who said a transcription turn (no translation direction depends on
+   * it). Marked as edited so the record shows it was assigned by hand.
+   * @param {number} turnKey
+   * @param {'patient'|'practice'|null} role
+   */
+  const updateTurnSpeaker = useCallback((turnKey, role) => {
+    const next = role === 'patient' || role === 'practice' ? role : null;
+    setTurns(prev => prev.map(t => t.key === turnKey && t.mode === SESSION_MODES.TRANSCRIPTION
+      ? { ...t, speakerRole: next, speakerUncertain: next === null, speakerEdited: true }
+      : t));
+  }, []);
+
+  /**
    * Pause the active session: mute the microphone track so OpenAI receives only
    * silence, and block new turn creation.  The WebRTC/DataChannel connection stays
    * open — no reconnect is needed to resume.
@@ -1025,6 +1144,9 @@ export function useRealtimeSession() {
     sendEvent,
     updateTurnOriginalText,
     setManualMode,
+    setActiveSpeaker,
+    updateTurnSpeaker,
+    sessionMode,
     gateNotice,
     ignoredCount,
     connectionState,
