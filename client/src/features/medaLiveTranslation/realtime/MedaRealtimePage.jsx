@@ -1372,6 +1372,7 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
           const roleLabel =
             turn.speakerRole === 'patient' ? rt.conversation.rolePatient :
             turn.speakerRole === 'practice' ? rt.conversation.rolePractice :
+            turn.speakerUncertain ? rt.conversation.roleUncertain :
             turn.isDone ? rt.conversation.roleUnknownLanguage : rt.conversation.roleDetecting;
 
           return (
@@ -1394,7 +1395,9 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                     </span>
                   ) : (
                     <span className="mrt-turn-section-label mrt-turn-section-label--muted">
-                      {turn.isDone ? rt.conversation.unknownLanguage : rt.conversation.detectingLanguage}
+                      {turn.speakerUncertain
+                        ? rt.conversation.languageUncertain
+                        : turn.isDone ? rt.conversation.unknownLanguage : rt.conversation.detectingLanguage}
                     </span>
                   )}
                   {turn.isDone && !turn.unsupportedLanguage && editingKey !== turn.key && (
@@ -1717,15 +1720,19 @@ export default function MedaRealtimePage({ variant = 'patient' }) {
                       <p className="mrt-archive-turns-empty">{rt.history.noStoredTurns}</p>
                     )}
                     {entry.turns.map((t, i) => {
-                      const isPatient  = t.speakerRole === 'patient';
-                      const roleLabel  = isPatient ? rt.conversation.rolePatient : rt.conversation.rolePractice;
+                      // No stored speaker = not reliably assigned — never shown as practice.
+                      const role       = t.speakerRole === 'patient' || t.speakerRole === 'practice' ? t.speakerRole : null;
+                      const isPatient  = role === 'patient';
+                      const roleLabel  = role === null ? rt.conversation.roleUncertain
+                        : isPatient ? rt.conversation.rolePatient : rt.conversation.rolePractice;
                       const srcLabel   = t.sourceLanguage ? getLanguageName(t.sourceLanguage) : '—';
                       const tgtLabel   = t.targetLanguage ? getLanguageName(t.targetLanguage) : '—';
-                      const transLabel = isPatient ? rt.history.translationForPractice : rt.history.translationForPatient;
+                      const transLabel = role === null ? rt.conversation.translationGeneric
+                        : isPatient ? rt.history.translationForPractice : rt.history.translationForPatient;
                       return (
                         <div
                           key={t.key ?? i}
-                          className={`mrt-archive-turn${isPatient ? ' mrt-archive-turn--patient' : ' mrt-archive-turn--practice'}`}
+                          className={`mrt-archive-turn mrt-archive-turn--${role ?? 'uncertain'}`}
                         >
                           <div className="mrt-archive-turn-header">
                             <span className="mrt-archive-turn-role">{roleLabel}</span>

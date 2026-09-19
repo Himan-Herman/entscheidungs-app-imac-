@@ -25,6 +25,8 @@ const COL = {
   practiceBorder: [203, 213, 225],
   patientAccent:  [14,  116, 144],
   practiceAccent: [71,   85, 105],
+  // Speaker not reliably assigned — neutral, neither patient nor practice.
+  uncertainAccent: [100, 116, 139],
   cardTitle:      [14,  116, 144],
 };
 
@@ -287,6 +289,7 @@ export async function exportRealtimeConversationPdf({
     noTurns: historyTx.noStoredTurns ?? pdfTx.exportNoTurns ?? 'No conversation history stored.',
     rolePatient: conversationTx.rolePatient ?? sessionBarTx.patientLabel ?? 'Patient',
     rolePractice: conversationTx.rolePractice ?? sessionBarTx.practiceLabel ?? 'Practice / doctor',
+    roleUncertain: conversationTx.roleUncertain ?? 'Speaker not reliably assigned',
     unclear: historyTx.unclear ?? 'Unclear',
     sourceLanguageLabel: conversationTx.sourceLanguageLabel ?? 'Original language',
     originalLabel: historyTx.originalLabel ?? reviewTx.originalLabel ?? 'Original',
@@ -554,7 +557,9 @@ export async function exportRealtimeConversationPdf({
 
   sectionHeading(pdfText.conversationHeading);
 
-  const doneTurns = turns.filter(t => t.isDone && (t.originalText || t.translatedText));
+  // Live turns carry isDone; archived turns do not (only finished turns are
+  // archived, and the flag is not stored) — so only an explicit false excludes.
+  const doneTurns = turns.filter(t => t.isDone !== false && (t.originalText || t.translatedText));
 
   if (doneTurns.length === 0) {
     doc.setFont('helvetica', 'italic');
@@ -566,12 +571,15 @@ export async function exportRealtimeConversationPdf({
   }
 
   for (const turn of doneTurns) {
-    const isPatient   = turn.speakerRole === 'patient';
-    const accentColor = isPatient ? COL.patientAccent : COL.practiceAccent;
-    const turnBg      = isPatient ? COL.patientBg     : COL.practiceBg;
-    const turnBorder  = isPatient ? COL.patientBorder  : COL.practiceBorder;
-    const roleLabel   = isPatient ? pdfText.rolePatient : pdfText.rolePractice;
-    const transLabel  = isPatient ? pdfText.translationForPractice : pdfText.translationForPatient;
+    // No speaker = not reliably assigned — never exported as practice.
+    const role        = turn.speakerRole === 'patient' || turn.speakerRole === 'practice' ? turn.speakerRole : null;
+    const isPatient   = role === 'patient';
+    const accentColor = role === null ? COL.uncertainAccent : isPatient ? COL.patientAccent : COL.practiceAccent;
+    const turnBg      = role === null ? COL.boxBg     : isPatient ? COL.patientBg     : COL.practiceBg;
+    const turnBorder  = role === null ? COL.boxBorder : isPatient ? COL.patientBorder : COL.practiceBorder;
+    const roleLabel   = role === null ? pdfText.roleUncertain : isPatient ? pdfText.rolePatient : pdfText.rolePractice;
+    const transLabel  = role === null ? pdfText.translationLabel
+      : isPatient ? pdfText.translationForPractice : pdfText.translationForPatient;
     const srcLabel    = formatLanguageLabel(turn.sourceLanguage, locale);
     const tgtLabel    = formatLanguageLabel(turn.targetLanguage, locale);
     const timeStr     = formatTime(turn.timestamp, locale);

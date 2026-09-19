@@ -10,6 +10,7 @@ import {
   REJECT_REASONS,
   decideUtterance,
   isInterpreterRefusal,
+  isOutsideSessionLanguages,
   redactEventForDebug,
 } from "../utteranceGate.js";
 
@@ -60,15 +61,44 @@ test("manual mode: the speaker bound at speech start wins over the text", () => 
   assert.equal(d.speakerCertain, true);
 });
 
-test("short answers, doses and names are kept — without a guessed speaker", () => {
-  for (const transcript of ["Ja", "Nein", "Paracetamol 500", "Okay", "Müller", "zweimal täglich", "38,5"]) {
+test("short answers are attributed by their language", () => {
+  for (const [transcript, role] of [["Ja", "patient"], ["Nein", "patient"], ["Yes", "practice"], ["No.", "practice"]]) {
     const d = decideUtterance({ ...DE_EN, transcript });
     assert.equal(d.accept, true, transcript);
-    if (!d.speakerCertain) {
-      assert.equal(d.speakerRole, null, `${transcript}: no attribution on a guess`);
-      assert.equal(d.sourceLanguage, null);
-    }
+    assert.equal(d.speakerRole, role, transcript);
+    assert.equal(d.speakerCertain, true, transcript);
   }
+});
+
+test("doses, names and numbers are kept — without a guessed speaker", () => {
+  for (const transcript of ["Paracetamol 500", "Okay", "Müller", "zweimal täglich 400 mg", "38,5", "Im Mai", "Da oben", "Merci"]) {
+    const d = decideUtterance({ ...DE_EN, transcript });
+    assert.equal(d.accept, true, transcript);
+    assert.equal(d.speakerCertain, false, transcript);
+    assert.equal(d.speakerRole, null, `${transcript}: no attribution on a guess`);
+    assert.equal(d.sourceLanguage, null);
+    assert.equal(d.targetLanguage, null);
+  }
+});
+
+test("a third language never sets a source or target language", () => {
+  for (const manualMode of [false, true]) {
+    const d = decideUtterance({
+      ...DE_EN, manualMode, boundRole: "practice",
+      transcript: "Ja, tengo dolor de cabeza desde hace tres días",
+    });
+    assert.equal(d.accept, false);
+    assert.equal(d.sourceLanguage, null);
+    assert.equal(d.targetLanguage, null);
+  }
+});
+
+test("output lock for an unattributed turn: either session language, never a third", () => {
+  assert.equal(isOutsideSessionLanguages("I have had a severe headache for three days.", "de", "en"), false);
+  assert.equal(isOutsideSessionLanguages("Ich habe seit drei Tagen Kopfschmerzen.", "de", "en"), false);
+  assert.equal(isOutsideSessionLanguages("Paracetamol 500", "de", "en"), false);
+  assert.equal(isOutsideSessionLanguages("Usted tiene dolor desde hace muchos días", "de", "en"), true);
+  assert.equal(isOutsideSessionLanguages("Болит голова", "de", "en"), true);
 });
 
 test("works for any language pair, not only German", () => {

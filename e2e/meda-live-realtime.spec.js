@@ -10,6 +10,8 @@
  *
  * Run: npx playwright test e2e/meda-live-realtime.spec.js
  */
+import { execFileSync } from "node:child_process";
+import path from "node:path";
 import { test, expect } from "@playwright/test";
 
 const PAGE = "/practice/meda-realtime?practiceId=e2e-practice";
@@ -420,5 +422,109 @@ test.describe("Meda Live — client-gated responses", () => {
     await answer(page, 1, "resp_a", "I have had a severe headache for three days.");
     await expect.poll(async () => (await readTurns(page))[0]?.translation).toBe("I have had a severe headache for three days.");
     await expect(page.locator(".mrt-error")).toHaveCount(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Strict language lock: only the session's languages count; short medical
+// utterances are kept; a turn without evidence is never attributed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Text layer of a generated PDF. The export embeds a font, so the text is not
+ * searchable as bytes; the server's existing pdf.js wrapper (unpdf) reads it.
+ */
+function pdfText(file) {
+  const script = `
+    import fs from "node:fs";
+    import { getDocumentProxy, extractText } from "unpdf";
+    const doc = await getDocumentProxy(new Uint8Array(fs.readFileSync(process.argv[1])));
+    const { text } = await extractText(doc, { mergePages: true });
+    process.stdout.write(text);`;
+  return execFileSync(process.execPath, ["--input-type=module", "-e", script, file], {
+    cwd: path.resolve("server"),
+  }).toString("utf8");
+}
+
+test.describe("Meda Live — strict language lock", () => {
+  test("\"Nein\" is attributed to the patient and translated", async ({ page }) => {
+    await openMeda(page, GATED);
+    await startSession(page);
+
+    await speakUntilCommitted(page, "item_a");
+    await transcribe(page, "item_a", "Nein");
+    await answer(page, 1, "resp_a", "No.");
+
+    await expect.poll(async () => (await readTurns(page))[0]).toMatchObject({
+      role: "Patient", original: "Nein", translation: "No.", unclear: false,
+    });
+  });
+
+  test("a short time statement is kept and marked as not reliably assigned", async ({ page }) => {
+    await openMeda(page, GATED);
+    await startSession(page);
+
+    // "Mai" is also an Italian word — must not make this German answer foreign.
+    await speakUntilCommitted(page, "item_a");
+    await transcribe(page, "item_a", "Im Mai");
+    await answer(page, 1, "resp_a", "In May.");
+
+    await expect.poll(async () => (await readTurns(page))[0]).toMatchObject({
+      role: "Sprecher nicht sicher zugeordnet", original: "Im Mai", translation: "In May.", unclear: false,
+    });
+    await expect(turnRows(page).first()).toContainText("Eine der Gesprächssprachen");
+    expect(await sent(page, "conversation.item.delete")).toEqual([]);
+    await expect(page.locator(".mrt-gate-notice")).toHaveCount(0);
+  });
+
+  test("an unattributed turn never shows a third-language translation", async ({ page }) => {
+    await openMeda(page, GATED);
+    await startSession(page);
+
+    await speakUntilCommitted(page, "item_a");
+    await transcribe(page, "item_a", "Paracetamol 500");
+    await answer(page, 1, "resp_a", "Usted tiene dolor desde hace muchos días");
+
+    await expect.poll(async () => (await readTurns(page))[0]?.unclear).toBe(true);
+    await expect(page.locator(".mrt-conversation")).not.toContainText("Usted tiene dolor");
+    const [a] = await readTurns(page);
+    expect(a.original).toBe("Paracetamol 500");
+    expect(a.role).toBe("Sprecher nicht sicher zugeordnet");
+  });
+
+  test("local history and its PDF never label an unattributed turn as practice", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("medscoutx_meda_realtime_archive", JSON.stringify([{
+        id: "arch-1",
+        createdAt: "2026-09-19T10:00:00.000Z",
+        sessionStartedAt: "2026-09-19T09:55:00.000Z",
+        patientName: "Anna Schmidt",
+        practiceName: null, practiceDepartment: null, doctorName: null,
+        patientLanguage: "de", practiceLanguage: "en",
+        patientInfo: { name: "Anna Schmidt" }, practiceInfo: {},
+        turns: [{
+          key: 1, speakerRole: null, sourceLanguage: null, targetLanguage: null,
+          originalText: "Paracetamol 500", translatedText: "Paracetamol 500",
+          isUnclear: false, originalEdited: false, timestamp: "2026-09-19T09:56:00.000Z",
+        }],
+      }]));
+    });
+    await openMeda(page, GATED);
+
+    await page.click(".mrt-btn--archive-view");
+    const turn = page.locator(".mrt-archive-turn").first();
+    await expect(turn.locator(".mrt-archive-turn-role")).toHaveText("Sprecher nicht sicher zugeordnet");
+    await expect(turn).toHaveClass(/mrt-archive-turn--uncertain/);
+    await expect(turn).not.toContainText("Praxis / Arzt");
+
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.click(".mrt-btn--archive-pdf"),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/\.pdf$/i);
+    const text = pdfText(await download.path());
+    expect(text).toContain("Sprecher nicht sicher zugeordnet");
+    expect(text).toContain("Paracetamol 500");
+    expect(text).not.toContain("Praxis / Arzt");
   });
 });

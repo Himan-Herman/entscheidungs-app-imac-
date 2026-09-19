@@ -5,6 +5,7 @@ import {
   REJECT_REASONS,
   decideUtterance,
   isInterpreterRefusal,
+  isOutsideSessionLanguages,
   redactEventForDebug,
 } from './utteranceGate.js';
 
@@ -31,6 +32,7 @@ function nowMs() {
  *   targetRole: SpeakerRole|null,
  *   sourceLanguage: string|null,
  *   targetLanguage: string|null,
+ *   speakerUncertain?: boolean,
  *   timestamp: string,
  * }} Turn
  */
@@ -224,6 +226,10 @@ export function useRealtimeSession() {
      */
     const _isOutputMismatch = (turn, text) => {
       if (!text || text.length < 10) return false;
+      if (turn.speakerUncertain) {
+        // No known direction: either session language is fine, a third is not.
+        return isOutsideSessionLanguages(text, patientLangRef.current, practiceLangRef.current);
+      }
       if (!turn.targetLanguage || !turn.sourceLanguage) return false;
       const detected = detectLanguage(text, turn.targetLanguage, turn.sourceLanguage);
       // Tier 1: confident wrong direction (e.g. source instead of target)
@@ -349,7 +355,11 @@ export function useRealtimeSession() {
           targetRole:     decision.targetRole,
           sourceLanguage: decision.sourceLanguage,
           targetLanguage: decision.targetLanguage,
-        } : {}),
+        } : {
+          // Kept, but nobody is named: shown, archived and exported as
+          // "speaker not reliably assigned", never as practice or patient.
+          speakerUncertain: true,
+        }),
       } : t));
 
       _requestResponse(mapped.key);

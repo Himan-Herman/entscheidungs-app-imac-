@@ -9,16 +9,19 @@
  * Order — deterministic, no extra model anywhere:
  *   1. empty transcript   → nothing was said
  *   2. allowed languages  → a segment CLEARLY in a third language is rejected
+ *                           (classifyUtteranceLanguage: only the session's
+ *                           languages are ever returned)
  *   3. speaker binding    → manual mode: the selection at SPEECH START;
  *                           auto mode: the recognised session language
- *   4. otherwise          → kept, without a speaker (short answers, numbers,
- *                           drug names carry no language evidence)
+ *                           ("Ja", "Nein", "Yes", "No" count as evidence)
+ *   4. otherwise          → kept, without a speaker ("Paracetamol 500",
+ *                           names, numbers carry no language evidence)
  *
  * Nothing is attributed to a speaker on a guess, and nothing that might be a
  * dose or an answer is dropped just because it is short.
  */
 
-import { detectLanguage, isDefinitelyThirdLanguage } from './realtimeLanguages.js';
+import { classifyUtteranceLanguage } from './realtimeLanguages.js';
 
 /** Why a segment was kept out of the conversation. */
 export const REJECT_REASONS = Object.freeze({
@@ -98,11 +101,10 @@ export function decideUtterance({
   // 1. Nothing recognisable — noise, a cough, a door.
   if (!text) return reject(REJECT_REASONS.EMPTY);
 
-  // 2. The session's two languages are binding. Only CLEAR evidence rejects:
-  //    a foreign script, or several words of another language and none of ours.
-  if (isDefinitelyThirdLanguage(text, patientLanguage, practiceLanguage)) {
-    return reject(REJECT_REASONS.FOREIGN_LANGUAGE);
-  }
+  // 2. The session's two languages are binding. Only CLEAR evidence rejects.
+  const lang = classifyUtteranceLanguage(text, [patientLanguage, practiceLanguage]);
+  if (lang.verdict === 'empty') return reject(REJECT_REASONS.EMPTY);
+  if (lang.verdict === 'foreign') return reject(REJECT_REASONS.FOREIGN_LANGUAGE);
 
   // 3a. Manual: the speaker selected when this segment STARTED decides.
   if (manualMode && (boundRole === 'patient' || boundRole === 'practice')) {
@@ -110,14 +112,25 @@ export function decideUtterance({
   }
 
   // 3b. Auto: the recognised session language decides.
-  const detected = detectLanguage(text, patientLanguage, practiceLanguage);
-  if (detected === patientLanguage) return accept('patient');
-  if (detected === practiceLanguage) return accept('practice');
+  if (lang.language === patientLanguage) return accept('patient');
+  if (lang.language === practiceLanguage) return accept('practice');
 
-  // 4. No evidence either way ("ja", "Paracetamol 500", a name). Not foreign,
+  // 4. No evidence either way ("Paracetamol 500", a name, a number). Not foreign,
   //    so not dropped. Kept WITHOUT a speaker; the interpreter hears the audio
   //    and knows the two permitted languages.
   return accept(null);
+}
+
+/**
+ * Output lock for a turn without a known direction: the model's answer may be
+ * in either session language, but never in a third one.
+ *
+ * @param {string} text
+ * @param {string} patientLanguage
+ * @param {string} practiceLanguage
+ */
+export function isOutsideSessionLanguages(text, patientLanguage, practiceLanguage) {
+  return classifyUtteranceLanguage(text, [patientLanguage, practiceLanguage]).verdict === 'foreign';
 }
 
 /**

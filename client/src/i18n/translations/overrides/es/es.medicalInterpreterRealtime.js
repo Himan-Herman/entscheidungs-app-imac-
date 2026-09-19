@@ -142,6 +142,10 @@ export default {
     rolePractice: "Consulta / médico",
     roleUnknownLanguage: "Idioma no identificado con claridad",
     roleDetecting: "Detectando el idioma …",
+    // Kept segment without evidence for either side ("Paracetamol 500", a
+    // name, a number) — never attributed on a guess.
+    roleUncertain: "Hablante no asignado con certeza",
+    languageUncertain: "Uno de los idiomas de la sesión",
     sourceLanguageLabel: "Idioma original",
     unknownLanguage: "Idioma desconocido",
     detectingLanguage: "Detectando el idioma …",

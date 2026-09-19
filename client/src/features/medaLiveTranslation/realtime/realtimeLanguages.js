@@ -235,3 +235,143 @@ export function isDefinitelyThirdLanguage(text, langA, langB) {
 
   return false;
 }
+
+// ── Session language lock (generic: one or two allowed languages) ───────────
+
+/**
+ * Short answers that decide a medical exchange ("Ja", "Nein", "Links") but are
+ * far too short for the fingerprint heuristics above, which need ≥2 words.
+ *
+ * Used in ONE direction only: to attribute a short answer to an ALLOWED
+ * session language. Never as evidence FOR a third language — "Mai" (Italian
+ * "never", German "May"), "da" (Romanian "yes", German "there") and "ne"
+ * (Croatian "no", colloquial German "no") would otherwise turn a German answer
+ * into a rejected segment.
+ */
+const SHORT_ANSWERS = {
+  de: ['ja', 'nein', 'genau', 'doch', 'danke', 'bitte', 'links', 'rechts', 'gut', 'schlecht', 'manchmal', 'immer', 'nie', 'gestern', 'heute', 'morgens', 'abends'],
+  en: ['yes', 'no', 'yeah', 'nope', 'thanks', 'left', 'right', 'good', 'bad', 'sometimes', 'always', 'never', 'yesterday', 'today'],
+  fr: ['oui', 'non', 'merci', 'gauche', 'droite', 'bien', 'parfois', 'toujours', 'jamais', 'hier', "aujourd'hui"],
+  es: ['sí', 'si', 'no', 'gracias', 'izquierda', 'derecha', 'bien', 'siempre', 'nunca', 'ayer', 'hoy'],
+  it: ['sì', 'si', 'no', 'grazie', 'sinistra', 'destra', 'bene', 'sempre', 'mai', 'ieri', 'oggi'],
+  pt: ['sim', 'não', 'obrigado', 'obrigada', 'esquerda', 'direita', 'sempre', 'nunca', 'ontem', 'hoje'],
+  nl: ['ja', 'nee', 'dank', 'links', 'rechts', 'goed', 'altijd', 'nooit', 'gisteren', 'vandaag'],
+  pl: ['tak', 'nie', 'dziękuję', 'lewo', 'prawo', 'dobrze', 'zawsze', 'nigdy', 'wczoraj', 'dzisiaj'],
+  ro: ['da', 'nu', 'mulțumesc', 'stânga', 'dreapta', 'bine', 'mereu', 'niciodată', 'ieri', 'azi'],
+  hr: ['da', 'ne', 'hvala', 'lijevo', 'desno', 'dobro', 'nikad', 'jučer', 'danas'],
+  cs: ['ano', 'ne', 'děkuji', 'vlevo', 'vpravo', 'dobře', 'nikdy', 'včera', 'dnes'],
+  sk: ['áno', 'nie', 'ďakujem', 'vľavo', 'vpravo', 'dobre', 'nikdy', 'včera', 'dnes'],
+  tr: ['evet', 'hayır', 'teşekkürler', 'sol', 'sağ', 'iyi', 'bazen', 'hep', 'asla', 'dün', 'bugün'],
+  vi: ['vâng', 'dạ', 'không', 'cảm', 'ơn'],
+  ru: ['да', 'нет', 'спасибо', 'слева', 'справа', 'хорошо', 'иногда', 'всегда', 'никогда', 'вчера', 'сегодня'],
+  uk: ['так', 'ні', 'дякую', 'зліва', 'справа', 'добре', 'завжди', 'ніколи', 'вчора', 'сьогодні'],
+  sr: ['да', 'не', 'хвала', 'лево', 'десно', 'добро', 'никад', 'јуче', 'данас'],
+  ar: ['نعم', 'لا', 'شكرا', 'يسار', 'يمين'],
+  fa: ['بله', 'نه', 'ممنون', 'چپ', 'راست'],
+  zh: ['是', '不', '谢谢', '左', '右'],
+};
+
+const TOKEN_SPLIT = /[\s.,!?;:()\-"'«»„“”‚‘’\u200b\u00a0]+/;
+
+function tokens(text) {
+  return text.toLowerCase().split(TOKEN_SPLIT).filter(Boolean);
+}
+
+/** Evidence for an ALLOWED language: fingerprints plus short answers. */
+function allowedScore(words, lang) {
+  const fp = FINGERPRINTS[lang] ?? [];
+  const sa = SHORT_ANSWERS[lang] ?? [];
+  let score = 0;
+  for (const w of words) {
+    if ((w.length > 1 && fp.includes(w)) || sa.includes(w)) score += 1;
+  }
+  return score;
+}
+
+/** Evidence for a THIRD language: fingerprints only (see SHORT_ANSWERS). */
+function thirdLanguageScore(words, lang) {
+  const fp = FINGERPRINTS[lang] ?? [];
+  let score = 0;
+  for (const w of words) {
+    if (w.length > 1 && fp.includes(w)) score += 1;
+  }
+  return score;
+}
+
+/**
+ * Classifies a transcript against the session's allowed languages.
+ *
+ * Works for ONE allowed language (same-language transcription, e.g. de→de) and
+ * for TWO (interpretation, e.g. de↔en). The session configuration is binding:
+ * nothing here ever returns a language outside `allowedLanguages`.
+ *
+ * Conservative — only clear evidence rejects, absence of evidence never does:
+ *   'foreign'       a script no allowed language uses; or ≥3 words with no
+ *                   allowed-language evidence and ≥2 fingerprint words of one
+ *                   third language; or a third language clearly dominating
+ *   'allowed'       evidence for an allowed language; `language` is set when
+ *                   that evidence points at exactly one of them
+ *   'inconclusive'  no evidence either way ("Paracetamol 500", "Müller",
+ *                   "38,5", "Merci") — kept by the caller, NOT treated as foreign
+ *   'empty'         nothing to classify
+ *
+ * @param {string} text
+ * @param {string[]} allowedLanguages  1 or 2 ISO 639-1 codes
+ * @returns {{ verdict: 'foreign'|'allowed'|'inconclusive'|'empty', language: string|null, basis: string }}
+ */
+export function classifyUtteranceLanguage(text, allowedLanguages) {
+  const allowed = [...new Set((allowedLanguages ?? []).filter(Boolean))];
+  const clean = String(text ?? '').trim();
+  if (!clean || allowed.length === 0) return { verdict: 'empty', language: null, basis: 'empty' };
+
+  const scripts = allowed.map(getLangScript);
+  const configured = new Set(scripts);
+  for (const [script, ranges] of Object.entries(SCRIPT_RANGES)) {
+    if (!configured.has(script) && countCharsInRanges(clean, ranges) > 0) {
+      return { verdict: 'foreign', language: null, basis: 'script' };
+    }
+  }
+
+  // Two allowed languages in different scripts: character counts decide.
+  if (allowed.length === 2 && scripts[0] !== scripts[1]) {
+    const a = countCharsInRanges(clean, SCRIPT_RANGES[scripts[0]] ?? []);
+    const b = countCharsInRanges(clean, SCRIPT_RANGES[scripts[1]] ?? []);
+    if (a > b) return { verdict: 'allowed', language: allowed[0], basis: 'script' };
+    if (b > a) return { verdict: 'allowed', language: allowed[1], basis: 'script' };
+    // Neither script present (digits, a Latin drug name in ru↔ar): fall
+    // through to the word evidence below.
+  }
+
+  const words = tokens(clean);
+  if (words.length === 0) return { verdict: 'inconclusive', language: null, basis: 'no_words' };
+
+  const scores = allowed.map((l) => allowedScore(words, l));
+  const best = Math.max(...scores);
+
+  // Strongest third language that shares an allowed script (other scripts were
+  // already rejected above).
+  let otherBest = 0;
+  for (const lang of Object.keys(FINGERPRINTS)) {
+    if (allowed.includes(lang)) continue;
+    if (!configured.has(getLangScript(lang))) continue;
+    otherBest = Math.max(otherBest, thirdLanguageScore(words, lang));
+  }
+
+  if (best === 0) {
+    if (words.length >= 3 && otherBest >= 2) {
+      return { verdict: 'foreign', language: null, basis: 'lexicon' };
+    }
+    return { verdict: 'inconclusive', language: null, basis: 'no_evidence' };
+  }
+
+  // Evidence for an allowed language — foreign only if a third language
+  // clearly dominates, not merely shares a word.
+  if (otherBest >= best + 2) {
+    return { verdict: 'foreign', language: null, basis: 'lexicon' };
+  }
+
+  if (allowed.length === 1) return { verdict: 'allowed', language: allowed[0], basis: 'lexicon' };
+  if (scores[0] > scores[1]) return { verdict: 'allowed', language: allowed[0], basis: 'lexicon' };
+  if (scores[1] > scores[0]) return { verdict: 'allowed', language: allowed[1], basis: 'lexicon' };
+  return { verdict: 'allowed', language: null, basis: 'lexicon_tie' };
+}

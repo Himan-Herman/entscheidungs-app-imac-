@@ -1344,6 +1344,8 @@
 
 .mrt-archive-turn--patient  { border-left: 3px solid #0e7490; }
 .mrt-archive-turn--practice { border-left: 3px solid #475569; }
+/* Speaker not reliably assigned — dashed so it never reads as either side. */
+.mrt-archive-turn--uncertain { border-left: 3px dashed #94a3b8; }
 
 .mrt-archive-turn-header {
   display: flex;
@@ -1436,6 +1438,7 @@
 :root[data-theme="dark"] .mrt-archive-turn           { border-bottom-color: #1e293b; }
 :root[data-theme="dark"] .mrt-archive-turn--patient  { border-left-color: #22d3ee; }
 :root[data-theme="dark"] .mrt-archive-turn--practice { border-left-color: #64748b; }
+:root[data-theme="dark"] .mrt-archive-turn--uncertain { border-left-color: #64748b; }
 :root[data-theme="dark"] .mrt-archive-turn-role      { color: #f1f5f9; }
 :root[data-theme="dark"] .mrt-archive-turn-time      { color: #64748b; }
 :root[data-theme="dark"] .mrt-archive-turn-text      { color: #e2e8f0; }

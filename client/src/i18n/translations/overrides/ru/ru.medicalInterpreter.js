@@ -957,6 +957,10 @@ export default {
       rolePractice: "Клиника / врач",
       roleUnknownLanguage: "Язык определен неясно",
       roleDetecting: "Определение языка…",
+      // Kept segment without evidence for either side ("Paracetamol 500", a
+      // name, a number) — never attributed on a guess.
+      roleUncertain: "Говорящий не определён однозначно",
+      languageUncertain: "Один из языков сеанса",
       sourceLanguageLabel: "Исходный язык",
       unknownLanguage: "Неизвестный язык",
       detectingLanguage: "Определение языка…",
