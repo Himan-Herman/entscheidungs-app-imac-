@@ -457,15 +457,19 @@ export function useRealtimeSession() {
         break;
 
       // Create a turn slot; speaker role is unknown until transcription completes
-      case 'input_audio_buffer.committed':
+      case 'input_audio_buffer.committed': {
         if (speakerLockRef.current) break; // echo during Meda playback — discard
         if (isPausedRef.current) break;    // paused — discard any buffered input
         turnCounterRef.current += 1;
+        // Taken NOW: the updater below runs later, and a second segment
+        // committed before React renders would otherwise give both turns the
+        // same key — and one transcript would overwrite the other.
+        const turnKey = turnCounterRef.current;
         if (gatingRef.current !== 'server' && ev.item_id) {
-          itemTurnRef.current.set(ev.item_id, { key: turnCounterRef.current, committedAt: nowMs() });
+          itemTurnRef.current.set(ev.item_id, { key: turnKey, committedAt: nowMs() });
         }
         setTurns(prev => [...prev, {
-          key:             turnCounterRef.current,
+          key:             turnKey,
           inputItemId:     ev.item_id ?? null,
           originalText:    null,
           translatedText:  '',
@@ -482,6 +486,7 @@ export function useRealtimeSession() {
           ...(sessionModeRef.current === SESSION_MODES.TRANSCRIPTION ? { mode: SESSION_MODES.TRANSCRIPTION } : {}),
         }]);
         break;
+      }
 
       // ── Transcription ────────────────────────────────────────────────────────
       // Speaker role and language direction are determined here.

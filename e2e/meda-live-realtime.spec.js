@@ -721,3 +721,37 @@ test.describe("Meda Live — live transcription (same language)", () => {
     await expect(page.locator(".mrt-end-reason--inactivity")).toBeVisible();
   });
 });
+
+test.describe("Meda Live — turn keys under bursts", () => {
+  const burstCommits = (page, a, b) => burst(page, [
+    { type: "input_audio_buffer.speech_started", item_id: a, audio_start_ms: 0 },
+    { type: "input_audio_buffer.speech_stopped", item_id: a, audio_end_ms: 700 },
+    { type: "input_audio_buffer.committed", item_id: a },
+    { type: "input_audio_buffer.speech_started", item_id: b, audio_start_ms: 800 },
+    { type: "input_audio_buffer.speech_stopped", item_id: b, audio_end_ms: 1500 },
+    { type: "input_audio_buffer.committed", item_id: b },
+  ]);
+
+  test("transcription: two segments committed before React renders keep their own entries", async ({ page }) => {
+    await openMeda(page, MODE_AWARE);
+    await startTranscription(page);
+    await burstCommits(page, "item_a", "item_b");
+    await transcribe(page, "item_a", "Ja");
+    await transcribe(page, "item_b", "Paracetamol 500");
+    await expect.poll(async () => (await readTranscript(page)).map((t) => t.text)).toEqual(["Ja", "Paracetamol 500"]);
+  });
+
+  test("interpreting: two segments committed before React renders keep their own turns", async ({ page }) => {
+    await openMeda(page, GATED);
+    await startSession(page);
+    await burstCommits(page, "item_a", "item_b");
+    await transcribe(page, "item_a", "Ich habe seit gestern Fieber");
+    await transcribe(page, "item_b", "How high was the fever?");
+    await expect.poll(async () => (await readTurns(page)).map((t) => t.original)).toEqual([
+      "Ich habe seit gestern Fieber",
+      "How high was the fever?",
+    ]);
+    // Each translation request names its own turn.
+    await expect.poll(async () => (await sent(page, "response.create")).map((e) => e.response.metadata.turn_key)).toEqual(["1"]);
+  });
+});
